@@ -6,6 +6,7 @@ import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
@@ -126,7 +127,9 @@ function buildSingleChainItem(
 
 export function useSpaceSafeSelectorItems() {
   const { dropdownSafes: allSafes } = useSafeBarSafes()
-  const { safe, safeAddress } = useSafeInfo()
+  const { safe, safeAddress: reduxSafeAddress } = useSafeInfo()
+  const urlSafeAddress = useSafeAddressFromUrl()
+  const effectiveSafeAddress = urlSafeAddress || reduxSafeAddress
   const currentChainId = useChainId()
   const { configs: chainConfigs } = useChains()
   const router = useRouter()
@@ -146,7 +149,7 @@ export function useSpaceSafeSelectorItems() {
 
   const items: SafeItemData[] = useMemo(() => {
     return allSafes.map((item) => {
-      const isCurrentSafe = item.address.toLowerCase() === safeAddress.toLowerCase()
+      const isCurrentSafe = sameAddress(item.address, effectiveSafeAddress)
 
       if (isMultiChainSafeItem(item)) {
         return buildMultiChainItem(
@@ -163,9 +166,9 @@ export function useSpaceSafeSelectorItems() {
 
       return buildSingleChainItem(item, isCurrentSafe, overviews, overviewsLoading, safe, chainConfigs)
     })
-  }, [allSafes, safeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs, undeployedSafes])
+  }, [allSafes, effectiveSafeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs, undeployedSafes])
 
-  const selectedItemId = `${currentChainId}:${safeAddress}`
+  const selectedItemId = effectiveSafeAddress ? `${currentChainId}:${effectiveSafeAddress}` : ''
 
   const handleItemSelect = useCallback(
     (itemId: string) => {

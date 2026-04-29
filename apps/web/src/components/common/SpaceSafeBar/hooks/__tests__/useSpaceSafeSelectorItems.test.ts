@@ -20,6 +20,9 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeAddressFromUrl: jest.fn(),
+}))
 jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -64,6 +67,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
@@ -131,9 +135,14 @@ function setupDefaults(
   })
   ;(useCurrentSpaceId as jest.Mock).mockReturnValue(overrides.spaceId ?? '42')
   ;(useSafeInfo as jest.Mock).mockReturnValue({
-    safe: { threshold: 2, owners: [{ value: '0xOwner1' }, { value: '0xOwner2' }] },
+    safe: {
+      address: { value: overrides.safeAddress ?? '0xSafe1' },
+      threshold: 2,
+      owners: [{ value: '0xOwner1' }, { value: '0xOwner2' }],
+    },
     safeAddress: overrides.safeAddress ?? '0xSafe1',
   })
+  ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue(overrides.safeAddress ?? '0xSafe1')
   ;(useChainId as jest.Mock).mockReturnValue(overrides.currentChainId ?? '1')
   ;(useChains as jest.Mock).mockReturnValue({ configs: chainConfigs })
   ;(useGetMultipleSafeOverviewsQuery as jest.Mock).mockReturnValue({
@@ -495,7 +504,7 @@ describe('useSpaceSafeSelectorItems', () => {
 
   // ── case-insensitive address matching ──
 
-  it('matches the current safe using case-insensitive address comparison', () => {
+  it('matches the current safe using case-insensitive address comparison against the URL', () => {
     const mixedCaseSafe: SafeItem = {
       chainId: '1',
       address: '0xAbCdEf',
@@ -506,15 +515,57 @@ describe('useSpaceSafeSelectorItems', () => {
     }
 
     ;(useSafeInfo as jest.Mock).mockReturnValue({
-      safe: { threshold: 3, owners: [{ value: '0x1' }, { value: '0x2' }, { value: '0x3' }] },
-      safeAddress: '0xabcdef', // lowercase vs mixed-case in item
+      safe: {
+        address: { value: '0xAbCdEf' },
+        threshold: 3,
+        owners: [{ value: '0x1' }, { value: '0x2' }, { value: '0x3' }],
+      },
+      safeAddress: '0xAbCdEf',
     })
+    ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xabcdef') // lowercase vs mixed-case in item
     ;(useSafeBarSafes as jest.Mock).mockReturnValue({ dropdownSafes: [mixedCaseSafe] })
 
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
     // Should use live safe.threshold (3) not overview, proving case-insensitive match worked
     expect(result.current.items[0].threshold).toBe(3)
     expect(result.current.items[0].owners).toBe(3)
+  })
+
+  // ── URL drives selectedItemId even when Redux lags ──
+
+  it('uses the URL safe address for selectedItemId even when Redux still holds the previous safe', () => {
+    setupDefaults({
+      allSafes: [singleChainSafe],
+      safeAddress: '0xSafe1',
+    })
+    ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xNewSafeFromUrl')
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.selectedItemId).toBe('1:0xNewSafeFromUrl')
+  })
+
+  it('falls back to Redux safeAddress for selectedItemId when URL has no safe', () => {
+    setupDefaults()
+    ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('')
+    ;(useSafeInfo as jest.Mock).mockReturnValue({
+      safe: { address: { value: '0xFromRedux' }, threshold: 2, owners: [] },
+      safeAddress: '0xFromRedux',
+    })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.selectedItemId).toBe('1:0xFromRedux')
+  })
+
+  it('returns empty selectedItemId when both URL and Redux are empty', () => {
+    setupDefaults()
+    ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('')
+    ;(useSafeInfo as jest.Mock).mockReturnValue({
+      safe: { address: { value: '' }, threshold: 0, owners: [] },
+      safeAddress: '',
+    })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.selectedItemId).toBe('')
   })
 
   // ── tracking:
@@ -562,5 +613,22 @@ describe('useSpaceSafeSelectorItems', () => {
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
     // id should start with currentChainId (137), not first chain in safes array (1)
     expect(result.current.items[0].id).toBe('137:0xSafe2')
+  })
+
+  it('places URL chainId first in multi-chain id even when Redux holds a different safe', () => {
+    setupDefaults({
+      allSafes: [multiChainSafe],
+      safeAddress: '0xPreviousSafe',
+      currentChainId: '137',
+      overviews: [
+        { address: { value: '0xSafe2' }, chainId: '1', fiatTotal: '100', threshold: 1, owners: [{ value: '0xO' }] },
+        { address: { value: '0xSafe2' }, chainId: '137', fiatTotal: '200', threshold: 1, owners: [{ value: '0xO' }] },
+      ],
+    })
+    ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xSafe2')
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].id).toBe('137:0xSafe2')
+    expect(result.current.selectedItemId).toBe('137:0xSafe2')
   })
 })

@@ -9,8 +9,11 @@ interface UseSafeSelectorStateProps {
   forceOpenable?: boolean
 }
 
+// No items[0] fallback on miss — surfaces regressions instead of silently
+// snapping to the wrong safe.
 const getSelectedItem = (items: SafeItemData[], selectedItemId?: string) => {
-  return items.find((item) => item.id === selectedItemId) ?? items[0]
+  if (!selectedItemId) return undefined
+  return items.find((item) => item.id === selectedItemId)
 }
 
 const getFirstChainId = (item: SafeItemData | undefined) => {
