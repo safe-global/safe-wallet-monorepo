@@ -44,7 +44,7 @@ export enum MixpanelEvent {
   AUTH_LOGIN_SUCCEEDED = 'Auth Login Succeeded',
   AUTH_LOGIN_FAILED = 'Auth Login Failed',
   AUTH_LOGGED_OUT = 'Auth Logged Out',
-  SPACE_CREATED = 'Space Created',
+  WORKSPACE_CREATED = 'Workspace Created',
   SPACE_INVITE_SENT = 'Space Invite Sent',
   SPACE_INVITE_ACCEPTED = 'Space Invite Accepted',
   SPACE_INVITE_DECLINED = 'Space Invite Declined',

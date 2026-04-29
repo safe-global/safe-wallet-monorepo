@@ -31,8 +31,8 @@ export const SPACE_EVENTS = {
     action: 'Workspace create started',
     category: SPACE_CATEGORY,
   },
-  CREATE_SPACE: {
-    action: 'Submit space creation',
+  WORKSPACE_CREATED: {
+    action: 'Workspace created',
     category: SPACE_CATEGORY,
   },
   ACCEPT_INVITE: {

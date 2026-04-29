@@ -31,7 +31,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
 
       if (response.data) {
         const spaceId = response.data.id.toString()
-        trackEvent({ ...SPACE_EVENTS.CREATE_SPACE, label: spaceId }, { spaceId })
+        trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: spaceId }, { workspace_id: spaceId })
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
         onClose()
 

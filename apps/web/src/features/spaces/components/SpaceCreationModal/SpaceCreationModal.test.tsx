@@ -78,8 +78,8 @@ describe('SpaceCreationModal tracking', () => {
 
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.CREATE_SPACE, label: '99' }, // GA receives spaceId as label
-        { spaceId: '99' }, // Mixpanel receives spaceId as additionalParameters
+        { ...SPACE_EVENTS.WORKSPACE_CREATED, label: '99' },
+        { workspace_id: '99' },
       )
     })
   })
@@ -99,7 +99,7 @@ describe('SpaceCreationModal tracking', () => {
 
     await waitFor(() => {
       expect(trackEvent).not.toHaveBeenCalledWith(
-        expect.objectContaining({ action: SPACE_EVENTS.CREATE_SPACE.action }),
+        expect.objectContaining({ action: SPACE_EVENTS.WORKSPACE_CREATED.action }),
         expect.anything(),
       )
     })

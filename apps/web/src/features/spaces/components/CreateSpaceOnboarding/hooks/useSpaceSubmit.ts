@@ -47,7 +47,7 @@ const useSpaceSubmit = (
 
     if (response.data) {
       const newSpaceId = response.data.id.toString()
-      trackEvent({ ...SPACE_EVENTS.CREATE_SPACE, label: newSpaceId }, { spaceId: newSpaceId })
+      trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: newSpaceId }, { workspace_id: newSpaceId })
 
       dispatch(setLastUsedSpace(newSpaceId))
 

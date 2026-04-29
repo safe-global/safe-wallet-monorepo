@@ -78,10 +78,7 @@ describe('useSpaceSubmit tracking', () => {
       await result.current.onSubmit()
     })
 
-    expect(trackEvent).toHaveBeenCalledWith(
-      { ...SPACE_EVENTS.CREATE_SPACE, label: '42' }, // GA receives spaceId as label
-      { spaceId: '42' }, // Mixpanel receives spaceId as additionalParameters
-    )
+    expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: '42' }, { workspace_id: '42' })
   })
 
   it('does not track CREATE_SPACE when the API returns an error', async () => {
@@ -94,7 +91,7 @@ describe('useSpaceSubmit tracking', () => {
     })
 
     expect(trackEvent).not.toHaveBeenCalledWith(
-      expect.objectContaining({ action: SPACE_EVENTS.CREATE_SPACE.action }),
+      expect.objectContaining({ action: SPACE_EVENTS.WORKSPACE_CREATED.action }),
       expect.anything(),
     )
   })
