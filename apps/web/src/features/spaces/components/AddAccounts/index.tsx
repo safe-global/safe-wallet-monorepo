@@ -246,6 +246,13 @@ const AddAccounts = ({
           setError(msg.replace(/:\s*Key\s*\(.*$/, ''))
           return
         }
+
+        safesToAdd.forEach(({ chainId, address }) => {
+          trackEvent(
+            { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: spaceId },
+            { workspace_id: spaceId, safe_address: address, chain_id: chainId },
+          )
+        })
       }
 
       // Remove unchecked safes
@@ -259,6 +266,13 @@ const AddAccounts = ({
           setError(getRtkQueryErrorMessage(result.error) || 'Something went wrong removing one or more Safe Accounts.')
           return
         }
+
+        safesToRemove.forEach(({ chainId, address }) => {
+          trackEvent(
+            { ...SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED, label: spaceId },
+            { workspace_id: spaceId, safe_address: address, chain_id: chainId },
+          )
+        })
       }
 
       // Show success notification
@@ -325,7 +339,13 @@ const AddAccounts = ({
           className="font-bold px-4 py-0"
           variant={buttonVariant}
           disabled={!isAdmin}
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            trackEvent(
+              { ...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED, label: spaceId },
+              { workspace_id: spaceId, entry_point: 'dashboard' },
+            )
+            setOpen(true)
+          }}
           title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
           data-testid="add-space-account-button"
         >

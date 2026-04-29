@@ -8,6 +8,7 @@ import { getInitials, getSafeDisplayInfo } from '../utils'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
 import type { SafeItemData } from '../types'
+import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 
 export interface SafeSelectorTriggerContentProps {
   selectedItem: SafeItemData
@@ -30,6 +31,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
     navigator.clipboard.writeText(selectedItem.address)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+    trackEvent(OVERVIEW_EVENTS.COPY_ADDRESS, { [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Copy Address' })
   }, [selectedItem.address])
 
   const handleCopyPointer = (e: MouseEvent | PointerEvent) => {

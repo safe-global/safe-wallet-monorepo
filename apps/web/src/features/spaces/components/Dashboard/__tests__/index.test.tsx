@@ -32,7 +32,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
     ADD_ACCOUNTS_MODAL: { action: 'add_accounts_modal', category: 'spaces' },
     ACCOUNTS_WIDGET_CLICKED: { action: 'accounts_widget_clicked', category: 'spaces' },
     PENDING_TX_WIDGET_CLICKED: { action: 'pending_tx_widget_clicked', category: 'spaces' },
-    SPACES_ENTRY_VIEWED: { action: 'spaces_entry_viewed', category: 'spaces' },
+    WORKSPACE_DASHBOARD_VIEWED: { action: 'workspace_dashboard_viewed', category: 'spaces' },
   },
   SPACE_LABELS: { space_dashboard_card: 'space_dashboard_card' },
 }))
@@ -142,75 +142,83 @@ const restoreDefaultMocks = () => {
 
 // ---- Tests ----
 
-describe('SpaceDashboard – SPACES_ENTRY_VIEWED tracking', () => {
+describe('SpaceDashboard – WORKSPACE_DASHBOARD_VIEWED tracking', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     restoreDefaultMocks()
     setupUseLoadFeature()
   })
 
-  it('fires SPACES_ENTRY_VIEWED once on mount', () => {
+  it('fires WORKSPACE_DASHBOARD_VIEWED once on mount', () => {
     render(<SpaceDashboard />)
 
-    const calls = getCallsForEvent(SPACE_EVENTS.SPACES_ENTRY_VIEWED.action)
+    const calls = getCallsForEvent(SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED.action)
     expect(calls).toHaveLength(1)
   })
 
-  it('fires SPACES_ENTRY_VIEWED with spaceId as GA label', () => {
+  it('fires WORKSPACE_DASHBOARD_VIEWED with spaceId as GA label', () => {
     render(<SpaceDashboard />)
 
     expect(trackEvent).toHaveBeenCalledWith(
-      { ...SPACE_EVENTS.SPACES_ENTRY_VIEWED, label: MOCK_SPACE_ID },
+      { ...SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED, label: MOCK_SPACE_ID },
       expect.anything(),
     )
   })
 
-  it('fires SPACES_ENTRY_VIEWED with spaceId as Mixpanel additional parameter', () => {
+  it('fires WORKSPACE_DASHBOARD_VIEWED with workspace_id and counts as Mixpanel params', () => {
     render(<SpaceDashboard />)
 
-    expect(trackEvent).toHaveBeenCalledWith(expect.anything(), { spaceId: MOCK_SPACE_ID })
+    expect(trackEvent).toHaveBeenCalledWith(expect.anything(), {
+      workspace_id: MOCK_SPACE_ID,
+      pending_tx_count: 0,
+      member_count: 0,
+      safe_count: 1,
+    })
   })
 
-  it('fires SPACES_ENTRY_VIEWED with full correct signature – GA label + Mixpanel param', () => {
+  it('fires WORKSPACE_DASHBOARD_VIEWED with full correct signature', () => {
     render(<SpaceDashboard />)
 
     expect(trackEvent).toHaveBeenCalledWith(
-      { ...SPACE_EVENTS.SPACES_ENTRY_VIEWED, label: MOCK_SPACE_ID },
-      { spaceId: MOCK_SPACE_ID },
+      { ...SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED, label: MOCK_SPACE_ID },
+      { workspace_id: MOCK_SPACE_ID, pending_tx_count: 0, member_count: 0, safe_count: 1 },
     )
   })
 
-  it('does not fire SPACES_ENTRY_VIEWED when spaceId is not yet available', () => {
+  it('does not fire WORKSPACE_DASHBOARD_VIEWED when spaceId is not yet available', () => {
     ;(useCurrentSpaceId as jest.Mock).mockReturnValue(null)
 
     render(<SpaceDashboard />)
 
-    const calls = getCallsForEvent(SPACE_EVENTS.SPACES_ENTRY_VIEWED.action)
+    const calls = getCallsForEvent(SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED.action)
     expect(calls).toHaveLength(0)
   })
 
-  it('does not fire SPACES_ENTRY_VIEWED again on re-render with the same spaceId', () => {
+  it('does not fire WORKSPACE_DASHBOARD_VIEWED again on re-render with the same spaceId', () => {
     const { rerender } = render(<SpaceDashboard />)
     rerender(<SpaceDashboard />)
 
-    const calls = getCallsForEvent(SPACE_EVENTS.SPACES_ENTRY_VIEWED.action)
+    const calls = getCallsForEvent(SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED.action)
     expect(calls).toHaveLength(1)
   })
 
-  it('fires SPACES_ENTRY_VIEWED exactly once more when spaceId changes, with the new spaceId', () => {
+  it('fires WORKSPACE_DASHBOARD_VIEWED exactly once more when spaceId changes, with the new spaceId', () => {
     const spaceIdMock = useCurrentSpaceId as jest.Mock
     const { rerender } = render(<SpaceDashboard />)
 
     spaceIdMock.mockReturnValue('99')
     rerender(<SpaceDashboard />)
 
-    const calls = getCallsForEvent(SPACE_EVENTS.SPACES_ENTRY_VIEWED.action)
+    const calls = getCallsForEvent(SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED.action)
     expect(calls).toHaveLength(2)
     expect(calls[0]).toEqual([
-      { ...SPACE_EVENTS.SPACES_ENTRY_VIEWED, label: MOCK_SPACE_ID },
-      { spaceId: MOCK_SPACE_ID },
+      { ...SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED, label: MOCK_SPACE_ID },
+      { workspace_id: MOCK_SPACE_ID, pending_tx_count: 0, member_count: 0, safe_count: 1 },
     ])
-    expect(calls[1]).toEqual([{ ...SPACE_EVENTS.SPACES_ENTRY_VIEWED, label: '99' }, { spaceId: '99' }])
+    expect(calls[1]).toEqual([
+      { ...SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED, label: '99' },
+      { workspace_id: '99', pending_tx_count: 0, member_count: 0, safe_count: 1 },
+    ])
   })
 })
 

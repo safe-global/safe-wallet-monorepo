@@ -27,6 +27,10 @@ jest.mock('@/store', () => ({
   useAppDispatch: () => mockDispatch,
 }))
 
+jest.mock('@/features/spaces', () => ({
+  useCurrentSpaceId: () => '42',
+}))
+
 jest.mock('@/components/common/Track', () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => <>{children}</>,

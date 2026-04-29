@@ -5,6 +5,7 @@ import ChainSelectorBlock from '@/features/spaces/components/SafeSelectorDropdow
 import { CreateSafeOnNewChain } from '@/features/multichain'
 import { TxModalContext } from '@/components/tx-flow'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
+import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 
 function SpaceChainSelectorSkeleton() {
   return (
@@ -24,7 +25,16 @@ function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
 
   const handleAddNetwork = useCallback((chainId: string) => {
     setAddNetworkChainId(chainId)
+    trackEvent(OVERVIEW_EVENTS.ADD_NEW_NETWORK)
   }, [])
+
+  const handleChainSelect = useCallback(
+    (chainId: string) => {
+      handleChainChange(chainId)
+      trackEvent(OVERVIEW_EVENTS.SWITCH_NETWORK)
+    },
+    [handleChainChange],
+  )
 
   const handleCloseDialog = useCallback(() => {
     setAddNetworkChainId(undefined)
@@ -48,7 +58,7 @@ function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
               selectedChainId={selectedChainId}
               safeAddress={safeAddress}
               deployedChainIds={deployedChainIds}
-              onChainSelect={handleChainChange}
+              onChainSelect={handleChainSelect}
               onAddNetwork={handleAddNetwork}
               disabled
             />
@@ -61,7 +71,7 @@ function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
           selectedChainId={selectedChainId}
           safeAddress={safeAddress}
           deployedChainIds={deployedChainIds}
-          onChainSelect={handleChainChange}
+          onChainSelect={handleChainSelect}
           onAddNetwork={handleAddNetwork}
         />
       )}

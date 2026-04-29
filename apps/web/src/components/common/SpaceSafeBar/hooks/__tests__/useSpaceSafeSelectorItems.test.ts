@@ -581,9 +581,10 @@ describe('useSpaceSafeSelectorItems', () => {
     expect(trackEvent).toHaveBeenCalledWith(
       { ...SPACE_EVENTS.SAFE_SELECTED, label: '42' },
       {
-        spaceId: '42',
+        workspace_id: '42',
         [MixpanelEventParams.SAFE_ADDRESS]: '0xNewSafe',
         [MixpanelEventParams.CHAIN_ID]: '1',
+        source: 'space_selector',
       },
     )
   })

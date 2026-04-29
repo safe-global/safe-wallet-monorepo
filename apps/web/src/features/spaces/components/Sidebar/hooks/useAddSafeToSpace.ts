@@ -6,6 +6,8 @@ import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { SpaceItem } from '../types'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 interface UseAddSafeToSpaceOptions {
   spaces: SpaceItem[]
@@ -51,6 +53,10 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
           variant: 'success',
           groupKey: 'add-safe-to-workspace-success',
         }),
+      )
+      trackEvent(
+        { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: String(spaceId) },
+        { workspace_id: String(spaceId), safe_address: safe.address.value, chain_id: chain.chainId },
       )
       const space = spaces.find((s) => s.id === spaceId)
       if (space) onSpaceAdded?.(space)

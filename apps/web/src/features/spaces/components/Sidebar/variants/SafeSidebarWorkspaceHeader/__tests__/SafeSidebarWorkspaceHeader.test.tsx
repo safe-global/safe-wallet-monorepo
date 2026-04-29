@@ -34,6 +34,7 @@ jest.mock('next/router', () => ({
 
 jest.mock('@/features/spaces', () => ({
   getDeterministicColor: (name: string) => `color-${name}`,
+  useCurrentSpaceId: () => '42',
 }))
 
 jest.mock('@/components/ui/sidebar', () => ({

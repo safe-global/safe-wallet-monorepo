@@ -35,7 +35,7 @@ jest.mock('@/services/analytics', () => ({
 
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: {
-    CREATE_SPACE_MODAL: {},
+    WORKSPACE_CREATE_STARTED: { action: 'Workspace create started' },
     OPEN_SPACE_LIST_PAGE: {},
   },
   SPACE_LABELS: {
@@ -204,14 +204,17 @@ describe('SpaceSelectorDropdown', () => {
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: '2' } })
   })
 
-  it('tracks CREATE_SPACE_MODAL event and navigates when "Add new space" is clicked', () => {
+  it('tracks WORKSPACE_CREATE_STARTED event and navigates when "Add new space" is clicked', () => {
     render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha', safeCount: 0 }} spaces={[]} />)
 
     const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
     fireEvent.click(trigger)
     fireEvent.click(screen.getByText('Add new space'))
 
-    expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }))
+    expect(trackEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'Workspace create started' }),
+      expect.objectContaining({ entry_point: 'sidebar' }),
+    )
     expect(mockPush).toHaveBeenCalledWith(AppRoutes.spaces.createSpace)
   })
 
