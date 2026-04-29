@@ -109,6 +109,7 @@ describe('useSafeBarSafes', () => {
     mockIsSpaceRoute.mockReturnValue(true)
     const spaceSafe = createSafe('0xSpaceSafe', true)
     mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
+    mockSafeAddress.mockReturnValue('0xSpaceSafe')
 
     const { result } = renderHook(() => useSafeBarSafes())
 
