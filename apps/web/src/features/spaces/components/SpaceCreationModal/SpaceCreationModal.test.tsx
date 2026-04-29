@@ -14,7 +14,7 @@ jest.mock('@/services/analytics', () => ({
 
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: {
-    CREATE_SPACE: { action: 'Submit space creation', category: 'spaces' },
+    WORKSPACE_CREATED: { action: 'Workspace created', category: 'spaces' },
   },
   SPACE_LABELS: {},
 }))
@@ -63,7 +63,7 @@ describe('SpaceCreationModal tracking', () => {
     jest.clearAllMocks()
   })
 
-  it('tracks CREATE_SPACE with spaceId sent to both GA (label) and Mixpanel (additionalParameters) after successful creation', async () => {
+  it('tracks WORKSPACE_CREATED with spaceId sent to both GA (label) and Mixpanel (additionalParameters) after successful creation', async () => {
     mockCreateSpaceWithUser.mockResolvedValue({ data: { id: 99, name: 'My Space' } })
 
     render(<SpaceCreationModal onClose={jest.fn()} />)
@@ -84,7 +84,7 @@ describe('SpaceCreationModal tracking', () => {
     })
   })
 
-  it('does not track CREATE_SPACE when the API returns an error', async () => {
+  it('does not track WORKSPACE_CREATED when the API returns an error', async () => {
     mockCreateSpaceWithUser.mockResolvedValue({ error: { status: 500 } })
 
     render(<SpaceCreationModal onClose={jest.fn()} />)

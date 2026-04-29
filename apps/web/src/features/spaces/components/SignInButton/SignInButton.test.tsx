@@ -95,9 +95,10 @@ describe('SignInButton tracking', () => {
     fireEvent.click(screen.getByText('Sign in'))
 
     await waitFor(() => {
-      expect(trackEvent).toHaveBeenCalledWith(
+      expect(trackEvent).toHaveBeenNthCalledWith(
+        2,
         { ...SPACE_EVENTS.AUTH_LOGIN_SUCCEEDED, label: '42' },
-        { spaceId: '42', method: 'siwe' },
+        expect.objectContaining({ spaceId: '42', method: 'siwe' }),
       )
     })
   })

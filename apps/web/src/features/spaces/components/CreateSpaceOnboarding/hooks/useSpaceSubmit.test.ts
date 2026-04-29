@@ -16,7 +16,7 @@ jest.mock('@/services/analytics', () => ({
 
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: {
-    CREATE_SPACE: { action: 'Submit space creation', category: 'spaces' },
+    WORKSPACE_CREATED: { action: 'Workspace created', category: 'spaces' },
   },
 }))
 
@@ -69,7 +69,7 @@ describe('useSpaceSubmit tracking', () => {
     return result
   }
 
-  it('tracks CREATE_SPACE with spaceId sent to both GA (label) and Mixpanel (additionalParameters) after successful creation', async () => {
+  it('tracks WORKSPACE_CREATED with spaceId sent to both GA (label) and Mixpanel (additionalParameters) after successful creation', async () => {
     mockCreateSpaceWithUser.mockResolvedValue({ data: { id: 42, name: 'My Space' } })
 
     const result = setupHook(undefined, false)
@@ -81,7 +81,7 @@ describe('useSpaceSubmit tracking', () => {
     expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: '42' }, { workspace_id: '42' })
   })
 
-  it('does not track CREATE_SPACE when the API returns an error', async () => {
+  it('does not track WORKSPACE_CREATED when the API returns an error', async () => {
     mockCreateSpaceWithUser.mockResolvedValue({ error: 'Something went wrong' })
 
     const result = setupHook(undefined, false)
