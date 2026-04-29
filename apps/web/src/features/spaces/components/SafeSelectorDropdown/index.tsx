@@ -55,8 +55,7 @@ function SafeSelectorDropdown({
 
   if (!selectedItem || !mounted) {
     if (isError && mounted) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
-    if (isLoading || !mounted) return <SafeSelectorDropdownSkeleton />
-    return null
+    return <SafeSelectorDropdownSkeleton />
   }
 
   return (
