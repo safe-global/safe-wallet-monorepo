@@ -25,10 +25,10 @@
   --color-success-main: #00b460;
   --color-success-light: #d3f2e4;
   --color-success-background: #effaf1;
-  --color-info-dark: #52bfdc;
-  --color-info-main: #5fddff;
-  --color-info-light: #d7f6ff;
-  --color-info-background: #effcff;
+  --color-info-dark: #15566a;
+  --color-info-main: #00bfe5;
+  --color-info-light: #78d2e7;
+  --color-info-background: #cef0fd;
   --color-warning-dark: #c04c32;
   --color-warning-main: #ff8061;
   --color-warning-light: #ffbc9f;
@@ -69,7 +69,7 @@
 [data-theme='dark'] {
   --color-text-primary: #ffffff;
   --color-text-secondary: #636669;
-  --color-text-disabled: #636669;
+  --color-text-disabled: rgba(255, 255, 255, 0.3);
   --color-text-contrast: #000000;
   --color-primary-dark: #0cb259;
   --color-primary-main: #12ff80;
@@ -91,10 +91,10 @@
   --color-success-main: #00b460;
   --color-success-light: #81c784;
   --color-success-background: #1f2920;
-  --color-info-dark: #52bfdc;
-  --color-info-main: #5fddff;
-  --color-info-light: #b7f0ff;
-  --color-info-background: #19252c;
+  --color-info-dark: #d9f4fb;
+  --color-info-main: #00bfe5;
+  --color-info-light: #458898;
+  --color-info-background: #203339;
   --color-warning-dark: #c04c32;
   --color-warning-main: #ff8061;
   --color-warning-light: #ffbc9f;
@@ -125,7 +125,7 @@
   :root:not([data-theme='light']) {
     --color-text-primary: #ffffff;
     --color-text-secondary: #636669;
-    --color-text-disabled: #636669;
+    --color-text-disabled: rgba(255, 255, 255, 0.3);
     --color-text-contrast: #000000;
     --color-primary-dark: #0cb259;
     --color-primary-main: #12ff80;
@@ -147,10 +147,10 @@
     --color-success-main: #00b460;
     --color-success-light: #81c784;
     --color-success-background: #1f2920;
-    --color-info-dark: #52bfdc;
-    --color-info-main: #5fddff;
-    --color-info-light: #b7f0ff;
-    --color-info-background: #19252c;
+    --color-info-dark: #d9f4fb;
+    --color-info-main: #00bfe5;
+    --color-info-light: #458898;
+    --color-info-background: #203339;
     --color-warning-dark: #c04c32;
     --color-warning-main: #ff8061;
     --color-warning-light: #ffbc9f;
