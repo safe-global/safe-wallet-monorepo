@@ -27,13 +27,21 @@ const PinnedSafeContextMenu = ({ address, chainId, name }: PinnedSafeContextMenu
     <>
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger
-          render={<Button variant="ghost" size="icon-sm" className="shrink-0" onClick={(e) => e.stopPropagation()} />}
+          render={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="shrink-0"
+              onClick={(e) => e.stopPropagation()}
+              data-testid="safe-options-btn"
+            />
+          }
         >
           <MoreVertical className="size-4" />
           <span className="sr-only">Safe options</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={handleRename} onSelect={(e) => e.stopPropagation()}>
+          <DropdownMenuItem onClick={handleRename} onSelect={(e) => e.stopPropagation()} data-testid="rename-btn">
             <Pencil className="size-4 text-success" />
             <span>{hasName ? 'Rename' : 'Give name'}</span>
           </DropdownMenuItem>

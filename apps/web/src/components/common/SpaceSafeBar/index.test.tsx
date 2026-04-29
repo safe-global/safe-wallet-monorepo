@@ -51,7 +51,7 @@ jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
 })
 
 jest.mock('./SpaceNestedSafesButton', () => {
-  const MockSpaceNestedSafesButton = () => <div data-testid="space-nested-safes-button" />
+  const MockSpaceNestedSafesButton = () => <div data-testid="nested-safes-button" />
   MockSpaceNestedSafesButton.displayName = 'SpaceNestedSafesButton'
   return { __esModule: true, default: MockSpaceNestedSafesButton }
 })
@@ -142,7 +142,7 @@ describe('SpaceSafeBar', () => {
 
   it('always renders SpaceNestedSafesButton', () => {
     const { getByTestId } = render(<SpaceSafeBar />)
-    expect(getByTestId('space-nested-safes-button')).toBeInTheDocument()
+    expect(getByTestId('nested-safes-button')).toBeInTheDocument()
   })
 
   it('passes items from the hook to SafeSelectorDropdown', () => {
@@ -229,7 +229,7 @@ describe('SpaceSafeBar', () => {
       const { queryByTestId } = render(<SpaceSafeBar />)
       expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()
       expect(queryByTestId('space-chain-selector')).not.toBeInTheDocument()
-      expect(queryByTestId('space-nested-safes-button')).not.toBeInTheDocument()
+      expect(queryByTestId('nested-safes-button')).not.toBeInTheDocument()
     },
   )
 })

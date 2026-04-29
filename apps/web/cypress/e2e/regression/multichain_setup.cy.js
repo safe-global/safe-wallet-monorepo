@@ -16,7 +16,8 @@ let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
-describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
+// Tests rewritten for the new UI in multichain_setup_new.cy.js.
+describe.skip('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })

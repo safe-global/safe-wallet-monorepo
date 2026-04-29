@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as sideBar from '../pages/sidebar.pages.js'
+import * as safeNav from '../pages/safe_navigation.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import * as nsafes from '../pages/nestedsafes.pages.js'
 import * as txs from '../pages/transactions.page.js'
@@ -30,7 +31,7 @@ describe('Nested safes happy path tests', () => {
     cy.wait(5000)
     createTx.deleteAllTx()
 
-    sideBar.clickOnOpenNestedSafeListBtn()
+    safeNav.clickOnNestedSafesBtn()
     // Handle intro screen if present (select valid safes)
     nsafes.completeIntroScreenSelectValid()
     nsafes.clickOnAddNestedSafeBtn()
@@ -50,7 +51,7 @@ describe('Nested safes happy path tests', () => {
       nsafes.nonfundAssetsActions[0],
       nsafes.nonfundAssetsActions[1],
     ])
-    sideBar.clickOnOpenNestedSafeListBtn()
+    safeNav.clickOnNestedSafesBtn()
     sideBar.checkSafesCountInPopverList(1)
     sideBar.clickOnSafeInPopover(nestedSafe1Short)
   })

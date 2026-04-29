@@ -53,7 +53,7 @@ function SpaceNestedSafesButton(): ReactElement | null {
                 onClick={onClick}
                 className="relative flex items-center border-0 rounded-lg bg-transparent px-2 m-1 cursor-pointer hover:bg-muted/30 transition-colors"
                 aria-label="Nested Safes"
-                data-testid="space-nested-safes-button"
+                data-testid="nested-safes-button"
               />
             }
           >

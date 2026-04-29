@@ -3,6 +3,7 @@ import TxModalDialog from '@/components/common/TxModalDialog'
 import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './flows'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { usePreventNavigation } from '@/hooks/usePreventNavigation'
+import { useTopbarElevation } from '@/hooks/useTopbarElevation'
 
 const noop = () => {}
 
@@ -66,6 +67,8 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   )
 
   usePreventNavigation(txFlow ? handleModalClose : undefined)
+
+  useTopbarElevation('tx-flow', !!txFlow)
 
   return (
     <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth }}>

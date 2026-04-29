@@ -21,7 +21,7 @@ describe('Spaces basic flow tests', () => {
 
   it('Verify a user can sign in, create, rename and delete an organisation', () => {
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
-    const newSpaceName = 'Renamed Space'
+    const newSpaceName = 'Renamed Space' + Math.random().toString(36).substring(2, 12)
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
@@ -70,8 +70,8 @@ describe('Spaces basic flow tests', () => {
     space.disconnectFromSpaceLevel()
     wallet.connectSigner(user)
     space.clickOnSignInBtn()
-    main.verifyElementByTextExists('Pending invitations')
-    cy.reload() // Required to trigger the invite
+    main.verifyElementByTextExists(`You were invited to join ${spaceName}`)
     space.acceptInvite(newInviteName)
+    main.verifyElementByTextExists(space.acceptInviteConfirmationMsg(spaceName))
   })
 })

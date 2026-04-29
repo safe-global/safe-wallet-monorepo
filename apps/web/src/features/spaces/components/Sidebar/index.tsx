@@ -26,6 +26,7 @@ export const EnhancedSidebar = ({
       collapsible="icon"
       variant="floating"
       className="!p-0 border-r-0 group-data-[side=left]:border-r-0 [&_[data-slot=sidebar-inner]]:rounded-none [&_[data-slot=sidebar-inner]]:rounded-tr-[8px] [&_[data-slot=sidebar-inner]]:rounded-br-[8px] [&_[data-slot=sidebar-inner]]:shadow-none"
+      data-testid="sidebar-container"
     >
       <SidebarHeader>
         <SidebarTopBar />

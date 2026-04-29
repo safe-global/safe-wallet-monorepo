@@ -42,17 +42,6 @@ export function useSpaceChainSelector() {
     return { deployedChains: resolvedChains, deployedChainIds: chainIds, safeName: currentSafe.name }
   }, [allSafes, safeAddress, chainConfigs])
 
-  const availableChains: ChainInfo[] = useMemo(() => {
-    return chainConfigs
-      .filter((c) => !deployedChainIds.includes(c.chainId))
-      .map((c) => ({
-        chainId: c.chainId,
-        chainName: c.chainName,
-        chainLogoUri: c.chainLogoUri ?? null,
-        shortName: c.shortName,
-      }))
-  }, [chainConfigs, deployedChainIds])
-
   const handleChainChange = useCallback(
     (chainId: string) => {
       const chain = chainConfigs.find((c) => c.chainId === chainId)
@@ -72,7 +61,6 @@ export function useSpaceChainSelector() {
 
   return {
     deployedChains,
-    availableChains,
     selectedChainId,
     deployedChainIds,
     safeAddress,
