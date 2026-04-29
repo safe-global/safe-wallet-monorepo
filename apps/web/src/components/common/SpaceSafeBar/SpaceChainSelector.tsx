@@ -25,8 +25,8 @@ function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
   }, [])
 
   const handleChainSelect = useCallback(
-    (chainId: string, event?: React.MouseEvent) => {
-      handleChainChange(chainId, event)
+    (chainId: string) => {
+      handleChainChange(chainId)
       trackEvent(OVERVIEW_EVENTS.SWITCH_NETWORK)
     },
     [handleChainChange],
