@@ -1,8 +1,11 @@
 import type { Dispatch } from '@reduxjs/toolkit'
 import { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
+import { apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
+import { store } from '@/src/store'
 import { SafeInfo } from '@/src/types/address'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 import { updateSettings } from '@/src/store/settingsSlice'
 import { updatePromptAttempts } from '@/src/store/notificationsSlice'
 import { addSafe } from '@/src/store/safesSlice'
@@ -26,6 +29,13 @@ import { walletConnectE2eState } from '@/src/features/WalletConnect/context/wall
  * RTK Query caches are reset alongside reducer slices because slice
  * matchers (e.g. `safesSlice` listening to `safesGetOverviewForMany`)
  * would otherwise repopulate freshly-reset slices from stale cached data.
+ *
+ * Chains are re-initiated immediately after the reset because no component
+ * on the pending-tx → review-and-execute path subscribes via
+ * `useGetChainsConfigV2Query`. Without this re-fetch, `selectActiveChain`
+ * returns `undefined` and `getExecutionMethod` falls back to WITH_PK,
+ * which causes `WalletConnectGate` to render its children (Execute button)
+ * instead of the WC gate even when an active WC signer is present.
  */
 export const resetReduxForE2E = (dispatch: Dispatch) => {
   dispatch(resetE2EState())
@@ -33,6 +43,9 @@ export const resetReduxForE2E = (dispatch: Dispatch) => {
   dispatch(web3API.util.resetApiState())
   dispatch(hypernativeApi.util.resetApiState())
   walletConnectE2eState.reset()
+  store.dispatch(
+    apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY, { forceRefetch: true }),
+  )
 }
 
 /**
