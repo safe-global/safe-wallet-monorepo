@@ -95,6 +95,7 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [SPACE_EVENTS.WORKSPACE_SWITCHED.action]: MixpanelEvent.WORKSPACE_SWITCHED,
   [SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED.action]: MixpanelEvent.ADDRESS_BOOK_ENTRY_CREATED,
   [SPACE_EVENTS.TRANSACTION_INITIATED.action]: MixpanelEvent.WORKSPACE_TRANSACTION_INITIATED,
+  [SPACE_EVENTS.ONBOARDING_WIZARD.action]: MixpanelEvent.ONBOARDING_WIZARD,
 }
 
 // Maps GA labels (lowercase) to Mixpanel properties (Title Case)

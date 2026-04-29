@@ -249,6 +249,10 @@ export const SPACE_EVENTS = {
     action: 'Transaction initiated',
     category: SPACE_CATEGORY,
   },
+  ONBOARDING_WIZARD: {
+    action: 'Onboarding wizard item clicked',
+    category: SPACE_CATEGORY,
+  },
   WALLET_SWITCHED: {
     action: 'Wallet switched in space',
     category: SPACE_CATEGORY,
