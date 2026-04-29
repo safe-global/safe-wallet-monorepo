@@ -111,6 +111,8 @@ export enum MixpanelEventParams {
   SOURCE = 'Source',
   TRANSACTION_TYPE = 'Transaction Type',
   SPACE_ID = 'Space ID',
+  WORKSPACE_ID = 'Workspace ID',
+  AUTH_METHOD = 'Auth Method',
   FAILURE_REASON = 'Failure Reason',
   CHAIN_ID = 'Chain ID',
   TX_ID = 'TX ID',
