@@ -9,6 +9,7 @@ import * as useIsSpaceRouteHook from '@/hooks/useIsSpaceRoute'
 import * as useMixpanelUserPropertiesHook from '../useMixpanelUserProperties'
 import * as useChainHook from '@/hooks/useChains'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
+import * as useCurrentSpaceIdHook from '@/features/spaces/hooks/useCurrentSpaceId'
 import { CookieAndTermType, cookiesAndTermsSlice, cookiesAndTermsInitialState } from '@/store/cookiesAndTermsSlice'
 import { DeviceType } from '../types'
 import { MixpanelUserProperty } from '../mixpanel-events'
@@ -78,6 +79,14 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   default: jest.fn(),
 }))
 
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+  useCurrentSpaceId: jest.fn(),
+}))
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/auth', () => ({
+  useAuthGetMeV1Query: jest.fn(() => ({ data: undefined })),
+}))
+
 describe('useMixpanel', () => {
   const mockSafeAddress = faker.finance.ethereumAddress()
   const mockWalletAddress = faker.finance.ethereumAddress()
@@ -111,6 +120,7 @@ describe('useMixpanel', () => {
       chainName: mockChainName,
       chainId: mockChainId,
     } as any)
+    jest.spyOn(useCurrentSpaceIdHook, 'useCurrentSpaceId').mockReturnValue('42')
   })
 
   afterEach(() => {
@@ -218,13 +228,13 @@ describe('useMixpanel', () => {
     expect(mixpanelModule.mixpanelIdentify).toHaveBeenCalledWith(mockSafeAddress)
   })
 
-  it('should not identify user when on space route', () => {
+  it('should identify the connected wallet when on space route', () => {
     jest.spyOn(useIsSpaceRouteHook, 'useIsSpaceRoute').mockReturnValue(true)
     jest.spyOn(mixpanelModule, 'mixpanelIdentify')
 
     renderHook(() => useMixpanel(), { initialReduxState: getDefaultInitialReduxState() })
 
-    expect(mixpanelModule.mixpanelIdentify).not.toHaveBeenCalled()
+    expect(mixpanelModule.mixpanelIdentify).toHaveBeenCalledWith(mockWalletAddress)
   })
 
   it('should set wallet properties when wallet is connected', () => {

@@ -54,6 +54,7 @@ jest.mock('@safe-global/utils/utils/chains', () => ({
 
 jest.mock('@/features/spaces', () => ({
   getDeterministicColor: (name: string) => `color-${name}`,
+  useCurrentSpaceId: () => '42',
 }))
 
 jest.mock('../../NavItem', () => ({

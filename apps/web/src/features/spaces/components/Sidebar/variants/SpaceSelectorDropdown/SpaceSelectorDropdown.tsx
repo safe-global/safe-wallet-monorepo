@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import { getDeterministicColor } from '@/features/spaces'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT, SPACE_SELECTOR_NAME_MAX_LENGTH, SPACES_LIMIT } from '../../constants'
@@ -49,26 +50,37 @@ export const SpaceSelectorDropdown = ({
   const safe = useSafeQueryParam() || undefined
 
   const { addToSpace, loadingSpaceId } = useAddSafeToSpace({ spaces, onSpaceAdded })
+  const spaceId = selectedSpace?.id?.toString()
 
   const spaceColors = useMemo(
     () => Object.fromEntries(spaces.map((s) => [s.id, getDeterministicColor(s.name)])),
     [spaces],
   )
 
-  const handleSelectSpace = async (spaceId: number) => {
+  const handleSelectSpace = async (targetSpaceId: number) => {
     if (triggerVariant === 'addToWorkspace') {
-      const success = await addToSpace(spaceId)
+      const success = await addToSpace(targetSpaceId)
       if (success) setIsOpen(false)
     } else {
+      const targetSpace = spaces.find((s) => s.id === targetSpaceId)
+      trackEvent(
+        { ...SPACE_EVENTS.WORKSPACE_SWITCHED, label: String(targetSpaceId) },
+        {
+          from_workspace_id: selectedSpace?.id !== undefined ? String(selectedSpace.id) : undefined,
+          to_workspace_id: String(targetSpaceId),
+          source: 'sidebar',
+          safe_count: targetSpace?.safeCount ?? 0,
+        },
+      )
       router.push({
         pathname: router.pathname,
-        query: { ...router.query, spaceId: spaceId.toString() },
+        query: { ...router.query, spaceId: targetSpaceId.toString() },
       })
     }
   }
 
   const handleCreateSpace = () => {
-    trackEvent({ ...SPACE_EVENTS.CREATE_SPACE_MODAL, label: SPACE_LABELS.space_selector })
+    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.SIDEBAR })
     router.push(safe ? { pathname: AppRoutes.spaces.createSpace, query: { safe } } : AppRoutes.spaces.createSpace)
   }
 
@@ -117,8 +129,18 @@ export const SpaceSelectorDropdown = ({
     return renderMenuItemWithTooltip(menuItem, space)
   }
 
+  const handleOpenChange = (open: boolean) => {
+    if (open && triggerVariant === 'addToWorkspace') {
+      trackEvent(
+        { ...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED, label: spaceId },
+        { workspace_id: spaceId, entry_point: 'sidebar' },
+      )
+    }
+    setIsOpen(open)
+  }
+
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+    <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger
         render={
           <SidebarMenuButton

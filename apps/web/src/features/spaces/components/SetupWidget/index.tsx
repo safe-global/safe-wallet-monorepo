@@ -5,6 +5,8 @@ import { Typography } from '@/components/ui/typography'
 import SafeWidget from '../SafeWidget'
 import { cn } from '@/utils/cn'
 import { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook, useCurrentSpaceId } from '@/features/spaces'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { flattenSafeItems } from '@/hooks/safes'
 import { addDays } from 'date-fns'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
@@ -101,6 +103,7 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
   }, [deps.addressBookCount, deps.safeAccountsCount, deps.teamMembersCount])
 
   const handleStepClick = (stepKey: string) => {
+    trackEvent(SPACE_EVENTS.ONBOARDING_WIZARD, { item_clicked: stepKey, workspace_id: spaceId })
     if (stepKey === 'address-book') {
       setImportOpen(true)
     } else if (stepKey === 'safe-accounts') {

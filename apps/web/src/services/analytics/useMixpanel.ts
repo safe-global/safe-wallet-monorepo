@@ -10,6 +10,8 @@ import {
   mixpanelSetEOAWalletLabel,
   mixpanelSetEOAWalletAddress,
   mixpanelSetEOAWalletNetwork,
+  mixpanelSetWorkspaceId,
+  mixpanelSetAuthMethod,
   mixpanelOptInTracking,
   mixpanelOptOutTracking,
 } from './mixpanel'
@@ -27,6 +29,8 @@ import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useMixpanelUserProperties } from './useMixpanelUserProperties'
 import { useChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 
 const useMixpanel = () => {
   const isMixpanelEnabled = useHasFeature(FEATURES.MIXPANEL)
@@ -45,6 +49,8 @@ const useMixpanel = () => {
   const currentChain = useChain(safe?.chainId || '')
   const walletChain = useChain(wallet?.chainId || '')
   const lastUserPropertiesRef = useRef<string | null>(null)
+  const spaceId = useCurrentSpaceId()
+  const { data: session } = useAuthGetMeV1Query(undefined, { skip: !isSpaceRoute })
 
   useEffect(() => {
     if (isMixpanelEnabled) {
@@ -83,8 +89,10 @@ const useMixpanel = () => {
 
     if (safeAddress && !isSpaceRoute) {
       mixpanelIdentify(safeAddress)
+    } else if (isSpaceRoute && wallet?.address) {
+      mixpanelIdentify(wallet.address)
     }
-  }, [safeAddress, isSpaceRoute])
+  }, [safeAddress, isSpaceRoute, wallet?.address])
 
   useEffect(() => {
     if (wallet) {
@@ -128,6 +136,14 @@ const useMixpanel = () => {
       mixpanelSetUserProperties(userProperties.properties)
     }
   }, [userProperties])
+
+  useEffect(() => {
+    mixpanelSetWorkspaceId(isSpaceRoute && spaceId ? spaceId : '')
+  }, [isSpaceRoute, spaceId])
+
+  useEffect(() => {
+    mixpanelSetAuthMethod(isSpaceRoute && session?.authMethod ? session.authMethod : '')
+  }, [isSpaceRoute, session?.authMethod])
 }
 
 export default useMixpanel

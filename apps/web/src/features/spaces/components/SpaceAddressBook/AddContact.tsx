@@ -12,7 +12,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useChains from '@/hooks/useChains'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 
@@ -29,6 +29,7 @@ const AddContact = () => {
   const { configs: allNetworks } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const addressBookItems = useGetSpaceAddressBook()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const defaultValues = {
@@ -80,6 +81,11 @@ const AddContact = () => {
         setError('Something went wrong. Please try again.')
         return
       }
+
+      trackEvent(
+        { ...SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED },
+        { workspace_id: spaceId, entry_count_after: addressBookItems.length + 1 },
+      )
 
       dispatch(
         showNotification({

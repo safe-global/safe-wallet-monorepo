@@ -16,6 +16,9 @@ import { useIsSwapFeatureEnabled } from '@/features/swap'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { ESafeAction, openSafeActionsModal } from '@/features/spaces/store'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { useCurrentSpaceId } from '@/features/spaces'
 
 interface NavigationItem {
   icon: ReactNode
@@ -39,6 +42,7 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
   const wallet = useWallet()
   const isSwapEnabled = useIsSwapFeatureEnabled()
   const isSpaceRoute = useIsSpaceRoute()
+  const spaceId = useCurrentSpaceId()
 
   const navigationItems = useMemo(
     () => [...COMMON_ITEMS, isSpaceRoute ? SPACE_LEVEL_ITEM : SAFE_LEVEL_ITEM],
@@ -58,6 +62,15 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
     [],
   )
 
+  const transactionActionByLabel: Record<string, string> = useMemo(
+    () => ({
+      Send: 'send',
+      Swap: 'swap',
+      'Transaction builder': 'build_tx',
+    }),
+    [],
+  )
+
   const handleNavigation = useCallback(
     (itemLabel: string) => {
       setTxFlow(undefined)
@@ -67,6 +80,8 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
       if (isSpaceRoute) {
         const safeAction = spaceActionByLabel[itemLabel]
         if (safeAction) {
+          const action = transactionActionByLabel[itemLabel]
+          trackEvent(SPACE_EVENTS.TRANSACTION_INITIATED, { workspace_id: spaceId, action, entry_point: 'searchbar' })
           dispatch(openSafeActionsModal({ type: safeAction }))
           return
         }
@@ -104,7 +119,17 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
           break
       }
     },
-    [isSpaceRoute, isSafeLevel, dispatch, setTxFlow, router, txBuilderLink, spaceActionByLabel],
+    [
+      isSpaceRoute,
+      isSafeLevel,
+      dispatch,
+      setTxFlow,
+      router,
+      txBuilderLink,
+      spaceActionByLabel,
+      transactionActionByLabel,
+      spaceId,
+    ],
   )
 
   if (filteredItems.length === 0) return null

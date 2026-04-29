@@ -7,12 +7,24 @@ import type { SafeWorkspaceHeaderProps } from '../../types'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
 import { BackToSpaceButton } from '../../BackToSpaceButton'
 import { AddToSpacePopupModal } from '../../../AddToSpacePopupModal/AddToSpacePopupModal'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { useCurrentSpaceId } from '@/features/spaces'
 
 export interface SafeSidebarWorkspaceHeaderProps {
   workspaceHeader: SafeWorkspaceHeaderProps
 }
 
 export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorkspaceHeaderProps): ReactElement => {
+  const spaceId = useCurrentSpaceId()
+
+  const handleAddSafeClick = () => {
+    trackEvent(
+      { ...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED, label: spaceId },
+      { workspace_id: spaceId, entry_point: 'sidebar' },
+    )
+  }
+
   switch (workspaceHeader.variant) {
     case 'backToSpace':
       return <BackToSpaceButton {...workspaceHeader} />
@@ -31,7 +43,7 @@ export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorks
       }
 
       return (
-        <Dialog>
+        <Dialog onOpenChange={(open) => open && handleAddSafeClick()}>
           <DialogTrigger
             render={
               <SidebarMenuButton
