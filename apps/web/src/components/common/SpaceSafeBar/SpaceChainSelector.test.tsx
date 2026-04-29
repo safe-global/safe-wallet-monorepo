@@ -1,6 +1,8 @@
+import type { ReactElement, ReactNode } from 'react'
 import { render, screen } from '@testing-library/react'
 import SpaceChainSelector from './SpaceChainSelector'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
+import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import type { ChainSelectorBlockProps } from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
 
 jest.mock('./hooks/useSpaceChainSelector')
@@ -12,6 +14,7 @@ jest.mock(
       selectedChainId,
       safeAddress,
       deployedChainIds,
+      disabled,
     }: ChainSelectorBlockProps) {
       return (
         <div
@@ -20,13 +23,37 @@ jest.mock(
           data-selected-chain-id={selectedChainId}
           data-safe-address={safeAddress}
           data-deployed-chain-ids={deployedChainIds.join(',')}
+          data-disabled={String(Boolean(disabled))}
         />
       )
     },
 )
+jest.mock('@/components/ui/tooltip', () => ({
+  Tooltip: ({ children }: { children: ReactNode }) => <div data-testid="tooltip">{children}</div>,
+  TooltipTrigger: ({ render: renderProp, children }: { render?: ReactElement; children: ReactNode }) => (
+    <div data-testid="tooltip-trigger" data-has-render-prop={String(Boolean(renderProp))}>
+      {children}
+    </div>
+  ),
+  TooltipContent: ({ children }: { children: ReactNode }) => <div data-testid="tooltip-content">{children}</div>,
+}))
 jest.mock('@/features/multichain', () => ({
   CreateSafeOnNewChain: () => <div data-testid="create-safe-on-new-chain" />,
 }))
+
+const renderWithTxFlow = (txFlow: TxModalContextType['txFlow']) => {
+  const value: TxModalContextType = {
+    txFlow,
+    setTxFlow: jest.fn(),
+    setFullWidth: jest.fn(),
+  }
+
+  return render(
+    <TxModalContext.Provider value={value}>
+      <SpaceChainSelector />
+    </TxModalContext.Provider>,
+  )
+}
 
 const mockUseSpaceChainSelector = useSpaceChainSelector as jest.Mock
 
@@ -119,5 +146,32 @@ describe('SpaceChainSelector', () => {
 
     expect(screen.getByTestId('chain-selector-block')).toHaveAttribute('data-safe-address', '0xSafe2')
     expect(screen.getByTestId('chain-selector-block')).toHaveAttribute('data-deployed-chain-ids', '1,137')
+  })
+
+  it('does not disable ChainSelectorBlock and does not render tooltip when no tx flow is active', () => {
+    render(<SpaceChainSelector />)
+
+    expect(screen.getByTestId('chain-selector-block')).toHaveAttribute('data-disabled', 'false')
+    expect(screen.queryByTestId('tooltip')).not.toBeInTheDocument()
+  })
+
+  describe('when a tx flow is active', () => {
+    const activeTxFlow = <div>active tx flow</div>
+
+    it('disables ChainSelectorBlock', () => {
+      renderWithTxFlow(activeTxFlow)
+
+      expect(screen.getByTestId('chain-selector-block')).toHaveAttribute('data-disabled', 'true')
+    })
+
+    it('wraps ChainSelectorBlock in a tooltip explaining the restriction', () => {
+      renderWithTxFlow(activeTxFlow)
+
+      const tooltip = screen.getByTestId('tooltip')
+      expect(tooltip).toContainElement(screen.getByTestId('chain-selector-block'))
+      expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
+        'Changing the network is not allowed in this screen',
+      )
+    })
   })
 })
