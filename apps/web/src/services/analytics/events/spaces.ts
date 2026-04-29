@@ -39,8 +39,16 @@ export const SPACE_EVENTS = {
     action: 'Open accept invitation dialog',
     category: SPACE_CATEGORY,
   },
-  ACCEPT_INVITE_SUBMIT: {
-    action: 'Submit accept invitation',
+  WORKSPACE_MEMBER_INVITE_ACCEPTED: {
+    action: 'Workspace member invite accepted',
+    category: SPACE_CATEGORY,
+  },
+  WORKSPACE_MEMBER_ROLE_CHANGED: {
+    action: 'Workspace member role changed',
+    category: SPACE_CATEGORY,
+  },
+  WORKSPACE_MEMBER_REMOVED: {
+    action: 'Workspace member removed',
     category: SPACE_CATEGORY,
   },
   DECLINE_INVITE: {
@@ -67,8 +75,8 @@ export const SPACE_EVENTS = {
     action: 'Submit remove member',
     category: SPACE_CATEGORY,
   },
-  ADD_MEMBER: {
-    action: 'Submit add member',
+  WORKSPACE_MEMBER_INVITE_SENT: {
+    action: 'Workspace member invite sent',
     category: SPACE_CATEGORY,
   },
   ADD_ACCOUNTS_MODAL: {
