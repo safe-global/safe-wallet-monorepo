@@ -40,7 +40,7 @@ export enum MixpanelEvent {
   HYPERNATIVE_LOGIN_CLICKED = 'Hypernative Login Clicked',
   HYPERNATIVE_CONNECTED = 'Hypernative Connected',
   FALSE_RESULT_REPORTED = 'False Result Reported',
-  SPACES_ENTRY_VIEWED = 'Spaces Entry Viewed',
+  WORKSPACE_DASHBOARD_VIEWED = 'Workspace Dashboard Viewed',
   AUTH_LOGIN_SUCCEEDED = 'Auth Login Succeeded',
   AUTH_LOGIN_FAILED = 'Auth Login Failed',
   AUTH_LOGGED_OUT = 'Auth Logged Out',
@@ -60,6 +60,7 @@ export enum MixpanelEvent {
   WALLET_SWITCHED = 'Wallet Switched',
   WALLET_DISCONNECTED = 'Wallet Disconnected',
   WORKSPACE_CREATE_STARTED = 'Workspace Create Started',
+  WORKSPACE_SWITCHED = 'Workspace Switched',
 }
 
 export enum WorkspaceCreateEntryPoint {

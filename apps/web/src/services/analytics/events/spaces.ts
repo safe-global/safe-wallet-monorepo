@@ -193,8 +193,8 @@ export const SPACE_EVENTS = {
     action: 'Submit edit address',
     category: SPACE_CATEGORY,
   },
-  SPACES_ENTRY_VIEWED: {
-    action: 'Spaces entry viewed',
+  WORKSPACE_DASHBOARD_VIEWED: {
+    action: 'Workspace dashboard viewed',
     category: SPACE_CATEGORY,
   },
   AUTH_LOGIN_SUCCEEDED: {
@@ -227,6 +227,10 @@ export const SPACE_EVENTS = {
   },
   WORKSPACE_SAFE_UNLINKED: {
     action: 'Workspace safe unlinked',
+    category: SPACE_CATEGORY,
+  },
+  WORKSPACE_SWITCHED: {
+    action: 'Workspace switched',
     category: SPACE_CATEGORY,
   },
   ACCOUNTS_WIDGET_CLICKED: {

@@ -57,14 +57,24 @@ export const SpaceSelectorDropdown = ({
     [spaces],
   )
 
-  const handleSelectSpace = async (spaceId: number) => {
+  const handleSelectSpace = async (targetSpaceId: number) => {
     if (triggerVariant === 'addToWorkspace') {
-      const success = await addToSpace(spaceId)
+      const success = await addToSpace(targetSpaceId)
       if (success) setIsOpen(false)
     } else {
+      const targetSpace = spaces.find((s) => s.id === targetSpaceId)
+      trackEvent(
+        { ...SPACE_EVENTS.WORKSPACE_SWITCHED, label: String(targetSpaceId) },
+        {
+          from_workspace_id: selectedSpace?.id !== undefined ? String(selectedSpace.id) : undefined,
+          to_workspace_id: String(targetSpaceId),
+          source: 'sidebar',
+          safe_count: targetSpace?.safeCount ?? 0,
+        },
+      )
       router.push({
         pathname: router.pathname,
-        query: { ...router.query, spaceId: spaceId.toString() },
+        query: { ...router.query, spaceId: targetSpaceId.toString() },
       })
     }
   }

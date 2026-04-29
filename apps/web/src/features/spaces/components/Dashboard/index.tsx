@@ -67,8 +67,16 @@ const SpaceDashboard = () => {
 
   useEffect(() => {
     if (!spaceId) return
-    trackEvent({ ...SPACE_EVENTS.SPACES_ENTRY_VIEWED, label: spaceId }, { spaceId })
-  }, [spaceId])
+    trackEvent(
+      { ...SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED, label: spaceId },
+      {
+        workspace_id: spaceId,
+        pending_tx_count: pendingTxCount,
+        member_count: activeMembers.length,
+        safe_count: safeItems.length,
+      },
+    )
+  }, [spaceId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
 
