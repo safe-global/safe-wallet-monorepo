@@ -3,6 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import ChainSelectorBlock from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
 import { CreateSafeOnNewChain } from '@/features/multichain'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
+import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 
 function SpaceChainSelectorSkeleton() {
   return (
@@ -20,7 +21,16 @@ function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
 
   const handleAddNetwork = useCallback((chainId: string) => {
     setAddNetworkChainId(chainId)
+    trackEvent(OVERVIEW_EVENTS.ADD_NEW_NETWORK)
   }, [])
+
+  const handleChainSelect = useCallback(
+    (chainId: string, event?: React.MouseEvent) => {
+      handleChainChange(chainId, event)
+      trackEvent(OVERVIEW_EVENTS.SWITCH_NETWORK)
+    },
+    [handleChainChange],
+  )
 
   const handleCloseDialog = useCallback(() => {
     setAddNetworkChainId(undefined)
@@ -41,7 +51,7 @@ function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
         selectedChainId={selectedChainId}
         safeAddress={safeAddress}
         deployedChainIds={deployedChainIds}
-        onChainSelect={handleChainChange}
+        onChainSelect={handleChainSelect}
         onAddNetwork={handleAddNetwork}
       />
 
