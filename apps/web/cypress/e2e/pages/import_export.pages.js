@@ -169,7 +169,8 @@ export function clickOnDataTab() {
 
 export function verifyCheckboxes(checkboxes, checked = false) {
   checkboxes.forEach((checkbox) => {
-    cy.contains('label', checkbox)
+    cy.get('main')
+      .contains('label', checkbox)
       .find('input[type="checkbox"]')
       .should(checked ? 'be.checked' : 'not.be.checked')
   })
