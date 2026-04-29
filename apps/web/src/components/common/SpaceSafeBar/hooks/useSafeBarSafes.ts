@@ -2,9 +2,9 @@ import { useMemo } from 'react'
 import { useIsQualifiedSafe, useSpaceSafes } from '@/features/spaces'
 import { useAllSafes, useAllSafesGrouped, type AllSafeItems } from '@/hooks/safes'
 import type { SafeItem } from '@/hooks/safes'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 /**
@@ -22,7 +22,7 @@ export function useSafeBarSafes() {
   const isSpaceRoute = useIsSpaceRoute()
   const isInSpaceContext = isQualifiedSafe || isSpaceRoute
   const { allSafes: spaceSafes } = useSpaceSafes()
-  const { safeAddress } = useSafeInfo()
+  const safeAddress = useSafeAddressFromUrl()
   const currentChainId = useChainId()
 
   const allSafeItems = useAllSafes()

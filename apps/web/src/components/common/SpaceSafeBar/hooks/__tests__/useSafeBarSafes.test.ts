@@ -15,9 +15,8 @@ jest.mock('@/features/spaces', () => ({
 }))
 
 const mockSafeAddress = jest.fn(() => '0xCurrentSafe')
-jest.mock('@/hooks/useSafeInfo', () => ({
-  __esModule: true,
-  default: () => ({ safeAddress: mockSafeAddress() }),
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeAddressFromUrl: () => mockSafeAddress(),
 }))
 
 const mockChainId = jest.fn(() => '1')
@@ -73,10 +72,11 @@ describe('useSafeBarSafes', () => {
     expect(result.current.dropdownSafes[0].address).toBe('0xCurrentSafe')
   })
 
-  it('returns space safes when in space context', () => {
+  it('returns space safes when in space context and the URL safe is in the space', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
     const spaceSafe = createSafe('0xSpaceSafe', true)
     mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
+    mockSafeAddress.mockReturnValue('0xSpaceSafe')
 
     const { result } = renderHook(() => useSafeBarSafes())
 
@@ -89,6 +89,7 @@ describe('useSafeBarSafes', () => {
     mockIsSpaceRoute.mockReturnValue(true)
     const spaceSafe = createSafe('0xSpaceSafe', true)
     mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
+    mockSafeAddress.mockReturnValue('0xSpaceSafe')
 
     const { result } = renderHook(() => useSafeBarSafes())
 
@@ -149,6 +150,21 @@ describe('useSafeBarSafes', () => {
     expect(fallback.chainId).toBe('11155111')
     expect(fallback.isReadOnly).toBe(true)
     expect(fallback.isPinned).toBe(false)
+  })
+
+  it('keeps URL fallback at index 0 even when other pinned safes exist', () => {
+    const pinnedA = createSafe('0xPinnedA', true)
+    const pinnedB = createSafe('0xPinnedB', true)
+    mockAllSafes.mockReturnValue([pinnedA, pinnedB])
+    mockSafeAddress.mockReturnValue('0xNestedChild')
+    mockChainId.mockReturnValue('11155111')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.dropdownSafes).toHaveLength(3)
+    expect(result.current.dropdownSafes[0].address).toBe('0xNestedChild')
+    expect(result.current.dropdownSafes[1].address).toBe('0xPinnedA')
+    expect(result.current.dropdownSafes[2].address).toBe('0xPinnedB')
   })
 
   it('injects fallback into chainSelectorSafes when not in allKnownSafes', () => {

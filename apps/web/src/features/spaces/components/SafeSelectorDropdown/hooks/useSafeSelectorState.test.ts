@@ -61,6 +61,22 @@ describe('useSafeSelectorState', () => {
     expect(result.current.dropdownOpen).toBe(false)
   })
 
+  it('returns undefined selectedItem when selectedItemId does not match any item', () => {
+    const { result } = renderHook(() =>
+      useSafeSelectorState({ items: [createItem('1'), createItem('2')], selectedItemId: 'unknown' }),
+    )
+
+    expect(result.current.selectedItem).toBeUndefined()
+  })
+
+  it('returns undefined selectedItem when selectedItemId is empty', () => {
+    const { result } = renderHook(() =>
+      useSafeSelectorState({ items: [createItem('1'), createItem('2')], selectedItemId: '' }),
+    )
+
+    expect(result.current.selectedItem).toBeUndefined()
+  })
+
   /**
    * When a controlled Select emits onValueChange twice (new id, then snap-back to the previous id
    * before the URL updates), only the first call is forwarded — the second matches currentSelectionId.
