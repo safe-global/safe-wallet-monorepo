@@ -45,6 +45,7 @@ export const useSiwe = () => {
     } catch (error) {
       setLoading(false)
       logError(ErrorCodes._640)
+      throw error
     }
   }, [fetchNonce, provider, verifyAuthMutation, wallet])
 
