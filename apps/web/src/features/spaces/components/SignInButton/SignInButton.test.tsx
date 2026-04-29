@@ -14,8 +14,8 @@ jest.mock('@/services/analytics', () => ({
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: {
     SIGN_IN_BUTTON: { action: 'Open sign in message', category: 'spaces' },
-    SPACES_SIWE_SUCCESS: { action: 'Spaces SIWE success', category: 'spaces' },
-    SPACES_SIWE_FAILURE: { action: 'Spaces SIWE failure', category: 'spaces' },
+    AUTH_LOGIN_SUCCEEDED: { action: 'Auth (SIWE / Email) success', category: 'spaces' },
+    AUTH_LOGIN_FAILED: { action: 'Auth (SIWE / Email) failure', category: 'spaces' },
   },
   SPACE_LABELS: {},
 }))
@@ -58,7 +58,7 @@ describe('SignInButton tracking', () => {
     jest.clearAllMocks()
   })
 
-  it('tracks SPACES_SIWE_SUCCESS with spaceId sent to both GA (label) and Mixpanel (additionalParameters)', async () => {
+  it('tracks AUTH_LOGIN_SUCCEEDED with spaceId and method sent to both GA (label) and Mixpanel (additionalParameters)', async () => {
     mockSignIn.mockResolvedValue({ token: 'abc' })
 
     render(<SignInButton redirectLoading={false} afterSignIn={jest.fn()} />)
@@ -66,13 +66,13 @@ describe('SignInButton tracking', () => {
 
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.SPACES_SIWE_SUCCESS, label: '42' }, // GA receives spaceId as label
-        { spaceId: '42' }, // Mixpanel receives spaceId as additionalParameters
+        { ...SPACE_EVENTS.AUTH_LOGIN_SUCCEEDED, label: '42' },
+        { spaceId: '42', method: 'siwe' },
       )
     })
   })
 
-  it('tracks SPACES_SIWE_FAILURE with failure_reason on sign in error', async () => {
+  it('tracks AUTH_LOGIN_FAILED with failure_reason on sign in error', async () => {
     const error = new Error('User rejected')
     mockSignIn.mockRejectedValue(error)
 
@@ -80,26 +80,28 @@ describe('SignInButton tracking', () => {
     fireEvent.click(screen.getByText('Sign in'))
 
     await waitFor(() => {
-      expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.SPACES_SIWE_FAILURE, {
+      expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.AUTH_LOGIN_FAILED, {
         'Failure Reason': 'User rejected',
+        method: 'siwe',
       })
     })
   })
 
-  it('tracks SPACES_SIWE_FAILURE when signIn returns an error object', async () => {
+  it('tracks AUTH_LOGIN_FAILED when signIn returns an error object', async () => {
     mockSignIn.mockResolvedValue({ error: new Error('Signature failed') })
 
     render(<SignInButton redirectLoading={false} afterSignIn={jest.fn()} />)
     fireEvent.click(screen.getByText('Sign in'))
 
     await waitFor(() => {
-      expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.SPACES_SIWE_FAILURE, {
+      expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.AUTH_LOGIN_FAILED, {
         'Failure Reason': 'Signature failed',
+        method: 'siwe',
       })
     })
   })
 
-  it('does not track SPACES_SIWE_SUCCESS when signIn returns null', async () => {
+  it('does not track AUTH_LOGIN_SUCCEEDED when signIn returns null', async () => {
     mockSignIn.mockResolvedValue(null)
 
     render(<SignInButton redirectLoading={false} afterSignIn={jest.fn()} />)
@@ -107,7 +109,7 @@ describe('SignInButton tracking', () => {
 
     await waitFor(() => {
       expect(trackEvent).not.toHaveBeenCalledWith(
-        expect.objectContaining({ action: SPACE_EVENTS.SPACES_SIWE_SUCCESS.action }),
+        expect.objectContaining({ action: SPACE_EVENTS.AUTH_LOGIN_SUCCEEDED.action }),
         expect.anything(),
       )
     })

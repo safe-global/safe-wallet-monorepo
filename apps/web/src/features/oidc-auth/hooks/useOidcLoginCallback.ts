@@ -6,7 +6,15 @@ import { showNotification } from '@/store/notificationsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import reconcileAuth from '@/store/reconcileAuth'
-import { DEFAULT_SIGN_IN_ERROR_MESSAGE, OIDC_AUTH_PENDING_KEY, SIGN_IN_ERROR_DESCRIPTION_MAP } from '../constants'
+import {
+  DEFAULT_SIGN_IN_ERROR_MESSAGE,
+  OIDC_AUTH_PENDING_KEY,
+  OIDC_AUTH_CONNECTION_KEY,
+  SIGN_IN_ERROR_DESCRIPTION_MAP,
+} from '../constants'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { AuthLoginMethod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 
 const getErrorNotification = (errorDescription: string | null) => ({
   message:
@@ -53,6 +61,12 @@ export const useOidcLoginCallback = () => {
       if (params.has('error')) {
         const errorDescription = params.get('error_description')
         dispatch(showNotification(getErrorNotification(errorDescription)))
+        const method =
+          (sessionStorage.getItem(OIDC_AUTH_CONNECTION_KEY) as AuthLoginMethod) ?? AuthLoginMethod.EMAIL_OTP
+        trackEvent(SPACE_EVENTS.AUTH_LOGIN_FAILED, {
+          [MixpanelEventParams.FAILURE_REASON]: errorDescription ?? 'unknown',
+          method,
+        })
 
         // Read params from window.location.search instead of
         // router.query, which may still be empty before router.isReady on first render.
@@ -66,10 +80,15 @@ export const useOidcLoginCallback = () => {
         const result = await reconcileAuth(dispatch)
         if (result === 'unauthenticated') {
           dispatch(showNotification(getErrorNotification(null)))
+        } else {
+          const method =
+            (sessionStorage.getItem(OIDC_AUTH_CONNECTION_KEY) as AuthLoginMethod) ?? AuthLoginMethod.EMAIL_OTP
+          trackEvent(SPACE_EVENTS.AUTH_LOGIN_SUCCEEDED, { method, timestamp: new Date().toISOString() })
         }
       }
 
       sessionStorage.removeItem(OIDC_AUTH_PENDING_KEY)
+      sessionStorage.removeItem(OIDC_AUTH_CONNECTION_KEY)
       dispatch(setIsOidcLoginPending(false))
     }
 

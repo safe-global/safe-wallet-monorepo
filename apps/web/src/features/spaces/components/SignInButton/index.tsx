@@ -10,7 +10,7 @@ import { setAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
-import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { AuthLoginMethod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentSpaceId } from '@/features/spaces'
 
 interface SignInButtonProps {
@@ -42,12 +42,16 @@ const SignInButton = ({ afterSignIn, redirectLoading = false, buttonStyle, butto
       if (result) {
         const oneDayInMs = 24 * 60 * 60 * 1000
         dispatch(setAuthenticated(Date.now() + oneDayInMs))
-        trackEvent({ ...SPACE_EVENTS.SPACES_SIWE_SUCCESS, label: spaceId ?? undefined }, { spaceId })
+        trackEvent(
+          { ...SPACE_EVENTS.AUTH_LOGIN_SUCCEEDED, label: spaceId ?? undefined },
+          { spaceId, method: AuthLoginMethod.SIWE, timestamp: new Date().toISOString() },
+        )
         afterSignIn()
       }
     } catch (error) {
-      trackEvent(SPACE_EVENTS.SPACES_SIWE_FAILURE, {
+      trackEvent(SPACE_EVENTS.AUTH_LOGIN_FAILED, {
         [MixpanelEventParams.FAILURE_REASON]: error instanceof Error ? error.message : String(error),
+        method: AuthLoginMethod.SIWE,
       })
       logError(ErrorCodes._640)
 

@@ -41,8 +41,9 @@ export enum MixpanelEvent {
   HYPERNATIVE_CONNECTED = 'Hypernative Connected',
   FALSE_RESULT_REPORTED = 'False Result Reported',
   SPACES_ENTRY_VIEWED = 'Spaces Entry Viewed',
-  SPACES_SIWE_SUCCESS = 'Spaces SIWE Success',
-  SPACES_SIWE_FAILURE = 'Spaces SIWE Failure',
+  AUTH_LOGIN_SUCCEEDED = 'Auth Login Succeeded',
+  AUTH_LOGIN_FAILED = 'Auth Login Failed',
+  AUTH_LOGGED_OUT = 'Auth Logged Out',
   SPACE_CREATED = 'Space Created',
   SPACE_INVITE_SENT = 'Space Invite Sent',
   SPACE_INVITE_ACCEPTED = 'Space Invite Accepted',
@@ -99,6 +100,12 @@ export enum MixpanelEventParams {
   CHAIN_ID = 'Chain ID',
   TX_ID = 'TX ID',
   SAFE_SELECTOR_DROPDOWN = 'Safe Selector Dropdown',
+}
+
+export enum AuthLoginMethod {
+  SIWE = 'siwe',
+  EMAIL_OTP = 'email_otp',
+  EMAIL_GOOGLE = 'email_google',
 }
 
 export enum SafeAppLaunchLocation {

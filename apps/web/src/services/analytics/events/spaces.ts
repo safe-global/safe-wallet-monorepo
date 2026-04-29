@@ -189,12 +189,16 @@ export const SPACE_EVENTS = {
     action: 'Spaces entry viewed',
     category: SPACE_CATEGORY,
   },
-  SPACES_SIWE_SUCCESS: {
-    action: 'Spaces SIWE success',
+  AUTH_LOGIN_SUCCEEDED: {
+    action: 'Auth (SIWE / Email) success',
     category: SPACE_CATEGORY,
   },
-  SPACES_SIWE_FAILURE: {
-    action: 'Spaces SIWE failure',
+  AUTH_LOGIN_FAILED: {
+    action: 'Auth (SIWE / Email) failure',
+    category: SPACE_CATEGORY,
+  },
+  AUTH_LOGGED_OUT: {
+    action: 'Auth logged out',
     category: SPACE_CATEGORY,
   },
   SAFE_SELECTED: {
