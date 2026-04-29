@@ -91,9 +91,6 @@ const SpaceAddressBook = () => {
         <div className="mt-6 mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <Typography variant="h1">Address book</Typography>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Org-verified contacts are shared with all Workspace members.
-            </p>
           </div>
 
           {isAdmin && (

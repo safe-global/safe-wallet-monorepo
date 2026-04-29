@@ -1,4 +1,4 @@
-import { useState, type MouseEvent, type PointerEvent } from 'react'
+import { useState, useCallback, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react'
 import { blo } from 'blo'
 import { Copy, Check } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -26,23 +26,36 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
     chainShortName,
   )
 
-  const handleCopy = (e: MouseEvent | PointerEvent) => {
-    e.stopPropagation()
-    e.preventDefault()
+  const runCopy = useCallback(() => {
     navigator.clipboard.writeText(selectedItem.address)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }, [selectedItem.address])
+
+  const handleCopyPointer = (e: MouseEvent | PointerEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    runCopy()
+  }
+
+  const handleCopyKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return
+    e.stopPropagation()
+    e.preventDefault()
+    runCopy()
   }
 
   const copyButton = (
     <Tooltip>
       <TooltipTrigger
         render={
-          <button
-            type="button"
-            onClick={handleCopy}
-            onPointerDown={handleCopy}
-            className="shrink-0 rounded p-0.5 hover:bg-muted transition-colors cursor-pointer"
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={handleCopyPointer}
+            onPointerDown={handleCopyPointer}
+            onKeyDown={handleCopyKeyDown}
+            className="shrink-0 rounded p-0.5 hover:bg-muted transition-colors cursor-pointer inline-flex"
             aria-label="Copy address"
             data-testid="copy-address-btn"
           />
