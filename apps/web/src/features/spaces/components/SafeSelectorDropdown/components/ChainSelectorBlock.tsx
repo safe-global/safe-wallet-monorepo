@@ -13,6 +13,7 @@ export interface ChainSelectorBlockProps {
   deployedChainIds: string[]
   onChainSelect: (chainId: string, event?: React.MouseEvent) => void
   onAddNetwork: (chainId: string) => void
+  disabled?: boolean
 }
 
 const handleChainTriggerKeyDown = (e: React.KeyboardEvent) => {
@@ -29,6 +30,7 @@ function ChainSelectorBlock({
   deployedChainIds,
   onChainSelect,
   onAddNetwork,
+  disabled = false,
 }: ChainSelectorBlockProps) {
   const displayChainId = selectedChainId || deployedChains[0]?.chainId
   const [open, setOpen] = useState(false)
@@ -38,16 +40,27 @@ function ChainSelectorBlock({
     onAddNetwork(chainId)
   }
 
+  const handleOpenChange = (next: boolean) => {
+    if (disabled) return
+    setOpen(next)
+  }
+
+  const triggerClassName = disabled
+    ? 'w-16 flex items-center justify-between px-2 m-1 rounded-lg shrink-0 cursor-not-allowed opacity-50 focus:outline-none'
+    : 'w-16 flex items-center justify-between px-2 m-1 rounded-lg shrink-0 cursor-pointer hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
+    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger
+        disabled={disabled}
         render={
           <span
             role="button"
-            tabIndex={0}
+            tabIndex={disabled ? -1 : 0}
+            aria-disabled={disabled}
             data-testid="space-chain-navigation-button"
-            className="w-16 flex items-center justify-between px-2 m-1 rounded-lg shrink-0 cursor-pointer hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            onKeyDown={handleChainTriggerKeyDown}
+            className={triggerClassName}
+            onKeyDown={disabled ? undefined : handleChainTriggerKeyDown}
           >
             <ChainLogo chainId={displayChainId} />
             <ChevronDown className="size-4 text-muted-foreground shrink-0" />
