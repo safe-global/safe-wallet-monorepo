@@ -2,6 +2,7 @@ import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '.'
 import { Address, SignerInfo } from '../types/address'
 import { removeSigner } from '@/src/store/signersSlice'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 type ActiveSignerState = Record<Address, SignerInfo>
 
@@ -24,7 +25,7 @@ const activeSignerSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(removeSigner, (state, action) => {
       for (const [safeAddress, signerInfo] of Object.entries(state) as [Address, SignerInfo][]) {
-        if (signerInfo.value === action.payload) {
+        if (sameAddress(signerInfo.value, action.payload)) {
           // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
           delete state[safeAddress]
         }

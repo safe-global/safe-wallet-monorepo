@@ -45,6 +45,14 @@ const items = [
     Image: <ConnectWalletAppImage />,
     imageProps: { marginBottom: -32 },
   },
+  {
+    name: 'passkey',
+    title: 'Create passkey signer',
+    description: 'Create a passkey to sign transactions.',
+    icon: <SafeFontIcon name="fingerprint" size={16} />,
+    Image: undefined,
+    imageProps: {},
+  },
 ] as const
 
 const title = 'Add signer'
@@ -68,6 +76,7 @@ export const ImportSignersContainer = () => {
           ),
         hardwareSigner: () => router.push('/import-signers/hardware-devices'),
         connectSigner: initiateConnection,
+        passkey: () => router.push('/passkey-setup/info'),
       }
 
       actions[name]()

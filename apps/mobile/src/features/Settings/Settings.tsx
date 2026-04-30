@@ -15,8 +15,6 @@ import { ThresholdBadge } from '@/src/components/ThresholdBadge'
 import { Navbar } from '@/src/features/Settings/components/Navbar/Navbar'
 import { type Contact } from '@/src/store/addressBookSlice'
 import { Alert } from '@/src/components/Alert'
-import { PasskeySignerContainer } from '@/src/features/PasskeySigner'
-
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 
@@ -183,8 +181,6 @@ export const Settings = ({
                     </Pressable>
                   </View>
                 </View>
-
-                <PasskeySignerContainer />
 
                 {displayDevMenu && (
                   <View backgroundColor="$backgroundDark" padding="$4" borderRadius="$3" gap={'$2'}>

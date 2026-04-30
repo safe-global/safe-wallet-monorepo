@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectContactByAddress, upsertContact } from '@/src/store/addressBookSlice'
 import { selectSignerHasPrivateKey, selectSignerByAddress, removeSigner } from '@/src/store/signersSlice'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Alert, Linking } from 'react-native'
 import { selectActiveChain } from '@/src/store/chains'
 import { getHashedExplorerUrl } from '@safe-global/utils/utils/gateway'
@@ -13,6 +13,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { FormValues } from '@/src/features/Signer/types'
 import { formSchema } from '@/src/features/Signer/schema'
 import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
+import { useSignerSafes } from '@/src/features/YourSigners/hooks/useSignerSafes'
+import { getPasskeyMetadataByRawId, type PasskeyMetadata } from '@/src/services/passkey/passkey-storage.service'
 
 export const SignerContainer = () => {
   const { address } = useLocalSearchParams<{ address: string }>()
@@ -26,7 +28,15 @@ export const SignerContainer = () => {
   const isLedgerSigner = signer?.type === 'ledger'
   const { reconnect, isWalletConnectSigner } = useWalletConnectContext()
   const isWcSigner = isWalletConnectSigner(address)
+  const signerSafes = useSignerSafes(address)
   const [editMode, setEditMode] = useState(Boolean(local.editMode))
+  const [passkeyMetadata, setPasskeyMetadata] = useState<PasskeyMetadata | null>(null)
+
+  useEffect(() => {
+    if (signer?.type === 'passkey') {
+      getPasskeyMetadataByRawId(signer.rawId).then(setPasskeyMetadata)
+    }
+  }, [signer])
 
   usePreventLeaveScreen(editMode)
 
@@ -74,6 +84,26 @@ export const SignerContainer = () => {
       },
     ])
   }, [address, dispatch, router])
+
+  const onRemoveSigner = useCallback(() => {
+    const safeCount = signerSafes.length
+    const warningMessage =
+      safeCount > 0
+        ? `This signer is still an owner of ${safeCount} Safe(s). Removing it will permanently delete the signing credentials. This cannot be undone.`
+        : 'This will remove the signer from your device. This cannot be undone.'
+
+    Alert.alert('Remove signer', warningMessage, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: () => {
+          dispatch(removeSigner(address))
+          router.back()
+        },
+      },
+    ])
+  }, [address, dispatch, router, signerSafes.length])
 
   // Initialize the form with React Hook Form and Zod schema resolver
   const {
@@ -128,10 +158,14 @@ export const SignerContainer = () => {
   return (
     <SignerView
       signerAddress={address}
+      signerType={signer?.type}
+      signerSafes={signerSafes}
       onPressExplorer={onPressExplorer}
       onPressEdit={onPressEdit}
       onPressViewPrivateKey={hasPrivateKey ? onPressViewPrivateKey : undefined}
       onDeleteLedgerConnection={isLedgerSigner ? onDeleteLedgerConnection : undefined}
+      onRemoveSigner={onRemoveSigner}
+      passkeyMetadata={passkeyMetadata}
       editMode={editMode}
       hasPrivateKey={hasPrivateKey}
       isLedgerSigner={isLedgerSigner}

@@ -26,10 +26,13 @@ import {
   getAndValidateSafeSDK,
   getSafeSDKWithSigner,
   tryOffChainTxSigning,
+  signWithPasskeySigner,
   getUncheckedSigner,
   prepareTxExecution,
   prepareApproveTxHash,
 } from './sdk'
+import { PASSKEY_MODULE_LABEL } from '@/services/passkey-module/constants'
+import { getActivePasskey } from '@/services/passkey-module/passkey-store'
 import { createWeb3, getUserNonce } from '@/hooks/wallets/web3'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import chains from '@safe-global/utils/config/chains'
@@ -93,12 +96,23 @@ export const dispatchTxSigning = async (
   safeTx: SafeTransaction,
   provider: Eip1193Provider,
   txId?: string,
+  walletLabel?: string,
 ): Promise<SafeTransaction> => {
-  const sdk = await getSafeSDKWithSigner(provider)
-
   let signedTx: SafeTransaction | undefined
   try {
-    signedTx = await tryOffChainTxSigning(safeTx, sdk)
+    if (walletLabel === PASSKEY_MODULE_LABEL) {
+      const passkey = getActivePasskey()
+      if (!passkey) {
+        throw new Error('Passkey data not found')
+      }
+      const safeSDK = getAndValidateSafeSDK()
+      const chainId = String(await safeSDK.getChainId())
+      const safeAddress = await safeSDK.getAddress()
+      signedTx = await signWithPasskeySigner(safeTx, passkey, chainId, safeAddress)
+    } else {
+      const sdk = await getSafeSDKWithSigner(provider)
+      signedTx = await tryOffChainTxSigning(safeTx, sdk)
+    }
   } catch (error) {
     txDispatch(TxEvent.SIGN_FAILED, {
       txId,

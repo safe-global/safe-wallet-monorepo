@@ -39,8 +39,12 @@ function SignerViewWithForm(
 
 const defaultProps = {
   signerAddress,
+  signerType: 'private-key' as const,
+  signerSafes: [],
   onPressExplorer: jest.fn(),
   onPressEdit: jest.fn(),
+  onRemoveSigner: jest.fn(),
+  passkeyMetadata: null,
   editMode: false,
   name: 'Test Signer',
   hasPrivateKey: false,

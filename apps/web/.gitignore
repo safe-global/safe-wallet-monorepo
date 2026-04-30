@@ -22,3 +22,5 @@ storybook-static
 
 # Generated build-time data
 src/config/__generated__/
+
+certificates

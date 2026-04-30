@@ -6,15 +6,10 @@ import { RootState } from '@/src/store'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import { signTx } from '@/src/services/tx/tx-sender/sign'
 import { signWithPasskey } from '@/src/services/tx/tx-sender/signWithPasskey'
-import { getPasskeyMetadata, updateDeployedChains } from '@/src/services/passkey/passkey-storage.service'
-import {
-  isIdentityDeployed,
-  deployIdentityContract,
-  waitForDeployment,
-} from '@/src/services/passkey/identity-contract.service'
+import { getPasskeyMetadataByRawId } from '@/src/services/passkey/passkey-storage.service'
+import type { RelayClient } from '@safe-global/utils/services/passkey'
 import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useRelayRelayV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
-import { useLazyRelayGetTaskStatusV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import logger from '@/src/utils/logger'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
 import { SigningResponse, ledgerSafeSigningService } from '@/src/services/ledger/ledger-safe-signing.service'
@@ -50,7 +45,6 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
   const [addConfirmation, { isLoading: isApiLoading, data: apiData, isError: isApiError }] =
     useTransactionsAddConfirmationV1Mutation()
   const [relayMutation] = useRelayRelayV1Mutation()
-  const [triggerTaskStatus] = useLazyRelayGetTaskStatusV1Query()
 
   const executeSign = useCallback(async () => {
     setStatus(SigningStatus.LOADING)
@@ -67,52 +61,28 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
           safeVersion: safe.version ?? undefined,
         })
       } else if (signer?.type === 'passkey') {
-        // Handle passkey signing
-        const passkeyMetadata = await getPasskeyMetadata()
+        const passkeyMetadata = await getPasskeyMetadataByRawId(signer.rawId)
         if (!passkeyMetadata) {
-          throw new Error('Passkey metadata not found')
+          throw new Error('Passkey metadata not found for this signer')
         }
 
-        // Check if identity contract is deployed on this chain
-        // Use cached deployment status first, only hit RPC if not cached
-        const cachedDeployed = passkeyMetadata.deployedOnChains.includes(activeSafe.chainId)
-        const deployed =
-          cachedDeployed ||
-          (await isIdentityDeployed(passkeyMetadata.identityContractAddress, activeChain as ChainInfo))
-
-        if (!deployed) {
-          const { taskId } = await deployIdentityContract({
-            signer: {
-              rawId: passkeyMetadata.rawId,
-              coordinates: passkeyMetadata.coordinates,
-            },
-            activeSafe,
-            chain: activeChain as ChainInfo,
-            relayMutation: async (args) => {
-              const result = await relayMutation(args).unwrap()
-              return result
-            },
-          })
-
-          await waitForDeployment({
-            taskId,
-            chainId: activeSafe.chainId,
-            pollTaskStatus: async (args) => {
-              const result = await triggerTaskStatus(args).unwrap()
-              return result
-            },
-          })
-
-          // Cache deployment status to skip RPC check next time
-          await updateDeployedChains(activeSafe.chainId)
+        const relay: RelayClient = {
+          relay: async (args) => {
+            const result = await relayMutation({
+              chainId: args.chainId,
+              relayDto: { to: args.to, data: args.data, version: args.version },
+            }).unwrap()
+            return { taskId: result.taskId }
+          },
         }
 
-        // Sign with passkey (triggers OS biometric prompt)
+        logger.info('[passkey-sign] Signing transaction (biometric prompt)')
         signedTx = await signWithPasskey({
           chain: activeChain as ChainInfo,
           activeSafe,
           txId,
           passkeyMetadata,
+          relay,
         })
       } else if (signer?.type === 'ledger') {
         // Handle Ledger signing
@@ -194,7 +164,6 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
     safe.version,
     dispatch,
     relayMutation,
-    triggerTaskStatus,
     signWithWc,
   ])
 
