@@ -18,6 +18,7 @@ import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCandidates'
+import { isGtfSafePaid } from '../utils/isGtfSafePaid'
 
 export type FeeRow = {
   label: string
@@ -162,8 +163,10 @@ export const useFeesPreview = (): FeesPreviewData => {
 
   // Once the first signer has signed, the gas token is baked into the signed payload — later
   // signers can't change it, so we skip the candidate probing and just render what's locked in.
+  // The `isGtfSafePaid` guard distinguishes real Safe-pays confirmations from Signer-pays / pre-GTF
+  // queued txs, where `gasToken` is `0x0..0` (always defined) but no Safe payment is happening.
   const lockedGasToken = safeTx && safeTx.signatures.size > 0 ? safeTx.data.gasToken : undefined
-  const isConfirmation = lockedGasToken !== undefined
+  const isConfirmation = lockedGasToken !== undefined && !!safeTx && isGtfSafePaid(safeTx.data)
 
   const { candidates, defaultAddress } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
 

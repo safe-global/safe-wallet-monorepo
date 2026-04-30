@@ -384,13 +384,21 @@ describe('useFeesPreview', () => {
   })
 
   describe('confirmation flow (second signer)', () => {
+    // GTF Safe-pays fingerprint: baseGas/gasPrice non-zero AND refundReceiver != ZERO_ADDRESS.
+    const SAFE_PAYS = {
+      safeTxGas: '2409',
+      baseGas: '68568',
+      gasPrice: '741064438',
+      refundReceiver: '0xc918e75504D1B0c741Eb4236B72Dae7A52401E95',
+    }
+
     const signedNativeSafeTx = buildSafeTx(
-      { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: ETH_ADDRESS },
+      { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: ETH_ADDRESS, ...SAFE_PAYS },
       new Map([['0xSigner', {}]]),
     )
 
     const signedWethGasSafeTx = buildSafeTx(
-      { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: WETH_ADDRESS },
+      { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: WETH_ADDRESS, ...SAFE_PAYS },
       new Map([['0xSigner', {}]]),
     )
 
@@ -440,9 +448,7 @@ describe('useFeesPreview', () => {
           value: '100000000000000',
           data: '0x',
           gasToken: ETH_ADDRESS,
-          safeTxGas: '2409',
-          baseGas: '68568',
-          gasPrice: '741064438',
+          ...SAFE_PAYS,
         },
         new Map([['0xSigner', {}]]),
       )
@@ -466,9 +472,7 @@ describe('useFeesPreview', () => {
           value: '0',
           data: '0x',
           gasToken: ETH_ADDRESS,
-          safeTxGas: '2409',
-          baseGas: '68568',
-          gasPrice: '741064438',
+          ...SAFE_PAYS,
         },
         new Map([['0xSigner', {}]]),
       )
@@ -481,6 +485,20 @@ describe('useFeesPreview', () => {
       expect(result.current.totalOutgoing?.fees).toBeUndefined()
     })
 
+    it('does not mark isConfirmation for a signed Signer-pays tx (gasToken=0x0, baseGas=0) — PLA-1384', () => {
+      jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+      // Signer-pays signed tx: `gasToken` is `ZERO_ADDRESS` (always defined) but no GTF fee fields
+      // are set, so this is NOT a Safe-pays confirmation — falls through to the standard path.
+      const signedSignerPaysTx = buildSafeTx(
+        { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: ETH_ADDRESS },
+        new Map([['0xSigner', {}]]),
+      )
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(signedSignerPaysTx) })
+
+      expect(result.current.isConfirmation).toBeFalsy()
+    })
+
     it('renders totalOutgoing in the locked ERC-20 gas token for a reject-shape signed safeTx — PLA-1384', () => {
       jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
       const lockedRejectWeth = buildSafeTx(
@@ -489,9 +507,7 @@ describe('useFeesPreview', () => {
           value: '0',
           data: '0x',
           gasToken: WETH_ADDRESS,
-          safeTxGas: '2409',
-          baseGas: '68568',
-          gasPrice: '741064438',
+          ...SAFE_PAYS,
         },
         new Map([['0xSigner', {}]]),
       )
