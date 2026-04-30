@@ -21,6 +21,7 @@ const FeeRow = ({
   currency,
   fiatAmount,
   isFree,
+  note,
   loading,
   error,
   tooltip,
@@ -43,6 +44,10 @@ const FeeRow = ({
       ) : error ? (
         <Typography variant="body2" color="warning.main">
           Cannot estimate
+        </Typography>
+      ) : note ? (
+        <Typography variant="body2" color="text.secondary">
+          {note}
         </Typography>
       ) : (
         <>

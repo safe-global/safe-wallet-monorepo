@@ -26,6 +26,8 @@ export type FeeRow = {
   currency?: string
   fiatAmount?: string
   isFree?: boolean
+  /** When set, replaces the amount/currency/fiat slot with explanatory copy (e.g. "Paid by executor"). */
+  note?: string
 }
 
 export type TotalOutgoing = {
@@ -281,9 +283,22 @@ export const useFeesPreview = (): FeesPreviewData => {
     }
   }
 
-  // Signer mode — direct EOA execution, no relayer. Show the local on-chain gas estimate
-  // regardless of threshold so the user always sees a value, not the stale CGW Safe-pays quote.
+  // Signer mode — direct EOA execution, no relayer. Single-signer Safes can simulate
+  // `execTransaction` for a real local estimate. Multi-signer Safes can't (signatures incomplete
+  // at sign time, and the executor wallet is unknown anyway), so render an explanatory note
+  // instead of a number.
   if (isSignerMode) {
+    if (safe.threshold > 1) {
+      return {
+        ...base,
+        canCoverFees: true,
+        gasFee: { label: 'Gas fee', note: 'Paid by executor' },
+        totalOutgoing: undefined,
+        loading: false,
+        error: false,
+      }
+    }
+
     const localGasWei = gasLimit && gasPrice?.maxFeePerGas ? gasLimit * gasPrice.maxFeePerGas : 0n
     const totalOutgoing = safeTx
       ? computeTotalOutgoing({
@@ -299,18 +314,17 @@ export const useFeesPreview = (): FeesPreviewData => {
         })
       : undefined
 
-    const fallbackLoading = !safeTx || gasLimitLoading || gasPriceLoading
-    const fallbackError =
-      !fallbackLoading && (!!gasLimitError || !!gasPriceError || !gasLimit || !gasPrice?.maxFeePerGas)
-    const fallbackAmount = getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain)
-
     return {
       ...base,
       canCoverFees: true,
-      gasFee: { label: 'Gas fee', amount: fallbackAmount, currency: nativeSymbol },
+      gasFee: {
+        label: 'Gas fee',
+        amount: getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain),
+        currency: nativeSymbol,
+      },
       totalOutgoing,
-      loading: fallbackLoading,
-      error: fallbackError,
+      loading: !safeTx || gasLimitLoading || gasPriceLoading,
+      error: false,
     }
   }
 
