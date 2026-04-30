@@ -281,14 +281,14 @@ export const useFeesPreview = (): FeesPreviewData => {
     }
   }
 
-  // Signer mode — direct EOA execution, no relayer. Single-signer Safes get a local gas estimate;
-  // multi-signer Safes drop the row (executor's gas is unknown at sign time, matches pre-GTF prod).
+  // Signer mode — direct EOA execution, no relayer. Show the local on-chain gas estimate
+  // regardless of threshold so the user always sees a value, not the stale CGW Safe-pays quote.
   if (isSignerMode) {
     const localGasWei = gasLimit && gasPrice?.maxFeePerGas ? gasLimit * gasPrice.maxFeePerGas : 0n
     const totalOutgoing = safeTx
       ? computeTotalOutgoing({
           safeTx,
-          gasWei: safe.threshold > 1 ? 0n : localGasWei,
+          gasWei: localGasWei,
           relayCostUsd: 0,
           nativeSymbol,
           nativeDecimals,
@@ -298,17 +298,6 @@ export const useFeesPreview = (): FeesPreviewData => {
           balances,
         })
       : undefined
-
-    if (safe.threshold > 1) {
-      return {
-        ...base,
-        canCoverFees: true,
-        gasFee: { label: 'Gas fee' },
-        totalOutgoing,
-        loading: false,
-        error: false,
-      }
-    }
 
     const fallbackLoading = !safeTx || gasLimitLoading || gasPriceLoading
     const fallbackError =

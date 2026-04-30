@@ -356,9 +356,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
         )}
 
         <FeeRow {...executionFee} loading={props.loading} tooltip={EXECUTION_FEE_TOOLTIP} />
-        {(props.loading || props.error || gasFee.amount !== undefined) && (
-          <FeeRow {...gasFee} loading={props.loading} error={props.error} tooltip={GAS_FEE_TOOLTIP} />
-        )}
+        <FeeRow {...gasFee} loading={props.loading} error={props.error} tooltip={GAS_FEE_TOOLTIP} />
       </div>
 
       {displayedOutgoing && <TotalOutgoingSection totalOutgoing={displayedOutgoing} />}

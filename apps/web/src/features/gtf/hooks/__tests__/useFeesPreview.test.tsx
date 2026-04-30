@@ -383,25 +383,8 @@ describe('useFeesPreview', () => {
       expect(previewSpy.mock.calls.at(-1)?.[0]).toBe(skipToken)
     })
 
-    it('drops the gas-fee row for multi-signer Safes (executor unknown at sign time)', () => {
+    it('shows the local EOA gas estimate (regardless of threshold)', () => {
       jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
-
-      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx, 'signer') })
-
-      expect(result.current.gasFee.amount).toBeUndefined()
-      expect(result.current.gasFee.currency).toBeUndefined()
-      expect(result.current.canCoverFees).toBe(true)
-    })
-
-    it('uses the local EOA gas estimate for single-signer Safes', () => {
-      jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
-      const singleSignerSafe = extendedSafeInfoBuilder().with({ threshold: 1 }).build()
-      jest.spyOn(useSafeInfoModule, 'default').mockReturnValue({
-        safe: singleSignerSafe,
-        safeAddress: singleSignerSafe.address.value,
-        safeLoaded: true,
-        safeLoading: false,
-      })
 
       const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx, 'signer') })
 
