@@ -52,6 +52,9 @@ export { useNetworksOfSafe } from './hooks/useNetworksOfSafe'
 // Space accounts data
 export { default as useSpaceAccountsData } from './hooks/useSpaceAccountsData'
 
+// Pin actions
+export { usePinActions } from './hooks/usePinActions'
+
 // Address safety hooks
 export { default as useSafeSelectionModal } from './hooks/useSafeSelectionModal'
 export { default as useNonPinnedSafeWarning } from './hooks/useNonPinnedSafeWarning'

@@ -152,6 +152,8 @@ export function clickOnSettingsBtn() {
 
 export function clickOnAppearenceBtn() {
   cy.contains(tab, appearenceTabStr).click()
+  // Wait for appearance page content to render after Next.js client-side navigation
+  cy.contains('Chain-specific addresses').should('be.visible')
 }
 
 export function clickOnShowMoreTabsBtn() {
@@ -167,7 +169,8 @@ export function clickOnDataTab() {
 
 export function verifyCheckboxes(checkboxes, checked = false) {
   checkboxes.forEach((checkbox) => {
-    cy.contains('label', checkbox)
+    cy.get('main')
+      .contains('label', checkbox)
       .find('input[type="checkbox"]')
       .should(checked ? 'be.checked' : 'not.be.checked')
   })

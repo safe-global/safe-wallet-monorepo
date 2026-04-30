@@ -5,7 +5,6 @@ import Head from 'next/head'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
 import SafeAppsHeader from '@/components/safe-apps/SafeAppsHeader'
 import SafeAppList from '@/components/safe-apps/SafeAppList'
-import SafeAppsSDKLink from '@/components/safe-apps/SafeAppsSDKLink'
 import { RemoveCustomAppModal } from '@/components/safe-apps/RemoveCustomAppModal'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { SAFE_APPS_LABELS } from '@/services/analytics'
@@ -33,8 +32,6 @@ const CustomSafeApps: NextPage = () => {
       <Head>
         <title>{`${BRAND_NAME} – Custom Safe Apps`}</title>
       </Head>
-
-      <SafeAppsSDKLink />
 
       <SafeAppsHeader />
 

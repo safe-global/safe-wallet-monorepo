@@ -5,22 +5,32 @@ interface UseSafeSelectorStateProps {
   items: SafeItemData[]
   selectedItemId?: string
   onItemSelect?: (itemId: string) => void
+  /** When true, the dropdown can open even with a single safe (e.g. header/footer present). */
+  forceOpenable?: boolean
 }
 
+// No items[0] fallback on miss — surfaces regressions instead of silently
+// snapping to the wrong safe.
 const getSelectedItem = (items: SafeItemData[], selectedItemId?: string) => {
-  return items.find((item) => item.id === selectedItemId) ?? items[0]
+  if (!selectedItemId) return undefined
+  return items.find((item) => item.id === selectedItemId)
 }
 
 const getFirstChainId = (item: SafeItemData | undefined) => {
   return item?.chains?.[0]?.chainId ?? ''
 }
 
-export const useSafeSelectorState = ({ items, selectedItemId, onItemSelect }: UseSafeSelectorStateProps) => {
+export const useSafeSelectorState = ({
+  items,
+  selectedItemId,
+  onItemSelect,
+  forceOpenable,
+}: UseSafeSelectorStateProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [selectedChainId, setSelectedChainId] = useState<string>('')
 
   const selectedItem = useMemo(() => getSelectedItem(items, selectedItemId), [items, selectedItemId])
-  const isSingleSafe = items.length <= 1
+  const isSingleSafe = items.length <= 1 && !forceOpenable
 
   useEffect(() => {
     const chainId = getFirstChainId(selectedItem)
@@ -37,10 +47,17 @@ export const useSafeSelectorState = ({ items, selectedItemId, onItemSelect }: Us
   const handleSafeChange = useCallback(
     (value: string | null) => {
       const itemId = value ?? ''
+      // Skip reselecting the previous id before the URL updates
+      const currentSelectionId = selectedItemId ?? selectedItem?.id ?? ''
+      if (itemId === currentSelectionId) return
       onItemSelect?.(itemId)
     },
-    [onItemSelect],
+    [onItemSelect, selectedItemId, selectedItem],
   )
+
+  const closeDropdown = useCallback(() => {
+    setDropdownOpen(false)
+  }, [])
 
   return {
     dropdownOpen,
@@ -49,5 +66,6 @@ export const useSafeSelectorState = ({ items, selectedItemId, onItemSelect }: Us
     isSingleSafe,
     handleOpenChange,
     handleSafeChange,
+    closeDropdown,
   }
 }

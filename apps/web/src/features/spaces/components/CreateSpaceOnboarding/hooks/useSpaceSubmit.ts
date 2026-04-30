@@ -8,6 +8,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import type { UseFormHandleSubmit } from 'react-hook-form'
 
 const useSpaceSubmit = (
@@ -19,6 +20,7 @@ const useSpaceSubmit = (
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const safe = useSafeQueryParam() || undefined
   const [createSpaceWithUser] = useSpacesCreateV1Mutation()
   const [updateSpace] = useSpacesUpdateV1Mutation()
 
@@ -37,7 +39,7 @@ const useSpaceSubmit = (
       }),
     )
 
-    router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId } })
+    router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId, ...(safe ? { safe } : {}) } })
   }
 
   const createSpace = async (name: string) => {
@@ -45,7 +47,7 @@ const useSpaceSubmit = (
 
     if (response.data) {
       const newSpaceId = response.data.id.toString()
-      trackEvent({ ...SPACE_EVENTS.CREATE_SPACE, label: newSpaceId }, { spaceId: newSpaceId })
+      trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: newSpaceId }, { workspace_id: newSpaceId })
 
       dispatch(setLastUsedSpace(newSpaceId))
 
@@ -57,7 +59,10 @@ const useSpaceSubmit = (
         }),
       )
 
-      router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId: newSpaceId } })
+      router.push({
+        pathname: AppRoutes.welcome.selectSafes,
+        query: { spaceId: newSpaceId, ...(safe ? { safe } : {}) },
+      })
     }
 
     if (response.error) {

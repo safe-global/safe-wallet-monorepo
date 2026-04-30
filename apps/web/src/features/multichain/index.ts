@@ -4,7 +4,8 @@ export type { SafeSetup, SafeOrMultichainSafe, CreateSafeOnNewChainForm } from '
 
 export { MIN_SAFE_VERSION_FOR_MULTICHAIN } from './constants'
 
-export { useIsMultichainSafe, useSafeCreationData } from './hooks'
+export { useIsMultichainSafe, useSafeCreationData, useAddNetworkState } from './hooks'
+export type { AddNetworkState, AddNetworkUnavailableReason, AvailableNetwork } from './hooks'
 
 export {
   isMultiChainSafeItem,

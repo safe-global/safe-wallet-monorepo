@@ -1,3 +1,4 @@
+import ActionsTray from '@/features/actions-tray/components/ActionsTray'
 import { TotalValueElement } from '@/features/spaces/components/TotalValueElement'
 
 /**
@@ -16,12 +17,14 @@ interface DashboardHeaderProps {
   onSwap?: () => void
   onBuildTransaction?: () => void
   otherActions?: React.ReactNode
+  noAssets: boolean
 }
 
-const DashboardHeader = ({ value, loading }: DashboardHeaderProps) => {
+const DashboardHeader = ({ value, loading, noAssets }: DashboardHeaderProps) => {
   return (
     <div className="flex flex-col gap-6 mb-10">
       <TotalValueElement value={value} loading={loading} />
+      <ActionsTray noAssets={noAssets} variant="space" />
     </div>
   )
 }

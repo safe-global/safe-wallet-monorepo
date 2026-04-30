@@ -20,7 +20,7 @@ jest.mock('@/services/analytics', () => ({
 
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: {
-    ACCEPT_INVITE_SUBMIT: { action: 'Submit accept invitation', category: 'spaces' },
+    WORKSPACE_MEMBER_INVITE_ACCEPTED: { action: 'Workspace member invite accepted', category: 'spaces' },
   },
   SPACE_LABELS: {},
 }))
@@ -77,7 +77,7 @@ describe('AcceptInviteDialog tracking', () => {
     jest.clearAllMocks()
   })
 
-  it('tracks ACCEPT_INVITE_SUBMIT with spaceId for both GA and Mixpanel exactly once on submit', async () => {
+  it('tracks WORKSPACE_MEMBER_INVITE_ACCEPTED with workspace_id and user_id on submit', async () => {
     mockAcceptInvite.mockResolvedValue({ data: {} })
 
     render(<AcceptInviteDialog space={mockSpace} onClose={jest.fn()} />)
@@ -90,7 +90,10 @@ describe('AcceptInviteDialog tracking', () => {
 
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledTimes(1)
-      expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.ACCEPT_INVITE_SUBMIT, label: '42' }, { spaceId: '42' })
+      expect(trackEvent).toHaveBeenCalledWith(
+        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: '42' },
+        { workspace_id: '42', user_id: 1 },
+      )
     })
   })
 })
