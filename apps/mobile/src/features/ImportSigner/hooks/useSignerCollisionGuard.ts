@@ -13,6 +13,8 @@ const describeExistingSigner = (existing: Signer): string => {
       return 'as a Ledger signer'
     case 'walletconnect':
       return existing.walletName ? `via ${existing.walletName}` : 'as a WalletConnect signer'
+    case 'passkey':
+      return 'as a passkey signer'
     default:
       // Exhaustiveness check: if a new signer kind is added to the union,
       // `existing satisfies never` fails to compile. The runtime return is
