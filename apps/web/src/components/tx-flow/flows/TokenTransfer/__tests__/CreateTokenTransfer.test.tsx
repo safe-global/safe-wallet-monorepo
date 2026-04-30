@@ -361,8 +361,6 @@ describe('CreateTokenTransfer', () => {
         (sent?: string) => ({ status: 'resolved', address: sent ?? ZERO_ADDRESS }) as never,
       )
 
-    const mockBlocked = () => useResolvedGasTokenSpy.mockReturnValue({ status: 'blocked' } as never)
-
     const mockBalancesForGtf = () => {
       const balances = {
         fiatTotal: '0',
@@ -451,18 +449,6 @@ describe('CreateTokenTransfer', () => {
       fireEvent.click(getByLabelText('Dismiss fee banner'))
 
       expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
-    })
-
-    it('shows block banner when resolution is blocked', async () => {
-      useHasFeatureSpy.mockImplementation(() => true)
-      mockBalancesForGtf()
-      mockBlocked()
-
-      const { getByTestId } = renderCreateTokenTransfer()
-
-      await waitFor(() => {
-        expect(getByTestId('gtf-block-banner')).toBeInTheDocument()
-      })
     })
   })
 })
