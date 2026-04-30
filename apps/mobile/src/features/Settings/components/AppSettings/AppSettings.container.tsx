@@ -4,6 +4,7 @@ import { router } from 'expo-router'
 
 import { Text, View } from 'tamagui'
 import { AppSettings } from './AppSettings'
+import { type SettingsSection } from './AppSettings.types'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { FloatingMenu } from '../FloatingMenu'
@@ -54,7 +55,7 @@ export const AppSettingsContainer = () => {
     )
   }
 
-  const settingsSections = [
+  const settingsSections: SettingsSection[] = [
     {
       sectionName: 'Preferences',
       items: [
