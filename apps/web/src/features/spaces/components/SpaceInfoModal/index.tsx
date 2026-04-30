@@ -20,6 +20,7 @@ import { AppRoutes } from '@/config/routes'
 import Link from 'next/link'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import ExternalLink from '@/components/common/ExternalLink'
 
 const ListIcon = () => (
@@ -108,7 +109,9 @@ const SpaceInfoModal = ({
                     variant="contained"
                     color="primary"
                     onClick={() => {
-                      trackEvent({ ...SPACE_EVENTS.CREATE_SPACE_MODAL, label: SPACE_LABELS.info_modal })
+                      trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
+                        entry_point: WorkspaceCreateEntryPoint.EMPTY_STATE,
+                      })
                       onClose()
                       onCreateSpace()
                     }}

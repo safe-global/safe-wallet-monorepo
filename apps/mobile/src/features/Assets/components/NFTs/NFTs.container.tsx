@@ -44,6 +44,8 @@ export function NFTsContainer() {
     }
   }
 
+  const renderItem = React.useCallback(({ item }: { item: Collectible }) => <NFTItem item={item} />, [])
+
   if (error) {
     return (
       <Fallback loading={isFetching}>
@@ -64,7 +66,7 @@ export function NFTsContainer() {
     <SafeTab.FlatList<Collectible>
       onEndReached={onEndReached}
       data={allCollectibles}
-      renderItem={NFTItem}
+      renderItem={renderItem}
       ListFooterComponent={isFetching ? <Loader size={24} /> : undefined}
       keyExtractor={(item, index) => `${item.address}-${index}`}
       contentContainerStyle={{ paddingHorizontal: getTokenValue('$4'), gap: getTokenValue('$2') }}

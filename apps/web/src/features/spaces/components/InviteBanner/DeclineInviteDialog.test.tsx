@@ -50,7 +50,7 @@ describe('DeclineInviteDialog tracking', () => {
     jest.clearAllMocks()
   })
 
-  it('tracks DECLINE_INVITE_SUBMIT with spaceId for both GA and Mixpanel exactly once on confirm', async () => {
+  it('tracks DECLINE_INVITE_SUBMIT with workspace_id for both GA and Mixpanel exactly once on confirm', async () => {
     mockDeclineInvite.mockResolvedValue({})
 
     render(<DeclineInviteDialog space={mockSpace} onClose={jest.fn()} />)
@@ -59,7 +59,10 @@ describe('DeclineInviteDialog tracking', () => {
 
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledTimes(1)
-      expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.DECLINE_INVITE_SUBMIT, label: '42' }, { spaceId: '42' })
+      expect(trackEvent).toHaveBeenCalledWith(
+        { ...SPACE_EVENTS.DECLINE_INVITE_SUBMIT, label: '42' },
+        { workspace_id: '42' },
+      )
     })
   })
 })

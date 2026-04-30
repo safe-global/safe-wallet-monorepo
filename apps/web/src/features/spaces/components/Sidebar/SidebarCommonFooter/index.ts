@@ -1,0 +1,1 @@
+export { SidebarCommonFooter } from './SidebarCommonFooter'

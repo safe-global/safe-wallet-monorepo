@@ -1,18 +1,7 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ComponentType, type ReactElement, type ReactNode, useContext } from 'react'
-import {
-  Box,
-  Container,
-  Grid2 as Grid,
-  Typography,
-  Button,
-  Paper,
-  SvgIcon,
-  useMediaQuery,
-  Card,
-  Stack,
-} from '@mui/material'
+import { Box, Container, Grid2 as Grid, Typography, Button, Paper, SvgIcon, useMediaQuery, Stack } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useTheme } from '@mui/material/styles'
 import classnames from 'classnames'
@@ -22,8 +11,6 @@ import { TxInfoProvider } from '@/components/tx-flow/TxInfoProvider'
 import TxNonce from '../TxNonce'
 import TxStatusWidget from '../TxStatusWidget'
 import css from './styles.module.css'
-import ChainIndicator from '@/components/common/ChainIndicator'
-import SafeInfo from '@/components/tx-flow/common/SafeInfo'
 import SafeShieldWidget from '@/features/safe-shield'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 
@@ -111,10 +98,6 @@ const TxLayout = ({
               <Grid sx={{ width: 200 }} pt={5}>
                 <aside>
                   <Stack gap={3} position="fixed">
-                    <Card className={css.safeInfoCard}>
-                      <SafeInfo />
-                    </Card>
-
                     <TxStatusWidget
                       isLastStep={step === steps.length - 1}
                       txSummary={txSummary}
@@ -141,11 +124,16 @@ const TxLayout = ({
                       >
                         {title}
                       </Typography>
-
-                      <ChainIndicator inline />
                     </div>
 
-                    <Paper data-testid="modal-header" className={css.header}>
+                    <Paper
+                      data-testid="modal-header"
+                      className={css.header}
+                      sx={{
+                        borderTopLeftRadius: !hideProgress ? '0' : '16px',
+                        borderTopRightRadius: !hideProgress ? '0' : '16px',
+                      }}
+                    >
                       {!hideProgress && (
                         <Box className={css.progressBar}>
                           <ProgressBar value={progress} />

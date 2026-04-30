@@ -5,7 +5,7 @@ import { updateSettings } from '@/src/store/settingsSlice'
 import { updatePromptAttempts } from '@/src/store/notificationsSlice'
 import { addSafe } from '@/src/store/safesSlice'
 import { addContact } from '@/src/store/addressBookSlice'
-import { addSigner } from '@/src/store/signersSlice'
+import { addSigner, Signer } from '@/src/store/signersSlice'
 import { setActiveSigner } from '@/src/store/activeSignerSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 
@@ -55,6 +55,10 @@ export const setupSigner = (dispatch: Dispatch, signerAddress: string) => {
  * - Signer setup
  * - Safe setup
  * - Active signer and safe
+ *
+ * By default registers a private-key signer for `signerAddress`.
+ * Pass `options.signer` to register a pre-built signer (e.g. a WalletConnect
+ * signer) instead.
  */
 export const setupPendingTxSafe = (
   dispatch: Dispatch,
@@ -62,12 +66,19 @@ export const setupPendingTxSafe = (
   info: SafeOverview,
   name: string,
   signerAddress: string,
+  options: { signer?: Signer } = {},
 ) => {
   setupBaseConfig(dispatch)
 
-  const mockedSigner = setupSigner(dispatch, signerAddress)
+  let signer: Signer
+  if (options.signer) {
+    signer = options.signer
+    dispatch(addSigner(signer))
+  } else {
+    signer = setupSigner(dispatch, signerAddress)
+  }
 
   setupSafe(dispatch, account, info, name)
-  dispatch(setActiveSigner({ safeAddress: account.address, signer: mockedSigner }))
+  dispatch(setActiveSigner({ safeAddress: account.address, signer }))
   dispatch(setActiveSafe(account))
 }

@@ -32,6 +32,10 @@ import SpaceMembersPage from './components/Members/Page'
 import SpaceSafeAccountsPage from './components/SafeAccounts/Page'
 import SpaceAddressBookPage from './components/SpaceAddressBook/Page'
 import SpaceSettingsPage from './components/SpaceSettings/Page'
+import CreateSpaceOnboarding from './components/CreateSpaceOnboarding'
+import SelectSafesOnboarding from './components/SelectSafesOnboarding'
+import InviteMembersOnboarding from './components/InviteMembersOnboarding'
+import SelectSafeModal from './components/SelectSafeModal'
 
 // Service imports
 import { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -55,6 +59,14 @@ const feature: SpacesContract = {
   SpaceSafeContextMenu,
   SendTransactionButton,
   PendingTxWidget,
+
+  // Modal components
+  SelectSafeModal,
+
+  // Onboarding page components
+  CreateSpaceOnboarding,
+  SelectSafesOnboarding,
+  InviteMembersOnboarding,
 
   // Page components
   SpaceDashboardPage,

@@ -119,6 +119,14 @@ export const mixpanelSetEOAWalletNetwork = (network: string): void => {
   safeMixpanelRegister({ [MixpanelEventParams.EOA_WALLET_NETWORK]: network })
 }
 
+export const mixpanelSetWorkspaceId = (workspaceId: string): void => {
+  safeMixpanelRegister({ [MixpanelEventParams.WORKSPACE_ID]: workspaceId })
+}
+
+export const mixpanelSetAuthMethod = (authMethod: string): void => {
+  safeMixpanelRegister({ [MixpanelEventParams.AUTH_METHOD]: authMethod })
+}
+
 export const mixpanelTrack = (eventName: string, properties?: Record<string, any>): void => {
   safeMixpanelTrack(eventName, properties)
 

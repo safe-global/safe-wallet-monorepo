@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as ls from '../../support/localstorage_data.js'
 import * as sideBar from '../pages/sidebar.pages.js'
+import * as safeNav from '../pages/safe_navigation.pages.js'
 import * as nsafes from '../pages/nestedsafes.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -24,7 +25,7 @@ describe('Nested safes fund asset tests', () => {
     main.setupSafeSettingsWithAllTokens().then(() => {
       cy.reload()
       wallet.connectSigner(signer)
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       // This safe has no existing nested safes, so no intro screen - just click add
       nsafes.clickOnAddNestedSafeBtn()
     })

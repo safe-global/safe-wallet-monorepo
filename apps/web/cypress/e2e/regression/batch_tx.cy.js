@@ -59,6 +59,7 @@ describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
     wallet.connectSigner(signer)
     batch.openBatchtransactionsModal()
     batch.verifyNewTxButtonStatus(constants.enabledStates.enabled)
+    batch.closeBatchtransactionsModal()
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
     wallet.connectSigner(signer2)

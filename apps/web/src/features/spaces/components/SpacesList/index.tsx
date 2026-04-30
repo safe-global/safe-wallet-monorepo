@@ -13,8 +13,9 @@ import SpaceListInvite from '../InviteBanner'
 import { useCallback, useState } from 'react'
 import css from './styles.module.css'
 import { MemberStatus } from '@/features/spaces'
-import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
-import Track from '@/components/common/Track'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { trackEvent } from '@/services/analytics'
+import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus } from '@/features/spaces/utils'
 import { AppRoutes } from '@/config/routes'
@@ -22,16 +23,17 @@ import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
 
-const AddSpaceButton = () => {
+const AddSpaceButton = ({ onClick }: { onClick?: () => void }) => {
   return (
     <Button
       data-testid="create-space-button"
       variant="default"
       size="lg"
-      className="h-full rounded-lg px-6 text-base"
+      className="h-full rounded-lg px-6 py-3 text-base"
       render={<NextLink href={AppRoutes.welcome.createSpace} />}
+      onClick={onClick}
     >
-      <AddIcon className="size-5 fill-[var(--color-static-text-brand)]" />
+      <AddIcon className="size-5 fill-primary-foreground" />
       Create space
     </Button>
   )
@@ -73,9 +75,11 @@ const NoSpacesState = () => {
           </Link>
         </Box>
         <div className="h-12">
-          <Track {...SPACE_EVENTS.CREATE_SPACE_MODAL} label={SPACE_LABELS.space_list_page}>
-            <AddSpaceButton />
-          </Track>
+          <AddSpaceButton
+            onClick={() =>
+              trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
+            }
+          />
         </div>
       </Card>
       {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} />}
@@ -114,9 +118,11 @@ const SpacesList = () => {
           <AccountsNavigation />
 
           {isUserSignedIn && activeSpaces.length > 0 && (
-            <Track {...SPACE_EVENTS.CREATE_SPACE_MODAL} label={SPACE_LABELS.space_list_page}>
-              <AddSpaceButton />
-            </Track>
+            <AddSpaceButton
+              onClick={() =>
+                trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
+              }
+            />
           )}
         </Box>
 

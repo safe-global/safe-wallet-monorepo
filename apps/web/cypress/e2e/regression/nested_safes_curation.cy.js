@@ -1,5 +1,5 @@
 import * as constants from '../../support/constants.js'
-import * as sideBar from '../pages/sidebar.pages.js'
+import * as safeNav from '../pages/safe_navigation.pages.js'
 import * as nsafes from '../pages/nestedsafes.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
@@ -43,7 +43,7 @@ describe('Nested safes curation tests', () => {
 
   describe('First-time curation flow', () => {
     it('Verify first-time visit shows intro screen with close button', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForIntroScreenToLoad()
 
       // First-time flow: intro screen is shown
@@ -55,7 +55,7 @@ describe('Nested safes curation tests', () => {
     })
 
     it('Verify closing intro screen and reopening shows intro again', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForIntroScreenToLoad()
 
       // Close the popover without completing curation
@@ -63,13 +63,13 @@ describe('Nested safes curation tests', () => {
       nsafes.verifyPopoverClosed()
 
       // Re-open - should show intro screen again (curation not complete)
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForIntroScreenToLoad()
       nsafes.verifyIntroScreenVisible()
     })
 
     it('Verify clicking Review Nested Safes opens manage mode', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForIntroScreenToLoad()
       nsafes.clickReviewNestedSafesBtn()
 
@@ -84,7 +84,7 @@ describe('Nested safes curation tests', () => {
     })
 
     it('Verify user can select safes and confirm curation', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForIntroScreenToLoad()
       nsafes.clickReviewNestedSafesBtn()
 
@@ -107,7 +107,7 @@ describe('Nested safes curation tests', () => {
     })
 
     it('Verify suspicious safes have warning icons in manage mode', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForIntroScreenToLoad()
       nsafes.clickReviewNestedSafesBtn()
 
@@ -121,7 +121,7 @@ describe('Nested safes curation tests', () => {
   describe('After curation completed', () => {
     beforeEach(() => {
       // Complete first-time curation by selecting one valid safe
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForIntroScreenToLoad()
       nsafes.clickReviewNestedSafesBtn()
       nsafes.clickFirstValidSafeCheckbox()
@@ -133,7 +133,7 @@ describe('Nested safes curation tests', () => {
 
     it('Verify normal view shows only selected safes without warning icons', () => {
       // Re-open the list
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForNestedSafeListToLoad()
 
       // Only the one safe we selected should be visible
@@ -144,7 +144,7 @@ describe('Nested safes curation tests', () => {
 
     it('Verify +X more nested safes indicator appears when uncurated safes exist', () => {
       // Re-open the list
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForNestedSafeListToLoad()
 
       // We selected 1 safe, so there should be (TOTAL - 1) more
@@ -154,7 +154,7 @@ describe('Nested safes curation tests', () => {
 
     it('Verify clicking +X more indicator opens manage mode', () => {
       // Re-open the list
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForNestedSafeListToLoad()
 
       // Click the "+X more" indicator
@@ -166,7 +166,7 @@ describe('Nested safes curation tests', () => {
     })
 
     it('Verify re-entering manage mode shows all safes again', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForNestedSafeListToLoad()
 
       nsafes.clickOnManageNestedSafesBtn()
@@ -183,7 +183,7 @@ describe('Nested safes curation tests', () => {
     })
 
     it('Verify canceling manage mode discards changes', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForNestedSafeListToLoad()
 
       nsafes.clickOnManageNestedSafesBtn()
@@ -200,7 +200,7 @@ describe('Nested safes curation tests', () => {
     })
 
     it('Verify selecting more safes adds them to normal view', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForNestedSafeListToLoad()
 
       nsafes.clickOnManageNestedSafesBtn()
@@ -224,13 +224,13 @@ describe('Nested safes curation tests', () => {
     })
 
     it('Verify curation persists after page reload', () => {
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForNestedSafeListToLoad()
       nsafes.verifyVisibleNestedSafesCount(1)
 
       cy.reload()
 
-      sideBar.clickOnOpenNestedSafeListBtn()
+      safeNav.clickOnNestedSafesBtn()
       nsafes.waitForNestedSafeListToLoad()
 
       // Still shows curated view (not first-time flow)

@@ -24,9 +24,9 @@ const SafeWidgetRoot = ({
     <div
       data-slot="safe-widget"
       data-testid={testId}
-      className={cn('flex h-full min-h-0 flex-col rounded-sm bg-card p-1', className)}
+      className={cn('flex h-full min-h-0 flex-col rounded-xl bg-card p-1', className)}
     >
-      <div className="flex shrink-0 items-center px-6 justify-between pb-2 pt-6">
+      <div className="flex shrink-0 items-center px-6 justify-between pb-3 pt-6">
         <div className={cn('flex items-center', onTitleClick && 'cursor-pointer')} onClick={onTitleClick}>
           <Typography variant="h4">{title}</Typography>
         </div>

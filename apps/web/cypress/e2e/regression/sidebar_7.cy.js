@@ -13,7 +13,8 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 const signer1 = walletCredentials.OWNER_1_PRIVATE_KEY
 const signer2 = walletCredentials.OWNER_3_PRIVATE_KEY
 
-describe('Sidebar tests 7', () => {
+// Tests added to @safe_selector.cy.js; import-export is covered in other test files
+describe.skip('Sidebar tests 7', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })

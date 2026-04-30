@@ -9,9 +9,16 @@
   position: fixed;
   z-index: 3;
   right: 64px;
-  top: var(--header-height);
-  transition: transform 0.3s ease-in-out;
+  top: var(--topbar-height);
+  transition:
+    transform 0.3s ease-in-out,
+    border-color 0.3s ease-in-out,
+    background-color 0.3s ease-in-out;
   transform: translateY(-24px);
+}
+
+.container > *:not(.openButton) {
+  transition: opacity 0.3s ease-in-out;
 }
 
 .container:focus-visible {
@@ -32,14 +39,34 @@
 }
 
 .container.mini {
-  transform: translateY(-100%);
+  transform: translateY(calc(-100% - var(--topbar-height)));
   transition-duration: 0.4s;
+  border-color: transparent;
+  background-color: transparent;
+}
+
+.container.mini > *:not(.openButton) {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .container:focus,
 .container:hover {
   z-index: 1200;
   transform: translateY(0);
+}
+
+.container.mini:focus,
+.container.mini:hover {
+  transform: translateY(calc(-1 * var(--topbar-height)));
+  border-color: #12ff80;
+  background-color: var(--color-background-main);
+}
+
+.container.mini:focus > *,
+.container.mini:hover > * {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .openButton {
@@ -94,7 +121,6 @@
   margin-top: var(--space-1);
 }
 
-.mini .link,
 .container:focus .link,
 .container:hover .link {
   opacity: 1;

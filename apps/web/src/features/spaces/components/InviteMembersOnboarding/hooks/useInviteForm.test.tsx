@@ -13,7 +13,7 @@ jest.mock('@/services/analytics', () => ({
 
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: {
-    ADD_MEMBER: { action: 'Submit add member', category: 'spaces' },
+    WORKSPACE_MEMBER_INVITE_SENT: { action: 'Workspace member invite sent', category: 'spaces' },
   },
   SPACE_LABELS: {},
 }))
@@ -53,8 +53,10 @@ describe('useInviteForm tracking', () => {
     jest.clearAllMocks()
   })
 
-  it('tracks ADD_MEMBER with spaceId for both GA and Mixpanel exactly once on submit', async () => {
-    mockInviteMembers.mockResolvedValue({ data: {} })
+  it('tracks WORKSPACE_MEMBER_INVITE_SENT per member with workspace_id, user_id, role and batch_size on submit', async () => {
+    mockInviteMembers.mockResolvedValue({
+      data: [{ userId: 7, spaceId: 42, name: 'Alice', role: 'MEMBER', status: 'INVITED' }],
+    })
 
     render(<TestComponent spaceId="42" />)
 
@@ -65,7 +67,10 @@ describe('useInviteForm tracking', () => {
 
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledTimes(1)
-      expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.ADD_MEMBER, label: '42' }, { spaceId: '42' })
+      expect(trackEvent).toHaveBeenCalledWith(
+        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: '42' },
+        { workspace_id: '42', user_id: 7, role: 'member', batch_size: 1 },
+      )
     })
   })
 })

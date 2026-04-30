@@ -16,7 +16,8 @@ export const useCurrentSpaceId = (): string | null => {
 
   const { data: spaces } = useSpacesGetV1Query(undefined, { skip: !isSiweAuthenticated })
 
-  const querySpaceId = typeof query.spaceId === 'string' ? query.spaceId : null
+  const rawSpaceId = query.spaceId
+  const querySpaceId = typeof rawSpaceId === 'string' && rawSpaceId.length > 0 ? rawSpaceId : null
   const firstSpaceId = spaces?.[0] ? String(spaces[0].id) : null
 
   return querySpaceId || storedSpaceId || firstSpaceId

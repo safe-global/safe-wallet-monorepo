@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { GATEWAY_URL } from '@/config/gateway'
-import { OIDC_AUTH_PENDING_KEY, type OidcConnection } from '../constants'
+import { OIDC_AUTH_PENDING_KEY, OIDC_AUTH_CONNECTION_KEY, OidcConnection } from '../constants'
+import { AuthLoginMethod } from '@/services/analytics/mixpanel-events'
 
 const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
 
@@ -13,7 +14,9 @@ const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
  */
 export const useOidcLogin = () => {
   const loginWithRedirect = useCallback((connection: OidcConnection, redirectUrl?: string) => {
+    const method = connection === OidcConnection.GOOGLE ? AuthLoginMethod.EMAIL_GOOGLE : AuthLoginMethod.EMAIL_OTP
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
+    sessionStorage.setItem(OIDC_AUTH_CONNECTION_KEY, method)
 
     // Strip any stale `error` param so the callback can trust that an `error`
     // in the return URL genuinely came from the OIDC provider, not from a

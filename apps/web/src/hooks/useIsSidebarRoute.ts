@@ -43,8 +43,8 @@ export function useIsSidebarRoute(pathname?: string): [boolean, boolean] {
 
   useEffect(() => {
     if (!router.isReady) return
-    setIsSidebarRoute(!!router.query.safe)
-  }, [router.isReady, router.query.safe])
+    setIsSidebarRoute(!!router.query.safe && !noSidebarRoute)
+  }, [router.isReady, router.query.safe, noSidebarRoute])
 
   const displaySidebar = isSidebarRoute || isSpaceRoute
 

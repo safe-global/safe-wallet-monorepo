@@ -32,7 +32,7 @@ const TotalAssetValue = ({
 
   return (
     <Box>
-      <Typography fontWeight={700} fontSize="14px" mb={0.5} sx={{ color: 'var(--color-text-secondary)' }}>
+      <Typography fontWeight={700} mb={0.5}>
         {title}
         {tooltipTitle && <InfoTooltip title={tooltipTitle} />}
       </Typography>

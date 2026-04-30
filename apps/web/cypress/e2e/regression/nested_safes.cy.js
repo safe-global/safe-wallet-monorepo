@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as sideBar from '../pages/sidebar.pages.js'
+import * as safeNav from '../pages/safe_navigation.pages.js'
 import * as nsafes from '../pages/nestedsafes.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import * as txs from '../pages/transactions.page.js'
@@ -29,7 +30,7 @@ describe('Nested safes basic flow tests', () => {
 
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_39)
     // Check nested safe 1
-    sideBar.clickOnOpenNestedSafeListBtn()
+    safeNav.clickOnNestedSafesBtn()
     // Handle intro screen if present (select all safes including suspicious ones)
     nsafes.completeIntroScreenSelectAll()
     sideBar.checkSafesInPopverList([nestedSafe1Short])
@@ -43,7 +44,7 @@ describe('Nested safes basic flow tests', () => {
     checkExistingSignerAddress(0, staticSafes.SEP_STATIC_SAFE_39.substring(4))
 
     // Check nested safe 2
-    sideBar.clickOnOpenNestedSafeListBtn()
+    safeNav.clickOnNestedSafesBtn()
     // Handle intro screen if present (select all safes including suspicious ones)
     nsafes.completeIntroScreenSelectAll()
     sideBar.checkSafesInPopverList([nestedSafe2Short])

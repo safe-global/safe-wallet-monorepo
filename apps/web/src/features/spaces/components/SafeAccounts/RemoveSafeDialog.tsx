@@ -48,6 +48,13 @@ const RemoveSafeDialog = ({
         throw result.error
       }
 
+      safeAccounts.forEach(({ chainId, address }) => {
+        trackEvent(
+          { ...SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED, label: spaceId },
+          { workspace_id: spaceId, safe_address: address, chain_id: chainId },
+        )
+      })
+
       dispatch(
         showNotification({
           message: `Removed safe account from space`,

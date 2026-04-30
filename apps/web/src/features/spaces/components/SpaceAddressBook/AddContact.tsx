@@ -1,4 +1,5 @@
 import { Alert, DialogActions, Stack, Button, DialogContent, Typography, CircularProgress, Box } from '@mui/material'
+import { Button as ShadcnButton } from '@/components/ui/button'
 import PlusIcon from '@/public/images/common/plus.svg'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
@@ -11,7 +12,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useChains from '@/hooks/useChains'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 
@@ -21,13 +22,14 @@ export type ContactField = {
   networks: Chain[]
 }
 
-const AddContact = ({ disabled }: { disabled?: boolean }) => {
+const AddContact = () => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { configs: allNetworks } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const addressBookItems = useGetSpaceAddressBook()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const defaultValues = {
@@ -80,6 +82,11 @@ const AddContact = ({ disabled }: { disabled?: boolean }) => {
         return
       }
 
+      trackEvent(
+        { ...SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED },
+        { workspace_id: spaceId, entry_count_after: addressBookItems.length + 1 },
+      )
+
       dispatch(
         showNotification({
           message: `Added contact`,
@@ -98,9 +105,10 @@ const AddContact = ({ disabled }: { disabled?: boolean }) => {
 
   return (
     <>
-      <Button variant="contained" size="small" startIcon={<PlusIcon />} onClick={handleOpen} disabled={disabled}>
+      <ShadcnButton size="sm" onClick={handleOpen}>
+        <PlusIcon />
         Add contact
-      </Button>
+      </ShadcnButton>
       <ModalDialog open={open} onClose={handleClose} dialogTitle="Add contact" hideChainIndicator>
         <FormProvider {...methods}>
           <form onSubmit={onSubmit}>
@@ -145,7 +153,7 @@ const AddContact = ({ disabled }: { disabled?: boolean }) => {
               <Button data-testid="cancel-btn" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" disabled={!formState.isValid || isSubmitting} disableElevation>
+              <Button type="submit" variant="contained" disableElevation>
                 {isSubmitting ? <CircularProgress size={20} /> : 'Add contact'}
               </Button>
             </DialogActions>

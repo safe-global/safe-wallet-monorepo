@@ -55,8 +55,6 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     setIsSubmitting(true)
 
     try {
-      trackEvent({ ...SPACE_EVENTS.ADD_MEMBER, label: spaceId ?? undefined }, { spaceId })
-
       const usersToInvite = validMembers.map((member) => ({
         address: member.address,
         name: member.address,
@@ -75,6 +73,18 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
         setIsSubmitting(false)
         return
       }
+
+      result.data?.forEach((invitation) => {
+        trackEvent(
+          { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: spaceId },
+          {
+            workspace_id: spaceId,
+            user_id: invitation.userId,
+            role: invitation.role.toLowerCase(),
+            batch_size: validMembers.length,
+          },
+        )
+      })
 
       dispatch(
         showNotification({
