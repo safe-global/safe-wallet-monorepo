@@ -85,19 +85,12 @@ export const ExecuteForm = ({
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
 
+  const noFeeCampaignEligible = isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress
+
   // Safe-pays bypasses the no-fee campaign and the daily relay quota (Safe funds its own relay).
-  const canRelay =
-    walletCanRelay &&
-    (requiresRelay || ((!isNoFeeCampaign || !isNoFeeCampaignEnabled) && hasRemainingRelays(relays[0])))
-  const canNoFeeCampaign =
-    !requiresRelay &&
-    isNoFeeCampaignEnabled &&
-    isNoFeeCampaign &&
-    !blockedAddress &&
-    !gasTooHigh &&
-    !!remaining &&
-    remaining > 0
-  const isLimitReached = isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && remaining === 0
+  const canRelay = walletCanRelay && (requiresRelay || (!noFeeCampaignEligible && hasRemainingRelays(relays[0])))
+  const canNoFeeCampaign = !requiresRelay && noFeeCampaignEligible && !gasTooHigh && !!remaining && remaining > 0
+  const isLimitReached = noFeeCampaignEligible && remaining === 0
 
   useEffect(() => {
     if (requiresRelay) {
