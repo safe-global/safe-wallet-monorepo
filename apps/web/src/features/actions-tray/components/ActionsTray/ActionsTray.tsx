@@ -109,14 +109,14 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Wallet>
           {(isOk) => {
             const sendDisabled = !isOk || isBlockedCountry || noAssets
             return (
               <Tooltip title={sendTooltip} arrow placement="top">
                 <span className={cn('inline-flex', { 'cursor-not-allowed': sendDisabled })}>
-                  <Button variant="default" className="px-6 font-bold" onClick={handleOnSend} disabled={sendDisabled}>
+                  <Button variant="default" className="px-6" onClick={handleOnSend} disabled={sendDisabled}>
                     <ArrowUpRight className="size-5 text-green-400" />
                     Send
                   </Button>
@@ -130,7 +130,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
           {isSpace ? (
             <Button
               variant={secondaryVariant}
-              className={cn('px-6 font-bold hover:bg-border')}
+              className={cn('px-6 hover:bg-border')}
               onClick={handleOnReceive}
               disabled={noAssets}
             >
@@ -158,7 +158,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                       {isSpace ? (
                         <Button
                           variant={secondaryVariant}
-                          className={cn('px-6 font-bold hover:bg-border')}
+                          className={cn('px-6 hover:bg-border')}
                           data-testid="overview-swap-btn"
                           disabled={swapDisabled}
                           onClick={handleOnSwap}
@@ -195,7 +195,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
             const buildTxButton = isSpace ? (
               <Button
                 variant={secondaryVariant}
-                className="px-6 font-bold hover:bg-border"
+                className="px-6 hover:bg-border"
                 disabled={!isOk || noAssets}
                 onClick={handleOnBuildTx}
                 aria-label="Transaction builder"
