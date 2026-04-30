@@ -60,10 +60,12 @@ const SecurityReportDrawer = ({
         sx: {
           width: 520,
           maxWidth: '100vw',
-          borderRadius: 0,
+          borderRadius: '24px 0 0 24px',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
+          fontFamily: '"DM Sans", system-ui, sans-serif',
+          boxShadow: '-8px 0 32px rgba(0,0,0,0.08)',
         },
       }}
     >
@@ -93,9 +95,13 @@ const SecurityReportDrawer = ({
             >
               <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1.5} spacing={1}>
                 <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}
+                  sx={{
+                    fontSize: '12px',
+                    color: '#737373',
+                    letterSpacing: '0',
+                    fontWeight: 500,
+                    fontFamily: '"DM Sans", system-ui, sans-serif',
+                  }}
                 >
                   Security report
                 </Typography>

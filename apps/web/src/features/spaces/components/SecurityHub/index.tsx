@@ -161,12 +161,22 @@ const SecurityHub = (): ReactElement => {
   const handleCloseDrawer = useCallback(() => setSelectedSafe(null), [])
 
   return (
-    <Box data-testid="security-hub">
-      <Box mb={3}>
-        <Typography variant="h1" mb={0.5}>
+    <Box data-testid="security-hub" sx={{ fontFamily: '"DM Sans", system-ui, sans-serif' }}>
+      <Box mb={4}>
+        <Typography
+          variant="h1"
+          sx={{
+            fontSize: '28px',
+            fontWeight: 600,
+            letterSpacing: '-0.5px',
+            lineHeight: 1.2,
+            color: 'text.primary',
+            mb: 0.5,
+          }}
+        >
           Security
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{ fontSize: '13px', color: 'text.secondary', lineHeight: 1.5 }}>
           Overview of security checks across your accounts.
         </Typography>
       </Box>

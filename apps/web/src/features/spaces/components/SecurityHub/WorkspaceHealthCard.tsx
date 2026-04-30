@@ -64,12 +64,12 @@ const computeCounts = (scanResults: Record<string, Record<string, ScanResult>>):
 
 const ScoreGauge = ({ scorePct, color }: { scorePct: number; color: string }) => (
   <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-    <CircularProgress variant="determinate" value={100} size={120} thickness={4} sx={{ color: 'border.light' }} />
+    <CircularProgress variant="determinate" value={100} size={120} thickness={3.5} sx={{ color: '#f0f0f0' }} />
     <CircularProgress
       variant="determinate"
       value={scorePct}
       size={120}
-      thickness={4}
+      thickness={3.5}
       sx={{
         color,
         position: 'absolute',
@@ -87,10 +87,27 @@ const ScoreGauge = ({ scorePct, color }: { scorePct: number; color: string }) =>
         flexDirection: 'column',
       }}
     >
-      <Typography variant="h3" fontWeight={700} sx={{ lineHeight: 1 }}>
+      <Typography
+        sx={{
+          fontSize: '32px',
+          fontWeight: 700,
+          lineHeight: 1,
+          letterSpacing: '-0.03em',
+          color: 'text.primary',
+          fontVariantNumeric: 'tabular-nums',
+          fontFamily: '"DM Sans", system-ui, sans-serif',
+        }}
+      >
         {scorePct}
       </Typography>
-      <Typography variant="caption" color="text.secondary">
+      <Typography
+        sx={{
+          fontSize: '11px',
+          color: '#a1a3a7',
+          fontWeight: 400,
+          fontFamily: '"DM Sans", system-ui, sans-serif',
+        }}
+      >
         / 100
       </Typography>
     </Box>
@@ -142,16 +159,16 @@ const WorkspaceHealthCard = ({
   // surfaces the in-progress state via its "Scanning..." label.
   if (!aggregate) {
     return (
-      <Paper sx={{ p: 3, borderRadius: '12px', mb: 3 }}>
+      <Paper sx={{ p: 3, borderRadius: '24px', mb: 3, boxShadow: 'none', border: 'none' }}>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'flex-start', md: 'center' }}>
           <Skeleton variant="circular" width={120} height={120} />
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Skeleton variant="rounded" width={180} height={24} sx={{ mb: 1 }} />
-            <Skeleton variant="rounded" width={320} height={16} sx={{ mb: 0.5 }} />
-            <Skeleton variant="rounded" width={260} height={16} sx={{ mb: 2 }} />
+            <Skeleton variant="rounded" width={180} height={24} sx={{ mb: 1, borderRadius: '8px' }} />
+            <Skeleton variant="rounded" width={320} height={16} sx={{ mb: 0.5, borderRadius: '6px' }} />
+            <Skeleton variant="rounded" width={260} height={16} sx={{ mb: 2, borderRadius: '6px' }} />
             <Stack direction="row" spacing={1}>
-              <Skeleton variant="rounded" width={80} height={20} sx={{ borderRadius: '10px' }} />
-              <Skeleton variant="rounded" width={100} height={20} sx={{ borderRadius: '10px' }} />
+              <Skeleton variant="rounded" width={80} height={24} sx={{ borderRadius: '9999px' }} />
+              <Skeleton variant="rounded" width={100} height={24} sx={{ borderRadius: '9999px' }} />
             </Stack>
           </Box>
         </Stack>
@@ -162,12 +179,29 @@ const WorkspaceHealthCard = ({
   const { color, level, scorePct } = aggregate
 
   return (
-    <Paper sx={{ p: 3, borderRadius: '12px', mb: 3 }}>
+    <Paper
+      sx={{
+        p: 3,
+        borderRadius: '24px',
+        mb: 3,
+        boxShadow: 'none',
+        border: 'none',
+        fontFamily: '"DM Sans", system-ui, sans-serif',
+      }}
+    >
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'flex-start', md: 'center' }}>
         <ScoreGauge scorePct={scorePct} color={color} />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Stack direction="row" alignItems="center" spacing={1.5} mb={0.5} flexWrap="wrap">
-            <Typography variant="h5" fontWeight={700}>
+            <Typography
+              sx={{
+                fontSize: '20px',
+                fontWeight: 600,
+                letterSpacing: '0.15px',
+                color: 'text.primary',
+                fontFamily: '"DM Sans", system-ui, sans-serif',
+              }}
+            >
               Security score
             </Typography>
             <Chip
@@ -177,14 +211,24 @@ const WorkspaceHealthCard = ({
                 backgroundColor: color,
                 color: 'background.paper',
                 fontWeight: 700,
-                letterSpacing: '0.5px',
-                height: 18,
-                fontSize: '0.65rem',
-                '& .MuiChip-label': { px: 0.75 },
+                letterSpacing: '0.05em',
+                height: 20,
+                fontSize: '10px',
+                borderRadius: '9999px',
+                textTransform: 'uppercase',
+                '& .MuiChip-label': { px: 1 },
               }}
             />
           </Stack>
-          <Typography variant="body2" color="text.secondary" mb={2}>
+          <Typography
+            sx={{
+              fontSize: '13px',
+              color: '#a1a3a7',
+              mb: 2,
+              lineHeight: 1.5,
+              fontFamily: '"DM Sans", system-ui, sans-serif',
+            }}
+          >
             Combined score from all security checks across your accounts.
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
@@ -235,15 +279,18 @@ const WorkspaceHealthCard = ({
                     onClick={() => onFilterChange(c.grade)}
                     sx={{
                       cursor: 'pointer',
-                      fontWeight: 700,
-                      transition: 'background-color 0.15s, color 0.15s',
+                      fontWeight: 600,
+                      fontSize: '11px',
+                      borderRadius: '9999px',
+                      fontFamily: '"DM Sans", system-ui, sans-serif',
+                      transition: 'all 0.15s ease',
                       '& .MuiChip-root:active, & .MuiTouchRipple-root': { display: 'none' },
                       backgroundColor: isActive ? c.activeBg : c.inactiveBg,
                       color: isActive ? 'background.paper' : c.text,
                       '&:hover': {
                         backgroundColor: isActive ? c.activeBg : c.inactiveBg,
                         color: isActive ? 'background.paper' : c.text,
-                        opacity: 0.8,
+                        opacity: 0.85,
                       },
                     }}
                   />

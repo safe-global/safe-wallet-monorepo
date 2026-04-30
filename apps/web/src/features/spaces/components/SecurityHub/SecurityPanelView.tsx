@@ -279,14 +279,14 @@ const SectionPanel = ({
       sx={{ mb: 3 }}
     >
       <Typography
-        variant="caption"
-        color="text.secondary"
         sx={{
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px',
-          fontWeight: 700,
+          fontSize: '12px',
+          color: '#737373',
+          letterSpacing: '0',
+          fontWeight: 500,
           display: 'block',
           mb: 1,
+          fontFamily: '"DM Sans", system-ui, sans-serif',
         }}
       >
         {title}
@@ -294,10 +294,11 @@ const SectionPanel = ({
       <Paper
         elevation={0}
         sx={{
-          borderRadius: '12px',
+          borderRadius: '16px',
           overflow: 'hidden',
           border: '1px solid',
-          borderColor: 'divider',
+          borderColor: '#f0f0f0',
+          fontFamily: '"DM Sans", system-ui, sans-serif',
         }}
       >
         {rows.map((r, idx) => (
@@ -354,7 +355,16 @@ const PanelHeader = ({
       : `${failureCount} ${failureCount === 1 ? 'issue' : 'issues'} need attention.`
 
   return (
-    <Paper sx={{ p: 2.5, borderRadius: '12px', mb: 3, backgroundColor: GRADE_BG_BY_STRENGTH[level] }} elevation={0}>
+    <Paper
+      sx={{
+        p: 2.5,
+        borderRadius: '16px',
+        mb: 3,
+        backgroundColor: GRADE_BG_BY_STRENGTH[level],
+        fontFamily: '"DM Sans", system-ui, sans-serif',
+      }}
+      elevation={0}
+    >
       <Stack direction="row" spacing={2.5} alignItems="center">
         <Box sx={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
           <CircularProgress variant="determinate" value={100} size={80} thickness={4} sx={{ color: 'border.light' }} />
