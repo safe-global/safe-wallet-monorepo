@@ -216,9 +216,14 @@ export const useFeesPreview = (): FeesPreviewData => {
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
+  // CGW preview models the Safe-pays gas cost (Gelato-relayed `handlePayment` reimbursement).
+  // Skip in Signer mode — execution goes directly through the EOA wallet, gas is local network
+  // gas, not a relay quote.
+  const isSignerMode = !isConfirmation && gtfPaymentMode === 'signer'
+
   // Confirmers render the fee locked in the signed payload, not a fresh CGW quote.
   const preview = useGetGtfFeePreviewQuery(
-    !isConfirmation && txPayload && chain?.chainId && safeAddress && safe.threshold > 0
+    !isConfirmation && !isSignerMode && txPayload && chain?.chainId && safeAddress && safe.threshold > 0
       ? {
           chainId: chain.chainId,
           safeAddress,
@@ -273,6 +278,50 @@ export const useFeesPreview = (): FeesPreviewData => {
       totalOutgoing,
       loading: false,
       error: false,
+    }
+  }
+
+  // Signer mode — direct EOA execution, no relayer. Single-signer Safes get a local gas estimate;
+  // multi-signer Safes drop the row (executor's gas is unknown at sign time, matches pre-GTF prod).
+  if (isSignerMode) {
+    const localGasWei = gasLimit && gasPrice?.maxFeePerGas ? gasLimit * gasPrice.maxFeePerGas : 0n
+    const totalOutgoing = safeTx
+      ? computeTotalOutgoing({
+          safeTx,
+          gasWei: safe.threshold > 1 ? 0n : localGasWei,
+          relayCostUsd: 0,
+          nativeSymbol,
+          nativeDecimals,
+          gasTokenAddress: ZERO_ADDRESS,
+          gasSymbol: nativeSymbol,
+          gasDecimals: nativeDecimals,
+          balances,
+        })
+      : undefined
+
+    if (safe.threshold > 1) {
+      return {
+        ...base,
+        canCoverFees: true,
+        gasFee: { label: 'Gas fee' },
+        totalOutgoing,
+        loading: false,
+        error: false,
+      }
+    }
+
+    const fallbackLoading = !safeTx || gasLimitLoading || gasPriceLoading
+    const fallbackError =
+      !fallbackLoading && (!!gasLimitError || !!gasPriceError || !gasLimit || !gasPrice?.maxFeePerGas)
+    const fallbackAmount = getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain)
+
+    return {
+      ...base,
+      canCoverFees: true,
+      gasFee: { label: 'Gas fee', amount: fallbackAmount, currency: nativeSymbol },
+      totalOutgoing,
+      loading: fallbackLoading,
+      error: fallbackError,
     }
   }
 
