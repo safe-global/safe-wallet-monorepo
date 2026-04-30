@@ -51,6 +51,10 @@
   /* we need it in order to have higher importance than the .main class */
   && {
     padding-top: var(--topbar-height);
+
+    @media (max-width: 640px) {
+      padding-top: 0;
+    }
   }
 }
 
