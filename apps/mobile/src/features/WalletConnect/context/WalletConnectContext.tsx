@@ -1,5 +1,13 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { AppKit, AppKitProvider, useAccount, useAppKit, useProvider, useWalletInfo } from '@reown/appkit-react-native'
+import {
+  AppKit,
+  AppKitProvider,
+  useAccount,
+  useAppKit,
+  useAppKitState,
+  useProvider,
+  useWalletInfo,
+} from '@reown/appkit-react-native'
 import type { Provider } from '@reown/appkit-common-react-native'
 import { Platform } from 'react-native'
 import { FullWindowOverlay } from 'react-native-screens'
@@ -50,7 +58,13 @@ export function useOptionalWalletConnectContext(): WalletConnectContextValue | n
  * Mounts all WalletConnect hooks once and pushes the combined API into
  * the given callback. Must be rendered inside AppKitProvider.
  */
-function WalletConnectContextBridge({ onContextReady }: { onContextReady: (v: WalletConnectContextValue) => void }) {
+function WalletConnectContextBridge({
+  onContextReady,
+  requestModalMount,
+}: {
+  onContextReady: (v: WalletConnectContextValue) => void
+  requestModalMount: () => void
+}) {
   const { initiateConnection } = useImportSignerFlow()
   const { reconnect } = useReconnectFlow()
   const { switchNetwork, switchNetworkIfNeeded, isWrongNetwork } = useSwitchNetwork()
@@ -60,6 +74,7 @@ function WalletConnectContextBridge({ onContextReady }: { onContextReady: (v: Wa
   const appKitHook = useAppKit()
   const { address, chainId, isConnected } = useAccount()
   const { walletInfo } = useWalletInfo()
+  const { isOpen } = useAppKitState()
   const signers = useAppSelector(selectSigners)
 
   const isWalletConnectSigner = useCallback(
@@ -73,6 +88,13 @@ function WalletConnectContextBridge({ onContextReady }: { onContextReady: (v: Wa
   // bridge/provider cycle.
   const appKitRef = useRef(appKitHook)
   appKitRef.current = appKitHook
+
+  // Lazy-mount <AppKit /> the first time anything opens the modal
+  useEffect(() => {
+    if (isOpen) {
+      requestModalMount()
+    }
+  }, [isOpen, requestModalMount])
 
   const disconnect = useCallback(() => appKitRef.current.disconnect(), [])
   const open = useCallback((...args: Parameters<typeof appKitHook.open>) => appKitRef.current.open(...args), [])
@@ -135,16 +157,27 @@ interface WalletConnectProviderProps {
  * Children always occupy the same tree position so React never remounts
  * them when AppKit initializes (which would cause a visible flash).
  * The AppKit bridge and modal are rendered as siblings above children.
+ *
+ * The `<AppKit />` modal is lazy-mounted the first time anything sets
+ * `ModalController.state.open` to true (i.e. any caller of
+ * `useAppKit().open()`). Mounting `<AppKit />` eagerly triggers
+ * `ApiController.prefetch()` inside the SDK, which fires `/getWallets`,
+ * network image requests to api.web3modal.org on cold start — which is not desired.
+ * The first open() sets the modal state synchronously; the bridge observes that,
+ * mounts `<AppKit />`, and the modal renders visible on the next paint.
  */
 export function WalletConnectProvider({ children, instance }: WalletConnectProviderProps) {
   const [contextValue, setContextValue] = useState<WalletConnectContextValue | null>(null)
+  const [modalMounted, setModalMounted] = useState(false)
+
+  const requestModalMount = useCallback(() => setModalMounted(true), [])
 
   return (
     <WalletConnectContext.Provider value={contextValue}>
       {instance && (
         <AppKitProvider instance={instance}>
-          <WalletConnectContextBridge onContextReady={setContextValue} />
-          <AppKit modalContentWrapper={Platform.OS === 'ios' ? FullWindowOverlay : undefined} />
+          <WalletConnectContextBridge onContextReady={setContextValue} requestModalMount={requestModalMount} />
+          {modalMounted && <AppKit modalContentWrapper={Platform.OS === 'ios' ? FullWindowOverlay : undefined} />}
         </AppKitProvider>
       )}
       {children}

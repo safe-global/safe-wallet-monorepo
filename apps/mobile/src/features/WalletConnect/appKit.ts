@@ -87,6 +87,9 @@ export function createAppKitInstance(networks: [Network, ...Network[]], defaultN
     themeVariables: {
       accent: '#12FF80',
     },
+    // Reown SDK fires telemetry to api.web3modal.org when this is undefined.
+    // We have our own opt-in analytics; never send data to Reown.
+    enableAnalytics: false,
     debug: __DEV__,
   })
 }
