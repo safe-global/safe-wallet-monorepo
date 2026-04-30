@@ -7,9 +7,9 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { getChainsByIds } from '@/src/store/chains'
 import { RootState } from '@/src/store'
-import { useSafeOverviewService } from '@/src/hooks/services/useSafeOverviewService'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { sumFiatTotals } from '@/src/utils/balance'
+import { useSafeKnownChainsOverview } from '@/src/hooks/services/useSafeKnownChainsOverview'
 
 interface MyAccountsContainerProps {
   item: { address: Address; info: SafesSliceItem }
@@ -19,7 +19,9 @@ interface MyAccountsContainerProps {
 }
 
 export function MyAccountsContainer({ item, isDragging, drag, onClose }: MyAccountsContainerProps) {
-  useSafeOverviewService(item.address)
+  // Refresh balances for this safe on its known chains. Mounts/unmounts with the
+  // FlatList row, so the request volume scales with viewport, not library size.
+  useSafeKnownChainsOverview(item.address)
 
   const dispatch = useDispatch()
   const activeSafe = useDefinedActiveSafe()
