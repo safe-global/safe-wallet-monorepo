@@ -60,7 +60,7 @@ export function NetworksSheetFooter({
     if (phase === 'scanning') {
       return {
         iconNode: <Loader size={20} thickness={1} />,
-        label: 'Scanning…',
+        label: 'Checking…',
         resultText: null as string | null,
       }
     }
@@ -68,14 +68,14 @@ export function NetworksSheetFooter({
     if (phase === 'error') {
       return {
         iconNode: <SafeFontIcon size={24} name="alert-triangle" color="$error" />,
-        label: 'Scan failed — tap to retry',
+        label: 'Check failed — tap to retry',
         resultText: errorMessage,
       }
     }
 
     return {
       iconNode: <SafeFontIcon size={24} name="update" />,
-      label: 'Scan for new networks',
+      label: 'Check for new networks',
       resultText: lastResult ? formatNewChainsText(lastResult.newChainIds, chains) : null,
     }
   }, [phase, errorMessage, lastResult, chains])

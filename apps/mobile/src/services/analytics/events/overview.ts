@@ -44,12 +44,12 @@ export const createSafeReorderEvent = (totalSafeCount: number) => ({
 export type ScanForNewNetworksResult = 'success' | 'empty' | 'error'
 
 /**
- * Creates an analytics event for the "Scan for new networks" action on the network selector sheet.
+ * Creates an analytics event for the "Check for new networks" action on the network selector sheet.
  * eventLabel encodes the result; newChainsFound is provided as a numeric param for "success" results.
  */
 export const createScanForNewNetworksEvent = (result: ScanForNewNetworksResult, newChainsFound: number) => ({
   eventName: EventType.CLICK,
   eventCategory: OVERVIEW_CATEGORY,
-  eventAction: 'Scan for new networks',
+  eventAction: 'Check for new networks',
   eventLabel: result === 'success' ? `success:${newChainsFound}` : result,
 })

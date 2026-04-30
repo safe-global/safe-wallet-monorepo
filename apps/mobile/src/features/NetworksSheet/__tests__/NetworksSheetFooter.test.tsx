@@ -18,7 +18,7 @@ describe('NetworksSheetFooter', () => {
   it('renders the idle label and triggers onScan when tapped', () => {
     render(<NetworksSheetFooter {...baseProps} phase="idle" lastResult={null} />)
 
-    expect(screen.getByText('Scan for new networks')).toBeTruthy()
+    expect(screen.getByText('Check for new networks')).toBeTruthy()
     expect(screen.queryByTestId('scan-result-text')).toBeNull()
 
     fireEvent.press(screen.getByTestId('scan-for-new-networks'))
@@ -28,7 +28,7 @@ describe('NetworksSheetFooter', () => {
   it('renders a scanning label and is disabled while scanning', () => {
     render(<NetworksSheetFooter {...baseProps} phase="scanning" lastResult={null} isPressable={false} />)
 
-    expect(screen.getByText('Scanning…')).toBeTruthy()
+    expect(screen.getByText('Checking…')).toBeTruthy()
 
     fireEvent.press(screen.getByTestId('scan-for-new-networks'))
     expect(baseProps.onScan).not.toHaveBeenCalled()
@@ -51,7 +51,7 @@ describe('NetworksSheetFooter', () => {
   it('shows the error label and message in the error phase', () => {
     render(<NetworksSheetFooter {...baseProps} phase="error" lastResult={null} errorMessage="Network request failed" />)
 
-    expect(screen.getByText('Scan failed — tap to retry')).toBeTruthy()
+    expect(screen.getByText('Check failed — tap to retry')).toBeTruthy()
     expect(screen.getByText('Network request failed')).toBeTruthy()
   })
 })
