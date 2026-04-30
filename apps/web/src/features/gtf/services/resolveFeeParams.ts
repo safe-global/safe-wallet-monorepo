@@ -43,8 +43,6 @@ export const resolveFeeParams = async ({
 
   const { safeTxGas, baseGas, gasPrice, gasToken: resolvedGasToken, refundReceiver } = preview.txData
 
-  // Defense-in-depth: only sign payloads with a refundReceiver we recognise as a Gelato fee
-  // collector. If CGW is ever compromised, this stops attacker addresses from leaking through.
   if (!GELATO_FEE_COLLECTORS.some((addr) => sameAddress(addr, refundReceiver))) {
     throw new Error(`Refusing to sign: untrusted refundReceiver ${refundReceiver} returned by CGW.`)
   }

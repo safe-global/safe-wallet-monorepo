@@ -263,7 +263,7 @@ describe('useFeesPreview', () => {
     expect(result.current.totalOutgoing).toBeUndefined()
   })
 
-  it('renders totalOutgoing as gas-only for a reject-shape safeTx (value=0, data=0x) — PLA-1384', () => {
+  it('renders totalOutgoing as gas-only for a reject-shape safeTx (value=0, data=0x)', () => {
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
     const rejectTx = buildSafeTx({ to: mockSafe.address.value, value: '0', data: '0x' })
 
@@ -503,7 +503,7 @@ describe('useFeesPreview', () => {
       expect(result.current.canCoverFees).toBe(true)
     })
 
-    it('renders totalOutgoing as gas-only for a reject-shape signed safeTx with native gas — PLA-1384', () => {
+    it('renders totalOutgoing as gas-only for a reject-shape signed safeTx with native gas', () => {
       jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
       const lockedReject = buildSafeTx(
         {
@@ -524,7 +524,7 @@ describe('useFeesPreview', () => {
       expect(result.current.totalOutgoing?.fees).toBeUndefined()
     })
 
-    it('does not mark isConfirmation for a signed Signer-pays tx (gasToken=0x0, baseGas=0) — PLA-1384', () => {
+    it('does not mark isConfirmation for a signed Signer-pays tx (gasToken=0x0, baseGas=0)', () => {
       jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
       // Signer-pays signed tx: `gasToken` is `ZERO_ADDRESS` (always defined) but no GTF fee fields
       // are set, so this is NOT a Safe-pays confirmation — falls through to the standard path.
@@ -538,7 +538,7 @@ describe('useFeesPreview', () => {
       expect(result.current.isConfirmation).toBeFalsy()
     })
 
-    it('renders totalOutgoing in the locked ERC-20 gas token for a reject-shape signed safeTx — PLA-1384', () => {
+    it('renders totalOutgoing in the locked ERC-20 gas token for a reject-shape signed safeTx', () => {
       jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
       const lockedRejectWeth = buildSafeTx(
         {

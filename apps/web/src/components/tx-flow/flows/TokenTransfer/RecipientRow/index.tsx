@@ -80,15 +80,14 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
   const isGtfEnabled = useHasFeature(FEATURES.GTF)
   const [maxPressed, setMaxPressed] = useState(false)
 
-  // Lazy-fire: only build the probe payload once the user clicks Max. Eager probing on every
-  // recipient/token edit is wasted network for the common case where the sent token covers gas.
+  // Probe only after Max click — eager probing on every edit wastes network for the common case.
   const previewTx = useMemo<FeePreviewTx | undefined>(() => {
     if (!isGtfEnabled || !maxPressed || !isAddressValid || !selectedToken) return undefined
     const params = createTokenTransferParams(recipient, '1', selectedToken.tokenInfo.decimals, tokenAddress)
     return { ...params, operation: OperationType.Call }
   }, [isGtfEnabled, maxPressed, isAddressValid, recipient, selectedToken, tokenAddress])
 
-  const resolution = useResolvedGasToken(isGtfEnabled && maxPressed ? tokenAddress : undefined, previewTx)
+  const resolution = useResolvedGasToken(isGtfEnabled ? tokenAddress : undefined, previewTx)
   const sentTokenIsFeeToken = resolution.status === 'resolved' && sameAddress(tokenAddress, resolution.address)
 
   // Reset banner when token changes

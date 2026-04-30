@@ -163,10 +163,8 @@ export const useFeesPreview = (): FeesPreviewData => {
       }
     : undefined
 
-  // Once the first signer has signed, the gas token is baked into the signed payload — later
-  // signers can't change it, so we skip the candidate probing and just render what's locked in.
-  // The `isGtfSafePaid` guard distinguishes real Safe-pays confirmations from Signer-pays / pre-GTF
-  // queued txs, where `gasToken` is `0x0..0` (always defined) but no Safe payment is happening.
+  // Once the first signer has signed, gas params are baked into the payload — later signers
+  // render what's locked in. The isGtfSafePaid guard excludes Signer-pays / pre-GTF queued txs.
   const lockedGasToken = safeTx && safeTx.signatures.size > 0 ? safeTx.data.gasToken : undefined
   const isConfirmation = lockedGasToken !== undefined && !!safeTx && isGtfSafePaid(safeTx.data)
 
@@ -218,9 +216,6 @@ export const useFeesPreview = (): FeesPreviewData => {
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
-  // CGW preview models the Safe-pays gas cost (Gelato-relayed `handlePayment` reimbursement).
-  // Skip in Signer mode — execution goes directly through the EOA wallet, gas is local network
-  // gas, not a relay quote.
   const isSignerMode = !isConfirmation && gtfPaymentMode === 'signer'
 
   // Confirmers render the fee locked in the signed payload, not a fresh CGW quote.
@@ -283,17 +278,14 @@ export const useFeesPreview = (): FeesPreviewData => {
     }
   }
 
-  // Signer mode — direct EOA execution, no relayer. Single-signer Safes can simulate
-  // `execTransaction` for a real local estimate. Multi-signer Safes can't (signatures incomplete
-  // at sign time, and the executor wallet is unknown anyway), so render an explanatory note
-  // instead of a number.
   if (isSignerMode) {
+    // Multi-signer can't simulate execTransaction at sign time — executor unknown, signatures
+    // incomplete — so we surface an explanatory note instead of a fake number.
     if (safe.threshold > 1) {
       return {
         ...base,
         canCoverFees: true,
         gasFee: { label: 'Gas fee', note: 'Paid by executor' },
-        totalOutgoing: undefined,
         loading: false,
         error: false,
       }
