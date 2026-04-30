@@ -1,7 +1,8 @@
 import { createElement, type ReactNode } from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
-import ActionsTray from '../ActionsTray'
+import ActionsTray, { TRANSACTION_BUILDER_TOOLTIP } from '../ActionsTray'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const mockDispatch = jest.fn()
@@ -216,6 +217,24 @@ describe('ActionsTray geoblocking', () => {
 
       const receiveButton = screen.getByRole('button', { name: /receive/i })
       expect(receiveButton).toBeEnabled()
+    })
+  })
+
+  describe('Transaction Builder button (safe / dashboard variant)', () => {
+    it('shows a descriptive tooltip on hover when the wallet check passes', async () => {
+      const user = userEvent.setup()
+      renderTray({ isBlockedCountry: false, variant: 'safe' })
+
+      const buildTxControl = screen.getByRole('link', { name: /transaction builder/i })
+      expect(buildTxControl).toBeEnabled()
+
+      const tooltipTrigger = buildTxControl.parentElement
+      expect(tooltipTrigger).toBeTruthy()
+      await user.hover(tooltipTrigger as HTMLElement)
+
+      await waitFor(() => {
+        expect(screen.getByRole('tooltip')).toHaveTextContent(TRANSACTION_BUILDER_TOOLTIP)
+      })
     })
   })
 

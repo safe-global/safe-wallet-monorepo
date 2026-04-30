@@ -25,6 +25,7 @@ import { useCurrentSpaceId } from '@/features/spaces'
 
 const NOT_ALLOWED_COUNTRY_MESSAGE = 'is not allowed for your country'
 const NO_ASSETS_MESSAGE = 'You have no assets or balance on this safe account.'
+export const TRANSACTION_BUILDER_TOOLTIP = 'Open Transaction Builder'
 
 const PassThrough = ({ children }: { children: (ok: boolean) => ReactNode }) => <Fragment>{children(true)}</Fragment>
 
@@ -190,8 +191,8 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
         )}
 
         <Wallet>
-          {(isOk) =>
-            isSpace ? (
+          {(isOk) => {
+            const buildTxButton = isSpace ? (
               <Button
                 variant={secondaryVariant}
                 className="px-6 hover:bg-border"
@@ -214,7 +215,17 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                 <SquareDashedBottomCode className="size-5 text-muted-foreground" strokeWidth={1.5} />
               </Button>
             )
-          }
+
+            if (!isOk) {
+              return buildTxButton
+            }
+
+            return (
+              <Tooltip title={TRANSACTION_BUILDER_TOOLTIP} arrow placement="top">
+                <span className="inline-flex">{buildTxButton}</span>
+              </Tooltip>
+            )
+          }}
         </Wallet>
       </div>
     </div>
