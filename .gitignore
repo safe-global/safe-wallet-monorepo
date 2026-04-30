@@ -118,6 +118,7 @@ apps/tx-builder/vite.config.d.ts
 todos/*
 /docs/plans/
 /docs/todos/
+/docs/brainstorms/
 
 .codemod
 .serena
