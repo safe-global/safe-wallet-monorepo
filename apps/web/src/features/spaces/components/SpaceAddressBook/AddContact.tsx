@@ -1,6 +1,6 @@
 import { Alert, DialogActions, Stack, Button, DialogContent, Typography, CircularProgress, Box } from '@mui/material'
 import { Button as ShadcnButton } from '@/components/ui/button'
-import PlusIcon from '@/public/images/common/plus.svg'
+import { Plus } from 'lucide-react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import { useState } from 'react'
@@ -105,8 +105,8 @@ const AddContact = () => {
 
   return (
     <>
-      <ShadcnButton size="sm" onClick={handleOpen}>
-        <PlusIcon />
+      <ShadcnButton size="lg" className="font-bold px-4 py-0" onClick={handleOpen}>
+        <Plus className="size-4 mr-1 text-green-500" />
         Add contact
       </ShadcnButton>
       <ModalDialog open={open} onClose={handleClose} dialogTitle="Add contact" hideChainIndicator>
