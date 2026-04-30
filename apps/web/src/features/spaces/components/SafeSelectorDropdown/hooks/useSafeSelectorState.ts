@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import type { SelectRootChangeEventDetails } from '@base-ui/react/select'
 import type { SafeItemData } from '../types'
 
 interface UseSafeSelectorStateProps {
@@ -44,15 +45,24 @@ export const useSafeSelectorState = ({
     [isSingleSafe],
   )
 
+  // Prevents the dropdown from snapping back to the safe selected on first mount whenever
+  // a multi-chain row expands/collapses or items load async. base-ui fires `onValueChange`
+  // and then resets to its captured initial value (SelectPositioner
+  // `onMapChange`). We only forward 'item-press' picks and cancel() everything
+  // else to avoid unwanted fallbacks.
   const handleSafeChange = useCallback(
-    (value: string | null) => {
+    (value: string | null, eventDetails: SelectRootChangeEventDetails) => {
+      if (eventDetails.reason !== 'item-press') {
+        eventDetails.cancel()
+        return
+      }
+
       const itemId = value ?? ''
-      // Skip reselecting the previous id before the URL updates
-      const currentSelectionId = selectedItemId ?? selectedItem?.id ?? ''
-      if (itemId === currentSelectionId) return
+      if (itemId === (selectedItemId ?? '')) return
+
       onItemSelect?.(itemId)
     },
-    [onItemSelect, selectedItemId, selectedItem],
+    [onItemSelect, selectedItemId],
   )
 
   const closeDropdown = useCallback(() => {
