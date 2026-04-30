@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react'
-import SafeSelectorTriggerContent from './SafeSelectorTriggerContent'
-import type { SafeItemData } from '../types'
+import SafeSelectorTriggerContent from '../SafeSelectorTriggerContent'
+import type { SafeItemData } from '../../types'
 
 const mockUseSafeDisplayName = jest.fn()
 
@@ -8,7 +8,7 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: (...args: unknown[]) => mockUseSafeDisplayName(...args),
 }))
 
-jest.mock('./SafeBalanceBlock', () => {
+jest.mock('../SafeBalanceBlock', () => {
   const Mock = () => <div data-testid="safe-balance-block" />
   Mock.displayName = 'SafeBalanceBlock'
   return { __esModule: true, default: Mock }

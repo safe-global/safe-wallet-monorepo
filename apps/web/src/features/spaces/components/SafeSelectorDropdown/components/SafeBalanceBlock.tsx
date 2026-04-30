@@ -14,7 +14,7 @@ function SafeBalanceBlock({ isLoading, balance, threshold, owners, showBalanceDi
   return (
     <div className="flex flex-col items-end gap-1 py-2 min-w-0 shrink sm:min-w-[90px] sm:shrink-0">
       {isLoading ? (
-        <Skeleton className="h-4 w-16 rounded" />
+        <Skeleton className="h-4 w-16 rounded-full" />
       ) : (
         <span data-testid="safe-selector-balance" className="text-sm text-muted-foreground">
           <FiatValue value={balance} />

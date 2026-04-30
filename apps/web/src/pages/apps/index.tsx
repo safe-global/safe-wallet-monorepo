@@ -6,7 +6,6 @@ import debounce from 'lodash/debounce'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
-import SafeAppsSDKLink from '@/components/safe-apps/SafeAppsSDKLink'
 import SafeAppsHeader from '@/components/safe-apps/SafeAppsHeader'
 import SafeAppList from '@/components/safe-apps/SafeAppList'
 import { AppRoutes } from '@/config/routes'
@@ -53,8 +52,6 @@ const SafeApps: NextPage = () => {
       <Head>
         <title>{`${BRAND_NAME} – Safe Apps`}</title>
       </Head>
-
-      <SafeAppsSDKLink />
 
       <SafeAppsHeader />
 
