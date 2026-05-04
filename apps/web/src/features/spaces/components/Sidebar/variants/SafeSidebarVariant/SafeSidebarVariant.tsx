@@ -104,7 +104,7 @@ export const SafeSidebarVariant = ({
                     data-testid="sidebar-settings-item"
                   >
                     <Tooltip>
-                      <TooltipTrigger className="flex min-w-0 items-center gap-3">
+                      <TooltipTrigger className="flex min-w-0 cursor-pointer items-center gap-3">
                         <span className="relative">
                           <Settings className="text-muted-foreground" />
                           {isOutdated && <span className={css.outdatedDot} aria-hidden />}

@@ -81,7 +81,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
             onClick={handleHelpClick}
           >
             <Tooltip>
-              <TooltipTrigger className="flex min-w-0 items-center gap-3">
+              <TooltipTrigger className="flex min-w-0 cursor-pointer items-center gap-3">
                 <icons.CircleHelp />
                 <span className="truncate group-data-[collapsible=icon]:hidden">Help</span>
               </TooltipTrigger>

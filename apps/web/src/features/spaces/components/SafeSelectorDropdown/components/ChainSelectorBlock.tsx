@@ -50,7 +50,7 @@ function ChainSelectorBlock({
     : 'w-16 flex items-center justify-between px-2 m-1 rounded-lg shrink-0 cursor-pointer hover:bg-muted/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
 
   return (
-    <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+    <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
       <DropdownMenuTrigger
         disabled={disabled}
         render={
