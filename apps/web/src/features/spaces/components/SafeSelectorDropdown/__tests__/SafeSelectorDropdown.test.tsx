@@ -167,6 +167,46 @@ describe('SafeSelectorDropdown', () => {
      * useSpaceChainSelector, or the controlled value plumbing), this test catches the
      * second router.push. The two unit tests above only cover each branch in isolation.
      */
+    it('renders an error message when items are loaded but selectedItemId has no match', () => {
+      const itemA = createItem()
+      render(<SafeSelectorDropdown items={[itemA]} selectedItemId="999:0xnotfound" isLoading={false} />)
+
+      expect(screen.getByText('This Safe is not available on the selected network')).toBeInTheDocument()
+    })
+
+    it('keeps showing the skeleton while items are still loading and there is no match yet', () => {
+      const itemA = createItem()
+      render(<SafeSelectorDropdown items={[itemA]} selectedItemId="999:0xnotfound" isLoading={true} />)
+
+      expect(screen.queryByText('This Safe is not available on the selected network')).not.toBeInTheDocument()
+    })
+
+    it('shows the load error (not the no-match error) when isError is true', () => {
+      const itemA = createItem()
+      const onRetry = jest.fn()
+      render(
+        <SafeSelectorDropdown
+          items={[itemA]}
+          selectedItemId="999:0xnotfound"
+          isLoading={false}
+          isError={true}
+          onRetry={onRetry}
+        />,
+      )
+
+      expect(screen.getByText('Failed to load Safe data')).toBeInTheDocument()
+      expect(screen.queryByText('This Safe is not available on the selected network')).not.toBeInTheDocument()
+    })
+
+    it('shows the skeleton (not the no-match error) when items are empty', () => {
+      const { container } = render(<SafeSelectorDropdown items={[]} selectedItemId="1:0xa" isLoading={false} />)
+
+      expect(screen.queryByText('This Safe is not available on the selected network')).not.toBeInTheDocument()
+      // Skeleton renders a placeholder block; trigger content is not rendered yet
+      expect(screen.queryByTestId('safe-selector-trigger-content')).not.toBeInTheDocument()
+      expect(container.firstChild).toBeTruthy()
+    })
+
     it('performs exactly one router.push across pick → rerender → base-ui auto-reset', async () => {
       const mockPush = jest.fn()
       jest.mocked(useRouter).mockReturnValue({ push: mockPush } as unknown as ReturnType<typeof useRouter>)

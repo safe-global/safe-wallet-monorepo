@@ -63,13 +63,15 @@ export function useSafeBarSafes() {
     }
   }, [safeAddress, currentChainId])
 
-  // Inject the current safe into pinnedSafes if it's not already there.
+  // Current safe: pull from allKnownSafes so the dropdown sees every chain it's
+  // deployed on (pinned, owned, or counterfactual); other safes stay pinned-only.
+  // Pin state stays decoupled — bookmark drives it, navigating doesn't auto-pin.
   const dropdownSafes = useMemo<AllSafeItems>(() => {
     if (!safeAddress) return pinnedSafes
-    if (pinnedSafes.some((s) => sameAddress(s.address, safeAddress))) return pinnedSafes
     const current = allKnownSafes.find((s) => sameAddress(s.address, safeAddress)) ?? fallbackCurrentSafe
     if (!current) return pinnedSafes
-    return [current, ...pinnedSafes]
+    const otherPinned = pinnedSafes.filter((s) => !sameAddress(s.address, safeAddress))
+    return [current, ...otherPinned]
   }, [pinnedSafes, allKnownSafes, safeAddress, fallbackCurrentSafe])
 
   // Same for chain selector.
