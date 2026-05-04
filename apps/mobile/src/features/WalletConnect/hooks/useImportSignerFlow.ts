@@ -62,3 +62,5 @@ export function useImportSignerFlow() {
 
   return { initiateConnection }
 }
+
+export type ImportSignerFlowResult = ReturnType<typeof useImportSignerFlow>

@@ -8,7 +8,6 @@ import {
   useProvider,
   useWalletInfo,
 } from '@reown/appkit-react-native'
-import type { Provider } from '@reown/appkit-common-react-native'
 import { Platform } from 'react-native'
 import { FullWindowOverlay } from 'react-native-screens'
 import { useAppSelector } from '@/src/store/hooks'
@@ -18,21 +17,7 @@ import { useReconnectFlow } from '../hooks/useReconnectFlow'
 import { useSwitchNetwork } from '../hooks/useSwitchNetwork'
 import { useWalletConnectSigning } from '../hooks/useWalletConnectSigning'
 import { useChainSync } from '../hooks/useChainSync'
-
-interface WalletConnectContextValue
-  extends Pick<ReturnType<typeof useImportSignerFlow>, 'initiateConnection'>,
-    Pick<ReturnType<typeof useReconnectFlow>, 'reconnect'>,
-    Pick<ReturnType<typeof useSwitchNetwork>, 'switchNetwork' | 'switchNetworkIfNeeded' | 'isWrongNetwork'>,
-    Pick<ReturnType<typeof useWalletConnectSigning>, 'sign' | 'hasProvider'> {
-  provider: Provider | undefined
-  isWalletConnectSigner: (address: string) => boolean
-  isConnected: ReturnType<typeof useAccount>['isConnected']
-  address: ReturnType<typeof useAccount>['address']
-  chainId: ReturnType<typeof useAccount>['chainId']
-  walletInfo: ReturnType<typeof useWalletInfo>['walletInfo']
-  disconnect: ReturnType<typeof useAppKit>['disconnect']
-  open: ReturnType<typeof useAppKit>['open']
-}
+import type { WalletConnectContextValue } from './types'
 
 const WalletConnectContext = createContext<WalletConnectContextValue | null>(null)
 

@@ -46,3 +46,5 @@ export function useReconnectFlow() {
 
   return { reconnect }
 }
+
+export type ReconnectFlowResult = ReturnType<typeof useReconnectFlow>
