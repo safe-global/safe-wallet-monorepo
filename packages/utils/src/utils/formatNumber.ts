@@ -85,6 +85,21 @@ export const formatCurrency = (number: string | number, currency: string, maxLen
   return result.replace(/^(\D+)/, '$1 ')
 }
 
+/**
+ * Currency formatter for small fees: forces x.xx precision and shows
+ * "< {currency}0.01" when the value is positive but rounds to zero on L2s where
+ * fees are sub-cent. Avoids the misleading "$0.00" display on per-fee rows.
+ */
+export const formatCurrencyMinimal = (number: string | number, currency: string): string => {
+  const float = Number(number)
+  // 0.005 is the rounding boundary for 2-decimal precision: anything below
+  // would otherwise display as "0.00".
+  if (float > 0 && float < 0.005) {
+    return `< ${formatCurrencyPrecise(0.01, currency)}`
+  }
+  return formatCurrencyPrecise(number, currency)
+}
+
 export const formatCurrencyPrecise = (number: string | number, currency: string): string => {
   const result = getCurrencyFormatter(currency, false, 2, 2).format(Number(number))
   return result.replace(/^(\D+)/, '$1 ')

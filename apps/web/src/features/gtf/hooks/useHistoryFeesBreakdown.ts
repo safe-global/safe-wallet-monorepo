@@ -4,7 +4,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
+import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
@@ -26,7 +26,7 @@ const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 const formatFiat = (gasWei: bigint, decimals: number, fiatConversion: string | undefined) =>
   fiatConversion === undefined
     ? undefined
-    : formatCurrency(Number(formatUnits(gasWei, decimals)) * Number(fiatConversion), 'usd')
+    : formatCurrencyMinimal(Number(formatUnits(gasWei, decimals)) * Number(fiatConversion), 'usd')
 
 const buildFees = (amount: string, currency: string, fiatAmount: string | undefined): HistoryFeesData => ({
   totalFee: { amount, currency, fiatAmount },

@@ -14,7 +14,7 @@ import useGasLimit from '@/hooks/useGasLimit'
 import useGasPrice from '@/hooks/useGasPrice'
 import { useGetGtfFeePreviewQuery } from '@/store/api/gateway'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
-import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
+import { formatCurrencyMinimal, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCandidates'
@@ -91,13 +91,13 @@ const computeTotalOutgoing = ({
     if (gasIsNative) {
       return {
         primary: { amount: formatVisualAmount(sendWei + gasWei, nativeDecimals), currency: nativeSymbol },
-        fiatTotal: formatCurrency(sendFiat + relayCostUsd, 'usd'),
+        fiatTotal: formatCurrencyPrecise(sendFiat + relayCostUsd, 'usd'),
       }
     }
     return {
       primary: { amount: formatVisualAmount(sendWei, nativeDecimals), currency: nativeSymbol },
       fees: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
-      fiatTotal: formatCurrency(sendFiat + relayCostUsd, 'usd'),
+      fiatTotal: formatCurrencyPrecise(sendFiat + relayCostUsd, 'usd'),
     }
   }
 
@@ -120,14 +120,14 @@ const computeTotalOutgoing = ({
             amount: formatVisualAmount(transferValue + gasWei, token.tokenInfo.decimals),
             currency: token.tokenInfo.symbol,
           },
-          fiatTotal: formatCurrency(sendFiat + relayCostUsd, 'usd'),
+          fiatTotal: formatCurrencyPrecise(sendFiat + relayCostUsd, 'usd'),
         }
       }
 
       return {
         primary: { amount: sendAmount, currency: token.tokenInfo.symbol },
         fees: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
-        fiatTotal: formatCurrency(sendFiat + relayCostUsd, 'usd'),
+        fiatTotal: formatCurrencyPrecise(sendFiat + relayCostUsd, 'usd'),
       }
     } catch {
       return undefined
@@ -138,7 +138,7 @@ const computeTotalOutgoing = ({
   if (isEmptyData) {
     return {
       primary: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
-      fiatTotal: formatCurrency(relayCostUsd, 'usd'),
+      fiatTotal: formatCurrencyPrecise(relayCostUsd, 'usd'),
     }
   }
 
@@ -270,7 +270,7 @@ export const useFeesPreview = (): FeesPreviewData => {
         label: 'Gas fee',
         amount: gasAmount,
         currency: gasSymbol,
-        fiatAmount: formatCurrency(gasFiatUsd, 'usd'),
+        fiatAmount: formatCurrencyMinimal(gasFiatUsd, 'usd'),
       },
       totalOutgoing,
       loading: false,
@@ -356,7 +356,7 @@ export const useFeesPreview = (): FeesPreviewData => {
         label: 'Gas fee',
         amount: gasAmount,
         currency: gasSymbol,
-        fiatAmount: formatCurrency(relayCostUsd, 'usd'),
+        fiatAmount: formatCurrencyMinimal(relayCostUsd, 'usd'),
       },
       totalOutgoing,
       loading: false,
