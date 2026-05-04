@@ -64,6 +64,12 @@ jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: () => mockIsSpaceRoute(),
 }))
 
+const mockUsePathname = jest.fn<string, []>(() => '/home')
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  usePathname: () => mockUsePathname(),
+}))
+
 jest.mock('@/components/common/SpaceSafeBar', () => {
   const MockSpaceSafeBar = () => <div data-testid="space-safe-bar" />
   MockSpaceSafeBar.displayName = 'SpaceSafeBar'
@@ -122,6 +128,7 @@ describe('Topbar', () => {
     jest.clearAllMocks()
     mockUseIsMobile.mockReturnValue(false)
     mockIsSpaceRoute.mockReturnValue(true)
+    mockUsePathname.mockReturnValue('/home')
     mockUseLoadFeature.mockReturnValue({
       WalletPopover: () => null,
       GlobalSearchModal: () => null,
@@ -186,6 +193,36 @@ describe('Topbar', () => {
         </TxModalContext.Provider>,
       )
       expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
+    })
+  })
+
+  describe('search button visibility', () => {
+    it('shows the search button on non-space, non-welcome routes', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/home')
+      render(<Topbar />)
+      expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument()
+    })
+
+    it('hides the search button on /welcome/accounts', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/welcome/accounts')
+      render(<Topbar />)
+      expect(screen.queryByRole('button', { name: /search/i })).not.toBeInTheDocument()
+    })
+
+    it('hides the search button on /welcome/spaces', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/welcome/spaces')
+      render(<Topbar />)
+      expect(screen.queryByRole('button', { name: /search/i })).not.toBeInTheDocument()
+    })
+
+    it('shows the search button on other welcome subpaths', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/welcome')
+      render(<Topbar />)
+      expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument()
     })
   })
 
