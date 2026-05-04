@@ -81,6 +81,7 @@ const TargetedOutreachPopupLoader = () => {
   return <OutreachPopup />
 }
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
+import PasskeyModulePopup from '@/services/passkey-module/PasskeyModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
@@ -229,6 +230,7 @@ const SafeWalletApp = ({
               <Analytics />
 
               <PkModulePopup />
+              <PasskeyModulePopup />
             </TermsGate>
           </CaptchaProvider>
         </AppProviders>

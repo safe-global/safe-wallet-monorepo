@@ -19,6 +19,10 @@ export type Signer = AddressInfo &
         walletName?: string
         walletIcon?: string
       }
+    | {
+        type: 'passkey'
+        rawId: string
+      }
   )
 
 const initialState: Record<string, Signer> = {}

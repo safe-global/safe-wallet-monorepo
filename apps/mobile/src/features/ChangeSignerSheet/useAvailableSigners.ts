@@ -24,7 +24,10 @@ const useAvailableSigners = (txId: string, actionType: ActionType) => {
 
   const detailedExecutionInfo = txDetails?.detailedExecutionInfo as MultisigExecutionDetails
 
-  const storedSigners = useMemo(() => extractAppSigners(signers, detailedExecutionInfo), [txDetails, signers])
+  const storedSigners = useMemo(
+    () => extractAppSigners(signers, detailedExecutionInfo, activeChain),
+    [txDetails, signers, activeChain],
+  )
 
   const { data, isLoading } = useGetBalancesQuery({
     addresses: storedSigners?.map((item) => item.value) || [],

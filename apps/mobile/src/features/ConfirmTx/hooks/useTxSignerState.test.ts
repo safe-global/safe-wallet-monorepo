@@ -128,7 +128,7 @@ describe('useTxSignerState', () => {
 
       const { result } = renderHook(() => useTxSignerState(mockExecutionDetails), initialStore)
 
-      expect(mockExtractAppSigners).toHaveBeenCalledWith({}, mockExecutionDetails)
+      expect(mockExtractAppSigners).toHaveBeenCalledWith({}, mockExecutionDetails, undefined)
       expect(result.current.appSigners).toEqual(mockAppSigners)
     })
   })

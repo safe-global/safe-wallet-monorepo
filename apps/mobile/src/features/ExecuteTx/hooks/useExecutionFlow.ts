@@ -46,6 +46,31 @@ export const useExecutionFlow = ({
     const routeParams = buildRouteParams(txId, executionMethod, feeParams)
     const executionPath = determineExecutionPath(activeSigner, isBiometricsEnabled, executionMethod)
 
+    // Passkey flow - execute directly (passkey handles its own biometric via WebAuthn)
+    // Identity contract deployment is handled inside the execution flow
+    if (executionPath === 'passkey') {
+      try {
+        setIsExecuting(true)
+        await execute()
+
+        if (isMounted()) {
+          router.replace({
+            pathname: '/execution-success',
+            params: { txId },
+          })
+        }
+      } catch (err) {
+        if (isMounted()) {
+          setIsExecuting(false)
+          router.push({
+            pathname: '/execution-error',
+            params: { description: getErrorMessage(err) },
+          })
+        }
+      }
+      return
+    }
+
     // Ledger flow - navigate to Ledger connection screen
     if (executionPath === 'ledger') {
       router.push({

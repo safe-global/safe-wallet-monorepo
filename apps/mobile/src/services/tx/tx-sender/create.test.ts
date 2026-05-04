@@ -167,13 +167,16 @@ describe('create.ts', () => {
   })
 
   describe('addSignaturesToTx', () => {
-    it('adds signatures to transaction', () => {
+    it('adds EOA signatures to transaction', () => {
       const mockTx = createMockSafeTx()
       const signer1 = generateChecksummedAddress()
       const signer2 = generateChecksummedAddress()
+      // EOA signatures are exactly 65 bytes = 132 hex chars including 0x prefix
+      const eoaSig1 = '0x' + 'ab'.repeat(65)
+      const eoaSig2 = '0x' + 'cd'.repeat(65)
       const signatures = {
-        [signer1]: '0xsignature1',
-        [signer2]: '0xsignature2',
+        [signer1]: eoaSig1,
+        [signer2]: eoaSig2,
       }
 
       addSignaturesToTx(mockTx, signatures)
@@ -182,15 +185,43 @@ describe('create.ts', () => {
       expect(mockTx.addSignature).toHaveBeenCalledWith(
         expect.objectContaining({
           signer: signer1,
-          data: '0xsignature1',
+          data: eoaSig1,
           isContractSignature: false,
         }),
       )
       expect(mockTx.addSignature).toHaveBeenCalledWith(
         expect.objectContaining({
           signer: signer2,
-          data: '0xsignature2',
+          data: eoaSig2,
           isContractSignature: false,
+        }),
+      )
+    })
+
+    it('extracts inner data from contract (passkey) signatures', () => {
+      const mockTx = createMockSafeTx()
+      const signerAddress = '0x22fa5cF3294CeA8cB0e80cfd780BFc423ef4aa7f'
+
+      // Simulate the full encodedSignatures() output from a single-signer passkey context.
+      // Format: 0x + {32-byte padded signer} + {32-byte offset=65} + {v=00}
+      //         + {32-byte data length} + {inner data}
+      const paddedSigner = '00000000000000000000000022fa5cf3294cea8cb0e80cfd780bfc423ef4aa7f'
+      const offset = '0000000000000000000000000000000000000000000000000000000000000041'
+      const vByte = '00'
+      const innerData = 'deadbeef01020304'
+      const length = innerData.length.toString(16).padStart(64, '0')
+      const fullEncodedSig = '0x' + paddedSigner + offset + vByte + length + innerData
+
+      // Must be longer than 132 chars (an EOA sig) to be detected as contract sig
+      expect(fullEncodedSig.length).toBeGreaterThan(132)
+
+      addSignaturesToTx(mockTx, { [signerAddress]: fullEncodedSig })
+
+      expect(mockTx.addSignature).toHaveBeenCalledWith(
+        expect.objectContaining({
+          signer: signerAddress,
+          data: '0x' + innerData,
+          isContractSignature: true,
         }),
       )
     })

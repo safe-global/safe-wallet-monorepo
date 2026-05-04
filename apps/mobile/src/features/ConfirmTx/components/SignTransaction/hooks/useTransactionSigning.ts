@@ -5,7 +5,11 @@ import { selectChainById } from '@/src/store/chains'
 import { RootState } from '@/src/store'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import { signTx } from '@/src/services/tx/tx-sender/sign'
+import { signWithPasskey } from '@/src/services/tx/tx-sender/signWithPasskey'
+import { getPasskeyMetadataByRawId } from '@/src/services/passkey/passkey-storage.service'
+import type { RelayClient } from '@safe-global/utils/services/passkey'
 import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { useRelayRelayV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import logger from '@/src/utils/logger'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
 import { SigningResponse, ledgerSafeSigningService } from '@/src/services/ledger/ledger-safe-signing.service'
@@ -40,6 +44,7 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
 
   const [addConfirmation, { isLoading: isApiLoading, data: apiData, isError: isApiError }] =
     useTransactionsAddConfirmationV1Mutation()
+  const [relayMutation] = useRelayRelayV1Mutation()
 
   const executeSign = useCallback(async () => {
     setStatus(SigningStatus.LOADING)
@@ -55,7 +60,32 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
           signerAddress,
           safeVersion: safe.version ?? undefined,
         })
+      } else if (signer?.type === 'passkey') {
+        const passkeyMetadata = await getPasskeyMetadataByRawId(signer.rawId)
+        if (!passkeyMetadata) {
+          throw new Error('Passkey metadata not found for this signer')
+        }
+
+        const relay: RelayClient = {
+          relay: async (args) => {
+            const result = await relayMutation({
+              chainId: args.chainId,
+              relayDto: { to: args.to, data: args.data, version: args.version },
+            }).unwrap()
+            return { taskId: result.taskId }
+          },
+        }
+
+        logger.info('[passkey-sign] Signing transaction (biometric prompt)')
+        signedTx = await signWithPasskey({
+          chain: activeChain as ChainInfo,
+          activeSafe,
+          txId,
+          passkeyMetadata,
+          relay,
+        })
       } else if (signer?.type === 'ledger') {
+        // Handle Ledger signing
         if (!signer.derivationPath) {
           throw new Error('Ledger signer missing derivation path')
         }
@@ -91,13 +121,22 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
         })
       }
 
-      await addConfirmation({
+      logger.info('[passkey-confirm] sending addConfirmation:', {
+        chainId: activeSafe.chainId,
+        safeTxHash: signedTx.safeTransactionHash,
+        signatureLength: signedTx.signature.length,
+        signaturePrefix: signedTx.signature.slice(0, 66),
+      })
+
+      const confirmResult = await addConfirmation({
         chainId: activeSafe.chainId,
         safeTxHash: signedTx.safeTransactionHash,
         addConfirmationDto: {
           signature: signedTx.signature,
         },
       })
+
+      logger.info('[passkey-confirm] addConfirmation result:', JSON.stringify(confirmResult).slice(0, 200))
 
       // Mark signing as successful - SigningMonitor will handle cleanup
       dispatch(setSigningSuccess(txId))
@@ -115,7 +154,18 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
       // Re-throw error so it can be handled imperatively by the caller
       throw error
     }
-  }, [activeChain, activeSafe, txId, signerAddress, addConfirmation, signer, safe.version, dispatch, signWithWc])
+  }, [
+    activeChain,
+    activeSafe,
+    txId,
+    signerAddress,
+    addConfirmation,
+    signer,
+    safe.version,
+    dispatch,
+    relayMutation,
+    signWithWc,
+  ])
 
   const retry = useCallback(() => {
     executeSign()

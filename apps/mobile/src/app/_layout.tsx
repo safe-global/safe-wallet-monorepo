@@ -106,7 +106,9 @@ function NavigationStack() {
       <Stack.Screen name="address-book" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="contact" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="signers" options={{ headerShown: false }} />
+      <Stack.Screen name="your-signers" options={{ headerShown: false }} />
       <Stack.Screen name="import-signers" options={{ headerShown: false }} />
+      <Stack.Screen name="passkey-setup" options={{ headerShown: false }} />
       <Stack.Screen name="(send)" options={{ headerShown: false }} />
       <Stack.Screen name="safe-shield-details-sheet" options={transparentModalOptions} />
       <Stack.Screen name="import-data" options={{ headerShown: false }} />

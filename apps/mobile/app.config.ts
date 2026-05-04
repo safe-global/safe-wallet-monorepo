@@ -75,6 +75,7 @@ const config: ExpoConfig = {
         IS_DEV ? 'group.global.safe.mobileapp.ios.dev' : 'group.global.safe.mobileapp.ios',
       ],
     },
+    associatedDomains: ['webcredentials:app.safe.global'],
     googleServicesFile: IS_DEV ? process.env.GOOGLE_SERVICES_PLIST_DEV : process.env.GOOGLE_SERVICES_PLIST,
   },
   android: {

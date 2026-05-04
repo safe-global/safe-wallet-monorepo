@@ -32,7 +32,9 @@ export const ConfirmationsSheetContainer = () => {
 
   const confirmationsMapper = useMemo(() => {
     const mapper = confirmations.reduce((acc, confirmation) => {
-      acc.set(confirmation.signer.value as Address, true)
+      // Use lowercase keys to handle checksum mismatches between
+      // confirmation signer addresses and owner list addresses
+      acc.set(confirmation.signer.value.toLowerCase() as Address, true)
 
       return acc
     }, new Map<Address, boolean>())
@@ -72,7 +74,7 @@ export const ConfirmationsSheetContainer = () => {
 
   const renderItem = useCallback(
     ({ item }: { item: AddressInfo }) => {
-      const hasSigned = confirmationsMapper.has(item.value as Address)
+      const hasSigned = confirmationsMapper.has(item.value.toLowerCase() as Address)
 
       return (
         <View width="100%">

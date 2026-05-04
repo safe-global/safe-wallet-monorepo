@@ -1,6 +1,5 @@
 import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import type Safe from '@safe-global/protocol-kit'
-import { SafeProvider } from '@safe-global/protocol-kit'
+import { SafeProvider, type default as Safe } from '@safe-global/protocol-kit'
 import {
   SigningMethod,
   OperationType,
@@ -9,6 +8,11 @@ import {
 } from '@safe-global/types-kit'
 import { generatePreValidatedSignature } from '@safe-global/protocol-kit'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { signSafeTxWithPasskey, type PasskeyMetadata, type RelayClient } from '@safe-global/utils/services/passkey'
+import { cgwApi as relayApi } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
+import { GATEWAY_URL } from '@/config/gateway'
+import { getStoreInstance } from '@/store'
+import { webPasskeyStorage } from '@/services/passkey-module/passkey-store'
 import type { Eip1193Provider, JsonRpcSigner } from 'ethers'
 import { isHardwareWallet, isWalletConnect } from '@/utils/wallets'
 import { getChainConfig } from '@/utils/chains'
@@ -148,6 +152,73 @@ export const getSafeSDKWithSigner = async (provider: Eip1193Provider): Promise<S
 
 export const tryOffChainTxSigning = async (safeTx: SafeTransaction, sdk: Safe): Promise<SafeTransaction> => {
   return sdk.signTransaction(safeTx, SigningMethod.ETH_SIGN_TYPED_DATA)
+}
+
+function buildWebRelayClient(): RelayClient {
+  return {
+    async relay({ chainId, to, data, version }) {
+      const store = getStoreInstance()
+      const action = relayApi.endpoints.relayRelayV1.initiate({
+        chainId,
+        relayDto: { to, data, version },
+      })
+      const response = await store.dispatch(action).unwrap()
+      if (!response.taskId) {
+        throw new Error('Failed to relay identity contract deployment')
+      }
+      return { taskId: response.taskId }
+    },
+  }
+}
+
+/**
+ * `getFn` adapter for protocol-kit's WebAuthn flow. Strips `allowCredentials`
+ * because protocol-kit passes raw bytes that the browser's `navigator.credentials.get`
+ * rejects. Falls back to discoverable-credentials (OS picker), which works.
+ *
+ * TODO: drop the strip once the protocol-kit allowCredentials encoding is fixed
+ * upstream — see plan 2026-04-30-refactor-shared-passkey-logic-plan bug #6.
+ */
+const webPasskeyGetFn = async (options?: CredentialRequestOptions): Promise<Credential> => {
+  const fixedOptions: CredentialRequestOptions = {
+    ...options,
+    publicKey: options?.publicKey ? { ...options.publicKey, allowCredentials: [] } : undefined,
+  }
+  const credential = await navigator.credentials.get(fixedOptions)
+  if (!credential) {
+    throw new Error('Passkey authentication cancelled')
+  }
+  return credential
+}
+
+/**
+ * Signs a Safe transaction with a passkey via the shared
+ * `signSafeTxWithPasskey` orchestration. Handles the deploy-on-sign path
+ * (required for ERC-1271 signature verification during execution).
+ */
+export const signWithPasskeySigner = async (
+  safeTx: SafeTransaction,
+  passkey: PasskeyMetadata,
+  chainId: string,
+  safeAddress: string,
+): Promise<SafeTransaction> => {
+  const rpcProvider = getWeb3ReadOnly()
+  if (!rpcProvider) {
+    throw new Error('RPC provider not found')
+  }
+
+  const { signedTx } = await signSafeTxWithPasskey({
+    rpcUrl: rpcProvider._getConnection().url,
+    chainId,
+    safeAddress,
+    safeTx,
+    passkey,
+    getFn: webPasskeyGetFn,
+    relay: buildWebRelayClient(),
+    storage: webPasskeyStorage,
+    cgwBaseUrl: GATEWAY_URL,
+  })
+  return signedTx
 }
 
 export const isDelegateCall = (safeTx: SafeTransaction): boolean => {

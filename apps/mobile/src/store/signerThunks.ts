@@ -28,7 +28,9 @@ export const addSignerWithEffects =
 
     dispatch(addSigner(signerInfo))
 
-    if (activeSafe && !activeSigner[activeSafe.address]) {
+    const isOwnerOfActiveSafe = activeSafe && computeSignerChainIds(signerInfo.value, state).length > 0
+
+    if (activeSafe && !activeSigner[activeSafe.address] && isOwnerOfActiveSafe) {
       dispatch(setActiveSigner({ safeAddress: activeSafe.address, signer: signerInfo }))
     }
 

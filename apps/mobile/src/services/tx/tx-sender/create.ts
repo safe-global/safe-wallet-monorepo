@@ -6,6 +6,7 @@ import { SafeInfo } from '@/src/types/address'
 import type { SafeTransaction, SafeTransactionDataPartial } from '@safe-global/types-kit'
 import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { EthSafeSignature } from '@safe-global/protocol-kit'
 
 interface CreateTxParams {
   activeSafe: SafeInfo
@@ -39,13 +40,30 @@ export const createTx = async (txParams: SafeTransactionDataPartial, nonce?: num
  */
 export const addSignaturesToTx = (safeTx: SafeTransaction, signatures: Record<string, string>): void => {
   Object.entries(signatures).forEach(([signer, data]) => {
-    safeTx.addSignature({
-      signer,
-      data,
-      staticPart: () => data,
-      dynamicPart: () => '',
-      isContractSignature: false,
-    })
+    // Contract signatures (ERC-1271, e.g. passkey signers) are stored in CGW
+    // as the full encoded form from encodedSignatures(). This includes:
+    //   {32-byte padded signer}{32-byte dynamic offset}{1-byte v=0x00}
+    //   {32-byte data length}{inner signature data}
+    // We need to extract the inner signature data so buildSignatureBytes
+    // can recalculate the dynamic offset when combining multiple signatures.
+    //
+    // Standard EOA signatures are exactly 65 bytes (132 hex chars with 0x).
+    const isContractSig = data.length > 132
+
+    if (isContractSig) {
+      // Extract the inner signature data from the full encoded form.
+      // The stored format from encodedSignatures() for a single contract sig:
+      //   0x + 64 chars (32-byte padded signer) + 64 chars (32-byte offset) + 2 chars (v=0x00)
+      //   = 130 hex chars of static part (65 bytes)
+      //   Then: 64 chars (32-byte data length) + actual inner data
+      // EthSafeSignature.dynamicPart() will re-prepend the length, so we
+      // skip the static part (130 chars) + length (64 chars).
+      const innerDataStart = 2 + 64 + 64 + 2 + 64 // = 196
+      const innerData = '0x' + data.slice(innerDataStart)
+      safeTx.addSignature(new EthSafeSignature(signer, innerData, true))
+    } else {
+      safeTx.addSignature(new EthSafeSignature(signer, data, false))
+    }
   })
 }
 

@@ -42,6 +42,13 @@ const mockWalletConnectSigner: Signer = {
   walletName: 'MetaMask',
 }
 
+const mockPasskeySigner: Signer = {
+  value: '0x789',
+  name: 'Passkey Signer',
+  type: 'passkey',
+  rawId: 'test-raw-id',
+}
+
 describe('helpers', () => {
   describe('getExecutionMethod', () => {
     it('should return WITH_RELAY when relay is requested and available', () => {
@@ -97,6 +104,16 @@ describe('helpers', () => {
     it('should return WITH_PK when no signer is provided', () => {
       const result = getExecutionMethod(ExecutionMethod.WITH_PK, true, mockChainWithRelay)
       expect(result).toBe(ExecutionMethod.WITH_PK)
+    })
+
+    it('should always return WITH_RELAY for passkey signers', () => {
+      const result = getExecutionMethod(ExecutionMethod.WITH_PK, false, mockChainWithRelay, mockPasskeySigner)
+      expect(result).toBe(ExecutionMethod.WITH_RELAY)
+    })
+
+    it('should return WITH_RELAY for passkey even when relay not available', () => {
+      const result = getExecutionMethod(ExecutionMethod.WITH_PK, false, mockChainWithoutRelay, mockPasskeySigner)
+      expect(result).toBe(ExecutionMethod.WITH_RELAY)
     })
   })
 
@@ -196,6 +213,16 @@ describe('helpers', () => {
 
     it('should return "standard" when signer is undefined and biometrics enabled', () => {
       expect(determineExecutionPath(undefined, true)).toBe('standard')
+    })
+
+    it('should return "passkey" for passkey signers regardless of biometrics', () => {
+      expect(determineExecutionPath(mockPasskeySigner, true)).toBe('passkey')
+      expect(determineExecutionPath(mockPasskeySigner, false)).toBe('passkey')
+    })
+
+    it('should return "passkey" for passkey signers regardless of execution method', () => {
+      expect(determineExecutionPath(mockPasskeySigner, true, ExecutionMethod.WITH_RELAY)).toBe('passkey')
+      expect(determineExecutionPath(mockPasskeySigner, false, ExecutionMethod.WITH_PK)).toBe('passkey')
     })
   })
 

@@ -1,4 +1,5 @@
 import { createTx, addSignaturesToTx } from '@/src/services/tx/tx-sender/create'
+import logger from '@/src/utils/logger'
 import { getReadOnlyCurrentGnosisSafeContract } from '@/src/services/contracts/safeContracts'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import extractTxInfo from '@/src/services/tx/extractTx'
@@ -49,7 +50,19 @@ export const executeRelayTx = async ({
   }
 
   // Add all signatures to the transaction
+  logger.info(
+    '[relay-exec] raw signatures from CGW:',
+    JSON.stringify(
+      Object.fromEntries(
+        Object.entries(signatures).map(([k, v]) => [k, { length: v.length, prefix: v.slice(0, 20) + '...' }]),
+      ),
+    ),
+  )
   addSignaturesToTx(safeTx, signatures)
+
+  const encodedSigs = safeTx.encodedSignatures()
+  logger.info('[relay-exec] encodedSignatures length:', encodedSigs.length)
+  logger.info('[relay-exec] encodedSignatures:', encodedSigs.slice(0, 200) + '...')
 
   // Get readonly safe contract to encode the transaction
   const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe)
@@ -65,7 +78,7 @@ export const executeRelayTx = async ({
     safeTx.data.gasPrice,
     safeTx.data.gasToken,
     safeTx.data.refundReceiver,
-    safeTx.encodedSignatures(),
+    encodedSigs,
   ])
 
   // Call relay mutation

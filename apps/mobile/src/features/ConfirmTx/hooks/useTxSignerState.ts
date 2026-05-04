@@ -6,13 +6,18 @@ import { RootState } from '@/src/store'
 import { extractAppSigners } from '../utils'
 import { selectSigners } from '@/src/store/signersSlice'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { selectChainById } from '@/src/store/chains'
 
 export const useTxSignerState = (detailedExecutionInfo?: MultisigExecutionDetails) => {
   const activeSafe = useDefinedActiveSafe()
   const activeSigner = useAppSelector((state: RootState) => selectActiveSigner(state, activeSafe.address))
   const signers = useAppSelector(selectSigners)
+  const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
 
-  const appSigners = useMemo(() => extractAppSigners(signers, detailedExecutionInfo), [signers, detailedExecutionInfo])
+  const appSigners = useMemo(
+    () => extractAppSigners(signers, detailedExecutionInfo, activeChain),
+    [signers, detailedExecutionInfo, activeChain],
+  )
 
   const activeTxSigner = useMemo(
     () => appSigners.find((signer) => signer.value === activeSigner?.value),

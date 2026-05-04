@@ -22,6 +22,7 @@ interface SafeBottomSheetProps<T> {
   items?: T[]
   snapPoints?: BottomSheetModalProps['snapPoints']
   actions?: React.ReactNode
+  headerContent?: React.ReactNode
   FooterComponent?: React.FC
   renderItem?: React.FC<{ item: T; isDragging?: boolean; drag?: () => void; onClose: () => void }>
   keyExtractor?: ({ item, index }: { item: T; index: number }) => string
@@ -37,6 +38,7 @@ export function SafeBottomSheet<T>({
   snapPoints = [600, '100%'],
   keyExtractor,
   actions,
+  headerContent,
   renderItem: Render,
   FooterComponent,
   onDragEnd,
@@ -66,25 +68,23 @@ export function SafeBottomSheet<T>({
 
   const TitleHeader = useCallback(
     () => (
-      <View
-        justifyContent="center"
-        paddingTop="$3"
-        paddingBottom="$4"
-        alignItems="center"
-        backgroundColor="$backgroundSheet"
-      >
-        <H4 fontWeight={600} tabIndex={0}>
-          {title}
-        </H4>
+      <View backgroundColor="$backgroundSheet">
+        <View justifyContent="center" paddingTop="$3" paddingBottom="$4" alignItems="center">
+          <H4 fontWeight={600} tabIndex={0}>
+            {title}
+          </H4>
 
-        {actions && (
-          <View position="absolute" right={'$4'} top={'$3'} justifyContent="center" alignItems="center">
-            {actions}
-          </View>
-        )}
+          {actions && (
+            <View position="absolute" right={'$4'} top={'$3'} justifyContent="center" alignItems="center">
+              {actions}
+            </View>
+          )}
+        </View>
+
+        {headerContent}
       </View>
     ),
-    [title, actions],
+    [title, actions, headerContent],
   )
 
   // callbacks
