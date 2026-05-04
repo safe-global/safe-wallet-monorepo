@@ -82,7 +82,7 @@ function AllNetworksSection({ safeAddress, deployedChainIds, onAddNetwork }: All
   }
 
   return (
-    <Accordion defaultValue={[]} onValueChange={handleAccordionChange}>
+    <Accordion defaultValue={[]} onValueChange={handleAccordionChange} data-testid="all-networks-accordion">
       <AccordionItem value="all-networks" className="border-0">
         <AccordionTrigger className="rounded-lg pl-4 pr-2 py-2 hover:no-underline hover:bg-muted/30 text-muted-foreground cursor-pointer">
           <Typography variant="paragraph-small-medium" className="text-muted-foreground">
@@ -99,6 +99,7 @@ function AllNetworksSection({ safeAddress, deployedChainIds, onAddNetwork }: All
                   onClick={() => !disabled && handleChainClick(chainItem.chainId)}
                   disabled={disabled}
                   className="flex items-center justify-between px-2 py-2 rounded-lg w-full cursor-pointer hover:bg-muted/30 text-left disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                  data-testid="add-network-btn"
                   aria-label={`Add ${chainItem.chainName}`}
                 >
                   <div className="flex items-center gap-4">
