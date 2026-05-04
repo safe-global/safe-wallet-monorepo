@@ -31,6 +31,7 @@ export * from './visitedSafesSlice'
 export * from './orderByPreferenceSlice'
 export * from './authSlice'
 export * from '@/features/hypernative/store'
+export * from '@/features/gtf/store'
 export {
   globalSearchSlice,
   openGlobalSearch,
