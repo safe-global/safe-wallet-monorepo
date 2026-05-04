@@ -85,14 +85,14 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
       onClick={handleClick}
     >
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger className="flex min-w-0 items-center gap-3">
           <div className={item.isActive ? css.activeIcon : undefined}>
             <item.icon />
           </div>
+          <span className="truncate group-data-[collapsible=icon]:hidden">{item.label}</span>
         </TooltipTrigger>
         <TooltipContent side="right">{item.label}</TooltipContent>
       </Tooltip>
-      <span>{item.label}</span>
     </SidebarMenuButton>
   )
 
