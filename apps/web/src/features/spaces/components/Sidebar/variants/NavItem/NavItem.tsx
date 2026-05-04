@@ -108,7 +108,7 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
   return (
     <SidebarMenuItem className="relative">
       {interactive}
-      {item.badge !== undefined && item.badge && (
+      {!!item.badge && (
         <>
           <span
             className={cn(css.transactionsBadge, item.isActive && css.transactionsBadgeActive)}
