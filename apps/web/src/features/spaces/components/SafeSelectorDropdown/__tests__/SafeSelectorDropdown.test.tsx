@@ -3,11 +3,32 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
+import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import SafeSelectorDropdown from '../index'
 import type { SafeItemData } from '../types'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
+}))
+
+jest.mock('@/components/ui/tooltip', () => ({
+  __esModule: true,
+  Tooltip: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({
+    children,
+    render,
+  }: {
+    children?: React.ReactNode
+    render?: React.ReactElement<{ children?: React.ReactNode }>
+  }) => {
+    if (render) {
+      return React.cloneElement(render, undefined, children)
+    }
+    return <>{children}</>
+  },
+  TooltipContent: ({ children }: { children?: React.ReactNode }) => (
+    <span data-testid="tooltip-content">{children}</span>
+  ),
 }))
 
 jest.mock('../components/SafeSelectorTriggerContent', () => ({
@@ -40,12 +61,21 @@ jest.mock('@/components/ui/select', () => {
       children,
       value,
       onValueChange,
+      disabled,
+      open,
     }: {
       children?: React.ReactNode
       value?: string
       onValueChange?: (next: string | null, details: { reason: string; cancel: () => void }) => void
+      disabled?: boolean
+      open?: boolean
     }) => (
-      <div data-testid="mock-select-root" data-mock-controlled-value={value}>
+      <div
+        data-testid="mock-select-root"
+        data-mock-controlled-value={value}
+        data-mock-disabled={String(!!disabled)}
+        data-mock-open={String(!!open)}
+      >
         <button
           type="button"
           data-testid="simulate-user-pick-new"
@@ -240,6 +270,56 @@ describe('SafeSelectorDropdown', () => {
       await user.click(screen.getByTestId('simulate-base-ui-auto-reset'))
 
       expect(mockPush).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('disabled while a tx flow is active', () => {
+    const renderWithTxFlow = (txFlow: TxModalContextType['txFlow']) => {
+      const itemA = createItem()
+      const value: TxModalContextType = {
+        txFlow,
+        setTxFlow: jest.fn(),
+        setFullWidth: jest.fn(),
+      }
+      return render(
+        <TxModalContext.Provider value={value}>
+          <SafeSelectorDropdown items={[itemA]} selectedItemId={itemA.id} onItemSelect={jest.fn()} />
+        </TxModalContext.Provider>,
+      )
+    }
+
+    it('disables the Select and forces it closed when a tx flow is open', () => {
+      renderWithTxFlow(<div data-testid="active-tx-flow" />)
+
+      const selectRoot = screen.getByTestId('mock-select-root')
+      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('true')
+      expect(selectRoot.getAttribute('data-mock-open')).toBe('false')
+    })
+
+    it('renders the explanatory tooltip when a tx flow is open', () => {
+      renderWithTxFlow(<div data-testid="active-tx-flow" />)
+
+      expect(screen.getByTestId('tooltip-content')).toHaveTextContent('Changing the Safe is not allowed in this screen')
+    })
+
+    it('applies the disabled styling to the trigger when a tx flow is open', () => {
+      renderWithTxFlow(<div data-testid="active-tx-flow" />)
+
+      const trigger = screen.getByTestId('open-safes-icon')
+      expect(trigger.className).toMatch(/cursor-not-allowed/)
+      expect(trigger.className).toMatch(/opacity-50/)
+    })
+
+    it('does not disable the Select or render the tooltip when no tx flow is active', () => {
+      renderWithTxFlow(undefined)
+
+      const selectRoot = screen.getByTestId('mock-select-root')
+      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('false')
+      expect(screen.queryByTestId('tooltip-content')).not.toBeInTheDocument()
+
+      const trigger = screen.getByTestId('open-safes-icon')
+      expect(trigger.className).not.toMatch(/cursor-not-allowed/)
+      expect(trigger.className).not.toMatch(/opacity-50/)
     })
   })
 })
