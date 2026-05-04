@@ -6123,6 +6123,10 @@
           "signerAddress": {
             "type": "string",
             "description": "Wallet signer address. Present only for SIWE-authenticated users."
+          },
+          "email": {
+            "type": "string",
+            "description": "Verified email address. Present only for OIDC-authenticated users when stored."
           }
         },
         "required": [
