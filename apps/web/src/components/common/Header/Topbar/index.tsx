@@ -1,8 +1,10 @@
 import type { Dispatch, SetStateAction } from 'react'
 import { useContext, useMemo, useRef, type ReactElement } from 'react'
 import { Menu } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
+import { AppRoutes } from '@/config/routes'
 import { HeaderNavigation } from '@/features/spaces/components/HeaderNavigation'
 import { useLoadFeature } from '@/features/__core__'
 import { WalletFeature, useWalletPopover } from '@/features/wallet'
@@ -54,6 +56,8 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const notifications = useAppSelector(selectNotifications)
   const spaceId = useCurrentSpaceId()
   const isSpaceRoute = useIsSpaceRoute()
+  const pathname = usePathname()
+  const isWelcomeListRoute = pathname === AppRoutes.welcome.accounts || pathname === AppRoutes.welcome.spaces
   const safeAddress = useSafeAddress()
   const isProposer = useIsWalletProposer()
   const isSafeOwner = useIsSafeOwner()
@@ -120,7 +124,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             walletLabel={wallet?.label}
             walletOpen={walletOpen}
             messages={unreadCount}
-            showSearch={!isSpaceRoute}
+            showSearch={!isSpaceRoute && !isWelcomeListRoute}
             onSearchClick={() => dispatch(openGlobalSearch())}
             onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}
             onWalletClick={handleWalletClick}
