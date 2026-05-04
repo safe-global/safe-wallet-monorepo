@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import SpaceNestedSafesButton from './SpaceNestedSafesButton'
 
 const mockStartFiltering = jest.fn()
@@ -189,5 +190,63 @@ describe('SpaceNestedSafesButton', () => {
     const track = screen.getByTestId('track')
     expect(track).toHaveAttribute('data-action', 'Open nested Safe list')
     expect(track).toHaveAttribute('data-label', 'space_safe_bar')
+  })
+
+  describe('disabled while a tx flow is active', () => {
+    const renderWithTxFlow = (txFlow: TxModalContextType['txFlow']) => {
+      const value: TxModalContextType = {
+        txFlow,
+        setTxFlow: jest.fn(),
+        setFullWidth: jest.fn(),
+      }
+      return render(
+        <TxModalContext.Provider value={value}>
+          <SpaceNestedSafesButton />
+        </TxModalContext.Provider>,
+      )
+    }
+
+    it('disables the button when a tx flow is open', () => {
+      renderWithTxFlow(<div data-testid="active-tx-flow" />)
+
+      const button = screen.getByTestId('nested-safes-button')
+      expect(button).toBeDisabled()
+    })
+
+    it('applies the disabled styling to the button when a tx flow is open', () => {
+      renderWithTxFlow(<div data-testid="active-tx-flow" />)
+
+      const button = screen.getByTestId('nested-safes-button')
+      expect(button.className).toMatch(/cursor-not-allowed/)
+      expect(button.className).toMatch(/opacity-50/)
+      expect(button.className).not.toMatch(/cursor-pointer/)
+    })
+
+    it('shows the explanatory tooltip text when a tx flow is open', () => {
+      renderWithTxFlow(<div data-testid="active-tx-flow" />)
+
+      expect(screen.getByText('Nested Safes are not allowed in this screen')).toBeInTheDocument()
+      expect(screen.queryByText('Nested Safes')).not.toBeInTheDocument()
+    })
+
+    it('does not open the popover or call startFiltering when clicked while disabled', () => {
+      renderWithTxFlow(<div data-testid="active-tx-flow" />)
+
+      fireEvent.click(screen.getByTestId('nested-safes-button'))
+
+      expect(mockStartFiltering).not.toHaveBeenCalled()
+      expect(screen.getByTestId('nested-safes-popover')).toHaveAttribute('data-open', 'false')
+    })
+
+    it('renders the original tooltip and remains enabled when no tx flow is active', () => {
+      renderWithTxFlow(undefined)
+
+      const button = screen.getByTestId('nested-safes-button')
+      expect(button).not.toBeDisabled()
+      expect(button.className).not.toMatch(/cursor-not-allowed/)
+      expect(button.className).not.toMatch(/opacity-50/)
+      expect(screen.getByText('Nested Safes')).toBeInTheDocument()
+      expect(screen.queryByText('Nested Safes are not allowed in this screen')).not.toBeInTheDocument()
+    })
   })
 })
