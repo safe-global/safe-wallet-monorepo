@@ -29,7 +29,7 @@ const customNavEvents: Record<
   [AppRoutes.earn]: { event: EARN_EVENTS.OPEN_EARN_PAGE, label: EARN_LABELS.sidebar },
 }
 
-const getBadgeAriaLabel = (label: string, count: number): string =>
+const getBadgeAriaLabel = (label: string, count: number | string): string =>
   `${count} ${label} ${count === 1 ? 'notification' : 'notifications'}`
 
 const SkeletonPulse = ({ className }: { className: string }): ReactElement => (
@@ -108,7 +108,7 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
   return (
     <SidebarMenuItem className="relative">
       {interactive}
-      {item.badge !== undefined && item.badge > 0 && (
+      {!!item.badge && (
         <>
           <span
             className={cn(css.transactionsBadge, item.isActive && css.transactionsBadgeActive)}
