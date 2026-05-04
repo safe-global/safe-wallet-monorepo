@@ -165,7 +165,7 @@ const TxFlowProvider = <T extends unknown>({
   const { safe } = useSafeInfo()
   const isProposer = useIsWalletProposer()
   const chainId = useChainId()
-  const { safeTx, txOrigin } = useContext(SafeTxContext)
+  const { safeTx, txOrigin, gtfPaymentMode } = useContext(SafeTxContext)
   const isCorrectNonce = useValidateNonce(safeTx)
   const { transactionExecution } = useAppSelector(selectSettings)
   const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
@@ -206,7 +206,16 @@ const TxFlowProvider = <T extends unknown>({
   }, [])
 
   const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
-  const gasPaymentSource = isGtfChain && safeTx ? (isGtfSafePaid(safeTx.data) ? 'safe' : 'signing_wallet') : undefined
+  const gasPaymentSource =
+    !isGtfChain || !safeTx
+      ? undefined
+      : safeTx.signatures.size > 0
+        ? isGtfSafePaid(safeTx.data)
+          ? 'safe'
+          : 'signing_wallet'
+        : gtfPaymentMode === 'safe'
+          ? 'safe'
+          : 'signing_wallet'
 
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
