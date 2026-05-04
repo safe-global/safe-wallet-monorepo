@@ -13,6 +13,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import type { SafeWorkspaceHeaderProps, SidebarItemConfig, SpaceItem, SidebarVariantContentProps } from '../../types'
 import { getQuerySpaceId } from '../../utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
+import isNumber from 'lodash/isNumber'
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 
@@ -93,12 +94,15 @@ export const SafeSidebarContent = ({
     })
     return { ...safeDefiGroup, items: filteredItems }
   }, [chain, isBlockedCountry])
-
   // tx queue badge
+
   const mainNavWithBadges = useMemo(() => {
     return visibleMainNavigation.map((item) => {
       if (item.href === AppRoutes.transactions.history) {
-        return { ...item, badge: Number(queueSize) }
+        const parsedQueueSize = Number(queueSize)
+        const badge = !parsedQueueSize ? queueSize : parsedQueueSize
+
+        return { ...item, badge }
       }
       return item
     })
