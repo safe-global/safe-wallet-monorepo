@@ -1,0 +1,1 @@
+export { SpacesEnhancedSidebar } from './SpacesEnhancedSidebar'

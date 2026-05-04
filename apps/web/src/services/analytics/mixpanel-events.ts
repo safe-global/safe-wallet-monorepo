@@ -40,19 +40,36 @@ export enum MixpanelEvent {
   HYPERNATIVE_LOGIN_CLICKED = 'Hypernative Login Clicked',
   HYPERNATIVE_CONNECTED = 'Hypernative Connected',
   FALSE_RESULT_REPORTED = 'False Result Reported',
-  SPACES_ENTRY_VIEWED = 'Spaces Entry Viewed',
-  SPACES_SIWE_SUCCESS = 'Spaces SIWE Success',
-  SPACES_SIWE_FAILURE = 'Spaces SIWE Failure',
-  SPACE_CREATED = 'Space Created',
-  SPACE_INVITE_SENT = 'Space Invite Sent',
-  SPACE_INVITE_ACCEPTED = 'Space Invite Accepted',
-  SPACE_INVITE_DECLINED = 'Space Invite Declined',
+  WORKSPACE_DASHBOARD_VIEWED = 'Workspace Dashboard Viewed',
+  AUTH_LOGIN_SUCCEEDED = 'Auth Login Succeeded',
+  AUTH_LOGIN_FAILED = 'Auth Login Failed',
+  AUTH_LOGGED_OUT = 'Auth Logged Out',
+  WORKSPACE_CREATED = 'Workspace Created',
+  WORKSPACE_MEMBER_INVITE_SENT = 'Workspace Member Invite Sent',
+  WORKSPACE_MEMBER_INVITE_ACCEPTED = 'Workspace Member Invite Accepted',
+  WORKSPACE_MEMBER_ROLE_CHANGED = 'Workspace Member Role Changed',
+  WORKSPACE_MEMBER_REMOVED = 'Workspace Member Removed',
+  WORKSPACE_MEMBER_INVITE_DECLINED = 'Workspace Member Invite Declined',
   SAFE_SELECTED = 'Safe Selected',
   CHAIN_SWITCHED = 'Chain Switched',
+  WORKSPACE_SAFE_LINK_STARTED = 'Workspace Safe Link Started',
+  WORKSPACE_SAFE_LINKED = 'Workspace Safe Linked',
+  WORKSPACE_SAFE_UNLINKED = 'Workspace Safe Unlinked',
   ACCOUNTS_WIDGET_CLICKED = 'Accounts Widget Clicked',
   PENDING_TX_WIDGET_CLICKED = 'Pending TX Widget Clicked',
   WALLET_SWITCHED = 'Wallet Switched',
   WALLET_DISCONNECTED = 'Wallet Disconnected',
+  WORKSPACE_CREATE_STARTED = 'Workspace Create Started',
+  WORKSPACE_SWITCHED = 'Workspace Switched',
+  ADDRESS_BOOK_ENTRY_CREATED = 'Address Book Entry Created',
+  WORKSPACE_TRANSACTION_INITIATED = 'Workspace Transaction Initiated',
+  ONBOARDING_WIZARD = 'Onboarding Wizard',
+}
+
+export enum WorkspaceCreateEntryPoint {
+  WELCOME = 'welcome',
+  EMPTY_STATE = 'empty_state',
+  SIDEBAR = 'sidebar',
 }
 
 export enum MixpanelUserProperty {
@@ -95,10 +112,19 @@ export enum MixpanelEventParams {
   SOURCE = 'Source',
   TRANSACTION_TYPE = 'Transaction Type',
   SPACE_ID = 'Space ID',
+  WORKSPACE_ID = 'Workspace ID',
+  AUTH_METHOD = 'Auth Method',
   FAILURE_REASON = 'Failure Reason',
   CHAIN_ID = 'Chain ID',
   TX_ID = 'TX ID',
   SAFE_SELECTOR_DROPDOWN = 'Safe Selector Dropdown',
+  GAS_PAYMENT_SOURCE = 'Gas Payment Source',
+}
+
+export enum AuthLoginMethod {
+  SIWE = 'siwe',
+  EMAIL_OTP = 'email_otp',
+  EMAIL_GOOGLE = 'email_google',
 }
 
 export enum SafeAppLaunchLocation {

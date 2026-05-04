@@ -18,6 +18,7 @@ import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCandidates'
+import { isGtfSafePaid } from '../utils/isGtfSafePaid'
 
 export type FeeRow = {
   label: string
@@ -25,6 +26,8 @@ export type FeeRow = {
   currency?: string
   fiatAmount?: string
   isFree?: boolean
+  /** When set, replaces the amount/currency/fiat slot with explanatory copy (e.g. "Paid by executor"). */
+  note?: string
 }
 
 export type TotalOutgoing = {
@@ -131,6 +134,14 @@ const computeTotalOutgoing = ({
     }
   }
 
+  // No-op self-call: only outflow is gas. FeesPreview drops this row in Signer mode via its !isSafeWallet check.
+  if (isEmptyData) {
+    return {
+      primary: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
+      fiatTotal: formatCurrency(relayCostUsd, 'usd'),
+    }
+  }
+
   return undefined
 }
 
@@ -152,10 +163,10 @@ export const useFeesPreview = (): FeesPreviewData => {
       }
     : undefined
 
-  // Once the first signer has signed, the gas token is baked into the signed payload — later
-  // signers can't change it, so we skip the candidate probing and just render what's locked in.
+  // Once the first signer has signed, gas params are baked into the payload — later signers
+  // render what's locked in. The isGtfSafePaid guard excludes Signer-pays / pre-GTF queued txs.
   const lockedGasToken = safeTx && safeTx.signatures.size > 0 ? safeTx.data.gasToken : undefined
-  const isConfirmation = lockedGasToken !== undefined
+  const isConfirmation = lockedGasToken !== undefined && !!safeTx && isGtfSafePaid(safeTx.data)
 
   const { candidates, defaultAddress } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
 
@@ -205,9 +216,11 @@ export const useFeesPreview = (): FeesPreviewData => {
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
+  const isSignerMode = !isConfirmation && gtfPaymentMode === 'signer'
+
   // Confirmers render the fee locked in the signed payload, not a fresh CGW quote.
   const preview = useGetGtfFeePreviewQuery(
-    !isConfirmation && txPayload && chain?.chainId && safeAddress && safe.threshold > 0
+    !isConfirmation && !isSignerMode && txPayload && chain?.chainId && safeAddress && safe.threshold > 0
       ? {
           chainId: chain.chainId,
           safeAddress,
@@ -261,6 +274,48 @@ export const useFeesPreview = (): FeesPreviewData => {
       },
       totalOutgoing,
       loading: false,
+      error: false,
+    }
+  }
+
+  if (isSignerMode) {
+    // Multi-signer can't simulate execTransaction at sign time — executor unknown, signatures
+    // incomplete — so we surface an explanatory note instead of a fake number.
+    if (safe.threshold > 1) {
+      return {
+        ...base,
+        canCoverFees: true,
+        gasFee: { label: 'Gas fee', note: 'Paid by executor' },
+        loading: false,
+        error: false,
+      }
+    }
+
+    const localGasWei = gasLimit && gasPrice?.maxFeePerGas ? gasLimit * gasPrice.maxFeePerGas : 0n
+    const totalOutgoing = safeTx
+      ? computeTotalOutgoing({
+          safeTx,
+          gasWei: localGasWei,
+          relayCostUsd: 0,
+          nativeSymbol,
+          nativeDecimals,
+          gasTokenAddress: ZERO_ADDRESS,
+          gasSymbol: nativeSymbol,
+          gasDecimals: nativeDecimals,
+          balances,
+        })
+      : undefined
+
+    return {
+      ...base,
+      canCoverFees: true,
+      gasFee: {
+        label: 'Gas fee',
+        amount: getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain),
+        currency: nativeSymbol,
+      },
+      totalOutgoing,
+      loading: !safeTx || gasLimitLoading || gasPriceLoading,
       error: false,
     }
   }

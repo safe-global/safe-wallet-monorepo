@@ -1,0 +1,33 @@
+.indexingStatusButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--rounded-md, 8px);
+  background-color: var(--secondary);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.indexingStatusButton:hover {
+  background-color: color-mix(in srgb, var(--secondary) 80%, var(--foreground) 10%);
+}
+
+.indexingStatusButton[data-status='synced'] {
+  color: var(--color-success-main);
+}
+
+.indexingStatusButton[data-status='slow'] {
+  color: var(--color-warning-main);
+}
+
+.indexingStatusButton[data-status='outOfSync'] {
+  color: var(--color-error-main);
+}
+
+.indexingStatusIcon {
+  width: 15px;
+  height: 15px;
+}

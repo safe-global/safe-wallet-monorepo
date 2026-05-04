@@ -23,7 +23,7 @@
   z-index: 2;
   width: 100%;
   position: sticky !important;
-  top: var(--header-height);
+  top: 0;
   padding: 0 var(--space-3);
 }
 

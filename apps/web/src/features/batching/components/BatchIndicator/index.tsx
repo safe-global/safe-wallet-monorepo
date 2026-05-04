@@ -5,6 +5,10 @@ import Track from '@/components/common/Track'
 import { BATCH_EVENTS } from '@/services/analytics'
 import BatchTooltip from './BatchTooltip'
 
+/**
+ * @deprecated Used only by the legacy MUI Header (`components/common/Header/index.tsx`).
+ * Remove this entire directory once the Header migration to TopBar is complete.
+ */
 const BatchIndicator = ({ onClick }: { onClick?: () => void }) => {
   const { length } = useDraftBatch()
 

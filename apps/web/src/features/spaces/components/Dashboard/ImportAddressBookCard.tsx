@@ -20,7 +20,7 @@ const AddressBookCard = () => {
 
   return (
     <>
-      <Paper sx={{ p: 3, borderRadius: '12px', height: '100%' }}>
+      <Paper sx={{ p: 3, borderRadius: '24px', height: '100%' }}>
         <Box position="relative" width={1}>
           <Box className={classnames(css.iconBG, css.iconBGBlue)}>
             <SvgIcon component={AddressBookIcon} inheritViewBox color="info" />

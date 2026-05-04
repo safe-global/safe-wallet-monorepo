@@ -13,6 +13,7 @@ import useBalances from '@/hooks/useBalances'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { Errors, logError } from '@/services/exceptions'
 import type { FeeRow } from './useFeesPreview'
+import { isGtfSafePaid } from '../utils/isGtfSafePaid'
 
 export type HistoryFeesData = {
   totalFee: { amount: string; currency: string; fiatAmount?: string }
@@ -58,13 +59,7 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   const refundReceiver = exec?.refundReceiver?.value
   const { txHash, executedAt } = txDetails
 
-  const isSafePaid =
-    !!gasPrice &&
-    !!baseGas &&
-    !!refundReceiver &&
-    BigInt(gasPrice) > 0n &&
-    BigInt(baseGas) > 0n &&
-    !sameAddress(refundReceiver, ZERO_ADDRESS)
+  const isSafePaid = isGtfSafePaid({ gasPrice, baseGas, refundReceiver })
 
   // Pick the relevant fiat rate as a scalar. Balances polls return a new object reference,
   // but the per-token conversion string stays the same unless the price actually moves.

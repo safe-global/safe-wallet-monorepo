@@ -1,26 +1,45 @@
 import type { Dispatch, SetStateAction } from 'react'
-import { useMemo, useRef, type ReactElement } from 'react'
+import { useContext, useMemo, useRef, type ReactElement } from 'react'
 import { Menu } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { HeaderNavigation } from '@/features/spaces/components/HeaderNavigation'
 import { useLoadFeature } from '@/features/__core__'
 import { WalletFeature, useWalletPopover } from '@/features/wallet'
-import { useIsMobile } from '@/hooks/use-mobile'
-import { useAppSelector } from '@/store'
+import { GlobalSearchFeature } from '@/features/global-search'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useDraftBatch } from '@/features/batching'
+import { useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
+import { openGlobalSearch } from '@/features/global-search/store/globalSearchSlice'
+import useSafeAddress from '@/hooks/useSafeAddress'
+import useIsSafeOwner from '@/hooks/useIsSafeOwner'
+import { useIsWalletProposer } from '@/hooks/useProposers'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import NotificationsPopover, { type NotificationsPopoverRef } from './NotificationsPopover'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import SpaceSafeBar from '@/components/common/SpaceSafeBar'
+import SafenetStakingButton from './SafenetStakingButton'
+import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
+import { TxModalContext } from '@/components/tx-flow'
 
 interface TopbarProps {
   /** When provided, shows a menu button on mobile to open the sidebar */
   onMenuToggle?: Dispatch<SetStateAction<boolean>>
+  /** When provided, toggles the batch sidebar (Safe routes only) */
+  onBatchToggle?: Dispatch<SetStateAction<boolean>>
 }
 
-const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
-  const isMobile = useIsMobile()
+const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
+  const dispatch = useAppDispatch()
+  const { breakpoints } = useTheme()
+  // Below `md` the sidebar is closed and rendered as an overlay,
+  // so the burger needs to appear on the same range to keep it reachable.
+  const isBelowMd = useMediaQuery(breakpoints.down('md'))
   const {
     wallet,
     open: walletOpen,
@@ -29,9 +48,25 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
     handleClose: handleWalletClose,
   } = useWalletPopover()
   const { WalletPopover } = useLoadFeature(WalletFeature)
+  const { GlobalSearchModal, GlobalSearchInput } = useLoadFeature(GlobalSearchFeature)
+  const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const notificationsRef = useRef<NotificationsPopoverRef>(null)
   const notifications = useAppSelector(selectNotifications)
   const spaceId = useCurrentSpaceId()
+  const isSpaceRoute = useIsSpaceRoute()
+  const safeAddress = useSafeAddress()
+  const isProposer = useIsWalletProposer()
+  const isSafeOwner = useIsSafeOwner()
+  const draftBatch = useDraftBatch()
+  const showSafeToken = useSafeTokenEnabled()
+  const { txFlow } = useContext(TxModalContext)
+
+  // On space routes we show the global search input by default, but when a transaction
+  // modal is open (e.g. Send via the Actions Tray) the URL keeps the space pathname —
+  // swap in the SpaceSafeBar so the user can see the Safe they're transacting against.
+  const showSpaceSafeBar = !isSpaceRoute || Boolean(txFlow)
+
+  const showBatchButton = Boolean(safeAddress && (!isProposer || isSafeOwner))
 
   const handleWalletSwitch = () => {
     if (!spaceId) return
@@ -42,13 +77,16 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
     if (!spaceId) return
     trackEvent({ ...SPACE_EVENTS.WALLET_DISCONNECTED, label: spaceId }, { spaceId })
   }
+
   const unreadCount = useMemo(() => notifications.filter(({ isRead }) => !isRead).length, [notifications])
-  const showMenuButton = Boolean(onMenuToggle && isMobile)
+  const showMenuButton = Boolean(onMenuToggle && isBelowMd)
 
   return (
     <>
       <header
-        className={`flex items-center p-6 pb-0 bg-secondary -mb-10 dark:bg-background ${showMenuButton ? 'justify-between pl-2' : 'justify-end'}`}
+        className={`flex flex-wrap items-start gap-y-2 px-6 py-4 bg-secondary dark:bg-background ${
+          showMenuButton ? 'justify-between pl-2' : 'justify-between'
+        }`}
       >
         {showMenuButton ? (
           <Button
@@ -60,13 +98,41 @@ const Topbar = ({ onMenuToggle }: TopbarProps): ReactElement => {
             <Menu className="size-5" />
           </Button>
         ) : null}
-        <HeaderNavigation
-          walletAddress={wallet?.address ?? ''}
-          messages={unreadCount}
-          onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}
-          onWalletClick={handleWalletClick}
-        />
+
+        {/* Left content: SpaceSafeBar must not shrink so its children stay on one line */}
+        <div className="shrink-0 max-md:order-last flex items-center max-md:basis-full max-md:mt-2">
+          {showSpaceSafeBar ? <SpaceSafeBar /> : <GlobalSearchInput className="w-64 md:w-80" />}
+        </div>
+
+        {/* Right content: navigation buttons — wraps to next row when viewport is narrow */}
+        <div className="flex items-center gap-1 shrink-0">
+          {showSafeToken && (
+            <div className="hidden sm:block">
+              <SafenetStakingButton />
+            </div>
+          )}
+
+          <HeaderNavigation
+            walletAddress={wallet?.address ?? ''}
+            walletEns={wallet?.ens}
+            isConnected={Boolean(wallet)}
+            walletIcon={wallet?.icon}
+            walletLabel={wallet?.label}
+            walletOpen={walletOpen}
+            messages={unreadCount}
+            showSearch={!isSpaceRoute}
+            onSearchClick={() => dispatch(openGlobalSearch())}
+            onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}
+            onWalletClick={handleWalletClick}
+            walletConnectSlot={<WalletConnectWidget />}
+            showBatch={!isSpaceRoute && showBatchButton}
+            batchCount={draftBatch.length}
+            onBatchClick={() => onBatchToggle?.((open) => !open)}
+          />
+        </div>
       </header>
+
+      <GlobalSearchModal />
 
       <NotificationsPopover ref={notificationsRef} />
 

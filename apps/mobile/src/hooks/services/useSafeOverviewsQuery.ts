@@ -1,12 +1,5 @@
 import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
-
-type OverviewQueryArgs = {
-  safes: string[]
-  currency: string
-  trusted?: boolean
-  excludeSpam?: boolean
-  walletAddress?: string
-}
+import { normalizeOverviewArgs, type OverviewQueryArgs } from './overviewQueryArgs'
 
 type OverviewQueryOptions = {
   skip?: boolean
@@ -15,9 +8,8 @@ type OverviewQueryOptions = {
 
 export function useSafeOverviewsQuery(args: OverviewQueryArgs, options?: OverviewQueryOptions) {
   const skip = options?.skip || args.safes.length === 0
-  const normalizedArgs = { ...args, currency: args.currency.toUpperCase() }
 
-  const result = useSafesGetOverviewForManyQuery(normalizedArgs, {
+  const result = useSafesGetOverviewForManyQuery(normalizeOverviewArgs(args), {
     skip,
     pollingInterval: options?.pollingInterval,
   })

@@ -7,6 +7,8 @@ import { cn } from '@/utils/cn'
 import { LogOut, User } from 'lucide-react'
 import { useCurrentMemberProfile, MemberStatus } from '@/features/spaces'
 import useLogout from '@/hooks/useLogout'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import InitialsAvatar from '../InitialsAvatar'
 import css from './styles.module.css'
@@ -106,5 +108,10 @@ export const SidebarProfileSection = (): ReactElement | null => {
   const displayName = signerAddress ? shortenAddress(signerAddress) : memberName
   const role = membership.role.toLowerCase()
 
-  return <SidebarProfileView memberName={memberName} displayName={displayName} role={role} onSignOut={logout} />
+  const handleSignOut = () => {
+    trackEvent(SPACE_EVENTS.AUTH_LOGGED_OUT, { timestamp: new Date().toISOString() })
+    logout()
+  }
+
+  return <SidebarProfileView memberName={memberName} displayName={displayName} role={role} onSignOut={handleSignOut} />
 }

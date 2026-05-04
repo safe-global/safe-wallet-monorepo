@@ -1,3 +1,7 @@
+/**
+ * @deprecated Tests for legacy MUI Header. Remove together with Header/index.tsx
+ * once the Header migration to TopBar is complete.
+ */
 import Header, { getLogoLink } from '@/components/common/Header/index'
 import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import * as useProposers from '@/hooks/useProposers'

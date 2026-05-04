@@ -1,14 +1,20 @@
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import type { SafeTransaction } from '@safe-global/types-kit'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 /**
- * True when the SafeTx carries GTF fee fields that would trigger `Safe.handlePayment()` on-chain.
- * Structural fingerprint of Safe-pays — catches any tx that will transfer a real payment out of
- * the Safe on execution. If true, execution must go via the intended relayer, otherwise the
- * signer pays network gas AND the Safe pays the fee (double-charge).
+ * True when the SafeTx carries GTF fee fields that trigger `Safe.handlePayment()` on-chain —
+ * i.e. a real Safe-pays payment. Accepts both full `SafeTransaction['data']` and loose CGW
+ * history scalars; missing/zero values short-circuit to false.
  */
-export const isGtfSafePaid = (safeTxData: SafeTransaction['data']): boolean => {
-  return (
-    BigInt(safeTxData.gasPrice) > 0n && BigInt(safeTxData.baseGas) > 0n && safeTxData.refundReceiver !== ZERO_ADDRESS
-  )
+export const isGtfSafePaid = ({
+  gasPrice,
+  baseGas,
+  refundReceiver,
+}: {
+  gasPrice?: string | bigint | null
+  baseGas?: string | bigint | null
+  refundReceiver?: string | null
+}): boolean => {
+  if (!gasPrice || !baseGas || !refundReceiver) return false
+  return BigInt(gasPrice) > 0n && BigInt(baseGas) > 0n && !sameAddress(refundReceiver, ZERO_ADDRESS)
 }

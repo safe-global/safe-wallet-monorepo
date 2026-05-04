@@ -32,3 +32,19 @@ export * from './orderByPreferenceSlice'
 export * from './authSlice'
 export * from '@/features/hypernative/store'
 export * from '@/features/gtf/store'
+export {
+  globalSearchSlice,
+  openGlobalSearch,
+  closeGlobalSearch,
+  toggleGlobalSearch,
+  selectGlobalSearchOpen,
+} from '@/features/global-search/store'
+export {
+  safeActionsModalSlice,
+  ESafeAction,
+  openSafeActionsModal,
+  closeSafeActionsModal,
+  selectSafeActionsModal,
+  selectSafeActionsModalOpen,
+  selectSafeActionsModalType,
+} from '@/features/spaces/store'

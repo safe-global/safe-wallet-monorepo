@@ -30,6 +30,9 @@ import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import useTxDetails from '@/hooks/useTxDetails'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { isGtfSafePaid } from '@/features/gtf/utils/isGtfSafePaid'
 
 export type TxFlowContextType<T extends unknown = any> = {
   step: number
@@ -162,7 +165,7 @@ const TxFlowProvider = <T extends unknown>({
   const { safe } = useSafeInfo()
   const isProposer = useIsWalletProposer()
   const chainId = useChainId()
-  const { safeTx, txOrigin } = useContext(SafeTxContext)
+  const { safeTx, txOrigin, gtfPaymentMode } = useContext(SafeTxContext)
   const isCorrectNonce = useValidateNonce(safeTx)
   const { transactionExecution } = useAppSelector(selectSettings)
   const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
@@ -202,6 +205,18 @@ const TxFlowProvider = <T extends unknown>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+  const gasPaymentSource =
+    !isGtfChain || !safeTx
+      ? undefined
+      : safeTx.signatures.size > 0
+        ? isGtfSafePaid(safeTx.data)
+          ? 'safe'
+          : 'signing_wallet'
+        : gtfPaymentMode === 'safe'
+          ? 'safe'
+          : 'signing_wallet'
+
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
       const { data: details } = await trigger({ chainId, id: txId })
@@ -218,9 +233,10 @@ const TxFlowProvider = <T extends unknown>({
         txOrigin,
         isMassPayout,
         safe.threshold,
+        gasPaymentSource,
       )
     },
-    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, data, safe.threshold],
+    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, data, safe.threshold, gasPaymentSource],
   )
 
   const value = {

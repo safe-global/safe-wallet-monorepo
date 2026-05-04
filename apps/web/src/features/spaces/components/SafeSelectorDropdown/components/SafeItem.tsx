@@ -14,7 +14,7 @@ const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading
   const resolvedName = useSafeDisplayName(address, chainId, name)
 
   return (
-    <div className={cn('flex items-center gap-3 w-full', isNested && 'pl-8')}>
+    <div className={cn('flex items-center gap-3 w-full', isNested && 'pl-8')} data-testid="multichain-item-summary">
       <SafeInfoDisplay
         name={resolvedName}
         address={address}

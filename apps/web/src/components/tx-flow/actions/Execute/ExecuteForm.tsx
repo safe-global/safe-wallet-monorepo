@@ -1,7 +1,7 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useState, useEffect } from 'react'
-import { Box, CardActions, Divider, Tooltip } from '@mui/material'
+import { Box, Button, CardActions, Divider, Tooltip } from '@mui/material'
 import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
@@ -79,25 +79,18 @@ export const ExecuteForm = ({
   const gasTooHigh = useGasTooHigh(safeTx)
 
   // GTF Safe-pays must go via Gelato — WALLET execution would double-charge (network gas + Safe fee).
-  const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const { gtfPaymentMode, gtfSelectedGasToken, setGtfPaymentMode, setGtfSelectedGasToken } = useContext(SafeTxContext)
   const requiresRelay = (safeTx && isGtfSafePaid(safeTx.data)) || (gtfPaymentMode === 'safe' && !!gtfSelectedGasToken)
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
 
+  const noFeeCampaignEligible = isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress
+
   // Safe-pays bypasses the no-fee campaign and the daily relay quota (Safe funds its own relay).
-  const canRelay =
-    walletCanRelay &&
-    (requiresRelay || ((!isNoFeeCampaign || !isNoFeeCampaignEnabled) && hasRemainingRelays(relays[0])))
-  const canNoFeeCampaign =
-    !requiresRelay &&
-    isNoFeeCampaignEnabled &&
-    isNoFeeCampaign &&
-    !blockedAddress &&
-    !gasTooHigh &&
-    !!remaining &&
-    remaining > 0
-  const isLimitReached = isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && remaining === 0
+  const canRelay = walletCanRelay && (requiresRelay || (!noFeeCampaignEligible && hasRemainingRelays(relays[0])))
+  const canNoFeeCampaign = !requiresRelay && noFeeCampaignEligible && !gasTooHigh && !!remaining && remaining > 0
+  const isLimitReached = noFeeCampaignEligible && remaining === 0
 
   useEffect(() => {
     if (requiresRelay) {
@@ -242,8 +235,19 @@ export const ExecuteForm = ({
           </ErrorMessage>
         ) : relayUnavailableForGtf ? (
           <ErrorMessage>
-            Safe-paid fees require Gelato relay, which is currently unavailable. Cancel and retry this transaction, or
-            wait for relay quota to reset.
+            Safe-paid fees require Gelato relay, which is currently unavailable.
+            <Box sx={{ mt: 1 }}>
+              <Button
+                size="small"
+                variant="contained"
+                onClick={() => {
+                  setGtfPaymentMode('signer')
+                  setGtfSelectedGasToken(undefined)
+                }}
+              >
+                Switch to Signer
+              </Button>
+            </Box>
           </ErrorMessage>
         ) : !walletCanPay && !willRelay && !willNoFeeCampaign ? (
           <ErrorMessage level="info">

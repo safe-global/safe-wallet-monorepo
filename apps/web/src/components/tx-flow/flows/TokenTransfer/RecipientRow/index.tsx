@@ -45,8 +45,6 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
     formState: { errors },
     trigger,
     watch,
-    setError,
-    clearErrors,
   } = useFormContext<MultiTokenTransferParams>()
 
   const { setNonceNeeded } = useContext(SafeTxContext)
@@ -82,36 +80,20 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
   const isGtfEnabled = useHasFeature(FEATURES.GTF)
   const [maxPressed, setMaxPressed] = useState(false)
 
-  const amountFieldName = getFieldName(TokenTransferFields.amount, fieldArray)
-
+  // Probe only after Max click — eager probing on every edit wastes network for the common case.
   const previewTx = useMemo<FeePreviewTx | undefined>(() => {
-    if (!isGtfEnabled || !isAddressValid || !selectedToken) return undefined
-
-    // Probe with a fixed 1-atomic-unit amount — gas cost is largely value-independent for
-    // transfers, so this keeps the probe stable across amount-field keystrokes.
+    if (!isGtfEnabled || !maxPressed || !isAddressValid || !selectedToken) return undefined
     const params = createTokenTransferParams(recipient, '1', selectedToken.tokenInfo.decimals, tokenAddress)
     return { ...params, operation: OperationType.Call }
-  }, [isGtfEnabled, isAddressValid, recipient, selectedToken, tokenAddress])
+  }, [isGtfEnabled, maxPressed, isAddressValid, recipient, selectedToken, tokenAddress])
 
   const resolution = useResolvedGasToken(isGtfEnabled ? tokenAddress : undefined, previewTx)
-  const isBlocked = resolution.status === 'blocked'
   const sentTokenIsFeeToken = resolution.status === 'resolved' && sameAddress(tokenAddress, resolution.address)
 
   // Reset banner when token changes
   useEffect(() => {
     setMaxPressed(false)
   }, [tokenAddress])
-
-  // When the sent token can't pay gas (and no other held token can either), mark the row invalid
-  // so the form-level Continue button (which gates on formState.isValid) becomes disabled.
-  useEffect(() => {
-    if (isBlocked) {
-      setError(amountFieldName, { type: 'gtfBlocked' })
-    } else {
-      const existing = get(errors, amountFieldName)
-      if (existing?.type === 'gtfBlocked') clearErrors(amountFieldName)
-    }
-  }, [isBlocked, amountFieldName, setError, clearErrors, errors, selectedToken?.tokenInfo.symbol])
 
   const showFeeBanner = !!isGtfEnabled && !isSpendingLimitType && maxPressed && sentTokenIsFeeToken
 
@@ -155,13 +137,6 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
           >
             Your max send amount accounts for fees paid in {selectedToken?.tokenInfo.symbol}. This updates if fees
             change.
-          </Alert>
-        )}
-
-        {isBlocked && !isSpendingLimitType && (
-          <Alert severity="error" data-testid="gtf-block-banner">
-            Fees can&apos;t be paid in {selectedToken?.tokenInfo.symbol ?? 'this token'} on this Safe. Add ETH to your
-            Safe or send a different asset.
           </Alert>
         )}
 

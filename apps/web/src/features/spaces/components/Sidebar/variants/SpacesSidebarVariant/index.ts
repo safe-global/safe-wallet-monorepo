@@ -1,0 +1,1 @@
+export { SpacesSidebarVariant } from './SpacesSidebarVariant'

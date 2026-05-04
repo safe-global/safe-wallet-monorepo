@@ -48,4 +48,15 @@ describe('isGtfSafePaid', () => {
   it('accepts a non-Gelato refundReceiver — check is structural, not address-specific', () => {
     expect(isGtfSafePaid({ ...baseData, refundReceiver: '0x7811208e0811341ce4E56471aEF0c1C78d83c74b' })).toBe(true)
   })
+
+  it('returns false on missing scalars (loose CGW-shaped input)', () => {
+    expect(isGtfSafePaid({ gasPrice: undefined, baseGas: '1', refundReceiver: GELATO })).toBe(false)
+    expect(isGtfSafePaid({ gasPrice: '1', baseGas: undefined, refundReceiver: GELATO })).toBe(false)
+    expect(isGtfSafePaid({ gasPrice: '1', baseGas: '1', refundReceiver: undefined })).toBe(false)
+    expect(isGtfSafePaid({ gasPrice: null, baseGas: null, refundReceiver: null })).toBe(false)
+  })
+
+  it('treats lowercase zero-address as zero (case-insensitive via sameAddress)', () => {
+    expect(isGtfSafePaid({ ...baseData, refundReceiver: ZERO_ADDRESS.toLowerCase() })).toBe(false)
+  })
 })

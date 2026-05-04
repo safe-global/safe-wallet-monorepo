@@ -215,7 +215,7 @@ export function clickOnAddBtn() {
 }
 
 export function veriySidebarSafeNameIsVisible(safeName) {
-  cy.get('aside').contains(safeName).should('be.visible')
+  cy.get('[data-testid="safe-selector-trigger-name"]').should('contain.text', safeName)
 }
 
 export function verifyOwnerNamePresentInSettings(ownername) {

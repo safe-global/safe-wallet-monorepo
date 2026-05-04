@@ -78,12 +78,6 @@ export function generateCSSVars(): string {
       light: '#D3F2E4',
       background: '#EFFAF1',
     },
-    info: {
-      dark: '#52BFDC',
-      main: '#5FDDFF',
-      light: '#D7F6FF',
-      background: '#EFFCFF',
-    },
     warning: {
       dark: '#C04C32',
       main: '#FF8061',
@@ -105,12 +99,6 @@ export function generateCSSVars(): string {
       main: '#00B460',
       light: '#81C784',
       background: '#1F2920',
-    },
-    info: {
-      dark: '#52BFDC',
-      main: '#5FDDFF',
-      light: '#B7F0FF',
-      background: '#19252C',
     },
     warning: {
       dark: '#C04C32',

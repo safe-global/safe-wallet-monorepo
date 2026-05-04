@@ -42,7 +42,7 @@ describe('resolveFeeParams', () => {
       baseGas: '48564',
       gasPrice: '195000000000000',
       gasToken: '0xa0b86991000000000000000000000000000000aa',
-      refundReceiver: '0xgelatofeecollector000000000000000000bbbb',
+      refundReceiver: '0xc918e75504D1B0c741Eb4236B72Dae7A52401E95',
       numberSignatures: 3,
     },
     relayCostUsd: 38.22,
@@ -93,11 +93,33 @@ describe('resolveFeeParams', () => {
         baseGas: '48564',
         gasPrice: '195000000000000',
         gasToken: '0xa0b86991000000000000000000000000000000aa',
-        refundReceiver: '0xgelatofeecollector000000000000000000bbbb',
+        refundReceiver: '0xc918e75504D1B0c741Eb4236B72Dae7A52401E95',
       }),
       safeTx.data.nonce,
     )
     expect(result).toBe(mergedTx)
+  })
+
+  it('throws when CGW returns an unknown refundReceiver (defense-in-depth)', async () => {
+    const tampered = {
+      ...previewResponse,
+      txData: { ...previewResponse.txData, refundReceiver: '0xattacker0000000000000000000000000000aaaa' },
+    }
+    mockInitiate.mockReturnValue({ kind: 'thunk' })
+    const dispatch = buildDispatch(buildThunk(Promise.resolve(tampered)))
+
+    await expect(
+      resolveFeeParams({
+        chainId: '1',
+        safeAddress: '0xsafe',
+        safeTx,
+        gasToken: '0xa0b86991000000000000000000000000000000aa',
+        numberSignatures: 3,
+        dispatch,
+      }),
+    ).rejects.toThrow(/untrusted refundReceiver/)
+
+    expect(mockCreateTx).not.toHaveBeenCalled()
   })
 
   it('propagates errors from the preview dispatch', async () => {

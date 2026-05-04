@@ -1,8 +1,10 @@
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 import { createTx } from '@/services/tx/tx-sender'
 import { gatewayApi } from '@/store/api/gateway'
 import type { AppDispatch } from '@/store'
+import { GELATO_FEE_COLLECTORS } from '../constants'
 
 export type ResolveFeeParamsArgs = {
   chainId: string
@@ -40,6 +42,10 @@ export const resolveFeeParams = async ({
   ).unwrap()
 
   const { safeTxGas, baseGas, gasPrice, gasToken: resolvedGasToken, refundReceiver } = preview.txData
+
+  if (!GELATO_FEE_COLLECTORS.some((addr) => sameAddress(addr, refundReceiver))) {
+    throw new Error(`Refusing to sign: untrusted refundReceiver ${refundReceiver} returned by CGW.`)
+  }
 
   return createTx(
     {

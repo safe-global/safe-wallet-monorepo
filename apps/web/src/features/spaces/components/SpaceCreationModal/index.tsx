@@ -1,4 +1,4 @@
-import { useSpacesCreateWithUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useSpacesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useRouter } from 'next/router'
 import { type ReactElement, useState } from 'react'
 import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, SvgIcon, Typography } from '@mui/material'
@@ -19,7 +19,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
   const router = useRouter()
   const dispatch = useAppDispatch()
   const methods = useForm<{ name: string }>({ mode: 'onChange' })
-  const [createSpaceWithUser] = useSpacesCreateWithUserV1Mutation()
+  const [createSpaceWithUser] = useSpacesCreateV1Mutation()
   const { handleSubmit, formState } = methods
 
   const onSubmit = handleSubmit(async (data) => {
@@ -31,7 +31,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
 
       if (response.data) {
         const spaceId = response.data.id.toString()
-        trackEvent({ ...SPACE_EVENTS.CREATE_SPACE, label: spaceId }, { spaceId })
+        trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: spaceId }, { workspace_id: spaceId })
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
         onClose()
 
