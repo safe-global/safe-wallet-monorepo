@@ -55,6 +55,10 @@ function SafeSelectorDropdown({
 
   if (!selectedItem || !mounted) {
     if (isError && mounted) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
+    // Mismatch (loaded, but no item for selectedItemId). No retry: refetch can't fix it.
+    if (mounted && !isLoading && items.length > 0) {
+      return <InlineRetryError message="This Safe is not available on the selected network" />
+    }
     return <SafeSelectorDropdownSkeleton />
   }
 
