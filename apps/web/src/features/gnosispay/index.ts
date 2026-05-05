@@ -1,3 +1,5 @@
 export { useIsGnosisPayOwner } from './hooks/useIsGnosisPayOwner'
+export { useIsGnosisPaySafe } from './hooks/useIsGnosisPaySafe'
+export { useGnosisPayDelayModule } from './hooks/useGnosisPayDelayModule'
 export { useGnosisPayDelayModifier } from './hooks/useGnosisPayDelayModifier'
 export { useGnosisPayActions } from './hooks/useGnosisPayActions'

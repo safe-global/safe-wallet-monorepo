@@ -6,7 +6,7 @@ import { isDelegateCall as checkIsDelegateCall } from '@/services/tx/tx-sender/s
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
-import { useIsGnosisPayOwner } from '@/features/gnosispay'
+import { useIsGnosisPaySafe } from '@/features/gnosispay'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { Errors, logError } from '@/services/exceptions'
@@ -85,7 +85,7 @@ const Batching = ({
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const [isGnosisPayOwner] = useIsGnosisPayOwner()
+  const [isGnosisPaySafe] = useIsGnosisPaySafe()
   const { isBatch, isProposing, willExecuteThroughRole, isCreation, isBatchable, data } = useContext(TxFlowContext)
   const isOwner = useIsSafeOwner()
   const { safeTx } = useContext(SafeTxContext)
@@ -100,7 +100,7 @@ const useShouldRegisterSlot = () => {
     isCreation &&
     !isBatch &&
     !isCounterfactualSafe &&
-    !isGnosisPayOwner &&
+    !isGnosisPaySafe &&
     !willExecuteThroughRole &&
     !isProposing &&
     (!isDelegateCall || (isMultiSend && isFromTxBuilder)) &&

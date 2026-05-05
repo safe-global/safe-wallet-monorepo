@@ -2,7 +2,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
 import GnosisPayExecutionForm from '@/features/gnosispay/GnosisPayExecutionForm'
-import { useIsGnosisPayOwner } from '@/features/gnosispay'
+import { useIsGnosisPaySafe } from '@/features/gnosispay'
 import { type SlotComponentProps, SlotName, withSlot } from '../slots'
 
 const GnosisPay = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>) => {
@@ -21,10 +21,10 @@ const GnosisPay = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>) => 
 }
 
 const useShouldRegisterSlot = () => {
-  const [isGnosisPayOwner] = useIsGnosisPayOwner()
+  const [isGnosisPaySafe] = useIsGnosisPaySafe()
   const { isProposing } = useContext(TxFlowContext)
 
-  return Boolean(isGnosisPayOwner) && !isProposing
+  return Boolean(isGnosisPaySafe) && !isProposing
 }
 
 const GnosisPaySlot = withSlot({

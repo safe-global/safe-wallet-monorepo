@@ -1,15 +1,13 @@
-import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector } from '@/store'
 import GnosisPayQueueItemSummary from './GnosisPayQueueItemSummary'
 import { selectQueuedGnosisPayTransactions } from '@/store/gnosisPayTxsSlice'
 import { useMemo } from 'react'
 import { TxListGrid } from '@/components/transactions/TxList'
-
-const GNOSIS_CHAIN_ID = '100'
+import { useIsGnosisPaySafe } from './hooks/useIsGnosisPaySafe'
 
 export const GnosisPayQueue = () => {
-  const chain = useCurrentChain()
+  const [isGnosisPaySafe] = useIsGnosisPaySafe()
 
   const { safe } = useSafeInfo()
 
@@ -21,7 +19,7 @@ export const GnosisPayQueue = () => {
     })
   }, [safeQueue])
 
-  if (chain?.chainId !== GNOSIS_CHAIN_ID || safeQueue.length === 0) {
+  if (!isGnosisPaySafe || safeQueue.length === 0) {
     return null
   }
 

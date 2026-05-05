@@ -18,10 +18,14 @@ process.env.TZ = 'UTC'
 const gnosisPayHooksMock = {
   __esModule: true,
   useIsGnosisPayOwner: () => [false, undefined, false],
+  useIsGnosisPaySafe: () => [false, undefined, false],
+  useGnosisPayDelayModule: () => [undefined, undefined, false],
   useGnosisPayDelayModifier: () => [undefined, undefined, false],
   useGnosisPayActions: () => ({ enqueueTx: () => undefined, executeTx: () => undefined }),
 }
 jest.mock('@/features/gnosispay/hooks/useIsGnosisPayOwner', () => gnosisPayHooksMock)
+jest.mock('@/features/gnosispay/hooks/useIsGnosisPaySafe', () => gnosisPayHooksMock)
+jest.mock('@/features/gnosispay/hooks/useGnosisPayDelayModule', () => gnosisPayHooksMock)
 jest.mock('@/features/gnosispay', () => gnosisPayHooksMock)
 
 jest.mock('@web3-onboard/coinbase', () => jest.fn())

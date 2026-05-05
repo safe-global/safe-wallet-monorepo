@@ -3,7 +3,7 @@ import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import SignForm from './SignForm'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
-import { useIsGnosisPayOwner } from '@/features/gnosispay'
+import { useIsGnosisPaySafe } from '@/features/gnosispay'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 import type { SubmitCallback } from '../../TxFlow'
 import { useAlreadySigned } from '@/components/tx/shared/hooks'
@@ -43,7 +43,7 @@ const useShouldRegisterSlot = () => {
   const { isProposing, willExecuteThroughRole } = useContext(TxFlowContext)
   const { safeTx } = useContext(SafeTxContext)
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const [isGnosisPayOwner] = useIsGnosisPayOwner()
+  const [isGnosisPaySafe] = useIsGnosisPaySafe()
   const hasSigned = useAlreadySigned(safeTx)
   const { safe } = useSafeInfo()
 
@@ -54,7 +54,7 @@ const useShouldRegisterSlot = () => {
     !hasSigned &&
     !isFullySigned &&
     !isCounterfactualSafe &&
-    !isGnosisPayOwner &&
+    !isGnosisPaySafe &&
     !willExecuteThroughRole &&
     !isProposing
   )
