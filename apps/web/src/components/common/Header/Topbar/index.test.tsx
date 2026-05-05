@@ -50,6 +50,11 @@ jest.mock('@/hooks/useSafeAddress', () => ({
   default: () => '',
 }))
 
+const mockUseSafeAddressFromUrl = jest.fn<string, []>(() => '')
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
+}))
+
 jest.mock('@/hooks/useIsSafeOwner', () => ({
   __esModule: true,
   default: () => false,
@@ -129,6 +134,7 @@ describe('Topbar', () => {
     mockUseIsMobile.mockReturnValue(false)
     mockIsSpaceRoute.mockReturnValue(true)
     mockUsePathname.mockReturnValue('/home')
+    mockUseSafeAddressFromUrl.mockReturnValue('')
     mockUseLoadFeature.mockReturnValue({
       WalletPopover: () => null,
       GlobalSearchModal: () => null,
@@ -193,6 +199,29 @@ describe('Topbar', () => {
         </TxModalContext.Provider>,
       )
       expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
+    })
+
+    it('renders SafeLogo on settings routes when no safe address is in the URL', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/settings/setup')
+      mockUseSafeAddressFromUrl.mockReturnValue('')
+      const { container } = render(<Topbar />)
+      expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+      expect(screen.getByTestId('logo-image')).toBeInTheDocument()
+      // Logo row is short — header centers items vertically so the logo aligns with the right-side button group
+      expect(container.querySelector('header')?.className).toMatch(/items-center/)
+      expect(container.querySelector('header')?.className).not.toMatch(/items-start/)
+    })
+
+    it('renders SpaceSafeBar on settings routes when a safe address is in the URL', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/settings/setup')
+      mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
+      const { container } = render(<Topbar />)
+      expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
+      expect(screen.queryByTestId('logo-image')).not.toBeInTheDocument()
+      // Default top alignment is preserved when the SpaceSafeBar is shown
+      expect(container.querySelector('header')?.className).toMatch(/items-start/)
     })
   })
 

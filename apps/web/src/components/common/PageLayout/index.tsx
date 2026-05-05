@@ -20,6 +20,7 @@ import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -52,6 +53,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
+  const urlSafeAddress = useSafeAddressFromUrl()
+  const isSettingsWithoutSafe = pathname.startsWith(AppRoutes.settings.index) && !urlSafeAddress
   const parentSafe = useParentSafe()
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
 
@@ -100,6 +103,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           [css.mainAnimated]: isSidebarRoute && isAnimated,
           [css.mainNoHeader]: hideHeader,
           [css.mainSpace]: !hideHeader,
+          [css.mainSpaceCompact]: isSettingsWithoutSafe,
           [css.mainSpaceCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
         })}
       >

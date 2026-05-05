@@ -66,6 +66,11 @@ jest.mock('@/hooks/useTopbarElevation', () => ({
   useIsTopbarElevated: jest.fn(() => false),
 }))
 
+const mockUseSafeAddressFromUrl = jest.fn<string, []>(() => '')
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
+}))
+
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(() => ({
     BatchSidebar: () => null,
@@ -81,6 +86,10 @@ const STATIC_ROUTES = [AppRoutes.terms, AppRoutes.privacy, AppRoutes.licenses, A
 const NON_STATIC_ROUTES = ['/home', '/balances', '/settings/setup', '/welcome/accounts']
 
 describe('PageLayout', () => {
+  beforeEach(() => {
+    mockUseSafeAddressFromUrl.mockReturnValue('')
+  })
+
   const renderLayout = (pathname: string) =>
     render(
       <PageLayout pathname={pathname}>
@@ -119,5 +128,28 @@ describe('PageLayout', () => {
         expect(screen.getByTestId('topbar')).toBeInTheDocument()
       },
     )
+  })
+
+  describe('settings route padding-top', () => {
+    it('applies the compact main class on settings without a safe address', () => {
+      mockUseSafeAddressFromUrl.mockReturnValue('')
+      const { container } = renderLayout('/settings/notifications')
+      const main = container.querySelector('main, [class*="main"]')
+      expect(main?.className).toMatch(/mainSpaceCompact/)
+    })
+
+    it('does not apply the compact main class on settings with a safe address', () => {
+      mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
+      const { container } = renderLayout('/settings/notifications')
+      const main = container.querySelector('main, [class*="main"]')
+      expect(main?.className).not.toMatch(/mainSpaceCompact/)
+    })
+
+    it('does not apply the compact main class on non-settings routes', () => {
+      mockUseSafeAddressFromUrl.mockReturnValue('')
+      const { container } = renderLayout('/home')
+      const main = container.querySelector('main, [class*="main"]')
+      expect(main?.className).not.toMatch(/mainSpaceCompact/)
+    })
   })
 })
