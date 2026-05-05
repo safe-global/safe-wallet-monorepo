@@ -20,7 +20,13 @@ import { clearAllPendingTxs } from '@/src/store/pendingTxsSlice'
 
 export const AppSettingsContainer = () => {
   const dispatch = useAppDispatch()
-  const { toggleBiometrics, isBiometricsEnabled, isLoading: isBiometricsLoading, getBiometricsUIInfo } = useBiometrics()
+  const {
+    toggleBiometrics,
+    openBiometricSettings,
+    isBiometricsEnabled,
+    isLoading: isBiometricsLoading,
+    getBiometricsUIInfo,
+  } = useBiometrics()
   const { enableNotification, disableNotification, isLoading: isNotificationsLoading } = useNotificationManager()
   const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
   const currency = useAppSelector(selectCurrency)
@@ -31,6 +37,23 @@ export const AppSettingsContainer = () => {
       disableNotification()
     } else {
       enableNotification()
+    }
+  }
+
+  const handleToggleBiometrics = async () => {
+    const result = await toggleBiometrics(!isBiometricsEnabled)
+    if (result.status === 'os-not-configured') {
+      Alert.alert(
+        'Set up biometrics',
+        Platform.OS === 'ios'
+          ? 'Set up Face ID or Touch ID in iOS Settings to enable biometrics in Safe.'
+          : 'Set up fingerprint in your device Settings to enable biometrics in Safe.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Open Settings', onPress: openBiometricSettings },
+        ],
+        { cancelable: true },
+      )
     }
   }
 
@@ -116,7 +139,7 @@ export const AppSettingsContainer = () => {
           rightNode: (
             <LoadableSwitch
               testID="toggle-app-biometrics"
-              onChange={() => toggleBiometrics(!isBiometricsEnabled)}
+              onChange={handleToggleBiometrics}
               value={isBiometricsEnabled}
               isLoading={isBiometricsLoading}
               trackColor={{ true: '$primary' }}

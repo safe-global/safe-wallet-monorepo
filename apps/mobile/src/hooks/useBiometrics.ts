@@ -13,6 +13,14 @@ import { RootState } from '../store'
 
 const BIOMETRICS_KEY = 'SAFE_WALLET_BIOMETRICS'
 
+export type EnableBiometricsResult =
+  | { status: 'enabled' }
+  | { status: 'os-not-configured' }
+  | { status: 'cancelled' }
+  | { status: 'error'; error: unknown }
+
+export type ToggleBiometricsResult = EnableBiometricsResult | { status: 'disabled' }
+
 export function useBiometrics() {
   const dispatch = useAppDispatch()
   const [isLoading, setIsLoading] = useState(false)
@@ -84,7 +92,7 @@ export function useBiometrics() {
     }
   }, [])
 
-  const disableBiometrics = useCallback(async () => {
+  const disableBiometrics = useCallback(async (): Promise<{ status: 'disabled' }> => {
     setIsLoading(true)
     try {
       await Keychain.resetGenericPassword()
@@ -94,87 +102,78 @@ export function useBiometrics() {
     } finally {
       setIsLoading(false)
     }
+    return { status: 'disabled' }
   }, [])
 
-  const enableBiometrics = useCallback(
-    async (fromInteraction?: boolean) => {
-      setIsLoading(true)
+  const enableBiometrics = useCallback(async (): Promise<EnableBiometricsResult> => {
+    setIsLoading(true)
+
+    try {
+      const isSupported = await checkBiometricsSupport()
+      const { biometricsEnabled: isEnabledAtOSLevel } = await checkBiometricsOSSettingsStatus()
+
+      // Biometrics not available at OS level (no hardware or not enrolled).
+      // Surface the outcome to the caller — never auto-redirect to system Settings here.
+      // The caller decides whether to show an explainer with an explicit "Open Settings" button.
+      if (!isSupported || !isEnabledAtOSLevel) {
+        dispatch(setBiometricsEnabled(false))
+        return { status: 'os-not-configured' }
+      }
 
       try {
-        const isSupported = await checkBiometricsSupport()
-        const { biometricsEnabled: isEnabledAtOSLevel } = await checkBiometricsOSSettingsStatus()
+        // Wrap the biometrics operations in a nested try-catch to allow for user cancellation
+        const setGenericPasswordResult = await Keychain.setGenericPassword(BIOMETRICS_KEY, 'biometrics-enabled', {
+          accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
+          accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED,
+        })
 
-        if (!isSupported || !isEnabledAtOSLevel) {
-          dispatch(setBiometricsEnabled(false))
-
-          if (fromInteraction) {
-            return openBiometricSettings()
-          }
-        }
-
-        try {
-          // Wrap the biometrics operations in a nested try-catch to allow for user cancellation
-          const setGenericPasswordResult = await Keychain.setGenericPassword(BIOMETRICS_KEY, 'biometrics-enabled', {
+        if (setGenericPasswordResult) {
+          const getGenericPasswordResult = await Keychain.getGenericPassword({
             accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
-            accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED,
           })
 
-          if (setGenericPasswordResult) {
-            const getGenericPasswordResult = await Keychain.getGenericPassword({
-              accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY,
-            })
-
-            if (getGenericPasswordResult) {
-              dispatch(setBiometricsEnabled(true))
-              dispatch(setUserAttempts(0))
-              return true
-            }
+          if (getGenericPasswordResult) {
+            dispatch(setBiometricsEnabled(true))
+            dispatch(setUserAttempts(0))
+            return { status: 'enabled' }
           }
-
-          // If we get here, something went wrong with setting or getting the password
-          throw new Error('Failed to verify biometrics setup')
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (biometricsError: any) {
-          // Handle user cancellation specifically
-          if (
-            biometricsError.code === '-128' || // User pressed Cancel
-            biometricsError.code === 'AuthenticationFailed' ||
-            biometricsError.message.includes('cancel') ||
-            biometricsError.message.includes('user name or passphrase')
-          ) {
-            Keychain.resetGenericPassword().then(() => {
-              dispatch(setUserAttempts(userAttempts + 1))
-            })
-            dispatch(setBiometricsEnabled(false))
-            return false
-          }
-          // Re-throw other errors
-          throw biometricsError
         }
-      } catch (error) {
-        Logger.error('Unexpected error in biometrics setup:', error)
-        await Keychain.resetGenericPassword()
-        dispatch(setBiometricsEnabled(false))
-        return false
-      } finally {
-        setIsLoading(false)
+
+        // If we get here, something went wrong with setting or getting the password
+        throw new Error('Failed to verify biometrics setup')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (biometricsError: any) {
+        // Handle user cancellation specifically
+        if (
+          biometricsError.code === '-128' || // User pressed Cancel
+          biometricsError.code === 'AuthenticationFailed' ||
+          biometricsError.message.includes('cancel') ||
+          biometricsError.message.includes('user name or passphrase')
+        ) {
+          Keychain.resetGenericPassword().then(() => {
+            dispatch(setUserAttempts(userAttempts + 1))
+          })
+          dispatch(setBiometricsEnabled(false))
+          return { status: 'cancelled' }
+        }
+        // Re-throw other errors
+        throw biometricsError
       }
-    },
-    [checkBiometricsSupport, userAttempts],
-  )
+    } catch (error) {
+      Logger.error('Unexpected error in biometrics setup:', error)
+      await Keychain.resetGenericPassword()
+      dispatch(setBiometricsEnabled(false))
+      return { status: 'error', error }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [checkBiometricsSupport, checkBiometricsOSSettingsStatus, userAttempts])
 
   const toggleBiometrics = useCallback(
-    async (newValue: boolean, fromInteraction: boolean) => {
-      return newValue ? enableBiometrics(fromInteraction) : disableBiometrics()
+    async (newValue: boolean): Promise<ToggleBiometricsResult> => {
+      return newValue ? enableBiometrics() : disableBiometrics()
     },
     [enableBiometrics, disableBiometrics],
-  )
-
-  const toggleBiometricsFromUser = useCallback(
-    async (newValue: boolean) => {
-      return toggleBiometrics(newValue, true)
-    },
-    [toggleBiometrics],
   )
 
   const getBiometricsUIInfo = useCallback(() => {
@@ -202,7 +201,7 @@ export function useBiometrics() {
   }, [])
 
   return {
-    toggleBiometrics: toggleBiometricsFromUser,
+    toggleBiometrics,
     openBiometricSettings,
     isBiometricsEnabled: isEnabled,
     biometricsType,

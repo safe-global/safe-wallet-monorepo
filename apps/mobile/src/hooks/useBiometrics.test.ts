@@ -113,7 +113,8 @@ describe('useBiometrics', () => {
       const store = hookResult.store as TestStore
 
       await act(async () => {
-        await hookResult.result.current.toggleBiometrics(true)
+        const returnValue = await hookResult.result.current.toggleBiometrics(true)
+        expect(returnValue).toEqual({ status: 'enabled' })
       })
 
       await waitFor(() => {
@@ -130,7 +131,8 @@ describe('useBiometrics', () => {
       const store = hookResult.store as TestStore
 
       await act(async () => {
-        await hookResult.result.current.toggleBiometrics(false)
+        const returnValue = await hookResult.result.current.toggleBiometrics(false)
+        expect(returnValue).toEqual({ status: 'disabled' })
       })
 
       await waitFor(() => {
@@ -152,7 +154,7 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await hookResult.result.current.toggleBiometrics(true)
-        expect(returnValue).toBe(false)
+        expect(returnValue).toEqual({ status: 'cancelled' })
       })
 
       await waitFor(() => {
@@ -172,7 +174,7 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await result.current.toggleBiometrics(true)
-        expect(returnValue).toBe(false)
+        expect(returnValue).toEqual({ status: 'cancelled' })
       })
     })
 
@@ -188,7 +190,7 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await result.current.toggleBiometrics(true)
-        expect(returnValue).toBe(false)
+        expect(returnValue).toEqual({ status: 'cancelled' })
       })
     })
 
@@ -204,21 +206,32 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await result.current.toggleBiometrics(true)
-        expect(returnValue).toBe(false)
+        expect(returnValue).toEqual({ status: 'cancelled' })
       })
     })
 
-    it('does not enable when biometrics is not supported', async () => {
+    it('returns os-not-configured when biometrics is not available, without redirecting to Settings', async () => {
+      // Compliance invariant: enabling biometrics must NEVER call Linking.openURL or
+      // Linking.openSettings as a side effect. The caller renders an in-app explainer
+      // with an explicit "Open Settings" button.
       mockGetSupportedBiometryType.mockResolvedValue(null)
+      const openURLSpy = jest.spyOn(Linking, 'openURL').mockImplementation(jest.fn())
+      const openSettingsSpy = jest.spyOn(Linking, 'openSettings').mockImplementation(jest.fn())
 
       const hookResult = renderHook(() => useBiometrics())
       const store = hookResult.store as TestStore
 
       await act(async () => {
-        await hookResult.result.current.toggleBiometrics(true)
+        const returnValue = await hookResult.result.current.toggleBiometrics(true)
+        expect(returnValue).toEqual({ status: 'os-not-configured' })
       })
 
       expect(store.getState().biometrics.isEnabled).toBe(false)
+      expect(openURLSpy).not.toHaveBeenCalled()
+      expect(openSettingsSpy).not.toHaveBeenCalled()
+
+      openURLSpy.mockRestore()
+      openSettingsSpy.mockRestore()
     })
 
     it('handles unexpected errors during biometrics setup', async () => {
@@ -231,7 +244,7 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await hookResult.result.current.toggleBiometrics(true)
-        expect(returnValue).toBe(false)
+        expect(returnValue).toMatchObject({ status: 'error' })
       })
 
       expect(store.getState().biometrics.isEnabled).toBe(false)
@@ -248,7 +261,7 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await result.current.toggleBiometrics(true)
-        expect(returnValue).toBe(false)
+        expect(returnValue).toMatchObject({ status: 'error' })
       })
     })
   })
@@ -278,6 +291,27 @@ describe('useBiometrics', () => {
       await waitFor(() => {
         expect(store.getState().biometrics.isEnabled).toBe(false)
       })
+    })
+
+    it('does not redirect to Settings when OS-level biometrics is disabled on mount', async () => {
+      // Background re-evaluation must not auto-redirect either.
+      mockGetSupportedBiometryType.mockResolvedValue(null)
+      mockResetGenericPassword.mockResolvedValue(true)
+      const openURLSpy = jest.spyOn(Linking, 'openURL').mockImplementation(jest.fn())
+      const openSettingsSpy = jest.spyOn(Linking, 'openSettings').mockImplementation(jest.fn())
+
+      renderHook(() => useBiometrics(), {
+        biometrics: { isEnabled: true, isSupported: true, type: 'FACE_ID', userAttempts: 0 },
+      })
+
+      await waitFor(() => {
+        expect(mockResetGenericPassword).toHaveBeenCalled()
+      })
+      expect(openURLSpy).not.toHaveBeenCalled()
+      expect(openSettingsSpy).not.toHaveBeenCalled()
+
+      openURLSpy.mockRestore()
+      openSettingsSpy.mockRestore()
     })
   })
 })
