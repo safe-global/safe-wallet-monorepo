@@ -85,7 +85,7 @@ export const ReviewTransactionContent = ({
 
         <TxCardActions sx={{ marginTop: '0 !important' }}>
           {/* Continue button */}
-          <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
+          <CheckWallet allowNonOwner={onlyExecute} allowGnosisPaySafe checkNetwork={!isSubmitDisabled}>
             {(isOk) => {
               return (
                 <Button
