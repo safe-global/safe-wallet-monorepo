@@ -7,7 +7,7 @@ import {
   setBiometricsType,
   setUserAttempts,
 } from '@/src/store/biometricsSlice'
-import { Platform, Linking } from 'react-native'
+import { Alert, Platform, Linking } from 'react-native'
 import Logger from '@/src/utils/logger'
 import { RootState } from '../store'
 
@@ -19,7 +19,9 @@ export type EnableBiometricsResult =
   | { status: 'cancelled' }
   | { status: 'error'; error: unknown }
 
-export type ToggleBiometricsResult = EnableBiometricsResult | { status: 'disabled' }
+export type DisableBiometricsResult = { status: 'disabled' } | { status: 'error'; error: unknown }
+
+export type ToggleBiometricsResult = EnableBiometricsResult | DisableBiometricsResult
 
 export function useBiometrics() {
   const dispatch = useAppDispatch()
@@ -40,6 +42,20 @@ export function useBiometrics() {
       Linking.openSettings()
     }
   }
+
+  const promptBiometricsSetup = useCallback(() => {
+    Alert.alert(
+      'Set up biometrics',
+      Platform.OS === 'ios'
+        ? 'Set up Face ID or Touch ID in iOS Settings to enable biometrics in Safe.'
+        : 'Set up fingerprint in your device Settings to enable biometrics in Safe.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Open Settings', onPress: openBiometricSettings },
+      ],
+      { cancelable: true },
+    )
+  }, [])
 
   const checkBiometricsSupport = useCallback(async () => {
     try {
@@ -92,17 +108,21 @@ export function useBiometrics() {
     }
   }, [])
 
-  const disableBiometrics = useCallback(async (): Promise<{ status: 'disabled' }> => {
+  const disableBiometrics = useCallback(async (): Promise<DisableBiometricsResult> => {
     setIsLoading(true)
     try {
       await Keychain.resetGenericPassword()
       dispatch(setBiometricsEnabled(false))
+      return { status: 'disabled' }
     } catch (error) {
       Logger.error('Error disabling biometrics:', error)
+      // Keep Redux in sync with user intent so the toggle reflects 'off', but signal
+      // the keychain failure to callers — the credential may still be present.
+      dispatch(setBiometricsEnabled(false))
+      return { status: 'error', error }
     } finally {
       setIsLoading(false)
     }
-    return { status: 'disabled' }
   }, [])
 
   const enableBiometrics = useCallback(async (): Promise<EnableBiometricsResult> => {
@@ -150,9 +170,12 @@ export function useBiometrics() {
           biometricsError.message.includes('cancel') ||
           biometricsError.message.includes('user name or passphrase')
         ) {
-          Keychain.resetGenericPassword().then(() => {
-            dispatch(setUserAttempts(userAttempts + 1))
-          })
+          try {
+            await Keychain.resetGenericPassword()
+          } catch (resetError) {
+            Logger.error('Failed to reset keychain after cancellation:', resetError)
+          }
+          dispatch(setUserAttempts(userAttempts + 1))
           dispatch(setBiometricsEnabled(false))
           return { status: 'cancelled' }
         }
@@ -194,15 +217,16 @@ export function useBiometrics() {
       const { biometricsEnabled: isEnabledAtOSLevel } = await checkBiometricsOSSettingsStatus()
 
       if (!isEnabledAtOSLevel) {
-        disableBiometrics()
+        await disableBiometrics()
       }
     }
-    checkBiometrics()
-  }, [])
+    checkBiometrics().catch((error) => Logger.error('Error in biometrics OS-status check:', error))
+  }, [checkBiometricsOSSettingsStatus, disableBiometrics])
 
   return {
     toggleBiometrics,
     openBiometricSettings,
+    promptBiometricsSetup,
     isBiometricsEnabled: isEnabled,
     biometricsType,
     isLoading,

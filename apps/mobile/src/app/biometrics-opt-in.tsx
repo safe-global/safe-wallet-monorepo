@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react'
-import { Alert, Platform } from 'react-native'
+import { Platform } from 'react-native'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 import { OptIn } from '@/src/components/OptIn'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -10,7 +10,7 @@ import { View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 function BiometricsOptIn() {
-  const { toggleBiometrics, openBiometricSettings, getBiometricsUIInfo, isBiometricsEnabled, isLoading } =
+  const { toggleBiometrics, promptBiometricsSetup, getBiometricsUIInfo, isBiometricsEnabled, isLoading } =
     useBiometrics()
   const { bottom } = useSafeAreaInsets()
   const local = useLocalSearchParams<{
@@ -60,17 +60,13 @@ function BiometricsOptIn() {
     try {
       const result = await toggleBiometrics(true)
       if (result.status === 'os-not-configured') {
-        Alert.alert(
-          'Set up biometrics',
-          Platform.OS === 'ios'
-            ? 'Set up Face ID or Touch ID in iOS Settings to enable biometrics in Safe.'
-            : 'Set up fingerprint in your device Settings to enable biometrics in Safe.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: openBiometricSettings },
-          ],
-          { cancelable: true },
-        )
+        promptBiometricsSetup()
+      } else if (result.status === 'error') {
+        Logger.error('Error enabling biometrics:', result.error)
+        toast.show('Error enabling biometrics', {
+          native: false,
+          duration: 2000,
+        })
       }
     } catch (error) {
       Logger.error('Error enabling biometrics', error)

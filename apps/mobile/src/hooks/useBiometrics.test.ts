@@ -2,7 +2,7 @@ import { act, waitFor } from '@testing-library/react-native'
 import { renderHook, type TestStore } from '@/src/tests/test-utils'
 import { useBiometrics } from './useBiometrics'
 import * as Keychain from 'react-native-keychain'
-import { Linking } from 'react-native'
+import { Alert, Linking } from 'react-native'
 
 const mockGetSupportedBiometryType = Keychain.getSupportedBiometryType as jest.Mock
 const mockSetGenericPassword = Keychain.setGenericPassword as jest.Mock
@@ -236,7 +236,8 @@ describe('useBiometrics', () => {
 
     it('handles unexpected errors during biometrics setup', async () => {
       mockGetSupportedBiometryType.mockResolvedValue(Keychain.BIOMETRY_TYPE.FACE_ID)
-      mockSetGenericPassword.mockRejectedValue(new Error('Unexpected storage error'))
+      const thrown = new Error('Unexpected storage error')
+      mockSetGenericPassword.mockRejectedValue(thrown)
       mockResetGenericPassword.mockResolvedValue(true)
 
       const hookResult = renderHook(() => useBiometrics())
@@ -244,7 +245,7 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await hookResult.result.current.toggleBiometrics(true)
-        expect(returnValue).toMatchObject({ status: 'error' })
+        expect(returnValue).toEqual({ status: 'error', error: thrown })
       })
 
       expect(store.getState().biometrics.isEnabled).toBe(false)
@@ -261,8 +262,65 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await result.current.toggleBiometrics(true)
-        expect(returnValue).toMatchObject({ status: 'error' })
+        expect(returnValue).toEqual({
+          status: 'error',
+          error: expect.objectContaining({ message: 'Failed to verify biometrics setup' }),
+        })
       })
+    })
+
+    it('returns error when disable fails to reset the keychain', async () => {
+      const resetError = new Error('Keychain unavailable')
+      mockResetGenericPassword.mockRejectedValue(resetError)
+
+      const hookResult = renderHook(() => useBiometrics(), {
+        biometrics: { isEnabled: true, isSupported: true, type: 'FACE_ID', userAttempts: 0 },
+      })
+      const store = hookResult.store as TestStore
+
+      await act(async () => {
+        const returnValue = await hookResult.result.current.toggleBiometrics(false)
+        expect(returnValue).toEqual({ status: 'error', error: resetError })
+      })
+
+      // Redux still flips to disabled to match user intent.
+      expect(store.getState().biometrics.isEnabled).toBe(false)
+    })
+  })
+
+  describe('promptBiometricsSetup', () => {
+    it('shows an Alert with explicit Cancel and Open Settings buttons', () => {
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
+      const { result } = renderHook(() => useBiometrics())
+
+      result.current.promptBiometricsSetup()
+
+      expect(alertSpy).toHaveBeenCalledTimes(1)
+      const [, , buttons] = alertSpy.mock.calls[0]
+      expect(buttons).toEqual([
+        expect.objectContaining({ text: 'Cancel', style: 'cancel' }),
+        expect.objectContaining({ text: 'Open Settings' }),
+      ])
+
+      alertSpy.mockRestore()
+    })
+
+    it('only invokes Linking when the user taps Open Settings', () => {
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
+      const openURLSpy = jest.spyOn(Linking, 'openURL').mockImplementation(jest.fn())
+      const { result } = renderHook(() => useBiometrics())
+
+      result.current.promptBiometricsSetup()
+      expect(openURLSpy).not.toHaveBeenCalled()
+
+      // Simulate the user tapping the Open Settings button.
+      const buttons = alertSpy.mock.calls[0][2] as { text: string; onPress?: () => void }[]
+      buttons.find((b) => b.text === 'Open Settings')?.onPress?.()
+
+      expect(openURLSpy).toHaveBeenCalledWith('app-settings:')
+
+      alertSpy.mockRestore()
+      openURLSpy.mockRestore()
     })
   })
 

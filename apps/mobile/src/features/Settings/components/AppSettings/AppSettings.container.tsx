@@ -10,6 +10,7 @@ import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon
 import { FloatingMenu } from '../FloatingMenu'
 import { LoadableSwitch } from '@/src/components/LoadableSwitch'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
+import Logger from '@/src/utils/logger'
 import { useNotificationManager } from '@/src/hooks/useNotificationManager'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectAppNotificationStatus } from '@/src/store/notificationsSlice'
@@ -22,7 +23,7 @@ export const AppSettingsContainer = () => {
   const dispatch = useAppDispatch()
   const {
     toggleBiometrics,
-    openBiometricSettings,
+    promptBiometricsSetup,
     isBiometricsEnabled,
     isLoading: isBiometricsLoading,
     getBiometricsUIInfo,
@@ -43,17 +44,10 @@ export const AppSettingsContainer = () => {
   const handleToggleBiometrics = async () => {
     const result = await toggleBiometrics(!isBiometricsEnabled)
     if (result.status === 'os-not-configured') {
-      Alert.alert(
-        'Set up biometrics',
-        Platform.OS === 'ios'
-          ? 'Set up Face ID or Touch ID in iOS Settings to enable biometrics in Safe.'
-          : 'Set up fingerprint in your device Settings to enable biometrics in Safe.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Open Settings', onPress: openBiometricSettings },
-        ],
-        { cancelable: true },
-      )
+      promptBiometricsSetup()
+    } else if (result.status === 'error') {
+      Logger.error('Biometrics toggle failed:', result.error)
+      Alert.alert('Biometrics error', 'Something went wrong. Please try again.', [{ text: 'OK' }])
     }
   }
 
