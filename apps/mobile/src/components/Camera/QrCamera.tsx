@@ -2,7 +2,7 @@ import { Camera, useCodeScanner, useCameraDevice, Code, CameraPermissionStatus }
 import { View, Theme, H3, getTokenValue } from 'tamagui'
 import { Dimensions, Pressable, StyleSheet, useWindowDimensions } from 'react-native'
 import { useTheme } from '@/src/theme/hooks/useTheme'
-import React, { useCallback } from 'react'
+import React from 'react'
 import { useRouter } from 'expo-router'
 
 const { width } = Dimensions.get('window')
@@ -116,17 +116,23 @@ function CameraLens({
     onPressSettings,
   })
 
-  const handlePressBox = useCallback(() => {
-    if (button) {
-      void button.onPress()
-    }
-  }, [button])
+  // Only let taps on the wrapper trigger the in-lens action when the camera is
+  // ready to activate. For 'not-determined' / 'denied' / 'restricted' the
+  // wrapper must be inert so that Settings (and the OS prompt) only ever fires
+  // from an explicit tap on the labeled SafeButton — Apple guideline 5.1.1(iv).
+  const wrapperPress =
+    permission === 'granted' && !isCameraActive
+      ? () => {
+          void onActivateCamera()
+        }
+      : undefined
 
   return (
     <Pressable
       style={[styles.transparentBox, denied && { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}
-      onPress={button ? handlePressBox : undefined}
-      disabled={!button}
+      onPress={wrapperPress}
+      disabled={!wrapperPress}
+      testID="camera-lens-wrapper"
     >
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.topLeft]} />
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.topRight]} />
