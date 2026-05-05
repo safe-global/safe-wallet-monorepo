@@ -27,10 +27,6 @@ export function useBiometrics() {
   const dispatch = useAppDispatch()
   const [isLoading, setIsLoading] = useState(false)
 
-  // This hasInteracted ref is used to prevent the biometrics from being enabled/disabled
-  // even when the app is in background then comes back to foreground
-  // with biometrics enabled and the app settings was disabled
-  // and the user has not interacted with config
   const isEnabled = useAppSelector((state: RootState) => state.biometrics.isEnabled)
   const biometricsType = useAppSelector((state: RootState) => state.biometrics.type)
   const userAttempts = useAppSelector((state: RootState) => state.biometrics.userAttempts)
