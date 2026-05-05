@@ -10,7 +10,8 @@ import { View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 function BiometricsOptIn() {
-  const { toggleBiometrics, getBiometricsUIInfo, isBiometricsEnabled, isLoading } = useBiometrics()
+  const { toggleBiometrics, promptBiometricsSetup, getBiometricsUIInfo, isBiometricsEnabled, isLoading } =
+    useBiometrics()
   const { bottom } = useSafeAreaInsets()
   const local = useLocalSearchParams<{
     txId: string
@@ -57,7 +58,16 @@ function BiometricsOptIn() {
 
   const handleAccept = async () => {
     try {
-      await toggleBiometrics(true)
+      const result = await toggleBiometrics(true)
+      if (result.status === 'os-not-configured') {
+        promptBiometricsSetup()
+      } else if (result.status === 'error') {
+        Logger.error('Error enabling biometrics:', result.error)
+        toast.show('Error enabling biometrics', {
+          native: false,
+          duration: 2000,
+        })
+      }
     } catch (error) {
       Logger.error('Error enabling biometrics', error)
       toast.show('Error enabling biometrics', {
