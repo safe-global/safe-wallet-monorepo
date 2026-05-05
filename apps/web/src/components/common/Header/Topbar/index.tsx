@@ -2,7 +2,6 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useContext, useMemo, useRef, type ReactElement } from 'react'
 import { Menu } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-
 import { Button } from '@/components/ui/button'
 import { AppRoutes } from '@/config/routes'
 import { HeaderNavigation } from '@/features/spaces/components/HeaderNavigation'
