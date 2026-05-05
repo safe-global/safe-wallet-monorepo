@@ -42,6 +42,7 @@ import {
 } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
 import { EurcvBoostBanner, eurcvBoostBannerID } from '@/components/dashboard/NewsCarousel/banners/EurcvBoostBanner'
+import { GnosisPayBanner } from '@/features/gnosispay'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
@@ -90,6 +91,7 @@ const Dashboard = (): ReactElement => {
     <>
       <div className={css.dashboardGrid}>
         <div className={css.leftCol}>
+          <GnosisPayBanner />
           <Overview />
 
           {noAssets ? (

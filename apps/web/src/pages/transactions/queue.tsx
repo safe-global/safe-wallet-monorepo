@@ -12,6 +12,7 @@ import { RecoveryFeature } from '@/features/recovery'
 import { useLoadFeature } from '@/features/__core__'
 import { BRAND_NAME } from '@/config/constants'
 import { GnosisPayQueue } from '@/features/gnosispay/GnosisPayQueue'
+import { GnosisPayBanner } from '@/features/gnosispay'
 import {
   useIsHypernativeEligible,
   useIsHypernativeQueueScanFeature,
@@ -60,6 +61,8 @@ const Queue: NextPage = () => {
                 <HnBannerForQueue />
               </Box>
             )}
+
+            <GnosisPayBanner />
 
             <RecoveryList />
 

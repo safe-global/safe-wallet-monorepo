@@ -9,13 +9,16 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { Tooltip } from '@mui/material'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
-import { useIsGnosisPayOwner } from '@/features/gnosispay'
+import { useIsGnosisPayOwner, useIsGnosisPaySafe } from '@/features/gnosispay'
 
 type CheckWalletProps = {
   children: (ok: boolean) => ReactElement
   allowSpendingLimit?: boolean
   allowNonOwner?: boolean
+  /** Pass when only the wallet enabled on the Delay modifier should pass (e.g. submit gates). */
   allowGnosisPayOwner?: boolean
+  /** Pass when any visitor of a Gnosis Pay safe should pass (e.g. nav/preview gates). */
+  allowGnosisPaySafe?: boolean
   noTooltip?: boolean
   checkNetwork?: boolean
   allowUndeployedSafe?: boolean
@@ -34,6 +37,7 @@ const CheckWallet = ({
   allowSpendingLimit,
   allowNonOwner,
   allowGnosisPayOwner,
+  allowGnosisPaySafe,
   noTooltip,
   checkNetwork = false,
   allowUndeployedSafe = false,
@@ -47,6 +51,7 @@ const CheckWallet = ({
   const sdk = useSafeSDK()
   const isProposer = useIsWalletProposer()
   const [isGnosisPayOwner] = useIsGnosisPayOwner()
+  const [isGnosisPaySafe] = useIsGnosisPaySafe()
 
   const { safe, safeLoaded } = useSafeInfo()
 
@@ -72,6 +77,7 @@ const CheckWallet = ({
       !isProposer &&
       !isNestedSafeOwner &&
       !(allowGnosisPayOwner && isGnosisPayOwner) &&
+      !(allowGnosisPaySafe && isGnosisPaySafe) &&
       (!isOnlySpendingLimit || !allowSpendingLimit)
     ) {
       return Message.NotSafeOwner
@@ -83,10 +89,12 @@ const CheckWallet = ({
   }, [
     allowNonOwner,
     allowGnosisPayOwner,
+    allowGnosisPaySafe,
     allowProposer,
     allowSpendingLimit,
     allowUndeployedSafe,
     isGnosisPayOwner,
+    isGnosisPaySafe,
     isProposer,
     isNestedSafeOwner,
     isOnlySpendingLimit,
