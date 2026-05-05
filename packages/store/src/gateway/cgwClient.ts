@@ -54,16 +54,6 @@ export const addHandleResponseHook = (hook: HandleResponseHook): (() => void) =>
   }
 }
 
-/**
- * @deprecated Prefer addHandleResponseHook, which composes with other registrations.
- * This setter REPLACES all previously registered response hooks, matching the
- * pre-multi-hook contract — useful primarily for test isolation.
- */
-export const setHandleResponseHook = (hook: HandleResponseHook): (() => void) => {
-  responseHooks.length = 0
-  return addHandleResponseHook(hook)
-}
-
 export const rawBaseQuery = fetchBaseQuery({
   baseUrl: '/',
   headers: {
