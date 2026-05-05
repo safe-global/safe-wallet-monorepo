@@ -30,6 +30,11 @@ const HIDDEN_ROUTES = [
   AppRoutes.welcome.spaces,
   AppRoutes.newSafe.create,
   AppRoutes.newSafe.load,
+  AppRoutes.terms,
+  AppRoutes.privacy,
+  AppRoutes.licenses,
+  AppRoutes.imprint,
+  AppRoutes.cookie,
 ]
 
 function DropdownHeader({ isPinned, onPin }: { isPinned: boolean; onPin: () => void }) {
