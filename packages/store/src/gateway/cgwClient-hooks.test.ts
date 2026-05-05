@@ -8,6 +8,15 @@ import * as cgwClient from './cgwClient'
 describe('cgwClient hooks', () => {
   let testApi: BaseQueryApi
   let originalFetch: typeof global.fetch
+  const responseHookDeregisters: Array<() => void> = []
+
+  // Wraps addHandleResponseHook so per-test registrations are torn down in afterEach.
+  // This keeps each test isolated now that there's no reset-style setter.
+  const registerResponseHook = (hook: Parameters<typeof cgwClient.addHandleResponseHook>[0]) => {
+    const deregister = cgwClient.addHandleResponseHook(hook)
+    responseHookDeregisters.push(deregister)
+    return deregister
+  }
 
   beforeAll(() => {
     cgwClient.setBaseUrl('https://test.com')
@@ -21,9 +30,8 @@ describe('cgwClient hooks', () => {
       new Response('{}', { status: 200, headers: new Headers() }), // Headers need to be mutable for set
     )
 
-    // Reset hooks to default implementations
+    // Reset prepareHeaders hook to a passthrough; response hooks are deregistered in afterEach.
     cgwClient.setPrepareHeadersHook((headers) => headers)
-    cgwClient.setHandleResponseHook(() => {})
 
     testApi = {
       dispatch: jest.fn(),
@@ -39,6 +47,10 @@ describe('cgwClient hooks', () => {
   afterEach(() => {
     // Restore original fetch
     global.fetch = originalFetch
+    // Tear down any response hooks registered by the test
+    while (responseHookDeregisters.length > 0) {
+      responseHookDeregisters.pop()?.()
+    }
   })
 
   it('should call custom prepareHeadersHook and set header when fetchBaseQuery is used', async () => {
@@ -59,9 +71,9 @@ describe('cgwClient hooks', () => {
     expect(request.headers.get('X-Test-Header')).toBe('test-value')
   })
 
-  it('should call custom handleResponseHook when fetchBaseQuery is used', async () => {
+  it('should call a registered handleResponseHook when fetchBaseQuery is used', async () => {
     const mockResponseFunction = jest.fn()
-    cgwClient.setHandleResponseHook(mockResponseFunction)
+    registerResponseHook(mockResponseFunction)
 
     await cgwClient.dynamicBaseQuery('/test-response', testApi, {})
 
@@ -81,8 +93,8 @@ describe('cgwClient hooks', () => {
       callOrder.push('B')
     })
 
-    cgwClient.addHandleResponseHook(hookA)
-    cgwClient.addHandleResponseHook(hookB)
+    registerResponseHook(hookA)
+    registerResponseHook(hookB)
 
     await cgwClient.dynamicBaseQuery('/test-multi-hook', testApi, {})
 
@@ -97,8 +109,8 @@ describe('cgwClient hooks', () => {
     })
     const succeeding = jest.fn()
 
-    cgwClient.addHandleResponseHook(failing)
-    cgwClient.addHandleResponseHook(succeeding)
+    registerResponseHook(failing)
+    registerResponseHook(succeeding)
 
     await cgwClient.dynamicBaseQuery('/test-hook-isolation', testApi, {})
 
@@ -108,24 +120,11 @@ describe('cgwClient hooks', () => {
 
   it('addHandleResponseHook returns a deregistration function', async () => {
     const hook = jest.fn()
-    const deregister = cgwClient.addHandleResponseHook(hook)
+    const deregister = registerResponseHook(hook)
 
     deregister()
 
     await cgwClient.dynamicBaseQuery('/test-deregister', testApi, {})
     expect(hook).not.toHaveBeenCalled()
-  })
-
-  it('setHandleResponseHook still replaces previously registered hooks (back-compat)', async () => {
-    const previous = jest.fn()
-    const replacement = jest.fn()
-
-    cgwClient.addHandleResponseHook(previous)
-    cgwClient.setHandleResponseHook(replacement)
-
-    await cgwClient.dynamicBaseQuery('/test-replace', testApi, {})
-
-    expect(previous).not.toHaveBeenCalled()
-    expect(replacement).toHaveBeenCalled()
   })
 })
