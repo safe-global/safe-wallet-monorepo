@@ -8,30 +8,27 @@ import { useState } from 'react'
 import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useChains from '@/hooks/useChains'
-import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
+import { useUserAddressBookUpsertPrivateItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
+import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 
-export type ContactField = {
+type ContactField = {
   name: string
   address: string
   networks: Chain[]
 }
 
-const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
+const AddPrivateContact = () => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { configs: allNetworks } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
-  const addressBookItems = useGetSpaceAddressBook()
-  const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
+  const [upsertPrivate] = useUserAddressBookUpsertPrivateItemsV1Mutation()
 
   const defaultValues = {
     name: '',
@@ -62,7 +59,7 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
 
-    const addressBookItem = {
+    const item = {
       name: data.name,
       address: data.address,
       chainIds: data.networks.map((network) => network.chainId),
@@ -70,11 +67,10 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
 
     try {
       setIsSubmitting(true)
-      trackEvent({ ...SPACE_EVENTS.ADD_ADDRESS_SUBMIT })
 
-      const result = await upsertAddressBook({
+      const result = await upsertPrivate({
         spaceId: Number(spaceId),
-        upsertAddressBookItemsDto: { items: [addressBookItem] },
+        upsertAddressBookItemsDto: { items: [item] },
       })
 
       if (result.error) {
@@ -82,16 +78,11 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
         return
       }
 
-      trackEvent(
-        { ...SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED },
-        { workspace_id: spaceId, entry_count_after: addressBookItems.length + 1 },
-      )
-
       dispatch(
         showNotification({
-          message: 'Added contact',
+          message: 'Private contact added',
           variant: 'success',
-          groupKey: 'add-contact-success',
+          groupKey: 'add-private-contact-success',
         }),
       )
 
@@ -105,15 +96,20 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
 
   return (
     <>
-      <ShadcnButton size="sm" onClick={handleOpen}>
+      <ShadcnButton size="sm" variant="outline" onClick={handleOpen}>
         <PlusIcon />
-        {label}
+        Add private contact
       </ShadcnButton>
-      <ModalDialog open={open} onClose={handleClose} dialogTitle="Add contact" hideChainIndicator>
+      <ModalDialog open={open} onClose={handleClose} dialogTitle="Add private contact" hideChainIndicator>
         <FormProvider {...methods}>
           <form onSubmit={onSubmit}>
             <DialogContent sx={{ py: 2 }}>
               <div className="flex flex-col gap-6">
+                <p className="text-muted-foreground text-sm">
+                  This contact will be visible only to you. You can request to add it to the shared workspace address
+                  book later.
+                </p>
+
                 <NameInput name="name" label="Name" required />
                 <AddressInput name="address" label="Address" required showPrefix={false} />
 
@@ -161,4 +157,4 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
   )
 }
 
-export default AddContact
+export default AddPrivateContact
