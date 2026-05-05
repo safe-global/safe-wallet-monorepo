@@ -91,6 +91,28 @@ describe('useNotificationManager', () => {
       expect(NotificationsService.requestPushNotificationsPermission).toHaveBeenCalled()
     })
 
+    // Registration can fail with a granted permission (network, backend); pushing the user to
+    // Settings in that case is misleading and leaves pendingPermissionRequestRef stuck true.
+    it('toggleNotificationState does NOT show the explainer when registration fails with permission granted', async () => {
+      jest.mocked(NotificationsService.isDeviceNotificationEnabled).mockResolvedValue(false)
+      jest.mocked(NotificationsService.getAllPermissions).mockResolvedValue({
+        permission: 'granted',
+        blockedNotifications: new Map(),
+      })
+      mockRegisterForNotifications.mockResolvedValueOnce({ loading: false, error: new Error('network') })
+      const stateUnsubscribed = {
+        ...mockState,
+        notifications: { ...mockState.notifications, isAppNotificationsEnabled: false },
+      } as unknown as RootState
+      const { result } = renderHook(() => useNotificationManager(), stateUnsubscribed)
+
+      await act(async () => {
+        await result.current.toggleNotificationState()
+      })
+
+      expect(NotificationsService.requestPushNotificationsPermission).not.toHaveBeenCalled()
+    })
+
     it('enableNotification shows the in-app explainer once promptThreshold is reached', async () => {
       jest.mocked(NotificationsService.isDeviceNotificationEnabled).mockResolvedValue(false)
       const stateAtThreshold = {
