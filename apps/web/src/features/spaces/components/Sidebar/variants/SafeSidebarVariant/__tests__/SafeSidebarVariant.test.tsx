@@ -438,7 +438,7 @@ describe('SafeSidebarVariant', () => {
       )
 
       expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
-      expect(screen.queryByText('Add Safe to workspace')).not.toBeInTheDocument()
+      expect(screen.queryByText('Add Safe to space')).not.toBeInTheDocument()
     })
 
     it('shows addToWorkspace when sessionExpiresAt is still in the future (token valid)', () => {
