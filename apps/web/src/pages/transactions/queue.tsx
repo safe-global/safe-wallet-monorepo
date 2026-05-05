@@ -11,6 +11,7 @@ import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import { RecoveryFeature } from '@/features/recovery'
 import { useLoadFeature } from '@/features/__core__'
 import { BRAND_NAME } from '@/config/constants'
+import { GnosisPayQueue } from '@/features/gnosispay/GnosisPayQueue'
 import {
   useIsHypernativeEligible,
   useIsHypernativeQueueScanFeature,
@@ -61,6 +62,8 @@ const Queue: NextPage = () => {
             )}
 
             <RecoveryList />
+
+            <GnosisPayQueue />
 
             {/* Pending unsigned transactions */}
             {showPending && (

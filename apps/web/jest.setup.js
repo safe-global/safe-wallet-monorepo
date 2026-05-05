@@ -10,6 +10,20 @@ faker.seed(123)
 // Set timezone to UTC for consistent date formatting across environments
 process.env.TZ = 'UTC'
 
+// Default-mock the Gnosis Pay owner check so any component using CheckWallet or
+// the tx-flow action slots in tests doesn't need to wire up useChains/wallet/web3 mocks.
+// Use a plain function (not jest.fn) so `jest.resetAllMocks()` in test files doesn't
+// clear the implementation. Tests that exercise Gnosis Pay can still override with
+// jest.mock(...) at the file level.
+const gnosisPayHooksMock = {
+  __esModule: true,
+  useIsGnosisPayOwner: () => [false, undefined, false],
+  useGnosisPayDelayModifier: () => [undefined, undefined, false],
+  useGnosisPayActions: () => ({ enqueueTx: () => undefined, executeTx: () => undefined }),
+}
+jest.mock('@/features/gnosispay/hooks/useIsGnosisPayOwner', () => gnosisPayHooksMock)
+jest.mock('@/features/gnosispay', () => gnosisPayHooksMock)
+
 jest.mock('@web3-onboard/coinbase', () => jest.fn())
 jest.mock('@web3-onboard/injected-wallets', () => ({ ProviderLabel: { MetaMask: 'MetaMask' } }))
 jest.mock('@web3-onboard/walletconnect', () => jest.fn())

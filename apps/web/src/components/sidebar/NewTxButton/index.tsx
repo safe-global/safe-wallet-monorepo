@@ -25,7 +25,7 @@ const NewTxButton = (): ReactElement => {
   }
 
   return (
-    <CheckWallet allowSpendingLimit>
+    <CheckWallet allowSpendingLimit allowGnosisPayOwner>
       {(isOk) => (
         <Button
           data-testid="new-tx-btn"
