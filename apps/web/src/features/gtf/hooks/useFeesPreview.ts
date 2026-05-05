@@ -14,7 +14,7 @@ import useGasLimit from '@/hooks/useGasLimit'
 import useGasPrice from '@/hooks/useGasPrice'
 import { useGetGtfFeePreviewQuery } from '@/store/api/gateway'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
-import { formatCurrencyMinimal, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
+import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCandidates'
@@ -97,13 +97,13 @@ const computeTotalOutgoing = ({
     if (gasIsNative) {
       return {
         primary: { amount: formatVisualAmount(sendWei + gasWei, nativeDecimals), currency: nativeSymbol },
-        fiatTotal: formatCurrencyPrecise(sendFiat + relayCostUsd, 'usd'),
+        fiatTotal: formatCurrencyMinimal(sendFiat + relayCostUsd, 'usd'),
       }
     }
     return {
       primary: { amount: formatVisualAmount(sendWei, nativeDecimals), currency: nativeSymbol },
       fees: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
-      fiatTotal: formatCurrencyPrecise(sendFiat + relayCostUsd, 'usd'),
+      fiatTotal: formatCurrencyMinimal(sendFiat + relayCostUsd, 'usd'),
     }
   }
 
@@ -126,14 +126,14 @@ const computeTotalOutgoing = ({
             amount: formatVisualAmount(transferValue + gasWei, token.tokenInfo.decimals),
             currency: token.tokenInfo.symbol,
           },
-          fiatTotal: formatCurrencyPrecise(sendFiat + relayCostUsd, 'usd'),
+          fiatTotal: formatCurrencyMinimal(sendFiat + relayCostUsd, 'usd'),
         }
       }
 
       return {
         primary: { amount: sendAmount, currency: token.tokenInfo.symbol },
         fees: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
-        fiatTotal: formatCurrencyPrecise(sendFiat + relayCostUsd, 'usd'),
+        fiatTotal: formatCurrencyMinimal(sendFiat + relayCostUsd, 'usd'),
       }
     } catch {
       return undefined
@@ -144,7 +144,7 @@ const computeTotalOutgoing = ({
   if (isEmptyData) {
     return {
       primary: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
-      fiatTotal: formatCurrencyPrecise(relayCostUsd, 'usd'),
+      fiatTotal: formatCurrencyMinimal(relayCostUsd, 'usd'),
     }
   }
 
