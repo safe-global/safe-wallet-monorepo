@@ -89,3 +89,12 @@ export const EmailUser: Story = {
     onSignOut: () => {},
   },
 }
+
+export const LongEmail: Story = {
+  args: {
+    profileName: 'alice.long.email.address@example-enterprise-customer.com',
+    displayName: 'alice.long.email.address@example-enterprise-customer.com',
+    role: 'member',
+    onSignOut: () => {},
+  },
+}

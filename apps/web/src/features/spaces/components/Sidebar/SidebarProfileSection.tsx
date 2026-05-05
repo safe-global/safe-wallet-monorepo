@@ -61,7 +61,7 @@ export const SidebarProfileView = ({
               </div>
 
               <div className={css.profileInfo}>
-                <span className={css.textSmall}>{displayName}</span>
+                <span className={css.profileName}>{displayName}</span>
                 <span className={css.profileRole}>{role}</span>
               </div>
 
