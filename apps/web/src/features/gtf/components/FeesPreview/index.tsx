@@ -3,8 +3,10 @@ import { useContext, useRef, useState } from 'react'
 import { Divider, MenuItem, Popover, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import OutgoingIcon from '@/public/images/transactions/outgoing.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
+import TokenIcon from '@/components/common/TokenIcon'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { GtfPaymentMode } from '@/features/gtf/types'
 import type { FeesPreviewData, FeeRow as FeeRowType, TotalOutgoing } from '../../hooks/useFeesPreview'
@@ -161,7 +163,9 @@ const GasTokenSelector = ({
   onGasTokenChange?: (address: string) => void
   locked?: boolean
 }): ReactElement => {
-  const selected = availableGasTokens?.find((t) => t.address === selectedGasToken) ?? availableGasTokens?.[0]
+  // EVM addresses are case-insensitive; strict `===` would silently fall back to [0] when the
+  // stored address and the candidate address differ in checksum casing.
+  const selected = availableGasTokens?.find((t) => sameAddress(t.address, selectedGasToken)) ?? availableGasTokens?.[0]
   const anchorRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
 
@@ -179,9 +183,7 @@ const GasTokenSelector = ({
         role={locked ? undefined : 'button'}
         data-testid="gas-token-selector"
       >
-        {selected?.logoUri && (
-          <img src={selected.logoUri} alt={selected.symbol} width={24} height={24} className={css.tokenLogo} />
-        )}
+        <TokenIcon logoUri={selected?.logoUri} tokenSymbol={selected?.symbol} size={24} />
         <Typography variant="body2" fontWeight={700} letterSpacing="0.1px">
           {selected?.symbol}
         </Typography>
@@ -207,13 +209,11 @@ const GasTokenSelector = ({
         {availableGasTokens?.map((token) => (
           <MenuItem
             key={token.address}
-            selected={token.address === selectedGasToken}
+            selected={sameAddress(token.address, selectedGasToken)}
             onClick={() => handleSelect(token.address)}
             className={css.gasTokenMenuItem}
           >
-            {token.logoUri && (
-              <img src={token.logoUri} alt={token.symbol} width={24} height={24} className={css.tokenLogo} />
-            )}
+            <TokenIcon logoUri={token.logoUri} tokenSymbol={token.symbol} size={24} />
             <div>
               <Typography variant="body2" fontWeight={700}>
                 {token.symbol}
@@ -244,9 +244,7 @@ const SignerFeeNotice = ({
         <Typography variant="body2" fontWeight={700}>
           Fees will be paid from the signer using
         </Typography>
-        {nativeToken?.logoUri && (
-          <img src={nativeToken.logoUri} alt={nativeToken.symbol} width={24} height={24} className={css.tokenLogo} />
-        )}
+        <TokenIcon logoUri={nativeToken?.logoUri} tokenSymbol={nativeToken?.symbol} size={24} />
         <Typography variant="body2" fontWeight={700}>
           {nativeToken?.symbol}
         </Typography>
@@ -270,16 +268,15 @@ const ConfirmationFeeNotice = ({
   availableGasTokens: FeesPreviewData['availableGasTokens']
   selectedGasToken?: string
 }): ReactElement => {
-  const token = availableGasTokens?.find((t) => t.address === selectedGasToken) ?? availableGasTokens?.[0]
+  const token =
+    availableGasTokens?.find((t) => sameAddress(t.address, selectedGasToken ?? '')) ?? availableGasTokens?.[0]
 
   return (
     <div className={css.signerFeeNoticeRow}>
       <Typography variant="body2" fontWeight={700}>
         Fees will be paid from your Safe using
       </Typography>
-      {token?.logoUri && (
-        <img src={token.logoUri} alt={token.symbol} width={24} height={24} className={css.tokenLogo} />
-      )}
+      <TokenIcon logoUri={token?.logoUri} tokenSymbol={token?.symbol} size={24} />
       <Typography variant="body2" fontWeight={700}>
         {token?.symbol}
       </Typography>
@@ -288,8 +285,16 @@ const ConfirmationFeeNotice = ({
 }
 
 const FeesPreview = (props: FeesPreviewData): ReactElement => {
-  const { canCoverFees, isConfirmation, executionFee, gasFee, totalOutgoing, availableGasTokens, selectedGasToken } =
-    props
+  const {
+    canCoverFees,
+    isConfirmation,
+    isLegacySigned,
+    executionFee,
+    gasFee,
+    totalOutgoing,
+    availableGasTokens,
+    selectedGasToken,
+  } = props
   const { gtfPaymentMode, setGtfPaymentMode } = useContext(SafeTxContext)
 
   const isSafeWallet = gtfPaymentMode === 'safe'
@@ -316,10 +321,19 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
       </div>
 
       <div className={css.feeCard}>
-        {/* Not the first signer — fees already locked */}
-        {isConfirmation && canCoverFees && (
+        {/* Confirmer on a Safe-pays signed payload — fees already locked in */}
+        {isConfirmation && canCoverFees && !isLegacySigned && (
           <>
             <ConfirmationFeeNotice availableGasTokens={availableGasTokens} selectedGasToken={selectedGasToken} />
+
+            <Divider sx={{ mx: -2 }} />
+          </>
+        )}
+
+        {/* Confirmer on a non-Safe-pays signed payload — pay from signer, also locked */}
+        {isLegacySigned && (
+          <>
+            <SignerFeeNotice availableGasTokens={availableGasTokens} />
 
             <Divider sx={{ mx: -2 }} />
           </>

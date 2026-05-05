@@ -79,8 +79,13 @@ export const ExecuteForm = ({
   const gasTooHigh = useGasTooHigh(safeTx)
 
   // GTF Safe-pays must go via Gelato — WALLET execution would double-charge (network gas + Safe fee).
+  // For confirmers, the structural fingerprint of the signed payload is the only source of truth:
+  // a stale `gtfPaymentMode === 'safe'` from the user's persisted preference must NOT force the
+  // relay path on a tx whose payload doesn't carry the GTF fee fields (would fail in handlePayment).
   const { gtfPaymentMode, gtfSelectedGasToken, setGtfPaymentMode, setGtfSelectedGasToken } = useContext(SafeTxContext)
-  const requiresRelay = (safeTx && isGtfSafePaid(safeTx.data)) || (gtfPaymentMode === 'safe' && !!gtfSelectedGasToken)
+  const requiresRelay =
+    (safeTx && isGtfSafePaid(safeTx.data)) ||
+    (!!safeTx && safeTx.signatures.size === 0 && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken)
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)

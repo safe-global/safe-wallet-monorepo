@@ -524,10 +524,11 @@ describe('useFeesPreview', () => {
       expect(result.current.totalOutgoing?.fees).toBeUndefined()
     })
 
-    it('does not mark isConfirmation for a signed Signer-pays tx (gasToken=0x0, baseGas=0)', () => {
+    it('locks the UI as legacy-signed for a signed Signer-pays tx (gasToken=0x0, baseGas=0)', () => {
       jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
-      // Signer-pays signed tx: `gasToken` is `ZERO_ADDRESS` (always defined) but no GTF fee fields
-      // are set, so this is NOT a Safe-pays confirmation — falls through to the standard path.
+      // Signer-pays signed tx: gasPrice/baseGas are zero and refundReceiver is ZERO_ADDRESS, so
+      // it's not a Safe-pays confirmer. The hook locks the UI anyway (no editable selectors)
+      // and surfaces "Paid by executor" — same as a pre-M2 queue item.
       const signedSignerPaysTx = buildSafeTx(
         { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: ETH_ADDRESS },
         new Map([['0xSigner', {}]]),
@@ -535,7 +536,10 @@ describe('useFeesPreview', () => {
 
       const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(signedSignerPaysTx) })
 
-      expect(result.current.isConfirmation).toBeFalsy()
+      expect(result.current.isLegacySigned).toBe(true)
+      expect(result.current.isConfirmation).toBe(true)
+      expect(result.current.gasFee.note).toBe('Paid by executor')
+      expect(result.current.gasFee.amount).toBeUndefined()
     })
 
     it('renders totalOutgoing in the locked ERC-20 gas token for a reject-shape signed safeTx', () => {

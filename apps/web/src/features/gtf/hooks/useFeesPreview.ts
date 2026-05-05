@@ -40,6 +40,12 @@ export type FeesPreviewData = {
   canCoverFees: boolean
   /** When true, fees are already locked in (not the first signer) — no selectors shown */
   isConfirmation?: boolean
+  /**
+   * Locked confirmer state for a signed payload that did NOT go through Safe-pays setup
+   * (pre-M2 queue items, or post-M2 Signer-pays multi-sig after the first signature).
+   * Renders the "paid from signer" notice instead of the Safe-pays one.
+   */
+  isLegacySigned?: boolean
   executionFee: FeeRow
   gasFee: FeeRow
   totalOutgoing?: TotalOutgoing
@@ -168,6 +174,12 @@ export const useFeesPreview = (): FeesPreviewData => {
   const lockedGasToken = safeTx && safeTx.signatures.size > 0 ? safeTx.data.gasToken : undefined
   const isConfirmation = lockedGasToken !== undefined && !!safeTx && isGtfSafePaid(safeTx.data)
 
+  // Signed payload that never went through Safe-pays setup — pre-M2 queue items, or post-M2
+  // Signer-pays multi-sig after the first signature. The hook can't tell these apart from the
+  // payload alone (both have zero gasPrice/baseGas + ZERO_ADDRESS refundReceiver), so we lock
+  // the UI for confirmers regardless of how the tx got there.
+  const isLegacySigned = !!safeTx && safeTx.signatures.size > 0 && !isGtfSafePaid(safeTx.data)
+
   const { candidates, defaultAddress } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
 
   const lockedCandidate = ((): GasTokenCandidate | undefined => {
@@ -203,12 +215,16 @@ export const useFeesPreview = (): FeesPreviewData => {
   }, [gtfSelectedGasToken, candidates, setGtfSelectedGasToken])
 
   // Persist the implicit default — `mergeGtfFeeParams` bails without a selection.
+  // Skip for legacy signed txs: a residual selection here would later trip ExecuteForm's
+  // requiresRelay path and try to send the tx through Gelato, which would fail since the
+  // signed payload doesn't carry refundReceiver.
   useEffect(() => {
     if (gtfPaymentMode !== 'safe') return
     if (gtfSelectedGasToken) return
     if (!defaultAddress) return
+    if (isLegacySigned) return
     setGtfSelectedGasToken(defaultAddress)
-  }, [gtfPaymentMode, gtfSelectedGasToken, defaultAddress, setGtfSelectedGasToken])
+  }, [gtfPaymentMode, gtfSelectedGasToken, defaultAddress, isLegacySigned, setGtfSelectedGasToken])
 
   const availableGasTokens = isConfirmation && lockedCandidate ? [lockedCandidate] : candidates
   const selectedAddress = lockedGasToken ?? gtfSelectedGasToken ?? defaultAddress ?? ZERO_ADDRESS
@@ -220,7 +236,13 @@ export const useFeesPreview = (): FeesPreviewData => {
 
   // Confirmers render the fee locked in the signed payload, not a fresh CGW quote.
   const preview = useGetGtfFeePreviewQuery(
-    !isConfirmation && !isSignerMode && txPayload && chain?.chainId && safeAddress && safe.threshold > 0
+    !isConfirmation &&
+      !isSignerMode &&
+      !isLegacySigned &&
+      txPayload &&
+      chain?.chainId &&
+      safeAddress &&
+      safe.threshold > 0
       ? {
           chainId: chain.chainId,
           safeAddress,
@@ -274,6 +296,35 @@ export const useFeesPreview = (): FeesPreviewData => {
       },
       totalOutgoing,
       loading: false,
+      error: false,
+    }
+  }
+
+  // Signed payload without GTF fee setup. Locked confirmer-style UI: no selectors, gas fee
+  // shown as "Paid by executor" (multi-sig — executor unknown) or local EOA estimate (1/1).
+  if (isLegacySigned && safeTx) {
+    if (safe.threshold > 1) {
+      return {
+        ...base,
+        isConfirmation: true,
+        isLegacySigned: true,
+        canCoverFees: true,
+        gasFee: { label: 'Gas fee', note: 'Paid by executor' },
+        loading: false,
+        error: false,
+      }
+    }
+    return {
+      ...base,
+      isConfirmation: true,
+      isLegacySigned: true,
+      canCoverFees: true,
+      gasFee: {
+        label: 'Gas fee',
+        amount: getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain),
+        currency: nativeSymbol,
+      },
+      loading: !safeTx || gasLimitLoading || gasPriceLoading,
       error: false,
     }
   }

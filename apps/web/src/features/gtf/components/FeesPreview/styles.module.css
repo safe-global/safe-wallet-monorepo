@@ -95,10 +95,6 @@
   cursor: default;
 }
 
-.tokenLogo {
-  border-radius: 50%;
-}
-
 .gasTokenMenuItem {
   display: flex;
   align-items: center;
