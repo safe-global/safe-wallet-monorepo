@@ -51,9 +51,6 @@ export const showUnsupportedChainAlert = () => {
 // the wallet completes pairing, surfacing as "Proposal expired". We don't want
 // these to page on-call as Logger.error.
 //
-// TODO(WA-2198): pin to `PROPOSAL_EXPIRY_MESSAGE` from `@walletconnect/sign-client`
-// once it becomes a direct dep (today it's only transitive via @reown/appkit-react-native).
-// Until then, the anchored regex tolerates whitespace/case drift.
 export const isProposalExpiredError = (error: unknown): boolean =>
   error instanceof Error && /proposal\s+expired/i.test(error.message)
 
