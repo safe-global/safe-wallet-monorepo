@@ -3,8 +3,14 @@ import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import { renderHook, act, waitFor } from '@/src/tests/test-utils'
 import { useReconnectFlow } from '../useReconnectFlow'
-import { UnsupportedChainError, UserRejectedError } from '../useConnect'
+import { ConnectError, UnsupportedChainError, UserRejectedError } from '../useConnect'
 import type { ConnectResult } from '../useConnect'
+import Logger from '@/src/utils/logger'
+
+jest.mock('@/src/utils/logger', () => ({
+  __esModule: true,
+  default: { error: jest.fn(), warn: jest.fn(), info: jest.fn() },
+}))
 
 jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
 
@@ -13,6 +19,7 @@ const mockOtherAddress = faker.finance.ethereumAddress() as `0x${string}`
 
 const mockRouterPush = jest.fn()
 const mockDisconnect = jest.fn()
+const mockClose = jest.fn()
 const mockSwitchNetworkIfNeeded = jest.fn().mockResolvedValue(undefined)
 
 let mockConnectResolve: (result: ConnectResult) => void
@@ -33,7 +40,7 @@ jest.mock('expo-router', () => ({
 }))
 
 jest.mock('@reown/appkit-react-native', () => ({
-  useAppKit: () => ({ disconnect: mockDisconnect }),
+  useAppKit: () => ({ disconnect: mockDisconnect, close: mockClose }),
 }))
 
 jest.mock('../useSwitchNetwork', () => ({
@@ -120,9 +127,10 @@ describe('useReconnectFlow', () => {
     expect(mockSwitchNetworkIfNeeded).not.toHaveBeenCalled()
     expect(mockDisconnect).not.toHaveBeenCalled()
     expect(mockRouterPush).not.toHaveBeenCalled()
+    expect(mockClose).not.toHaveBeenCalled()
   })
 
-  it('does nothing when connect is rejected', async () => {
+  it('closes the modal on UserRejectedError without alerting and emits info-level telemetry', async () => {
     const { result } = renderReconnectFlow()
 
     act(() => {
@@ -136,5 +144,59 @@ describe('useReconnectFlow', () => {
     expect(mockSwitchNetworkIfNeeded).not.toHaveBeenCalled()
     expect(mockDisconnect).not.toHaveBeenCalled()
     expect(mockRouterPush).not.toHaveBeenCalled()
+    expect(Alert.alert).not.toHaveBeenCalled()
+    expect(Logger.error).not.toHaveBeenCalled()
+    expect(Logger.warn).not.toHaveBeenCalled()
+    expect(Logger.info).toHaveBeenCalledWith('User rejected WC connect during reconnect')
+    expect(mockClose).toHaveBeenCalled()
+  })
+
+  it('disconnects, closes the modal, then alerts when connect fails with a non-expiry ConnectError', async () => {
+    const { result } = renderReconnectFlow()
+    const connectError = new ConnectError('Connection failed')
+
+    act(() => {
+      result.current.reconnect(mockAddress)
+    })
+
+    await act(async () => {
+      mockConnectReject(connectError)
+    })
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith('Error during reconnect', expect.any(String), expect.any(Array))
+    })
+
+    expect(Logger.error).toHaveBeenCalledWith('Error during reconnect:', connectError)
+    expect(Logger.warn).not.toHaveBeenCalled()
+    expect(mockDisconnect).toHaveBeenCalled()
+    expect(mockClose).toHaveBeenCalled()
+    // Modal must dismiss before the alert renders so the alert isn't hosted by
+    // the dismissing modal on iOS.
+    const closeOrder = mockClose.mock.invocationCallOrder[0]
+    const alertOrder = (Alert.alert as jest.Mock).mock.invocationCallOrder[0]
+    expect(closeOrder).toBeLessThan(alertOrder)
+  })
+
+  it('downgrades to Logger.warn and still cleans up when connect fails with a "Proposal expired" ConnectError', async () => {
+    const { result } = renderReconnectFlow()
+    const expiredError = new ConnectError('Proposal expired')
+
+    act(() => {
+      result.current.reconnect(mockAddress)
+    })
+
+    await act(async () => {
+      mockConnectReject(expiredError)
+    })
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith('Error during reconnect', expect.any(String), expect.any(Array))
+    })
+
+    expect(Logger.warn).toHaveBeenCalledWith('WalletConnect proposal expired during reconnect:', expiredError)
+    expect(Logger.error).not.toHaveBeenCalled()
+    expect(mockDisconnect).toHaveBeenCalled()
+    expect(mockClose).toHaveBeenCalled()
   })
 })

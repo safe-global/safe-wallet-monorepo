@@ -1,5 +1,11 @@
 import { renderHook, act } from '@/src/tests/test-utils'
-import { useConnect, ConnectError, UnsupportedChainError, UserRejectedError } from '../useConnect'
+import {
+  useConnect,
+  ConnectError,
+  UnsupportedChainError,
+  UserRejectedError,
+  isProposalExpiredError,
+} from '../useConnect'
 
 const mockOpen = jest.fn()
 const mockDisconnect = jest.fn().mockResolvedValue(undefined)
@@ -22,7 +28,9 @@ jest.mock('@reown/appkit-react-native', () => ({
   useWalletInfo: () => ({ walletInfo: mockWalletState.walletInfo }),
 }))
 
-type EventCallback = (state?: { data: { address?: string; properties: { caipNetworkId?: string } } }) => void
+type EventCallback = (state?: {
+  data: { address?: string; properties: { caipNetworkId?: string; message?: string } }
+}) => void
 const eventCallbacks: Record<string, EventCallback | undefined> = {}
 
 jest.mock('../useStableAppKitEvent', () => ({
@@ -94,7 +102,7 @@ describe('useConnect', () => {
     })
   })
 
-  it('rejects on CONNECT_ERROR', async () => {
+  it('rejects on CONNECT_ERROR with the AppKit message preserved', async () => {
     const { result } = renderHook(() => useConnect())
 
     let rejected: Error | undefined
@@ -105,7 +113,9 @@ describe('useConnect', () => {
     })
 
     act(() => {
-      eventCallbacks['CONNECT_ERROR']?.()
+      eventCallbacks['CONNECT_ERROR']?.({
+        data: { properties: { message: 'WalletConnect signing failed' } },
+      })
     })
 
     await act(async () => {
@@ -113,6 +123,54 @@ describe('useConnect', () => {
     })
 
     expect(rejected).toBeInstanceOf(ConnectError)
+    expect(rejected?.message).toBe('WalletConnect signing failed')
+    expect(isProposalExpiredError(rejected)).toBe(false)
+  })
+
+  it('preserves "Proposal expired" message so callers can downgrade log level', async () => {
+    const { result } = renderHook(() => useConnect())
+
+    let rejected: Error | undefined
+    act(() => {
+      result.current().catch((e: Error) => {
+        rejected = e
+      })
+    })
+
+    act(() => {
+      eventCallbacks['CONNECT_ERROR']?.({
+        data: { properties: { message: 'Proposal expired' } },
+      })
+    })
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(rejected).toBeInstanceOf(ConnectError)
+    expect(isProposalExpiredError(rejected)).toBe(true)
+  })
+
+  it('falls back to a generic message when AppKit emits CONNECT_ERROR without one', async () => {
+    const { result } = renderHook(() => useConnect())
+
+    let rejected: Error | undefined
+    act(() => {
+      result.current().catch((e: Error) => {
+        rejected = e
+      })
+    })
+
+    act(() => {
+      eventCallbacks['CONNECT_ERROR']?.({ data: { properties: {} } })
+    })
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(rejected).toBeInstanceOf(ConnectError)
+    expect(rejected?.message).toBe('Connection failed')
   })
 
   it('rejects on USER_REJECTED', async () => {
@@ -184,7 +242,7 @@ describe('useConnect', () => {
 
     // Should not throw
     act(() => {
-      eventCallbacks['CONNECT_ERROR']?.()
+      eventCallbacks['CONNECT_ERROR']?.({ data: { properties: { message: 'Proposal expired' } } })
       eventCallbacks['USER_REJECTED']?.()
     })
   })

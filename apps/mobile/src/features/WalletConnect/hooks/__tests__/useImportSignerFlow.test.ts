@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import { renderHook, act, waitFor } from '@/src/tests/test-utils'
 import { useImportSignerFlow } from '../useImportSignerFlow'
-import { UnsupportedChainError, UserRejectedError } from '../useConnect'
+import { ConnectError, UnsupportedChainError, UserRejectedError } from '../useConnect'
 import Logger from '@/src/utils/logger'
 import type { ConnectResult } from '../useConnect'
 import type { Signer } from '@/src/store/signersSlice'
@@ -20,6 +20,7 @@ const checksumAddress = getAddress(mockAddress)
 
 const mockRouterPush = jest.fn()
 const mockDisconnect = jest.fn()
+const mockClose = jest.fn()
 const mockValidateAddressOwnership = jest.fn()
 const mockSwitchNetworkIfNeeded = jest.fn().mockResolvedValue(undefined)
 
@@ -41,7 +42,7 @@ jest.mock('expo-router', () => ({
 }))
 
 jest.mock('@reown/appkit-react-native', () => ({
-  useAppKit: () => ({ disconnect: mockDisconnect }),
+  useAppKit: () => ({ disconnect: mockDisconnect, close: mockClose }),
 }))
 
 jest.mock('@/src/hooks/useAddressOwnershipValidation', () => ({
@@ -148,7 +149,7 @@ describe('useImportSignerFlow', () => {
     })
   })
 
-  it('does nothing when connect is rejected (user rejected)', async () => {
+  it('closes the modal on UserRejectedError without alerting and emits info-level telemetry', async () => {
     const { result } = renderImportFlow()
 
     act(() => {
@@ -161,6 +162,12 @@ describe('useImportSignerFlow', () => {
 
     expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
     expect(mockRouterPush).not.toHaveBeenCalled()
+    expect(Alert.alert).not.toHaveBeenCalled()
+    expect(Logger.error).not.toHaveBeenCalled()
+    expect(Logger.warn).not.toHaveBeenCalled()
+    expect(Logger.info).toHaveBeenCalledWith('User rejected WC connect during signer import')
+    expect(mockDisconnect).not.toHaveBeenCalled()
+    expect(mockClose).toHaveBeenCalled()
   })
 
   it('shows an alert when wallet does not support the active Safe chain', async () => {
@@ -181,21 +188,58 @@ describe('useImportSignerFlow', () => {
     expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
     expect(mockRouterPush).not.toHaveBeenCalled()
     expect(Logger.error).not.toHaveBeenCalled()
+    expect(mockClose).not.toHaveBeenCalled()
   })
 
-  it('does nothing when connect fails (connection error)', async () => {
+  it('disconnects, closes the modal, then alerts when connect fails with a non-expiry ConnectError', async () => {
     const { result } = renderImportFlow()
+    const connectError = new ConnectError('Connection failed')
 
     act(() => {
       result.current.initiateConnection()
     })
 
     await act(async () => {
-      mockConnectReject(new Error('Connection failed'))
+      mockConnectReject(connectError)
     })
 
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith('Error during signer import', expect.any(String), expect.any(Array))
+    })
+
+    expect(Logger.error).toHaveBeenCalledWith('Error during signer import:', connectError)
+    expect(Logger.warn).not.toHaveBeenCalled()
+    expect(mockDisconnect).toHaveBeenCalled()
+    expect(mockClose).toHaveBeenCalled()
     expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
     expect(mockRouterPush).not.toHaveBeenCalled()
+    // Modal must dismiss before the alert renders so the alert isn't hosted by
+    // the dismissing modal on iOS.
+    const closeOrder = mockClose.mock.invocationCallOrder[0]
+    const alertOrder = (Alert.alert as jest.Mock).mock.invocationCallOrder[0]
+    expect(closeOrder).toBeLessThan(alertOrder)
+  })
+
+  it('downgrades to Logger.warn and still cleans up when connect fails with a "Proposal expired" ConnectError', async () => {
+    const { result } = renderImportFlow()
+    const expiredError = new ConnectError('Proposal expired')
+
+    act(() => {
+      result.current.initiateConnection()
+    })
+
+    await act(async () => {
+      mockConnectReject(expiredError)
+    })
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith('Error during signer import', expect.any(String), expect.any(Array))
+    })
+
+    expect(Logger.warn).toHaveBeenCalledWith('WalletConnect proposal expired during signer import:', expiredError)
+    expect(Logger.error).not.toHaveBeenCalled()
+    expect(mockDisconnect).toHaveBeenCalled()
+    expect(mockClose).toHaveBeenCalled()
   })
 
   it('disconnects and shows alert when a different-type signer exists for the address', async () => {

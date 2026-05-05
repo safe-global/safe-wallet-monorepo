@@ -46,6 +46,17 @@ export const showUnsupportedChainAlert = () => {
   )
 }
 
+// AppKit forwards the underlying SignClient/Universal Provider message verbatim
+// in CONNECT_ERROR. The QR-code pairing proposal expires (~5 min default) before
+// the wallet completes pairing, surfacing as "Proposal expired". We don't want
+// these to page on-call as Logger.error.
+//
+// TODO(WA-2198): pin to `PROPOSAL_EXPIRY_MESSAGE` from `@walletconnect/sign-client`
+// once it becomes a direct dep (today it's only transitive via @reown/appkit-react-native).
+// Until then, the anchored regex tolerates whitespace/case drift.
+export const isProposalExpiredError = (error: unknown): boolean =>
+  error instanceof Error && /proposal\s+expired/i.test(error.message)
+
 interface PendingConnect {
   resolve: (result: ConnectResult) => void
   reject: (error: Error) => void
@@ -157,14 +168,14 @@ export function useConnect() {
       })
   })
 
-  useStableAppKitEvent('CONNECT_ERROR', () => {
+  useStableAppKitEvent('CONNECT_ERROR', ({ data }) => {
     if (!pendingRef.current) {
       return
     }
     const { reject } = pendingRef.current
     pendingRef.current = null
     clearSwitchTimeout()
-    reject(new ConnectError('Connection failed'))
+    reject(new ConnectError(data.properties?.message || 'Connection failed'))
   })
 
   useStableAppKitEvent('USER_REJECTED', () => {
