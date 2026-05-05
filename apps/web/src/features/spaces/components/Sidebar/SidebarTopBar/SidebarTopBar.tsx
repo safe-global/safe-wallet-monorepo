@@ -18,9 +18,7 @@ export const SidebarTopBar = (): ReactElement => {
       data-sidebar-state={state}
       className={cn('relative w-full', isCollapsed ? 'min-h-16' : 'h-10')}
     >
-      <div className="absolute left-3 top-3 z-10" data-testid="logo-container">
-        <SafeLogo href={logoHref} />
-      </div>
+      <SafeLogo href={logoHref} data-testid="logo-container" className="absolute left-3 top-3 z-10" />
       <SidebarTrigger
         className={cn(
           'absolute z-10 shrink-0 cursor-pointer text-sidebar-foreground/65 hover:text-sidebar-foreground hover:bg-sidebar-accent',

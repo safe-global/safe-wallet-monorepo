@@ -19,8 +19,9 @@ describe('SafeLogo', () => {
     expect(screen.getByRole('link')).toHaveAttribute('href', '/welcome')
   })
 
-  it('renders the Safe logo image with alt text', () => {
+  it('renders the Safe logo image with alt text and testid', () => {
     render(<SafeLogo />)
-    expect(screen.getByRole('img', { name: 'Safe' })).toBeInTheDocument()
+    const img = screen.getByTestId('logo-image')
+    expect(img).toHaveAttribute('alt', 'Safe')
   })
 })

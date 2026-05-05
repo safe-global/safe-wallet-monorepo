@@ -6,6 +6,7 @@ import { BRAND_NAME } from '@/config/constants'
 import SafeCookiePolicy from '@/markdown/cookie/cookie.md'
 import type { MDXComponents } from 'mdx/types'
 import CustomLink from '@/components/common/CustomLink'
+import MarkdownContent from '@/components/common/MarkdownContent'
 import { Table as MuiTable, TableHead, TableBody, TableRow, TableCell } from '@mui/material'
 
 const Table = (props: ComponentProps<typeof MuiTable>) => <MuiTable {...props} sx={{ border: '1px solid black' }} />
@@ -35,7 +36,11 @@ const CookiePolicy: NextPage = () => {
       </Head>
 
       <main style={{ lineHeight: '1.5' }}>
-        {isOfficialHost && <SafeCookiePolicy components={overrideComponents} />}
+        {isOfficialHost && (
+          <MarkdownContent>
+            <SafeCookiePolicy components={overrideComponents} />
+          </MarkdownContent>
+        )}
       </main>
     </>
   )
