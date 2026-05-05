@@ -85,7 +85,7 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
       onClick={handleClick}
     >
       <Tooltip>
-        <TooltipTrigger className="flex min-w-0 items-center gap-3">
+        <TooltipTrigger className="flex min-w-0 cursor-pointer items-center gap-3">
           <div className={item.isActive ? css.activeIcon : undefined}>
             <item.icon />
           </div>
