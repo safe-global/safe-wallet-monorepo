@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState, type ReactElement } from 'react'
 import classnames from 'classnames'
 import { AnimatePresence, motion } from 'motion/react'
-
 import Topbar from '@/components/common/Header/Topbar'
+import SafeLogo from '@/components/common/SafeLogo'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import css from './styles.module.css'
 import SafeLoadingError from '../SafeLoadingError'
@@ -27,6 +27,8 @@ const ONBOARDING_ROUTES = [
   AppRoutes.welcome.inviteMembers,
 ]
 
+const STATIC_PAGE_ROUTES = [AppRoutes.terms, AppRoutes.privacy, AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
+
 const NO_HEADER_ROUTES = [
   AppRoutes.safeLabsTerms,
   AppRoutes.welcome.index,
@@ -34,6 +36,7 @@ const NO_HEADER_ROUTES = [
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
   AppRoutes.spaces.createSpace,
+  ...STATIC_PAGE_ROUTES,
 ]
 
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
@@ -45,6 +48,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const { BatchSidebar } = useLoadFeature(BatchingFeature)
   const { SelectSafeModal } = useLoadFeature(SpacesFeature)
   const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
+  const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
@@ -73,6 +77,12 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           })}
         >
           <Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
+        </div>
+      )}
+
+      {isStaticPage && (
+        <div className="px-6 py-4">
+          <SafeLogo />
         </div>
       )}
 

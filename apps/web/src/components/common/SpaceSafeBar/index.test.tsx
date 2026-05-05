@@ -291,4 +291,16 @@ describe('SpaceSafeBar', () => {
     const { getByTestId } = render(<SpaceSafeBar />)
     expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
   })
+
+  it.each([['/terms'], ['/privacy'], ['/licenses'], ['/imprint'], ['/cookie']])(
+    'renders nothing on static page %s',
+    (pathname) => {
+      mockUsePathname.mockReturnValue(pathname)
+
+      const { queryByTestId } = render(<SpaceSafeBar />)
+      expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()
+      expect(queryByTestId('nested-safes-button')).not.toBeInTheDocument()
+      expect(queryByTestId('space-chain-selector')).not.toBeInTheDocument()
+    },
+  )
 })
