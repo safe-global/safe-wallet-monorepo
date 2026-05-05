@@ -50,7 +50,7 @@ export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorks
                 size="lg"
                 className={css.addSafeToWorkspaceTrigger}
                 data-testid="add-safe-to-workspace-button"
-                aria-label="Add Safe to workspace"
+                aria-label="Add Safe to space"
                 aria-haspopup="dialog"
               />
             }
@@ -58,7 +58,7 @@ export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorks
             <span className={css.addSafeToWorkspaceRing}>
               <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} strokeWidth={2.5} />
             </span>
-            <span className={css.addSafeToWorkspaceLabel}>Add Safe to workspace</span>
+            <span className={css.addSafeToWorkspaceLabel}>Add Safe to space</span>
           </DialogTrigger>
           <DialogContent className="max-w-[420px] p-0" showCloseButton={false}>
             <AddToSpacePopupModal />
