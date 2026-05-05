@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { ChevronRight, Users } from 'lucide-react'
+import { ChevronRight, Plus, WalletCards } from 'lucide-react'
 import SafeWidget from './index'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -88,7 +88,18 @@ export const Assets: Story = {
 export const EmptyState: Story = {
   render: () => (
     <SafeWidget title="Accounts">
-      <SafeWidget.EmptyState icon={<Users className="size-6" />} text="No accounts yet" />
+      <SafeWidget.EmptyState
+        icon={<WalletCards className="size-6 text-[#22C55E]" />}
+        iconContainerClassName="bg-accent"
+        text="No accounts yet"
+        subtitle="Add your Safe accounts to view balances and manage transactions."
+        action={
+          <Button size="sm">
+            <Plus className="size-4" />
+            Add account
+          </Button>
+        }
+      />
     </SafeWidget>
   ),
 }

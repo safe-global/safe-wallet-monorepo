@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 import { FormProvider } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
@@ -24,9 +24,11 @@ const SelectSafesOnboarding = (): ReactElement => {
   const connectWallet = useConnectWallet()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
   const { trustedSafes, ownedSafes, similarAddresses, handleSearch } = useOnboardingSafes()
+  const allSafes = useMemo(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
   const { formMethods, onSubmit, selectedSafesLength, error, isSubmitting } = useOnboardingSubmit(
     spaceId,
     redirectToNextStep,
+    allSafes,
   )
 
   return (

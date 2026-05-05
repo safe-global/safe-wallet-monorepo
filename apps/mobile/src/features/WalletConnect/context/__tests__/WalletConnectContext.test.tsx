@@ -51,6 +51,8 @@ const mockAppKit = { open: mockOpen, disconnect: mockDisconnect }
 const mockAccount = { address: mockAddress, chainId: 1, isConnected: true }
 const mockWalletInfoResult = { walletInfo: { name: 'MetaMask' } }
 
+const mockAppKitState = { isOpen: false, isLoading: false, isConnected: false, chain: undefined }
+
 jest.mock('@reown/appkit-react-native', () => ({
   AppKit: () => null,
   AppKitProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -58,6 +60,7 @@ jest.mock('@reown/appkit-react-native', () => ({
   useAccount: () => mockAccount,
   useWalletInfo: () => mockWalletInfoResult,
   useProvider: () => ({ provider: undefined }),
+  useAppKitState: () => mockAppKitState,
 }))
 
 const mockInstance = {} as NonNullable<React.ComponentProps<typeof WalletConnectProvider>['instance']>
@@ -135,9 +138,9 @@ describe('WalletConnectContext', () => {
     it('delegates open to useAppKit', async () => {
       const { result } = await renderWithProvider()
 
-      result.current?.open()
+      result.current?.open({ view: 'Connect' })
 
-      expect(mockOpen).toHaveBeenCalled()
+      expect(mockOpen).toHaveBeenCalledWith({ view: 'Connect' })
     })
 
     it('delegates disconnect to useAppKit', async () => {

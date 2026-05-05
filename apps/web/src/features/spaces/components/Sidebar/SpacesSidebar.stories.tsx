@@ -7,7 +7,7 @@ import { withMockProvider } from '@/storybook/preview'
 import { SpacesSidebarVariant } from './variants/SpacesSidebarVariant'
 import { SidebarTopBar } from './SidebarTopBar'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
-import { SidebarSkeleton } from './SidebarSkeleton'
+import type { SpaceItem } from './types'
 import type { ResolvedSidebarItem, ResolvedSidebarGroup } from './types'
 
 const mockSpaceId = '1'
@@ -87,9 +87,9 @@ const mockDisabledSetupGroup: ResolvedSidebarGroup = {
   ),
 }
 
-const mockSpaces = [
-  { id: 1, name: 'Company Space' },
-  { id: 2, name: 'Personal Space' },
+const mockSpaces: SpaceItem[] = [
+  { id: 1, name: 'Company Space', safeCount: 0 },
+  { id: 2, name: 'Personal Space', safeCount: 0 },
 ]
 
 const selectedSpace = mockSpaces[0]
@@ -186,23 +186,17 @@ export const TransactionsActive: Story = {
 
 export const Skeleton: Story = {
   args: {
-    mainNavItems: mockMainNavItems,
-    setupGroup: mockSetupGroup,
+    mainNavItems: null,
+    setupGroup: null,
     selectedSpace,
     spaces: mockSpaces,
+    isLoading: true,
   },
-  render: () => (
-    <SidebarProvider
-      defaultOpen
-      style={
-        {
-          '--sidebar-width': SPACES_SIDEBAR_WIDTH,
-        } as CSSProperties
-      }
-    >
-      <div className="flex min-h-screen w-full p-4">
-        <SidebarSkeleton />
-      </div>
-    </SidebarProvider>
-  ),
+  decorators: [
+    (Story) => (
+      <SidebarWrapper>
+        <Story />
+      </SidebarWrapper>
+    ),
+  ],
 }

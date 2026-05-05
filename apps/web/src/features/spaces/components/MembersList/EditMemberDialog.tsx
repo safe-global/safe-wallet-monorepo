@@ -8,6 +8,8 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import MemberInfoForm from '../AddMemberModal/MemberInfoForm'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 type MemberField = {
   name: string
@@ -50,6 +52,16 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
       if (error) {
         throw error
       }
+
+      trackEvent(
+        { ...SPACE_EVENTS.WORKSPACE_MEMBER_ROLE_CHANGED, label: spaceId },
+        {
+          workspace_id: spaceId,
+          target_user_id: member.user.id,
+          from_role: member.role.toLowerCase(),
+          to_role: data.role.toLowerCase(),
+        },
+      )
 
       dispatch(
         showNotification({

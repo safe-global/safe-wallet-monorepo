@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { MoreVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { withMockProvider } from '@/storybook/preview'
 import { DashboardHeader } from './DashboardHeader'
 
 const meta = {
@@ -10,6 +11,7 @@ const meta = {
     layout: 'centered',
   },
   decorators: [
+    withMockProvider(),
     (Story) => (
       <div className="bg-muted p-6 min-w-[1000px] min-h-[200px]">
         <Story />
@@ -24,6 +26,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     value: '$123,456.01',
+    noAssets: false,
     onSend: () => {},
     onReceive: () => {},
     onSwap: () => {},

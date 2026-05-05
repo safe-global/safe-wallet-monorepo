@@ -1,4 +1,5 @@
 import { AuthorizationStatus, EventType } from '@notifee/react-native'
+import { Linking, Platform } from 'react-native'
 import { ChannelId } from '@/src/utils/notifications'
 
 jest.mock('./notificationParser', () => ({
@@ -116,9 +117,30 @@ describe('NotificationsService', () => {
       })
       ;(notifee.getChannels as jest.Mock).mockResolvedValue([])
 
-      const result = await NotificationsService.getAllPermissions(false)
+      const result = await NotificationsService.getAllPermissions()
 
       expect(result.permission).toBe('denied')
+    })
+
+    // Apple App Store guideline 5.1.1(iv): denial of an OS permission prompt must NOT chain into a
+    // Settings redirect. See WA-2238 / WA-2229 (camera fix #7810).
+    it('does not open device Settings when permission is denied', async () => {
+      ;(notifee.createChannel as jest.Mock).mockResolvedValue('channel-id')
+      ;(notifee.requestPermission as jest.Mock).mockResolvedValue({ authorizationStatus: AuthorizationStatus.DENIED })
+      ;(notifee.getNotificationSettings as jest.Mock).mockResolvedValue({
+        authorizationStatus: AuthorizationStatus.DENIED,
+      })
+      ;(notifee.getChannels as jest.Mock).mockResolvedValue([])
+      const openURLSpy = jest.spyOn(Linking, 'openURL').mockResolvedValue(true)
+      const openSettingsSpy = jest.spyOn(Linking, 'openSettings').mockResolvedValue(undefined)
+
+      await NotificationsService.getAllPermissions()
+
+      expect(openURLSpy).not.toHaveBeenCalled()
+      expect(openSettingsSpy).not.toHaveBeenCalled()
+
+      openURLSpy.mockRestore()
+      openSettingsSpy.mockRestore()
     })
 
     it('returns denied on error', async () => {
@@ -129,6 +151,41 @@ describe('NotificationsService', () => {
       const result = await NotificationsService.getAllPermissions()
 
       expect(result.permission).toBe('denied')
+    })
+  })
+
+  describe('openDeviceSettings', () => {
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    // Apple 5.1.1(iv): openDeviceSettings is a pure side-effect — it must not re-request the
+    // permission, otherwise a denial of that prompt would chain into a Settings redirect.
+    it('does not re-request notification permission', async () => {
+      Platform.OS = 'ios'
+      jest.spyOn(Linking, 'openURL').mockResolvedValue(true)
+
+      await NotificationsService.openDeviceSettings()
+
+      expect(notifee.requestPermission).not.toHaveBeenCalled()
+    })
+
+    it('opens iOS app settings via Linking.openURL', async () => {
+      Platform.OS = 'ios'
+      const openURLSpy = jest.spyOn(Linking, 'openURL').mockResolvedValue(true)
+
+      await NotificationsService.openDeviceSettings()
+
+      expect(openURLSpy).toHaveBeenCalledWith('app-settings:')
+    })
+
+    it('opens Android settings via Linking.openSettings', async () => {
+      Platform.OS = 'android'
+      const openSettingsSpy = jest.spyOn(Linking, 'openSettings').mockResolvedValue(undefined)
+
+      await NotificationsService.openDeviceSettings()
+
+      expect(openSettingsSpy).toHaveBeenCalled()
     })
   })
 

@@ -11,6 +11,7 @@
 .popoverContainer {
   width: 446px;
   border: 1px solid var(--color-border-light);
+  border-radius: 24px;
 }
 
 @media (max-width: 599.95px) {

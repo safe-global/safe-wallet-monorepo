@@ -1,7 +1,6 @@
-import { useState, useCallback, type ReactElement, type MouseEvent } from 'react'
-import { IconButton, Menu, MenuItem, ListItemIcon, ListItemText, SvgIcon } from '@mui/material'
+import { useState, useCallback, type ReactElement } from 'react'
+import { Menu, MenuItem, ListItemIcon, ListItemText, SvgIcon } from '@mui/material'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
-import CloseIcon from '@mui/icons-material/Close'
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
 import { OpenInNewRounded } from '@mui/icons-material'
 import { useLoadFeature } from '@/features/__core__'
@@ -11,8 +10,12 @@ import css from './styles.module.css'
 
 const HELP_CENTER_URL = 'https://help.safe.global'
 
-const HelpMenu = (): ReactElement | null => {
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+type HelpMenuProps = {
+  anchorEl: HTMLElement | null
+  onClose: () => void
+}
+
+const HelpMenu = ({ anchorEl, onClose }: HelpMenuProps): ReactElement | null => {
   const [isSupportOpen, setSupportOpen] = useState(false)
   const { SupportChatDrawer, $isDisabled } = useLoadFeature(SupportChatFeature)
   const { config, user } = useSupportChat()
@@ -21,30 +24,15 @@ const HelpMenu = (): ReactElement | null => {
   const isMenuOpen = Boolean(anchorEl)
   const showSupport = !$isDisabled && isOfficialHost
 
-  const handleFabClick = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      if (isSupportOpen) {
-        setSupportOpen(false)
-      } else {
-        setAnchorEl(event.currentTarget)
-      }
-    },
-    [isSupportOpen],
-  )
-
-  const handleMenuClose = useCallback(() => {
-    setAnchorEl(null)
-  }, [])
-
   const handleHelpCenterClick = useCallback(() => {
     window.open(HELP_CENTER_URL, '_blank', 'noopener,noreferrer')
-    setAnchorEl(null)
-  }, [])
+    onClose()
+  }, [onClose])
 
   const handleContactSupportClick = useCallback(() => {
     setSupportOpen(true)
-    setAnchorEl(null)
-  }, [])
+    onClose()
+  }, [onClose])
 
   const handleSupportClose = useCallback(() => {
     setSupportOpen(false)
@@ -52,19 +40,11 @@ const HelpMenu = (): ReactElement | null => {
 
   return (
     <>
-      <IconButton
-        className={css.fab}
-        onClick={handleFabClick}
-        aria-label={isSupportOpen ? 'Close support chat' : 'Help menu'}
-      >
-        {isSupportOpen ? <CloseIcon /> : <HelpOutlineIcon />}
-      </IconButton>
-
       <Menu
         className={css.menu}
         anchorEl={anchorEl}
         open={isMenuOpen}
-        onClose={handleMenuClose}
+        onClose={onClose}
         anchorOrigin={{
           vertical: 'top',
           horizontal: 'right',

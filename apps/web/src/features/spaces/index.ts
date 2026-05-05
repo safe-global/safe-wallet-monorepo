@@ -52,6 +52,8 @@ export { default as useAddressBookSearch } from './hooks/useAddressBookSearch'
 export { useCurrentSpaceId } from './hooks/useCurrentSpaceId'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
 export { default as useGetSpaceAddressBook } from './hooks/useGetSpaceAddressBook'
+export { default as useGetPrivateAddressBook } from './hooks/useGetPrivateAddressBook'
+export { default as useGetAddressBookRequests } from './hooks/useGetAddressBookRequests'
 export { useAdminCount, useIsLastActiveAdmin } from './hooks/useIsLastActiveAdmin'
 export { default as useIsQualifiedSafe } from './hooks/useIsQualifiedSafe'
 export { useMembersSearch } from './hooks/useMembersSearch'
@@ -76,6 +78,16 @@ export { useSpaceSafes } from './hooks/useSpaceSafes'
 
 // Hooks from useSpacePendingTransactions.ts
 export { useSpacePendingTransactions } from './hooks/useSpacePendingTransactions'
+
+// Store exports (actions, selectors, types)
+export {
+  ESafeAction,
+  openSafeActionsModal,
+  closeSafeActionsModal,
+  selectSafeActionsModal,
+  selectSafeActionsModalOpen,
+  selectSafeActionsModalType,
+} from './store'
 
 // Public types (compile-time only, no runtime cost)
 export { mapSpaceContactsToAddressBookState } from './utils'

@@ -187,3 +187,85 @@ export const WithNestedSafes: Story = {
   render: () => <InteractiveWrapper items={mockItemsWithNested} initialItemId={mockItemsWithNested[0].id} />,
   args: {} as any,
 }
+
+/** Dropdown content shows loading skeletons while safe data is being fetched. */
+export const Loading: Story = {
+  render: () => (
+    <SafeSelectorDropdown
+      items={[mockItems[0]]}
+      selectedItemId={mockItems[0].id}
+      isLoading
+      onItemSelect={action('Item selected')}
+    />
+  ),
+  args: {} as any,
+}
+
+/** Dropdown content shows error state with retry button when loading fails. */
+export const Error: Story = {
+  render: () => (
+    <SafeSelectorDropdown
+      items={[mockItems[0]]}
+      selectedItemId={mockItems[0].id}
+      isError
+      onRetry={action('Retry')}
+      onItemSelect={action('Item selected')}
+    />
+  ),
+  args: {} as any,
+}
+
+/** Loading state with header and footer (non-space context). */
+export const LoadingWithHeaderFooter: Story = {
+  render: () => {
+    const header = (
+      <div className="flex items-center gap-1 px-4 pt-3 pb-2">
+        <span className="text-sm font-semibold text-secondary-foreground">Trusted Safes</span>
+      </div>
+    )
+    const footer = (
+      <div className="px-4 py-3">
+        <button className="w-full rounded-md border px-3 py-1.5 text-sm">All accounts &rsaquo;</button>
+      </div>
+    )
+    return (
+      <SafeSelectorDropdown
+        items={[mockItems[0]]}
+        selectedItemId={mockItems[0].id}
+        isLoading
+        onItemSelect={action('Item selected')}
+        header={header}
+        footer={footer}
+      />
+    )
+  },
+  args: {} as any,
+}
+
+/** Error state with header and footer (non-space context). */
+export const ErrorWithHeaderFooter: Story = {
+  render: () => {
+    const header = (
+      <div className="flex items-center gap-1 px-4 pt-3 pb-2">
+        <span className="text-sm font-semibold text-secondary-foreground">Trusted Safes</span>
+      </div>
+    )
+    const footer = (
+      <div className="px-4 py-3">
+        <button className="w-full rounded-md border px-3 py-1.5 text-sm">All accounts &rsaquo;</button>
+      </div>
+    )
+    return (
+      <SafeSelectorDropdown
+        items={[mockItems[0]]}
+        selectedItemId={mockItems[0].id}
+        isError
+        onRetry={action('Retry')}
+        onItemSelect={action('Item selected')}
+        header={header}
+        footer={footer}
+      />
+    )
+  },
+  args: {} as any,
+}

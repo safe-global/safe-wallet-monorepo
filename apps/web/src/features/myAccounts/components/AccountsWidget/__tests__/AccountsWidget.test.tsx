@@ -130,7 +130,14 @@ describe('AccountsWidget', () => {
 
     expect(screen.getByText('Accounts')).toBeInTheDocument()
     expect(screen.getByText('No accounts yet')).toBeInTheDocument()
+    expect(screen.getByText('Add your Safe accounts to view balances and manage transactions.')).toBeInTheDocument()
     expect(screen.queryByText('View all accounts')).not.toBeInTheDocument()
+  })
+
+  it('renders the empty state action when provided', () => {
+    render(<AccountsWidget accounts={[]} emptyStateAction={<button>Add account</button>} />)
+
+    expect(screen.getByRole('button', { name: 'Add account' })).toBeInTheDocument()
   })
 
   it('renders the error state with error message', () => {

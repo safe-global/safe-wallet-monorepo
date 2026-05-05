@@ -125,7 +125,9 @@ function mapFindings(findings: HypernativeFinding): AnalysisResult<AllowedThreat
     const mappedDetails = HypernativeRiskDescriptionMap[type] ?? (mappedTitle ? risk.title : risk.details)
     const details = mappedDetails.length > 0 && !mappedDetails.endsWith('.') ? `${mappedDetails}.` : mappedDetails
 
-    const description = `${details.length > 0 ? `${details} ` : ''}The full threat report is available in your Hypernative account.`
+    const description = `${
+      details.length > 0 ? `${details} ` : ''
+    }The full threat report is available in your Hypernative account.`
 
     return { severity, type, title, description }
   })

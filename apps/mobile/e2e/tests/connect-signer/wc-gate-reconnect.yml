@@ -1,0 +1,34 @@
+appId: ${APP_ID}
+tags:
+  - connect-signer
+  - wc-gate
+---
+# WalletConnect Gate: Session expired → "Reconnect wallet to continue"
+# Uses pendingTxSafe1 with a WC signer whose session is NOT active.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- runFlow:
+    file: ../../utils/setup/open-review-and-execute.yml
+    env:
+      SETUP_BUTTON_ID: 'e2eWcGateReconnect'
+
+# Verify the WalletConnect gate shows "Reconnect wallet to continue"
+# instead of the normal execute/confirm button
+- extendedWaitUntil:
+    visible:
+      id: 'reconnect-wallet-button'
+    timeout: 10000
+- assertVisible: 'Reconnect wallet to continue'
+
+# Tap "Reconnect wallet to continue" — the e2e mock marks the session active
+- tapOn:
+    id: 'reconnect-wallet-button'
+
+# Verify the gate is dismissed (the underlying execute/insufficient-funds
+# button is intentionally not asserted — those are distinct semantic states)
+- extendedWaitUntil:
+    notVisible:
+      id: 'reconnect-wallet-button'
+    timeout: 10000

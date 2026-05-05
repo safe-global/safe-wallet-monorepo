@@ -6,6 +6,8 @@
  */
 
 export interface WalletConnectE2eState {
+  // ── Scenario directives — drive what the next mock call should do ────────
+
   /** What initiateConnection resolves with (happy path) */
   connectResult: {
     address: string
@@ -22,13 +24,20 @@ export interface WalletConnectE2eState {
    */
   isOwner: boolean
 
-  /** Session state (read by WalletConnectGate via useWalletConnectStatus) */
+  /**
+   * Single-shot: when true, the next reconnect() routes to
+   * `/import-signers/reconnect-error` AND clears this flag, so a follow-up
+   * retry succeeds. Mirrors the user journey "wrong wallet connected →
+   * reconnect with the right one". See WalletConnectContext.e2e.tsx.
+   */
+  reconnectMismatch: boolean
+
+  // ── Session state — what a real WC provider would expose downstream ─────
+
   isConnected: boolean
   address: string | undefined
-  chainId: number | undefined
+  chainId: string | undefined
   walletInfo: { name: string; icon?: string } | undefined
-
-  /** Gate states */
   isWrongNetwork: boolean
   hasProvider: boolean
 }
@@ -37,6 +46,7 @@ const initialState: WalletConnectE2eState = {
   connectResult: null,
   connectError: null,
   isOwner: false,
+  reconnectMismatch: false,
   isConnected: false,
   address: undefined,
   chainId: undefined,

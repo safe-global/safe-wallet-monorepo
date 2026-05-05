@@ -38,7 +38,11 @@ const guardRules: GuardRule[] = [
     match: ({ isSiweAuthenticated }) => {
       return !isSiweAuthenticated
     },
-    action: ({ isSpacesPath }) => redirect(isSpacesPath ? AppRoutes.welcome.spaces : AppRoutes.welcome.index),
+    action: ({ isSpacesPath, query }) => {
+      const target = isSpacesPath ? AppRoutes.welcome.spaces : AppRoutes.welcome.index
+      const safe = typeof query.safe === 'string' ? query.safe : undefined
+      return redirect(safe ? `${target}?safe=${encodeURIComponent(safe)}` : target)
+    },
   },
 
   // Authenticated but has no spaces → onboarding
@@ -48,7 +52,11 @@ const guardRules: GuardRule[] = [
 
       return shouldRedirect
     },
-    action: () => redirect(AppRoutes.welcome.createSpace),
+    action: ({ query }) => {
+      const safe = typeof query.safe === 'string' ? query.safe : undefined
+      const target = AppRoutes.welcome.createSpace
+      return redirect(safe ? `${target}?safe=${encodeURIComponent(safe)}` : target)
+    },
   },
 
   // Authenticated with spaces but navigating to onboarding without a spaceId → spaces create page
@@ -57,7 +65,11 @@ const guardRules: GuardRule[] = [
       const shouldRedirect = hasSpaces && isOnboardingRoute && !query.spaceId
       return shouldRedirect
     },
-    action: () => redirect(AppRoutes.spaces.createSpace),
+    action: ({ query }) => {
+      const safe = typeof query.safe === 'string' ? query.safe : undefined
+      const target = AppRoutes.spaces.createSpace
+      return redirect(safe ? `${target}?safe=${encodeURIComponent(safe)}` : target)
+    },
   },
 
   {

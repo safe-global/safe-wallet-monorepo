@@ -2,7 +2,7 @@
 
 exports[`./NoFeeCampaignBanner.stories Default 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-t31lyp-MuiPaper-root-MuiCard-root"
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-fmnm4n-MuiPaper-root-MuiCard-root"
   style="--Paper-shadow: none;"
 >
   <div

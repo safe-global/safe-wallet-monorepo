@@ -188,7 +188,6 @@ const CreateSafe = () => {
         columnSpacing={3}
         sx={{
           justifyContent: 'center',
-          mt: [2, null, 7],
         }}
       >
         <Grid item xs={12}>

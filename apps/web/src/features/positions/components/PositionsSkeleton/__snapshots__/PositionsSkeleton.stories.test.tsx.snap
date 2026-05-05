@@ -11,11 +11,11 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
       class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-10wna7a-MuiPaper-root-MuiCard-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-1e0hdwf-MuiPaper-root-MuiCard-root"
         style="--Paper-shadow: none;"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded Mui-expanded mui-style-b8kipg-MuiPaper-root-MuiAccordion-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded Mui-expanded mui-style-1bceubf-MuiPaper-root-MuiAccordion-root"
           style="--Paper-shadow: none;"
         >
           <h3
@@ -108,7 +108,7 @@ exports[`./PositionsSkeleton.stories Default 1`] = `
                         class="MuiBox-root mui-style-dzaqf9"
                       >
                         <div
-                          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-15l0b46-MuiPaper-root-MuiTableContainer-root"
+                          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-1uh4fgc-MuiPaper-root-MuiTableContainer-root"
                           data-testid="table-container"
                           style="--Paper-shadow: none;"
                         >

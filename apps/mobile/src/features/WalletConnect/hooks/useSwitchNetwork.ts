@@ -42,3 +42,5 @@ export function useSwitchNetwork() {
 
   return { switchNetworkIfNeeded, switchNetwork, isWrongNetwork }
 }
+
+export type SwitchNetworkResult = ReturnType<typeof useSwitchNetwork>

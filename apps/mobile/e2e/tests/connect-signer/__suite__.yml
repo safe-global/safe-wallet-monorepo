@@ -1,0 +1,25 @@
+appId: ${APP_ID}
+tags:
+  - connect-signer
+  - suite
+---
+# Connect Signer Test Suite. Each test calls resetReduxForE2E before
+# seeding, so the order below is presentation-only — tests are independent.
+
+- runFlow:
+    file: ./connect-signer-success.yml
+
+- runFlow:
+    file: ./connect-signer-not-owner.yml
+
+- runFlow:
+    file: ./connect-signer-collision.yml
+
+- runFlow:
+    file: ./wc-gate-reconnect.yml
+
+- runFlow:
+    file: ./wc-gate-switch-network.yml
+
+- runFlow:
+    file: ./reconnect-wrong-wallet.yml

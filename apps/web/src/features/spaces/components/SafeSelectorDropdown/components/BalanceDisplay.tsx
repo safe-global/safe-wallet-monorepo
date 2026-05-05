@@ -16,7 +16,7 @@ const BalanceDisplay = ({ balance, threshold, owners, isLoading, showThreshold =
   <div className="flex flex-col items-end min-w-0 shrink sm:w-[100px] sm:shrink-0">
     {balance !== undefined &&
       (isLoading ? (
-        <Skeleton className="h-3.5 w-14 rounded" />
+        <Skeleton className="h-4 w-14 rounded" />
       ) : (
         <Typography variant="paragraph-mini-medium" color="muted">
           {balance}
@@ -24,7 +24,7 @@ const BalanceDisplay = ({ balance, threshold, owners, isLoading, showThreshold =
       ))}
     {showThreshold &&
       (isLoading ? (
-        <Skeleton className="h-5 w-12 rounded-full" />
+        <Skeleton className="h-4 w-14 rounded" />
       ) : (
         <Badge data-testid="safe-selector-threshold" variant="secondary" className="gap-1">
           <User className="size-3" />

@@ -4,6 +4,7 @@ import { RootState } from '.'
 import merge from 'lodash/merge'
 
 import type { EnvState } from '@safe-global/store/settingsSlice'
+import { resetE2EState } from './resetE2EState'
 
 export enum TOKEN_LISTS {
   TRUSTED = 'TRUSTED',
@@ -80,6 +81,16 @@ const settingsSlice = createSlice({
     setTenderly: (state, { payload }: PayloadAction<EnvState['tenderly']>) => {
       state.env.tenderly = merge({}, state.env.tenderly, payload)
     },
+  },
+  extraReducers: (builder) => {
+    // E2E reset preserves `onboardingVersionSeen` so setup paths that skip
+    // setupBaseConfig don't accidentally surface the onboarding screen.
+    // Everything else is reset so per-test settings (theme/currency/RPC etc.)
+    // don't leak across the suite.
+    builder.addCase(resetE2EState, (state) => ({
+      ...initialState,
+      onboardingVersionSeen: state.onboardingVersionSeen,
+    }))
   },
 })
 

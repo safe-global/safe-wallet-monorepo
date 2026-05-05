@@ -1,4 +1,6 @@
-import { Alert, DialogActions, Stack, Button, DialogContent, Typography, CircularProgress, Box } from '@mui/material'
+import { Alert, DialogActions, Button, DialogContent } from '@mui/material'
+import { Button as ShadcnButton } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import PlusIcon from '@/public/images/common/plus.svg'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
@@ -11,7 +13,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useChains from '@/hooks/useChains'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 
@@ -21,13 +23,14 @@ export type ContactField = {
   networks: Chain[]
 }
 
-const AddContact = ({ disabled }: { disabled?: boolean }) => {
+const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { configs: allNetworks } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const addressBookItems = useGetSpaceAddressBook()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const defaultValues = {
@@ -42,7 +45,6 @@ const AddContact = ({ disabled }: { disabled?: boolean }) => {
   })
 
   const { handleSubmit, formState, control, reset } = methods
-
   const { errors } = formState
 
   const handleClose = () => {
@@ -80,16 +82,21 @@ const AddContact = ({ disabled }: { disabled?: boolean }) => {
         return
       }
 
+      trackEvent(
+        { ...SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED },
+        { workspace_id: spaceId, entry_count_after: addressBookItems.length + 1 },
+      )
+
       dispatch(
         showNotification({
-          message: `Added contact`,
+          message: 'Added contact',
           variant: 'success',
           groupKey: 'add-contact-success',
         }),
       )
 
       handleClose()
-    } catch (error) {
+    } catch {
       setError('Something went wrong. Please try again.')
     } finally {
       setIsSubmitting(false)
@@ -98,25 +105,23 @@ const AddContact = ({ disabled }: { disabled?: boolean }) => {
 
   return (
     <>
-      <Button variant="contained" size="small" startIcon={<PlusIcon />} onClick={handleOpen} disabled={disabled}>
-        Add contact
-      </Button>
+      <ShadcnButton size="sm" onClick={handleOpen}>
+        <PlusIcon />
+        {label}
+      </ShadcnButton>
       <ModalDialog open={open} onClose={handleClose} dialogTitle="Add contact" hideChainIndicator>
         <FormProvider {...methods}>
           <form onSubmit={onSubmit}>
             <DialogContent sx={{ py: 2 }}>
-              <Stack spacing={3}>
+              <div className="flex flex-col gap-6">
                 <NameInput name="name" label="Name" required />
-
                 <AddressInput name="address" label="Address" required showPrefix={false} />
 
-                <Box>
-                  <Typography variant="h5" fontWeight={700} display="inline-flex" alignItems="center" gap={1} mb={1}>
-                    Select networks
-                  </Typography>
-                  <Typography variant="body2" mb={2}>
-                    Add contact on all networks or only on specific ones of your choice.{' '}
-                  </Typography>
+                <div>
+                  <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
+                  <p className="text-muted-foreground mb-2 text-sm">
+                    Add contact on all networks or only on specific ones of your choice.
+                  </p>
                   <Controller
                     name="networks"
                     control={control}
@@ -131,8 +136,8 @@ const AddContact = ({ disabled }: { disabled?: boolean }) => {
                     )}
                     rules={{ required: true }}
                   />
-                </Box>
-              </Stack>
+                </div>
+              </div>
 
               {error && (
                 <Alert severity="error" sx={{ mt: 2 }}>
@@ -146,7 +151,7 @@ const AddContact = ({ disabled }: { disabled?: boolean }) => {
                 Cancel
               </Button>
               <Button type="submit" variant="contained" disabled={!formState.isValid || isSubmitting} disableElevation>
-                {isSubmitting ? <CircularProgress size={20} /> : 'Add contact'}
+                {isSubmitting ? <Spinner className="size-5" /> : 'Add contact'}
               </Button>
             </DialogActions>
           </form>

@@ -5,7 +5,7 @@ exports[`./index.stories CustomRecipient 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
@@ -498,7 +498,7 @@ exports[`./index.stories CustomRecipient 1`] = `
       </div>
       <div>
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorWarning MuiAlert-standardWarning MuiAlert-standard mui-style-1wi6bbj-MuiPaper-root-MuiAlert-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorWarning MuiAlert-standardWarning MuiAlert-standard mui-style-s3yatq-MuiPaper-root-MuiAlert-root"
           data-testid="recipient-alert"
           role="alert"
           style="--Paper-shadow: none;"
@@ -535,7 +535,7 @@ exports[`./index.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
