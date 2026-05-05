@@ -30,7 +30,7 @@ export const useNotificationManager = () => {
   const pendingPermissionRequestRef = useRef(false)
 
   const requestAndRegister = useCallback(
-    async (updateNotificationSettings = true, openSettingsOnDenied = false) => {
+    async (updateNotificationSettings = true) => {
       const { permission } = await NotificationsService.getAllPermissions()
 
       if (permission === 'granted') {
@@ -42,9 +42,6 @@ export const useNotificationManager = () => {
           dispatch(toggleDeviceNotifications(true))
           return true
         }
-      } else if (openSettingsOnDenied) {
-        pendingPermissionRequestRef.current = true
-        await NotificationsService.getAllPermissions(true)
       }
 
       return false
@@ -70,8 +67,10 @@ export const useNotificationManager = () => {
         dispatch(updatePromptAttempts(promptAttempts + 1))
         return await requestAndRegister()
       } else {
+        // Threshold reached — surface the in-app explainer Alert so the user can EXPLICITLY tap
+        // "Turn on" to open Settings. Never auto-redirect on denial (Apple 5.1.1(iv)).
         pendingPermissionRequestRef.current = true
-        await NotificationsService.getAllPermissions(true)
+        await NotificationsService.requestPushNotificationsPermission()
       }
     } catch (error) {
       pendingPermissionRequestRef.current = false
@@ -102,11 +101,14 @@ export const useNotificationManager = () => {
 
       if (!isSubscribed) {
         if (!deviceNotificationStatus) {
-          const success = await requestAndRegister(false, true)
+          const success = await requestAndRegister(false)
           if (success) {
             return true
           }
-          // Don't clear the flag here if not granted immediately
+          // Denied — show the in-app explainer Alert so the user can EXPLICITLY tap "Turn on"
+          // to open Settings. Never auto-redirect on denial (Apple 5.1.1(iv)).
+          pendingPermissionRequestRef.current = true
+          await NotificationsService.requestPushNotificationsPermission()
         } else {
           await registerForNotifications(false)
         }
