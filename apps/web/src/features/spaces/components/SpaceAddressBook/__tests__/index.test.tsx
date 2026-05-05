@@ -12,6 +12,9 @@ jest.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: jest.fn(() => false),
 }))
 jest.mock('@/hooks/useAllAddressBooks', () => jest.fn(() => ({})))
+jest.mock('@/hooks/useChains', () => ({
+  useHasFeature: jest.fn(() => true),
+}))
 jest.mock('@/features/spaces', () => ({
   useIsAdmin: jest.fn(),
   useIsInvited: jest.fn(() => false),
