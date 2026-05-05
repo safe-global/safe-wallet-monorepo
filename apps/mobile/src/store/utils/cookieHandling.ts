@@ -1,4 +1,4 @@
-import { setPrepareHeadersHook, setHandleResponseHook, isCredentialRoute } from '@safe-global/store/gateway/cgwClient'
+import { setPrepareHeadersHook, addHandleResponseHook, isCredentialRoute } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/src/config/constants'
 import { isIpOrLocalhostUrl, isHttpsUrl } from '@/src/utils/url'
 // Store for parsed cookies
@@ -97,7 +97,7 @@ export const setupMobileCookieHandling = () => {
   })
 
   // Set up the custom response hook
-  setHandleResponseHook((response, url) => {
+  addHandleResponseHook((response, url) => {
     cookies = handleCookieResponse(response, url, cookies)
   })
 }

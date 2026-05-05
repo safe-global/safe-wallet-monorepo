@@ -71,4 +71,61 @@ describe('cgwClient hooks', () => {
     expect(mockResponseFunction).toHaveBeenCalled()
     expect(mockResponseFunction).toHaveBeenCalledWith(expect.any(Response), '/test-response')
   })
+
+  it('runs every registered response hook in registration order', async () => {
+    const callOrder: string[] = []
+    const hookA = jest.fn(() => {
+      callOrder.push('A')
+    })
+    const hookB = jest.fn(() => {
+      callOrder.push('B')
+    })
+
+    cgwClient.addHandleResponseHook(hookA)
+    cgwClient.addHandleResponseHook(hookB)
+
+    await cgwClient.dynamicBaseQuery('/test-multi-hook', testApi, {})
+
+    expect(hookA).toHaveBeenCalledTimes(1)
+    expect(hookB).toHaveBeenCalledTimes(1)
+    expect(callOrder).toEqual(['A', 'B'])
+  })
+
+  it('continues invoking subsequent hooks when an earlier one throws', async () => {
+    const failing = jest.fn(() => {
+      throw new Error('hook failed')
+    })
+    const succeeding = jest.fn()
+
+    cgwClient.addHandleResponseHook(failing)
+    cgwClient.addHandleResponseHook(succeeding)
+
+    await cgwClient.dynamicBaseQuery('/test-hook-isolation', testApi, {})
+
+    expect(failing).toHaveBeenCalled()
+    expect(succeeding).toHaveBeenCalled()
+  })
+
+  it('addHandleResponseHook returns a deregistration function', async () => {
+    const hook = jest.fn()
+    const deregister = cgwClient.addHandleResponseHook(hook)
+
+    deregister()
+
+    await cgwClient.dynamicBaseQuery('/test-deregister', testApi, {})
+    expect(hook).not.toHaveBeenCalled()
+  })
+
+  it('setHandleResponseHook still replaces previously registered hooks (back-compat)', async () => {
+    const previous = jest.fn()
+    const replacement = jest.fn()
+
+    cgwClient.addHandleResponseHook(previous)
+    cgwClient.setHandleResponseHook(replacement)
+
+    await cgwClient.dynamicBaseQuery('/test-replace', testApi, {})
+
+    expect(previous).not.toHaveBeenCalled()
+    expect(replacement).toHaveBeenCalled()
+  })
 })

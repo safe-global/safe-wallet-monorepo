@@ -1,4 +1,4 @@
-import { setPrepareHeadersHook, setHandleResponseHook } from '@safe-global/store/gateway/cgwClient'
+import { setPrepareHeadersHook, addHandleResponseHook } from '@safe-global/store/gateway/cgwClient'
 import { TURNSTILE_SITE_KEY } from '@safe-global/utils/config/constants'
 
 export const sharedTokenRef: { current: string | null } = { current: null }
@@ -118,7 +118,7 @@ export function initializeCaptchaHeaders() {
     }
   })
 
-  setHandleResponseHook(async (response: Response, url: string) => {
+  addHandleResponseHook(async (response: Response, url: string) => {
     // Only handle 401 responses
     if (response.status !== 401) return
     // Only captcha-protected endpoints can return captcha 401s

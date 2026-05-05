@@ -9,7 +9,7 @@ describe('captchaHeadersInit', () => {
   let isCaptchaActivated: () => boolean
   let isProtectedEndpoint: (url: string) => boolean
   let mockSetPrepareHeadersHook: jest.Mock
-  let mockSetHandleResponseHook: jest.Mock
+  let mockAddHandleResponseHook: jest.Mock
 
   const PROTECTED_URL = '/v2/owners/0xABC123/safes'
   const NON_PROTECTED_URL = '/v1/chains/1/safes'
@@ -18,7 +18,7 @@ describe('captchaHeadersInit', () => {
     jest.resetModules()
     jest.doMock('@safe-global/store/gateway/cgwClient', () => ({
       setPrepareHeadersHook: jest.fn(),
-      setHandleResponseHook: jest.fn(),
+      addHandleResponseHook: jest.fn(),
     }))
     jest.doMock('@safe-global/utils/config/constants', () => ({
       TURNSTILE_SITE_KEY: 'test-site-key',
@@ -35,7 +35,7 @@ describe('captchaHeadersInit', () => {
     } = require('@/components/common/Captcha/captchaHeadersInit'))
     ;({
       setPrepareHeadersHook: mockSetPrepareHeadersHook,
-      setHandleResponseHook: mockSetHandleResponseHook,
+      addHandleResponseHook: mockAddHandleResponseHook,
     } = require('@safe-global/store/gateway/cgwClient'))
   })
 
@@ -130,14 +130,14 @@ describe('captchaHeadersInit', () => {
 
     it('registers a handle-response hook', () => {
       initializeCaptchaHeaders()
-      expect(mockSetHandleResponseHook).toHaveBeenCalledTimes(1)
+      expect(mockAddHandleResponseHook).toHaveBeenCalledTimes(1)
     })
 
     it('is idempotent — registers hooks only once', () => {
       initializeCaptchaHeaders()
       initializeCaptchaHeaders()
       expect(mockSetPrepareHeadersHook).toHaveBeenCalledTimes(1)
-      expect(mockSetHandleResponseHook).toHaveBeenCalledTimes(1)
+      expect(mockAddHandleResponseHook).toHaveBeenCalledTimes(1)
     })
 
     it('adds X-Captcha-Token header when token is set', async () => {
@@ -371,7 +371,7 @@ describe('captchaHeadersInit', () => {
       sharedTokenRef.current = 'old-token'
       initializeCaptchaHeaders()
 
-      const hook = mockSetHandleResponseHook.mock.calls[0][0]
+      const hook = mockAddHandleResponseHook.mock.calls[0][0]
       await hook(makeResponse(401, { message: 'Invalid CAPTCHA token' }), PROTECTED_URL)
 
       expect(sharedTokenRef.current).toBeNull()
@@ -386,7 +386,7 @@ describe('captchaHeadersInit', () => {
       sharedTokenRef.current = 'old-token'
       initializeCaptchaHeaders()
 
-      const hook = mockSetHandleResponseHook.mock.calls[0][0]
+      const hook = mockAddHandleResponseHook.mock.calls[0][0]
       await hook(makeResponse(401, { message: 'Invalid CAPTCHA token' }), NON_PROTECTED_URL)
 
       expect(sharedTokenRef.current).toBe('old-token')
@@ -399,7 +399,7 @@ describe('captchaHeadersInit', () => {
       sharedTokenRef.current = 'token'
       initializeCaptchaHeaders()
 
-      const hook = mockSetHandleResponseHook.mock.calls[0][0]
+      const hook = mockAddHandleResponseHook.mock.calls[0][0]
       await hook(makeResponse(200, { message: 'Invalid CAPTCHA token' }), PROTECTED_URL)
 
       expect(sharedTokenRef.current).toBe('token')
@@ -412,7 +412,7 @@ describe('captchaHeadersInit', () => {
       sharedTokenRef.current = 'token'
       initializeCaptchaHeaders()
 
-      const hook = mockSetHandleResponseHook.mock.calls[0][0]
+      const hook = mockAddHandleResponseHook.mock.calls[0][0]
       await hook(makeResponse(401, { message: 'Unauthorized' }), PROTECTED_URL)
 
       expect(sharedTokenRef.current).toBe('token')
@@ -421,7 +421,7 @@ describe('captchaHeadersInit', () => {
 
     it('does not throw when the response body is not JSON', async () => {
       initializeCaptchaHeaders()
-      const hook = mockSetHandleResponseHook.mock.calls[0][0]
+      const hook = mockAddHandleResponseHook.mock.calls[0][0]
       await expect(hook(makeUnreadableResponse(401), PROTECTED_URL)).resolves.not.toThrow()
     })
   })
