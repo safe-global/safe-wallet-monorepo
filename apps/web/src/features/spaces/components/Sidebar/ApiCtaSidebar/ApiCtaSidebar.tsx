@@ -30,7 +30,7 @@ export const ApiCtaSidebar = (): ReactElement => {
           render={isIconCollapsed ? <a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" /> : undefined}
         >
           <Tooltip>
-            <TooltipTrigger className="flex min-w-0 items-center gap-3">
+            <TooltipTrigger className="flex min-w-0 cursor-pointer items-center gap-3">
               <Image
                 src="/images/spaces/api-sidebar.svg"
                 alt="API"
