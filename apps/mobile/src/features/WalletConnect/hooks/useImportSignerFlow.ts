@@ -48,7 +48,15 @@ export function useImportSignerFlow() {
           params: { address: checksumAddress, walletName },
         })
       } else {
-        disconnect()
+        // disconnect() is typed () => void but returns a Promise at runtime;
+        // wrap in an awaited IIFE so async rejections don't escape unhandled.
+        void (async () => {
+          try {
+            await disconnect()
+          } catch (disconnectError) {
+            Logger.warn('Failed to disconnect WC session after non-owner connect:', disconnectError)
+          }
+        })()
 
         router.push({
           pathname: '/import-signers/connect-signer-error',

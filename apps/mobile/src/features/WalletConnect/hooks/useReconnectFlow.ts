@@ -28,7 +28,15 @@ export function useReconnectFlow() {
         const reconnectAddress = getAddress(signerAddress)
 
         if (!sameAddress(reconnectAddress, result.address)) {
-          disconnect()
+          // disconnect() is typed () => void but returns a Promise at runtime;
+          // wrap in an awaited IIFE so async rejections don't escape unhandled.
+          void (async () => {
+            try {
+              await disconnect()
+            } catch (disconnectError) {
+              Logger.warn('Failed to disconnect WC session after address mismatch:', disconnectError)
+            }
+          })()
 
           router.push({
             pathname: '/import-signers/reconnect-error',
