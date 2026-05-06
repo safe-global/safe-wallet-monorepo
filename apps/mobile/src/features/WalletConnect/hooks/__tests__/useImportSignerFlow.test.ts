@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import { renderHook, act, waitFor } from '@/src/tests/test-utils'
 import { useImportSignerFlow } from '../useImportSignerFlow'
-import { ConnectError, ProposalExpiredError, UnsupportedChainError, UserRejectedError } from '../useConnect'
+import { ConnectError } from '../useConnect'
 import Logger from '@/src/utils/logger'
 import type { ConnectResult } from '../useConnect'
 import type { Signer } from '@/src/store/signersSlice'
@@ -24,12 +24,12 @@ const mockClose = jest.fn()
 const mockValidateAddressOwnership = jest.fn()
 const mockSwitchNetworkIfNeeded = jest.fn().mockResolvedValue(undefined)
 
-let mockConnectResolve: (result: ConnectResult) => void
+let mockConnectResolve: (result: ConnectResult | null) => void
 let mockConnectReject: (error: Error) => void
 
 const mockConnect = jest.fn(
   () =>
-    new Promise<ConnectResult>((resolve, reject) => {
+    new Promise<ConnectResult | null>((resolve, reject) => {
       mockConnectResolve = resolve
       mockConnectReject = reject
     }),
@@ -66,7 +66,7 @@ describe('useImportSignerFlow', () => {
     jest.clearAllMocks()
   })
 
-  it('calls connect when initiateConnection is called', async () => {
+  it('calls connect when initiateConnection is called', () => {
     const { result } = renderImportFlow()
 
     act(() => {
@@ -131,9 +131,7 @@ describe('useImportSignerFlow', () => {
     })
   })
 
-  it('navigates to error when validation throws', async () => {
-    mockValidateAddressOwnership.mockRejectedValue(new Error('Network error'))
-
+  it('short-circuits silently when connect resolves null (useConnect handled the cancel/unsupported case)', async () => {
     const { result } = renderImportFlow()
 
     act(() => {
@@ -141,57 +139,18 @@ describe('useImportSignerFlow', () => {
     })
 
     await act(async () => {
-      mockConnectResolve({ address: mockAddress, walletName: 'MetaMask', walletIcon: 'icon' })
-    })
-
-    await waitFor(() => {
-      expect(mockRouterPush).not.toHaveBeenCalled()
-    })
-  })
-
-  it('closes the modal on UserRejectedError without alerting and emits info-level telemetry', async () => {
-    const { result } = renderImportFlow()
-
-    act(() => {
-      result.current.initiateConnection()
-    })
-
-    await act(async () => {
-      mockConnectReject(new UserRejectedError())
+      mockConnectResolve(null)
     })
 
     expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
     expect(mockRouterPush).not.toHaveBeenCalled()
-    expect(Alert.alert).not.toHaveBeenCalled()
-    expect(Logger.error).not.toHaveBeenCalled()
-    expect(Logger.warn).not.toHaveBeenCalled()
-    expect(Logger.info).toHaveBeenCalledWith('User rejected WC connect during signer import')
     expect(mockDisconnect).not.toHaveBeenCalled()
-    expect(mockClose).toHaveBeenCalled()
-  })
-
-  it('shows an alert when wallet does not support the active Safe chain', async () => {
-    const { result } = renderImportFlow()
-
-    act(() => {
-      result.current.initiateConnection()
-    })
-
-    await act(async () => {
-      mockConnectReject(new UnsupportedChainError())
-    })
-
-    await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith('Unsupported network', expect.any(String), expect.any(Array))
-    })
-
-    expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
-    expect(mockRouterPush).not.toHaveBeenCalled()
+    expect(Alert.alert).not.toHaveBeenCalled()
+    // The flow's catch must not run for the null path — no fallback log either.
     expect(Logger.error).not.toHaveBeenCalled()
-    expect(mockClose).not.toHaveBeenCalled()
   })
 
-  it('disconnects, closes the modal, then alerts when connect fails with a non-expiry ConnectError', async () => {
+  it('disconnects, closes the modal, then alerts when connect rejects with a catastrophic ConnectError', async () => {
     const { result } = renderImportFlow()
     const connectError = new ConnectError('Connection failed')
 
@@ -208,7 +167,6 @@ describe('useImportSignerFlow', () => {
     })
 
     expect(Logger.error).toHaveBeenCalledWith('Error during signer import:', connectError)
-    expect(Logger.warn).not.toHaveBeenCalled()
     expect(mockDisconnect).toHaveBeenCalled()
     expect(mockClose).toHaveBeenCalled()
     expect(mockValidateAddressOwnership).not.toHaveBeenCalled()
@@ -220,36 +178,7 @@ describe('useImportSignerFlow', () => {
     expect(closeOrder).toBeLessThan(alertOrder)
   })
 
-  it('reopens the QR via connect() on ProposalExpiredError instead of alerting', async () => {
-    const { result } = renderImportFlow()
-    const expiredError = new ProposalExpiredError('Proposal expired')
-
-    act(() => {
-      result.current.initiateConnection()
-    })
-
-    expect(mockConnect).toHaveBeenCalledTimes(1)
-
-    await act(async () => {
-      mockConnectReject(expiredError)
-    })
-
-    // Helper awaits disconnect cleanup, signals retry; flow re-calls connect.
-    await waitFor(() => {
-      expect(mockConnect).toHaveBeenCalledTimes(2)
-    })
-
-    expect(Logger.warn).toHaveBeenCalledWith(
-      'WalletConnect proposal expired during signer import, reopening connect modal:',
-      expiredError,
-    )
-    expect(Logger.error).not.toHaveBeenCalled()
-    expect(mockDisconnect).toHaveBeenCalled()
-    expect(mockClose).not.toHaveBeenCalled()
-    expect(Alert.alert).not.toHaveBeenCalled()
-  })
-
-  it('captures async rejection from disconnect() during error cleanup without dropping close/alert', async () => {
+  it('captures async rejection from disconnect() during fallback cleanup without dropping close/alert', async () => {
     const { result } = renderImportFlow()
     const connectError = new ConnectError('Connection failed')
     const disconnectRejection = new Error('relay teardown failed')
@@ -273,6 +202,28 @@ describe('useImportSignerFlow', () => {
     expect(mockDisconnect).toHaveBeenCalled()
     expect(mockClose).toHaveBeenCalled()
     expect(Alert.alert).toHaveBeenCalledWith('Error during signer import', expect.any(String), expect.any(Array))
+  })
+
+  it('runs the fallback alert when validation throws after a successful connect', async () => {
+    const validationError = new Error('Network error')
+    mockValidateAddressOwnership.mockRejectedValue(validationError)
+
+    const { result } = renderImportFlow()
+
+    act(() => {
+      result.current.initiateConnection()
+    })
+
+    await act(async () => {
+      mockConnectResolve({ address: mockAddress, walletName: 'MetaMask', walletIcon: 'icon' })
+    })
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith('Error during signer import', expect.any(String), expect.any(Array))
+    })
+
+    expect(Logger.error).toHaveBeenCalledWith('Error during signer import:', validationError)
+    expect(mockRouterPush).not.toHaveBeenCalled()
   })
 
   it('disconnects and shows alert when a different-type signer exists for the address', async () => {
