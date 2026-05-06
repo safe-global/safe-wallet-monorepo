@@ -288,7 +288,16 @@ describe('DatadogProvider', () => {
       expect(filterRumEvent(event, {} as any)).toBe(false)
     })
 
-    it('keeps errors from sources other than console (e.g. unhandled exceptions, network)', async () => {
+    it('drops errors auto-captured from the Browser Reporting API (source=report)', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const event = buildErrorEvent({
+        source: 'report',
+        message: "csp_violation: 'eval' blocked by 'script-src' directive",
+      })
+      expect(filterRumEvent(event, {} as any)).toBe(false)
+    })
+
+    it('keeps errors from user-impacting sources (unhandled exceptions, network, custom)', async () => {
       const { filterRumEvent } = await import('../datadog')
       for (const source of ['source', 'network', 'custom', undefined]) {
         const event = buildErrorEvent({
