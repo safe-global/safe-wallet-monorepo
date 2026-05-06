@@ -9104,11 +9104,16 @@
               "PENDING",
               "ACTIVE"
             ]
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
           "id",
-          "status"
+          "status",
+          "email"
         ]
       },
       "MemberDto": {

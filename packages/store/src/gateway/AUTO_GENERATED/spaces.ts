@@ -346,6 +346,7 @@ export type AcceptInviteDto = {
 export type MemberUser = {
   id: number
   status: 'PENDING' | 'ACTIVE'
+  email: string | null
 }
 export type MemberDto = {
   id: number
