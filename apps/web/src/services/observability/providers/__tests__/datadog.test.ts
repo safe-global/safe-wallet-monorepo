@@ -277,5 +277,27 @@ describe('DatadogProvider', () => {
         expect(filterRumEvent(buildErrorEvent({ message }), {} as any)).toBe(false)
       }
     })
+
+    it('drops errors auto-captured from console.error (source=console)', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const event = buildErrorEvent({
+        source: 'console',
+        message: 'Failed to copy address: PermissionDenied',
+        stack: 'at copy (https://app.safe.global/_next/static/chunks/main.js:1:1)',
+      })
+      expect(filterRumEvent(event, {} as any)).toBe(false)
+    })
+
+    it('keeps errors from sources other than console (e.g. unhandled exceptions, network)', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      for (const source of ['source', 'network', 'custom', undefined]) {
+        const event = buildErrorEvent({
+          source,
+          message: 'Boom',
+          stack: 'at handler (https://app.safe.global/_next/static/chunks/main.js:1:1)',
+        })
+        expect(filterRumEvent(event, {} as any)).toBe(true)
+      }
+    })
   })
 })
