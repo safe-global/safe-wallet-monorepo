@@ -151,6 +151,18 @@ describe('useConnect', () => {
     expect(isProposalExpiredError(rejected)).toBe(true)
   })
 
+  it('isProposalExpiredError matches wrapped messages and rejects unrelated substrings', () => {
+    // Realistic wrapped form from SignClient when a pairing already exists.
+    expect(isProposalExpiredError(new Error('Pairing already exists: Proposal expired'))).toBe(true)
+    // Whitespace tolerance.
+    expect(isProposalExpiredError(new Error('Proposal  expired'))).toBe(true)
+    // Word boundaries prevent matches on substrings inside other words.
+    expect(isProposalExpiredError(new Error('subproposal expired-ish'))).toBe(false)
+    // Non-Error inputs are rejected.
+    expect(isProposalExpiredError('Proposal expired')).toBe(false)
+    expect(isProposalExpiredError(undefined)).toBe(false)
+  })
+
   it('falls back to a generic message when AppKit emits CONNECT_ERROR without one', async () => {
     const { result } = renderHook(() => useConnect())
 

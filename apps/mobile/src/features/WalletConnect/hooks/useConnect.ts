@@ -48,11 +48,12 @@ export const showUnsupportedChainAlert = () => {
 
 // AppKit forwards the underlying SignClient/Universal Provider message verbatim
 // in CONNECT_ERROR. The QR-code pairing proposal expires (~5 min default) before
-// the wallet completes pairing, surfacing as "Proposal expired". We don't want
-// these to page on-call as Logger.error.
-//
+// the wallet completes pairing, surfacing as "Proposal expired" — sometimes
+// wrapped (e.g. "Pairing already exists: Proposal expired"). Word boundaries
+// keep the match tight enough to avoid downgrading non-WC errors that happen
+// to contain the substring.
 export const isProposalExpiredError = (error: unknown): boolean =>
-  error instanceof Error && /proposal\s+expired/i.test(error.message)
+  error instanceof Error && /\bproposal\s+expired\b/i.test(error.message)
 
 interface PendingConnect {
   resolve: (result: ConnectResult) => void
@@ -144,7 +145,7 @@ export function useConnect() {
       return
     }
 
-    const wrongChain = caipNetworkId && caipNetworkId !== expectedCaipId
+    const wrongChain = caipNetworkId !== expectedCaipId
 
     // Wallet connected on the right chain with an account — resolver will handle it.
     if (data.address && !wrongChain) {

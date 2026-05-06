@@ -199,4 +199,30 @@ describe('useReconnectFlow', () => {
     expect(mockDisconnect).toHaveBeenCalled()
     expect(mockClose).toHaveBeenCalled()
   })
+
+  it('captures async rejection from disconnect() during error cleanup without dropping close/alert', async () => {
+    const { result } = renderReconnectFlow()
+    const connectError = new ConnectError('Connection failed')
+    const disconnectRejection = new Error('relay teardown failed')
+    mockDisconnect.mockRejectedValueOnce(disconnectRejection)
+
+    act(() => {
+      result.current.reconnect(mockAddress)
+    })
+
+    await act(async () => {
+      mockConnectReject(connectError)
+    })
+
+    await waitFor(() => {
+      expect(Logger.warn).toHaveBeenCalledWith(
+        'Failed to disconnect WC session after reconnect error:',
+        disconnectRejection,
+      )
+    })
+
+    expect(mockDisconnect).toHaveBeenCalled()
+    expect(mockClose).toHaveBeenCalled()
+    expect(Alert.alert).toHaveBeenCalledWith('Error during reconnect', expect.any(String), expect.any(Array))
+  })
 })

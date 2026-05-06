@@ -60,12 +60,17 @@ export function useReconnectFlow() {
         }
 
         // Tear down any half-formed pairing before dismissing the modal so we
-        // don't leak relay subscriptions or ghost sessions on retry.
-        try {
-          disconnect()
-        } catch (disconnectError) {
-          Logger.warn('Failed to disconnect WC session after reconnect error:', disconnectError)
-        }
+        // don't leak relay subscriptions or ghost sessions on retry. AppKit's
+        // useAppKit narrows disconnect to () => void, but the underlying call
+        // returns a Promise — await inside an IIFE so async rejections are
+        // captured rather than escaping as unhandled rejections.
+        void (async () => {
+          try {
+            await disconnect()
+          } catch (disconnectError) {
+            Logger.warn('Failed to disconnect WC session after reconnect error:', disconnectError)
+          }
+        })()
         close()
         Alert.alert('Error during reconnect', 'Something went wrong while reconnecting the signer. Please try again.', [
           { text: 'OK' },

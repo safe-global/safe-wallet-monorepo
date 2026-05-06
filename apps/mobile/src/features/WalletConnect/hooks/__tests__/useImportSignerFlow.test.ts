@@ -242,6 +242,32 @@ describe('useImportSignerFlow', () => {
     expect(mockClose).toHaveBeenCalled()
   })
 
+  it('captures async rejection from disconnect() during error cleanup without dropping close/alert', async () => {
+    const { result } = renderImportFlow()
+    const connectError = new ConnectError('Connection failed')
+    const disconnectRejection = new Error('relay teardown failed')
+    mockDisconnect.mockRejectedValueOnce(disconnectRejection)
+
+    act(() => {
+      result.current.initiateConnection()
+    })
+
+    await act(async () => {
+      mockConnectReject(connectError)
+    })
+
+    await waitFor(() => {
+      expect(Logger.warn).toHaveBeenCalledWith(
+        'Failed to disconnect WC session after import error:',
+        disconnectRejection,
+      )
+    })
+
+    expect(mockDisconnect).toHaveBeenCalled()
+    expect(mockClose).toHaveBeenCalled()
+    expect(Alert.alert).toHaveBeenCalledWith('Error during signer import', expect.any(String), expect.any(Array))
+  })
+
   it('disconnects and shows alert when a different-type signer exists for the address', async () => {
     mockValidateAddressOwnership.mockResolvedValue({ isOwner: true })
 
