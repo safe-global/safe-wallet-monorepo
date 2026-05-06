@@ -73,6 +73,8 @@ export const handleCookieResponse = (
   return updatedCookies
 }
 
+let deregisterResponseHook: (() => void) | undefined
+
 /**
  * Sets up mobile-specific cookie handling for API requests.
  * This ensures cookies are properly stored and forwarded for credential routes.
@@ -88,6 +90,10 @@ export const setupMobileCookieHandling = () => {
     return
   }
 
+  // Deregister any previously registered response hook (e.g. during Fast Refresh)
+  // to prevent duplicate hook accumulation in the responseHooks array.
+  deregisterResponseHook?.()
+
   // Reset cookies object
   cookies = {}
 
@@ -97,7 +103,7 @@ export const setupMobileCookieHandling = () => {
   })
 
   // Set up the custom response hook
-  addHandleResponseHook((response, url) => {
+  deregisterResponseHook = addHandleResponseHook((response, url) => {
     cookies = handleCookieResponse(response, url, cookies)
   })
 }
