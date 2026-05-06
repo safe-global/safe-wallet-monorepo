@@ -39,15 +39,19 @@ export const setPrepareHeadersHook = (hook: PrepareHeadersHook) => {
   customPrepareHeaders = hook
 }
 
-// Hook for handling response - this can be overridden by platform-specific code
+// Hook for handling response - platform-specific code can register one or more.
+// Hooks run in registration order; failures in one hook do not abort the others.
 type HandleResponseHook = (response: Response, url: string) => void | Promise<void>
 
-// Default implementation (does nothing)
-let customHandleResponse: HandleResponseHook = () => {}
+const responseHooks: HandleResponseHook[] = []
 
-// Setter for the custom hook
-export const setHandleResponseHook = (hook: HandleResponseHook) => {
-  customHandleResponse = hook
+// Register a response hook. Returns a deregistration function.
+export const addHandleResponseHook = (hook: HandleResponseHook): (() => void) => {
+  responseHooks.push(hook)
+  return () => {
+    const index = responseHooks.indexOf(hook)
+    if (index !== -1) responseHooks.splice(index, 1)
+  }
 }
 
 export const rawBaseQuery = fetchBaseQuery({
@@ -108,9 +112,16 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 
   const response = await rawBaseQuery(adjustedArgs, api, extraOptions)
 
-  // Apply platform-specific response handling
+  // Apply platform-specific response handling. Run hooks sequentially in
+  // registration order; one hook's failure must not block the others.
   if (response.meta?.response) {
-    await customHandleResponse(response.meta.response, urlEnd)
+    for (const hook of responseHooks) {
+      try {
+        await hook(response.meta.response, urlEnd)
+      } catch {
+        // Swallow hook errors — a misbehaving hook must not break the request flow
+      }
+    }
   }
 
   return response

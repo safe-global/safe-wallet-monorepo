@@ -415,6 +415,54 @@ describe('SafeSidebarVariant', () => {
       expect(screen.queryByText('Add Safe to space')).not.toBeInTheDocument()
     })
 
+    it('hides addToWorkspace when the SIWE session token has expired (sessionExpiresAt in the past)', () => {
+      // Drive the real isAuthenticated selector logic: sessionExpiresAt > Date.now() ? signed-in : not.
+      // Each call returns whatever the mocked selector function (passed in) computes against this state.
+      const expiredAuthState = { auth: { sessionExpiresAt: Date.now() - 1_000 } }
+      mockUseAppSelector.mockImplementation((selector: (s: typeof expiredAuthState) => unknown) =>
+        selector(expiredAuthState),
+      )
+
+      jest.isolateModules(() => {
+        // Use the real selector so the regression surface is "expired token" not "selector returned false".
+        const { isAuthenticated } = jest.requireActual('@/store/authSlice')
+        expect(isAuthenticated(expiredAuthState)).toBe(false)
+      })
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createAddHeader({ spaces: [] })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
+      expect(screen.queryByText('Add Safe to space')).not.toBeInTheDocument()
+    })
+
+    it('shows addToWorkspace when sessionExpiresAt is still in the future (token valid)', () => {
+      const validAuthState = { auth: { sessionExpiresAt: Date.now() + 60_000 } }
+      mockUseAppSelector.mockImplementation((selector: (s: typeof validAuthState) => unknown) =>
+        selector(validAuthState),
+      )
+
+      jest.isolateModules(() => {
+        const { isAuthenticated } = jest.requireActual('@/store/authSlice')
+        expect(isAuthenticated(validAuthState)).toBe(true)
+      })
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createAddHeader({ spaces: [] })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
+    })
+
     it('hides the addToWorkspace section entirely when Safe is counterfactual (undeployed)', () => {
       mockUseIsCounterfactualSafe.mockReturnValue(true)
       const spaces = [{ id: 1, name: 'Team', safeCount: 0 }]
