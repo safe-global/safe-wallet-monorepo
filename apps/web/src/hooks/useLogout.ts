@@ -1,6 +1,8 @@
 import { useCallback } from 'react'
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
+import { useAppDispatch } from '@/store'
+import { setUnauthenticated } from '@/store/authSlice'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 
 const LOGOUT_REDIRECT_PATH = '/v1/auth/logout/redirect'
@@ -14,9 +16,16 @@ const LOGOUT_REDIRECT_PATH = '/v1/auth/logout/redirect'
  *
  * Sets a transient flag in sessionStorage so that after the redirect lands back in the app,
  * `useLogoutCallback` can reconcile with the backend via /v1/auth/me.
+ *
+ * Dispatches setUnauthenticated() before the form submit so that any 403s from in-flight
+ * credentialed requests during the redirect window find sessionExpiresAt already cleared
+ * and do not trigger the "session expired" toast on a deliberate logout.
  */
 const useLogout = () => {
+  const dispatch = useAppDispatch()
+
   const logout = useCallback(() => {
+    dispatch(setUnauthenticated())
     sessionStorage.setItem(LOGGING_OUT_KEY, '1')
 
     const redirectUrl = new URL(AppRoutes.welcome.spaces, window.location.origin).toString()
@@ -36,7 +45,7 @@ const useLogout = () => {
     document.body.appendChild(form)
     form.submit()
     document.body.removeChild(form)
-  }, [])
+  }, [dispatch])
 
   return { logout }
 }
