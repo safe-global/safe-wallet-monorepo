@@ -1,6 +1,13 @@
 import { act, waitFor } from '@testing-library/react'
 import { OperationType } from '@safe-global/types-kit'
 
+// The hook staggers probes off-prod to respect staging's 5 rps limit. Tests run as non-prod
+// by default; force IS_PRODUCTION=true so probes fire immediately and assertions stay tight.
+jest.mock('@/config/constants', () => ({
+  ...jest.requireActual('@/config/constants'),
+  IS_PRODUCTION: true,
+}))
+
 import { renderHook } from '@/tests/test-utils'
 import { useGasTokenCandidates } from '../useGasTokenCandidates'
 import type { FeePreviewTx } from '../useResolvedGasToken'
@@ -222,6 +229,8 @@ describe('useGasTokenCandidates', () => {
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
     expect(result.current.probing).toBe(true)
+    // Probes are debounced + staggered, so the dispatch only happens after the timers fire.
+    await waitFor(() => expect(resolveProbe).toBeDefined())
     await act(async () => {
       resolveProbe?.()
     })
