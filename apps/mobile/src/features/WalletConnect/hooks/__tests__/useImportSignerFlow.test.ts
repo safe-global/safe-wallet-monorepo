@@ -258,7 +258,7 @@ describe('useImportSignerFlow', () => {
 
     await waitFor(() => {
       expect(Logger.warn).toHaveBeenCalledWith(
-        'Failed to disconnect WC session after import error:',
+        'Failed to disconnect WC session after signer import error:',
         disconnectRejection,
       )
     })

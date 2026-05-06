@@ -55,6 +55,69 @@ export const showUnsupportedChainAlert = () => {
 export const isProposalExpiredError = (error: unknown): boolean =>
   error instanceof Error && /\bproposal\s+expired\b/i.test(error.message)
 
+export interface WalletConnectErrorContext {
+  /** Slug used in log messages, e.g. 'signer import' → "during signer import". */
+  flow: string
+  /** Title shown in the user-facing alert for unhandled errors. */
+  alertTitle: string
+  /** Body shown alongside `alertTitle`. */
+  alertBody: string
+  /** From `useAppKit()` — closes the modal sheet. */
+  close: () => void
+  /** From `useAppKit()` — typed `() => void` but returns a Promise at runtime. */
+  disconnect: () => void
+}
+
+/**
+ * Centralizes WalletConnect-flow error handling so logging, modal cleanup,
+ * and user alerts stay consistent across consumers of `useConnect`.
+ *
+ * Behaviour by error class:
+ * - `UnsupportedChainError` → `showUnsupportedChainAlert` (disconnect already
+ *   handled inside `useConnect.rejectUnsupported`).
+ * - `UserRejectedError` → `Logger.info` + `close()`. No alert (intentional
+ *   cancellation).
+ * - `Proposal expired` `ConnectError` → `Logger.warn` + cleanup + alert.
+ * - Any other error → `Logger.error` + cleanup + alert.
+ *
+ * Cleanup runs `disconnect()` inside an awaited IIFE so async rejections from
+ * AppKit don't escape as unhandled rejections. `close()` is called before
+ * `Alert.alert` so the alert isn't hosted by a dismissing modal on iOS.
+ */
+export const handleWalletConnectError = (error: unknown, ctx: WalletConnectErrorContext): void => {
+  if (error instanceof UnsupportedChainError) {
+    showUnsupportedChainAlert()
+    return
+  }
+
+  if (error instanceof UserRejectedError) {
+    Logger.info(`User rejected WC connect during ${ctx.flow}`)
+    ctx.close()
+    return
+  }
+
+  if (isProposalExpiredError(error)) {
+    Logger.warn(`WalletConnect proposal expired during ${ctx.flow}:`, error)
+  } else {
+    Logger.error(`Error during ${ctx.flow}:`, error)
+  }
+
+  // Tear down any half-formed pairing before dismissing the modal so we
+  // don't leak relay subscriptions or ghost sessions on retry. AppKit's
+  // useAppKit narrows disconnect to () => void, but the underlying call
+  // returns a Promise — await inside an IIFE so async rejections are
+  // captured rather than escaping as unhandled rejections.
+  void (async () => {
+    try {
+      await ctx.disconnect()
+    } catch (disconnectError) {
+      Logger.warn(`Failed to disconnect WC session after ${ctx.flow} error:`, disconnectError)
+    }
+  })()
+  ctx.close()
+  Alert.alert(ctx.alertTitle, ctx.alertBody, [{ text: 'OK' }])
+}
+
 interface PendingConnect {
   resolve: (result: ConnectResult) => void
   reject: (error: Error) => void

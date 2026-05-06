@@ -4,15 +4,7 @@ import { useAppKit } from '@reown/appkit-react-native'
 import { getAddress } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useSwitchNetwork } from './useSwitchNetwork'
-import {
-  useConnect,
-  UnsupportedChainError,
-  showUnsupportedChainAlert,
-  UserRejectedError,
-  isProposalExpiredError,
-} from './useConnect'
-import { Alert } from 'react-native'
-import Logger from '@/src/utils/logger'
+import { useConnect, handleWalletConnectError } from './useConnect'
 
 /**
  * Handles the first WalletConnect reconnection attempt for existing signers.
@@ -42,39 +34,13 @@ export function useReconnectFlow() {
 
         switchNetworkIfNeeded()
       } catch (error) {
-        if (error instanceof UnsupportedChainError) {
-          showUnsupportedChainAlert()
-          return
-        }
-
-        if (error instanceof UserRejectedError) {
-          Logger.info('User rejected WC connect during reconnect')
-          close()
-          return
-        }
-
-        if (isProposalExpiredError(error)) {
-          Logger.warn('WalletConnect proposal expired during reconnect:', error)
-        } else {
-          Logger.error('Error during reconnect:', error)
-        }
-
-        // Tear down any half-formed pairing before dismissing the modal so we
-        // don't leak relay subscriptions or ghost sessions on retry. AppKit's
-        // useAppKit narrows disconnect to () => void, but the underlying call
-        // returns a Promise — await inside an IIFE so async rejections are
-        // captured rather than escaping as unhandled rejections.
-        void (async () => {
-          try {
-            await disconnect()
-          } catch (disconnectError) {
-            Logger.warn('Failed to disconnect WC session after reconnect error:', disconnectError)
-          }
-        })()
-        close()
-        Alert.alert('Error during reconnect', 'Something went wrong while reconnecting the signer. Please try again.', [
-          { text: 'OK' },
-        ])
+        handleWalletConnectError(error, {
+          flow: 'reconnect',
+          alertTitle: 'Error during reconnect',
+          alertBody: 'Something went wrong while reconnecting the signer. Please try again.',
+          close,
+          disconnect,
+        })
       }
     },
     [connect, disconnect, switchNetworkIfNeeded, close],

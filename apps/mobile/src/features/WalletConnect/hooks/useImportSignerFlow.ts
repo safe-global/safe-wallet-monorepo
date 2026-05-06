@@ -6,14 +6,7 @@ import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipVa
 import { useSignerCollisionGuard } from '@/src/features/ImportSigner/hooks/useSignerCollisionGuard'
 import Logger from '@/src/utils/logger'
 import { useSwitchNetwork } from './useSwitchNetwork'
-import {
-  useConnect,
-  UnsupportedChainError,
-  UserRejectedError,
-  showUnsupportedChainAlert,
-  isProposalExpiredError,
-} from './useConnect'
-import { Alert } from 'react-native'
+import { useConnect, handleWalletConnectError } from './useConnect'
 
 /**
  * Handles the signer import flow: ownership validation and navigation
@@ -57,39 +50,13 @@ export function useImportSignerFlow() {
         })
       }
     } catch (error) {
-      if (error instanceof UnsupportedChainError) {
-        showUnsupportedChainAlert()
-        return
-      }
-
-      if (error instanceof UserRejectedError) {
-        Logger.info('User rejected WC connect during signer import')
-        close()
-        return
-      }
-
-      if (isProposalExpiredError(error)) {
-        Logger.warn('WalletConnect proposal expired during signer import:', error)
-      } else {
-        Logger.error('Error during signer import:', error)
-      }
-
-      // Tear down any half-formed pairing before dismissing the modal so we
-      // don't leak relay subscriptions or ghost sessions on retry. AppKit's
-      // useAppKit narrows disconnect to () => void, but the underlying call
-      // returns a Promise — await inside an IIFE so async rejections are
-      // captured rather than escaping as unhandled rejections.
-      void (async () => {
-        try {
-          await disconnect()
-        } catch (disconnectError) {
-          Logger.warn('Failed to disconnect WC session after import error:', disconnectError)
-        }
-      })()
-      close()
-      Alert.alert('Error during signer import', 'Something went wrong while importing the signer. Please try again.', [
-        { text: 'OK' },
-      ])
+      handleWalletConnectError(error, {
+        flow: 'signer import',
+        alertTitle: 'Error during signer import',
+        alertBody: 'Something went wrong while importing the signer. Please try again.',
+        close,
+        disconnect,
+      })
     }
   }, [connect, validateAddressOwnership, switchNetworkIfNeeded, disconnect, guardAgainstCollision, close])
 
