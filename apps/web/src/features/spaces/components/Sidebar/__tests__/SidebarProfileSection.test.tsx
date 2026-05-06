@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@/tests/test-utils'
 import type { ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
 import { SidebarProfileSection } from '../SidebarProfileSection'
@@ -223,6 +223,23 @@ describe('SidebarProfileSection', () => {
 
     const shortened = `${signerAddress.slice(0, 6)}...${signerAddress.slice(-4)}`
     expect(screen.getByText(shortened)).toBeInTheDocument()
+  })
+
+  it('shows email as sidebar profile identity when email is present', () => {
+    const email = faker.internet.email().toLowerCase()
+    mockUseCurrentMemberProfile.mockReturnValue({
+      membership: activeMember,
+      email,
+      signerAddress: faker.finance.ethereumAddress(),
+      isLoading: false,
+    })
+
+    render(<SidebarProfileSection />)
+
+    const popoverEmailElements = within(screen.getByTestId('sidebar-profile-popover')).getAllByText(email)
+
+    expect(popoverEmailElements.length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText(email).length).toBeGreaterThan(popoverEmailElements.length)
   })
 
   it('shows member name in popover when signerAddress is absent', () => {
