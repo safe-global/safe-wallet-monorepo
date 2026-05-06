@@ -1,5 +1,7 @@
-import { renderHook } from '@/tests/test-utils'
+import { act, renderHook } from '@/tests/test-utils'
 import { useSessionExpiryGuard } from '../useSessionExpiryGuard'
+import { setAuthenticated } from '@/store/authSlice'
+import { useAppDispatch } from '@/store'
 import type { RootState } from '@/store'
 
 const mockSessionExpiredAction = { type: 'sessionExpired' }
@@ -26,6 +28,7 @@ describe('useSessionExpiryGuard', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.useFakeTimers().setSystemTime(new Date('2026-05-05T12:00:00Z'))
+    window.localStorage.clear()
   })
 
   afterEach(() => {
@@ -59,6 +62,26 @@ describe('useSessionExpiryGuard', () => {
     })
 
     expect(mockSessionExpired).not.toHaveBeenCalled()
+  })
+
+  it('dispatches when sessionExpiresAt becomes stale after store hydration', () => {
+    const { result } = renderHook(
+      () => {
+        useSessionExpiryGuard()
+        return useAppDispatch()
+      },
+      { initialReduxState: buildState(null) },
+    )
+
+    // No dispatch yet — initial render saw null (pre-hydration state).
+    expect(mockSessionExpired).not.toHaveBeenCalled()
+
+    // Simulate the persisted, already-expired value arriving via HYDRATE_ACTION.
+    act(() => {
+      result.current(setAuthenticated(Date.now() - 1_000))
+    })
+
+    expect(mockSessionExpired).toHaveBeenCalledTimes(1)
   })
 
   it('dispatches when routeChangeStart fires after the session has expired', () => {

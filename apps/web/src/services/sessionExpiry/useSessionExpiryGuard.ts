@@ -21,18 +21,14 @@ export const useSessionExpiryGuard = (): void => {
   const router = useRouter()
   const sessionExpiresAt = useAppSelector((state) => state.auth.sessionExpiresAt)
 
-  // Mount-time check: if we boot up with an already-expired session,
-  // clean it up before any pages render data.
+  // Runs on mount, after store hydration populates a persisted sessionExpiresAt,
+  // and on every Next.js route change. The thunk is idempotent so duplicate
+  // dispatches across the mount/hydrate/route paths are safe.
   useEffect(() => {
     if (isExpired(sessionExpiresAt)) {
       dispatch(sessionExpired())
     }
-    // Intentionally only on first mount — the routeChangeStart listener below
-    // covers all subsequent transitions.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
-  useEffect(() => {
     const handleRouteChange = () => {
       if (isExpired(sessionExpiresAt)) {
         dispatch(sessionExpired())
