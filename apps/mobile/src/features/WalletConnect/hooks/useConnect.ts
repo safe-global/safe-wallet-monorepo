@@ -138,6 +138,12 @@ export function useConnect() {
     }
 
     const { caipNetworkId } = data.properties
+
+    // If the wallet is not connected, we don't need to switch network
+    if (!caipNetworkId) {
+      return
+    }
+
     const wrongChain = caipNetworkId && caipNetworkId !== expectedCaipId
 
     // Wallet connected on the right chain with an account — resolver will handle it.
