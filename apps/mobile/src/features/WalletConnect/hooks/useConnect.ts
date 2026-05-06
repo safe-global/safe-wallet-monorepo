@@ -83,39 +83,59 @@ export interface WalletConnectErrorContext {
 }
 
 /**
+ * Outcome of `handleWalletConnectError`. Callers loop on `'retry'` to give
+ * the user a fresh QR after a benign expiry; `'handled'` means the helper
+ * has already shown the appropriate UI and the caller should stop.
+ */
+export type WalletConnectErrorOutcome = 'handled' | 'retry'
+
+/**
  * Centralizes WalletConnect-flow error handling so logging, modal cleanup,
  * and user alerts stay consistent across consumers of `useConnect`.
  *
  * Behaviour by error class:
  * - `UnsupportedChainError` → `showUnsupportedChainAlert` (disconnect already
- *   handled inside `useConnect.rejectUnsupported`).
- * - `UserRejectedError` → `Logger.info` + `close()`. No alert (intentional
- *   cancellation).
- * - `ProposalExpiredError` → `Logger.warn` + cleanup + alert.
- * - Any other error → `Logger.error` + cleanup + alert.
+ *   handled inside `useConnect.rejectUnsupported`); returns `'handled'`.
+ * - `UserRejectedError` → `Logger.info` + `close()`; returns `'handled'`.
+ * - `ProposalExpiredError` → `Logger.warn` + awaited disconnect, then
+ *   returns `'retry'` so the caller can re-call `connect()` and present a
+ *   fresh QR. No alert — proposal expiry is benign and recoverable.
+ * - Any other error → `Logger.error` + cleanup + alert; returns `'handled'`.
  *
- * Cleanup runs `disconnect()` inside an awaited IIFE so async rejections from
- * AppKit don't escape as unhandled rejections. `close()` is called before
+ * Cleanup is awaited on the retry path (so the next `connect()` doesn't
+ * pick up the dead pairing), and runs inside a fire-and-forget IIFE on the
+ * alert path (so the alert renders promptly). `close()` is called before
  * `Alert.alert` so the alert isn't hosted by a dismissing modal on iOS.
  */
-export const handleWalletConnectError = (error: unknown, ctx: WalletConnectErrorContext): void => {
+export const handleWalletConnectError = async (
+  error: unknown,
+  ctx: WalletConnectErrorContext,
+): Promise<WalletConnectErrorOutcome> => {
   if (error instanceof UnsupportedChainError) {
     showUnsupportedChainAlert()
-    return
+    return 'handled'
   }
 
   if (error instanceof UserRejectedError) {
     Logger.info(`User rejected WC connect during ${ctx.flow}`)
     ctx.close()
-    return
+    return 'handled'
   }
 
   if (error instanceof ProposalExpiredError) {
-    Logger.warn(`WalletConnect proposal expired during ${ctx.flow}:`, error)
-  } else {
-    Logger.error(`Error during ${ctx.flow}:`, error)
+    Logger.warn(`WalletConnect proposal expired during ${ctx.flow}, reopening connect modal:`, error)
+    // Tear down the stale pairing before reopening so the next connect()
+    // doesn't pick up a dead session. Awaited (vs. fire-and-forget) so the
+    // retry can't race the cleanup.
+    try {
+      await ctx.disconnect()
+    } catch (disconnectError) {
+      Logger.warn(`Failed to disconnect WC session after ${ctx.flow} error:`, disconnectError)
+    }
+    return 'retry'
   }
 
+  Logger.error(`Error during ${ctx.flow}:`, error)
   // Tear down any half-formed pairing before dismissing the modal so we
   // don't leak relay subscriptions or ghost sessions on retry. AppKit's
   // useAppKit narrows disconnect to () => void, but the underlying call
@@ -130,6 +150,7 @@ export const handleWalletConnectError = (error: unknown, ctx: WalletConnectError
   })()
   ctx.close()
   Alert.alert(ctx.alertTitle, ctx.alertBody, [{ text: 'OK' }])
+  return 'handled'
 }
 
 interface PendingConnect {

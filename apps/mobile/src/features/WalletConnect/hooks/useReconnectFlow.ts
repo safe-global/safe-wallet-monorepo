@@ -17,30 +17,41 @@ export function useReconnectFlow() {
 
   const reconnect = useCallback(
     async (signerAddress: string) => {
-      try {
-        const { address } = await connect()
-        const reconnectAddress = getAddress(signerAddress)
+      // Loop so a ProposalExpiredError (benign QR expiry) transparently
+      // reopens the connect modal with a fresh proposal. Any other error
+      // exits the loop via handleWalletConnectError returning 'handled'.
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        try {
+          const { address } = await connect()
+          const reconnectAddress = getAddress(signerAddress)
 
-        if (!sameAddress(reconnectAddress, address)) {
-          disconnect()
+          if (!sameAddress(reconnectAddress, address)) {
+            disconnect()
 
-          router.push({
-            pathname: '/import-signers/reconnect-error',
-            params: { address: reconnectAddress },
+            router.push({
+              pathname: '/import-signers/reconnect-error',
+              params: { address: reconnectAddress },
+            })
+
+            return
+          }
+
+          switchNetworkIfNeeded()
+          return
+        } catch (error) {
+          const outcome = await handleWalletConnectError(error, {
+            flow: 'reconnect',
+            alertTitle: 'Error during reconnect',
+            alertBody: 'Something went wrong while reconnecting the signer. Please try again.',
+            close,
+            disconnect,
           })
-
+          if (outcome === 'retry') {
+            continue
+          }
           return
         }
-
-        switchNetworkIfNeeded()
-      } catch (error) {
-        handleWalletConnectError(error, {
-          flow: 'reconnect',
-          alertTitle: 'Error during reconnect',
-          alertBody: 'Something went wrong while reconnecting the signer. Please try again.',
-          close,
-          disconnect,
-        })
       }
     },
     [connect, disconnect, switchNetworkIfNeeded, close],

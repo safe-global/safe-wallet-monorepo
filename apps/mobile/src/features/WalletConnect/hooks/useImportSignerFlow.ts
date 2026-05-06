@@ -20,43 +20,54 @@ export function useImportSignerFlow() {
   const connect = useConnect()
 
   const initiateConnection = useCallback(async () => {
-    try {
-      const { address, walletName, walletIcon } = await connect()
-      const checksumAddress = getAddress(address)
-      const result = await validateAddressOwnership(checksumAddress)
+    // Loop so a ProposalExpiredError (benign QR expiry) transparently
+    // reopens the connect modal with a fresh proposal. Any other error
+    // exits the loop via handleWalletConnectError returning 'handled'.
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        const { address, walletName, walletIcon } = await connect()
+        const checksumAddress = getAddress(address)
+        const result = await validateAddressOwnership(checksumAddress)
 
-      if (result.isOwner) {
-        if (guardAgainstCollision(checksumAddress, 'walletconnect')) {
-          try {
-            await disconnect()
-          } catch (disconnectError) {
-            Logger.error('Failed to disconnect WC session after collision:', disconnectError)
+        if (result.isOwner) {
+          if (guardAgainstCollision(checksumAddress, 'walletconnect')) {
+            try {
+              await disconnect()
+            } catch (disconnectError) {
+              Logger.error('Failed to disconnect WC session after collision:', disconnectError)
+            }
+            return
           }
-          return
+
+          await switchNetworkIfNeeded()
+
+          router.push({
+            pathname: '/import-signers/name-signer',
+            params: { address: checksumAddress, walletName },
+          })
+        } else {
+          disconnect()
+
+          router.push({
+            pathname: '/import-signers/connect-signer-error',
+            params: { address: checksumAddress, walletIcon },
+          })
         }
-
-        await switchNetworkIfNeeded()
-
-        router.push({
-          pathname: '/import-signers/name-signer',
-          params: { address: checksumAddress, walletName },
+        return
+      } catch (error) {
+        const outcome = await handleWalletConnectError(error, {
+          flow: 'signer import',
+          alertTitle: 'Error during signer import',
+          alertBody: 'Something went wrong while importing the signer. Please try again.',
+          close,
+          disconnect,
         })
-      } else {
-        disconnect()
-
-        router.push({
-          pathname: '/import-signers/connect-signer-error',
-          params: { address: checksumAddress, walletIcon },
-        })
+        if (outcome === 'retry') {
+          continue
+        }
+        return
       }
-    } catch (error) {
-      handleWalletConnectError(error, {
-        flow: 'signer import',
-        alertTitle: 'Error during signer import',
-        alertBody: 'Something went wrong while importing the signer. Please try again.',
-        close,
-        disconnect,
-      })
     }
   }, [connect, validateAddressOwnership, switchNetworkIfNeeded, disconnect, guardAgainstCollision, close])
 

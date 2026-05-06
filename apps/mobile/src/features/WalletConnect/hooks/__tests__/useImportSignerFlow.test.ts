@@ -220,7 +220,7 @@ describe('useImportSignerFlow', () => {
     expect(closeOrder).toBeLessThan(alertOrder)
   })
 
-  it('downgrades to Logger.warn and still cleans up when connect fails with a ProposalExpiredError', async () => {
+  it('reopens the QR via connect() on ProposalExpiredError instead of alerting', async () => {
     const { result } = renderImportFlow()
     const expiredError = new ProposalExpiredError('Proposal expired')
 
@@ -228,18 +228,25 @@ describe('useImportSignerFlow', () => {
       result.current.initiateConnection()
     })
 
+    expect(mockConnect).toHaveBeenCalledTimes(1)
+
     await act(async () => {
       mockConnectReject(expiredError)
     })
 
+    // Helper awaits disconnect cleanup, signals retry; flow re-calls connect.
     await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith('Error during signer import', expect.any(String), expect.any(Array))
+      expect(mockConnect).toHaveBeenCalledTimes(2)
     })
 
-    expect(Logger.warn).toHaveBeenCalledWith('WalletConnect proposal expired during signer import:', expiredError)
+    expect(Logger.warn).toHaveBeenCalledWith(
+      'WalletConnect proposal expired during signer import, reopening connect modal:',
+      expiredError,
+    )
     expect(Logger.error).not.toHaveBeenCalled()
     expect(mockDisconnect).toHaveBeenCalled()
-    expect(mockClose).toHaveBeenCalled()
+    expect(mockClose).not.toHaveBeenCalled()
+    expect(Alert.alert).not.toHaveBeenCalled()
   })
 
   it('captures async rejection from disconnect() during error cleanup without dropping close/alert', async () => {

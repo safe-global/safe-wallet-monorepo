@@ -178,7 +178,7 @@ describe('useReconnectFlow', () => {
     expect(closeOrder).toBeLessThan(alertOrder)
   })
 
-  it('downgrades to Logger.warn and still cleans up when connect fails with a ProposalExpiredError', async () => {
+  it('reopens the QR via connect() on ProposalExpiredError instead of alerting', async () => {
     const { result } = renderReconnectFlow()
     const expiredError = new ProposalExpiredError('Proposal expired')
 
@@ -186,18 +186,25 @@ describe('useReconnectFlow', () => {
       result.current.reconnect(mockAddress)
     })
 
+    expect(mockConnect).toHaveBeenCalledTimes(1)
+
     await act(async () => {
       mockConnectReject(expiredError)
     })
 
+    // Helper awaits disconnect cleanup, signals retry; flow re-calls connect.
     await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith('Error during reconnect', expect.any(String), expect.any(Array))
+      expect(mockConnect).toHaveBeenCalledTimes(2)
     })
 
-    expect(Logger.warn).toHaveBeenCalledWith('WalletConnect proposal expired during reconnect:', expiredError)
+    expect(Logger.warn).toHaveBeenCalledWith(
+      'WalletConnect proposal expired during reconnect, reopening connect modal:',
+      expiredError,
+    )
     expect(Logger.error).not.toHaveBeenCalled()
     expect(mockDisconnect).toHaveBeenCalled()
-    expect(mockClose).toHaveBeenCalled()
+    expect(mockClose).not.toHaveBeenCalled()
+    expect(Alert.alert).not.toHaveBeenCalled()
   })
 
   it('captures async rejection from disconnect() during error cleanup without dropping close/alert', async () => {
