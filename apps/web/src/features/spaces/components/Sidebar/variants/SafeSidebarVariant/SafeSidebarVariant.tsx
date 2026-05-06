@@ -22,12 +22,9 @@ import Link from 'next/link'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
-import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { useSidebarHydrated } from '../../hooks/useSidebarHydrated'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { containerVariants, itemVariants } from '../../constants'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
 
 const MAIN_NAV_SKELETON_COUNT = 5
 const DEFI_GROUP_SKELETON_COUNT = 4
@@ -40,9 +37,7 @@ export const SafeSidebarVariant = ({
 }: SafeSidebarVariantProps): ReactElement => {
   const router = useRouter()
   const { safe } = useSafeInfo()
-  const isCounterfactualSafe = useIsCounterfactualSafe()
   const isHydrated = useSidebarHydrated()
-  const isUserSignedIn = useAppSelector(isAuthenticated)
   const safeFromQuery = useSafeQueryParam()
   const safeAddress = isHydrated ? safeFromQuery || undefined : undefined
   const isOutdated =
@@ -55,8 +50,9 @@ export const SafeSidebarVariant = ({
   }
   const isSettingsActive = router.pathname.startsWith(AppRoutes.settings.index)
 
-  const shouldRenderWorkspaceHeaderGroup =
-    workspaceHeader.variant === 'backToSpace' || (isUserSignedIn && !(isHydrated && isCounterfactualSafe))
+  // The "Add Safe to space" entry point is intentionally hidden for this release.
+  // Re-enable by restoring the previous addToWorkspace condition.
+  const shouldRenderWorkspaceHeaderGroup = workspaceHeader.variant === 'backToSpace'
 
   // Use provided items or create placeholders for skeleton
   const displayMainNavItems = mainNavItems || Array(MAIN_NAV_SKELETON_COUNT).fill(null)

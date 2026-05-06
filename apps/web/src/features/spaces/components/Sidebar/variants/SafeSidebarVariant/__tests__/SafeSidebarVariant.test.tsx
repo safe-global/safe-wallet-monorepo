@@ -11,13 +11,7 @@ import { AppRoutes } from '@/config/routes'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 
 const mockUseSafeInfo = jest.fn()
-const mockUseIsCounterfactualSafe = jest.fn()
 const mockUseSidebarHydrated = jest.fn()
-const mockUseAppSelector = jest.fn()
-
-jest.mock('@/store', () => ({
-  useAppSelector: (...args: unknown[]) => mockUseAppSelector(...args),
-}))
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(() => ({
@@ -30,10 +24,6 @@ jest.mock('next/router', () => ({
 jest.mock('@/hooks/useSafeInfo', () => ({
   __esModule: true,
   default: () => mockUseSafeInfo(),
-}))
-
-jest.mock('@/features/counterfactual', () => ({
-  useIsCounterfactualSafe: () => mockUseIsCounterfactualSafe(),
 }))
 
 jest.mock('../../../hooks/useSidebarHydrated', () => ({
@@ -199,9 +189,7 @@ describe('SafeSidebarVariant', () => {
     mockUseSafeInfo.mockReturnValue({
       safe: { implementationVersionState: ImplementationVersionState.UP_TO_DATE, version: '1.3.0' },
     })
-    mockUseIsCounterfactualSafe.mockReturnValue(false)
     mockUseSidebarHydrated.mockReturnValue(true)
-    mockUseAppSelector.mockReturnValue(true)
   })
 
   it('renders all navigation sections', () => {
@@ -220,9 +208,7 @@ describe('SafeSidebarVariant', () => {
     expect(screen.getAllByText('Swap').length).toBeGreaterThan(0)
   })
 
-  it('hides workspace header group for counterfactual addToWorkspace (undeployed) Safes', () => {
-    mockUseIsCounterfactualSafe.mockReturnValue(true)
-
+  it('does not render the addToWorkspace variant ("Add Safe to space" is hidden for this release)', () => {
     render(
       <SafeSidebarVariant
         workspaceHeader={createAddHeader()}
@@ -233,21 +219,6 @@ describe('SafeSidebarVariant', () => {
 
     expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
     expect(screen.queryByText('Add Safe to space')).not.toBeInTheDocument()
-  })
-
-  it('still renders backToSpace workspace header when Safe is counterfactual', () => {
-    mockUseIsCounterfactualSafe.mockReturnValue(true)
-
-    render(
-      <SafeSidebarVariant
-        workspaceHeader={createBackHeader({ spaceName: 'My Space', spaceId: '9' })}
-        mainNavItems={mockMainNavItems}
-        defiGroup={mockDefiGroup}
-      />,
-    )
-
-    expect(screen.getByTestId('back-to-space-button')).toBeInTheDocument()
-    expect(screen.getByText('My Space')).toBeInTheDocument()
   })
 
   it('renders all main navigation items', () => {
@@ -357,55 +328,15 @@ describe('SafeSidebarVariant', () => {
       expect(avatarFallback).toHaveTextContent('E')
     })
 
-    it('renders the addToWorkspace variant with the trigger button', () => {
-      render(
-        <SafeSidebarVariant
-          workspaceHeader={createAddHeader({ spaces: [] })}
-          mainNavItems={mockMainNavItems}
-          defiGroup={mockDefiGroup}
-        />,
-      )
-
-      expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
-    })
-
-    it('shows addToWorkspace when signed in and the Safe is deployed (not counterfactual)', () => {
-      mockUseAppSelector.mockReturnValue(true)
-      mockUseIsCounterfactualSafe.mockReturnValue(false)
-
-      render(
-        <SafeSidebarVariant
-          workspaceHeader={createAddHeader({ spaces: [] })}
-          mainNavItems={mockMainNavItems}
-          defiGroup={mockDefiGroup}
-        />,
-      )
-
-      expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
-    })
-
-    it('passes spaces array to addToWorkspace variant', () => {
+    it('never renders the addToWorkspace variant trigger (hidden for this release)', () => {
       const spaces = [
         { id: 1, name: 'Team', safeCount: 5 },
         { id: 2, name: 'Personal', safeCount: 2 },
       ]
+
       render(
         <SafeSidebarVariant
           workspaceHeader={createAddHeader({ spaces })}
-          mainNavItems={mockMainNavItems}
-          defiGroup={mockDefiGroup}
-        />,
-      )
-
-      expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
-    })
-
-    it('hides addToWorkspace when the user is not signed in (SIWE session)', () => {
-      mockUseAppSelector.mockReturnValue(false)
-
-      render(
-        <SafeSidebarVariant
-          workspaceHeader={createAddHeader({ spaces: [] })}
           mainNavItems={mockMainNavItems}
           defiGroup={mockDefiGroup}
         />,
@@ -413,102 +344,6 @@ describe('SafeSidebarVariant', () => {
 
       expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
       expect(screen.queryByText('Add Safe to space')).not.toBeInTheDocument()
-    })
-
-    it('hides addToWorkspace when the SIWE session token has expired (sessionExpiresAt in the past)', () => {
-      // Drive the real isAuthenticated selector logic: sessionExpiresAt > Date.now() ? signed-in : not.
-      // Each call returns whatever the mocked selector function (passed in) computes against this state.
-      const expiredAuthState = { auth: { sessionExpiresAt: Date.now() - 1_000 } }
-      mockUseAppSelector.mockImplementation((selector: (s: typeof expiredAuthState) => unknown) =>
-        selector(expiredAuthState),
-      )
-
-      jest.isolateModules(() => {
-        // Use the real selector so the regression surface is "expired token" not "selector returned false".
-        const { isAuthenticated } = jest.requireActual('@/store/authSlice')
-        expect(isAuthenticated(expiredAuthState)).toBe(false)
-      })
-
-      render(
-        <SafeSidebarVariant
-          workspaceHeader={createAddHeader({ spaces: [] })}
-          mainNavItems={mockMainNavItems}
-          defiGroup={mockDefiGroup}
-        />,
-      )
-
-      expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
-      expect(screen.queryByText('Add Safe to space')).not.toBeInTheDocument()
-    })
-
-    it('shows addToWorkspace when sessionExpiresAt is still in the future (token valid)', () => {
-      const validAuthState = { auth: { sessionExpiresAt: Date.now() + 60_000 } }
-      mockUseAppSelector.mockImplementation((selector: (s: typeof validAuthState) => unknown) =>
-        selector(validAuthState),
-      )
-
-      jest.isolateModules(() => {
-        const { isAuthenticated } = jest.requireActual('@/store/authSlice')
-        expect(isAuthenticated(validAuthState)).toBe(true)
-      })
-
-      render(
-        <SafeSidebarVariant
-          workspaceHeader={createAddHeader({ spaces: [] })}
-          mainNavItems={mockMainNavItems}
-          defiGroup={mockDefiGroup}
-        />,
-      )
-
-      expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
-    })
-
-    it('hides the addToWorkspace section entirely when Safe is counterfactual (undeployed)', () => {
-      mockUseIsCounterfactualSafe.mockReturnValue(true)
-      const spaces = [{ id: 1, name: 'Team', safeCount: 0 }]
-
-      render(
-        <SafeSidebarVariant
-          workspaceHeader={createAddHeader({ spaces })}
-          mainNavItems={mockMainNavItems}
-          defiGroup={mockDefiGroup}
-        />,
-      )
-
-      expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
-    })
-
-    it('keeps backToSpace header visible when Safe is counterfactual', () => {
-      mockUseIsCounterfactualSafe.mockReturnValue(true)
-
-      render(
-        <SafeSidebarVariant
-          workspaceHeader={createBackHeader({ spaceName: 'Shared Workspace', spaceId: '100' })}
-          mainNavItems={mockMainNavItems}
-          defiGroup={mockDefiGroup}
-        />,
-      )
-
-      expect(screen.getByTestId('back-to-space-button')).toBeInTheDocument()
-      expect(screen.getByText('Shared Workspace')).toBeInTheDocument()
-    })
-
-    it('renders correct number of spaces in addToWorkspace when multiple spaces provided', () => {
-      const spaces = Array.from({ length: 5 }, (_, i) => ({
-        id: i + 1,
-        name: `Space ${i + 1}`,
-        safeCount: 0,
-      }))
-
-      render(
-        <SafeSidebarVariant
-          workspaceHeader={createAddHeader({ spaces })}
-          mainNavItems={mockMainNavItems}
-          defiGroup={mockDefiGroup}
-        />,
-      )
-
-      expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
     })
   })
 
