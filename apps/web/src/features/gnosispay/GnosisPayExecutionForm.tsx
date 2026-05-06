@@ -164,20 +164,25 @@ export const GnosisPayExecutionForm = ({
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <Alert severity="info" sx={{ mb: 2, border: 0, position: 'relative' }} icon={false}>
-          <SvgIcon
-            component={GnosisPayIcon}
-            inheritViewBox
-            fontSize="large"
-            sx={{ position: 'absolute', top: '16px', left: '16px', width: '225px', height: '25px' }}
-          />
+        <Alert severity="info" sx={{ mb: 2, border: 0 }} icon={false}>
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <SvgIcon
+              component={GnosisPayIcon}
+              inheritViewBox
+              sx={{ width: 24, height: 24, flexShrink: 0 }}
+              aria-label="Gnosis Pay"
+            />
+            <Typography variant="subtitle2" fontWeight={700}>
+              Gnosis Pay
+            </Typography>
+          </Box>
           {queuedGnosisPayTx ? (
-            <Typography pt={4}>
+            <Typography>
               This is an activated Gnosis Pay Safe. You are about to execute the next transaction in the Delay queue of
               the Safe.
             </Typography>
           ) : (
-            <Typography pt={4}>
+            <Typography>
               This is an activated Gnosis Pay Safe. Transaction executions have a delay of 3 minutes and require two
               transactions: <br />
               <ul>

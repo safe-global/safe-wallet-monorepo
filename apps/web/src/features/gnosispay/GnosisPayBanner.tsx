@@ -14,11 +14,19 @@ export const GnosisPayBanner = () => {
 
   return (
     <Alert severity="info" icon={false} sx={{ mb: 2 }}>
-      <Box display="flex" alignItems="center" gap={1.5} flexWrap="wrap">
-        <SvgIcon component={GnosisPayIcon} inheritViewBox sx={{ width: '140px', height: '16px', flexShrink: 0 }} />
+      <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+        <SvgIcon
+          component={GnosisPayIcon}
+          inheritViewBox
+          sx={{ width: 20, height: 20, flexShrink: 0 }}
+          aria-label="Gnosis Pay"
+        />
+        <Typography variant="body2" component="span" fontWeight={700}>
+          Gnosis Pay
+        </Typography>
         <Typography variant="body2" component="span">
-          This is an activated Gnosis Pay Safe. Transactions are queued through a Delay modifier with a 3-minute
-          cooldown before they can be executed.
+          — Transactions on this Safe are queued through a Delay modifier with a 3-minute cooldown before they can be
+          executed.
         </Typography>
       </Box>
     </Alert>
