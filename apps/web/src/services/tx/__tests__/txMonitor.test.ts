@@ -160,7 +160,7 @@ describe('txMonitor', () => {
         expect(txDispatchSpy).toHaveBeenCalledWith('REVERTED', {
           nonce: 1,
           txId: '0x2',
-          error: new Error('Relayed transaction reverted by EVM.'),
+          error: new Error('Relayed transaction reverted.'),
           chainId,
           safeAddress,
         })
