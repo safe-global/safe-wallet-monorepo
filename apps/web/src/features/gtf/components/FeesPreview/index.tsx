@@ -7,6 +7,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import OutgoingIcon from '@/public/images/transactions/outgoing.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import TokenIcon from '@/components/common/TokenIcon'
+import { useCurrentChain } from '@/hooks/useChains'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { GtfPaymentMode } from '@/features/gtf/types'
 import type { FeesPreviewData, FeeRow as FeeRowType, TotalOutgoing } from '../../hooks/useFeesPreview'
@@ -236,7 +237,14 @@ const SignerFeeNotice = ({
 }: {
   availableGasTokens: FeesPreviewData['availableGasTokens']
 }): ReactElement => {
-  const nativeToken = availableGasTokens?.[0]
+  const chain = useCurrentChain()
+  // Fall back to the chain's native currency when no candidate is available — happens when
+  // the CGW fees endpoint errors out (e.g. 429) and every probe rejects. Signer always pays
+  // in the chain's native gas, so the chain config is the correct deterministic fallback.
+  const nativeToken = availableGasTokens?.[0] ?? {
+    symbol: chain?.nativeCurrency.symbol ?? '',
+    logoUri: chain?.nativeCurrency.logoUri ?? '',
+  }
 
   return (
     <div className={css.signerFeeNotice}>
@@ -244,9 +252,9 @@ const SignerFeeNotice = ({
         <Typography variant="body2" fontWeight={700}>
           Fees will be paid from the signer using
         </Typography>
-        <TokenIcon logoUri={nativeToken?.logoUri} tokenSymbol={nativeToken?.symbol} size={24} />
+        <TokenIcon logoUri={nativeToken.logoUri} tokenSymbol={nativeToken.symbol} size={24} />
         <Typography variant="body2" fontWeight={700}>
-          {nativeToken?.symbol}
+          {nativeToken.symbol}
         </Typography>
         <Tooltip title={SIGNER_FEE_TOOLTIP} placement="top" arrow>
           <span className={css.tooltipIcon}>
