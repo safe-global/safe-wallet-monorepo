@@ -67,6 +67,7 @@ export const useCurrentMemberProfile = () => {
 
   return {
     membership,
+    email: session?.email,
     signerAddress: session?.authMethod === 'siwe' ? session.signerAddress : undefined,
     isLoading: isSessionLoading || isMembershipLoading,
   }
