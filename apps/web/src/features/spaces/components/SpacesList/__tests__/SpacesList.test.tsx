@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import SpacesList from '../index'
 
@@ -110,5 +111,20 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     // Sign in card must NOT render in this branch.
     expect(screen.queryByTestId('sign-in-options')).not.toBeInTheDocument()
+  })
+
+  it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {
+    mockUseAppSelector.mockReturnValue(true)
+    const tenSpaces = Array.from({ length: 10 }, (_, i) => ({ id: i + 1, name: `Space ${i + 1}` }))
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: tenSpaces, isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    const button = screen.getByTestId('create-space-button')
+    expect(button).toHaveAttribute('disabled')
+
+    await userEvent.hover(button)
+    expect(await screen.findByText(/you can have up to 10 workspaces/i)).toBeInTheDocument()
   })
 })
