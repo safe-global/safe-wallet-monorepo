@@ -11,8 +11,7 @@ import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import { RecoveryFeature } from '@/features/recovery'
 import { useLoadFeature } from '@/features/__core__'
 import { BRAND_NAME } from '@/config/constants'
-import { GnosisPayQueue } from '@/features/gnosispay/GnosisPayQueue'
-import { GnosisPayBanner } from '@/features/gnosispay'
+import { GnosisPayFeature } from '@/features/gnosispay'
 import {
   useIsHypernativeEligible,
   useIsHypernativeQueueScanFeature,
@@ -25,6 +24,7 @@ import {
 
 const Queue: NextPage = () => {
   const { RecoveryList } = useLoadFeature(RecoveryFeature)
+  const { GnosisPayBanner, GnosisPayQueue } = useLoadFeature(GnosisPayFeature)
   const showPending = useShowUnsignedQueue()
   const hn = useLoadFeature(HypernativeFeature)
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)

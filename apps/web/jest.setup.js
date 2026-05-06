@@ -10,12 +10,27 @@ faker.seed(123)
 // Set timezone to UTC for consistent date formatting across environments
 process.env.TZ = 'UTC'
 
-// Default-mock the Gnosis Pay owner check so any component using CheckWallet or
-// the tx-flow action slots in tests doesn't need to wire up useChains/wallet/web3 mocks.
-// Use a plain function (not jest.fn) so `jest.resetAllMocks()` in test files doesn't
-// clear the implementation. Tests that exercise Gnosis Pay can still override with
-// jest.mock(...) at the file level.
-const gnosisPayHooksMock = {
+// Default-mock the Gnosis Pay barrel so any component using CheckWallet or the
+// tx-flow action slots in tests doesn't need to wire up useChains/wallet/web3
+// mocks. Use plain functions (not jest.fn) so `jest.resetAllMocks()` in test
+// files doesn't clear the implementation. Tests that exercise Gnosis Pay can
+// override with jest.mock(...) at the file level.
+//
+// Keeping the GnosisPayFeature handle here ensures `useLoadFeature(GnosisPayFeature)`
+// returns the stub proxy in tests (since useIsEnabled returns false by default),
+// so consumers' `feature.GnosisPayBanner` etc. render null without trying to
+// dynamic-import the feature chunk inside the jsdom environment.
+const gnosisPayBarrelMock = {
+  __esModule: true,
+  GnosisPayFeature: {
+    name: 'gnosispay',
+    useIsEnabled: () => false,
+    load: () => Promise.resolve({ default: {} }),
+  },
+  useIsGnosisPaySafe: () => [false, undefined, false],
+  useGnosisPayDelayModule: () => [undefined, undefined, false],
+}
+const gnosisPayInternalHooksMock = {
   __esModule: true,
   useIsGnosisPayOwner: () => [false, undefined, false],
   useIsGnosisPaySafe: () => [false, undefined, false],
@@ -23,10 +38,10 @@ const gnosisPayHooksMock = {
   useGnosisPayDelayModifier: () => [undefined, undefined, false],
   useGnosisPayActions: () => ({ enqueueTx: () => undefined, executeTx: () => undefined }),
 }
-jest.mock('@/features/gnosispay/hooks/useIsGnosisPayOwner', () => gnosisPayHooksMock)
-jest.mock('@/features/gnosispay/hooks/useIsGnosisPaySafe', () => gnosisPayHooksMock)
-jest.mock('@/features/gnosispay/hooks/useGnosisPayDelayModule', () => gnosisPayHooksMock)
-jest.mock('@/features/gnosispay', () => gnosisPayHooksMock)
+jest.mock('@/features/gnosispay', () => gnosisPayBarrelMock)
+jest.mock('@/features/gnosispay/hooks/useIsGnosisPayOwner', () => gnosisPayInternalHooksMock)
+jest.mock('@/features/gnosispay/hooks/useIsGnosisPaySafe', () => gnosisPayInternalHooksMock)
+jest.mock('@/features/gnosispay/hooks/useGnosisPayDelayModule', () => gnosisPayInternalHooksMock)
 
 jest.mock('@web3-onboard/coinbase', () => jest.fn())
 jest.mock('@web3-onboard/injected-wallets', () => ({ ProviderLabel: { MetaMask: 'MetaMask' } }))

@@ -25,3 +25,5 @@ export const GnosisPayQueue = () => {
 
   return <TxListGrid>{transactions}</TxListGrid>
 }
+
+export default GnosisPayQueue

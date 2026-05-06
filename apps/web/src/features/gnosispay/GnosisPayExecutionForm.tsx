@@ -22,7 +22,11 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
-import { useIsGnosisPayOwner, useGnosisPayDelayModifier } from '@/features/gnosispay'
+// Imports inside this file are part of the lazy GP chunk — pulling
+// `useIsGnosisPayOwner` (zodiac) and `useGnosisPayDelayModifier`
+// (recovery-sender → zodiac) here is fine.
+import { useIsGnosisPayOwner } from './hooks/useIsGnosisPayOwner'
+import { useGnosisPayDelayModifier } from './hooks/useGnosisPayDelayModifier'
 import { didRevert } from '@/utils/ethers-utils'
 import GnosisPayIcon from '@/public/images/common/gnosis-pay.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -228,7 +232,9 @@ export const GnosisPayExecutionForm = ({
 
         <CardActions>
           {/* Submit button */}
-          <CheckWallet allowGnosisPayOwner>
+          {/* allowGnosisPaySafe lets read-only viewers past CheckWallet; the
+              actual owner gate is enforced via `cannotPropose` in submitDisabled. */}
+          <CheckWallet allowGnosisPaySafe>
             {(isOk) => (
               <Button variant="contained" type="submit" disabled={!isOk || submitDisabled} sx={{ minWidth: '112px' }}>
                 {!isSubmittable ? <CircularProgress size={20} /> : 'Execute'}

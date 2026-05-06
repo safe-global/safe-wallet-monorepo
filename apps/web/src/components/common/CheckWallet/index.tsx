@@ -9,15 +9,19 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { Tooltip } from '@mui/material'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
-import { useIsGnosisPayOwner, useIsGnosisPaySafe } from '@/features/gnosispay'
+import { useIsGnosisPaySafe } from '@/features/gnosispay'
 
 type CheckWalletProps = {
   children: (ok: boolean) => ReactElement
   allowSpendingLimit?: boolean
   allowNonOwner?: boolean
-  /** Pass when only the wallet enabled on the Delay modifier should pass (e.g. submit gates). */
-  allowGnosisPayOwner?: boolean
-  /** Pass when any visitor of a Gnosis Pay safe should pass (e.g. nav/preview gates). */
+  /**
+   * Pass to let any visitor of a Gnosis Pay safe through (nav / preview gates).
+   * The actual write permission (must be the wallet enabled on the Delay modifier)
+   * is enforced inside the lazy-loaded GnosisPayExecutionForm via its
+   * `cannotPropose` check, not here — keeping `useIsGnosisPayOwner` (which pulls
+   * @gnosis.pm/zodiac) out of the main bundle.
+   */
   allowGnosisPaySafe?: boolean
   noTooltip?: boolean
   checkNetwork?: boolean
@@ -36,7 +40,6 @@ const CheckWallet = ({
   children,
   allowSpendingLimit,
   allowNonOwner,
-  allowGnosisPayOwner,
   allowGnosisPaySafe,
   noTooltip,
   checkNetwork = false,
@@ -50,7 +53,6 @@ const CheckWallet = ({
   const isWrongChain = useIsWrongChain()
   const sdk = useSafeSDK()
   const isProposer = useIsWalletProposer()
-  const [isGnosisPayOwner] = useIsGnosisPayOwner()
   const [isGnosisPaySafe] = useIsGnosisPaySafe()
 
   const { safe, safeLoaded } = useSafeInfo()
@@ -76,7 +78,6 @@ const CheckWallet = ({
       !isSafeOwner &&
       !isProposer &&
       !isNestedSafeOwner &&
-      !(allowGnosisPayOwner && isGnosisPayOwner) &&
       !(allowGnosisPaySafe && isGnosisPaySafe) &&
       (!isOnlySpendingLimit || !allowSpendingLimit)
     ) {
@@ -88,12 +89,10 @@ const CheckWallet = ({
     }
   }, [
     allowNonOwner,
-    allowGnosisPayOwner,
     allowGnosisPaySafe,
     allowProposer,
     allowSpendingLimit,
     allowUndeployedSafe,
-    isGnosisPayOwner,
     isGnosisPaySafe,
     isProposer,
     isNestedSafeOwner,

@@ -1,13 +1,16 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCallback, useContext } from 'react'
 import { TxFlowContext } from '../TxFlowProvider'
-import GnosisPayExecutionForm from '@/features/gnosispay/GnosisPayExecutionForm'
-import { useIsGnosisPaySafe } from '@/features/gnosispay'
+import { GnosisPayFeature, useIsGnosisPaySafe } from '@/features/gnosispay'
+import { useLoadFeature } from '@/features/__core__'
 import { type SlotComponentProps, SlotName, withSlot } from '../slots'
 
 const GnosisPay = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx } = useContext(SafeTxContext)
   const { trackTxEvent, isSubmitDisabled } = useContext(TxFlowContext)
+  // Lazy-loaded form chunk — pulls @gnosis.pm/zodiac etc. only when this
+  // slot actually renders (i.e., on a Gnosis Pay safe).
+  const { GnosisPayExecutionForm } = useLoadFeature(GnosisPayFeature)
 
   const handleSubmit = useCallback(
     async (txId: string, isExecuted = false) => {

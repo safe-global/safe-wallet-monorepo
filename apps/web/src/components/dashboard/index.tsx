@@ -42,7 +42,7 @@ import {
 } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
 import { EurcvBoostBanner, eurcvBoostBannerID } from '@/components/dashboard/NewsCarousel/banners/EurcvBoostBanner'
-import { GnosisPayBanner } from '@/features/gnosispay'
+import { GnosisPayFeature } from '@/features/gnosispay'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
@@ -68,6 +68,7 @@ const Dashboard = (): ReactElement => {
   const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
   const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
   const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
+  const { GnosisPayBanner } = useLoadFeature(GnosisPayFeature)
 
   const banners = [
     showHnBanner && !hnLoading && { id: hnBannerID, element: HnBannerForCarousel },
