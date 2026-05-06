@@ -19,6 +19,20 @@ export class ConnectError extends Error {
   }
 }
 
+/**
+ * QR-code pairing proposal expired before the wallet completed pairing
+ * (default ~5 min). Treated as a benign, expected failure mode (downgraded
+ * log severity, lighter cleanup messaging) but still requires the same
+ * teardown as a generic ConnectError. Extends ConnectError so consumers
+ * who only care about "any connect failure" still match via `instanceof`.
+ */
+export class ProposalExpiredError extends ConnectError {
+  constructor(message: string) {
+    super(message)
+    this.name = 'ProposalExpiredError'
+  }
+}
+
 export class UserRejectedError extends Error {
   constructor() {
     super('User rejected the connection request')
@@ -50,10 +64,10 @@ export const showUnsupportedChainAlert = () => {
 // in CONNECT_ERROR. The QR-code pairing proposal expires (~5 min default) before
 // the wallet completes pairing, surfacing as "Proposal expired" — sometimes
 // wrapped (e.g. "Pairing already exists: Proposal expired"). Word boundaries
-// keep the match tight enough to avoid downgrading non-WC errors that happen
-// to contain the substring.
-export const isProposalExpiredError = (error: unknown): boolean =>
-  error instanceof Error && /\bproposal\s+expired\b/i.test(error.message)
+// keep the match tight enough to avoid promoting non-WC errors that happen
+// to contain the substring. Used at the CONNECT_ERROR rejection site to
+// upgrade plain ConnectError to ProposalExpiredError.
+export const isProposalExpiredMessage = (message: string): boolean => /\bproposal\s+expired\b/i.test(message)
 
 export interface WalletConnectErrorContext {
   /** Slug used in log messages, e.g. 'signer import' → "during signer import". */
@@ -77,7 +91,7 @@ export interface WalletConnectErrorContext {
  *   handled inside `useConnect.rejectUnsupported`).
  * - `UserRejectedError` → `Logger.info` + `close()`. No alert (intentional
  *   cancellation).
- * - `Proposal expired` `ConnectError` → `Logger.warn` + cleanup + alert.
+ * - `ProposalExpiredError` → `Logger.warn` + cleanup + alert.
  * - Any other error → `Logger.error` + cleanup + alert.
  *
  * Cleanup runs `disconnect()` inside an awaited IIFE so async rejections from
@@ -96,7 +110,7 @@ export const handleWalletConnectError = (error: unknown, ctx: WalletConnectError
     return
   }
 
-  if (isProposalExpiredError(error)) {
+  if (error instanceof ProposalExpiredError) {
     Logger.warn(`WalletConnect proposal expired during ${ctx.flow}:`, error)
   } else {
     Logger.error(`Error during ${ctx.flow}:`, error)
@@ -242,7 +256,8 @@ export function useConnect() {
     const { reject } = pendingRef.current
     pendingRef.current = null
     clearSwitchTimeout()
-    reject(new ConnectError(data.properties?.message || 'Connection failed'))
+    const message = data.properties?.message || 'Connection failed'
+    reject(isProposalExpiredMessage(message) ? new ProposalExpiredError(message) : new ConnectError(message))
   })
 
   useStableAppKitEvent('USER_REJECTED', () => {

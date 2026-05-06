@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import { renderHook, act, waitFor } from '@/src/tests/test-utils'
 import { useReconnectFlow } from '../useReconnectFlow'
-import { ConnectError, UnsupportedChainError, UserRejectedError } from '../useConnect'
+import { ConnectError, ProposalExpiredError, UnsupportedChainError, UserRejectedError } from '../useConnect'
 import type { ConnectResult } from '../useConnect'
 import Logger from '@/src/utils/logger'
 
@@ -178,9 +178,9 @@ describe('useReconnectFlow', () => {
     expect(closeOrder).toBeLessThan(alertOrder)
   })
 
-  it('downgrades to Logger.warn and still cleans up when connect fails with a "Proposal expired" ConnectError', async () => {
+  it('downgrades to Logger.warn and still cleans up when connect fails with a ProposalExpiredError', async () => {
     const { result } = renderReconnectFlow()
-    const expiredError = new ConnectError('Proposal expired')
+    const expiredError = new ProposalExpiredError('Proposal expired')
 
     act(() => {
       result.current.reconnect(mockAddress)

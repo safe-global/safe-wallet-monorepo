@@ -2,9 +2,10 @@ import { renderHook, act } from '@/src/tests/test-utils'
 import {
   useConnect,
   ConnectError,
+  ProposalExpiredError,
   UnsupportedChainError,
   UserRejectedError,
-  isProposalExpiredError,
+  isProposalExpiredMessage,
 } from '../useConnect'
 
 const mockOpen = jest.fn()
@@ -123,11 +124,11 @@ describe('useConnect', () => {
     })
 
     expect(rejected).toBeInstanceOf(ConnectError)
+    expect(rejected).not.toBeInstanceOf(ProposalExpiredError)
     expect(rejected?.message).toBe('WalletConnect signing failed')
-    expect(isProposalExpiredError(rejected)).toBe(false)
   })
 
-  it('preserves "Proposal expired" message so callers can downgrade log level', async () => {
+  it('upgrades CONNECT_ERROR with "Proposal expired" message to ProposalExpiredError', async () => {
     const { result } = renderHook(() => useConnect())
 
     let rejected: Error | undefined
@@ -147,20 +148,46 @@ describe('useConnect', () => {
       await Promise.resolve()
     })
 
+    expect(rejected).toBeInstanceOf(ProposalExpiredError)
+    // ProposalExpiredError extends ConnectError so consumers catching the
+    // generic class still match.
     expect(rejected).toBeInstanceOf(ConnectError)
-    expect(isProposalExpiredError(rejected)).toBe(true)
+    expect(rejected?.message).toBe('Proposal expired')
   })
 
-  it('isProposalExpiredError matches wrapped messages and rejects unrelated substrings', () => {
+  it('upgrades wrapped "Proposal expired" messages to ProposalExpiredError', async () => {
+    const { result } = renderHook(() => useConnect())
+
+    let rejected: Error | undefined
+    act(() => {
+      result.current().catch((e: Error) => {
+        rejected = e
+      })
+    })
+
+    act(() => {
+      eventCallbacks['CONNECT_ERROR']?.({
+        data: { properties: { message: 'Pairing already exists: Proposal expired' } },
+      })
+    })
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(rejected).toBeInstanceOf(ProposalExpiredError)
+  })
+
+  it('isProposalExpiredMessage matches wrapped messages and rejects unrelated substrings', () => {
     // Realistic wrapped form from SignClient when a pairing already exists.
-    expect(isProposalExpiredError(new Error('Pairing already exists: Proposal expired'))).toBe(true)
+    expect(isProposalExpiredMessage('Pairing already exists: Proposal expired')).toBe(true)
     // Whitespace tolerance.
-    expect(isProposalExpiredError(new Error('Proposal  expired'))).toBe(true)
+    expect(isProposalExpiredMessage('Proposal  expired')).toBe(true)
     // Word boundaries prevent matches on substrings inside other words.
-    expect(isProposalExpiredError(new Error('subproposal expired-ish'))).toBe(false)
-    // Non-Error inputs are rejected.
-    expect(isProposalExpiredError('Proposal expired')).toBe(false)
-    expect(isProposalExpiredError(undefined)).toBe(false)
+    expect(isProposalExpiredMessage('subproposal expired-ish')).toBe(false)
+    // Empty / unrelated.
+    expect(isProposalExpiredMessage('')).toBe(false)
+    expect(isProposalExpiredMessage('Connection failed')).toBe(false)
   })
 
   it('falls back to a generic message when AppKit emits CONNECT_ERROR without one', async () => {
