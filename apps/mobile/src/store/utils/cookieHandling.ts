@@ -1,4 +1,4 @@
-import { setPrepareHeadersHook, addHandleResponseHook, isCredentialRoute } from '@safe-global/store/gateway/cgwClient'
+import { setPrepareHeadersHook, setHandleResponseHook, isCredentialRoute } from '@safe-global/store/gateway/cgwClient'
 import { GATEWAY_URL } from '@/src/config/constants'
 import { isIpOrLocalhostUrl, isHttpsUrl } from '@/src/utils/url'
 // Store for parsed cookies
@@ -73,8 +73,6 @@ export const handleCookieResponse = (
   return updatedCookies
 }
 
-let deregisterResponseHook: (() => void) | undefined
-
 /**
  * Sets up mobile-specific cookie handling for API requests.
  * This ensures cookies are properly stored and forwarded for credential routes.
@@ -90,10 +88,6 @@ export const setupMobileCookieHandling = () => {
     return
   }
 
-  // Deregister any previously registered response hook (e.g. during Fast Refresh)
-  // to prevent duplicate hook accumulation in the responseHooks array.
-  deregisterResponseHook?.()
-
   // Reset cookies object
   cookies = {}
 
@@ -103,7 +97,7 @@ export const setupMobileCookieHandling = () => {
   })
 
   // Set up the custom response hook
-  deregisterResponseHook = addHandleResponseHook((response, url) => {
+  setHandleResponseHook((response, url) => {
     cookies = handleCookieResponse(response, url, cookies)
   })
 }

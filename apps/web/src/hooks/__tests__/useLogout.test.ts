@@ -1,15 +1,9 @@
 import { renderHook, act } from '@testing-library/react'
 import useLogout from '@/hooks/useLogout'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
-import { setUnauthenticated } from '@/store/authSlice'
 
 jest.mock('@/config/gateway', () => ({
   GATEWAY_URL: 'https://safe-client.safe.global',
-}))
-
-const mockDispatch = jest.fn()
-jest.mock('@/store', () => ({
-  useAppDispatch: () => mockDispatch,
 }))
 
 describe('useLogout', () => {
@@ -21,7 +15,6 @@ describe('useLogout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockDispatch.mockReset()
     sessionStorage.clear()
     capturedForm = null
 
@@ -56,21 +49,6 @@ describe('useLogout', () => {
 
     expect(sessionStorage.getItem(LOGGING_OUT_KEY)).toBe('1')
     expect(submitSpy).toHaveBeenCalled()
-  })
-
-  it('should dispatch setUnauthenticated before submitting the form', () => {
-    const { result } = renderHook(() => useLogout())
-
-    const callOrder: string[] = []
-    mockDispatch.mockImplementation(() => callOrder.push('dispatch'))
-    submitSpy.mockImplementation(() => callOrder.push('submit'))
-
-    act(() => {
-      result.current.logout()
-    })
-
-    expect(mockDispatch).toHaveBeenCalledWith(setUnauthenticated())
-    expect(callOrder).toEqual(['dispatch', 'submit'])
   })
 
   it('should submit a form POST to the logout redirect endpoint', () => {
