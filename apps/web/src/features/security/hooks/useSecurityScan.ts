@@ -50,23 +50,21 @@ const useSecurityScan = (ctx: ScanContext | null): ScanState => {
   ctxRef.current = ctx
 
   const executeScan = useCallback(
-    (scannerId: string, scanFn: () => Promise<ScanResult>, guardId?: number, onAllComplete?: () => void) => {
+    async (scannerId: string, scanFn: () => Promise<ScanResult>, guardId?: number, onAllComplete?: () => void) => {
       setLoading((prev) => ({ ...prev, [scannerId]: true }))
 
-      scanFn()
-        .then((result) => {
-          if (guardId !== undefined && scanIdRef.current !== guardId) return
-          setResults((prev) => ({ ...prev, [scannerId]: result }))
-        })
-        .catch((err) => {
-          if (guardId !== undefined && scanIdRef.current !== guardId) return
-          setErrors((prev) => ({ ...prev, [scannerId]: err instanceof Error ? err.message : 'Scan failed' }))
-        })
-        .finally(() => {
-          if (guardId !== undefined && scanIdRef.current !== guardId) return
-          setLoading((prev) => ({ ...prev, [scannerId]: false }))
-          onAllComplete?.()
-        })
+      try {
+        const result = await scanFn()
+        if (guardId !== undefined && scanIdRef.current !== guardId) return
+        setResults((prev) => ({ ...prev, [scannerId]: result }))
+      } catch (err: any) {
+        if (guardId !== undefined && scanIdRef.current !== guardId) return
+        setErrors((prev) => ({ ...prev, [scannerId]: err instanceof Error ? err.message : 'Scan failed' }))
+      } finally {
+        if (guardId !== undefined && scanIdRef.current !== guardId) return
+        setLoading((prev) => ({ ...prev, [scannerId]: false }))
+        onAllComplete?.()
+      }
     },
     [],
   )

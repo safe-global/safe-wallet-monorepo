@@ -8,8 +8,8 @@ import Identicon from '@/components/common/Identicon'
 import { useSecurityScan } from '@/features/security'
 import { useChain } from '@/hooks/useChains'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import type { SelectedSafe, SpaceSafeEntry } from './index'
-import SecurityPanelView from './SecurityPanelView'
+import SecurityPanelView from '../SecurityPanelView/SecurityPanelView'
+import { SelectedSafe, SpaceSafeEntry } from '../../types'
 
 const MotionBox = motion.create(Box)
 

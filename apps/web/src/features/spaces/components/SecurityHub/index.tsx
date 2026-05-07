@@ -7,34 +7,17 @@ import type { ScanResult, SafeGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
-import useSafeScanContext, { type OverviewData } from '@/features/spaces/hooks/useSafeScanContext'
+import useSafeScanContext from '@/features/spaces/hooks/useSafeScanContext'
 import useAutoScan, { type AutoScanServices } from '@/features/spaces/hooks/useAutoScan'
-import SecuritySafesTable from './SecuritySafesTable'
-import SecurityReportDrawer from './SecurityReportDrawer'
-import WorkspaceHealthCard from './WorkspaceHealthCard'
+import SecuritySafesTable from './components/SecuritySafesTable/SecuritySafesTable'
+import SecurityReportDrawer from './components/SecurityReportDrawer/SecurityReportDrawer'
+import WorkspaceHealthCard from './components/WorkspaceHealthCard/WorkspaceHealthCard'
 import { flattenSafes, getDeployedEntries, reconcileDeployedSafes, toSafeItems } from './utils'
-
-export type ChainEntry = {
-  chainId: string
-  isDeployed: boolean
-}
-
-export type SpaceSafeEntry = {
-  address: string
-  chainId: string
-  name?: string
-  isMultichain: boolean
-  chainEntries: ChainEntry[]
-}
-
-export type SelectedSafe = {
-  address: string
-  chainId: string
-}
+import { BalanceMap, OverviewMap, SelectedSafe } from './types'
 
 const SecurityHub = (): ReactElement => {
   const security = useLoadFeature(SecurityFeature)
-  const { allSafes, isLoading } = useSpaceSafes()
+  const { allSafes, isLoading: isLoadingSpacesSafes } = useSpaceSafes()
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const [selectedSafe, setSelectedSafe] = useState<SelectedSafe | null>(null)
   const [allScanResults, setAllScanResults] = useState<Record<string, Record<string, ScanResult>>>({})
@@ -85,18 +68,28 @@ const SecurityHub = (): ReactElement => {
   //   - `balanceMap` / `overviewMap`: keyed per Safe for table cells and scan context.
   const { confirmedDeployedKeys, balanceMap, overviewMap } = useMemo(() => {
     if (!security.$isReady || !overviews) {
-      return { confirmedDeployedKeys: null, balanceMap: {}, overviewMap: {} as Record<string, OverviewData> }
+      return { confirmedDeployedKeys: null, balanceMap: {}, overviewMap: {} }
     }
+
     const confirmed = new Set<string>()
-    const bMap: Record<string, string | undefined> = {}
-    const oMap: Record<string, OverviewData> = {}
-    for (const ov of overviews) {
-      if (!ov.address?.value || !ov.chainId) continue
-      const key = security.scanKey(ov.address.value, ov.chainId)
-      confirmed.add(key)
-      bMap[key] = ov.fiatTotal
-      oMap[key] = { balanceUsd: Number(ov.fiatTotal) || 0, queuedTxCount: ov.queued ?? 0 }
-    }
+    const { bMap, oMap } = overviews.reduce(
+      (acc: { bMap: BalanceMap; oMap: OverviewMap }, ov) => {
+        if (!ov.address?.value || !ov.chainId) {
+          return acc
+        }
+
+        const key = security.scanKey(ov.address.value, ov.chainId)
+
+        confirmed.add(key)
+
+        acc.bMap[key] = ov.fiatTotal
+        acc.oMap[key] = { balanceUsd: Number(ov.fiatTotal) || 0, queuedTxCount: ov.queued ?? 0 }
+
+        return acc
+      },
+      { bMap: {}, oMap: {} },
+    )
+
     return {
       confirmedDeployedKeys: confirmed.size > 0 ? confirmed : null,
       balanceMap: bMap,
@@ -133,7 +126,7 @@ const SecurityHub = (): ReactElement => {
   // (e.g., user switches Safes via the selector).
   const lastScannedKeysRef = useRef<string>('')
   useEffect(() => {
-    if (isLoading || safes.length === 0 || !security.$isReady) return
+    if (isLoadingSpacesSafes || safes.length === 0 || !security.$isReady) return
     const currentKeys = deployedEntries
       .map((e) => security.scanKey(e.address, e.chainId))
       .sort()
@@ -142,7 +135,7 @@ const SecurityHub = (): ReactElement => {
       lastScannedKeysRef.current = currentKeys
       startScan()
     }
-  }, [isLoading, safes.length, deployedEntries, startScan, security.$isReady, security.scanKey])
+  }, [isLoadingSpacesSafes, safes.length, deployedEntries, startScan, security.$isReady, security.scanKey])
 
   const handleViewReport = useCallback((address: string, chainId: string) => {
     setSelectedSafe((prev) => {
@@ -171,7 +164,7 @@ const SecurityHub = (): ReactElement => {
         </Typography>
       </Box>
 
-      {isLoading ? (
+      {isLoadingSpacesSafes ? (
         <Typography variant="body2" color="text.secondary">
           Loading accounts...
         </Typography>
