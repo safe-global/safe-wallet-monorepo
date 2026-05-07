@@ -340,6 +340,44 @@ describe('useFeesPreview', () => {
     expect(result.current.selectedGasToken).toBe(ETH_ADDRESS)
   })
 
+  it('preserves user selection across a transient empty-candidates render (PLA-1399)', () => {
+    // Simulates Back/Forward between flow steps: useGasTokenCandidates re-mounts and reports
+    // an empty candidates list for one tick before the new probes resolve. The cleanup must NOT
+    // wipe the persisted selection during that window.
+    const spy = jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
+      candidates: [candidateEth, candidateWeth],
+      defaultAddress: ETH_ADDRESS,
+      probing: false,
+    })
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+
+    const { result, rerender } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    act(() => {
+      result.current.onGasTokenChange?.(WETH_ADDRESS)
+    })
+    expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
+
+    // Empty candidates window — user navigated Back, candidates not yet re-probed
+    spy.mockReturnValue({ candidates: [], defaultAddress: undefined, probing: false })
+    rerender()
+    expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
+
+    // Probes still in flight — same: must preserve
+    spy.mockReturnValue({ candidates: [], defaultAddress: undefined, probing: true })
+    rerender()
+    expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
+
+    // Probes complete with WETH still usable — selection unchanged
+    spy.mockReturnValue({
+      candidates: [candidateEth, candidateWeth],
+      defaultAddress: ETH_ADDRESS,
+      probing: false,
+    })
+    rerender()
+    expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
+  })
+
   it('falls back to ZERO_ADDRESS when there is no default and no user selection', () => {
     jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
       candidates: [],
