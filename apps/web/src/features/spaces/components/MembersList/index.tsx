@@ -26,12 +26,12 @@ const headCells = [
   {
     id: 'role',
     label: 'Role',
-    width: '15%',
+    width: '21%',
   },
   {
     id: 'actions',
     label: '',
-    width: '15%',
+    width: '8%',
     sticky: true,
   },
 ]
