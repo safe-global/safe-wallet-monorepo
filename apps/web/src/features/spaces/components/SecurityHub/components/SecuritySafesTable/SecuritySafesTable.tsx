@@ -27,7 +27,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
-import { SelectedSafe, SpaceSafeEntry } from '../../types'
+import type { SelectedSafe, SpaceSafeEntry } from '../../types'
 
 const DASH = '—'
 

@@ -13,7 +13,9 @@ import SecuritySafesTable from './components/SecuritySafesTable/SecuritySafesTab
 import SecurityReportDrawer from './components/SecurityReportDrawer/SecurityReportDrawer'
 import WorkspaceHealthCard from './components/WorkspaceHealthCard/WorkspaceHealthCard'
 import { flattenSafes, getDeployedEntries, reconcileDeployedSafes, toSafeItems } from './utils'
-import { BalanceMap, OverviewMap, SelectedSafe } from './types'
+import type { BalanceMap, OverviewMap, SelectedSafe } from './types'
+
+export type { BalanceMap, OverviewMap, SelectedSafe, SpaceSafeEntry, ChainEntry } from './types'
 
 const SecurityHub = (): ReactElement => {
   const security = useLoadFeature(SecurityFeature)

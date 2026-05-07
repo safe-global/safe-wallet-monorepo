@@ -1,5 +1,5 @@
 import { reconcileDeployedSafes, getDeployedEntries } from '../utils'
-import type { SpaceSafeEntry } from '../index'
+import type { SpaceSafeEntry } from '../types'
 
 const scanKey = (address: string, chainId: string) => `${address}:${chainId}`
 

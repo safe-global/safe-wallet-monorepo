@@ -20,7 +20,7 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: () => mockUseHasFeature(),
 }))
 
-jest.mock('../hooks/useResolvedSidebarNav', () => ({
+jest.mock('../../../hooks/useResolvedSidebarNav', () => ({
   useResolvedSidebarNav: jest.fn((main, setup, options) => mockUseResolvedSidebarNav(main, setup, options)),
 }))
 
@@ -169,9 +169,7 @@ describe('SpacesSidebarContent', () => {
     it('hides the Security entry when the flag is explicitly off', () => {
       mockUseHasFeature.mockReturnValue(false)
 
-      render(
-        <SpacesSidebarContent spaceName="Test Space" spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />,
-      )
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
       // The mocked config has Team + Security; only Team should remain.
@@ -181,9 +179,7 @@ describe('SpacesSidebarContent', () => {
     it('keeps the Security entry while the flag is undefined (chain config still loading)', () => {
       mockUseHasFeature.mockReturnValue(undefined)
 
-      render(
-        <SpacesSidebarContent spaceName="Test Space" spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />,
-      )
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
       expect(setupGroup.items).toHaveLength(2)
@@ -192,9 +188,7 @@ describe('SpacesSidebarContent', () => {
     it('keeps the Security entry when the flag is enabled', () => {
       mockUseHasFeature.mockReturnValue(true)
 
-      render(
-        <SpacesSidebarContent spaceName="Test Space" spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />,
-      )
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
       expect(setupGroup.items).toHaveLength(2)

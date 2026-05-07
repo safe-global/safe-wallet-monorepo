@@ -1,6 +1,6 @@
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
-import type { SpaceSafeEntry, SelectedSafe } from './index'
+import type { SpaceSafeEntry, SelectedSafe } from './types'
 
 /** Build SpaceSafeEntry[] from the raw space items, applying the client's local undeployed flags. */
 export const flattenSafes = (

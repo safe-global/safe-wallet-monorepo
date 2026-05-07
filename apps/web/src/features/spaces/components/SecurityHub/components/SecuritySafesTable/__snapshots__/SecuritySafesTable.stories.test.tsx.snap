@@ -5,7 +5,7 @@ exports[`./SecuritySafesTable.stories MultichainSafe 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   />
 </div>
@@ -16,7 +16,7 @@ exports[`./SecuritySafesTable.stories Scanning 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   />
 </div>
@@ -27,7 +27,7 @@ exports[`./SecuritySafesTable.stories SingleChainSafes 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   />
 </div>

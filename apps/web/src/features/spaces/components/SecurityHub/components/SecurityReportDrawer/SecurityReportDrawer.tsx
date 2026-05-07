@@ -9,7 +9,7 @@ import { useSecurityScan } from '@/features/security'
 import { useChain } from '@/hooks/useChains'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import SecurityPanelView from '../SecurityPanelView/SecurityPanelView'
-import { SelectedSafe, SpaceSafeEntry } from '../../types'
+import type { SelectedSafe, SpaceSafeEntry } from '../../types'
 
 const MotionBox = motion.create(Box)
 

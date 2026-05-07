@@ -4,7 +4,7 @@ import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import type { ScanResult, SafeGrade, StrengthLevel } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
-import type { SpaceSafeEntry } from './index'
+import type { SpaceSafeEntry } from '../../types'
 
 type WorkspaceHealthCardProps = {
   safes: SpaceSafeEntry[]

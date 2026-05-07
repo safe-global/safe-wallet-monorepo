@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import { createMockContext } from '@/features/security/testing'
 import type { ScanResult } from '@/features/security/types'
-import SecurityPanelView from '../SecurityPanelView'
+import SecurityPanelView from '../components/SecurityPanelView/SecurityPanelView'
 
 // next/link isn't meaningful in a jsdom render; pass through to a plain anchor.
 jest.mock('next/link', () => {

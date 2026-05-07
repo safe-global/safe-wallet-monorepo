@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import SecurityReportDrawer from './SecurityReportDrawer'
 import { createMockStory } from '@/stories/mocks'
 import { createMockContext } from '@/features/security/testing'
-import { SpaceSafeEntry } from '../../types'
+import type { SpaceSafeEntry } from '../../types'
 
 const SAFE_A = '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'
 
