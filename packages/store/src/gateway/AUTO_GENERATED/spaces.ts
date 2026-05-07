@@ -376,8 +376,14 @@ export type SpaceAddressBookItemDto = {
   name: string
   address: string
   chainIds: string[]
+  /** Email or wallet address of the creator, "Unknown user" if the user has no display identity, or "Deleted user" */
   createdBy: string
+  /** User ID of the creator */
+  createdByUserId: number
+  /** Email or wallet address of the last editor, "Unknown user" if the user has no display identity, or "Deleted user" */
   lastUpdatedBy: string
+  /** User ID of the last editor */
+  lastUpdatedByUserId: number
   createdAt: string
   updatedAt: string
 }
@@ -491,6 +497,7 @@ export type AcceptInviteDto = {
 export type MemberUser = {
   id: number
   status: 'PENDING' | 'ACTIVE'
+  email: string | null
 }
 export type MemberDto = {
   id: number
