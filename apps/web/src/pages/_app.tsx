@@ -93,10 +93,9 @@ import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
 import { useOidcLoginCallback } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
+import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
-import { initializeSessionExpiry } from '@/services/sessionExpiry/sessionExpiryInit'
-import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
@@ -106,11 +105,6 @@ if (typeof window !== 'undefined') {
 
 const reduxStore = makeStore()
 setStoreInstance(reduxStore)
-
-// Register the global 403-on-credentialed-route → session-expired interceptor.
-// Must run after setStoreInstance (so getStoreInstance() works) and before any
-// RTK Query requests fire.
-initializeSessionExpiry()
 
 const InitApp = (): null => {
   useHydrateStore(reduxStore)
