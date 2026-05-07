@@ -1,7 +1,13 @@
 import { useStore } from 'react-redux'
 import { act, renderHook, waitFor } from '@/tests/test-utils'
 import type { AppStore, RootState } from '@/store'
-import { useSessionExpiryGuard, SESSION_EXPIRED_GROUP_KEY, SESSION_EXPIRED_MESSAGE } from '../useSessionExpiryGuard'
+import {
+  useSessionExpiryGuard,
+  SESSION_EXPIRED_GROUP_KEY,
+  SESSION_EXPIRED_MESSAGE,
+  SESSION_EXPIRED_SIGN_IN_LABEL,
+} from '../useSessionExpiryGuard'
+import { setAuthenticated } from '@/store/authSlice'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 
 const mockUnwrap = jest.fn()
@@ -272,6 +278,36 @@ describe('useSessionExpiryGuard', () => {
     renderGuardWithStore(Date.now() + 120_000)
     await flushMicrotasks()
     expect(mockInitiate).toHaveBeenCalledTimes(2)
+  })
+
+  it('dismisses a lingering session-expired toast when the user signs back in within the same tab', async () => {
+    mockUnwrap.mockResolvedValue({ id: 'u' })
+
+    // Reproduce the bug: prior expiry left a toast in the store, then the user
+    // signs in again. The toast must not hang on screen.
+    const { store } = renderGuardWithStore(Date.now() - 1_000)
+    await flushMicrotasks()
+    const toast = findNotification(store)
+    expect(toast).toBeDefined()
+    expect(toast?.isDismissed).not.toBe(true)
+
+    await act(async () => {
+      store.dispatch(setAuthenticated(Date.now() + 60_000))
+      await Promise.resolve()
+    })
+
+    expect(findNotification(store)?.isDismissed).toBe(true)
+  })
+
+  it('shows a Spaces sign-in link in the toast that points at /welcome/spaces', async () => {
+    const { store } = renderGuardWithStore(Date.now() - 1_000)
+    await flushMicrotasks()
+
+    expect(findNotification(store)).toMatchObject({
+      message: SESSION_EXPIRED_MESSAGE,
+      link: { href: '/welcome/spaces', title: SESSION_EXPIRED_SIGN_IN_LABEL },
+    })
+    expect(SESSION_EXPIRED_MESSAGE).toBe('Your session has expired. Please sign in to Spaces again.')
   })
 
   it('runs once after the store hydrates from a partial preloaded state', async () => {

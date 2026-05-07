@@ -3,8 +3,9 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import { cgwApi as authApi } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectIsStoreHydrated, setUnauthenticated } from '@/store/authSlice'
-import { showNotification } from '@/store/notificationsSlice'
+import { closeByGroupKey, showNotification } from '@/store/notificationsSlice'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
+import { AppRoutes } from '@/config/routes'
 
 // Mirrors apps/web/src/features/oidc-auth/constants.ts. The constant is not
 // exported from the feature's public API; duplicating the literal here avoids
@@ -12,7 +13,8 @@ import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 const OIDC_AUTH_PENDING_KEY = 'oidc_auth_pending'
 
 export const SESSION_EXPIRED_GROUP_KEY = 'session-expired'
-export const SESSION_EXPIRED_MESSAGE = 'Your session has expired. Please sign in again.'
+export const SESSION_EXPIRED_MESSAGE = 'Your session has expired. Please sign in to Spaces again.'
+export const SESSION_EXPIRED_SIGN_IN_LABEL = 'Sign in to Spaces'
 
 const isForbidden = (error: unknown): error is FetchBaseQueryError =>
   typeof error === 'object' && error !== null && 'status' in error && error.status === 403
@@ -68,6 +70,7 @@ export const useSessionExpiryGuard = (): void => {
           message: SESSION_EXPIRED_MESSAGE,
           variant: 'error',
           groupKey: SESSION_EXPIRED_GROUP_KEY,
+          link: { href: AppRoutes.welcome.spaces, title: SESSION_EXPIRED_SIGN_IN_LABEL },
         }),
       )
     }
@@ -78,6 +81,11 @@ export const useSessionExpiryGuard = (): void => {
       expireNow()
       return
     }
+
+    // We have a fresh, future expiry — meaning the user is (re-)authenticated.
+    // Dismiss any lingering session-expired toast left over from a prior expiry
+    // in the same tab so it doesn't hang around after the user signs back in.
+    dispatch(closeByGroupKey({ groupKey: SESSION_EXPIRED_GROUP_KEY }))
 
     // Arm the local-expiry timer up front. This is the floor on cleanup
     // latency: even if the /me probe hangs or is suppressed (OIDC/logout flow
