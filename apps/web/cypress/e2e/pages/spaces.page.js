@@ -20,7 +20,7 @@ const spaceSaveBtn = '[data-testid="space-save-button"]'
 const spaceDeleteBtn = '[data-testid="space-delete-button"]'
 const spaceConfirmDeleteBtn = '[data-testid="space-confirm-delete-button"]'
 const spaceCard = '[data-testid="space-card"]'
-const spaceVertMenuIcon = '[data-testid="MoreVertIcon"]'
+const spaceCardContextMenuBtn = '[data-testid="space-card-context-menu-button"]'
 const contectMenuRemoveBtn = '[data-testid="remove-button"]'
 
 // -- Dashboard widgets --
@@ -427,42 +427,25 @@ export function deleteSpace(name) {
 
 const MAX_SPACES = 10
 
-function deleteAllSpaces() {
-  cy.get('body').then(($body) => {
-    if ($body.find(spaceCard).length > 0) {
-      cy.get(spaceCard)
-        .first()
-        .within(() => {
-          cy.get(spaceVertMenuIcon).click({ force: true })
-        })
-      cy.get(contectMenuRemoveBtn).click({ force: true })
-      cy.get(spaceConfirmDeleteBtn).click()
-      cy.wait(1000)
-      deleteAllSpaces()
-    }
-  })
-}
-
-function deleteOneSpace() {
-  cy.get(spaceCard)
-    .first()
-    .within(() => {
-      cy.get(spaceVertMenuIcon).click({ force: true })
-    })
-  cy.get(contectMenuRemoveBtn).click({ force: true })
-  cy.get(spaceConfirmDeleteBtn).click()
-  cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
-}
-
 export function ensureReadyToCreateSpace() {
-  cy.get('body').then(($body) => {
-    const count = $body.find(spaceCard).length
-    if (count >= MAX_SPACES) {
-      deleteOneSpace()
-    } else if (count > 0) {
-      deleteAllSpaces()
-    }
-  })
+  // Wait for the page to settle: either the spaces list or the create button must be visible
+  cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
+
+  // Use the live jQuery collection so the count reflects what's actually in the DOM now
+  cy.get('body')
+    .find(spaceCard)
+    .then(($cards) => {
+      if ($cards.length >= MAX_SPACES) {
+        // At the limit — delete one space to free a slot
+        cy.wrap($cards.first()).within(() => {
+          cy.get(spaceCardContextMenuBtn).click({ force: true })
+        })
+        cy.get(contectMenuRemoveBtn).click({ force: true })
+        cy.get(spaceConfirmDeleteBtn).click()
+        cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
+      }
+    })
+
   // Wait for either the create button or the create-space form to settle after deletion/redirect
   cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 }
