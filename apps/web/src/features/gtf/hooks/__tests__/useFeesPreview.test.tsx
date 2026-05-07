@@ -199,7 +199,6 @@ describe('useFeesPreview', () => {
     jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
       candidates: [candidateEth, candidateWeth],
       defaultAddress: ETH_ADDRESS,
-      probing: false,
     })
     jest.spyOn(useGasLimitModule, 'default').mockReturnValue({ gasLimit: BigInt(21000), gasLimitLoading: false })
     jest
@@ -318,7 +317,6 @@ describe('useFeesPreview', () => {
     const spy = jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
       candidates: [candidateEth, candidateWeth],
       defaultAddress: ETH_ADDRESS,
-      probing: false,
     })
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
 
@@ -333,7 +331,6 @@ describe('useFeesPreview', () => {
     spy.mockReturnValue({
       candidates: [candidateEth],
       defaultAddress: ETH_ADDRESS,
-      probing: false,
     })
     rerender()
 
@@ -347,7 +344,6 @@ describe('useFeesPreview', () => {
     const spy = jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
       candidates: [candidateEth, candidateWeth],
       defaultAddress: ETH_ADDRESS,
-      probing: false,
     })
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
 
@@ -358,21 +354,15 @@ describe('useFeesPreview', () => {
     })
     expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
 
-    // Empty candidates window — user navigated Back, candidates not yet re-probed
-    spy.mockReturnValue({ candidates: [], defaultAddress: undefined, probing: false })
+    // Empty candidates window — user navigated Back, balances not yet repopulated
+    spy.mockReturnValue({ candidates: [], defaultAddress: undefined })
     rerender()
     expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
 
-    // Probes still in flight — same: must preserve
-    spy.mockReturnValue({ candidates: [], defaultAddress: undefined, probing: true })
-    rerender()
-    expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
-
-    // Probes complete with WETH still usable — selection unchanged
+    // Candidates repopulated with WETH still usable — selection unchanged
     spy.mockReturnValue({
       candidates: [candidateEth, candidateWeth],
       defaultAddress: ETH_ADDRESS,
-      probing: false,
     })
     rerender()
     expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
@@ -382,7 +372,6 @@ describe('useFeesPreview', () => {
     jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
       candidates: [],
       defaultAddress: undefined,
-      probing: false,
     })
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
 

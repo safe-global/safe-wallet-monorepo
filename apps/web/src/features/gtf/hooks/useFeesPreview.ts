@@ -180,7 +180,7 @@ export const useFeesPreview = (): FeesPreviewData => {
   // the UI for confirmers regardless of how the tx got there.
   const isLegacySigned = !!safeTx && safeTx.signatures.size > 0 && !isGtfSafePaid(safeTx.data)
 
-  const { candidates, defaultAddress, probing } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
+  const { candidates, defaultAddress } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
 
   const lockedCandidate = ((): GasTokenCandidate | undefined => {
     if (!lockedGasToken) return undefined
@@ -207,18 +207,15 @@ export const useFeesPreview = (): FeesPreviewData => {
   })()
 
   // If the user's explicit choice drops out of candidates (e.g. balance dropped to 0), forget it.
-  // Skip while probing or before any candidate has resolved — the transient empty-candidates
-  // window during a re-mount (Back/Forward between flow steps) would otherwise wipe a valid
-  // persisted selection. The choice is only invalidated when probes have completed AND we have
-  // a non-empty candidates list AND the choice isn't in it.
+  // Skip while the candidates list is empty — that's the transient remount window (Back/Forward
+  // between flow steps) where balances haven't repopulated yet, not a real "token unavailable".
   useEffect(() => {
     if (!gtfSelectedGasToken) return
-    if (probing) return
     if (candidates.length === 0) return
     if (!candidates.some((c) => sameAddress(c.address, gtfSelectedGasToken))) {
       setGtfSelectedGasToken(undefined)
     }
-  }, [gtfSelectedGasToken, candidates, probing, setGtfSelectedGasToken])
+  }, [gtfSelectedGasToken, candidates, setGtfSelectedGasToken])
 
   // Persist the implicit default — `mergeGtfFeeParams` bails without a selection.
   // Skip for legacy signed txs: a residual selection here would later trip ExecuteForm's
