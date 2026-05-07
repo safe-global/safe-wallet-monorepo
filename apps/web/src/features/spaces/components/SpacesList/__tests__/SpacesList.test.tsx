@@ -125,6 +125,6 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(button).toHaveAttribute('disabled')
 
     await userEvent.hover(button)
-    expect(await screen.findByText(/you can have up to 10 workspaces/i)).toBeInTheDocument()
+    expect(await screen.findByText(/limit of 10 workspaces reached/i)).toBeInTheDocument()
   })
 })

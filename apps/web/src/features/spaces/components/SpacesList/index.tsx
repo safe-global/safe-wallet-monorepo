@@ -46,7 +46,7 @@ const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?
   return (
     <Tooltip>
       <TooltipTrigger render={<div className="inline-flex" />}>{button}</TooltipTrigger>
-      <TooltipContent>You can have up to {SPACES_LIMIT} workspaces</TooltipContent>
+      <TooltipContent>Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
     </Tooltip>
   )
 }
