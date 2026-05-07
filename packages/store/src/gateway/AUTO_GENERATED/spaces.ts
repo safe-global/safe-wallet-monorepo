@@ -98,6 +98,13 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members/decline`, method: 'POST' }),
         invalidatesTags: ['spaces'],
       }),
+      membersResendInviteV1: build.mutation<MembersResendInviteV1ApiResponse, MembersResendInviteV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}/resend`,
+          method: 'POST',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       membersGetUsersV1: build.query<MembersGetUsersV1ApiResponse, MembersGetUsersV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members` }),
         providesTags: ['spaces'],
@@ -222,6 +229,13 @@ export type MembersDeclineInviteV1ApiArg = {
   /** Space ID to decline invitation for */
   spaceId: number
 }
+export type MembersResendInviteV1ApiResponse = unknown
+export type MembersResendInviteV1ApiArg = {
+  /** Space ID containing the invitation */
+  spaceId: number
+  /** User ID of the invited member */
+  userId: number
+}
 export type MembersGetUsersV1ApiResponse = /** status 200 Space members retrieved successfully */ MembersDto
 export type MembersGetUsersV1ApiArg = {
   /** Space ID to get members for */
@@ -293,6 +307,7 @@ export type SpaceMemberDto = {
   name: string
   invitedBy: string
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
+  inviteExpiresAt?: string | null
   user: UserDto
 }
 export type GetSpaceResponse = {
@@ -331,9 +346,11 @@ export type Invitation = {
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   invitedBy?: string | null
+  inviteExpiresAt?: string | null
 }
 export type InviteUserDto = {
-  address: string
+  address?: string
+  email?: string
   name: string
   role: 'ADMIN' | 'MEMBER'
 }
@@ -356,6 +373,7 @@ export type MemberDto = {
   invitedBy?: string | null
   createdAt: string
   updatedAt: string
+  inviteExpiresAt?: string | null
   user: MemberUser
 }
 export type MembersDto = {
@@ -388,6 +406,7 @@ export const {
   useMembersInviteUserV1Mutation,
   useMembersAcceptInviteV1Mutation,
   useMembersDeclineInviteV1Mutation,
+  useMembersResendInviteV1Mutation,
   useMembersGetUsersV1Query,
   useLazyMembersGetUsersV1Query,
   useMembersSelfRemoveV1Mutation,

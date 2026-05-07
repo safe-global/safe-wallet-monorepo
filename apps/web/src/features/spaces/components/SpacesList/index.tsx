@@ -23,6 +23,26 @@ import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
 
+const PendingInvitations = ({ pendingInvites }: { pendingInvites: GetSpaceResponse[] }) => {
+  if (pendingInvites.length === 0) return null
+
+  if (pendingInvites.length === 1) {
+    return <SpaceListInvite space={pendingInvites[0]} isProminent />
+  }
+
+  return (
+    <Box mb={3}>
+      <Typography variant="h4" fontWeight={700} mb={2}>
+        Pending invitations ({pendingInvites.length})
+      </Typography>
+
+      {pendingInvites.map((invitingSpace) => (
+        <SpaceListInvite key={invitingSpace.id} space={invitingSpace} />
+      ))}
+    </Box>
+  )
+}
+
 const AddSpaceButton = ({ onClick }: { onClick?: () => void }) => {
   return (
     <Button
@@ -126,11 +146,7 @@ const SpacesList = () => {
           )}
         </Box>
 
-        {isUserSignedIn &&
-          pendingInvites.length > 0 &&
-          pendingInvites.map((invitingSpace: GetSpaceResponse) => (
-            <SpaceListInvite key={invitingSpace.id} space={invitingSpace} />
-          ))}
+        {isUserSignedIn && <PendingInvitations pendingInvites={pendingInvites} />}
 
         {isUserSignedIn || (!redirectLoading && pendingInvites.length) ? (
           <>
@@ -142,9 +158,9 @@ const SpacesList = () => {
                   </Grid2>
                 ))}
               </Grid2>
-            ) : (
+            ) : pendingInvites.length === 0 ? (
               <NoSpacesState />
-            )}
+            ) : null}
           </>
         ) : (
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />

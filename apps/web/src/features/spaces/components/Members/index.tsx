@@ -63,7 +63,7 @@ const SpaceMembers = () => {
             Found 0 results
           </Typography>
         )}
-        {filteredInvites.length > 0 && (
+        {isAdmin && filteredInvites.length > 0 && (
           <>
             <Typography variant="h5" fontWeight={700} mb={2}>
               Pending invitations ({filteredInvites.length})

@@ -22,17 +22,16 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { useAppDispatch } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import MemberInfoForm from './MemberInfoForm'
-import AddressBookInput from '@/components/common/AddressBookInput'
 import useAddressBook from '@/hooks/useAddressBook'
-
-type MemberField = {
-  name: string
-  address: string
-  role: MemberRole
-}
+import { isAuthenticated } from '@/store/authSlice'
+import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { isAddress } from 'viem'
+import { type MemberField, buildInviteUserPayload, getIdentifierValidationError } from './utils'
+import AddMemberInput from './AddMemberInput'
 
 export const RoleMenuItem = ({
   role,
@@ -77,29 +76,52 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [inviteMembers] = useMembersInviteUserV1Mutation()
   const addressBook = useAddressBook()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { data: session } = useAuthGetMeV1Query(undefined, { skip: !isUserSignedIn })
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
+  const sessionEmail = session && 'email' in session && typeof session.email === 'string' ? session.email : undefined
 
   const methods = useForm<MemberField>({
     mode: 'onChange',
     defaultValues: {
       name: '',
-      address: '',
+      identifier: '',
       role: MemberRole.MEMBER,
     },
   })
 
-  const { handleSubmit, formState, watch, setValue } = methods
+  const { handleSubmit, formState, register, watch, setValue } = methods
 
-  const addressValue = watch('address')
+  const identifierValue = watch('identifier')
+  const identifierInputProps = register('identifier', {
+    validate: (value) => {
+      return (
+        getIdentifierValidationError({
+          identifier: value,
+          sessionEmail,
+          walletAddresses: currentUser?.wallets?.map((wallet) => wallet.address),
+        }) ?? true
+      )
+    },
+  })
 
   useEffect(() => {
-    const addressBookName = addressBook[addressValue]
+    if (!isAddress(identifierValue)) {
+      return
+    }
+
+    const addressBookName = addressBook[identifierValue]
     if (addressBookName) {
       setValue('name', addressBookName)
     }
-  }, [addressBook, addressValue, setValue])
+  }, [addressBook, identifierValue, setValue])
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
+
+    if (!data.identifier.trim()) {
+      return
+    }
 
     if (!spaceId) {
       setError('Something went wrong. Please try again.')
@@ -110,7 +132,9 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
       setIsSubmitting(true)
       const response = await inviteMembers({
         spaceId: Number(spaceId),
-        inviteUsersDto: { users: [{ address: data.address, role: data.role, name: data.name }] },
+        inviteUsersDto: {
+          users: [buildInviteUserPayload(data)],
+        },
       })
 
       if (response.data) {
@@ -152,20 +176,21 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
     <ModalDialog open onClose={onClose} dialogTitle="Add member" hideChainIndicator>
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>
-          <DialogContent sx={{ py: 2 }}>
-            <Typography mb={2}>
-              Invite a signer of the Safe Accounts, or any other wallet address. Anyone in the space can see their name.
-            </Typography>
+          <DialogContent sx={{ overflow: 'visible', py: 2 }}>
+            <Typography mb={2}>Invite a member by email or wallet address.</Typography>
 
             <Stack spacing={3}>
               <MemberInfoForm />
 
-              <AddressBookInput
-                data-testid="member-address-input"
-                name="address"
-                label="Address"
-                required
-                showPrefix={false}
+              <AddMemberInput
+                addressBook={addressBook}
+                error={formState.errors.identifier?.message}
+                inputProps={identifierInputProps}
+                onSelectAddress={(address, name) => {
+                  setValue('identifier', address, { shouldDirty: true, shouldValidate: true })
+                  setValue('name', name)
+                }}
+                value={identifierValue}
               />
             </Stack>
 
@@ -184,7 +209,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
               data-testid="add-member-modal-button"
               type="submit"
               variant="contained"
-              disabled={!formState.isValid || isSubmitting}
+              disabled={!identifierValue.trim() || !formState.isValid || isSubmitting}
               disableElevation
             >
               {isSubmitting ? <CircularProgress size={20} /> : 'Add member'}

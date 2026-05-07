@@ -1,16 +1,26 @@
 import { Box, Chip, IconButton, Stack, SvgIcon, Tooltip } from '@mui/material'
-import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { type MemberDto, useMembersResendInviteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
+import { Button } from '@/components/ui/button'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import { useState } from 'react'
-import { useIsAdmin, isAdmin as checkIsAdmin, isActiveAdmin, MemberStatus, useAdminCount } from '@/features/spaces'
+import {
+  useCurrentSpaceId,
+  useIsAdmin,
+  isAdmin as checkIsAdmin,
+  isActiveAdmin,
+  MemberStatus,
+  useAdminCount,
+} from '@/features/spaces'
 import EditMemberDialog from './EditMemberDialog'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
+import { useAppDispatch } from '@/store'
+import { showNotification } from '@/store/notificationsSlice'
 
 const headCells = [
   {
@@ -45,6 +55,41 @@ const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean
       </Tooltip>
       {open && <EditMemberDialog member={member} handleClose={() => setOpen(false)} />}
     </>
+  )
+}
+
+const ResendInviteButton = ({ member, disabled }: { member: MemberDto; disabled: boolean }) => {
+  const dispatch = useAppDispatch()
+  const spaceId = useCurrentSpaceId()
+  const [resendInvite, { isLoading }] = useMembersResendInviteV1Mutation()
+
+  const handleClick = async () => {
+    const { error } = await resendInvite({ spaceId: Number(spaceId), userId: member.user.id })
+
+    if (error) {
+      dispatch(
+        showNotification({
+          message: 'Something went wrong resending the invitation.',
+          variant: 'error',
+          groupKey: 'resend-invite-error',
+        }),
+      )
+      return
+    }
+
+    dispatch(
+      showNotification({
+        message: `Resent invitation to ${member.name}`,
+        variant: 'success',
+        groupKey: 'resend-invite-success',
+      }),
+    )
+  }
+
+  return (
+    <Button variant="outline" size="sm" disabled={disabled || isLoading} onClick={handleClick}>
+      Resend
+    </Button>
   )
 }
 
@@ -131,6 +176,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
           content: isAdmin ? (
             <div className={tableCss.actions}>
               {!isInvite && <EditButton member={member} disabled={isDisabled} />}
+              {isInvite && <ResendInviteButton member={member} disabled={isDisabled} />}
               <RemoveMemberButton member={member} disabled={isDisabled} isInvite={isInvite} />
             </div>
           ) : null,

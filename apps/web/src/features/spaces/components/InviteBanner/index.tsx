@@ -18,9 +18,11 @@ import { isAuthenticated } from '@/store/authSlice'
 
 type SpaceListInvite = {
   space: GetSpaceResponse
+  // Used for the single pending-invite acceptance state.
+  isProminent?: boolean
 }
 
-const SpaceListInvite = ({ space }: SpaceListInvite) => {
+const SpaceListInvite = ({ space, isProminent = false }: SpaceListInvite) => {
   const { id, name, members, safeCount } = space
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
@@ -28,8 +30,45 @@ const SpaceListInvite = ({ space }: SpaceListInvite) => {
 
   const invitedBy = space.members.find((member) => member.user.id === currentUser?.id)?.invitedBy
 
+  const inviteCard = (
+    <Link href={{ pathname: AppRoutes.spaces.index, query: { spaceId: id } }} passHref legacyBehavior>
+      <MUILink
+        underline="none"
+        sx={{ display: 'block' }}
+        onClick={() => trackEvent({ ...SPACE_EVENTS.VIEW_INVITING_SPACE })}
+      >
+        <Card sx={{ p: 2, backgroundColor: 'background.main', '&:hover': { backgroundColor: 'background.light' } }}>
+          <Box className={css.spacesListInviteContent}>
+            <Stack direction="row" spacing={2} alignItems="center" flexGrow={1}>
+              <Box>
+                <InitialsAvatar name={name} size="large" />
+              </Box>
+
+              <Box>
+                <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={numberOfMembers} />
+              </Box>
+            </Stack>
+
+            <Stack direction="row" spacing={1}>
+              <Track {...SPACE_EVENTS.ACCEPT_INVITE} label={SPACE_LABELS.space_list_page}>
+                <AcceptButton space={space} />
+              </Track>
+              <Track {...SPACE_EVENTS.DECLINE_INVITE} label={SPACE_LABELS.space_list_page}>
+                <DeclineButton space={space} />
+              </Track>
+            </Stack>
+          </Box>
+        </Card>
+      </MUILink>
+    </Link>
+  )
+
+  if (!isProminent) {
+    return <Box mb={2}>{inviteCard}</Box>
+  }
+
   return (
-    <Card sx={{ p: 2, mb: 2 }}>
+    <Card sx={{ p: 2, mb: 3 }}>
       <Typography variant="h4" fontWeight={700} mb={2} color="primary.light">
         You were invited to join{' '}
         <Typography component="span" variant="h4" fontWeight={700} color="primary.main">
@@ -56,36 +95,7 @@ const SpaceListInvite = ({ space }: SpaceListInvite) => {
         )}
       </Typography>
 
-      <Link href={{ pathname: AppRoutes.spaces.index, query: { spaceId: id } }} passHref legacyBehavior>
-        <MUILink
-          underline="none"
-          sx={{ display: 'block' }}
-          onClick={() => trackEvent({ ...SPACE_EVENTS.VIEW_INVITING_SPACE })}
-        >
-          <Card sx={{ p: 2, backgroundColor: 'background.main', '&:hover': { backgroundColor: 'background.light' } }}>
-            <Box className={css.spacesListInviteContent}>
-              <Stack direction="row" spacing={2} alignItems="center" flexGrow={1}>
-                <Box>
-                  <InitialsAvatar name={name} size="large" />
-                </Box>
-
-                <Box>
-                  <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={numberOfMembers} />
-                </Box>
-              </Stack>
-
-              <Stack direction="row" spacing={1}>
-                <Track {...SPACE_EVENTS.ACCEPT_INVITE} label={SPACE_LABELS.space_list_page}>
-                  <AcceptButton space={space} />
-                </Track>
-                <Track {...SPACE_EVENTS.DECLINE_INVITE} label={SPACE_LABELS.space_list_page}>
-                  <DeclineButton space={space} />
-                </Track>
-              </Stack>
-            </Box>
-          </Card>
-        </MUILink>
-      </Link>
+      {inviteCard}
     </Card>
   )
 }
