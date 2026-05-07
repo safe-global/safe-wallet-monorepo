@@ -102,7 +102,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     const isInvite = member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED
     const isDeclined = member.status === MemberStatus.DECLINED
     const isDisabled = isAdmin && isLastAdmin && !isInvite
-    const memberEmail = member.user.email ?? null
+    const memberEmail = member.user.email
 
     return {
       cells: {
