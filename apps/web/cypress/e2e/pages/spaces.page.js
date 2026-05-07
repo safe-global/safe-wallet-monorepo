@@ -425,6 +425,8 @@ export function deleteSpace(name) {
   cy.contains(spaceCard, name).should('not.exist')
 }
 
+const MAX_SPACES = 10
+
 function deleteAllSpaces() {
   cy.get('body').then(($body) => {
     if ($body.find(spaceCard).length > 0) {
@@ -441,9 +443,23 @@ function deleteAllSpaces() {
   })
 }
 
+function deleteOneSpace() {
+  cy.get(spaceCard)
+    .first()
+    .within(() => {
+      cy.get(spaceVertMenuIcon).click({ force: true })
+    })
+  cy.get(contectMenuRemoveBtn).click({ force: true })
+  cy.get(spaceConfirmDeleteBtn).click()
+  cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
+}
+
 export function ensureReadyToCreateSpace() {
   cy.get('body').then(($body) => {
-    if ($body.find(spaceCard).length > 0) {
+    const count = $body.find(spaceCard).length
+    if (count >= MAX_SPACES) {
+      deleteOneSpace()
+    } else if (count > 0) {
       deleteAllSpaces()
     }
   })
