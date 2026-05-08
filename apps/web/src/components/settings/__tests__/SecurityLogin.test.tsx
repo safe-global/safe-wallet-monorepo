@@ -1,9 +1,13 @@
 import { render, screen } from '@/tests/test-utils'
 import SecurityLogin from '../SecurityLogin'
+// eslint-disable-next-line no-restricted-imports
 import * as useIsRecoverySupportedHook from '@/features/recovery/hooks/useIsRecoverySupported'
+// eslint-disable-next-line no-restricted-imports
 import * as useIsHypernativeFeatureHook from '@/features/hypernative/hooks/useIsHypernativeFeature'
+// eslint-disable-next-line no-restricted-imports
 import * as useIsHypernativeGuardHook from '@/features/hypernative/hooks/useIsHypernativeGuard'
 import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
+// eslint-disable-next-line no-restricted-imports
 import * as useBannerStorageHook from '@/features/hypernative/hooks/useBannerStorage'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsOutreachSafeHook from '@/features/targeted-features'

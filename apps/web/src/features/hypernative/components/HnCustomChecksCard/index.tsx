@@ -2,6 +2,7 @@ import { useMemo, type ReactElement } from 'react'
 import type { ThreatAnalysisResults, Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
+// eslint-disable-next-line no-restricted-imports
 import { AnalysisGroupCardDisabled } from '@/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
 import { HnAnalysisGroupCard } from '../HnAnalysisGroupCard'
 import type { HypernativeAuthStatus } from '../../hooks/useHypernativeOAuth'

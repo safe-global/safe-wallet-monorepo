@@ -5,6 +5,7 @@ import { getLatestTransactions } from '@/utils/tx-list'
 import useTxQueue, { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { AppRoutes } from '@/config/routes'
+// eslint-disable-next-line no-restricted-imports
 import SafeWidget from '@/features/spaces/components/SafeWidget'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

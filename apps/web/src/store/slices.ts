@@ -9,11 +9,11 @@ export * from './addedSafesSlice'
 export * from './settingsSlice'
 export * from './cookiesAndTermsSlice'
 export * from './popupSlice'
-export * from '@/features/spending-limits/store/spendingLimitsSlice'
+export * from '@/features/spending-limits/store'
 export * from './safeAppsSlice'
 export { safeMessagesListener } from './safeMessagesSlice'
 export * from './pendingSafeMessagesSlice'
-export { batchSlice, addTx, removeTx, selectBatchBySafe } from '@/features/batching/store/batchSlice'
+export { batchSlice, addTx, removeTx, selectBatchBySafe } from '@/features/batching/store'
 export {
   undeployedSafesSlice,
   addUndeployedSafe,

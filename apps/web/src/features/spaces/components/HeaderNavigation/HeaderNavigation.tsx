@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/utils/cn'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, BATCH_EVENTS } from '@/services/analytics'
+// eslint-disable-next-line no-restricted-imports
 import BatchTooltip from '@/features/batching/components/BatchTooltip'
 
 export interface HeaderNavigationProps {

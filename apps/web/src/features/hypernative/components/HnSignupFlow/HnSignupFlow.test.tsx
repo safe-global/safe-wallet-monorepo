@@ -1,7 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import { userEvent } from '@testing-library/user-event'
 import HnSignupFlow from './HnSignupFlow'
-import { setFormCompleted } from '@/features/hypernative/store/hnStateSlice'
+import { setFormCompleted } from '../../store/hnStateSlice'
 import * as storeHooks from '@/store'
 import * as useChainIdHook from '@/hooks/useChainId'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'

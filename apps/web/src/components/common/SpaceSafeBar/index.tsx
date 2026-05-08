@@ -4,6 +4,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import { Bookmark, ChevronRight, Wallet } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { useIsQualifiedSafe } from '@/features/spaces'
+// eslint-disable-next-line no-restricted-imports
 import SafeSelectorDropdown from '@/features/spaces/components/SafeSelectorDropdown'
 import { Button } from '@/components/ui/button'
 import { useAppDispatch, useAppSelector } from '@/store'

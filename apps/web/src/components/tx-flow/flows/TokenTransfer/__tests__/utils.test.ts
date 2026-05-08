@@ -3,7 +3,9 @@ import { type Balance, type Balances } from '@safe-global/store/gateway/AUTO_GEN
 import { TokenType } from '@safe-global/store/gateway/types'
 import { useTokenAmount, useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
 import { renderHook } from '@/tests/test-utils'
+// eslint-disable-next-line no-restricted-imports
 import * as spendingLimit from '@/features/spending-limits/hooks/useSpendingLimit'
+// eslint-disable-next-line no-restricted-imports
 import * as spendingLimitBeneficiary from '@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary'
 import * as trustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as hiddenTokens from '@/hooks/useHiddenTokens'

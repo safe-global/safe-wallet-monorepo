@@ -3,16 +3,16 @@ import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analyti
 import type { MultiChainSafeItem, SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import MultiAccountItem from '../MultiAccountItem'
-import { useMultiAccountItemData } from '@/features/myAccounts/hooks/useMultiAccountItemData'
-import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
+import { useMultiAccountItemData } from '../../../../../hooks/useMultiAccountItemData'
+import { useSafeItemData } from '../../../../../hooks/useSafeItemData'
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
 }))
 
-jest.mock('@/features/myAccounts/hooks/useMultiAccountItemData')
-jest.mock('@/features/myAccounts/hooks/useSafeItemData')
+jest.mock('../../../../../hooks/useMultiAccountItemData')
+jest.mock('../../../../../hooks/useSafeItemData')
 
 jest.mock('@/components/common/Identicon', () => ({
   __esModule: true,

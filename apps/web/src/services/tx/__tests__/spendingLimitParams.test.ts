@@ -3,10 +3,11 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import * as safeCoreSDK from '@/hooks/coreSDK/safeCoreSDK'
 import * as txSender from '@/services/tx/tx-sender/create'
+// eslint-disable-next-line no-restricted-imports
 import * as spendingLimitParams from '@/features/spending-limits/services/spendingLimitParams'
 import type Safe from '@safe-global/protocol-kit'
 import type { SpendingLimitState } from '@/features/spending-limits'
-import { createNewSpendingLimitTx } from '@/features/spending-limits/services/spendingLimitExecution'
+import { createNewSpendingLimitTx } from '@/features/spending-limits/services'
 
 const mockData: NewSpendingLimitFlowProps = {
   beneficiary: ZERO_ADDRESS,

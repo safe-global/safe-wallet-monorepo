@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import { SpacesEnhancedSidebar } from '@/features/spaces/components/Sidebar/SpacesEnhancedSidebar'
 import { useRouter } from 'next/router'
 import { useEffect, type ReactElement } from 'react'

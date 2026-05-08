@@ -7,7 +7,7 @@ import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import AssetsWidget from '@/components/dashboard/Assets'
 import Overview from '@/components/dashboard/Overview/Overview'
 import ExplorePossibleWidget from '@/components/dashboard/ExplorePossibleWidget'
-import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
+import { useIsRecoverySupported } from '@/features/recovery'
 import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
 import {
@@ -27,7 +27,7 @@ import { EarnBanner, earnBannerID } from '@/components/dashboard/NewsCarousel/ba
 import { SpacesBanner, spacesBannerID } from '@/components/dashboard/NewsCarousel/banners/SpacesBanner'
 import { StakeBanner, stakeBannerID } from '@/components/dashboard/NewsCarousel/banners/StakeBanner'
 import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
-import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
+import { useIsPositionsFeatureEnabled } from '@/features/positions'
 import {
   NoFeeCampaignFeature,
   useNoFeeCampaignEligibility,

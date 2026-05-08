@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import { _validateSpendingLimit } from '@/features/spending-limits/components/CreateSpendingLimit'
 
 describe('CreateSpendingLimit', () => {

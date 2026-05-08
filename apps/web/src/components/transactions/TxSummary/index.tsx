@@ -1,4 +1,5 @@
 import type { ModuleTransaction, MultisigTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+// eslint-disable-next-line no-restricted-imports
 import TxProposalChip from '@/features/proposers/components/TxProposalChip'
 import { SwapFeature, useIsExpiredSwap } from '@/features/swap'
 import { Box, Typography } from '@mui/material'

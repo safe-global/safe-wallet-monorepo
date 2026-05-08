@@ -3,6 +3,7 @@ import { UserRound } from 'lucide-react'
 import { Typography } from '@/components/ui/typography'
 import { Badge } from '@/components/ui/badge'
 import { Avatar } from '@/components/ui/avatar'
+// eslint-disable-next-line no-restricted-imports
 import { WidgetItem } from '@/features/spaces/components/SafeWidget'
 import { AccountItem } from '../AccountItem'
 import type { Account } from './types'

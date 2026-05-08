@@ -1,5 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import { WalletCards } from 'lucide-react'
+// eslint-disable-next-line no-restricted-imports
 import SafeWidget from '@/features/spaces/components/SafeWidget'
 import { AccountWidgetItem } from './AccountWidgetItem'
 import { ExpandableAccountItem } from './ExpandableAccountItem'

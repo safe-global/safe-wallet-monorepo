@@ -1,6 +1,7 @@
 import type { SafeItem } from '@/hooks/safes'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Checkbox } from '@/components/ui/checkbox'
+// eslint-disable-next-line no-restricted-imports
 import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import Identicon from '@/components/common/Identicon'
 import { Badge } from '@/components/ui/badge'

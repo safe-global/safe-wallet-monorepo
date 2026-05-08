@@ -2,6 +2,7 @@ import { renderHook } from '@/tests/test-utils'
 import * as reactRedux from 'react-redux'
 import { useRoleProps } from './useRoleProps'
 import { Role } from '../config'
+// eslint-disable-next-line no-restricted-imports
 import * as spendingLimitsSlice from '@/features/spending-limits/store/spendingLimitsSlice'
 import type { SpendingLimitState } from '@/features/spending-limits'
 

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { Button, CircularProgress, DialogActions, DialogContent, TextField, Typography } from '@mui/material'
 import ModalDialog from '@/components/common/ModalDialog'
-import { useReportFalseResult } from '@/features/safe-shield/hooks/useReportFalseResult'
+import { useReportFalseResult } from '../../hooks/useReportFalseResult'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
 

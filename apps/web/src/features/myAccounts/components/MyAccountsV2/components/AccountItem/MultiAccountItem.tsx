@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import NextLink from 'next/link'
 import Identicon from '@/components/common/Identicon'
+// eslint-disable-next-line no-restricted-imports
 import FiatBalance from '@/features/spaces/components/SelectSafesOnboarding/components/FiatBalance'
 import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
 import { AccountItem as BaseAccountItem } from '../../../AccountItem'

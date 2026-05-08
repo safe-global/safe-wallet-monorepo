@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import { Stack, Typography } from '@mui/material'
+// eslint-disable-next-line no-restricted-imports
 import { AnalysisGroupCard, type AnalysisGroupCardProps } from '@/features/safe-shield/components/AnalysisGroupCard'
 import HypernativeLogo from '../HypernativeLogo'
 

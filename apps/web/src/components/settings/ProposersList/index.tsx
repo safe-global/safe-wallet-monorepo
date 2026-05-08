@@ -2,11 +2,15 @@ import EnhancedTable from '@/components/common/EnhancedTable'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
+// eslint-disable-next-line no-restricted-imports
 import UpsertProposer from '@/features/proposers/components/UpsertProposer'
+// eslint-disable-next-line no-restricted-imports
 import DeleteProposerDialog from '@/features/proposers/components/DeleteProposerDialog'
+// eslint-disable-next-line no-restricted-imports
 import EditProposerDialog from '@/features/proposers/components/EditProposerDialog'
+// eslint-disable-next-line no-restricted-imports
 import PendingDelegationsList from '@/features/proposers/components/PendingDelegationsList'
-import { useParentSafeThreshold } from '@/features/proposers/hooks/useParentSafeThreshold'
+import { useParentSafeThreshold } from '@/features/proposers'
 import { useHasFeature } from '@/hooks/useChains'
 import useProposers from '@/hooks/useProposers'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'

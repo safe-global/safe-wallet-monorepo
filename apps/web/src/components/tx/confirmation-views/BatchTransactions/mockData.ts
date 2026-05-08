@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import type { DraftBatchItem } from '@/features/batching/store/batchSlice'
+import type { DraftBatchItem } from '@/features/batching/store'
 import { OperationType } from '@safe-global/types-kit'
 
 export const mockedDraftBatch: DraftBatchItem[] = [

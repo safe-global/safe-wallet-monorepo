@@ -1,6 +1,6 @@
 import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
-import UpsertProposer from '@/features/proposers/components/UpsertProposer'
+import UpsertProposer from './UpsertProposer'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { sameAddress } from '@safe-global/utils/utils/addresses'

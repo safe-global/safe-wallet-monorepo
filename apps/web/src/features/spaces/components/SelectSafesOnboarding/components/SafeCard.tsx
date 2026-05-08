@@ -1,6 +1,6 @@
 import { Controller, useFormContext } from 'react-hook-form'
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
-import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/index'
+import type { AddAccountsFormValues } from '../../AddAccounts/index'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 
 import useSafeCardData from '../hooks/useSafeCardData'

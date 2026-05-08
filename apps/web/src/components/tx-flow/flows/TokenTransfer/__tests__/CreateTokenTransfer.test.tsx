@@ -11,6 +11,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { TokenType } from '@safe-global/store/gateway/types'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+// eslint-disable-next-line no-restricted-imports
 import * as useRecipientAnalysis from '@/features/safe-shield/hooks/useRecipientAnalysis'
 import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'

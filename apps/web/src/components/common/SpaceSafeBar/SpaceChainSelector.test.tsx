@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import SpaceChainSelector from './SpaceChainSelector'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+// eslint-disable-next-line no-restricted-imports
 import type { ChainSelectorBlockProps } from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
 
 jest.mock('./hooks/useSpaceChainSelector')

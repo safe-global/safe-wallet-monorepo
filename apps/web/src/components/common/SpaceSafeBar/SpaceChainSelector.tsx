@@ -1,6 +1,7 @@
 import { useContext, useState, useCallback } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+// eslint-disable-next-line no-restricted-imports
 import ChainSelectorBlock from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
 import { CreateSafeOnNewChain } from '@/features/multichain'
 import { TxModalContext } from '@/components/tx-flow'

@@ -4,8 +4,10 @@ import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as useSafeAddress from '@/hooks/useSafeAddress'
 import * as useAddressResolver from '@/hooks/useAddressResolver'
 import * as useVisibleBalances from '@/hooks/useVisibleBalances'
+// eslint-disable-next-line no-restricted-imports
 import * as useIsHypernativeGuard from '@/features/hypernative/hooks/useIsHypernativeGuard'
 import * as coreFeatures from '@/features/__core__'
+// eslint-disable-next-line no-restricted-imports
 import { SafeHeaderHnTooltip } from '@/features/hypernative/components/SafeHeaderHnTooltip'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 

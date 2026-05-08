@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SpaceCardNew from './index'
-import { MemberRole, MemberStatus } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberRole, MemberStatus } from '../../hooks/useSpaceMembers'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { withMockProvider } from '@/storybook/preview'
 

@@ -6,7 +6,7 @@ import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberRole } from '../../../hooks/useSpaceMembers'
 
 interface MemberInvite {
   address: string

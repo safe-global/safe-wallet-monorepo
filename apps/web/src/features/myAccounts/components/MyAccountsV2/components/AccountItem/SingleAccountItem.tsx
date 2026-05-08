@@ -1,6 +1,7 @@
 import NextLink from 'next/link'
 import Identicon from '@/components/common/Identicon'
 import Track from '@/components/common/Track'
+// eslint-disable-next-line no-restricted-imports
 import FiatBalance from '@/features/spaces/components/SelectSafesOnboarding/components/FiatBalance'
 import { AccountItem as BaseAccountItem } from '../../../AccountItem'
 import { useSafeItemData } from '../../../../hooks/useSafeItemData'

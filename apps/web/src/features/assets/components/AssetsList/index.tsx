@@ -8,6 +8,7 @@ import { selectCurrency } from '@/store/settingsSlice'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { AppRoutes } from '@/config/routes'
+// eslint-disable-next-line no-restricted-imports
 import SafeWidget from '@/features/spaces/components/SafeWidget'
 import { Button } from '@/components/ui/button'
 import TokenIcon from '@/components/common/TokenIcon'

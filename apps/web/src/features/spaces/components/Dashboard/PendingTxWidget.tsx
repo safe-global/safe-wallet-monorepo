@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { Users } from 'lucide-react'
-import SafeWidget from '@/features/spaces/components/SafeWidget'
+import SafeWidget from '../SafeWidget'
 import { Badge } from '@/components/ui/badge'
 import { getTxStatus } from '@/features/transactions/utils'
 import { formatTimeInWords } from '@safe-global/utils/utils/date'

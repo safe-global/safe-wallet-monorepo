@@ -30,6 +30,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 
 import * as useIsPinnedSafeHook from '@/hooks/useIsPinnedSafe'
+// eslint-disable-next-line no-restricted-imports
 import * as useTrustSafeHook from '@/features/myAccounts/hooks/useTrustSafe'
 
 const renderWithSafeShield = (ui: ReactElement) => {

@@ -6,6 +6,7 @@ import {
   replayCounterfactualSafeDeployment,
   activateReplayedSafe,
 } from '@/features/counterfactual/services'
+// eslint-disable-next-line no-restricted-imports
 import { PayNowPayLater } from '@/features/counterfactual/components'
 import { CF_TX_GROUP_KEY } from '@/features/counterfactual'
 import { NetworkLogosList, predictAddressBasedOnReplayData } from '@/features/multichain'

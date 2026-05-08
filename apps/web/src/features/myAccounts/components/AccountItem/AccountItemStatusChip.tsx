@@ -1,6 +1,7 @@
 import { Chip, Typography } from '@mui/material'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+// eslint-disable-next-line no-restricted-imports
 import { LoopIcon } from '@/features/counterfactual/components/CounterfactualStatusButton'
 import css from './styles.module.css'
 

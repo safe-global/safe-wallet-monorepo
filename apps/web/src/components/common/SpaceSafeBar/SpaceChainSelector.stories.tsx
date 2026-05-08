@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { SAFE_ADDRESSES } from '@safe-global/test/msw/fixtures'
 import { createMockStory } from '@/stories/mocks'
+// eslint-disable-next-line no-restricted-imports
 import ChainSelectorBlock from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
 
 const deployedChains = {

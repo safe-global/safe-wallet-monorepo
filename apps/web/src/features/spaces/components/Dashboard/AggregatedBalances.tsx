@@ -13,7 +13,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { MoreVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { DashboardHeader } from '@/features/spaces/components/Dashboard/DashboardHeader'
+import { DashboardHeader } from './DashboardHeader'
 import QrModal from '@/components/sidebar/QrCodeButton/QrModal'
 
 const AggregatedBalance = ({

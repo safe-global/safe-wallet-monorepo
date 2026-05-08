@@ -1,6 +1,8 @@
 import { render } from '@/tests/test-utils'
 import { HnAnalysisGroupCard } from './index'
+// eslint-disable-next-line no-restricted-imports
 import type { AnalysisGroupCardProps } from '@/features/safe-shield/components/AnalysisGroupCard'
+// eslint-disable-next-line no-restricted-imports
 import { AnalysisGroupCard } from '@/features/safe-shield/components/AnalysisGroupCard'
 
 jest.mock('@/features/safe-shield/components/AnalysisGroupCard', () => ({

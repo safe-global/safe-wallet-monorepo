@@ -5,6 +5,7 @@ import * as useChains from '@/hooks/useChains'
 import * as store from '@/store'
 import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import * as portfolioQueries from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
+// eslint-disable-next-line no-restricted-imports
 import * as useCounterfactualBalances from '@/features/counterfactual/hooks'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { chainBuilder } from '@/tests/builders/chains'

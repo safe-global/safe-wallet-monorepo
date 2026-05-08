@@ -2,6 +2,7 @@ import { useState, type ReactElement } from 'react'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import type { SafeAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { SeverityIcon } from '../SeverityIcon'
+// eslint-disable-next-line no-restricted-imports
 import AddTrustedSafeDialog from '@/features/myAccounts/components/NonPinnedWarning/AddTrustedSafeDialog'
 import { useSimilarAddressDetection } from '@/features/myAccounts'
 import useSafeInfo from '@/hooks/useSafeInfo'

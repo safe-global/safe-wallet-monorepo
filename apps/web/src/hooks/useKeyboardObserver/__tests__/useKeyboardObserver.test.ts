@@ -1,5 +1,6 @@
 import { renderHook } from '@/tests/test-utils'
 import useKeyboardObserver from '../useKeyboardObserver'
+// eslint-disable-next-line no-restricted-imports
 import * as globalSearchSlice from '@/features/global-search/store/globalSearchSlice'
 
 describe('useKeyboardObserver', () => {

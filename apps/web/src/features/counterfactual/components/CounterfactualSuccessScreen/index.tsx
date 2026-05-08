@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material'
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+// eslint-disable-next-line no-restricted-imports
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 

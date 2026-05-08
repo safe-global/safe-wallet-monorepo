@@ -14,7 +14,7 @@ import {
 } from '@/features/spaces/store'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import SafeCardReadOnly from '@/features/spaces/components/SafeAccounts/SafeCardReadOnly'
+import SafeCardReadOnly from '../SafeAccounts/SafeCardReadOnly'
 import SafeSearch from './SafeSearch'
 import useSafeActionMapper from './useSafeActionMapper'
 import { safeModalTitles } from './constants'

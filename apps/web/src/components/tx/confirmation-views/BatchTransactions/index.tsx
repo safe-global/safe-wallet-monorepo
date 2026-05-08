@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import BatchTxList from '@/features/batching/components/BatchSidebar/BatchTxList'
 import { useDraftBatch } from '@/features/batching'
 

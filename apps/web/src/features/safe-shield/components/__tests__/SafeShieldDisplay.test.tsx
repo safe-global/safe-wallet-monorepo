@@ -3,7 +3,7 @@ import { SafeShieldDisplay } from '../SafeShieldDisplay'
 import { RecipientAnalysisBuilder, ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { faker } from '@faker-js/faker'
-import * as useCheckSimulation from '@/features/safe-shield/hooks/useCheckSimulation'
+import * as useCheckSimulation from '../../hooks/useCheckSimulation'
 import type {
   RecipientAnalysisResults,
   ContractAnalysisResults,
@@ -13,7 +13,7 @@ import type {
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 
 // Mock hooks
-jest.mock('@/features/safe-shield/hooks/useCheckSimulation')
+jest.mock('../../hooks/useCheckSimulation')
 
 // Default empty AsyncResult values
 const emptyRecipient: AsyncResult<RecipientAnalysisResults> = [{}, undefined, false]
