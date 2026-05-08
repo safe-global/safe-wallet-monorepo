@@ -17,6 +17,7 @@ import useNoFeeNovemberEligibility from '@/features/no-fee-november/hooks/useNoF
 import useGasTooHigh from '@/features/no-fee-november/hooks/useGasTooHigh'
 import useIsNoFeeNovemberFeatureEnabled from '@/features/no-fee-november/hooks/useIsNoFeeNovemberFeatureEnabled'
 import { hasRemainingRelays } from '@/utils/relaying'
+import { isDelegateCall } from '@/services/tx/tx-sender/sdk'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
@@ -80,22 +81,27 @@ export const ExecuteForm = ({
   const { isEligible: isNoFeeNovember, remaining, limit, blockedAddress } = useNoFeeNovemberEligibility()
   const isNoFeeNovemberEnabled = useIsNoFeeNovemberFeatureEnabled()
   const gasTooHigh = useGasTooHigh(safeTx)
+  const isDelegateCallTx = safeTx ? isDelegateCall(safeTx) : false
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
 
-  // No-fee November REPLACES relay when eligible AND not blocked AND gas is not too high AND has remaining
-  const canRelay = (!isNoFeeNovember || !isNoFeeNovemberEnabled) && walletCanRelay && hasRemainingRelays(relays[0])
+  // Delegate-call txs (e.g. Safe migration 1.3→1.4) must use wallet execution; relay may reject them with "Delegate call is disabled"
+  const canRelay =
+    (!isNoFeeNovember || !isNoFeeNovemberEnabled) &&
+    !isDelegateCallTx &&
+    walletCanRelay &&
+    hasRemainingRelays(relays[0])
   const canNoFeeNovember =
     isNoFeeNovemberEnabled && isNoFeeNovember && !blockedAddress && !gasTooHigh && !!remaining && remaining > 0
   const isLimitReached = isNoFeeNovemberEnabled && isNoFeeNovember && !blockedAddress && remaining === 0
 
-  // If gas is too high or limit reached, force WALLET method
+  // If gas is too high, limit reached, or tx is a delegate call (e.g. migration), force WALLET method
   useEffect(() => {
-    if (gasTooHigh || isLimitReached) {
+    if (gasTooHigh || isLimitReached || isDelegateCallTx) {
       setExecutionMethod(ExecutionMethod.WALLET)
     }
-  }, [gasTooHigh, isLimitReached])
+  }, [gasTooHigh, isLimitReached, isDelegateCallTx])
 
   // Handle execution method changes
   const handleExecutionMethodChange = (method: ExecutionMethod | ((prev: ExecutionMethod) => ExecutionMethod)) => {

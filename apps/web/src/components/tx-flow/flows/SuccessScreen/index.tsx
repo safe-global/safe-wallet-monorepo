@@ -16,6 +16,8 @@ import { IndexingStatus } from '@/components/tx-flow/flows/SuccessScreen/statuse
 import { DefaultStatus } from '@/components/tx-flow/flows/SuccessScreen/statuses/DefaultStatus'
 import { isSwapTransferOrderTxInfo } from '@/utils/transaction-guards'
 import { getTxLink } from '@/utils/tx-link'
+import { getBlockExplorerLink } from '@/utils/chains'
+import { DIRECT_EXEC_TX_ID_PREFIX } from '@/components/tx/SignOrExecuteForm/hooks'
 import useTxDetails from '@/hooks/useTxDetails'
 import { usePredictSafeAddressFromTxDetails } from '@/hooks/usePredictSafeAddressFromTxDetails'
 import { AppRoutes } from '@/config/routes'
@@ -38,7 +40,13 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
   const { safeAddress } = useSafeInfo()
   const status = !txId && txHash ? PendingStatus.INDEXING : pendingTx?.status
   const pendingTxHash = pendingTx && 'txHash' in pendingTx ? pendingTx.txHash : undefined
-  const txLink = chain && txId && getTxLink(txId, chain, safeAddress)
+  // Direct-exec migration (no propose): show block explorer link; CGW has no tx for this id
+  const isDirectExecMigration = txId?.startsWith(DIRECT_EXEC_TX_ID_PREFIX) && pendingTxHash && chain
+  const txLink = isDirectExecMigration
+    ? getBlockExplorerLink(chain, pendingTxHash)
+    : chain && txId
+      ? getTxLink(txId, chain, safeAddress)
+      : undefined
   const [txDetails] = useTxDetails(txId)
   const isSwapOrder = txDetails && isSwapTransferOrderTxInfo(txDetails.txInfo)
   const [predictedSafeAddress] = usePredictSafeAddressFromTxDetails(txDetails)

@@ -169,6 +169,20 @@ yarn workspace @safe-global/web cmp MyNewComponent
 
 This repo has a pre-push hook that runs the linter (always) and the tests (if the `RUN_TESTS_ON_PUSH` env variable is set to true) before pushing. If you want to skip the hooks, you can use the `--no-verify` flag.
 
+## Safe migration (1.3 → 1.4)
+
+Migration from Safe 1.3.0 to 1.4.1 uses a **delegate call** to the [SafeMigration](https://docs.safe.global/advanced/smart-account-migration) contract (see [Safe Smart Account Migration](https://docs.safe.global/advanced/smart-account-migration)).
+
+- **1/1 Safes**: If the Client Gateway (CGW) rejects delegate-call proposals (e.g. "Delegate call is disabled" on some chains), the app **executes the migration directly** with the connected wallet and skips proposing to the backend. The success screen shows a block explorer link.
+- **Multi-sig Safes**: The normal flow is propose → sign → execute. For this to work, the **CGW must allow proposing delegate-call transactions** for the chain. The "delegate call disabled" restriction should apply only to **relay** (sponsorship), not to the **propose** endpoint. If your CGW returns 422 for delegate-call proposals, configure it to accept them so that migration transactions can be queued and signed by all owners; only relay should reject delegate calls.
+
+**If the migration transaction reverts on-chain** (e.g. on [Kairos/Kaiascan](https://kairos.kaiascan.io)):
+
+1. **L2 vs L1**: The app chooses `migrateSingleton` / `migrateWithFallbackHandler` (L1) or `migrateL2Singleton` / `migrateL2WithFallbackHandler` (L2) based on the chain’s `l2` flag in CGW. If your Safe 1.3.0 is the standard (L1) singleton but the chain is configured as L2, or the other way around, the migration path can be wrong. Check the CGW chain config for that chain and ensure `l2` matches the Safe’s singleton type.
+2. **Gas**: Ensure the execution uses a sufficient gas limit; migration can require more gas than a normal call.
+3. **Safe version**: Migration from 1.3.0 to 1.4.1 is supported; other versions may need a different flow.
+4. **Contract deployment**: SafeMigration and the target singleton (1.4.1 L1 or L2) must be deployed on that chain. The app uses the chain-specific address from [@safe-global/safe-deployments](https://github.com/safe-global/safe-deployments); if the chain is not in the package, add it or use CGW contract overrides.
+
 ## Frameworks
 
 This app is built using the following frameworks:

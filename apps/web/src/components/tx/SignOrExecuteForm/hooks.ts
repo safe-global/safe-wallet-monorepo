@@ -15,7 +15,12 @@ import {
   dispatchTxRelay,
   dispatchTxSigning,
 } from '@/services/tx/tx-sender'
+import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
+import { isSafeMigrationTx } from '@/utils/transaction-guards'
+
+/** Prefix for txId when migration is executed directly without propose (1/1 Safe, backend rejects delegate-call). */
+export const DIRECT_EXEC_TX_ID_PREFIX = 'direct-exec-'
 import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useUpdateBatch } from '@/hooks/useDraftBatch'
@@ -138,8 +143,24 @@ export const useTxActions = (): TxActions => {
         rePropose = true
       }
 
-      // Propose the tx if there's no id yet ("immediate execution")
-      if (!txId || rePropose) {
+      // Migration (1.3→1.4) with threshold 1: execute directly without propose when backend rejects delegate-call
+      const canSkipProposeForMigration =
+        !txId &&
+        !rePropose &&
+        !isRelayed &&
+        safe.threshold === 1 &&
+        isSafeMigrationTx(safeTx, chainId)
+
+      if (canSkipProposeForMigration) {
+        // Sign first if not yet signed (immediate execution path)
+        if (safeTx.signatures.size < safe.threshold) {
+          safeTx = await signRelayedTx(safeTx)
+        }
+        const sdk = getAndValidateSafeSDK()
+        const safeTxHash = await sdk.getTransactionHash(safeTx)
+        txId = `${DIRECT_EXEC_TX_ID_PREFIX}${safeTxHash}`
+      } else if (!txId || rePropose) {
+        // Propose the tx if there's no id yet ("immediate execution")
         tx = await _propose(signer.address, safeTx, txId, origin)
         txId = tx.txId
       }

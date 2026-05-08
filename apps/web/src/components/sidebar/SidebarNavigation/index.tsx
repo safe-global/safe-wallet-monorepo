@@ -25,7 +25,7 @@ import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
 import { Tooltip } from '@mui/material'
 import { BRIDGE_EVENTS, BRIDGE_LABELS } from '@/services/analytics/events/bridge'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
-import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
+import { getLatestSafeVersion, isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 
 const getSubdirectory = (pathname: string): string => {
   return pathname.split('/')[1]
@@ -67,8 +67,10 @@ const Navigation = (): ReactElement => {
   const getBadge = (item: NavItem) => {
     // Indicate whether the current Safe needs an upgrade
     if (item.href === AppRoutes.settings.setup) {
+      const latestVersion = chain ? getLatestSafeVersion(chain) : undefined
       return (
-        safe.implementationVersionState === ImplementationVersionState.OUTDATED && !isNonCriticalUpdate(safe.version)
+        safe.implementationVersionState === ImplementationVersionState.OUTDATED &&
+        !isNonCriticalUpdate(safe.version, latestVersion)
       )
     }
   }

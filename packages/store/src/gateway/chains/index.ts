@@ -13,10 +13,12 @@ const getChainsConfigs = async (
   const response = await dynamicBaseQuery(url, { endpoint: 'getChainsConfig', type: 'query' } as any, {})
 
   if (response.error) {
+    console.error('[getChainsConfigs] Query error:', response.error)
     return { error: response.error }
   }
 
   const data = response.data as { results: ChainInfo[]; next?: string }
+  console.log('[getChainsConfigs] Received', data.results?.length || 0, 'chains. Has next:', !!data.next)
 
   const nextResults = [...results, ...data.results]
 
@@ -26,7 +28,10 @@ const getChainsConfigs = async (
     return getChainsConfigs(nextUrl, nextResults)
   }
 
-  return { data: chainsAdapter.setAll(initialState, nextResults) }
+  console.log('[getChainsConfigs] Total chains collected:', nextResults.length)
+  const normalized = chainsAdapter.setAll(initialState, nextResults)
+  console.log('[getChainsConfigs] Normalized data - IDs:', normalized.ids.length, 'Entities:', Object.keys(normalized.entities).length)
+  return { data: normalized }
 }
 
 const getChains = async (): Promise<

@@ -238,6 +238,29 @@ describe('proposeTx', () => {
     }
   })
 
+  it('should throw a user-friendly message when backend returns "Delegate call is disabled"', async () => {
+    const errorResponse = {
+      code: 422,
+      message: 'Delegate call is disabled',
+    }
+
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/chains/${CHAIN_ID}/transactions/${SAFE_ADDRESS}/propose`, () => {
+        return HttpResponse.json(errorResponse, { status: 422 })
+      }),
+    )
+
+    const tx = createMockSafeTransaction({
+      to: '0x123',
+      value: '1',
+      data: '0x0',
+    })
+
+    await expect(proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH)).rejects.toThrow(
+      'Delegate call transactions cannot be proposed on this chain. Your signature was created. Execute this transaction directly with your wallet once it has enough signatures.',
+    )
+  })
+
   it('should include correct transaction data in the request', async () => {
     let capturedRequest: any
 

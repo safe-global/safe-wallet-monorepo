@@ -87,6 +87,17 @@ export const getLatestSafeVersion = (
   }
 }
 
-export const isNonCriticalUpdate = (version?: string | null) => {
-  return version && semverSatisfies(version, `>= ${MIN_SAFE_VERSION}`)
+/**
+ * Returns true when an update is considered "non-critical" and the app should not show a migration notification.
+ * - When latestVersion is provided: only non-critical if Safe is already on chain's latest (>= 1.3.0 and satisfies latest).
+ * - When latestVersion is omitted: treats version >= 1.3.0 as non-critical (legacy behavior).
+ */
+export const isNonCriticalUpdate = (version?: string | null, latestVersion?: string | null): boolean => {
+  if (!version || !semverSatisfies(version, `>=${MIN_SAFE_VERSION}`)) {
+    return false
+  }
+  if (latestVersion === undefined || latestVersion === null) {
+    return true
+  }
+  return semverSatisfies(version, latestVersion)
 }

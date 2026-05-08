@@ -455,6 +455,25 @@ export const isSafeMigrationTxData = (data?: TransactionData | null): boolean =>
   })
 }
 
+/**
+ * True if the SafeTransaction is a 1.3→1.4 migration (delegate call to SafeMigration contract).
+ * Used to allow direct execution without propose when backend rejects delegate-call proposals.
+ */
+export const isSafeMigrationTx = (
+  safeTx: { data: { to: string; operation: number } },
+  chainId: string,
+): boolean => {
+  if (safeTx.data.operation !== OperationType.DelegateCall) return false
+  const deployment = getSafeMigrationDeployment({
+    version: LATEST_SAFE_VERSION,
+    released: true,
+    network: chainId,
+  })
+  if (!deployment) return false
+  const migrationAddress = deployment.networkAddresses[chainId] ?? deployment.defaultAddress
+  return sameAddress(safeTx.data.to, migrationAddress)
+}
+
 export const isVaultDepositTxInfo = (value: TransactionDetails['txInfo']): value is VaultDepositTransactionInfo => {
   return value.type === 'VaultDeposit'
 }

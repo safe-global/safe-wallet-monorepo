@@ -37,6 +37,14 @@ jest.mock('../useBytecodeComparison', () => ({
   })),
 }))
 
+// mock useChains (useCurrentChain) - chain with recommendedMasterCopyVersion 1.4.1 so 1.3.0 shows update notification
+jest.mock('../useChains', () => ({
+  useCurrentChain: jest.fn(() => ({
+    chainId: '1',
+    recommendedMasterCopyVersion: '1.4.1',
+  })),
+}))
+
 describe('useSafeNotifications', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -120,6 +128,36 @@ describe('useSafeNotifications', () => {
       // check that the notification was shown
       expect(result.current).toBeUndefined()
       expect(showNotification).not.toHaveBeenCalled()
+    })
+
+    it('should show a notification when Safe 1.3.0 is outdated and chain recommends 1.4.1', () => {
+      ;(useSafeInfo as jest.Mock).mockReturnValue({
+        safe: {
+          implementation: { value: '0x234' },
+          implementationVersionState: 'OUTDATED',
+          version: '1.3.0',
+          address: { value: '0x123' },
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+      })
+
+      const { result } = renderHook(() => useSafeNotifications())
+
+      expect(result.current).toBeUndefined()
+      expect(showNotification).toHaveBeenCalledWith({
+        variant: 'warning',
+        message: `Your Safe Account version 1.3.0 is out of date. Please update it.`,
+        groupKey: 'safe-outdated-version',
+        link: {
+          href: {
+            pathname: '/settings/setup',
+            query: { safe: 'eth:0x123' },
+          },
+          title: 'Update Safe Account',
+        },
+        onClose: expect.anything(),
+      })
     })
   })
 

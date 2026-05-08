@@ -14,8 +14,9 @@ import useIsSafeOwner from './useIsSafeOwner'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
-import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
+import { getLatestSafeVersion, isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 import { useBytecodeComparison } from './useBytecodeComparison'
+import { useCurrentChain } from './useChains'
 
 const CLI_LINK = {
   href: 'https://github.com/5afe/safe-cli',
@@ -42,11 +43,13 @@ const useSafeNotifications = (): void => {
   const [dismissedUpdateNotifications, setDismissedUpdateNotifications] =
     useLocalStorage<DismissedUpdateNotifications>(DISMISS_NOTIFICATION_KEY)
   const dispatch = useAppDispatch()
+  const chain = useCurrentChain()
   const { query } = useRouter()
   const { safe, safeAddress } = useSafeInfo()
   const { chainId, version, implementationVersionState } = safe
   const isOwner = useIsSafeOwner()
   const urlSafeAddress = useSafeAddress()
+  const latestSafeVersion = chain ? getLatestSafeVersion(chain) : undefined
 
   const dismissUpdateNotification = useCallback(
     (groupKey: string) => {
@@ -90,8 +93,8 @@ const useSafeNotifications = (): void => {
     }
 
     // Is Safe version outdated?
-    // Non-critical Safe upgrades (versions >= '1.3.0') intentionally skip notifications
-    if (implementationVersionState !== ImplementationVersionState.OUTDATED || isNonCriticalUpdate(version)) return
+    // Only skip notification when already on chain's latest (non-critical); show for 1.3.0 → 1.4.1 etc.
+    if (implementationVersionState !== ImplementationVersionState.OUTDATED || isNonCriticalUpdate(version, latestSafeVersion)) return
 
     const isUnsupported = !isValidSafeVersion(version)
 
@@ -125,6 +128,7 @@ const useSafeNotifications = (): void => {
     dispatch,
     implementationVersionState,
     version,
+    latestSafeVersion,
     query.safe,
     isOwner,
     safeAddress,

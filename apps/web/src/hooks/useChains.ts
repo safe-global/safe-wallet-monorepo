@@ -10,18 +10,30 @@ const useChains = (): { configs: Chain[]; error?: string; loading?: boolean } =>
   const { data, error, isLoading } = useGetChainsConfigQuery()
 
   const configs = useMemo(() => {
-    if (!data) return []
+    if (!data) {
+      return []
+    }
     // data is already EntityState with { ids: string[], entities: { [id: string]: Chain } }
-    return data.ids.map((id) => data.entities[id]!)
+   const chains = data.ids.map((id) => data.entities[id]!).filter(Boolean)
+    return chains
   }, [data])
+
+  const errorMessage = useMemo(() => {
+    if (error) {
+      const msg = getRtkQueryErrorMessage(error)
+      console.error('[useChains] Query error:', msg, error)
+      return msg
+    }
+    return undefined
+  }, [error])
 
   return useMemo(
     () => ({
       configs,
-      error: error ? getRtkQueryErrorMessage(error) : undefined,
+      error: errorMessage,
       loading: isLoading,
     }),
-    [configs, error, isLoading],
+    [configs, errorMessage, isLoading],
   )
 }
 
@@ -39,7 +51,10 @@ export const useChain = (chainId: string): Chain | undefined => {
 
 export const useCurrentChain = (): Chain | undefined => {
   const chainId = useChainId()
-  return useChain(chainId)
+  const chain = useChain(chainId)
+  if (chainId && !chain) {
+  }
+  return chain
 }
 
 /**

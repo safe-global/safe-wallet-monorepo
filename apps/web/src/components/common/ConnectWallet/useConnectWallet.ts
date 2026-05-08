@@ -6,9 +6,12 @@ const useConnectWallet = () => {
 
   return useCallback(() => {
     if (!onboard) {
+      console.warn('[ConnectWallet] Onboard instance is not initialized yet. Please wait for the app to finish loading.')
+      console.warn('[ConnectWallet] This usually means chain configs are still loading. Check browser console for errors.')
       return Promise.resolve(undefined)
     }
 
+    console.log('[ConnectWallet] Onboard instance found, attempting connection...')
     return connectWallet(onboard)
   }, [onboard])
 }

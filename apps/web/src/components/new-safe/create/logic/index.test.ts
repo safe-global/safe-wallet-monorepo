@@ -16,9 +16,7 @@ import {
   getProxyFactoryDeployment,
   getSafeL2SingletonDeployment,
   getSafeSingletonDeployment,
-  getSafeToL2SetupDeployment,
 } from '@safe-global/safe-deployments'
-import { Safe_to_l2_setup__factory } from '@safe-global/utils/types/contracts'
 import { FEATURES, getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import * as safeDeployments from '@safe-global/safe-deployments'
 import type { SingletonDeploymentV2 } from '@safe-global/safe-deployments'
@@ -262,40 +260,38 @@ describe('create/logic', () => {
       })
     })
 
-    it('should use l1 masterCopy and migration on l2s with multichain feature', () => {
+    it('should use l2 masterCopy and no migration on l2s with multichain feature when SafeToL2Setup is not available for chain', () => {
       const safeSetup = {
         owners: [faker.finance.ethereumAddress()],
         threshold: 1,
       }
       const chainSetup = chainBuilder()
         .with({ chainId: '137' })
-        // Multichain creation is toggled on
         .with({ features: [FEATURES.COUNTERFACTUAL, FEATURES.MULTI_CHAIN_SAFE_CREATION] as any })
         .with({ recommendedMasterCopyVersion: '1.4.1' })
         .with({ l2: true })
+        .with({
+          contractAddresses: {
+            safeProxyFactoryAddress: null,
+            safeSingletonAddress: null,
+            fallbackHandlerAddress: null,
+          } as any,
+        })
         .build()
 
-      const safeL2SingletonDeployment = getSafeL2SingletonDeployment({
-        version: '1.4.1',
-        network: '137',
-      })?.defaultAddress
-
-      const safeToL2SetupDeployment = getSafeToL2SetupDeployment({ version: '1.4.1', network: chainSetup.chainId })
-      const safeToL2SetupAddress = safeToL2SetupDeployment?.networkAddresses[chainSetup.chainId]
-      const safeToL2SetupInterface = Safe_to_l2_setup__factory.createInterface()
-
+      // When SafeToL2Setup is not deployed for the chain (or not found via getCanonicalOrFirstAddress),
+      // we use L2 masterCopy and no migration. When it is deployed, createNewUndeployedSafeWithoutSalt
+      // uses L1 masterCopy and migration (see logic: includeMigration && safeToL2SetupAddress).
       expect(createNewUndeployedSafeWithoutSalt('1.4.1', safeSetup, chainSetup)).toEqual({
         safeAccountConfig: {
           ...safeSetup,
           fallbackHandler: getFallbackHandlerDeployment({ version: '1.4.1', network: '137' })?.defaultAddress,
-          to: safeToL2SetupAddress,
-          data:
-            safeL2SingletonDeployment &&
-            safeToL2SetupInterface.encodeFunctionData('setupToL2', [safeL2SingletonDeployment]),
+          to: ZERO_ADDRESS,
+          data: EMPTY_DATA,
           paymentReceiver: ECOSYSTEM_ID_ADDRESS,
         },
         safeVersion: '1.4.1',
-        masterCopy: getSafeSingletonDeployment({ version: '1.4.1', network: '137' })?.defaultAddress,
+        masterCopy: getSafeL2SingletonDeployment({ version: '1.4.1', network: '137' })?.defaultAddress,
         factoryAddress: getProxyFactoryDeployment({ version: '1.4.1', network: '137' })?.defaultAddress,
       })
     })

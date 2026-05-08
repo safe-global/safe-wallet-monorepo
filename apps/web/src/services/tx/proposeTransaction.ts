@@ -5,6 +5,14 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { getStoreInstance } from '@/store'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
+/** Thrown when the backend rejects a delegate-call proposal (e.g. chain has delegate calls disabled). */
+export class DelegateCallProposeDisabledError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'DelegateCallProposeDisabledError'
+  }
+}
+
 const proposeTx = async (
   chainId: string,
   safeAddress: string,
@@ -43,7 +51,15 @@ const proposeTx = async (
   )
 
   if ('error' in result) {
-    throw asError(result.error)
+    const err = asError(result.error)
+    // Backend (CGW) may reject delegate-call proposals when relay is disabled for the chain.
+    // Provide a clear message so the user knows to execute with their wallet once ready.
+    if (err.message.toLowerCase().includes('delegate call is disabled')) {
+      throw new DelegateCallProposeDisabledError(
+        'Delegate call transactions cannot be proposed on this chain. Your signature was created. Execute this transaction directly with your wallet once it has enough signatures.',
+      )
+    }
+    throw err
   }
 
   return result.data

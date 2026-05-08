@@ -35,7 +35,17 @@ export const initOnboard = async (
 ) => {
   const { createOnboard } = await import('@/services/onboard')
   if (!getStore()) {
-    setStore(createOnboard(chainConfigs, currentChain, rpcConfig))
+    console.log('[InitOnboard] Creating onboard instance...')
+    try {
+      const onboardInstance = createOnboard(chainConfigs, currentChain, rpcConfig)
+      setStore(onboardInstance)
+      console.log('[InitOnboard] Onboard instance created successfully')
+    } catch (e) {
+      console.error('[InitOnboard] Error creating onboard instance:', e)
+      throw e
+    }
+  } else {
+    console.log('[InitOnboard] Onboard instance already exists')
   }
 }
 
@@ -119,6 +129,12 @@ export const connectWallet = async (
   options?: Parameters<OnboardAPI['connectWallet']>[0],
 ): Promise<WalletState[] | undefined> => {
   if (isConnecting) {
+    console.warn('[ConnectWallet] Already connecting, please wait...')
+    return
+  }
+
+  if (!onboard) {
+    console.error('[ConnectWallet] Onboard instance is null')
     return
   }
 
@@ -127,8 +143,11 @@ export const connectWallet = async (
   let wallets: WalletState[] | undefined
 
   try {
+    console.log('[ConnectWallet] Attempting to connect wallet...')
     wallets = await onboard.connectWallet(options)
+    console.log('[ConnectWallet] Wallet connection result:', wallets ? 'success' : 'cancelled')
   } catch (e) {
+    console.error('[ConnectWallet] Error connecting wallet:', e)
     logError(Errors._107, e)
     isConnecting = false
 
@@ -173,23 +192,43 @@ export const useInitOnboard = () => {
 
   useEffect(() => {
     if (configs.length > 0 && chain) {
-      void initOnboard(configs, chain, customRpc)
+      console.log('[InitOnboard] Initializing onboard with configs:', configs.length, 'chains, current chain:', chain.chainName)
+      void initOnboard(configs, chain, customRpc).then(() => {
+        console.log('[InitOnboard] Onboard initialization complete')
+      }).catch((e) => {
+        console.error('[InitOnboard] Failed to initialize onboard:', e)
+      })
+    } else {
+      if (configs.length === 0) {
+        console.warn('[InitOnboard] Waiting for chain configs to load...')
+      }
+      if (!chain) {
+        console.warn('[InitOnboard] Waiting for current chain to be determined...')
+      }
     }
   }, [configs, chain, customRpc])
 
   // Disable unsupported wallets on the current chain
   useEffect(() => {
-    if (!onboard || !chain) return
+    if (!onboard || !chain) {
+      if (!onboard) console.warn('[InitOnboard] Cannot set wallet modules: onboard not initialized')
+      if (!chain) console.warn('[InitOnboard] Cannot set wallet modules: chain not available')
+      return
+    }
 
     const enableWallets = async () => {
       const { getSupportedWallets } = await import('@/hooks/wallets/wallets')
       const supportedWallets = getSupportedWallets(chain)
+      console.log('[InitOnboard] Setting', supportedWallets.length, 'supported wallet modules for chain:', chain.chainName)
       onboard.state.actions.setWalletModules(supportedWallets)
+      console.log('[InitOnboard] Wallet modules set successfully')
     }
 
     enableWallets().then(() => {
       // Reconnect last wallet
       connectLastWallet(onboard)
+    }).catch((e) => {
+      console.error('[InitOnboard] Error setting wallet modules:', e)
     })
   }, [chain, onboard])
 

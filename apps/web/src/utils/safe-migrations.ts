@@ -42,10 +42,13 @@ export const createUpdateMigration = (
 
   const interfce = Safe_migration__factory.createInterface()
 
+  // Use chain-specific address so we delegate to the contract deployed on this chain
+  const migrationAddress = deployment.networkAddresses[chain.chainId] ?? deployment.defaultAddress
+
   const tx: MetaTransactionData = {
     operation: OperationType.DelegateCall, // delegate call required
     data: interfce.encodeFunctionData(method),
-    to: deployment.defaultAddress,
+    to: migrationAddress,
     value: '0',
   }
 
@@ -65,10 +68,12 @@ export const createMigrateToL2 = (chain: Chain) => {
 
   const interfce = Safe_migration__factory.createInterface()
 
+  const migrationAddress = deployment.networkAddresses[chain.chainId] ?? deployment.defaultAddress
+
   const tx: MetaTransactionData = {
     operation: OperationType.DelegateCall, // delegate call required
     data: interfce.encodeFunctionData('migrateL2Singleton'),
-    to: deployment.defaultAddress,
+    to: migrationAddress,
     value: '0',
   }
 

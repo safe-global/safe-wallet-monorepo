@@ -1,5 +1,10 @@
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
+import {
+  FEATURES,
+  getLatestSafeVersion,
+  hasFeature,
+  isNonCriticalUpdate,
+} from '@safe-global/utils/utils/chains'
 import { CONFIG_SERVICE_CHAINS } from '@/tests/mocks/chains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getChainConfig } from '@/utils/chains'
@@ -101,6 +106,24 @@ describe('chains', () => {
             chainBuilder().with({ chainId: '11155111', recommendedMasterCopyVersion: null }).build(),
           ),
         ).toEqual('1.4.1')
+      })
+    })
+
+    describe('isNonCriticalUpdate', () => {
+      it('returns false for 1.3.0 when chain latest is 1.4.1 (should show migration notification)', () => {
+        expect(isNonCriticalUpdate('1.3.0', '1.4.1')).toBe(false)
+      })
+
+      it('returns true when Safe is already on chain latest', () => {
+        expect(isNonCriticalUpdate('1.4.1', '1.4.1')).toBe(true)
+      })
+
+      it('returns true for version >= 1.3.0 when latestVersion is not provided (legacy)', () => {
+        expect(isNonCriticalUpdate('1.3.0')).toBe(true)
+      })
+
+      it('returns false for version < 1.3.0', () => {
+        expect(isNonCriticalUpdate('1.1.1', '1.4.1')).toBe(false)
       })
     })
   })

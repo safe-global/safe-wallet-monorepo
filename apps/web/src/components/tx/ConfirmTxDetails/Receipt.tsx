@@ -56,6 +56,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
                     <NameChip txData={txData} txInfo={txInfo} />
 
                     <Typography
+                      component="div"
                       variant="body2"
                       mt={grid ? 0.75 : 0}
                       width={grid ? undefined : '100%'}
@@ -107,7 +108,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
                 </TxDetailsRow>
 
                 <TxDetailsRow label="GasToken" grid={grid}>
-                  <Typography variant="body2">
+                  <Typography component="div" variant="body2">
                     <EthHashInfo
                       address={safeTxData.gasToken}
                       avatarSize={20}
@@ -120,7 +121,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
                 </TxDetailsRow>
 
                 <TxDetailsRow label="RefundReceiver" grid={grid}>
-                  <Typography variant="body2">
+                  <Typography component="div" variant="body2">
                     <EthHashInfo
                       address={safeTxData.refundReceiver}
                       avatarSize={20}

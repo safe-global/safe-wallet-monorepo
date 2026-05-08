@@ -1,4 +1,14 @@
-import { memo, type ReactElement, useContext, useMemo, useState, useEffect } from 'react'
+import {
+  memo,
+  forwardRef,
+  type ReactElement,
+  type ReactNode,
+  type HTMLAttributes,
+  useContext,
+  useMemo,
+  useState,
+  useEffect,
+} from 'react'
 import {
   Autocomplete,
   Box,
@@ -89,6 +99,16 @@ const getFieldMinWidth = (value: string): string => {
 }
 
 const filter = createFilterOptions<string>()
+
+/** Wrapper so Tooltip receives a single child that forwards ref and props (fixes MUI Tooltip warning) */
+const TooltipSpan = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpanElement> & { children: ReactNode }>(
+  ({ children, ...props }, ref) => (
+    <span ref={ref} style={{ display: 'inline-block' }} {...props}>
+      {children}
+    </span>
+  ),
+)
+TooltipSpan.displayName = 'TooltipSpan'
 
 enum TxNonceFormFieldNames {
   NONCE = 'nonce',
@@ -252,9 +272,10 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
 
               return (
                 <Tooltip title={fieldState.error?.message || warning} open arrow placement="top">
-                  <NumberField
-                    ref={combinedRef}
-                    {...params}
+                  <TooltipSpan>
+                    <NumberField
+                      ref={combinedRef}
+                      {...params}
                     error={!!fieldState.error}
                     InputProps={{
                       ...params.InputProps,
@@ -282,6 +303,7 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
                       minWidth: getFieldMinWidth(field.value),
                     }}
                   />
+                  </TooltipSpan>
                 </Tooltip>
               )
             }}

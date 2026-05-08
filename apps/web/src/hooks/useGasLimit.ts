@@ -15,6 +15,7 @@ import {
   incrementByGasMultiplier,
   getGasLimitForZkSync as getGasLimitForZkSyncUtil,
 } from '@safe-global/utils/hooks/coreSDK/gasLimitUtils'
+import { isSafeMigrationTx } from '@/utils/transaction-guards'
 
 const useGasLimit = (
   safeTx?: SafeTransaction,
@@ -64,6 +65,12 @@ const useGasLimit = (
         // when the safeTxGas is defined and not 0. Currently Nethermind is used only for Gnosis Chain.
         if (currentChainId === chains.gno && hasSafeTxGas) {
           return incrementByGasMultiplier(gasLimit, GasMultipliers[chains.gno])
+        }
+
+        // Migration (1.3→1.4) delegate call often underestimates on some chains (e.g. Kairos);
+        // add 100% buffer to avoid "out of gas" revert.
+        if (safeTx && isSafeMigrationTx(safeTx, currentChainId)) {
+          return incrementByGasMultiplier(gasLimit, 2)
         }
 
         return gasLimit

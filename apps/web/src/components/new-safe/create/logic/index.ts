@@ -5,7 +5,6 @@ import { type SafeState, cgwApi as safesApi } from '@safe-global/store/gateway/A
 import { cgwApi as relayApi } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getStoreInstance } from '@/store'
-import { getReadOnlyProxyFactoryContract } from '@/services/contracts/safeContracts'
 import type { UrlObject } from 'url'
 import { AppRoutes } from '@/config/routes'
 import { SAFE_APPS_EVENTS, trackEvent } from '@/services/analytics'
@@ -37,8 +36,6 @@ import {
 } from '@safe-global/utils/types/contracts'
 import { createWeb3 } from '@/hooks/wallets/web3'
 import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
-import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
-
 export type SafeCreationProps = {
   owners: string[]
   threshold: number
@@ -128,28 +125,33 @@ export const estimateSafeCreationGas = async (
   provider: Provider,
   from: string,
   undeployedSafe: UndeployedSafeProps,
+  // safeVersion kept for API compatibility; factory address comes from chain config / replayed props
   safeVersion?: SafeVersion,
 ): Promise<bigint> => {
-  const readOnlyProxyFactoryContract = await getReadOnlyProxyFactoryContract(safeVersion ?? getLatestSafeVersion(chain))
+  void safeVersion
+  const replayedSafeProps = assertNewUndeployedSafeProps(undeployedSafe, chain)
   const encodedSafeCreationTx = encodeSafeCreationTx(undeployedSafe, chain)
 
+  // Use factory address from replayed props so chain config (e.g. local safe-infrastructure) is respected
   const gas = await provider.estimateGas({
     from,
-    to: readOnlyProxyFactoryContract.getAddress(),
+    to: replayedSafeProps.factoryAddress,
     data: encodedSafeCreationTx,
   })
 
   return gas
 }
 
+const MAX_404_ATTEMPTS = 5
+
 /**
- * Poll for safe info after creation until the safe is indexed by client-gateway
- * Uses RTK Query with exponential backoff retry (19 attempts over ~4 minutes)
+ * Poll for safe info after creation until the safe is indexed by client-gateway.
+ * Uses RTK Query with exponential backoff. Stops earlier on persistent 404 (CGW does not have this chain/Safe).
  */
 export const pollSafeInfo = async (chainId: string, safeAddress: string): Promise<SafeState> => {
   const store = getStoreInstance()
+  let consecutive404Attempts = 0
 
-  // Use exponential backoff to retry RTK Query calls
   return backOff(
     async () => {
       const queryAction = safesApi.endpoints.safesGetSafeV1.initiate(
@@ -164,6 +166,14 @@ export const pollSafeInfo = async (chainId: string, safeAddress: string): Promis
       try {
         const result = await queryPromise.unwrap()
         return result
+      } catch (e) {
+        const status = (e as { status?: number })?.status
+        if (status === 404) {
+          consecutive404Attempts += 1
+        } else {
+          consecutive404Attempts = 0
+        }
+        throw e
       } finally {
         queryPromise.unsubscribe()
       }
@@ -173,6 +183,10 @@ export const pollSafeInfo = async (chainId: string, safeAddress: string): Promis
       maxDelay: 20000,
       numOfAttempts: 19,
       retry: (e) => {
+        const status = (e as { status?: number })?.status
+        if (status === 404 && consecutive404Attempts >= MAX_404_ATTEMPTS) {
+          return false
+        }
         console.info('waiting for client-gateway to provide safe information', e)
         return true
       },
@@ -244,7 +258,34 @@ export const createNewUndeployedSafeWithoutSalt = (
   },
   chain: Chain,
 ): UndeployedSafeWithoutSalt => {
-  // Create universal deployment Data across chains:
+  const { contractAddresses } = chain
+
+  // Prefer contract addresses from chain config (e.g. local safe-infrastructure) when all required addresses are set.
+  // This allows using custom proxy/master copy not yet published in @safe-global/safe-deployments.
+  const configFactory = contractAddresses?.safeProxyFactoryAddress ?? null
+  const configSingleton = contractAddresses?.safeSingletonAddress ?? null
+  const configFallbackHandler = contractAddresses?.fallbackHandlerAddress ?? null
+  const useChainConfig =
+    configFactory && configSingleton && configFallbackHandler
+
+  if (useChainConfig) {
+    const replayedSafe: Omit<ReplayedSafeProps, 'saltNonce'> = {
+      factoryAddress: configFactory,
+      masterCopy: configSingleton,
+      safeAccountConfig: {
+        threshold: safeAccountConfig.threshold,
+        owners: safeAccountConfig.owners,
+        fallbackHandler: configFallbackHandler,
+        to: ZERO_ADDRESS,
+        data: EMPTY_DATA,
+        paymentReceiver: safeAccountConfig.paymentReceiver ?? ECOSYSTEM_ID_ADDRESS,
+      },
+      safeVersion,
+    }
+    return replayedSafe
+  }
+
+  // Fallback to published safe-deployments (Safe SDK repo)
   const fallbackHandlerDeployments = getCompatibilityFallbackHandlerDeployments({
     version: safeVersion,
     network: chain.chainId,
@@ -299,22 +340,39 @@ export const createNewUndeployedSafeWithoutSalt = (
 export const migrateLegacySafeProps = (predictedSafeProps: PredictedSafeProps, chain: Chain): ReplayedSafeProps => {
   const safeVersion = predictedSafeProps.safeDeploymentConfig?.safeVersion
   const saltNonce = predictedSafeProps.safeDeploymentConfig?.saltNonce
-  const { chainId } = chain
+  const { chainId, contractAddresses } = chain
   if (!safeVersion || !saltNonce) {
     throw new Error('Undeployed Safe with incomplete data.')
   }
 
-  const fallbackHandlerDeployment = getCompatibilityFallbackHandlerDeployment({
-    version: safeVersion,
-    network: chainId,
-  })
-  const fallbackHandlerAddress = fallbackHandlerDeployment?.defaultAddress
+  // Prefer contract addresses from chain config (e.g. local safe-infrastructure) when all required are set
+  const configFactory = contractAddresses?.safeProxyFactoryAddress ?? null
+  const configSingleton = contractAddresses?.safeSingletonAddress ?? null
+  const configFallbackHandler = contractAddresses?.fallbackHandlerAddress ?? null
+  const useChainConfig =
+    configFactory && configSingleton && configFallbackHandler
 
-  const masterCopyDeployment = getSafeContractDeployment(chain, safeVersion)
-  const masterCopyAddress = masterCopyDeployment?.defaultAddress
+  let masterCopyAddress: string | undefined
+  let safeFactoryAddress: string | undefined
+  let fallbackHandlerAddress: string | undefined
 
-  const safeFactoryDeployment = getProxyFactoryDeployment({ version: safeVersion, network: chainId })
-  const safeFactoryAddress = safeFactoryDeployment?.defaultAddress
+  if (useChainConfig) {
+    masterCopyAddress = configSingleton
+    safeFactoryAddress = configFactory
+    fallbackHandlerAddress = configFallbackHandler
+  } else {
+    const fallbackHandlerDeployment = getCompatibilityFallbackHandlerDeployment({
+      version: safeVersion,
+      network: chainId,
+    })
+    fallbackHandlerAddress = fallbackHandlerDeployment?.defaultAddress
+
+    const masterCopyDeployment = getSafeContractDeployment(chain, safeVersion)
+    masterCopyAddress = masterCopyDeployment?.defaultAddress
+
+    const safeFactoryDeployment = getProxyFactoryDeployment({ version: safeVersion, network: chainId })
+    safeFactoryAddress = safeFactoryDeployment?.defaultAddress
+  }
 
   if (!masterCopyAddress || !safeFactoryAddress || !fallbackHandlerAddress) {
     throw new Error('No Safe deployment found')
