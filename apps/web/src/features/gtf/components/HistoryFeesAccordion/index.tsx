@@ -1,7 +1,17 @@
 import type { ReactElement } from 'react'
-import { useState } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, SvgIcon, Tooltip, Typography } from '@mui/material'
+import {
+  Accordion,
+  accordionClasses,
+  AccordionDetails,
+  AccordionSummary,
+  accordionSummaryClasses,
+  styled,
+  SvgIcon,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import type { HistoryFeesData } from '../../hooks/useHistoryFeesBreakdown'
 import type { FeeRow as FeeRowType } from '../../hooks/useFeesPreview'
@@ -12,6 +22,31 @@ const FEES_TOOLTIP = 'Total fees paid for this transaction, including execution 
 const EXECUTION_FEE_TOOLTIP =
   'Covers third-party services required to securely execute this transaction. Based on the transaction amount. Currently free while the new model is introduced.'
 const GAS_FEE_TOOLTIP = 'Network cost required to process this transaction on the blockchain.'
+
+// Match ColorCodedTxAccordion ("Advanced details") so both accordions stack with matching
+// border + summary background per tx category. CSS vars are theme-aware — no light/dark branch.
+type AccordionPalette = { border: string; bg: string }
+const TX_PALETTE_BY_TYPE: Record<string, AccordionPalette> = {
+  Transfer: { border: 'var(--color-success-light)', bg: 'var(--color-background-light)' },
+  SwapTransfer: { border: 'var(--color-success-light)', bg: 'var(--color-background-light)' },
+  TwapOrder: { border: 'var(--color-success-light)', bg: 'var(--color-background-light)' },
+  NativeStakingDeposit: { border: 'var(--color-success-light)', bg: 'var(--color-background-light)' },
+  SettingsChange: { border: 'var(--color-warning-light)', bg: 'var(--color-warning-background)' },
+}
+const DEFAULT_PALETTE: AccordionPalette = { border: 'var(--color-info-dark)', bg: 'var(--color-info-background)' }
+
+const StyledAccordion = styled(Accordion, {
+  shouldForwardProp: (p) => p !== 'palette',
+})<{ palette: AccordionPalette }>(({ palette }) => ({
+  [`&.${accordionClasses.expanded}.${accordionClasses.root}, &:hover.${accordionClasses.root}`]: {
+    borderColor: palette.border,
+    position: 'relative',
+    zIndex: 1,
+  },
+  [`&.${accordionClasses.expanded} > * > .${accordionSummaryClasses.root}`]: {
+    backgroundColor: palette.bg,
+  },
+}))
 
 const FeeBreakdownRow = ({
   label,
@@ -55,36 +90,21 @@ const FeeBreakdownRow = ({
   </div>
 )
 
-const HistoryFeesAccordion = ({ data }: { data: HistoryFeesData }): ReactElement => {
-  const [expanded, setExpanded] = useState(false)
+const HistoryFeesAccordion = ({
+  data,
+  txInfo,
+}: {
+  data: HistoryFeesData
+  txInfo?: TransactionDetails['txInfo']
+}): ReactElement => {
+  const palette = (txInfo?.type && TX_PALETTE_BY_TYPE[txInfo.type]) || DEFAULT_PALETTE
 
   return (
-    <Accordion
-      elevation={0}
-      expanded={expanded}
-      onChange={(_, isExpanded) => setExpanded(isExpanded)}
-      className={css.feesAccordion}
-      disableGutters
-      sx={{
-        '&::before': { display: 'none' },
-        backgroundColor: 'background.paper',
-        '&:hover': { borderColor: 'border.light' },
-        '&:hover > .MuiAccordionSummary-root': { background: 'background.paper' },
-      }}
-    >
+    <StyledAccordion elevation={0} palette={palette} className={css.feesAccordion}>
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         className={accordionCss.accordion}
         data-testid="history-fees-summary"
-        sx={{
-          minHeight: '56px',
-          px: 2,
-          py: 1.5,
-          '&.Mui-expanded': { minHeight: '56px', backgroundColor: 'background.paper' },
-          '& .MuiAccordionSummary-content': { my: 0, mr: '8px' },
-          '& .MuiAccordionSummary-content.Mui-expanded': { my: 0 },
-          '& .MuiAccordionSummary-expandIconWrapper': { width: 24, height: 24, fontSize: 24 },
-        }}
       >
         <div className={css.summaryContent}>
           <div className={css.summaryLeft}>
@@ -117,7 +137,7 @@ const HistoryFeesAccordion = ({ data }: { data: HistoryFeesData }): ReactElement
           <FeeBreakdownRow {...data.gasFee} tooltip={GAS_FEE_TOOLTIP} />
         </div>
       </AccordionDetails>
-    </Accordion>
+    </StyledAccordion>
   )
 }
 

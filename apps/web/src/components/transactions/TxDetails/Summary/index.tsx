@@ -32,7 +32,7 @@ const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactEle
 
   if (!feesData) return null
 
-  return <HistoryFeesAccordion data={feesData} />
+  return <HistoryFeesAccordion data={feesData} txInfo={txDetails.txInfo} />
 }
 
 const Summary = ({
