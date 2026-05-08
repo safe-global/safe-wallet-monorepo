@@ -119,6 +119,7 @@ todos/*
 /docs/plans/
 /docs/todos/
 /docs/brainstorms/
+docs/engineering/pr-self-review-checklist.generated.md
 
 .codemod
 .serena

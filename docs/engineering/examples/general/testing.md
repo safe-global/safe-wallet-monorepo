@@ -223,3 +223,155 @@ chainId. The moment that package adds the chain, the test stops exercising the
 fallback branch and silently becomes meaningless. Mock the lookup so the branch
 is hit deterministically, and add a sibling test for the explicit-null variant
 to lock in current behavior.
+
+## TEST-01 — Test the debounce, not just the post-debounce assertion
+
+Source: PR #7455 (RL-20260318-002)
+
+### Avoid
+
+```ts
+// After debounce settles, should still be undefined (no ENS for ADDRESS2)
+await waitFor(() => {
+  expect(result.current.ens).toBeUndefined()
+})
+```
+
+### Prefer
+
+```ts
+jest.useFakeTimers()
+rerender({ address: ADDR_WITHOUT_ENS })
+// Stale-guard returns undefined immediately while debounce is pending
+expect(result.current.ens).toBeUndefined()
+// Advance past the debounce, then assert the lookup happened for the NEW address
+act(() => {
+  jest.advanceTimersByTime(200)
+})
+expect(lookupAddress).toHaveBeenCalledWith(ADDR_WITHOUT_ENS)
+await waitFor(() => expect(result.current.ens).toBeUndefined())
+```
+
+### Why
+
+An assertion that holds on render zero never exercises the debounced behavior, so a regression in the staleness guard slips through. Advance fake timers and assert the new lookup ran so the test fails when the guard is removed.
+
+## Overwriting localStorage fixtures must include implicit app-seeded entries
+
+Source: PR (RL-20260217-001)
+
+### Avoid
+
+```ts
+// support/localstorage_data.js
+export const sidebarTrustedSafe1Safe2 = {
+  11155111: {
+    '0xBb26...80aEB': { owners: [], threshold: 1, ethBalance: '0' },
+    // missing the visited safe SEP_STATIC_SAFE_9 that autoTrustSafeFromUrl
+    // would otherwise add — addToAppLocalStorage overwrites the whole key.
+  },
+}
+```
+
+### Prefer
+
+```ts
+export const sidebarTrustedSafe1Safe2 = {
+  11155111: {
+    '0x9870...5fec0': { owners: [], threshold: 1, ethBalance: '0' }, // visited safe
+    '0xBb26...80aEB': { owners: [], threshold: 1, ethBalance: '0' },
+  },
+}
+```
+
+### Why
+
+If the helper writes the whole key (not a merge), any state the app would populate on visit is lost on reload. Every fixture must explicitly carry those entries, or the assertions silently regress against a banner state.
+
+## Cypress retry timeout belongs on the preceding command
+
+Source: PR (RL-20260218-001)
+
+### Avoid
+
+```ts
+cy.window().invoke('localStorage.getItem', key).should('equal', '{}', { timeout: 10000 }) // treated as assertion message, not timeout
+```
+
+### Prefer
+
+```ts
+cy.window({ timeout: 10000 }).invoke('localStorage.getItem', key).should('equal', '{}')
+```
+
+### Why
+
+Cypress retries the chained command using the preceding command's timeout. The third argument of .should() is parsed as the failure message, so the intended retry budget silently degrades to the suite default.
+
+## Match real gateway response shapes when intercepting
+
+Source: PR (RL-20260220-003)
+
+### Avoid
+
+```ts
+// constants.js
+export const chainConfigEndpoint = '**/v1/chains/*' // never matches the paginated /v1/chains call
+
+// page object
+cy.intercept('GET', constants.chainConfigEndpoint, (req) => {
+  req.continue((res) => {
+    if (res.body?.features) res.body.features.push(featureName) // top-level features doesn't exist
+  })
+})
+```
+
+### Prefer
+
+```ts
+export const chainsListEndpoint = '**/v1/chains?**'
+
+cy.intercept('GET', constants.chainsListEndpoint, (req) => {
+  req.continue((res) => {
+    res.body.results = res.body.results?.map((chain) => ({
+      ...chain,
+      features: chain.features.includes(featureName) ? chain.features : [...chain.features, featureName],
+    }))
+  })
+})
+```
+
+### Why
+
+If the URL pattern doesn't match the real call, or the mutated path doesn't exist on the response, the interceptor is a silent no-op and the test still depends on live backend state — the very thing the mock is supposed to remove.
+
+## Builders vs MSW fixtures
+
+Source: PR #7416 (RL-20260313-002)
+
+### Avoid
+
+```ts
+// unit test for a token decimals helper
+import { efSafe } from 'config/test/msw/fixtures/balances'
+
+it('handles 6-decimal tokens', () => {
+  const usdc = efSafe.balances.find((b) => b.tokenInfo.symbol === 'USDC')!
+  expect(formatAmount(usdc)).toBe('1,234.56')
+})
+```
+
+### Prefer
+
+```ts
+import { erc20TokenBuilder } from '@/tests/builders/balances'
+
+it('handles 6-decimal tokens', () => {
+  const usdc = erc20TokenBuilder().with({ decimals: 6, balance: '1234560000' }).build()
+  expect(formatAmount(usdc)).toBe('1,234.56')
+})
+```
+
+### Why
+
+MSW fixtures are scenario-shaped real responses tied to specific Safes. They are not minimal test cases, they hide which field the assertion actually depends on, and they deterministically encode values that should be free in a unit test.
