@@ -58,7 +58,7 @@ const SpaceMembers = () => {
         )}
       </Stack>
       <>
-        {searchQuery && !filteredMembers.length && !filteredInvites.length && (
+        {searchQuery && !filteredMembers.length && (!isAdmin || !filteredInvites.length) && (
           <Typography variant="h5" fontWeight="normal" mb={2} color="primary.light">
             Found 0 results
           </Typography>

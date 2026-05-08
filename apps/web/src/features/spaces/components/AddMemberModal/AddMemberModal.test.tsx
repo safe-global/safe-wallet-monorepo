@@ -75,6 +75,16 @@ jest.mock('@/config/routes', () => ({
   AppRoutes: { spaces: { members: '/spaces/members' } },
 }))
 
+jest.mock('@/components/common/EthHashInfo', () => ({
+  __esModule: true,
+  default: ({ name, address }: { name?: string; address: string }) => <div>{name ?? address}</div>,
+}))
+
+jest.mock('@/components/common/AddressInput/useNameResolver', () => ({
+  __esModule: true,
+  default: () => ({ address: undefined, resolverError: undefined, resolving: false }),
+}))
+
 describe('AddMemberModal tracking', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -193,7 +203,10 @@ describe('AddMemberModal tracking', () => {
     fireEvent.mouseDown(await screen.findByText(name))
 
     expect(screen.getByTestId('member-identifier-input')).toHaveValue(address)
-    fireEvent.click(screen.getByTestId('add-member-modal-button'))
+
+    const submitButton = screen.getByTestId('add-member-modal-button')
+    await waitFor(() => expect(submitButton).not.toBeDisabled())
+    fireEvent.click(submitButton)
 
     await waitFor(() => {
       expect(mockInviteMembers).toHaveBeenCalledWith({
