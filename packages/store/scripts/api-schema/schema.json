@@ -14229,7 +14229,7 @@
           "signerAddress": {
             "type": "string",
             "nullable": true,
-            "description": "Optional signer address filter:\n\u2022 Omitted (undefined): Deletes subscriptions regardless of signer address\n\u2022 null: Deletes only subscriptions with no signer address\n\u2022 Valid address: Deletes only subscriptions with that specific signer address"
+            "description": "Optional signer address filter:\n• Omitted (undefined): Deletes subscriptions regardless of signer address\n• null: Deletes only subscriptions with no signer address\n• Valid address: Deletes only subscriptions with that specific signer address"
           }
         },
         "required": [
