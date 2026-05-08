@@ -52,7 +52,6 @@
   justify-content: flex-start;
   width: 100%;
   border: 1px dashed var(--sidebar-border, #e5e5e5);
-  padding-left: 4px;
   border-radius: 8px;
   cursor: pointer;
 }
