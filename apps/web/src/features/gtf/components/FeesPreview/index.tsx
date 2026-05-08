@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import { useContext, useRef, useState } from 'react'
-import { Divider, MenuItem, Popover, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Alert, Divider, MenuItem, Popover, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -302,6 +302,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
     totalOutgoing,
     availableGasTokens,
     selectedGasToken,
+    safeHasEnoughGas,
   } = props
   const { gtfPaymentMode, setGtfPaymentMode } = useContext(SafeTxContext)
 
@@ -386,6 +387,17 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
         <FeeRow {...executionFee} loading={props.loading} tooltip={EXECUTION_FEE_TOOLTIP} />
         <FeeRow {...gasFee} loading={props.loading} error={props.error} tooltip={GAS_FEE_TOOLTIP} />
       </div>
+
+      {/* Safe-pays only — surfaced when the Safe doesn't currently hold enough of the chosen
+          gas token to cover the on-chain fee. We don't block signing in case another signer or
+          a top-up brings the balance up before execution; the simulation/execution will revert
+          with GS013 if it doesn't. */}
+      {safeHasEnoughGas === false && !props.loading && (
+        <Alert severity="warning" sx={{ mt: 1 }}>
+          The Safe doesn&apos;t currently hold enough {gasFee.currency} to cover the gas fee. The transaction will fail
+          at execution unless the balance is topped up before then.
+        </Alert>
+      )}
 
       {displayedOutgoing && <TotalOutgoingSection totalOutgoing={displayedOutgoing} />}
     </div>

@@ -158,4 +158,31 @@ describe('FeesPreview', () => {
       expect(notice).toHaveTextContent('USDC')
     })
   })
+
+  describe('insufficient Safe balance warning (Safe-pays)', () => {
+    it('renders the warning when safeHasEnoughGas is false', () => {
+      render(<FeesPreview {...defaultProps} safeHasEnoughGas={false} />)
+
+      expect(screen.getByText(/doesn't currently hold enough/)).toBeInTheDocument()
+      expect(screen.getByText(/will fail at execution/)).toBeInTheDocument()
+    })
+
+    it('does not render the warning when safeHasEnoughGas is true', () => {
+      render(<FeesPreview {...defaultProps} safeHasEnoughGas />)
+
+      expect(screen.queryByText(/doesn't currently hold enough/)).not.toBeInTheDocument()
+    })
+
+    it('does not render the warning when safeHasEnoughGas is undefined (non-Safe-pays paths)', () => {
+      render(<FeesPreview {...defaultProps} />)
+
+      expect(screen.queryByText(/doesn't currently hold enough/)).not.toBeInTheDocument()
+    })
+
+    it('does not render the warning while loading (avoids a flash before data arrives)', () => {
+      render(<FeesPreview {...defaultProps} safeHasEnoughGas={false} loading />)
+
+      expect(screen.queryByText(/doesn't currently hold enough/)).not.toBeInTheDocument()
+    })
+  })
 })

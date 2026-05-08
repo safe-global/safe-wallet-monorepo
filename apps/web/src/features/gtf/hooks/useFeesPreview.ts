@@ -55,6 +55,13 @@ export type FeesPreviewData = {
   onGasTokenChange?: (address: string) => void
   loading?: boolean
   error?: boolean
+  /**
+   * Safe-pays only. False when the Safe's current balance of the chosen gas token is less than
+   * the on-chain gas fee. We don't block signing — in a multi-sig the Safe may be topped up
+   * before execution — but we surface a warning so the user is aware the tx may revert (GS013)
+   * if the balance isn't covered by execution time.
+   */
+  safeHasEnoughGas?: boolean
 }
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()
@@ -275,6 +282,7 @@ export const useFeesPreview = (): FeesPreviewData => {
     const gasFiatUsd = gasTokenBalance
       ? Number(formatUnits(gasWei, gasDecimals)) * Number(gasTokenBalance.fiatConversion)
       : 0
+    const safeHasEnoughGas = gasTokenBalance ? BigInt(gasTokenBalance.balance) >= gasWei : false
 
     const totalOutgoing = computeTotalOutgoing({
       safeTx,
@@ -298,6 +306,7 @@ export const useFeesPreview = (): FeesPreviewData => {
         fiatAmount: formatCurrencyMinimal(gasFiatUsd, 'usd'),
       },
       totalOutgoing,
+      safeHasEnoughGas,
       loading: false,
       error: false,
     }
@@ -391,6 +400,8 @@ export const useFeesPreview = (): FeesPreviewData => {
     const { txData, relayCostUsd } = preview.data
     const gasWei = (BigInt(txData.safeTxGas) + BigInt(txData.baseGas)) * BigInt(txData.gasPrice)
     const gasAmount = formatVisualAmount(gasWei, gasDecimals)
+    const gasTokenBalance = balances.items.find((b) => sameAddress(b.tokenInfo.address, selectedAddress))
+    const safeHasEnoughGas = gasTokenBalance ? BigInt(gasTokenBalance.balance) >= gasWei : false
     const totalOutgoing = computeTotalOutgoing({
       safeTx,
       gasWei,
@@ -413,6 +424,7 @@ export const useFeesPreview = (): FeesPreviewData => {
         fiatAmount: formatCurrencyMinimal(relayCostUsd, 'usd'),
       },
       totalOutgoing,
+      safeHasEnoughGas,
       loading: false,
       error: false,
     }
