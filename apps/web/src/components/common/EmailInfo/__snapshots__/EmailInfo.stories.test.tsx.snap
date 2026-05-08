@@ -1,0 +1,149 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./EmailInfo.stories AllSizes 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiStack-root mui-style-1x33toh-MuiStack-root"
+  >
+    <div
+      class="container"
+    >
+      <div
+        class="initialsAvatar MuiBox-root mui-style-i53eir"
+      >
+        a
+      </div>
+      <span
+        aria-label="alice@safe.global"
+        class="email MuiBox-root mui-style-0"
+        data-mui-internal-clone-element="true"
+      >
+        alice@safe.global
+      </span>
+    </div>
+    <div
+      class="container"
+    >
+      <div
+        class="initialsAvatar MuiBox-root mui-style-1jru28y"
+      >
+        a
+      </div>
+      <span
+        aria-label="alice@safe.global"
+        class="email MuiBox-root mui-style-0"
+        data-mui-internal-clone-element="true"
+      >
+        alice@safe.global
+      </span>
+    </div>
+    <div
+      class="container"
+    >
+      <div
+        class="initialsAvatar MuiBox-root mui-style-1cq109p"
+      >
+        a
+      </div>
+      <span
+        aria-label="alice@safe.global"
+        class="email MuiBox-root mui-style-0"
+        data-mui-internal-clone-element="true"
+      >
+        alice@safe.global
+      </span>
+    </div>
+    <div
+      class="container"
+    >
+      <div
+        class="initialsAvatar MuiBox-root mui-style-dl5gmi"
+      >
+        a
+      </div>
+      <span
+        aria-label="alice@safe.global"
+        class="email MuiBox-root mui-style-0"
+        data-mui-internal-clone-element="true"
+      >
+        alice@safe.global
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="container"
+  >
+    <div
+      class="initialsAvatar MuiBox-root mui-style-1cq109p"
+    >
+      a
+    </div>
+    <span
+      aria-label="alice@safe.global"
+      class="email MuiBox-root mui-style-0"
+      data-mui-internal-clone-element="true"
+    >
+      alice@safe.global
+    </span>
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories LongEmailTruncated 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiBox-root mui-style-p20wo7"
+  >
+    <div
+      class="container"
+    >
+      <div
+        class="initialsAvatar MuiBox-root mui-style-i9xiy1"
+      >
+        a
+      </div>
+      <span
+        aria-label="a-very-long-address-that-will-not-fit@some-very-long-domain.example.com"
+        class="email MuiBox-root mui-style-0"
+        data-mui-internal-clone-element="true"
+      >
+        a-very-long-address-that-will-not-fit@some-very-long-domain.example.com
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories SquareAvatar 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="container"
+  >
+    <div
+      class="initialsAvatar MuiBox-root mui-style-1nezy3a"
+    >
+      b
+    </div>
+    <span
+      aria-label="bob@safe.global"
+      class="email MuiBox-root mui-style-0"
+      data-mui-internal-clone-element="true"
+    >
+      bob@safe.global
+    </span>
+  </div>
+</div>
+`;

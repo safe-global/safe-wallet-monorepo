@@ -28,6 +28,9 @@ const InitialsAvatar = ({
       bgcolor={logoColor}
       width={width}
       height={height}
+      minWidth={width}
+      minHeight={height}
+      flexShrink={0}
       fontSize={fontSize}
       borderRadius={rounded ? '50%' : '6px'}
     >

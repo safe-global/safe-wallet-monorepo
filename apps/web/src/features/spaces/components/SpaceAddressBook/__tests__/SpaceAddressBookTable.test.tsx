@@ -6,8 +6,12 @@ import { faker } from '@faker-js/faker'
 
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
 jest.mock('@/components/common/EthHashInfo', () => {
-  const EthHashInfo = () => <span data-testid="eth-hash-info" />
+  const EthHashInfo = ({ address }: { address: string }) => <span data-testid="eth-hash-info">{address}</span>
   return EthHashInfo
+})
+jest.mock('@/components/common/EmailInfo', () => {
+  const EmailInfo = ({ email }: { email: string }) => <span data-testid="email-info">{email}</span>
+  return EmailInfo
 })
 jest.mock('@/components/common/Identicon', () => {
   const Identicon = () => <span data-testid="identicon" />
@@ -46,5 +50,23 @@ describe('SpaceAddressBookTable', () => {
     render(<SpaceAddressBookTable entries={[entryBuilder().with({ isLocal: true }).build()]} />)
 
     expect(screen.queryByTestId('actions')).not.toBeInTheDocument()
+  })
+
+  it('renders EthHashInfo in the "Added by" cell when createdBy is an address', () => {
+    const createdBy = faker.finance.ethereumAddress()
+    render(<SpaceAddressBookTable entries={[entryBuilder().with({ createdBy }).build()]} />)
+
+    // One EthHashInfo for the Address column, one for the "Added by" cell
+    expect(screen.getAllByTestId('eth-hash-info')).toHaveLength(2)
+    expect(screen.queryByTestId('email-info')).not.toBeInTheDocument()
+  })
+
+  it('renders EmailInfo in the "Added by" cell when createdBy is an email', () => {
+    const createdBy = faker.internet.email()
+    render(<SpaceAddressBookTable entries={[entryBuilder().with({ createdBy }).build()]} />)
+
+    // EthHashInfo only renders for the Address column; "Added by" uses EmailInfo
+    expect(screen.getAllByTestId('eth-hash-info')).toHaveLength(1)
+    expect(screen.getByTestId('email-info')).toHaveTextContent(createdBy)
   })
 })
