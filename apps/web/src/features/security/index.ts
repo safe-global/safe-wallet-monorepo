@@ -40,4 +40,3 @@ export type { SecurityContract } from './contract'
 
 // Hooks exported directly — always loaded, not lazy
 export { default as useSecurityScan } from './hooks/useSecurityScan'
-export { default as useSecurityHubFeatureRedirect } from './hooks/useSecurityHubFeatureRedirect'
