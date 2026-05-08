@@ -394,8 +394,8 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
           with GS013 if it doesn't. */}
       {safeHasEnoughGas === false && !props.loading && (
         <Alert severity="warning" sx={{ mt: 1 }}>
-          The Safe doesn&apos;t currently hold enough {gasFee.currency} to cover the gas fee. The transaction will fail
-          at execution unless the balance is topped up before then.
+          Insufficient {gasFee.currency} balance to cover the gas fee. Top up before execution, otherwise the
+          transaction will fail.
         </Alert>
       )}
 
