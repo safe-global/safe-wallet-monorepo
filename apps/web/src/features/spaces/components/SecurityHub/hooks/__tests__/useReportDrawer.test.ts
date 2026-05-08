@@ -4,12 +4,12 @@ import type { ScanContext } from '@/features/security/types'
 import type { OverviewMap, SpaceSafeEntry } from '../../types'
 
 let mockScanContext: ScanContext | null = null
-const useSafeScanContextMock = jest.fn()
+const safeScanContextMock = jest.fn()
 
 jest.mock('@/features/spaces/hooks/useSafeScanContext', () => ({
   __esModule: true,
   default: (...args: unknown[]) => {
-    useSafeScanContextMock(...args)
+    safeScanContextMock(...args)
     return mockScanContext
   },
 }))
@@ -35,7 +35,7 @@ const mkSecurity = (isReady = true) =>
 describe('useReportDrawer', () => {
   beforeEach(() => {
     mockScanContext = null
-    useSafeScanContextMock.mockReset()
+    safeScanContextMock.mockReset()
   })
 
   it('starts with no Safe selected', () => {
@@ -94,7 +94,7 @@ describe('useReportDrawer', () => {
 
     act(() => result.current.openReport(SAFE_A, CHAIN))
 
-    expect(useSafeScanContextMock).toHaveBeenLastCalledWith({ address: SAFE_A, chainId: CHAIN }, safes[0], {
+    expect(safeScanContextMock).toHaveBeenLastCalledWith({ address: SAFE_A, chainId: CHAIN }, safes[0], {
       balanceUsd: 1234,
       queuedTxCount: 2,
     })
@@ -107,7 +107,7 @@ describe('useReportDrawer', () => {
 
     act(() => result.current.openReport(SAFE_A, CHAIN))
 
-    expect(useSafeScanContextMock).toHaveBeenLastCalledWith({ address: SAFE_A, chainId: CHAIN }, safes[0], undefined)
+    expect(safeScanContextMock).toHaveBeenLastCalledWith({ address: SAFE_A, chainId: CHAIN }, safes[0], undefined)
   })
 
   it('returns the resolved scanContext from useSafeScanContext', () => {

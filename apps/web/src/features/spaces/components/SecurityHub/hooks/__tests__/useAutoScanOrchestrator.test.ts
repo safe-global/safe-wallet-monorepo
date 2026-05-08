@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react'
 import useAutoScanOrchestrator from '../useAutoScanOrchestrator'
 import type { OverviewMap, SelectedSafe, SpaceSafeEntry } from '../../types'
 
-const useAutoScanMock = jest.fn()
+const autoScanMock = jest.fn()
 let lastServices: unknown = null
 
 jest.mock('@/features/spaces/hooks/useAutoScan', () => ({
@@ -15,7 +15,7 @@ jest.mock('@/features/spaces/hooks/useAutoScan', () => ({
     onComplete: unknown,
   ) => {
     lastServices = services
-    return useAutoScanMock(queue, safes, overviewMap, services, onComplete)
+    return autoScanMock(queue, safes, overviewMap, services, onComplete)
   },
 }))
 
@@ -52,12 +52,12 @@ const mkSecurity = (isReady = true) =>
 
 describe('useAutoScanOrchestrator', () => {
   beforeEach(() => {
-    useAutoScanMock.mockReset()
+    autoScanMock.mockReset()
     useCurrentSpaceIdMock.mockReset()
     useCurrentSpaceIdMock.mockReturnValue('space-1')
     startScanFn.mockReset()
     lastServices = null
-    useAutoScanMock.mockReturnValue({
+    autoScanMock.mockReturnValue({
       scanningKeys: new Set<string>(),
       isRunning: false,
       justCompleted: false,
@@ -230,7 +230,7 @@ describe('useAutoScanOrchestrator', () => {
 
   it('returns the AutoScanState passed back from useAutoScan', () => {
     const scanningKeys = new Set([`${SAFE_A}:${CHAIN}`])
-    useAutoScanMock.mockReturnValue({
+    autoScanMock.mockReturnValue({
       scanningKeys,
       isRunning: true,
       justCompleted: false,
