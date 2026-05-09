@@ -1,0 +1,128 @@
+[
+  {
+    "protocol": "CoW Swap",
+    "protocol_metadata": {
+      "name": "CoW Swap",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/cow-swap.jpg"
+      },
+      "url": "https://cow.fi"
+    },
+    "fiatTotal": "1769138.0466956708",
+    "items": [
+      {
+        "name": "CoW Swap Vesting",
+        "items": [
+          {
+            "position_type": "reward",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB",
+              "decimals": 18,
+              "symbol": "COW",
+              "name": "CoW Protocol",
+              "logoUri": "https://cdn.zerion.io/0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab.png"
+            },
+            "balance": "9889456964168240710287360",
+            "fiatBalance": "1761049.3988286138",
+            "fiatBalance24hChange": "-8.664733221268506",
+            "fiatConversion": "0.1780734175"
+          },
+          {
+            "position_type": "locked",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB",
+              "decimals": 18,
+              "symbol": "COW",
+              "name": "CoW Protocol",
+              "logoUri": "https://cdn.zerion.io/0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab.png"
+            },
+            "balance": "45423106832085289712640",
+            "fiatBalance": "8088.647867057026",
+            "fiatBalance24hChange": "-8.664733221268506",
+            "fiatConversion": "0.1780734175"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "protocol": "Gnosis Safe",
+    "protocol_metadata": {
+      "name": "Safe Factory",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/gnosis-safe-factory.jpg"
+      },
+      "url": "https://gnosis.io/"
+    },
+    "fiatTotal": "1385.4311842208926",
+    "items": [
+      {
+        "name": "Gnosis Safe Vesting",
+        "items": [
+          {
+            "position_type": "reward",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+              "decimals": 18,
+              "symbol": "SAFE",
+              "name": "Safe Token",
+              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+            },
+            "balance": "5170126051567719153664",
+            "fiatBalance": "713.1604327835648",
+            "fiatBalance24hChange": "-7.275036237493005",
+            "fiatConversion": "0.1379386935"
+          },
+          {
+            "position_type": "reward",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+              "decimals": 18,
+              "symbol": "SAFE",
+              "name": "Safe Token",
+              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+            },
+            "balance": "2857990768787701891072",
+            "fiatBalance": "394.22751268163614",
+            "fiatBalance24hChange": "-7.275036237493005",
+            "fiatConversion": "0.1379386935"
+          },
+          {
+            "position_type": "locked",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+              "decimals": 18,
+              "symbol": "SAFE",
+              "name": "Safe Token",
+              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+            },
+            "balance": "1253480031778953846336",
+            "fiatBalance": "172.90339791192736",
+            "fiatBalance24hChange": "-7.275036237493005",
+            "fiatConversion": "0.1379386935"
+          },
+          {
+            "position_type": "locked",
+            "tokenInfo": {
+              "type": "ERC20",
+              "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+              "decimals": 18,
+              "symbol": "SAFE",
+              "name": "Safe Token",
+              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+            },
+            "balance": "762221521575918608928",
+            "fiatBalance": "105.13984084376426",
+            "fiatBalance24hChange": "-7.275036237493005",
+            "fiatConversion": "0.1379386935"
+          }
+        ]
+      }
+    ]
+  }
+]

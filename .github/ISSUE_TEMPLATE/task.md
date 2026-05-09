@@ -6,13 +6,10 @@ type: 'task'
 
 ## Links
 
-Epic on Notion: 
+Epic on Notion:
 
 ## What must be done
 
-
-
 ## Designs/sketches
-
 
 ## How to test it

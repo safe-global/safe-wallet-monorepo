@@ -1,0 +1,108 @@
+appId: ${APP_ID}
+tags:
+  - connect-signer
+---
+# Happy path: Connect wallet → Name signer → Success → Signers list
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Setup: onboard with test Safe, configure WC mock to return an owner address
+- tapOn:
+    id: 'e2eConnectSignerOwner'
+
+# Wait for home to load
+- assertVisible:
+    id: 'home-tab'
+
+# Navigate to Settings → Signers
+- tapOn: 'Account, tab, 3 of 3'
+- tapOn:
+    id: 'settings-signers-list-item'
+- assertVisible: 'Signers'
+
+# Verify the owner address is in the list but has no wallet icon badge (not yet imported)
+- assertVisible:
+    id: 'signer-0x3336745b7EA628F5134Bd9d08aa68b4979fA3472'
+- assertNotVisible:
+    id: 'signer-type-badge-0x3336745b7EA628F5134Bd9d08aa68b4979fA3472'
+
+# Tap "Add signer"
+- tapOn:
+    id: 'import-signer-button'
+- assertVisible: 'Add signer'
+
+# Verify "Connect wallet app" option is visible
+- assertVisible: 'Connect wallet app'
+
+# Tap "Connect wallet app"
+- tapOn:
+    id: 'connectSigner'
+
+# Verify Name Signer screen appears with prefilled name
+- assertVisible: 'Name your signer'
+- assertVisible:
+    id: 'name-signer-input'
+- assertVisible: 'E2E Wallet - 3472'
+
+# Test validation: clear name — button should be disabled when empty
+- tapOn:
+    id: 'clear-name-button'
+- assertVisible:
+    id: 'name-signer-continue'
+    enabled: false
+
+# Test validation: type a name that is too long (>20 chars) — button should stay disabled
+- tapOn:
+    id: 'name-signer-input'
+- inputText: 'This name is way too long'
+- assertVisible: 'Name must be at most 20 characters long'
+- assertVisible:
+    id: 'name-signer-continue'
+    enabled: false
+
+# Clear the too-long text and type a valid custom name
+- hideKeyboard
+- tapOn:
+    id: 'clear-name-button'
+- tapOn:
+    id: 'name-signer-input'
+- inputText: 'My WC Signer'
+
+# Continue button should be re-enabled with valid input
+- assertVisible:
+    id: 'name-signer-continue'
+    enabled: true
+- tapOn:
+    id: 'name-signer-continue'
+
+# Verify Success screen
+- assertVisible:
+    id: 'import-success'
+- assertVisible: 'Your signer is ready!'
+- assertVisible: 'My WC Signer, 0x3336...3472'
+
+# Tap Done
+- tapOn:
+    id: 'import-success-continue'
+
+# Verify we're back on Signers list
+- assertVisible:
+    id: 'signers-screen'
+
+# Verify imported signer shows with the submitted name
+- assertVisible: 'My WC Signer, 0x3336...3472'
+
+# Tap on the imported signer to open details
+- tapOn:
+    id: 'signer-0x3336745b7EA628F5134Bd9d08aa68b4979fA3472'
+
+# Verify signer details page shows wallet icon and connected status badge
+- assertVisible: 'My WC Signer'
+- assertVisible: 'Address'
+- assertVisible:
+    id: 'signer-detail-badge'
+- assertVisible:
+    id: 'signer-detail-badge-status-connected'
+- assertVisible:
+    id: 'remove-wc-signer-button'

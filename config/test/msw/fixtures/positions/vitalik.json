@@ -1,0 +1,35 @@
+[
+  {
+    "protocol": "Eth2",
+    "protocol_metadata": {
+      "name": "Eth2",
+      "icon": {
+        "url": "https://protocol-icons.s3.amazonaws.com/icons/eth2.jpg"
+      },
+      "url": "https://launchpad.ethereum.org"
+    },
+    "fiatTotal": "19642390.298695732",
+    "items": [
+      {
+        "name": "Eth2 ETH Pool",
+        "items": [
+          {
+            "position_type": "staked",
+            "tokenInfo": {
+              "type": "NATIVE_TOKEN",
+              "address": "0x0000000000000000000000000000000000000000",
+              "decimals": 18,
+              "symbol": "ETH",
+              "name": "Ether",
+              "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+            },
+            "balance": "6976147709657000000000",
+            "fiatBalance": "19642390.298695732",
+            "fiatBalance24hChange": "-6.461161274890859",
+            "fiatConversion": "2815.65"
+          }
+        ]
+      }
+    ]
+  }
+]

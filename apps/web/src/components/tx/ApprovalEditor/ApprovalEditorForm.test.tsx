@@ -1,6 +1,6 @@
+import { TokenType } from '@safe-global/store/gateway/types'
 import { act, fireEvent, render, waitFor } from '@/tests/test-utils'
 import { toBeHex } from 'ethers'
-import { TokenType } from '@safe-global/safe-gateway-typescript-sdk'
 import { ApprovalEditorForm } from '@/components/tx/ApprovalEditor/ApprovalEditorForm'
 import { getAllByTestId, getAllByTitle } from '@testing-library/dom'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
@@ -20,7 +20,7 @@ describe('ApprovalEditorForm', () => {
     const mockApprovalInfos: ApprovalInfo[] = [
       {
         tokenInfo: { symbol: 'TST', decimals: 18, address: tokenAddress1, type: TokenType.ERC20 },
-        tokenAddress: '0x1',
+        tokenAddress: tokenAddress1,
         spender: spenderAddress,
         amount: '4200000',
         amountFormatted: '420.0',
@@ -29,7 +29,7 @@ describe('ApprovalEditorForm', () => {
       },
       {
         tokenInfo: { symbol: 'TST', decimals: 18, address: tokenAddress2, type: TokenType.ERC20 },
-        tokenAddress: '0x1',
+        tokenAddress: tokenAddress2,
         spender: spenderAddress,
         amount: '6900000',
         amountFormatted: '69.0',
@@ -105,7 +105,7 @@ describe('ApprovalEditorForm', () => {
 
     const mockApprovalInfo: ApprovalInfo = {
       tokenInfo: { symbol: 'TST', decimals: 18, address: tokenAddress, type: TokenType.ERC20 },
-      tokenAddress: '0x1',
+      tokenAddress,
       spender: faker.finance.ethereumAddress(),
       amount: '4200000',
       amountFormatted: '420.0',

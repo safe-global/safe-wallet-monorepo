@@ -1,0 +1,110 @@
+{
+  "chainId": "1",
+  "chainName": "Ethereum",
+  "description": "",
+  "chainLogoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png",
+  "l2": false,
+  "isTestnet": false,
+  "zk": false,
+  "nativeCurrency": {
+    "name": "Ether",
+    "symbol": "ETH",
+    "decimals": 18,
+    "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+  },
+  "transactionService": "https://api.5afe.dev/tx-service/eth",
+  "blockExplorerUriTemplate": {
+    "address": "https://etherscan.io/address/{{address}}",
+    "txHash": "https://etherscan.io/tx/{{txHash}}",
+    "api": "https://api.etherscan.io/v2/api?chainid=1&module={{module}}&action={{action}}&address={{address}}&apiKey={{apiKey}}"
+  },
+  "beaconChainExplorerUriTemplate": {
+    "publicKey": null
+  },
+  "disabledWallets": ["socialSigner", "trezor"],
+  "ensRegistryAddress": "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
+  "balancesProvider": {
+    "chainName": "ethereum",
+    "enabled": true
+  },
+  "contractAddresses": {
+    "safeSingletonAddress": null,
+    "safeProxyFactoryAddress": null,
+    "multiSendAddress": null,
+    "multiSendCallOnlyAddress": null,
+    "fallbackHandlerAddress": null,
+    "signMessageLibAddress": null,
+    "createCallAddress": null,
+    "simulateTxAccessorAddress": null,
+    "safeWebAuthnSignerFactoryAddress": null
+  },
+  "features": [
+    "BRIDGE",
+    "COUNTERFACTUAL",
+    "CSV_TX_EXPORT",
+    "DEFAULT_TOKENLIST",
+    "DELETE_TX",
+    "DOMAIN_LOOKUP",
+    "EARN",
+    "EIP1271",
+    "EIP1559",
+    "ERC721",
+    "EURCV_BOOST",
+    "HYPERNATIVE",
+    "LENDING",
+    "MASS_PAYOUTS",
+    "MIXPANEL",
+    "MULTI_CHAIN_SAFE_ADD_NETWORK",
+    "MULTI_CHAIN_SAFE_CREATION",
+    "NATIVE_COW_SWAP_FEE_V2",
+    "NATIVE_SWAPS",
+    "NATIVE_SWAPS_COW",
+    "NATIVE_SWAPS_FEE_ENABLED",
+    "NATIVE_SWAPS_USE_COW_STAGING_SERVER",
+    "NATIVE_WALLETCONNECT",
+    "NESTED_SAFES",
+    "NEW_MOBILE_APP_AVAILABLE",
+    "PORTFOLIO_ENDPOINT",
+    "POSITIONS",
+    "PROPOSERS",
+    "PUSH_NOTIFICATIONS",
+    "RECOVERY",
+    "RISK_MITIGATION",
+    "SAFE_APPS",
+    "SAP_BANNER",
+    "SPACES",
+    "SPENDING_LIMIT",
+    "STAKE_TEASER",
+    "STAKING",
+    "STAKING_BANNER",
+    "TX_NOTES",
+    "TX_SIMULATION",
+    "ZODIAC_ROLES"
+  ],
+  "gasPrice": [
+    {
+      "type": "oracle",
+      "uri": "https://api.etherscan.io/v2/api?chainid=1&module=gastracker&action=gasoracle&apikey=JNFAU892RF9TJWBU3EV7DJCPIWZY8KEMY1",
+      "gasParameter": "FastGasPrice",
+      "gweiFactor": "1000000000.000000000"
+    }
+  ],
+  "publicRpcUri": {
+    "authentication": "NO_AUTHENTICATION",
+    "value": "https://cloudflare-eth.com"
+  },
+  "rpcUri": {
+    "authentication": "API_KEY_PATH",
+    "value": "https://mainnet.infura.io/v3/"
+  },
+  "safeAppsRpcUri": {
+    "authentication": "API_KEY_PATH",
+    "value": "https://mainnet.infura.io/v3/"
+  },
+  "shortName": "eth",
+  "theme": {
+    "textColor": "#ffffff",
+    "backgroundColor": "#627EEA"
+  },
+  "recommendedMasterCopyVersion": "1.4.1"
+}

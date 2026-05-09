@@ -1,0 +1,24 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# Tap Pending Transaction Card (Reusable)
+# ===========================================
+# Waits for and taps on a pending transaction card, then verifies Confirm transaction screen
+#
+# Environment variables:
+#   WAIT_FOR: Text pattern to wait for (e.g., ".*addOwnerWithThreshold.*", ".*0\.001 MATIC.*")
+#   TAP_TEXT: Text to tap on (e.g., "Settings change", ".*0\.001 MATIC.*")
+#   TAP_INDEX: Optional index if multiple matches (default: 0)
+
+- extendedWaitUntil:
+    visible:
+      text: '${WAIT_FOR}'
+    timeout: 10000
+
+- evalScript: '${output.tapIndex = (typeof TAP_INDEX !== "undefined") ? parseInt(TAP_INDEX) : 0}'
+
+- tapOn:
+    text: '${TAP_TEXT}'
+    index: ${output.tapIndex}

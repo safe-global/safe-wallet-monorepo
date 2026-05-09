@@ -2,100 +2,88 @@ import React from 'react'
 import { KeyboardAvoidingView } from 'react-native'
 import { LargeHeaderTitle } from '@/src/components/Title/LargeHeaderTitle'
 import { SafeInput } from '@/src/components/SafeInput/SafeInput'
-import { Identicon } from '@/src/components/Identicon'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SafeButton } from '@/src/components/SafeButton'
 import { VerificationStatus } from '@/src/features/ImportReadOnly/components/VerificationStatus'
-import { View, Text, ScrollView } from 'tamagui'
-import { useLazySafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
+import { View, Text, ScrollView, YStack, getTokenValue } from 'tamagui'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
-import { useSafeAreaPaddingBottom } from '@/src/theme/hooks/useSafeAreaPaddingBottom'
-
-type LazyQueryResult = ReturnType<typeof useLazySafesGetOverviewForManyQuery>[1]
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Controller, useFormContext, useWatch } from 'react-hook-form'
+import type { FormValues } from '@/src/features/ImportReadOnly/types'
+import SafeAccountInput from '@/src/components/SafeAccountInput'
 
 type ImportAccountFormViewProps = {
-  safeAddress: string
-  onChangeText: (text: string) => void
-  error: string | undefined
-  canContinue: boolean
-  addressWithoutPrefix: string | undefined
-  result: LazyQueryResult
   isEnteredAddressValid: boolean
-  safeExists: boolean
   onContinue: () => void
 }
 
-const ADJUSTMENT_FOR_KEYBOARD = 20
+export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({ isEnteredAddressValid, onContinue }) => {
+  const {
+    control,
+    formState: { errors, isValid, dirtyFields },
+  } = useFormContext<FormValues>()
+  const { top, bottom } = useSafeAreaInsets()
+  const result = useWatch({ name: 'importedSafeResult' })
 
-export const ImportAccountFormView: React.FC<ImportAccountFormViewProps> = ({
-  safeAddress,
-  onChangeText,
-  error,
-  canContinue,
-  addressWithoutPrefix,
-  result,
-  isEnteredAddressValid,
-  safeExists,
-  onContinue,
-}) => {
-  const paddingBottom = useSafeAreaPaddingBottom()
   const { handleScroll } = useScrollableHeader({
-    children: (
-      <>
-        <NavBarTitle paddingRight={5}>Import Safe account</NavBarTitle>
-      </>
-    ),
+    children: <NavBarTitle paddingRight={5}>Import Safe account</NavBarTitle>,
   })
 
   return (
-    <View flex={1} paddingBottom={paddingBottom} paddingHorizontal={'$6'}>
-      <KeyboardAvoidingView
-        behavior="padding"
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={paddingBottom + ADJUSTMENT_FOR_KEYBOARD}
-      >
-        <ScrollView paddingBottom={'$4'} onScroll={handleScroll} flex={1}>
-          <LargeHeaderTitle marginBottom={'$4'}>Import Safe account</LargeHeaderTitle>
-          <Text marginBottom={'$4'}>Paste the address of an account you want to import.</Text>
-          <SafeInput
-            value={safeAddress}
-            onChangeText={onChangeText}
-            multiline={true}
-            placeholder="Paste address..."
-            error={error && error.length > 0 ? error : undefined}
-            success={canContinue}
-            left={
-              addressWithoutPrefix ? (
-                <Identicon address={addressWithoutPrefix as `0x${string}`} size={32} />
-              ) : (
-                <View width={32} />
-              )
-            }
-            right={
-              result?.data?.length && !error ? (
-                <SafeFontIcon name={'check-filled'} size={20} color={'$success'} testID={'success-icon'} />
-              ) : (
-                <View width={20} />
-              )
-            }
-          />
-
-          <VerificationStatus
-            isLoading={result.isLoading}
-            data={result.data}
-            isEnteredAddressValid={isEnteredAddressValid}
-          />
-        </ScrollView>
-        <SafeButton
-          primary
-          onPress={onContinue}
-          disabled={!isEnteredAddressValid || !safeExists}
-          testID={'continue-button'}
+    <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }} keyboardVerticalOffset={bottom + top}>
+      <YStack flex={1}>
+        <ScrollView
+          paddingBottom={'$4'}
+          onScroll={handleScroll}
+          flex={1}
+          contentContainerStyle={{ paddingBottom: '$4', paddingHorizontal: '$4' }}
         >
-          Continue
-        </SafeButton>
-      </KeyboardAvoidingView>
-    </View>
+          <LargeHeaderTitle marginBottom={'$4'}>Import Safe account</LargeHeaderTitle>
+          <Text>Paste the address of an account you want to import.</Text>
+          <View marginTop={'$4'}>
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { onChange, value } }) => {
+                return (
+                  <SafeInput
+                    value={value}
+                    onChangeText={onChange}
+                    multiline={true}
+                    autoFocus={true}
+                    placeholder="Enter safe name here"
+                    error={errors.name?.message}
+                    success={dirtyFields.name && !errors.name}
+                  />
+                )
+              }}
+            />
+          </View>
+
+          <View>
+            <SafeAccountInput />
+          </View>
+
+          {!errors.safeAddress && (
+            <VerificationStatus
+              isLoading={result?.isFetching}
+              data={result?.data}
+              isEnteredAddressValid={isEnteredAddressValid}
+            />
+          )}
+        </ScrollView>
+
+        <View paddingHorizontal={'$4'} paddingTop={'$2'} paddingBottom={bottom || getTokenValue('$4')}>
+          <SafeButton
+            primary
+            onPress={onContinue}
+            disabled={!isValid || result?.isFetching || !result?.data?.length}
+            testID={'continue-button'}
+          >
+            Continue
+          </SafeButton>
+        </View>
+      </YStack>
+    </KeyboardAvoidingView>
   )
 }

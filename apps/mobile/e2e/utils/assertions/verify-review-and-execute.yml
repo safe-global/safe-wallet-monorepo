@@ -1,0 +1,375 @@
+appId: ${APP_ID}
+jsEngine: graaljs
+tags:
+  - util
+---
+- runScript:
+    file: ../../utils/scripts/defaults.js
+# ===========================================
+# Review and Execute/Confirm (Reusable Component)
+# ===========================================
+# Tests navigating to either Review and execute or Review and confirm screen from Confirm transaction
+# and verifies all elements including tabs, execution method/signer, and execute/confirm button
+#
+# Environment variables:
+#   EXPECTED_SIGNER_PATTERN: Optional regex pattern to verify signer name/address
+#                           Example: "Signer-2a3b" or ".*2a3b.*"
+#                           Defaults to ".*Signer.*" to match any signer
+#   TX_EXECUTION_STATUS: Transaction execution status - "succeed" or "fail"
+#                        If "succeed": verifies estimated network fee is displayed
+#                        If "fail": verifies "Can not estimate" and failure warning
+#                        Defaults to "succeed" if not provided
+#   IS_FULLY_SIGNED: Whether the transaction is fully signed - "true" or "false"
+#                   If "true": navigates to "Review and execute" screen (execution flow)
+#                   If "false": navigates to "Review and confirm" screen (signing flow)
+#                   Defaults to "true" if not provided
+#
+
+# ===========================================
+# Navigate to Review and Execute
+# ===========================================
+# Tap the Continue button on Confirm transaction screen
+- assertVisible:
+    text: 'Continue'
+
+- tapOn:
+    text: 'Continue'
+
+# Wait for navigation to complete
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# ===========================================
+# Parse IS_FULLY_SIGNED and TX_EXECUTION_STATUS
+# ===========================================
+# Parse the IS_FULLY_SIGNED environment variable using GraalJS
+# Default to "true" (fully signed = execute flow) if not provided
+- evalScript: '${output.isFullySigned = (typeof IS_FULLY_SIGNED !== "undefined" && IS_FULLY_SIGNED === "true") || (typeof IS_FULLY_SIGNED === "undefined")}'
+
+# Set flags for conditional execution
+- evalScript: '${output.isExecuteFlow = output.isFullySigned === true}'
+- evalScript: '${output.isConfirmFlow = output.isFullySigned === false}'
+
+# Parse TX_EXECUTION_STATUS environment variable
+# Default to "succeed" if not provided
+- evalScript: '${output.txStatus = (typeof TX_EXECUTION_STATUS !== "undefined" && TX_EXECUTION_STATUS) ? TX_EXECUTION_STATUS.toLowerCase() : "succeed"}'
+
+# Set flags for transaction execution status
+- evalScript: '${output.isSuccessFlow = output.txStatus === "succeed"}'
+- evalScript: '${output.isFailureFlow = output.txStatus === "fail"}'
+
+# ===========================================
+# Verify Review Screen (Execute or Confirm)
+# ===========================================
+# Verify the correct screen title based on flow type
+- runFlow:
+    when:
+      true: '${output.isExecuteFlow === true}'
+    commands:
+      - assertVisible: 'Review and execute'
+
+- runFlow:
+    when:
+      true: '${output.isConfirmFlow === true}'
+    commands:
+      - assertVisible: 'Review and confirm'
+
+# Verify the instructional text is visible (same for both screens)
+- assertVisible:
+    text: '.*Review this transaction data.*'
+
+# ===========================================
+# Verify Tabs
+# ===========================================
+# Verify all three tabs are visible: Data, Hashes, JSON
+- assertVisible:
+    text: 'Data'
+
+- assertVisible:
+    text: 'Hashes'
+
+- assertVisible:
+    text: 'JSON'
+
+# ===========================================
+# Test Data Tab (default selected)
+# ===========================================
+# Verify Data tab content using existing comprehensive tests
+- runFlow:
+    file: ../components/advanced-details/data.yml
+
+# ===========================================
+# Test Tab Switching
+# ===========================================
+# Tap on Hashes tab
+- tapOn:
+    text: 'Hashes'
+
+# Wait for tab content to load
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# Verify Hashes tab content is visible (should show hash fields)
+- extendedWaitUntil:
+    visible:
+      text: '.*Domain hash.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- extendedWaitUntil:
+    visible:
+      text: '.*Message hash.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- extendedWaitUntil:
+    visible:
+      text: '.*safeTxHash.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# Tap on JSON tab
+- tapOn:
+    text: 'JSON'
+
+# Wait for tab content to load
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# Verify JSON tab content is visible (should show JSON data)
+- extendedWaitUntil:
+    visible:
+      text: '.*"to".*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# Tap back on Data tab
+- tapOn:
+    text: 'Data'
+
+# Wait for tab content to load
+- waitForAnimationToEnd:
+    timeout: 1000
+
+# ===========================================
+# Verify Footer Section (Execution Method or Signer Selection)
+# ===========================================
+# Execute Flow: Verify Execution Method (Dynamically Detected: Relay or Signer)
+- runFlow:
+    when:
+      true: '${output.isExecuteFlow === true}'
+    commands:
+      # Verify "Execution method" label is visible
+      - assertVisible:
+          text: 'Execution method'
+
+      # ===========================================
+      # Dynamically Detect: Relay (Sponsored by Safe) or Signer
+      # ===========================================
+      # Check initial execution method once at the beginning and store in output variable
+      # Default to false (signer selected)
+      - evalScript: '${output.isRelaySelected = false}'
+
+      # If "Sponsored by Safe" is visible, set flag to true (relay selected)
+      - runFlow:
+          when:
+            visible:
+              text: 'Sponsored by Safe'
+          commands:
+            - evalScript: '${output.isRelaySelected = true}'
+
+      # ===========================================
+      # Flow: Relay (Sponsored by Safe) - Run if relay was initially selected
+      # ===========================================
+      - runFlow:
+          when:
+            true: '${output.isRelaySelected === true}'
+          commands:
+            # Verify "Sponsored by Safe" is visible
+            - assertVisible:
+                text: 'Sponsored by Safe'
+
+            # Success scenario: Verify "Free x left / day" is visible
+            - runFlow:
+                when:
+                  true: '${output.isSuccessFlow === true}'
+                commands:
+                  - assertVisible:
+                      text: '.*\d+ left / day.*'
+
+            # Failure scenario: Verify "Can not estimate" is visible
+            - runFlow:
+                when:
+                  true: '${output.isFailureFlow === true}'
+                commands:
+                  - assertVisible:
+                      text: '.*Est\. network fee.*'
+                  - assertVisible:
+                      text: '.*Can not estimate.*'
+
+            # Tap on execution method to open the sheet
+            - tapOn:
+                text: 'Execution method'
+            # Wait for sheet to open
+            - waitForAnimationToEnd:
+                timeout: 1000
+            # Verify the sheet opens (should show "Choose how to execute")
+            - assertVisible:
+                text: 'Choose how to execute'
+            # Verify "Sponsored by Safe" option is visible in the sheet
+            - assertVisible:
+                text: 'Sponsored by Safe'
+            # Verify "Or use your signer:" section is visible
+            - assertVisible:
+                text: '.*Or use your signer.*'
+            # Verify the signer is visible in the signer list
+            - assertVisible:
+                text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
+            # Tap on the signer to select it (switch from relay to signer execution)
+            - tapOn:
+                text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
+            # Verify we're back on Review and execute screen
+            - assertVisible: 'Review and execute'
+            # Verify "Est. network fee" label is now visible (after switching from relay)
+            - assertVisible:
+                text: '.*Est\. network fee.*'
+
+            # Success scenario after switching: Verify estimated fee is displayed
+            - runFlow:
+                when:
+                  true: '${output.isSuccessFlow === true}'
+                commands:
+                  - extendedWaitUntil:
+                      visible:
+                        text: '.*(<|≈).*\d+.*ETH.*'
+                        optional: true
+                      timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+            # Failure scenario after switching: Verify "Can not estimate" is still shown
+            - runFlow:
+                when:
+                  true: '${output.isFailureFlow === true}'
+                commands:
+                  - assertVisible:
+                      text: '.*Can not estimate.*'
+
+      # ===========================================
+      # Flow: Signer (User previously selected signer) - Run if signer was initially selected
+      # ===========================================
+      - runFlow:
+          when:
+            true: '${output.isRelaySelected === false}'
+          commands:
+            # Verify the signer is visible in the execution method
+            - assertVisible:
+                text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
+            # Verify "Est. network fee" label is visible
+            - assertVisible:
+                text: '.*Est\. network fee.*'
+            # Verify estimated fee value is displayed (format: "< 0.00001 ETH" or similar)
+            - extendedWaitUntil:
+                visible:
+                  text: '.*(<|≈).*\d+.*ETH.*'
+                  optional: true
+                timeout: ${output.defaults.extendedWaitUntilTimeout}
+            # Optionally verify we can still open the sheet and see both options
+            - tapOn:
+                text: 'Execution method'
+            # Wait for sheet to open
+            - waitForAnimationToEnd:
+                timeout: 1000
+            # Verify the sheet opens
+            - assertVisible:
+                text: 'Choose how to execute'
+            # Verify "Sponsored by Safe" option is visible
+            - assertVisible:
+                text: 'Sponsored by Safe'
+            # Verify "Or use your signer:" section is visible
+            - assertVisible:
+                text: '.*Or use your signer.*'
+            # Verify the signer is visible and selected (should have checkmark)
+            - assertVisible:
+                text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
+            # Dismiss the sheet by swiping down
+            - swipe:
+                direction: 'DOWN'
+                startPoint: '50%,50%'
+                endPoint: '50%,80%'
+            # Wait for sheet to close
+            - waitForAnimationToEnd:
+                timeout: 1000
+            # Verify we're back on Review and execute screen
+            - assertVisible: 'Review and execute'
+
+# Confirm Flow: Verify Signer Selection
+- runFlow:
+    when:
+      true: '${output.isConfirmFlow === true}'
+    commands:
+      # Verify "Sign with" label is visible
+      - assertVisible:
+          text: 'Sign with'
+      # Verify the active signer is visible
+      - assertVisible:
+          text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
+
+# ===========================================
+# Verify Footer Button (Execute or Confirm)
+# ===========================================
+# Execute Flow: Verify Execute Transaction Button
+- runFlow:
+    when:
+      true: '${output.isExecuteFlow === true}'
+    commands:
+      - assertVisible:
+          text: 'Execute transaction'
+
+# Confirm Flow: Verify Confirm Transaction Button
+- runFlow:
+    when:
+      true: '${output.isConfirmFlow === true}'
+    commands:
+      - assertVisible:
+          text: 'Confirm transaction'
+
+# ===========================================
+# Success Flow: Verify Estimated Network Fee (Execute Flow with Signer Only)
+# ===========================================
+# Run success flow if TX_EXECUTION_STATUS is "succeed" AND we're in execute flow AND signer is selected
+# Note: Relay execution shows "Free x left / day" instead of estimated fee, so we skip this check
+# We check if signer was initially selected (or if relay flow switched to signer)
+- runFlow:
+    when:
+      true: '${output.isSuccessFlow === true && output.isExecuteFlow === true && output.isRelaySelected === false}'
+    commands:
+      # Verify "Est. network fee" label is visible
+      - assertVisible:
+          text: '.*Est\. network fee.*'
+      # Verify estimated fee value is displayed (format: "< 0.00001 ETH" or similar)
+      - extendedWaitUntil:
+          visible:
+            text: '.*(<|≈).*\d+.*ETH.*'
+            optional: true
+          timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# ===========================================
+# Failure Flow: Verify Cannot Estimate and Failure Warning (Execute Flow - Both Relay and Signer)
+# ===========================================
+# Run failure flow if TX_EXECUTION_STATUS is "fail" AND we're in execute flow
+# Note: Failure warnings are shown for BOTH relay and signer execution methods
+- runFlow:
+    when:
+      true: '${output.isFailureFlow === true && output.isExecuteFlow === true}'
+    commands:
+      # Verify "Est. network fee" label is visible
+      - assertVisible:
+          text: '.*Est\. network fee.*'
+      # Verify "Can not estimate." message is displayed
+      - assertVisible:
+          text: '.*Can not estimate.*'
+      # Verify failure warning is displayed
+      - assertVisible:
+          text: '.*This transaction will most likely fail.*'
+
+- tapOn:
+    id: 'go-back'

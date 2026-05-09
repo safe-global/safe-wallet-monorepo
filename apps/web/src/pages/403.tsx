@@ -6,7 +6,7 @@ import MUILink from '@mui/material/Link'
 const Custom403: NextPage = () => {
   return (
     <main>
-      <h1>403 - Access Restricted</h1>
+      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>403 – Access Restricted</h1>
       <p>
         We regret to inform you that access to this service is currently unavailable in your region. For further
         information, you may refer to our{' '}

@@ -3,7 +3,7 @@
 exports[`SettingsChange should display the SettingsChange component with newOwner details 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-1nt2i3f-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 css-3m5je5-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <p
@@ -32,7 +32,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
         class="MuiBox-root css-1lchl8k"
       >
         <div
-          class="MuiBox-root css-171onha"
+          class="ethHashInfo-name MuiBox-root css-171onha"
           title="Bob"
         >
           <div
@@ -66,7 +66,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
           >
             <button
               aria-label="Copy to clipboard"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-uneijd-MuiButtonBase-root-MuiIconButton-root"
               tabindex="0"
               type="button"
             >
@@ -86,18 +86,18 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
     </div>
   </div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container css-zpxm0u-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container css-1n5z6j7-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <p
-      class="MuiTypography-root MuiTypography-body1 css-14yu9oo-MuiTypography-root"
+      class="MuiTypography-root MuiTypography-body1 css-1950vt0-MuiTypography-root"
     >
       <mock-icon
         aria-hidden=""
         class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
         focusable="false"
       />
-      New signer
+      Add owner
     </p>
     <div
       class="container"
@@ -115,7 +115,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
         class="MuiBox-root css-1lchl8k"
       >
         <div
-          class="MuiBox-root css-171onha"
+          class="ethHashInfo-name MuiBox-root css-171onha"
           title="Alice"
         >
           <div
@@ -149,7 +149,7 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
           >
             <button
               aria-label="Copy to clipboard"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-uneijd-MuiButtonBase-root-MuiIconButton-root"
               tabindex="0"
               type="button"
             >
@@ -177,18 +177,18 @@ exports[`SettingsChange should display the SettingsChange component with newOwne
 exports[`SettingsChange should display the SettingsChange component with owner details 1`] = `
 <div>
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container css-zpxm0u-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 container css-1n5z6j7-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <p
-      class="MuiTypography-root MuiTypography-body1 css-14yu9oo-MuiTypography-root"
+      class="MuiTypography-root MuiTypography-body1 css-1950vt0-MuiTypography-root"
     >
       <mock-icon
         aria-hidden=""
         class="MuiSvgIcon-root MuiSvgIcon-fontSizeSmall css-1hr8a3z-MuiSvgIcon-root"
         focusable="false"
       />
-      New signer
+      Add owner
     </p>
     <div
       class="container"
@@ -206,7 +206,7 @@ exports[`SettingsChange should display the SettingsChange component with owner d
         class="MuiBox-root css-1lchl8k"
       >
         <div
-          class="MuiBox-root css-171onha"
+          class="ethHashInfo-name MuiBox-root css-171onha"
           title="Nevinha"
         >
           <div
@@ -240,7 +240,7 @@ exports[`SettingsChange should display the SettingsChange component with owner d
           >
             <button
               aria-label="Copy to clipboard"
-              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-xyrzjn-MuiButtonBase-root-MuiIconButton-root"
+              class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-uneijd-MuiButtonBase-root-MuiIconButton-root"
               tabindex="0"
               type="button"
             >

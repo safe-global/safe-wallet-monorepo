@@ -3,11 +3,11 @@ import { fireEvent, render, waitFor } from '@/tests/test-utils'
 import { FormProvider, useForm } from 'react-hook-form'
 import AddressBookInput from '.'
 import type { AddressInputProps } from '../AddressInput'
-import { useCurrentChain } from '@/hooks/useChains'
+import * as useChains from '@/hooks/useChains'
 import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
-import { FEATURES } from '@safe-global/safe-gateway-typescript-sdk'
-import { checksumAddress } from '@/utils/addresses'
+import { FEATURES } from '@safe-global/store/gateway/types'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { AddressBook } from '@/store/addressBookSlice'
 
 // We use Rinkeby and chainId 4 here as this is our default url chain (see jest.setup.js)
@@ -16,13 +16,6 @@ const mockChain = chainBuilder()
   .with({ chainId: '4' })
   .with({ shortName: 'rin' })
   .build()
-
-// mock useCurrentChain
-jest.mock('@/hooks/useChains', () => ({
-  ...jest.requireActual('@/hooks/useChains'),
-  useCurrentChain: jest.fn(() => mockChain),
-  __esModule: true,
-}))
 
 // mock useNameResolver
 jest.mock('@/components/common/AddressInput/useNameResolver', () => ({
@@ -82,7 +75,6 @@ const setup = (
       addressBook: {
         [mockChain.chainId]: initialAddressBook,
       },
-      chains: { data: [mockChain], loading: false },
     },
   })
   const input = utils.getByLabelText('Recipient address', { exact: false })
@@ -104,7 +96,13 @@ describe('AddressBookInput', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: [mockChain],
+      error: undefined,
+      loading: false,
+    }))
+    jest.spyOn(useChains, 'useChain').mockImplementation(() => mockChain)
+    jest.spyOn(useChains, 'useCurrentChain').mockImplementation(() => mockChain)
   })
 
   it('should not open autocomplete without entries', () => {

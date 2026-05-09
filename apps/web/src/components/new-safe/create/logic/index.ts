@@ -1,33 +1,48 @@
-import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
-import { type Eip1193Provider, type Provider } from 'ethers'
+import type { SafeVersion, TransactionOptions } from '@safe-global/types-kit'
+import { type TransactionResponse, type Eip1193Provider, type Provider, type BrowserProvider } from 'ethers'
 import semverSatisfies from 'semver/functions/satisfies'
-
-import { getSafeInfo, type SafeInfo, type ChainInfo, relayTransaction } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState, cgwApi as safesApi } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { cgwApi as relayApi } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { getStoreInstance } from '@/store'
 import { getReadOnlyProxyFactoryContract } from '@/services/contracts/safeContracts'
 import type { UrlObject } from 'url'
 import { AppRoutes } from '@/config/routes'
 import { SAFE_APPS_EVENTS, trackEvent } from '@/services/analytics'
-import { predictSafeAddress, SafeFactory, SafeProvider } from '@safe-global/protocol-kit'
-import type { DeploySafeProps, PredictedSafeProps } from '@safe-global/protocol-kit'
-import { isValidSafeVersion } from '@/hooks/coreSDK/safeCoreSDK'
+import Safe, { predictSafeAddress, SafeProvider } from '@safe-global/protocol-kit'
+import type { PredictedSafeProps } from '@safe-global/protocol-kit'
 
 import { backOff } from 'exponential-backoff'
-import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { getLatestSafeVersion } from '@/utils/chains'
+import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import {
   getCompatibilityFallbackHandlerDeployment,
+  getCompatibilityFallbackHandlerDeployments,
   getProxyFactoryDeployment,
-  getSafeL2SingletonDeployment,
-  getSafeSingletonDeployment,
-  getSafeToL2SetupDeployment,
+  getProxyFactoryDeployments,
+  getSafeL2SingletonDeployments,
+  getSafeSingletonDeployments,
+  getSafeToL2SetupDeployments,
 } from '@safe-global/safe-deployments'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
-import type { ReplayedSafeProps, UndeployedSafeProps } from '@/store/slices'
-import { activateReplayedSafe, isPredictedSafeProps } from '@/features/counterfactual/utils'
-import { getSafeContractDeployment } from '@/services/contracts/deployments'
-import { Safe__factory, Safe_proxy_factory__factory, Safe_to_l2_setup__factory } from '@/types/contracts'
+import type { ReplayedSafeProps, UndeployedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import { isPredictedSafeProps } from '@/features/counterfactual/services'
+import { getSafeContractDeployment, getChainAgnosticAddress } from '@safe-global/utils/services/contracts/deployments'
+import {
+  Safe__factory,
+  Safe_proxy_factory__factory,
+  Safe_to_l2_setup__factory,
+} from '@safe-global/utils/types/contracts'
 import { createWeb3 } from '@/hooks/wallets/web3'
-import { hasMultiChainCreationFeatures } from '@/features/multichain/utils/utils'
+import { hasMultiChainCreationFeatures } from '@/features/multichain'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+
+// Type for the lazy-loaded activateReplayedSafe function
+export type ActivateReplayedSafeFn = (
+  chain: Chain,
+  props: ReplayedSafeProps,
+  provider: BrowserProvider,
+  options: TransactionOptions,
+) => Promise<TransactionResponse>
 
 export type SafeCreationProps = {
   owners: string[]
@@ -35,37 +50,43 @@ export type SafeCreationProps = {
   saltNonce: number
 }
 
-const getSafeFactory = async (
-  provider: Eip1193Provider,
-  safeVersion: SafeVersion,
-  isL1SafeSingleton?: boolean,
-): Promise<SafeFactory> => {
-  if (!isValidSafeVersion(safeVersion)) {
-    throw new Error('Invalid Safe version')
-  }
-  return SafeFactory.init({ provider, safeVersion, isL1SafeSingleton })
-}
-
 /**
  * Create a Safe creation transaction via Core SDK and submits it to the wallet
+ *
+ * @param activateReplayedSafe - Optional function for activating replayed safes (lazy-loaded from counterfactual feature)
  */
 export const createNewSafe = async (
   provider: Eip1193Provider,
   undeployedSafeProps: UndeployedSafeProps,
-  safeVersion: SafeVersion,
-  chain: ChainInfo,
-  options: DeploySafeProps['options'],
+  chain: Chain,
+  options: TransactionOptions,
   callback: (txHash: string) => void,
   isL1SafeSingleton?: boolean,
+  activateReplayedSafe?: ActivateReplayedSafeFn,
 ): Promise<void> => {
-  const safeFactory = await getSafeFactory(provider, safeVersion, isL1SafeSingleton)
-
+  let txResponse: TransactionResponse
   if (isPredictedSafeProps(undeployedSafeProps)) {
-    await safeFactory.deploySafe({ ...undeployedSafeProps, options, callback })
+    const safe = await Safe.init({
+      predictedSafe: undeployedSafeProps,
+      provider,
+      isL1SafeSingleton,
+    })
+
+    const creationTx = await safe.createSafeDeploymentTransaction()
+
+    const signer = await createWeb3(provider).getSigner()
+
+    txResponse = await signer?.sendTransaction({
+      ...creationTx,
+      ...options,
+    })
   } else {
-    const txResponse = await activateReplayedSafe(chain, undeployedSafeProps, createWeb3(provider), options)
-    callback(txResponse.hash)
+    if (!activateReplayedSafe) {
+      throw new Error('activateReplayedSafe function is required for replayed safes')
+    }
+    txResponse = await activateReplayedSafe(chain, undeployedSafeProps, createWeb3(provider), options)
   }
+  callback(txResponse.hash)
 }
 
 /**
@@ -73,9 +94,8 @@ export const createNewSafe = async (
  */
 export const computeNewSafeAddress = async (
   provider: Eip1193Provider | string,
-  props: DeploySafeProps,
-  chain: ChainInfo,
-  safeVersion?: SafeVersion,
+  props: PredictedSafeProps,
+  chain: Chain,
 ): Promise<string> => {
   const safeProvider = new SafeProvider({ provider })
 
@@ -83,10 +103,7 @@ export const computeNewSafeAddress = async (
     safeProvider,
     chainId: BigInt(chain.chainId),
     safeAccountConfig: props.safeAccountConfig,
-    safeDeploymentConfig: {
-      saltNonce: props.saltNonce,
-      safeVersion: safeVersion ?? getLatestSafeVersion(chain),
-    },
+    safeDeploymentConfig: props.safeDeploymentConfig,
   })
 }
 
@@ -107,7 +124,7 @@ export const encodeSafeSetupCall = (safeAccountConfig: ReplayedSafeProps['safeAc
  * Encode a Safe creation transaction NOT using the Core SDK because it doesn't support that
  * This is used for gas estimation.
  */
-export const encodeSafeCreationTx = (undeployedSafe: UndeployedSafeProps, chain: ChainInfo) => {
+export const encodeSafeCreationTx = (undeployedSafe: UndeployedSafeProps, chain: Chain) => {
   const replayedSafeProps = assertNewUndeployedSafeProps(undeployedSafe, chain)
 
   return Safe_proxy_factory__factory.createInterface().encodeFunctionData('createProxyWithNonce', [
@@ -118,7 +135,7 @@ export const encodeSafeCreationTx = (undeployedSafe: UndeployedSafeProps, chain:
 }
 
 export const estimateSafeCreationGas = async (
-  chain: ChainInfo,
+  chain: Chain,
   provider: Provider,
   from: string,
   undeployedSafe: UndeployedSafeProps,
@@ -129,24 +146,49 @@ export const estimateSafeCreationGas = async (
 
   const gas = await provider.estimateGas({
     from,
-    to: await readOnlyProxyFactoryContract.getAddress(),
+    to: readOnlyProxyFactoryContract.getAddress(),
     data: encodedSafeCreationTx,
   })
 
   return gas
 }
 
-export const pollSafeInfo = async (chainId: string, safeAddress: string): Promise<SafeInfo> => {
-  // exponential delay between attempts for around 4 min
-  return backOff(() => getSafeInfo(chainId, safeAddress), {
-    startingDelay: 750,
-    maxDelay: 20000,
-    numOfAttempts: 19,
-    retry: (e) => {
-      console.info('waiting for client-gateway to provide safe information', e)
-      return true
+/**
+ * Poll for safe info after creation until the safe is indexed by client-gateway
+ * Uses RTK Query with exponential backoff retry (19 attempts over ~4 minutes)
+ */
+export const pollSafeInfo = async (chainId: string, safeAddress: string): Promise<SafeState> => {
+  const store = getStoreInstance()
+
+  // Use exponential backoff to retry RTK Query calls
+  return backOff(
+    async () => {
+      const queryAction = safesApi.endpoints.safesGetSafeV1.initiate(
+        { chainId, safeAddress },
+        {
+          subscribe: false,
+          forceRefetch: true,
+        },
+      )
+
+      const queryPromise = store.dispatch(queryAction)
+      try {
+        const result = await queryPromise.unwrap()
+        return result
+      } finally {
+        queryPromise.unsubscribe()
+      }
     },
-  })
+    {
+      startingDelay: 750,
+      maxDelay: 20000,
+      numOfAttempts: 19,
+      retry: (e) => {
+        console.info('waiting for client-gateway to provide safe information', e)
+        return true
+      },
+    },
+  )
 }
 
 export const getRedirect = (
@@ -178,16 +220,22 @@ export const getRedirect = (
   return redirectUrl + `${appendChar}safe=${address}`
 }
 
-export const relaySafeCreation = async (chain: ChainInfo, undeployedSafeProps: UndeployedSafeProps) => {
+export const relaySafeCreation = async (chain: Chain, undeployedSafeProps: UndeployedSafeProps) => {
+  const store = getStoreInstance()
+
   const replayedSafeProps = assertNewUndeployedSafeProps(undeployedSafeProps, chain)
   const encodedSafeCreationTx = encodeSafeCreationTx(replayedSafeProps, chain)
 
-  const relayResponse = await relayTransaction(chain.chainId, {
-    to: replayedSafeProps.factoryAddress,
-    data: encodedSafeCreationTx,
-    version: replayedSafeProps.safeVersion,
+  const relayAction = relayApi.endpoints.relayRelayV1.initiate({
+    chainId: chain.chainId,
+    relayDto: {
+      to: replayedSafeProps.factoryAddress,
+      data: encodedSafeCreationTx,
+      version: replayedSafeProps.safeVersion,
+    },
   })
 
+  const relayResponse = await store.dispatch(relayAction).unwrap()
   return relayResponse.taskId
 }
 
@@ -205,29 +253,29 @@ export const createNewUndeployedSafeWithoutSalt = (
   safeAccountConfig: Pick<ReplayedSafeProps['safeAccountConfig'], 'owners' | 'threshold'> & {
     paymentReceiver?: string
   },
-  chain: ChainInfo,
+  chain: Chain,
 ): UndeployedSafeWithoutSalt => {
-  // Create universal deployment Data across chains:
-  const fallbackHandlerDeployment = getCompatibilityFallbackHandlerDeployment({
-    version: safeVersion,
-    network: chain.chainId,
-  })
-  const fallbackHandlerAddress = fallbackHandlerDeployment?.networkAddresses[chain.chainId]
-  const safeL2Deployment = getSafeL2SingletonDeployment({ version: safeVersion, network: chain.chainId })
-  const safeL2Address = safeL2Deployment?.networkAddresses[chain.chainId]
+  // Resolve contract addresses (per-chain for registered chains, chain-agnostic fallback for new chains)
+  const deploymentType = chain.zk ? 'zksync' : 'canonical'
 
-  const safeL1Deployment = getSafeSingletonDeployment({ version: safeVersion, network: chain.chainId })
-  const safeL1Address = safeL1Deployment?.networkAddresses[chain.chainId]
+  const fallbackHandlerDeployments = getCompatibilityFallbackHandlerDeployments({ version: safeVersion })
+  const fallbackHandlerAddress = getChainAgnosticAddress(fallbackHandlerDeployments, chain.chainId, deploymentType)
 
-  const safeFactoryDeployment = getProxyFactoryDeployment({ version: safeVersion, network: chain.chainId })
-  const safeFactoryAddress = safeFactoryDeployment?.networkAddresses[chain.chainId]
+  const safeL2Deployments = getSafeL2SingletonDeployments({ version: safeVersion })
+  const safeL2Address = getChainAgnosticAddress(safeL2Deployments, chain.chainId, deploymentType)
+
+  const safeL1Deployments = getSafeSingletonDeployments({ version: safeVersion })
+  const safeL1Address = getChainAgnosticAddress(safeL1Deployments, chain.chainId, deploymentType)
+
+  const safeFactoryDeployments = getProxyFactoryDeployments({ version: safeVersion })
+  const safeFactoryAddress = getChainAgnosticAddress(safeFactoryDeployments, chain.chainId, deploymentType)
 
   if (!safeL2Address || !safeL1Address || !safeFactoryAddress || !fallbackHandlerAddress) {
     throw new Error('No Safe deployment found')
   }
 
-  const safeToL2SetupDeployment = getSafeToL2SetupDeployment({ version: '1.4.1', network: chain.chainId })
-  const safeToL2SetupAddress = safeToL2SetupDeployment?.networkAddresses[chain.chainId]
+  const safeToL2SetupDeployments = getSafeToL2SetupDeployments({ version: '1.4.1' })
+  const safeToL2SetupAddress = getChainAgnosticAddress(safeToL2SetupDeployments, chain.chainId, deploymentType)
   const safeToL2SetupInterface = Safe_to_l2_setup__factory.createInterface()
 
   // Only do migration if the chain supports multiChain deployments and has a SafeToL2Setup deployment
@@ -259,7 +307,7 @@ export const createNewUndeployedSafeWithoutSalt = (
  * @param chain
  * @returns
  */
-export const migrateLegacySafeProps = (predictedSafeProps: PredictedSafeProps, chain: ChainInfo): ReplayedSafeProps => {
+export const migrateLegacySafeProps = (predictedSafeProps: PredictedSafeProps, chain: Chain): ReplayedSafeProps => {
   const safeVersion = predictedSafeProps.safeDeploymentConfig?.safeVersion
   const saltNonce = predictedSafeProps.safeDeploymentConfig?.saltNonce
   const { chainId } = chain
@@ -299,7 +347,7 @@ export const migrateLegacySafeProps = (predictedSafeProps: PredictedSafeProps, c
   }
 }
 
-export const assertNewUndeployedSafeProps = (props: UndeployedSafeProps, chain: ChainInfo): ReplayedSafeProps => {
+export const assertNewUndeployedSafeProps = (props: UndeployedSafeProps, chain: Chain): ReplayedSafeProps => {
   if (isPredictedSafeProps(props)) {
     return migrateLegacySafeProps(props, chain)
   }

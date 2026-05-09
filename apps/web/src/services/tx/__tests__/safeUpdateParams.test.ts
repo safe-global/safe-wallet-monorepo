@@ -1,17 +1,17 @@
 import * as sdkHelpers from '@/services/tx/tx-sender/sdk'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SafeProvider } from '@safe-global/protocol-kit'
 import {
   getFallbackHandlerDeployment,
   getSafeL2SingletonDeployment,
   getSafeSingletonDeployment,
 } from '@safe-global/safe-deployments'
-import { type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Interface, JsonRpcProvider } from 'ethers'
 import { createUpdateSafeTxs } from '../safeUpdateParams'
 import * as web3 from '@/hooks/wallets/web3'
-import { getLatestSafeVersion } from '@/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 const MOCK_SAFE_ADDRESS = '0x0000000000000000000000000000000000005AFE'
 
@@ -20,6 +20,7 @@ const getMockSafeProviderForChain = (chainId: number) => {
     getExternalProvider: jest.fn(),
     getExternalSigner: jest.fn(),
     getChainId: jest.fn().mockReturnValue(BigInt(chainId)),
+    isContractDeployed: jest.fn().mockResolvedValue(true),
   } as unknown as SafeProvider
 }
 
@@ -36,7 +37,7 @@ describe('safeUpgradeParams', () => {
         value: MOCK_SAFE_ADDRESS,
       },
       version: '1.0.0',
-    } as SafeInfo
+    } as SafeState
 
     const mockChainInfo = chainBuilder()
       .with({ chainId: '1', l2: false, recommendedMasterCopyVersion: '1.4.1' })
@@ -72,7 +73,7 @@ describe('safeUpgradeParams', () => {
         value: MOCK_SAFE_ADDRESS,
       },
       version: '1.1.1',
-    } as SafeInfo
+    } as SafeState
     const mockChainInfo = chainBuilder()
       .with({ chainId: '1', l2: false, recommendedMasterCopyVersion: '1.4.1' })
       .build()
@@ -109,7 +110,7 @@ describe('safeUpgradeParams', () => {
         value: MOCK_SAFE_ADDRESS,
       },
       version: '1.1.1',
-    } as SafeInfo
+    } as SafeState
     const mockChainInfo = chainBuilder()
       .with({ chainId: '100', l2: true, recommendedMasterCopyVersion: '1.4.1' })
       .build()

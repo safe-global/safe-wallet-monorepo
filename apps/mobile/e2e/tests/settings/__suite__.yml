@@ -1,0 +1,32 @@
+appId: ${APP_ID}
+tags:
+  - settings
+  - suite
+---
+# Settings Test Suite
+# Runs all settings tests with a single app launch for optimal performance
+
+# Clean app start ONCE at the beginning
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- runFlow:
+    file: ./address-book.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+# Run all settings tests with SKIP_CLEAN_START
+- runFlow:
+    file: ./change-theme.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./state-preservation.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./view-account-info.yml
+    env:
+      SKIP_CLEAN_START: 'true'

@@ -1,4 +1,17 @@
 .encodedData {
   line-break: anywhere;
   word-break: break-all;
+  line-height: 1.1;
+}
+
+.showMore {
+  white-space: nowrap;
+}
+
+.monospace {
+  font-family: monospace;
+}
+
+.zeroes {
+  opacity: 0.75;
 }

@@ -1,10 +1,10 @@
-import { ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
+import { _getMinimumMultiSendCallOnlyVersion } from '../safeContracts'
 import {
-  _getValidatedGetContractProps,
   isValidMasterCopy,
-  _getMinimumMultiSendCallOnlyVersion,
+  _getValidatedGetContractProps,
   isMigrationToL2Possible,
-} from '../safeContracts'
+} from '@safe-global/utils/services/contracts/safeContracts'
 import { safeInfoBuilder } from '@/tests/builders/safe'
 
 describe('safeContracts', () => {
@@ -71,8 +71,8 @@ describe('safeContracts', () => {
   })
 
   describe('isMigrationToL2Possible', () => {
-    it('should not be possible to migrate Safes on chains without migration lib', () => {
-      expect(isMigrationToL2Possible(safeInfoBuilder().with({ nonce: 0, chainId: '69420' }).build())).toBeFalsy()
+    it('should be possible to migrate Safes on unregistered chains (chain-agnostic canonical fallback)', () => {
+      expect(isMigrationToL2Possible(safeInfoBuilder().with({ nonce: 0, chainId: '69420' }).build())).toBeTruthy()
     })
 
     it('should not be possible to migrate Safes with nonce > 0', () => {

@@ -21,12 +21,12 @@ const ExternalLink = ({
       sx={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 0.2,
+        gap: 0.5,
         cursor: 'pointer',
       }}
     >
-      {children}
-      {!noIcon && <OpenInNewRounded fontSize="small" />}
+      {children ?? href}
+      {!noIcon && <OpenInNewRounded className="external-link-icon" fontSize="small" />}
     </Box>
   )
   return mode === 'link' ? (
@@ -34,7 +34,14 @@ const ExternalLink = ({
       {linkContent}
     </Link>
   ) : (
-    <Button variant="outlined" href={href} rel="noreferrer noopener" target="_blank" sx={props.sx}>
+    <Button
+      variant="outlined"
+      href={href}
+      rel="noreferrer noopener"
+      target="_blank"
+      className={props.className}
+      sx={props.sx}
+    >
       {linkContent}
     </Button>
   )

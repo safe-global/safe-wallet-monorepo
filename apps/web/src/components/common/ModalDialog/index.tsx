@@ -1,6 +1,12 @@
 import { type ReactElement, type ReactNode } from 'react'
 import { IconButton, type ModalProps } from '@mui/material'
-import { Dialog, DialogTitle, type DialogProps, useMediaQuery } from '@mui/material'
+import {
+  Dialog,
+  DialogTitle,
+  type DialogProps,
+  type DialogTitleProps as MuiDialogTitleProps,
+  useMediaQuery,
+} from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import CloseIcon from '@mui/icons-material/Close'
@@ -18,6 +24,7 @@ interface DialogTitleProps {
   onClose?: ModalProps['onClose']
   hideChainIndicator?: boolean
   chainId?: string
+  sx?: MuiDialogTitleProps['sx']
 }
 
 export const ModalDialogTitle = ({
@@ -25,12 +32,13 @@ export const ModalDialogTitle = ({
   onClose,
   hideChainIndicator = false,
   chainId,
+  sx = {},
   ...other
 }: DialogTitleProps) => {
   return (
     <DialogTitle
       data-testid="modal-title"
-      sx={{ m: 0, px: 3, pt: 3, pb: 2, display: 'flex', alignItems: 'center', fontWeight: 'bold' }}
+      sx={{ m: 0, px: 3, pt: 3, pb: 2, display: 'flex', alignItems: 'center', fontWeight: 'bold', ...sx }}
       {...other}
     >
       {children}

@@ -2,9 +2,16 @@ import { createTamagui } from 'tamagui'
 import { createDmSansFont } from '@tamagui/font-dm-sans'
 import { badgeTheme } from '@/src/components/Badge/theme'
 import { badgeTheme as NetworkBadgeTheme } from '@/src/components/NetworkBadge/theme'
-import { tokens } from '@/src/theme/tokens'
-import { createAnimations } from '@tamagui/animations-moti'
-import { inputTheme } from '../components/SafeInput/theme'
+import { navbarTheme } from '@/src/features/Assets/components/Navbar/theme'
+import { fontSizes, tokens } from '@/src/theme/tokens'
+import { createAnimations } from '@tamagui/animations-reanimated'
+import { inputTheme, inputWithLabelTheme } from '../components/SafeInput/theme'
+import { safeTabTheme } from '@/src/components/SafeTab/theme'
+import { SafeListItemTheme } from '@/src/components/SafeListItem/theme'
+import { alertTheme } from '@/src/components/Alert/theme'
+import { safeShieldHeadlineStatusTheme } from '@/src/features/SafeShield/components/SafeShieldHeadline/theme'
+import { safeShieldAnalysisStatusTheme } from '@/src/features/SafeShield/theme'
+import { safeShieldWidgetTheme } from '../features/SafeShield/components/SafeShieldWidget/theme'
 
 const DmSansFont = createDmSansFont({
   face: {
@@ -12,6 +19,7 @@ const DmSansFont = createDmSansFont({
     600: { normal: 'DMSans-SemiBold', italic: 'DMSans-SemiBoldItalic' },
     700: { normal: 'DMSans-Bold', italic: 'DMSans-BoldItalic' },
   },
+  size: fontSizes,
 })
 export const config = createTamagui({
   fonts: {
@@ -24,19 +32,33 @@ export const config = createTamagui({
       background: tokens.color.backgroundDefaultLight,
       backgroundSecondary: tokens.color.backgroundSecondaryLight,
       backgroundPaper: tokens.color.backgroundPaperLight,
+      backgroundSheet: tokens.color.backgroundSheetLight,
       backgroundHover: tokens.color.backgroundLightLight,
       backgroundPress: tokens.color.primaryLightLight,
       backgroundFocus: tokens.color.backgroundMainLight,
       backgroundStrong: tokens.color.primaryDarkLight,
+      backgroundDisabled: tokens.color.backgroundDisabledLight,
+      backgroundSuccess: tokens.color.successBackgroundLight,
+      backgroundWarning: tokens.color.warningBackgroundLight,
+      backgroundError: tokens.color.errorBackgroundLight,
       backgroundTransparent: 'transparent',
       backgroundSkeleton: tokens.color.backgroundSkeletonLight,
       color: tokens.color.textPrimaryLight,
       primary: tokens.color.primaryMainLight,
       colorHover: tokens.color.textSecondaryLight,
       colorSecondary: tokens.color.textSecondaryLight,
+      colorDisabled: tokens.color.textDisabledLight,
+      colorLight: tokens.color.primaryLightLight,
+      colorContrast: tokens.color.textContrastLight,
+      colorOutline: tokens.color.textSecondaryLight,
+      colorBackdrop: tokens.color.backdropMainLight,
+      borderMain: tokens.color.borderMainLight,
       borderLight: tokens.color.borderLightLight,
       error: tokens.color.errorMainLight,
       success: tokens.color.successMainLight,
+      warning: tokens.color.warningMainLight,
+      info: tokens.color.infoMainLight,
+      infoBackground: tokens.color.infoBackgroundLight,
       errorDark: tokens.color.errorDarkDark,
       errorLight: tokens.color.errorLightLight,
       errorBackground: tokens.color.errorBackgroundLight,
@@ -48,45 +70,17 @@ export const config = createTamagui({
     dark_label: {
       color: tokens.color.textSecondaryDark,
     },
-    light_info: {
-      background: tokens.color.infoBackgroundLight,
-      color: tokens.color.infoMainLight,
-    },
-    dark_info: {
-      background: tokens.color.infoBackgroundDark,
-      color: tokens.color.infoMainDark,
-    },
     ...badgeTheme,
+    ...alertTheme,
     ...inputTheme,
     ...NetworkBadgeTheme,
-    light_success: {
-      background: tokens.color.successBackgroundLight,
-      color: tokens.color.successMainLight,
-      badgeBackground: tokens.color.successDarkLight,
-      badgeTextColor: tokens.color.backgroundMainDark,
-    },
-    dark_success: {
-      background: tokens.color.successBackgroundDark,
-      color: tokens.color.successMainDark,
-      badgeBackground: tokens.color.successDarkDark,
-    },
+    ...navbarTheme,
+    ...safeTabTheme,
+    ...inputWithLabelTheme,
+    ...safeShieldAnalysisStatusTheme,
+    ...safeShieldHeadlineStatusTheme,
+    ...safeShieldWidgetTheme,
     dark_success_light: {},
-    light_warning: {
-      background: tokens.color.warning1MainLight,
-      color: tokens.color.warning1ContrastTextLight,
-    },
-    dark_warning: {
-      background: tokens.color.warning1MainDark,
-      color: tokens.color.warning1ContrastTextDark,
-    },
-    light_error: {
-      background: tokens.color.error1MainLight,
-      color: tokens.color.error1ContrastTextLight,
-    },
-    dark_error: {
-      background: tokens.color.error1MainDark,
-      color: tokens.color.error1ContrastTextDark,
-    },
     light_logo: {
       background: tokens.color.logoBackgroundLight,
     },
@@ -105,36 +99,47 @@ export const config = createTamagui({
     dark_settings: {
       background: tokens.color.backgroundPaperDark,
     },
-    light_safe_list: {
-      background: tokens.color.backgroundPaperLight,
-    },
-    dark_safe_list: {
-      background: tokens.color.backgroundDefaultDark,
-    },
+    ...SafeListItemTheme,
     dark: {
       background: tokens.color.backgroundDefaultDark,
       backgroundSecondary: tokens.color.backgroundSecondaryDark,
       backgroundPaper: tokens.color.backgroundPaperDark,
+      backgroundSheet: tokens.color.backgroundSheetDark,
       backgroundHover: tokens.color.backgroundLightDark,
       backgroundPress: tokens.color.primaryLightDark,
       backgroundFocus: tokens.color.backgroundMainDark,
       backgroundStrong: tokens.color.primaryDarkDark,
       backgroundTransparent: 'transparent',
-      backgroundSkeleton: tokens.color.backgroundSkeletonLight,
+      backgroundDisabled: tokens.color.backgroundDisabledDark,
+      backgroundSkeleton: tokens.color.backgroundSkeletonDark,
+      backgroundSuccess: tokens.color.successBackgroundDark,
+      backgroundWarning: tokens.color.warningBackgroundDark,
+      backgroundError: tokens.color.errorBackgroundDark,
       color: tokens.color.textPrimaryDark,
+      colorLight: tokens.color.primaryLightDark,
+      colorOutline: tokens.color.primaryLightDark,
       primary: tokens.color.primaryMainDark,
+      colorBackdrop: tokens.color.backdropMainDark,
+      borderMain: tokens.color.borderMainDark,
       borderLight: tokens.color.borderLightDark,
       colorHover: tokens.color.textSecondaryDark,
-      colorSecondary: tokens.color.textSecondaryDark,
+      colorSecondary: tokens.color.primaryLightDark,
+      colorDisabled: tokens.color.textDisabledDark,
       error: tokens.color.errorMainDark,
       errorDark: tokens.color.errorDarkDark,
       errorLight: tokens.color.errorLightDark,
       errorBackground: tokens.color.errorBackgroundDark,
       success: tokens.color.successMainLight,
+      warning: tokens.color.warningMainDark,
+      info: tokens.color.infoMainDark,
+      infoBackground: tokens.color.infoBackgroundDark,
       contrast: tokens.color.textContrastDark,
     },
   },
   tokens,
+  settings: {
+    defaultFont: 'body',
+  },
   animations: createAnimations({
     fast: {
       type: 'spring',

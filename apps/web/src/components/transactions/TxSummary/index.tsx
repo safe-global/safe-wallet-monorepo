@@ -1,9 +1,8 @@
+import type { ModuleTransaction, MultisigTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import TxProposalChip from '@/features/proposers/components/TxProposalChip'
-import StatusLabel from '@/features/swap/components/StatusLabel'
-import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
-import { Box } from '@mui/material'
+import { SwapFeature, useIsExpiredSwap } from '@/features/swap'
+import { Box, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
-import { type Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 
 import css from './styles.module.css'
 import DateTime from '@/components/common/DateTime'
@@ -17,17 +16,28 @@ import QueueActions from './QueueActions'
 import useIsPending from '@/hooks/useIsPending'
 import TxConfirmations from '../TxConfirmations'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { ellipsis } from '@safe-global/utils/utils/formatters'
+import {
+  useHnQueueAssessmentResult,
+  useShowHypernativeAssessment,
+  useHypernativeOAuth,
+  HypernativeFeature,
+} from '@/features/hypernative'
+import { getSafeTxHashFromTxId } from '@/utils/transactions'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 type TxSummaryProps = {
   isConflictGroup?: boolean
   isBulkGroup?: boolean
-  item: Transaction
+  item: ModuleTransaction | MultisigTransaction
 }
 
 const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): ReactElement => {
+  const { StatusLabel } = useLoadFeature(SwapFeature)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
+  const { HnQueueAssessment } = useLoadFeature(HypernativeFeature)
 
   const tx = item.transaction
   const isQueue = isTxQueued(tx.txStatus)
@@ -38,6 +48,12 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
   const expiredSwap = useIsExpiredSwap(tx.txInfo)
 
+  // Extract safeTxHash for assessment
+  const safeTxHash = tx.id ? getSafeTxHashFromTxId(tx.id) : undefined
+  const assessment = useHnQueueAssessmentResult(safeTxHash)
+  const { isAuthenticated } = useHypernativeOAuth()
+  const showAssessment = useShowHypernativeAssessment() && isQueue
+
   return (
     <Box
       data-testid="transaction-item"
@@ -46,6 +62,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
         [css.conflictGroup]: isConflictGroup,
         [css.bulkGroup]: isBulkGroup,
         [css.untrusted]: !isTrusted || isImitationTransaction,
+        [css.withAssessment]: showAssessment,
       })}
       id={tx.id}
     >
@@ -63,6 +80,12 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
 
       <Box data-testid="tx-type" gridArea="type">
         <TxType tx={tx} />
+
+        {tx.note && (
+          <Typography variant="body2" component="span" color="text.secondary" title={tx.note}>
+            {ellipsis(tx.note, 25)}
+          </Typography>
+        )}
       </Box>
 
       <Box data-testid="tx-info" gridArea="info">
@@ -83,6 +106,12 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
           ) : (
             <TxProposalChip />
           )}
+        </Box>
+      )}
+
+      {showAssessment && safeTxHash && (
+        <Box gridArea="assessment" className={css.assessment}>
+          <HnQueueAssessment safeTxHash={safeTxHash} assessment={assessment} isAuthenticated={isAuthenticated} />
         </Box>
       )}
 

@@ -12,11 +12,12 @@ import madProps from '@/utils/mad-props'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import useWallet from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
+import { useTopbarElevation } from '@/hooks/useTopbarElevation'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
-export function InternalRecoveryModal({
+function InternalRecoveryModal({
   isOwner,
   isRecoverer,
   queue,
@@ -34,6 +35,8 @@ export function InternalRecoveryModal({
 
   const [modal, setModal] = useState<ReactElement | null>(null)
   const router = useRouter()
+
+  useTopbarElevation('recovery', !!modal)
 
   const next = queue[0]
 
@@ -105,13 +108,17 @@ const useSidebar = () => {
   return isSidebarRoute
 }
 
-export const RecoveryModal = madProps(InternalRecoveryModal, {
+const RecoveryModal = madProps(InternalRecoveryModal, {
   isOwner: useIsSafeOwner,
   isRecoverer: useIsRecoverer,
   queue: useRecoveryQueue,
   wallet: useWallet,
   isSidebarRoute: useSidebar,
 })
+
+// Exports
+export { InternalRecoveryModal }
+export default RecoveryModal
 
 export function useDidDismissProposal() {
   const LS_KEY = 'dismissedRecoveryProposals'

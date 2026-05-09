@@ -1,0 +1,227 @@
+name: tx-builder Deploy
+
+on:
+  pull_request:
+    paths:
+      - apps/tx-builder/**
+      - packages/**
+      - .github/workflows/tx-builder-deploy.yml
+
+  push:
+    branches:
+      - dev
+    paths:
+      - apps/tx-builder/**
+      - packages/**
+
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Prepare a production release'
+        type: boolean
+        default: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  WORKING_DIRECTORY: apps/tx-builder
+
+jobs:
+  pr-preview:
+    name: PR Preview
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Post building comment
+        uses: mshick/add-pr-comment@v3
+        with:
+          message-id: tx-builder-preview
+          message: |
+            ## tx-builder Preview
+            ⏳ Building preview deployment...
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: ./.github/actions/yarn
+
+      - name: Build
+        run: yarn workspace @safe-global/tx-builder build
+        env:
+          VITE_TENDERLY_ORG_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_ORG_NAME }}
+          VITE_TENDERLY_PROJECT_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_PROJECT_NAME }}
+          VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
+
+      - name: Extract branch name
+        id: extract_branch
+        uses: ./.github/actions/branch-slug
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to S3
+        env:
+          BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/tx-builder/${{ steps.extract_branch.outputs.slug }}
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: aws s3 sync ./build $BUCKET --delete
+
+      - name: Post deployment link
+        if: always()
+        uses: mshick/add-pr-comment@v3
+        with:
+          message-id: tx-builder-preview
+          message: |
+            ## tx-builder Preview
+            ✅ Deploy successful!
+
+            **Preview URL:**
+            https://${{ steps.extract_branch.outputs.slug }}--tx-builder.review.5afe.dev/
+          message-failure: |
+            ## tx-builder Preview
+            ❌ Deploy failed!
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-staging:
+    name: Deploy Staging
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    permissions:
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/yarn
+
+      - name: Build
+        run: yarn workspace @safe-global/tx-builder build
+        env:
+          VITE_TENDERLY_ORG_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_ORG_NAME }}
+          VITE_TENDERLY_PROJECT_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_PROJECT_NAME }}
+          VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.TX_BUILDER_AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to staging
+        env:
+          BUCKET: s3://${{ secrets.TX_BUILDER_AWS_STAGING_BUCKET_NAME }}/current
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: aws s3 sync ./build $BUCKET --delete
+
+  prepare-release:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.release
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/yarn
+
+      - name: Extract version
+        id: version
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          VERSION=$(node -p 'require("./package.json").version')
+          echo "version=tx-builder-v$VERSION" >> $GITHUB_OUTPUT
+          echo "version_number=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Check if tag already exists
+        run: |
+          if git rev-parse "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "Tag ${{ steps.version.outputs.version }} already exists!"
+            echo "Make sure you've bumped the version in apps/tx-builder/package.json"
+            exit 1
+          fi
+          echo "Tag is new"
+
+      - name: Build (production base path)
+        run: yarn workspace @safe-global/tx-builder build
+        env:
+          VITE_BASE_PATH: /tx-builder/
+          VITE_TENDERLY_ORG_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_ORG_NAME }}
+          VITE_TENDERLY_PROJECT_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_PROJECT_NAME }}
+          VITE_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
+
+      - name: Create release archive
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: tar -czf tx-builder-${{ steps.version.outputs.version_number }}.tar.gz -C build .
+
+      - name: Generate artifact attestation
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ env.WORKING_DIRECTORY }}/tx-builder-${{ steps.version.outputs.version_number }}.tar.gz
+
+      - name: Create checksum
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: sha256sum tx-builder-${{ steps.version.outputs.version_number }}.tar.gz > tx-builder-${{ steps.version.outputs.version_number }}-sha256-checksum.txt
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git tag --list 'tx-builder-v*' --sort=-v:refname | head -1)
+          if [ -n "$PREV_TAG" ]; then
+            LOG=$(git log "$PREV_TAG"..HEAD --oneline -- apps/tx-builder/)
+          else
+            LOG="Initial release"
+          fi
+          {
+            echo "log<<EOF"
+            echo "$LOG"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create git tag
+        env:
+          HUSKY: '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.version.outputs.version }}
+          files: |
+            ${{ env.WORKING_DIRECTORY }}/tx-builder-${{ steps.version.outputs.version_number }}.tar.gz
+            ${{ env.WORKING_DIRECTORY }}/tx-builder-${{ steps.version.outputs.version_number }}-sha256-checksum.txt
+          body: |
+            ### Changes
+            ${{ steps.changelog.outputs.log }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Summary
+        run: |
+          echo "### tx-builder Release Ready" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Artifact:** tx-builder-${{ steps.version.outputs.version_number }}.tar.gz" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Next step: provide this tag to DevOps for production deployment." >> $GITHUB_STEP_SUMMARY

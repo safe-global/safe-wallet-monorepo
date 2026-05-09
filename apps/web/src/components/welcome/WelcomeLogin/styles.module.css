@@ -6,14 +6,76 @@
   justify-content: center;
   align-items: center;
   padding: var(--space-2);
+  background: #fff;
 }
 
 .loginContent {
   display: flex;
-  height: 100%;
   width: 320px;
   gap: var(--space-1);
+  color: #000;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.loginDescription {
+  color: var(--color-backdrop-main);
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.watchViewAccountLink button {
+  color: #000;
+}
+
+.watchViewAccountLink button:hover {
+  --variant-containedBg: #3c3c3c;
+  --variant-textBg: rgba(18, 19, 18, 0.04);
+  --variant-outlinedBorder: #121312;
+  --variant-outlinedBg: rgba(18, 19, 18, 0.04);
+}
+
+.orDivider::after {
+  background-color: #dcdee0;
+}
+.orDivider::before {
+  background-color: #dcdee0;
+}
+
+.walletBtnPrimary {
+  color: var(--color-text-contrast);
+  background-color: var(--color-primary-main);
+  min-height: 42px;
+}
+
+.walletBtnPrimary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+.walletBtnSecondary {
+  background-color: var(--color-background-main);
+  color: var(--color-text-primary);
+  border-radius: 16px;
+  padding: 10px 28px;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: none;
+  min-height: 36px;
+}
+
+.walletBtnSecondary:hover {
+  background-color: var(--color-border-light);
+}
+
+.walletBtnStatic {
+  color: #fff;
+  background-color: #121312;
+  min-height: 42px;
+}
+
+.walletBtnStatic:hover {
+  background-color: #121312;
 }

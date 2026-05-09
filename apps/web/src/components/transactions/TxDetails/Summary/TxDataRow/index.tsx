@@ -1,11 +1,9 @@
+import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
-import type { AddressEx } from '@safe-global/safe-gateway-typescript-sdk'
-import CopyButton from '@/components/common/CopyButton'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
-import { Typography, Box } from '@mui/material'
-import { dataLength } from 'ethers'
-import EthHashInfo from '@/components/common/EthHashInfo'
+import { Typography } from '@mui/material'
 import { DataRow } from '@/components/common/Table/DataRow'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 export const TxDataRow = DataRow
 
@@ -13,7 +11,7 @@ export const generateDataRowValue = (
   value?: string,
   type?: 'hash' | 'rawData' | 'address' | 'bytes',
   hasExplorer?: boolean,
-  addressInfo?: AddressEx,
+  addressInfo?: AddressInfo,
 ): ReactElement | null => {
   if (value == undefined) return null
 
@@ -23,37 +21,32 @@ export const generateDataRowValue = (
       const customAvatar = addressInfo?.logoUri
 
       return (
-        <EthHashInfo
-          address={value}
-          name={addressInfo?.name}
-          customAvatar={customAvatar}
-          showAvatar={!!customAvatar}
-          hasExplorer={hasExplorer}
-          showCopyButton
-        />
+        <Typography variant="body2" component="span">
+          <NamedAddressInfo
+            address={value}
+            name={addressInfo?.name}
+            customAvatar={customAvatar}
+            showAvatar={type === 'address'}
+            avatarSize={20}
+            showPrefix={false}
+            shortAddress={type !== 'address'}
+            hasExplorer={hasExplorer}
+            highlight4bytes
+          />
+        </Typography>
       )
     case 'rawData':
-      let length = 0
-      try {
-        length = dataLength(value)
-      } catch {
-        // ignore
-      }
-      return (
-        <Box
-          data-testid="tx-data-row"
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <div>{length} bytes</div>
-          <CopyButton text={value} />
-        </Box>
-      )
     case 'bytes':
-      return <HexEncodedData highlightFirstBytes={false} limit={60} hexData={value} />
+      return (
+        <Typography variant="body2" component="span">
+          <HexEncodedData highlightFirstBytes={false} limit={66} hexData={value} />
+        </Typography>
+      )
     default:
-      return <Typography sx={{ wordBreak: 'break-all' }}>{value}</Typography>
+      return (
+        <Typography variant="body2" sx={{ wordBreak: 'break-all' }} component="span">
+          {value}
+        </Typography>
+      )
   }
 }

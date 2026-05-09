@@ -1,0 +1,1055 @@
+{
+  "totalBalanceFiat": "146594224.98842797",
+  "totalTokenBalanceFiat": "4521112.763971539",
+  "totalPositionsBalanceFiat": "142073112.22445643",
+  "tokenBalances": [
+    {
+      "tokenInfo": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "decimals": 18,
+        "symbol": "ETH",
+        "name": "Ethereum",
+        "logoUri": "https://cdn.zerion.io/eth.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "NATIVE_TOKEN"
+      },
+      "balance": "1600001300200000000000",
+      "balanceFiat": "4504755.660674094",
+      "price": "2815.47",
+      "priceChangePercentage1d": "-6.467141063206361"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "decimals": 6,
+        "symbol": "USDC",
+        "name": "USDC",
+        "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "8547989885",
+      "balanceFiat": "8541.959505512663",
+      "price": "0.9992945265999998",
+      "priceChangePercentage1d": "0.2464356588191441"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
+        "decimals": 18,
+        "symbol": "GHO",
+        "name": "Gho Token",
+        "logoUri": "https://cdn.zerion.io/0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "5947530000000000000000",
+      "balanceFiat": "5941.706038857044",
+      "price": "0.9990207765",
+      "priceChangePercentage1d": "0.2916577059590475"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x1C13522ca36e5E13c591c0803083D5bB9282FE48",
+        "decimals": 18,
+        "symbol": "Z",
+        "name": "zkCLOB",
+        "logoUri": "https://cdn.zerion.io/18d5a90c-db2e-4eb7-88e3-0b0784dec5e1.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "69420000000000000000000",
+      "balanceFiat": "989.03986038",
+      "price": "0.014247189",
+      "priceChangePercentage1d": "4.7138327320912055"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xf1df7305E4BAB3885caB5B1e4dFC338452a67891",
+        "decimals": 9,
+        "symbol": "PALM",
+        "name": "PaLM AI",
+        "logoUri": "https://cdn.zerion.io/0xf1df7305e4bab3885cab5b1e4dfc338452a67891.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "10000000000000",
+      "balanceFiat": "427.134105",
+      "price": "0.0427134105",
+      "priceChangePercentage1d": "-11.699801900441475"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xb01dd87B29d187F3E3a4Bf6cdAebfb97F3D9aB98",
+        "decimals": 18,
+        "symbol": "Bold",
+        "name": "Bold Stablecoin",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "283272952934176521528",
+      "balanceFiat": "263.9170334426446",
+      "price": "0.9316704285",
+      "priceChangePercentage1d": "-6.46116127489087"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xb45ad160634c528Cc3D2926d9807104FA3157305",
+        "decimals": 18,
+        "symbol": "sDOLA",
+        "name": "Staked Dola",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "99396274771150154037",
+      "balanceFiat": "117.26068707267338",
+      "price": "1.1797291935",
+      "priceChangePercentage1d": "0.0021383415413689377"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xAD038Eb671c44b853887A7E32528FaB35dC5D710",
+        "decimals": 18,
+        "symbol": "DBR",
+        "name": "Dola Borrowing Right",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "800000000000000000000",
+      "balanceFiat": "41.0859648",
+      "price": "0.051357456",
+      "priceChangePercentage1d": "-2.7835659062113605"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xba386A4Ca26B85FD057ab1Ef86e3DC7BdeB5ce70",
+        "decimals": 18,
+        "symbol": "JESUS",
+        "name": "Jesus Coin",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "777000000000000000000000000",
+      "balanceFiat": "15.505851906719998",
+      "price": "0.00000001995605136",
+      "priceChangePercentage1d": "-3.0333619798167066"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x9A594F5ed8D119B73525dfE23aDBCeCa77fD828D",
+        "decimals": 18,
+        "symbol": "triangle",
+        "name": "dancing triangle",
+        "logoUri": "https://cdn.zerion.io/9a8d443d-9290-4a60-8ba3-89cee8546b13.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "420420696969000000000000",
+      "balanceFiat": "14.820644343467979",
+      "price": "0.000035251938",
+      "priceChangePercentage1d": "-8.098072601556428"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x6Bb7a212910682DCFdbd5BCBb3e28FB4E8da10Ee",
+        "decimals": 18,
+        "symbol": "GHO",
+        "name": "Gho Token",
+        "logoUri": "https://cdn.zerion.io/0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f.png",
+        "chainId": "8453",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "2000292367491919541",
+      "balanceFiat": "1.9983336341988007",
+      "price": "0.9990207765",
+      "priceChangePercentage1d": "0.2916577059590475"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x594DaaD7D77592a2b97b725A7AD59D7E188b5bFa",
+        "decimals": 18,
+        "symbol": "APU",
+        "name": "Apu Apustaja",
+        "logoUri": "https://cdn.zerion.io/68d04089-ed87-4e1a-9d3f-72029fd49001.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "31000000000000000000000",
+      "balanceFiat": "1.35161054775",
+      "price": "0.00004360034025",
+      "priceChangePercentage1d": "-9.708956635187949"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xD8E8438CF7bEEd13cFABC82F300Fb6573962c9e3",
+        "decimals": 9,
+        "symbol": "HONK",
+        "name": "Pepoclown",
+        "logoUri": "https://cdn.zerion.io/4389b970-7888-448b-826b-7957a285ee52.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "696969420000000000",
+      "balanceFiat": "0.46701913746967294",
+      "price": "0.00000000067007120265",
+      "priceChangePercentage1d": "-10.271170567302491"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "decimals": 6,
+        "symbol": "USDC",
+        "name": "USDC",
+        "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+        "chainId": "8453",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "370000",
+      "balanceFiat": "0.3697389748419999",
+      "price": "0.9992945265999998",
+      "priceChangePercentage1d": "0.2464356588191441"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xD4F4D0a10BcaE123bB6655E8Fe93a30d01eEbD04",
+        "decimals": 18,
+        "symbol": "LNQ",
+        "name": "LinqAI",
+        "logoUri": "https://cdn.zerion.io/74297ba1-e32d-42fa-9340-453be8836c01.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "69000000000000000000",
+      "balanceFiat": "0.240907014",
+      "price": "0.003491406",
+      "priceChangePercentage1d": "-7.209471984691762"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x0000000000c5dc95539589fbD24BE07c6C14eCa4",
+        "decimals": 18,
+        "symbol": "CULT",
+        "name": "Milady Cult Coin",
+        "logoUri": "https://cdn.zerion.io/360c2995-02b4-48aa-9a00-e878b7f1abc1.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "877739477067827364130",
+      "balanceFiat": "0.2333057785867263",
+      "price": "0.0002658029913",
+      "priceChangePercentage1d": "-7.563714792231025"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x06450dEe7FD2Fb8E39061434BAbCFC05599a6Fb8",
+        "decimals": 18,
+        "symbol": "XEN",
+        "name": "XEN Crypto",
+        "logoUri": "https://cdn.zerion.io/0x06450dee7fd2fb8e39061434babcfc05599a6fb8.png",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "1000000000000000000000000",
+      "balanceFiat": "0.00710388495",
+      "price": "0.00000000710388495",
+      "priceChangePercentage1d": "-13.426819477824525"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x0000000000000000000000000000000000000000",
+        "decimals": 18,
+        "symbol": "ETH",
+        "name": "Ethereum",
+        "logoUri": "https://cdn.zerion.io/eth.png",
+        "chainId": "8453",
+        "trusted": true,
+        "type": "NATIVE_TOKEN"
+      },
+      "balance": "1000000000000",
+      "balanceFiat": "0.0028154699999999996",
+      "price": "2815.47",
+      "priceChangePercentage1d": "-6.467141063206361"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xfB18511F1590a494360069F3640c27d55c2B5290",
+        "decimals": 6,
+        "symbol": "WGC",
+        "name": "Wild Goat Coin",
+        "logoUri": "https://cdn.zerion.io/a39a8c1f-a6be-482a-8bfa-a21d8c9432aa.png",
+        "chainId": "8453",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "50000000",
+      "balanceFiat": "0.0027716894414999997",
+      "price": "0.00005543378882999999",
+      "priceChangePercentage1d": "-5.946452522649148"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x18577F0f4A0B2Ee6F4048dB51c7acd8699F97DB8",
+        "decimals": 18,
+        "symbol": "variableDebtEthLidoGHO",
+        "name": "Aave Ethereum Lido Variable Debt GHO",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "2000009965758552051764938",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x17aA4Ee3704bE86b2F1b4978C47Df8ae532f1Ff2",
+        "decimals": 18,
+        "symbol": "TST",
+        "name": "The Serpent",
+        "logoUri": "",
+        "chainId": "8453",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "770000000000000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x32a6268f9Ba3642Dda7892aDd74f1D34469A4259",
+        "decimals": 18,
+        "symbol": "aEthUSDS",
+        "name": "Aave Ethereum USDS",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "2017710571272338002490756",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x4042bA2085eDfA4b68106b2eec5d5007F1D36DdE",
+        "decimals": 18,
+        "symbol": "RCA",
+        "name": "RECOIN ASSET",
+        "logoUri": "",
+        "chainId": "137",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "9200000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x2146Ef1D91c237C87A41610E54fDf30ab539D91f",
+        "decimals": 18,
+        "symbol": "CAT",
+        "name": "Cat Sniper",
+        "logoUri": "",
+        "chainId": "8453",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "115000000000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xfA1fDbBD71B0aA16162D76914d69cD8CB3Ef92da",
+        "decimals": 18,
+        "symbol": "aEthLidoWETH",
+        "name": "Aave Ethereum Lido WETH",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "10000000283180395046484",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x83D8BA42B7F47FaBBb689cDB68800DF87Abf4eD0",
+        "decimals": 18,
+        "symbol": "Ayabuu",
+        "name": "Aya Miyaguchi's Dog",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "50000000000000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x08d23468A467d2bb86FaE0e32F247A26C7E2e994",
+        "decimals": 18,
+        "symbol": "sINV",
+        "name": "Staked Inv",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "2000000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x24E161B9B028156aEEaA0852833FA10eDd774EbE",
+        "decimals": 9,
+        "symbol": "MIYAGUCHI",
+        "name": "Aya Miyaguchi",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "210345000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0x2c969d681003b1B2E85bBDFd505B63E699F226fD",
+        "decimals": 18,
+        "symbol": "ONE",
+        "name": "1",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "1000000000000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xb684967097d77B41788164Fd1D03ec54d7Ab0176",
+        "decimals": 18,
+        "symbol": "SAM",
+        "name": "COMMANDER SAM",
+        "logoUri": "",
+        "chainId": "480",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "10000000000000000000",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xA17581A9E3356d9A858b789D68B4d866e593aE94",
+        "decimals": 18,
+        "symbol": "cWETHv3",
+        "name": "Compound WETH",
+        "logoUri": "",
+        "chainId": "1",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "4199999999999999999999",
+      "price": "0"
+    },
+    {
+      "tokenInfo": {
+        "address": "0xF2Ec9f5A4466a6C3B8550d523f8159333abCBA05",
+        "decimals": 18,
+        "symbol": "以太坊×10⁻⁴",
+        "name": "以太坊×10⁻⁴",
+        "logoUri": "",
+        "chainId": "56",
+        "trusted": true,
+        "type": "ERC20"
+      },
+      "balance": "155050000000000000",
+      "price": "0"
+    }
+  ],
+  "positionBalances": [
+    {
+      "appInfo": {
+        "name": "AAVE V3",
+        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/aave-pool-v3.jpg",
+        "url": "https://app.aave.com"
+      },
+      "balanceFiat": "88335494.96771908",
+      "groups": [
+        {
+          "name": "Aave V3 Lending",
+          "items": [
+            {
+              "key": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2-ethereum-aave v3 lending-deposit",
+              "type": "deposit",
+              "name": "Aave V3 Lending",
+              "groupId": "17f2f504020eaad4cfcb8d450ae8fe80d4754aece6a6a378bb30adfe1b7c854a",
+              "tokenInfo": {
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "decimals": 18,
+                "symbol": "WETH",
+                "name": "Wrapped Ether",
+                "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+              "balance": "21170802429264353000000",
+              "balanceFiat": "59626357.37180536",
+              "priceChangePercentage1d": "-6.448757586753051"
+            },
+            {
+              "key": "0xdc035d45d973e3ec169d2276ddab16f1e407384f-ethereum-aave v3 lending-deposit",
+              "type": "deposit",
+              "name": "Aave V3 Lending",
+              "groupId": "17f2f504020eaad4cfcb8d450ae8fe80d4754aece6a6a378bb30adfe1b7c854a",
+              "tokenInfo": {
+                "address": "0xdC035D45d973E3EC169d2276DDab16f1e407384F",
+                "decimals": 18,
+                "symbol": "USDS",
+                "name": "USDS Stablecoin",
+                "logoUri": "https://cdn.zerion.io/665d1d2c-7add-45e2-b08a-1c584ca19caf.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+              "balance": "2039392905541517300000000",
+              "balanceFiat": "2038314.6387441962",
+              "priceChangePercentage1d": "0.26719487317528046"
+            },
+            {
+              "key": "0xdc035d45d973e3ec169d2276ddab16f1e407384f-ethereum-aave v3 lending-reward",
+              "type": "reward",
+              "name": "Aave V3 Lending",
+              "groupId": "17f2f504020eaad4cfcb8d450ae8fe80d4754aece6a6a378bb30adfe1b7c854a",
+              "tokenInfo": {
+                "address": "0xdC035D45d973E3EC169d2276DDab16f1e407384F",
+                "decimals": 18,
+                "symbol": "USDS",
+                "name": "USDS Stablecoin",
+                "logoUri": "https://cdn.zerion.io/665d1d2c-7add-45e2-b08a-1c584ca19caf.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+              "balance": "21462833098802806000000",
+              "balanceFiat": "21451.485280418226",
+              "priceChangePercentage1d": "0.26719487317528046"
+            }
+          ]
+        },
+        {
+          "name": "Aave V3 Lending",
+          "items": [
+            {
+              "key": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2-ethereum-aave v3 lending-deposit",
+              "type": "deposit",
+              "name": "Aave V3 Lending",
+              "groupId": "9f85b02868446089657bf58180586c1af738f4d95b38e6b01251c39d55e56a35",
+              "tokenInfo": {
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "decimals": 18,
+                "symbol": "WETH",
+                "name": "Wrapped Ether",
+                "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0x4e033931ad43597d96D6bcc25c280717730B58B1",
+              "balance": "10195162655396696000000",
+              "balanceFiat": "28714094.044638958",
+              "priceChangePercentage1d": "-6.448757586753051"
+            },
+            {
+              "key": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f-ethereum-aave v3 lending-loan",
+              "type": "loan",
+              "name": "Aave V3 Lending",
+              "groupId": "9f85b02868446089657bf58180586c1af738f4d95b38e6b01251c39d55e56a35",
+              "tokenInfo": {
+                "address": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
+                "decimals": 18,
+                "symbol": "GHO",
+                "name": "Gho Token",
+                "logoUri": "https://cdn.zerion.io/0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0x4e033931ad43597d96D6bcc25c280717730B58B1",
+              "balance": "2066746379373081700000000",
+              "balanceFiat": "-2064722.5727498597",
+              "priceChangePercentage1d": "0.2916577059590475"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appInfo": {
+        "name": "Spark",
+        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/spark.jpg",
+        "url": "https://app.spark.fi/"
+      },
+      "balanceFiat": "28645753.81856933",
+      "groups": [
+        {
+          "name": "Spark Lending",
+          "items": [
+            {
+              "key": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2-ethereum-spark lending-deposit",
+              "type": "deposit",
+              "name": "Spark Lending",
+              "groupId": "6681242d570e4bb83fefd54056fa7e49cd3ae15c77c482b96d35249c0413e038",
+              "tokenInfo": {
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "decimals": 18,
+                "symbol": "WETH",
+                "name": "Wrapped Ether",
+                "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xC13e21B648A5Ee794902342038FF3aDAB66BE987",
+              "balance": "10170897926041025000000",
+              "balanceFiat": "28645753.81856933",
+              "priceChangePercentage1d": "-6.448757586753051"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appInfo": {
+        "name": "Compound V3",
+        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/compound-v3.jpg",
+        "url": "https://v3-app.compound.finance/"
+      },
+      "balanceFiat": "12084088.464837901",
+      "groups": [
+        {
+          "name": "Compound V3 Yield: WETH Pool",
+          "items": [
+            {
+              "key": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2-ethereum-compound v3 yield: weth pool-deposit",
+              "type": "deposit",
+              "name": "Compound V3 Yield: WETH Pool",
+              "groupId": "5355a6d7828b13641e22e59e2a6102adf0cc92fca22c4fe4d4f7f43cfac0854e",
+              "tokenInfo": {
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "decimals": 18,
+                "symbol": "WETH",
+                "name": "Wrapped Ether",
+                "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xA17581A9E3356d9A858b789D68B4d866e593aE94",
+              "balance": "4286358775255468000000",
+              "balanceFiat": "12072284.978856958",
+              "priceChangePercentage1d": "-6.448757586753051"
+            }
+          ]
+        },
+        {
+          "name": "Compound V3 Lending",
+          "items": [
+            {
+              "key": "0xc00e94cb662c3520282e6f5717214004a7f26888-ethereum-compound v3 lending-reward",
+              "type": "reward",
+              "name": "Compound V3 Lending",
+              "groupId": "465b6935c4c88fa42904c6c8274a5a6e2752cd8665fc72d5933cc30a7d98ca95",
+              "tokenInfo": {
+                "address": "0xc00e94Cb662C3520282E6f5717214004A7f26888",
+                "decimals": 18,
+                "symbol": "COMP",
+                "name": "Compound",
+                "logoUri": "https://cdn.zerion.io/0xc00e94cb662c3520282e6f5717214004a7f26888.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xA17581A9E3356d9A858b789D68B4d866e593aE94",
+              "balance": "520523269000000000000",
+              "balanceFiat": "11803.485980942349",
+              "priceChangePercentage1d": "-4.723337325681587"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appInfo": {
+        "name": "Morpho",
+        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/morpho-blue.jpg",
+        "url": "https://app.morpho.org"
+      },
+      "balanceFiat": "12853354.617840348",
+      "groups": [
+        {
+          "name": "Morpho Yield: USDC Pool (Steakhouse USDC)",
+          "items": [
+            {
+              "key": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48-ethereum-morpho yield: usdc pool (steakhouse usdc)-deposit",
+              "type": "deposit",
+              "name": "Morpho Yield: USDC Pool (Steakhouse USDC)",
+              "groupId": "d29512bc41703fc71636acef01118098a43160f4ebc345c10d8adc3346866ab7",
+              "tokenInfo": {
+                "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                "decimals": 6,
+                "symbol": "USDC",
+                "name": "USDC",
+                "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xBEEF01735c132Ada46AA9aA4c54623cAA92A64CB",
+              "balance": "4042727470707",
+              "balanceFiat": "4039875.434012966",
+              "priceChangePercentage1d": "0.2464356588191441"
+            }
+          ]
+        },
+        {
+          "name": "Morpho Yield: WETH Pool (Gauntlet WETH Prime)",
+          "items": [
+            {
+              "key": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2-ethereum-morpho yield: weth pool (gauntlet weth prime)-deposit",
+              "type": "deposit",
+              "name": "Morpho Yield: WETH Pool (Gauntlet WETH Prime)",
+              "groupId": "7322ae3d6b57c0a693e9083a4316dc1da232e2b92001516a6bda5f64b9d0464c",
+              "tokenInfo": {
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "decimals": 18,
+                "symbol": "WETH",
+                "name": "Wrapped Ether",
+                "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0x2371e134e3455e0593363cBF89d3b6cf53740618",
+              "balance": "1206223601362248500000",
+              "balanceFiat": "3397259.9652487854",
+              "priceChangePercentage1d": "-6.448757586753051"
+            }
+          ]
+        },
+        {
+          "name": "Morpho Yield: WETH Pool (Steakhouse ETH)",
+          "items": [
+            {
+              "key": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2-ethereum-morpho yield: weth pool (steakhouse eth)-deposit",
+              "type": "deposit",
+              "name": "Morpho Yield: WETH Pool (Steakhouse ETH)",
+              "groupId": "eb5e13dd7d87c0a386da010f06f9664f4dc1a08a89ee14a5f781e577e898bbb1",
+              "tokenInfo": {
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "decimals": 18,
+                "symbol": "WETH",
+                "name": "Wrapped Ether",
+                "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xBEEf050ecd6a16c4e7bfFbB52Ebba7846C4b8cD4",
+              "balance": "1205852658882485000000",
+              "balanceFiat": "3396215.2269146265",
+              "priceChangePercentage1d": "-6.448757586753051"
+            }
+          ]
+        },
+        {
+          "name": "Morpho Yield: USDC Pool (Gauntlet USDC Prime)",
+          "items": [
+            {
+              "key": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48-ethereum-morpho yield: usdc pool (gauntlet usdc prime)-deposit",
+              "type": "deposit",
+              "name": "Morpho Yield: USDC Pool (Gauntlet USDC Prime)",
+              "groupId": "ca509bf30be6a9ef2d0e26f7a33a2833a3876717b2b069ea7087c6c690033483",
+              "tokenInfo": {
+                "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+                "decimals": 6,
+                "symbol": "USDC",
+                "name": "USDC",
+                "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xdd0f28e19C1780eb6396170735D45153D261490d",
+              "balance": "2021430056799",
+              "balanceFiat": "2020003.9916639675",
+              "priceChangePercentage1d": "0.2464356588191441"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appInfo": {
+        "name": "RAILGUN",
+        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/railgun.jpg",
+        "url": "https://railgun.org"
+      },
+      "balanceFiat": "115092.50939999998",
+      "groups": [
+        {
+          "name": "RAILGUN RAIL Pool",
+          "items": [
+            {
+              "key": "0xe76c6c83af64e4c60245d8c7de953df673a7a33d-ethereum-railgun rail pool-staked",
+              "type": "staked",
+              "name": "RAILGUN RAIL Pool",
+              "groupId": "47418345f836d87e8cf6dc72cc012524174f3cf55aee7aa68f482fd65d74cfdb",
+              "tokenInfo": {
+                "address": "0xe76C6c83af64e4C60245D8C7dE953DF673a7A33D",
+                "decimals": 18,
+                "symbol": "RAIL",
+                "name": "Rail",
+                "logoUri": "https://cdn.zerion.io/0xe76c6c83af64e4c60245d8c7de953df673a7a33d.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xEE6A649Aa3766bD117e12C161726b693A1B2Ee20",
+              "balance": "50000000000000000000000",
+              "balanceFiat": "115092.50939999998",
+              "priceChangePercentage1d": "-15.737535884001208"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appInfo": {
+        "name": "Merkl",
+        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/merkl.jpg",
+        "url": "https://app.merkl.xyz/"
+      },
+      "balanceFiat": "30813.16384434439",
+      "groups": [
+        {
+          "name": "Merkl Rewards",
+          "items": [
+            {
+              "key": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2-ethereum-merkl rewards-reward",
+              "type": "reward",
+              "name": "Merkl Rewards",
+              "groupId": "76b805ee161d0bce1dcf552ce131affa28dbbc2843c78f38fbe3ca838ba85b19",
+              "tokenInfo": {
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "decimals": 18,
+                "symbol": "WETH",
+                "name": "Wrapped Ether",
+                "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0x3Ef3D8bA38EBe18DB133cEc108f4D14CE00Dd9Ae",
+              "balance": "8207033145668248000",
+              "balanceFiat": "23114.640691626875",
+              "priceChangePercentage1d": "-6.448757586753051"
+            },
+            {
+              "key": "0x58d97b57bb95320f9a05dc918aef65434969c2b2-ethereum-merkl rewards-reward",
+              "type": "reward",
+              "name": "Merkl Rewards",
+              "groupId": "76b805ee161d0bce1dcf552ce131affa28dbbc2843c78f38fbe3ca838ba85b19",
+              "tokenInfo": {
+                "address": "0x58D97B57BB95320F9a05dC918Aef65434969c2B2",
+                "decimals": 18,
+                "symbol": "MORPHO",
+                "name": "Morpho",
+                "logoUri": "https://cdn.zerion.io/38f1c334-bbe0-4d99-aef4-e6d0a3a4207b.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0x3Ef3D8bA38EBe18DB133cEc108f4D14CE00Dd9Ae",
+              "balance": "6417534053027804000000",
+              "balanceFiat": "7698.5231527175165",
+              "priceChangePercentage1d": "-1.177319813443245"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appInfo": {
+        "name": "Symbiotic",
+        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/symbiotic.jpg",
+        "url": "https://app.symbiotic.fi"
+      },
+      "balanceFiat": "8157.862857797948",
+      "groups": [
+        {
+          "name": "Symbiotic SPK Pool (stSPK)",
+          "items": [
+            {
+              "key": "0xc20059e0317de91738d13af027dfc4a50781b066-ethereum-symbiotic spk pool (stspk)-staked",
+              "type": "staked",
+              "name": "Symbiotic SPK Pool (stSPK)",
+              "groupId": "0f1447e3a851329074a3ba85e9eacc768505324bdb84da42c0bbfba27c36fe1f",
+              "tokenInfo": {
+                "address": "0xc20059e0317DE91738d13af027DfC4a50781b066",
+                "decimals": 18,
+                "symbol": "SPK",
+                "name": "Spark",
+                "logoUri": "https://cdn.zerion.io/9b9bf8de-2f8c-471e-b24a-3262c106c900.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xc6132FAF04627c8d05d6E759FAbB331Ef2D8F8fD",
+              "balance": "372886544746895260000000",
+              "balanceFiat": "8157.862857797948",
+              "priceChangePercentage1d": "-7.059235691291821"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "appInfo": {
+        "name": "Inverse",
+        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/inverse.jpg",
+        "url": "https://inverse.finance"
+      },
+      "balanceFiat": "356.8193876278141",
+      "groups": [
+        {
+          "name": "Inverse Yield: DOLA Pool (Staked Dola)",
+          "items": [
+            {
+              "key": "0x865377367054516e17014ccded1e7d814edc9ce4-ethereum-inverse yield: dola pool (staked dola)-deposit",
+              "type": "deposit",
+              "name": "Inverse Yield: DOLA Pool (Staked Dola)",
+              "groupId": "08723dc024f4beb25e52bb9560dac38b2eb6e060e19bb969945c39a1ec3b01ba",
+              "tokenInfo": {
+                "address": "0x865377367054516e17014CcdED1e7d814EDC9ce4",
+                "decimals": 18,
+                "symbol": "DOLA",
+                "name": "Dola USD Stablecoin",
+                "logoUri": "https://cdn.zerion.io/0x865377367054516e17014ccded1e7d814edc9ce4.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0xb45ad160634c528Cc3D2926d9807104FA3157305",
+              "balance": "117641432768279430000",
+              "balanceFiat": "117.30430665562248",
+              "priceChangePercentage1d": "0.27195891182392185"
+            }
+          ]
+        },
+        {
+          "name": "Inverse Lending",
+          "items": [
+            {
+              "key": "0xae7ab96520de3a18e5e111b5eaab095312d7fe84-ethereum-inverse lending-deposit",
+              "type": "deposit",
+              "name": "Inverse Lending",
+              "groupId": "0d500e0511af213c1f5c43a664a06f35dab592585db29a1f4fd75b111e81a5d8",
+              "tokenInfo": {
+                "address": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+                "decimals": 18,
+                "symbol": "stETH",
+                "name": "Lido Staked ETH",
+                "logoUri": "https://cdn.zerion.io/0xae7ab96520de3a18e5e111b5eaab095312d7fe84.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0x3FD3daBB9F9480621C8A111603D3Ba70F17550BC",
+              "balance": "33092317982150770",
+              "balanceFiat": "93.10538658450416",
+              "priceChangePercentage1d": "-6.4812887456634165"
+            }
+          ]
+        },
+        {
+          "name": "Inverse Lending",
+          "items": [
+            {
+              "key": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2-ethereum-inverse lending-deposit",
+              "type": "deposit",
+              "name": "Inverse Lending",
+              "groupId": "c8fb99edb35cff04ceb8d9f277f82a0e91708f44fdac23792053fba74c559d2e",
+              "tokenInfo": {
+                "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+                "decimals": 18,
+                "symbol": "WETH",
+                "name": "Wrapped Ether",
+                "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0x63Df5e23Db45a2066508318f172bA45B9CD37035",
+              "balance": "33000000000000000",
+              "balanceFiat": "92.94261754338001",
+              "priceChangePercentage1d": "-6.448757586753051"
+            }
+          ]
+        },
+        {
+          "name": "Inverse INV Pool (sINV)",
+          "items": [
+            {
+              "key": "0x41d5d79431a913c4ae7d69a668ecdfe5ff9dfb68-ethereum-inverse inv pool (sinv)-staked",
+              "type": "staked",
+              "name": "Inverse INV Pool (sINV)",
+              "groupId": "ac892789f33f6f6218bd32a6a154afc9a6ca8d0169c4484e5cb5a964f44d2e27",
+              "tokenInfo": {
+                "address": "0x41D5D79431A913C4aE7d69a668ecdfE5fF9DFB68",
+                "decimals": 18,
+                "symbol": "INV",
+                "name": "Inverse DAO",
+                "logoUri": "https://cdn.zerion.io/0x41d5d79431a913c4ae7d69a668ecdfe5ff9dfb68.png",
+                "chainId": "1",
+                "trusted": true,
+                "type": "ERC20"
+              },
+              "receiptTokenAddress": "0x08d23468A467d2bb86FaE0e32F247A26C7E2e994",
+              "balance": "2075339018602906000",
+              "balanceFiat": "53.467076844307456",
+              "priceChangePercentage1d": "-6.047666065897783"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -3,8 +3,8 @@
     "queue": {
       "contractName": "GPv2Settlement",
       "action": "setPreSignature",
-      "oneOfOne": "1 out of 1",
-      "oneOfTwo": "1 out of 2",
+      "oneOfOne": "1/1",
+      "oneOfTwo": "1/2",
       "title": "Swap order"
     },
     "orderDetails": {

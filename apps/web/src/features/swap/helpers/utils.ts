@@ -1,8 +1,13 @@
-import type { DataDecoded, Order as SwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
-import { formatUnits } from 'ethers'
-import type { AnyAppDataDocVersion, latest, LatestAppDataDocVersion } from '@cowprotocol/app-data'
+import type { DataDecoded, SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
+import { formatUnits, id } from 'ethers'
+import type { AnyAppDataDocVersion, latest } from '@cowprotocol/app-data'
+import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
+import { APPROVAL_SIGNATURE_HASH } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 
-import { TradeType, UiOrderType } from '@/features/swap/types'
+import { TradeType, UiOrderType } from '@safe-global/utils/features/swap/types'
+import { LIMIT_ORDER_TITLE, SWAP_ORDER_TITLE, TWAP_ORDER_TITLE } from '../constants'
+import type { SwapState } from '../store/swapParamsSlice'
 
 type Quantity = {
   amount: string | number | bigint
@@ -25,10 +30,21 @@ function asDecimal(amount: number | bigint, decimals: number): number {
 export const TWAP_FALLBACK_HANDLER = '0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5'
 
 // https://github.com/cowprotocol/composable-cow/blob/main/networks.json
-export const TWAP_FALLBACK_HANDLER_NETWORKS = ['1', '100', '11155111', '42161']
+export const TWAP_FALLBACK_HANDLER_NETWORKS = [
+  '1',
+  '100',
+  '137',
+  '11155111',
+  '8453',
+  '42161',
+  '43114',
+  '232',
+  '59144',
+  '9745',
+]
 
 export const getExecutionPrice = (
-  order: Pick<SwapOrder, 'executedSellAmount' | 'executedBuyAmount' | 'buyToken' | 'sellToken'>,
+  order: Pick<OrderTransactionInfo, 'executedSellAmount' | 'executedBuyAmount' | 'buyToken' | 'sellToken'>,
 ): number => {
   const { executedSellAmount, executedBuyAmount, buyToken, sellToken } = order
 
@@ -44,7 +60,7 @@ export const getExecutionPrice = (
 }
 
 export const getLimitPrice = (
-  order: Pick<SwapOrder, 'sellAmount' | 'buyAmount' | 'buyToken' | 'sellToken'>,
+  order: Pick<SwapOrderTransactionInfo, 'sellAmount' | 'buyAmount' | 'buyToken' | 'sellToken'>,
 ): number => {
   const { sellAmount, buyAmount, buyToken, sellToken } = order
 
@@ -65,7 +81,7 @@ const calculateRatio = (a: Quantity, b: Quantity) => {
 
 export const getSurplusPrice = (
   order: Pick<
-    SwapOrder,
+    OrderTransactionInfo,
     'executedBuyAmount' | 'buyAmount' | 'buyToken' | 'executedSellAmount' | 'sellAmount' | 'sellToken' | 'kind'
   >,
 ): number => {
@@ -79,7 +95,7 @@ export const getSurplusPrice = (
   }
 }
 
-export const getPartiallyFilledSurplus = (order: SwapOrder): number => {
+export const getPartiallyFilledSurplus = (order: OrderTransactionInfo): number => {
   if (order.kind === OrderKind.BUY) {
     return getPartiallyFilledBuySurplus(order)
   } else if (order.kind === OrderKind.SELL) {
@@ -91,7 +107,7 @@ export const getPartiallyFilledSurplus = (order: SwapOrder): number => {
 
 const getPartiallyFilledBuySurplus = (
   order: Pick<
-    SwapOrder,
+    OrderTransactionInfo,
     'executedBuyAmount' | 'buyAmount' | 'buyToken' | 'executedSellAmount' | 'sellAmount' | 'sellToken' | 'kind'
   >,
 ): number => {
@@ -107,7 +123,7 @@ const getPartiallyFilledBuySurplus = (
 
 const getPartiallyFilledSellSurplus = (
   order: Pick<
-    SwapOrder,
+    OrderTransactionInfo,
     'executedBuyAmount' | 'buyAmount' | 'buyToken' | 'executedSellAmount' | 'sellAmount' | 'sellToken' | 'kind'
   >,
 ): number => {
@@ -123,7 +139,7 @@ const getPartiallyFilledSellSurplus = (
 }
 
 export const getFilledPercentage = (
-  order: Pick<SwapOrder, 'executedBuyAmount' | 'kind' | 'buyAmount' | 'executedSellAmount' | 'sellAmount'>,
+  order: Pick<OrderTransactionInfo, 'executedBuyAmount' | 'kind' | 'buyAmount' | 'executedSellAmount' | 'sellAmount'>,
 ): string => {
   let executed: number
   let total: number
@@ -142,7 +158,7 @@ export const getFilledPercentage = (
 }
 
 export const getFilledAmount = (
-  order: Pick<SwapOrder, 'kind' | 'executedBuyAmount' | 'executedSellAmount' | 'buyToken' | 'sellToken'>,
+  order: Pick<OrderTransactionInfo, 'kind' | 'executedBuyAmount' | 'executedSellAmount' | 'buyToken' | 'sellToken'>,
 ): string => {
   if (order.kind === OrderKind.BUY) {
     return formatUnits(order.executedBuyAmount || 0n, order.buyToken.decimals)
@@ -153,29 +169,22 @@ export const getFilledAmount = (
   }
 }
 
-export const getSlippageInPercent = (order: Pick<SwapOrder, 'fullAppData'>): string => {
+export const getSlippageInPercent = (order: Pick<OrderTransactionInfo, 'fullAppData'>): string => {
   const fullAppData = order.fullAppData as AnyAppDataDocVersion
   const slippageBips = (fullAppData?.metadata?.quote as latest.Quote)?.slippageBips || 0
 
   return (Number(slippageBips) / 100).toFixed(2)
 }
 
-export const getOrderClass = (order: Pick<SwapOrder, 'fullAppData'>): latest.OrderClass1 => {
+export const getOrderClass = (order: Pick<OrderTransactionInfo, 'fullAppData'>): latest.OrderClass1 => {
   const fullAppData = order.fullAppData as AnyAppDataDocVersion
   const orderClass = (fullAppData?.metadata?.orderClass as latest.OrderClass)?.orderClass
 
   return orderClass || 'market'
 }
 
-export const getOrderFeeBps = (order: Pick<SwapOrder, 'fullAppData'>): number => {
-  const fullAppData = order.fullAppData as unknown as LatestAppDataDocVersion
-  const basisPoints = (fullAppData?.metadata?.partnerFee as latest.PartnerFee)?.bps
-
-  return Number(basisPoints) || 0
-}
-
 export const isOrderPartiallyFilled = (
-  order: Pick<SwapOrder, 'executedBuyAmount' | 'executedSellAmount' | 'sellAmount' | 'buyAmount' | 'kind'>,
+  order: Pick<OrderTransactionInfo, 'executedBuyAmount' | 'executedSellAmount' | 'sellAmount' | 'buyAmount' | 'kind'>,
 ): boolean => {
   const executedBuyAmount = BigInt(order.executedBuyAmount || 0)
   const buyAmount = BigInt(order.buyAmount)
@@ -214,4 +223,29 @@ export const isSettingTwapFallbackHandler = (decodedData: DataDecoded) => {
         ),
     ) || false
   )
+}
+
+// Signature hashes for getSwapTitle
+const PRE_SIGN_SIGHASH = id('setPreSignature(bytes,bool)').slice(0, 10)
+const WRAP_SIGHASH = id('deposit()').slice(0, 10)
+const UNWRAP_SIGHASH = id('withdraw(uint256)').slice(0, 10)
+const CREATE_WITH_CONTEXT_SIGHASH = id('createWithContext((address,bytes32,bytes),address,bytes,bool)').slice(0, 10)
+const CANCEL_ORDER_SIGHASH = id('invalidateOrder(bytes)').slice(0, 10)
+
+export const getSwapTitle = (tradeType: SwapState['tradeType'], txs: BaseTransaction[] | undefined) => {
+  const hashToLabel: Record<string, string> = {
+    [PRE_SIGN_SIGHASH]: tradeType === 'limit' ? LIMIT_ORDER_TITLE : SWAP_ORDER_TITLE,
+    [APPROVAL_SIGNATURE_HASH]: 'Approve',
+    [WRAP_SIGHASH]: 'Wrap',
+    [UNWRAP_SIGHASH]: 'Unwrap',
+    [CREATE_WITH_CONTEXT_SIGHASH]: TWAP_ORDER_TITLE,
+    [CANCEL_ORDER_SIGHASH]: 'Cancel Order',
+  }
+
+  const swapTitle = txs
+    ?.map((tx) => hashToLabel[tx.data.slice(0, 10)])
+    .filter(Boolean)
+    .join(' and ')
+
+  return swapTitle
 }

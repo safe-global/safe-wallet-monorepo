@@ -1,5 +1,5 @@
+import type { SafeMessageListItem } from '@safe-global/store/gateway/types'
 import type { ReactElement } from 'react'
-import type { SafeMessageListItem } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { isSafeMessageListDateLabel, isSafeMessageListItem } from '@/utils/safe-message-guards'
 import TxDateLabel from '@/components/transactions/TxDateLabel'

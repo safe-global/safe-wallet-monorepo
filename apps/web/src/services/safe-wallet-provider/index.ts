@@ -1,5 +1,5 @@
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { TransactionStatus } from '@safe-global/safe-gateway-typescript-sdk'
+import { TransactionStatus } from '@safe-global/store/gateway/types'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionReceipt } from 'ethers'
 import { numberToHex } from '@/utils/hex'
 
@@ -10,6 +10,50 @@ type SafeInfo = {
 
 type SafeSettings = {
   offChainSigning?: boolean
+}
+
+type Capability = {
+  [key: string]: unknown
+  optional?: boolean
+}
+
+type SendCallsParams = {
+  version: string
+  id?: string
+  from?: `0x${string}`
+  chainId: `0x${string}`
+  atomicRequired: boolean
+  calls: Array<{
+    to?: `0x${string}`
+    data?: `0x${string}`
+    value?: `0x${string}`
+    capabilities?: Record<string, Capability>
+  }>
+  capabilities?: Record<string, Capability>
+}
+
+type SendCallsResult = {
+  id: string
+  capabilities?: Record<string, any>
+}
+
+type GetCallsParams = `0x${string}`
+
+type GetCallsResult = {
+  version: string
+  id: `0x${string}`
+  chainId: `0x${string}`
+  status: number // See "Status Codes"
+  atomic: boolean
+  receipts?: Array<{
+    logs: TransactionReceipt['logs']
+    status: `0x${string}` // Hex 1 or 0 for success or failure, respectively
+    blockHash: `0x${string}`
+    blockNumber: `0x${string}`
+    gasUsed: `0x${string}`
+    transactionHash: `0x${string}`
+  }>
+  capabilities?: Record<string, any>
 }
 
 type GetCapabilitiesResult = Record<`0x${string}`, Record<string, any>>
@@ -49,21 +93,23 @@ interface RpcRequest {
 export enum RpcErrorCode {
   INVALID_PARAMS = -32602,
   USER_REJECTED = 4001,
-  UNSUPPORTED_METHOD = 4200,
   UNSUPPORTED_CHAIN = 4901,
 }
 
 enum BundleStatus {
-  PENDING = 'PENDING',
-  CONFIRMED = 'CONFIRMED',
+  PENDING = 100, // Batch has been received by the wallet but has not completed execution onchain (pending)
+  CONFIRMED = 200, // Batch has been included onchain without reverts, receipts array contains info of all calls (confirmed)
+  OFFCHAIN_FAILURE = 400, // Batch has not been included onchain and wallet will not retry (offchain failure)
+  REVERTED = 500, // Batch reverted completely and only changes related to gas charge may have been included onchain (chain rules failure)
+  PARTIALLY_REVERTED = 600, // Batch reverted partially and some changes related to batch calls may have been included onchain (partial chain rules failure)
 }
 
 const BundleTxStatuses: Record<TransactionStatus, BundleStatus> = {
   [TransactionStatus.AWAITING_CONFIRMATIONS]: BundleStatus.PENDING,
   [TransactionStatus.AWAITING_EXECUTION]: BundleStatus.PENDING,
-  [TransactionStatus.CANCELLED]: BundleStatus.CONFIRMED,
-  [TransactionStatus.FAILED]: BundleStatus.CONFIRMED,
   [TransactionStatus.SUCCESS]: BundleStatus.CONFIRMED,
+  [TransactionStatus.CANCELLED]: BundleStatus.OFFCHAIN_FAILURE,
+  [TransactionStatus.FAILED]: BundleStatus.REVERTED,
 }
 
 class RpcError extends Error {
@@ -137,22 +183,11 @@ export class SafeWalletProvider {
       // EIP-5792
       // @see https://eips.ethereum.org/EIPS/eip-5792
       case 'wallet_sendCalls': {
-        return this.wallet_sendCalls(
-          ...(params as [
-            {
-              version: string
-              chainId: string
-              from: string
-              calls: Array<{ data: string; to?: string; value?: string }>
-              capabilities?: Record<string, any> | undefined
-            },
-          ]),
-          appInfo,
-        )
+        return this.wallet_sendCalls(...(params as [SendCallsParams]), appInfo)
       }
 
       case 'wallet_getCallsStatus': {
-        return this.wallet_getCallsStatus(...(params as [string]))
+        return this.wallet_getCallsStatus(...(params as [GetCallsParams]))
       }
 
       case 'wallet_showCallsStatus': {
@@ -201,15 +236,46 @@ export class SafeWalletProvider {
         result: await this.makeRequest(request, appInfo),
       }
     } catch (e) {
+      const { code, message } = this.parseRpcError(e)
+
       return {
         jsonrpc: '2.0',
         id,
         error: {
-          code: -32000,
-          message: (e as Error).message,
+          code,
+          message,
         },
       }
     }
+  }
+
+  private parseRpcError(error: unknown): { code: number; message: string } {
+    const defaultCode = -32000
+    const defaultMessage = 'Unknown error'
+
+    if (error instanceof RpcError) {
+      return { code: error.code, message: error.message }
+    }
+
+    if (typeof error === 'object' && error !== null) {
+      const { code, message } = error as { code?: unknown; message?: unknown }
+
+      const numericCode = typeof code === 'number' ? code : undefined
+      const stringMessage = typeof message === 'string' ? message : undefined
+
+      if (numericCode !== undefined || stringMessage !== undefined) {
+        return {
+          code: numericCode ?? defaultCode,
+          message: stringMessage ?? defaultMessage,
+        }
+      }
+    }
+
+    if (error instanceof Error) {
+      return { code: defaultCode, message: error.message }
+    }
+
+    return { code: defaultCode, message: defaultMessage }
   }
 
   // Actual RPC methods
@@ -218,6 +284,10 @@ export class SafeWalletProvider {
     try {
       await this.sdk.switchChain(chainId, appInfo)
     } catch (e) {
+      if (typeof e === 'object' && e && 'code' in e && (e as { code?: number }).code === RpcErrorCode.USER_REJECTED) {
+        throw new RpcError(RpcErrorCode.USER_REJECTED, 'User rejected chain switch')
+      }
+
       throw new RpcError(RpcErrorCode.UNSUPPORTED_CHAIN, 'Unsupported chain')
     }
     return null
@@ -279,7 +349,7 @@ export class SafeWalletProvider {
     const { safeTxHash, txHash } = await this.sdk.send(
       {
         txs: [tx],
-        params: { safeTxGas: Number(tx.gas) },
+        params: { safeTxGas: Number(tx.gas ?? 0) },
       },
       appInfo,
     )
@@ -328,14 +398,15 @@ export class SafeWalletProvider {
 
   // EIP-5792
   // @see https://eips.ethereum.org/EIPS/eip-5792
-  async wallet_sendCalls(
-    bundle: {
-      chainId: string
-      from: string
-      calls: Array<{ data?: string; to?: string; value?: string }>
-    },
-    appInfo: AppInfo,
-  ): Promise<string> {
+  async wallet_sendCalls(bundle: SendCallsParams, appInfo: AppInfo): Promise<SendCallsResult> {
+    if (bundle.chainId !== numberToHex(this.safe.chainId)) {
+      throw new Error(`Safe is not on chain ${this.safe.chainId}`)
+    }
+
+    if (bundle.from !== this.safe.safeAddress) {
+      throw Error('Invalid from address')
+    }
+
     const txs = bundle.calls.map((call) => {
       if (!call.to && !call.value && !call.data) {
         throw new RpcError(RpcErrorCode.INVALID_PARAMS, 'Invalid call parameters.')
@@ -363,20 +434,9 @@ export class SafeWalletProvider {
       appInfo,
     )
 
-    return safeTxHash
+    return { id: safeTxHash }
   }
-  async wallet_getCallsStatus(safeTxHash: string): Promise<{
-    status: BundleStatus
-    receipts?: Array<{
-      logs: TransactionReceipt['logs']
-      status: `0x${string}` // Hex 1 or 0 for success or failure, respectively
-      chainId: `0x${string}`
-      blockHash: `0x${string}`
-      blockNumber: `0x${string}`
-      gasUsed: `0x${string}`
-      transactionHash: `0x${string}`
-    }>
-  }> {
+  async wallet_getCallsStatus(safeTxHash: GetCallsParams): Promise<GetCallsResult> {
     let tx: TransactionDetails | undefined
 
     try {
@@ -387,41 +447,44 @@ export class SafeWalletProvider {
       throw new Error('Transaction not found')
     }
 
-    const status = BundleTxStatuses[tx.txStatus]
+    const result: GetCallsResult = {
+      version: '2.0.0',
+      id: safeTxHash,
+      chainId: numberToHex(this.safe.chainId),
+      status: BundleTxStatuses[tx.txStatus],
+      atomic: true,
+    }
 
     if (!tx.txHash) {
-      return {
-        status,
-      }
+      return result
     }
 
     const receipt = await (this.sdk.proxy('eth_getTransactionReceipt', [
       tx.txHash,
     ]) as Promise<TransactionReceipt | null>)
     if (!receipt) {
-      return { status }
+      return result
     }
 
-    const calls = tx.txData?.dataDecoded?.parameters?.[0].valueDecoded?.length ?? 1
+    let calls = 1
+    if (Array.isArray(tx.txData?.dataDecoded?.parameters?.[0].valueDecoded)) {
+      calls = tx.txData?.dataDecoded?.parameters?.[0].valueDecoded.length ?? 1
+    }
 
     // Typed as number; is hex
     const blockNumber = Number(receipt.blockNumber)
     const gasUsed = Number(receipt.gasUsed)
 
-    const receipts = Array.from({ length: calls }, () => ({
+    result.receipts = Array.from({ length: calls }, () => ({
       logs: receipt.logs,
       status: numberToHex(tx.txStatus === TransactionStatus.SUCCESS ? 1 : 0),
-      chainId: numberToHex(this.safe.chainId),
       blockHash: receipt.blockHash as `0x${string}`,
       blockNumber: numberToHex(blockNumber),
       gasUsed: numberToHex(gasUsed),
       transactionHash: tx.txHash as `0x${string}`,
     }))
 
-    return {
-      status,
-      receipts,
-    }
+    return result
   }
   async wallet_showCallsStatus(txHash: string): Promise<null> {
     this.sdk.showTxStatus(txHash)
@@ -434,6 +497,9 @@ export class SafeWalletProvider {
         [`0x${this.safe.chainId.toString(16)}`]: {
           atomicBatch: {
             supported: true,
+          },
+          atomic: {
+            status: 'supported',
           },
         },
       }

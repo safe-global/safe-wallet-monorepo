@@ -16,8 +16,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  bottom: -6px;
-  right: -6px;
+  bottom: -4px;
+  right: -4px;
   border-radius: 50%;
   border: 2px solid var(--color-background-paper);
   background-color: var(--color-background-main);

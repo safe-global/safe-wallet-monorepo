@@ -1,8 +1,0 @@
-{
-  "**/*.{js,jsx,ts,tsx,mjs,cjs,md,yml,json}": ["prettier --write"],
-  "*.tsx": ["prettier --write"],
-  "apps/mobile/assets/fonts/safe-icons/selection.json": [
-    "node ./apps/mobile/scripts/generateIconTypes.js",
-    "git add ./apps/mobile/src/types/iconTypes.ts"
-  ]
-}

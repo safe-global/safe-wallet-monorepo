@@ -2,7 +2,7 @@ import * as constants from '../../support/constants.js'
 import * as createTx from '../pages/create_tx.pages.js'
 import * as msg_data from '../../fixtures/txmessages_data.json'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import { acceptCookies2 } from '../pages/main.page.js'
+import { acceptCookies2, closeSecurityNotice } from '../pages/main.page.js'
 
 let staticSafes = []
 
@@ -15,6 +15,8 @@ describe('[PROD] Onchain Messages tests', () => {
 
   beforeEach(() => {
     cy.visit(constants.prodbaseUrl + constants.transactionsHistoryUrl + staticSafes.SEP_STATIC_SAFE_10)
+    cy.contains(createTx.txStr, { timeout: 10000 })
+    closeSecurityNotice()
     acceptCookies2()
   })
 

@@ -1,11 +1,21 @@
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { renderHook } from '@/tests/test-utils'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { renderHook, getAppName } from '@/tests/test-utils'
 import type { WalletKitTypes } from '@reown/walletkit'
 import { useCompatibilityWarning } from '../useCompatibilityWarning'
-import * as wcUtils from '@/features/walletconnect/services/utils'
+import * as wcUtils from '../../../services/utils'
+import * as useChains from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 
 describe('useCompatibilityWarning', () => {
+  const mockEthereumChain = chainBuilder().with({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' }).build()
+
+  beforeEach(() => {
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: [mockEthereumChain],
+      error: undefined,
+      loading: false,
+    }))
+  })
   describe('should return an error for a dangerous bridge', () => {
     it('if the dApp is named', () => {
       jest.spyOn(wcUtils, 'isBlockedBridge').mockReturnValue(true)
@@ -17,9 +27,10 @@ describe('useCompatibilityWarning', () => {
 
       const { result } = renderHook(() => useCompatibilityWarning(proposal, false))
 
+      const appName = getAppName()
+
       expect(result.current).toEqual({
-        message:
-          'Fake Bridge is a bridge that is incompatible with Safe{Wallet} — the bridged funds will be lost. Consider using a different bridge.',
+        message: `Fake Bridge is a bridge that is incompatible with ${appName} — the bridged funds will be lost. Consider using a different bridge.`,
         severity: 'error',
       })
     })
@@ -34,9 +45,10 @@ describe('useCompatibilityWarning', () => {
 
       const { result } = renderHook(() => useCompatibilityWarning(proposal, false))
 
+      const appName = getAppName()
+
       expect(result.current).toEqual({
-        message:
-          'This dApp is a bridge that is incompatible with Safe{Wallet} — the bridged funds will be lost. Consider using a different bridge.',
+        message: `This dApp is a bridge that is incompatible with ${appName} — the bridged funds will be lost. Consider using a different bridge.`,
         severity: 'error',
       })
     })
@@ -128,18 +140,9 @@ describe('useCompatibilityWarning', () => {
 
       const { result } = renderHook(() => useCompatibilityWarning(proposal, false), {
         initialReduxState: {
-          chains: {
-            loading: false,
-            error: undefined,
-            data: [
-              {
-                chainId: '1',
-                chainName: 'Ethereum',
-              },
-            ] as unknown as Array<ChainInfo>,
-          },
           safeInfo: {
             loading: false,
+            loaded: true,
             error: undefined,
             data: {
               ...extendedSafeInfoBuilder().build(),

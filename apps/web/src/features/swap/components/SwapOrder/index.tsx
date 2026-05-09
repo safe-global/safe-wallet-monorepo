@@ -1,23 +1,24 @@
+import type {
+  SwapOrderTransactionInfo as SwapOrderType,
+  SwapTransferTransactionInfo,
+  TransactionData,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
+import type { TwapOrderTransactionInfo as SwapTwapOrder } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Fragment } from 'react'
-import OrderId from '@/features/swap/components/OrderId'
-import StatusLabel from '@/features/swap/components/StatusLabel'
-import SwapProgress from '@/features/swap/components/SwapProgress'
+import OrderId from '../OrderId'
+import StatusLabel from '../StatusLabel'
+import SwapProgress from '../SwapProgress'
 import { capitalize } from '@/hooks/useMnemonicName'
-import { formatDateTime, formatTimeInWords } from '@/utils/date'
+import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
 import Stack from '@mui/material/Stack'
 import type { ReactElement } from 'react'
-import type { TwapOrder as SwapTwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
-import {
-  type Order,
-  type SwapOrder as SwapOrderType,
-  type TransactionData,
-} from '@safe-global/safe-gateway-typescript-sdk'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { DataTable } from '@/components/common/Table/DataTable'
 import { compareAsc } from 'date-fns'
 import css from './styles.module.css'
 import { Typography } from '@mui/material'
-import { formatAmount } from '@/utils/formatNumber'
+import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import {
   getExecutionPrice,
   getLimitPrice,
@@ -25,25 +26,25 @@ import {
   getPartiallyFilledSurplus,
   getSurplusPrice,
   isOrderPartiallyFilled,
-} from '@/features/swap/helpers/utils'
+} from '../../helpers/utils'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenAmount from '@/components/common/TokenAmount'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { isSwapOrderTxInfo, isSwapTransferOrderTxInfo, isTwapOrderTxInfo } from '@/utils/transaction-guards'
 import { EmptyRow } from '@/components/common/Table/EmptyRow'
-import { PartDuration } from '@/features/swap/components/SwapOrder/rows/PartDuration'
-import { PartSellAmount } from '@/features/swap/components/SwapOrder/rows/PartSellAmount'
-import { PartBuyAmount } from '@/features/swap/components/SwapOrder/rows/PartBuyAmount'
-import { SurplusFee } from '@/features/swap/components/SwapOrder/rows/SurplusFee'
+import { PartDuration } from './rows/PartDuration'
+import { PartSellAmount } from './rows/PartSellAmount'
+import { PartBuyAmount } from './rows/PartBuyAmount'
+import { SurplusFee } from './rows/SurplusFee'
 
 type SwapOrderProps = {
-  txData?: TransactionData
-  txInfo?: Order
+  txData?: TransactionData | null
+  txInfo?: OrderTransactionInfo | null
 }
 
 const TWAP_PARTS_STATUS_THRESHOLD = 10
 
-const AmountRow = ({ order }: { order: Order }) => {
+const AmountRow = ({ order }: { order: OrderTransactionInfo }) => {
   const { sellToken, buyToken, sellAmount, buyAmount, kind } = order
   const isSellOrder = kind === 'sell'
   return (
@@ -80,7 +81,7 @@ const AmountRow = ({ order }: { order: Order }) => {
   )
 }
 
-const PriceRow = ({ order }: { order: Order }) => {
+const PriceRow = ({ order }: { order: OrderTransactionInfo }) => {
   const { status, sellToken, buyToken } = order
   const executionPrice = getExecutionPrice(order)
   const limitPrice = getLimitPrice(order)
@@ -100,7 +101,7 @@ const PriceRow = ({ order }: { order: Order }) => {
   )
 }
 
-const ExpiryRow = ({ order }: { order: Order }) => {
+const ExpiryRow = ({ order }: { order: OrderTransactionInfo }) => {
   const { validUntil, status } = order
   const now = new Date()
   const expires = new Date(validUntil * 1000)
@@ -133,7 +134,7 @@ const ExpiryRow = ({ order }: { order: Order }) => {
   return null
 }
 
-const SurplusRow = ({ order }: { order: Order }) => {
+const SurplusRow = ({ order }: { order: OrderTransactionInfo }) => {
   const { status, kind } = order
   const isPartiallyFilled = isOrderPartiallyFilled(order)
   const surplusPrice = isPartiallyFilled ? getPartiallyFilledSurplus(order) : getSurplusPrice(order)
@@ -150,7 +151,7 @@ const SurplusRow = ({ order }: { order: Order }) => {
   return null
 }
 
-const FilledRow = ({ order }: { order: Order }) => {
+const FilledRow = ({ order }: { order: OrderTransactionInfo }) => {
   const orderClass = getOrderClass(order)
   if (['limit', 'twap'].includes(orderClass)) {
     return (
@@ -163,7 +164,7 @@ const FilledRow = ({ order }: { order: Order }) => {
   return null
 }
 
-const OrderUidRow = ({ order }: { order: Order }) => {
+const OrderUidRow = ({ order }: { order: OrderTransactionInfo }) => {
   if (isSwapOrderTxInfo(order) || isSwapTransferOrderTxInfo(order)) {
     const { uid, explorerUrl } = order
     return (
@@ -175,7 +176,7 @@ const OrderUidRow = ({ order }: { order: Order }) => {
   return null
 }
 
-const StatusRow = ({ order }: { order: Order }) => {
+const StatusRow = ({ order }: { order: OrderTransactionInfo }) => {
   const { status } = order
   const isPartiallyFilled = isOrderPartiallyFilled(order)
   return (
@@ -185,7 +186,7 @@ const StatusRow = ({ order }: { order: Order }) => {
   )
 }
 
-const RecipientRow = ({ order }: { order: Order }) => {
+const RecipientRow = ({ order }: { order: OrderTransactionInfo }) => {
   const { safeAddress } = useSafeInfo()
   const { receiver } = order
 
@@ -200,7 +201,7 @@ const RecipientRow = ({ order }: { order: Order }) => {
   return null
 }
 
-export const SellOrder = ({ order }: { order: SwapOrderType }) => {
+export const SellOrder = ({ order }: { order: SwapOrderType | SwapTransferTransactionInfo }) => {
   const { kind } = order
   const orderKindLabel = capitalize(kind)
 
@@ -284,7 +285,7 @@ export const TwapOrder = ({ order }: { order: SwapTwapOrder }) => {
   )
 }
 
-export const SwapOrder = ({ txInfo }: SwapOrderProps): ReactElement | null => {
+const SwapOrder = ({ txInfo }: SwapOrderProps): ReactElement | null => {
   if (!txInfo) return null
 
   if (isTwapOrderTxInfo(txInfo)) {

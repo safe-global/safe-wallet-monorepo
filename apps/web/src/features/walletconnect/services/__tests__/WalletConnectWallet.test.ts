@@ -304,9 +304,9 @@ describe('WalletConnectWallet', () => {
   })
 
   describe('updateSession', () => {
-    it('should disconnect unsupported chains', async () => {
+    it('should extend the session namespace when switching to a new chain', async () => {
       const disconnectSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'disconnectSession')
-      const emitSpy = jest.spyOn(((wallet as any).web3Wallet as IWalletKit).events, 'emit')
+      const updateSessionSpy = jest.spyOn((wallet as any).web3Wallet as IWalletKit, 'updateSession')
 
       const session = {
         topic: 'topic1',
@@ -322,15 +322,18 @@ describe('WalletConnectWallet', () => {
 
       await (wallet as any).updateSession(session, '69420', toBeHex('0x123', 20))
 
-      expect(disconnectSessionSpy).toHaveBeenCalledWith({
-        reason: {
-          code: 6000,
-          message: 'User disconnected.',
-        },
+      expect(disconnectSessionSpy).not.toHaveBeenCalled()
+      expect(updateSessionSpy).toHaveBeenCalledWith({
         topic: 'topic1',
+        namespaces: {
+          eip155: {
+            chains: ['eip155:69420', 'eip155:1'],
+            accounts: [`eip155:69420:${toBeHex('0x123', 20)}`, `eip155:1:${toBeHex('0x123', 20)}`],
+            events: ['chainChanged', 'accountsChanged'],
+            methods: [],
+          },
+        },
       })
-
-      expect(emitSpy).toHaveBeenCalledWith('session_delete', session)
     })
 
     it('should update the session with the correct namespace', async () => {

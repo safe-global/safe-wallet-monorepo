@@ -1,4 +1,3 @@
-import 'cypress-file-upload'
 import * as constants from '../../support/constants'
 import * as addressBook from '../../e2e/pages/address_book.page'
 import * as main from '../../e2e/pages/main.page'
@@ -13,8 +12,9 @@ describe('[SMOKE] Address book tests', () => {
   })
 
   beforeEach(() => {
+    cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
     cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4)
-    main.waitForHistoryCallToComplete()
+    cy.wait('@History', { timeout: 20000 })
   })
 
   it('[SMOKE] Verify empty name is not allowed when editing', () => {

@@ -1,24 +1,25 @@
-import { SentryErrorBoundary } from '@/services/sentry' // needs to be imported first
+import Analytics from '@/services/analytics/Analytics'
 import type { ReactNode } from 'react'
 import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
 import Head from 'next/head'
+import dynamic from 'next/dynamic'
+
+// Lazy-load Web3 initialization to keep viem/protocol-kit out of the main _app chunk
+const LazyWeb3Init = dynamic(() => import('@/components/common/LazyWeb3Init'), { ssr: false })
 import { Provider } from 'react-redux'
 import CssBaseline from '@mui/material/CssBaseline'
 import type { Theme } from '@mui/material/styles'
 import { ThemeProvider } from '@mui/material/styles'
-import { setBaseUrl as setGatewayBaseUrl } from '@safe-global/safe-gateway-typescript-sdk'
-import { setBaseUrl as setNewGatewayBaseUrl } from '@safe-global/safe-client-gateway-sdk'
 import { CacheProvider, type EmotionCache } from '@emotion/react'
 import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
+import '@/styles/shadcn.css'
 import { BRAND_NAME } from '@/config/constants'
-import { makeStore, useHydrateStore } from '@/store'
+import { makeStore, setStoreInstance, useHydrateStore, useInitStaticChains } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
-import { useInitOnboard } from '@/hooks/wallets/useOnboard'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
-import { useInitSafeCoreSDK } from '@/hooks/coreSDK/useInitSafeCoreSDK'
 import useTxNotifications from '@/hooks/useTxNotifications'
 import useSafeNotifications from '@/hooks/useSafeNotifications'
 import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
@@ -30,7 +31,6 @@ import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
 import useBeamer from '@/hooks/Beamer/useBeamer'
-import ErrorBoundary from '@/components/common/ErrorBoundary'
 import createEmotionCache from '@/utils/createEmotionCache'
 import MetaTags from '@/components/common/MetaTags'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
@@ -39,29 +39,82 @@ import useSafeMessagePendingStatuses from '@/hooks/messages/useSafeMessagePendin
 import useChangedValue from '@/hooks/useChangedValue'
 import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
-import Recovery from '@/features/recovery/components/Recovery'
 import WalletProvider from '@/components/common/WalletProvider'
-import CounterfactualHooks from '@/features/counterfactual/CounterfactualHooks'
+import { CounterfactualFeature } from '@/features/counterfactual'
+import { RecoveryFeature } from '@/features/recovery'
+import { SpendingLimitsFeature } from '@/features/spending-limits'
+import { useLoadFeature } from '@/features/__core__'
+import { TargetedOutreachFeature } from '@/features/targeted-outreach'
+
+/**
+ * Wrapper that lazy-loads Recovery via the feature system.
+ */
+const RecoveryLoader = () => {
+  const { Recovery } = useLoadFeature(RecoveryFeature)
+  return <Recovery />
+}
+
+/**
+ * Wrapper that lazy-loads CounterfactualHooks via the feature system.
+ * This ensures the entire counterfactual feature loads as a single chunk
+ * through handle.ts rather than scattered next/dynamic imports.
+ */
+const CounterfactualHooksLoader = () => {
+  const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
+  return <CounterfactualHooks />
+}
+
+/**
+ * Wrapper that lazy-loads SpendingLimitsLoader via the feature system.
+ */
+const SpendingLimitsLoaderWrapper = () => {
+  const { SpendingLimitsLoader } = useLoadFeature(SpendingLimitsFeature)
+  return <SpendingLimitsLoader />
+}
+
+/**
+ * Wrapper that lazy-loads OutreachPopup via the feature system.
+ * This ensures the entire targeted-outreach feature loads as a single chunk.
+ */
+const TargetedOutreachPopupLoader = () => {
+  const { OutreachPopup } = useLoadFeature(TargetedOutreachFeature)
+  return <OutreachPopup />
+}
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
-import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
-import OutreachPopup from '@/features/targetedOutreach/components/OutreachPopup'
+import { useVisitedSafes } from '@/features/myAccounts'
+import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
 import { GATEWAY_URL } from '@/config/gateway'
+import { captureException, initObservability } from '@/services/observability'
+import useMixpanel from '@/services/analytics/useMixpanel'
+import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
+import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
+import { CaptchaProvider } from '@/components/common/Captcha'
+import { HnQueueAssessmentProvider } from '@/features/hypernative'
+import { useOidcLoginCallback } from '@/features/oidc-auth'
+import { useLogoutCallback } from '@/hooks/useLogoutCallback'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+
+// Initialize observability before React rendering starts
+// This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
+if (typeof window !== 'undefined') {
+  initObservability()
+}
 
 const reduxStore = makeStore()
+setStoreInstance(reduxStore)
 
 const InitApp = (): null => {
-  setGatewayBaseUrl(GATEWAY_URL)
-  setNewGatewayBaseUrl(GATEWAY_URL)
   useHydrateStore(reduxStore)
+  useInitStaticChains()
   useAdjustUrl()
   useGtm()
+  useMixpanel()
   useNotificationTracking()
   useInitSession()
   useLoadableStores()
-  useInitOnboard()
   useInitWeb3()
-  useInitSafeCoreSDK()
   useTxNotifications()
   useSafeMessageNotifications()
   useSafeNotifications()
@@ -71,6 +124,10 @@ const InitApp = (): null => {
   useSafeMsgTracking()
   useBeamer()
   useVisitedSafes()
+  usePortfolioRefetchOnTxHistory()
+  useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
+  useOidcLoginCallback()
+  useLogoutCallback()
 
   return null
 }
@@ -78,21 +135,36 @@ const InitApp = (): null => {
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache()
 
+const THEME_DARK = 'dark'
+const THEME_LIGHT = 'light'
+
 export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }) => {
   const isDarkMode = useDarkMode()
-  const themeMode = isDarkMode ? 'dark' : 'light'
+  const themeMode = isDarkMode ? THEME_DARK : THEME_LIGHT
+
+  const handleError = (error: Error, componentStack?: string) => {
+    captureException(error, { componentStack })
+  }
+
+  const content = (
+    <ShadcnProvider dark={isDarkMode}>
+      <WalletProvider>
+        <GeoblockingProvider>
+          <TxModalProvider>
+            <AddressBookSourceProvider>
+              <HnQueueAssessmentProvider>{children}</HnQueueAssessmentProvider>
+            </AddressBookSourceProvider>
+          </TxModalProvider>
+        </GeoblockingProvider>
+      </WalletProvider>
+    </ShadcnProvider>
+  )
 
   return (
     <SafeThemeProvider mode={themeMode}>
       {(safeTheme: Theme) => (
         <ThemeProvider theme={safeTheme}>
-          <SentryErrorBoundary showDialog fallback={ErrorBoundary}>
-            <WalletProvider>
-              <GeoblockingProvider>
-                <TxModalProvider>{children}</TxModalProvider>
-              </GeoblockingProvider>
-            </WalletProvider>
-          </SentryErrorBoundary>
+          <ObservabilityErrorBoundary onError={handleError}>{content}</ObservabilityErrorBoundary>
         </ThemeProvider>
       )}
     </SafeThemeProvider>
@@ -101,6 +173,16 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
 
 interface SafeWalletAppProps extends AppProps {
   emotionCache?: EmotionCache
+}
+
+const TermsGate = ({ children }: { children: ReactNode }) => {
+  const { shouldShowContent } = useSafeLabsTerms()
+
+  if (!shouldShowContent) {
+    return null
+  }
+
+  return <>{children}</>
 }
 
 const SafeWalletApp = ({
@@ -122,23 +204,33 @@ const SafeWalletApp = ({
         <AppProviders>
           <CssBaseline />
 
-          <InitApp />
+          <CaptchaProvider>
+            <InitApp />
 
-          <PageLayout pathname={router.pathname}>
-            <Component {...pageProps} key={safeKey} />
-          </PageLayout>
+            <LazyWeb3Init />
 
-          <CookieAndTermBanner />
+            <TermsGate>
+              <PageLayout pathname={router.pathname}>
+                <Component {...pageProps} key={safeKey} />
+              </PageLayout>
 
-          <OutreachPopup />
+              <CookieAndTermBanner />
 
-          <Notifications />
+              <TargetedOutreachPopupLoader />
 
-          <Recovery />
+              <Notifications />
 
-          <CounterfactualHooks />
+              <RecoveryLoader />
 
-          <PkModulePopup />
+              <CounterfactualHooksLoader />
+
+              <SpendingLimitsLoaderWrapper />
+
+              <Analytics />
+
+              <PkModulePopup />
+            </TermsGate>
+          </CaptchaProvider>
         </AppProviders>
       </CacheProvider>
     </Provider>

@@ -11,7 +11,7 @@ import { logError, Errors } from '@/services/exceptions'
 import { getRecoveredSafeInfo } from '@/features/recovery/services/transaction-list'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
-export function RecoveryDescription({ item }: { item: RecoveryQueueItem }): ReactElement {
+export default function RecoveryDescription({ item }: { item: RecoveryQueueItem }): ReactElement {
   const { args, isMalicious } = item
   const { safe } = useSafeInfo()
   const isRecoverer = useIsRecoverer()

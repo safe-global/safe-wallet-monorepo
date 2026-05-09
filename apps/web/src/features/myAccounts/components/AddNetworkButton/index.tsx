@@ -1,5 +1,5 @@
 import Track from '@/components/common/Track'
-import { CreateSafeOnNewChain } from '@/features/multichain/components/CreateSafeOnNewChain'
+import { CreateSafeOnNewChain } from '@/features/multichain'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { Button } from '@mui/material'
 import { useState } from 'react'

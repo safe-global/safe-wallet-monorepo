@@ -1,5 +1,5 @@
 import { AppRoutes } from '@/config/routes'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { createContext, type ReactElement, type ReactNode } from 'react'
 
 export const GeoblockingContext = createContext<boolean | null>(null)

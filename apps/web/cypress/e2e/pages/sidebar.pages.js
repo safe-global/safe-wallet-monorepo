@@ -4,7 +4,7 @@ import * as modal from './modals.page.js'
 import * as navigation from './navigation.page.js'
 import { safeHeaderInfo } from './import_export.pages.js'
 import * as file from './import_export.pages.js'
-import safes from '../../fixtures/safes/static.json'
+import safes from '../../fixtures/safes/static.js'
 import * as address_book from './address_book.page.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
 
@@ -13,12 +13,14 @@ const safeIcon = '[data-testid="safe-icon"]'
 const sidebarContainer = '[data-testid="sidebar-container"]'
 const openSafesIcon = '[data-testid="open-safes-icon"]'
 const qrModalBtn = '[data-testid="qr-modal-btn"]'
-const copyAddressBtn = '[data-testid="copy-address-btn"]'
+export const copyAddressBtn = '[data-testid="copy-address-btn"]'
 const explorerBtn = '[data-testid="explorer-btn"]'
 export const sideBarListItem = '[data-testid="sidebar-list-item"]'
 const sideBarListItemWhatsNew = '[data-testid="list-item-whats-new"]'
 const sideBarListItemNeedHelp = '[data-testid="list-item-need-help"]'
-const sideSafeListItem = '[data-testid="safe-list-item"]'
+export const sidebarSettingsItem = '[data-testid="sidebar-settings-item"]'
+export const sidebarListItem = '[data-testid="sidebar-list-item"]'
+export const sideSafeListItem = '[data-testid="safe-list-item"]'
 const sidebarSafeHeader = '[data-testid="safe-header-info"]'
 const sidebarSafeContainer = '[data-testid="sidebar-safe-container"]'
 const safeItemOptionsBtn = '[data-testid="safe-options-btn"]'
@@ -45,6 +47,7 @@ const groupBalance = '[data-testid="group-balance"]'
 const groupAddress = '[data-testid="group-address"]'
 const groupSafeIcon = '[data-testid="group-safe-icon"]'
 const multichainTooltip = '[data-testid="multichain-tooltip"]'
+const tooltipTrigger = '[data-slot="tooltip-trigger"]'
 const networkInput = '[id="network-input"]'
 const networkOption = 'li[role="option"]'
 const showAllNetworks = '[data-testid="show-all-networks"]'
@@ -65,6 +68,56 @@ export const currentSafeSection = '[data-testid="current-safe-section"]'
 const readOnlyChip = '[data-testid="read-only-chip"]'
 const addSafeBtn = '[data-testid="add-safe-button"]'
 const indexStatusSection = '[data-testid="index-status"]'
+const needHelpBtn = '[data-testid="list-item-need-help"]'
+const openNestedSafeListBtn = '[data-track="nested-safes: Open nested Safe list"]'
+const nestedSafeListPopover = '[data-testid="nested-safe-list"]'
+const breadcrumpContainer = '[data-testid="safe-breadcrumb-container"]'
+const parentSafeItem = 'div[aria-label="Parent Safe"]'
+const nestedSafeItem = 'div[aria-label="Nested Safe"]'
+const safeIconItem = '[data-testid="safe-icon"]'
+
+export function clickOnOpenNestedSafeListBtn() {
+  cy.get(openNestedSafeListBtn).click()
+}
+
+export function checkSafesInPopverList(safes) {
+  main.verifyValuesExist(nestedSafeListPopover, safes)
+}
+
+export function checkSafesCountInPopverList(number) {
+  main.verifyElementsCount(nestedSafeListPopover, number)
+}
+
+export function clickOnSafeInPopover(safe) {
+  cy.get(nestedSafeListPopover).within(() => {
+    cy.contains(safe).click()
+  })
+}
+
+export function clickOnParentSafeInBreadcrumb() {
+  cy.wait(1000) // Needs time to render
+  cy.get(breadcrumpContainer).within(() => {
+    cy.get(parentSafeItem).within(() => {
+      cy.get('a').click()
+    })
+  })
+}
+
+export function checkParentSafeInBreadcrumb(name, address) {
+  cy.get(breadcrumpContainer).within(() => {
+    cy.get(parentSafeItem).within(() => {
+      cy.get(`a[href*="${address}"]`).should('contain', name)
+    })
+  })
+}
+
+export function checkNestedSafeInBreadcrumb(name) {
+  cy.get(breadcrumpContainer).within(() => {
+    cy.get(nestedSafeItem).within(() => {
+      cy.get('p').should('contain', name)
+    })
+  })
+}
 
 export const importBtnStr = 'Import'
 export const exportBtnStr = 'Export'
@@ -72,10 +125,6 @@ export const undeployedSafe = 'Undeployed Sepolia'
 export const notActivatedStr = 'Not activated'
 export const addingNetworkNotPossibleStr = 'Adding another network is not possible for this Safe.'
 export const createSafeMsg = (network) => `Successfully added your account on ${network}`
-const signersNotConsistentMsg = 'Signers are not consistent'
-const signersNotConsistentMsg2 = (network) => `Signers are different on these networks of this account:${network}`
-const signersNotConsistentMsg3 =
-  'To manage your account easier and to prevent lose of funds, we recommend keeping the same signers'
 const signersNotConsistentConfirmTxViewMsg = (network) =>
   `Signers are not consistent across networks on this account. Changing signers will only affect the account on ${network}`
 const activateStr = 'You need to activate your Safe first'
@@ -84,6 +133,7 @@ const emptyPinnedMessage = 'Personalize your account list by clicking theicon on
 export const addedSafesEth = ['0x8675...a19b']
 export const addedSafesSepolia = ['0x6d0b...6dC1', '0x5912...fFdb', '0x0637...708e', '0xD157...DE9a']
 export const sideBarListItems = ['Home', 'Assets', 'Transactions', 'Address book', 'Apps', 'Settings', 'Swap']
+export const sideBarListItemsNew = ['Overview', 'Assets', 'Transactions', 'Address book', 'Apps']
 export const sideBarSafes = {
   safe1: '0xBb26E3717172d5000F87DeFd391994f789D80aEB',
   safe2: '0x905934aA8758c06B2422F0C90D97d2fbb6677811',
@@ -110,13 +160,23 @@ const confirmTxStr = (number) => `${number} to confirm`
 const pedningTxStr = (n) => `${n} pending`
 export const confirmGenStr = 'to confirm'
 const searchResults = (number) => `Found ${number} result${number === 1 ? '' : 's'}`
+const needHelpLink = 'https://help.safe.global'
 
 export const sortOptions = {
   lastVisited: '[data-testid="last-visited-option"]',
   name: '[data-testid="name-option"]',
 }
+
+export function whatsNewBtnIsVisible() {
+  cy.get(sideBarListItemWhatsNew).should('be.visible')
+}
+
 export function checkSearchResults(number) {
   cy.contains(searchResults(number)).should('exist')
+}
+
+export function checkNeedHelpBtnLink() {
+  cy.get(needHelpBtn).should('have.attr', 'href', needHelpLink)
 }
 
 export const multichainSafes = {
@@ -174,9 +234,7 @@ export function verifyCurrentSafeReadOnly(number) {
 }
 
 export function verifyIndexStatusPresent() {
-  cy.get(indexStatusSection).within(() => {
-    cy.get('a').should('have.attr', 'href', constants.indexStatusUrl)
-  })
+  cy.get(indexStatusSection).should('have.attr', 'href', constants.indexStatusUrl)
 }
 
 export function clickOnAddSafeBtn() {
@@ -195,6 +253,18 @@ export function clickOnSidebarImportBtn() {
   getImportBtn().click()
   modal.verifyModalTitle(modal.modalTitiles.dataImport)
   file.verifyValidImportInputExists()
+}
+
+export function clickOnCopyAddressBtn(expectedData) {
+  cy.window().then((win) => {
+    cy.stub(win.navigator.clipboard, 'writeText').as('clipboardWrite')
+  })
+  cy.get(copyAddressBtn).click()
+  cy.get('@clipboardWrite', { timeout: 10000 }).should('have.been.called')
+  cy.get('@clipboardWrite').then((stub) => {
+    const actualCallArgs = stub.args[0][0]
+    expect(actualCallArgs).to.include(expectedData)
+  })
 }
 
 export function showAllSafes() {
@@ -231,11 +301,9 @@ export function verifySafeHeaderDetails(details) {
 }
 
 export function clickOnQRCodeBtn() {
-  cy.get(sidebarContainer)
-    .should('be.visible')
-    .within(() => {
-      cy.get(qrModalBtn).click()
-    })
+  cy.get(sidebarContainer).within(() => {
+    cy.get(qrModalBtn).should('have.length', 1).click()
+  })
 }
 
 export function verifyQRModalDisplayed() {
@@ -281,6 +349,15 @@ export function verifySideListItems() {
 
 export function verifyTxCounter(counter) {
   cy.get(sideBarListItem).contains(sideBarListItems[2]).should('contain', counter)
+}
+
+export function verifySideListItemsNew() {
+  main.verifyValuesExist(sideBarListItem, sideBarListItemsNew)
+  main.verifyElementsExist([sidebarSettingsItem, sideBarListItemNeedHelp])
+}
+
+export function verifyTxCounterNew(counter) {
+  cy.get('[data-testid="queued-tx-info"]').should('be.visible').and('contain.text', String(counter))
 }
 
 export function verifyNavItemDisabled(item) {
@@ -361,6 +438,10 @@ export function verifyQueuedTx(safe) {
   return getSafeItemOptions(safe).find(queuedTxInfo).should('exist')
 }
 
+export function verifySafeIconData(safe) {
+  return getSafeByName(safe).find(safeIconItem).should('be.visible')
+}
+
 export function clickOnSafeItemOptionsBtn(name) {
   getSafeItemOptions(name).find(safeItemOptionsBtn).click()
 }
@@ -378,7 +459,7 @@ export function clickOnMultichainItemOptionsBtn(index) {
 }
 
 export function checkMultichainTooltipExists(index) {
-  cy.get(multichainItemSummary).eq(index).find(chainLogo).eq(0).trigger('mouseover', { force: true })
+  cy.get(multichainItemSummary).eq(index).find(tooltipTrigger).eq(0).focus()
   cy.get(multichainTooltip).should('exist')
 }
 
@@ -567,7 +648,7 @@ export function verifyTxToConfirmDoesNotExist() {
 
 export function checkBalanceExists() {
   const balance = new RegExp(`\\s*\\d*\\.?\\d*\\s*`, 'i')
-  const element = cy.get(chainLogo).prev().contains(balance)
+  cy.get(chainLogo).next().contains(balance).should('exist')
 }
 
 export function clickOnAddOptionsBtn() {
@@ -625,12 +706,6 @@ export function checkNetworksInRange(expectedString, expectedCount, direction = 
     })
 }
 
-export function checkInconsistentSignersMsgDisplayed(network) {
-  cy.contains(signersNotConsistentMsg).should('exist')
-  cy.contains(signersNotConsistentMsg2(network)).should('exist')
-  cy.contains(signersNotConsistentMsg3).should('exist')
-}
-
 export function checkInconsistentSignersMsgDisplayedConfirmTxView(network) {
   cy.contains(signersNotConsistentConfirmTxViewMsg(network)).should('exist')
 }
@@ -651,4 +726,24 @@ export function checkNetworkDisabled(networks) {
       expect($el).not.to.have.attr('aria-disabled')
     }
   })
+}
+
+export function verifySidebarContainerVisible() {
+  cy.get(sidebarContainer).should('be.visible')
+}
+
+export function verifySidebarSettingsItemVisible() {
+  cy.get(sidebarSettingsItem).should('be.visible')
+}
+
+export function verifySidebarListItem() {
+  cy.get(sidebarListItem).should('be.visible')
+}
+
+export function verifyQueuedTxInfoCount(count) {
+  cy.get(queuedTxInfo).should('be.visible').and('contain.text', String(count))
+}
+
+export function verifyListItemNeedHelp() {
+  cy.get(sideBarListItemNeedHelp).should('be.visible')
 }

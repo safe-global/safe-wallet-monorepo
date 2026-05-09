@@ -1,15 +1,15 @@
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { Accordion, AccordionDetails, AccordionSummary, Box } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { ReactElement } from 'react'
-import type { SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
-import { ErrorBoundary } from '@sentry/react'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 
 import MsgDetails from '@/components/safe-messages/MsgDetails'
 import MsgSummary from '@/components/safe-messages/MsgSummary'
 
 import txListItemCss from '@/components/transactions/TxListItem/styles.module.css'
 
-const ExpandableMsgItem = ({ msg, expanded = false }: { msg: SafeMessage; expanded?: boolean }): ReactElement => {
+const ExpandableMsgItem = ({ msg, expanded = false }: { msg: MessageItem; expanded?: boolean }): ReactElement => {
   return (
     <Accordion
       defaultExpanded={expanded}
@@ -27,9 +27,9 @@ const ExpandableMsgItem = ({ msg, expanded = false }: { msg: SafeMessage; expand
       </AccordionSummary>
 
       <AccordionDetails sx={{ padding: 0 }}>
-        <ErrorBoundary fallback={<Box sx={{ p: 2 }}>Failed to render message details</Box>}>
+        <ObservabilityErrorBoundary fallback={<Box sx={{ p: 2 }}>Failed to render message details</Box>}>
           <MsgDetails msg={msg} />
-        </ErrorBoundary>
+        </ObservabilityErrorBoundary>
       </AccordionDetails>
     </Accordion>
   )

@@ -2,6 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { AlertColor } from '@mui/material'
 import type { AppThunk, RootState } from '@/store'
 import type { LinkProps } from 'next/link'
+import type { ReactNode } from 'react'
 
 export type Notification = {
   id: string
@@ -14,6 +15,7 @@ export type Notification = {
   isDismissed?: boolean
   isRead?: boolean
   link?: { href: LinkProps['href']; title: string } | { onClick: () => void; title: string }
+  icon?: ReactNode
   onClose?: () => void
 }
 
@@ -52,8 +54,7 @@ export const notificationsSlice = createSlice({
   },
 })
 
-export const { closeNotification, closeByGroupKey, deleteNotification, deleteAllNotifications, readNotification } =
-  notificationsSlice.actions
+export const { closeNotification, deleteAllNotifications, readNotification } = notificationsSlice.actions
 
 export const showNotification = (payload: Omit<Notification, 'id' | 'timestamp'>): AppThunk<string> => {
   return (dispatch) => {

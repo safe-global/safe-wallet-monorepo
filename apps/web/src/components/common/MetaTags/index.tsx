@@ -1,7 +1,6 @@
-import { BRAND_NAME, IS_PRODUCTION } from '@/config/constants'
+import { BRAND_NAME, IS_PRODUCTION, IS_BEHIND_IAP } from '@/config/constants'
 import { ContentSecurityPolicy, StrictTransportSecurity } from '@/config/securityHeaders'
-import lightPalette from '@/components/theme/lightPalette'
-import darkPalette from '@/components/theme/darkPalette'
+import { lightPalette, darkPalette } from '@safe-global/theme/palettes'
 
 const descriptionText = `${BRAND_NAME} is the most trusted smart account wallet on Ethereum with over $100B secured.`
 const titleText = BRAND_NAME
@@ -36,7 +35,7 @@ const MetaTags = ({ prefetchUrl }: { prefetchUrl: string }) => (
     {/* PWA primary color and manifest */}
     <meta name="theme-color" content={lightPalette.background.main} media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content={darkPalette.background.main} media="(prefers-color-scheme: dark)" />
-    <link rel="manifest" href="/safe.webmanifest" />
+    <link rel="manifest" href="/safe.webmanifest" {...(IS_BEHIND_IAP && { crossOrigin: 'use-credentials' })} />
 
     {/* Favicons */}
     <link rel="shortcut icon" href="/favicons/favicon.ico" />

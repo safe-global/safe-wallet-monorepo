@@ -1,7 +1,7 @@
 // Unit tests for the SafeWalletProvider class
 import { faker } from '@faker-js/faker'
-import { SafeWalletProvider } from '.'
-import { ERC20__factory } from '@/types/contracts'
+import { RpcErrorCode, SafeWalletProvider } from '.'
+import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { numberToHex } from '@/utils/hex'
 import type { TransactionReceipt } from 'ethers'
 
@@ -56,8 +56,32 @@ describe('SafeWalletProvider', () => {
         id: 1,
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: RpcErrorCode.UNSUPPORTED_CHAIN,
           message: 'Unsupported chain',
+        },
+      })
+    })
+
+    it('should surface user rejections when the chain switch is cancelled', async () => {
+      const sdk = {
+        switchChain: jest
+          .fn()
+          .mockRejectedValue({ code: RpcErrorCode.USER_REJECTED, message: 'User rejected chain switch' }),
+      }
+      const safeWalletProvider = new SafeWalletProvider(safe, sdk as any)
+
+      await expect(
+        safeWalletProvider.request(
+          1,
+          { method: 'wallet_switchEthereumChain', params: [{ chainId: '0x1' }] } as any,
+          {} as any,
+        ),
+      ).resolves.toEqual({
+        id: 1,
+        jsonrpc: '2.0',
+        error: {
+          code: RpcErrorCode.USER_REJECTED,
+          message: 'User rejected chain switch',
         },
       })
     })
@@ -108,7 +132,7 @@ describe('SafeWalletProvider', () => {
         id: 1,
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: RpcErrorCode.INVALID_PARAMS,
           message: 'The address or message hash is invalid',
         },
       })
@@ -126,7 +150,7 @@ describe('SafeWalletProvider', () => {
         id: 1,
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: RpcErrorCode.INVALID_PARAMS,
           message: 'The address or message hash is invalid',
         },
       })
@@ -185,7 +209,7 @@ describe('SafeWalletProvider', () => {
         id: 1,
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: RpcErrorCode.INVALID_PARAMS,
           message: 'The address or message hash is invalid',
         },
       })
@@ -204,7 +228,7 @@ describe('SafeWalletProvider', () => {
         id: 1,
         jsonrpc: '2.0',
         error: {
-          code: -32000,
+          code: RpcErrorCode.INVALID_PARAMS,
           message: 'The address or message hash is invalid',
         },
       })
@@ -277,7 +301,7 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           error: {
-            code: -32000,
+            code: RpcErrorCode.INVALID_PARAMS,
             message: 'The address is invalid',
           },
         })
@@ -520,9 +544,9 @@ describe('SafeWalletProvider', () => {
 
         const params = [
           {
-            chainId: 1,
+            chainId: '0x1',
             version: '1.0',
-            from: faker.finance.ethereumAddress(),
+            from: safe.safeAddress,
             calls: [
               { data: '0x123', to: faker.finance.ethereumAddress(), value: '0x123' },
               { data: '0x456', to: faker.finance.ethereumAddress(), value: '0x1' },
@@ -570,7 +594,7 @@ describe('SafeWalletProvider', () => {
 
         const params = [
           {
-            chainId: 1,
+            chainId: '0x1',
             version: '1.0',
             from: safe.safeAddress,
             calls: [
@@ -656,18 +680,21 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           result: {
+            atomic: true,
+            id: params[0],
+            chainId: '0x1',
             receipts: [
               {
                 blockHash: receipt.blockHash,
                 blockNumber: receipt.blockNumber,
-                chainId: '0x1',
                 gasUsed: receipt.gasUsed,
                 logs: receipt.logs,
                 status: '0x1',
                 transactionHash: '0x123',
               },
             ],
-            status: 'CONFIRMED',
+            status: 200,
+            version: '2.0.0',
           },
         })
       })
@@ -708,18 +735,21 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           result: {
+            atomic: true,
+            chainId: '0x1',
+            id: params[0],
             receipts: [
               {
                 blockHash: numberToHex(Number(receipt.blockHash)),
                 blockNumber: numberToHex(Number(receipt.blockNumber)),
-                chainId: '0x1',
                 gasUsed: numberToHex(receipt.gasUsed),
                 logs: receipt.logs,
                 status: '0x1',
                 transactionHash: '0x123',
               },
             ],
-            status: 'CONFIRMED',
+            status: 200,
+            version: '2.0.0',
           },
         })
       })
@@ -748,7 +778,11 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           result: {
-            status: 'PENDING',
+            atomic: true,
+            chainId: '0x1',
+            id: params[0],
+            status: 100,
+            version: '2.0.0',
           },
         })
       })
@@ -783,7 +817,11 @@ describe('SafeWalletProvider', () => {
           id: 1,
           jsonrpc: '2.0',
           result: {
-            status: 'PENDING',
+            atomic: true,
+            chainId: '0x1',
+            id: params[0],
+            status: 100,
+            version: '2.0.0',
           },
         })
       })
@@ -822,6 +860,9 @@ describe('SafeWalletProvider', () => {
             ['0x1']: {
               atomicBatch: {
                 supported: true,
+              },
+              atomic: {
+                status: 'supported',
               },
             },
           },

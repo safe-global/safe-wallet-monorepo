@@ -1,13 +1,10 @@
+import type { TransactionInfoType, OrderTransactionInfo } from '@safe-global/store/gateway/types'
+import type { TokenInfo, SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Builder, type IBuilder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
-import type {
-  OrderToken,
-  SwapOrder,
-  TransactionInfoType,
-  TwapOrder,
-  Order,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import { DurationType, StartTimeValue } from '@safe-global/safe-gateway-typescript-sdk'
+
+// Seed faker for deterministic values in stories/tests
+faker.seed(42)
 
 export function appDataBuilder(
   orderClass: 'limit' | 'market' | 'twap' | 'liquidity' = 'limit',
@@ -34,8 +31,8 @@ export function appDataBuilder(
   })
 }
 
-export function orderTokenBuilder(): IBuilder<OrderToken> {
-  return Builder.new<OrderToken>().with({
+export function orderTokenBuilder(): IBuilder<TokenInfo> {
+  return Builder.new<TokenInfo>().with({
     address: faker.finance.ethereumAddress(),
     decimals: faker.number.int({ max: 18 }),
     logoUri:
@@ -46,70 +43,10 @@ export function orderTokenBuilder(): IBuilder<OrderToken> {
   })
 }
 
-export function swapOrderBuilder(): IBuilder<SwapOrder> {
-  const sellToken = orderTokenBuilder().build()
-  const executedFee = faker.string.numeric()
-  return Builder.new<SwapOrder>().with({
-    type: 'SwapOrder' as TransactionInfoType.SWAP_ORDER,
-    uid: faker.string.uuid(),
-    status: faker.helpers.arrayElement(['presignaturePending', 'open', 'cancelled', 'fulfilled', 'expired']),
-    kind: faker.helpers.arrayElement(['buy', 'sell']),
-    orderClass: faker.helpers.arrayElement(['limit', 'market', 'liquidity']),
-    validUntil: faker.date.future().getTime(),
-    sellAmount: faker.string.numeric(),
-    buyAmount: faker.string.numeric(),
-    executedSellAmount: faker.string.numeric(),
-    executedBuyAmount: faker.string.numeric(),
-    sellToken,
-    buyToken: orderTokenBuilder().build(),
-    explorerUrl:
-      'https://explorer.cow.fi/orders/0x03a5d561ad2452d719a0d075573f4bed68217c696b52f151122c30e3e4426f1b05e6b5eb1d0e6aabab082057d5bb91f2ee6d11be66223d88',
-    executedFee,
-    executedFeeToken: sellToken,
-    fullAppData: appDataBuilder().build(),
-  })
-}
-
-export function twapOrderBuilder(): IBuilder<TwapOrder> {
-  const sellToken = orderTokenBuilder().build()
-  const executedFee = faker.string.numeric()
-  return Builder.new<TwapOrder>().with({
-    type: 'TwapOrder' as TransactionInfoType.TWAP_ORDER,
-    status: faker.helpers.arrayElement(['presignaturePending', 'open', 'cancelled', 'fulfilled', 'expired']),
-    kind: faker.helpers.arrayElement(['buy', 'sell']),
-    orderClass: faker.helpers.arrayElement(['limit', 'market', 'liquidity']),
-    validUntil: faker.date.future().getTime(),
-    sellAmount: faker.string.numeric(),
-    buyAmount: faker.string.numeric(),
-    executedSellAmount: faker.string.numeric(),
-    executedBuyAmount: faker.string.numeric(),
-    sellToken: orderTokenBuilder().build(),
-    buyToken: orderTokenBuilder().build(),
-    executedFee,
-    executedFeeToken: sellToken,
-    fullAppData: appDataBuilder().build(),
-    numberOfParts: faker.number.int({ min: 1, max: 10 }).toString(),
-    /** @description The amount of sellToken to sell in each part */
-    partSellAmount: faker.string.numeric(),
-    /** @description The amount of buyToken that must be bought in each part */
-    minPartLimit: faker.string.numeric(),
-    /** @description The duration of the TWAP interval */
-    timeBetweenParts: faker.number.int({ min: 1, max: 10000000 }),
-    /** @description Whether the TWAP is valid for the entire interval or not */
-    durationOfPart: {
-      durationType: DurationType.AUTO,
-    },
-    /** @description The start time of the TWAP */
-    startTime: {
-      startType: StartTimeValue.AT_MINING_TIME,
-    },
-  })
-}
-
 // create a builder for SwapOrderConfirmationView
-export function swapOrderConfirmationViewBuilder(): IBuilder<Order> {
+export function swapOrderConfirmationViewBuilder(): IBuilder<OrderTransactionInfo> {
   const ownerAndReceiver = faker.finance.ethereumAddress()
-  return Builder.new<Order>().with({
+  return Builder.new<SwapOrderTransactionInfo>().with({
     type: 'SwapOrder' as TransactionInfoType.SWAP_ORDER,
     uid: faker.string.uuid(),
     kind: faker.helpers.arrayElement(['buy', 'sell']),

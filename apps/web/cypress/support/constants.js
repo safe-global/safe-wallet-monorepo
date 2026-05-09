@@ -1,5 +1,9 @@
 import { LS_NAMESPACE } from '../../src/config/constants'
-import safes from '../fixtures/safes/static.json'
+import safes from '../fixtures/safes/static.js'
+
+// Visual regression (Argos) test settings
+export const VISUAL_VIEWPORT = { viewportWidth: 1920, viewportHeight: 1080 }
+export const VISUAL_SETTLE_TIME = 7000 // ms to let UI animations settle before Argos captures the screenshot
 
 export const RECIPIENT_ADDRESS = '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC'
 export const GOERLI_SAFE_APPS_SAFE = 'gor:0x168ca275d1103cb0a30980813140053c7566932F'
@@ -18,6 +22,9 @@ export const SAFE_APP_ADDRESS_3 = '0xc6b82bA149CFA113f8f48d5E3b1F78e933e16DfD'
 export const DEFAULT_OWNER_ADDRESS = '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED'
 // Below is also used in sidebar tests as a beneficiary
 export const SPENDING_LIMIT_ADDRESS_2 = '0x52835f11E348605E9D791Ec09380a3224526d538'
+// AllowanceModule contract addresses — keyed by contract version, not by network
+export const ALLOWANCE_MODULE_V0_1_0 = '0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134'
+export const ALLOWANCE_MODULE_V0_1_1 = '0xAA46724893dedD72658219405185Fb0Fc91e091C'
 export const SEPOLIA_OWNER_2 = '0x96D4c6fFC338912322813a77655fCC926b9A5aC5'
 export const SEPOLIA_OWNER_2_SHORT = '0x96D4...5aC5'
 export const TEST_SAFE_2 = 'gor:0xE96C43C54B08eC528e9e815fC3D02Ea94A320505'
@@ -37,19 +44,29 @@ export const goerlySafeName = /g(ö|oe)rli-safe/
 export const sepoliaSafeName = 'sepolia-safe'
 export const goerliToken = /G(ö|oe)rli Ether/
 
+export const spaceDashboardUrl = '/spaces?spaceId='
+export const spaceUrl = '/spaces/settings?spaceId='
+export const spaceMembersUrl = '/spaces/members?spaceId='
+export const spaceSafeAccountsUrl = '/spaces/safe-accounts?spaceId='
+export const spaceAddressBookUrl = '/spaces/address-book?spaceId='
+export const userSettingsUrl = '/user-settings'
 export const prodbaseUrl = 'https://app.safe.global'
-export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
+export const swapWidget = 'https://swap.cow.finance/#/11155111/widget/swap/'
+export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
-export const TX_Builder_url = 'https://safe-apps.dev.5afe.dev/tx-builder'
+export const TX_Builder_url = 'https://tx-builder.staging.5afe.dev'
 export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe'
 export const testAppUrl = 'https://safe-test-app.com'
 export const swapUrl = '/swap?safe='
 export const addressBookUrl = '/address-book?safe='
-export const appsUrlGeneral = '/apps?=safe='
+export const appsUrlGeneral = '/apps?safe='
 export const stakingUrl = '/stake?safe='
+export const earnUrl = '/earn?safe='
+export const bridgeUrl = '/bridge?safe='
 export const appsCustomUrl = 'apps/custom?safe='
 export const BALANCE_URL = '/balances?safe='
 export const balanceNftsUrl = '/balances/nfts?safe='
+export const positionsUrl = '/balances/positions?safe='
 export const transactionQueueUrl = '/transactions/queue?safe='
 export const transactionsHistoryUrl = '/transactions/history?safe='
 export const transactionsMessagesUrl = '/transactions/messages?safe='
@@ -57,28 +74,34 @@ export const transactionsQueued = 'transactions/queued'
 export const transactionUrl = '/transactions/tx?safe='
 export const openAppsUrl = '/apps/open?safe='
 export const homeUrl = '/home?safe='
+export const spacesUrl = '/welcome/spaces'
 export const welcomeUrl = '/welcome'
+export const welcomeAccountUrl = 'welcome/accounts'
+export const welcomeAccountsSepoliaUrl = 'welcome/accounts?chain=sep'
+export const welcomeSepoliaUrl = '/welcome?chain=sep'
 export const chainMaticUrl = '/welcome?chain=matic'
 export const createNewSafeSepoliaUrl = '/new-safe/create?chain=sep'
 export const loadNewSafeSepoliaUrl = '/new-safe/load?chain=sep'
 export const loadNewSafeUrl = '/new-safe/load'
+export const advancedCreateSafeSepoliaUrl = '/new-safe/advanced-create?chain=sep'
 export const appsUrl = '/apps'
 export const requestPermissionsUrl = '/request-permissions'
 export const getPermissionsUrl = '/get-permissions'
 export const appSettingsUrl = '/settings/safe-apps'
+export const safeAppsSettingsUrl = '/settings/safe-apps?safe='
 export const setupUrl = '/settings/setup?safe='
 export const dataSettingsUrl = '/settings/data?safe='
 export const securityUrl = '/settings/security?safe='
+export const cookiesUrl = '/settings/cookies?safe='
 export const modulesUrl = '/settings/modules?safe='
 export const notificationsUrl = '/settings/notifications?safe='
-export const invalidAppUrl = 'https://my-invalid-custom-app.com/manifest.json'
-export const validAppUrlJson = 'https://my-valid-custom-app.com/manifest.json'
+export const envVariablesUrl = '/settings/environment-variables?safe='
 export const validAppUrl = 'https://my-valid-custom-app.com'
 export const etherscanlLink = 'etherscan.io'
 export const stagingTxServiceUrl = 'https://safe-transaction-sepolia.staging.5afe.dev/api'
 export const stagingTxServiceSafesUrl = '/safes/'
 export const stagingTxServiceBalancesUrl = '/balances/'
-
+export const appearanceSettingsUrl = '/settings/appearance?safe='
 export const stagingCGWUrl = 'https://safe-client.staging.5afe.dev/'
 export const stagingCGWUrlv1 = 'https://safe-client.staging.5afe.dev/v1'
 export const stagingCGWUrlv2 = 'https://safe-client.staging.5afe.dev/v2'
@@ -90,11 +113,28 @@ export const stagingCGWDelegatesUrl = '/delegates?safe='
 export const relayPath = '/relay/'
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
 
-export const proposeEndpoint = '/**/propose'
-export const appsEndpoint = '/**/safe-apps'
-export const transactionHistoryEndpoint = '**/history*'
-export const safeListEndpoint = '**/safes'
-export const queuedEndpoint = '**/queued'
+export const usersEndpoint = '**/v1/users'
+export const spacesEndpoint = '**/**/spaces*'
+export const spacesGetOneEndpoint = '**/v1/spaces/*'
+export const spacesMembersEndpoint = '**/v1/spaces/*/members'
+export const spacesSafesEndpoint = '**/v1/spaces/*/safes'
+export const spacesAddressBookEndpoint = '**/v1/spaces/*/address-book'
+export const proposeEndpoint = '/**/propose*'
+export const appsEndpoint = '**/v1/**/safe-apps*'
+export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
+export const safeListEndpoint = '**/safes*'
+export const ownedSafesEndpoint = '**/v2/owners/**/safes*'
+export const queuedEndpoint = '**/queued*'
+export const messagesEndpoint = 'v1/chains/**/safes/**/messages*'
+export const collectiblesEndpoint = '**/collectibles*'
+export const chainsEndpoint = '**/v2/chains'
+export const chainConfigEndpoint = '**/v2/chains/*'
+export const safeInfoEndpoint = '**/v1/chains/*/safes/*'
+export const balancesEndpoint = '**/v1/**/safes/**/balances/**'
+export const portfolioEndpoint = '**/v1/portfolio/**'
+export const positionsEndpoint = '**/v1/**/safes/**/positions/**'
+export const masterCopiesEndpoint = '**/v1/**/about/master-copies*'
+export const targetedMessagingEndpoint = '**/v1/targeted-messaging/**'
 
 export const indexStatusUrl = 'https://status.safe.global'
 
@@ -136,6 +176,7 @@ export const networks = {
   sepolia: 'Sepolia',
   polygon: 'Polygon',
   gnosis: 'Gnosis',
+  berachain: 'Berachain',
   zkSync: 'zkSync Era',
   base: 'Base',
   optimism: 'Optimism',
@@ -201,12 +242,14 @@ export const tokenNames = {
   wrappedEther: 'Wrapped Ether',
   sepoliaEther: 'Sepolia Ether',
   qaToken: 'QAtest10',
+  cow: 'CoW Protocol Token',
 }
 
 export const addressBookErrrMsg = {
   invalidFormat: 'Invalid address format',
   invalidChecksum: 'Invalid address checksum',
   exceedChars: 'Maximum 50 symbols',
+  ownSafeManage: 'The Safe Account cannot own itself',
   ownSafe: 'Cannot use Safe Account itself as signer',
   alreadyAdded: 'Address already added',
   ownerAdded: 'Signer is already added',
@@ -244,6 +287,24 @@ export const addresBookContacts = {
   },
 }
 
+export const termsUrl = '/terms'
+export const privacyUrl = '/privacy'
+export const licensesUrl = '/licenses'
+export const imprintUrl = '/imprint'
+export const cookiePolicyUrl = '/cookie'
+export const safeLabsTermsUrl = '/safe-labs-terms'
+export const error403Url = '/403'
+export const error404Url = '/404'
+
+export const chainFeatures = {
+  positions: 'POSITIONS',
+  nativeSwaps: 'NATIVE_SWAPS',
+  bridge: 'BRIDGE',
+  staking: 'STAKING',
+  earn: 'EARN',
+  spaces: 'SPACES',
+}
+
 export const CURRENT_COOKIE_TERMS_VERSION = Cypress.env('CURRENT_COOKIE_TERMS_VERSION')
 
 export const localStorageKeys = {
@@ -260,4 +321,5 @@ export const localStorageKeys = {
   SAFE_v2__undeployedSafes: 'SAFE_v2__undeployedSafes',
   SAFE_v2__batch: 'SAFE_v2__batch',
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
+  SAFE_v2__auth: 'SAFE_v2__auth',
 }

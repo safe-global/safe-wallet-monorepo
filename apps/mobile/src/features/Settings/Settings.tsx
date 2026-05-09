@@ -1,24 +1,51 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { H2, ScrollView, Text, Theme, View, XStack, YStack } from 'tamagui'
-import { SafeFontIcon as Icon } from '@/src/components/SafeFontIcon/SafeFontIcon'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { Skeleton } from 'moti/skeleton'
-import { Pressable } from 'react-native'
+import { SafeSkeleton } from '@/src/components/SafeSkeleton'
+import { Pressable, TouchableOpacity } from 'react-native'
 import { EthAddress } from '@/src/components/EthAddress'
 import { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Address } from '@/src/types/address'
 import { router } from 'expo-router'
-import { IdenticonWithBadge } from '@/src/features/Settings/components/IdenticonWithBadge'
+import { Identicon } from '@/src/components/Identicon'
+import { BadgeWrapper } from '@/src/components/BadgeWrapper'
+import { ThresholdBadge } from '@/src/components/ThresholdBadge'
 
 import { Navbar } from '@/src/features/Settings/components/Navbar/Navbar'
+import { type Contact } from '@/src/store/addressBookSlice'
+import { Alert } from '@/src/components/Alert'
+
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
 
 interface SettingsProps {
   data: SafeState
   address: `0x${string}`
+  displayDevMenu: boolean
+  onImplementationTap: () => void
+  contact: Contact | null
+  isLatestVersion: boolean
+  latestSafeVersion: string
+  isUnsupportedMasterCopy: boolean
 }
 
-export const Settings = ({ address, data }: SettingsProps) => {
+export const Settings = ({
+  address,
+  data,
+  onImplementationTap,
+  displayDevMenu,
+  contact,
+  isLatestVersion,
+  latestSafeVersion,
+  isUnsupportedMasterCopy,
+}: SettingsProps) => {
+  const activeSafe = useDefinedActiveSafe()
+  const copy = useCopyAndDispatchToast()
   const { owners = [], threshold, implementation } = data
+  const onPressAddressCopy = useCallback(() => {
+    copy(activeSafe.address)
+  }, [activeSafe.address])
 
   return (
     <>
@@ -33,30 +60,34 @@ export const Settings = ({ address, data }: SettingsProps) => {
             marginTop: -15,
           }}
         >
-          <YStack flex={1} padding="$4" paddingTop={'$10'}>
-            <Skeleton.Group show={!owners.length}>
-              <YStack alignItems="center" space="$3" marginBottom="$6">
-                <IdenticonWithBadge
-                  address={address}
-                  badgeContent={owners.length ? `${threshold}/${owners.length}` : ''}
-                />
-                <H2 color="$foreground" fontWeight={600}>
-                  My DAO
+          <YStack flex={1} paddingTop={'$10'}>
+            <SafeSkeleton.Group show={!owners.length}>
+              <YStack alignItems="center" gap="$3" marginBottom="$6">
+                <BadgeWrapper
+                  badge={
+                    <ThresholdBadge
+                      threshold={threshold}
+                      ownersCount={owners.length}
+                      isLoading={!owners.length}
+                      testID="threshold-info-badge"
+                    />
+                  }
+                >
+                  <Identicon address={address} size={56} />
+                </BadgeWrapper>
+                <H2 color="$foreground" fontWeight={600} numberOfLines={1}>
+                  {contact?.name || 'Unnamed Safe'}
                 </H2>
                 <View>
-                  <EthAddress
-                    address={address as Address}
-                    copy
-                    textProps={{
-                      color: '$colorSecondary',
-                    }}
-                  />
-                </View>
-
-                <View>
-                  <Skeleton>
-                    <Text color="$primary">saaafe.xyz</Text>
-                  </Skeleton>
+                  <TouchableOpacity onPress={onPressAddressCopy}>
+                    <EthAddress
+                      address={address as Address}
+                      copy
+                      textProps={{
+                        color: '$colorSecondary',
+                      }}
+                    />
+                  </TouchableOpacity>
                 </View>
               </YStack>
 
@@ -64,17 +95,18 @@ export const Settings = ({ address, data }: SettingsProps) => {
                 <YStack
                   alignItems="center"
                   backgroundColor={'$background'}
-                  padding={'$2'}
+                  paddingTop={'$3'}
+                  paddingBottom={'$2'}
                   borderRadius={'$6'}
                   width={80}
                   marginRight={'$2'}
                 >
                   <View width={30}>
-                    <Skeleton>
-                      <Text fontWeight="700" textAlign="center" fontSize={'$4'}>
+                    <SafeSkeleton>
+                      <Text fontWeight="bold" textAlign="center" fontSize={'$4'}>
                         {owners.length}
                       </Text>
-                    </Skeleton>
+                    </SafeSkeleton>
                   </View>
                   <Text color="$colorHover" fontSize={'$3'}>
                     Signers
@@ -84,16 +116,17 @@ export const Settings = ({ address, data }: SettingsProps) => {
                 <YStack
                   alignItems="center"
                   backgroundColor={'$background'}
-                  padding={'$2'}
+                  paddingTop={'$3'}
+                  paddingBottom={'$2'}
                   borderRadius={'$6'}
                   width={80}
                 >
                   <View width={30}>
-                    <Skeleton>
+                    <SafeSkeleton>
                       <Text fontWeight="bold" textAlign="center" fontSize={'$4'}>
                         {threshold}/{owners.length}
                       </Text>
-                    </Skeleton>
+                    </SafeSkeleton>
                   </View>
                   <Text color="$colorHover" fontSize={'$3'}>
                     Threshold
@@ -101,7 +134,7 @@ export const Settings = ({ address, data }: SettingsProps) => {
                 </YStack>
               </XStack>
 
-              <YStack space="$4">
+              <YStack>
                 <View padding="$4" borderRadius="$3" gap={'$2'}>
                   <Text color="$colorSecondary" fontWeight={500}>
                     Members
@@ -114,16 +147,17 @@ export const Settings = ({ address, data }: SettingsProps) => {
                   >
                     <SafeListItem
                       label={'Signers'}
-                      leftNode={<Icon name={'owners'} color={'$colorSecondary'} />}
+                      testID="settings-signers-list-item"
+                      leftNode={<SafeFontIcon name={'owners'} color={'$colorSecondary'} />}
                       rightNode={
                         <View flexDirection={'row'} alignItems={'center'} justifyContent={'center'}>
-                          <Skeleton height={17}>
+                          <SafeSkeleton height={17}>
                             <Text minWidth={15} marginRight={'$3'} color={'$colorSecondary'}>
                               {owners.length}
                             </Text>
-                          </Skeleton>
+                          </SafeSkeleton>
                           <View>
-                            <Icon name={'arrow-right'} />
+                            <SafeFontIcon name={'chevron-right'} />
                           </View>
                         </View>
                       }
@@ -132,29 +166,73 @@ export const Settings = ({ address, data }: SettingsProps) => {
                 </View>
 
                 <View backgroundColor="$backgroundDark" padding="$4" borderRadius="$3" gap={'$2'}>
-                  <Text color="$foreground">General</Text>
+                  <Text color="$colorSecondary">General</Text>
                   <View backgroundColor={'$background'} borderRadius={'$3'}>
                     <Pressable
                       style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
                       onPress={() => {
-                        router.push('/notifications')
+                        router.push('/notifications-settings')
                       }}
                     >
                       <SafeListItem
                         label={'Notifications'}
-                        leftNode={<Icon name={'bell'} />}
-                        rightNode={<Icon name={'arrow-right'} />}
+                        leftNode={<SafeFontIcon name={'bell'} color={'$colorSecondary'} />}
+                        rightNode={<SafeFontIcon name={'chevron-right'} />}
                       />
                     </Pressable>
                   </View>
                 </View>
+
+                {displayDevMenu && (
+                  <View backgroundColor="$backgroundDark" padding="$4" borderRadius="$3" gap={'$2'}>
+                    <Text color="$foreground">Developer</Text>
+                    <View backgroundColor={'$background'} borderRadius={'$3'}>
+                      <Pressable
+                        style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
+                        onPress={() => {
+                          router.push('/developer')
+                        }}
+                      >
+                        <SafeListItem
+                          label={'Developer'}
+                          leftNode={<SafeFontIcon name={'alert-triangle'} color={'$colorSecondary'} />}
+                          rightNode={<SafeFontIcon name={'chevron-right'} />}
+                        />
+                      </Pressable>
+                    </View>
+                  </View>
+                )}
               </YStack>
-            </Skeleton.Group>
+            </SafeSkeleton.Group>
 
             {/* Footer */}
-            <Text textAlign="center" color="$colorSecondary" marginTop="$8">
-              {implementation?.name}
-            </Text>
+            <Pressable
+              onPress={onImplementationTap}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '$2',
+                marginTop: 14,
+              }}
+            >
+              {isLatestVersion && <SafeFontIcon testID="check-icon" name={'check-filled'} color={'$success'} />}
+              <Text marginLeft={'$2'} textAlign="center" color="$colorSecondary">
+                {implementation?.name}{' '}
+                {isLatestVersion ? `(Latest version)` : `(New version is available: ${latestSafeVersion})`}
+              </Text>
+            </Pressable>
+
+            {isUnsupportedMasterCopy && (
+              <View flex={1} padding="$5">
+                <Alert
+                  type="warning"
+                  info="Your Safe Account's base contract is not supported. You should migrate it to a compatible
+              version. Use the web app for this."
+                  message="Base contract is not supported"
+                />
+              </View>
+            )}
           </YStack>
         </ScrollView>
       </Theme>

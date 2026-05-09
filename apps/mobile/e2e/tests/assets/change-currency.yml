@@ -1,0 +1,263 @@
+appId: ${APP_ID}
+tags:
+  - assets
+  - settings
+---
+# Currency Change Happy Path Test
+# Tests changing the display currency and verifying fiat values update throughout the app
+
+- runScript:
+    file: ../../utils/scripts/defaults.js
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Use e2eOnboardedAccount shortcut
+- tapOn:
+    id: 'e2eOnboardedAccount'
+
+# Wait for home screen to load
+- assertVisible:
+    id: 'home-tab'
+
+# ============================================
+# Note Initial Currency - Home Tab
+# ============================================
+
+# Verify fiat balance is displayed (e.g., "$1,234.56")
+- assertVisible:
+    id: 'fiat-balance-symbol'
+
+# Verify currency symbol is USD ($) - should contain dollar sign
+- assertVisible:
+    id: 'fiat-balance-symbol'
+    text: '.*\$.*'
+
+# Verify token fiat values in list - should contain dollar sign
+- extendedWaitUntil:
+    visible:
+      id: 'token-ETH-fiat-balance'
+      text: '.*\$.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# ============================================
+# Navigate to Settings tab
+# ============================================
+
+- tapOn:
+    id: 'account-tab'
+
+# Wait for settings screen
+- assertVisible:
+    text: '.*(Settings|Account).*'
+
+# ============================================
+# Navigate to App Settings
+# ============================================
+
+# Tap "App Settings" button (settings icon)
+- tapOn:
+    id: 'settings-screen-header-app-settings-button'
+
+# Verify navigation to app settings screen
+- assertVisible:
+    text: 'Settings'
+
+# Verify "Currency" row is visible
+- assertVisible:
+    text: '.*Currency.*'
+
+# ============================================
+# Navigate to Currency Settings
+# ============================================
+
+# Tap "Currency" row
+- tapOn:
+    text: '.*Currency.*'
+
+# Verify navigation to currency selection screen
+- assertVisible:
+    text: '.*(EUR|GBP).*'
+
+# ============================================
+# Currency List Verification
+# ============================================
+
+# Verify currencies show currency code (EUR, GBP, etc.)
+- assertVisible:
+    text: '.*EUR.*'
+
+- assertVisible:
+    text: '.*GBP.*'
+
+# Verify currency symbols ($, €, £, etc.)
+
+- assertVisible:
+    text: '.*€.*'
+
+- assertVisible:
+    text: '.*£.*'
+
+# Verify currency names (US Dollar, Euro, etc.)
+- assertVisible:
+    text: '.*Euro.*'
+
+- assertVisible:
+    text: '.*(British Pound|Pound).*'
+
+- scroll
+
+# Verify current currency (USD) is visible
+# Note: Selected currency shows a checkmark icon, but Maestro verifies via text matching
+- assertVisible:
+    text: 'USD.*'
+
+# ============================================
+# Change Currency to EUR
+# ============================================
+
+# Scroll if needed to find EUR
+- scrollUntilVisible:
+    element:
+      text: 'EUR.*'
+
+# Tap "EUR - Euro" option (currency selection navigates back automatically)
+- tapOn:
+    text: 'EUR.*'
+
+# Wait for automatic navigation back to app settings screen
+- assertVisible:
+    text: '.*Currency.*'
+
+# Verify we're back on app settings screen
+- assertVisible:
+    text: 'Settings'
+
+# ============================================
+# Verify Currency Change - Home Tab
+# ============================================
+
+- tapOn:
+    id: 'go-back'
+# Navigate back to Home tab
+- tapOn:
+    id: 'home-tab'
+
+# Wait for home tab to load
+- assertVisible:
+    id: 'home-tab'
+
+# Verify fiat balance now shows Euro symbol (€)
+- assertVisible:
+    id: 'fiat-balance-symbol'
+    text: '.*€.*'
+
+# Verify token fiat values show € symbol
+- extendedWaitUntil:
+    visible:
+      id: 'token-ETH-fiat-balance'
+      text: '.*€.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# ============================================
+# Change Currency Again - GBP
+# ============================================
+
+# Navigate back to Settings (if not already there)
+- tapOn:
+    id: 'account-tab'
+
+# Wait for settings screen
+- assertVisible:
+    text: '.*(Settings|Account).*'
+
+# Navigate to App Settings
+- tapOn:
+    id: 'settings-screen-header-app-settings-button'
+
+# Wait for app settings screen
+- assertVisible:
+    text: 'Settings'
+
+# Navigate to Currency
+- tapOn:
+    text: '.*Currency.*'
+
+# Select "GBP - British Pound"
+- scrollUntilVisible:
+    element:
+      text: 'GBP.*'
+
+- tapOn:
+    text: 'GBP.*'
+
+# Wait for automatic navigation back
+- assertVisible:
+    text: '.*Currency.*'
+
+- tapOn:
+    id: 'go-back'
+
+# Navigate to home
+- tapOn:
+    id: 'home-tab'
+
+# Wait for home tab to load
+- assertVisible:
+    id: 'home-tab'
+
+# Verify balance shows £ symbol
+- assertVisible:
+    id: 'fiat-balance-symbol'
+    text: '.*£.*'
+
+# ============================================
+# Reset to USD
+# ============================================
+
+# Return to currency settings
+- tapOn:
+    id: 'account-tab'
+
+- assertVisible:
+    text: '.*(Settings|Account).*'
+
+- tapOn:
+    id: 'settings-screen-header-app-settings-button'
+
+- assertVisible:
+    text: 'Settings'
+
+- tapOn:
+    text: '.*Currency.*'
+
+# Select "USD - US Dollar"
+- scrollUntilVisible:
+    element:
+      text: 'USD.*'
+
+- tapOn:
+    text: 'USD.*'
+
+# Wait for automatic navigation back
+- assertVisible:
+    text: '.*Currency.*'
+
+- tapOn:
+    id: 'go-back'
+
+# Navigate to home
+- tapOn:
+    id: 'home-tab'
+
+# Wait for home tab to load
+- assertVisible:
+    id: 'home-tab'
+
+# Verify returns to original state with $ symbol
+- assertVisible:
+    id: 'fiat-balance-symbol'
+    text: '.*\$.*'
+# Test completed successfully
+

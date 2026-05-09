@@ -1,7 +1,7 @@
 import { render } from '@/tests/test-utils'
 
 import DateTime from '.'
-import { formatDateTime, formatTime } from '@/utils/date'
+import { formatDateTime, formatTime } from '@safe-global/utils/utils/date'
 import { useTxFilter } from '@/utils/tx-history-filter'
 
 jest.mock('@/utils/tx-history-filter', () => ({

@@ -1,6 +1,6 @@
 import { renderHook } from '@/tests/test-utils'
 import { useRankedSafeApps } from '@/hooks/safe-apps/useRankedSafeApps'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 const getMockSafeApp = (props: Partial<SafeAppData>) => {
   return {

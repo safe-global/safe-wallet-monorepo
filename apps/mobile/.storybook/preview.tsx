@@ -1,9 +1,89 @@
 import type { Preview } from '@storybook/react'
-import { NavigationIndependentTree } from '@react-navigation/native'
-import { SafeThemeProvider } from '@/src/theme/provider/safeTheme'
+import { useColorScheme } from 'react-native'
+import { NavigationContainer, NavigationIndependentTree } from '@react-navigation/native'
+import { StorybookThemeProvider } from '@/src/theme/provider/storybookTheme'
 import { SafeToastProvider } from '@/src/theme/provider/toastProvider'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { PortalProvider, View } from 'tamagui'
+import { createNavigationContainerRef } from '@react-navigation/native'
+import { Provider } from 'react-redux'
+import { configureStore } from '@reduxjs/toolkit'
+import { rootReducer } from '@/src/store'
+import { FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE } from 'redux-persist'
+import { cgwClient } from '@safe-global/store/gateway/cgwClient'
+import { web3API } from '@/src/store/signersBalance'
+import { TOKEN_LISTS } from '@/src/store/settingsSlice'
+import { chainsAdapter } from '@safe-global/store/gateway/chains'
+import { mockChain } from '@/src/tests/mocks'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
+
+const navigationRef = createNavigationContainerRef()
+
+// Create a mock Redux store for Storybook
+const createStorybookStore = () => {
+  const mockChainsState = chainsAdapter.setAll(chainsAdapter.getInitialState(), [mockChain])
+
+  return configureStore({
+    reducer: rootReducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware({
+        serializableCheck: {
+          ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        },
+      }).concat(cgwClient.middleware, web3API.middleware),
+    preloadedState: {
+      settings: {
+        onboardingVersionSeen: '',
+        themePreference: 'light',
+        currency: 'usd',
+        tokenList: TOKEN_LISTS.TRUSTED,
+        env: {
+          rpc: {},
+          tenderly: {
+            url: '',
+            accessToken: '',
+          },
+        },
+      },
+      activeSafe: {
+        chainId: '1',
+        address: '0x1234567890123456789012345678901234567890',
+        threshold: 1,
+        owners: [],
+        nonce: 0,
+        version: '1.3.0',
+      },
+      [cgwClient.reducerPath]: {
+        queries: {
+          [`getChainsConfigV2("${CONFIG_SERVICE_KEY}")`]: {
+            status: 'fulfilled',
+            data: mockChainsState,
+          },
+        },
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any,
+  })
+}
+
+const storybookStore = createStorybookStore()
+
+// Navigation wrapper component for Storybook
+// Uses NavigationIndependentTree to isolate from any parent navigation
+const NavigationWrapper = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <NavigationIndependentTree>
+      <NavigationContainer
+        ref={navigationRef}
+        documentTitle={{
+          enabled: false,
+        }}
+      >
+        {children}
+      </NavigationContainer>
+    </NavigationIndependentTree>
+  )
+}
 
 const preview: Preview = {
   parameters: {
@@ -14,23 +94,43 @@ const preview: Preview = {
       },
     },
   },
+  globalTypes: {
+    theme: {
+      description: 'Global theme for components',
+      defaultValue: '',
+      toolbar: {
+        title: 'Theme',
+        icon: 'circlehollow',
+        items: [
+          { value: 'light', icon: 'circlehollow', title: 'Light' },
+          { value: 'dark', icon: 'circle', title: 'Dark' },
+        ],
+        dynamicTitle: true,
+      },
+    },
+  },
   tags: ['autodocs'],
   decorators: [
-    (Story) => {
+    (Story, context) => {
+      const colorScheme = useColorScheme()
+      const theme = context.globals.theme || colorScheme || 'light'
+
       return (
-        <PortalProvider shouldAddRootHost>
-          <NavigationIndependentTree>
-            <SafeAreaProvider>
-              <SafeThemeProvider>
-                <SafeToastProvider>
-                  <View style={{ padding: 16, flex: 1 }} backgroundColor={'$background'}>
-                    <Story />
-                  </View>
-                </SafeToastProvider>
-              </SafeThemeProvider>
-            </SafeAreaProvider>
-          </NavigationIndependentTree>
-        </PortalProvider>
+        <Provider store={storybookStore}>
+          <PortalProvider shouldAddRootHost>
+            <NavigationWrapper>
+              <SafeAreaProvider>
+                <StorybookThemeProvider theme={theme}>
+                  <SafeToastProvider>
+                    <View style={{ padding: 16, flex: 1 }} backgroundColor={'$background'}>
+                      <Story />
+                    </View>
+                  </SafeToastProvider>
+                </StorybookThemeProvider>
+              </SafeAreaProvider>
+            </NavigationWrapper>
+          </PortalProvider>
+        </Provider>
       )
     },
   ],

@@ -14,7 +14,7 @@ import { trackEvent, OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analyti
 import { SvgIcon } from '@mui/material'
 import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
-import { CreateSafeOnNewChain } from '@/features/multichain/components/CreateSafeOnNewChain'
+import { CreateSafeOnNewChain } from '@/features/multichain'
 
 enum ModalType {
   RENAME = 'rename',

@@ -40,4 +40,4 @@ This will:
 
 - Fetch the OpenAPI schema.
 - Use the configuration provided in the `openapi-config.ts` file.
-- Gerate the API code using **@rtk-query/codegen-openapi**.
+- Generate the API code using **@rtk-query/codegen-openapi**.

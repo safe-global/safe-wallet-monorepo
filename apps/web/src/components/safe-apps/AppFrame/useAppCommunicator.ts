@@ -1,11 +1,9 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { MutableRefObject } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import { getAddress } from 'ethers'
-import type {
-  SafeAppData,
-  ChainInfo as WebCoreChainInfo,
-  TransactionDetails,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import type { Chain as WebCoreChain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type {
   AddressBookItem,
   BaseTransaction,
@@ -19,9 +17,14 @@ import type {
   SendTransactionsParams,
   SignMessageParams,
   SignTypedMessageParams,
-  ChainInfo,
   SafeInfoExtended,
 } from '@safe-global/safe-apps-sdk'
+
+export type ChainInfo = Pick<
+  WebCoreChain,
+  'chainName' | 'chainId' | 'shortName' | 'nativeCurrency' | 'blockExplorerUriTemplate'
+>
+
 import { Methods, RPC_CALLS } from '@safe-global/safe-apps-sdk'
 import type { Permission, PermissionRequest } from '@safe-global/safe-apps-sdk/dist/types/types/permissions'
 import type { SafeSettings } from '@safe-global/safe-apps-sdk'
@@ -69,7 +72,7 @@ export type UseAppCommunicatorHandlers = {
 const useAppCommunicator = (
   iframeRef: MutableRefObject<HTMLIFrameElement | null>,
   app: SafeAppData | undefined,
-  chain: WebCoreChainInfo | undefined,
+  chain: WebCoreChain | undefined,
   handlers: UseAppCommunicatorHandlers,
 ): AppCommunicator | undefined => {
   const [communicator, setCommunicator] = useState<AppCommunicator | undefined>(undefined)
@@ -87,22 +90,27 @@ const useAppCommunicator = (
   useEffect(() => {
     let communicatorInstance: AppCommunicator
 
-    const initCommunicator = (iframeRef: MutableRefObject<HTMLIFrameElement | null>, app?: SafeAppData) => {
-      communicatorInstance = new AppCommunicator(iframeRef, {
+    const initCommunicator = (iframeRef: MutableRefObject<HTMLIFrameElement | null>, app: SafeAppData) => {
+      let allowedOrigin: string
+      try {
+        allowedOrigin = new URL(app.url).origin
+      } catch {
+        return
+      }
+
+      communicatorInstance = new AppCommunicator(iframeRef, allowedOrigin, {
         onMessage: (msg) => {
           if (!msg.data) return
 
-          const isCustomApp = app && app.id < 1
+          const isCustomApp = app.id < 1
 
-          trackSafeAppEvent(
-            { ...SAFE_APPS_EVENTS.SAFE_APP_SDK_METHOD_CALL },
-            isCustomApp ? app?.url : app?.name || '',
-            {
+          trackSafeAppEvent({ ...SAFE_APPS_EVENTS.SAFE_APP_SDK_METHOD_CALL }, isCustomApp ? app.url : app.name || '', {
+            sdkEventData: {
               method: msg.data.method,
               ethMethod: (msg.data.params as any)?.call,
               version: msg.data.env.sdkVersion,
             },
-          )
+          })
         },
         onError: (error) => {
           logError(Errors._901, error.message)

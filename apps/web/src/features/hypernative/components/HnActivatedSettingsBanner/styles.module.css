@@ -1,0 +1,54 @@
+.badgeContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border-radius: 13.362px;
+  width: fit-content;
+}
+
+.statusBadge {
+  background: #b0ffc9;
+  border-radius: 100px;
+  padding: 2px 8px;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusLabel {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 1px;
+  color: #121312; /* same color across themes */
+  white-space: nowrap;
+}
+
+.buttonText {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 24px;
+  letter-spacing: 0.4px;
+  color: var(--color-primary-main, #121312);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.ctaButton {
+  border: 2px solid;
+  border-color: var(--color-primary-main, #121312);
+  border-radius: 6px;
+  padding: 6px 16px;
+  gap: 8px;
+  background-color: transparent;
+  text-transform: none;
+  inline-size: fit-content;
+}
+
+.ctaButton:hover {
+  border-color: var(--color-primary-main, #121312);
+  background-color: transparent;
+}

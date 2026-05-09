@@ -8,12 +8,13 @@ import {
 } from '@/services/push-notifications/tracking'
 import { trackEvent } from '@/services/analytics'
 import { PUSH_NOTIFICATION_EVENTS } from '@/services/analytics/events/push-notifications'
-import ErrorCodes from '@/services/exceptions/ErrorCodes'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { logError } from '@/services/exceptions'
 import type { NotificationTracking, NotificationTrackingKey } from '@/services/push-notifications/tracking'
 import type { WebhookType } from '@/service-workers/firebase-messaging/webhook-types'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const trackNotificationEvents = (
   chainId: string,

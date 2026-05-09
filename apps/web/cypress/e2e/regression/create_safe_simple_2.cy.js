@@ -14,14 +14,10 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 describe('Safe creation tests 2', () => {
   beforeEach(() => {
-    cy.visit(constants.welcomeUrl + '?chain=sep')
+    createwallet.startCreateSafeFlow(signer)
   })
 
   it('Cancel button cancels safe creation', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     safe.clickOnNextBtn()
     createwallet.clickOnBackBtn()
     createwallet.cancelWalletCreation()
@@ -29,10 +25,6 @@ describe('Safe creation tests 2', () => {
 
   // Owners and confirmation step
   it('Verify Next button is disabled when address is empty', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     safe.clickOnNextBtn()
     safe.clearOwnerAddress(0)
     createwallet.verifyNextBtnIsDisabled()
@@ -44,11 +36,7 @@ describe('Safe creation tests 2', () => {
         main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sameOwnerName),
       )
       .then(() => {
-        cy.visit(constants.welcomeUrl + '?chain=sep')
-        wallet.connectSigner(signer)
-        owner.waitForConnectionStatus()
-        createwallet.clickOnContinueWithWalletBtn()
-        createwallet.clickOnCreateNewSafeBtn()
+        createwallet.startCreateSafeFlow(signer)
         safe.clickOnNextBtn()
         safe.verifyOwnerNamesInConfirmationStep(ownerSepolia)
       })
@@ -60,41 +48,25 @@ describe('Safe creation tests 2', () => {
         main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sameOwnerName[1]),
       )
       .then(() => {
-        cy.visit(constants.welcomeUrl + '?chain=sep')
-        wallet.connectSigner(signer)
-        owner.waitForConnectionStatus()
-        createwallet.clickOnContinueWithWalletBtn()
-        createwallet.clickOnCreateNewSafeBtn()
+        createwallet.startCreateSafeFlow(signer)
         safe.clickOnNextBtn()
         safe.verifyDataDoesNotExist(ownerSepolia)
       })
   })
 
   it('Verify an valid name for owner can be inputed', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     safe.clickOnNextBtn()
     safe.inputOwnerName(0, ownerName)
     safe.verifyownerNameFormatIsValid()
   })
 
   it('Verify Threshold matching required confirmations max with amount of owners', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     safe.clickOnNextBtn()
     safe.clickOnAddNewOwnerBtn()
     owner.verifyThreshold(1, 2)
   })
 
   it('Verify deleting owner rows updates the currenlty set policies value', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     safe.clickOnNextBtn()
     safe.clickOnAddNewOwnerBtn()
     owner.verifyThreshold(1, 2)
@@ -103,10 +75,6 @@ describe('Safe creation tests 2', () => {
   })
 
   it('Verify ENS name in the address and name fields is resolved', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     safe.clickOnNextBtn()
     safe.inputOwnerAddress(0, constants.ENS_TEST_SEPOLIA_VALID)
     safe.verifyOwnerAddress(0, constants.DEFAULT_OWNER_ADDRESS)
@@ -114,10 +82,6 @@ describe('Safe creation tests 2', () => {
   })
 
   it('Verify deleting owner rows is possible', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     safe.clickOnNextBtn()
     safe.clickOnAddNewOwnerBtn()
     safe.verifyNumberOfOwners(2)
@@ -131,11 +95,7 @@ describe('Safe creation tests 2', () => {
         main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.sepoliaAddress1),
       )
       .then(() => {
-        cy.visit(constants.welcomeUrl + '?chain=sep')
-        wallet.connectSigner(signer)
-        owner.waitForConnectionStatus()
-        createwallet.clickOnContinueWithWalletBtn()
-        createwallet.clickOnCreateNewSafeBtn()
+        createwallet.startCreateSafeFlow(signer)
         safe.clickOnNextBtn()
         safe.inputOwnerAddress(0, constants.RECIPIENT_ADDRESS)
         safe.verifyOnwerName(0, owner1)

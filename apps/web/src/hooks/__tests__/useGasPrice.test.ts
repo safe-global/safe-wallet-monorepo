@@ -1,6 +1,7 @@
 import { act, renderHook, waitFor } from '@/tests/test-utils'
-import useGasPrice, { getTotalFee } from '@/hooks/useGasPrice'
+import useGasPrice from '@/hooks/useGasPrice'
 import { useCurrentChain } from '../useChains'
+import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 
 // mock useWeb3Readonly
 jest.mock('../wallets/web3', () => {
@@ -22,7 +23,7 @@ const currentChain = {
   gasPrice: [
     {
       type: 'oracle',
-      uri: 'https://api.etherscan.io/api?module=gastracker&action=gasoracle',
+      uri: 'https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle',
       gasParameter: 'FastGasPrice',
       gweiFactor: '1000000000.000000000',
     },
@@ -53,11 +54,13 @@ describe('useGasPrice', () => {
     ;(useCurrentChain as jest.Mock).mockReturnValue(currentChain)
   })
 
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   it('should return the fetched gas price from the first oracle', async () => {
-    // Mock fetch
-    Object.defineProperty(window, 'fetch', {
-      writable: true,
-      value: jest.fn(() =>
+    jest.spyOn(window, 'fetch').mockImplementation(
+      jest.fn(() =>
         Promise.resolve({
           ok: true,
           json: () =>
@@ -68,8 +71,8 @@ describe('useGasPrice', () => {
               },
             }),
         }),
-      ),
-    })
+      ) as jest.Mock,
+    )
 
     // render the hook
     const { result } = renderHook(() => useGasPrice())
@@ -82,7 +85,7 @@ describe('useGasPrice', () => {
       await Promise.resolve()
     })
 
-    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/api?module=gastracker&action=gasoracle')
+    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle')
 
     // assert the hook is not loading
     expect(result.current[2]).toBe(false)
@@ -95,10 +98,8 @@ describe('useGasPrice', () => {
   })
 
   it('should speed up the gas price', async () => {
-    // Mock fetch
-    Object.defineProperty(window, 'fetch', {
-      writable: true,
-      value: jest.fn(() =>
+    jest.spyOn(window, 'fetch').mockImplementation(
+      jest.fn(() =>
         Promise.resolve({
           ok: true,
           json: () =>
@@ -109,8 +110,8 @@ describe('useGasPrice', () => {
               },
             }),
         }),
-      ),
-    })
+      ) as jest.Mock,
+    )
 
     // render the hook
     const { result } = renderHook(() => useGasPrice(true))
@@ -123,7 +124,7 @@ describe('useGasPrice', () => {
       await Promise.resolve()
     })
 
-    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/api?module=gastracker&action=gasoracle')
+    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle')
 
     // assert the hook is not loading
     expect(result.current[2]).toBe(false)
@@ -164,7 +165,7 @@ describe('useGasPrice', () => {
       // assert the hook is not loading
       expect(result.current[2]).toBe(false)
 
-      expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/api?module=gastracker&action=gasoracle')
+      expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle')
       expect(fetch).toHaveBeenCalledWith('https://ethgasstation.info/json/ethgasAPI.json')
     })
 
@@ -195,7 +196,7 @@ describe('useGasPrice', () => {
       await Promise.resolve()
     })
 
-    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/api?module=gastracker&action=gasoracle')
+    expect(fetch).toHaveBeenCalledWith('https://api.etherscan.io/v2/api?chainid=4&module=gastracker&action=gasoracle')
     expect(fetch).toHaveBeenCalledWith('https://ethgasstation.info/json/ethgasAPI.json')
 
     // assert the hook is not loading
@@ -259,36 +260,32 @@ describe('useGasPrice', () => {
   })
 
   it('should keep the previous gas price if the hook re-renders', async () => {
-    // Mock fetch
-    Object.defineProperty(window, 'fetch', {
-      writable: true,
-      value: jest
-        .fn()
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                data: {
-                  FastGasPrice: '21',
-                  suggestBaseFee: '19',
-                },
-              }),
-          }),
-        )
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            ok: true,
-            json: () =>
-              Promise.resolve({
-                data: {
-                  FastGasPrice: '22',
-                  suggestBaseFee: '19',
-                },
-              }),
-          }),
-        ),
-    })
+    jest
+      .spyOn(window, 'fetch')
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: {
+                FastGasPrice: '21',
+                suggestBaseFee: '19',
+              },
+            }),
+        } as Response),
+      )
+      .mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              data: {
+                FastGasPrice: '22',
+                suggestBaseFee: '19',
+              },
+            }),
+        } as Response),
+      )
 
     // render the hook
     const { result } = renderHook(() => useGasPrice())

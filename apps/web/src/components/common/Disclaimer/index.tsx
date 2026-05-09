@@ -3,7 +3,7 @@ import { Box, Button, Divider, Paper, Stack, SvgIcon, Typography } from '@mui/ma
 import InfoIcon from '@/public/images/notifications/info.svg'
 import css from './styles.module.css'
 
-export const Disclaimer = ({
+const Disclaimer = ({
   title,
   subtitle,
   buttonText,

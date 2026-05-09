@@ -1,6 +1,6 @@
 import { Core } from '@walletconnect/core'
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit'
-import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils'
+import { buildApprovedNamespaces, buildAuthObject, getSdkError } from '@walletconnect/utils'
 import type Web3WalletType from '@reown/walletkit'
 import type { ProposalTypes, SessionTypes } from '@walletconnect/types'
 import { type JsonRpcResponse } from '@walletconnect/jsonrpc-utils'
@@ -8,8 +8,8 @@ import uniq from 'lodash/uniq'
 
 import { IS_PRODUCTION, LS_NAMESPACE, WC_PROJECT_ID } from '@/config/constants'
 import { EIP155, SAFE_COMPATIBLE_EVENTS, SAFE_COMPATIBLE_METHODS, SAFE_WALLET_METADATA } from '../constants'
-import { invariant } from '@/utils/helpers'
 import { getEip155ChainId, stripEip155Prefix } from './utils'
+import { invariant } from '@safe-global/utils/utils/helpers'
 
 const SESSION_ADD_EVENT = 'session_add' as WalletKitTypes.Event // Workaround: WalletConnect doesn't emit session_add event
 const SESSION_REJECT_EVENT = 'session_reject' as WalletKitTypes.Event // Workaround: WalletConnect doesn't emit session_reject event
@@ -35,7 +35,8 @@ class WalletConnectWallet {
     const core = new Core({
       projectId: WC_PROJECT_ID,
       logger: IS_PRODUCTION ? undefined : 'debug',
-      customStoragePrefix: LS_NAMESPACE,
+      // This isolation ensures wallet connections work independently from dApp connections.
+      customStoragePrefix: LS_NAMESPACE + 'wc_dapp_',
     })
 
     const web3wallet = await WalletKit.init({
@@ -145,18 +146,14 @@ class WalletConnectWallet {
     const isUnsupportedChain = !currentEip155ChainIds.includes(newEip155ChainId)
     const isNewSessionSafe = !currentEip155Accounts.includes(newEip155Account)
 
-    // Switching to unsupported chain
-    if (isUnsupportedChain) {
-      return this.disconnectSession(session)
-    }
+    const shouldUpdateNamespaces = isUnsupportedChain || isNewSessionSafe
 
-    // Add new Safe to the session namespace
-    if (isNewSessionSafe) {
+    if (shouldUpdateNamespaces) {
       const namespaces: SessionTypes.Namespaces = {
         [EIP155]: {
           ...session.namespaces[EIP155],
-          chains: currentEip155ChainIds,
-          accounts: [newEip155Account, ...currentEip155Accounts],
+          chains: isUnsupportedChain ? [newEip155ChainId, ...currentEip155ChainIds] : currentEip155ChainIds,
+          accounts: isNewSessionSafe ? [newEip155Account, ...currentEip155Accounts] : currentEip155Accounts,
         },
       }
 
@@ -287,6 +284,70 @@ class WalletConnectWallet {
     assertWeb3Wallet(this.web3Wallet)
 
     return await this.web3Wallet.respondSessionRequest({ topic, response })
+  }
+
+  /**
+   * Subscribe to SiWE requests
+   */
+  public onSessionAuth(handler: (e: WalletKitTypes.SessionAuthenticate) => void) {
+    // Subscribe to the session auth event
+    this.web3Wallet?.on('session_authenticate', handler)
+
+    // Return the unsubscribe function
+    return () => {
+      this.web3Wallet?.off('session_authenticate', handler)
+    }
+  }
+
+  /**
+   * Format SiWE message
+   */
+  public formatAuthMessage(
+    authPayload: WalletKitTypes.SessionAuthenticate['params']['authPayload'],
+    chainId: string,
+    address: string,
+  ): string {
+    assertWeb3Wallet(this.web3Wallet)
+
+    return this.web3Wallet.formatAuthMessage({
+      request: authPayload,
+      iss: `${getEip155ChainId(chainId)}:${address}`,
+    })
+  }
+
+  public async approveSessionAuth(
+    eventId: number,
+    authPayload: WalletKitTypes.SessionAuthenticate['params']['authPayload'],
+    signature: string,
+    chainId: string,
+    address: string,
+  ) {
+    assertWeb3Wallet(this.web3Wallet)
+
+    const auth = buildAuthObject(
+      authPayload,
+      {
+        t: 'eip1271',
+        s: signature,
+      },
+      `${getEip155ChainId(chainId)}:${address}`,
+    )
+
+    const resp = await this.web3Wallet.approveSessionAuthenticate({
+      id: eventId,
+      auths: [auth],
+    })
+
+    this.web3Wallet?.events.emit(SESSION_ADD_EVENT, resp.session)
+  }
+
+  public async rejectSessionAuth(eventId: number) {
+    assertWeb3Wallet(this.web3Wallet)
+
+    return this.web3Wallet.rejectSessionAuthenticate({
+      id: eventId,
+      reason: getSdkError('USER_REJECTED'),
+    })
   }
 }
 

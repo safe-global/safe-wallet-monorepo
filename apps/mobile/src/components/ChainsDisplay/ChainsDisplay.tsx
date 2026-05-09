@@ -21,13 +21,23 @@ export function ChainsDisplay({ chains, activeChainId, max }: ChainsDisplayProps
   return (
     <View flexDirection="row">
       {slicedChains.map(({ chainLogoUri, chainName, chainId }, index) => (
-        <View key={chainId} testID="chain-display" marginRight={(showBadge || index !== slicedChains.length - 1) && -8}>
-          <Logo size="$7" logoUri={chainLogoUri} accessibilityLabel={chainName} />
+        <View
+          key={chainId}
+          testID="chain-display"
+          marginRight={showBadge || index !== slicedChains.length - 1 ? -6 : 0}
+        >
+          <Logo size="$6" logoUri={chainLogoUri} accessibilityLabel={chainName} />
         </View>
       ))}
 
       {showBadge && (
-        <Badge testID="more-chains-badge" content={`+${chains.length - max}`} themeName="badge_background" />
+        <Badge
+          fontSize={String(chains.length).length > 1 ? 12 : 14}
+          testID="more-chains-badge"
+          circleSize="$6"
+          content={`+${chains.length - max}`}
+          themeName="badge_background"
+        />
       )}
     </View>
   )

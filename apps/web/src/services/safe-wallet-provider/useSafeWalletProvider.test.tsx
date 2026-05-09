@@ -1,22 +1,93 @@
 import { Provider } from 'react-redux'
-import type { ExtendedSafeInfo } from '@/store/safeInfoSlice'
-import * as gateway from '@safe-global/safe-gateway-typescript-sdk'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import * as router from 'next/router'
 
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as notifications from './notifications'
-import { act, renderHook } from '@/tests/test-utils'
-import { TxModalContext } from '@/components/tx-flow'
+import { act, renderHook, getAppName } from '@/tests/test-utils'
+import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import useSafeWalletProvider, { useTxFlowApi } from './useSafeWalletProvider'
-import { SafeWalletProvider } from '.'
+import { RpcErrorCode, SafeWalletProvider } from '.'
 import type { RootState } from '@/store'
 import { makeStore } from '@/store'
-import * as messages from '@/utils/safe-messages'
+import * as messages from '@safe-global/utils/utils/safe-messages'
 import { faker } from '@faker-js/faker'
 import { Interface } from 'ethers'
 import { getCreateCallDeployment } from '@safe-global/safe-deployments'
-import { useCurrentChain } from '@/hooks/useChains'
+import * as chainHooks from '@/hooks/useChains'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { chainBuilder } from '@/tests/builders/chains'
+import { useAllSafes, useGetHref } from '@/hooks/safes'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+
+const createMockStore = <T,>(initialValue: T) => {
+  let value: T = initialValue
+  return {
+    useStore: jest.fn(() => value),
+    setStore: jest.fn((newValue: T) => {
+      value = newValue
+    }),
+    getStore: jest.fn(() => value),
+    _reset: (newValue: T) => {
+      value = newValue
+    },
+  }
+}
+
+const mockWcPopupStore = createMockStore<boolean>(false)
+
+const mockWcChainSwitchStore = createMockStore<
+  | {
+      appInfo: unknown
+      chain: { chainId: string }
+      safes: unknown[]
+      onSelectSafe: (safe: unknown) => Promise<void>
+      onCancel: () => void
+    }
+  | undefined
+>(undefined)
+const mockWalletConnectInstance = {
+  init: jest.fn(),
+  updateSessions: jest.fn().mockResolvedValue(undefined),
+}
+
+// Mock useLoadFeature to return the WalletConnect feature (flat structure)
+jest.mock('@/features/__core__', () => ({
+  useLoadFeature: jest.fn(() => ({
+    wcPopupStore: mockWcPopupStore,
+    wcChainSwitchStore: mockWcChainSwitchStore,
+    walletConnectInstance: mockWalletConnectInstance,
+  })),
+  createFeatureHandle: jest.fn((name: string) => ({
+    name,
+    useIsEnabled: () => true,
+    load: jest.fn(),
+  })),
+}))
+
+// Mock the feature handle export (not used directly, but imported)
+jest.mock('@/features/walletconnect', () => ({
+  WalletConnectFeature: {
+    name: 'walletconnect',
+    useIsEnabled: () => true,
+    load: jest.fn(),
+  },
+}))
+
+const updateSessionsMock = mockWalletConnectInstance.updateSessions as jest.MockedFunction<
+  typeof mockWalletConnectInstance.updateSessions
+>
+
+updateSessionsMock.mockResolvedValue(undefined)
+
+jest.mock('@/hooks/safes', () => ({
+  __esModule: true,
+  useAllSafes: jest.fn(),
+  useGetHref: jest.fn(),
+}))
+
+const mockedUseAllSafes = useAllSafes as jest.MockedFunction<typeof useAllSafes>
+const mockedUseGetHref = useGetHref as jest.MockedFunction<typeof useGetHref>
 
 const appInfo = {
   id: 1,
@@ -33,21 +104,32 @@ jest.mock('./notifications', () => {
   }
 })
 
-jest.mock('@/hooks/useChains', () => ({
-  __esModule: true,
-  ...jest.requireActual('@/hooks/useChains'),
-  useCurrentChain: jest.fn(),
-}))
-
 describe('useSafeWalletProvider', () => {
-  const mockUseCurrentChain = useCurrentChain as jest.MockedFunction<typeof useCurrentChain>
-
   beforeEach(() => {
     jest.clearAllMocks()
+    updateSessionsMock.mockClear()
 
-    mockUseCurrentChain.mockReturnValue(
-      chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build(),
-    )
+    jest.spyOn(chainHooks, 'default').mockImplementation(() => ({
+      configs: [
+        chainBuilder().with({ chainId: '1', shortName: 'eth', chainName: 'Ethereum' }).build(),
+        chainBuilder().with({ chainId: '5', shortName: 'gor', chainName: 'Goerli' }).build(),
+      ],
+      error: undefined,
+      loading: false,
+    }))
+
+    jest.spyOn(chainHooks, 'useCurrentChain').mockImplementation(() => {
+      return chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build()
+    })
+
+    mockedUseAllSafes.mockReturnValue([])
+    mockedUseGetHref.mockImplementation(() => (chain, address: string) => ({
+      pathname: '/',
+      query: { safe: `${chain.shortName}:${address}` },
+    }))
+
+    mockWcPopupStore._reset(false)
+    mockWcChainSwitchStore._reset(undefined)
   })
 
   describe('useSafeWalletProvider', () => {
@@ -56,6 +138,7 @@ describe('useSafeWalletProvider', () => {
         initialReduxState: {
           safeInfo: {
             loading: false,
+            loaded: true,
             error: undefined,
             data: {
               chainId: '1',
@@ -97,15 +180,21 @@ describe('useSafeWalletProvider', () => {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
           <Provider store={makeStore(undefined, { skipBroadcast: true })}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
 
       const resp = result?.current?.signMessage('message', appInfo)
 
+      const appName = getAppName()
+
       expect(showNotificationSpy).toHaveBeenCalledWith('Signature request', {
-        body: 'test wants you to sign a message. Open the Safe{Wallet} to continue.',
+        body: `test wants you to sign a message. Open the ${appName} to continue.`,
       })
 
       expect(mockSetTxFlow.mock.calls[0][0].props).toStrictEqual({
@@ -142,7 +231,11 @@ describe('useSafeWalletProvider', () => {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
           <Provider store={testStore}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -156,8 +249,10 @@ describe('useSafeWalletProvider', () => {
 
       const resp2 = result?.current?.signMessage('message', appInfo)
 
+      const appName = getAppName()
+
       expect(showNotificationSpy).toHaveBeenCalledWith('Signature request', {
-        body: 'test wants you to sign a message. Open the Safe{Wallet} to continue.',
+        body: `test wants you to sign a message. Open the ${appName} to continue.`,
       })
 
       // SignMessageOnChainFlow props
@@ -182,7 +277,11 @@ describe('useSafeWalletProvider', () => {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
           <Provider store={makeStore(undefined, { skipBroadcast: true })}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -227,8 +326,10 @@ describe('useSafeWalletProvider', () => {
 
       const resp = result?.current?.signTypedMessage(typedMessage, appInfo)
 
+      const appName = getAppName()
+
       expect(showNotificationSpy).toHaveBeenCalledWith('Signature request', {
-        body: 'test wants you to sign a message. Open the Safe{Wallet} to continue.',
+        body: `test wants you to sign a message. Open the ${appName} to continue.`,
       })
 
       expect(mockSetTxFlow.mock.calls[0][0].props).toStrictEqual({
@@ -252,7 +353,11 @@ describe('useSafeWalletProvider', () => {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
           <Provider store={makeStore(undefined, { skipBroadcast: true })}>
-            <TxModalContext.Provider value={{ setTxFlow: mockSetTxFlow } as any}>{children}</TxModalContext.Provider>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
           </Provider>
         ),
       })
@@ -277,8 +382,10 @@ describe('useSafeWalletProvider', () => {
         appInfo,
       )
 
+      const appName = getAppName()
+
       expect(showNotificationSpy).toHaveBeenCalledWith('Transaction request', {
-        body: 'test wants to submit a transaction. Open the Safe{Wallet} to continue.',
+        body: `test wants to submit a transaction. Open the ${appName} to continue.`,
       })
 
       expect(mockSetTxFlow.mock.calls[0][0].props).toStrictEqual({
@@ -308,52 +415,384 @@ describe('useSafeWalletProvider', () => {
     })
 
     it('should get tx by safe tx hash', async () => {
-      jest.spyOn(gateway as any, 'getTransactionDetails').mockImplementation(() => ({
-        hash: '0x123',
-      }))
+      const mockTxDetails: TransactionDetails = {
+        txInfo: {
+          type: 'Custom',
+          to: {
+            value: '0x123',
+            name: 'Test',
+            logoUri: null,
+          },
+          dataSize: '100',
+          value: null,
+          isCancellation: false,
+          methodName: 'test',
+        },
+        safeAddress: '0x456',
+        txId: '0x123456789000',
+        txStatus: 'AWAITING_CONFIRMATIONS',
+      }
+
+      jest.spyOn(require('@/utils/transactions'), 'getTransactionDetails').mockResolvedValue(mockTxDetails)
 
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'))
 
       const resp = await result.current?.getBySafeTxHash('0x123456789000')
 
-      expect(gateway.getTransactionDetails).toHaveBeenCalledWith('1', '0x123456789000')
-      expect(resp).toEqual({ hash: '0x123' })
+      expect(resp).toEqual(mockTxDetails)
     })
 
-    it('should switch chain', () => {
-      const mockPush = jest.fn()
+    it('should request a Safe selection when switching chains', async () => {
+      const mockPush = jest.fn().mockResolvedValue(true)
+      const safeItem = {
+        chainId: '5',
+        address: '0x1234567890000000000000000000000000000000',
+        isPinned: false,
+        isReadOnly: false,
+        lastVisited: 0,
+        name: 'Test Safe',
+      }
+
+      mockedUseAllSafes.mockReturnValue([safeItem])
+
       jest.spyOn(router, 'useRouter').mockReturnValue({
         push: mockPush,
+        pathname: '/',
+        query: {},
       } as unknown as router.NextRouter)
 
-      jest.spyOn(window, 'confirm').mockReturnValue(true)
+      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
 
-      const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'), {
-        initialReduxState: {
-          chains: {
-            loading: false,
-            error: undefined,
-            data: [{ chainId: '1', shortName: 'eth' } as gateway.ChainInfo],
-          },
-        },
+      mockWcPopupStore.setStore(true)
+
+      const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
+        wrapper: ({ children }) => (
+          <Provider store={store}>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
+          </Provider>
+        ),
       })
 
-      result.current?.switchChain('0x5', appInfo)
+      const promise = result.current?.switchChain('0x5', appInfo)
 
+      expect(promise).toBeInstanceOf(Promise)
+
+      const request = mockWcChainSwitchStore.getStore()
+      expect(request).toBeDefined()
+      expect(request?.safes).toEqual([safeItem])
+      expect(request?.chain.chainId).toBe('5')
+
+      await act(async () => {
+        if (!request) {
+          throw new Error('Expected WalletConnect chain switch request')
+        }
+
+        await request.onSelectSafe(safeItem)
+      })
+
+      await expect(promise).resolves.toBeNull()
+      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
+      expect(mockWcPopupStore.getStore()).toBe(true)
+      expect(updateSessionsMock).toHaveBeenCalledWith('5', safeItem.address)
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/',
-        query: {
-          chain: 'eth',
+        query: { safe: 'gor:0x1234567890000000000000000000000000000000' },
+      })
+    })
+
+    it('should automatically switch to a Safe with the same address on the target chain', async () => {
+      const mockPush = jest.fn().mockResolvedValue(true)
+      const currentSafeAddress = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'
+      const safeItem = {
+        chainId: '5',
+        address: currentSafeAddress,
+        isPinned: false,
+        isReadOnly: false,
+        lastVisited: 0,
+        name: 'Matching Safe',
+      }
+
+      mockedUseAllSafes.mockReturnValue([safeItem])
+
+      jest.spyOn(router, 'useRouter').mockReturnValue({
+        push: mockPush,
+        pathname: '/',
+        query: {},
+      } as unknown as router.NextRouter)
+
+      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
+
+      const { result } = renderHook(() => useTxFlowApi('1', currentSafeAddress), {
+        wrapper: ({ children }) => (
+          <Provider store={store}>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
+          </Provider>
+        ),
+      })
+
+      const promise = result.current?.switchChain('0x5', appInfo)
+
+      expect(promise).toBeInstanceOf(Promise)
+      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
+      expect(mockWcPopupStore.getStore()).toBe(false)
+
+      await act(async () => {
+        await expect(promise).resolves.toBeNull()
+      })
+
+      expect(updateSessionsMock).toHaveBeenCalledWith('5', currentSafeAddress)
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/',
+        query: { safe: 'gor:0xabcdefabcdefabcdefabcdefabcdefabcdefabcd' },
+      })
+    })
+
+    it('should reject switching chains when the user cancels the modal', async () => {
+      const mockPush = jest.fn().mockResolvedValue(true)
+      const safeItem = {
+        chainId: '5',
+        address: '0x1234567890000000000000000000000000000000',
+        isPinned: false,
+        isReadOnly: false,
+        lastVisited: 0,
+        name: 'Test Safe',
+      }
+
+      mockedUseAllSafes.mockReturnValue([safeItem])
+
+      jest.spyOn(router, 'useRouter').mockReturnValue({
+        push: mockPush,
+        pathname: '/',
+        query: {},
+      } as unknown as router.NextRouter)
+
+      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
+
+      const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
+        wrapper: ({ children }) => (
+          <Provider store={store}>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
+          </Provider>
+        ),
+      })
+
+      const promise = result.current?.switchChain('0x5', appInfo)
+
+      expect(promise).toBeInstanceOf(Promise)
+      expect(mockWcPopupStore.getStore()).toBe(true)
+
+      const request = mockWcChainSwitchStore.getStore()
+      expect(request).toBeDefined()
+      expect(request?.chain.chainId).toBe('5')
+      expect(request?.safes).toEqual([safeItem])
+
+      let error: unknown
+      await act(async () => {
+        request?.onCancel()
+        error = await (promise as Promise<never>).catch((err) => err)
+      })
+
+      expect(error).toEqual({
+        code: RpcErrorCode.USER_REJECTED,
+        message: 'User rejected chain switch',
+      })
+      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
+      expect(mockWcPopupStore.getStore()).toBe(false)
+      expect(updateSessionsMock).not.toHaveBeenCalled()
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+
+    it('should ignore cancellation once the chain switch promise is settled', async () => {
+      const mockPush = jest.fn().mockResolvedValue(true)
+
+      const safeItem = {
+        chainId: '5',
+        address: '0x1234567890000000000000000000000000000000',
+        isPinned: false,
+        isReadOnly: false,
+        lastVisited: 0,
+        name: 'Test Safe',
+      }
+
+      mockedUseAllSafes.mockReturnValue([safeItem])
+
+      jest.spyOn(router, 'useRouter').mockReturnValue({
+        push: mockPush,
+        pathname: '/',
+        query: {},
+      } as unknown as router.NextRouter)
+
+      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
+
+      const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
+        wrapper: ({ children }) => (
+          <Provider store={store}>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
+          </Provider>
+        ),
+      })
+
+      const promise = result.current?.switchChain('0x5', appInfo)
+
+      const request = mockWcChainSwitchStore.getStore()
+      expect(request).toBeDefined()
+
+      await act(async () => {
+        if (!request) {
+          throw new Error('Expected WalletConnect chain switch request')
+        }
+
+        await request.onSelectSafe(safeItem)
+      })
+
+      await expect(promise).resolves.toBeNull()
+      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
+      expect(mockWcPopupStore.getStore()).toBe(false)
+
+      expect(updateSessionsMock).toHaveBeenCalledWith('5', safeItem.address)
+
+      request?.onCancel()
+
+      expect(mockWcChainSwitchStore.getStore()).toBeUndefined()
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/',
+        query: { safe: 'gor:0x1234567890000000000000000000000000000000' },
+      })
+    })
+
+    it('should handle consecutive chain switch requests on the same chain', async () => {
+      const mockPush = jest.fn().mockResolvedValue(true)
+
+      const safes = [
+        {
+          chainId: '5',
+          address: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+          isPinned: false,
+          isReadOnly: false,
+          lastVisited: 0,
+          name: 'Safe Alpha',
         },
+        {
+          chainId: '5',
+          address: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+          isPinned: false,
+          isReadOnly: false,
+          lastVisited: 0,
+          name: 'Safe Beta',
+        },
+      ]
+
+      mockedUseAllSafes.mockReturnValue(safes)
+
+      jest.spyOn(router, 'useRouter').mockReturnValue({
+        push: mockPush,
+        pathname: '/',
+        query: {},
+      } as unknown as router.NextRouter)
+
+      const store = makeStore(
+        {
+          chains: {
+            data: [
+              {
+                chainId: '5',
+                shortName: 'gor',
+                chainName: 'Goerli',
+                zk: false,
+                beaconChainExplorerUriTemplate: {},
+              } as unknown as Chain,
+            ],
+            loading: false,
+            loaded: true,
+            error: undefined,
+          },
+        } as Partial<RootState>,
+        { skipBroadcast: true },
+      )
+
+      const { result } = renderHook(() => useTxFlowApi('5', safes[0].address), {
+        wrapper: ({ children }) => (
+          <Provider store={store}>
+            <TxModalContext.Provider
+              value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() } as TxModalContextType}
+            >
+              {children}
+            </TxModalContext.Provider>
+          </Provider>
+        ),
+      })
+
+      const firstPromise = result.current?.switchChain('0x5', appInfo)
+      expect(firstPromise).toBeInstanceOf(Promise)
+
+      const firstRequest = mockWcChainSwitchStore.getStore()
+      expect(firstRequest?.safes).toEqual(safes)
+
+      await act(async () => {
+        if (!firstRequest) {
+          throw new Error('Expected WalletConnect chain switch request')
+        }
+
+        await firstRequest.onSelectSafe(safes[1])
+      })
+
+      await expect(firstPromise).resolves.toBeNull()
+      expect(updateSessionsMock).toHaveBeenCalledWith('5', safes[1].address)
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/',
+        query: { safe: 'gor:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' },
+      })
+
+      updateSessionsMock.mockClear()
+      mockPush.mockClear()
+
+      const secondPromise = result.current?.switchChain('0x5', appInfo)
+      expect(secondPromise).toBeInstanceOf(Promise)
+
+      const secondRequest = mockWcChainSwitchStore.getStore()
+      expect(secondRequest?.safes).toEqual(safes)
+
+      await act(async () => {
+        if (!secondRequest) {
+          throw new Error('Expected WalletConnect chain switch request')
+        }
+
+        await secondRequest.onSelectSafe(safes[0])
+      })
+
+      await expect(secondPromise).resolves.toBeNull()
+      expect(updateSessionsMock).toHaveBeenCalledWith('5', safes[0].address)
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/',
+        query: { safe: 'gor:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
       })
     })
 
     it('should proxy RPC calls', async () => {
       const mockSend = jest.fn(() => Promise.resolve({ result: '0x' }))
 
-      jest.spyOn(web3 as any, 'useWeb3ReadOnly').mockImplementation(() => ({
-        send: mockSend,
-      }))
+      jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockImplementation(
+        () =>
+          ({
+            send: mockSend,
+          }) as unknown as ReturnType<typeof web3ReadOnly.useWeb3ReadOnly>,
+      )
 
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'))
 
@@ -394,6 +833,7 @@ describe('useSafeWalletProvider', () => {
       initialReduxState: {
         safeInfo: {
           loading: false,
+          loaded: true,
           error: undefined,
           data: {
             chainId: '1',

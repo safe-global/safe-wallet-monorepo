@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Store the initial git status
 initial_status=$(git status --porcelain)
@@ -18,8 +19,16 @@ if [ "$initial_status" != "$post_lint_status" ]; then
   exit 1
 fi
 
+# Run type-check on all workspaces
+if ! yarn run type-check; then
+  echo "===================================="
+  echo "Type check failed. Please fix the type errors before pushing or push with --no-verify flag to omit this check."
+  echo "===================================="
+  exit 1
+fi
+
 # Check if the user wants to run tests on push
-if [ "$RUN_TESTS_ON_PUSH" == "true" ]; then
+if [ "${RUN_TESTS_ON_PUSH:-}" == "true" ]; then
   echo "Running tests..."
   if ! yarn test; then
     echo "===================================="

@@ -1,5 +1,7 @@
 # Code Style Guidelines
 
+> Cyclomatic-complexity guidelines (lookup tables, early returns, switch for type discrimination, function-length limits) live in [`../../web/docs/code-style.md`](../../web/docs/code-style.md#code-complexity) and apply equally here.
+
 ## Code Structure
 
 ### General Components
@@ -58,7 +60,6 @@ For a feature called **Assets**, the file structure might look like this:
 ### Presentation vs. Container Components
 
 - **Presentation Components**:
-
   - Responsible only for rendering the UI.
   - Receive data and callbacks via props.
   - Avoid direct manipulation of business logic.

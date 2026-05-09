@@ -1,36 +1,34 @@
 import { type ReactNode } from 'react'
 import { Grid, Typography } from '@mui/material'
 
-const width = { xl: '25%', lg: '200px', xs: 'auto' }
-const minWidth = { xl: '25%', lg: '200px' }
-const wrap = { flexWrap: { xl: 'nowrap' } }
+export const gridSx = {
+  width: { xl: '25%', lg: '170px', xs: 'auto' },
+  minWidth: '100px',
+  flexWrap: { xl: 'nowrap' },
+}
 
-const FieldsGrid = ({ title, children }: { title: string | ReactNode; children: ReactNode }) => {
+const FieldsGrid = ({
+  title,
+  children,
+  testId,
+}: {
+  title: string | ReactNode
+  children: ReactNode
+  testId?: string
+}) => {
   return (
     <Grid
       container
       sx={[
         {
-          alignItems: 'center',
           gap: 1,
+          flexWrap: gridSx.flexWrap,
         },
-        ...(Array.isArray(wrap) ? wrap : [wrap]),
       ]}
+      data-testid={testId}
     >
-      <Grid
-        item
-        data-testid="tx-row-title"
-        style={{ wordBreak: 'break-word' }}
-        sx={{
-          width,
-          minWidth,
-        }}
-      >
-        <Typography
-          sx={{
-            color: 'primary.light',
-          }}
-        >
+      <Grid item data-testid="tx-row-title" style={{ wordBreak: 'break-word' }} sx={gridSx}>
+        <Typography color="primary.light" variant="body2" component="span">
           {title}
         </Typography>
       </Grid>

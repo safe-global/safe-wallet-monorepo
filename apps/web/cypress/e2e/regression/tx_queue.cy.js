@@ -31,7 +31,7 @@ describe('Transaction queue tests', { defaultCommandTimeout: 30000 }, () => {
       swapsHistory.sell,
       dai,
       eq,
-      swapsHistory.executionNeeded,
+      swapsHistory.expired,
     ])
     create_tx.clickOnAdvancedDetails()
     create_tx.verifyExpandedDetails(
@@ -81,7 +81,6 @@ describe('Transaction queue tests', { defaultCommandTimeout: 30000 }, () => {
       swapsHistory.sellOrder,
       swapsHistory.sell,
       swapsHistory.executionNeeded,
-      orderDetails.expiry12Months,
       dai,
       eq,
     ])

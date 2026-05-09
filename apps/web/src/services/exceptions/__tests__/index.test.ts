@@ -2,18 +2,17 @@ import { Errors, CodedException } from '..'
 
 const defaultPublicIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
 describe('CodedException', () => {
-  beforeAll(() => {
-    console.error = jest.fn()
-  })
-
   beforeEach(() => {
     process.env.NEXT_PUBLIC_IS_PRODUCTION = 'false'
     jest.resetModules()
     jest.clearAllMocks()
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    jest.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterAll(() => {
     process.env.NEXT_PUBLIC_IS_PRODUCTION = defaultPublicIsProduction
+    jest.restoreAllMocks()
   })
 
   it('throws an error if code is not found', () => {
@@ -46,10 +45,14 @@ describe('CodedException', () => {
   })
 
   it('creates an error with an extra message from an object', () => {
-    const err = new CodedException(Errors._100, { address: '0x123' })
-    expect(err.message).toBe('Code 100: Invalid input in the address field ({"address":"0x123"})')
+    const err = new CodedException(Errors._100, { secretKey: '0x123' })
+    expect(err.message).toBe('Code 100: Invalid input in the address field (Non-Error object of type: object)')
     expect(err.code).toBe(100)
     expect(err.content).toBe(Errors._100)
+
+    // Verify it does NOT expose object contents (security test)
+    expect(err.message).not.toContain('0x123')
+    expect(err.message).not.toContain('secretKey')
   })
 
   it('creates an error with an extra message', () => {
@@ -60,73 +63,98 @@ describe('CodedException', () => {
     expect(err.code).toBe(901)
   })
 
-  describe('Logging', () => {
-    it('logs to the console', async () => {
+  describe('Logging (warn level)', () => {
+    it('logs caught exceptions to console.warn, not console.error', async () => {
       const { logError } = await import('..')
 
       const err = logError(Errors._100, '123')
       expect(err.message).toBe('Code 100: Invalid input in the address field (123)')
-      expect(console.error).toHaveBeenCalledWith(err)
+      expect(console.warn).toHaveBeenCalledWith(err)
+      expect(console.error).not.toHaveBeenCalled()
     })
 
-    it('logs to the console via the public log method', () => {
+    it('public log method routes through console.warn', () => {
       const err = new CodedException(Errors._601)
       expect(err.message).toBe('Code 601: Error fetching balances')
-      expect(console.error).not.toHaveBeenCalled()
+      expect(console.warn).not.toHaveBeenCalled()
       err.log()
-      expect(console.error).toHaveBeenCalledWith(err)
+      expect(console.warn).toHaveBeenCalledWith(err)
     })
 
-    it('logs only the error message on prod', async () => {
+    it('logs only the message on prod', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
       const { logError, Errors } = await import('..')
 
       logError(Errors._100)
-      expect(console.error).toHaveBeenCalledWith('Code 100: Invalid input in the address field')
+      expect(console.warn).toHaveBeenCalledWith('Code 100: Invalid input in the address field')
+    })
+
+    it('forwards to logger.warn in production (NOT addError)', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockWarn = jest.fn()
+      const mockError = jest.fn()
+      jest.doMock('@/services/observability', () => ({
+        __esModule: true,
+        ...jest.requireActual('@/services/observability'),
+        logger: { info: jest.fn(), warn: mockWarn, error: mockError, debug: jest.fn() },
+      }))
+
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601, 'rpc down')
+      expect(mockWarn).toHaveBeenCalledWith(expect.stringContaining('601'), { code: 601 })
+      expect(mockError).not.toHaveBeenCalled()
+    })
+
+    it('does not forward to logger in non-production envs', async () => {
+      const mockWarn = jest.fn()
+      jest.doMock('@/services/observability', () => ({
+        __esModule: true,
+        ...jest.requireActual('@/services/observability'),
+        logger: { info: jest.fn(), warn: mockWarn, error: jest.fn(), debug: jest.fn() },
+      }))
+
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601)
+      expect(mockWarn).not.toHaveBeenCalled()
     })
   })
 
-  describe('Tracking', () => {
-    beforeAll(() => {
-      console.error = jest.fn()
-    })
-
-    beforeEach(() => {
-      jest.resetModules()
-      jest.clearAllMocks()
-    })
-
-    // I can't figure out a way to override the IS_PRODUCTION constant
-    it('tracks using Sentry on production', async () => {
+  describe('Tracking (error level)', () => {
+    it('logs at error level AND forwards to captureException on production', async () => {
       process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
 
-      const mockSentryCaptureException = jest.fn()
+      const mockCaptureException = jest.fn()
+      const mockError = jest.fn()
 
-      jest.doMock('@/services/sentry', () => ({
+      jest.doMock('@/services/observability', () => ({
         __esModule: true,
-        ...jest.requireActual('@/services/sentry'),
-        sentryCaptureException: mockSentryCaptureException,
+        ...jest.requireActual('@/services/observability'),
+        captureException: mockCaptureException,
+        logger: { info: jest.fn(), warn: jest.fn(), error: mockError, debug: jest.fn() },
       }))
 
       const { trackError, Errors } = await import('..')
 
       const err = trackError(Errors._100)
-      expect(mockSentryCaptureException).toHaveBeenCalled()
+      expect(mockCaptureException).toHaveBeenCalled()
+      expect(mockError).toHaveBeenCalledWith(err.message, { code: 100 })
       expect(console.error).toHaveBeenCalledWith(err.message)
     })
 
-    it('does not track using Sentry in non-production envs', async () => {
-      const mockSentryCaptureException = jest.fn()
-      jest.doMock('@/services/sentry', () => ({
+    it('does not track in non-production envs', async () => {
+      const mockCaptureException = jest.fn()
+      jest.doMock('@/services/observability', () => ({
         __esModule: true,
-        ...jest.requireActual('@/services/sentry'),
-        sentryCaptureException: mockSentryCaptureException,
+        ...jest.requireActual('@/services/observability'),
+        captureException: mockCaptureException,
       }))
 
       const { trackError, Errors } = await import('..')
 
       const err = trackError(Errors._100)
-      expect(mockSentryCaptureException).not.toHaveBeenCalled()
+      expect(mockCaptureException).not.toHaveBeenCalled()
       expect(console.error).toHaveBeenCalledWith(err)
     })
   })

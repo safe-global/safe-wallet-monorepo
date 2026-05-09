@@ -1,4 +1,4 @@
-import { splitError } from '@/features/walletconnect/services/utils'
+import { splitError } from '../../services/utils'
 import { Button, Typography } from '@mui/material'
 import WcLogoHeader from '../WcLogoHeader'
 import css from './styles.module.css'

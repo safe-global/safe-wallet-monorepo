@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AlreadySigned matches snapshot 1`] = `
+<View>
+  <View
+    style={
+      {
+        "flex": 1,
+      }
+    }
+    testID="theme-light"
+  >
+    <View
+      style={
+        {
+          "flexDirection": "column",
+          "paddingBottom": 16,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#A1A3A7",
+            "fontSize": 14,
+            "fontWeight": 400,
+            "marginBottom": 8,
+            "textAlign": "center",
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Can be executed once the threshold is reached.
+      </Text>
+    </View>
+  </View>
+</View>
+`;

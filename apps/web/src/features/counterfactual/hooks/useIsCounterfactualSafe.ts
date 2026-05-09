@@ -1,4 +1,4 @@
-import { selectIsUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectIsUndeployedSafe } from '../store/undeployedSafesSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector } from '@/store'
 

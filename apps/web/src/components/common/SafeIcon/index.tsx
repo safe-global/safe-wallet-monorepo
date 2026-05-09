@@ -23,7 +23,7 @@ interface SafeIconProps extends IdenticonProps {
   isMultiChainItem?: boolean
 }
 
-const ChainIcon = ({ chainId }: { chainId: string }) => {
+export const ChainIcon = ({ chainId }: { chainId: string }) => {
   const chainConfig = useChain(chainId)
 
   if (!chainConfig) {

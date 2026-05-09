@@ -1,7 +1,8 @@
+import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
+import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { render, waitFor } from '@/tests/test-utils'
 import SignTxButton from '.'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
-import { type AddressEx, DetailedExecutionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
 import { faker } from '@faker-js/faker'
 import useWallet, { useSigner } from '@/hooks/wallets/useWallet'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
@@ -21,7 +22,7 @@ describe('SignTxButton', () => {
   const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
   const mockUseIsSafeOwner = useIsSafeOwner as jest.MockedFunction<typeof useIsSafeOwner>
 
-  const testMissingSigners: AddressEx[] = [
+  const testMissingSigners: AddressInfo[] = [
     {
       value: faker.finance.ethereumAddress(),
     },

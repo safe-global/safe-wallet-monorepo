@@ -1,13 +1,13 @@
-import type { TwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
-import { getOrderFeeBps } from '@/features/swap/helpers/utils'
+import type { TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { getOrderFeeBps } from '@safe-global/utils/features/swap/helpers/utils'
 import { DataRow } from '@/components/common/Table/DataRow'
-import { formatVisualAmount } from '@/utils/formatters'
-import { HelpIconTooltip } from '@/features/swap/components/HelpIconTooltip'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { HelpIconTooltip } from '../../HelpIconTooltip'
 
 export const SurplusFee = ({
   order,
 }: {
-  order: Pick<TwapOrder, 'fullAppData' | 'executedFee' | 'executedFeeToken'>
+  order: Pick<TwapOrderTransactionInfo, 'fullAppData' | 'executedFee' | 'executedFeeToken'>
 }) => {
   const bps = getOrderFeeBps(order)
   const { executedFee, executedFeeToken } = order

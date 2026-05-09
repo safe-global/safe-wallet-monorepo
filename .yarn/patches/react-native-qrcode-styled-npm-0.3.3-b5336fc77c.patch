@@ -1,0 +1,12 @@
+diff --git a/package.json b/package.json
+index 228948278bbbd33e0637fb59397e4f4751efdf1b..37e8f4de7600b39c8fbc409f1095be2228a030dc 100644
+--- a/package.json
++++ b/package.json
+@@ -5,6 +5,7 @@
+   "main": "lib/commonjs/index.js",
+   "module": "lib/module/index.js",
+   "react-native": "src/index.tsx",
++  "types": "lib/typescript/module/src/index.d.ts",
+   "source": "src/index",
+   "files": [
+     "src",

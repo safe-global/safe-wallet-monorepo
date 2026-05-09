@@ -1,12 +1,12 @@
 import { Box } from '@mui/material'
 import type { ReactElement } from 'react'
 
-const stickyTop = { xs: '103px', md: '111px' }
+const stickyTop = { xs: '103px', sm: '111px' }
 export const Sticky = ({ children }: { children: ReactElement }): ReactElement => (
   <Box
     sx={{
       position: 'sticky',
-      zIndex: '1',
+      zIndex: 2,
       top: stickyTop,
       py: 1,
       bgcolor: 'background.main',

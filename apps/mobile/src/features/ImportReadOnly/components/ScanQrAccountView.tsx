@@ -11,28 +11,65 @@ type QrCameraViewProps = {
   isCameraActive: boolean
   onScan: (codes: Code[]) => void
   onEnterManuallyPress: () => void
+  onActivateCamera: () => void
+  onRequestPermission: () => void | Promise<unknown>
+  onPressSettings: () => void
 }
 
-export const QrCameraView = ({ permission, isCameraActive, onScan, onEnterManuallyPress }: QrCameraViewProps) => (
+const headingForPermission = (permission: CameraPermissionStatus): string => {
+  switch (permission) {
+    case 'denied':
+      return 'Camera access is off'
+    case 'restricted':
+      return 'Camera access is restricted'
+    case 'not-determined':
+      return 'Allow camera access'
+    default:
+      return 'Scan a QR code'
+  }
+}
+
+const bodyForPermission = (permission: CameraPermissionStatus): string => {
+  switch (permission) {
+    case 'denied':
+      return 'Enable camera access to scan QR codes for adding Safe Accounts and connecting wallets. You can change this in Settings.'
+    case 'restricted':
+      return 'Camera access is disabled by a device restriction. If you manage this device, you can change it in Settings.'
+    case 'not-determined':
+      return 'Safe needs camera access to scan QR codes for adding Safe Accounts and connecting wallets.'
+    default:
+      return 'Scan the QR code of the account you want to import. You can find it under Receive or in the sidebar.'
+  }
+}
+
+export const QrCameraView = ({
+  permission,
+  isCameraActive,
+  onScan,
+  onEnterManuallyPress,
+  onActivateCamera,
+  onRequestPermission,
+  onPressSettings,
+}: QrCameraViewProps) => (
   <>
     <QrCamera
       permission={permission}
       isCameraActive={isCameraActive}
       onScan={onScan}
-      heading={permission === 'denied' ? 'Camera access disabled' : 'Scan a QR code'}
+      onActivateCamera={onActivateCamera}
+      onRequestPermission={onRequestPermission}
+      onPressSettings={onPressSettings}
+      heading={headingForPermission(permission)}
       footer={
         <>
-          <Text textAlign={'center'}>
-            {permission === 'denied'
-              ? 'Enabling camera will allow you to scan QR codes to import existing Safe Accounts and join new ones with a mobile signer.'
-              : 'Scan the QR code of the account you want to import. You can find it under Receive or in the sidebar.'}
-          </Text>
+          <Text textAlign="center">{bodyForPermission(permission)}</Text>
           <View alignItems="center" marginTop="$5">
             <SafeButton
               secondary
-              icon={<SafeFontIcon name="copy" />}
+              icon={<SafeFontIcon name="copy" size={18} />}
               onPress={onEnterManuallyPress}
               testID={'enter-manually'}
+              size="$sm"
             >
               Enter manually
             </SafeButton>

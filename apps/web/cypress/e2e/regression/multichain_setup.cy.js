@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as sideBar from '../pages/sidebar.pages.js'
+import * as dashboard from '../pages/dashboard.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -14,10 +15,9 @@ let staticSafes = []
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-// DO NOT use OWNER_2_PRIVATE_KEY for safe creation. Used for CF safes.
-const signer2 = walletCredentials.OWNER_2_PRIVATE_KEY
 
-describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
+// Tests rewritten for the new UI in multichain_setup_new.cy.js.
+describe.skip('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -39,7 +39,7 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
     main.verifyElementsCount(navigation.newTxBtn, 0)
     main.verifyElementsCount(create_wallet.activateAccountBtn, 2)
     cy.visit(constants.setupUrl + safe)
-    owner.verifyAddOwnerBtnIsDisabled()
+    owner.verifyManageSignersBtnIsDisabled()
     sideBar.verifyNavItemDisabled(sideBar.sideBarListItems[4])
     sideBar.verifyNavItemDisabled(sideBar.sideBarListItems[6])
   })
@@ -49,22 +49,18 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
     sideBar.addNetwork(constants.networks.ethereum)
     cy.contains(sideBar.createSafeMsg(constants.networks.ethereum))
     cy.visit(constants.homeUrl + staticSafes.MATIC_STATIC_SAFE_28)
-    sideBar.checkInconsistentSignersMsgDisplayed(constants.networks.ethereum)
+    dashboard.expandActionRequiredPanel()
+    dashboard.checkInconsistentSignersMsgDisplayed()
+    dashboard.clickActionInPanel(dashboard.reviewSignersTestId)
+    cy.url().should('include', '/settings/setup').and('include', staticSafes.MATIC_STATIC_SAFE_28)
   })
 
   it('Verify warning on add owner for one safe in the group', () => {
     cy.visit(constants.setupUrl + staticSafes.MATIC_STATIC_SAFE_28)
-    owner.openAddOwnerWindow()
-    owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
-    owner.clickOnNextBtn()
-    sideBar.checkInconsistentSignersMsgDisplayedConfirmTxView(constants.networks.polygon)
-  })
-
-  it('Verify warning on add owner for one safe in the group', () => {
-    cy.visit(constants.setupUrl + staticSafes.MATIC_STATIC_SAFE_28)
-    owner.openAddOwnerWindow()
-    owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
-    owner.clickOnNextBtn()
+    owner.openManageSignersWindow()
+    owner.clickOnAddSignerBtn()
+    owner.typeOwnerAddressManage(4, constants.SEPOLIA_OWNER_2)
+    owner.clickOnNextBtnManage()
     sideBar.checkInconsistentSignersMsgDisplayedConfirmTxView(constants.networks.polygon)
   })
 

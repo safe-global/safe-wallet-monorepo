@@ -1,63 +1,48 @@
-import { HexEncodedData } from '@/components/transactions/HexEncodedData'
+import type { AddressInfo, DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isAddress, isArrayParameter, isByte } from '@/utils/transaction-guards'
-import type { AddressEx, DataDecoded } from '@safe-global/safe-gateway-typescript-sdk'
-import { Box, Typography } from '@mui/material'
+import { Box, Stack, Typography } from '@mui/material'
 import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/ValueArray'
+import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 
 type MethodDetailsProps = {
   data: DataDecoded
-  hexData?: string
+  hexData?: string | null
   addressInfoIndex?: {
-    [key: string]: AddressEx
-  }
+    [key: string]: AddressInfo
+  } | null
 }
 
-export const MethodDetails = ({ data, hexData, addressInfoIndex }: MethodDetailsProps): ReactElement => {
+export const MethodDetails = ({ data, addressInfoIndex, hexData }: MethodDetailsProps): ReactElement | null => {
+  const showHexData = data.method === 'fallback' && !data.parameters?.length && hexData
   if (!data.parameters?.length) {
     return (
       <>
-        <Typography
-          sx={{
-            color: 'text.secondary',
-          }}
-        >
+        <Typography color="text.secondary" variant="body2">
           No parameters
         </Typography>
-
-        {hexData && <HexEncodedData title="Data (hex-encoded)" hexData={hexData} />}
+        {showHexData && <HexEncodedData title="Data" hexData={hexData} />}
       </>
     )
   }
 
   return (
-    <Box>
-      <Typography
-        sx={{
-          fontWeight: 'bold',
-          pb: 1,
-        }}
-      >
-        Parameters
-      </Typography>
+    <Stack gap={0.75}>
       {data.parameters?.map((param, index) => {
         const isArrayValueParam = isArrayParameter(param.type) || Array.isArray(param.value)
         const inlineType = isAddress(param.type) ? 'address' : isByte(param.type) ? 'bytes' : undefined
         const addressEx = typeof param.value === 'string' ? addressInfoIndex?.[param.value] : undefined
 
         const title = (
-          <>
-            <Typography component="span">{param.name}</Typography>{' '}
-            <Typography
-              component="span"
-              sx={{
-                color: 'text.secondary',
-              }}
-            >
+          <Box mb={-0.75}>
+            <Typography variant="body2" component="span">
+              {param.name}
+            </Typography>{' '}
+            <Typography variant="body2" component="span" color="text.secondary">
               {param.type}
             </Typography>
-          </>
+          </Box>
         )
 
         return (
@@ -70,6 +55,6 @@ export const MethodDetails = ({ data, hexData, addressInfoIndex }: MethodDetails
           </TxDataRow>
         )
       })}
-    </Box>
+    </Stack>
   )
 }

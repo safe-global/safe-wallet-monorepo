@@ -1,19 +1,20 @@
+import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo } from 'react'
-import { type TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
 import { useAppSelector } from '@/store'
-import useAsync from './useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { selectTxHistory } from '@/store/txHistorySlice'
 import useSafeInfo from './useSafeInfo'
 import { fetchFilteredTxHistory, useTxFilter } from '@/utils/tx-history-filter'
 import { getTxHistory } from '@/services/transactions'
 import { selectSettings } from '@/store/settingsSlice'
 import { useHasFeature } from './useChains'
-import { FEATURES } from '@/utils/chains'
+
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const useTxHistory = (
   pageUrl?: string,
 ): {
-  page?: TransactionListPage
+  page?: TransactionItemPage
   error?: string
   loading: boolean
 } => {
@@ -31,13 +32,15 @@ const useTxHistory = (
   } = useSafeInfo()
 
   // If filter exists or pageUrl is passed, load a new history page from the API
-  const [page, error, loading] = useAsync<TransactionListPage>(
+  const [page, error, loading] = useAsync<TransactionItemPage>(
     () => {
       if (!(filter || pageUrl)) return
 
-      return filter
-        ? fetchFilteredTxHistory(chainId, safeAddress, filter, hideUntrustedTxs, hideImitationTxs, pageUrl)
-        : getTxHistory(chainId, safeAddress, hideUntrustedTxs, hideImitationTxs, pageUrl)
+      return (
+        filter
+          ? fetchFilteredTxHistory(chainId, safeAddress, filter, hideUntrustedTxs, hideImitationTxs, pageUrl)
+          : getTxHistory(chainId, safeAddress, hideUntrustedTxs, hideImitationTxs, pageUrl)
+      ) as Promise<TransactionItemPage>
     },
     [filter, pageUrl, chainId, safeAddress, hideUntrustedTxs, hideImitationTxs],
     false,

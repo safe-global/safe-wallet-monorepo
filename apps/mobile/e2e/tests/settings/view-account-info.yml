@@ -1,0 +1,409 @@
+appId: ${APP_ID}
+tags:
+  - settings
+  - smoke
+---
+# Safe Account Information Display E2E Test
+# Tests viewing detailed information about the current Safe account including owners, threshold, and address
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# ============================================
+# Use e2eOnboardedAccount shortcut
+# ============================================
+
+- tapOn:
+    id: 'e2eOnboardedAccount'
+
+# Wait for home screen to load
+- assertVisible:
+    id: 'home-tab'
+
+# ============================================
+# Navigate to Settings/Account tab
+# ============================================
+
+- tapOn:
+    id: 'account-tab'
+
+# Wait for account/settings screen
+- assertVisible:
+    text: '.*(Settings|Account|Unnamed Safe).*'
+
+# ============================================
+# View Safe Info Section
+# ============================================
+
+# Verify Safe info card/section visible at top
+# Safe name should be displayed (defaults to "Unnamed Safe" if no contact name)
+- assertVisible:
+    text: '.*Unnamed Safe.*'
+
+# Verify Safe address displayed (truncated format)
+# Address format: 0x2f3e...Fbb6 (from mockedActiveSafeInfo)
+- assertVisible:
+    text: '.*0x2f3e.*Fbb6.*'
+
+# Verify threshold badge displayed (e.g., "1/2" based on mockedActiveSafeInfo)
+# ThresholdBadge shows threshold/ownersCount format
+- assertVisible:
+    id: 'threshold-info-badge'
+
+# ============================================
+# Safe Address Display
+# ============================================
+
+# Verify full Safe address visible (truncated format is shown)
+- assertVisible:
+    text: '.*0x2f3e.*Fbb6.*'
+
+# Verify address has copy button
+# EthAddress component with copy prop renders CopyButton with testID "copy-button"
+- assertVisible:
+    id: 'copy-button'
+
+# ============================================
+# Copy Safe Address
+# ============================================
+
+# Tap copy button for Safe address
+# EthAddress component renders CopyButton with testID "copy-button"
+# The TouchableOpacity wrapping EthAddress also triggers copy, but CopyButton is more explicit
+- tapOn:
+    id: 'copy-button'
+
+# Verify success feedback (toast/animation)
+# CopyAndDispatchToast hook shows toast message "Address copied."
+# Note: Maestro can't easily verify clipboard content, but we verify toast appears
+- assertVisible:
+    text: '.*Address copied.*'
+
+# ============================================
+# Threshold Information
+# ============================================
+
+# Verify threshold badge is visible
+- assertVisible:
+    id: 'threshold-info-badge'
+
+# Verify threshold display cards
+# Two cards showing "Signers" count and "Threshold" ratio
+- assertVisible:
+    text: 'Signers'
+
+- assertVisible:
+    text: 'Threshold'
+
+# Verify threshold ratio displayed (e.g., "1/2")
+# Based on mockedActiveSafeInfo: threshold=1, owners.length=2
+- assertVisible:
+    text: '.*1/2.*'
+
+# Verify signers count displayed
+- assertVisible:
+    id: settings-signers-list-item
+    containsDescendants:
+      - text: '.*2.*'
+
+# ============================================
+# Owners List Section
+# ============================================
+
+# Verify section titled "Members"
+- assertVisible:
+    text: 'Members'
+
+# Verify "Signers" list item visible
+- assertVisible:
+    id: settings-signers-list-item
+
+# Verify signers count displayed in list item
+- assertVisible:
+    text: 'Signers'
+
+# Tap on Signers list item to navigate to signers screen
+- tapOn:
+    id: settings-signers-list-item
+
+# Wait for signers screen to load
+- assertVisible:
+    id: 'signers-screen'
+
+# Verify all owners listed
+# Based on mockedActiveSafeInfo, there are 2 owners:
+# - 0x3336745b7EA628F5134Bd9d08aa68b4979fA3472
+# - 0x4d5CF9E6df9a95F4c1F5398706cA27218add5949
+- assertVisible:
+    id: 'signer-0x3336745b7EA628F5134Bd9d08aa68b4979fA3472'
+
+- assertVisible:
+    id: 'signer-0x4d5CF9E6df9a95F4c1F5398706cA27218add5949'
+
+# ============================================
+# Copy Owner Address
+# ============================================
+
+# Tap on the menu icon for the first owner
+# The menu is positioned on the right side of the signer item
+# We'll use a point tap on the right side of the first signer item
+- tapOn:
+    id: 'signer-menu'
+
+# Wait for menu to appear
+- waitForAnimationToEnd
+
+# Tap "Copy address" option
+# MenuView shows actions with title "Copy address"
+- tapOn:
+    text: '.*Copy address.*'
+
+# Verify success feedback
+- assertVisible:
+    text: '.*Address copied.*'
+
+# ============================================
+# Navigate Back to Settings
+# ============================================
+
+# Navigate back to account/settings screen
+- tapOn:
+    id: 'go-back'
+
+# Verify we're back on settings screen
+- assertVisible:
+    text: '.*Unnamed Safe.*'
+
+# ============================================
+# Safe Version Information
+# ============================================
+
+# Verify Safe contract version shown
+# Footer shows implementation name and version info
+# Check icon indicates latest version
+- assertVisible:
+    id: 'check-icon'
+
+# Verify version text displayed (e.g., "SafeL2 1.4.1 (Latest version)")
+- assertVisible:
+    text: '.*(Latest version|SafeL2|Safe).*'
+
+# ============================================
+# General Section Verification
+# ============================================
+
+# Verify "General" section header
+- assertVisible:
+    text: 'General'
+
+# Verify "Notifications" option available
+- assertVisible:
+    text: '.*Notifications.*'
+
+# ============================================
+# Account Dropdown Menu Tests
+# ============================================
+
+# Verify dropdown menu button is visible
+- assertVisible:
+    id: 'settings-screen-header-more-settings-button'
+
+# ============================================
+# Test Copy Address from Menu
+# ============================================
+
+# Open dropdown menu
+- tapOn:
+    id: 'settings-screen-header-more-settings-button'
+
+# Wait for menu to appear
+- waitForAnimationToEnd
+
+# Tap "Copy address" option from menu
+- tapOn:
+    text: '.*Copy address.*'
+
+# Verify success feedback
+- assertVisible:
+    text: '.*Address copied.*'
+
+# ============================================
+# Test Share Account
+# ============================================
+
+# Open dropdown menu again
+- tapOn:
+    id: 'settings-screen-header-more-settings-button'
+
+# Wait for menu to appear
+- waitForAnimationToEnd
+
+# Tap "Share account" option
+- tapOn:
+    text: '.*Share account.*'
+
+# Wait for share screen to load
+- assertVisible:
+    text: '.*(Unnamed safe|Unnamed Safe).*'
+
+# Verify Safe address is displayed on share screen
+- assertVisible:
+    text: '.*0x2f3e.*Fbb6.*'
+
+# Verify Share and Copy buttons are visible
+- assertVisible:
+    text: '.*Share.*'
+
+- assertVisible:
+    text: '.*Copy.*'
+
+# Navigate back to settings screen
+- swipe:
+    direction: 'DOWN'
+
+# Verify we're back on settings screen
+- assertVisible:
+    text: '.*Unnamed Safe.*'
+
+# ============================================
+# Test View on Explorer
+# ============================================
+
+# Open dropdown menu
+- tapOn:
+    id: 'settings-screen-header-more-settings-button'
+
+# Wait for menu to appear
+- waitForAnimationToEnd
+
+# Tap "View on explorer" option
+- tapOn:
+    text: '.*View on explorer.*'
+
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          id: 'breadcrumb'
+
+- runFlow:
+    when:
+      platform: android
+    commands:
+      - back
+
+# ============================================
+# Test Rename Account
+# ============================================
+
+# Navigate back to account tab if needed (in case explorer opened external browser)
+- tapOn:
+    id: 'account-tab'
+
+# Verify we're on settings screen
+- assertVisible:
+    text: '.*Unnamed Safe.*'
+
+# Open dropdown menu
+- tapOn:
+    id: 'settings-screen-header-more-settings-button'
+
+# Wait for menu to appear
+- waitForAnimationToEnd
+
+# Tap "Rename" option
+- tapOn:
+    text: '.*Rename.*'
+
+# Wait for rename screen to load
+# The screen shows "Rename safe" title and signer details
+- assertVisible:
+    text: '.*Rename safe.*'
+
+# Verify Safe address is displayed
+- assertVisible:
+    text: '.*0x2f3e.*Fbb6.*'
+
+# Verify name input field is visible
+- assertVisible:
+    text: '.*Name.*'
+
+# Verify Save button is visible
+- assertVisible:
+    text: '.*Save.*'
+
+# Navigate back to settings screen without saving
+- tapOn:
+    id: 'go-back'
+
+- assertVisible:
+    text: 'Discard changes?'
+
+- tapOn: 'Discard'
+
+# Verify we're back on settings screen
+- assertVisible:
+    text: '.*Unnamed Safe.*'
+
+# ============================================
+# Test Remove Account - Cancel First
+# ============================================
+
+# Open dropdown menu
+- tapOn:
+    id: 'settings-screen-header-more-settings-button'
+
+# Wait for menu to appear
+- waitForAnimationToEnd
+
+# Tap "Remove account" option
+- tapOn:
+    text: '.*Remove account.*'
+
+# Verify alert dialog appears
+- assertVisible:
+    text: '.*Remove account.*'
+
+- assertVisible:
+    text: '.*Are you sure you want to remove this account.*'
+
+# Tap "Cancel" button
+- tapOn:
+    text: '.*Cancel.*'
+
+# Verify alert is dismissed and we're still on settings screen
+- assertVisible:
+    text: '.*Unnamed Safe.*'
+
+# ============================================
+# Test Remove Account - Confirm Removal
+# ============================================
+
+# Open dropdown menu again
+- tapOn:
+    id: 'settings-screen-header-more-settings-button'
+
+# Wait for menu to appear
+- waitForAnimationToEnd
+
+# Tap "Remove account" option
+- tapOn:
+    text: '.*Remove account.*'
+
+# Verify alert dialog appears again
+- assertVisible:
+    text: '.*Remove account.*'
+
+# Tap "Remove" button to confirm deletion
+- tapOn:
+    text: 'Remove'
+
+# Verify success toast appears
+- assertVisible:
+    text: '.*The safe with address.*was deleted.*'
+
+# Verify navigation to onboarding screen
+# When the last safe is deleted, the app redirects to onboarding
+- assertVisible:
+    text: '.*(Track your accounts|Get started|onboarding).*'

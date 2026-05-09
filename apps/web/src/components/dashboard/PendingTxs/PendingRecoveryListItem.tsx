@@ -2,19 +2,20 @@ import Link from 'next/link'
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { ChevronRight } from '@mui/icons-material'
-import { Box } from '@mui/material'
+import { Box, Stack } from '@mui/material'
 import type { ReactElement } from 'react'
 
-import { RecoveryInfo } from '@/features/recovery/components/RecoveryInfo'
-import { RecoveryStatus } from '@/features/recovery/components/RecoveryStatus'
-import { RecoveryType } from '@/features/recovery/components/RecoveryType'
+import { RecoveryFeature } from '@/features/recovery'
+import { useLoadFeature } from '@/features/__core__'
 import { AppRoutes } from '@/config/routes'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '@/features/recovery'
 
 import css from './styles.module.css'
+import classnames from 'classnames'
 
 function PendingRecoveryListItem({ transaction }: { transaction: RecoveryQueueItem }): ReactElement {
   const router = useRouter()
+  const { RecoveryType, RecoveryInfo, RecoveryStatus } = useLoadFeature(RecoveryFeature)
   const { isMalicious } = transaction
 
   const url = useMemo(
@@ -27,16 +28,15 @@ function PendingRecoveryListItem({ transaction }: { transaction: RecoveryQueueIt
 
   return (
     <Link href={url} passHref>
-      <Box className={css.container} sx={{ minHeight: 50 }}>
-        <Box flex={1}>
-          <RecoveryType isMalicious={isMalicious} />
-        </Box>
+      <Box className={classnames(css.container, css.recoveryContainer)} sx={{ minHeight: 50 }}>
+        <RecoveryType isMalicious={isMalicious} date={transaction.timestamp} isDashboard />
 
         <RecoveryInfo isMalicious={isMalicious} />
 
-        <RecoveryStatus recovery={transaction} />
-
-        <ChevronRight color="border" />
+        <Stack direction="row" gap={1.5} alignItems="center" ml="auto">
+          <RecoveryStatus recovery={transaction} />
+          <ChevronRight color="border" fontSize="small" />
+        </Stack>
       </Box>
     </Link>
   )

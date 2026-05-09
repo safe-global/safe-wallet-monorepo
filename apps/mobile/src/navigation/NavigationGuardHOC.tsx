@@ -1,18 +1,22 @@
 import { useRouter, useSegments } from 'expo-router'
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectSettings } from '@/src/store/settingsSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
-import useNotifications from '@/src/hooks/useNotifications'
-import { updatePromptAttempts } from '@/src/store/notificationsSlice'
+import { selectAppNotificationStatus, updatePromptAttempts, selectPromptAttempts } from '@/src/store/notificationsSlice'
 import { ONBOARDING_VERSION } from '@/src/config/constants'
-
+import { useBiometrics } from '../hooks/useBiometrics'
+import { useAppUpdateCheck } from '@/src/features/AppUpdate/hooks/useAppUpdateCheck'
+import { ForceUpdateScreen } from '@/src/features/AppUpdate/components/ForceUpdateScreen'
+import { SoftUpdatePrompt } from '@/src/features/AppUpdate/components/SoftUpdatePrompt'
+import { remoteConfigService } from '@/src/services/remoteConfig/remoteConfigService'
 let navigated = false
 
 function useInitialNavigationScreen() {
   const onboardingVersionSeen = useAppSelector((state) => selectSettings(state, 'onboardingVersionSeen'))
+  const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
   const activeSafe = useAppSelector(selectActiveSafe)
-  const { isAppNotificationEnabled, promptAttempts } = useNotifications()
+  const promptAttempts = useAppSelector(selectPromptAttempts)
   const dispatch = useAppDispatch()
   const router = useRouter()
   const segments = useSegments()
@@ -21,20 +25,20 @@ function useInitialNavigationScreen() {
    * If the user has not enabled notifications and has not been prompted to enable them,
    * show him the opt-in screen, but only if he is in a navigator that has (tabs) as the first screen
    * */
+  const [hasShownNotifications, setHasShownNotifications] = useState(false)
   const shouldShowOptIn = !isAppNotificationEnabled && !promptAttempts && segments[0] === '(tabs)'
 
   useEffect(() => {
-    if (shouldShowOptIn) {
+    if (shouldShowOptIn && !hasShownNotifications) {
       dispatch(updatePromptAttempts(1))
-      // The user most probably just navigated to the (tabs) screen
-      // wait a bit before showing the popup
+      setHasShownNotifications(true)
       setTimeout(() => {
         router.navigate('/notifications-opt-in')
       }, 500)
     }
-  }, [shouldShowOptIn])
+  }, [shouldShowOptIn, hasShownNotifications, dispatch])
 
-  React.useEffect(() => {
+  useEffect(() => {
     // We will navigate only on startup. Any other navigation should not happen here
     if (navigated) {
       return
@@ -65,6 +69,29 @@ function useInitialNavigationScreen() {
 }
 
 export function NavigationGuardHOC({ children }: { children: React.ReactNode }) {
+  const { requiresForceUpdate, recommendsUpdate, isLoading } = useAppUpdateCheck()
+  const [softUpdateDismissed, setSoftUpdateDismissed] = useState(false)
+
   useInitialNavigationScreen()
-  return children
+  useBiometrics()
+
+  const handleSoftUpdateDismiss = useCallback(() => {
+    setSoftUpdateDismissed(true)
+  }, [])
+
+  if (isLoading) {
+    return null
+  }
+
+  if (requiresForceUpdate) {
+    const minVersion = remoteConfigService.getPlatformString('min_required_version')
+    return <ForceUpdateScreen minVersion={minVersion} />
+  }
+
+  return (
+    <>
+      {children}
+      {recommendsUpdate && !softUpdateDismissed && <SoftUpdatePrompt onDismiss={handleSoftUpdateDismiss} />}
+    </>
+  )
 }

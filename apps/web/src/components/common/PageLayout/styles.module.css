@@ -1,17 +1,63 @@
-.header {
-  position: fixed;
+@reference '../../../styles/shadcn.css';
+
+.topbar {
+  @apply absolute top-0 right-0 z-[1];
+  left: 230px;
+}
+
+.topbarCollapsed {
+  left: 4rem;
+}
+
+.topbarNoSidebar {
   left: 0;
-  top: 0;
+}
+
+.topbarElevated {
+  position: fixed;
+  z-index: 99;
+  left: 0;
   width: 100%;
-  z-index: 1201;
-  background: var(--color-background-paper);
-  padding-top: env(safe-area-inset-top);
+  transition: none;
+
+  header {
+    padding-left: 230px;
+  }
+}
+
+.topbarElevated:not(.topbarNoSidebar) header {
+  padding-left: calc(230px + 1.5rem);
+}
+
+.topbarElevated.topbarNoSidebar header {
+  padding-left: 1.5rem;
+}
+
+@media (max-width: 899.95px) {
+  .topbar {
+    left: 0;
+    position: sticky;
+    top: 0;
+  }
+
+  .mainSpace {
+    && {
+      @apply pt-0;
+    }
+  }
+}
+
+.mainSpace {
+  /* we need it in order to have higher importance than the .main class */
+  && {
+    padding-top: var(--topbar-height);
+  }
 }
 
 .main {
   background-color: var(--color-background-main);
   padding-left: 230px;
-  padding-top: calc(var(--header-height) + env(safe-area-inset-top));
+  padding-top: 0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -25,12 +71,37 @@
   padding-left: 0;
 }
 
+/* Spaces: use black background in dark mode (matches shadcn --background) */
+[data-theme='dark'] .mainSpace {
+  background-color: var(--background);
+}
+
+/* Spaces: reduce left padding when the sidebar is collapsed to icon mode */
+.mainSpaceCollapsed {
+  padding-left: 4rem;
+}
+
+.mainNoHeader {
+  padding-top: 0;
+}
+
 .content {
   flex: 1;
   position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
+  min-width: 0;
+}
+
+/* Onboarding flows: prevent flex descendants from forcing horizontal overflow on narrow viewports */
+.onboardingMotion {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .content main {

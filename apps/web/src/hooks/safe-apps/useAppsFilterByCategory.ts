@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 const useAppsFilterByCategory = (safeApps: SafeAppData[], selectedCategories: string[]): SafeAppData[] => {
   const filteredApps = useMemo(() => {

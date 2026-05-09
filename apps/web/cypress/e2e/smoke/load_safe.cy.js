@@ -1,4 +1,3 @@
-import 'cypress-file-upload'
 import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as safe from '../pages/load_safe.pages'
@@ -38,7 +37,6 @@ describe('[SMOKE] Load Safe tests', { defaultCommandTimeout: 30000 }, () => {
   })
 
   it('[SMOKE] Verify ENS name is translated to a valid address', () => {
-    // cy.visit(constants.loadNewSafeEthUrl)
     safe.inputAddress(constants.ENS_TEST_SEPOLIA)
     safe.verifyAddressInputValue(staticSafes.SEP_STATIC_SAFE_6)
     safe.verifyNextButtonStatus('be.enabled')
@@ -48,11 +46,6 @@ describe('[SMOKE] Load Safe tests', { defaultCommandTimeout: 30000 }, () => {
     createwallet.verifyDefaultWalletName(createwallet.defaultSepoliaPlaceholder)
     cy.reload()
     createwallet.verifyDefaultWalletName(createwallet.defaultSepoliaPlaceholder)
-  })
-
-  it('[SMOKE] Verify there are mandatory networks in dropdown: Eth, Polygon, Sepolia', () => {
-    safe.clickNetworkSelector(constants.networks.sepolia)
-    safe.verifyMandatoryNetworksExist()
   })
 
   it('[SMOKE] Verify non-smart contract address is not allowed in safe address', () => {

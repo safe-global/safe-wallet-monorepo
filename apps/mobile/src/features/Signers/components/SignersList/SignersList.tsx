@@ -1,9 +1,6 @@
 import React, { useMemo } from 'react'
-
-import { SafeListItem } from '@/src/components/SafeListItem'
-import { getTokenValue, Spinner } from 'tamagui'
-
-import { SectionList } from 'react-native'
+import { Loader } from '@/src/components/Loader'
+import { FlatList } from 'react-native'
 import { useCallback } from 'react'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
 import { NavBarTitle } from '@/src/components/Title'
@@ -13,6 +10,7 @@ import { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transacti
 import SignersListItem from './SignersListItem'
 
 export type SignerSection = {
+  id: string
   title: string
   data: SafeState['owners']
 }
@@ -22,48 +20,41 @@ const keyExtractor = (item: AddressInfo, index: number) => item.value + index
 interface SignersListProps {
   signersGroup: SignerSection[]
   isFetching: boolean
-  hasLocalSingers: boolean
+  hasLocalSigners: boolean
   navbarTitle?: string
 }
 
-export function SignersList({ signersGroup, isFetching, hasLocalSingers, navbarTitle }: SignersListProps) {
-  const title = navbarTitle || 'Signers'
+export function SignersList({ signersGroup, isFetching, hasLocalSigners, navbarTitle }: SignersListProps) {
+  const title = navbarTitle || 'Your signers'
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle>{title}</NavBarTitle>,
   })
 
+  const flatData = useMemo(() => signersGroup.flatMap((section) => section.data), [signersGroup])
+
   const renderItem = useCallback(
-    ({ item, index }: { item: AddressInfo; index: number }) => {
-      return <SignersListItem item={item} index={index} signersGroup={signersGroup} />
+    ({ item }: { item: AddressInfo }) => {
+      return <SignersListItem item={item} signersGroup={signersGroup} />
     },
     [signersGroup],
   )
 
   const ListHeaderComponent = useCallback(
-    () => <SignersListHeader sectionTitle={title} withAlert={!hasLocalSingers} />,
-    [hasLocalSingers],
-  )
-  const contentContainerStyle = useMemo(
-    () => ({
-      paddingHorizontal: getTokenValue('$3'),
-    }),
-    [],
+    () => <SignersListHeader sectionTitle={title} withAlert={!hasLocalSigners} />,
+    [hasLocalSigners, title],
   )
 
   return (
-    <SectionList<AddressInfo, SignerSection>
-      testID="tx-history-list"
+    <FlatList<AddressInfo>
+      testID="signers-list"
       onScroll={handleScroll}
       ListHeaderComponent={ListHeaderComponent}
-      stickySectionHeadersEnabled
       contentInsetAdjustmentBehavior="automatic"
-      sections={signersGroup}
-      ListFooterComponent={isFetching ? <Spinner size="small" color="$color" /> : undefined}
+      data={flatData}
+      ListFooterComponent={isFetching ? <Loader size={24} color="$color" /> : undefined}
       keyExtractor={keyExtractor}
       renderItem={renderItem}
       scrollEventThrottle={16}
-      contentContainerStyle={contentContainerStyle}
-      renderSectionHeader={({ section: { title } }) => <SafeListItem.Header title={title} />}
     />
   )
 }

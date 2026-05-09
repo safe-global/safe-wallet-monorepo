@@ -4,8 +4,8 @@ import * as safeAddress from '@/hooks/useSafeAddress'
 
 import { render } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
-import { FEATURES } from '@/utils/chains'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 describe('SettingsHeader', () => {
   beforeEach(() => {
@@ -30,7 +30,7 @@ describe('SettingsHeader', () => {
           safeAddress="0x1234"
           chain={{
             ...CONFIG_SERVICE_CHAINS[0],
-            features: [FEATURES.PUSH_NOTIFICATIONS] as unknown as ChainInfo['features'],
+            features: [FEATURES.PUSH_NOTIFICATIONS] as unknown as Chain['features'],
           }}
         />,
       )
@@ -60,7 +60,7 @@ describe('SettingsHeader', () => {
           safeAddress=""
           chain={{
             ...CONFIG_SERVICE_CHAINS[0],
-            features: [FEATURES.PUSH_NOTIFICATIONS] as unknown as ChainInfo['features'],
+            features: [FEATURES.PUSH_NOTIFICATIONS] as unknown as Chain['features'],
           }}
         />,
       )

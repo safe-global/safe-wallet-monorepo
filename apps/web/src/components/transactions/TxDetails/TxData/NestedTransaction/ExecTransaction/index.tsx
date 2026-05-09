@@ -1,17 +1,17 @@
-import { Safe__factory } from '@/types/contracts'
-import { Skeleton } from '@mui/material'
-import { type TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { Safe__factory } from '@safe-global/utils/types/contracts'
+import { Box, Skeleton } from '@mui/material'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 
-import DecodedTx from '@/components/tx/DecodedTx'
 import Link from 'next/link'
 import { useCurrentChain } from '@/hooks/useChains'
 import { AppRoutes } from '@/config/routes'
 import { useMemo } from 'react'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import ExternalLink from '@/components/common/ExternalLink'
 import { NestedTransaction } from '../NestedTransaction'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
+import TxData from '../..'
 
 const safeInterface = Safe__factory.createInterface()
 
@@ -45,7 +45,7 @@ export const ExecTransaction = ({
   data,
   isConfirmationView = false,
 }: {
-  data?: TransactionData
+  data?: TransactionData | null
   isConfirmationView?: boolean
 }) => {
   const chain = useCurrentChain()
@@ -68,7 +68,7 @@ export const ExecTransaction = ({
   )
 
   const decodedNestedTxDataBlock = txPreview ? (
-    <DecodedTx {...txPreview} tx={childSafeTx} showMethodCall showAdvancedDetails={false} />
+    <TxData txData={txPreview.txData} txInfo={txPreview.txInfo} trusted imitation={false} />
   ) : null
 
   return (
@@ -78,16 +78,18 @@ export const ExecTransaction = ({
           {decodedNestedTxDataBlock}
 
           {chain && data && (
-            <Link
-              href={{
-                pathname: AppRoutes.transactions.history,
-                query: { safe: `${chain.shortName}:${data.to.value}` },
-              }}
-              passHref
-              legacyBehavior
-            >
-              <ExternalLink>Open Safe</ExternalLink>
-            </Link>
+            <Box>
+              <Link
+                href={{
+                  pathname: AppRoutes.transactions.history,
+                  query: { safe: `${chain.shortName}:${data.to.value}` },
+                }}
+                passHref
+                legacyBehavior
+              >
+                <ExternalLink>Open Safe</ExternalLink>
+              </Link>
+            </Box>
           )}
         </>
       ) : error ? (

@@ -1,24 +1,28 @@
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
+import { SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
 import type { Meta, StoryObj } from '@storybook/react'
 import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import ChangeThreshold from './index'
-import { ChangeThresholdReviewContext } from '@/components/tx-flow/flows/ChangeThreshold/context'
 
 const meta = {
   component: ChangeThreshold,
-  parameters: {
-    layout: 'centered',
-    newThreshold: 1,
+  args: {
+    txInfo: {
+      type: TransactionInfoType.SETTINGS_CHANGE,
+      settingsInfo: {
+        type: SettingsInfoType.CHANGE_THRESHOLD,
+        threshold: 1,
+      },
+    } as TransactionInfo,
   },
   decorators: [
-    (Story, { parameters }) => {
+    (Story) => {
       return (
         <StoreDecorator initialState={{}}>
-          <ChangeThresholdReviewContext.Provider value={{ newThreshold: parameters.newThreshold }}>
-            <Paper sx={{ padding: 2 }}>
-              <Story />
-            </Paper>
-          </ChangeThresholdReviewContext.Provider>
+          <Paper sx={{ padding: 2 }}>
+            <Story />
+          </Paper>
         </StoreDecorator>
       )
     },

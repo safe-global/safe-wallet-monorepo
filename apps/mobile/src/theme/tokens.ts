@@ -1,43 +1,35 @@
 import { createTokens } from 'tamagui'
-import { radius, zIndex } from '@tamagui/themes'
-import { flattenPalette } from '@/src/theme/helpers/utils'
-import lightPalette from '@/src/theme/palettes/lightPalette'
-import darkPalette from '@/src/theme/palettes/darkPalette'
-const colors = {
-  ...flattenPalette(lightPalette, { suffix: 'Light' }),
-  ...flattenPalette(darkPalette, { suffix: 'Dark' }),
-}
+import { zIndex } from '@tamagui/themes'
+import { generateTamaguiColorTokens, generateTamaguiFontSizes } from '@safe-global/theme/generators/tamagui'
+import { radius } from '@safe-global/theme/tokens/radius'
+import { spacingMobile } from '@safe-global/theme/tokens/spacing'
+
+// Generate color tokens from unified palettes
+const colors = generateTamaguiColorTokens()
+
+// Re-export radius for use in other files
+export { radius }
+
+// Re-export font sizes
+export const fontSizes = generateTamaguiFontSizes()
+
+// Create and export tokens
 export const tokens = createTokens({
   color: colors,
   space: {
-    $1: 4,
-    $2: 8,
-    true: 8,
-    $3: 12,
-    $4: 16,
-    $5: 20,
-    $6: 24,
-    $7: 28,
-    $8: 32,
-    $9: 36,
-    $10: 40,
+    ...spacingMobile,
+    true: spacingMobile.$2, // Default spacing (8px)
   },
-  // space,
   size: {
-    $1: 4,
-    $2: 8,
-    true: 8,
-    $3: 12,
-    $4: 16,
-    $5: 20,
-    $6: 24,
-    $7: 28,
-    $8: 32,
-    $9: 36,
-    $10: 40,
+    ...spacingMobile,
+    true: spacingMobile.$2, // Default size (8px)
+    $xl: 14,
     $md: 14,
     $sm: 14,
   },
   zIndex,
-  radius,
+  radius: {
+    ...radius,
+    true: radius[4], // Default radius (9px)
+  },
 })

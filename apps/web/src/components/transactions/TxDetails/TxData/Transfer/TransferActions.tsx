@@ -1,19 +1,19 @@
+import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { MouseEvent } from 'react'
 import { type ReactElement, useContext, useState } from 'react'
 import IconButton from '@mui/material/IconButton'
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
 import MenuItem from '@mui/material/MenuItem'
-import ListItemText from '@mui/material/ListItemText'
 
+import ListItemText from '@mui/material/ListItemText'
 import useAddressBook from '@/hooks/useAddressBook'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import ContextMenu from '@/components/common/ContextMenu'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
-import type { Transfer } from '@safe-global/safe-gateway-typescript-sdk'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { isERC20Transfer, isNativeTokenTransfer, isOutgoingTransfer } from '@/utils/transaction-guards'
 import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
-import { safeFormatUnits } from '@/utils/formatters'
+import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
 
@@ -32,7 +32,7 @@ const TransferActions = ({
   trusted,
 }: {
   address: string
-  txInfo: Transfer
+  txInfo: TransferTransactionInfo
   trusted: boolean
 }): ReactElement => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
@@ -66,7 +66,7 @@ const TransferActions = ({
   const tokenAddress = isNativeTokenTransfer(txInfo.transferInfo) ? ZERO_ADDRESS : txInfo.transferInfo.tokenAddress
 
   const amount = isNativeTokenTransfer(txInfo.transferInfo)
-    ? safeFormatUnits(txInfo.transferInfo.value, ETHER)
+    ? safeFormatUnits(txInfo.transferInfo.value ?? '0', ETHER)
     : isERC20Transfer(txInfo.transferInfo)
       ? safeFormatUnits(txInfo.transferInfo.value, txInfo.transferInfo.decimals)
       : undefined
@@ -87,7 +87,7 @@ const TransferActions = ({
               <MenuItem
                 onClick={() => {
                   handleCloseContextMenu()
-                  setTxFlow(<TokenTransferFlow recipient={recipient} tokenAddress={tokenAddress} amount={amount} />)
+                  setTxFlow(<TokenTransferFlow recipients={[{ recipient, tokenAddress, amount }]} />)
                 }}
                 disabled={!isOk}
               >

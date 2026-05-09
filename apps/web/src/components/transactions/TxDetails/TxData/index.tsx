@@ -1,39 +1,47 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionStatus } from '@safe-global/store/gateway/types'
 import SettingsChangeTxInfo from '@/components/transactions/TxDetails/TxData/SettingsChange'
-import type { SpendingLimitMethods } from '@/utils/transaction-guards'
 import {
+  isStakingTxExitInfo,
+  isBridgeOrderTxInfo,
   isExecTxData,
+  isLifiSwapTxInfo,
   isOnChainConfirmationTxData,
   isSafeUpdateTxData,
   isStakingTxWithdrawInfo,
-} from '@/utils/transaction-guards'
-import { isStakingTxExitInfo } from '@/utils/transaction-guards'
-import {
+  isVaultDepositTxInfo,
+  isVaultRedeemTxInfo,
   isCancellationTxInfo,
   isCustomTxInfo,
   isMigrateToL2TxData,
   isMultisigDetailedExecutionInfo,
+  isMultiSendTxInfo,
   isOrderTxInfo,
   isSettingsChangeTxInfo,
   isSpendingLimitMethod,
   isStakingTxDepositInfo,
   isSupportedSpendingLimitAddress,
   isTransferTxInfo,
+  type SpendingLimitMethods,
 } from '@/utils/transaction-guards'
 import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
-import { TransactionStatus, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { type ReactElement } from 'react'
+import type { PropsWithChildren, ReactElement } from 'react'
 import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejection'
-import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'
 import useChainId from '@/hooks/useChainId'
 import { MigrationToL2TxData } from './MigrationToL2TxData'
-import SwapOrder from '@/features/swap/components/SwapOrder'
-import StakingTxDepositDetails from '@/features/stake/components/StakingTxDepositDetails'
-import StakingTxExitDetails from '@/features/stake/components/StakingTxExitDetails'
-import StakingTxWithdrawDetails from '@/features/stake/components/StakingTxWithdrawDetails'
+import { StakingTxDepositDetails, StakingTxExitDetails, StakingTxWithdrawDetails } from './Staking'
+import { SwapFeature } from '@/features/swap'
+import { useLoadFeature } from '@/features/__core__'
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
+import { VaultDepositTxDetails, VaultRedeemTxDetails } from '@/features/earn'
+import DecodedData from './DecodedData'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import Multisend from './DecodedData/Multisend'
+import BridgeTransaction from '@/components/tx/confirmation-views/BridgeTransaction'
+import { LifiSwapTransaction } from '@/components/tx/confirmation-views/LifiSwapTransaction'
 
 const TxData = ({
   txInfo,
@@ -41,14 +49,16 @@ const TxData = ({
   txDetails,
   trusted,
   imitation,
-}: {
+  children,
+}: PropsWithChildren<{
   txInfo: TransactionDetails['txInfo']
   txData: TransactionDetails['txData']
   txDetails?: TransactionDetails
   trusted: boolean
   imitation: boolean
-}): ReactElement => {
+}>): ReactElement => {
   const chainId = useChainId()
+  const { SwapOrder } = useLoadFeature(SwapFeature)
 
   if (isOrderTxInfo(txInfo)) {
     return <SwapOrder txData={txData} txInfo={txInfo} />
@@ -64,6 +74,24 @@ const TxData = ({
 
   if (isStakingTxWithdrawInfo(txInfo)) {
     return <StakingTxWithdrawDetails info={txInfo} />
+  }
+
+  // @ts-ignore: TODO: Fix this type
+  if (isVaultDepositTxInfo(txInfo)) {
+    return <VaultDepositTxDetails info={txInfo} />
+  }
+
+  // @ts-ignore: TODO: Fix this type
+  if (isVaultRedeemTxInfo(txInfo)) {
+    return <VaultRedeemTxDetails info={txInfo} />
+  }
+
+  if (isBridgeOrderTxInfo(txInfo)) {
+    return <BridgeTransaction txInfo={txInfo} />
+  }
+
+  if (isLifiSwapTxInfo(txInfo)) {
+    return <LifiSwapTransaction txInfo={txInfo} isPreview={false} />
   }
 
   if (isTransferTxInfo(txInfo)) {
@@ -109,7 +137,19 @@ const TxData = ({
     return <SafeUpdate txData={txData} />
   }
 
-  return <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : undefined} />
+  return !!children ? (
+    <>{children}</>
+  ) : (
+    <>
+      <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
+
+      {(isMultiSendTxInfo(txInfo) || isOrderTxInfo(txInfo)) && (
+        <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+          <Multisend txData={txData} isExecuted={!!txDetails?.executedAt} />
+        </ObservabilityErrorBoundary>
+      )}
+    </>
+  )
 }
 
 export default TxData

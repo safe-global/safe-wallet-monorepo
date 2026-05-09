@@ -1,7 +1,7 @@
-import type { StakingTxInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import StakingConfirmationTxDeposit from '@/features/stake/components/StakingConfirmationTx/Deposit'
-import StakingConfirmationTxExit from '@/features/stake/components/StakingConfirmationTx/Exit'
-import StakingConfirmationTxWithdraw from '@/features/stake/components/StakingConfirmationTx/Withdraw'
+import type { StakingTxInfo } from '@safe-global/store/gateway/types'
+import StakingConfirmationTxDeposit from '@/components/transactions/TxDetails/TxData/Staking/StakingConfirmationTxDeposit'
+import StakingConfirmationTxExit from './Exit'
+import StakingConfirmationTxWithdraw from '@/components/transactions/TxDetails/TxData/Staking/StakingConfirmationTxWithdraw'
 import { isStakingTxDepositInfo, isStakingTxExitInfo, isStakingTxWithdrawInfo } from '@/utils/transaction-guards'
 
 type StakingOrderConfirmationViewProps = {

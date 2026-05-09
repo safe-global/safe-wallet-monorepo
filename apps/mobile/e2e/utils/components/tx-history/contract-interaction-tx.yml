@@ -1,0 +1,78 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# Contract Interaction Transaction
+# ===========================================
+# Environment variables:
+#   METHOD_NAME: The method name (e.g., "deleteAllowance", "deposit")
+#   CONTRACT_NAME: The contract name (e.g., "AllowanceModule", "Wrapped Ether")
+#   ACTION_NAME: The capitalized action name shown in details (e.g., "DeleteAllowance", "Deposit")
+- assertVisible: Transaction details
+- assertVisible: Contract interaction
+- assertVisible: ${ACTION_NAME}
+
+# ===========================================
+# Call Field with Method Name Badge
+# ===========================================
+- assertVisible: Call
+- assertVisible:
+    text: '.*${METHOD_NAME}.*'
+
+# ===========================================
+# Contract Information
+# ===========================================
+- assertVisible: Contract
+- assertVisible:
+    id: 'history-contract-information'
+    containsDescendants:
+      - text: '.*${CONTRACT_NAME}.*'
+
+# ===========================================
+# Network Display
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-network.yml
+
+# ===========================================
+# Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-details.yml
+
+# ===========================================
+# Common Transaction Info
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-info.yml
+
+# ===========================================
+# Confirmations
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-tx-history-confirmations.yml
+
+# ===========================================
+# Test Explorer Link
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-explorer-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Share Transaction Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-share-link.yml
+
+- assertVisible: Transaction details
+
+# ===========================================
+# Test Transaction Details Button
+# ===========================================
+- runFlow:
+    file: ../../assertions/verify-advanced-details.yml
+
+- assertVisible: Transaction details

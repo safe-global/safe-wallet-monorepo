@@ -1,6 +1,6 @@
 import { type Provider } from 'ethers'
 import { logError } from '../exceptions'
-import ErrorCodes from '../exceptions/ErrorCodes'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 
 type EthersError = Error & {
   reason?: string

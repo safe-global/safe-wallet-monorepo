@@ -1,35 +1,42 @@
-import { selectActiveSafe, setActiveSafe } from '@/src/store/activeSafeSlice'
+import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectMyAccountsMode } from '@/src/store/myAccountsSlice'
-import { removeSafe, selectAllSafes } from '@/src/store/safesSlice'
+import { selectAllSafes } from '@/src/store/safesSlice'
+import { selectSigners } from '@/src/store/signersSlice'
+import { useDelegateCleanup } from '@/src/hooks/useDelegateCleanup'
 import { Address } from '@/src/types/address'
 import { useCallback } from 'react'
+import { useNavigation } from 'expo-router'
+import { handleSafeDeletion } from '../utils/editAccountHelpers'
 
 export const useEditAccountItem = () => {
   const isEdit = useAppSelector(selectMyAccountsMode)
   const activeSafe = useAppSelector(selectActiveSafe)
   const safes = useAppSelector(selectAllSafes)
+  const allSigners = useAppSelector(selectSigners)
   const dispatch = useAppDispatch()
+  const navigation = useNavigation()
+  const { removeAllDelegatesForOwner } = useDelegateCleanup()
 
-  const onSafeDeleted = useCallback(
-    (address: Address) => () => {
-      if (activeSafe?.address === address) {
-        const safe = Object.values(safes).find((item) => item.SafeInfo.address.value !== address)
-
-        if (safe) {
-          dispatch(
-            setActiveSafe({
-              address: safe.SafeInfo.address.value as Address,
-              chainId: safe.chains[0],
-            }),
-          )
-        }
+  const deleteSafe = useCallback(
+    async (address: Address) => {
+      const deletionContext = {
+        navigation,
+        activeSafe,
+        safes,
       }
 
-      dispatch(removeSafe(address))
+      await handleSafeDeletion({
+        address,
+        allSafesInfo: safes,
+        allSigners,
+        removeAllDelegatesForOwner,
+        deletionContext,
+        reduxDispatch: dispatch,
+      })
     },
-    [activeSafe],
+    [navigation, activeSafe, safes, dispatch, allSigners, removeAllDelegatesForOwner],
   )
 
-  return { isEdit, onSafeDeleted }
+  return { isEdit, deleteSafe }
 }

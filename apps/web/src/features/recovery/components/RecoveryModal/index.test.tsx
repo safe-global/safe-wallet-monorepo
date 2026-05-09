@@ -70,13 +70,13 @@ describe('RecoveryModal', () => {
       )
 
       expect(container).not.toBeEmptyDOMElement()
-      expect(queryByText('Account recovery in progress')).toBeTruthy()
+      expect(queryByText(/Account recovery in progress/)).toBeTruthy()
 
       // Trigger the route change
       mockUseRouter.events.on.mock.calls[0][1]()
 
       await waitFor(() => {
-        expect(queryByText('Account recovery in progress')).toBeFalsy()
+        expect(queryByText(/Account recovery in progress/)).toBeFalsy()
       })
     })
 
@@ -94,7 +94,7 @@ describe('RecoveryModal', () => {
         )
 
         expect(container).not.toBeEmptyDOMElement()
-        expect(queryByText('Account recovery in progress')).toBeTruthy()
+        expect(queryByText(/Account recovery in progress/)).toBeTruthy()
       })
 
       it('should render the in-progress modal when there is a queue for owners', () => {
@@ -110,7 +110,7 @@ describe('RecoveryModal', () => {
         )
 
         expect(container).not.toBeEmptyDOMElement()
-        expect(queryByText('Account recovery in progress')).toBeTruthy()
+        expect(queryByText(/Account recovery in progress/)).toBeTruthy()
       })
 
       it('should not render the in-progress modal when there is a queue but the user is not an owner or recoverer', () => {

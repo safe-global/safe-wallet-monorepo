@@ -4,13 +4,13 @@ import { useFonts } from 'expo-font'
 import { IconName } from '@/src/types/iconTypes'
 import { getVariable, useTheme } from 'tamagui'
 
-export const SafeIcon = createIconSetFromIcoMoon(
-  require('@/assets/fonts/safe-icons/selection.json'),
+const SafeIcon = createIconSetFromIcoMoon(
+  require('@/assets/fonts/safe-icons/safe-icons.icomoon.json'),
   'SafeIcons',
   'safe-icons.ttf',
 )
 
-export interface IconProps {
+export interface IconProps extends Omit<React.ComponentProps<typeof SafeIcon>, 'name' | 'size' | 'color'> {
   name: IconName
   size?: number
   color?: string
@@ -19,7 +19,7 @@ export interface IconProps {
 
 export const SafeFontIcon = ({ name, size = 24, color, ...rest }: IconProps) => {
   const theme = useTheme()
-  const iconColor = color ? theme[color]?.get() || getVariable(color, 'color') : theme.color?.get()
+  const iconColor = color ? theme[color]?.get() || getVariable(color, 'color') : theme.color.get()
   const [fontsLoaded] = useFonts({
     SafeIcons: require('@/assets/fonts/safe-icons/safe-icons.ttf'),
   })

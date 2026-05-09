@@ -1,11 +1,12 @@
 import { JsonRpcProvider, Wallet } from 'ethers'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type WalletInit, createEIP1193Provider } from '@web3-onboard/common'
 import { getRpcServiceUrl } from '@/hooks/wallets/web3'
 import pkPopupStore from './pk-popup-store'
 import { numberToHex } from '@/utils/hex'
 
-export const PRIVATE_KEY_MODULE_LABEL = 'Private key'
+import { PRIVATE_KEY_MODULE_LABEL } from './constants'
+export { PRIVATE_KEY_MODULE_LABEL }
 
 async function getPrivateKey() {
   const savedKey = pkPopupStore.getStore()?.privateKey
@@ -27,9 +28,9 @@ async function getPrivateKey() {
 let currentChainId = ''
 let currentRpcUri = ''
 
-const PrivateKeyModule = (chainId: ChainInfo['chainId'], rpcUri: ChainInfo['rpcUri']): WalletInit => {
+const PrivateKeyModule = (chainId: Chain['chainId'], rpcUri: Chain['rpcUri']): WalletInit => {
   currentChainId = chainId
-  currentRpcUri = getRpcServiceUrl(rpcUri)
+  currentRpcUri = getRpcServiceUrl(rpcUri as any)
 
   return () => {
     return {
@@ -100,8 +101,7 @@ const PrivateKeyModule = (chainId: ChainInfo['chainId'], rpcUri: ChainInfo['rpcU
               },
 
               personal_sign: async ({ params }) => {
-                const signedMessage = wallet.signingKey.sign(params[0])
-                return signedMessage.serialized
+                return wallet.signMessage(params[0])
               },
 
               eth_signTypedData: async ({ params }) => {
@@ -110,6 +110,32 @@ const PrivateKeyModule = (chainId: ChainInfo['chainId'], rpcUri: ChainInfo['rpcU
                   typedData.domain,
                   { [typedData.primaryType]: typedData.types[typedData.primaryType] },
                   typedData.message,
+                )
+              },
+
+              // @ts-ignore
+              eth_signTypedData_v4: async ({ params }) => {
+                const [, typedData] = params
+
+                let parsedTypedData
+                try {
+                  parsedTypedData = JSON.parse(typedData)
+                } catch (error: unknown) {
+                  if (error instanceof Error) {
+                    throw new Error('Failed to parse typedData: ' + error.message)
+                  } else {
+                    throw new Error('Failed to parse typedData: Unknown error')
+                  }
+                }
+
+                if (!parsedTypedData || !parsedTypedData.domain || !parsedTypedData.types || !parsedTypedData.message) {
+                  throw new Error('Invalid parameters for eth_signTypedData_v4')
+                }
+
+                return await wallet.signTypedData(
+                  parsedTypedData.domain,
+                  { [parsedTypedData.primaryType]: parsedTypedData.types[parsedTypedData.primaryType] },
+                  parsedTypedData.message,
                 )
               },
 

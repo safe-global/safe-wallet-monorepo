@@ -1,13 +1,13 @@
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
 import classnames from 'classnames'
-import { useAppSelector } from '@/store'
-import { selectChainById, selectChains } from '@/store/chainsSlice'
 import css from './styles.module.css'
 import useChainId from '@/hooks/useChainId'
-import { Skeleton, Stack, Typography } from '@mui/material'
-import isEmpty from 'lodash/isEmpty'
+import { Skeleton, Stack, SvgIcon, Typography } from '@mui/material'
 import FiatValue from '../FiatValue'
+import UnknownChainIcon from '@/public/images/common/unknown.svg'
+import useChains from '@/hooks/useChains'
+import { useChain } from '@/hooks/useChains'
 
 type ChainIndicatorProps = {
   chainId?: string
@@ -18,10 +18,11 @@ type ChainIndicatorProps = {
   onlyLogo?: boolean
   responsive?: boolean
   fiatValue?: string
+  imageSize?: number
 }
 
 const fallbackChainConfig = {
-  chainName: 'Unknown chain',
+  chainName: 'Unknown network',
   chainId: '-1',
   theme: {
     backgroundColor: '#ddd',
@@ -39,13 +40,13 @@ const ChainIndicator = ({
   showLogo = true,
   responsive = false,
   onlyLogo = false,
+  imageSize = 24,
 }: ChainIndicatorProps): ReactElement | null => {
   const currentChainId = useChainId()
   const id = chainId || currentChainId
-  const chains = useAppSelector(selectChains)
-  const chainConfig =
-    useAppSelector((state) => selectChainById(state, id)) || (showUnknown ? fallbackChainConfig : null)
-  const noChains = isEmpty(chains.data)
+  const { configs: chains } = useChains()
+  const chainConfig = useChain(id) || (showUnknown ? fallbackChainConfig : null)
+  const noChains = chains.length === 0
 
   const style = useMemo(() => {
     if (!chainConfig) return
@@ -56,6 +57,29 @@ const ChainIndicator = ({
       color: theme.textColor,
     }
   }, [chainConfig])
+
+  const logoComponent = chainConfig?.chainLogoUri ? (
+    <img
+      data-testid="chain-indicator-network-logo-img"
+      src={chainConfig.chainLogoUri ?? undefined}
+      alt={`${chainConfig.chainName} Logo`}
+      width={imageSize}
+      height={imageSize}
+      loading="lazy"
+      style={{ minWidth: imageSize }}
+    />
+  ) : (
+    <SvgIcon
+      component={UnknownChainIcon}
+      inheritViewBox
+      sx={{
+        height: imageSize,
+        width: imageSize,
+        backgroundColor: (theme) => theme.palette.background.main,
+        borderRadius: '100%',
+      }}
+    />
+  )
 
   return noChains ? (
     <Skeleton width="100%" height="22px" variant="rectangular" sx={{ flexShrink: 0 }} />
@@ -71,15 +95,7 @@ const ChainIndicator = ({
         [css.onlyLogo]: onlyLogo,
       })}
     >
-      {showLogo && (
-        <img
-          src={chainConfig.chainLogoUri ?? undefined}
-          alt={`${chainConfig.chainName} Logo`}
-          width={24}
-          height={24}
-          loading="lazy"
-        />
-      )}
+      {showLogo && logoComponent}
       {!onlyLogo && (
         <Stack>
           <span className={css.name}>{chainConfig.chainName}</span>

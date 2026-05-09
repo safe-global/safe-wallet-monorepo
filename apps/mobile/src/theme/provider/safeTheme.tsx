@@ -1,5 +1,5 @@
-import React from 'react'
-import { StatusBar, useColorScheme } from 'react-native'
+import React, { useEffect } from 'react'
+import { Appearance } from 'react-native'
 import { ThemeProvider } from '@react-navigation/native'
 import { TamaguiProvider } from '@tamagui/core'
 
@@ -8,31 +8,40 @@ import { NavDarkTheme, NavLightTheme } from '@/src/theme/navigation'
 import { FontProvider } from '@/src/theme/provider/font'
 import { isStorybookEnv } from '@/src/config/constants'
 import { View } from 'tamagui'
+import { useTheme } from '../hooks/useTheme'
 
 interface SafeThemeProviderProps {
   children: React.ReactNode
 }
 
 export const SafeThemeProvider = ({ children }: SafeThemeProviderProps) => {
-  const colorScheme = useColorScheme()
+  const { colorScheme, isDark, themePreference } = useTheme()
+
+  // Sync native iOS appearance so native components (RefreshControl, context
+  // menus, etc.) match the app theme. In auto mode, pass 'unspecified' to
+  // follow the OS. Fixed by .yarn/patches/react-native-npm-0.83.4-* which
+  // resolves the actual OS scheme instead of storing 'unspecified' as-is.
+  useEffect(() => {
+    Appearance.setColorScheme(themePreference === 'auto' ? 'unspecified' : themePreference)
+  }, [themePreference])
 
   const themeProvider = isStorybookEnv ? (
     <View
-      backgroundColor={colorScheme === 'dark' ? NavDarkTheme.colors.background : NavLightTheme.colors.background}
+      backgroundColor={isDark ? NavDarkTheme.colors.background : NavLightTheme.colors.background}
       style={{ flex: 1 }}
     >
       {children}
     </View>
   ) : (
-    <ThemeProvider value={colorScheme === 'dark' ? NavDarkTheme : NavLightTheme}>{children}</ThemeProvider>
+    <ThemeProvider value={isDark ? NavDarkTheme : NavLightTheme}>{children}</ThemeProvider>
   )
 
   return (
     <FontProvider>
-      <StatusBar animated={true} barStyle="light-content" backgroundColor="transparent" translucent={true} />
-
-      <TamaguiProvider config={config} defaultTheme={colorScheme ? colorScheme : 'dark'}>
-        {themeProvider}
+      <TamaguiProvider config={config} defaultTheme={colorScheme}>
+        <View testID={`theme-${colorScheme}`} style={{ flex: 1 }}>
+          {themeProvider}
+        </View>
       </TamaguiProvider>
     </FontProvider>
   )

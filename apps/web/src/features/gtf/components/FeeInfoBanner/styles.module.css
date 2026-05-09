@@ -1,0 +1,69 @@
+.feeInfoBanner {
+  background-color: var(--color-info-background);
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.feeInfoContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.newTag {
+  background-color: var(--color-info-light);
+  color: var(--color-info-dark);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 6px;
+  align-self: flex-start;
+}
+
+.feeInfoBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feeInfoBullet {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bulletIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--color-border-light);
+  flex-shrink: 0;
+}
+
+.bulletIcon {
+  font-size: 16px;
+  color: var(--color-primary-light);
+}
+
+.learnMoreLink {
+  padding: 4px 0;
+}
+
+.closeIcon {
+  font-size: 16px;
+}
+
+.feeInfoClose {
+  padding: 0;
+  flex-shrink: 0;
+}

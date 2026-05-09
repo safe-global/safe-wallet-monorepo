@@ -1,5 +1,5 @@
-import { Box, Button, CardActions, Divider, FormControl, Grid, SvgIcon, Typography } from '@mui/material'
-import { type SafeCollectibleResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import { Box, Button, CardActions, Divider, FormControl, Stack, SvgIcon, Typography } from '@mui/material'
+import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import { FormProvider, useForm } from 'react-hook-form'
 import NftIcon from '@/public/images/common/nft.svg'
 import AddressBookInput from '@/components/common/AddressBookInput'
@@ -7,6 +7,9 @@ import type { NftTransferParams } from '.'
 import ImageFallback from '@/components/common/ImageFallback'
 import TxCard from '../../common/TxCard'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
+import { useContext, useMemo } from 'react'
+import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
+import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
 
 enum Field {
   recipient = 'recipient',
@@ -14,52 +17,26 @@ enum Field {
 
 type FormData = Pick<NftTransferParams, Field.recipient>
 
-type SendNftBatchProps = {
-  onSubmit: (data: NftTransferParams) => void
-  params: NftTransferParams
-}
-
 const NftItem = ({ image, name, description }: { image: string; name: string; description?: string }) => (
-  <Grid
-    container
-    wrap="nowrap"
-    sx={{
-      gap: 2,
-      alignItems: 'center',
-    }}
-  >
-    <Grid item>
-      <Box
-        sx={{
-          width: 40,
-          height: 40,
-        }}
-      >
-        <ImageFallback
-          src={image}
-          fallbackSrc=""
-          fallbackComponent={<SvgIcon component={NftIcon} inheritViewBox sx={{ width: 1, height: 1 }} />}
-          alt={name}
-          height={40}
-        />
-      </Box>
-    </Grid>
+  <Stack direction="row" spacing={1} flexWrap="nowrap" alignItems="flex-start">
+    <Box flex={0}>
+      <ImageFallback
+        src={image}
+        fallbackSrc=""
+        fallbackComponent={<SvgIcon component={NftIcon} inheritViewBox sx={{ width: 1, height: 1 }} />}
+        alt={name}
+        height={40}
+      />
+    </Box>
 
-    <Grid
-      item
-      sx={{
-        overflow: 'hidden',
-      }}
-    >
+    <Box flex={1} minWidth={0} maxWidth={{ xl: 'calc(100% - 200px)' }}>
       <Typography
         data-testid="nft-item-name"
         variant="body2"
-        sx={{
-          fontWeight: 700,
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        }}
+        fontWeight={700}
+        whiteSpace="nowrap"
+        overflow="hidden"
+        textOverflow="ellipsis"
       >
         {name}
       </Typography>
@@ -67,28 +44,24 @@ const NftItem = ({ image, name, description }: { image: string; name: string; de
       {description && (
         <Typography
           variant="body2"
-          sx={{
-            color: 'text.secondary',
-            whiteSpace: 'nowrap',
-            display: 'block',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
+          color="text.secondary"
+          display="block"
+          whiteSpace="nowrap"
+          overflow="hidden"
+          textOverflow="ellipsis"
         >
           {description}
         </Typography>
       )}
-    </Grid>
-  </Grid>
+    </Box>
+  </Stack>
 )
 
-export const NftItems = ({ tokens }: { tokens: SafeCollectibleResponse[] }) => {
+export const NftItems = ({ tokens }: { tokens: Collectible[] }) => {
   return (
-    <Box
+    <Stack
       data-testid="nft-item-list"
       sx={{
-        display: 'flex',
-        flexDirection: 'column',
         gap: 2,
         overflow: 'auto',
         maxHeight: '20vh',
@@ -103,16 +76,17 @@ export const NftItems = ({ tokens }: { tokens: SafeCollectibleResponse[] }) => {
           description={`Token ID: ${token.id}${token.name ? ` - ${token.name}` : ''}`}
         />
       ))}
-    </Box>
+    </Stack>
   )
 }
 
-const SendNftBatch = ({ params, onSubmit }: SendNftBatchProps) => {
-  const { tokens } = params
+const SendNftBatch = () => {
+  const { data, onNext } = useContext<TxFlowContextType<NftTransferParams>>(TxFlowContext)
+  const { tokens = [] } = data || {}
 
   const formMethods = useForm<FormData>({
     defaultValues: {
-      [Field.recipient]: params.recipient,
+      [Field.recipient]: data?.recipient,
     },
   })
   const {
@@ -124,8 +98,11 @@ const SendNftBatch = ({ params, onSubmit }: SendNftBatchProps) => {
   const recipient = watch(Field.recipient)
   const isAddressValid = !!recipient && !errors[Field.recipient]
 
+  const recipientArray = useMemo(() => [recipient], [recipient])
+  useSafeShieldForRecipients(recipientArray)
+
   const onFormSubmit = (data: FormData) => {
-    onSubmit({
+    onNext({
       recipient: data.recipient,
       tokens,
     })

@@ -1,11 +1,8 @@
+import type { TransactionListItem } from '@safe-global/store/gateway/types'
+import { TransactionListItemType, TransactionInfoType, ConflictType } from '@safe-global/store/gateway/types'
 import { listenerMiddlewareInstance } from '@/store'
 import { txHistorySlice } from '@/store/txHistorySlice'
 import { swapOrderListener, swapOrderStatusListener, setSwapOrder, deleteSwapOrder } from '@/store/swapOrderSlice'
-import {
-  TransactionListItemType,
-  type TransactionListItem,
-  TransactionInfoType,
-} from '@safe-global/safe-gateway-typescript-sdk'
 import * as notificationsSlice from '@/store/notificationsSlice'
 
 import { type TypedStartListening } from '@reduxjs/toolkit'
@@ -34,6 +31,7 @@ describe('swapOrderSlice', () => {
     it('should not dispatch an event if the transaction is not a swapTx', () => {
       const nonSwapTransaction = {
         type: TransactionListItemType.TRANSACTION,
+        conflictType: ConflictType.NONE,
         transaction: {
           id: '0x123',
           txInfo: {
@@ -44,6 +42,7 @@ describe('swapOrderSlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [nonSwapTransaction],
         },
@@ -58,6 +57,7 @@ describe('swapOrderSlice', () => {
     it('should not dispatch an event if the swapOrder status did not change', () => {
       const swapTransaction = {
         type: TransactionListItemType.TRANSACTION,
+        conflictType: ConflictType.NONE,
         transaction: {
           id: '0x123',
           txInfo: {
@@ -70,6 +70,7 @@ describe('swapOrderSlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [swapTransaction],
         },
@@ -94,6 +95,7 @@ describe('swapOrderSlice', () => {
     it('should dispatch setSwapOrder if the swapOrder status changed', () => {
       const swapTransaction = {
         type: TransactionListItemType.TRANSACTION,
+        conflictType: ConflictType.NONE,
         transaction: {
           id: '0x123',
           txInfo: {
@@ -106,6 +108,7 @@ describe('swapOrderSlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [swapTransaction],
         },
@@ -136,6 +139,7 @@ describe('swapOrderSlice', () => {
     it('should not dispatch setSwapOrder if the old status is undefined and new status is fulfilled, expired, or cancelled', () => {
       const swapTransaction = {
         type: TransactionListItemType.TRANSACTION,
+        conflictType: ConflictType.NONE,
         transaction: {
           id: '0x123',
           txInfo: {
@@ -148,6 +152,7 @@ describe('swapOrderSlice', () => {
 
       const action = txHistorySlice.actions.set({
         loading: false,
+        loaded: true,
         data: {
           results: [swapTransaction],
         },

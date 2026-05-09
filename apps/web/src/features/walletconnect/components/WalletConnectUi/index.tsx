@@ -1,17 +1,14 @@
 import { useCallback, useContext, useEffect } from 'react'
-import { ErrorBoundary } from '@sentry/react'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import useWalletConnectSessions from '@/features/walletconnect/hooks/useWalletConnectSessions'
-import { WalletConnectContext } from '@/features/walletconnect/WalletConnectContext'
+import { WalletConnectContext, WalletConnectProvider } from '../WalletConnectContext'
 import useWcUri from '../../hooks/useWcUri'
 import WcHeaderWidget from '../WcHeaderWidget'
 import WcSessionManager from '../WcSessionManager'
-import { WalletConnectProvider } from '../WalletConnectProvider'
 
 const WalletConnectWidget = () => {
-  const { walletConnect, error, open, setOpen } = useContext(WalletConnectContext)
+  const { walletConnect, error, open, setOpen, sessions } = useContext(WalletConnectContext)
   const [uri, clearUri] = useWcUri()
-  const sessions = useWalletConnectSessions()
   const { safeLoaded } = useSafeInfo()
 
   const onOpen = useCallback(() => {
@@ -36,17 +33,17 @@ const WalletConnectWidget = () => {
 
   return (
     <WcHeaderWidget isError={!!error} isOpen={open} onOpen={onOpen} onClose={onClose} sessions={sessions}>
-      <WcSessionManager sessions={sessions} uri={uri} />
+      <WcSessionManager uri={uri} />
     </WcHeaderWidget>
   )
 }
 
 const WalletConnectUi = () => (
-  <ErrorBoundary>
+  <ObservabilityErrorBoundary>
     <WalletConnectProvider>
       <WalletConnectWidget />
     </WalletConnectProvider>
-  </ErrorBoundary>
+  </ObservabilityErrorBoundary>
 )
 
 export default WalletConnectUi

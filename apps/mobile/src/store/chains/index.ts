@@ -3,8 +3,9 @@ import { createSelector } from '@reduxjs/toolkit'
 import { RootState } from '..'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { selectActiveSafe } from '../activeSafeSlice'
+import { CONFIG_SERVICE_KEY } from '@/src/config/constants'
 
-const selectChainsResult = apiSliceWithChainsConfig.endpoints.getChainsConfig.select()
+const selectChainsResult = apiSliceWithChainsConfig.endpoints.getChainsConfigV2.select(CONFIG_SERVICE_KEY)
 
 const selectChainsData = createSelector(selectChainsResult, (result) => {
   return result.data ?? initialState
@@ -13,17 +14,25 @@ const selectChainsData = createSelector(selectChainsResult, (result) => {
 const { selectAll: selectAllChains, selectById } = chainsAdapter.getSelectors(selectChainsData)
 
 export const selectChainById = (state: RootState, chainId: string) => selectById(state, chainId)
-export const selectAllChainsIds = createSelector([selectAllChains], (chains: Chain[]) =>
-  chains.map((chain) => chain.chainId),
-)
-export const selectActiveChainCurrency = createSelector(
+
+export const selectActiveChain = createSelector(
   [selectActiveSafe, (state: RootState) => state],
   (activeSafe, state) => {
     if (!activeSafe) {
       return null
     }
-    const chain = selectChainById(state, activeSafe.chainId)
-    return chain?.nativeCurrency
+    return selectChainById(state, activeSafe.chainId)
+  },
+)
+
+export const selectAllChainsIds = createSelector([selectAllChains], (chains: Chain[]) =>
+  (chains || []).map((chain) => chain.chainId),
+)
+
+export const selectActiveChainCurrency = createSelector(
+  [selectActiveChain, (state: RootState) => state],
+  (activeChain) => {
+    return activeChain?.nativeCurrency
   },
 )
 
@@ -33,8 +42,10 @@ export const getChainsByIds = createSelector(
     (state: RootState) => state,
     (_state: RootState, chainIds: string[]) => chainIds,
   ],
-  (state, chainIds) => chainIds.map((chainId) => selectById(state, chainId)).filter(Boolean),
+  (state, chainIds) => {
+    return (chainIds || []).map((chainId) => selectById(state, chainId)).filter(Boolean)
+  },
 )
 
-export const { useGetChainsConfigQuery } = apiSliceWithChainsConfig
+export const { useGetChainsConfigV2Query } = apiSliceWithChainsConfig
 export { selectAllChains }

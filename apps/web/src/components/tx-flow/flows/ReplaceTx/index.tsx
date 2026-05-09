@@ -18,13 +18,13 @@ import DeleteTxModal from './DeleteTxModal'
 import ExternalLink from '@/components/common/ExternalLink'
 import ChoiceButton from '@/components/common/ChoiceButton'
 import useWallet from '@/hooks/wallets/useWallet'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { AppRoutes } from '@/config/routes'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import Track from '@/components/common/Track'
 import { REJECT_TX_EVENTS } from '@/services/analytics/events/reject-tx'
-import { useRecommendedNonce } from '@/components/tx/SignOrExecuteForm/hooks'
+import { useRecommendedNonce } from '@/components/tx/shared/hooks'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const goToQueue = (router: NextRouter) => {
   if (router.pathname === AppRoutes.transactions.tx) {
@@ -131,7 +131,7 @@ const ReplaceTxMenu = ({
         <Typography variant="body2" mt={-1} mb={1}>
           You can replace or reject this transaction on-chain. It requires gas fees and your signature.{' '}
           <Track {...REJECT_TX_EVENTS.READ_MORE}>
-            <ExternalLink href="https://help.safe.global/en/articles/40836-why-do-i-need-to-pay-for-cancelling-a-transaction">
+            <ExternalLink href="https://help.safe.global/articles/4016097317-Why-do-I-need-to-pay-for-cancelling-a-transaction?">
               Read more
             </ExternalLink>
           </Track>

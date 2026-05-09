@@ -1,0 +1,40 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.sign {
+  background-color: var(--color-info-background);
+}
+
+.sign svg {
+  color: var(--color-info-dark);
+}
+
+.execute {
+  background-color: var(--color-secondary-background);
+}
+
+.execute svg {
+  color: var(--color-secondary-dark);
+}
+
+[data-theme='dark'] .execute {
+  background-color: var(--color-success-background);
+}
+
+[data-theme='dark'] .execute svg {
+  color: var(--color-success-dark);
+}

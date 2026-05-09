@@ -2,7 +2,7 @@
 <path fill-rule="evenodd" clip-rule="evenodd" d="M8 11.5C8 10.6716 8.67157 10 9.5 10H19.5C20.3284 10 21 10.6716 21 11.5C21 12.3284 20.3284 13 19.5 13H9.5C8.67157 13 8 12.3284 8 11.5Z" fill="black"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M8 17.5C8 16.6716 8.67157 16 9.5 16H19.5C20.3284 16 21 16.6716 21 17.5C21 18.3284 20.3284 19 19.5 19H9.5C8.67157 19 8 18.3284 8 17.5Z" fill="black"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M8 5.5C8 4.67157 8.67157 4 9.5 4H19.5C20.3284 4 21 4.67157 21 5.5C21 6.32843 20.3284 7 19.5 7H9.5C8.67157 7 8 6.32843 8 5.5Z" fill="black"/>
-<circle cx="4.5" cy="5.5" r="1.5" fill="#121312"/>
-<circle cx="4.5" cy="11.5" r="1.5" fill="#121312"/>
-<circle cx="4.5" cy="17.5" r="1.5" fill="#121312"/>
+<circle cx="4.5" cy="5.5" r="1.5" fill="black"/>
+<circle cx="4.5" cy="11.5" r="1.5" fill="black"/>
+<circle cx="4.5" cy="17.5" r="1.5" fill="black"/>
 </svg>

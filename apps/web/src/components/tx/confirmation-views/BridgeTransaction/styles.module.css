@@ -1,0 +1,5 @@
+.externalLink {
+  text-decoration: none;
+  font-weight: 400 !important;
+  color: var(--color-text-primary);
+}

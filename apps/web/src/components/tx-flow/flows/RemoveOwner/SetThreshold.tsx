@@ -11,7 +11,7 @@ import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
 import type { RemoveOwnerFlowProps } from '.'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export const SetThreshold = ({
   params,
@@ -37,35 +37,16 @@ export const SetThreshold = ({
   return (
     <TxCard>
       <form onSubmit={onSubmitHandler}>
-        <Box
-          sx={{
-            mb: 3,
-          }}
-        >
-          <Typography
-            sx={{
-              mb: 2,
-            }}
-          >
-            Review the signer you want to remove from the active Safe Account:
-          </Typography>
-          {/* TODO: Update the EthHashInfo style from the replace owner PR */}
+        <Box mb={3}>
+          <Typography mb={2}>Review the signer you want to remove from the active Safe Account:</Typography>
+
           <EthHashInfo address={params.removedOwner.address} shortAddress={false} showCopyButton hasExplorer />
         </Box>
 
         <Divider className={commonCss.nestedDivider} />
 
-        <Box
-          sx={{
-            my: 3,
-          }}
-        >
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
+        <Box my={3}>
+          <Typography variant="h4" fontWeight={700}>
             Threshold
             <Tooltip title={TOOLTIP_TITLES.THRESHOLD} arrow placement="top">
               <span>

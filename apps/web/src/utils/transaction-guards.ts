@@ -1,88 +1,100 @@
 import type {
-  AddressEx,
-  BaselineConfirmationView,
-  Cancellation,
-  ConflictHeader,
-  Creation,
-  Custom,
-  DateLabel,
+  StakingTxInfo,
   DetailedExecutionInfo,
-  Erc20Transfer,
-  Erc721Transfer,
+  TransactionInfo,
+  OrderTransactionInfo,
   ExecutionInfo,
-  Label,
-  ModuleExecutionDetails,
-  ModuleExecutionInfo,
-  MultiSend,
+  TransactionListItem,
+  TransferInfo,
+  Cancellation,
+} from '@safe-global/store/gateway/types'
+import {
+  DetailedExecutionInfoType,
+  TransactionInfoType,
+  TransferDirection,
+  TransactionListItemType,
+  ConflictType,
+  TransactionTokenType,
+} from '@safe-global/store/gateway/types'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+
+import type {
+  ConflictHeaderQueuedItem,
+  CustomTransactionInfo,
+  DateLabel,
+  LabelQueuedItem,
+  MultiSendTransactionInfo,
   MultisigExecutionDetails,
   MultisigExecutionInfo,
-  NativeCoinTransfer,
-  NativeStakingDepositConfirmationView,
-  Order,
-  AnyConfirmationView,
-  AnySwapOrderConfirmationView,
-  SafeInfo,
-  SettingsChange,
-  SwapOrder,
-  SwapOrderConfirmationView,
+  SettingsChangeTransaction,
+  SwapOrderTransactionInfo,
   Transaction,
-  TransactionInfo,
-  TransactionListItem,
-  TransactionSummary,
-  Transfer,
-  TransferInfo,
-  TwapOrder,
-  TwapOrderConfirmationView,
-  AnyStakingConfirmationView,
-  StakingTxExitInfo,
-  StakingTxDepositInfo,
-  StakingTxWithdrawInfo,
-  NativeStakingWithdrawConfirmationView,
-  NativeStakingValidatorsExitConfirmationView,
-  StakingTxInfo,
+  TransferTransactionInfo,
+  TwapOrderTransactionInfo,
+  NativeStakingValidatorsExitTransactionInfo,
+  NativeStakingDepositTransactionInfo,
+  NativeStakingWithdrawTransactionInfo,
   TransactionData,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import {
-  ConfirmationViewTypes,
-  ConflictType,
-  DetailedExecutionInfoType,
-  Operation,
-  TransactionInfoType,
-  TransactionListItemType,
-  TransactionStatus,
-  TransactionTokenType,
-  TransferDirection,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import { getDeployedSpendingLimitModuleAddress } from '@/services/contracts/spendingLimitContracts'
-import { sameAddress } from '@/utils/addresses'
+  TransactionItem,
+  TransactionQueuedItem,
+  QueuedItemPage,
+  CreationTransactionInfo,
+  Erc20Transfer,
+  Erc721Transfer,
+  ModuleExecutionDetails,
+  ModuleExecutionInfo,
+  NativeCoinTransfer,
+  TransactionItemPage,
+  SwapTransferTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+
+export type AnyResults = (TransactionItemPage['results'] | QueuedItemPage['results'])[number]
+
+import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { Operation } from '@safe-global/store/gateway/types'
+// NOTE: Import directly from deployments file (not barrel) to avoid circular dependency
+// transaction-guards.ts is imported by store slices, and the barrel imports createFeatureHandle
+// which has dependencies that create a circular import chain
+import { getDeployedSpendingLimitModuleAddress } from '@/features/spending-limits/services/spendingLimitDeployments'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
-import { ethers } from 'ethers'
+import { id } from 'ethers'
 import {
   getSafeToL2MigrationDeployment,
   getSafeMigrationDeployment,
   getMultiSendDeployments,
+  getSignMessageLibDeployments,
 } from '@safe-global/safe-deployments'
-import { Safe__factory, Safe_to_l2_migration__factory } from '@/types/contracts'
-import { hasMatchingDeployment } from '@/services/contracts/deployments'
+import {
+  Safe__factory,
+  Safe_to_l2_migration__factory,
+  Sign_message_lib__factory,
+} from '@safe-global/utils/types/contracts'
+import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { isMultiSendCalldata } from './transaction-calldata'
-import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
-import { OperationType } from '@safe-global/safe-core-sdk-types'
-import { LATEST_SAFE_VERSION } from '@/config/constants'
-import { extractMigrationL2MasterCopyAddress } from '@/features/multichain/utils/extract-migration-data'
+import { decodeMultiSendData } from '@safe-global/protocol-kit'
+import { OperationType } from '@safe-global/types-kit'
+import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
+import type {
+  BridgeAndSwapTransactionInfo,
+  SwapTransactionInfo,
+  TransactionDetails,
+  VaultDepositTransactionInfo,
+  VaultRedeemTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
-export const isTxQueued = (value: TransactionStatus): boolean => {
-  return [TransactionStatus.AWAITING_CONFIRMATIONS, TransactionStatus.AWAITING_EXECUTION].includes(value)
+export const isTxQueued = (value: Transaction['txStatus']): boolean => {
+  return ['AWAITING_CONFIRMATIONS', 'AWAITING_EXECUTION'].includes(value)
 }
 
-export const isAwaitingExecution = (txStatus: TransactionStatus): boolean =>
-  TransactionStatus.AWAITING_EXECUTION === txStatus
+export const isAwaitingExecution = (txStatus: Transaction['txStatus']): boolean => 'AWAITING_EXECUTION' === txStatus
 
-const isAddressEx = (owners: AddressEx[] | NamedAddress[]): owners is AddressEx[] => {
-  return (owners as AddressEx[]).every((owner) => owner.value !== undefined)
+const isAddressEx = (owners: AddressInfo[] | NamedAddress[]): owners is AddressInfo[] => {
+  return (owners as AddressInfo[]).every((owner) => owner.value !== undefined)
 }
 
-export const isOwner = (safeOwners: AddressEx[] | NamedAddress[] = [], walletAddress?: string) => {
+export const isOwner = (safeOwners: AddressInfo[] | NamedAddress[] = [], walletAddress?: string) => {
   if (isAddressEx(safeOwners)) {
     return safeOwners.some((owner) => sameAddress(owner.value, walletAddress))
   }
@@ -90,11 +102,15 @@ export const isOwner = (safeOwners: AddressEx[] | NamedAddress[] = [], walletAdd
   return safeOwners.some((owner) => sameAddress(owner.address, walletAddress))
 }
 
-export const isMultisigDetailedExecutionInfo = (value?: DetailedExecutionInfo): value is MultisigExecutionDetails => {
+export const isMultisigDetailedExecutionInfo = (
+  value?: DetailedExecutionInfo | null,
+): value is MultisigExecutionDetails => {
   return value?.type === DetailedExecutionInfoType.MULTISIG
 }
 
-export const isModuleDetailedExecutionInfo = (value?: DetailedExecutionInfo): value is ModuleExecutionDetails => {
+export const isModuleDetailedExecutionInfo = (
+  value?: DetailedExecutionInfo | null,
+): value is ModuleExecutionDetails => {
   return value?.type === DetailedExecutionInfoType.MODULE
 }
 
@@ -114,7 +130,10 @@ const isMigrateToL2CallData = (value: {
   return false
 }
 
-export const isMigrateToL2TxData = (value: TransactionData | undefined, chainId: string | undefined): boolean => {
+export const isMigrateToL2TxData = (
+  value: TransactionData | null | undefined,
+  chainId: string | undefined,
+): boolean => {
   if (!value) {
     return false
   }
@@ -139,11 +158,15 @@ export const isMigrateToL2TxData = (value: TransactionData | undefined, chainId:
     }
   }
 
+  if (!value.hexData) {
+    return false
+  }
+
   return isMigrateToL2CallData({ to: value.to.value, data: value.hexData, operation: value.operation as 0 | 1 })
 }
 
 // TransactionInfo type guards
-export const isTransferTxInfo = (value: TransactionInfo): value is Transfer => {
+export const isTransferTxInfo = (value: TransactionInfo): value is TransferTransactionInfo => {
   return value.type === TransactionInfoType.TRANSFER || isSwapTransferOrderTxInfo(value)
 }
 
@@ -153,131 +176,63 @@ export const isTransferTxInfo = (value: TransactionInfo): value is Transfer => {
  *
  * @param value
  */
-export const isSwapTransferOrderTxInfo = (value: TransactionInfo): value is SwapOrder => {
+export const isSwapTransferOrderTxInfo = (value: TransactionInfo): value is SwapTransferTransactionInfo => {
   return value.type === TransactionInfoType.SWAP_TRANSFER
 }
 
-export const isSettingsChangeTxInfo = (value: TransactionInfo): value is SettingsChange => {
+export const isSettingsChangeTxInfo = (value: TransactionInfo): value is SettingsChangeTransaction => {
   return value.type === TransactionInfoType.SETTINGS_CHANGE
 }
 
-export const isCustomTxInfo = (value: TransactionInfo): value is Custom => {
+export const isCustomTxInfo = (value: TransactionInfo): value is CustomTransactionInfo => {
   return value.type === TransactionInfoType.CUSTOM
 }
 
-export const isMultiSendTxInfo = (value: TransactionInfo): value is MultiSend => {
-  return (
-    value.type === TransactionInfoType.CUSTOM &&
-    value.methodName === 'multiSend' &&
-    typeof value.actionCount === 'number'
-  )
+export const isMultiSendTxInfo = (value: TransactionInfo): value is MultiSendTransactionInfo => {
+  return value.type === TransactionInfoType.CUSTOM && value.methodName === 'multiSend'
 }
 
-export const isOrderTxInfo = (value: TransactionInfo): value is Order => {
+export const isOrderTxInfo = (value: TransactionInfo): value is OrderTransactionInfo => {
   return isSwapOrderTxInfo(value) || isTwapOrderTxInfo(value)
 }
 
-export const isMigrateToL2TxInfo = (value: TransactionInfo): value is Custom => {
+export const isMigrateToL2TxInfo = (value: TransactionInfo): value is CustomTransactionInfo => {
   const safeToL2MigrationDeployment = getSafeToL2MigrationDeployment()
   const safeToL2MigrationAddress = safeToL2MigrationDeployment?.defaultAddress
 
   return isCustomTxInfo(value) && sameAddress(value.to.value, safeToL2MigrationAddress)
 }
 
-export const isSwapOrderTxInfo = (value: TransactionInfo): value is SwapOrder => {
+export const isSwapOrderTxInfo = (value: TransactionInfo): value is SwapOrderTransactionInfo => {
   return value.type === TransactionInfoType.SWAP_ORDER
 }
 
-export const isTwapOrderTxInfo = (value: TransactionInfo): value is TwapOrder => {
+export const isBridgeOrderTxInfo = (value: any): value is BridgeAndSwapTransactionInfo => {
+  return (value.type as string) === 'SwapAndBridge'
+}
+
+export const isLifiSwapTxInfo = (value: any): value is SwapTransactionInfo => {
+  return (value.type as string) === 'Swap'
+}
+
+export const isTwapOrderTxInfo = (value: TransactionInfo): value is TwapOrderTransactionInfo => {
   return value.type === TransactionInfoType.TWAP_ORDER
 }
 
-export const isStakingTxDepositInfo = (value: TransactionInfo): value is StakingTxDepositInfo => {
+export const isStakingTxDepositInfo = (value: TransactionInfo): value is NativeStakingDepositTransactionInfo => {
   return value.type === TransactionInfoType.NATIVE_STAKING_DEPOSIT
 }
 
-export const isStakingTxExitInfo = (value: TransactionInfo): value is StakingTxExitInfo => {
+export const isStakingTxExitInfo = (value: TransactionInfo): value is NativeStakingValidatorsExitTransactionInfo => {
   return value.type === TransactionInfoType.NATIVE_STAKING_VALIDATORS_EXIT
 }
 
-export const isStakingTxWithdrawInfo = (value: TransactionInfo): value is StakingTxWithdrawInfo => {
+export const isStakingTxWithdrawInfo = (value: TransactionInfo): value is NativeStakingWithdrawTransactionInfo => {
   return value.type === TransactionInfoType.NATIVE_STAKING_WITHDRAW
 }
 
 export const isAnyStakingTxInfo = (value: TransactionInfo): value is StakingTxInfo => {
   return isStakingTxDepositInfo(value) || isStakingTxExitInfo(value) || isStakingTxWithdrawInfo(value)
-}
-
-export const isTwapConfirmationViewOrder = (
-  decodedData: AnyConfirmationView | undefined,
-): decodedData is TwapOrderConfirmationView => {
-  if (decodedData && 'type' in decodedData) {
-    return decodedData.type === ConfirmationViewTypes.COW_SWAP_TWAP_ORDER
-  }
-
-  return false
-}
-
-export const isSwapConfirmationViewOrder = (
-  decodedData: AnyConfirmationView | undefined,
-): decodedData is SwapOrderConfirmationView => {
-  if (decodedData && 'type' in decodedData) {
-    return decodedData.type === ConfirmationViewTypes.COW_SWAP_ORDER
-  }
-
-  return false
-}
-
-export const isAnySwapConfirmationViewOrder = (
-  decodedData: AnyConfirmationView | undefined,
-): decodedData is AnySwapOrderConfirmationView => {
-  return isSwapConfirmationViewOrder(decodedData) || isTwapConfirmationViewOrder(decodedData)
-}
-
-export const isStakingDepositConfirmationView = (
-  decodedData: AnyConfirmationView | undefined,
-): decodedData is NativeStakingDepositConfirmationView => {
-  if (decodedData && 'type' in decodedData) {
-    return decodedData?.type === ConfirmationViewTypes.KILN_NATIVE_STAKING_DEPOSIT
-  }
-  return false
-}
-
-export const isStakingExitConfirmationView = (
-  decodedData: AnyConfirmationView | undefined,
-): decodedData is NativeStakingValidatorsExitConfirmationView => {
-  if (decodedData && 'type' in decodedData) {
-    return decodedData?.type === ConfirmationViewTypes.KILN_NATIVE_STAKING_VALIDATORS_EXIT
-  }
-  return false
-}
-
-export const isStakingWithdrawConfirmationView = (
-  decodedData: AnyConfirmationView | undefined,
-): decodedData is NativeStakingWithdrawConfirmationView => {
-  if (decodedData && 'type' in decodedData) {
-    return decodedData?.type === ConfirmationViewTypes.KILN_NATIVE_STAKING_WITHDRAW
-  }
-  return false
-}
-
-export const isAnyStakingConfirmationView = (
-  decodedData: AnyConfirmationView | undefined,
-): decodedData is AnyStakingConfirmationView => {
-  return (
-    isStakingDepositConfirmationView(decodedData) ||
-    isStakingExitConfirmationView(decodedData) ||
-    isStakingWithdrawConfirmationView(decodedData)
-  )
-}
-
-export const isGenericConfirmation = (
-  decodedData: AnyConfirmationView | undefined,
-): decodedData is BaselineConfirmationView => {
-  if (decodedData && 'type' in decodedData) {
-    return decodedData.type === ConfirmationViewTypes.GENERIC
-  }
-  return false
 }
 
 export const isCancelledSwapOrder = (value: TransactionInfo) => {
@@ -292,7 +247,7 @@ export const isCancellationTxInfo = (value: TransactionInfo): value is Cancellat
   return isCustomTxInfo(value) && value.isCancellation
 }
 
-export const isCreationTxInfo = (value: TransactionInfo): value is Creation => {
+export const isCreationTxInfo = (value: TransactionInfo): value is CreationTransactionInfo => {
   return value.type === TransactionInfoType.CREATION
 }
 
@@ -305,44 +260,51 @@ export const isIncomingTransfer = (txInfo: TransactionInfo): boolean => {
 }
 
 // TransactionListItem type guards
-export const isLabelListItem = (value: TransactionListItem): value is Label => {
+export const isLabelListItem = (
+  value: QueuedItemPage['results'][number] | TransactionItemPage['results'][number],
+): value is LabelQueuedItem => {
   return value.type === TransactionListItemType.LABEL
 }
 
-export const isConflictHeaderListItem = (value: TransactionListItem): value is ConflictHeader => {
+export const isConflictHeaderQueuedItem = (value: AnyResults): value is ConflictHeaderQueuedItem => {
   return value.type === TransactionListItemType.CONFLICT_HEADER
 }
 
-export const isDateLabel = (value: TransactionListItem): value is DateLabel => {
+export const isDateLabel = (value: AnyResults): value is DateLabel => {
   return value.type === TransactionListItemType.DATE_LABEL
 }
 
-export const isTransactionListItem = (value: TransactionListItem): value is Transaction => {
+export const isTransactionListItem = (value: AnyResults): value is TransactionItem => {
+  return value.type === TransactionListItemType.TRANSACTION && value.conflictType === ConflictType.NONE
+}
+
+export const isTransactionQueuedItem = (value: AnyResults): value is TransactionQueuedItem => {
   return value.type === TransactionListItemType.TRANSACTION
 }
 
 export function isRecoveryQueueItem(value: TransactionListItem | RecoveryQueueItem): value is RecoveryQueueItem {
   const EVENT_SIGNATURE = 'TransactionAdded(uint256,bytes32,address,uint256,bytes,uint8)'
-  return 'fragment' in value && ethers.id(EVENT_SIGNATURE) === value.fragment.topicHash
+  return 'fragment' in value && id(EVENT_SIGNATURE) === value.fragment.topicHash
 }
 
 // Narrows `Transaction`
 // TODO: Consolidate these types with the new sdk
 export const isMultisigExecutionInfo = (
-  value?: ExecutionInfo | DetailedExecutionInfo,
+  value?: ExecutionInfo | DetailedExecutionInfo | null,
 ): value is MultisigExecutionInfo => {
   return value?.type === 'MULTISIG'
 }
 
-export const isModuleExecutionInfo = (value?: ExecutionInfo | DetailedExecutionInfo): value is ModuleExecutionInfo =>
-  value?.type === 'MODULE'
+export const isModuleExecutionInfo = (
+  value?: ExecutionInfo | DetailedExecutionInfo | null,
+): value is ModuleExecutionInfo => value?.type === 'MODULE'
 
-export const isSignableBy = (txSummary: TransactionSummary, walletAddress: string): boolean => {
+export const isSignableBy = (txSummary: Transaction, walletAddress: string): boolean => {
   const executionInfo = isMultisigExecutionInfo(txSummary.executionInfo) ? txSummary.executionInfo : undefined
   return !!executionInfo?.missingSigners?.some((address) => address.value === walletAddress)
 }
 
-export const isConfirmableBy = (txSummary: TransactionSummary, walletAddress: string): boolean => {
+export const isConfirmableBy = (txSummary: Transaction, walletAddress: string): boolean => {
   if (!txSummary.executionInfo || !isMultisigExecutionInfo(txSummary.executionInfo)) {
     return false
   }
@@ -353,7 +315,11 @@ export const isConfirmableBy = (txSummary: TransactionSummary, walletAddress: st
   )
 }
 
-export const isExecutable = (txSummary: TransactionSummary, walletAddress: string, safe: SafeInfo): boolean => {
+export const isExecutable = (
+  txSummary: Transaction,
+  walletAddress: string,
+  safe: Pick<SafeState, 'nonce'>,
+): boolean => {
   if (
     !txSummary.executionInfo ||
     !isMultisigExecutionInfo(txSummary.executionInfo) ||
@@ -397,14 +363,8 @@ export const isArrayParameter = (parameter: string): boolean => /(\[\d*?])+$/.te
 export const isAddress = (type: string): boolean => type.indexOf('address') === 0
 export const isByte = (type: string): boolean => type.indexOf('byte') === 0
 
-export const isNoneConflictType = (transaction: Transaction) => {
-  return transaction.conflictType === ConflictType.NONE
-}
-export const isHasNextConflictType = (transaction: Transaction) => {
-  return transaction.conflictType === ConflictType.HAS_NEXT
-}
-export const isEndConflictType = (transaction: Transaction) => {
-  return transaction.conflictType === ConflictType.END
+export const isNoneConflictType = (transaction: QueuedItemPage['results'][number]) => {
+  return transaction.type === 'TRANSACTION' && transaction.conflictType === ConflictType.NONE
 }
 
 export const isNativeTokenTransfer = (value: TransferInfo): value is NativeCoinTransfer => {
@@ -420,30 +380,41 @@ export const isERC721Transfer = (value: TransferInfo): value is Erc721Transfer =
 }
 
 const safeInterface = Safe__factory.createInterface()
+const signMessageInterface = Sign_message_lib__factory.createInterface()
 /**
  * True if the tx calls `approveHash`
  */
-export const isOnChainConfirmationTxData = (data?: TransactionData): boolean => {
+export const isOnChainConfirmationTxData = (data?: TransactionData | null): boolean => {
   const approveHashSelector = safeInterface.getFunction('approveHash').selector
   return Boolean(data && data.hexData?.startsWith(approveHashSelector))
 }
 
-export const isOnChainConfirmationTxInfo = (info: TransactionInfo): info is Custom => {
+export const isOnChainConfirmationTxInfo = (info: TransactionInfo): info is CustomTransactionInfo => {
   if (isCustomTxInfo(info)) {
     return info.methodName === 'approveHash' && info.dataSize === '36'
   }
   return false
 }
 
+export const isOnChainSignMessageTxData = (data: TransactionData | null | undefined, chainId: string): boolean => {
+  const signMessageSelector = signMessageInterface.getFunction('signMessage').selector
+  const toAddress = data?.to.value
+  const isDelegateCall = data?.operation === Operation.DELEGATE
+  const isSignMessageLib =
+    toAddress !== undefined &&
+    hasMatchingDeployment(getSignMessageLibDeployments, toAddress, chainId, ['1.3.0', '1.4.1'])
+  return Boolean(data && data.hexData?.startsWith(signMessageSelector) && isSignMessageLib && isDelegateCall)
+}
+
 /**
  * True if the tx calls `execTransaction`
  */
-export const isExecTxData = (data?: TransactionData): boolean => {
+export const isExecTxData = (data?: TransactionData | null): boolean => {
   const execTransactionSelector = safeInterface.getFunction('execTransaction').selector
   return Boolean(data && data.hexData?.startsWith(execTransactionSelector))
 }
 
-export const isExecTxInfo = (info: TransactionInfo): info is Custom => {
+export const isExecTxInfo = (info: TransactionInfo): info is CustomTransactionInfo => {
   if (isCustomTxInfo(info)) {
     return info.methodName === 'execTransaction'
   }
@@ -454,8 +425,8 @@ export const isNestedConfirmationTxInfo = (info: TransactionInfo): boolean => {
   return isCustomTxInfo(info) && (isOnChainConfirmationTxInfo(info) || isExecTxInfo(info))
 }
 
-export const isSafeUpdateTxData = (data?: TransactionData): boolean => {
-  if (!data) return false
+export const isSafeUpdateTxData = (data?: TransactionData | null): boolean => {
+  if (!data || !data.hexData) return false
 
   // Must be a trusted delegate call
   if (!(data.trustedDelegateCallTarget && data.operation === Operation.DELEGATE)) {
@@ -470,14 +441,33 @@ export const isSafeUpdateTxData = (data?: TransactionData): boolean => {
 
   // For older Safes
   return (
-    isMultiSendCalldata(data.hexData || '') &&
+    isMultiSendCalldata(data.hexData) &&
     Boolean(
-      data.dataDecoded?.parameters?.[0]?.valueDecoded?.some((tx) => tx.dataDecoded?.method === 'changeMasterCopy'),
+      Array.isArray(data.dataDecoded?.parameters?.[0]?.valueDecoded) &&
+        data.dataDecoded.parameters[0].valueDecoded.some((tx) => tx.dataDecoded?.method === 'changeMasterCopy'),
     )
   )
 }
 
-export const isSafeToL2MigrationTxData = (data?: TransactionData): boolean => {
-  if (!data) return false
-  return !!extractMigrationL2MasterCopyAddress(data)
+export const isSafeMigrationTxData = (data?: TransactionData | null): boolean => {
+  if (!data || !data.hexData) return false
+  return isMigrateToL2CallData({
+    data: data.hexData,
+    to: data.to.value,
+    operation: data.operation as number,
+  })
+}
+
+export const isVaultDepositTxInfo = (value: TransactionDetails['txInfo']): value is VaultDepositTransactionInfo => {
+  return value.type === 'VaultDeposit'
+}
+
+export const isVaultRedeemTxInfo = (value: TransactionDetails['txInfo']): value is VaultRedeemTransactionInfo => {
+  return value.type === 'VaultRedeem'
+}
+
+export const isAnyEarnTxInfo = (
+  value: TransactionDetails['txInfo'],
+): value is VaultDepositTransactionInfo | VaultRedeemTransactionInfo => {
+  return isVaultDepositTxInfo(value) || isVaultRedeemTxInfo(value)
 }

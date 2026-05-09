@@ -57,7 +57,6 @@ const LoadSafe = ({ initialData }: { initialData?: TxStepperProps<LoadSafeFormDa
         container
         columnSpacing={3}
         sx={{
-          mt: [2, null, 7],
           justifyContent: 'center',
         }}
       >

@@ -1,13 +1,13 @@
-import { type ReactElement } from 'react'
+import type { TransactionInfo } from '@safe-global/store/gateway/types'
+import { SettingsInfoType } from '@safe-global/store/gateway/types'
 import type {
-  Creation,
-  Custom,
-  MultiSend,
-  SettingsChange,
-  TransactionInfo,
-  Transfer,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import { SettingsInfoType } from '@safe-global/safe-gateway-typescript-sdk'
+  CreationTransactionInfo,
+  CustomTransactionInfo,
+  MultiSendTransactionInfo,
+  SettingsChangeTransaction,
+  TransferTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { type ReactElement } from 'react'
 import TokenAmount from '@/components/common/TokenAmount'
 import {
   isOrderTxInfo,
@@ -23,15 +23,16 @@ import {
   isStakingTxDepositInfo,
   isStakingTxExitInfo,
   isStakingTxWithdrawInfo,
+  isVaultDepositTxInfo,
+  isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
-import { ellipsis, maybePlural, shortenAddress } from '@/utils/formatters'
+import { ellipsis, maybePlural, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useCurrentChain } from '@/hooks/useChains'
-import { SwapTx } from '@/features/swap/components/SwapTxInfo/SwapTx'
-import StakingTxExitInfo from '@/features/stake/components/StakingTxExitInfo'
-import StakingTxWithdrawInfo from '@/features/stake/components/StakingTxWithdrawInfo'
+import { StakingTxDepositInfo, StakingTxExitInfo, StakingTxWithdrawInfo } from './Staking'
 import { Box } from '@mui/material'
 import css from './styles.module.css'
-import StakingTxDepositInfo from '@/features/stake/components/StakingTxDepositInfo'
+import { VaultDepositTxInfo, VaultRedeemTxInfo } from '@/features/earn'
+import { SwapTx } from './SwapTx'
 
 export const TransferTx = ({
   info,
@@ -39,7 +40,7 @@ export const TransferTx = ({
   withLogo = true,
   preciseAmount = false,
 }: {
-  info: Transfer
+  info: TransferTransactionInfo
   omitSign?: boolean
   withLogo?: boolean
   preciseAmount?: boolean
@@ -53,7 +54,7 @@ export const TransferTx = ({
     return (
       <TokenAmount
         direction={direction}
-        value={transfer.value}
+        value={transfer.value ?? '0'}
         decimals={nativeCurrency?.decimals}
         tokenSymbol={nativeCurrency?.symbol}
         logoUri={withLogo ? nativeCurrency?.logoUri : undefined}
@@ -93,15 +94,15 @@ export const TransferTx = ({
   return <></>
 }
 
-const CustomTx = ({ info }: { info: Custom }): ReactElement => {
+const CustomTx = ({ info }: { info: CustomTransactionInfo }): ReactElement => {
   return <Box className={css.txInfo}>{info.methodName}</Box>
 }
 
-const CreationTx = ({ info }: { info: Creation }): ReactElement => {
+const CreationTx = ({ info }: { info: CreationTransactionInfo }): ReactElement => {
   return <Box className={css.txInfo}>Created by {shortenAddress(info.creator.value)}</Box>
 }
 
-const MultiSendTx = ({ info }: { info: MultiSend }): ReactElement => {
+const MultiSendTx = ({ info }: { info: MultiSendTransactionInfo }): ReactElement => {
   return (
     <Box className={css.txInfo}>
       {info.actionCount} {`action${maybePlural(info.actionCount)}`}
@@ -109,7 +110,7 @@ const MultiSendTx = ({ info }: { info: MultiSend }): ReactElement => {
   )
 }
 
-const SettingsChangeTx = ({ info }: { info: SettingsChange }): ReactElement => {
+const SettingsChangeTx = ({ info }: { info: SettingsChangeTransaction }): ReactElement => {
   if (
     info.settingsInfo?.type === SettingsInfoType.ENABLE_MODULE ||
     info.settingsInfo?.type === SettingsInfoType.DISABLE_MODULE
@@ -158,6 +159,14 @@ const TxInfo = ({ info, ...rest }: { info: TransactionInfo; omitSign?: boolean; 
 
   if (isStakingTxWithdrawInfo(info)) {
     return <StakingTxWithdrawInfo info={info} />
+  }
+
+  if (isVaultDepositTxInfo(info)) {
+    return <VaultDepositTxInfo txInfo={info} />
+  }
+
+  if (isVaultRedeemTxInfo(info)) {
+    return <VaultRedeemTxInfo txInfo={info} />
   }
 
   if (isCustomTxInfo(info)) {

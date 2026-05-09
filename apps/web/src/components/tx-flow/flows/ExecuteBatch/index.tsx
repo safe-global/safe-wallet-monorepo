@@ -1,11 +1,11 @@
-import type { Transaction } from '@safe-global/safe-gateway-typescript-sdk'
+import type { ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import { ReviewBatch } from './ReviewBatch'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
 
 export type ExecuteBatchFlowProps = {
-  txs: Transaction[]
+  txs: ModuleTransaction[]
 }
 
 const ExecuteBatchFlow = (props: ExecuteBatchFlowProps) => {

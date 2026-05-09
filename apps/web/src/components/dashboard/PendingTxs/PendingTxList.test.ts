@@ -1,6 +1,6 @@
+import type { MultisigExecutionInfo, ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
-import { DetailedExecutionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
-import type { MultisigExecutionInfo, Transaction } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { safeInfoBuilder } from '@/tests/builders/safe'
 import { _getTransactionsToDisplay } from './PendingTxsList'
@@ -17,7 +17,7 @@ describe('_getTransactionsToDisplay', () => {
       { timestamp: BigInt(4) },
       { timestamp: BigInt(5) },
     ] as Array<RecoveryQueueItem>
-    const queue = [] as Array<Transaction>
+    const queue = [] as Array<ModuleTransaction>
 
     const result = _getTransactionsToDisplay({ recoveryQueue, queue, walletAddress, safe })
     expect(result).toStrictEqual([recoveryQueue.slice(0, 4), []])
@@ -38,14 +38,14 @@ describe('_getTransactionsToDisplay', () => {
           type: DetailedExecutionInfoType.MULTISIG,
           missingSigners: [walletAddress],
         } as unknown as MultisigExecutionInfo,
-      } as unknown as Transaction,
+      } as unknown as ModuleTransaction,
       {
         transaction: { id: '2' },
         executionInfo: {
           type: DetailedExecutionInfoType.MULTISIG,
           missingSigners: [walletAddress],
         } as unknown as MultisigExecutionInfo,
-      } as unknown as Transaction,
+      } as unknown as ModuleTransaction,
     ]
 
     const expected = [recoveryQueue, [actionableQueue[0]]]
@@ -61,7 +61,7 @@ describe('_getTransactionsToDisplay', () => {
       { timestamp: BigInt(2) },
       { timestamp: BigInt(3) },
     ] as Array<RecoveryQueueItem>
-    const queue = [{ transaction: { id: '1' } }, { transaction: { id: '2' } }] as Array<Transaction>
+    const queue = [{ transaction: { id: '1' } }, { transaction: { id: '2' } }] as Array<ModuleTransaction>
 
     const expected = [recoveryQueue, [queue[0]]]
     const result = _getTransactionsToDisplay({ recoveryQueue, queue, walletAddress, safe })

@@ -1,111 +1,115 @@
-import type { ReactElement } from 'react'
-import React, { useMemo } from 'react'
-import { Box, Stack } from '@mui/material'
-import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
-import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { dateString } from '@/utils/formatters'
-import type { SafeTransaction, SafeTransactionData, SafeVersion } from '@safe-global/safe-core-sdk-types'
-import SafeTxGasForm from '../SafeTxGasForm'
-import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import { SafeTxHashDataRow } from './SafeTxHashDataRow'
-import { logError, Errors } from '@/services/exceptions'
-import { AdvancedTxDetails } from './AdvancedTxDetails'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { memo, type ReactElement } from 'react'
+import { TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
+import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import type { SafeTransactionData } from '@safe-global/types-kit'
+import { dateString } from '@safe-global/utils/utils/formatters'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { Receipt } from '@/components/tx/ConfirmTxDetails/Receipt'
+import DecodedData from '../TxData/DecodedData'
+import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
+import { Box, Divider, Stack, Typography } from '@mui/material'
+import DecoderLinks from './DecoderLinks'
+import isEqual from 'lodash/isEqual'
+import Multisend from '../TxData/DecodedData/Multisend'
+import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 
 interface Props {
-  txDetails: TransactionDetails
-  defaultExpanded?: boolean
-  hideDecodedData?: boolean
+  safeTxData?: SafeTransactionData
+  txData: TransactionDetails['txData']
+  txInfo?: TransactionDetails['txInfo']
+  txDetails?: TransactionDetails
+  showMultisend?: boolean
+  showDecodedData?: boolean
+  showAuditLogFields?: boolean
 }
 
-const Summary = ({ txDetails, defaultExpanded = false, hideDecodedData = false }: Props): ReactElement => {
-  const { safe } = useSafeInfo()
+const Summary = ({
+  safeTxData,
+  txData,
+  txInfo,
+  txDetails,
+  showMultisend = true,
+  showDecodedData = true,
+  showAuditLogFields = true,
+}: Props): ReactElement => {
+  const { executedAt } = txDetails ?? {}
+  const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
+  const toInfo = customTxInfo?.to || txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
+  const showDetails = Boolean(txInfo && txData)
 
-  const { txHash, detailedExecutionInfo, executedAt, txData } = txDetails
-
-  let safeTxData: SafeTransactionData | undefined = undefined
-  let submittedAt, safeTxHash, baseGas, gasPrice, gasToken, refundReceiver, safeTxGas, nonce
-  if (isMultisigDetailedExecutionInfo(detailedExecutionInfo)) {
-    ;({ submittedAt, safeTxHash, baseGas, gasPrice, gasToken, safeTxGas, nonce } = detailedExecutionInfo)
-    refundReceiver = detailedExecutionInfo.refundReceiver?.value
-    if (txData) {
-      safeTxData = {
-        to: txData.to.value,
-        data: txData.hexData ?? '0x',
-        value: txData.value ?? '0',
-        operation: txData.operation as number,
-        baseGas,
-        gasPrice,
-        gasToken,
-        nonce,
-        refundReceiver,
-        safeTxGas,
-      }
-    }
+  let baseGas, gasPrice, gasToken, safeTxGas, refundReceiver, submittedAt, nonce
+  if (txDetails && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
+    ;({ baseGas, gasPrice, gasToken, safeTxGas, submittedAt, nonce } = txDetails.detailedExecutionInfo)
+    refundReceiver = txDetails.detailedExecutionInfo.refundReceiver?.value
   }
 
-  return (
-    <Stack gap={2}>
-      <Box>
-        {txHash && (
-          <TxDataRow datatestid="tx-hash" title="Transaction hash:">
-            {generateDataRowValue(txHash, 'hash', true)}
-          </TxDataRow>
-        )}
-        {safeTxHash && (
-          <SafeTxHashDataRow
-            safeTxHash={safeTxHash}
-            safeTxData={safeTxData}
-            safeVersion={safe.version as SafeVersion}
-          />
-        )}
-        <TxDataRow datatestid="tx-created-at" title="Created:">
-          {submittedAt ? dateString(submittedAt) : null}
-        </TxDataRow>
+  safeTxData = safeTxData ?? {
+    to: txData?.to.value ?? ZERO_ADDRESS,
+    data: txData?.hexData ?? '0x',
+    value: txData?.value ?? BigInt(0).toString(),
+    operation: (txData?.operation as number) ?? 0,
+    baseGas: baseGas ?? BigInt(0).toString(),
+    gasPrice: gasPrice ?? BigInt(0).toString(),
+    gasToken: gasToken ?? ZERO_ADDRESS,
+    nonce: nonce ?? 0,
+    refundReceiver: refundReceiver ?? ZERO_ADDRESS,
+    safeTxGas: safeTxGas ?? BigInt(0).toString(),
+  }
 
-        {executedAt && (
-          <TxDataRow datatestid="tx-executed-at" title="Executed:">
-            {dateString(executedAt)}
-          </TxDataRow>
-        )}
-      </Box>
+  const isMultisend = (txInfo !== undefined && isMultiSendTxInfo(txInfo)) || isMultiSendCalldata(safeTxData.data)
+  const transactionData = txData ?? txDetails?.txData
 
-      <AdvancedTxDetails txDetails={txDetails} defaultExpanded={defaultExpanded} hideDecodedData={hideDecodedData} />
-    </Stack>
-  )
-}
-
-export default Summary
-
-export const PartialSummary = ({ safeTx }: { safeTx: SafeTransaction }) => {
-  const txData = safeTx.data
-  const { safeAddress, safe } = useSafeInfo()
-  const safeTxHash = useMemo(() => {
-    if (!safe.version) return
-    try {
-      return calculateSafeTransactionHash(safeAddress, safeTx.data, safe.version, BigInt(safe.chainId))
-    } catch (e) {
-      logError(Errors._809, e)
-    }
-  }, [safe.chainId, safe.version, safeAddress, safeTx.data])
   return (
     <>
-      {safeTxHash && (
-        <SafeTxHashDataRow safeTxHash={safeTxHash} safeTxData={safeTx.data} safeVersion={safe.version as SafeVersion} />
+      {showMultisend && isMultisend && (
+        <Multisend txData={transactionData} isExecuted={!!txDetails?.executedAt} compact />
       )}
-      <TxDataRow datatestid="tx-executed-at" title="safeTxGas:">
-        <SafeTxGasForm />
-      </TxDataRow>
-      <TxDataRow datatestid="tx-executed-at" title="baseGas:">
-        {txData.baseGas}
-      </TxDataRow>
-      <TxDataRow datatestid="tx-executed-at" title="refundReceiver:">
-        {generateDataRowValue(txData.refundReceiver, 'hash', true)}
-      </TxDataRow>
-      <TxDataRow datatestid="tx-executed-at" title="Raw data:">
-        {generateDataRowValue(txData.data, 'rawData')}
-      </TxDataRow>
+
+      {showAuditLogFields && submittedAt && (
+        <TxDataRow datatestid="tx-created-at" title="Created">
+          <Typography variant="body2" component="div">
+            {dateString(submittedAt)}
+          </Typography>
+        </TxDataRow>
+      )}
+
+      {showAuditLogFields && executedAt && (
+        <TxDataRow datatestid="tx-executed-at" title="Executed">
+          <Typography variant="body2" component="div">
+            {dateString(executedAt)}
+          </Typography>
+        </TxDataRow>
+      )}
+
+      {showDetails && (
+        <Box mt={2}>
+          <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
+            <Stack gap={1} divider={<Divider sx={{ mx: -2, my: 1 }} />}>
+              {showDecodedData && <DecodedData txData={txData} toInfo={toInfo} />}
+
+              <Box>
+                <Typography variant="subtitle2" fontWeight={700} mb={2}>
+                  Advanced details
+                </Typography>
+
+                <DecoderLinks />
+
+                <Receipt
+                  safeTxData={safeTxData}
+                  txData={txData}
+                  txDetails={txDetails}
+                  txInfo={txInfo}
+                  withSignatures
+                  grid
+                />
+              </Box>
+            </Stack>
+          </ColorCodedTxAccordion>
+        </Box>
+      )}
     </>
   )
 }
+
+export default memo(Summary, isEqual)

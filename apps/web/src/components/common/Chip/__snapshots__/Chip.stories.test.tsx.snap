@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./Chip.stories CustomLabel 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <span
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
+  >
+    <span
+      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
+      >
+        Testing VRT
+      </span>
+    </span>
+  </span>
+</div>
+`;
+
+exports[`./Chip.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <span
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
+  >
+    <span
+      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
+      >
+        New
+      </span>
+    </span>
+  </span>
+</div>
+`;
+
+exports[`./Chip.stories NormalFontWeight 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <span
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-14d0kko-MuiChip-root"
+  >
+    <span
+      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-caption mui-style-1pbessu-MuiTypography-root"
+      >
+        New
+      </span>
+    </span>
+  </span>
+</div>
+`;
+
+exports[`./Chip.stories WithCustomStyling 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <span
+    class="MuiChip-root MuiChip-filled MuiChip-sizeSmall MuiChip-colorDefault MuiChip-filledDefault mui-style-1gcknf1-MuiChip-root"
+  >
+    <span
+      class="MuiChip-label MuiChip-labelSmall mui-style-qmwq9b-MuiChip-label"
+    >
+      <span
+        class="MuiTypography-root MuiTypography-caption mui-style-11b0zy1-MuiTypography-root"
+      >
+        Featured
+      </span>
+    </span>
+  </span>
+</div>
+`;

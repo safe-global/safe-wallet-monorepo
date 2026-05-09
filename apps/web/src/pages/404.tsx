@@ -45,7 +45,7 @@ const Custom404: NextPage = () => {
     }
   }, [router])
 
-  return <main>{!isRedirecting && <h1>404 - Page not found</h1>}</main>
+  return <main>{!isRedirecting && <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>404 – Page not found</h1>}</main>
 }
 
 export default Custom404

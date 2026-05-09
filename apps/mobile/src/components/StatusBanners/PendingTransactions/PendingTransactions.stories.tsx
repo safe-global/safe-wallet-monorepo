@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { PendingTransactions } from '@/src/components/StatusBanners/PendingTransactions'
-import { action } from '@storybook/addon-actions'
+import { action } from 'storybook/actions'
 
 const meta: Meta<typeof PendingTransactions> = {
   title: 'StatusBanners/PendingTransactions',

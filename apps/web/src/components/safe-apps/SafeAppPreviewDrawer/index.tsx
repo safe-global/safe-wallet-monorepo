@@ -7,7 +7,7 @@ import Button from '@mui/material/Button'
 import SvgIcon from '@mui/material/SvgIcon'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -18,7 +18,7 @@ import SafeAppSocialLinksCard from '@/components/safe-apps/SafeAppSocialLinksCar
 import CloseIcon from '@/public/images/common/close.svg'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
 import css from './styles.module.css'
-import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent } from '@/services/analytics'
+import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent, SafeAppLaunchLocation } from '@/services/analytics'
 
 type SafeAppPreviewDrawerProps = {
   safeApp?: SafeAppData
@@ -36,13 +36,15 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
   const onOpenSafe = () => {
     if (safeApp) {
       markSafeAppOpened(safeApp.id)
-      trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: SAFE_APPS_LABELS.apps_sidebar }, safeApp.name)
+      trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_APP, label: SAFE_APPS_LABELS.apps_sidebar }, safeApp, {
+        launchLocation: SafeAppLaunchLocation.PREVIEW_DRAWER,
+      })
     }
   }
 
   return (
-    <Drawer anchor="right" open={isOpen} onClose={onClose}>
-      <Box className={css.drawerContainer}>
+    <Drawer anchor="right" open={isOpen} onClose={onClose} sx={{ '& .MuiDrawer-paper': { borderTopRightRadius: '0' } }}>
+      <Box className={css.drawerContainer} sx={{ paddingTop: '20px!important' }}>
         {/* Toolbar */}
 
         {safeApp && (
@@ -65,7 +67,7 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
 
         {/* Safe App Info */}
         <Box sx={{ px: 1 }}>
-          <SafeAppIconCard src={safeApp?.iconUrl || ''} alt={`${safeApp?.name} logo`} width={90} height={90} />
+          <SafeAppIconCard src={safeApp?.iconUrl} alt={`${safeApp?.name} logo`} width={90} height={90} />
         </Box>
 
         <Typography variant="h4" fontWeight={700} sx={{ mt: 2 }}>

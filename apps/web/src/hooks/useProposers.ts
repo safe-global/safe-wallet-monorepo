@@ -1,7 +1,9 @@
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useGetProposersQuery } from '@/store/api/gateway'
-import { skipToken } from '@reduxjs/toolkit/query/react'
+import {
+  useDelegatesGetDelegatesV2Query,
+  type DelegatesGetDelegatesV2ApiArg,
+} from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 
 const useProposers = () => {
   const {
@@ -9,7 +11,13 @@ const useProposers = () => {
     safeAddress,
   } = useSafeInfo()
 
-  return useGetProposersQuery(chainId && safeAddress ? { chainId, safeAddress } : skipToken)
+  const shouldFetch = Boolean(chainId && safeAddress)
+
+  const queryArg: DelegatesGetDelegatesV2ApiArg | undefined = shouldFetch ? { chainId, safe: safeAddress } : undefined
+
+  return useDelegatesGetDelegatesV2Query(queryArg as DelegatesGetDelegatesV2ApiArg, {
+    skip: !shouldFetch,
+  })
 }
 
 export const useIsWalletProposer = () => {

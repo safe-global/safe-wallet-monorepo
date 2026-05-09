@@ -2,6 +2,11 @@
   margin-top: 10px;
 }
 
+.contentContainer {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .header {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
@@ -10,10 +15,19 @@
 .headerInner {
   display: flex;
   justify-content: space-between;
+  word-break: break-all;
   align-items: center;
-  /* Remove height of progress bar */
-  padding: calc(var(--space-3) - 6px) var(--space-3) var(--space-3);
+  padding: var(--space-3);
   border-bottom: 1px solid var(--color-border-light);
+}
+
+.safeInfoCard {
+  padding: 4px 8px 4px 4px;
+  max-width: 212px;
+  margin-left: -12px;
+  overflow: visible;
+  position: fixed;
+  top: 62px;
 }
 
 .step {
@@ -27,7 +41,7 @@
   bottom: var(--space-3);
 }
 
-.step :global(.MuiCard-root:first-child) {
+.step > :global(.MuiCard-root:first-child) {
   border-top-right-radius: 0;
   border-top-left-radius: 0;
   margin-top: 0;
@@ -73,21 +87,6 @@
   margin-left: var(--space-2);
 }
 
-.statusButton {
-  position: absolute;
-  top: 0;
-  right: 57px;
-  color: var(--color-text-primary);
-  padding: var(--space-2);
-  border-left: 1px solid var(--color-border-light);
-  border-right: 1px solid var(--color-border-light);
-  border-radius: 0;
-  width: 24px;
-  height: 24px;
-  box-sizing: content-box;
-  display: none;
-}
-
 .sticky {
   display: flex;
   flex-direction: column;
@@ -106,17 +105,20 @@
 
 .widget {
   /* Height of transaction type title */
-  margin-top: 46px;
+  margin-top: 30px;
 }
+
 @media (max-width: 1199px) {
   .backButton {
     left: 50%;
     transform: translateX(-50%);
   }
+
   .step :global(.MuiCardActions-root) {
     margin-bottom: var(--space-8);
   }
 }
+
 @media (max-width: 899.95px) {
   .widget {
     position: absolute;
@@ -128,10 +130,6 @@
     margin-top: unset;
   }
 
-  .widget.active {
-    z-index: 1;
-  }
-
   .widget :global .MuiPaper-root {
     height: 100%;
   }
@@ -141,7 +139,7 @@
     top: 16px;
     left: var(--space-2);
     margin-bottom: 0;
-    width: calc(100% - 145px);
+    width: calc(100% - 70px);
   }
 
   .title {
@@ -154,15 +152,16 @@
   }
 
   .progressBar {
-    display: none;
+    display: block;
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    z-index: 2;
   }
 
   .step :global(.MuiCard-root),
   .header {
     border-radius: 0;
-  }
-
-  .statusButton {
-    display: inline-flex;
   }
 }

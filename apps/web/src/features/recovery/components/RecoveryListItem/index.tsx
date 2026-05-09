@@ -3,8 +3,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useContext, useState } from 'react'
 import type { ComponentProps, ReactElement } from 'react'
 
-import { RecoverySummary } from '../RecoverySummary'
-import { RecoveryDetails } from '../RecoveryDetails'
+import RecoverySummary from '../RecoverySummary'
+import RecoveryDetails from '../RecoveryDetails'
 import { RecoveryListItemContext, RecoveryListItemProvider } from './RecoveryListItemContext'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
@@ -36,7 +36,7 @@ function ProvidedRecoveryListItem({ item }: { item: RecoveryQueueItem }): ReactE
   )
 }
 
-export function RecoveryListItem(props: ComponentProps<typeof ProvidedRecoveryListItem>): ReactElement {
+export default function RecoveryListItem(props: ComponentProps<typeof ProvidedRecoveryListItem>): ReactElement {
   return (
     <RecoveryListItemProvider>
       <ProvidedRecoveryListItem {...props} />

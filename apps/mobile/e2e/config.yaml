@@ -1,0 +1,12 @@
+# Maestro E2E Test Configuration
+#
+# Documentation: https://docs.maestro.dev/api-reference/configuration
+
+flows:
+  - 'tests/*/**'
+
+excludeTags:
+  - util # Utility flows (should never run standalone)
+  - wip # Work-in-progress tests excluded from default runs
+  - deprecated # Deprecated tests marked for removal
+  - suite # exclude suite orchestrator files from default runs

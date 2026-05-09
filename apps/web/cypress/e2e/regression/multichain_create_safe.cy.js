@@ -1,7 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as wallet from '../../support/utils/wallet.js'
-import * as createwallet from '../pages/create_wallet.pages'
+import * as createwallet from '../pages/create_wallet.pages.js'
 import * as createtx from '../pages/create_tx.pages.js'
 import * as tx from '../pages/transactions.page.js'
 import * as owner from '../pages/owners.pages'
@@ -12,37 +12,32 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 describe('Multichain safe creation tests', () => {
   beforeEach(() => {
-    cy.visit(constants.welcomeUrl + '?chain=sep')
-    cy.wait(2000)
-    wallet.connectSigner(signer)
+    createwallet.startCreateSafeFlow(signer)
   })
 
   it('Verify that Pay now is not available for the multichain safe creation', () => {
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
+    createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
-    main.verifyElementsCount(createwallet.payNowExecMethod, 0)
+    main.verifyElementsCount(createtx.payNowExecMethod, 0)
   })
 
   it('Verify that Pay now is available for single safe creation', () => {
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.clearNetworkInput(1)
     createwallet.enterNetwork(1, constants.networks.polygon)
     createwallet.clickOnNetwrokCheckbox()
+    createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
     main.verifyElementsCount(createtx.payNowExecMethod, 1)
   })
 
   it('Verify that Relay is available for one safe creation', () => {
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.clearNetworkInput(1)
     createwallet.enterNetwork(1, constants.networks.polygon)
     createwallet.clickOnNetwrokCheckbox()
+    createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
     tx.selectRelayOtion()
@@ -50,9 +45,8 @@ describe('Multichain safe creation tests', () => {
   })
 
   it('Verify that multichain safe creation is available with 2/2 setup', () => {
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
+    createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressCreateSafeStep(1, getMockAddress())
@@ -68,9 +62,8 @@ describe('Multichain safe creation tests', () => {
   })
 
   it('Verify that multichain safe creation is available for 1/2 set up', () => {
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.selectMultiNetwork(1, constants.networks.polygon.toLowerCase())
+    createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     owner.clickOnAddSignerBtn()
     owner.typeOwnerAddressCreateSafeStep(1, getMockAddress())

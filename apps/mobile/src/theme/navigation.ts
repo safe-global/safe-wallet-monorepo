@@ -1,5 +1,5 @@
 import { getTokenValue } from 'tamagui'
-import type { Theme } from '@react-navigation/native/src/types'
+import type { Theme } from '@react-navigation/native'
 import { DarkTheme, DefaultTheme } from '@react-navigation/native'
 export const NavDarkTheme: Theme = {
   ...DarkTheme,

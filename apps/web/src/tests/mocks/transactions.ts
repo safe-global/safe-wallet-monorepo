@@ -1,20 +1,23 @@
+import type { TransactionInfo, TransferInfo } from '@safe-global/store/gateway/types'
+
 import {
-  type AddressEx,
   ConflictType,
   DetailedExecutionInfoType,
-  type MultisigExecutionInfo,
-  type Transaction,
-  type TransactionInfo,
   TransactionInfoType,
   TransactionListItemType,
   TransactionStatus,
-  type TransactionSummary,
   TransactionTokenType,
   TransferDirection,
-  type TransferInfo,
-} from '@safe-global/safe-gateway-typescript-sdk'
+} from '@safe-global/store/gateway/types'
 
-const mockAddressEx: AddressEx = {
+import type {
+  AddressInfo,
+  MultisigExecutionInfo,
+  ModuleTransaction,
+  Transaction,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+
+const mockAddressEx: AddressInfo = {
   value: 'string',
 }
 
@@ -34,7 +37,7 @@ const mockTxInfo: TransactionInfo = {
   transferInfo: mockTransferInfo,
 }
 
-export const defaultTx: TransactionSummary = {
+export const defaultTx: Transaction = {
   id: '',
   timestamp: 0,
   txInfo: mockTxInfo,
@@ -48,7 +51,7 @@ export const defaultTx: TransactionSummary = {
   txHash: null,
 }
 
-export const getMockTx = ({ nonce }: { nonce?: number }): Transaction => {
+export const getMockTx = ({ nonce }: { nonce?: number }): ModuleTransaction => {
   return {
     transaction: {
       ...defaultTx,

@@ -1,7 +1,7 @@
-import type { OperationType } from '@safe-global/safe-core-sdk-types'
-import { type SafeTransactionData } from '@safe-global/safe-core-sdk-types'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { OperationType } from '@safe-global/types-kit'
+import { type SafeTransactionData } from '@safe-global/types-kit'
+import { Operation } from '@safe-global/store/gateway/types'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 
 const ZERO_ADDRESS: string = '0x0000000000000000000000000000000000000000'

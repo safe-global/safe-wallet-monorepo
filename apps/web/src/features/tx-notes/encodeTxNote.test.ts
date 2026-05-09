@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { encodeTxNote } from './encodeTxNote'
+import { encodeTxNote } from './services/encodeTxNote'
 
 describe('encodeTxNote', () => {
   it('should encode tx note with an existing origin', () => {
@@ -27,5 +27,11 @@ describe('encodeTxNote', () => {
     const url = 'http://example.com'
     const result = encodeTxNote(note, JSON.stringify({ url }))
     expect(result).toEqual(JSON.stringify({ url, note: 'a'.repeat(172) }, null, 0))
+  })
+
+  it('should sanitize the note', () => {
+    const note = '<b>hello<b>'
+    const result = encodeTxNote(note)
+    expect(result).toEqual(JSON.stringify({ note: 'hello' }, null, 0))
   })
 })

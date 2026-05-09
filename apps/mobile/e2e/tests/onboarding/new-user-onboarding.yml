@@ -1,0 +1,48 @@
+appId: 'global.safe.mobileapp.ios'
+tags:
+  - onboarding
+  - smoke
+---
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eTestOnboarding'
+- tapOn:
+    id: 'get-started'
+- assertVisible:
+    id: 'get-started-screen'
+- tapOn:
+    id: 'add-account-button'
+- assertVisible: 'Scan a QR code'
+- tapOn:
+    id: 'enter-manually'
+- tapOn: 'Paste address...'
+- inputText: 'celo:0xCB57c3bC317d1905A435Dc75d7e4413E5B4Ecc97'
+
+- assertVisible:
+    id: 'success-icon'
+- assertVisible: 'Available on networks:'
+- tapOn: 'Enter safe name here'
+- inputText: 'My test safe'
+- assertVisible:
+    id: 'continue-button'
+- tapOn:
+    point: '50%,35%'
+- tapOn:
+    id: 'continue-button'
+- assertVisible:
+    id: 'add-signers-form-screen'
+- assertVisible: 'Not imported signers'
+- assertVisible:
+    id: 'signer-0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0'
+- tapOn:
+    id: 'continue-button'
+- tapOn:
+    id: 'notifications-opt-in-screen'
+- assertVisible:
+    id: 'opt-in-primary-button'
+- tapOn:
+    id: 'opt-in-secondary-button'
+- assertVisible:
+    id: 'home-tab'

@@ -4,4 +4,5 @@
   gap: var(--space-1);
   padding: var(--space-2);
   background-color: var(--color-success-background);
+  font-size: 14px;
 }

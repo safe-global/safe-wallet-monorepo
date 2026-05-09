@@ -1,18 +1,17 @@
 import { Link } from '@mui/material'
 import { useState } from 'react'
-import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
+import { Operation } from '@safe-global/store/gateway/types'
 import type { ReactElement } from 'react'
 
-import { dateString } from '@/utils/formatters'
+import { dateString } from '@safe-global/utils/utils/formatters'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
-import { RecoverySigners } from '../RecoverySigners'
-import { RecoveryDescription } from '../RecoveryDescription'
+import RecoverySigners from '../RecoverySigners'
+import RecoveryDescription from '../RecoveryDescription'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
 import txDetailsCss from '@/components/transactions/TxDetails/styles.module.css'
-import summaryCss from '@/components/transactions/TxDetails/Summary/styles.module.css'
 
-export function RecoveryDetails({ item }: { item: RecoveryQueueItem }): ReactElement {
+export default function RecoveryDetails({ item }: { item: RecoveryQueueItem }): ReactElement {
   const { transactionHash, timestamp, validFrom, expiresAt, args, address } = item
 
   const [expanded, setExpanded] = useState(false)
@@ -35,7 +34,7 @@ export function RecoveryDetails({ item }: { item: RecoveryQueueItem }): ReactEle
 
           {expiresAt !== null && <TxDataRow title="Expires:">{dateString(Number(expiresAt))}</TxDataRow>}
 
-          <Link className={summaryCss.buttonExpand} onClick={toggleExpanded} component="button" variant="body1">
+          <Link onClick={toggleExpanded} component="button" variant="body1">
             Advanced details
           </Link>
 

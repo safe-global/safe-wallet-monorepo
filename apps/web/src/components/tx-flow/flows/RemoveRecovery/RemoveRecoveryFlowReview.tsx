@@ -1,28 +1,33 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { Typography } from '@mui/material'
-import { useContext, useEffect } from 'react'
-import type { ReactElement } from 'react'
+import { useCallback, useContext, useEffect } from 'react'
+import type { PropsWithChildren, ReactElement } from 'react'
 
-import SignOrExecuteForm from '@/components/tx/SignOrExecuteForm'
 import { createRemoveModuleTx } from '@/services/tx/tx-sender'
 import { OwnerList } from '../../common/OwnerList'
 import { SafeTxContext } from '../../SafeTxProvider'
 import type { RecoveryFlowProps } from '.'
+import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
-const onSubmit = () => {
-  trackEvent({ ...RECOVERY_EVENTS.SUBMIT_RECOVERY_REMOVE })
-}
-
-export function RemoveRecoveryFlowReview({ delayModifier }: RecoveryFlowProps): ReactElement {
+export function RemoveRecoveryFlowReview({
+  delayModifier,
+  onSubmit,
+  children,
+}: PropsWithChildren<RecoveryFlowProps & { onSubmit: () => void }>): ReactElement {
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
 
   useEffect(() => {
     createRemoveModuleTx(delayModifier.address).then(setSafeTx).catch(setSafeTxError)
   }, [delayModifier.address, setSafeTx, setSafeTxError])
 
+  const onFormSubmit = useCallback(() => {
+    trackEvent({ ...RECOVERY_EVENTS.SUBMIT_RECOVERY_REMOVE })
+    onSubmit()
+  }, [onSubmit])
+
   return (
-    <SignOrExecuteForm onSubmit={onSubmit}>
+    <ReviewTransaction onSubmit={onFormSubmit}>
       <Typography>
         This transaction will remove the recovery module from your Safe Account. You will no longer be able to recover
         your Safe Account once this transaction is executed.
@@ -33,6 +38,8 @@ export function RemoveRecoveryFlowReview({ delayModifier }: RecoveryFlowProps): 
         owners={delayModifier.recoverers.map((recoverer) => ({ value: recoverer }))}
         sx={{ bgcolor: ({ palette }) => `${palette.warning.background} !important` }}
       />
-    </SignOrExecuteForm>
+
+      {children}
+    </ReviewTransaction>
   )
 }

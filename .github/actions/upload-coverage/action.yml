@@ -1,0 +1,35 @@
+name: 'Upload Coverage to Datadog'
+description: 'Upload LCOV coverage report to Datadog Code Coverage'
+
+inputs:
+  api-key:
+    required: true
+    description: 'Datadog API key'
+  site:
+    required: false
+    default: 'datadoghq.eu'
+    description: 'Datadog site'
+  coverage-path:
+    required: true
+    description: 'Path to coverage directory containing lcov.info'
+  base-path:
+    required: true
+    description: 'Workspace root relative to repo root (e.g., apps/web)'
+  flag:
+    required: true
+    description: 'Flag to identify the workspace (e.g., workspace:web)'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Upload coverage to Datadog
+      shell: bash
+      continue-on-error: true
+      run: |
+        npx @datadog/datadog-ci coverage upload \
+          --flags "${{ inputs.flag }}" \
+          --base-path "${{ inputs.base-path }}" \
+          "${{ inputs.coverage-path }}"
+      env:
+        DD_API_KEY: ${{ inputs.api-key }}
+        DD_SITE: ${{ inputs.site }}

@@ -1,16 +1,15 @@
 import { Button, CardActions, Divider, Typography } from '@mui/material'
-import type { ReactElement } from 'react'
+import { useContext, type ReactElement } from 'react'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TxCard from '../../common/TxCard'
 import type { RecoveryFlowProps } from '.'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
+import { TxFlowContext } from '../../TxFlowProvider'
 
-export function RemoveRecoveryFlowOverview({
-  delayModifier,
-  onSubmit,
-}: RecoveryFlowProps & { onSubmit: () => void }): ReactElement {
+export function RemoveRecoveryFlowOverview({ delayModifier }: RecoveryFlowProps): ReactElement {
+  const { onNext } = useContext(TxFlowContext)
   return (
     <TxCard>
       <Typography variant="body2">
@@ -42,7 +41,7 @@ export function RemoveRecoveryFlowOverview({
       <Divider className={commonCss.nestedDivider} />
 
       <CardActions sx={{ mt: '0 !important' }}>
-        <Button data-testid="next-btn" variant="contained" onClick={onSubmit}>
+        <Button data-testid="next-btn" variant="contained" onClick={onNext}>
           Next
         </Button>
       </CardActions>

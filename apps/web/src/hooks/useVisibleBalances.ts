@@ -1,8 +1,14 @@
-import { safeFormatUnits, safeParseUnits } from '@/utils/formatters'
-import type { SafeBalanceResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { useMemo } from 'react'
 import useBalances from './useBalances'
 import useHiddenTokens from './useHiddenTokens'
+import type { PortfolioBalances } from './loadables/useLoadBalances'
+import { useAppSelector } from '@/store'
+import { selectHideDust } from '@/store/settingsSlice'
+import { DUST_THRESHOLD } from '@/config/constants'
+import useSafeInfo from './useSafeInfo'
+import { useNativeTokenDisplay } from './useNativeTokenDisplay'
+import { TokenType } from '@safe-global/store/gateway/types'
 
 const PRECISION = 18
 
@@ -20,10 +26,15 @@ const truncateNumber = (balance: string): string => {
   return currentPrecision < PRECISION ? balance : balance.slice(0, floatingPointPosition + PRECISION + 1)
 }
 
-const filterHiddenTokens = (items: SafeBalanceResponse['items'], hiddenAssets: string[]) =>
+const filterHiddenTokens = (items: PortfolioBalances['items'], hiddenAssets: string[]) =>
   items.filter((balanceItem) => !hiddenAssets.includes(balanceItem.tokenInfo.address))
 
-const getVisibleFiatTotal = (balances: SafeBalanceResponse, hiddenAssets: string[]): string => {
+const filterDustTokens = (items: PortfolioBalances['items'], hideDust: boolean) => {
+  if (!hideDust) return items
+  return items.filter((balanceItem) => Number(balanceItem.fiatBalance) >= DUST_THRESHOLD)
+}
+
+const getVisibleFiatTotal = (balances: PortfolioBalances, hiddenAssets: string[]): string => {
   return safeFormatUnits(
     balances.items
       .reduce(
@@ -40,22 +51,59 @@ const getVisibleFiatTotal = (balances: SafeBalanceResponse, hiddenAssets: string
   )
 }
 
+const getVisibleTokensFiatTotal = (balances: PortfolioBalances, hiddenAssets: string[]): string | undefined => {
+  if (!balances.tokensFiatTotal) {
+    return undefined
+  }
+  return safeFormatUnits(
+    balances.items
+      .reduce(
+        (acc, balanceItem) => {
+          if (hiddenAssets.includes(balanceItem.tokenInfo.address)) {
+            return acc - BigInt(safeParseUnits(truncateNumber(balanceItem.fiatBalance), PRECISION) ?? 0)
+          }
+          return acc
+        },
+        BigInt(safeParseUnits(truncateNumber(balances.tokensFiatTotal), PRECISION) ?? 0),
+      )
+      .toString(),
+    PRECISION,
+  )
+}
+
 export const useVisibleBalances = (): {
-  balances: SafeBalanceResponse
+  balances: PortfolioBalances
+  loaded: boolean
   loading: boolean
   error?: string
 } => {
+  const { safe } = useSafeInfo()
   const data = useBalances()
   const hiddenTokens = useHiddenTokens()
+  // Disable dust filtering for counterfactual safes
+  const hideDust = useAppSelector(selectHideDust) && safe.deployed
+  const { showNativeInBalances } = useNativeTokenDisplay()
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    let items = filterHiddenTokens(data.balances.items, hiddenTokens)
+
+    if (!showNativeInBalances) {
+      items = items.filter((item) => item.tokenInfo.type !== TokenType.NATIVE_TOKEN)
+    }
+
+    const visibleItems = filterDustTokens(items, hideDust)
+
+    return {
       ...data,
       balances: {
-        items: filterHiddenTokens(data.balances.items, hiddenTokens),
+        ...data.balances,
+        items: visibleItems,
         fiatTotal: data.balances.fiatTotal ? getVisibleFiatTotal(data.balances, hiddenTokens) : '',
+        tokensFiatTotal: data.balances.tokensFiatTotal
+          ? getVisibleTokensFiatTotal(data.balances, hiddenTokens)
+          : undefined,
+        positionsFiatTotal: data.balances.positionsFiatTotal,
       },
-    }),
-    [data, hiddenTokens],
-  )
+    }
+  }, [data, hiddenTokens, hideDust, showNativeInBalances])
 }

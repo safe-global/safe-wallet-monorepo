@@ -1,0 +1,32 @@
+{
+  "members": [
+    {
+      "id": 1,
+      "role": "ADMIN",
+      "name": "Admin User",
+      "status": "ACTIVE",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z",
+      "user": { "id": 1, "status": "ACTIVE" }
+    },
+    {
+      "id": 2,
+      "role": "MEMBER",
+      "name": "Team Member",
+      "status": "ACTIVE",
+      "createdAt": "2025-01-02T00:00:00.000Z",
+      "updatedAt": "2025-01-02T00:00:00.000Z",
+      "user": { "id": 2, "status": "ACTIVE" }
+    },
+    {
+      "id": 3,
+      "role": "MEMBER",
+      "name": "Invited User",
+      "status": "INVITED",
+      "invitedBy": "Admin User",
+      "createdAt": "2025-01-03T00:00:00.000Z",
+      "updatedAt": "2025-01-03T00:00:00.000Z",
+      "user": { "id": 3, "status": "PENDING" }
+    }
+  ]
+}

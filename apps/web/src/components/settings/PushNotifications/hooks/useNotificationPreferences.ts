@@ -8,14 +8,14 @@ import {
 import { useCallback, useEffect, useMemo } from 'react'
 
 import { WebhookType } from '@/service-workers/firebase-messaging/webhook-types'
-import ExternalStore from '@/services/ExternalStore'
+import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import {
   createPushNotificationPrefsIndexedDb,
   createPushNotificationUuidIndexedDb,
   getPushNotificationPrefsKey,
 } from '@/services/push-notifications/preferences'
 import { logError } from '@/services/exceptions'
-import ErrorCodes from '@/services/exceptions/ErrorCodes'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import type { PushNotificationPreferences, PushNotificationPrefsKey } from '@/services/push-notifications/preferences'
 import type { NotifiableSafes } from '../logic'
 

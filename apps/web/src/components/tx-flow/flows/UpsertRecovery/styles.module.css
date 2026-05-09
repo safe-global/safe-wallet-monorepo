@@ -3,6 +3,7 @@
   align-items: center;
   cursor: pointer;
   color: var(--color-primary-light);
+  margin-bottom: var(--space-1);
 }
 
 .icon {

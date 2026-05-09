@@ -1,7 +1,7 @@
 .bell {
   display: flex;
   justify-content: center;
-  padding: var(--space-2) var(--space-2);
+  padding: 10px;
 }
 
 .bell svg path {
@@ -11,6 +11,7 @@
 .popoverContainer {
   width: 446px;
   border: 1px solid var(--color-border-light);
+  border-radius: 24px;
 }
 
 @media (max-width: 599.95px) {

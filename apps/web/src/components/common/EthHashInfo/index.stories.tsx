@@ -3,6 +3,7 @@ import EthHashInfo from './index'
 import { Paper } from '@mui/material'
 
 import { StoreDecorator } from '@/stories/storeDecorator'
+import { RouterDecorator } from '@/stories/routerDecorator'
 
 const meta = {
   component: EthHashInfo,
@@ -14,9 +15,11 @@ const meta = {
     (Story) => {
       return (
         <StoreDecorator initialState={{}}>
-          <Paper sx={{ padding: 2 }}>
-            <Story />
-          </Paper>
+          <RouterDecorator>
+            <Paper sx={{ padding: 2 }}>
+              <Story />
+            </Paper>
+          </RouterDecorator>
         </StoreDecorator>
       )
     },

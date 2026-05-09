@@ -1,5 +1,5 @@
 import type { SafeContractImplementationType } from '@safe-global/protocol-kit'
-import type { SafeTransaction, SafeSignature } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction, SafeSignature } from '@safe-global/types-kit'
 import * as useWallet from '@/hooks/wallets/useWallet'
 import { act, renderHook } from '@/tests/test-utils'
 import useIsValidExecution from '../../../../hooks/useIsValidExecution'
@@ -62,12 +62,8 @@ describe('useIsValidExecution', () => {
 
     jest.spyOn(contracts, 'getCurrentGnosisSafeContract').mockImplementation(() =>
       Promise.resolve({
-        contract: {
-          execTransaction: {
-            staticCall: () => {
-              throw error
-            },
-          },
+        isValidTransaction: () => {
+          throw error
         },
       } as unknown as SafeContractImplementationType),
     )

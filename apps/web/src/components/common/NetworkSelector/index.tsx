@@ -1,8 +1,6 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import Track from '@/components/common/Track'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { useAppSelector } from '@/store'
-import { selectChains } from '@/store/chainsSlice'
 import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
 import {
@@ -19,68 +17,43 @@ import {
   Typography,
 } from '@mui/material'
 import partition from 'lodash/partition'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ExpandMoreIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import type { NextRouter } from 'next/router'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
-import { useChainId } from '@/hooks/useChainId'
 import { type ReactElement, useCallback, useMemo, useState } from 'react'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
-
-import { useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
+import { useAllSafesGrouped } from '@/hooks/safes'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import uniq from 'lodash/uniq'
-import { useCompatibleNetworks } from '@/features/multichain/hooks/useCompatibleNetworks'
-import { useSafeCreationData } from '@/features/multichain/hooks/useSafeCreationData'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
+import { useSafeCreationData, CreateSafeOnSpecificChain, hasMultiChainAddNetworkFeature } from '@/features/multichain'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
-import { CreateSafeOnSpecificChain } from '@/features/multichain/components/CreateSafeOnNewChain'
-import { useGetSafeOverviewQuery } from '@/store/api/gateway'
+import useChainId from '@/hooks/useChainId'
 import { InfoOutlined } from '@mui/icons-material'
-import { selectUndeployedSafe } from '@/store/slices'
-import { skipToken } from '@reduxjs/toolkit/query'
-import { hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
-
-const ChainIndicatorWithFiatBalance = ({
-  isSelected,
-  chain,
-  safeAddress,
-}: {
-  isSelected: boolean
-  chain: ChainInfo
-  safeAddress: string
-}) => {
-  const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chain.chainId, safeAddress))
-  const { data: safeOverview } = useGetSafeOverviewQuery(
-    undeployedSafe ? skipToken : { safeAddress, chainId: chain.chainId },
-  )
-
-  return (
-    <ChainIndicator
-      responsive={isSelected}
-      chainId={chain.chainId}
-      fiatValue={safeOverview ? safeOverview.fiatTotal : undefined}
-      inline
-    />
-  )
-}
-
-export const getNetworkLink = (router: NextRouter, safeAddress: string, networkShortName: string) => {
+export const getNetworkLink = (
+  router: NextRouter,
+  safeAddress: string,
+  chainInfo: Pick<Chain, 'chainId' | 'shortName'>,
+) => {
+  const { shortName } = chainInfo
   const isSafeOpened = safeAddress !== ''
 
   const query = (
     isSafeOpened
       ? {
-          safe: `${networkShortName}:${safeAddress}`,
+          safe: `${shortName}:${safeAddress}`,
         }
-      : { chain: networkShortName }
+      : { chain: shortName }
   ) as {
     safe?: string
     chain?: string
     safeViewRedirectURL?: string
+    appUrl?: string
   }
 
   const route = {
@@ -88,8 +61,12 @@ export const getNetworkLink = (router: NextRouter, safeAddress: string, networkS
     query,
   }
 
-  if (router.query?.safeViewRedirectURL) {
-    route.query.safeViewRedirectURL = router.query?.safeViewRedirectURL.toString()
+  const queryParams = ['safeViewRedirectURL', 'appUrl'] as const
+
+  for (const key of queryParams) {
+    if (router.query?.[key]) {
+      route.query[key] = router.query?.[key].toString()
+    }
   }
 
   return route
@@ -100,9 +77,9 @@ const UndeployedNetworkMenuItem = ({
   isSelected = false,
   onSelect,
 }: {
-  chain: ChainInfo & { available: boolean }
+  chain: Chain & { available: boolean }
   isSelected?: boolean
-  onSelect: (chain: ChainInfo) => void
+  onSelect: (chain: Chain) => void
 }) => {
   const isDisabled = !chain.available
 
@@ -169,14 +146,16 @@ const UndeployedNetworks = ({
   closeNetworkSelect,
 }: {
   deployedChains: string[]
-  chains: ChainInfo[]
+  chains: Chain[]
   safeAddress: string
   closeNetworkSelect: () => void
 }) => {
   const [open, setOpen] = useState(false)
-  const [replayOnChain, setReplayOnChain] = useState<ChainInfo>()
+  const [replayOnChain, setReplayOnChain] = useState<Chain>()
   const addressBook = useAddressBook()
   const safeName = addressBook[safeAddress]
+  const { configs } = useChains()
+
   const deployedChainInfos = useMemo(
     () => chains.filter((chain) => deployedChains.includes(chain.chainId)),
     [chains, deployedChains],
@@ -184,7 +163,7 @@ const UndeployedNetworks = ({
   const safeCreationResult = useSafeCreationData(safeAddress, deployedChainInfos)
   const [safeCreationData, safeCreationDataError, safeCreationLoading] = safeCreationResult
 
-  const allCompatibleChains = useCompatibleNetworks(safeCreationData)
+  const allCompatibleChains = useCompatibleNetworks(safeCreationData, configs)
   const isUnsupportedSafeCreationVersion = Boolean(!allCompatibleChains?.length)
 
   const availableNetworks = useMemo(
@@ -202,7 +181,7 @@ const UndeployedNetworks = ({
 
   const noAvailableNetworks = useMemo(() => availableNetworks.every((config) => !config.available), [availableNetworks])
 
-  const onSelect = (chain: ChainInfo) => {
+  const onSelect = (chain: Chain) => {
     setReplayOnChain(chain)
   }
 
@@ -333,9 +312,11 @@ const UndeployedNetworks = ({
 const NetworkSelector = ({
   onChainSelect,
   offerSafeCreation = false,
+  compactButton = false,
 }: {
   onChainSelect?: () => void
   offerSafeCreation?: boolean
+  compactButton?: boolean
 }): ReactElement => {
   const [open, setOpen] = useState<boolean>(false)
   const isDarkMode = useDarkMode()
@@ -345,8 +326,6 @@ const NetworkSelector = ({
   const router = useRouter()
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
-  const chains = useAppSelector(selectChains)
-
   const isSafeOpened = safeAddress !== ''
 
   const addNetworkFeatureEnabled = hasMultiChainAddNetworkFeature(currentChain)
@@ -376,7 +355,7 @@ const NetworkSelector = ({
 
   const renderMenuItem = useCallback(
     (chainId: string, isSelected: boolean) => {
-      const chain = chains.data.find((chain) => chain.chainId === chainId)
+      const chain = configs.find((chain) => chain.chainId === chainId)
       if (!chain) return null
 
       const onSwitchNetwork = () => {
@@ -385,23 +364,25 @@ const NetworkSelector = ({
 
       return (
         <MenuItem
+          data-testid="network-selector-item"
           key={chainId}
           value={chainId}
           sx={{ '&:hover': { backgroundColor: isSelected ? 'transparent' : 'inherit' } }}
           disableRipple={isSelected}
           onClick={onSwitchNetwork}
         >
-          <Link
-            href={getNetworkLink(router, safeAddress, chain.shortName)}
-            onClick={onChainSelect}
-            className={css.item}
-          >
-            <ChainIndicatorWithFiatBalance chain={chain} safeAddress={safeAddress} isSelected={isSelected} />
+          <Link href={getNetworkLink(router, safeAddress, chain)} onClick={onChainSelect} className={css.item}>
+            <ChainIndicator
+              responsive={isSelected}
+              chainId={chain.chainId}
+              inline
+              onlyLogo={compactButton && isSelected}
+            />
           </Link>
         </MenuItem>
       )
     },
-    [chains.data, onChainSelect, router, safeAddress],
+    [configs, onChainSelect, router, safeAddress, compactButton],
   )
 
   const handleClose = () => {
@@ -441,9 +422,21 @@ const NetworkSelector = ({
         },
       }}
       sx={{
+        backgroundColor: 'transparent',
+        '& .MuiInput-root::before': {
+          borderBottom: 'none',
+        },
+        '& .MuiInput-root::after': {
+          borderBottom: 'none',
+        },
         '& .MuiSelect-select': {
           py: 0,
         },
+        ...(compactButton && {
+          '& .MuiSelect-icon': {
+            fontSize: 16,
+          },
+        }),
       }}
     >
       {prodNets.map((chain) => renderMenuItem(chain.chainId, false))}

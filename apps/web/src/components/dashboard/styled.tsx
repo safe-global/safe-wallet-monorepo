@@ -1,18 +1,18 @@
-import type { ReactElement } from 'react'
+/**
+ * @usedBy features/positions/components/PositionsWidget/index.tsx (WidgetCard)
+ * @usedBy features/recovery/components/RecoveryHeader/index.tsx (WidgetContainer, WidgetBody)
+ */
+import type { ReactElement, ReactNode } from 'react'
 import styled from '@emotion/styled'
 import NextLink from 'next/link'
 import type { LinkProps } from 'next/link'
-import { Link } from '@mui/material'
+import { Card as MuiCard, Link, Stack, Typography } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 export const WidgetContainer = styled.section`
   display: flex;
   flex-direction: column;
   height: 100%;
-`
-
-export const WidgetTitle = styled.h2`
-  margin-top: 0;
 `
 
 export const WidgetBody = styled.div`
@@ -37,20 +37,59 @@ export const Card = styled.div`
   }
 `
 
-const StyledLink = styled(Link)`
-  text-decoration: none;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  margin-bottom: 10px;
-  padding-right: 17px;
-`
-
 export const ViewAllLink = ({ url, text }: { url: LinkProps['href']; text?: string }): ReactElement => (
   <NextLink href={url} passHref legacyBehavior>
-    <StyledLink data-testid="view-all-link">
-      {text || 'View all'} <ChevronRightIcon />
-    </StyledLink>
+    <Link
+      data-testid="view-all-link"
+      sx={{
+        textDecoration: 'none',
+        fontWeight: 'bold',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+        color: 'primary.light',
+        fontSize: '14px',
+        marginRight: '-4px', // Make up for 4px space at ChevronIcon
+        '&:hover': { color: 'primary.main' },
+      }}
+    >
+      {text || 'View all'} <ChevronRightIcon fontSize="small" />
+    </Link>
   </NextLink>
 )
+
+export const WidgetCard = ({
+  title,
+  titleExtra,
+  viewAllUrl,
+  viewAllText,
+  viewAllWrapper,
+  children,
+  testId,
+}: {
+  title: string
+  titleExtra?: ReactNode
+  viewAllUrl?: LinkProps['href']
+  viewAllText?: string
+  viewAllWrapper?: (children: ReactElement) => ReactElement
+  children: ReactNode
+  testId?: string
+}): ReactElement => {
+  const viewAllLink = viewAllUrl ? <ViewAllLink url={viewAllUrl} text={viewAllText} /> : null
+  const wrappedViewAllLink = viewAllWrapper && viewAllLink ? viewAllWrapper(viewAllLink) : viewAllLink
+
+  return (
+    <MuiCard data-testid={testId} sx={{ border: 0, px: { xs: 3, lg: 1.5 }, pt: 2.5, pb: 1.5 }}>
+      <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
+        <Stack direction="row" alignItems="center" gap={1}>
+          <Typography fontWeight={700}>{title}</Typography>
+          {titleExtra}
+        </Stack>
+
+        {wrappedViewAllLink}
+      </Stack>
+
+      {children}
+    </MuiCard>
+  )
+}

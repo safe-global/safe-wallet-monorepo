@@ -1,7 +1,9 @@
 import { useMemo } from 'react'
 import isEqual from 'lodash/isEqual'
 import { useAppSelector } from '@/store'
-import { defaultSafeInfo, type ExtendedSafeInfo, selectSafeInfo } from '@/store/safeInfoSlice'
+import { selectSafeInfo } from '@/store/safeInfoSlice'
+import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 
 const useSafeInfo = (): {
   safe: ExtendedSafeInfo
@@ -10,17 +12,17 @@ const useSafeInfo = (): {
   safeLoading: boolean
   safeError?: string
 } => {
-  const { data, error, loading } = useAppSelector(selectSafeInfo, isEqual)
+  const { data, error, loaded, loading } = useAppSelector(selectSafeInfo, isEqual)
 
   return useMemo(
     () => ({
       safe: data || defaultSafeInfo,
       safeAddress: data?.address.value || '',
-      safeLoaded: !!data,
+      safeLoaded: loaded,
       safeError: error,
       safeLoading: loading,
     }),
-    [data, error, loading],
+    [data, error, loaded, loading],
   )
 }
 

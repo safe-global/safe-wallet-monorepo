@@ -1,16 +1,18 @@
 import classnames from 'classnames'
-import type { ReactNode, ReactElement, SyntheticEvent } from 'react'
+import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
 import { isAddress } from 'ethers'
 import { useTheme } from '@mui/material/styles'
 import { Box, SvgIcon, Tooltip } from '@mui/material'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
+import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import Identicon from '../../Identicon'
 import CopyAddressButton from '../../CopyAddressButton'
 import ExplorerButton, { type ExplorerButtonProps } from '../../ExplorerButton'
-import { shortenAddress } from '@/utils/formatters'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import ImageFallback from '../../ImageFallback'
 import css from './styles.module.css'
+import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 export type EthHashInfoProps = {
   address: string
@@ -24,13 +26,15 @@ export type EthHashInfoProps = {
   copyPrefix?: boolean
   shortAddress?: boolean
   copyAddress?: boolean
-  customAvatar?: string
+  customAvatar?: string | null
   hasExplorer?: boolean
   avatarSize?: number
   children?: ReactNode
   trusted?: boolean
   ExplorerButtonProps?: ExplorerButtonProps
-  isAddressBookName?: boolean
+  addressBookNameSource?: ContactSource
+  highlight4bytes?: boolean
+  badgeTooltip?: ReactNode
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -52,7 +56,9 @@ const SrcEthHashInfo = ({
   ExplorerButtonProps,
   children,
   trusted = true,
-  isAddressBookName = false,
+  addressBookNameSource,
+  highlight4bytes = false,
+  badgeTooltip,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
   const theme = useTheme()
@@ -60,10 +66,30 @@ const SrcEthHashInfo = ({
   const identicon = <Identicon address={address} size={avatarSize} />
   const shouldCopyPrefix = shouldPrefix && copyPrefix
 
+  const accountStylesWithBadge = badgeTooltip
+    ? {
+        backgroundColor: 'var(--color-background-main)',
+        fontWeight: 'bold',
+        borderRadius: '16px',
+        padding: name ? '2px 8px 2px 6px' : undefined,
+      }
+    : undefined
+
+  const highlightedAddress = highlight4bytes ? (
+    <>
+      {address.slice(0, 2)}
+      <b>{address.slice(2, 6)}</b>
+      {address.slice(6, -4)}
+      <b>{address.slice(-4)}</b>
+    </>
+  ) : (
+    address
+  )
+
   const addressElement = (
     <>
       {showPrefix && shouldPrefix && prefix && <b>{prefix}:</b>}
-      <span>{shortAddress || isMobile ? shortenAddress(address) : address}</span>
+      <span>{shortAddress || isMobile ? shortenAddress(address) : highlightedAddress}</span>
     </>
   )
 
@@ -83,20 +109,40 @@ const SrcEthHashInfo = ({
       )}
 
       <Box overflow="hidden" className={onlyName ? css.inline : undefined} gap={0.5}>
-        {name && (
-          <Box title={name} display="flex" alignItems="center" gap={0.5}>
+        {!!name ? (
+          <Box
+            title={name}
+            className="ethHashInfo-name"
+            display="flex"
+            alignItems="center"
+            gap={0.5}
+            sx={accountStylesWithBadge}
+          >
             <Box overflow="hidden" textOverflow="ellipsis">
               {name}
             </Box>
 
-            {isAddressBookName && (
-              <Tooltip title="From your address book" placement="top">
-                <span style={{ lineHeight: 0 }}>
-                  <SvgIcon component={AddressBookIcon} inheritViewBox color="border" fontSize="small" />
-                </span>
-              </Tooltip>
-            )}
+            {badgeTooltip
+              ? badgeTooltip
+              : !!addressBookNameSource && (
+                  <Tooltip title={`From your ${addressBookNameSource} address book`} placement="top">
+                    <span style={{ lineHeight: 0 }}>
+                      <SvgIcon
+                        component={addressBookNameSource === ContactSource.local ? AddressBookIcon : CloudOutlinedIcon}
+                        inheritViewBox
+                        color="border"
+                        fontSize="small"
+                      />
+                    </span>
+                  </Tooltip>
+                )}
           </Box>
+        ) : (
+          badgeTooltip && (
+            <Box display="flex" alignItems="center" gap={0.5}>
+              {badgeTooltip}
+            </Box>
+          )
         )}
 
         <div className={classnames(css.addressContainer, { [css.inline]: onlyName })}>

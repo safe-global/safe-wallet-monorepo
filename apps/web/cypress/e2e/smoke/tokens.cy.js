@@ -20,7 +20,8 @@ describe('[SMOKE] Tokens tests', () => {
 
   // Added to prod
   it('Verify that when owner is disconnected, Send button is disabled', () => {
-    assets.selectTokenList(assets.tokenListOptions.allTokens)
+    assets.toggleShowAllTokens(true)
+    assets.toggleHideDust(false)
     assets.showSendBtn(0)
     assets.VerifySendButtonIsDisabled()
   })

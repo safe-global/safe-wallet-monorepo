@@ -1,5 +1,6 @@
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { SettingsInfoType } from '@safe-global/store/gateway/types'
 import { TX_TYPES } from '@/services/analytics/events/transactions'
-import { SettingsInfoType, type TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
 import {
   isERC721Transfer,
   isMultiSendTxInfo,
@@ -10,10 +11,19 @@ import {
   isSwapOrderTxInfo,
   isAnyStakingTxInfo,
   isNestedConfirmationTxInfo,
+  isAnyEarnTxInfo,
 } from '@/utils/transaction-guards'
-import { BRIDGE_WIDGET_URL } from '@/features/bridge/components/BridgeWidget'
+import { BRIDGE_WIDGET_URL } from '@/features/bridge'
+import { SWAP_WIDGET_URL } from '@/features/swap'
+export const getTransactionTrackingType = (
+  details: TransactionDetails | undefined,
+  origin?: string,
+  isMassPayout?: boolean,
+): string => {
+  if (isMassPayout) {
+    return TX_TYPES.batch_transfer_token
+  }
 
-export const getTransactionTrackingType = (details: TransactionDetails | undefined, origin?: string): string => {
   if (!details) {
     return TX_TYPES.custom
   }
@@ -21,8 +31,14 @@ export const getTransactionTrackingType = (details: TransactionDetails | undefin
   const { txInfo } = details
 
   const isNativeBridge = origin?.includes(BRIDGE_WIDGET_URL)
+  const isLiFiSwap = origin?.includes(SWAP_WIDGET_URL)
+
   if (isNativeBridge) {
     return TX_TYPES.native_bridge
+  }
+
+  if (isLiFiSwap) {
+    return TX_TYPES.native_swap_lifi
   }
 
   if (isTransferTxInfo(txInfo)) {
@@ -38,6 +54,11 @@ export const getTransactionTrackingType = (details: TransactionDetails | undefin
 
   if (isAnyStakingTxInfo(txInfo)) {
     return txInfo.type
+  }
+
+  //@ts-ignore TODO: Fix types after removing old sdk
+  if (isAnyEarnTxInfo(txInfo)) {
+    return TX_TYPES.native_earn
   }
 
   if (isSettingsChangeTxInfo(txInfo)) {

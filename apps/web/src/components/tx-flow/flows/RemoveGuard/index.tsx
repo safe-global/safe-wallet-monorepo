@@ -1,16 +1,27 @@
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import { ReviewRemoveGuard } from '@/components/tx-flow/flows/RemoveGuard/ReviewRemoveGuard'
+import { useContext } from 'react'
+import { TxFlow } from '../../TxFlow'
+import { TxFlowContext } from '../../TxFlowProvider'
+import { TxFlowType } from '@/services/analytics'
+import { ReviewRemoveGuard } from './ReviewRemoveGuard'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
-// TODO: This can possibly be combined with the remove module type
 export type RemoveGuardFlowProps = {
   address: string
 }
 
+const ReviewRemoveGuardStep = (props: ReviewTransactionProps) => {
+  const { data } = useContext(TxFlowContext)
+  return <ReviewRemoveGuard params={data} {...props} />
+}
+
 const RemoveGuardFlow = ({ address }: RemoveGuardFlowProps) => {
   return (
-    <TxLayout title="Confirm transaction" subtitle="Remove guard">
-      <ReviewRemoveGuard params={{ address }} />
-    </TxLayout>
+    <TxFlow
+      initialData={{ address }}
+      subtitle="Remove guard"
+      eventCategory={TxFlowType.REMOVE_GUARD}
+      ReviewTransactionComponent={ReviewRemoveGuardStep}
+    />
   )
 }
 

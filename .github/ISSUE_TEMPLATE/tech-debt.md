@@ -7,8 +7,6 @@ labels: 'tech debt'
 
 ## Problem
 
-
 ## Proposed solution
-
 
 ## Dependencies & risks

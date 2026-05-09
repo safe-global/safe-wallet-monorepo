@@ -4,15 +4,15 @@ import FieldsGrid from '../FieldsGrid'
 
 const SendToBlock = ({
   address,
-  title = 'To:',
+  title = 'Recipient',
   customAvatar,
   avatarSize,
   name,
 }: {
   address: string
-  name?: string
+  name?: string | null
   title?: string
-  customAvatar?: string
+  customAvatar?: string | null
   avatarSize?: number
 }) => {
   return (

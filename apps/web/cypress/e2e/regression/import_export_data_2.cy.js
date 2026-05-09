@@ -1,7 +1,6 @@
-import 'cypress-file-upload'
 import * as file from '../pages/import_export.pages.js'
 import * as constants from '../../support/constants.js'
-import * as sidebar from '../pages/sidebar.pages.js'
+import * as accountsModal from '../pages/accounts_modal.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 
 let staticSafes = []
@@ -19,17 +18,15 @@ describe('Import Export Data tests 2', { defaultCommandTimeout: 20000 }, () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_13)
+    cy.visit(constants.welcomeAccountUrl)
   })
 
-  it('Verify that the Sidebar Import button opens an import modal', () => {
-    sidebar.openSidebar()
-    sidebar.clickOnSidebarImportBtn()
+  it('Verify that the Import button opens an import modal', () => {
+    accountsModal.clickOnImportBtn()
   })
 
   it('Verify that correctly formatted json file can be uploaded and shows data', () => {
-    sidebar.openSidebar()
-    sidebar.clickOnSidebarImportBtn()
+    accountsModal.clickOnImportBtn()
     file.dragAndDropFile(validJsonPath)
     file.verifyImportMessages()
     file.verifyImportBtnStatus(constants.enabledStates.enabled)
@@ -41,20 +38,18 @@ describe('Import Export Data tests 2', { defaultCommandTimeout: 20000 }, () => {
   })
 
   it('Verify that only json files can be imported', () => {
-    sidebar.openSidebar()
-    sidebar.clickOnSidebarImportBtn()
+    accountsModal.clickOnImportBtn()
     file.dragAndDropFile(invalidJsonPath)
     file.verifyErrorOnUpload()
     file.verifyImportBtnStatus(constants.enabledStates.disabled)
   })
 
   it('Verify that json files with wrong information are rejected', () => {
-    sidebar.openSidebar()
-    sidebar.clickOnSidebarImportBtn()
+    accountsModal.clickOnImportBtn()
     file.dragAndDropFile(invalidJsonPath_3)
     file.verifyUploadErrorMessage(file.importErrorMessages.noImportableData)
     file.clickOnCancelBtn()
-    sidebar.clickOnSidebarImportBtn()
+    accountsModal.clickOnImportBtn()
     file.dragAndDropFile(invalidJsonPath_2)
     file.verifyUploadErrorMessage(file.importErrorMessages.noImportableData)
     file.clickOnCancelBtn()

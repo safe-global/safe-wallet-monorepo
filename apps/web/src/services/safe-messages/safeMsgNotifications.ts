@@ -1,7 +1,7 @@
-import type { SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { safeMsgDispatch, SafeMsgEvent } from './safeMsgEvents'
 
-const isMessageFullySigned = (message: SafeMessage): message is SafeMessage & { preparedSignature: string } => {
+const isMessageFullySigned = (message: MessageItem): message is MessageItem & { preparedSignature: string } => {
   return message.confirmationsSubmitted >= message.confirmationsRequired && !!message.preparedSignature
 }
 
@@ -14,7 +14,7 @@ const isMessageFullySigned = (message: SafeMessage): message is SafeMessage & { 
  * @param requestId
  */
 export const dispatchPreparedSignature = async (
-  message: SafeMessage,
+  message: MessageItem,
   safeMessageHash: string,
   onClose: () => void,
   requestId?: string,

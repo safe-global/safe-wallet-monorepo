@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { id, zeroPadValue } from 'ethers'
 import { JsonRpcProvider } from 'ethers'
 import cloneDeep from 'lodash/cloneDeep'
-import type { Delay, TransactionAddedEvent } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
+import type { TransactionAddedEvent, Delay } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
 import type { TransactionReceipt } from 'ethers'
 
 import {
@@ -12,11 +12,14 @@ import {
   _isMaliciousRecovery,
 } from '../recovery-state'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import { encodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils/transactions/utils'
+import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { getMultiSendCallOnlyDeployment, getSafeSingletonDeployment } from '@safe-global/safe-deployments'
 import { Interface } from 'ethers'
-import { getLatestSafeVersion } from '@/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { getModuleInstance, KnownContracts, ContractAbis } from '@gnosis.pm/zodiac'
+import { createMockWeb3Provider } from '@safe-global/utils/tests/web3Provider'
+import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 
 jest.mock('@/hooks/wallets/web3')
 
@@ -32,6 +35,9 @@ const SUPPORTED_MULTI_SEND_CALL_ONLY_VERSIONS = [
   latestSafeVersion,
 ]
 
+const chainId = '1' // Used for test data setup (deployment lookups)
+const DELAY_INTERFACE = new Interface(ContractAbis[KnownContracts.DELAY])
+
 describe('recovery-state', () => {
   beforeEach(() => {
     // Clear memoization cache
@@ -41,7 +47,6 @@ describe('recovery-state', () => {
   describe('isMaliciousRecovery', () => {
     describe('non-MultiSend', () => {
       it('should return true if the transaction is not calling the Safe itself', () => {
-        const chainId = '1'
         const version = latestSafeVersion
         const safeAddress = faker.finance.ethereumAddress()
 
@@ -54,7 +59,6 @@ describe('recovery-state', () => {
       })
 
       it('should return false if the transaction is calling the Safe itself', () => {
-        const chainId = '1'
         const version = latestSafeVersion
         const safeAddress = faker.finance.ethereumAddress()
 
@@ -70,7 +74,6 @@ describe('recovery-state', () => {
     describe('MultiSend', () => {
       ;[...PRE_MULTI_SEND_CALL_ONLY_VERSIONS, ...SUPPORTED_MULTI_SEND_CALL_ONLY_VERSIONS].forEach((version) => {
         it(`should return true if the transaction is not an official MultiSend address for Safe version ${version}`, () => {
-          const chainId = '1'
           const safeAddress = faker.finance.ethereumAddress()
 
           const safeAbi = getSafeSingletonDeployment({ network: chainId, version })!.abi
@@ -106,7 +109,6 @@ describe('recovery-state', () => {
       })
       ;[...PRE_MULTI_SEND_CALL_ONLY_VERSIONS, ...SUPPORTED_MULTI_SEND_CALL_ONLY_VERSIONS].forEach((version) => {
         it(`should return true if the transaction is an official MultiSend call and not every transaction in the batch calls the Safe itself for Safe version ${version}`, () => {
-          const chainId = '1'
           const version = latestSafeVersion
           const safeAddress = faker.finance.ethereumAddress()
 
@@ -144,7 +146,6 @@ describe('recovery-state', () => {
 
       SUPPORTED_MULTI_SEND_CALL_ONLY_VERSIONS.forEach((version) => {
         it(`should return false if the transaction is an official MultiSend call and every transaction in the batch calls the Safe itself for Safe version ${version}`, () => {
-          const chainId = '1'
           const safeAddress = faker.finance.ethereumAddress()
 
           const safeAbi = getSafeSingletonDeployment({ network: chainId, version })!.abi
@@ -179,7 +180,6 @@ describe('recovery-state', () => {
 
       PRE_MULTI_SEND_CALL_ONLY_VERSIONS.forEach((version) => {
         it(`should return false if the transaction is an official MultiSend call for Safe version ${version} (below the initial MultiSend contract version)`, () => {
-          const chainId = '1'
           const safeAddress = faker.finance.ethereumAddress()
 
           const safeAbi = getSafeSingletonDeployment({ network: chainId, version })!.abi
@@ -356,7 +356,6 @@ describe('recovery-state', () => {
   describe('getRecoveryState', () => {
     it('should return the recovery state from the Safe creation block', async () => {
       const safeAddress = faker.finance.ethereumAddress()
-      const chainId = '1'
       const version = '1.3.0'
       const transactionService = faker.internet.url({ appendSlash: false })
       const transactionHash = `0x${faker.string.hexadecimal()}`
@@ -366,12 +365,6 @@ describe('recovery-state', () => {
       const transactionAddedReceipt = {
         from: faker.finance.ethereumAddress(),
       } as TransactionReceipt
-      const provider = {
-        getTransactionReceipt: jest
-          .fn()
-          .mockResolvedValueOnce(safeCreationReceipt)
-          .mockResolvedValue(transactionAddedReceipt),
-      } as unknown as JsonRpcProvider
 
       global.fetch = jest.fn().mockImplementation(() => {
         return Promise.resolve({
@@ -419,34 +412,69 @@ describe('recovery-state', () => {
       const defaultTransactionAddedFilter = {
         getTopicFilter: jest.fn().mockResolvedValue([...topics]),
       }
-      const delayModifier = {
+
+      const mockProvider = createMockWeb3Provider([
+        {
+          signature: DELAY_INTERFACE.getFunction('getModulesPaginated')?.selector!,
+          returnType: 'raw',
+          returnValue: DELAY_INTERFACE.encodeFunctionResult('getModulesPaginated', [recoverers, SENTINEL_ADDRESS]),
+        },
+        {
+          signature: DELAY_INTERFACE.getFunction('txExpiration')?.selector!,
+          returnType: 'uint256',
+          returnValue: expiry,
+        },
+        {
+          signature: DELAY_INTERFACE.getFunction('txCooldown')?.selector!,
+          returnType: 'uint256',
+          returnValue: delay,
+        },
+        {
+          signature: DELAY_INTERFACE.getFunction('txNonce')?.selector!,
+          returnType: 'uint256',
+          returnValue: txNonce,
+        },
+        {
+          signature: DELAY_INTERFACE.getFunction('queueNonce')?.selector!,
+          returnType: 'uint256',
+          returnValue: queueNonce,
+        },
+      ])
+      ;(mockProvider.getTransactionReceipt as jest.MockedFunction<JsonRpcProvider['getTransactionReceipt']>)
+        .mockResolvedValueOnce(safeCreationReceipt)
+        .mockResolvedValue(transactionAddedReceipt)
+
+      const mockDelayModifierAddress = faker.finance.ethereumAddress()
+
+      const delayModifier = getModuleInstance(KnownContracts.DELAY, mockDelayModifierAddress, mockProvider)
+
+      const patchedDelayModifier = {
+        ...delayModifier,
         filters: {
           TransactionAdded: () => cloneDeep(defaultTransactionAddedFilter),
         },
-        getAddress: jest.fn().mockResolvedValue(faker.finance.ethereumAddress()),
-        getModulesPaginated: () => Promise.resolve([recoverers]),
-        txExpiration: () => Promise.resolve(expiry),
-        txCooldown: () => Promise.resolve(delay),
-        txNonce: () => Promise.resolve(txNonce),
+        getAddress: jest.fn().mockResolvedValue(mockDelayModifierAddress),
         txCreatedAt: jest
           .fn()
           .mockResolvedValueOnce(420n)
           .mockResolvedValueOnce(69420n)
           .mockResolvedValueOnce(6942069n),
-        queueNonce: () => Promise.resolve(queueNonce),
         queryFilter: queryFilterMock.mockImplementation(() => Promise.resolve(transactionsAdded)),
       }
 
       const recoveryState = await _getRecoveryStateItem({
-        delayModifier: delayModifier as unknown as Delay,
+        delayModifier: patchedDelayModifier as unknown as Delay,
         safeAddress,
         transactionService,
-        provider,
+        provider: mockProvider,
         chainId,
         version,
       })
 
-      expect(recoveryState).toStrictEqual({
+      expect({
+        ...recoveryState,
+        recoverers: recoveryState.recoverers.map((recoverer) => recoverer.toLowerCase()),
+      }).toEqual({
         address: await delayModifier.getAddress(),
         recoverers,
         expiry,
@@ -481,10 +509,8 @@ describe('recovery-state', () => {
 
     it('should not query data if the queueNonce equals the txNonce', async () => {
       const safeAddress = faker.finance.ethereumAddress()
-      const chainId = '1'
       const version = '1.3.0'
       const transactionService = faker.internet.url({ appendSlash: true })
-      const provider = {} as unknown as JsonRpcProvider
 
       const recoverers = [faker.finance.ethereumAddress()]
       const expiry = 0n
@@ -492,34 +518,71 @@ describe('recovery-state', () => {
       const txNonce = 2n
       const queueNonce = 2n
 
+      const mockProvider = createMockWeb3Provider([
+        {
+          signature: DELAY_INTERFACE.getFunction('getModulesPaginated')?.selector!,
+          returnType: 'raw',
+          returnValue: DELAY_INTERFACE.encodeFunctionResult('getModulesPaginated', [recoverers, SENTINEL_ADDRESS]),
+        },
+        {
+          signature: DELAY_INTERFACE.getFunction('txExpiration')?.selector!,
+          returnType: 'uint256',
+          returnValue: expiry,
+        },
+        {
+          signature: DELAY_INTERFACE.getFunction('txCooldown')?.selector!,
+          returnType: 'uint256',
+          returnValue: delay,
+        },
+        {
+          signature: DELAY_INTERFACE.getFunction('txNonce')?.selector!,
+          returnType: 'uint256',
+          returnValue: txNonce,
+        },
+        {
+          signature: DELAY_INTERFACE.getFunction('queueNonce')?.selector!,
+          returnType: 'uint256',
+          returnValue: queueNonce,
+        },
+      ])
+
       const queryFilterMock = jest.fn()
       const defaultTransactionAddedFilter = {
         address: faker.finance.ethereumAddress(),
         topics: [id('TransactionAdded(uint256,bytes32,address,uint256,bytes,uint8)')],
       }
-      const delayModifier = {
+
+      const mockDelayModifierAddress = faker.finance.ethereumAddress()
+
+      const delayModifier = getModuleInstance(KnownContracts.DELAY, mockDelayModifierAddress, mockProvider)
+
+      const patchedDelayModifier = {
+        ...delayModifier,
         filters: {
           TransactionAdded: () => cloneDeep(defaultTransactionAddedFilter),
         },
-        getAddress: jest.fn().mockResolvedValue(faker.finance.ethereumAddress()),
-        getModulesPaginated: () => Promise.resolve([recoverers]),
-        txExpiration: () => Promise.resolve(expiry),
-        txCooldown: () => Promise.resolve(delay),
-        txNonce: () => Promise.resolve(txNonce),
-        queueNonce: () => Promise.resolve(queueNonce),
-        queryFilter: queryFilterMock.mockRejectedValue('Not required'),
+        getAddress: jest.fn().mockResolvedValue(mockDelayModifierAddress),
+        txCreatedAt: jest
+          .fn()
+          .mockResolvedValueOnce(420n)
+          .mockResolvedValueOnce(69420n)
+          .mockResolvedValueOnce(6942069n),
+        queryFilter: queryFilterMock,
       }
 
       const recoveryState = await _getRecoveryStateItem({
-        delayModifier: delayModifier as unknown as Delay,
+        delayModifier: patchedDelayModifier as unknown as Delay,
         safeAddress,
         transactionService,
-        provider,
+        provider: mockProvider,
         chainId,
         version,
       })
 
-      expect(recoveryState).toStrictEqual({
+      expect({
+        ...recoveryState,
+        recoverers: recoveryState.recoverers.map((recoverer) => recoverer.toLowerCase()),
+      }).toEqual({
         address: await delayModifier.getAddress(),
         recoverers,
         expiry,

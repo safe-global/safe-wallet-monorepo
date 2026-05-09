@@ -1,17 +1,62 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { Link, useRouter } from 'expo-router'
-import { View, Text, YStack } from 'tamagui'
+import { View, Text, YStack, styled, getTokenValue } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BlurView } from 'expo-blur'
+import { getCrashlytics } from '@react-native-firebase/crashlytics'
+import { setAnalyticsCollectionEnabled } from '@/src/services/analytics'
+import { isAndroid, PRIVACY_POLICY_URL, TERMS_OF_USE_URL } from '@/src/config/constants'
+import { Platform } from 'react-native'
+import { useDispatch } from 'react-redux'
+import { setDataCollectionConsented } from '@/src/store/settingsSlice'
+import { DdSdkReactNative, TrackingConsent } from 'expo-datadog'
+
+const StyledText = styled(Text, {
+  fontSize: '$3',
+  color: '$colorSecondary',
+})
 
 export const GetStarted = () => {
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const dispatch = useDispatch()
+
+  const enableDataCollection = async () => {
+    await getCrashlytics().setCrashlyticsCollectionEnabled(true)
+    await setAnalyticsCollectionEnabled(true)
+    dispatch(setDataCollectionConsented(true))
+    DdSdkReactNative.setTrackingConsent(TrackingConsent.GRANTED)
+  }
+
+  const onPressAddAccount = useCallback(async () => {
+    await enableDataCollection()
+    router.navigate('/(import-accounts)')
+  }, [])
+
+  const onPressImportAccount = useCallback(async () => {
+    await enableDataCollection()
+    router.navigate('/import-data')
+  }, [router])
+
   return (
     <YStack justifyContent={'flex-end'} flex={1} testID={'get-started-screen'}>
-      <BlurView intensity={100} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+      <BlurView
+        intensity={100}
+        style={[
+          {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          },
+          Platform.OS === 'android' && {
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+          },
+        ]}
+      >
         <View
           flex={1}
           onPress={() => {
@@ -23,7 +68,7 @@ export const GetStarted = () => {
         gap={'$3'}
         paddingHorizontal={'$4'}
         backgroundColor={'$background'}
-        paddingBottom={insets.bottom}
+        paddingBottom={insets.bottom + getTokenValue(Platform.OS === 'ios' ? '$0' : '$4')}
         paddingTop={'$5'}
         borderTopLeftRadius={'$9'}
         borderTopRightRadius={'$9'}
@@ -38,29 +83,38 @@ export const GetStarted = () => {
         >
           How would you like to continue?
         </Text>
-        <SafeButton outlined icon={<SafeFontIcon name={'add-owner'} />}>
-          Join Account
+
+        <SafeButton
+          outlined
+          icon={<SafeFontIcon name={'plus-outlined'} />}
+          testID={'add-account-button'}
+          onPress={onPressAddAccount}
+        >
+          Add account
         </SafeButton>
-        <Link href={'/(import-accounts)'} asChild>
-          <SafeButton outlined icon={<SafeFontIcon name={'plus-outlined'} />} testID={'add-account-button'}>
-            Add account
+        {!isAndroid && (
+          <SafeButton outlined icon={<SafeFontIcon name={'upload'} />} onPress={onPressImportAccount}>
+            Migrate old app
           </SafeButton>
-        </Link>
-        <Text paddingHorizontal={'$10'} marginTop={'$2'} textAlign={'center'} fontSize={'$3'} color={'$colorSecondary'}>
-          By continuing, you agree to our{' '}
-          <Link href={'https://app.safe.global/terms'} target={'_blank'}>
-            <Text textDecorationLine={'underline'} color={'$colorSecondary'}>
-              User Terms
-            </Text>
-          </Link>{' '}
-          and{' '}
-          <Link href={'https://app.safe.global/privacy'} target={'_blank'} asChild>
-            <Text textDecorationLine={'underline'} color={'$colorSecondary'}>
-              Privacy Policy
-            </Text>
+        )}
+        <View
+          paddingHorizontal={'$10'}
+          marginTop={'$2'}
+          flexDirection="row"
+          alignItems="center"
+          flexWrap="wrap"
+          justifyContent="center"
+        >
+          <StyledText>By continuing, you agree to our </StyledText>
+          <Link href={TERMS_OF_USE_URL} target={'_blank'} asChild>
+            <StyledText textDecorationLine={'underline'}>User Terms</StyledText>
           </Link>
-          .
-        </Text>
+          <StyledText> and </StyledText>
+          <Link href={PRIVACY_POLICY_URL} target={'_blank'} asChild>
+            <StyledText textDecorationLine={'underline'}>Privacy Policy</StyledText>
+          </Link>
+          <StyledText>.</StyledText>
+        </View>
       </YStack>
     </YStack>
   )

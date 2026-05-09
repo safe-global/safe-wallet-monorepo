@@ -1,32 +1,38 @@
-import { CANCEL_RECOVERY_CATEGORY } from '@/services/analytics/events/recovery'
-import type { ReactElement } from 'react'
-
-import TxLayout from '../../common/TxLayout'
+import { useMemo, type ReactElement } from 'react'
 import { CancelRecoveryFlowReview } from './CancelRecoveryFlowReview'
 import { CancelRecoveryOverview } from './CancelRecoveryOverview'
-import useTxStepper from '../../useTxStepper'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import { TxFlowType } from '@/services/analytics'
+import { TxFlow } from '../../TxFlow'
+import { TxFlowStep } from '../../TxFlowStep'
+import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
-function CancelRecoveryFlow({ recovery }: { recovery: RecoveryQueueItem }): ReactElement {
-  const { step, nextStep, prevStep } = useTxStepper<undefined>(undefined, CANCEL_RECOVERY_CATEGORY)
+const TITLE = 'Cancel Account recovery'
 
-  const steps = [
-    <CancelRecoveryOverview key={0} onSubmit={() => nextStep(undefined)} />,
-    <CancelRecoveryFlowReview key={1} recovery={recovery} />,
-  ]
+type CancelRecoveryFlowProps = {
+  recovery: RecoveryQueueItem
+}
 
-  const isIntro = step === 0
+function CancelRecoveryFlow({ recovery }: CancelRecoveryFlowProps): ReactElement {
+  const ReviewTransactionComponent = useMemo<typeof ReviewTransaction>(
+    () =>
+      function ReviewCancelRecovery(props) {
+        return <CancelRecoveryFlowReview recovery={recovery} {...props} />
+      },
+    [recovery],
+  )
 
   return (
-    <TxLayout
-      title={isIntro ? 'Cancel Account recovery' : 'New transaction'}
-      subtitle={isIntro ? undefined : 'Cancel Account recovery'}
-      step={step}
-      hideNonce={isIntro}
-      onBack={prevStep}
+    <TxFlow
+      subtitle={TITLE}
+      eventCategory={TxFlowType.CANCEL_RECOVERY}
+      isBatchable={false}
+      ReviewTransactionComponent={ReviewTransactionComponent}
     >
-      {steps}
-    </TxLayout>
+      <TxFlowStep title={TITLE} subtitle="" hideNonce>
+        <CancelRecoveryOverview />
+      </TxFlowStep>
+    </TxFlow>
   )
 }
 

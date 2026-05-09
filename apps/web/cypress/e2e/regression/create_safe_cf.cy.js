@@ -41,9 +41,9 @@ describe('CF Safe regression tests', () => {
     wallet.connectSigner(signer)
     owner.waitForConnectionStatus()
     createwallet.clickOnAddFundsBtn()
-    createwallet.checkQRCodeSwitchStatus(constants.checkboxStates.checked)
-    createwallet.clickOnQRCodeSwitch()
     createwallet.checkQRCodeSwitchStatus(constants.checkboxStates.unchecked)
+    createwallet.clickOnQRCodeSwitch()
+    createwallet.checkQRCodeSwitchStatus(constants.checkboxStates.checked)
   })
 
   it('Verify "Notifications" in the settings are disabled', () => {

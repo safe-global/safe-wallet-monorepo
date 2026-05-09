@@ -5,21 +5,30 @@ exports[`InnerShadow should render the default markup 1`] = `
   <View
     style={
       {
-        "backgroundColor": "#FFFFFF",
-        "bottom": 0,
-        "height": 10,
-        "left": 0,
-        "position": "absolute",
-        "shadowColor": "rgb(255,255,255)",
-        "shadowOffset": {
-          "height": -4,
-          "width": -2,
-        },
-        "shadowOpacity": 1,
-        "shadowRadius": 4,
-        "width": "100%",
+        "flex": 1,
       }
     }
-  />
+    testID="theme-light"
+  >
+    <View
+      style={
+        {
+          "backgroundColor": "#FFFFFF",
+          "bottom": 0,
+          "height": 10,
+          "left": 0,
+          "position": "absolute",
+          "shadowColor": "rgb(255,255,255)",
+          "shadowOffset": {
+            "height": -4,
+            "width": -2,
+          },
+          "shadowOpacity": 1,
+          "shadowRadius": 4,
+          "width": "100%",
+        }
+      }
+    />
+  </View>
 </View>
 `;

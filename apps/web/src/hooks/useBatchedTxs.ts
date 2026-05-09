@@ -1,21 +1,21 @@
-import type { Transaction, TransactionListItem } from '@safe-global/safe-gateway-typescript-sdk'
-import { isMultisigExecutionInfo, isTransactionListItem } from '@/utils/transaction-guards'
+import type { ModuleTransaction, QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { isMultisigExecutionInfo, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { useMemo } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { groupConflictingTxs } from '@/utils/tx-list'
 
 const BATCH_LIMIT = 20
 
-export const getBatchableTransactions = (items: TransactionListItem[], nonce: number) => {
-  const batchableTransactions: Transaction[] = []
+export const getBatchableTransactions = (items: QueuedItemPage['results'], nonce: number) => {
+  const batchableTransactions: ModuleTransaction[] = []
   let currentNonce = nonce
 
   const grouped = groupConflictingTxs(items)
     .map((item) => {
       if (Array.isArray(item)) return item
-      if (isTransactionListItem(item)) return [item]
+      if (isTransactionQueuedItem(item)) return [item]
     })
-    .filter(Boolean) as Transaction[][]
+    .filter(Boolean) as ModuleTransaction[][]
 
   grouped.forEach((txs) => {
     const sorted = txs.slice().sort((a, b) => b.transaction.timestamp - a.transaction.timestamp)
@@ -37,7 +37,7 @@ export const getBatchableTransactions = (items: TransactionListItem[], nonce: nu
   return batchableTransactions
 }
 
-const useBatchedTxs = (items: TransactionListItem[]) => {
+const useBatchedTxs = (items: QueuedItemPage['results']) => {
   const { safe } = useSafeInfo()
   const currentNonce = safe.nonce
 

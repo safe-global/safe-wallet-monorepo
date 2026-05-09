@@ -1,0 +1,11 @@
+.button {
+  padding: 8px;
+  border-width: 1px !important;
+  border-color: var(--color-border-main);
+}
+
+.button:hover,
+.button:active {
+  background-color: var(--color-background-secondary);
+  border-color: var(--color-border-main);
+}

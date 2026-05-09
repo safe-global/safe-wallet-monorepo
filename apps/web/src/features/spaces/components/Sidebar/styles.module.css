@@ -1,0 +1,415 @@
+.sidebarInteractive {
+  cursor: pointer;
+  border-radius: var(--rounded-md, 8px);
+}
+
+.sidebarNavItem {
+  font-weight: 700;
+}
+
+.sidebarNavItem svg {
+  stroke-width: 2;
+}
+
+.activeIcon svg {
+  stroke: #22c55e;
+  color: #22c55e;
+}
+
+.spaceSelector {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 12px;
+  width: 100%;
+  min-height: 40px;
+  padding: 32px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Match dropdown panel width to sidebar when open (same as expanded sidebar) */
+.spaceSelectorDropdownContent {
+  min-width: var(--sidebar-width, 230px) !important;
+}
+
+.backToSpace {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  padding-left: 4px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* "Add Safe to workspace" (opens space selector) */
+.addSafeToWorkspaceTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  border: 1px dashed var(--sidebar-border, #e5e5e5);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.addSafeToWorkspaceRing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--color-success-background, #dcfce7);
+}
+
+.addSafeToWorkspacePlusIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--color-success-main, #16a34a);
+}
+
+.addSafeToWorkspaceLabel {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary, #171717);
+  text-align: left;
+}
+
+.spaceSelectorAvatar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: var(--rounded-md, 8px);
+  overflow: hidden;
+}
+
+.spaceSelectorAvatarFallback {
+  border-radius: var(--rounded-md, 8px);
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.spaceSelectorItemAvatar {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.spaceSelectorItemAvatarFallback {
+  border-radius: 8px;
+  color: var(--primary-foreground);
+  font-size: 0.75rem;
+}
+
+.spaceSelectorText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.spaceSelectorName {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--color-text-primary, #171717);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.spaceSelectorSubtitle {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--color-text-secondary, #737373);
+}
+
+.outdatedDot {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-error-main);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.transactionsBadge {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 16px;
+  color: var(--sidebar-foreground);
+  background-color: var(--color-success-background, #dcfce7);
+  border-radius: var(--rounded-lg, 12px);
+}
+
+.transactionsBadgeActive {
+  background-color: var(--accent-secondary, #c4fddd);
+  color: var(--accent-secondary-foreground, #121312);
+}
+
+:global(.group[data-collapsible='icon']) .spaceSelectorText,
+:global(.group[data-collapsible='icon']) .spaceSelector > div:last-of-type {
+  display: none !important;
+}
+
+:global(.group[data-collapsible='icon']) .backToSpace {
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+}
+
+:global(.group[data-collapsible='icon']) .backToSpaceChevron {
+  display: none;
+}
+
+:global(.group[data-collapsible='icon']) .addSafeToWorkspaceTrigger {
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px;
+  gap: 0;
+  border: none;
+}
+
+:global(.group[data-collapsible='icon']) .addSafeToWorkspaceLabel {
+  display: none !important;
+}
+
+:global(.group[data-collapsible='icon']) .addSafeToWorkspacePlusIcon {
+  width: 12px;
+  height: 12px;
+}
+
+:global(.group[data-collapsible='icon']) .spaceSelector .spaceSelectorAvatar {
+  width: 32px;
+  height: 32px;
+}
+
+:global(.group[data-collapsible='icon']) .transactionsBadge {
+  display: none;
+}
+
+.transactionsBadgeDot {
+  display: none;
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-success-main);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+:global(.group[data-collapsible='icon']) .transactionsBadgeDot {
+  display: block;
+}
+
+/* Beamer unread count */
+.footerBeamerButton {
+  position: relative;
+  overflow: visible;
+}
+
+.footerBeamerButton :global(.beamer_icon) {
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 18px;
+  background-color: var(--color-success-background, #dcfce7) !important;
+  color: var(--accent-secondary-foreground) !important;
+}
+
+.sidebarGroup {
+  padding-block: 0;
+}
+
+.navItemActive {
+  background-color: var(--sidebar-accent);
+}
+
+:global(.dark) .sidebarInteractive:hover,
+:global(.shadcn-scope.dark) .sidebarInteractive:hover {
+  background-color: var(--secondary) !important;
+}
+
+:global(.dark) .sidebarInteractive[data-active='true'],
+:global(.shadcn-scope.dark) .sidebarInteractive[data-active='true'],
+:global(.dark) .sidebarInteractive[data-active],
+:global(.shadcn-scope.dark) .sidebarInteractive[data-active] {
+  background-color: var(--secondary) !important;
+}
+
+.dropdownIcon {
+  color: var(--sidebar-muted, #737373);
+}
+
+.groupLabel {
+  color: var(--sidebar-muted, #737373);
+  font-size: 12px;
+  line-height: 16px;
+  padding: 8px 12px;
+}
+
+.textSmallBold {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+
+.textMini {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+}
+
+.footerHelp {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.footerHelpRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: visible;
+}
+
+.footerHelpRow .footerHelp {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.footerHelpStatus {
+  display: flex;
+  width: 32px;
+  min-width: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+:global(.group[data-collapsible='icon']) .footerHelpStatus {
+  display: none;
+}
+
+.footerMenuAction {
+  top: 50% !important;
+  transform: translateY(-50%);
+  padding-right: var(--space-2, 8px);
+}
+
+.footerMenuAction:hover {
+  background: transparent !important;
+}
+
+.profileName {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.profileTriggerAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--color-static-text-brand) 10%, transparent);
+  color: var(--color-text-secondary, #737373);
+}
+
+.profilePopover {
+  display: flex;
+  flex-direction: column;
+  gap: 12px !important;
+  padding: 16px !important;
+  width: 13.5rem !important;
+  background-color: var(--secondary) !important;
+  box-shadow: none !important;
+  --ring-width: 0px;
+}
+
+.profileHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.profileSignedIn {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--color-text-secondary, #737373);
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profileRole {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  text-transform: capitalize;
+  color: var(--color-text-secondary, #737373);
+}
+
+.profileSignOut {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0;
+  color: var(--color-text-primary, #171717);
+  background: none;
+  border: none;
+  width: 100%;
+}
+
+.profileSignOut:hover {
+  opacity: 0.7;
+}
+
+:global(.group[data-collapsible='icon']) {
+  .profileName {
+    display: none !important;
+  }
+
+  .profileTrigger {
+    height: 3rem !important;
+    width: 3rem !important;
+  }
+}

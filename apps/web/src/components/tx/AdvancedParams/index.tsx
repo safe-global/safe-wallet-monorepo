@@ -1,10 +1,10 @@
 import GasParams from '@/components/tx/GasParams'
 import { useHasFeature } from '@/hooks/useChains'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
-import { FEATURES } from '@/utils/chains'
 import { useState } from 'react'
 import AdvancedParamsForm from './AdvancedParamsForm'
 import { type AdvancedParameters } from './types'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 type Props = {
   params: AdvancedParameters
@@ -13,6 +13,11 @@ type Props = {
   onFormSubmit: (data: AdvancedParameters) => void
   gasLimitError?: Error
   willRelay?: boolean
+  noFeeCampaign?: {
+    isEligible: boolean
+    remaining: number
+    limit: number
+  }
 }
 
 const AdvancedParams = ({
@@ -22,6 +27,7 @@ const AdvancedParams = ({
   onFormSubmit,
   gasLimitError,
   willRelay,
+  noFeeCampaign,
 }: Props) => {
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const isEIP1559 = useHasFeature(FEATURES.EIP1559)
@@ -53,6 +59,7 @@ const AdvancedParams = ({
       gasLimitError={gasLimitError}
       onEdit={onEditOpen}
       willRelay={willRelay}
+      noFeeCampaign={noFeeCampaign}
     />
   )
 }

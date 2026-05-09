@@ -1,48 +1,79 @@
 import { type Chain as ChainInfo } from '../AUTO_GENERATED/chains'
 import { createEntityAdapter, EntityState } from '@reduxjs/toolkit'
-import { cgwClient, getBaseUrl } from '../cgwClient'
-import { QueryReturnValue, FetchBaseQueryError, FetchBaseQueryMeta } from '@reduxjs/toolkit/dist/query'
+import { retry } from '@reduxjs/toolkit/query'
+import { cgwClient, dynamicBaseQuery } from '../cgwClient'
+import type {
+  QueryReturnValue,
+  FetchBaseQueryMeta,
+  FetchBaseQueryError,
+  BaseQueryApi,
+  FetchArgs,
+} from '@reduxjs/toolkit/query'
 
 export const chainsAdapter = createEntityAdapter<ChainInfo, string>({ selectId: (chain: ChainInfo) => chain.chainId })
 export const initialState = chainsAdapter.getInitialState()
 
+const retryingBaseQuery = retry(dynamicBaseQuery, {
+  maxRetries: 5,
+  backoff: async (attempt) => {
+    const base = 3000 * Math.pow(2, attempt)
+    const jitter = Math.random() * base * 0.5
+    await new Promise((resolve) => setTimeout(resolve, base + jitter))
+  },
+})
+
 const getChainsConfigs = async (
-  url = `${getBaseUrl()}/v1/chains`,
+  api: BaseQueryApi,
+  url: '/v1/chains' | '/v2/chains',
+  serviceKey: string | undefined,
+  args: string | FetchArgs = {
+    url,
+    params: { ...(serviceKey ? { serviceKey: serviceKey } : {}), cursor: 'limit=50&offset=0' },
+  },
   results: ChainInfo[] = [],
-): Promise<EntityState<ChainInfo, string>> => {
-  const response = await fetch(url)
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
+): Promise<QueryReturnValue<EntityState<ChainInfo, string>, FetchBaseQueryError, FetchBaseQueryMeta>> => {
+  const response = await retryingBaseQuery(args, api, {})
+
+  if (response.error) {
+    return { error: response.error }
   }
-  const data = await response.json()
+
+  const data = response.data as { results?: ChainInfo[]; next?: string }
+
+  if (!Array.isArray(data?.results)) {
+    return {
+      error: { status: 'CUSTOM_ERROR', error: 'Invalid response: missing results array' } as FetchBaseQueryError,
+    }
+  }
 
   const nextResults = [...results, ...data.results]
 
   if (data.next) {
-    return getChainsConfigs(data.next, nextResults)
+    const { pathname, search } = new URL(data.next)
+    const nextUrl = pathname + search
+    return getChainsConfigs(api, url, serviceKey, nextUrl, nextResults)
   }
 
-  return chainsAdapter.setAll(initialState, nextResults)
-}
-
-const getChains = async (): Promise<
-  QueryReturnValue<EntityState<ChainInfo, string>, FetchBaseQueryError, FetchBaseQueryMeta>
-> => {
-  try {
-    const data = await getChainsConfigs()
-    return { data }
-  } catch (error) {
-    return { error: error as FetchBaseQueryError }
-  }
+  return { data: chainsAdapter.setAll(initialState, nextResults) }
 }
 
 export const apiSliceWithChainsConfig = cgwClient.injectEndpoints({
   endpoints: (builder) => ({
     getChainsConfig: builder.query<EntityState<ChainInfo, string>, void>({
-      queryFn: async () => {
-        return getChains()
+      queryFn: async (_arg, api) => {
+        return getChainsConfigs(api, '/v1/chains', undefined)
+      },
+    }),
+    getChainsConfigV2: builder.query<EntityState<ChainInfo, string>, string>({
+      queryFn: async (serviceKey, api) => {
+        if (!serviceKey) {
+          return { error: { status: 'CUSTOM_ERROR', error: 'serviceKey is required' } as FetchBaseQueryError }
+        }
+        return getChainsConfigs(api, '/v2/chains', serviceKey)
       },
     }),
   }),
   overrideExisting: true,
 })
+
+export const { useGetChainsConfigQuery, useGetChainsConfigV2Query } = apiSliceWithChainsConfig

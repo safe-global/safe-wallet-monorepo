@@ -1,0 +1,157 @@
+diff --git a/android/src/main/java/com/bleplx/BlePlxModule.java b/android/src/main/java/com/bleplx/BlePlxModule.java
+index 1234567..abcdefg 100644
+--- a/android/src/main/java/com/bleplx/BlePlxModule.java
++++ b/android/src/main/java/com/bleplx/BlePlxModule.java
+@@ -168,7 +168,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+     }, new OnErrorCallback() {
+       @Override
+       public void onError(BleError error) {
+-        safePromise.reject(null, errorConverter.toJs(error));
++        safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+       }
+     });
+   }
+@@ -187,7 +187,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+     }, new OnErrorCallback() {
+       @Override
+       public void onError(BleError error) {
+-        safePromise.reject(null, errorConverter.toJs(error));
++        safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+       }
+     });
+   }
+@@ -318,7 +318,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       });
+   }
+@@ -338,7 +338,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       });
+   }
+@@ -358,7 +358,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       });
+   }
+@@ -422,7 +422,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       });
+   }
+@@ -442,7 +442,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       });
+   }
+@@ -483,7 +483,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       });
+   }
+@@ -627,7 +627,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       }
+     );
+@@ -654,7 +654,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       }
+     );
+@@ -680,7 +680,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       });
+   }
+@@ -706,7 +706,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       }
+     );
+@@ -732,7 +732,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       }
+     );
+@@ -757,7 +757,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       }
+     );
+@@ -788,7 +788,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       }
+     );
+@@ -818,7 +818,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       }
+     );
+@@ -848,7 +848,7 @@ public class BlePlxModule extends ReactContextBaseJavaModule {
+       }, new OnErrorCallback() {
+         @Override
+         public void onError(BleError error) {
+-          safePromise.reject(null, errorConverter.toJs(error));
++          safePromise.reject(error.errorCode.name(), errorConverter.toJs(error));
+         }
+       }
+     );

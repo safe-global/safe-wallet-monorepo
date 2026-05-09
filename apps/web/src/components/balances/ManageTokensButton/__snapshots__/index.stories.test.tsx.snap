@@ -1,0 +1,93 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./index.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-2uby6n-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <button
+      class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary mui-style-z901d7-MuiButtonBase-root-MuiButton-root"
+      data-testid="manage-tokens-button"
+      tabindex="0"
+      type="button"
+    >
+      <span
+        class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall mui-style-1in3o51-MuiButton-startIcon"
+      >
+        <mock-icon />
+      </span>
+      <span
+        class="MuiBox-root mui-style-u5d1ce"
+      >
+        Manage tokens
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`./index.stories WithHiddenTokens 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-2uby6n-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-2uby6n-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <button
+        class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary mui-style-z901d7-MuiButtonBase-root-MuiButton-root"
+        data-testid="manage-tokens-button"
+        tabindex="0"
+        type="button"
+      >
+        <span
+          class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall mui-style-1in3o51-MuiButton-startIcon"
+        >
+          <mock-icon />
+        </span>
+        <span
+          class="MuiBox-root mui-style-u5d1ce"
+        >
+          Manage tokens
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./index.stories WithoutDefaultTokenlist 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-2uby6n-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <button
+      class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary mui-style-z901d7-MuiButtonBase-root-MuiButton-root"
+      data-testid="manage-tokens-button"
+      tabindex="0"
+      type="button"
+    >
+      <span
+        class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall mui-style-1in3o51-MuiButton-startIcon"
+      >
+        <mock-icon />
+      </span>
+      <span
+        class="MuiBox-root mui-style-u5d1ce"
+      >
+        Manage tokens
+      </span>
+    </button>
+  </div>
+</div>
+`;

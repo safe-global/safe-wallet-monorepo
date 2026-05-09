@@ -1,7 +1,15 @@
 {
   "extends": "../../config/tsconfig/confs/base.json",
   "compilerOptions": {
-    "rootDir": "./"
+    "baseUrl": "./",
+    "paths": {
+      "@safe-global/store/*": ["../../packages/store/src/*"],
+      "@safe-global/utils/*": ["../../packages/utils/src/*"]
+    }
   },
-  "include": ["**/*.ts"]
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
 }

@@ -1,0 +1,55 @@
+#!/bin/bash
+set -euo pipefail
+
+# Validate commit message follows conventional commit format
+# Format: type(scope): description OR type: description
+# Examples:
+#   feat(auth): add login functionality
+#   fix: resolve null pointer exception
+#   tests(e2e): fix regression
+#   chore(deps): update dependencies
+
+commit_msg_file="$1"
+commit_msg=$(cat "$commit_msg_file")
+
+# Skip merge commits
+if echo "$commit_msg" | grep -qE "^Merge "; then
+  exit 0
+fi
+
+# Skip revert commits
+if echo "$commit_msg" | grep -qE "^Revert "; then
+  exit 0
+fi
+
+# Valid commit types
+types="feat|fix|docs|style|refactor|perf|test|tests|build|ci|chore|revert"
+
+# Regex pattern for conventional commits
+# type(scope): description OR type: description
+pattern="^($types)(\([a-zA-Z0-9_-]+\))?: .+"
+
+if ! echo "$commit_msg" | head -1 | grep -qE "$pattern"; then
+  echo "======================================"
+  echo "ERROR: Invalid commit message format!"
+  echo "======================================"
+  echo ""
+  echo "Your commit message:"
+  echo "  $(head -1 "$commit_msg_file")"
+  echo ""
+  echo "Expected format:"
+  echo "  type(scope): description"
+  echo "  type: description"
+  echo ""
+  echo "Valid types: feat, fix, docs, style, refactor, perf, test, tests, build, ci, chore, revert"
+  echo ""
+  echo "Examples:"
+  echo "  feat(auth): add login functionality"
+  echo "  fix: resolve null pointer exception"
+  echo "  tests(e2e): fix regression"
+  echo "  chore(deps): update dependencies"
+  echo ""
+  exit 1
+fi
+
+exit 0

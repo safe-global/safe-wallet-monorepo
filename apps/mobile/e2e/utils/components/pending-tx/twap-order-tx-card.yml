@@ -1,0 +1,43 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ===========================================
+# TWAP Order Transaction Card (Pending)
+# ===========================================
+# Tests clicking on a TWAP order transaction in the pending transactions list
+# Can be used for expired or active TWAP orders
+#
+# Environment variables:
+#   ORDER_STATUS: Expected status of the TWAP order - "Expired", "Execution needed", or "Pending"
+#                 Passed through to twap-order-tx.yml (which defaults to "Execution needed" if not provided)
+
+- assertVisible:
+    text: '.*Twap order.*'
+
+# Verify the token pair is visible (e.g., "COW > DAI")
+- extendedWaitUntil:
+    visible:
+      text: '.*[A-Z]{2,}.*>.*[A-Z]{2,}.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+# Tap on the TWAP order transaction text
+# Note: TWAP orders may appear in "In queue" or "Conflicting transactions" sections
+# Using index: 0 to select the first one found
+- tapOn:
+    text: '.*Twap order.*'
+    index: 0
+
+# Pass ORDER_STATUS to the detail test
+# If ORDER_STATUS is not provided, twap-order-tx.yml will default to "Execution needed"
+# For expired orders, pass ORDER_STATUS: 'Expired' from the parent flow
+- runFlow:
+    file: ./twap-order-tx.yml
+    env:
+      ORDER_STATUS: ${ORDER_STATUS}
+
+- tapOn:
+    id: 'go-back'

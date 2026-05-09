@@ -1,0 +1,89 @@
+.container {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--color-background-paper);
+  border-radius: 8px;
+  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 50px;
+  position: relative;
+  overflow: hidden;
+}
+
+.container:hover {
+  background-color: var(--color-background-main);
+}
+
+.valueContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  flex: 1;
+  /* Offset = gap + button strip width
+     so buttons are fully hidden and the balance is never cropped */
+  transform: translateX(var(--asset-buttons-offset, 80px));
+  transition: transform 0.2s ease-out;
+}
+
+.container:hover .valueContainer {
+  transform: translateX(0);
+}
+
+.valueContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.assetButtons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.iconButton {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 6px;
+  background-color: var(--color-background-paper);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bar {
+  height: 4px;
+  border-radius: 4px;
+  background-color: var(--color-border-light);
+  width: 100px;
+}
+
+.tokenAmount * {
+  font-weight: normal;
+  color: var(--color-primary-light);
+}
+
+.barPercentage {
+  display: block;
+  border-radius: 4px;
+  height: 100%;
+  background: linear-gradient(225deg, #5fddff 12.5%, #12ff80 88.07%);
+}
+
+@media (max-width: 600px) {
+  .container {
+    flex-direction: column;
+    align-items: start;
+    flex-wrap: wrap;
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -1,17 +1,24 @@
 import { useIsMultichainSafe } from '../../hooks/useIsMultichainSafe'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
-import ErrorMessage from '@/components/tx/ErrorMessage'
+import { ActionCard } from '@/components/common/ActionCard'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAppSelector } from '@/store'
 import { selectCurrency, selectUndeployedSafes, useGetMultipleSafeOverviewsQuery } from '@/store/slices'
-import { useAllSafesGrouped } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import { sameAddress } from '@/utils/addresses'
+import { useAllSafesGrouped } from '@/hooks/safes'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
-import { getDeviatingSetups, getSafeSetups } from '@/features/multichain/utils/utils'
-import { Box, Typography } from '@mui/material'
+import { getDeviatingSetups, getSafeSetups } from '../../utils'
+import { Typography, Box } from '@mui/material'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
 import ChainIndicator from '@/components/common/ChainIndicator'
+import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 
-const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
+/**
+ * ChainIndicatorList component displays a list of chains with their logos and names
+ * Used in address book and other contexts where chain visualization is needed
+ */
+export const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
   const { configs } = useChains()
 
   return (
@@ -20,7 +27,7 @@ const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
         const chain = configs.find((chain) => chain.chainId === chainId)
         return (
           <Box key={chainId} display="inline-flex" flexWrap="wrap" position="relative" top={5}>
-            <ChainIndicator key={chainId} chainId={chainId} showUnknown={false} onlyLogo={true} />
+            <ChainIndicator responsive key={chainId} chainId={chainId} showUnknown={false} onlyLogo={true} />
             <Typography position="relative" mx={0.5} top={2}>
               {chain && chain.chainName}
               {index === chainIds.length - 1 ? '.' : ','}
@@ -33,6 +40,7 @@ const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
 }
 
 export const InconsistentSignerSetupWarning = () => {
+  const router = useRouter()
   const isMultichainSafe = useIsMultichainSafe()
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
@@ -59,15 +67,21 @@ export const InconsistentSignerSetupWarning = () => {
 
   if (!isMultichainSafe || !deviatingChainIds.length) return
 
+  const handleReviewSigners = () => {
+    router.push({
+      pathname: AppRoutes.settings.setup,
+      query: { safe: router.query.safe },
+    })
+  }
+
   return (
-    <ErrorMessage level="warning" title="Signers are not consistent">
-      <Typography display="inline" mr={1}>
-        Signers are different on these networks of this account:
-      </Typography>
-      <ChainIndicatorList chainIds={deviatingChainIds} />
-      <Typography display="inline">
-        To manage your account easier and to prevent lose of funds, we recommend keeping the same signers.
-      </Typography>
-    </ErrorMessage>
+    <ActionCard
+      severity="warning"
+      title="You have different signers across different networks."
+      content="This could break approvals and you may risk losing control of this Safe. First, switch to the affected network and review the signer setup for this Safe."
+      action={{ label: 'Review signers', onClick: handleReviewSigners }}
+      trackingEvent={ATTENTION_PANEL_EVENTS.REVIEW_SIGNERS}
+      actionTestId="review-signers-btn"
+    />
   )
 }

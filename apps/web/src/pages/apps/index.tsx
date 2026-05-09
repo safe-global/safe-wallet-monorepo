@@ -3,19 +3,18 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useMemo } from 'react'
 import debounce from 'lodash/debounce'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
-import SafeAppsSDKLink from '@/components/safe-apps/SafeAppsSDKLink'
 import SafeAppsHeader from '@/components/safe-apps/SafeAppsHeader'
 import SafeAppList from '@/components/safe-apps/SafeAppList'
 import { AppRoutes } from '@/config/routes'
 import useSafeAppsFilters from '@/hooks/safe-apps/useSafeAppsFilters'
 import SafeAppsFilters from '@/components/safe-apps/SafeAppsFilters'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import { SAFE_APPS_LABELS } from '@/services/analytics'
 import { BRAND_NAME } from '@/config/constants'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const SafeApps: NextPage = () => {
   const router = useRouter()
@@ -53,8 +52,6 @@ const SafeApps: NextPage = () => {
       <Head>
         <title>{`${BRAND_NAME} – Safe Apps`}</title>
       </Head>
-
-      <SafeAppsSDKLink />
 
       <SafeAppsHeader />
 

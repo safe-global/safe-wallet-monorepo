@@ -1,0 +1,163 @@
+import { FormControl, FormControlLabel, InputLabel, Radio, RadioGroup, SvgIcon, Tooltip } from '@mui/material'
+import { Controller, useFormContext } from 'react-hook-form'
+import classNames from 'classnames'
+import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
+import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+
+import InfoIcon from '@/public/images/notifications/info.svg'
+import ExternalLink from '@/components/common/ExternalLink'
+
+import css from './styles.module.css'
+import { TokenAmountFields } from '@/components/tx-flow/flows/TokenTransfer/types'
+import { useContext, useEffect } from 'react'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { useHasPermission } from '@/permissions/hooks/useHasPermission'
+import { Permission } from '@/permissions/config'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { TokenTransferType, MultiTransfersFields } from '@/components/tx-flow/flows/TokenTransfer'
+
+const SpendingLimitRow = ({
+  availableAmount,
+  selectedToken,
+}: {
+  availableAmount: bigint
+  selectedToken: Balance['tokenInfo'] | undefined
+}) => {
+  const { control, trigger, resetField } = useFormContext()
+  const canCreateStandardTx = useHasPermission(Permission.CreateTransaction)
+  const canCreateSpendingLimitTx = useHasPermission(Permission.CreateSpendingLimitTransaction, {
+    tokenAddress: selectedToken?.address,
+  })
+  const { setNonceNeeded } = useContext(SafeTxContext)
+
+  const formattedAmount = safeFormatUnits(availableAmount, selectedToken?.decimals)
+
+  useEffect(() => {
+    return () => {
+      // reset the field value to default when the component is unmounted
+      resetField(MultiTransfersFields.type)
+    }
+  }, [resetField])
+
+  return (
+    <FormControl>
+      <InputLabel shrink required sx={{ backgroundColor: 'background.paper', px: '6px', mx: '-6px' }}>
+        Send as
+      </InputLabel>
+      <Controller
+        rules={{ required: true }}
+        control={control}
+        name={MultiTransfersFields.type}
+        render={({ field: { onChange, ...field } }) => (
+          <RadioGroup
+            row
+            onChange={(e) => {
+              onChange(e)
+
+              setNonceNeeded(e.target.value === TokenTransferType.multiSig)
+
+              // Validate only after the field is changed
+              setTimeout(() => {
+                trigger(TokenAmountFields.amount)
+              }, 10)
+            }}
+            {...field}
+            defaultValue={TokenTransferType.multiSig}
+            className={css.group}
+          >
+            {canCreateStandardTx && (
+              <FormControlLabel
+                data-testid="standard-tx"
+                value={TokenTransferType.multiSig}
+                label={
+                  <>
+                    Standard transaction
+                    <Tooltip
+                      title={
+                        <>
+                          A standard transaction requires the signatures of other signers before the specified funds can
+                          be transferred.&nbsp;
+                          <ExternalLink
+                            href={HelpCenterArticle.SPENDING_LIMITS}
+                            title="Learn more about spending limits"
+                          >
+                            Learn more about spending limits
+                          </ExternalLink>
+                          .
+                        </>
+                      }
+                      arrow
+                      placement="top"
+                    >
+                      <span>
+                        <SvgIcon
+                          component={InfoIcon}
+                          inheritViewBox
+                          color="border"
+                          fontSize="small"
+                          sx={{
+                            verticalAlign: 'middle',
+                            ml: 0.5,
+                          }}
+                        />
+                      </span>
+                    </Tooltip>
+                  </>
+                }
+                control={<Radio />}
+                componentsProps={{ typography: { variant: 'body2' } }}
+                className={css.label}
+              />
+            )}
+            {canCreateSpendingLimitTx && (
+              <FormControlLabel
+                data-testid="spending-limit-tx"
+                value={TokenTransferType.spendingLimit}
+                label={
+                  <>
+                    Spending limit <b>{`(${formattedAmount} ${selectedToken?.symbol})`}</b>
+                    <Tooltip
+                      title={
+                        <>
+                          A spending limit transaction allows you to transfer the specified funds without the need to
+                          collect the signatures of other signers.&nbsp;
+                          <ExternalLink
+                            href={HelpCenterArticle.SPENDING_LIMITS}
+                            title="Learn more about spending limits"
+                          >
+                            Learn more about spending limits
+                          </ExternalLink>
+                          .
+                        </>
+                      }
+                      arrow
+                      placement="top"
+                    >
+                      <span>
+                        <SvgIcon
+                          component={InfoIcon}
+                          inheritViewBox
+                          color="border"
+                          fontSize="small"
+                          sx={{
+                            verticalAlign: 'middle',
+                            ml: 0.5,
+                          }}
+                        />
+                      </span>
+                    </Tooltip>
+                  </>
+                }
+                control={<Radio />}
+                componentsProps={{ typography: { variant: 'body2' } }}
+                className={classNames(css.label, { [css.spendingLimit]: canCreateStandardTx })}
+              />
+            )}
+          </RadioGroup>
+        )}
+      />
+    </FormControl>
+  )
+}
+
+export default SpendingLimitRow

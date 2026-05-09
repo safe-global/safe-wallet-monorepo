@@ -1,61 +1,43 @@
-import { _isL2 } from '@/services/contracts/deployments'
-import { getSafeProvider } from '@/services/tx/tx-sender/sdk'
-import { type GetContractProps, SafeProvider } from '@safe-global/protocol-kit'
 import {
-  getCompatibilityFallbackHandlerContractInstance,
-  getMultiSendCallOnlyContractInstance,
-  getSafeContractInstance,
-  getSafeProxyFactoryContractInstance,
-  getSignMessageLibContractInstance,
-} from '@safe-global/protocol-kit/dist/src/contracts/contractInstances'
-import type SafeBaseContract from '@safe-global/protocol-kit/dist/src/contracts/Safe/SafeBaseContract'
-import { type ChainInfo, ImplementationVersionState } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import type { SafeVersion } from '@safe-global/safe-core-sdk-types'
-import { assertValidSafeVersion, getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+  _isL2,
+  isCanonicalDeployment,
+  getCanonicalMultiSendCallOnlyAddress,
+} from '@safe-global/utils/services/contracts/deployments'
+import { getSafeProvider } from '@/services/tx/tx-sender/sdk'
+import {
+  SafeProvider,
+  getCompatibilityFallbackHandlerContract,
+  getMultiSendCallOnlyContract,
+  getSafeContract,
+  getSafeProxyFactoryContract,
+  getSignMessageLibContract,
+} from '@safe-global/protocol-kit'
+import type { SafeBaseContract } from '@safe-global/protocol-kit'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import semver from 'semver'
-import { getLatestSafeVersion } from '@/utils/chains'
-import { getSafeToL2MigrationDeployment } from '@safe-global/safe-deployments'
-
-// `UNKNOWN` is returned if the mastercopy does not match supported ones
-// @see https://github.com/safe-global/safe-client-gateway/blob/main/src/routes/safes/handlers/safes.rs#L28-L31
-//      https://github.com/safe-global/safe-client-gateway/blob/main/src/routes/safes/converters.rs#L77-L79
-export const isValidMasterCopy = (implementationVersionState: SafeInfo['implementationVersionState']): boolean => {
-  return implementationVersionState !== ImplementationVersionState.UNKNOWN
-}
-
-export const isMigrationToL2Possible = (safe: SafeInfo): boolean => {
-  return (
-    safe.nonce === 0 &&
-    Boolean(getSafeToL2MigrationDeployment({ network: safe.chainId })?.networkAddresses[safe.chainId])
-  )
-}
-
-export const _getValidatedGetContractProps = (
-  safeVersion: SafeInfo['version'],
-): Pick<GetContractProps, 'safeVersion'> => {
-  assertValidSafeVersion(safeVersion)
-
-  // SDK request here: https://github.com/safe-global/safe-core-sdk/issues/261
-  // Remove '+L2'/'+Circles' metadata from version
-  const [noMetadataVersion] = safeVersion.split('+')
-
-  return {
-    safeVersion: noMetadataVersion as SafeVersion,
-  }
-}
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { _getValidatedGetContractProps } from '@safe-global/utils/services/contracts/safeContracts'
 
 // GnosisSafe
 
-const getGnosisSafeContract = async (safe: SafeInfo, safeProvider: SafeProvider) => {
-  return getSafeContractInstance(
-    _getValidatedGetContractProps(safe.version).safeVersion,
+const getGnosisSafeContract = async (safe: SafeState, safeProvider: SafeProvider) => {
+  // For unsupported mastercopies, use the SDK version if available
+  let version = safe.version
+  if (!version) {
+    const safeSDK = getSafeSDK()
+    version = safeSDK?.getContractVersion() ?? null
+  }
+
+  return getSafeContract({
     safeProvider,
-    safe.address.value,
-  )
+    safeVersion: _getValidatedGetContractProps(version).safeVersion,
+    customSafeAddress: safe.address.value,
+  })
 }
 
-export const getReadOnlyCurrentGnosisSafeContract = async (safe: SafeInfo): Promise<SafeBaseContract<any>> => {
+export const getReadOnlyCurrentGnosisSafeContract = async (safe: SafeState): Promise<SafeBaseContract<any>> => {
   const safeSDK = getSafeSDK()
   if (!safeSDK) {
     throw new Error('Safe SDK not found.')
@@ -66,15 +48,15 @@ export const getReadOnlyCurrentGnosisSafeContract = async (safe: SafeInfo): Prom
   return getGnosisSafeContract(safe, safeProvider)
 }
 
-export const getCurrentGnosisSafeContract = async (safe: SafeInfo, provider: string) => {
+export const getCurrentGnosisSafeContract = async (safe: SafeState, provider: string) => {
   const safeProvider = new SafeProvider({ provider })
 
   return getGnosisSafeContract(safe, safeProvider)
 }
 
 export const getReadOnlyGnosisSafeContract = async (
-  chain: ChainInfo,
-  safeVersion: SafeInfo['version'],
+  chain: Chain,
+  safeVersion: SafeState['version'],
   isL1?: boolean,
 ) => {
   const version = safeVersion ?? getLatestSafeVersion(chain)
@@ -83,18 +65,16 @@ export const getReadOnlyGnosisSafeContract = async (
 
   const isL1SafeSingleton = isL1 ?? !_isL2(chain, _getValidatedGetContractProps(version).safeVersion)
 
-  return getSafeContractInstance(
-    _getValidatedGetContractProps(version).safeVersion,
+  return getSafeContract({
     safeProvider,
-    undefined,
-    undefined,
+    safeVersion: _getValidatedGetContractProps(version).safeVersion,
     isL1SafeSingleton,
-  )
+  })
 }
 
 // MultiSend
 
-export const _getMinimumMultiSendCallOnlyVersion = (safeVersion: SafeInfo['version']) => {
+export const _getMinimumMultiSendCallOnlyVersion = (safeVersion: SafeState['version']) => {
   const INITIAL_CALL_ONLY_VERSION = '1.3.0'
 
   if (!safeVersion) {
@@ -104,7 +84,11 @@ export const _getMinimumMultiSendCallOnlyVersion = (safeVersion: SafeInfo['versi
   return semver.gte(safeVersion, INITIAL_CALL_ONLY_VERSION) ? safeVersion : INITIAL_CALL_ONLY_VERSION
 }
 
-export const getReadOnlyMultiSendCallOnlyContract = async (safeVersion: SafeInfo['version']) => {
+export const getReadOnlyMultiSendCallOnlyContract = async (
+  safeVersion: SafeState['version'],
+  chainId?: string,
+  implementationAddress?: string,
+) => {
   const safeSDK = getSafeSDK()
   if (!safeSDK) {
     throw new Error('Safe SDK not found.')
@@ -112,36 +96,64 @@ export const getReadOnlyMultiSendCallOnlyContract = async (safeVersion: SafeInfo
 
   const safeProvider = safeSDK.getSafeProvider()
 
-  return getMultiSendCallOnlyContractInstance(_getValidatedGetContractProps(safeVersion).safeVersion, safeProvider)
+  // For unsupported mastercopies, use the SDK version if available
+  const version = safeVersion ?? safeSDK.getContractVersion()
+
+  // On zkSync, if the Safe uses a canonical (EVM bytecode) mastercopy,
+  // we must use canonical auxiliary contracts because EVM contracts
+  // cannot delegatecall to EraVM contracts.
+  let customContractAddress: string | undefined
+  if (chainId && implementationAddress && isCanonicalDeployment(implementationAddress, chainId, version)) {
+    customContractAddress = getCanonicalMultiSendCallOnlyAddress(version)
+  }
+
+  return getMultiSendCallOnlyContract({
+    safeProvider,
+    safeVersion: _getValidatedGetContractProps(version).safeVersion,
+    customContracts: customContractAddress ? { multiSendCallOnlyAddress: customContractAddress } : undefined,
+  })
 }
 
 // GnosisSafeProxyFactory
 
-export const getReadOnlyProxyFactoryContract = async (safeVersion: SafeInfo['version'], contractAddress?: string) => {
+export const getReadOnlyProxyFactoryContract = async (safeVersion: SafeState['version'], contractAddress?: string) => {
   const safeProvider = getSafeProvider()
 
-  return getSafeProxyFactoryContractInstance(
-    _getValidatedGetContractProps(safeVersion).safeVersion,
+  // For unsupported mastercopies, use the SDK version if available
+  let version = safeVersion
+  if (!version) {
+    const safeSDK = getSafeSDK()
+    version = safeSDK?.getContractVersion() ?? null
+  }
+
+  return getSafeProxyFactoryContract({
     safeProvider,
-    safeProvider.getExternalProvider(),
-    contractAddress,
-  )
+    safeVersion: _getValidatedGetContractProps(version).safeVersion,
+    customContracts: contractAddress ? { safeProxyFactoryAddress: contractAddress } : undefined,
+  })
 }
 
 // Fallback handler
 
-export const getReadOnlyFallbackHandlerContract = async (safeVersion: SafeInfo['version']) => {
+export const getReadOnlyFallbackHandlerContract = async (safeVersion: SafeState['version']) => {
   const safeProvider = getSafeProvider()
 
-  return getCompatibilityFallbackHandlerContractInstance(
-    _getValidatedGetContractProps(safeVersion).safeVersion,
+  // For unsupported mastercopies, use the SDK version if available
+  let version = safeVersion
+  if (!version) {
+    const safeSDK = getSafeSDK()
+    version = safeSDK?.getContractVersion() ?? null
+  }
+
+  return getCompatibilityFallbackHandlerContract({
     safeProvider,
-  )
+    safeVersion: _getValidatedGetContractProps(version).safeVersion,
+  })
 }
 
 // Sign messages deployment
 
-export const getReadOnlySignMessageLibContract = async (safeVersion: SafeInfo['version']) => {
+export const getReadOnlySignMessageLibContract = async (safeVersion: SafeState['version']) => {
   const safeSDK = getSafeSDK()
   if (!safeSDK) {
     throw new Error('Safe SDK not found.')
@@ -149,5 +161,11 @@ export const getReadOnlySignMessageLibContract = async (safeVersion: SafeInfo['v
 
   const safeProvider = safeSDK.getSafeProvider()
 
-  return getSignMessageLibContractInstance(_getValidatedGetContractProps(safeVersion).safeVersion, safeProvider)
+  // For unsupported mastercopies, use the SDK version if available
+  const version = safeVersion ?? safeSDK.getContractVersion()
+
+  return getSignMessageLibContract({
+    safeProvider,
+    safeVersion: _getValidatedGetContractProps(version).safeVersion,
+  })
 }

@@ -1,16 +1,11 @@
-import { createListenerMiddleware } from '@reduxjs/toolkit'
-import {
-  LabelValue,
-  TransactionListItemType,
-  DetailedExecutionInfoType,
-} from '@safe-global/safe-gateway-typescript-sdk'
 import type {
-  TransactionListItem,
-  Label,
-  ConflictHeader,
-  DateLabel,
-  TransactionListPage,
-} from '@safe-global/safe-gateway-typescript-sdk'
+  LabelQueuedItem,
+  ConflictHeaderQueuedItem,
+  TransactionQueuedItem,
+  QueuedItemPage,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { LabelValue, TransactionListItemType, DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
+import { createListenerMiddleware } from '@reduxjs/toolkit'
 
 import * as txEvents from '@/services/tx/txEvents'
 import { txQueueListener, txQueueSlice } from '../txQueueSlice'
@@ -58,10 +53,11 @@ describe('txQueueSlice', () => {
           missingSigners: [],
         },
       },
-    } as unknown as TransactionListItem
+    } as unknown as TransactionQueuedItem
 
     const action = txQueueSlice.actions.set({
       loading: false,
+      loaded: true,
       data: {
         results: [transaction],
       },
@@ -100,10 +96,11 @@ describe('txQueueSlice', () => {
           missingSigners: [],
         },
       },
-    } as unknown as TransactionListItem
+    } as unknown as TransactionQueuedItem
 
     const action = txQueueSlice.actions.set({
       loading: false,
+      loaded: true,
       data: {
         results: [transaction],
       },
@@ -134,6 +131,7 @@ describe('txQueueSlice', () => {
 
     const action = txQueueSlice.actions.set({
       loading: false,
+      loaded: true,
       data: undefined, // Cleared
     })
 
@@ -160,25 +158,21 @@ describe('txQueueSlice', () => {
       dispatch: jest.fn(),
     }
 
-    const dateLabel: DateLabel = {
-      type: TransactionListItemType.DATE_LABEL,
-      timestamp: 0,
-    }
-
-    const label: Label = {
+    const label: LabelQueuedItem = {
       label: LabelValue.Queued,
       type: TransactionListItemType.LABEL,
     }
 
-    const conflictHeader: ConflictHeader = {
+    const conflictHeader: ConflictHeaderQueuedItem = {
       nonce: 0,
       type: TransactionListItemType.CONFLICT_HEADER,
     }
 
     const action = txQueueSlice.actions.set({
       loading: false,
+      loaded: true,
       data: {
-        results: [dateLabel, label, conflictHeader],
+        results: [label, conflictHeader],
       },
     })
 
@@ -210,10 +204,11 @@ describe('txQueueSlice', () => {
       transaction: {
         id: '0x456',
       },
-    } as TransactionListItem
+    } as TransactionQueuedItem
 
     const action = txQueueSlice.actions.set({
       loading: false,
+      loaded: true,
       data: {
         results: [transaction],
       },
@@ -245,14 +240,15 @@ describe('txQueueSlice', () => {
           ],
         },
       },
-    } as TransactionListItem
+    } as TransactionQueuedItem
 
-    const payload: TransactionListPage = {
+    const payload: QueuedItemPage = {
       results: [transaction],
     }
 
     const action = txQueueSlice.actions.set({
       loading: false,
+      loaded: true,
       data: payload,
     })
 

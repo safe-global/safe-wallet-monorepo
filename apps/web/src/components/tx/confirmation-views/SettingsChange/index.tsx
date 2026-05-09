@@ -1,3 +1,5 @@
+import type { SettingsChangeTransaction as SettingsChangeType } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { SettingsInfoType } from '@safe-global/store/gateway/types'
 import { Paper, Typography, Box, Divider, SvgIcon } from '@mui/material'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import type { NarrowConfirmationViewProps } from '../types'
@@ -5,15 +7,13 @@ import { OwnerList } from '@/components/tx-flow/common/OwnerList'
 import MinusIcon from '@/public/images/common/minus.svg'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { SettingsInfoType, type SettingsChange } from '@safe-global/safe-gateway-typescript-sdk'
-import { ChangeSignerSetupWarning } from '@/features/multichain/components/SignerSetupWarning/ChangeSignerSetupWarning'
+import { ChangeSignerSetupWarning } from '@/features/multichain'
 import { useContext } from 'react'
 import { SettingsChangeContext } from '@/components/tx-flow/flows/AddOwner/context'
-import { maybePlural } from '@/utils/formatters'
-import { UntrustedFallbackHandlerTxAlert } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export interface SettingsChangeProps extends NarrowConfirmationViewProps {
-  txInfo: SettingsChange
+  txInfo: SettingsChangeType
 }
 
 const SettingsChange: React.FC<SettingsChangeProps> = ({ txInfo: { settingsInfo } }) => {
@@ -25,12 +25,9 @@ const SettingsChange: React.FC<SettingsChangeProps> = ({ txInfo: { settingsInfo 
   const shouldShowChangeSigner = 'owner' in settingsInfo || 'newOwner' in params
   const hasNewOwner = 'newOwner' in params
   const newSignersLength = safe.owners.length + ('removedOwner' in settingsInfo ? 0 : 1)
-  const setsFallbackHandler = settingsInfo.type === SettingsInfoType.SET_FALLBACK_HANDLER
 
   return (
     <>
-      {setsFallbackHandler && <UntrustedFallbackHandlerTxAlert fallbackHandler={settingsInfo.handler.value} />}
-
       {'oldOwner' in settingsInfo && (
         <Paper sx={{ backgroundColor: ({ palette }) => palette.warning.background, p: 2 }}>
           <Typography color="text.secondary" mb={2} display="flex" alignItems="center">

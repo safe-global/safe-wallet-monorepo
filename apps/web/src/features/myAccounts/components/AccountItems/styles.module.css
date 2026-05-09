@@ -2,9 +2,7 @@
   border: 1px solid var(--color-border-light);
   border-radius: var(--space-1);
   margin-bottom: 12px;
-  padding-top: 0;
-  padding-bottom: 0;
-  padding-left: 0;
+  padding: 0;
   flex-wrap: wrap;
 }
 
@@ -28,6 +26,10 @@
   background-color: var(--color-background-paper);
 }
 
+.listItem {
+  background-color: var(--color-background-paper);
+}
+
 .listItem.subItem {
   margin-bottom: 8px;
 }
@@ -46,22 +48,88 @@
 
 .listItem > :first-child {
   flex: 1;
-  width: 90%;
+  min-width: 0; /* Allow content to shrink for truncation */
+}
+
+.noActions {
+  /* Marker class for items without actions - used by AccountItem component */
 }
 
 .safeLink {
-  display: grid;
-  padding: var(--space-2) var(--space-1) var(--space-2) var(--space-2);
-  grid-template-columns: 60px 10fr 2fr 3fr;
+  display: flex;
+  flex-wrap: wrap;
+  padding: var(--space-2);
   align-items: center;
+  gap: var(--space-2);
+  width: 100%; /* Ensure full width */
 }
 
+/* Deprecated: keeping for backwards compatibility */
 .multiSafeLink {
-  grid-template-columns: 60px 8fr 5fr 3fr;
+  /* No longer needed with flexbox */
 }
 
+/* Deprecated: keeping for backwards compatibility */
 .safeSubLink {
-  grid-template-columns: 60px 3fr minmax(auto, 2fr);
+  /* No longer needed with flexbox */
+}
+
+/* Account item component parts */
+.accountItemIcon {
+  flex-shrink: 0;
+  padding-right: var(--space-1);
+  align-self: center;
+}
+
+.accountItemInfo {
+  flex: 1;
+  min-width: 0; /* Allow text truncation */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.accountItemInfoChips {
+  margin-top: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.accountItemBalance {
+  @apply flex-shrink-0 text-right self-center;
+  min-width: 80px;
+}
+
+.accountItemChainBadge {
+  flex-shrink: 0;
+}
+
+.accountItemCheckbox {
+  flex-shrink: 0;
+}
+
+/* Group multiple items together */
+.accountItemGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+/* Chips row - takes full width, forces new line */
+.accountItemChips {
+  flex-basis: 100%;
+  margin-top: var(--space-1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.accountItemChips:empty {
+  display: none;
 }
 
 .safeName,
@@ -69,6 +137,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.safeAddress :global .ethHashInfo-name {
+  font-weight: bold;
 }
 
 .listHeader {
@@ -106,30 +178,13 @@
 
 @media (max-width: 899.95px) {
   .safeLink {
-    padding-right: 0;
+    /* padding-right: 0; */
   }
 }
 
 @media (max-width: 599.95px) {
   .safeLink {
-    grid-template-columns: auto 1fr auto;
-    grid-template-areas:
-      'a b d'
-      'a c d';
-  }
-
-  .safeLink :nth-child(1) {
-    grid-area: a;
-  }
-  .safeLink :nth-child(2) {
-    grid-area: b;
-  }
-  .safeLink :nth-child(3) {
-    grid-area: c;
-    text-align: left;
-  }
-  .safeLink :nth-child(4) {
-    grid-area: d;
+    flex-wrap: wrap;
   }
 
   .multiChains {

@@ -1,18 +1,16 @@
 import { isSmartContract } from '@/utils/wallets'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { sameAddress } from '@/utils/addresses'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { createWeb3ReadOnly, getRpcServiceUrl } from '@/hooks/wallets/web3'
-import { type ReplayedSafeProps } from '@/store/slices'
-import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
-import chains from '@/config/chains'
-import { computeNewSafeAddress } from '.'
+import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import { predictAddressBasedOnReplayData } from '@/features/multichain'
 
 export const getAvailableSaltNonce = async (
   customRpcs: {
     [chainId: string]: string
   },
   replayedSafe: ReplayedSafeProps,
-  chainInfos: ChainInfo[],
+  chainInfos: Chain[],
   // All addresses from the sidebar disregarding the chain. This is an optimization to reduce RPC calls
   knownSafeAddresses: string[],
 ): Promise<string> => {
@@ -35,21 +33,8 @@ export const getAvailableSaltNonce = async (
     if (!web3ReadOnly) {
       throw new Error('Could not initiate RPC')
     }
-    let safeAddress: string
-    if (chain.chainId === chains['zksync']) {
-      // ZK-sync is using a different create2 method which is supported by the SDK
-      safeAddress = await computeNewSafeAddress(
-        rpcUrl,
-        {
-          safeAccountConfig: replayedSafe.safeAccountConfig,
-          saltNonce: replayedSafe.saltNonce,
-        },
-        chain,
-        replayedSafe.safeVersion,
-      )
-    } else {
-      safeAddress = await predictAddressBasedOnReplayData(replayedSafe, web3ReadOnly)
-    }
+    const safeAddress = await predictAddressBasedOnReplayData(replayedSafe, web3ReadOnly)
+
     const isKnown = knownSafeAddresses.some((knownAddress) => sameAddress(knownAddress, safeAddress))
     if (isKnown || (await isSmartContract(safeAddress, web3ReadOnly))) {
       // We found a chain where the nonce is used up

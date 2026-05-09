@@ -1,10 +1,9 @@
-import { createContext, type ReactElement, type ReactNode, useState, useEffect, useCallback, useRef } from 'react'
-import { usePathname } from 'next/navigation'
+import { createContext, type ReactElement, type ReactNode, useState, useCallback, useRef } from 'react'
 import TxModalDialog from '@/components/common/TxModalDialog'
 import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './flows'
-import useSafeAddress from '@/hooks/useSafeAddress'
-import useChainId from '@/hooks/useChainId'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
+import { usePreventNavigation } from '@/hooks/usePreventNavigation'
+import { useTopbarElevation } from '@/hooks/useTopbarElevation'
 
 const noop = () => {}
 
@@ -20,7 +19,6 @@ export const TxModalContext = createContext<TxModalContextType>({
   setFullWidth: noop,
 })
 
-// TODO: Rename TxModalProvider, setTxFlow, TxModalDialog to not contain Tx since it can be used for any type of modal as a global provider
 const confirmClose = () => {
   return confirm('Closing this window will discard your current progress.')
 }
@@ -30,21 +28,19 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   const [fullWidth, setFullWidth] = useState<boolean>(false)
   const shouldWarn = useRef<boolean>(true)
   const onClose = useRef<() => void>(noop)
-  const safeId = useChainId() + useSafeAddress()
-  const prevSafeId = useRef<string>(safeId ?? '')
-  const pathname = usePathname()
-  const prevPathname = useRef<string | null>(pathname)
   const { setSignerAddress } = useWalletContext() ?? {}
 
   const handleModalClose = useCallback(() => {
     if (shouldWarn.current && !confirmClose()) {
-      return
+      return false
     }
     onClose.current()
     onClose.current = noop
     setFlow(undefined)
 
     setSignerAddress?.(undefined)
+
+    return true
   }, [setSignerAddress])
 
   // Open a new tx flow, close the previous one if any
@@ -70,17 +66,9 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
     [],
   )
 
-  // Close the modal when the user navigates to a different Safe or route
-  useEffect(() => {
-    if (safeId === prevSafeId.current && pathname === prevPathname.current) return
+  usePreventNavigation(txFlow ? handleModalClose : undefined)
 
-    prevSafeId.current = safeId
-    prevPathname.current = pathname
-
-    if (txFlow) {
-      handleModalClose()
-    }
-  }, [txFlow, safeId, pathname, handleModalClose])
+  useTopbarElevation('tx-flow', !!txFlow)
 
   return (
     <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth }}>

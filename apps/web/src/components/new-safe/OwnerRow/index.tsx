@@ -9,11 +9,12 @@ import { useAddressResolver } from '@/hooks/useAddressResolver'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import useWallet from '@/hooks/wallets/useWallet'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import css from './styles.module.css'
 import classNames from 'classnames'
+import useSafeInfo from '@/hooks/useSafeInfo'
 
-export const OwnerRow = ({
+const OwnerRow = ({
   index,
   groupName,
   removable = true,
@@ -26,6 +27,7 @@ export const OwnerRow = ({
   remove?: (index: number) => void
   readOnly?: boolean
 }) => {
+  const { safeAddress } = useSafeInfo()
   const wallet = useWallet()
   const fieldName = `${groupName}.${index}`
   const { control, getValues, setValue } = useFormContext()
@@ -42,14 +44,17 @@ export const OwnerRow = ({
     return Array.from({ length: owners.length }, (_, i) => `${groupName}.${i}`)
   }, [owners, groupName])
 
-  const validateSafeAddress = useCallback(
+  const validateOwnerAddress = useCallback(
     async (address: string) => {
+      if (sameAddress(address, safeAddress)) {
+        return 'The Safe Account cannot own itself'
+      }
       const owners = getValues('owners')
       if (owners.filter((owner: NamedAddress) => sameAddress(owner.address, address)).length > 1) {
         return 'Signer is already added'
       }
     },
-    [getValues],
+    [getValues, safeAddress],
   )
 
   const { name, ens, resolving } = useAddressResolver(owner.address)
@@ -105,7 +110,13 @@ export const OwnerRow = ({
           </Typography>
         ) : (
           <FormControl fullWidth>
-            <AddressBookInput name={`${fieldName}.address`} label="Signer" validate={validateSafeAddress} deps={deps} />
+            <AddressBookInput
+              name={`${fieldName}.address`}
+              label="Signer"
+              validate={validateOwnerAddress}
+              deps={deps}
+              onReset={() => setValue(`${fieldName}.name`, '')}
+            />
           </FormControl>
         )}
       </Grid>

@@ -13,7 +13,7 @@ const STATUS_LABELS: Partial<Record<RecoveryEvent, string>> = {
   [RecoveryEvent.PROCESSED]: 'Loading',
 }
 
-export const RecoveryStatus = ({ recovery }: { recovery: RecoveryQueueItem }): ReactElement => {
+const RecoveryStatus = ({ recovery }: { recovery: RecoveryQueueItem }): ReactElement => {
   const { isExecutable, isExpired } = useRecoveryTxState(recovery)
   const pending = store.useStore()?.pending
 
@@ -37,3 +37,5 @@ export const RecoveryStatus = ({ recovery }: { recovery: RecoveryQueueItem }): R
 
   return <TxStatusChip color={isExpired ? 'error' : 'warning'}>{status}</TxStatusChip>
 }
+
+export default RecoveryStatus

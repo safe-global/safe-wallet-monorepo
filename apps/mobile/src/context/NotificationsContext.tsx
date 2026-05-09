@@ -1,12 +1,9 @@
 import React, { createContext, useContext, ReactNode } from 'react'
 
-import useNotifications from '@/src/hooks/useNotifications'
-import { FirebaseMessagingTypes } from '@react-native-firebase/messaging'
-
+import { selectAppNotificationStatus } from '../store/notificationsSlice'
+import { useAppSelector } from '../store/hooks'
 interface NotificationContextType {
   isAppNotificationEnabled: boolean
-  fcmToken: string | null
-  remoteMessages: FirebaseMessagingTypes.RemoteMessage[] | []
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined)
@@ -24,14 +21,7 @@ interface NotificationProviderProps {
 }
 
 export const NotificationsProvider: React.FC<NotificationProviderProps> = ({ children }) => {
-  /**
-   * Enables notifications for the app if the user has enabled them
-   */
-  const { isAppNotificationEnabled, fcmToken, remoteMessages } = useNotifications()
+  const isAppNotificationEnabled = useAppSelector(selectAppNotificationStatus)
 
-  return (
-    <NotificationContext.Provider value={{ isAppNotificationEnabled, fcmToken, remoteMessages }}>
-      {children}
-    </NotificationContext.Provider>
-  )
+  return <NotificationContext.Provider value={{ isAppNotificationEnabled }}>{children}</NotificationContext.Provider>
 }

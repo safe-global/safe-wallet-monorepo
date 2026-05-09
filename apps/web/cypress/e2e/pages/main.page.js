@@ -1,5 +1,26 @@
 import * as constants from '../../support/constants'
+import * as ls from '../../support/localstorage_data.js'
 
+// Common button text strings
+export const nextBtnStr = 'Next'
+export const executeBtnStr = 'Execute'
+export const acceptSelectionStr = 'Save settings'
+
+// Common table selectors
+export const tableRow = '[data-testid="table-row"]'
+export const tableContainer = '[data-testid="table-container"]'
+export const nextPageBtn = 'button[aria-label="Go to next page"]'
+export const previousPageBtn = 'button[aria-label="Go to previous page"]'
+
+// Common form input selectors
+export const nameInput = 'input[name="name"]'
+export const addressInput = 'input[name="address"]'
+
+// Common modal selectors
+export const modalTitle = '[data-testid="modal-title"]'
+export const modalHeader = '[data-testid="modal-header"]'
+
+// Legacy names for backward compatibility
 const acceptSelection = 'Save settings'
 const executeStr = 'Execute'
 const connectedOwnerBlock = '[data-testid="open-account-center"]'
@@ -7,6 +28,47 @@ export const modalDialogCloseBtn = '[data-testid="modal-dialog-close-btn"]'
 const closeOutreachPopupBtn = 'button[aria-label="close outreach popup"]'
 
 export const noRelayAttemptsError = 'Not enough relay attempts remaining'
+
+/** Waits for the page to settle before Argos captures the screenshot. */
+export function awaitVisualStability() {
+  cy.wait(constants.VISUAL_SETTLE_TIME)
+}
+
+/**
+ * Intercepts the chains list endpoint to inject a feature flag for a specific chain,
+ * and optionally aliases the feature's data endpoint for use with cy.wait().
+ *
+ * Handles both list responses ({ results: [...] }) and single-chain responses ({ chainId, ... }).
+ *
+ * @param {object} options
+ * @param {string} options.chainId       - The chain to target (e.g. constants.networkKeys.polygon)
+ * @param {string} options.addFlag       - Feature flag to inject (e.g. constants.chainFeatures.positions)
+ * @param {string} [options.removeFlag]  - Optional legacy flag to remove before adding the new one
+ * @param {string} [options.dataEndpoint] - Optional data endpoint glob to alias
+ * @param {string} [options.dataAlias]   - Alias name for cy.wait() (required if dataEndpoint is set)
+ */
+export function injectChainFeature({ chainId, addFlag, removeFlag, dataEndpoint, dataAlias }) {
+  cy.intercept('GET', '**/v2/chains**', (req) => {
+    req.continue((res) => {
+      const applyFlags = (chain) => {
+        let features = chain.features || []
+        if (removeFlag) features = features.filter((f) => f !== removeFlag)
+        if (!features.includes(addFlag)) features.push(addFlag)
+        return { ...chain, features }
+      }
+
+      if (res.body?.results && Array.isArray(res.body.results)) {
+        res.body.results = res.body.results.map((chain) => (chain.chainId === chainId ? applyFlags(chain) : chain))
+      } else if (res.body?.chainId === chainId) {
+        res.body = applyFlags(res.body)
+      }
+    })
+  })
+
+  if (dataEndpoint && dataAlias) {
+    cy.intercept('GET', dataEndpoint).as(dataAlias)
+  }
+}
 
 export function checkElementBackgroundColor(element, color) {
   cy.get(element).should('have.css', 'background-color', color)
@@ -35,6 +97,21 @@ export const fetchSafeData = (safeAddress) => {
     })
     .then((response) => {
       expect(response.status).to.eq(200)
+    })
+}
+export const getSafe = (safeAddress, chain) => {
+  return cy
+    .request({
+      method: 'GET',
+      url: `${constants.stagingCGWUrlv1}${constants.stagingCGWChains}${chain}${constants.stagingCGWSafes}${safeAddress}`,
+      headers: {
+        accept: 'application/json',
+      },
+    })
+    .then((response) => {
+      expect(response.status).to.eq(200)
+      console.log('********* RESPONSE ' + JSON.stringify(response.body))
+      return response.body
     })
 }
 
@@ -140,20 +217,6 @@ export function checkTokenBalance(safeAddress, tokenSymbol, expectedBalance) {
   })
 }
 
-export function getTokenBalance(safeAddress, tokenSymbol) {
-  getSafeBalance(safeAddress.substring(4), constants.networkKeys.sepolia).then((response) => {
-    const targetToken = response.body.items.find((token) => token.tokenInfo.symbol === tokenSymbol)
-    console.log('**** TOKEN BALANCE', targetToken.balance)
-  })
-}
-
-export function checkNFTBalance(safeAddress, tokenSymbol, expectedBalance) {
-  getSafeNFTs(safeAddress.substring(4), constants.networkKeys.sepolia).then((response) => {
-    const targetToken = response.body.results.find((token) => token.tokenSymbol === tokenSymbol)
-    expect(targetToken.tokenName).to.equal(expectedBalance)
-  })
-}
-
 export function checkTokenBalanceIsNull(safeAddress, tokenSymbol) {
   let pollCount = 0
 
@@ -216,12 +279,31 @@ export function closeOutreachPopup() {
   })
 }
 
+export function closeSecurityNotice() {
+  const value = 'I understand'
+  cy.wait(2000)
+  cy.get('body').then(($body) => {
+    if ($body.find('button:contains(' + value + ')').length > 0) {
+      cy.contains('button', value).click()
+      cy.wait(500)
+    }
+  })
+}
+
 export function verifyOwnerConnected(prefix = 'sep:') {
   cy.get(connectedOwnerBlock).should('contain', prefix)
 }
 
 export function verifyHomeSafeUrl(safe) {
   cy.location('href', { timeout: 10000 }).should('include', constants.homeUrl + safe)
+}
+
+export function verifyLinkContainsUrl(linkSelector, urlPattern) {
+  if (typeof linkSelector === 'string') {
+    cy.contains(linkSelector).closest('a').should('have.attr', 'href').and('include', urlPattern)
+  } else {
+    linkSelector.should('have.attr', 'href').and('include', urlPattern)
+  }
 }
 
 export function checkTextsExistWithinElement(element, texts) {
@@ -233,12 +315,15 @@ export function checkTextsExistWithinElement(element, texts) {
       })
   })
 }
-
-export function checkRadioButtonState(selector, state) {
-  if (state === constants.checkboxStates.checked) {
-    cy.get(selector).should('be.checked')
-  } else state === constants.checkboxStates.unchecked
-  cy.get(selector).should('not.be.checked')
+export function checkTextsExistWithinElementScroll(element, texts) {
+  texts.forEach((text) => {
+    cy.get(element)
+      .scrollIntoView()
+      .should('be.visible')
+      .within(() => {
+        cy.get('div').contains(text).scrollIntoView().should('be.visible')
+      })
+  })
 }
 
 export function verifyCheckboxeState(element, index, state) {
@@ -339,6 +424,31 @@ export function addToLocalStorage(key, jsonValue) {
   })
 }
 
+/**
+ * Sets localStorage in the app window (AUT). Use after cy.visit() then cy.reload() so the app picks up the data.
+ * Use this when the test runs in Cypress and the app must see the data (addToLocalStorage writes to the runner's window).
+ */
+export function addToAppLocalStorage(key, jsonValue) {
+  return cy.window().then((win) => {
+    win.localStorage.setItem(key, JSON.stringify(jsonValue))
+  })
+}
+
+/**
+ * Sets up SAFE_v2__settings in localStorage with tokenList: "ALL" and hideDust: false
+ * This function sets up the settings and verifies they are stored correctly before proceeding
+ * @returns {Promise} A promise that resolves when settings are set and verified
+ */
+export function setupSafeSettingsWithAllTokens() {
+  const settings = {
+    ...ls.safeSettings.slimitSettings,
+  }
+  return cy
+    .wrap(null)
+    .then(() => addToLocalStorage(constants.localStorageKeys.SAFE_v2__settings, settings))
+    .then(() => isItemInLocalstorage(constants.localStorageKeys.SAFE_v2__settings, settings))
+}
+
 export function checkTextOrder(selector, expectedTextArray) {
   cy.get(selector).each((element, index) => {
     const text = Cypress.$(element).text().trim()
@@ -360,13 +470,15 @@ export function formatAddressInCaps(address) {
   }
 }
 
-export function getElementText(element) {
-  return cy.get(element).invoke('text')
-}
-
 export function verifyTextVisibility(stringsArray) {
   stringsArray.forEach((string) => {
     cy.contains(string).should('be.visible')
+  })
+}
+
+export function verifyTextNotVisible(stringsArray) {
+  stringsArray.forEach((string) => {
+    cy.contains(string).should('not.exist')
   })
 }
 
@@ -395,4 +507,53 @@ export function getSafeAddressFromUrl(url) {
   const addressPattern = /0x[a-fA-F0-9]{40}/
   const match = url.match(addressPattern)
   return match ? match[0] : null
+}
+
+export function shortenAddress(address) {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`
+}
+
+// Waits for an element with given text to be visible inside a specific container (by ID)
+export function waitForElementByTextInContainer(containerSelector, elementText) {
+  cy.get(containerSelector) // Wait for container to exist
+    .should('exist')
+    .should('be.visible')
+    .contains(elementText, { timeout: 10000 }) // Then find text inside
+    .should('exist')
+    .should('be.visible')
+}
+
+export function verifyElementByTextExists(text) {
+  cy.contains(text).should('exist')
+}
+
+// ===========================================
+// Generic Helper Functions
+// ===========================================
+
+// Button clicks
+export function clickOnNextBtn(selector) {
+  cy.get(selector).should('be.enabled').click()
+}
+
+export function clickOnBackBtn(selector) {
+  cy.get(selector).should('be.enabled').click()
+}
+
+// Button state verification
+export function verifyBtnIsEnabled(selector) {
+  cy.get(selector).should('not.be.disabled')
+}
+
+export function verifyBtnIsDisabled(selector) {
+  cy.get(selector).should('be.disabled')
+}
+
+// Input helpers
+export function typeInField(selector, value) {
+  cy.get(selector).clear().type(value)
+}
+
+export function clearField(selector) {
+  cy.get(selector).clear()
 }

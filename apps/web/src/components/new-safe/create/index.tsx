@@ -17,15 +17,15 @@ import type { CreateSafeInfoItem } from '@/components/new-safe/create/CreateSafe
 import CreateSafeInfos from '@/components/new-safe/create/CreateSafeInfos'
 import { type ReactElement, useMemo, useState } from 'react'
 import ExternalLink from '@/components/common/ExternalLink'
-import { HelpCenterArticle } from '@/config/constants'
-import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
-import { getLatestSafeVersion } from '@/utils/chains'
+import { type SafeVersion } from '@safe-global/types-kit'
 import { useCurrentChain } from '@/hooks/useChains'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 export type NewSafeFormData = {
   name: string
-  networks: ChainInfo[]
+  networks: Chain[]
   threshold: number
   owners: NamedAddress[]
   saltNonce?: number
@@ -107,7 +107,7 @@ const CreateSafe = () => {
   const chain = useCurrentChain()
 
   const [safeName, setSafeName] = useState('')
-  const [overviewNetworks, setOverviewNetworks] = useState<ChainInfo[]>()
+  const [overviewNetworks, setOverviewNetworks] = useState<Chain[]>()
 
   const [dynamicHint, setDynamicHint] = useState<CreateSafeInfoItem>()
   const [activeStep, setActiveStep] = useState(0)
@@ -188,7 +188,6 @@ const CreateSafe = () => {
         columnSpacing={3}
         sx={{
           justifyContent: 'center',
-          mt: [2, null, 7],
         }}
       >
         <Grid item xs={12}>

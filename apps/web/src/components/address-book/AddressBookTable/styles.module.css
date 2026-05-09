@@ -1,3 +1,20 @@
+/* Desktop table - padding on cells instead of wrapper */
+.container tbody td:first-child {
+  padding-left: 16px !important;
+}
+
+.container tbody td:last-child {
+  padding-right: 16px !important;
+}
+
+.container thead th:first-child {
+  padding-left: 16px !important;
+}
+
+.container thead th:last-child {
+  padding-right: 16px !important;
+}
+
 .container tbody tr {
   transition: background-color 100ms linear;
 }
@@ -7,12 +24,36 @@
 }
 
 .container td:last-of-type button {
-  opacity: 0;
+  opacity: 1;
   transition: opacity 200ms 100ms ease-in-out;
 }
 
 .container tr:hover td:last-of-type button {
   opacity: 1;
+}
+
+.iconButton {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 6px;
+  background-color: var(--color-border-background);
+  border-radius: 4px;
+  color: var(--color-text-primary);
+}
+
+.iconButton:hover {
+  background-color: var(--color-background-paper);
+}
+
+.iconButton svg {
+  width: 16px;
+  height: 16px;
+  color: inherit;
+}
+
+.iconButton svg path {
+  fill: currentColor;
 }
 
 .headerButtonWrapper {
@@ -23,8 +64,85 @@
   margin-bottom: 8px;
 }
 
+/* Header styling - no bottom border with grey background */
+.container thead th {
+  border-bottom: none !important;
+  background-color: var(--color-background-main);
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+.container thead th span {
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+/* Last row - transparent border */
+.container tr:last-of-type {
+  border-bottom-color: transparent;
+}
+
+.mobileContainer {
+  display: none;
+  flex-direction: column;
+  gap: 0;
+  padding: 0 0 var(--space-2) 0;
+}
+
+.mobileHeader {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-1) 16px;
+  border-bottom: 1px solid var(--color-background-main);
+  margin-bottom: var(--space-1);
+  background-color: var(--color-background-main);
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.mobileRow {
+  display: none;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--space-2) 16px;
+  border-bottom: 1px solid var(--color-background-main);
+}
+
+.mobileRow:last-child {
+  border-bottom: none;
+}
+
+.mobileEntryInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.mobileActions {
+  display: flex;
+  gap: var(--space-1);
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+
 @media (max-width: 599.95px) {
-  .container td:last-of-type button {
-    opacity: 1;
+  .container {
+    display: none;
+  }
+
+  .mobileContainer {
+    display: flex;
+  }
+
+  .mobileHeader {
+    display: flex;
+  }
+
+  .mobileRow {
+    display: flex;
   }
 }

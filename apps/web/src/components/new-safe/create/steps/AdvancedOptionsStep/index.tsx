@@ -1,5 +1,5 @@
-import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { predictAddressBasedOnReplayData } from '@/features/multichain'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { Button, MenuItem, Divider, Box, TextField, Stack, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { type ReactElement, useMemo } from 'react'
@@ -9,10 +9,10 @@ import type { NewSafeFormData } from '@/components/new-safe/create'
 import useSyncSafeCreationStep from '@/components/new-safe/create/useSyncSafeCreationStep'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
-import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
+import { type SafeVersion } from '@safe-global/types-kit'
 import NumberField from '@/components/common/NumberField'
 import { useCurrentChain } from '@/hooks/useChains'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { createNewUndeployedSafeWithoutSalt } from '../../logic'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -248,13 +248,13 @@ const AdvancedOptionsStep = ({ onSubmit, onBack, data, setStep }: StepRenderProp
               <Button
                 data-testid="back-btn"
                 variant="outlined"
-                size="small"
+                size="large"
                 onClick={handleBack}
                 startIcon={<ArrowBackIcon fontSize="small" />}
               >
                 Back
               </Button>
-              <Button data-testid="next-btn" type="submit" variant="contained" size="stretched" disabled={isDisabled}>
+              <Button data-testid="next-btn" type="submit" variant="contained" size="large" disabled={isDisabled}>
                 Next
               </Button>
             </Box>

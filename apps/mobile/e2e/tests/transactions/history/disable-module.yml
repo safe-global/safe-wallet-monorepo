@@ -1,0 +1,25 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - history
+  - settings
+---
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Navigate to Transaction History using e2e button
+- tapOn:
+    id: 'e2eTransactionHistoryDirect'
+
+- assertVisible:
+    id: 'tx-history-list'
+
+# Scroll down to find disable module transaction
+- scrollUntilVisible:
+    element:
+      text: '.*disableModule.*'
+    centerElement: true
+
+# Test disable module transaction
+- runFlow:
+    file: ../../../utils/components/tx-history/disable-module-tx-card.yml

@@ -1,37 +1,69 @@
-import { TxDataRow, generateDataRowValue } from '../TxDataRow'
-import { type SafeTransactionData, type SafeVersion } from '@safe-global/safe-core-sdk-types'
-import useSafeAddress from '@/hooks/useSafeAddress'
-import useChainId from '@/hooks/useChainId'
-import { getDomainHash, getSafeTxMessageHash } from '@/utils/safe-hashes'
+import { useMemo } from 'react'
+import { type SafeTransactionData, type SafeVersion } from '@safe-global/types-kit'
+import { calculateSafeTransactionHash } from '@safe-global/protocol-kit'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { getDomainHash, getSafeTxMessageHash } from '@safe-global/utils/utils/safe-hashes'
+import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 
-export const SafeTxHashDataRow = ({
-  safeTxHash,
+export function useDomainHash(): string | null {
+  const { safe, safeAddress } = useSafeInfo()
+  const safeSDK = useSafeSDK()
+
+  return useMemo(() => {
+    // Try to get version from SDK first, fall back to safe.version
+    const version = safeSDK?.getContractVersion() || safe.version
+    if (!version) {
+      return null
+    }
+    try {
+      return getDomainHash({ chainId: safe.chainId, safeAddress, safeVersion: version as SafeVersion })
+    } catch {
+      return null
+    }
+  }, [safe.chainId, safe.version, safeAddress, safeSDK])
+}
+
+export function useMessageHash({ safeTxData }: { safeTxData: SafeTransactionData }): string | null {
+  const { safe } = useSafeInfo()
+  const safeSDK = useSafeSDK()
+
+  return useMemo(() => {
+    // Try to get version from SDK first, fall back to safe.version
+    const version = safeSDK?.getContractVersion() || safe.version
+    if (!version) {
+      return null
+    }
+    try {
+      return getSafeTxMessageHash({ safeVersion: version as SafeVersion, safeTxData })
+    } catch {
+      return null
+    }
+  }, [safe.version, safeTxData, safeSDK])
+}
+
+export function useSafeTxHash({
   safeTxData,
-  safeVersion,
+  safeTxHash,
 }: {
-  safeTxHash: string
-  safeTxData?: SafeTransactionData
-  safeVersion: SafeVersion
-}) => {
-  const chainId = useChainId()
-  const safeAddress = useSafeAddress()
+  safeTxData: SafeTransactionData
+  safeTxHash?: string
+}): string | null {
+  const { safe, safeAddress } = useSafeInfo()
+  const safeSDK = useSafeSDK()
 
-  const domainHash = getDomainHash({ chainId, safeAddress, safeVersion })
-  const messageHash = safeTxData ? getSafeTxMessageHash({ safeVersion, safeTxData }) : undefined
-
-  return (
-    <>
-      <TxDataRow datatestid="tx-safe-hash" title="safeTxHash:">
-        {generateDataRowValue(safeTxHash, 'hash')}
-      </TxDataRow>
-      <TxDataRow datatestid="tx-domain-hash" title="Domain hash:">
-        {generateDataRowValue(domainHash, 'hash')}
-      </TxDataRow>
-      {messageHash && (
-        <TxDataRow datatestid="tx-message-hash" title="Message hash:">
-          {generateDataRowValue(messageHash, 'hash')}
-        </TxDataRow>
-      )}
-    </>
-  )
+  return useMemo(() => {
+    if (safeTxHash) {
+      return safeTxHash
+    }
+    // Try to get version from SDK first, fall back to safe.version
+    const version = safeSDK?.getContractVersion() || safe.version
+    if (!version) {
+      return null
+    }
+    try {
+      return calculateSafeTransactionHash(safeAddress, safeTxData, version, BigInt(safe.chainId))
+    } catch {
+      return null
+    }
+  }, [safeTxData, safe.chainId, safe.version, safeAddress, safeTxHash, safeSDK])
 }

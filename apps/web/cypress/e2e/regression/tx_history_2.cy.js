@@ -3,6 +3,7 @@ import * as main from '../pages/main.page'
 import * as createTx from '../pages/create_tx.pages'
 import * as data from '../../fixtures/txhistory_data_data.json'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import * as batches from '../pages/batches.pages'
 
 let staticSafes = []
 
@@ -43,13 +44,9 @@ describe('Tx history tests 2', () => {
 
   // Added to prod
   // On-chain rejection
-  it('Verify exapanded details for on-chain rejection', () => {
+  it('Verify expanded details for on-chain rejection', () => {
     createTx.clickOnTransactionItemByName(typeOnchainRejection.title)
-    createTx.verifyExpandedDetails([
-      typeOnchainRejection.description,
-      typeOnchainRejection.transactionHash,
-      typeOnchainRejection.safeTxHash,
-    ])
+    createTx.verifyExpandedDetails([typeOnchainRejection.description])
     createTx.verifyActionListExists([
       typeSideActions.rejectionCreated,
       typeSideActions.confirmations,
@@ -59,13 +56,11 @@ describe('Tx history tests 2', () => {
 
   // Added to prod
   // Batch transaction
-  it('Verify exapanded details for batch', () => {
+  it('Verify expanded details for batch', () => {
     createTx.clickOnTransactionItemByName(typeBatch.title, typeBatch.summaryTxInfo)
-    createTx.verifyExpandedDetails(
-      [typeBatch.contractTitle, typeBatch.transactionHash, typeBatch.safeTxHash],
-      createTx.delegateCallWarning,
-    )
-    createTx.verifyActions([typeBatch.nativeTransfer.title])
+    createTx.verifyExpandedDetails([typeBatch.contractTitle], createTx.delegateCallWarning)
+    cy.get(batches.allActionsSection).should('exist')
+    batches.verifyCountOfActions(2)
   })
 
   // Added to prod
@@ -74,16 +69,10 @@ describe('Tx history tests 2', () => {
     createTx.verifySummaryByName(typeAddOwner.title, null, [typeGeneral.statusOk], typeAddOwner.altImage)
   })
 
-  it('Verify exapanded details for adding owner', () => {
+  it('Verify expanded details for adding owner', () => {
     createTx.clickOnTransactionItemByName(typeAddOwner.title)
     createTx.verifyExpandedDetails(
-      [
-        typeAddOwner.description,
-        typeAddOwner.requiredConfirmationsTitle,
-        typeAddOwner.ownerAddress,
-        typeAddOwner.transactionHash,
-        typeAddOwner.safeTxHash,
-      ],
+      [typeAddOwner.description, typeAddOwner.requiredConfirmationsTitle, typeAddOwner.ownerAddress],
       createTx.policyChangeWarning,
     )
   })
@@ -95,7 +84,7 @@ describe('Tx history tests 2', () => {
   })
 
   // Added to prod
-  it('Verify exapanded details for changing owner', () => {
+  it('Verify expanded details for changing owner', () => {
     createTx.clickOnTransactionItemByName(typeChangeOwner.title)
     createTx.verifyExpandedDetails([
       typeChangeOwner.description,
@@ -103,9 +92,6 @@ describe('Tx history tests 2', () => {
       typeChangeOwner.newOwner.ownerAddress,
       typeChangeOwner.oldOwner.actionTitile,
       typeChangeOwner.oldOwner.ownerAddress,
-
-      typeChangeOwner.transactionHash,
-      typeChangeOwner.safeTxHash,
     ])
   })
 
@@ -115,16 +101,10 @@ describe('Tx history tests 2', () => {
     createTx.verifySummaryByName(typeRemoveOwner.title, null, [typeGeneral.statusOk], typeRemoveOwner.altImage)
   })
 
-  it('Verify exapanded details for removing owner', () => {
+  it('Verify expanded details for removing owner', () => {
     createTx.clickOnTransactionItemByName(typeRemoveOwner.title)
     createTx.verifyExpandedDetails(
-      [
-        typeRemoveOwner.description,
-        typeRemoveOwner.requiredConfirmationsTitle,
-        typeRemoveOwner.ownerAddress,
-        typeRemoveOwner.transactionHash,
-        typeRemoveOwner.safeTxHash,
-      ],
+      [typeRemoveOwner.description, typeRemoveOwner.requiredConfirmationsTitle, typeRemoveOwner.ownerAddress],
       createTx.policyChangeWarning,
     )
     createTx.checkRequiredThreshold(1)
@@ -136,14 +116,9 @@ describe('Tx history tests 2', () => {
     createTx.verifySummaryByName(typeDisableOwner.title, null, [typeGeneral.statusOk], typeDisableOwner.altImage)
   })
 
-  it('Verify exapanded details for disable module', () => {
+  it('Verify expanded details for disable module', () => {
     createTx.clickOnTransactionItemByName(typeDisableOwner.title)
-    createTx.verifyExpandedDetails([
-      typeDisableOwner.description,
-      typeDisableOwner.address,
-      typeDisableOwner.transactionHash,
-      typeDisableOwner.safeTxHash,
-    ])
+    createTx.verifyExpandedDetails([typeDisableOwner.description, typeDisableOwner.address])
   })
 
   // Added to prod
@@ -153,16 +128,9 @@ describe('Tx history tests 2', () => {
   })
 
   // Added to prod
-  it('Verify exapanded details for changing threshold', () => {
+  it('Verify expanded details for changing threshold', () => {
     createTx.clickOnTransactionItemByName(typeChangeThreshold.title)
-    createTx.verifyExpandedDetails(
-      [
-        typeChangeThreshold.requiredConfirmationsTitle,
-        typeChangeThreshold.transactionHash,
-        typeChangeThreshold.safeTxHash,
-      ],
-      createTx.policyChangeWarning,
-    )
+    createTx.verifyExpandedDetails([typeChangeThreshold.requiredConfirmationsTitle], createTx.policyChangeWarning)
     createTx.checkRequiredThreshold(2)
   })
 
@@ -170,5 +138,16 @@ describe('Tx history tests 2', () => {
   it('Verify that sender address of untrusted token will not be copied until agreed in warning popup', () => {
     createTx.clickOnTransactionItemByName(typeUntrustedToken.summaryTitle, typeUntrustedToken.summaryTxInfo)
     createTx.verifyAddressNotCopied(0, typeUntrustedToken.senderAddress)
+  })
+
+  it('Verify tx hashes are grouped in advanced details', () => {
+    createTx.clickOnTransactionItemByName(typeDisableOwner.title)
+    createTx.verifyExpandedDetails([typeDisableOwner.description, typeDisableOwner.address])
+    createTx.clickOnAdvancedDetails()
+    createTx.clickOnHashes()
+    main.verifyElementByTextExists('Domain hash')
+    main.verifyElementByTextExists('Message hash')
+    main.verifyElementByTextExists('safeTxHash')
+    //TBD - add check for the hash format - createTx.checkHashesExist(3)?
   })
 })

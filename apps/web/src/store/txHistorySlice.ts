@@ -1,8 +1,9 @@
+import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { listenerMiddlewareInstance } from '@/store'
 import { createSelector } from '@reduxjs/toolkit'
-import type { TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
 import {
   isCreationTxInfo,
+  isCustomTxInfo,
   isIncomingTransfer,
   isMultisigExecutionInfo,
   isTransactionListItem,
@@ -10,8 +11,10 @@ import {
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { clearPendingTx, selectPendingTxs } from './pendingTxsSlice'
 import { makeLoadableSlice } from './common'
+import { selectSafeInfo } from './slices'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 
-const { slice, selector } = makeLoadableSlice('txHistory', undefined as TransactionListPage | undefined)
+const { slice, selector } = makeLoadableSlice('txHistory', undefined as TransactionItemPage | undefined)
 
 export const txHistorySlice = slice
 export const selectTxHistory = selector
@@ -45,6 +48,29 @@ export const txHistoryListener = (listenerMiddleware: typeof listenerMiddlewareI
 
         if (!pendingTxByNonce) continue
 
+        // Invalidate getOwnedSafe cache as nested Safe was (likely) created
+        if (isCustomTxInfo(result.transaction.txInfo)) {
+          const method = result.transaction.txInfo.methodName
+          const deployedSafe = method === 'createProxyWithNonce'
+          const likelyDeployedSafe = method === 'multiSend'
+
+          if (deployedSafe || likelyDeployedSafe) {
+            const safe = selectSafeInfo(listenerApi.getState())
+            const safeAddress = safe.data?.address?.value
+            const chainId = safe.data?.chainId
+
+            if (chainId && safeAddress) {
+              listenerApi.dispatch(
+                cgwApi.util.invalidateTags([
+                  {
+                    type: 'owners',
+                  },
+                ]),
+              )
+            }
+          }
+        }
+
         const txId = result.transaction.id
 
         const [pendingTxId, pendingTx] = pendingTxByNonce
@@ -54,6 +80,8 @@ export const txHistoryListener = (listenerMiddleware: typeof listenerMiddlewareI
           txDispatch(TxEvent.SUCCESS, {
             nonce: pendingTx.nonce,
             txId,
+            chainId: pendingTx.chainId,
+            safeAddress: pendingTx.safeAddress,
             groupKey: pendingTxs[txId].groupKey,
             txHash,
           })

@@ -1,7 +1,6 @@
 import { useState, useMemo, type ReactElement, type MouseEvent } from 'react'
 import ButtonBase from '@mui/material/ButtonBase'
 import Popover from '@mui/material/Popover'
-import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import MuiLink from '@mui/material/Link'
@@ -26,8 +25,8 @@ import css from './styles.module.css'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
 import SvgIcon from '@mui/icons-material/ExpandLess'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
 import { useShowNotificationsRenewalMessage } from '@/components/settings/PushNotifications/hooks/useShowNotificationsRenewalMessage'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const NOTIFICATION_CENTER_LIMIT = 4
 
@@ -100,7 +99,16 @@ const NotificationCenter = (): ReactElement => {
 
   return (
     <>
-      <ButtonBase className={css.bell} onClick={handleClick}>
+      <ButtonBase
+        className={css.bell}
+        onClick={handleClick}
+        sx={{
+          '&:hover': {
+            backgroundColor: 'background.light',
+            borderRadius: '6px',
+          },
+        }}
+      >
         <UnreadBadge
           invisible={!hasUnread}
           count={unreadCount}
@@ -135,66 +143,70 @@ const NotificationCenter = (): ReactElement => {
           },
         }}
         transitionDuration={0}
+        slotProps={{ paper: { className: css.popoverContainer } }}
       >
-        <Paper className={css.popoverContainer}>
-          <div className={css.popoverHeader}>
-            <div>
-              <Typography variant="h4" component="span" fontWeight={700}>
-                Notifications
-              </Typography>
-              {hasUnread && (
-                <Typography variant="caption" className={css.unreadCount}>
-                  {unreadCount}
-                </Typography>
-              )}
-            </div>
-            {notifications.length > 0 && (
-              <MuiLink onClick={handleClear} variant="body2" component="button" sx={{ textDecoration: 'unset' }}>
-                Clear all
-              </MuiLink>
-            )}
-          </div>
-
+        <div className={css.popoverHeader}>
           <div>
-            <NotificationCenterList notifications={notificationsToShow} handleClose={handleClose} />
-          </div>
-
-          <div className={css.popoverFooter}>
-            {canExpand && (
-              <>
-                <IconButton onClick={() => setShowAll((prev) => !prev)} disableRipple className={css.expandButton}>
-                  <UnreadBadge
-                    invisible={showAll || unreadCount <= NOTIFICATION_CENTER_LIMIT}
-                    anchorOrigin={{
-                      vertical: 'top',
-                      horizontal: 'left',
-                    }}
-                  >
-                    <ExpandIcon color="border" />
-                  </UnreadBadge>
-                </IconButton>
-                <Typography sx={{ color: ({ palette }) => palette.border.main }}>
-                  {showAll ? 'Hide' : `${notifications.length - NOTIFICATION_CENTER_LIMIT} other notifications`}
-                </Typography>
-              </>
+            <Typography data-testid="notifications-title" variant="h4" component="span" fontWeight={700}>
+              Notifications
+            </Typography>
+            {hasUnread && (
+              <Typography variant="caption" className={css.unreadCount}>
+                {unreadCount}
+              </Typography>
             )}
+          </div>
+          {notifications.length > 0 && (
+            <MuiLink onClick={handleClear} variant="body2" component="button" sx={{ textDecoration: 'unset' }}>
+              Clear all
+            </MuiLink>
+          )}
+        </div>
 
-            {hasPushNotifications && (
-              <Link
-                href={{
-                  pathname: AppRoutes.settings.notifications,
-                  query: router.query,
-                }}
-                passHref
-                legacyBehavior
+        <div>
+          <NotificationCenterList notifications={notificationsToShow} handleClose={handleClose} />
+        </div>
+
+        <div className={css.popoverFooter}>
+          {canExpand && (
+            <>
+              <IconButton onClick={() => setShowAll((prev) => !prev)} disableRipple className={css.expandButton}>
+                <UnreadBadge
+                  invisible={showAll || unreadCount <= NOTIFICATION_CENTER_LIMIT}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                  }}
+                >
+                  <ExpandIcon color="border" />
+                </UnreadBadge>
+              </IconButton>
+              <Typography sx={{ color: ({ palette }) => palette.border.main }}>
+                {showAll ? 'Hide' : `${notifications.length - NOTIFICATION_CENTER_LIMIT} other notifications`}
+              </Typography>
+            </>
+          )}
+
+          {hasPushNotifications && (
+            <Link
+              href={{
+                pathname: AppRoutes.settings.notifications,
+                query: router.query,
+              }}
+              passHref
+              legacyBehavior
+            >
+              <MuiLink
+                data-testid="notifications-button"
+                className={css.settingsLink}
+                variant="body2"
+                onClick={onSettingsClick}
               >
-                <MuiLink className={css.settingsLink} variant="body2" onClick={onSettingsClick}>
-                  <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" /> Push notifications settings
-                </MuiLink>
-              </Link>
-            )}
-          </div>
-        </Paper>
+                <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" /> Push notifications settings
+              </MuiLink>
+            </Link>
+          )}
+        </div>
       </Popover>
     </>
   )

@@ -8,9 +8,9 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
-import { selectDelayModifierByAddress } from '@/features/recovery/services/selectors'
 import { RemoveRecoveryFlow } from '@/components/tx-flow/flows'
-import useRecovery from '@/features/recovery/hooks/useRecovery'
+import { RecoveryFeature, useRecovery } from '@/features/recovery'
+import { useLoadFeature } from '@/features/__core__'
 
 import css from '../TransactionGuards/styles.module.css'
 
@@ -25,7 +25,8 @@ const NoModules = () => {
 const ModuleDisplay = ({ moduleAddress, chainId, name }: { moduleAddress: string; chainId: string; name?: string }) => {
   const { setTxFlow } = useContext(TxModalContext)
   const [recovery] = useRecovery()
-  const delayModifier = recovery && selectDelayModifierByAddress(recovery, moduleAddress)
+  const { selectDelayModifierByAddress, $isReady } = useLoadFeature(RecoveryFeature)
+  const delayModifier = recovery && selectDelayModifierByAddress?.(recovery, moduleAddress)
 
   const onRemove = () => {
     if (delayModifier) {
@@ -52,7 +53,7 @@ const ModuleDisplay = ({ moduleAddress, chainId, name }: { moduleAddress: string
             onClick={onRemove}
             color="error"
             size="small"
-            disabled={!isOk}
+            disabled={!isOk || !$isReady}
             title="Remove module"
           >
             <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
@@ -81,7 +82,7 @@ const SafeModules = () => {
             <Typography>
               Modules allow you to customize the access-control logic of your Safe Account. Modules are potentially
               risky, so make sure to only use modules from trusted sources. Learn more about modules{' '}
-              <ExternalLink href="https://docs.safe.global/safe-core-protocol/plugins">here</ExternalLink>
+              <ExternalLink href="https://help.safe.global/articles/5490514177-What-is-a-module?">here</ExternalLink>
             </Typography>
             {safeModules.length === 0 ? (
               <NoModules />
@@ -91,7 +92,7 @@ const SafeModules = () => {
                   key={module.value}
                   chainId={safe.chainId}
                   moduleAddress={module.value}
-                  name={module.name}
+                  name={module.name || undefined}
                 />
               ))
             )}

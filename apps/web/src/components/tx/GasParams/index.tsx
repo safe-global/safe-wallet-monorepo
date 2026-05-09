@@ -1,17 +1,28 @@
-import { getTotalFee } from '@/hooks/useGasPrice'
 import type { ReactElement, SyntheticEvent } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Skeleton, Typography, Link, Grid, SvgIcon } from '@mui/material'
-import type { ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Skeleton,
+  Typography,
+  Link,
+  Grid,
+  SvgIcon,
+  Tooltip,
+} from '@mui/material'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import { useCurrentChain } from '@/hooks/useChains'
-import { formatVisualAmount } from '@/utils/formatters'
+import { getNativeTokenDisplay, NATIVE_TOKEN_DISPLAY_DEFAULT } from '@safe-global/utils/utils/chains'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { type AdvancedParameters } from '../AdvancedParams/types'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
 import classnames from 'classnames'
 import css from './styles.module.css'
 import accordionCss from '@/styles/accordion.module.css'
 import madProps from '@/utils/mad-props'
+import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 
 const GasDetail = ({ name, value, isLoading }: { name: string; value: string; isLoading: boolean }): ReactElement => {
   const valueSkeleton = <Skeleton variant="text" sx={{ minWidth: '5em' }} />
@@ -32,6 +43,11 @@ type GasParamsProps = {
   onEdit?: () => void
   gasLimitError?: Error
   willRelay?: boolean
+  noFeeCampaign?: {
+    isEligible: boolean
+    remaining: number
+    limit: number
+  }
 }
 
 export const _GasParams = ({
@@ -41,9 +57,15 @@ export const _GasParams = ({
   onEdit,
   gasLimitError,
   willRelay,
+  noFeeCampaign,
   chain,
-}: GasParamsProps & { chain?: ChainInfo }): ReactElement => {
+}: GasParamsProps & { chain?: Chain }): ReactElement => {
   const { nonce, userNonce, safeTxGas, gasLimit, maxFeePerGas, maxPriorityFeePerGas } = params
+  const { showGasFeeEstimation } = chain?.features ? getNativeTokenDisplay(chain) : NATIVE_TOKEN_DISPLAY_DEFAULT
+
+  if (!showGasFeeEstimation) {
+    return <></>
+  }
 
   const onChangeExpand = (_: SyntheticEvent, expanded: boolean) => {
     trackEvent({ ...MODALS_EVENTS.ESTIMATION, label: expanded ? 'Open' : 'Close' })
@@ -111,12 +133,27 @@ export const _GasParams = ({
                     fontSize="small"
                     sx={{ color: 'var(--color-error-main)', mr: 'var(--space-1)' }}
                   />
-                  <span style={{ fontWeight: 'normal' }}>Cannot Estimate</span>
+                  <span style={{ fontWeight: 'normal' }}>Cannot estimate</span>
                 </>
               ) : isLoading ? (
                 <Skeleton variant="text" sx={{ display: 'inline-block', minWidth: '7em' }} />
               ) : (
-                <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>
+                <div className={css.feeContainer}>
+                  {noFeeCampaign?.isEligible ? (
+                    <>
+                      <span className={css.feeAmount}>Free</span>
+                      <Tooltip
+                        title="As a USDe holder, you are eligible for the gas sponsorship program"
+                        arrow
+                        placement="top"
+                      >
+                        <span className={css.noFeeCampaignTag}>Free January Sponsored</span>
+                      </Tooltip>
+                    </>
+                  ) : (
+                    <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>
+                  )}
+                </div>
               )}
             </Typography>
           ) : (

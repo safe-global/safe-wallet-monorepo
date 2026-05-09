@@ -18,6 +18,11 @@
                 ]
             }
         ]
+    },
+    "webcredentials": {
+        "apps": [
+            "86487MHG6V.global.safe.mobileapp.ios",
+            "86487MHG6V.global.safe.mobileapp.ios.dev"
+        ]
     }
 }
-

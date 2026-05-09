@@ -1,6 +1,24 @@
-# Types
-src/types/contracts
+# Ignore auto-generated service workers but allow public/beamer-embed.js
+public/work*.js
 
-# Auto-generated service workers
-public/*.js
+# testing
+coverage
+reports
+report.json
+public/sw.js
+public/firebase*.js
+public/fallback*.js
 public/*.map
+
+# Cypress
+cypress/snapshots/
+
+# Chromatic
+.chromatic
+cypress/downloads/
+
+# Storybook
+storybook-static
+
+# Generated build-time data
+src/config/__generated__/

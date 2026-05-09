@@ -1,4 +1,5 @@
-import { selectUndeployedSafes, type UndeployedSafesState } from '@/features/counterfactual/store/undeployedSafesSlice'
+import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
+import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import {
   Box,
   Grid,
@@ -19,11 +20,10 @@ import difference from 'lodash/difference'
 import pickBy from 'lodash/pickBy'
 import { Fragment, useEffect, useMemo, useState } from 'react'
 import type { ReactElement } from 'react'
-import type { AllOwnedSafes } from '@safe-global/safe-gateway-typescript-sdk'
-import { type ChainInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useChains from '@/hooks/useChains'
 import { useAppSelector } from '@/store'
 import { useNotificationPreferences } from './hooks/useNotificationPreferences'
@@ -37,11 +37,12 @@ import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermis
 import { Permission } from '@/permissions/config'
 
 import css from './styles.module.css'
-import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
+import { useAllOwnedSafes } from '@/hooks/safes'
 import useWallet from '@/hooks/wallets/useWallet'
 import { selectAllAddedSafes, type AddedSafesState } from '@/store/addedSafesSlice'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { useNotificationsRenewal } from './hooks/useNotificationsRenewal'
+import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
 
 // UI logic
 
@@ -81,10 +82,7 @@ export const _transformCurrentSubscribedSafes = (
 }
 
 // Remove Safes that are not on a supported chain
-export const _sanitizeNotifiableSafes = (
-  chains: Array<ChainInfo>,
-  notifiableSafes: NotifiableSafes,
-): NotifiableSafes => {
+export const _sanitizeNotifiableSafes = (chains: Array<Chain>, notifiableSafes: NotifiableSafes): NotifiableSafes => {
   return Object.entries(notifiableSafes).reduce<NotifiableSafes>((acc, [chainId, safeAddresses]) => {
     const chain = chains.find((chain) => chain.chainId === chainId)
 

@@ -1,6 +1,5 @@
-import { HexEncodedData } from '@/components/transactions/HexEncodedData'
-import { Operation } from '@safe-global/safe-gateway-typescript-sdk'
-import type { TransactionData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { Operation } from '@safe-global/store/gateway/types'
 import { useState, useEffect } from 'react'
 import type { Dispatch, ReactElement, SetStateAction } from 'react'
 import type { AccordionProps } from '@mui/material/Accordion/Accordion'
@@ -10,8 +9,9 @@ import css from './styles.module.css'
 import classnames from 'classnames'
 
 type MultisendProps = {
-  txData?: TransactionData
+  txData?: TransactionData | null
   compact?: boolean
+  isExecuted?: boolean
 }
 
 export const MultisendActionsHeader = ({
@@ -44,7 +44,7 @@ export const MultisendActionsHeader = ({
   )
 }
 
-export const Multisend = ({ txData, compact = false }: MultisendProps): ReactElement | null => {
+const Multisend = ({ txData, compact = false, isExecuted = false }: MultisendProps): ReactElement | null => {
   const [openMap, setOpenMap] = useState<Record<number, boolean>>()
   const isOpenMapUndefined = openMap == null
 
@@ -53,55 +53,50 @@ export const Multisend = ({ txData, compact = false }: MultisendProps): ReactEle
 
   useEffect(() => {
     // Initialise whether each transaction should be expanded or not
-    if (isOpenMapUndefined && multiSendTransactions) {
+    if (isOpenMapUndefined && Array.isArray(multiSendTransactions)) {
       setOpenMap(multiSendTransactions.map(({ operation }) => operation === Operation.DELEGATE))
     }
   }, [multiSendTransactions, isOpenMapUndefined])
 
-  if (!txData) return null
+  if (!multiSendTransactions) return null
 
-  // ? when can a multiSend call take no parameters?
-  if (!txData.dataDecoded?.parameters) {
-    if (txData.hexData) {
-      return <HexEncodedData title="Data (hex encoded)" hexData={txData.hexData} />
-    }
-    return null
-  }
-
-  if (!multiSendTransactions) {
-    return null
-  }
   return (
     <>
-      <MultisendActionsHeader setOpen={setOpenMap} amount={multiSendTransactions.length} compact={compact} />
+      <MultisendActionsHeader
+        setOpen={setOpenMap}
+        amount={Array.isArray(multiSendTransactions) ? multiSendTransactions.length : 0}
+        compact={compact}
+      />
 
       <div className={compact ? css.compact : ''}>
-        {multiSendTransactions.map(({ dataDecoded, data, value, to, operation }, index) => {
-          const onChange: AccordionProps['onChange'] = (_, expanded) => {
-            setOpenMap((prev) => ({
-              ...prev,
-              [index]: expanded,
-            }))
-          }
+        {Array.isArray(multiSendTransactions) &&
+          multiSendTransactions.map(({ dataDecoded, data, value, to, operation }, index) => {
+            const onChange: AccordionProps['onChange'] = (_, expanded) => {
+              setOpenMap((prev) => ({
+                ...prev,
+                [index]: expanded,
+              }))
+            }
 
-          return (
-            <SingleTxDecoded
-              key={`${data ?? to}-${index}`}
-              tx={{
-                dataDecoded,
-                data,
-                value,
-                to,
-                operation,
-              }}
-              txData={txData}
-              actionTitle={`${index + 1}`}
-              variant={compact ? 'outlined' : 'elevation'}
-              expanded={openMap?.[index] ?? false}
-              onChange={onChange}
-            />
-          )
-        })}
+            return (
+              <SingleTxDecoded
+                key={`${data ?? to}-${index}`}
+                tx={{
+                  dataDecoded,
+                  data,
+                  value,
+                  to,
+                  operation,
+                }}
+                txData={txData}
+                actionTitle={`${index + 1}`}
+                variant={compact ? 'outlined' : 'elevation'}
+                expanded={openMap?.[index] ?? false}
+                onChange={onChange}
+                isExecuted={isExecuted}
+              />
+            )
+          })}
       </div>
     </>
   )

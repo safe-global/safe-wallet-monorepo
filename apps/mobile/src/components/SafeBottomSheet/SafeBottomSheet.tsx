@@ -1,15 +1,18 @@
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
-import { getTokenValue, H5, View } from 'tamagui'
-import React, { useCallback } from 'react'
+import { getTokenValue, getVariable, H4, useTheme, View } from 'tamagui'
+import React, { useCallback, useEffect, useRef } from 'react'
 import BottomSheet, {
   BottomSheetFooterProps,
   BottomSheetModalProps,
-  BottomSheetView,
   BottomSheetScrollView,
+  BottomSheetFooter,
 } from '@gorhom/bottom-sheet'
 import DraggableFlatList, { DragEndParams, RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist'
-import { StyleSheet } from 'react-native'
+import { Platform, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { LoadingTx } from '@/src/features/ConfirmTx/components/LoadingTx'
+import { TestCtrls } from '@/src/tests/e2e-maestro/components/TestCtrls'
 
 interface SafeBottomSheetProps<T> {
   children?: React.ReactNode
@@ -19,9 +22,10 @@ interface SafeBottomSheetProps<T> {
   items?: T[]
   snapPoints?: BottomSheetModalProps['snapPoints']
   actions?: React.ReactNode
-  footerComponent?: React.FC<BottomSheetFooterProps>
+  FooterComponent?: React.FC
   renderItem?: React.FC<{ item: T; isDragging?: boolean; drag?: () => void; onClose: () => void }>
   keyExtractor?: ({ item, index }: { item: T; index: number }) => string
+  loading?: boolean
 }
 
 export function SafeBottomSheet<T>({
@@ -29,16 +33,21 @@ export function SafeBottomSheet<T>({
   title,
   sortable,
   items,
-  snapPoints = [600, '90%'],
+  loading,
+  snapPoints = [600, '100%'],
   keyExtractor,
   actions,
   renderItem: Render,
-  footerComponent,
+  FooterComponent,
   onDragEnd,
 }: SafeBottomSheetProps<T>) {
+  const ref = useRef<BottomSheet>(null)
   const router = useRouter()
-  const hasCustomItems = items && Render
-  const isSortable = items && sortable
+  const insets = useSafeAreaInsets()
+  const [footerHeight, setFooterHeight] = React.useState(0)
+  const hasCustomItems = items?.length && Render
+  const isSortable = items?.length && sortable
+  const theme = useTheme()
 
   const onClose = useCallback(() => {
     router.back()
@@ -57,11 +66,19 @@ export function SafeBottomSheet<T>({
 
   const TitleHeader = useCallback(
     () => (
-      <View justifyContent="center" marginTop="$3" marginBottom="$4" alignItems="center">
-        <H5 fontWeight={600}>{title}</H5>
+      <View
+        justifyContent="center"
+        paddingTop="$3"
+        paddingBottom="$4"
+        alignItems="center"
+        backgroundColor="$backgroundSheet"
+      >
+        <H4 fontWeight={600} tabIndex={0}>
+          {title}
+        </H4>
 
         {actions && (
-          <View position="absolute" right={'$4'} top={'$1'}>
+          <View position="absolute" right={'$4'} top={'$3'} justifyContent="center" alignItems="center">
             {actions}
           </View>
         )}
@@ -77,8 +94,34 @@ export function SafeBottomSheet<T>({
     }
   }, [])
 
+  // Auto-expand when sorting is enabled
+  useEffect(() => {
+    if (sortable && ref.current) {
+      ref.current.expand()
+    }
+  }, [sortable])
+
+  // Wrapping the footer component with a function to get the height of the footer
+  const renderFooter: React.FC<BottomSheetFooterProps> = useCallback(
+    (props) => {
+      return (
+        <BottomSheetFooter animatedFooterPosition={props.animatedFooterPosition} bottomInset={insets.bottom}>
+          <View
+            onLayout={(e) => {
+              setFooterHeight(e.nativeEvent.layout.height)
+            }}
+            accessible={true}
+          >
+            {FooterComponent && <FooterComponent />}
+          </View>
+        </BottomSheetFooter>
+      )
+    },
+    [FooterComponent, setFooterHeight],
+  )
   return (
     <BottomSheet
+      ref={ref}
       enableOverDrag={false}
       snapPoints={snapPoints}
       enableDynamicSizing={true}
@@ -86,38 +129,61 @@ export function SafeBottomSheet<T>({
       enablePanDownToClose
       overDragResistanceFactor={10}
       backgroundComponent={BackgroundComponent}
-      backdropComponent={BackdropComponent}
-      footerComponent={footerComponent}
+      // on iOS, if we don't call router.back() from the backdrop the close animation feels extremely slow
+      // iOS first slides the sheet down then triggers the removal of the backdrop
+      // when router.back() is called from the backdrop, the sheet no longer emits onChange events on iOS
+      // on Android the router.back() on the backdrop navigates back, but the onChange event is still triggered
+      // because of this on Android we end up with double navigation back and end up on the wrong screen
+      backdropComponent={() => <BackdropComponent shouldNavigateBack={Platform.OS === 'ios'} />}
+      footerComponent={isSortable ? undefined : renderFooter}
+      topInset={insets.top}
+      handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
+      accessible={false}
     >
-      {!isSortable && !!title && <TitleHeader />}
-      <BottomSheetView style={[styles.contentContainer, !isSortable ? { flex: 1 } : undefined]}>
-        {isSortable ? (
-          <DraggableFlatList<T>
-            data={items}
-            containerStyle={{ height: '90%' }}
-            ListHeaderComponent={title ? <TitleHeader /> : undefined}
-            onDragEnd={onDragEnd}
-            keyExtractor={(item, index) => (keyExtractor ? keyExtractor({ item, index }) : index.toString())}
-            renderItem={renderItem}
-          />
-        ) : (
-          <BottomSheetScrollView contentContainerStyle={styles.scrollInnerContainer}>
-            <View minHeight={200} alignItems="center" paddingVertical="$3">
-              <View alignItems="flex-start" paddingBottom="$4" width="100%">
-                {hasCustomItems
-                  ? items.map((item, index) => (
-                      <Render
-                        key={keyExtractor ? keyExtractor({ item, index }) : index}
-                        item={item}
-                        onClose={onClose}
-                      />
-                    ))
-                  : children}
-              </View>
+      {/** in e2e tests, the bottom sheet renders on top of the normal content,
+       * and the test controls are no longer visible, so we need to render them again here
+       * We need this mostly for the copy/paste tests.
+       **/}
+      <TestCtrls />
+      {isSortable ? (
+        <DraggableFlatList<T>
+          data={items}
+          contentContainerStyle={{ paddingBottom: insets.bottom }}
+          ListHeaderComponent={title ? <TitleHeader /> : undefined}
+          stickyHeaderIndices={title ? [0] : undefined}
+          onDragEnd={onDragEnd}
+          keyExtractor={(item, index) => (keyExtractor ? keyExtractor({ item, index }) : index.toString())}
+          renderItem={renderItem}
+        />
+      ) : (
+        <BottomSheetScrollView
+          accessible={false}
+          contentContainerStyle={[
+            styles.scrollInnerContainer,
+            {
+              paddingBottom:
+                (!sortable && FooterComponent ? footerHeight : insets.bottom) +
+                getTokenValue(Platform.OS === 'ios' ? '$4' : '$8'),
+            },
+          ]}
+          stickyHeaderIndices={title ? [0] : undefined}
+        >
+          {title && <TitleHeader />}
+          <View minHeight={200} alignItems="center" paddingVertical="$3">
+            <View alignItems="flex-start" paddingBottom="$4" width="100%">
+              {loading ? (
+                <LoadingTx />
+              ) : hasCustomItems ? (
+                items.map((item, index) => (
+                  <Render key={keyExtractor ? keyExtractor({ item, index }) : index} item={item} onClose={onClose} />
+                ))
+              ) : (
+                children
+              )}
             </View>
-          </BottomSheetScrollView>
-        )}
-      </BottomSheetView>
+          </View>
+        </BottomSheetScrollView>
+      )}
     </BottomSheet>
   )
 }
@@ -126,5 +192,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     justifyContent: 'space-around',
   },
-  scrollInnerContainer: { paddingHorizontal: getTokenValue('$3'), paddingBottom: getTokenValue('$5') },
+  scrollInnerContainer: {
+    paddingHorizontal: getTokenValue('$2'),
+  },
 })

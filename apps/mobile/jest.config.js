@@ -1,5 +1,8 @@
 const preset = require('../../config/test/presets/jest-preset')
 
+// Set timezone to UTC for consistent date formatting across environments
+process.env.TZ = 'UTC'
+
 module.exports = {
   ...preset,
   preset: 'jest-expo',
@@ -11,14 +14,14 @@ module.exports = {
     '!./src/types/**',
     '!./src/**/*.snap',
   ],
-  coverageReporters: ['json-summary', 'html', 'text-summary'],
-  setupFilesAfterEnv: ['./src/tests/jest.setup.tsx', './src/tests/test-utils.tsx'],
+  coverageReporters: ['json-summary', 'html', 'text-summary', 'lcov'],
+  setupFilesAfterEnv: ['./src/tests/jest.setup.tsx'],
   moduleNameMapper: {
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/__mocks__/fileMock.js',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@sentry/react-native|native-base|react-native-svg|@notifee/react-native|react-redux|moti/.*)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|native-base|react-native-svg|@notifee/react-native|react-redux|@ledgerhq/.*|uuid|@reduxjs/toolkit|immer|@datadog/.*|tamagui|@tamagui/.*)',
   ],
   testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
 }

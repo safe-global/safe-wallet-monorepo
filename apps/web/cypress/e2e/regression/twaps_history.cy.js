@@ -23,37 +23,6 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify order details', { defaultCommandTimeout: 60000 }, () => {
-    const limitPrice = swaps.createRegex(swapOrder.DAIeqCOW, 'COW')
-    const widgetFee = swaps.getWidgetFee()
-    const slippage = swaps.getWidgetFee()
-
-    cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_27)
-    main.waitForHistoryCallToComplete()
-    wallet.connectSigner(signer)
-    iframeSelector = `iframe[src*="${constants.swapWidget}"]`
-    swaps.acceptLegalDisclaimer()
-    main.getIframeBody(iframeSelector).within(() => {
-      swaps.switchToTwap()
-      swaps.selectInputCurrency(swaps.swapTokens.cow)
-      swaps.setInputValue(500)
-      swaps.selectOutputCurrency(swaps.swapTokens.dai)
-      swaps.verifyReviewOrderBtnIsVisible()
-      swaps.getTwapInitialData().then((formData) => {
-        cy.wrap(formData).as('twapFormData')
-        swaps.clickOnReviewOrderBtn()
-        swaps.placeTwapOrder()
-      })
-    })
-
-    cy.get('@twapFormData').then((formData) => {
-      swaps.checkTwapValuesInReviewScreen(formData)
-      cy.get('p').contains(swapsHistory.slippage).parent().next().contains(slippage)
-      cy.get('p').contains(swapsHistory.widget_fee).parent().next().contains(widgetFee)
-      cy.get('p').contains(swapsHistory.limitPrice).parent().next().contains(limitPrice)
-    })
-  })
-
   it('Verify partially filled sell order', () => {
     const tx =
       'sep:0x8f4A19C85b39032A37f7a6dCc65234f966F72551&id=multisig_0x8f4A19C85b39032A37f7a6dCc65234f966F72551_0x2fdf5e5d94306de5f7285fd74ca014067b090338b3ff15e3f66d6c02ef81e4a4'

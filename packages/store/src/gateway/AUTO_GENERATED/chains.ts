@@ -35,33 +35,83 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/about/indexing` }),
         providesTags: ['chains'],
       }),
+      chainsGetGasPriceV1: build.query<ChainsGetGasPriceV1ApiResponse, ChainsGetGasPriceV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/gas-price` }),
+        providesTags: ['chains'],
+      }),
+      chainsGetChainsV2: build.query<ChainsGetChainsV2ApiResponse, ChainsGetChainsV2ApiArg>({
+        query: (queryArg) => ({
+          url: `/v2/chains`,
+          params: {
+            serviceKey: queryArg.serviceKey,
+            cursor: queryArg.cursor,
+          },
+        }),
+        providesTags: ['chains'],
+      }),
+      chainsGetChainV2: build.query<ChainsGetChainV2ApiResponse, ChainsGetChainV2ApiArg>({
+        query: (queryArg) => ({
+          url: `/v2/chains/${queryArg.chainId}`,
+          params: {
+            serviceKey: queryArg.serviceKey,
+          },
+        }),
+        providesTags: ['chains'],
+      }),
     }),
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type ChainsGetChainsV1ApiResponse = /** status 200  */ ChainPage
+export type ChainsGetChainsV1ApiResponse = /** status 200 Paginated list of supported chains */ ChainPage
 export type ChainsGetChainsV1ApiArg = {
+  /** Pagination cursor for retrieving the next set of results */
   cursor?: string
 }
-export type ChainsGetChainV1ApiResponse = /** status 200  */ Chain
+export type ChainsGetChainV1ApiResponse = /** status 200 Chain details retrieved successfully */ Chain
 export type ChainsGetChainV1ApiArg = {
+  /** Chain ID of the blockchain network */
   chainId: string
 }
-export type ChainsGetAboutChainV1ApiResponse = /** status 200  */ AboutChain
+export type ChainsGetAboutChainV1ApiResponse = /** status 200 Chain information retrieved successfully */ AboutChain
 export type ChainsGetAboutChainV1ApiArg = {
+  /** Chain ID of the blockchain network */
   chainId: string
 }
-export type ChainsGetBackboneV1ApiResponse = /** status 200  */ Backbone
+export type ChainsGetBackboneV1ApiResponse =
+  /** status 200 Chain backbone information retrieved successfully */ Backbone
 export type ChainsGetBackboneV1ApiArg = {
+  /** Chain ID of the blockchain network */
   chainId: string
 }
-export type ChainsGetMasterCopiesV1ApiResponse = /** status 200  */ MasterCopy[]
+export type ChainsGetMasterCopiesV1ApiResponse = /** status 200 List of Safe master copy contracts */ MasterCopy[]
 export type ChainsGetMasterCopiesV1ApiArg = {
+  /** Chain ID of the blockchain network */
   chainId: string
 }
-export type ChainsGetIndexingStatusV1ApiResponse = /** status 200  */ IndexingStatus
+export type ChainsGetIndexingStatusV1ApiResponse =
+  /** status 200 Chain indexing status retrieved successfully */ IndexingStatus
 export type ChainsGetIndexingStatusV1ApiArg = {
+  /** Chain ID of the blockchain network */
   chainId: string
+}
+export type ChainsGetGasPriceV1ApiResponse = /** status 200  */ GasPriceResponse
+export type ChainsGetGasPriceV1ApiArg = {
+  chainId: string
+}
+export type ChainsGetChainsV2ApiResponse =
+  /** status 200 Paginated list of supported chains with service-scoped features */ ChainPage
+export type ChainsGetChainsV2ApiArg = {
+  /** Service key for scoping chain features (e.g., WALLET_WEB, MOBILE) */
+  serviceKey: string
+  /** Pagination cursor for retrieving the next set of results */
+  cursor?: string
+}
+export type ChainsGetChainV2ApiResponse = /** status 200 Chain details with service-scoped features */ Chain
+export type ChainsGetChainV2ApiArg = {
+  /** Chain ID of the blockchain network */
+  chainId: string
+  /** Service key for scoping chain features (e.g., WALLET_WEB, MOBILE) */
+  serviceKey: string
 }
 export type NativeCurrency = {
   decimals: number
@@ -75,32 +125,21 @@ export type BlockExplorerUriTemplate = {
   txHash: string
 }
 export type BalancesProvider = {
-  chainName?: number | null
+  chainName: string | null
   enabled: boolean
 }
-export type ContractAddresses = {
-  safeSingletonAddress?: string | null
-  safeProxyFactoryAddress?: string | null
-  multiSendAddress?: string | null
-  multiSendCallOnlyAddress?: string | null
-  fallbackHandlerAddress?: string | null
-  signMessageLibAddress?: string | null
-  createCallAddress?: string | null
-  simulateTxAccessorAddress?: string | null
-  safeWebAuthnSignerFactoryAddress?: string | null
-}
 export type GasPriceOracle = {
-  type: string
+  type: 'oracle'
   gasParameter: string
   gweiFactor: string
   uri: string
 }
 export type GasPriceFixed = {
-  type: string
+  type: 'fixed'
   weiValue: string
 }
 export type GasPriceFixedEip1559 = {
-  type: string
+  type: 'fixed1559'
   maxFeePerGas: string
   maxPriorityFeePerGas: string
 }
@@ -119,6 +158,7 @@ export type Chain = {
   chainLogoUri?: string | null
   l2: boolean
   isTestnet: boolean
+  zk: boolean
   nativeCurrency: NativeCurrency
   transactionService: string
   blockExplorerUriTemplate: BlockExplorerUriTemplate
@@ -126,7 +166,6 @@ export type Chain = {
   disabledWallets: string[]
   ensRegistryAddress?: string | null
   balancesProvider: BalancesProvider
-  contractAddresses: ContractAddresses
   features: string[]
   gasPrice: (GasPriceOracle | GasPriceFixed | GasPriceFixedEip1559)[]
   publicRpcUri: RpcUri
@@ -162,8 +201,38 @@ export type MasterCopy = {
   version: string
 }
 export type IndexingStatus = {
-  lastSync: number
+  currentBlockNumber: number
+  currentBlockTimestamp: string
+  erc20BlockNumber: number
+  erc20BlockTimestamp: string
+  erc20Synced: boolean
+  masterCopiesBlockNumber: number
+  masterCopiesBlockTimestamp: string
+  masterCopiesSynced: boolean
   synced: boolean
+  lastSync: number
+}
+export type GasPriceResult = {
+  /** Last block number */
+  LastBlock: string
+  /** Safe gas price recommendation (Gwei) */
+  SafeGasPrice: string
+  /** Proposed gas price (Gwei) */
+  ProposeGasPrice: string
+  /** Fast gas price recommendation (Gwei) */
+  FastGasPrice: string
+  /** Base fee of the next pending block (Gwei) */
+  suggestBaseFee: string
+  /** Gas used ratio to estimate network congestion */
+  gasUsedRatio: string
+}
+export type GasPriceResponse = {
+  /** Status code ("1" = success) */
+  status: string
+  /** Response message */
+  message: string
+  /** Gas price data */
+  result: GasPriceResult
 }
 export const {
   useChainsGetChainsV1Query,
@@ -178,4 +247,10 @@ export const {
   useLazyChainsGetMasterCopiesV1Query,
   useChainsGetIndexingStatusV1Query,
   useLazyChainsGetIndexingStatusV1Query,
+  useChainsGetGasPriceV1Query,
+  useLazyChainsGetGasPriceV1Query,
+  useChainsGetChainsV2Query,
+  useLazyChainsGetChainsV2Query,
+  useChainsGetChainV2Query,
+  useLazyChainsGetChainV2Query,
 } = injectedRtkApi

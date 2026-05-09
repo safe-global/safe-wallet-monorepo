@@ -18,6 +18,7 @@ import { createFilterOptions } from '@mui/material/Autocomplete'
 import { Controller, useForm } from 'react-hook-form'
 
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import RotateLeftIcon from '@mui/icons-material/RotateLeft'
 import NumberField from '@/components/common/NumberField'
 import { useQueuedTxByNonce } from '@/hooks/useTxQueue'
@@ -26,7 +27,6 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { getLatestTransactions } from '@/utils/tx-list'
 import { getTransactionType } from '@/hooks/useTransactionType'
 import usePreviousNonces from '@/hooks/usePreviousNonces'
-import { isRejectionTx } from '@/utils/transactions'
 
 import css from './styles.module.css'
 import classNames from 'classnames'
@@ -107,13 +107,14 @@ const MAX_NONCE_DIFFERENCE = 100
 
 const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNonce: string }) => {
   const { safeTx, setNonce } = useContext(SafeTxContext)
+  const { isRejection } = useContext(TxFlowContext)
   const previousNonces = usePreviousNonces().map((nonce) => nonce.toString())
   const { safe } = useSafeInfo()
   const [warning, setWarning] = useState<string>('')
 
   const showRecommendedNonceButton = recommendedNonce !== nonce
   const isEditable = !safeTx || safeTx?.signatures.size === 0
-  const readOnly = !isEditable || isRejectionTx(safeTx)
+  const readOnly = !isEditable || isRejection
 
   const formMethods = useForm({
     defaultValues: {
@@ -234,9 +235,26 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
               },
             }}
             renderInput={(params) => {
+              // Extract Autocomplete's ref from params and combine with NumberField's forwardRef
+              const autocompleteRef = params.inputProps.ref
+
+              // Create combined ref that applies Autocomplete's ref
+              const combinedRef = (node: HTMLInputElement | null) => {
+                // Apply Autocomplete's ref
+                if (typeof autocompleteRef === 'function') {
+                  autocompleteRef(node)
+                } else if (autocompleteRef && typeof autocompleteRef === 'object' && 'current' in autocompleteRef) {
+                  ;(autocompleteRef as React.RefObject<HTMLInputElement | null>).current = node
+                }
+              }
+
+              // Remove ref from inputProps since we'll pass it via NumberField's forwardRef
+              const { ref: _, ...inputPropsWithoutRef } = params.inputProps
+
               return (
                 <Tooltip title={fieldState.error?.message || warning} open arrow placement="top">
                   <NumberField
+                    ref={combinedRef}
                     {...params}
                     error={!!fieldState.error}
                     InputProps={{
@@ -251,6 +269,9 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
                           </Tooltip>
                         </InputAdornment>
                       ) : null,
+                    }}
+                    inputProps={{
+                      ...inputPropsWithoutRef,
                     }}
                     className={classNames([
                       css.input,
@@ -275,19 +296,23 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
 
 const skeletonMinWidth = getFieldMinWidth('')
 
-const TxNonce = () => {
-  const { nonce, recommendedNonce } = useContext(SafeTxContext)
+const TxNonce = ({ canEdit = true }: { canEdit?: boolean } = {}) => {
+  const { nonce, recommendedNonce, isReadOnly } = useContext(SafeTxContext)
 
   return (
-    <Box data-testid="nonce-fld" display="flex" alignItems="center" gap={1}>
+    <Box data-testid="nonce-fld" display="flex" alignItems="center" gap={1} className={css.nonce}>
       Nonce{' '}
       <Typography component="span" fontWeight={700}>
         #
       </Typography>
       {nonce === undefined || recommendedNonce === undefined ? (
         <Skeleton width={skeletonMinWidth} height="38px" />
-      ) : (
+      ) : canEdit && !isReadOnly ? (
         <TxNonceForm nonce={nonce.toString()} recommendedNonce={recommendedNonce.toString()} />
+      ) : (
+        <Typography ml={-1} fontWeight={700}>
+          {nonce}
+        </Typography>
       )}
     </Box>
   )

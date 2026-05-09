@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
-import useAsync from '@/hooks/useAsync'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { isDomain, resolveName } from '@/services/ens'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 
 const useNameResolver = (
   value?: string,

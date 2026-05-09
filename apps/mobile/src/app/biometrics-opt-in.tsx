@@ -1,0 +1,118 @@
+import React, { useEffect, useMemo } from 'react'
+import { Platform } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
+import { OptIn } from '@/src/components/OptIn'
+import { router, useLocalSearchParams } from 'expo-router'
+import { useToastController } from '@tamagui/toast'
+import { useBiometrics } from '@/src/hooks/useBiometrics'
+import Logger from '@/src/utils/logger'
+import { View } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+function BiometricsOptIn() {
+  const { toggleBiometrics, promptBiometricsSetup, getBiometricsUIInfo, isBiometricsEnabled, isLoading } =
+    useBiometrics()
+  const { bottom } = useSafeAreaInsets()
+  const local = useLocalSearchParams<{
+    txId: string
+    signerAddress: string
+    caller: '/import-signers' | '/review-and-confirm' | '/review-and-execute'
+  }>()
+
+  const redirectTo = useMemo(() => {
+    if (local.caller === '/import-signers') {
+      return {
+        pathname: '/import-signers/signer' as const,
+      }
+    }
+    if (local.caller === '/review-and-execute') {
+      return {
+        pathname: '/review-and-execute' as const,
+        params: {
+          txId: local.txId,
+        },
+      }
+    }
+    return {
+      pathname: '/review-and-confirm' as const,
+      params: {
+        txId: local.txId,
+        signerAddress: local.signerAddress,
+      },
+    }
+  }, [local.caller, local.txId, local.signerAddress])
+
+  const { colorScheme, isDark } = useTheme()
+  const toast = useToastController()
+
+  useEffect(() => {
+    if (isBiometricsEnabled) {
+      router.dismiss()
+      router.push(redirectTo)
+    }
+  }, [isBiometricsEnabled])
+
+  const handleReject = () => {
+    router.back()
+  }
+
+  const handleAccept = async () => {
+    try {
+      const result = await toggleBiometrics(true)
+      if (result.status === 'os-not-configured') {
+        promptBiometricsSetup()
+      } else if (result.status === 'error') {
+        Logger.error('Error enabling biometrics:', result.error)
+        toast.show('Error enabling biometrics', {
+          native: false,
+          duration: 2000,
+        })
+      }
+    } catch (error) {
+      Logger.error('Error enabling biometrics', error)
+      toast.show('Error enabling biometrics', {
+        native: false,
+        duration: 2000,
+      })
+    }
+  }
+
+  const darkImage =
+    Platform.OS === 'ios'
+      ? require('@/assets/images/biometrics-dark.png')
+      : require('@/assets/images/biometrics-dark-android.png')
+
+  const lightImage =
+    Platform.OS === 'ios'
+      ? require('@/assets/images/biometrics-light.png')
+      : require('@/assets/images/biometrics-light-android.png')
+
+  const image = isDark ? darkImage : lightImage
+
+  const infoMessage = 'Biometrics is required to import a signer.'
+
+  return (
+    <View style={{ flex: 1, paddingBottom: bottom }}>
+      <OptIn
+        testID="biometrics-opt-in-screen"
+        title="Simplify access, enhance security"
+        description="Enable biometrics to unlock the app quickly and confirm transactions securely using your device's biometric authentication."
+        image={image}
+        isVisible
+        isLoading={isLoading}
+        colorScheme={colorScheme}
+        infoMessage={infoMessage}
+        ctaButton={{
+          onPress: handleAccept,
+          label: getBiometricsUIInfo().label,
+        }}
+        secondaryButton={{
+          onPress: handleReject,
+          label: 'Maybe later',
+        }}
+      />
+    </View>
+  )
+}
+
+export default BiometricsOptIn

@@ -1,71 +1,44 @@
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useCallback, useEffect, useState } from 'react'
-import { makeSafeId } from '@/src/utils/formatters'
-import { useAppSelector } from '@/src/store/hooks'
-import { selectAllChainsIds } from '@/src/store/chains'
-import { useLazySafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
-import { isValidAddress } from '@safe-global/utils/validation'
-import { parsePrefixedAddress } from '@safe-global/utils/addresses'
+import React, { useCallback } from 'react'
+import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import { ImportAccountFormView } from '@/src/features/ImportReadOnly/components/ImportAccountFormView'
+import { FormProvider, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { formSchema } from './schema'
+import { FormValues } from './types'
+import { useAppDispatch } from '@/src/store/hooks'
+import { setPendingSafe } from '@/src/store/signerImportFlowSlice'
 
 export const ImportAccountFormContainer = () => {
-  const params = useLocalSearchParams<{ safeAddress: string }>()
-  const [safeAddress, setSafeAddress] = useState(params.safeAddress || '')
-  const chainIds = useAppSelector(selectAllChainsIds)
   const router = useRouter()
-  const [isEnteredAddressValid, setEnteredAddressValid] = useState(false)
-  const [error, setError] = useState<string | undefined>(undefined)
-  const [addressWithoutPrefix, setAddressWithoutPrefix] = useState<string | undefined>(undefined)
-
-  const [trigger, result] = useLazySafesGetOverviewForManyQuery()
-
-  const safeExists = (result.data && result.data.length > 0) || false
-
-  const onChangeText = useCallback(
-    (text: string) => {
-      const { address } = parsePrefixedAddress(text)
-      const shouldContinue = isValidAddress(address)
-      const isValid = isValidAddress(address)
-      if (isValid) {
-        trigger({
-          safes: chainIds.map((chainId: string) => makeSafeId(chainId, address)),
-          currency: 'usd',
-          trusted: true,
-          excludeSpam: true,
-        })
-      }
-
-      setEnteredAddressValid(isValid)
-      setError(shouldContinue ? undefined : 'Invalid address format')
-      setSafeAddress(text)
-      setAddressWithoutPrefix(address)
+  const dispatch = useAppDispatch()
+  const params = useLocalSearchParams<{ safeAddress: string }>()
+  const methods = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    mode: 'onChange',
+    defaultValues: {
+      name: '',
+      safeAddress: params.safeAddress || '',
     },
-    [chainIds, trigger],
-  )
+  })
 
-  useEffect(() => {
-    if (params.safeAddress) {
-      onChangeText(params.safeAddress)
-    }
-  }, [params.safeAddress, onChangeText])
-
-  const canContinue = isEnteredAddressValid && safeExists && !error
+  const addressState = methods.getFieldState('safeAddress')
 
   const handleContinue = useCallback(() => {
-    router.push(`/(import-accounts)/signers?safeAddress=${addressWithoutPrefix}&chainId=${result.data?.[0].chainId}`)
-  }, [addressWithoutPrefix, result.data, router])
+    const inputAddress = methods.getValues('safeAddress')
+    const safeName = methods.getValues('name')
+    const { address } = parsePrefixedAddress(inputAddress)
+
+    dispatch(setPendingSafe({ address, name: safeName }))
+    router.push(`/(import-accounts)/signers?safeAddress=${address}&safeName=${safeName}`)
+  }, [router, methods.getValues, dispatch])
 
   return (
-    <ImportAccountFormView
-      safeAddress={safeAddress}
-      onChangeText={onChangeText}
-      error={error}
-      canContinue={canContinue}
-      addressWithoutPrefix={addressWithoutPrefix}
-      result={result}
-      isEnteredAddressValid={isEnteredAddressValid}
-      safeExists={safeExists}
-      onContinue={handleContinue}
-    />
+    <FormProvider {...methods}>
+      <ImportAccountFormView
+        isEnteredAddressValid={addressState.isTouched && !addressState.invalid}
+        onContinue={handleContinue}
+      />
+    </FormProvider>
   )
 }

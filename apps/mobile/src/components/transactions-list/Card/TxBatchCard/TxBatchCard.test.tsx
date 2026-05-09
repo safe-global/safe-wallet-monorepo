@@ -7,6 +7,7 @@ describe('TxBatchCard', () => {
   it('should render the default markup', () => {
     const container = render(
       <TxBatchCard
+        onPress={() => null}
         txInfo={
           mockTransferWithInfo({
             type: TransactionInfoType.CUSTOM,

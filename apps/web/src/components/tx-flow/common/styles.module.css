@@ -16,3 +16,7 @@
 .form > :global(.MuiFormControl-root) {
   margin-bottom: 28px;
 }
+
+.params {
+  margin-bottom: var(--space-2);
+}

@@ -1,14 +1,15 @@
 import { jsonToCSV } from 'react-papaparse'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import EthHashInfo from '@/components/common/EthHashInfo'
-import { AddOwnerFlow, ReplaceOwnerFlow, RemoveOwnerFlow } from '@/components/tx-flow/flows'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+// import EthHashInfo from '@/components/common/EthHashInfo'
+import { ReplaceOwnerFlow, RemoveOwnerFlow } from '@/components/tx-flow/flows'
 import useAddressBook from '@/hooks/useAddressBook'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Box, Grid, Typography, Button, SvgIcon, Tooltip, IconButton } from '@mui/material'
 import { useContext, useMemo } from 'react'
 import { EditOwnerDialog } from '../EditOwnerDialog'
 import EnhancedTable from '@/components/common/EnhancedTable'
-import AddIcon from '@/public/images/common/add.svg'
+import EditOwnerIcon from '@/public/images/common/edit-owner.svg'
+import { ManageSignersFlow } from '@/components/tx-flow/flows'
 import Track from '@/components/common/Track'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -16,8 +17,8 @@ import { TxModalContext } from '@/components/tx-flow'
 import ReplaceOwnerIcon from '@/public/images/settings/setup/replace-owner.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import type { AddressBook } from '@/store/addressBookSlice'
-
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
+import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 
 export const OwnerList = () => {
   const addressBook = useAddressBook()
@@ -32,10 +33,11 @@ export const OwnerList = () => {
       const name = addressBook[address]
 
       return {
+        key: address,
         cells: {
           owner: {
             rawValue: address,
-            content: <EthHashInfo address={address} showCopyButton shortAddress={false} showName={true} hasExplorer />,
+            content: <NamedAddressInfo address={address} showCopyButton shortAddress={false} name={name} hasExplorer />,
           },
           actions: {
             rawValue: '',
@@ -98,18 +100,7 @@ export const OwnerList = () => {
       }}
     >
       <Grid container spacing={3}>
-        <Grid item lg={4} xs={12}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
-            Members
-          </Typography>
-        </Grid>
-
-        <Grid item xs>
+        <Grid data-testid="signer-list" item xs>
           <Typography
             fontWeight="bold"
             sx={{
@@ -125,29 +116,29 @@ export const OwnerList = () => {
 
           <Box
             sx={{
-              pt: 2,
+              py: 2,
               display: 'flex',
               justifyContent: 'space-between',
             }}
           >
             <CheckWallet>
               {(isOk) => (
-                <Track {...SETTINGS_EVENTS.SETUP.ADD_OWNER}>
+                <Track {...SETTINGS_EVENTS.SETUP.MANAGE_SIGNERS}>
                   <Button
-                    data-testid="add-owner-btn"
-                    onClick={() => setTxFlow(<AddOwnerFlow />)}
+                    data-testid="manage-signers-btn"
+                    onClick={() => setTxFlow(<ManageSignersFlow />)}
                     variant="text"
-                    startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
+                    startIcon={<SvgIcon component={EditOwnerIcon} inheritViewBox />}
                     disabled={!isOk}
-                    size="compact"
+                    size="medium"
                   >
-                    Add signer
+                    Manage signers
                   </Button>
                 </Track>
               )}
             </CheckWallet>
 
-            <Button variant="text" onClick={() => exportOwners(safe, addressBook)} size="compact">
+            <Button variant="text" onClick={() => exportOwners(safe, addressBook)} size="medium">
               Export as CSV
             </Button>
           </Box>
@@ -159,7 +150,10 @@ export const OwnerList = () => {
   )
 }
 
-function exportOwners({ chainId, address, owners }: SafeInfo, addressBook: AddressBook) {
+function exportOwners(
+  { chainId, address, owners }: Pick<SafeState, 'chainId' | 'address' | 'owners'>,
+  addressBook: AddressBook,
+) {
   const json = owners.map((owner) => {
     const address = owner.value
     const name = addressBook[address] || owner.name

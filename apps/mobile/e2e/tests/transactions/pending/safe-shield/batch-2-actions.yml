@@ -1,0 +1,72 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - pending
+  - safe-shield
+---
+# ===========================================
+# SafeShield: Batch (2 actions - ownership change)
+# ===========================================
+# Safe: 0x65e1Ff7e0901055B3bea7D8b3AF457a659714013 (Polygon)
+# Expected widget: Issues found (WARN)
+# - Known contract (OK)
+# - Ownership change (WARN)
+# - Balance change: No balance change detected
+# - No disclaimer (not CRITICAL)
+
+- runFlow:
+    file: ../../../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eSafeShieldSafe'
+
+- assertVisible:
+    id: 'pending-tx-list'
+
+# Scroll to see the 2 actions batch transaction
+- scrollUntilVisible:
+    element:
+      text: '.*2 actions.*'
+    centerElement: true
+
+- runFlow:
+    file: ../../../../utils/components/pending-tx/tap-tx-card.yml
+    env:
+      WAIT_FOR: '.*2 actions.*'
+      TAP_TEXT: '.*2 actions.*'
+
+- assertVisible: 'Confirm transaction'
+
+# ===========================================
+# SafeShield Widget
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-safe-shield-widget.yml
+    env:
+      WIDGET_HEADER: 'Issues found'
+      LABEL_1: 'Known contract'
+      LABEL_2: 'Ownership change'
+
+# ===========================================
+# Balance Change Block
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-balance-change.yml
+    env:
+      NO_CHANGE: 'true'
+
+# ===========================================
+# SafeShield Details Sheet
+# ===========================================
+- runFlow:
+    file: ../../../../utils/assertions/verify-safe-shield-sheet.yml
+    env:
+      TAP_TO_OPEN: 'Issues found'
+      HEADER: 'ISSUES FOUND'
+      LABEL_1: 'Known contract'
+      DESCRIPTION_1: '.*already interacted with this contract.*'
+      LABEL_2: 'Ownership change'
+      DESCRIPTION_2: '.*change the Safe.*ownership.*'
+
+# Verify back on Confirm transaction screen
+- assertVisible: 'Confirm transaction'

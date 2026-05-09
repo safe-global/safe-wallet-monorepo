@@ -1,6 +1,8 @@
-import { type Eip1193Provider, getAddress, type JsonRpcProvider } from 'ethers'
+import { type Eip1193Provider, type JsonRpcProvider } from 'ethers'
+import { getAddress } from 'viem'
 import { SafeWalletProvider, type WalletSDK } from '@/services/safe-wallet-provider'
-import { getTransactionDetails, type SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
+import { getTransactionDetails } from '@/utils/tx-details'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { type NextRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import proposeTx from '@/services/tx/proposeTransaction'
@@ -8,9 +10,9 @@ import { isSmartContractWallet } from '@/utils/wallets'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { initSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { logError } from '@/services/exceptions'
-import ErrorCodes from '@/services/exceptions/ErrorCodes'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { tryOffChainTxSigning } from '@/services/tx/tx-sender/sdk'
-import type { TransactionResult } from '@safe-global/safe-core-sdk-types'
+import type { TransactionResult } from '@safe-global/types-kit'
 
 export type NestedWallet = {
   address: string
@@ -21,7 +23,7 @@ export type NestedWallet = {
 
 export const getNestedWallet = (
   actualWallet: ConnectedWallet,
-  safeInfo: SafeInfo,
+  safeInfo: SafeState,
   web3ReadOnly: JsonRpcProvider,
   router: NextRouter,
 ): NestedWallet => {
@@ -96,7 +98,7 @@ export const getNestedWallet = (
             // Directly execute the tx
             result = await connectedSDK.executeTransaction(safeTx)
           } else {
-            const signedTx = await tryOffChainTxSigning(safeTx, safeInfo.version, connectedSDK)
+            const signedTx = await tryOffChainTxSigning(safeTx, connectedSDK)
             await proposeTx(safeInfo.chainId, safeInfo.address.value, actualWallet.address, signedTx, safeTxHash)
           }
         }

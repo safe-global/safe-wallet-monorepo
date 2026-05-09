@@ -18,18 +18,41 @@
   gap: var(--space-1);
 }
 
+.compactTable thead th {
+  font-size: 14px;
+  padding: var(--space-1) 0;
+}
+
+.compactTable tbody td {
+  padding: 12px 0 !important;
+}
+
+.compactTable tbody tr:hover {
+  background: none !important;
+}
+
+.mobileLabel {
+  display: none;
+}
+
 @media (max-width: 899.95px) {
   .mobileColumn thead th {
     display: none;
   }
 
-  .mobileColumn thead th:first-of-type {
-    display: block;
-  }
-
   .mobileColumn tbody td {
     display: block;
-    padding-left: var(--space-2) !important;
+    padding: 0 !important;
+    margin: 12px var(--space-3) !important;
     background: inherit;
+  }
+
+  .mobileLabel {
+    display: block;
+    margin-bottom: var(--space-1);
+  }
+
+  .actions {
+    justify-content: flex-start;
   }
 }

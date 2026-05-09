@@ -1,8 +1,9 @@
+import { SettingsInfoType } from '@safe-global/store/gateway/types'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { Meta, StoryObj } from '@storybook/react'
 import { Paper } from '@mui/material'
-import type { TransactionDetails } from '@safe-global/safe-gateway-typescript-sdk'
-import { SettingsInfoType } from '@safe-global/safe-gateway-typescript-sdk'
 import { StoreDecorator } from '@/stories/storeDecorator'
+import { RouterDecorator } from '@/stories/routerDecorator'
 import { ownerAddress, txInfo } from './mockData'
 import SettingsChange from '.'
 
@@ -15,9 +16,11 @@ const meta = {
     (Story) => {
       return (
         <StoreDecorator initialState={{}}>
-          <Paper sx={{ padding: 2 }}>
-            <Story />
-          </Paper>
+          <RouterDecorator>
+            <Paper sx={{ padding: 2 }}>
+              <Story />
+            </Paper>
+          </RouterDecorator>
         </StoreDecorator>
       )
     },

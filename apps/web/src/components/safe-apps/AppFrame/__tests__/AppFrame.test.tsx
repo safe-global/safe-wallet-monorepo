@@ -1,5 +1,3 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
-import AppFrame from '@/components/safe-apps/AppFrame'
 import {
   ConflictType,
   DetailedExecutionInfoType,
@@ -7,8 +5,10 @@ import {
   TransactionInfoType,
   TransactionListItemType,
   TransactionStatus,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import { defaultSafeInfo } from '@/store/safeInfoSlice'
+} from '@safe-global/store/gateway/types'
+import { render, screen, fireEvent } from '@/tests/test-utils'
+import AppFrame from '@/components/safe-apps/AppFrame'
+import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
 
 const emptySafeApp = getEmptySafeApp()
@@ -25,6 +25,7 @@ describe('AppFrame', () => {
       initialReduxState: {
         safeInfo: {
           loading: true,
+          loaded: true,
           data: defaultSafeInfo,
         },
         txQueue: {
@@ -67,6 +68,7 @@ describe('AppFrame', () => {
               },
             ],
           },
+          loaded: true,
           loading: false,
           error: undefined,
         },

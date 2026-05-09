@@ -1,0 +1,126 @@
+{
+  "address": {
+    "value": "0x8675B754342754A30A2AeF474D114d8460bca19b",
+    "name": null,
+    "logoUri": null
+  },
+  "chainId": "1",
+  "nonce": 531,
+  "threshold": 2,
+  "owners": [
+    {
+      "value": "0x8b0aB586dF1Ca1f360cb26b34eEC2C3AF969E821",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0x734c676a680Abca18230D113E0872E1357107BDc",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0x38D48FaDa993b749691E93e4E62259c488bCb766",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0x3e7c69aB0E785d09f10a0f04a3f6CeCaED85C0a7",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0xb43470d6913f548Bf90E299De2fe3f94140aaf7c",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0x1DD10F5c93536e299550ca6Fc4cBd4A15A07C057",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0x6c15f69EE76DA763e5b5DB6f7f0C29eb625bc9B7",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0x4cF25c77De50baBAB44c6BcC76D88624DDb3EbBE",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0x6f965E48347AF3Df65c14CCc176A9CbeCEa0eDb5",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0xec7b7F5C0031e6C933931Ade1833aac867c5CD5f",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0xfDDB1e19a973d7EDf1211970AF3E42d40acfd20F",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0x757Bf5b42cfe10ae5D2A47cD9c1eE90fd2fc322d",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0xEbAff84ec9D49795f1c9BEd3E5972C0638E9B27A",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0xdb24EfF70Fb73bCb2B9eacBf3AdCeb7717813FFf",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0x11B1D54B66e5e226D6f89069c21A569A22D98cfd",
+      "name": null,
+      "logoUri": null
+    },
+    {
+      "value": "0x30dE4DaCae4Ef7AC3c1253746CF2d168Bee0C3df",
+      "name": null,
+      "logoUri": null
+    }
+  ],
+  "implementation": {
+    "value": "0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
+    "name": "Safe 1.3.0",
+    "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552.png"
+  },
+  "modules": [
+    {
+      "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
+      "name": "AllowanceModule",
+      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.png"
+    }
+  ],
+  "fallbackHandler": {
+    "value": "0xf48f2B2d2a534e402487b3ee7C18c33Aec0Fe5e4",
+    "name": null,
+    "logoUri": null
+  },
+  "guard": null,
+  "version": "1.3.0",
+  "implementationVersionState": "OUTDATED",
+  "collectiblesTag": "1742357375",
+  "txQueuedTag": "1768993922",
+  "txHistoryTag": "1769175563",
+  "messagesTag": "1767979535"
+}

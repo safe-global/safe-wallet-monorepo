@@ -2,13 +2,13 @@ import type { MouseEvent } from 'react'
 import { useState } from 'react'
 import { Box, ButtonBase, Paper, Popover } from '@mui/material'
 import css from '@/components/common/ConnectWallet/styles.module.css'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ExpandLessIcon from '@mui/icons-material/KeyboardArrowUpRounded'
+import ExpandMoreIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import WalletOverview from '../WalletOverview'
 import WalletInfo from '@/components/common/WalletInfo'
 
-export const AccountCenter = ({ wallet }: { wallet: ConnectedWallet }) => {
+const AccountCenter = ({ wallet }: { wallet: ConnectedWallet }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const { balance } = wallet
 
@@ -32,11 +32,15 @@ export const AccountCenter = ({ wallet }: { wallet: ConnectedWallet }) => {
         sx={{ alignSelf: 'stretch' }}
         data-testid="open-account-center"
       >
-        <Box className={css.buttonContainer}>
+        <Box className={`${css.buttonContainer} ${css.connectedButton}`}>
           <WalletOverview wallet={wallet} balance={balance} showBalance />
 
           <Box display="flex" alignItems="center" justifyContent="flex-end" ml="auto">
-            {open ? <ExpandLessIcon color="border" /> : <ExpandMoreIcon color="border" />}
+            {open ? (
+              <ExpandLessIcon color="border" sx={{ fontSize: 16 }} />
+            ) : (
+              <ExpandMoreIcon data-testid="ExpandMoreIcon" color="border" sx={{ fontSize: 16 }} />
+            )}
           </Box>
         </Box>
       </ButtonBase>

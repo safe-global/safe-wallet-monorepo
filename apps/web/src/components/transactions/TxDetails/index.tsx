@@ -1,28 +1,32 @@
-import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
-import React, { type ReactElement, useEffect } from 'react'
-import type { TransactionDetails, TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
-import { Box, CircularProgress, Typography } from '@mui/material'
+import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { useIsExpiredSwap } from '@/features/swap'
+import React, { type ReactElement, useEffect, useRef, useState, useMemo } from 'react'
+import { Box, CircularProgress } from '@mui/material'
 
 import TxSigners from '@/components/transactions/TxSigners'
 import Summary from '@/components/transactions/TxDetails/Summary'
 import TxData from '@/components/transactions/TxDetails/TxData'
 import useChainId from '@/hooks/useChainId'
+import useProposers from '@/hooks/useProposers'
 import {
   isAwaitingExecution,
   isOrderTxInfo,
+  isModuleDetailedExecutionInfo,
   isModuleExecutionInfo,
   isMultiSendTxInfo,
   isMultisigDetailedExecutionInfo,
   isMultisigExecutionInfo,
   isOpenSwapOrder,
   isTxQueued,
+  isCustomTxInfo,
+  isBridgeOrderTxInfo,
+  isLifiSwapTxInfo,
 } from '@/utils/transaction-guards'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import css from './styles.module.css'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { TxShareButton } from '../TxShareLink/TxShareButton'
-import { ErrorBoundary } from '@sentry/react'
+import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import ExecuteTxButton from '@/components/transactions/ExecuteTxButton'
 import SignTxButton from '@/components/transactions/SignTxButton'
 import RejectTxButton from '@/components/transactions/RejectTxButton'
@@ -32,32 +36,45 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsPending from '@/hooks/useIsPending'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
 import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@/utils/chains'
-import { useGetTransactionDetailsQuery } from '@/store/api/gateway'
-import { asError } from '@/services/exceptions/utils'
+import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
-import { TxNote } from '@/features/tx-notes'
-import { TxShareBlock } from '../TxShareLink/TxShareBlock'
+import { TxNotesFeature } from '@/features/tx-notes'
+import { useLoadFeature } from '@/features/__core__'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import DecodedData from './TxData/DecodedData'
+import { QueuedTxSimulation } from '../QueuedTxSimulation'
+import { HypernativeFeature } from '@/features/hypernative'
 
 export const NOT_AVAILABLE = 'n/a'
 
 type TxDetailsProps = {
-  txSummary: TransactionSummary
+  txSummary: Transaction
   txDetails: TransactionDetails
 }
 
 const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement => {
+  const txNotes = useLoadFeature(TxNotesFeature)
+  const hn = useLoadFeature(HypernativeFeature)
   const isPending = useIsPending(txSummary.id)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const isQueue = isTxQueued(txSummary.txStatus)
   const awaitingExecution = isAwaitingExecution(txSummary.txStatus)
+  const { data: proposersData } = useProposers()
+
+  // Used to check if the decoded data was rendered inside the TxData component
+  // If it was, we hide the decoded data in the Summary to avoid showing it twice
+  const decodedDataRef = useRef(null)
+  const [isDecodedDataVisible, setIsDecodedDataVisible] = useState(false)
+
+  useEffect(() => {
+    // If decodedDataRef.current is not null, the decoded data was rendered inside the TxData component
+    setIsDecodedDataVisible(!!decodedDataRef.current)
+  }, [])
+
   const isUnsigned =
     isMultisigExecutionInfo(txSummary.executionInfo) && txSummary.executionInfo.confirmationsSubmitted === 0
-
-  const isTxFromProposer =
-    isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) &&
-    txDetails.detailedExecutionInfo.trusted &&
-    isUnsigned
 
   const isUntrusted =
     isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) && !txDetails.detailedExecutionInfo.trusted
@@ -66,13 +83,22 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   const isTrustedTransfer = !hasDefaultTokenlist || isTrustedTx(txSummary)
   const isImitationTransaction = isImitation(txSummary)
 
-  let proposer, safeTxHash, proposedByDelegate
+  let proposer: string | undefined
+  let safeTxHash: string | undefined
+  let proposedByDelegate
   if (isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)) {
     safeTxHash = txDetails.detailedExecutionInfo.safeTxHash
-    // @ts-expect-error TODO: Need to update the types from the new SDK
     proposedByDelegate = txDetails.detailedExecutionInfo.proposedByDelegate
     proposer = proposedByDelegate?.value ?? txDetails.detailedExecutionInfo.proposer?.value
   }
+
+  // Check if the proposer is actually a delegate
+  const isProposerDelegate = useMemo(() => {
+    if (!proposer || !proposersData?.results) return false
+    return proposersData.results.some((p) => sameAddress(p.delegate, proposer))
+  }, [proposer, proposersData])
+
+  const isTxFromProposer = Boolean(proposedByDelegate) || isProposerDelegate
 
   const expiredSwap = useIsExpiredSwap(txSummary.txInfo)
 
@@ -80,32 +106,52 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   const moduleAddress = isModuleExecutionInfo(txSummary.executionInfo) ? txSummary.executionInfo.address : undefined
   const moduleAddressInfo = moduleAddress ? txDetails.txData?.addressInfoIndex?.[moduleAddress.value] : undefined
 
+  const { safe } = useSafeInfo()
+
+  const isModuleExecution = isModuleDetailedExecutionInfo(txDetails.detailedExecutionInfo)
+  const showAuditLog =
+    (isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) && (!isUnsigned || !!proposer)) ||
+    isModuleExecution ||
+    !!txDetails.executedAt
+
   return (
     <>
       {/* /Details */}
       <div className={`${css.details} ${isUnsigned ? css.noSigners : ''}`}>
         <div className={css.txNote}>
-          <TxNote txDetails={txDetails} />
+          <txNotes.TxNote txDetails={txDetails} />
         </div>
 
-        <div className={css.shareLink}>
-          <TxShareButton txId={txSummary.id} />
-        </div>
+        <div className={css.detailsWrapper}>
+          {isQueue && (
+            <div className={css.inlineSimulation}>
+              <QueuedTxSimulation transaction={txDetails} />
+            </div>
+          )}
 
-        <div className={css.txData}>
-          <ErrorBoundary fallback={<div>Error parsing data</div>}>
-            <TxData
-              txData={txDetails.txData}
-              txInfo={txDetails.txInfo}
-              txDetails={txDetails}
-              trusted={isTrustedTransfer}
-              imitation={isImitationTransaction}
-            />
-          </ErrorBoundary>
+          <div className={css.txData}>
+            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+              <TxData
+                txData={txDetails.txData}
+                txInfo={txDetails.txInfo}
+                txDetails={txDetails}
+                trusted={isTrustedTransfer}
+                imitation={isImitationTransaction}
+              >
+                <Box ref={decodedDataRef}>
+                  <DecodedData
+                    txData={txDetails.txData}
+                    toInfo={isCustomTxInfo(txDetails.txInfo) ? txDetails.txInfo.to : txDetails.txData?.to}
+                    isWarningEnabled
+                  />
+                </Box>
+              </TxData>
+            </ObservabilityErrorBoundary>
+          </div>
         </div>
 
         {/* Module information*/}
-        {moduleAddress && (
+        {moduleAddress && !showAuditLog && (
           <div className={css.txModule}>
             <InfoDetails title="Executed via module:">
               <NamedAddressInfo
@@ -122,40 +168,65 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
         <div className={css.txSummary}>
           {isUntrusted && !isPending && <UnsignedWarning />}
-          <Summary txDetails={txDetails} />
+          <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+            <Summary
+              txDetails={txDetails}
+              txData={txDetails.txData}
+              txInfo={txDetails.txInfo}
+              showMultisend={false}
+              showDecodedData={!isDecodedDataVisible}
+              showAuditLogFields={!showAuditLog}
+            />
+          </ObservabilityErrorBoundary>
         </div>
 
-        {(isMultiSendTxInfo(txDetails.txInfo) || isOrderTxInfo(txDetails.txInfo)) && (
+        {(isMultiSendTxInfo(txDetails.txInfo) ||
+          isOrderTxInfo(txDetails.txInfo) ||
+          isBridgeOrderTxInfo(txDetails.txInfo) ||
+          isLifiSwapTxInfo(txDetails.txInfo)) && (
           <div className={css.multiSend}>
-            <ErrorBoundary fallback={<div>Error parsing data</div>}>
-              <Multisend txData={txDetails.txData} />
-            </ErrorBoundary>
+            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+              <Multisend txData={txDetails.txData} isExecuted={!!txDetails.executedAt} />
+            </ObservabilityErrorBoundary>
           </div>
         )}
       </div>
       {/* Signers */}
-      {(!isUnsigned || isTxFromProposer) && (
+      {(!isUnsigned || proposer) && (
         <div className={css.txSigners}>
           <TxSigners
             txDetails={txDetails}
             txSummary={txSummary}
             isTxFromProposer={isTxFromProposer}
-            proposer={proposedByDelegate}
+            proposer={proposer}
+            isExpired={expiredSwap}
           />
 
-          {isQueue && <TxShareBlock txId={txDetails.txId} />}
+          {isQueue && <hn.HnSecuritySection txDetails={txDetails} safeTxHash={safeTxHash} chainId={safe.chainId} />}
 
           {isQueue && (
             <Box className={css.buttons}>
-              {awaitingExecution ? <ExecuteTxButton txSummary={txSummary} /> : <SignTxButton txSummary={txSummary} />}
-              <RejectTxButton txSummary={txSummary} safeTxHash={safeTxHash} proposer={proposer} />
+              {isTxFromProposer ? (
+                <>
+                  {!expiredSwap &&
+                    (awaitingExecution ? (
+                      <ExecuteTxButton txSummary={txSummary} />
+                    ) : (
+                      <SignTxButton txSummary={txSummary} />
+                    ))}
+                  <RejectTxButton txSummary={txSummary} safeTxHash={safeTxHash} proposer={proposer} />
+                </>
+              ) : (
+                <>
+                  {awaitingExecution ? (
+                    <ExecuteTxButton txSummary={txSummary} />
+                  ) : (
+                    <SignTxButton txSummary={txSummary} />
+                  )}
+                  <RejectTxButton txSummary={txSummary} safeTxHash={safeTxHash} proposer={proposer} />
+                </>
+              )}
             </Box>
-          )}
-
-          {isQueue && expiredSwap && (
-            <Typography color="text.secondary" mt={2}>
-              This order has expired. Reject this transaction and try again.
-            </Typography>
           )}
         </div>
       )}
@@ -167,7 +238,7 @@ const TxDetails = ({
   txSummary,
   txDetails,
 }: {
-  txSummary: TransactionSummary
+  txSummary: Transaction
   txDetails?: TransactionDetails // optional
 }): ReactElement => {
   const chainId = useChainId()
@@ -179,10 +250,11 @@ const TxDetails = ({
     isLoading: loading,
     refetch,
     isUninitialized,
-  } = useGetTransactionDetailsQuery(
-    { chainId, txId: txSummary.id },
+  } = useTransactionsGetTransactionByIdV1Query(
+    { chainId: chainId || '', id: txSummary.id || '' },
     {
       pollingInterval: isOpenSwapOrder(txSummary.txInfo) ? POLLING_INTERVAL : undefined,
+      skipPollingIfUnfocused: true,
     },
   )
 

@@ -8,7 +8,7 @@ const activeSafeSlice = createSlice({
   name: 'activeSafe',
   initialState,
   reducers: {
-    setActiveSafe: (state, action: PayloadAction<SafeInfo | null>) => {
+    setActiveSafe: (_, action: PayloadAction<SafeInfo | null>) => {
       return action.payload
     },
     clearActiveSafe: () => {

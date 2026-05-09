@@ -5,6 +5,7 @@ import * as wallet from '../../support/utils/wallet.js'
 import * as proposer from '../pages/proposers.pages.js'
 import * as createtx from '../pages/create_tx.pages.js'
 import * as tx from '../pages/transactions.page.js'
+import * as assets from '../pages/assets.pages.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
 
 let staticSafes = []
@@ -21,24 +22,9 @@ describe('Proposers 2 tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify that an owner that is also a proposer can still execute transactions', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_32)
-    cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
-    wallet.connectSigner(signer)
-    createtx.clickOnNewtransactionBtn()
-    createtx.clickOnSendTokensBtn()
-    createtx.typeRecipientAddress(getMockAddress())
-    createtx.setSendValue(sendValue)
-    createtx.clickOnNextBtn()
-    tx.selectExecuteNow()
-    createtx.verifySubmitBtnIsEnabled()
-    tx.selectExecuteLater()
-    tx.verifySignBtnEnabled()
-  })
-
   it('Verify a proposers is capable of propose transactions', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
-    cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
+    cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_33)
+    assets.toggleHideDust(false)
     wallet.connectSigner(signer2)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()

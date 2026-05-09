@@ -1,5 +1,3 @@
-# This Docker image is meant to be used only by our safe-infrastructure repository
-
 name: Web Deploy to Dockerhub
 
 on:
@@ -21,24 +19,35 @@ on:
   release:
     types: [released]
 
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to publish (e.g. web-v1.85.0)'
+        required: true
+        type: string
+
 jobs:
   dockerhub-push:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev' || (github.event_name == 'release' && github.event.action == 'released')
+    if: >-
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/dev' ||
+      (github.event_name == 'release' && github.event.action == 'released') ||
+      github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-qemu-action@v3
+      - uses: actions/checkout@v6
+      - uses: docker/setup-qemu-action@v4
         with:
           platforms: arm64
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
       - name: Dockerhub login
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Deploy Main
         if: github.ref == 'refs/heads/main'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           push: true
           tags: safeglobal/safe-wallet-web:staging
@@ -49,7 +58,7 @@ jobs:
           cache-to: type=gha,mode=max
       - name: Deploy Develop
         if: github.ref == 'refs/heads/dev'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           push: true
           tags: safeglobal/safe-wallet-web:dev
@@ -58,13 +67,20 @@ jobs:
             linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Resolve Docker tag
+        if: (github.event_name == 'release' && github.event.action == 'released') || github.event_name == 'workflow_dispatch'
+        id: docker_tag
+        run: |
+          RAW_TAG="${{ github.event.release.tag_name || inputs.tag }}"
+          # Strip app prefix if present (e.g. web-v1.85.0 -> v1.85.0)
+          echo "tag=${RAW_TAG#web-}" >> $GITHUB_OUTPUT
       - name: Deploy Tag
-        if: (github.event_name == 'release' && github.event.action == 'released')
-        uses: docker/build-push-action@v6
+        if: (github.event_name == 'release' && github.event.action == 'released') || github.event_name == 'workflow_dispatch'
+        uses: docker/build-push-action@v7
         with:
           push: true
           tags: |
-            safeglobal/safe-wallet-web:${{ github.event.release.tag_name }}
+            safeglobal/safe-wallet-web:${{ steps.docker_tag.outputs.tag }}
             safeglobal/safe-wallet-web:latest
           platforms: |
             linux/amd64

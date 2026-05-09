@@ -6,18 +6,22 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import SidebarHeader from '@/components/sidebar/SidebarHeader'
 import SidebarNavigation from '@/components/sidebar/SidebarNavigation'
 import SidebarFooter from '@/components/sidebar/SidebarFooter'
-import IndexingStatus from '@/components/sidebar/IndexingStatus'
 
 import css from './styles.module.css'
-import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
-import MyAccounts from '@/features/myAccounts'
+import { trackEvent, OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
+import { useLoadFeature } from '@/features/__core__'
+import { MyAccountsFeature } from '@/features/myAccounts'
 
 const Sidebar = (): ReactElement => {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
+  const { MyAccounts } = useLoadFeature(MyAccountsFeature)
 
   const onDrawerToggle = useCallback(() => {
     setIsDrawerOpen((isOpen) => {
-      trackEvent({ ...OVERVIEW_EVENTS.SIDEBAR, label: isOpen ? 'Close' : 'Open' })
+      trackEvent(
+        { ...OVERVIEW_EVENTS.SIDEBAR, label: isOpen ? 'Close' : 'Open' },
+        { [MixpanelEventParams.SIDEBAR_ELEMENT]: isOpen ? 'Close Wallets' : 'Expand Wallets' },
+      )
 
       return !isOpen
     })
@@ -28,7 +32,7 @@ const Sidebar = (): ReactElement => {
   return (
     <div data-testid="sidebar-container" className={css.container}>
       <div className={css.scroll}>
-        <ChainIndicator showLogo={false} />
+        <ChainIndicator showLogo={false} onlyLogo />
 
         {/* Open the safes list */}
         <button data-testid="open-safes-icon" className={css.drawerButton} onClick={onDrawerToggle}>
@@ -37,8 +41,6 @@ const Sidebar = (): ReactElement => {
 
         {/* Address, balance, copy button, etc */}
         <SidebarHeader />
-
-        <Divider />
 
         {/* Nav menu */}
         <SidebarNavigation />
@@ -49,14 +51,9 @@ const Sidebar = (): ReactElement => {
           }}
         />
 
-        <Divider flexItem />
+        <Divider flexItem sx={{ borderColor: 'background.main' }} />
 
-        {/* What's new + Need help? */}
         <SidebarFooter />
-
-        <Divider flexItem />
-
-        <IndexingStatus />
       </div>
       <Drawer variant="temporary" anchor="left" open={isDrawerOpen} onClose={onDrawerToggle}>
         <div className={css.drawer}>

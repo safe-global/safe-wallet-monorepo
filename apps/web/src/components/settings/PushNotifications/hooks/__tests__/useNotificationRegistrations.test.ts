@@ -1,6 +1,5 @@
 import { toBeHex, BrowserProvider } from 'ethers'
-import { DeviceType } from '@safe-global/safe-gateway-typescript-sdk/dist/types/notifications'
-import * as sdk from '@safe-global/safe-gateway-typescript-sdk'
+import { http, HttpResponse } from 'msw'
 
 import { renderHook } from '@/tests/test-utils'
 import { useNotificationRegistrations } from '../useNotificationRegistrations'
@@ -13,8 +12,8 @@ import * as notificationsSlice from '@/store/notificationsSlice'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { NotificationsTokenVersion } from '@/services/push-notifications/preferences'
-
-jest.mock('@safe-global/safe-gateway-typescript-sdk')
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
 
 jest.mock('../useNotificationPreferences')
 jest.mock('../useNotificationsTokenVersion')
@@ -52,8 +51,6 @@ describe('useNotificationRegistrations', () => {
       )
     })
 
-    const registerDeviceSpy = jest.spyOn(sdk, 'registerDevice')
-
     const getExampleRegisterDevicePayload = (
       safesToRegister: logic.NotifiableSafes,
     ): logic.NotificationRegistration => {
@@ -76,7 +73,7 @@ describe('useNotificationRegistrations', () => {
         cloudMessagingToken: 'token',
         buildNumber: '0',
         bundle: 'https://app.safe.global',
-        deviceType: DeviceType.WEB,
+        deviceType: 'WEB',
         version: '1.17.0',
         timestamp: Math.floor(new Date().getTime() / 1000).toString(),
         safeRegistrations,
@@ -95,7 +92,6 @@ describe('useNotificationRegistrations', () => {
 
       await result.current.registerNotifications({})
 
-      expect(registerDeviceSpy).not.toHaveBeenCalled()
       expect(setTokenVersionMock).not.toHaveBeenCalled()
     })
 
@@ -109,8 +105,12 @@ describe('useNotificationRegistrations', () => {
 
       jest.spyOn(logic, 'getRegisterDevicePayload').mockImplementation(() => Promise.resolve(payload))
 
-      // @ts-expect-error
-      registerDeviceSpy.mockImplementation(() => Promise.resolve('Registration could not be completed.'))
+      // Mock the registration endpoint to return an error
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/register/notifications`, () => {
+          return HttpResponse.json({ error: 'Registration could not be completed.' })
+        }),
+      )
 
       const createPreferencesMock = jest.fn()
 
@@ -125,8 +125,6 @@ describe('useNotificationRegistrations', () => {
       const { result } = renderHook(() => useNotificationRegistrations())
 
       await result.current.registerNotifications(safesToRegister)
-
-      expect(registerDeviceSpy).toHaveBeenCalledWith(payload)
 
       expect(createPreferencesMock).not.toHaveBeenCalled()
       expect(setTokenVersionMock).not.toHaveBeenCalled()
@@ -142,8 +140,12 @@ describe('useNotificationRegistrations', () => {
 
       jest.spyOn(logic, 'getRegisterDevicePayload').mockImplementation(() => Promise.resolve(payload))
 
-      // @ts-expect-error
-      registerDeviceSpy.mockImplementation(() => Promise.resolve('Registration could not be completed.'))
+      // Mock the registration endpoint to throw an error
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/register/notifications`, () => {
+          return HttpResponse.error()
+        }),
+      )
 
       const createPreferencesMock = jest.fn()
 
@@ -159,10 +161,8 @@ describe('useNotificationRegistrations', () => {
 
       await result.current.registerNotifications(safesToRegister)
 
-      expect(registerDeviceSpy).toHaveBeenCalledWith(payload)
-
-      expect(createPreferencesMock).not.toHaveBeenCalledWith()
-      expect(setTokenVersionMock).not.toHaveBeenCalledWith()
+      expect(createPreferencesMock).not.toHaveBeenCalled()
+      expect(setTokenVersionMock).not.toHaveBeenCalled()
     })
 
     it('creates preferences/notifies if registration succeeded', async () => {
@@ -175,8 +175,7 @@ describe('useNotificationRegistrations', () => {
 
       jest.spyOn(logic, 'getRegisterDevicePayload').mockImplementation(() => Promise.resolve(payload))
 
-      registerDeviceSpy.mockImplementation(() => Promise.resolve())
-
+      // Default MSW handler returns success
       const createPreferencesMock = jest.fn()
 
       ;(preferences.useNotificationPreferences as jest.Mock).mockImplementation(
@@ -193,8 +192,6 @@ describe('useNotificationRegistrations', () => {
 
       await result.current.registerNotifications(safesToRegister, true)
 
-      expect(registerDeviceSpy).toHaveBeenCalledWith(payload)
-
       expect(createPreferencesMock).toHaveBeenCalled()
 
       expect(setTokenVersionMock).toHaveBeenCalledTimes(1)
@@ -209,8 +206,6 @@ describe('useNotificationRegistrations', () => {
   })
 
   describe('unregisterSafeNotifications', () => {
-    const unregisterSafeSpy = jest.spyOn(sdk, 'unregisterSafe')
-
     it('does not unregister if no uuid is present', async () => {
       ;(preferences.useNotificationPreferences as jest.Mock).mockImplementation(
         () =>
@@ -222,13 +217,15 @@ describe('useNotificationRegistrations', () => {
       const { result } = renderHook(() => useNotificationRegistrations())
 
       await result.current.unregisterSafeNotifications('1', toBeHex('0x1', 20))
-
-      expect(unregisterSafeSpy).not.toHaveBeenCalled()
     })
 
     it('does not delete preferences if unregistration does not succeed', async () => {
-      // @ts-expect-error
-      unregisterSafeSpy.mockImplementation(() => Promise.resolve('Unregistration could not be completed.'))
+      // Mock the endpoint to return an error
+      server.use(
+        http.delete(`${GATEWAY_URL}/v1/chains/:chainId/notifications/devices/:uuid/safes/:safeAddress`, () => {
+          return HttpResponse.json({ error: 'Unregistration could not be completed.' })
+        }),
+      )
 
       const uuid = self.crypto.randomUUID()
       const deletePreferencesMock = jest.fn()
@@ -247,14 +244,17 @@ describe('useNotificationRegistrations', () => {
       const safeAddress = toBeHex('0x1', 20)
 
       await result.current.unregisterSafeNotifications(chainId, safeAddress)
-
-      expect(unregisterSafeSpy).toHaveBeenCalledWith(chainId, safeAddress, uuid)
 
       expect(deletePreferencesMock).not.toHaveBeenCalled()
     })
 
     it('does not delete preferences if unregistration throws', async () => {
-      unregisterSafeSpy.mockImplementation(() => Promise.reject())
+      // Mock the endpoint to throw an error
+      server.use(
+        http.delete(`${GATEWAY_URL}/v1/chains/:chainId/notifications/devices/:uuid/safes/:safeAddress`, () => {
+          return HttpResponse.error()
+        }),
+      )
 
       const uuid = self.crypto.randomUUID()
       const deletePreferencesMock = jest.fn()
@@ -273,15 +273,12 @@ describe('useNotificationRegistrations', () => {
       const safeAddress = toBeHex('0x1', 20)
 
       await result.current.unregisterSafeNotifications(chainId, safeAddress)
-
-      expect(unregisterSafeSpy).toHaveBeenCalledWith(chainId, safeAddress, uuid)
 
       expect(deletePreferencesMock).not.toHaveBeenCalled()
     })
 
     it('deletes preferences if unregistration succeeds', async () => {
-      unregisterSafeSpy.mockImplementation(() => Promise.resolve())
-
+      // Default MSW handler returns success
       const uuid = self.crypto.randomUUID()
       const deletePreferencesMock = jest.fn()
 
@@ -299,16 +296,12 @@ describe('useNotificationRegistrations', () => {
       const safeAddress = toBeHex('0x1', 20)
 
       await result.current.unregisterSafeNotifications(chainId, safeAddress)
-
-      expect(unregisterSafeSpy).toHaveBeenCalledWith(chainId, safeAddress, uuid)
 
       expect(deletePreferencesMock).toHaveBeenCalledWith({ [chainId]: [safeAddress] })
     })
   })
 
   describe('unregisterDeviceNotifications', () => {
-    const unregisterDeviceSpy = jest.spyOn(sdk, 'unregisterDevice')
-
     it('does not unregister device if no uuid is present', async () => {
       ;(preferences.useNotificationPreferences as jest.Mock).mockImplementation(
         () =>
@@ -320,13 +313,15 @@ describe('useNotificationRegistrations', () => {
       const { result } = renderHook(() => useNotificationRegistrations())
 
       await result.current.unregisterDeviceNotifications('1')
-
-      expect(unregisterDeviceSpy).not.toHaveBeenCalled()
     })
 
     it('does not clear preferences if unregistration does not succeed', async () => {
-      // @ts-expect-error
-      unregisterDeviceSpy.mockImplementation(() => Promise.resolve('Unregistration could not be completed.'))
+      // Mock the endpoint to return an error
+      server.use(
+        http.delete(`${GATEWAY_URL}/v1/chains/:chainId/notifications/devices/:uuid`, () => {
+          return HttpResponse.json({ error: 'Unregistration could not be completed.' })
+        }),
+      )
 
       const uuid = self.crypto.randomUUID()
       const deleteAllChainPreferencesMock = jest.fn()
@@ -342,14 +337,17 @@ describe('useNotificationRegistrations', () => {
       const { result } = renderHook(() => useNotificationRegistrations())
 
       await result.current.unregisterDeviceNotifications('1')
-
-      expect(unregisterDeviceSpy).toHaveBeenCalledWith('1', uuid)
 
       expect(deleteAllChainPreferencesMock).not.toHaveBeenCalled()
     })
 
     it('does not clear preferences if unregistration throws', async () => {
-      unregisterDeviceSpy.mockImplementation(() => Promise.reject())
+      // Mock the endpoint to throw an error
+      server.use(
+        http.delete(`${GATEWAY_URL}/v1/chains/:chainId/notifications/devices/:uuid`, () => {
+          return HttpResponse.error()
+        }),
+      )
 
       const uuid = self.crypto.randomUUID()
       const deleteAllChainPreferencesMock = jest.fn()
@@ -366,14 +364,11 @@ describe('useNotificationRegistrations', () => {
 
       await result.current.unregisterDeviceNotifications('1')
 
-      expect(unregisterDeviceSpy).toHaveBeenCalledWith('1', uuid)
-
-      expect(deleteAllChainPreferencesMock).not.toHaveBeenCalledWith()
+      expect(deleteAllChainPreferencesMock).not.toHaveBeenCalled()
     })
 
     it('clears chain preferences if unregistration succeeds', async () => {
-      unregisterDeviceSpy.mockImplementation(() => Promise.resolve())
-
+      // Default MSW handler returns success
       const uuid = self.crypto.randomUUID()
       const deleteAllChainPreferencesMock = jest.fn()
 
@@ -388,8 +383,6 @@ describe('useNotificationRegistrations', () => {
       const { result } = renderHook(() => useNotificationRegistrations())
 
       await result.current.unregisterDeviceNotifications('1')
-
-      expect(unregisterDeviceSpy).toHaveBeenCalledWith('1', uuid)
 
       expect(deleteAllChainPreferencesMock).toHaveBeenCalledWith('1')
     })

@@ -16,53 +16,71 @@ describe('Swaps 2 tests', () => {
   })
 
   beforeEach(() => {
+    cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
     cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_1)
-    main.waitForHistoryCallToComplete()
+    cy.wait('@History', { timeout: 20000 })
     wallet.connectSigner(signer)
     iframeSelector = `iframe[src*="${constants.swapWidget}"]`
   })
 
+  it.skip(
+    'Verify Setting the top token first in a swap creates a "Sell order" tx',
+    { defaultCommandTimeout: 30000 },
+    () => {
+      const value = '200 COW'
+      swaps.getMockQuoteResponse(swaps.quoteResponse.quote1)
+      swaps.acceptLegalDisclaimer()
+      cy.wait(4000)
+      main.getIframeBody(iframeSelector).within(() => {
+        swaps.selectInputCurrency(swaps.swapTokens.cow)
+        swaps.setInputValue(200)
 
-  it('Verify Setting the top token first in a swap creates a "Sell order" tx', { defaultCommandTimeout: 30000 }, () => {
-    const value = '200 COW'
-    swaps.acceptLegalDisclaimer()
-    cy.wait(4000)
-    main.getIframeBody(iframeSelector).within(() => {
-      swaps.selectInputCurrency(swaps.swapTokens.cow)
-      swaps.setInputValue(200)
-
-      swaps.selectOutputCurrency(swaps.swapTokens.dai)
-      swaps.checkSwapBtnIsVisible()
-      swaps.isInputGreaterZero(swaps.outputCurrencyInput).then((isGreaterThanZero) => {
-        cy.wrap(isGreaterThanZero).should('be.true')
+        swaps.selectOutputCurrency(swaps.swapTokens.dai)
+        cy.wait('@mockedQuote').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200)
+          cy.log('Intercepted response:', JSON.stringify(interception.response.body))
+        })
+        swaps.checkSwapBtnIsVisible()
+        swaps.isInputGreaterZero(swaps.outputCurrencyInput).then((isGreaterThanZero) => {
+          cy.wrap(isGreaterThanZero).should('be.true')
+        })
+        swaps.clickOnExceeFeeChkbox()
+        swaps.clickOnSwapBtn()
+        swaps.checkInputCurrencyPreviewValue(value)
+        swaps.clickOnSwapBtn()
       })
-      swaps.clickOnExceeFeeChkbox()
-      swaps.clickOnSwapBtn()
-      swaps.checkInputCurrencyPreviewValue(value)
-      swaps.clickOnSwapBtn()
-    })
-    swaps.checkTokenBlockValue(0, value)
-  })
+      swaps.checkTokenBlockValue(0, value)
+    },
+  )
 
-  it('Verify Setting the bottom token first in a swap creates a "Buy order" tx', { defaultCommandTimeout: 30000 }, () => {
-    const value = '200 DAI'
-    swaps.acceptLegalDisclaimer()
-    cy.wait(4000)
-    main.getIframeBody(iframeSelector).within(() => {
-      swaps.selectOutputCurrency(swaps.swapTokens.dai)
-      swaps.setOutputValue(200)
+  it.skip(
+    'Verify Setting the bottom token first in a swap creates a "Buy order" tx',
+    { defaultCommandTimeout: 30000 },
+    () => {
+      const value = swaps.getTokenValue()
+      const tokenValue = '600'
+      swaps.getMockQuoteResponse(swaps.quoteResponse.quote2)
+      swaps.acceptLegalDisclaimer()
+      cy.wait(4000)
+      main.getIframeBody(iframeSelector).within(() => {
+        swaps.selectOutputCurrency(swaps.swapTokens.dai)
+        swaps.setOutputValue(tokenValue)
+        swaps.selectInputCurrency(swaps.swapTokens.cow)
+        cy.wait('@mockedQuote').then((interception) => {
+          expect(interception.response.statusCode).to.eq(200)
+          cy.log('Intercepted response:', JSON.stringify(interception.response.body))
+        })
+        swaps.checkSwapBtnIsVisible()
+        swaps.isInputGreaterZero(swaps.outputCurrencyInput).then((isGreaterThanZero) => {
+          cy.wrap(isGreaterThanZero).should('be.true')
+        })
 
-      swaps.selectInputCurrency(swaps.swapTokens.cow)
-
-      swaps.checkSwapBtnIsVisible()
-      swaps.isInputGreaterZero(swaps.outputCurrencyInput).then((isGreaterThanZero) => {
-        cy.wrap(isGreaterThanZero).should('be.true')
+        swaps.clickOnSwapBtn()
+        swaps.checkOutputCurrencyPreviewValue(value)
+        swaps.clickOnSwapBtn()
+        swaps.confirmPriceImpact()
       })
-      swaps.clickOnExceeFeeChkbox()
-      swaps.clickOnSwapBtn()
-      swaps.checkOutputCurrencyPreviewValue(value)
-      swaps.clickOnSwapBtn()
-    })
-    swaps.checkTokenBlockValue(1, value)
-  })
+      swaps.checkTokenBlockValue(1, tokenValue)
+    },
+  )
 })

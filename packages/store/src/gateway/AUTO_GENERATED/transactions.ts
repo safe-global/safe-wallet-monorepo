@@ -13,6 +13,52 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/transactions/${queryArg.id}` }),
         providesTags: ['transactions'],
       }),
+      transactionsGetDomainMultisigTransactionBySafeTxHashV1: build.query<
+        TransactionsGetDomainMultisigTransactionBySafeTxHashV1ApiResponse,
+        TransactionsGetDomainMultisigTransactionBySafeTxHashV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/chains/${queryArg.chainId}/multisig-transactions/${queryArg.safeTxHash}/raw`,
+        }),
+        providesTags: ['transactions'],
+      }),
+      transactionsGetDomainMultisigTransactionsV1: build.query<
+        TransactionsGetDomainMultisigTransactionsV1ApiResponse,
+        TransactionsGetDomainMultisigTransactionsV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/multisig-transactions/raw`,
+          params: {
+            failed: queryArg.failed,
+            modified__lt: queryArg.modifiedLt,
+            modified__gt: queryArg.modifiedGt,
+            modified__lte: queryArg.modifiedLte,
+            modified__gte: queryArg.modifiedGte,
+            nonce__lt: queryArg.nonceLt,
+            nonce__gt: queryArg.nonceGt,
+            nonce__lte: queryArg.nonceLte,
+            nonce__gte: queryArg.nonceGte,
+            nonce: queryArg.nonce,
+            safe_tx_hash: queryArg.safeTxHash,
+            to: queryArg.to,
+            value__lt: queryArg.valueLt,
+            value__gt: queryArg.valueGt,
+            value: queryArg.value,
+            executed: queryArg.executed,
+            has_confirmations: queryArg.hasConfirmations,
+            trusted: queryArg.trusted,
+            execution_date__gte: queryArg.executionDateGte,
+            execution_date__lte: queryArg.executionDateLte,
+            submission_date__gte: queryArg.submissionDateGte,
+            submission_date__lte: queryArg.submissionDateLte,
+            transaction_hash: queryArg.transactionHash,
+            ordering: queryArg.ordering,
+            limit: queryArg.limit,
+            offset: queryArg.offset,
+          },
+        }),
+        providesTags: ['transactions'],
+      }),
       transactionsGetMultisigTransactionsV1: build.query<
         TransactionsGetMultisigTransactionsV1ApiResponse,
         TransactionsGetMultisigTransactionsV1ApiArg
@@ -146,91 +192,201 @@ const injectedRtkApi = api
         }),
         providesTags: ['transactions'],
       }),
+      transactionsGetDomainCreationTransactionV1: build.query<
+        TransactionsGetDomainCreationTransactionV1ApiResponse,
+        TransactionsGetDomainCreationTransactionV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/creation/raw` }),
+        providesTags: ['transactions'],
+      }),
     }),
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type TransactionsGetTransactionByIdV1ApiResponse = /** status 200  */ TransactionDetails
+export type TransactionsGetTransactionByIdV1ApiResponse =
+  /** status 200 Transaction details retrieved successfully */ TransactionDetails
 export type TransactionsGetTransactionByIdV1ApiArg = {
+  /** Chain ID where the transaction exists */
   chainId: string
+  /** Transaction ID (safe transaction hash or multisig transaction ID) */
   id: string
 }
-export type TransactionsGetMultisigTransactionsV1ApiResponse = /** status 200  */ MultisigTransactionPage
-export type TransactionsGetMultisigTransactionsV1ApiArg = {
+export type TransactionsGetDomainMultisigTransactionBySafeTxHashV1ApiResponse =
+  /** status 200  */ TxsMultisigTransaction
+export type TransactionsGetDomainMultisigTransactionBySafeTxHashV1ApiArg = {
+  chainId: string
+  safeTxHash: string
+}
+export type TransactionsGetDomainMultisigTransactionsV1ApiResponse = /** status 200  */ TxsMultisigTransactionPage
+export type TransactionsGetDomainMultisigTransactionsV1ApiArg = {
   chainId: string
   safeAddress: string
+  failed?: boolean
+  modifiedLt?: string
+  modifiedGt?: string
+  modifiedLte?: string
+  modifiedGte?: string
+  nonceLt?: number
+  nonceGt?: number
+  nonceLte?: number
+  nonceGte?: number
+  nonce?: number
+  safeTxHash?: string
+  to?: string
+  valueLt?: number
+  valueGt?: number
+  value?: number
+  executed?: boolean
+  hasConfirmations?: boolean
+  trusted?: boolean
   executionDateGte?: string
   executionDateLte?: string
+  submissionDateGte?: string
+  submissionDateLte?: string
+  transactionHash?: string
+  ordering?: string
+  limit?: number
+  offset?: number
+}
+export type TransactionsGetMultisigTransactionsV1ApiResponse =
+  /** status 200 Paginated list of multisig transactions */ MultisigTransactionPage
+export type TransactionsGetMultisigTransactionsV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
+  chainId: string
+  /** Safe contract address (0x prefixed hex string) */
+  safeAddress: string
+  /** Filter by execution date greater than or equal to (ISO 8601 format) */
+  executionDateGte?: string
+  /** Filter by execution date less than or equal to (ISO 8601 format) */
+  executionDateLte?: string
+  /** Filter by recipient address (0x prefixed hex string) */
   to?: string
+  /** Filter by transaction value in wei */
   value?: string
+  /** Filter by transaction nonce */
   nonce?: string
+  /** Filter by execution status (true for executed, false for pending) */
   executed?: boolean
+  /** Pagination cursor for retrieving the next set of results */
   cursor?: string
 }
 export type TransactionsDeleteTransactionV1ApiResponse = unknown
 export type TransactionsDeleteTransactionV1ApiArg = {
+  /** Chain ID where the transaction exists */
   chainId: string
+  /** Safe transaction hash (0x prefixed hex string) */
   safeTxHash: string
+  /** Signature proving authorization to delete the transaction */
   deleteTransactionDto: DeleteTransactionDto
 }
-export type TransactionsGetModuleTransactionsV1ApiResponse = /** status 200  */ ModuleTransactionPage
+export type TransactionsGetModuleTransactionsV1ApiResponse =
+  /** status 200 Paginated list of module transactions */ ModuleTransactionPage
 export type TransactionsGetModuleTransactionsV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Filter by recipient address (0x prefixed hex string) */
   to?: string
+  /** Filter by module address that executed the transaction */
   module?: string
+  /** Filter by specific transaction hash */
   transactionHash?: string
+  /** Pagination cursor for retrieving the next set of results */
   cursor?: string
 }
-export type TransactionsAddConfirmationV1ApiResponse = /** status 200  */ Transaction
+export type TransactionsAddConfirmationV1ApiResponse =
+  /** status 200 Transaction details with updated confirmation status */ Transaction
 export type TransactionsAddConfirmationV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe transaction hash (0x prefixed hex string) */
   safeTxHash: string
+  /** Confirmation signature from a Safe owner proving their approval of the transaction */
   addConfirmationDto: AddConfirmationDto
 }
-export type TransactionsGetIncomingTransfersV1ApiResponse = /** status 200  */ IncomingTransferPage
+export type TransactionsGetIncomingTransfersV1ApiResponse =
+  /** status 200 Paginated list of incoming transfers */ IncomingTransferPage
 export type TransactionsGetIncomingTransfersV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Filter by trust status (true for trusted tokens, false for untrusted) */
   trusted?: boolean
+  /** Filter by execution date greater than or equal to (ISO 8601 format) */
   executionDateGte?: string
+  /** Filter by execution date less than or equal to (ISO 8601 format) */
   executionDateLte?: string
+  /** Filter by recipient address (0x prefixed hex string) */
   to?: string
+  /** Filter by transfer value in wei */
   value?: string
+  /** Filter by token contract address (0x prefixed hex string for ERC-20 tokens) */
   tokenAddress?: string
+  /** Pagination cursor for retrieving the next set of results */
   cursor?: string
 }
-export type TransactionsPreviewTransactionV1ApiResponse = /** status 200  */ TransactionPreview
+export type TransactionsPreviewTransactionV1ApiResponse =
+  /** status 200 Transaction preview with simulation results, gas estimates, and potential effects */ TransactionPreview
 export type TransactionsPreviewTransactionV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Transaction data to preview including recipient, value, data, and operation type */
   previewTransactionDto: PreviewTransactionDto
 }
-export type TransactionsGetTransactionQueueV1ApiResponse = /** status 200  */ QueuedItemPage
+export type TransactionsGetTransactionQueueV1ApiResponse =
+  /** status 200 Paginated list of queued transactions */ QueuedItemPage
 export type TransactionsGetTransactionQueueV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Filter by trust status (true for trusted transactions, false for untrusted) */
   trusted?: boolean
+  /** Pagination cursor for retrieving the next set of results */
   cursor?: string
 }
-export type TransactionsGetTransactionsHistoryV1ApiResponse = /** status 200  */ TransactionItemPage
+export type TransactionsGetTransactionsHistoryV1ApiResponse =
+  /** status 200 Paginated list of historical transactions */ TransactionItemPage
 export type TransactionsGetTransactionsHistoryV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Deprecated: Timezone offset in milliseconds for date formatting (use timezone parameter instead) */
   timezoneOffset?: string
+  /** Filter by trust status (default: true, set to false to include untrusted transactions) */
   trusted?: boolean
+  /** Include imitation transactions in results (default: true, set to false to exclude) */
   imitation?: boolean
+  /** IANA timezone identifier for date formatting (e.g., "America/New_York") */
   timezone?: string
+  /** Pagination cursor for retrieving the next set of results */
   cursor?: string
 }
-export type TransactionsProposeTransactionV1ApiResponse = /** status 200  */ Transaction
+export type TransactionsProposeTransactionV1ApiResponse =
+  /** status 200 Transaction proposed successfully */ TransactionDetails
 export type TransactionsProposeTransactionV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
   chainId: string
+  /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Transaction proposal including recipient, value, data, and initial signature */
   proposeTransactionDto: ProposeTransactionDto
 }
-export type TransactionsGetCreationTransactionV1ApiResponse = /** status 200  */ CreationTransaction
+export type TransactionsGetCreationTransactionV1ApiResponse =
+  /** status 200 Safe creation transaction details */ CreationTransaction
 export type TransactionsGetCreationTransactionV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
+  chainId: string
+  /** Safe contract address (0x prefixed hex string) */
+  safeAddress: string
+}
+export type TransactionsGetDomainCreationTransactionV1ApiResponse = /** status 200  */ TxsCreationTransaction
+export type TransactionsGetDomainCreationTransactionV1ApiArg = {
   chainId: string
   safeAddress: string
 }
@@ -256,36 +412,100 @@ export type CustomTransactionInfo = {
   value?: string | null
   isCancellation: boolean
   methodName?: string | null
-  actionCount?: number | null
+}
+export type MultiSendTransactionInfo = {
+  type: 'Custom'
+  humanDescription?: string | null
+  to: AddressInfo
+  dataSize: string
+  value?: string | null
+  isCancellation: boolean
+  methodName: 'multiSend'
+  actionCount: number
+}
+export type BaseDataDecoded = {
+  method: string
+  parameters?: DataDecodedParameter[]
+}
+export type Operation = 0 | 1
+export type MultiSend = {
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
+  value: string
+  dataDecoded?: BaseDataDecoded
+  to: string
+  /** Hexadecimal encoded data */
+  data: string | null
 }
 export type DataDecodedParameter = {
   name: string
   type: string
-  value: object
-  valueDecoded?: ((object | null) | (object[] | null)) | null
+  /** Parameter value - typically a string, but may be an array of strings for array types (e.g., address[], uint256[]) */
+  value: string | string[]
+  valueDecoded?: BaseDataDecoded | MultiSend[] | null
 }
 export type DataDecoded = {
   method: string
   parameters?: DataDecodedParameter[] | null
+  accuracy?: 'FULL_MATCH' | 'PARTIAL_MATCH' | 'ONLY_FUNCTION_MATCH' | 'NO_MATCH' | 'UNKNOWN'
 }
-export type SettingsChange = {
-  type:
-    | 'ADD_OWNER'
-    | 'CHANGE_MASTER_COPY'
-    | 'CHANGE_THRESHOLD'
-    | 'DELETE_GUARD'
-    | 'DISABLE_MODULE'
-    | 'ENABLE_MODULE'
-    | 'REMOVE_OWNER'
-    | 'SET_FALLBACK_HANDLER'
-    | 'SET_GUARD'
-    | 'SWAP_OWNER'
+export type AddOwner = {
+  type: 'ADD_OWNER'
+  owner: AddressInfo
+  threshold: number
+}
+export type ChangeMasterCopy = {
+  type: 'CHANGE_MASTER_COPY'
+  implementation: AddressInfo
+}
+export type ChangeThreshold = {
+  type: 'CHANGE_THRESHOLD'
+  threshold: number
+}
+export type DeleteGuard = {
+  type: 'DELETE_GUARD'
+}
+export type DisableModule = {
+  type: 'DISABLE_MODULE'
+  module: AddressInfo
+}
+export type EnableModule = {
+  type: 'ENABLE_MODULE'
+  module: AddressInfo
+}
+export type RemoveOwner = {
+  type: 'REMOVE_OWNER'
+  owner: AddressInfo
+  threshold: number
+}
+export type SetFallbackHandler = {
+  type: 'SET_FALLBACK_HANDLER'
+  handler: AddressInfo
+}
+export type SetGuard = {
+  type: 'SET_GUARD'
+  guard: AddressInfo
+}
+export type SwapOwner = {
+  type: 'SWAP_OWNER'
+  oldOwner: AddressInfo
+  newOwner: AddressInfo
 }
 export type SettingsChangeTransaction = {
   type: 'SettingsChange'
   humanDescription?: string | null
   dataDecoded: DataDecoded
-  settingsInfo?: SettingsChange | null
+  settingsInfo:
+    | AddOwner
+    | ChangeMasterCopy
+    | ChangeThreshold
+    | DeleteGuard
+    | DisableModule
+    | EnableModule
+    | RemoveOwner
+    | SetFallbackHandler
+    | SetGuard
+    | SwapOwner
 }
 export type Erc20Transfer = {
   type: 'ERC20'
@@ -360,12 +580,59 @@ export type SwapOrderTransactionInfo = {
   /** The amount of fees paid for this order. */
   executedFee: string
   /** The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders). */
-  executedFeeToken: string
+  executedFeeToken: TokenInfo
   /** The (optional) address to receive the proceeds of the trade */
   receiver?: string | null
   owner: string
   /** The App Data for this order */
   fullAppData?: object | null
+}
+export type BridgeFee = {
+  tokenAddress: string
+  integratorFee: string
+  lifiFee: string
+}
+export type BridgeAndSwapTransactionInfo = {
+  type: 'SwapAndBridge'
+  humanDescription?: string | null
+  fromToken: TokenInfo
+  recipient: AddressInfo
+  explorerUrl: string | null
+  status: 'NOT_FOUND' | 'INVALID' | 'PENDING' | 'DONE' | 'FAILED' | 'UNKNOWN' | 'AWAITING_EXECUTION'
+  substatus:
+    | 'WAIT_SOURCE_CONFIRMATIONS'
+    | 'WAIT_DESTINATION_TRANSACTION'
+    | 'BRIDGE_NOT_AVAILABLE'
+    | 'CHAIN_NOT_AVAILABLE'
+    | 'REFUND_IN_PROGRESS'
+    | 'UNKNOWN_ERROR'
+    | 'COMPLETED'
+    | 'PARTIAL'
+    | 'REFUNDED'
+    | 'INSUFFICIENT_ALLOWANCE'
+    | 'INSUFFICIENT_BALANCE'
+    | 'OUT_OF_GAS'
+    | 'EXPIRED'
+    | 'SLIPPAGE_EXCEEDED'
+    | 'UNKNOWN_FAILED_ERROR'
+    | 'UNKNOWN'
+    | 'AWAITING_EXECUTION'
+  fees: BridgeFee | null
+  fromAmount: string
+  toChain: string
+  toToken: TokenInfo | null
+  toAmount: string | null
+}
+export type SwapTransactionInfo = {
+  type: 'Swap'
+  humanDescription?: string | null
+  recipient: AddressInfo
+  fees: BridgeFee | null
+  fromToken: TokenInfo
+  fromAmount: string
+  toToken: TokenInfo
+  toAmount: string
+  lifiExplorerUrl: string | null
 }
 export type SwapTransferTransactionInfo = {
   type: 'SwapTransfer'
@@ -405,6 +672,20 @@ export type SwapTransferTransactionInfo = {
   /** The App Data for this order */
   fullAppData?: object | null
 }
+export type DurationAuto = {
+  durationType: 'AUTO'
+}
+export type DurationLimit = {
+  durationType: 'LIMIT_DURATION'
+  duration: string
+}
+export type StartTimeAtMining = {
+  startType: 'AT_MINING_TIME'
+}
+export type StartTimeAtEpoch = {
+  startType: 'AT_EPOCH'
+  epoch: number
+}
 export type TwapOrderTransactionInfo = {
   type: 'TwapOrder'
   humanDescription?: string | null
@@ -427,7 +708,7 @@ export type TwapOrderTransactionInfo = {
   /** The executed surplus fee raw amount (no decimals), or null if there are too many parts */
   executedFee?: string | null
   /** The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders). */
-  executedFeeToken: string
+  executedFeeToken: TokenInfo
   /** The sell token of the TWAP */
   sellToken: TokenInfo
   /** The buy token of the TWAP */
@@ -446,9 +727,9 @@ export type TwapOrderTransactionInfo = {
   /** The duration of the TWAP interval */
   timeBetweenParts: number
   /** Whether the TWAP is valid for the entire interval or not */
-  durationOfPart: object
+  durationOfPart: DurationAuto | DurationLimit
   /** The start time of the TWAP */
-  startTime: object
+  startTime: StartTimeAtMining | StartTimeAtEpoch
 }
 export type NativeStakingDepositTransactionInfo = {
   type: 'NativeStakingDeposit'
@@ -504,22 +785,88 @@ export type NativeStakingWithdrawTransactionInfo = {
   tokenInfo: TokenInfo
   validators: string[]
 }
+export type VaultInfo = {
+  address: string
+  name: string
+  description: string
+  dashboardUri?: string | null
+  logoUri: string
+}
+export type VaultExtraReward = {
+  tokenInfo: TokenInfo
+  nrr: number
+  claimable: string
+  claimableNext: string
+}
+export type VaultDepositTransactionInfo = {
+  type: 'VaultDeposit'
+  humanDescription?: string | null
+  value: string
+  baseNrr: number
+  fee: number
+  tokenInfo: TokenInfo
+  vaultInfo: VaultInfo
+  currentReward: string
+  additionalRewardsNrr: number
+  additionalRewards: VaultExtraReward[]
+  expectedMonthlyReward: string
+  expectedAnnualReward: string
+}
+export type VaultRedeemTransactionInfo = {
+  type: 'VaultRedeem'
+  humanDescription?: string | null
+  value: string
+  baseNrr: number
+  fee: number
+  tokenInfo: TokenInfo
+  vaultInfo: VaultInfo
+  currentReward: string
+  additionalRewardsNrr: number
+  additionalRewards: VaultExtraReward[]
+}
+export type NativeToken = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  type: 'NATIVE_TOKEN'
+}
+export type Erc20Token = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  type: 'ERC20'
+}
+export type Erc721Token = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  type: 'ERC721'
+}
 export type TransactionData = {
   hexData?: string | null
   dataDecoded?: DataDecoded | null
   to: AddressInfo
   value?: string | null
-  operation: number
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
   trustedDelegateCallTarget?: boolean | null
-  addressInfoIndex?: object | null
+  addressInfoIndex?: {
+    [key: string]: AddressInfo
+  } | null
+  tokenInfoIndex?: {
+    [key: string]: NativeToken | Erc20Token | Erc721Token
+  } | null
 }
-export type Token = {
-  address: string
-  decimals?: number | null
-  logoUri: string
-  name: string
-  symbol: string
-  type: 'ERC721' | 'ERC20' | 'NATIVE_TOKEN' | 'UNKNOWN'
+export type MultisigConfirmationDetails = {
+  signer: AddressInfo
+  signature?: string | null
+  submittedAt: number
 }
 export type MultisigExecutionDetails = {
   type: 'MULTISIG'
@@ -532,11 +879,11 @@ export type MultisigExecutionDetails = {
   refundReceiver: AddressInfo
   safeTxHash: string
   executor?: AddressInfo | null
-  signers: string[]
+  signers: AddressInfo[]
   confirmationsRequired: number
-  confirmations: string[]
+  confirmations: MultisigConfirmationDetails[]
   rejectors: AddressInfo[]
-  gasTokenInfo?: Token | null
+  gasTokenInfo?: (NativeToken | Erc20Token | Erc721Token) | null
   trusted: boolean
   proposer?: AddressInfo | null
   proposedByDelegate?: AddressInfo | null
@@ -554,14 +901,19 @@ export type TransactionDetails = {
   txInfo:
     | CreationTransactionInfo
     | CustomTransactionInfo
+    | MultiSendTransactionInfo
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
+    | BridgeAndSwapTransactionInfo
+    | SwapTransactionInfo
     | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
     | NativeStakingDepositTransactionInfo
     | NativeStakingValidatorsExitTransactionInfo
     | NativeStakingWithdrawTransactionInfo
+    | VaultDepositTransactionInfo
+    | VaultRedeemTransactionInfo
   safeAddress: string
   txId: string
   executedAt?: number | null
@@ -571,6 +923,45 @@ export type TransactionDetails = {
   txHash?: string | null
   safeAppInfo?: SafeAppInfo | null
   note?: string | null
+}
+export type TxsMultisigTransaction = {
+  safe: string
+  to: string
+  value: string
+  data: object
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
+  gasToken: object
+  safeTxGas: object
+  baseGas: object
+  gasPrice: object
+  proposer: object
+  proposedByDelegate: object
+  refundReceiver: object
+  nonce: number
+  executionDate: object
+  submissionDate: string
+  modified: object
+  blockNumber: object
+  transactionHash: object
+  safeTxHash: string
+  executor: object
+  isExecuted: boolean
+  isSuccessful: object
+  ethGasPrice: object
+  gasUsed: object
+  fee: object
+  origin: object
+  confirmationsRequired: number
+  confirmations: object
+  signatures: object
+  trusted: boolean
+}
+export type TxsMultisigTransactionPage = {
+  count?: number | null
+  next?: string | null
+  previous?: string | null
+  results: TxsMultisigTransaction[]
 }
 export type MultisigExecutionInfo = {
   type: 'MULTISIG'
@@ -587,20 +978,26 @@ export type Transaction = {
   txInfo:
     | CreationTransactionInfo
     | CustomTransactionInfo
+    | MultiSendTransactionInfo
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
+    | BridgeAndSwapTransactionInfo
+    | SwapTransactionInfo
     | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
     | NativeStakingDepositTransactionInfo
     | NativeStakingValidatorsExitTransactionInfo
     | NativeStakingWithdrawTransactionInfo
+    | VaultDepositTransactionInfo
+    | VaultRedeemTransactionInfo
   id: string
   txHash?: string | null
   timestamp: number
   txStatus: 'SUCCESS' | 'FAILED' | 'CANCELLED' | 'AWAITING_CONFIRMATIONS' | 'AWAITING_EXECUTION'
   executionInfo?: (MultisigExecutionInfo | ModuleExecutionInfo) | null
   safeAppInfo?: SafeAppInfo | null
+  note?: string | null
 }
 export type MultisigTransaction = {
   type: 'TRANSACTION'
@@ -628,7 +1025,7 @@ export type ModuleTransactionPage = {
   results: ModuleTransaction[]
 }
 export type AddConfirmationDto = {
-  signedSafeTxHash: string
+  signature: string
 }
 export type IncomingTransfer = {
   type: 'TRANSACTION'
@@ -645,21 +1042,27 @@ export type TransactionPreview = {
   txInfo:
     | CreationTransactionInfo
     | CustomTransactionInfo
+    | MultiSendTransactionInfo
     | SettingsChangeTransaction
     | TransferTransactionInfo
     | SwapOrderTransactionInfo
+    | BridgeAndSwapTransactionInfo
+    | SwapTransactionInfo
     | SwapTransferTransactionInfo
     | TwapOrderTransactionInfo
     | NativeStakingDepositTransactionInfo
     | NativeStakingValidatorsExitTransactionInfo
     | NativeStakingWithdrawTransactionInfo
+    | VaultDepositTransactionInfo
+    | VaultRedeemTransactionInfo
   txData: TransactionData
 }
 export type PreviewTransactionDto = {
   to: string
   data?: string | null
   value: string
-  operation: number
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
 }
 export type ConflictHeaderQueuedItem = {
   type: 'CONFLICT_HEADER'
@@ -700,7 +1103,8 @@ export type ProposeTransactionDto = {
   value: string
   data?: string | null
   nonce: string
-  operation: number
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
   safeTxGas: string
   baseGas: string
   gasPrice: string
@@ -721,9 +1125,22 @@ export type CreationTransaction = {
   saltNonce?: string | null
   dataDecoded?: DataDecoded | null
 }
+export type TxsCreationTransaction = {
+  created: string
+  creator: string
+  transactionHash: string
+  factoryAddress: string
+  masterCopy: object
+  setupData: object
+  saltNonce: object
+}
 export const {
   useTransactionsGetTransactionByIdV1Query,
   useLazyTransactionsGetTransactionByIdV1Query,
+  useTransactionsGetDomainMultisigTransactionBySafeTxHashV1Query,
+  useLazyTransactionsGetDomainMultisigTransactionBySafeTxHashV1Query,
+  useTransactionsGetDomainMultisigTransactionsV1Query,
+  useLazyTransactionsGetDomainMultisigTransactionsV1Query,
   useTransactionsGetMultisigTransactionsV1Query,
   useLazyTransactionsGetMultisigTransactionsV1Query,
   useTransactionsDeleteTransactionV1Mutation,
@@ -740,4 +1157,6 @@ export const {
   useTransactionsProposeTransactionV1Mutation,
   useTransactionsGetCreationTransactionV1Query,
   useLazyTransactionsGetCreationTransactionV1Query,
+  useTransactionsGetDomainCreationTransactionV1Query,
+  useLazyTransactionsGetDomainCreationTransactionV1Query,
 } = injectedRtkApi

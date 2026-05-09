@@ -3,7 +3,7 @@ import type { ReactElement } from 'react'
 
 import WarningIcon from '@/public/images/notifications/warning.svg'
 
-export const RecoveryInfo = ({ isMalicious }: { isMalicious: boolean }): ReactElement | null => {
+const RecoveryInfo = ({ isMalicious }: { isMalicious: boolean }): ReactElement | null => {
   if (!isMalicious) {
     return null
   }
@@ -16,3 +16,5 @@ export const RecoveryInfo = ({ isMalicious }: { isMalicious: boolean }): ReactEl
     </Tooltip>
   )
 }
+
+export default RecoveryInfo

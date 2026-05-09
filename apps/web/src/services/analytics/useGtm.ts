@@ -4,7 +4,6 @@
 import { useEffect, useState } from 'react'
 import { useTheme } from '@mui/material/styles'
 import {
-  gtmInit,
   gtmTrackPageview,
   gtmSetChainId,
   gtmEnableCookies,
@@ -14,7 +13,6 @@ import {
   gtmSetUserProperty,
   gtmTrack,
 } from '@/services/analytics/gtm'
-import { spindlInit, spindlAttribute } from './spindl'
 import { useAppSelector } from '@/store'
 import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import useChainId from '@/hooks/useChainId'
@@ -26,6 +24,7 @@ import { AnalyticsUserProperties, DeviceType } from './types'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
 import { OVERVIEW_EVENTS } from './events'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 
 const useGtm = () => {
   const chainId = useChainId()
@@ -38,12 +37,7 @@ const useGtm = () => {
   const deviceType = isMobile ? DeviceType.MOBILE : isTablet ? DeviceType.TABLET : DeviceType.DESKTOP
   const safeAddress = useSafeAddress()
   const wallet = useWallet()
-
-  // Initialize GTM and Spindl
-  useEffect(() => {
-    gtmInit()
-    spindlInit()
-  }, [])
+  const isSpaceRoute = useIsSpaceRoute()
 
   // Enable GA cookies if consent was given
   useEffect(() => {
@@ -74,18 +68,18 @@ const useGtm = () => {
   useEffect(() => {
     gtmSetSafeAddress(safeAddress)
 
-    if (safeAddress) {
+    if (safeAddress && !isSpaceRoute) {
       gtmTrack(OVERVIEW_EVENTS.SAFE_VIEWED)
     }
-  }, [safeAddress])
+  }, [safeAddress, isSpaceRoute])
 
   // Track page views – anonymized by default.
   useEffect(() => {
     // Don't track 404 because it's not a real page, it immediately does a client-side redirect
-    if (router.pathname === AppRoutes['404']) return
+    if (router.pathname === AppRoutes['404'] || isSpaceRoute) return
 
     gtmTrackPageview(router.pathname, router.asPath)
-  }, [router.asPath, router.pathname])
+  }, [router.asPath, router.pathname, isSpaceRoute])
 
   useEffect(() => {
     if (wallet?.label) {
@@ -95,8 +89,7 @@ const useGtm = () => {
 
   useEffect(() => {
     if (wallet?.address) {
-      gtmSetUserProperty(AnalyticsUserProperties.WALLET_ADDRESS, wallet.address.slice(2)) // Remove 0x prefix
-      spindlAttribute(wallet.address)
+      gtmSetUserProperty(AnalyticsUserProperties.WALLET_ADDRESS, wallet.address.slice(2)) // Remove 0x prefix because GA converts it to a number otherwise
     }
   }, [wallet?.address])
 

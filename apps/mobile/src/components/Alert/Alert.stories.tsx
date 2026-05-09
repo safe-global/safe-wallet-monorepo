@@ -39,3 +39,11 @@ export const Info: Story = {
     displayIcon: true,
   },
 }
+
+export const DarkModeTest: Story = {
+  args: {
+    type: 'warning',
+    message: 'Test: This should look different in light vs dark mode screenshots',
+    displayIcon: true,
+  },
+}

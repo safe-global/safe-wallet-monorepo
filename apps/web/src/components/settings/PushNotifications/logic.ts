@@ -1,22 +1,20 @@
+import type { RegisterDeviceDto } from '@safe-global/store/gateway/AUTO_GENERATED/notifications'
+import { DeviceType } from '@safe-global/store/gateway/types'
 import { getBytes, keccak256, toUtf8Bytes, type BrowserProvider } from 'ethers'
-import { joinSignature, splitSignature } from '@/utils/ethers-utils'
 import { getToken, getMessaging } from 'firebase/messaging'
-import { DeviceType } from '@safe-global/safe-gateway-typescript-sdk'
-import type { RegisterNotificationsRequest } from '@safe-global/safe-gateway-typescript-sdk'
 
 import { FIREBASE_VAPID_KEY, initializeFirebaseApp } from '@/services/push-notifications/firebase'
-import packageJson from '../../../../package.json'
+import { APP_VERSION } from '@/config/version'
 import { logError } from '@/services/exceptions'
-import ErrorCodes from '@/services/exceptions/ErrorCodes'
-import { checksumAddress } from '@/utils/addresses'
-import { isLedger } from '@/utils/wallets'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { createWeb3 } from '@/hooks/wallets/web3'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 
 type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 
 // We store UUID locally to track device registration
-export type NotificationRegistration = WithRequired<RegisterNotificationsRequest, 'uuid'>
+export type NotificationRegistration = WithRequired<RegisterDeviceDto, 'uuid'>
 
 export const requestNotificationPermission = async (): Promise<boolean> => {
   if (Notification.permission === 'granted') {
@@ -34,35 +32,18 @@ export const requestNotificationPermission = async (): Promise<boolean> => {
   return permission === 'granted'
 }
 
-// Ledger produces vrs signatures with a canonical v value of {0,1}
-// Ethereum's ecrecover call only accepts a non-standard v value of {27,28}.
-
-// @see https://github.com/ethereum/go-ethereum/issues/19751
-export const _adjustLedgerSignatureV = (signature: string): string => {
-  const split = splitSignature(signature)
-
-  // @ts-ignore
-  if (split.v === 0 || split.v === 1) {
-    split.v += 27
-  }
-
-  return joinSignature(split)
-}
-
 const getSafeRegistrationSignature = async ({
   safeAddresses,
   web3,
   timestamp,
   uuid,
   token,
-  isLedger,
 }: {
   safeAddresses: Array<string>
   web3: BrowserProvider
   timestamp: string
   uuid: string
   token: string
-  isLedger: boolean
 }) => {
   const MESSAGE_PREFIX = 'gnosis-safe'
 
@@ -75,13 +56,8 @@ const getSafeRegistrationSignature = async ({
   const message = MESSAGE_PREFIX + timestamp + uuid + token + safeAddresses.sort().join('')
   const hashedMessage = keccak256(toUtf8Bytes(message))
 
-  const signature = await (await web3.getSigner()).signMessage(getBytes(hashedMessage))
-
-  if (!isLedger) {
-    return signature
-  }
-
-  return _adjustLedgerSignatureV(signature)
+  const signer = await web3.getSigner()
+  return await signer.signMessage(getBytes(hashedMessage))
 }
 
 export type NotifiableSafes = { [chainId: string]: Array<string> }
@@ -94,7 +70,7 @@ export const getRegisterDevicePayload = async ({
   safesToRegister: NotifiableSafes
   uuid: string
   wallet: ConnectedWallet
-}): Promise<RegisterNotificationsRequest> => {
+}): Promise<RegisterDeviceDto> => {
   const BUILD_NUMBER = '0' // Required value, but does not exist on web
   const BUNDLE = 'safe'
 
@@ -110,7 +86,6 @@ export const getRegisterDevicePayload = async ({
   })
 
   const web3 = createWeb3(wallet.provider)
-  const isLedgerWallet = isLedger(wallet)
 
   // If uuid is not provided a new device will be created.
   // If a uuid for an existing Safe is provided the FirebaseDevice will be updated with all the new data provided.
@@ -120,7 +95,7 @@ export const getRegisterDevicePayload = async ({
 
   const timestamp = Math.floor(new Date().getTime() / 1000).toString()
 
-  let safeRegistrations: RegisterNotificationsRequest['safeRegistrations'] = []
+  let safeRegistrations: RegisterDeviceDto['safeRegistrations'] = []
 
   // We cannot `Promise.all` here as Ledger/Trezor return a "busy" error when signing multiple messages at once
   for await (const [chainId, safeAddresses] of Object.entries(safesToRegister)) {
@@ -133,7 +108,6 @@ export const getRegisterDevicePayload = async ({
       uuid,
       timestamp,
       token,
-      isLedger: isLedgerWallet,
     })
 
     safeRegistrations.push({
@@ -149,7 +123,7 @@ export const getRegisterDevicePayload = async ({
     buildNumber: BUILD_NUMBER,
     bundle: BUNDLE,
     deviceType: DeviceType.WEB,
-    version: packageJson.version,
+    version: APP_VERSION,
     timestamp,
     safeRegistrations,
   }

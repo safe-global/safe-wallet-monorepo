@@ -2,7 +2,9 @@ export const AppRoutes = {
   '403': '/403',
   '404': '/404',
   wc: '/wc',
+  userSettings: '/user-settings',
   terms: '/terms',
+  safeLabsTerms: '/safe-labs-terms',
   swap: '/swap',
   stake: '/stake',
   privacy: '/privacy',
@@ -10,9 +12,13 @@ export const AppRoutes = {
   index: '/',
   imprint: '/imprint',
   home: '/home',
+  earn: '/earn',
   cookie: '/cookie',
   bridge: '/bridge',
   addressBook: '/address-book',
+  hypernative: {
+    oauthCallback: '/hypernative/oauth-callback',
+  },
   addOwner: '/addOwner',
   _offline: '/_offline',
   apps: {
@@ -22,6 +28,7 @@ export const AppRoutes = {
     bookmarked: '/apps/bookmarked',
   },
   balances: {
+    positions: '/balances/positions',
     nfts: '/balances/nfts',
     index: '/balances',
   },
@@ -47,6 +54,16 @@ export const AppRoutes = {
   share: {
     safeApp: '/share/safe-app',
   },
+  spaces: {
+    settings: '/spaces/settings',
+    safeAccounts: '/spaces/safe-accounts',
+    members: '/spaces/members',
+    index: '/spaces',
+    addressBook: '/spaces/address-book',
+    createSpace: '/spaces/create-space',
+    transactions: '/spaces/transactions',
+    security: '/spaces/security',
+  },
   transactions: {
     tx: '/transactions/tx',
     queue: '/transactions/queue',
@@ -56,7 +73,21 @@ export const AppRoutes = {
     history: '/transactions/history',
   },
   welcome: {
+    spaces: '/welcome/spaces',
     index: '/welcome',
     accounts: '/welcome/accounts',
+
+    // Onboarding routes
+    createSpace: '/welcome/create-space',
+    selectSafes: '/welcome/select-safes',
+    inviteMembers: '/welcome/invite-members',
   },
 }
+
+export const UNDEPLOYED_SAFE_BLOCKED_ROUTES = [
+  AppRoutes.bridge,
+  AppRoutes.swap,
+  AppRoutes.stake,
+  AppRoutes.earn,
+  ...Object.values(AppRoutes.apps),
+]

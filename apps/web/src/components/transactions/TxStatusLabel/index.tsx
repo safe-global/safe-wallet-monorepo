@@ -1,10 +1,11 @@
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { isCancelledSwapOrder } from '@/utils/transaction-guards'
 import { CircularProgress, type Palette, Typography } from '@mui/material'
-import { TransactionStatus, type TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
 import useIsPending from '@/hooks/useIsPending'
 import useTransactionStatus from '@/hooks/useTransactionStatus'
 
-const getStatusColor = (tx: TransactionSummary, palette: Palette) => {
+const getStatusColor = (tx: Transaction, palette: Palette) => {
   if (isCancelledSwapOrder(tx.txInfo)) {
     return palette.error.main
   }
@@ -23,7 +24,7 @@ const getStatusColor = (tx: TransactionSummary, palette: Palette) => {
   }
 }
 
-const TxStatusLabel = ({ tx }: { tx: TransactionSummary }) => {
+const TxStatusLabel = ({ tx }: { tx: Transaction }) => {
   const txStatusLabel = useTransactionStatus(tx)
   const isPending = useIsPending(tx.id)
 

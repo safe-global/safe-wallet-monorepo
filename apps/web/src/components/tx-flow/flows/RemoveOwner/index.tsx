@@ -1,9 +1,13 @@
-import TxLayout from '@/components/tx-flow/common/TxLayout'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import useTxStepper from '../../useTxStepper'
 import { ReviewRemoveOwner } from './ReviewRemoveOwner'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import { SetThreshold } from './SetThreshold'
+import { useContext } from 'react'
+import { TxFlowType } from '@/services/analytics'
+import { TxFlowContext } from '../../TxFlowProvider'
+import { TxFlow } from '../../TxFlow'
+import { TxFlowStep } from '../../TxFlowStep'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
 type Owner = {
   address: string
@@ -15,6 +19,16 @@ export type RemoveOwnerFlowProps = {
   threshold: number
 }
 
+const SetThresholdStep = () => {
+  const { onNext, data } = useContext(TxFlowContext)
+  return <SetThreshold onSubmit={onNext} params={data} />
+}
+
+const ReviewOwnerStep = (props: ReviewTransactionProps) => {
+  const { data } = useContext(TxFlowContext)
+  return <ReviewRemoveOwner params={data} {...props} />
+}
+
 const RemoveOwnerFlow = (props: Owner) => {
   const { safe } = useSafeInfo()
 
@@ -23,23 +37,18 @@ const RemoveOwnerFlow = (props: Owner) => {
     threshold: Math.min(safe.threshold, safe.owners.length - 1),
   }
 
-  const { data, step, nextStep, prevStep } = useTxStepper<RemoveOwnerFlowProps>(defaultValues)
-
-  const steps = [
-    <SetThreshold key={0} params={data} onSubmit={(formData: any) => nextStep({ ...data, ...formData })} />,
-    <ReviewRemoveOwner key={1} params={data} />,
-  ]
-
   return (
-    <TxLayout
-      title={step === 0 ? 'New transaction' : 'Confirm transaction'}
-      subtitle="Remove signer"
+    <TxFlow
+      initialData={defaultValues}
+      eventCategory={TxFlowType.REMOVE_OWNER}
       icon={SaveAddressIcon}
-      step={step}
-      onBack={prevStep}
+      subtitle="Remove signer"
+      ReviewTransactionComponent={ReviewOwnerStep}
     >
-      {steps}
-    </TxLayout>
+      <TxFlowStep title="New transaction">
+        <SetThresholdStep />
+      </TxFlowStep>
+    </TxFlow>
   )
 }
 

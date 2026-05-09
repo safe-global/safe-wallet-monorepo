@@ -1,4 +1,4 @@
-import useAllOwnedSafes from '@/features/myAccounts/hooks/useAllOwnedSafes'
+import { useAllOwnedSafes } from '@/hooks/safes'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'

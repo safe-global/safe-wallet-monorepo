@@ -1,4 +1,3 @@
-import 'cypress-file-upload'
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as safe from '../pages/load_safe.pages.js'
@@ -56,5 +55,10 @@ describe('Load Safe tests - 3', () => {
     cy.wait(2000)
     safe.clickNetworkSelector(constants.networks.polygon)
     safe.selectSepolia()
+  })
+
+  it('Verify there are mandatory networks in dropdown: Eth, Polygon, Sepolia', () => {
+    safe.clickNetworkSelector(constants.networks.sepolia)
+    safe.verifyMandatoryNetworksExist()
   })
 })

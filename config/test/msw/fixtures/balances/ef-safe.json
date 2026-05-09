@@ -1,0 +1,579 @@
+{
+  "fiatTotal": "73530731.42267835",
+  "items": [
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x4d5F47FA6A74757f35C14fD3a6Ef8E3C9BC514E8",
+        "decimals": 18,
+        "symbol": "AWETH",
+        "name": "Aave v3 WETH",
+        "logoUri": "https://assets.coingecko.com/coins/images/32882/thumb/WETH_%281%29.png?1699716492"
+      },
+      "balance": "21171523664752906383300",
+      "fiatBalance": "59526914.512002505",
+      "fiatBalance24hChange": "-6.755033272038963",
+      "fiatConversion": "2811.65"
+    },
+    {
+      "tokenInfo": {
+        "type": "NATIVE_TOKEN",
+        "address": "0x0000000000000000000000000000000000000000",
+        "decimals": 18,
+        "symbol": "ETH",
+        "name": "Ether",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+      },
+      "balance": "1600001300200000000000",
+      "fiatBalance": "4505443.66123318",
+      "fiatBalance24hChange": "-6.469606473380263",
+      "fiatConversion": "2815.9"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xBEEF01735c132Ada46AA9aA4c54623cAA92A64CB",
+        "decimals": 18,
+        "symbol": "STEAKUSDC",
+        "name": "Steakhouse USDC Morpho Vault",
+        "logoUri": "https://assets.coingecko.com/coins/images/51473/thumb/steakUSDC.png?1731396462"
+      },
+      "balance": "3622286536796612324709701",
+      "fiatBalance": "4056960.9212122057",
+      "fiatBalance24hChange": "0.06250056666069292",
+      "fiatConversion": "1.12"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xBEEf050ecd6a16c4e7bfFbB52Ebba7846C4b8cD4",
+        "decimals": 18,
+        "symbol": "STEAKETH",
+        "name": "Steakhouse ETH Morpho Vault",
+        "logoUri": "https://assets.coingecko.com/coins/images/51382/thumb/ethereum.png?1730966831"
+      },
+      "balance": "1161015746321368633438",
+      "fiatBalance": "3396458.6846034587",
+      "fiatBalance24hChange": "-6.564451671271687",
+      "fiatConversion": "2925.42"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xdd0f28e19C1780eb6396170735D45153D261490d",
+        "decimals": 18,
+        "symbol": "GTUSDC",
+        "name": "Gauntlet USDC Prime Morpho Vault",
+        "logoUri": "https://assets.coingecko.com/coins/images/51338/thumb/usdc.png?1730814917"
+      },
+      "balance": "1827547347035399503771275",
+      "fiatBalance": "2028577.5552092937",
+      "fiatBalance24hChange": "0.01781947279559111",
+      "fiatConversion": "1.11"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "decimals": 6,
+        "symbol": "USDC",
+        "name": "USDC",
+        "logoUri": "https://assets.coingecko.com/coins/images/6319/thumb/USDC.png?1769615602"
+      },
+      "balance": "8547989985",
+      "fiatBalance": "8545.468327954424",
+      "fiatBalance24hChange": "0.0008553617455168864",
+      "fiatConversion": "0.999705"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
+        "decimals": 18,
+        "symbol": "GHO",
+        "name": "GHO",
+        "logoUri": "https://assets.coingecko.com/coins/images/30663/thumb/gho-token-logo.png?1720517092"
+      },
+      "balance": "5947530000000000000000",
+      "fiatBalance": "5940.398911530001",
+      "fiatBalance24hChange": "-0.0007750059636795971",
+      "fiatConversion": "0.998801"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x1C13522ca36e5E13c591c0803083D5bB9282FE48",
+        "decimals": 18,
+        "symbol": "Z",
+        "name": "zkCLOB",
+        "logoUri": "https://assets.coingecko.com/coins/images/70652/thumb/200b.png?1762974567"
+      },
+      "balance": "69420000000000000000000",
+      "fiatBalance": "988.408902",
+      "fiatBalance24hChange": "4.3629125477448465",
+      "fiatConversion": "0.0142381"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xf1df7305E4BAB3885caB5B1e4dFC338452a67891",
+        "decimals": 9,
+        "symbol": "PALM",
+        "name": "PaLM AI",
+        "logoUri": "https://assets.coingecko.com/coins/images/33097/thumb/PALM_NEW_LOGO.png?1735243643"
+      },
+      "balance": "10000000000000",
+      "fiatBalance": "427.1134",
+      "fiatBalance24hChange": "-14.574856467825494",
+      "fiatConversion": "0.04271134"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xb01dd87B29d187F3E3a4Bf6cdAebfb97F3D9aB98",
+        "decimals": 18,
+        "symbol": "BOLD",
+        "name": "Legacy BOLD",
+        "logoUri": "https://assets.coingecko.com/coins/images/53755/thumb/BOLD_logo.png?1737183873"
+      },
+      "balance": "283272952934176521528",
+      "fiatBalance": "283.18598813762577",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0.999693"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xb45ad160634c528Cc3D2926d9807104FA3157305",
+        "decimals": 18,
+        "symbol": "SDOLA",
+        "name": "sDOLA",
+        "logoUri": "https://assets.coingecko.com/coins/images/35495/thumb/sDOLAlogoFINAL.png?1708922289"
+      },
+      "balance": "99396274771150154037",
+      "fiatBalance": "117.2876042299572",
+      "fiatBalance24hChange": "-0.005556020188931779",
+      "fiatConversion": "1.18"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xAD038Eb671c44b853887A7E32528FaB35dC5D710",
+        "decimals": 18,
+        "symbol": "DBR",
+        "name": "DOLA Borrowing Right",
+        "logoUri": "https://assets.coingecko.com/coins/images/28530/thumb/DBR.png?1696527523"
+      },
+      "balance": "800000000000000000000",
+      "fiatBalance": "41.0984",
+      "fiatBalance24hChange": "-2.708714405922621",
+      "fiatConversion": "0.051373"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xba386A4Ca26B85FD057ab1Ef86e3DC7BdeB5ce70",
+        "decimals": 18,
+        "symbol": "JESUS",
+        "name": "Jesus Coin",
+        "logoUri": "https://assets.coingecko.com/coins/images/30036/thumb/JESUS_COIN_LOGO.png?1696528959"
+      },
+      "balance": "777000000000000000000000000",
+      "fiatBalance": "15.511251000000001",
+      "fiatBalance24hChange": "-3.145991346863492",
+      "fiatConversion": "0.000000019963"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x9A594F5ed8D119B73525dfE23aDBCeCa77fD828D",
+        "decimals": 18,
+        "symbol": "TRIANGLE",
+        "name": "dancing triangle",
+        "logoUri": "https://assets.coingecko.com/coins/images/50941/thumb/pfp-animated_copy.png?1729584483"
+      },
+      "balance": "420420696969000000000000",
+      "fiatBalance": "14.819829568157251",
+      "fiatBalance24hChange": "-8.1310420721484",
+      "fiatConversion": "0.00003525"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x594DaaD7D77592a2b97b725A7AD59D7E188b5bFa",
+        "decimals": 18,
+        "symbol": "APU",
+        "name": "Apu Apustaja",
+        "logoUri": "https://assets.coingecko.com/coins/images/35986/thumb/200x200.png?1710308147"
+      },
+      "balance": "31000000000000000000000",
+      "fiatBalance": "1.35129",
+      "fiatBalance24hChange": "-9.294286127576475",
+      "fiatConversion": "0.00004359"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xD8E8438CF7bEEd13cFABC82F300Fb6573962c9e3",
+        "decimals": 9,
+        "symbol": "HONK",
+        "name": "Pepoclown",
+        "logoUri": "https://assets.coingecko.com/coins/images/38498/thumb/Pepoclown.png?1717709240"
+      },
+      "balance": "696969420000000000",
+      "fiatBalance": "0.46708520832372",
+      "fiatBalance24hChange": "-10.400655227391363",
+      "fiatConversion": "0.000000000670166"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xDB99B0477574Ac0B2d9c8cec56B42277DA3fdb82",
+        "decimals": 18,
+        "symbol": "DECT",
+        "name": "DEC Token",
+        "logoUri": "https://assets.coingecko.com/coins/images/54986/thumb/dectoken_dect_logo_200_200.png?1743058530"
+      },
+      "balance": "1071000000000000000000",
+      "fiatBalance": "0.30226833",
+      "fiatBalance24hChange": "-1.7183538187948437",
+      "fiatConversion": "0.00028223"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xD4F4D0a10BcaE123bB6655E8Fe93a30d01eEbD04",
+        "decimals": 18,
+        "symbol": "LNQ",
+        "name": "LinqAI",
+        "logoUri": "https://assets.coingecko.com/coins/images/35645/thumb/cmc-cg-linq-logo_%282%29.png?1709368877"
+      },
+      "balance": "69000000000000000000",
+      "fiatBalance": "0.24078654",
+      "fiatBalance24hChange": "-7.12848488777542",
+      "fiatConversion": "0.00348966"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x0000000000c5dc95539589fbD24BE07c6C14eCa4",
+        "decimals": 18,
+        "symbol": "CULT",
+        "name": "Milady Cult Coin",
+        "logoUri": "https://assets.coingecko.com/coins/images/52583/thumb/cult.jpg?1733712273"
+      },
+      "balance": "877739477067827364130",
+      "fiatBalance": "0.2331100503196736",
+      "fiatBalance24hChange": "-7.730512341409379",
+      "fiatConversion": "0.00026558"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xa4C6984E817c086Ddc3EBAEedBdcc01469586918",
+        "decimals": 18,
+        "symbol": "PCHS",
+        "name": "Peaches.Finance",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xa4C6984E817c086Ddc3EBAEedBdcc01469586918.png"
+      },
+      "balance": "102852453000000000000",
+      "fiatBalance": "0.19415766110168997",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0.00188773"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x06450dEe7FD2Fb8E39061434BAbCFC05599a6Fb8",
+        "decimals": 18,
+        "symbol": "XEN",
+        "name": "XEN Crypto",
+        "logoUri": "https://assets.coingecko.com/coins/images/27713/thumb/Xen.jpeg?1696526739"
+      },
+      "balance": "1000000000000000000000000",
+      "fiatBalance": "0.007105",
+      "fiatBalance24hChange": "-13.836070608388665",
+      "fiatConversion": "0.000000007105"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+        "decimals": 18,
+        "symbol": "DAI",
+        "name": "Dai",
+        "logoUri": "https://assets.coingecko.com/coins/images/9956/thumb/Badge_Dai.png?1696509996"
+      },
+      "balance": "511458671904",
+      "fiatBalance": "0.00000051122698112563",
+      "fiatBalance24hChange": "0.009200393088635846",
+      "fiatConversion": "0.999547"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x2c969d681003b1B2E85bBDFd505B63E699F226fD",
+        "decimals": 18,
+        "symbol": "ONE",
+        "name": "1",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x2c969d681003b1B2E85bBDFd505B63E699F226fD.png"
+      },
+      "balance": "1000000000000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x18577F0f4A0B2Ee6F4048dB51c7acd8699F97DB8",
+        "decimals": 18,
+        "symbol": "variableDebtEthLidoGHO",
+        "name": "Aave Ethereum Lido Variable Debt GHO",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x18577F0f4A0B2Ee6F4048dB51c7acd8699F97DB8.png"
+      },
+      "balance": "2066948010904963745127050",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xfA1fDbBD71B0aA16162D76914d69cD8CB3Ef92da",
+        "decimals": 18,
+        "symbol": "aEthLidoWETH",
+        "name": "Aave Ethereum Lido WETH",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfA1fDbBD71B0aA16162D76914d69cD8CB3Ef92da.png"
+      },
+      "balance": "10195519708019469120532",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x32a6268f9Ba3642Dda7892aDd74f1D34469A4259",
+        "decimals": 18,
+        "symbol": "aEthUSDS",
+        "name": "Aave Ethereum USDS",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x32a6268f9Ba3642Dda7892aDd74f1D34469A4259.png"
+      },
+      "balance": "2039417959106534975939910",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x24E161B9B028156aEEaA0852833FA10eDd774EbE",
+        "decimals": 9,
+        "symbol": "MIYAGUCHI",
+        "name": "Aya Miyaguchi",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x24E161B9B028156aEEaA0852833FA10eDd774EbE.png"
+      },
+      "balance": "210345000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x83D8BA42B7F47FaBBb689cDB68800DF87Abf4eD0",
+        "decimals": 18,
+        "symbol": "Ayabuu",
+        "name": "Aya Miyaguchi's Dog",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x83D8BA42B7F47FaBBb689cDB68800DF87Abf4eD0.png"
+      },
+      "balance": "50000000000000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xA17581A9E3356d9A858b789D68B4d866e593aE94",
+        "decimals": 18,
+        "symbol": "cWETHv3",
+        "name": "Compound WETH",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA17581A9E3356d9A858b789D68B4d866e593aE94.png"
+      },
+      "balance": "4286511607273938899845",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x2371e134e3455e0593363cBF89d3b6cf53740618",
+        "decimals": 18,
+        "symbol": "gtWETH",
+        "name": "Gauntlet WETH Prime",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x2371e134e3455e0593363cBF89d3b6cf53740618.png"
+      },
+      "balance": "1159497758489350757924",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xCCBb7110D5a6DCFf236c293c78F9f47b078f20DD",
+        "decimals": 18,
+        "symbol": "GEL",
+        "name": "Geltonas",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xCCBb7110D5a6DCFf236c293c78F9f47b078f20DD.png"
+      },
+      "balance": "30072015000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xE1ffdc4437992373809Fd7479F4B058E83A600a0",
+        "decimals": 9,
+        "symbol": "HELLO",
+        "name": "hello world computer",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xE1ffdc4437992373809Fd7479F4B058E83A600a0.png"
+      },
+      "balance": "10000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x01d27c7278017221e72C369128d289Caa82b4eCc",
+        "decimals": 18,
+        "symbol": "KUNI",
+        "name": "KUNI",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x01d27c7278017221e72C369128d289Caa82b4eCc.png"
+      },
+      "balance": "10000000000000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xE5e63d22D23aB678CbD11dA11cFBfE1Ad3163584",
+        "decimals": 9,
+        "symbol": "GROOT",
+        "name": "Project Groot",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xE5e63d22D23aB678CbD11dA11cFBfE1Ad3163584.png"
+      },
+      "balance": "69000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xEA024703eA43cFa1A01838F8fDBC41919d62360C",
+        "decimals": 9,
+        "symbol": "SF",
+        "name": "Second Foundation",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEA024703eA43cFa1A01838F8fDBC41919d62360C.png"
+      },
+      "balance": "18000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x59cD1C87501baa753d0B5B5Ab5D8416A45cD71DB",
+        "decimals": 18,
+        "symbol": "spWETH",
+        "name": "Spark WETH",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x59cD1C87501baa753d0B5B5Ab5D8416A45cD71DB.png"
+      },
+      "balance": "10171248963604167830847",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x08d23468A467d2bb86FaE0e32F247A26C7E2e994",
+        "decimals": 18,
+        "symbol": "SINV",
+        "name": "Staked INV",
+        "logoUri": "https://assets.coingecko.com/coins/images/53505/thumb/sINVx512.png?1736535779"
+      },
+      "balance": "2000000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xc6132FAF04627c8d05d6E759FAbB331Ef2D8F8fD",
+        "decimals": 18,
+        "symbol": "stSPK",
+        "name": "Staked Spark",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xc6132FAF04627c8d05d6E759FAbB331Ef2D8F8fD.png"
+      },
+      "balance": "372886544746895256000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x1F316e894307285B2C503c677B75FB0B19560Df2",
+        "decimals": 9,
+        "symbol": "ETHFNDN",
+        "name": "The Ethereum Foundation",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x1F316e894307285B2C503c677B75FB0B19560Df2.png"
+      },
+      "balance": "500000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xbeDa74fa9b87bbCe9BBcf870cBA3E3f7F877573B",
+        "decimals": 18,
+        "symbol": "Visit website nanoether .org to claim rewards",
+        "name": "Visit website nanoether .org to claim rewards",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xbeDa74fa9b87bbCe9BBcf870cBA3E3f7F877573B.png"
+      },
+      "balance": "2700000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xcCD1A357916fE128319c01F90fAFda89418ffd0C",
+        "decimals": 6,
+        "symbol": "Visit website yield-usd .com to claim rewards",
+        "name": "Visit website yield-usd .com to claim rewards",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xcCD1A357916fE128319c01F90fAFda89418ffd0C.png"
+      },
+      "balance": "3876230000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    }
+  ]
+}

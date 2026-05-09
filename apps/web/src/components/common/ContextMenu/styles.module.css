@@ -1,5 +1,6 @@
 .menu :global .MuiPaper-root {
   border-radius: 8px !important;
+  outline: none;
 }
 
 .menu :global .MuiList-root {

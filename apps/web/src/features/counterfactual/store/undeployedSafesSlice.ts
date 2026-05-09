@@ -1,54 +1,15 @@
-import type { PayMethod } from '@/features/counterfactual/PayNowPayLater'
 import { type RootState } from '@/store'
 import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { PredictedSafeProps } from '@safe-global/protocol-kit'
-import { selectChainIdAndSafeAddress, selectSafeAddress } from '@/store/common'
-import { type SafeVersion } from '@safe-global/safe-core-sdk-types'
-
-export enum PendingSafeStatus {
-  AWAITING_EXECUTION = 'AWAITING_EXECUTION',
-  PROCESSING = 'PROCESSING',
-  RELAYING = 'RELAYING',
-}
-
-type UndeployedSafeStatus = {
-  status: PendingSafeStatus
-  type: PayMethod
-  txHash?: string
-  taskId?: string
-  startBlock?: number
-  submittedAt?: number
-  signerAddress?: string
-  signerNonce?: number | null
-}
-
-export type ReplayedSafeProps = {
-  factoryAddress: string
-  masterCopy: string
-  safeAccountConfig: {
-    threshold: number
-    owners: string[]
-    fallbackHandler: string
-    to: string
-    data: string
-    paymentToken?: string
-    payment?: number
-    paymentReceiver: string
-  }
-  saltNonce: string
-  safeVersion: SafeVersion
-}
-
-export type UndeployedSafeProps = PredictedSafeProps | ReplayedSafeProps
-
-export type UndeployedSafe = {
-  status: UndeployedSafeStatus
-  props: UndeployedSafeProps
-}
-
-type UndeployedSafesSlice = { [address: string]: UndeployedSafe }
-
-export type UndeployedSafesState = { [chainId: string]: UndeployedSafesSlice }
+import { selectChainIdAndSafeAddress } from '@/store/common'
+import type {
+  UndeployedSafe,
+  UndeployedSafesState,
+  UndeployedSafeStatus,
+  PredictedSafeProps,
+  ReplayedSafeProps,
+  PayMethod,
+} from '../types'
+import { PendingSafeStatus } from '../types'
 
 const initialState: UndeployedSafesState = {}
 
@@ -125,15 +86,6 @@ export const selectUndeployedSafe = createSelector(
   [selectUndeployedSafes, selectChainIdAndSafeAddress],
   (undeployedSafes, [chainId, address]): UndeployedSafe | undefined => {
     return undeployedSafes[chainId]?.[address]
-  },
-)
-
-export const selectUndeployedSafesByAddress = createSelector(
-  [selectUndeployedSafes, selectSafeAddress],
-  (undeployedSafes, [address]): UndeployedSafe[] => {
-    return Object.values(undeployedSafes)
-      .flatMap((value) => value[address])
-      .filter(Boolean)
   },
 )
 

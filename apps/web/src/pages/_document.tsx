@@ -16,7 +16,9 @@ export default class WebCoreDocument extends Document {
           {(this.props as any).emotionStyleTags}
         </Head>
         <body>
-          <Main />
+          <div className="root">
+            <Main />
+          </div>
           <NextScript />
         </body>
       </Html>

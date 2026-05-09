@@ -1,4 +1,4 @@
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import * as nextRouter from 'next/router'
 import useCategoryFilter from '@/hooks/safe-apps/useCategoryFilter'
 import { renderHook } from '@/tests/test-utils'

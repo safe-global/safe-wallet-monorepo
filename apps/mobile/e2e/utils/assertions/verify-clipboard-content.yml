@@ -1,0 +1,54 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# Clipboard Content Verification (Reusable)
+# ===========================================
+# Verifies that clipboard content matches expected value
+# Uses a workaround since Maestro cannot directly read clipboard
+#
+# Environment variables:
+#   EXPECTED_TEXT: The expected text pattern to verify (regex supported)
+#                  Example: "0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE"
+
+# Tap trigger to open clipboard verification UI
+- tapOn:
+    id: 'e2eClipboardVerificationTrigger'
+
+# Wait for TextInput to appear
+- assertVisible:
+    id: 'e2eClipboardVerificationInput'
+
+# iOS: Tap on TextInput to focus and show paste option
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          id: 'e2eClipboardVerificationInput'
+
+# Android: Long press on TextInput to show paste option
+- runFlow:
+    when:
+      platform: android
+    commands:
+      - longPressOn:
+          id: 'e2eClipboardVerificationInput'
+
+# Tap paste button
+- tapOn:
+    text: 'Paste'
+
+# Verify the pasted text matches expected pattern
+- assertVisible:
+    id: 'e2eClipboardVerificationInput'
+    text: '${EXPECTED_TEXT}'
+
+# Close the clipboard verification UI
+- tapOn:
+    id: 'e2eClipboardVerificationClose'
+
+# Verify UI is closed
+- assertNotVisible:
+    id: 'e2eClipboardVerificationInput'

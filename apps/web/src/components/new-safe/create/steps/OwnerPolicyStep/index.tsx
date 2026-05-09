@@ -16,7 +16,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import OwnerRow from '@/components/new-safe/OwnerRow'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 enum OwnerPolicyStepFields {
   owners = 'owners',
@@ -110,7 +110,7 @@ const OwnerPolicyStep = ({
             />
           ))}
           <Button
-            data-testid="add-owner-btn"
+            data-testid="add-new-signer"
             variant="text"
             onClick={() => appendOwner({ name: '', address: '' }, { shouldFocus: true })}
             startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
@@ -194,13 +194,13 @@ const OwnerPolicyStep = ({
             <Button
               data-testid="back-btn"
               variant="outlined"
-              size="small"
+              size="large"
               onClick={handleBack}
               startIcon={<ArrowBackIcon fontSize="small" />}
             >
               Back
             </Button>
-            <Button data-testid="next-btn" type="submit" variant="contained" size="stretched" disabled={isDisabled}>
+            <Button data-testid="next-btn" type="submit" variant="contained" size="large" disabled={isDisabled}>
               Next
             </Button>
           </Box>

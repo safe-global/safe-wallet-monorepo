@@ -13,6 +13,7 @@ export enum TX_TYPES {
 
   // Transfers
   transfer_token = 'transfer_token',
+  batch_transfer_token = 'batch_transfer_token',
   transfer_nft = 'transfer_nft',
 
   // Other
@@ -24,6 +25,8 @@ export enum TX_TYPES {
   custom = 'custom',
   native_bridge = 'native_bridge',
   native_swap = 'native_swap',
+  native_earn = 'native_earn',
+  native_swap_lifi = 'native_swap_lifi',
   bulk_execute = 'bulk_execute',
 
   // Counterfactual

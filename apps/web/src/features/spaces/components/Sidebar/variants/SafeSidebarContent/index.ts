@@ -1,0 +1,1 @@
+export { SafeSidebarContent } from './SafeSidebarContent'

@@ -1,1 +1,1 @@
-export { useSign } from './useSign'
+export { storePrivateKey, getPrivateKey, createMnemonicAccount } from './useSign'

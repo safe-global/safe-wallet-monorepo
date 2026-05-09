@@ -41,7 +41,7 @@ export const DataWidget = (): ReactElement => {
       <CardHeader
         className={css.cardHeader}
         title={
-          <>
+          <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
             <b>{hasData ? 'Export or import your Safe data' : 'Import your Safe data'}</b>
             <Tooltip
               title="Download or upload your local data with your added Safe Accounts, address book and settings."
@@ -52,7 +52,7 @@ export const DataWidget = (): ReactElement => {
                 <InfoIcon className={css.infoIcon} />
               </span>
             </Tooltip>
-          </>
+          </Box>
         }
       />
       <CardContent>

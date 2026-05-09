@@ -1,47 +1,42 @@
 import React from 'react'
-import { Avatar, Text, Theme, View } from 'tamagui'
+import { Text, Theme } from 'tamagui'
 import { SafeListItem } from '@/src/components/SafeListItem'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { MultiSend } from '@safe-global/store/gateway/types'
-import { Transaction, CustomTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { CustomTransactionInfo, SafeAppInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
+import { Logo } from '@/src/components/Logo'
 
-interface TxContractInteractionCardProps {
-  bordered?: boolean
+type TxContractInteractionCardProps = {
   txInfo: CustomTransactionInfo | MultiSend
-  inQueue?: boolean
-  executionInfo?: Transaction['executionInfo']
-}
+  safeAppInfo?: SafeAppInfo | null
+} & Partial<SafeListItemProps>
 
-export function TxContractInteractionCard({
-  bordered,
-  executionInfo,
-  txInfo,
-  inQueue,
-}: TxContractInteractionCardProps) {
-  const logoUri = txInfo.to.logoUri
-  const label = txInfo.to.name || 'Contract interaction'
+export function TxContractInteractionCard({ txInfo, safeAppInfo, ...rest }: TxContractInteractionCardProps) {
+  const logoUri = safeAppInfo?.logoUri || txInfo.to.logoUri
+  const label = safeAppInfo?.name || txInfo.to.name || 'Contract interaction'
+
   return (
     <SafeListItem
       label={label}
       icon={logoUri ? 'transaction-contract' : undefined}
-      type={txInfo.methodName || ''}
-      bordered={bordered}
-      executionInfo={executionInfo}
-      inQueue={inQueue}
+      type={safeAppInfo?.name || 'Contract interaction'}
       leftNode={
-        <Avatar circular size="$10">
-          <Theme name="logo">
-            {logoUri && <Avatar.Image backgroundColor="$color" accessibilityLabel={label} src={logoUri} />}
-
-            <Avatar.Fallback backgroundColor="$background">
-              <View backgroundColor="$background" padding="$2" borderRadius={100}>
-                <SafeFontIcon name="code-blocks" color="$color" />
-              </View>
-            </Avatar.Fallback>
-          </Theme>
-        </Avatar>
+        <Theme name="logo">
+          <Logo
+            size="$8"
+            logoUri={logoUri || ''}
+            fallbackIcon="code-blocks"
+            imageBackground="$background"
+            accessibilityLabel={label}
+          />
+        </Theme>
       }
-      rightNode={<Text>{txInfo.methodName}</Text>}
+      rightNode={
+        <Text numberOfLines={1} ellipsizeMode="tail">
+          {txInfo.methodName}
+        </Text>
+      }
+      {...rest}
     />
   )
 }

@@ -4,17 +4,20 @@ import {
   getTxHash,
   isConflictHeaderListItem,
   isLabelListItem,
+  isMultisigExecutionInfo,
   isTransactionListItem,
 } from '@/src/utils/transaction-guards'
 import { groupBulkTxs } from '@/src/utils/transactions'
-import { type PendingTransactionItems, TransactionListItemType } from '@safe-global/store//src/gateway/types'
+import { type PendingTransactionItems, TransactionListItemType } from '@safe-global/store/gateway/types'
 import { View } from 'tamagui'
 import { TxGroupedCard } from '@/src/components/transactions-list/Card/TxGroupedCard'
 import { TxConflictingCard } from '@/src/components/transactions-list/Card/TxConflictingCard'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { TxInfo } from '@/src/components/TxInfo'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { GroupedPendingTxsWithTitle } from './components/PendingTxList/PendingTxList.container'
+import { TxCardPress } from '@/src/components/TxInfo/types'
+import { useRouter } from 'expo-router'
 
 type GroupedTxs = (PendingTransactionItems | TransactionQueuedItem[])[]
 
@@ -25,6 +28,15 @@ export const groupTxs = (list: PendingTransactionItems[]) => {
 
 export const groupPendingTxs = (list: PendingTransactionItems[]) => {
   const transactions = groupTxs(list)
+
+  if (transactions.length === 0) {
+    return {
+      pointer: -1,
+      amount: 0,
+      sections: [],
+    }
+  }
+
   const sections = ['Next', 'Queued']
 
   const txSections: {
@@ -35,12 +47,12 @@ export const groupPendingTxs = (list: PendingTransactionItems[]) => {
     pointer: -1,
     amount: 0,
     sections: [
-      { title: 'Ready to execute', data: [] },
-      { title: 'Confirmation needed', data: [] },
+      { title: 'Next', data: [] },
+      { title: 'In queue', data: [] },
     ],
   }
 
-  return transactions.reduce((acc, item) => {
+  const result = transactions.reduce((acc, item) => {
     if ('type' in item && isLabelListItem(item)) {
       acc.pointer = sections.indexOf(item.label)
     } else if (
@@ -54,6 +66,12 @@ export const groupPendingTxs = (list: PendingTransactionItems[]) => {
 
     return acc
   }, txSections)
+
+  // Filter out sections that have no data
+  return {
+    ...result,
+    sections: result.sections.filter((section) => section.data.length > 0),
+  }
 }
 
 export const groupConflictingTxs = (list: PendingTransactionItems[]): GroupedTxs =>
@@ -86,6 +104,26 @@ export const renderItem = ({
   item: PendingTransactionItems | TransactionQueuedItem[]
   index: number
 }) => {
+  const router = useRouter()
+
+  const onPress = useCallback(
+    async (transaction?: TxCardPress) => {
+      if (transaction) {
+        router.push({
+          pathname: '/confirm-transaction',
+          params: {
+            txId: transaction.tx.id,
+          },
+        })
+      } else {
+        router.push({
+          pathname: '/conflict-transaction-sheet',
+        })
+      }
+    },
+    [router],
+  )
+
   if (Array.isArray(item)) {
     // Handle bulk transactions
     return (
@@ -93,7 +131,7 @@ export const renderItem = ({
         {getBulkGroupTxHash(item) ? (
           <TxGroupedCard transactions={item} inQueue />
         ) : (
-          <TxConflictingCard inQueue transactions={item} />
+          <TxConflictingCard inQueue transactions={item} onPress={onPress} />
         )}
       </View>
     )
@@ -110,7 +148,7 @@ export const renderItem = ({
   if (isTransactionListItem(item)) {
     return (
       <View marginTop={index && '$4'}>
-        <TxInfo inQueue tx={item.transaction} />
+        <TxInfo onPress={onPress} inQueue tx={item.transaction} />
       </View>
     )
   }
@@ -118,17 +156,37 @@ export const renderItem = ({
   return null
 }
 
-export const keyExtractor = (item: PendingTransactionItems | TransactionQueuedItem[], index: number) => {
+export const keyExtractor = (
+  item: PendingTransactionItems | TransactionQueuedItem[],
+  index: number,
+  section?: { title: string },
+) => {
+  const sectionPrefix = section?.title ? `${section.title}_` : ''
+
   if (Array.isArray(item)) {
     const txGroupHash = getBulkGroupTxHash(item)
     if (txGroupHash) {
-      return txGroupHash + index
+      return sectionPrefix + txGroupHash + index
+    }
+
+    if (isTransactionListItem(item[0]) && isMultisigExecutionInfo(item[0].transaction.executionInfo)) {
+      return sectionPrefix + getTxHash(item[0]) + item[0].transaction.executionInfo.confirmationsSubmitted + index
     }
 
     if (isTransactionListItem(item[0])) {
-      return getTxHash(item[0]) + index
+      return sectionPrefix + getTxHash(item[0]) + index
     }
-    return String(index)
+
+    return sectionPrefix + String(index)
   }
-  return String(index)
+
+  if (isTransactionListItem(item) && isMultisigExecutionInfo(item.transaction.executionInfo)) {
+    return sectionPrefix + item.transaction.id + item.transaction.executionInfo.confirmationsSubmitted + index
+  }
+
+  if (isTransactionListItem(item)) {
+    return sectionPrefix + item.transaction.id + index
+  }
+
+  return sectionPrefix + String(item) + index
 }

@@ -14,7 +14,7 @@ import { useAppSelector } from '@/store'
 import ExternalLink from '@/components/common/ExternalLink'
 import { MODALS_EVENTS } from '@/services/analytics'
 import Track from '@/components/common/Track'
-import useAsync from '@/hooks/useAsync'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getSafeTransaction } from '@/utils/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 
@@ -80,12 +80,7 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
             <Typography variant="body2" color="text.secondary">
               Parent Safe
             </Typography>
-            <EthHashInfo
-              address={cachedPendingTx.signerAddress}
-              name={parentSafeAddress}
-              isAddressBookName={Boolean(parentSafeAddress)}
-              shortAddress={false}
-            />
+            <EthHashInfo address={cachedPendingTx.signerAddress} name={parentSafeAddress} shortAddress={false} />
           </Box>
           <Stack direction="row" spacing={2} alignItems="center" pl={1}>
             <SvgIcon component={ArrowDownIcon} fontSize="medium" color="border" inheritViewBox />
@@ -109,12 +104,7 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
             <Typography variant="body2" color="text.secondary">
               Current Safe
             </Typography>
-            <EthHashInfo
-              address={cachedPendingTx.safeAddress}
-              name={currentSafeAddress}
-              isAddressBookName={Boolean(currentSafeAddress)}
-              shortAddress={false}
-            />
+            <EthHashInfo address={cachedPendingTx.safeAddress} name={currentSafeAddress} shortAddress={false} />
           </Box>
         </Stack>
         <Track {...MODALS_EVENTS.OPEN_PARENT_TX}>

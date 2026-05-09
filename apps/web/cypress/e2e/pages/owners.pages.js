@@ -11,44 +11,47 @@ const changeThresholdBtn = 'span[data-track="settings: Change threshold"] > butt
 const tooltip = 'div[role="tooltip"]'
 const expandMoreIcon = 'svg[data-testid="ExpandMoreIcon"]'
 const sentinelStart = 'div[data-testid="sentinelStart"]'
+const addNewSigner = '[data-testid="add-new-signer"]'
 const newOwnerName = 'input[name="newOwner.name"]'
 const newOwnerAddress = 'input[name="newOwner.address"]'
 const newOwnerNonceInput = 'input[name="nonce"]'
+const signerNameField = '[data-testid="owner-name"]'
+const signerAddressField = '[data-testid="address-item"]'
 const thresholdInput = 'input[name="threshold"]'
-const thresHoldDropDownIcon = 'svg[data-testid="ArrowDropDownIcon"]'
 const thresholdList = 'ul[role="listbox"]'
 const thresholdDropdown = '[data-testid="threshold-selector"]'
 const thresholdOption = 'li[role="option"]'
 const existingOwnerAddressInput = (index) => `input[name="owners.${index}.address"]`
 const existingOwnerNameInput = (index) => `input[name="owners.${index}.name"]`
 const singleOwnerNameInput = 'input[name="name"]'
-const finishTransactionBtn = '[data-testid="finish-transaction-btn"]'
-const addOwnerBtn = '[data-testid="add-owner-btn"]'
+const manageSignersBtn = '[data-testid="manage-signers-btn"]'
+const submitNextBt = '[data-testid="submit-next"]'
 const addOwnerNextBtn = '[data-testid="add-owner-next-btn"]'
 const modalHeader = '[data-testid="modal-header"]'
 const addressToBeRemoved = '[aria-label="Copy to clipboard"] span'
 const thresholdNextBtn = '[data-testid="threshold-next-btn"]'
+const signerList = '[data-testid="signer-list"]'
 
 const disconnectBtnStr = 'Disconnect'
 const notConnectedStatus = 'Connect'
-const e2eWalletStr = 'E2E Wallet'
-const max50charsLimitStr = 'Maximum 50 symbols'
-const executeBtnStr = 'Execute'
+const continueBtnStr = 'Continue'
 const backbtnStr = 'Back'
 const removeOwnerStr = 'Remove signer'
-const selectedOwnerStr = 'Selected signer'
-const addNewOwnerStr = 'Add new signer'
-const processedTransactionStr = 'Transaction was successful'
+const selectedOwnerStr = 'Signers'
 const changeThresholdStr = 'Change threshold'
 
 export const safeAccountNonceStr = 'Safe Account nonce'
 export const nonOwnerErrorMsg = 'Your connected wallet is not a signer of this Safe Account'
 export const disconnectedUserErrorMsg = 'Please connect your wallet'
 
-export function verifyOwnerTransactionComplted() {
-  cy.get(processedTransactionStr).should('exist')
-  cy.get(finishTransactionBtn).should('exist')
+export function checkExistingSignerCount(count) {
+  cy.get(signerList).find(addressBook.tableRow).should('have.length', count)
 }
+
+export function checkExistingSignerAddress(index, address) {
+  cy.get(signerList).find(addressBook.tableRow).eq(index).should('contain.text', address)
+}
+
 export function verifyNumberOfOwners(count) {
   const indices = Array.from({ length: count }, (_, index) => index)
   const names = indices.map(existingOwnerNameInput)
@@ -108,12 +111,10 @@ export function verifyRemoveBtnIsDisabled() {
   return cy.get(removeOwnerBtn).should('exist').and('be.disabled')
 }
 
-export function hoverOverDeleteOwnerBtn(index) {
-  cy.get(removeOwnerBtn).eq(index).trigger('mouseover', { force: true })
-}
-
 export function openRemoveOwnerWindow(btn) {
-  cy.get(removeOwnerBtn).eq(btn).click({ force: true })
+  const minimumCount = btn === 0 ? 1 : btn
+  main.verifyMinimumElementsCount(removeOwnerBtn, minimumCount)
+  cy.get(removeOwnerBtn).eq(btn).should('be.enabled').click({ force: true })
   cy.get('div').contains(removeOwnerStr).should('exist')
 }
 
@@ -133,7 +134,9 @@ export function getAddressToBeRemoved() {
 }
 
 export function openReplaceOwnerWindow(index) {
-  cy.get(replaceOwnerBtn).eq(index).click({ force: true })
+  const minimumCount = index === 0 ? 1 : index
+  main.verifyMinimumElementsCount(replaceOwnerBtn, minimumCount)
+  cy.get(replaceOwnerBtn).eq(index).should('be.enabled').click({ force: true })
   cy.get(newOwnerName).should('be.visible')
   cy.get(newOwnerAddress).should('be.visible')
 }
@@ -141,27 +144,27 @@ export function verifyTooltipLabel(label) {
   cy.get(tooltipLabel(label)).should('be.visible')
 }
 export function verifyReplaceBtnIsEnabled() {
-  cy.get(replaceOwnerBtn).should('exist').and('not.be.disabled')
+  cy.get(replaceOwnerBtn).should('exist')
+  main.verifyBtnIsEnabled(replaceOwnerBtn)
 }
 
 export function verifyReplaceBtnIsDisabled() {
-  cy.get(replaceOwnerBtn).should('exist').and('be.disabled')
+  cy.get(replaceOwnerBtn).should('exist')
+  main.verifyBtnIsDisabled(replaceOwnerBtn)
 }
 
-export function hoverOverReplaceOwnerBtn() {
-  cy.get(replaceOwnerBtn).trigger('mouseover', { force: true })
+export function verifyManageSignersBtnIsEnabled() {
+  cy.get(manageSignersBtn).should('exist')
+  main.verifyBtnIsEnabled(manageSignersBtn)
 }
 
-export function verifyAddOwnerBtnIsEnabled() {
-  cy.get(addOwnerBtn).should('exist').and('not.be.disabled')
+export function verifyManageSignersBtnIsDisabled() {
+  cy.get(manageSignersBtn).should('exist')
+  main.verifyBtnIsDisabled(manageSignersBtn)
 }
 
-export function verifyAddOwnerBtnIsDisabled() {
-  cy.get(addOwnerBtn).should('exist').and('be.disabled')
-}
-
-export function hoverOverAddOwnerBtn() {
-  cy.get(addOwnerBtn).trigger('mouseover')
+export function hoverOverManageSignersBtn() {
+  cy.get(manageSignersBtn).trigger('mouseover')
 }
 
 export function verifyTooltiptext(text) {
@@ -169,8 +172,7 @@ export function verifyTooltiptext(text) {
 }
 
 export function clickOnWalletExpandMoreIcon() {
-  cy.get(expandMoreIcon).eq(0).click({ force: true })
-  cy.get(sentinelStart).next().should('be.visible')
+  cy.get('[data-testid="open-account-center"]').click()
 }
 
 export function clickOnDisconnectBtn() {
@@ -178,23 +180,21 @@ export function clickOnDisconnectBtn() {
   cy.get('button').contains(notConnectedStatus)
 }
 
-export function clickOnConnectBtn() {
-  cy.get('button').contains(notConnectedStatus).click().wait(1000)
-}
-
 export function waitForConnectionStatus() {
   cy.get(createWallet.accountInfoHeader).should('exist')
 }
 
+export function clickOnManageSignersBtn() {
+  cy.get(manageSignersBtn).should('be.enabled').click()
+}
+export function openManageSignersWindow() {
+  clickOnManageSignersBtn()
+  cy.get(signerNameField).should('be.visible')
+  cy.get(signerAddressField).should('be.visible')
+}
 export function clickOnAddSignerBtn() {
-  cy.get(addOwnerBtn).should('be.enabled').click()
+  cy.get(addNewSigner).should('be.enabled').click()
 }
-export function openAddOwnerWindow() {
-  clickOnAddSignerBtn()
-  cy.get(newOwnerName).should('be.visible')
-  cy.get(newOwnerAddress).should('be.visible')
-}
-
 export function verifyNonceInputValue(value) {
   cy.get(newOwnerNonceInput).should('not.be.disabled')
   main.verifyInputValue(newOwnerNonceInput, value)
@@ -207,7 +207,7 @@ export function verifyErrorMsgInvalidAddress(errorMsg) {
 export function verifyValidWalletName(errorMsg) {
   cy.get('label').contains(errorMsg).should('not.exist')
 }
-
+//Type owner address on the manage signers form
 export function typeOwnerAddress(address) {
   cy.get(newOwnerAddress)
     .clear()
@@ -218,31 +218,41 @@ export function typeOwnerAddress(address) {
     })
   cy.wait(1000)
 }
-
+//Type the signer address into the 'Signer Address' field on the Manage Signers page, defined by the index (owners.index.address)
+export function typeOwnerAddressManage(index, address) {
+  cy.get(existingOwnerAddressInput(index)).clear().type(address)
+}
+//Type the signer name for one field pages
 export function typeOwnerName(name) {
   cy.get(newOwnerName).clear().type(name)
   main.verifyInputValue(newOwnerName, name)
 }
 
-export function selectNewOwner(name) {
-  cy.contains(name).click()
+//Type the signer name into the "Signer Name" field for manage signers
+export function typeOwnerNameManage(index, name) {
+  cy.get(existingOwnerNameInput(index)).clear().type(name)
+  main.verifyInputValue(existingOwnerNameInput(index), name)
 }
 
 export function verifyNewOwnerName(name) {
   cy.get(addressBook.addressBookRecipient).should('include.text', name)
 }
-
+//next button on Manage signers
+export function clickOnNextBtnManage() {
+  main.clickOnNextBtn(submitNextBt)
+}
+//Next button for usual tx flow
 export function clickOnNextBtn() {
-  cy.get(addOwnerNextBtn).should('be.enabled').click()
+  main.clickOnNextBtn(addOwnerNextBtn)
 }
 
 export function clickOnBackBtn() {
-  cy.get(navigation.modalBackBtn).should('be.enabled').click()
+  main.clickOnBackBtn(navigation.modalBackBtn)
 }
 
 export function verifyConfirmTransactionWindowDisplayed() {
   cy.get('div').contains(constants.transactionStatus.confirm).should('exist')
-  cy.get('button').contains(executeBtnStr).should('exist')
+  cy.get('button').contains(continueBtnStr).should('exist')
   cy.get('button').contains(backbtnStr).should('exist')
 }
 
@@ -266,4 +276,10 @@ export function clickOnThresholdNextBtn() {
   //TODO: Remove extra wait when init sdk is merged
   cy.wait(3000)
   cy.get(thresholdNextBtn).click()
+}
+
+export function verifyInconsistentSignersWarning(network) {
+  cy.contains(
+    `Signers are not consistent across networks on this account. Changing signers will only affect the account on ${network}`,
+  ).should('exist')
 }

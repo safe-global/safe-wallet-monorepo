@@ -7,7 +7,7 @@ import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined'
 import Track from '@/components/common/Track'
 
 import css from './styles.module.css'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 const HiddenTokenButton = ({
   toggleShowHiddenAssets,

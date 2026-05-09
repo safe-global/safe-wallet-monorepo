@@ -1,0 +1,22 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# Transaction Sender Address (Optional)
+# ===========================================
+# This flow asserts the "From" sender address field
+# Use this flow when testing received transactions
+# Not all transaction types will have this field
+
+- assertVisible: From
+- assertVisible:
+    id: 'identicon-image'
+- assertVisible:
+    id: 'hash-display-name-or-address'
+    text: '0x[0-9a-fA-F]{4}.*[0-9a-fA-F]{4}'
+    index: 0
+- assertVisible:
+    id: 'copy-button'
+- assertVisible:
+    id: 'hash-display-external-link-button'

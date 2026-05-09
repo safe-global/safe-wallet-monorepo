@@ -11,10 +11,6 @@ inputs:
     description: 'Production build flag'
     required: false
 
-  e2e_mnemonic:
-    description: 'Mnemonic for the E2E tests'
-    required: false
-
 runs:
   using: 'composite'
 
@@ -25,9 +21,53 @@ runs:
       with:
         mode: restore-nc
 
+    - name: Export NEXT_PUBLIC secrets to env
+      shell: bash
+      env:
+        SECRETS_JSON: ${{ inputs.secrets }}
+      run: |
+        set -euo pipefail
+
+        # Auto-export all NEXT_PUBLIC_* secrets.
+        # New secrets with this prefix are picked up automatically.
+        # Uses per-key heredoc delimiters to safely handle multi-line values
+        # (e.g. NEXT_PUBLIC_FIREBASE_OPTIONS_* are JSON strings).
+        EXPORTED=$(echo "$SECRETS_JSON" | jq -r '
+          to_entries[]
+          | select(.key | startswith("NEXT_PUBLIC_"))
+          | select(.value != null and .value != "")
+          | "\(.key)<<EOF_\(.key)\n\(.value)\nEOF_\(.key)"
+        ')
+
+        if [ -n "$EXPORTED" ]; then
+          echo "$EXPORTED" >> "$GITHUB_ENV"
+          # Log exported key names (values masked)
+          echo "$EXPORTED" | grep -oP '^[A-Z0-9_]+(?=<<)' | while read -r key; do
+            echo "  Exported: $key"
+          done
+        else
+          echo "Warning: No NEXT_PUBLIC_* secrets found to export"
+        fi
+
     - name: Set environment variables
       shell: bash
       run: |
+        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+        echo "NEXT_PUBLIC_COMMIT_HASH=$SHORT_SHA" >> $GITHUB_ENV
+
+        # Datadog RUM env:
+        # - can be overridden by setting NEXT_PUBLIC_DATADOG_RUM_ENV in repo secrets
+        # - otherwise set to "production" or "development" based on prod flag
+        DATADOG_RUM_ENV="${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_ENV }}"
+        if [ -z "$DATADOG_RUM_ENV" ]; then
+          if [ "${{ inputs.prod }}" = "true" ]; then
+            DATADOG_RUM_ENV="production"
+          else
+            DATADOG_RUM_ENV="development"
+          fi
+        fi
+        echo "NEXT_PUBLIC_DATADOG_RUM_ENV=$DATADOG_RUM_ENV" >> $GITHUB_ENV
+
         if [ "${{ inputs.prod }}" = "true" ]; then
           echo "NEXT_PUBLIC_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_INFURA_TOKEN }}" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN }}" >> $GITHUB_ENV
@@ -41,34 +81,36 @@ runs:
       run: yarn workspace @safe-global/web build
       env:
         NEXT_PUBLIC_IS_PRODUCTION: ${{ inputs.prod }}
-        NEXT_PUBLIC_CYPRESS_MNEMONIC: ${{ inputs.e2e_mnemonic }}
-        NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_GATEWAY_URL_PRODUCTION }}
-        NEXT_PUBLIC_GATEWAY_URL_STAGING: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_GATEWAY_URL_STAGING }}
-        NEXT_PUBLIC_SAFE_VERSION: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_VERSION }}
-        NEXT_PUBLIC_BEAMER_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_BEAMER_ID }}
-        NEXT_PUBLIC_GOOGLE_TAG_MANAGER_DEVELOPMENT_AUTH: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_GOOGLE_TAG_MANAGER_DEVELOPMENT_AUTH }}
-        NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID }}
-        NEXT_PUBLIC_GOOGLE_TAG_MANAGER_LATEST_AUTH: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_GOOGLE_TAG_MANAGER_LATEST_AUTH }}
-        NEXT_PUBLIC_GOOGLE_TAG_MANAGER_LIVE_AUTH: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_GOOGLE_TAG_MANAGER_LIVE_AUTH }}
-        NEXT_PUBLIC_SENTRY_DSN: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SENTRY_DSN }}
-        NEXT_PUBLIC_TENDERLY_ORG_NAME: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_TENDERLY_ORG_NAME }}
-        NEXT_PUBLIC_TENDERLY_PROJECT_NAME: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_TENDERLY_PROJECT_NAME }}
-        NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
-        NEXT_PUBLIC_WC_PROJECT_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_WC_PROJECT_ID }}
-        NEXT_PUBLIC_SAFE_RELAY_SERVICE_URL_PRODUCTION: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_GELATO_RELAY_SERVICE_URL_PRODUCTION }}
-        NEXT_PUBLIC_SAFE_RELAY_SERVICE_URL_STAGING: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_GELATO_RELAY_SERVICE_URL_STAGING }}
-        NEXT_PUBLIC_IS_OFFICIAL_HOST: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_IS_OFFICIAL_HOST }}
-        NEXT_PUBLIC_BRAND_LOGO: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_BRAND_LOGO }}
-        NEXT_PUBLIC_BRAND_NAME: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_BRAND_NAME }}
-        NEXT_PUBLIC_BLOCKAID_CLIENT_ID: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_BLOCKAID_CLIENT_ID }}
-        NEXT_PUBLIC_SOCIAL_WALLET_OPTIONS_STAGING: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SOCIAL_WALLET_OPTIONS_STAGING }}
-        NEXT_PUBLIC_SOCIAL_WALLET_OPTIONS_PRODUCTION: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SOCIAL_WALLET_OPTIONS_PRODUCTION }}
-        NEXT_PUBLIC_FIREBASE_OPTIONS_PRODUCTION: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_FIREBASE_OPTIONS_PRODUCTION }}
-        NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING }}
-        NEXT_PUBLIC_FIREBASE_VAPID_KEY_PRODUCTION: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_FIREBASE_VAPID_KEY_PRODUCTION }}
-        NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING }}
-        NEXT_PUBLIC_SPINDL_SDK_KEY: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SPINDL_SDK_KEY }}
-        NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS }}
+
+    - name: Upload source maps to Datadog
+      if: ${{ fromJSON(inputs.secrets).DATADOG_API_KEY }}
+      shell: bash
+      working-directory: apps/web
+      run: |
+        RELEASE_VERSION="${NEXT_PUBLIC_COMMIT_HASH:-$(echo "${{ github.sha }}" | cut -c1-7)}"
+        DATADOG_SERVICE="${NEXT_PUBLIC_DATADOG_RUM_SERVICE:-safe-wallet-web}"
+        echo "Uploading Datadog sourcemaps:"
+        echo "- env: ${NEXT_PUBLIC_DATADOG_RUM_ENV:-unset}"
+        echo "- service: $DATADOG_SERVICE"
+        echo "- release-version: $RELEASE_VERSION"
+        echo "- minified-path-prefix: /_next/static"
+        echo "- sourcemaps-dir: ./out/_next/static"
+        npx @datadog/datadog-ci sourcemaps upload ./out/_next/static \
+          --service="$DATADOG_SERVICE" \
+          --release-version="$RELEASE_VERSION" \
+          --minified-path-prefix=/_next/static
+      env:
+        DATADOG_API_KEY: ${{ fromJSON(inputs.secrets).DATADOG_API_KEY }}
+        DATADOG_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE || 'datadoghq.eu' }}
+    - name: Generate SRI for static scripts
+      shell: bash
+      # Skip SRI for Cypress test builds (NODE_ENV=cypress)
+      run: |
+        if [ "$NODE_ENV" != "cypress" ]; then
+          yarn workspace @safe-global/web integrity
+        else
+          echo "Skipping SRI generation for Cypress test environment"
+        fi
 
     - name: Save Next.js Build Cache & Cypress cache
       if: steps.restore-nc.outputs.cache-hit-nc != 'true'

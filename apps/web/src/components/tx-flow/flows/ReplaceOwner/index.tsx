@@ -1,9 +1,13 @@
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import useTxStepper from '@/components/tx-flow/useTxStepper'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import { ReviewOwner } from '../AddOwner/ReviewOwner'
-import { ChooseOwner, ChooseOwnerMode } from '../AddOwner/ChooseOwner'
+import { ChooseOwner, ChooseOwnerMode } from '@/components/tx-flow/flows/AddOwner/ChooseOwner'
+import { ReviewOwner } from '@/components/tx-flow/flows/AddOwner/ReviewOwner'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { useContext } from 'react'
+import { TxFlowType } from '@/services/analytics'
+import { TxFlow } from '../../TxFlow'
+import { TxFlowStep } from '../../TxFlowStep'
+import { TxFlowContext } from '../../TxFlowProvider'
+import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 
 type Owner = {
   address: string
@@ -16,37 +20,44 @@ export type ReplaceOwnerFlowProps = {
   threshold: number
 }
 
+const ChooseOwnerStep = () => {
+  const { onNext, data } = useContext(TxFlowContext)
+
+  return <ChooseOwner onSubmit={onNext} params={data} mode={ChooseOwnerMode.REPLACE} />
+}
+
+const ReviewOwnerStep = (props: ReviewTransactionProps) => {
+  const { data } = useContext(TxFlowContext)
+
+  return <ReviewOwner params={data} {...props} />
+}
+
 const ReplaceOwnerFlow = ({ address }: { address: string }) => {
-  const { safe } = useSafeInfo()
+  const {
+    safe: { threshold },
+    safeLoaded,
+  } = useSafeInfo()
 
   const defaultValues: ReplaceOwnerFlowProps = {
     newOwner: { address: '' },
     removedOwner: { address },
-    threshold: safe.threshold,
+    threshold,
   }
 
-  const { data, step, nextStep, prevStep } = useTxStepper<ReplaceOwnerFlowProps>(defaultValues)
-
-  const steps = [
-    <ChooseOwner
-      key={0}
-      params={data}
-      onSubmit={(formData) => nextStep({ ...data, ...formData })}
-      mode={ChooseOwnerMode.REPLACE}
-    />,
-    <ReviewOwner key={1} params={data} />,
-  ]
+  if (!safeLoaded) return null
 
   return (
-    <TxLayout
-      title={step === 0 ? 'New transaction' : 'Confirm transaction'}
-      subtitle="Replace signer"
+    <TxFlow
+      initialData={defaultValues}
+      eventCategory={TxFlowType.REPLACE_OWNER}
       icon={SaveAddressIcon}
-      step={step}
-      onBack={prevStep}
+      subtitle="Replace signer"
+      ReviewTransactionComponent={ReviewOwnerStep}
     >
-      {steps}
-    </TxLayout>
+      <TxFlowStep title="New transaction">
+        <ChooseOwnerStep />
+      </TxFlowStep>
+    </TxFlow>
   )
 }
 

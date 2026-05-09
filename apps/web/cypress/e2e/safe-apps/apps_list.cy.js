@@ -51,17 +51,16 @@ describe('Safe Apps list tests', () => {
   })
 
   it('Verify there is an error when the app manifest is invalid', () => {
-    cy.intercept('GET', constants.invalidAppUrl, {
-      name: constants.testAppData.name,
-    })
     safeapps.clickOnCustomAppsTab()
     safeapps.clickOnAddCustomApp()
-    safeapps.typeCustomAppUrl(constants.invalidAppUrl)
+    safeapps.typeCustomAppUrl(`https://manifest${Math.random()}.tow`)
     safeapps.verifyAppNotSupportedMsg()
   })
 
   it('Verify an app can be added to the list within the custom apps section', () => {
-    cy.intercept('GET', constants.validAppUrlJson, {
+    const url = `https://manifest${Math.random()}.com`
+    const manifest = url + '/manifest.json'
+    cy.intercept('GET', manifest, {
       name: constants.testAppData.name,
       description: constants.testAppData.descr,
       icons: [{ src: 'logo.svg', sizes: 'any', type: 'image/svg+xml' }],
@@ -69,7 +68,7 @@ describe('Safe Apps list tests', () => {
 
     safeapps.clickOnCustomAppsTab()
     safeapps.clickOnAddCustomApp()
-    safeapps.typeCustomAppUrl(constants.validAppUrl)
+    safeapps.typeCustomAppUrl(url)
     safeapps.verifyAppTitle(myCustomAppTitle)
     safeapps.acceptTC()
     safeapps.clickOnAddBtn()

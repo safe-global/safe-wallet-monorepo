@@ -2,13 +2,32 @@
 // Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
 import { server } from '@/tests/server'
+import { faker } from '@faker-js/faker'
+
+// Seed faker for deterministic test data
+faker.seed(123)
+
+// Set timezone to UTC for consistent date formatting across environments
+process.env.TZ = 'UTC'
 
 jest.mock('@web3-onboard/coinbase', () => jest.fn())
 jest.mock('@web3-onboard/injected-wallets', () => ({ ProviderLabel: { MetaMask: 'MetaMask' } }))
-jest.mock('@web3-onboard/ledger/dist/index', () => jest.fn())
-jest.mock('@web3-onboard/trezor', () => jest.fn())
 jest.mock('@web3-onboard/walletconnect', () => jest.fn())
-jest.mock('@safe-global/safe-client-gateway-sdk')
+
+// Mock Datadog RUM SDK to prevent it from loading during tests
+jest.mock(
+  '@datadog/browser-rum',
+  () => ({
+    datadogRum: {
+      init: jest.fn(),
+      addAction: jest.fn(),
+      addError: jest.fn(),
+      setGlobalContextProperty: jest.fn(),
+      getInitConfiguration: jest.fn(),
+    },
+  }),
+  { virtual: true },
+)
 
 const mockOnboardState = {
   chains: [],

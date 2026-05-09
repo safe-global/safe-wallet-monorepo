@@ -1,0 +1,18 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# Transaction Network Display (Optional)
+# ===========================================
+# This flow asserts the network display element
+# Most transaction views will have this, but include it only when needed
+# Environment variables:
+#   NETWORK: The network name to verify (e.g., "Sepolia", "Ethereum", "Ethereum Mainnet")
+#            If not provided, checks for "Sepolia"
+
+- assertVisible: Network
+- assertVisible:
+    id: 'logo-image'
+- assertVisible:
+    text: '${NETWORK || "Sepolia"}'

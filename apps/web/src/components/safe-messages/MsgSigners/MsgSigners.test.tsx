@@ -1,11 +1,11 @@
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { render } from '@/tests/test-utils'
-import { SafeMessageStatus, SafeMessageListItemType, type SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 import { toBeHex } from 'ethers'
 import MsgSigners from '.'
 
 describe('MsgSigners', () => {
   it('Message with more confirmations submitted than required', () => {
-    const mockMessage: SafeMessage = {
+    const mockMessage: MessageItem = {
       confirmations: [
         {
           owner: {
@@ -31,8 +31,8 @@ describe('MsgSigners', () => {
       proposedBy: {
         value: '',
       },
-      status: SafeMessageStatus.NEEDS_CONFIRMATION,
-      type: SafeMessageListItemType.MESSAGE,
+      status: 'NEEDS_CONFIRMATION',
+      type: 'MESSAGE',
     }
 
     const result = render(<MsgSigners msg={mockMessage} />)
@@ -43,7 +43,7 @@ describe('MsgSigners', () => {
   })
 
   it('should show missing signatures if prop is enabled', () => {
-    const mockMessage: SafeMessage = {
+    const mockMessage: MessageItem = {
       confirmations: [
         {
           owner: {
@@ -63,8 +63,8 @@ describe('MsgSigners', () => {
       proposedBy: {
         value: '',
       },
-      status: SafeMessageStatus.NEEDS_CONFIRMATION,
-      type: SafeMessageListItemType.MESSAGE,
+      status: 'NEEDS_CONFIRMATION',
+      type: 'MESSAGE',
     }
 
     const result = render(<MsgSigners msg={mockMessage} showMissingSignatures />)

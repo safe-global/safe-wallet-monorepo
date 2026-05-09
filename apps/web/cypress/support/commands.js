@@ -220,9 +220,41 @@ Cypress.Commands.add('setupInterceptors', () => {
   }).as('headers')
 })
 
+const CHAIN_PREFIX_TO_ID = {
+  eth: '1',
+  gor: '5',
+  gno: '100',
+  matic: '137',
+  sep: '11155111',
+}
+
+function autoTrustSafeFromUrl(url) {
+  const match = url.match(/safe=([a-z]+):(0x[a-fA-F0-9]{40})/)
+  if (!match) return
+
+  const [, prefix, address] = match
+  const chainId = CHAIN_PREFIX_TO_ID[prefix]
+  if (!chainId) return
+
+  const key = 'SAFE_v2__addedSafes'
+  const existing = localStorage.getItem(key)
+  const addedSafes = existing ? JSON.parse(existing) : {}
+
+  if (!addedSafes[chainId]) addedSafes[chainId] = {}
+  if (!addedSafes[chainId][address]) {
+    addedSafes[chainId][address] = { owners: [], threshold: 1, ethBalance: '0' }
+  }
+
+  localStorage.setItem(key, JSON.stringify(addedSafes))
+}
+
 Cypress.Commands.overwrite('visit', (originalFn, url, options = {}) => {
   const maxRetries = 3
   let attempt = 0
+
+  if (options.skipAutoTrust !== true) {
+    autoTrustSafeFromUrl(url)
+  }
 
   function attemptVisit(resolve, reject) {
     originalFn(url, options)

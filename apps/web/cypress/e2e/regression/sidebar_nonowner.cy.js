@@ -13,7 +13,8 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 const addedOwner = 'Added owner'
 const addedNonowner = 'Added non-owner'
 
-describe('Sidebar non-owner tests', () => {
+// Tests rewritten in safe_selector.cy.js for the new UI.
+describe.skip('Sidebar non-owner tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
@@ -30,10 +31,9 @@ describe('Sidebar non-owner tests', () => {
     navigation.verifyTxBtnStatus(constants.enabledStates.enabled)
   })
 
-  // TODOD: Waiting for endpoint from CGW
-  it.skip('Verify tag counting queue tx show for owners and non-owners', () => {
+  it('Verify tag counting queue tx show for owners and non-owners', () => {
     sideBar.openSidebar()
-    sideBar.verifyQueuedTx(addedOwner).contains(2)
-    sideBar.verifyQueuedTx(addedNonowner).contains(2)
+    sideBar.verifySafeIconData(addedOwner).contains('2/2')
+    sideBar.verifySafeIconData(addedNonowner).contains('2/2')
   })
 })

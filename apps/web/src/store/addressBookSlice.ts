@@ -1,5 +1,5 @@
 import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import { validateAddress } from '@/utils/validation'
+import { validateAddress } from '@safe-global/utils/utils/validation'
 import pickBy from 'lodash/pickBy'
 import type { RootState } from '.'
 

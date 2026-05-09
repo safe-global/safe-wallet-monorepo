@@ -1,5 +1,5 @@
-import type { RelayCountResponse } from '@safe-global/safe-gateway-typescript-sdk'
+import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 
-export const hasRemainingRelays = (relays?: RelayCountResponse): boolean => {
+export const hasRemainingRelays = (relays?: RelaysRemaining): boolean => {
   return !!relays && relays.remaining > 0
 }

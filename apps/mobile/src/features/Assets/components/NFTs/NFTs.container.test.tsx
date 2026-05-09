@@ -23,7 +23,7 @@ describe('NFTsContainer', () => {
 
   it('renders error state when API fails', async () => {
     server.use(
-      http.get(`${GATEWAY_URL}//v2/chains/:chainId/safes/:safeAddress/collectibles`, () => {
+      http.get(`${GATEWAY_URL}/v2/chains/:chainId/safes/:safeAddress/collectibles`, () => {
         return HttpResponse.error()
       }),
     )
@@ -48,7 +48,7 @@ describe('NFTsContainer', () => {
 
   it('renders fallback when data is empty', async () => {
     server.use(
-      http.get(`${GATEWAY_URL}//v2/chains/:chainId/safes/:safeAddress/collectibles`, () => {
+      http.get(`${GATEWAY_URL}/v2/chains/:chainId/safes/:safeAddress/collectibles`, () => {
         return HttpResponse.json({ results: [] })
       }),
     )

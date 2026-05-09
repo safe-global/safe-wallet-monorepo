@@ -1,0 +1,29 @@
+.assetActionIconButton {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 6px;
+  background-color: var(--color-border-background);
+  border-radius: 4px;
+  color: var(--color-text-primary);
+}
+
+.assetActionIconButton:hover {
+  background-color: var(--color-background-secondary);
+}
+
+.assetActionIconButton svg {
+  width: 16px;
+  height: 16px;
+  color: inherit;
+}
+
+.assetActionIconButton svg path {
+  fill: currentColor;
+}
+
+.sendButton {
+  height: 32px;
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}

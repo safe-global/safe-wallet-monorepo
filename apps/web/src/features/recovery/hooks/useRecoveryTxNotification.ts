@@ -1,13 +1,13 @@
 import { useEffect } from 'react'
 
-import { formatError } from '@/utils/formatters'
+import { formatError } from '@safe-global/utils/utils/formatters'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useSafeAddress from '../../../hooks/useSafeAddress'
 import { RecoveryEvent, RecoveryTxType, recoverySubscribe } from '@/features/recovery/services/recoveryEvents'
-import { getExplorerLink } from '@/utils/gateway'
 import { useCurrentChain } from '../../../hooks/useChains'
 import { isWalletRejection } from '@/utils/wallets'
+import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 
 const SUCCESS_EVENTS = [
   RecoveryEvent.PROCESSING_BY_SMART_CONTRACT_WALLET,

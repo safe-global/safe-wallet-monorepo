@@ -1,0 +1,26 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+# ===========================================
+# Sent Transaction Card
+# ===========================================
+- assertVisible:
+    text: 'Sent'
+
+- extendedWaitUntil:
+    visible:
+      text: '.*Sepolia Ether.*'
+      optional: true
+    timeout: ${output.defaults.extendedWaitUntilTimeout}
+
+- tapOn:
+    text: '.*Sepolia Ether.*'
+
+- runFlow:
+    file: ./sent-tx.yml
+
+- tapOn:
+    id: 'go-back'

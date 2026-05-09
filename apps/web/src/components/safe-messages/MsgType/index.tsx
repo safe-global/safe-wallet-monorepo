@@ -1,14 +1,14 @@
+import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { Box, SvgIcon } from '@mui/material'
-import type { SafeMessage } from '@safe-global/safe-gateway-typescript-sdk'
 import RequiredIcon from '@/public/images/messages/required.svg'
 import ImageFallback from '@/components/common/ImageFallback'
 import txTypeCss from '@/components/transactions/TxType/styles.module.css'
-import { isEIP712TypedData } from '@/utils/safe-messages'
+import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 
 const FALLBACK_LOGO_URI = '/images/transactions/custom.svg'
 const MAX_TRIMMED_LENGTH = 20
 
-const getMessageName = (msg: SafeMessage) => {
+const getMessageName = (msg: MessageItem) => {
   if (msg.name != null) return msg.name
 
   if (isEIP712TypedData(msg.message)) {
@@ -23,7 +23,7 @@ const getMessageName = (msg: SafeMessage) => {
   return trimmed
 }
 
-const MsgType = ({ msg }: { msg: SafeMessage }) => {
+const MsgType = ({ msg }: { msg: MessageItem }) => {
   return (
     <Box className={txTypeCss.txType}>
       {msg.logoUri ? (

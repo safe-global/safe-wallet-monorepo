@@ -1,21 +1,21 @@
-import { createContext, useState, useEffect, useCallback } from 'react'
+import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import { createContext, useState, useEffect } from 'react'
 import type { Dispatch, ReactNode, SetStateAction, ReactElement } from 'react'
-import type { SafeTransaction } from '@safe-global/safe-core-sdk-types'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import { createTx } from '@/services/tx/tx-sender'
-import { useRecommendedNonce, useSafeTxGas } from '../tx/SignOrExecuteForm/hooks'
+import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
-import type { EIP712TypedData } from '@safe-global/safe-gateway-typescript-sdk'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import { useCurrentChain } from '@/hooks/useChains'
-import { prependSafeToL2Migration } from '@/utils/safe-migrations'
-import { useSelectAvailableSigner } from '@/hooks/wallets/useSelectAvailableSigner'
+import { getTxOrigin } from '@/utils/transactions'
 
 export type SafeTxContextParams = {
   safeTx?: SafeTransaction
   setSafeTx: Dispatch<SetStateAction<SafeTransaction | undefined>>
 
-  safeMessage?: EIP712TypedData
-  setSafeMessage: Dispatch<SetStateAction<EIP712TypedData | undefined>>
+  safeMessage?: TypedData
+  setSafeMessage: Dispatch<SetStateAction<TypedData | undefined>>
+
+  safeMessageHash?: `0x${string}`
+  setSafeMessageHash: Dispatch<SetStateAction<`0x${string}` | undefined>>
 
   safeTxError?: Error
   setSafeTxError: Dispatch<SetStateAction<Error | undefined>>
@@ -29,64 +29,57 @@ export type SafeTxContextParams = {
   setSafeTxGas: Dispatch<SetStateAction<string | undefined>>
 
   recommendedNonce?: number
+
+  txOrigin?: string
+  setTxOrigin: Dispatch<SetStateAction<string | undefined>>
+
+  isReadOnly: boolean
 }
 
 export const SafeTxContext = createContext<SafeTxContextParams>({
   setSafeTx: () => {},
   setSafeMessage: () => {},
+  setSafeMessageHash: () => {},
   setSafeTxError: () => {},
   setNonce: () => {},
   setNonceNeeded: () => {},
   setSafeTxGas: () => {},
+  setTxOrigin: () => {},
+  isReadOnly: false,
 })
 
 const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const [safeTx, setSafeTx] = useState<SafeTransaction>()
-  const [safeMessage, setSafeMessage] = useState<EIP712TypedData>()
+  const [safeMessage, setSafeMessage] = useState<TypedData>()
+  const [safeMessageHash, setSafeMessageHash] = useState<`0x${string}`>()
   const [safeTxError, setSafeTxError] = useState<Error>()
   const [nonce, setNonce] = useState<number>()
   const [nonceNeeded, setNonceNeeded] = useState<boolean>(true)
   const [safeTxGas, setSafeTxGas] = useState<string>()
-
-  const { safe } = useSafeInfo()
-  const chain = useCurrentChain()
-  const selectAvailableSigner = useSelectAvailableSigner()
-
-  const setAndMigrateSafeTx: Dispatch<SetStateAction<SafeTransaction | undefined>> = useCallback(
-    (
-      value: SafeTransaction | undefined | ((prevState: SafeTransaction | undefined) => SafeTransaction | undefined),
-    ) => {
-      let safeTx: SafeTransaction | undefined
-      if (typeof value === 'function') {
-        safeTx = value(safeTx)
-      } else {
-        safeTx = value
-      }
-
-      prependSafeToL2Migration(safeTx, safe, chain).then(setSafeTx)
-
-      // Select a matching signer when we update the transaction
-      selectAvailableSigner(safeTx, safe)
-    },
-    [chain, safe, selectAvailableSigner],
+  const [txOrigin, setTxOrigin] = useState<string | undefined>(() =>
+    typeof window !== 'undefined' ? getTxOrigin({ url: window.location.origin, name: '' }) : undefined,
   )
 
   // Signed txs cannot be updated
-  const isSigned = safeTx && safeTx.signatures.size > 0
+  const isSigned = Boolean(safeTx && safeTx.signatures.size > 0)
 
   // Recommended nonce and safeTxGas
   const recommendedNonce = useRecommendedNonce()
   const recommendedSafeTxGas = useSafeTxGas(safeTx)
 
+  const canEdit = !isSigned
+  const isReadOnly = !canEdit
+
   // Priority to external nonce, then to the recommended one
-  const finalNonce = isSigned ? safeTx?.data.nonce : (nonce ?? recommendedNonce ?? safeTx?.data.nonce)
-  const finalSafeTxGas = isSigned
-    ? safeTx?.data.safeTxGas
-    : (safeTxGas ?? recommendedSafeTxGas ?? safeTx?.data.safeTxGas)
+  const finalNonce = canEdit ? (nonce ?? recommendedNonce ?? safeTx?.data.nonce) : safeTx?.data.nonce
+  const finalSafeTxGas = canEdit
+    ? (safeTxGas ?? recommendedSafeTxGas ?? safeTx?.data.safeTxGas)
+    : safeTx?.data.safeTxGas
 
   // Update the tx when the nonce or safeTxGas change
   useEffect(() => {
-    if (isSigned || !safeTx?.data) return
+    if (!canEdit) return
+    if (!safeTx?.data) return
     if (safeTx.data.nonce === finalNonce && safeTx.data.safeTxGas === finalSafeTxGas) return
 
     setSafeTxError(undefined)
@@ -96,7 +89,7 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         setSafeTx(tx)
       })
       .catch(setSafeTxError)
-  }, [isSigned, finalNonce, finalSafeTxGas, safeTx?.data])
+  }, [canEdit, finalNonce, finalSafeTxGas, safeTx?.data])
 
   // Log errors
   useEffect(() => {
@@ -108,10 +101,12 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
       value={{
         safeTx,
         safeTxError,
-        setSafeTx: setAndMigrateSafeTx,
+        setSafeTx,
         setSafeTxError,
         safeMessage,
         setSafeMessage,
+        safeMessageHash,
+        setSafeMessageHash,
         nonce: finalNonce,
         setNonce,
         nonceNeeded,
@@ -119,6 +114,9 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
         safeTxGas: finalSafeTxGas,
         setSafeTxGas,
         recommendedNonce,
+        txOrigin,
+        setTxOrigin,
+        isReadOnly,
       }}
     >
       {children}

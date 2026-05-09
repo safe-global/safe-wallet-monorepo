@@ -1,0 +1,22 @@
+{
+  "quote": {
+    "sellToken": "0x0625afb445c3b6b7b929342a04a22599fd5dbb59",
+    "buyToken": "0xb4f1737af37711e9a5890d9510c9bb60e170cb0d",
+    "receiver": "0x03042b890b99552b60a073f808100517fb148f60",
+    "sellAmount": "108978992606022873342",
+    "buyAmount": "600000000000000000000",
+    "validTo": 1743756219,
+    "appData": "{\"appCode\":\"Safe Wallet Swaps\",\"metadata\":{\"orderClass\":{\"orderClass\":\"market\"},\"partnerFee\":{\"bps\":35,\"recipient\":\"0xE344241493D573428076c022835856a221dB3E26\"},\"quote\":{\"slippageBips\":30,\"smartSlippage\":false},\"widget\":{\"appCode\":\"CoW Swap-SafeApp\",\"environment\":\"production\"}},\"version\":\"1.3.0\"}",
+    "appDataHash": "0xaf770d59f29b652477aeccb4e40f703b9fb615374b77fa61095b32e0723302bd",
+    "feeAmount": "103301303449504384",
+    "kind": "buy",
+    "partiallyFillable": false,
+    "sellTokenBalance": "erc20",
+    "buyTokenBalance": "erc20",
+    "signingScheme": "eip712"
+  },
+  "from": "0x03042b890b99552b60a073f808100517fb148f60",
+  "expiration": "2025-04-04T08:15:39.117769292Z",
+  "id": 720106,
+  "verified": true
+}

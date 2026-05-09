@@ -15,23 +15,26 @@ const SafeImprint = () => (
       Information in accordance with section 5 of the Telemedia Act (TMG, Germany):
     </Typography>
     <Typography mb={2}>
-      Core Contributors GmbH
+      Safe Labs GmbH
       <br />
-      Gontardstraße 11
+      Unter den Linden 10
       <br />
-      10178 Berlin, Germany
+      10117 Berlin, Germany
+      <br />
     </Typography>
     <Typography mb={4}>
-      Managing director: Richard Meißner
+      Managing director: Rahul Rumalla
+      <br />
+      Responsible for content: Rahul Rumalla
       <br />
       Contact:{' '}
-      <Link href="mailto:info@cc0x.dev" passHref legacyBehavior>
-        <MUILink>info@cc0x.dev</MUILink>
+      <Link href="mailto:info@safe.global" passHref legacyBehavior>
+        <MUILink>Email address: info@safe.global</MUILink>
       </Link>
       <br />
-      District Court: Berlin Charlottenburg
+      Commercial register maintained by: Amtsgericht Charlottenburg (Berlin) - Local Court
       <br />
-      Register Number: HRB 240421 B
+      Register Number: HRB 270980
     </Typography>
     <Typography variant="h3" mb={2}>
       Disclaimer

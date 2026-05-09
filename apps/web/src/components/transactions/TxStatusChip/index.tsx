@@ -4,14 +4,15 @@ import { Typography, Chip } from '@mui/material'
 export type TxStatusChipProps = {
   children: ReactNode
   color?: 'primary' | 'secondary' | 'info' | 'warning' | 'success' | 'error'
+  backgroundColor?: string
 }
 
-const TxStatusChip = ({ children, color }: TxStatusChipProps): ReactElement => {
+const TxStatusChip = ({ children, color = 'primary', backgroundColor }: TxStatusChipProps): ReactElement => {
   return (
     <Chip
       size="small"
       sx={{
-        backgroundColor: `${color}.background`,
+        backgroundColor: backgroundColor ?? `${color}.background`,
         color: `${color}.${color === 'success' ? 'dark' : color === 'primary' ? 'light' : 'main'}`,
       }}
       label={

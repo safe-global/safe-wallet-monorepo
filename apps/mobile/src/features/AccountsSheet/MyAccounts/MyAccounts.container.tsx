@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { RenderItemParams } from 'react-native-draggable-flatlist'
 import { AccountItem } from '../AccountItem'
 import { SafesSliceItem } from '@/src/store/safesSlice'
@@ -7,29 +7,33 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { getChainsByIds } from '@/src/store/chains'
 import { RootState } from '@/src/store'
-import { useMyAccounts } from './hooks/useMyAccounts'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { sumFiatTotals } from '@/src/utils/balance'
+import { useSafeKnownChainsOverview } from '@/src/hooks/services/useSafeKnownChainsOverview'
 
 interface MyAccountsContainerProps {
-  item: SafesSliceItem
+  item: { address: Address; info: SafesSliceItem }
   onClose: () => void
   isDragging?: boolean
-  drag?: RenderItemParams<SafesSliceItem>['drag']
+  drag?: RenderItemParams<{ address: Address; info: SafesSliceItem }>['drag']
 }
 
 export function MyAccountsContainer({ item, isDragging, drag, onClose }: MyAccountsContainerProps) {
-  useMyAccounts(item)
+  // Refresh balances for this safe on its known chains. Mounts/unmounts with the
+  // FlatList row, so the request volume scales with viewport, not library size.
+  useSafeKnownChainsOverview(item.address)
 
   const dispatch = useDispatch()
   const activeSafe = useDefinedActiveSafe()
-  const filteredChains = useSelector((state: RootState) => getChainsByIds(state, item.chains))
+  const chainsIds = Object.keys(item.info)
+  const filteredChains = useSelector((state: RootState) => getChainsByIds(state, chainsIds))
 
   const handleAccountSelected = () => {
-    const chainId = item.chains[0]
+    const chainId = chainsIds[0]
 
     dispatch(
       setActiveSafe({
-        address: item.SafeInfo.address.value as Address,
+        address: item.address,
         chainId,
       }),
     )
@@ -37,10 +41,15 @@ export function MyAccountsContainer({ item, isDragging, drag, onClose }: MyAccou
     onClose()
   }
 
+  const fiatTotal = useMemo(() => sumFiatTotals(chainsIds.map((id) => item.info[id].fiatTotal)), [chainsIds, item.info])
+
   return (
     <AccountItem
       drag={drag}
-      account={item.SafeInfo}
+      account={{
+        ...item.info[chainsIds[0]],
+        fiatTotal,
+      }}
       isDragging={isDragging}
       chains={filteredChains}
       onSelect={handleAccountSelected}

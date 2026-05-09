@@ -1,14 +1,19 @@
+import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import {
   isExecTxData,
   isExecTxInfo,
   isOnChainConfirmationTxData,
   isOnChainConfirmationTxInfo,
+  isOnChainSignMessageTxData,
   isSafeUpdateTxData,
 } from '../transaction-guards'
 import { faker } from '@faker-js/faker'
-import { Safe__factory } from '@/types/contracts'
-import { TransactionInfoType, TransactionTokenType, TransferDirection } from '@safe-global/safe-gateway-typescript-sdk'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { Safe__factory, Sign_message_lib__factory } from '@safe-global/utils/types/contracts'
+import { TransactionTokenType, TransferDirection } from '@safe-global/store/gateway/types'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { txDataBuilder } from '@/tests/builders/safeTx'
+import { getSignMessageLibDeployment } from '@safe-global/safe-deployments'
+import type { Operation } from '@safe-global/store/gateway/types'
 
 describe('transaction-guards', () => {
   describe('isOnChainConfirmationTxData', () => {
@@ -176,7 +181,7 @@ describe('transaction-guards', () => {
           logoUri: '',
         },
         value: '0',
-        operation: 1,
+        operation: 1 as Operation,
         trustedDelegateCallTarget: true,
       }
       expect(isSafeUpdateTxData(mockTxData)).toBeTruthy()
@@ -209,7 +214,7 @@ describe('transaction-guards', () => {
                 '0x0085c9f5aa0f82a531087a356a55623cf05e7bb895000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000247de7edef00000000000000000000000041675c099f32341bf84bfc5382af534df5c7461a0085c9f5aa0f82a531087a356a55623cf05e7bb89500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000024f08a0323000000000000000000000000fd0732dc9e303f09fcef3a7388ad10a83459ec99',
               valueDecoded: [
                 {
-                  operation: 0,
+                  operation: 0 as Operation,
                   to: '0x85C9f5aA0F82A531087a356a55623Cf05E7Bb895',
                   value: '0',
                   data: '0x7de7edef00000000000000000000000041675c099f32341bf84bfc5382af534df5c7461a',
@@ -225,7 +230,7 @@ describe('transaction-guards', () => {
                   },
                 },
                 {
-                  operation: 0,
+                  operation: 0 as Operation,
                   to: '0x85C9f5aA0F82A531087a356a55623Cf05E7Bb895',
                   value: '0',
                   data: '0xf08a0323000000000000000000000000fd0732dc9e303f09fcef3a7388ad10a83459ec99',
@@ -250,7 +255,7 @@ describe('transaction-guards', () => {
           logoUri: '',
         },
         value: '0',
-        operation: 1,
+        operation: 1 as Operation,
         trustedDelegateCallTarget: true,
       }
 
@@ -271,11 +276,75 @@ describe('transaction-guards', () => {
           logoUri: '',
         },
         value: '0',
-        operation: 1,
+        operation: 1 as Operation,
         trustedDelegateCallTarget: true,
       }
 
       expect(isSafeUpdateTxData(mockTxData)).toBeFalsy()
+    })
+  })
+
+  describe('isOnChainSignMessageTxData', () => {
+    it('should return false for undefined', () => {
+      expect(isOnChainSignMessageTxData(undefined, '1')).toBeFalsy()
+    })
+
+    it('should return false for arbitrary txData', () => {
+      expect(isOnChainSignMessageTxData(txDataBuilder().build(), '1')).toBeFalsy()
+    })
+
+    it('should return true for signMessage calls to the SignMessageLib', () => {
+      const signMessageInterface = Sign_message_lib__factory.createInterface()
+      const signMessageLibAddress = getSignMessageLibDeployment({ version: '1.3.0' })?.defaultAddress!
+
+      const mockTxData = txDataBuilder()
+        .with({
+          hexData: signMessageInterface.encodeFunctionData('signMessage', [faker.string.hexadecimal({ length: 64 })]),
+          to: { value: signMessageLibAddress },
+          addressInfoIndex: {},
+          value: '0',
+          operation: 1,
+          trustedDelegateCallTarget: true,
+        })
+        .build()
+
+      expect(isOnChainSignMessageTxData(mockTxData, '1')).toBeTruthy()
+    })
+
+    it('should return false for signMessage calls to a random address', () => {
+      const signMessageInterface = Sign_message_lib__factory.createInterface()
+      const randomAddress = faker.finance.ethereumAddress()
+
+      const mockTxData = txDataBuilder()
+        .with({
+          hexData: signMessageInterface.encodeFunctionData('signMessage', [faker.string.hexadecimal({ length: 64 })]),
+          to: { value: randomAddress },
+          addressInfoIndex: {},
+          value: '0',
+          operation: 1,
+          trustedDelegateCallTarget: true,
+        })
+        .build()
+
+      expect(isOnChainSignMessageTxData(mockTxData, '1')).toBeFalsy()
+    })
+
+    it('should return false for signMessage calls that are not delegate calls', () => {
+      const signMessageInterface = Sign_message_lib__factory.createInterface()
+      const signMessageLibAddress = getSignMessageLibDeployment({ version: '1.3.0' })?.defaultAddress!
+
+      const mockTxData = txDataBuilder()
+        .with({
+          hexData: signMessageInterface.encodeFunctionData('signMessage', [faker.string.hexadecimal({ length: 64 })]),
+          to: { value: signMessageLibAddress },
+          addressInfoIndex: {},
+          value: '0',
+          operation: 0, // Not a delegate call
+          trustedDelegateCallTarget: true,
+        })
+        .build()
+
+      expect(isOnChainSignMessageTxData(mockTxData, '1')).toBeFalsy()
     })
   })
 })

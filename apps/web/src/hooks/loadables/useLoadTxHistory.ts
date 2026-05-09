@@ -1,32 +1,44 @@
+import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useEffect } from 'react'
-import { type TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
-import useAsync, { type AsyncResult } from '../useAsync'
+import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { Errors, logError } from '@/services/exceptions'
 import useSafeInfo from '../useSafeInfo'
+import useEffectiveSafeParams from '../useEffectiveSafeParams'
 import { getTxHistory } from '@/services/transactions'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import { useHasFeature } from '../useChains'
-import { FEATURES } from '@/utils/chains'
 
-export const useLoadTxHistory = (): AsyncResult<TransactionListPage> => {
-  const { safe, safeAddress, safeLoaded } = useSafeInfo()
-  const { chainId, txHistoryTag } = safe
+import { FEATURES } from '@safe-global/utils/utils/chains'
+
+const useLoadTxHistory = (): AsyncResult<TransactionItemPage> => {
+  const { safe, safeLoaded } = useSafeInfo()
+  const { effectiveAddress, effectiveChainId } = useEffectiveSafeParams()
+  const { txHistoryTag } = safe
   const { hideSuspiciousTransactions } = useAppSelector(selectSettings)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const hideUntrustedTxs = (hasDefaultTokenlist && hideSuspiciousTransactions) ?? true
   const hideImitationTxs = hideSuspiciousTransactions ?? true
 
   // Re-fetch when chainId, address, hideSuspiciousTransactions, or txHistoryTag changes
-  const [data, error, loading] = useAsync<TransactionListPage>(
+  const [data, error, loading] = useAsync<TransactionItemPage>(
     () => {
-      if (!safeLoaded) return
-      if (!safe.deployed) return Promise.resolve({ results: [] })
+      if (!effectiveChainId || !effectiveAddress) return
+      // For undeployed safes, return empty once safe info confirms not deployed
+      if (safeLoaded && !safe.deployed) return Promise.resolve({ results: [] })
 
-      return getTxHistory(chainId, safeAddress, hideUntrustedTxs, hideImitationTxs)
+      return getTxHistory(effectiveChainId, effectiveAddress, hideUntrustedTxs, hideImitationTxs)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [safeLoaded, chainId, safeAddress, hideSuspiciousTransactions, hasDefaultTokenlist, txHistoryTag, safe.deployed],
+    [
+      effectiveChainId,
+      effectiveAddress,
+      hideSuspiciousTransactions,
+      hasDefaultTokenlist,
+      txHistoryTag,
+      safeLoaded,
+      safe.deployed,
+    ],
     false,
   )
 

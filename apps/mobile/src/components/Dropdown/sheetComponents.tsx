@@ -8,17 +8,19 @@ import { useRouter } from 'expo-router'
 const BackgroundComponent = React.memo(({ style }: BottomSheetBackgroundProps) => {
   return (
     <RCView style={style}>
-      <View flex={1} backgroundColor="$backgroundPaper" borderRadius={'$6'}></View>
+      <View flex={1} backgroundColor="$backgroundSheet" borderRadius={'$7'}></View>
     </RCView>
   )
 })
 
-const BackdropComponent = React.memo(() => {
+const BackdropComponent = React.memo(({ shouldNavigateBack = true }: { shouldNavigateBack?: boolean }) => {
   const { close } = useBottomSheet()
   const router = useRouter()
   const handleClose = () => {
     close()
-    router.back()
+    if (shouldNavigateBack) {
+      router.back()
+    }
   }
 
   return (
@@ -31,7 +33,7 @@ const BackdropComponent = React.memo(() => {
       width="100%"
       height="100%"
     >
-      <BlurView style={styles.absolute} intensity={100} experimentalBlurMethod={'dimezisBlurView'} tint={'dark'} />
+      <BlurView style={styles.absolute} intensity={100} tint={'dark'} />
     </View>
   )
 })

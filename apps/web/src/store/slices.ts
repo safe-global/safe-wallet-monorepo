@@ -1,6 +1,4 @@
-export * from './chainsSlice'
 export * from './safeInfoSlice'
-export * from './balancesSlice'
 export * from './sessionSlice'
 export * from './txHistorySlice'
 export * from './txQueueSlice'
@@ -11,15 +9,41 @@ export * from './addedSafesSlice'
 export * from './settingsSlice'
 export * from './cookiesAndTermsSlice'
 export * from './popupSlice'
-export * from './spendingLimitsSlice'
+export * from '@/features/spending-limits/store/spendingLimitsSlice'
 export * from './safeAppsSlice'
-export * from './safeMessagesSlice'
+export { safeMessagesListener } from './safeMessagesSlice'
 export * from './pendingSafeMessagesSlice'
-export * from './batchSlice'
-export * from '@/features/counterfactual/store/undeployedSafesSlice'
-export * from '@/features/swap/store/swapParamsSlice'
+export { batchSlice, addTx, removeTx, selectBatchBySafe } from '@/features/batching/store/batchSlice'
+export {
+  undeployedSafesSlice,
+  addUndeployedSafe,
+  updateUndeployedSafeStatus,
+  removeUndeployedSafe,
+  selectUndeployedSafes,
+  selectUndeployedSafe,
+  selectIsUndeployedSafe,
+} from '@/features/counterfactual/store'
+export * from '@/features/swap/store'
 export * from './swapOrderSlice'
 export * from './api/gateway'
 export * from './api/gateway/safeOverviews'
 export * from './visitedSafesSlice'
 export * from './orderByPreferenceSlice'
+export * from './authSlice'
+export * from '@/features/hypernative/store'
+export {
+  globalSearchSlice,
+  openGlobalSearch,
+  closeGlobalSearch,
+  toggleGlobalSearch,
+  selectGlobalSearchOpen,
+} from '@/features/global-search/store'
+export {
+  safeActionsModalSlice,
+  ESafeAction,
+  openSafeActionsModal,
+  closeSafeActionsModal,
+  selectSafeActionsModal,
+  selectSafeActionsModalOpen,
+  selectSafeActionsModalType,
+} from '@/features/spaces/store'

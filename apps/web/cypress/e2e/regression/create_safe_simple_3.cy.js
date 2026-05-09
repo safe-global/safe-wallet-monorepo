@@ -9,13 +9,9 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 describe('Safe creation tests 3', () => {
   beforeEach(() => {
-    cy.visit(constants.welcomeUrl + '?chain=sep')
+    createwallet.startCreateSafeFlow(signer)
   })
   it('Verify a Wallet can be connected', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     owner.clickOnWalletExpandMoreIcon()
     owner.clickOnDisconnectBtn()
     wallet.connectSigner(signer)
@@ -23,18 +19,10 @@ describe('Safe creation tests 3', () => {
   })
 
   it('Verify that a new Wallet has default name related to the selected network', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.verifyDefaultWalletName(createwallet.defaultSepoliaPlaceholder)
   })
 
   it('Verify Add and Remove Owner Row works as expected', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.clickOnNextBtn()
     createwallet.clickOnAddNewOwnerBtn()
     owner.verifyNumberOfOwners(2)
@@ -47,10 +35,6 @@ describe('Safe creation tests 3', () => {
   })
 
   it('Verify Threshold Setup', () => {
-    wallet.connectSigner(signer)
-    owner.waitForConnectionStatus()
-    createwallet.clickOnContinueWithWalletBtn()
-    createwallet.clickOnCreateNewSafeBtn()
     createwallet.clickOnNextBtn()
     createwallet.clickOnAddNewOwnerBtn()
     createwallet.clickOnAddNewOwnerBtn()

@@ -1,40 +1,55 @@
-import React from 'react'
-import { useColorScheme } from 'react-native'
+import React, { useEffect } from 'react'
+import { useTheme } from '@/src/theme/hooks/useTheme'
 import { OptIn } from '@/src/components/OptIn'
-import useNotifications from '@/src/hooks/useNotifications'
-import { router, useFocusEffect } from 'expo-router'
+import { router } from 'expo-router'
+import { useNotificationManager } from '@/src/hooks/useNotificationManager'
+import { useAppDispatch } from '../store/hooks'
+import { updatePromptAttempts } from '@/src/store/notificationsSlice'
 
+import { View } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 function NotificationsOptIn() {
-  const { enableNotifications, isAppNotificationEnabled } = useNotifications()
-  const colorScheme = useColorScheme()
+  const { bottom } = useSafeAreaInsets()
+  const dispatch = useAppDispatch()
+  const { isAppNotificationEnabled, enableNotification, isLoading } = useNotificationManager()
 
-  useFocusEffect(() => {
+  const { colorScheme, isDark } = useTheme()
+
+  useEffect(() => {
     if (isAppNotificationEnabled) {
       router.replace('/(tabs)')
     }
-  })
+  }, [isAppNotificationEnabled])
 
-  const image =
-    colorScheme === 'dark'
-      ? require('@/assets/images/notifications-dark.png')
-      : require('@/assets/images/notifications-light.png')
+  const handleReject = () => {
+    dispatch(updatePromptAttempts(1))
+    router.back()
+  }
+
+  const image = isDark
+    ? require('@/assets/images/notifications-dark.png')
+    : require('@/assets/images/notifications-light.png')
 
   return (
-    <OptIn
-      testID="notifications-opt-in-screen"
-      title="Stay in the loop with account activity"
-      description="Get notified when you receive assets, and when transactions require your action."
-      image={image}
-      isVisible
-      ctaButton={{
-        onPress: enableNotifications,
-        label: 'Enable notifications',
-      }}
-      secondaryButton={{
-        onPress: () => router.back(),
-        label: 'Maybe later',
-      }}
-    />
+    <View style={{ flex: 1, paddingBottom: bottom }}>
+      <OptIn
+        testID="notifications-opt-in-screen"
+        title="Stay in the loop with account activity"
+        description="Get notified when you receive assets, and when transactions require your action."
+        image={image}
+        isVisible
+        colorScheme={colorScheme}
+        isLoading={isLoading}
+        ctaButton={{
+          onPress: enableNotification,
+          label: 'Enable notifications',
+        }}
+        secondaryButton={{
+          onPress: handleReject,
+          label: 'Maybe later',
+        }}
+      />
+    </View>
   )
 }
 

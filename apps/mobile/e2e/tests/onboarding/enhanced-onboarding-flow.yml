@@ -1,0 +1,169 @@
+appId: ${APP_ID}
+tags:
+  - onboarding
+  - smoke
+---
+# Complete Onboarding Flow Test
+# Tests the onboarding flow including error states and edge cases
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# ============================================
+# Launch app and navigate through carousel
+# ============================================
+# Note: The onboarding carousel has 3 screens (carousel-item-0, carousel-item-1, carousel-item-2)
+
+- tapOn:
+    id: 'e2eTestOnboarding'
+
+# Verify first carousel screen
+- assertVisible:
+    id: 'carousel-item-0'
+
+# Swipe through carousel screens
+- swipe:
+    direction: 'LEFT'
+- assertVisible:
+    id: 'carousel-item-1'
+
+- swipe:
+    direction: 'LEFT'
+- assertVisible:
+    id: 'carousel-item-2'
+
+# Tap on final carousel screen and proceed
+- tapOn:
+    id: 'carousel-item-2'
+- tapOn:
+    id: 'get-started'
+
+# Verify Get Started screen
+- assertVisible:
+    id: 'get-started-screen'
+
+# ============================================
+# Navigate to Add Safe Account
+# ============================================
+
+- tapOn:
+    id: 'add-account-button'
+
+# Verify QR code scan screen appears
+- assertVisible: 'Scan a QR code'
+
+# ============================================
+# Error Case 1: Invalid Safe address format
+# ============================================
+
+- tapOn:
+    id: 'enter-manually'
+
+# Enter invalid address format
+- tapOn: 'Paste address...'
+- inputText: '0xINVALID'
+
+# Verify error message appears
+- assertVisible: 'Invalid address format'
+
+# Verify Continue button is not enabled (error state prevents progression)
+# Note: Maestro can't easily test disabled state, so we verify error is present
+- assertNotVisible:
+    id: 'success-icon'
+
+# ============================================
+# Error Case 2: Valid address format but not a Safe contract
+# ============================================
+
+# Clear input and enter valid EOA address (not a Safe)
+- eraseText
+- inputText: 'sep:0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+
+# Wait for validation to complete
+- extendedWaitUntil:
+    visible:
+      text: '.*No Safe deployment found for this address.*'
+    timeout: 5000
+
+# Verify error message appears
+- assertVisible: 'No Safe deployment found for this address'
+
+# Verify Continue button is disabled (error state)
+- assertNotVisible:
+    id: 'success-icon'
+
+# ============================================
+# Success Case: Valid Safe address
+# ============================================
+
+# Clear input and enter valid Safe address
+- eraseText
+- inputText: 'sep:0x9BFCA75a05175503580D593F4330b5505c594596'
+
+# Verify network auto-detection (Sepolia)
+- assertVisible: 'Sepolia'
+
+# Verify success icon appears
+- assertVisible:
+    id: 'success-icon'
+
+# Verify no error messages
+- assertNotVisible: 'Invalid address format'
+- assertNotVisible: 'No Safe deployment found for this address'
+
+# Enter Safe name
+- tapOn: 'Enter safe name here'
+- inputText: 'My test safe'
+
+# Verify Continue button is enabled
+- assertVisible:
+    id: 'continue-button'
+
+# Tap Continue to proceed
+- tapOn:
+    id: 'continue-button'
+
+# ============================================
+# Signer Selection/Import Screen
+# ============================================
+
+# Verify signers form screen appears
+- assertVisible:
+    id: 'add-signers-form-screen'
+- assertVisible: 'Import your signers to unlock account'
+- assertVisible: '.*Before you import signers....*'
+
+# Verify signers are listed
+- assertVisible:
+    id: 'signer-0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0'
+- assertVisible:
+    id: 'signer-0x0D65139Da4B36a8A39BF1b63e950038D42231b2e'
+- assertVisible:
+    id: 'signer-0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8'
+
+# Continue to notifications screen
+- tapOn:
+    id: 'continue-button'
+
+# ============================================
+# Test Skip Path: Skip notifications opt-in
+# ============================================
+
+# Verify notifications opt-in screen appears
+- assertVisible:
+    id: 'notifications-opt-in-screen'
+- assertVisible:
+    id: 'opt-in-primary-button'
+- assertVisible:
+    id: 'opt-in-secondary-button'
+
+# Tap Skip (secondary button)
+- tapOn:
+    id: 'opt-in-secondary-button'
+
+# Verify lands on Home tab
+- assertVisible:
+    id: 'home-tab'
+
+# Verify Safe account is displayed
+- assertVisible: '0x9BFC...4596.*'
+- assertVisible: 'Sepolia'

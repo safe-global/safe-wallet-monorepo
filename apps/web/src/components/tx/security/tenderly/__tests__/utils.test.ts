@@ -1,18 +1,17 @@
-import type { MetaTransactionData, SafeTransaction } from '@safe-global/safe-core-sdk-types'
-import type { SafeInfo } from '@safe-global/safe-gateway-typescript-sdk'
-import { zeroPadValue, Interface } from 'ethers'
-import {
-  getSimulationPayload,
-  NONCE_STORAGE_POSITION,
-  THRESHOLD_STORAGE_POSITION,
-} from '@/components/tx/security/tenderly/utils'
+import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { zeroPadValue, Interface, toBeHex } from 'ethers'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { getSimulationPayload } from '@/components/tx/security/tenderly/utils'
 import * as safeContracts from '@/services/contracts/safeContracts'
 import { getMultiSendCallOnlyDeployment, getSafeSingletonDeployment } from '@safe-global/safe-deployments'
-import EthSafeTransaction from '@safe-global/protocol-kit/dist/src/utils/transactions/SafeTransaction'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { generatePreValidatedSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
-import { toBeHex } from 'ethers'
-import * as Web3 from '@/hooks/wallets/web3'
+import { EthSafeTransaction } from '@safe-global/protocol-kit'
+import { generatePreValidatedSignature } from '@safe-global/protocol-kit'
+import * as Web3 from '@/hooks/wallets/web3ReadOnly'
+import {
+  NONCE_STORAGE_POSITION,
+  THRESHOLD_STORAGE_POSITION,
+} from '@safe-global/utils/components/tx/security/tenderly/utils'
 
 const SIGNATURE_LENGTH = 65 * 2
 
@@ -53,7 +52,7 @@ describe('simulation utils', () => {
   describe('getSimulationPayload', () => {
     it('unsigned executable multisig transaction with threshold 1', async () => {
       const ownerAddress = zeroPadValue('0x01', 20)
-      const mockSafeInfo: Partial<SafeInfo> = {
+      const mockSafeInfo: Partial<SafeState> = {
         threshold: 1,
         nonce: 0,
         chainId: '4',
@@ -75,7 +74,7 @@ describe('simulation utils', () => {
       const tenderlyPayload = await getSimulationPayload({
         executionOwner: ownerAddress,
         gasLimit: 50_000,
-        safe: mockSafeInfo as SafeInfo,
+        safe: mockSafeInfo as SafeState,
         transactions: mockTx,
       })
 
@@ -118,7 +117,7 @@ describe('simulation utils', () => {
       const otherOwnerAddress1 = zeroPadValue('0x11', 20)
       const otherOwnerAddress2 = zeroPadValue('0x12', 20)
 
-      const mockSafeInfo: Partial<SafeInfo> = {
+      const mockSafeInfo: Partial<SafeState> = {
         threshold: 2,
         nonce: 0,
         chainId: '4',
@@ -143,7 +142,7 @@ describe('simulation utils', () => {
       const tenderlyPayload = await getSimulationPayload({
         executionOwner: ownerAddress,
         gasLimit: 50_000,
-        safe: mockSafeInfo as SafeInfo,
+        safe: mockSafeInfo as SafeState,
         transactions: mockTx,
       })
 
@@ -159,7 +158,7 @@ describe('simulation utils', () => {
       const ownerAddress = zeroPadValue('0x01', 20)
       const otherOwnerAddress1 = zeroPadValue('0x11', 20)
 
-      const mockSafeInfo: Partial<SafeInfo> = {
+      const mockSafeInfo: Partial<SafeState> = {
         threshold: 2,
         nonce: 0,
         chainId: '4',
@@ -182,7 +181,7 @@ describe('simulation utils', () => {
 
       const tenderlyPayload = await getSimulationPayload({
         executionOwner: ownerAddress,
-        safe: mockSafeInfo as SafeInfo,
+        safe: mockSafeInfo as SafeState,
         transactions: mockTx,
       })
 
@@ -203,7 +202,7 @@ describe('simulation utils', () => {
       const ownerAddress = zeroPadValue('0x01', 20)
       const otherOwnerAddress1 = zeroPadValue('0x11', 20)
 
-      const mockSafeInfo: Partial<SafeInfo> = {
+      const mockSafeInfo: Partial<SafeState> = {
         threshold: 2,
         nonce: 0,
         chainId: '4',
@@ -227,7 +226,7 @@ describe('simulation utils', () => {
       const tenderlyPayload = await getSimulationPayload({
         executionOwner: ownerAddress,
         gasLimit: 50_000,
-        safe: mockSafeInfo as SafeInfo,
+        safe: mockSafeInfo as SafeState,
         transactions: mockTx,
       })
 
@@ -243,7 +242,7 @@ describe('simulation utils', () => {
     it('unsigned signed not-executable multisig transaction with threshold 2', async () => {
       const ownerAddress = zeroPadValue('0x01', 20)
 
-      const mockSafeInfo: Partial<SafeInfo> = {
+      const mockSafeInfo: Partial<SafeState> = {
         threshold: 2,
         nonce: 0,
         chainId: '4',
@@ -265,7 +264,7 @@ describe('simulation utils', () => {
       const tenderlyPayload = await getSimulationPayload({
         executionOwner: ownerAddress,
         gasLimit: 50_000,
-        safe: mockSafeInfo as SafeInfo,
+        safe: mockSafeInfo as SafeState,
         transactions: mockTx,
       })
 
@@ -284,7 +283,7 @@ describe('simulation utils', () => {
     it('batched transaction without gas limit', async () => {
       const ownerAddress = zeroPadValue('0x01', 20)
 
-      const mockSafeInfo: Partial<SafeInfo> = {
+      const mockSafeInfo: Partial<SafeState> = {
         threshold: 2,
         nonce: 0,
         chainId: '4',
@@ -313,7 +312,7 @@ describe('simulation utils', () => {
 
       const tenderlyPayload = await getSimulationPayload({
         executionOwner: ownerAddress,
-        safe: mockSafeInfo as SafeInfo,
+        safe: mockSafeInfo as SafeState,
         transactions: mockTxs,
       })
 

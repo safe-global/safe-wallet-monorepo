@@ -1,0 +1,69 @@
+import { Box, Skeleton, Typography, Stack } from '@mui/material'
+import type { ReactNode } from 'react'
+import FiatValue from '@/components/common/FiatValue'
+import TokenAmount from '@/components/common/TokenAmount'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import { InfoTooltip } from '@/components/common/InfoTooltip'
+import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
+import { TokenType } from '@safe-global/store/gateway/types'
+
+const TotalAssetValue = ({
+  fiatTotal,
+  title = 'Total value',
+  tooltipTitle,
+  size = 'md',
+  action,
+}: {
+  fiatTotal: string | number | undefined
+  title?: string
+  tooltipTitle?: string
+  size?: 'md' | 'lg'
+  action?: ReactNode
+}) => {
+  const fontSizeValue = size === 'lg' ? '44px' : '24px'
+  const { safe } = useSafeInfo()
+  const { balances } = useVisibleBalances()
+  const { showUndeployedNativeValue } = useNativeTokenDisplay()
+  const shouldHideNativeTokenValue = !safe.deployed && !showUndeployedNativeValue
+  const hasOtherBalances =
+    balances.items.length > 1 ||
+    (balances.items.length === 1 && balances.items[0]?.tokenInfo.type !== TokenType.NATIVE_TOKEN)
+
+  return (
+    <Box>
+      <Typography fontWeight={700} mb={0.5}>
+        {title}
+        {tooltipTitle && <InfoTooltip title={tooltipTitle} />}
+      </Typography>
+      <Stack direction="row" alignItems="flex-end" justifyContent="space-between">
+        <Typography component="div" variant="h1" fontSize={fontSizeValue} lineHeight="1.2" letterSpacing="-0.5px">
+          {safe.deployed ? (
+            fiatTotal !== undefined ? (
+              <>
+                <FiatValue value={fiatTotal} precise />
+              </>
+            ) : (
+              <Skeleton variant="text" width={60} />
+            )
+          ) : shouldHideNativeTokenValue ? (
+            hasOtherBalances ? (
+              <FiatValue value={fiatTotal ?? '0'} precise />
+            ) : (
+              <FiatValue value="0" precise />
+            )
+          ) : (
+            <TokenAmount
+              value={balances.items[0]?.balance}
+              decimals={balances.items[0]?.tokenInfo.decimals}
+              tokenSymbol={balances.items[0]?.tokenInfo.symbol}
+            />
+          )}
+        </Typography>
+        {action}
+      </Stack>
+    </Box>
+  )
+}
+
+export default TotalAssetValue

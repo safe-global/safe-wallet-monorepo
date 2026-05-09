@@ -1,12 +1,16 @@
-import TxLayout from '@/components/tx-flow/common/TxLayout'
 import { UpdateSafeReview } from './UpdateSafeReview'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
+import { TxFlowType } from '@/services/analytics'
+import { TxFlow } from '../../TxFlow'
 
 const UpdateSafeFlow = () => {
   return (
-    <TxLayout title="Confirm transaction" subtitle="Update Safe Account version" icon={SettingsIcon}>
-      <UpdateSafeReview />
-    </TxLayout>
+    <TxFlow
+      subtitle="Update Safe Account version"
+      icon={SettingsIcon}
+      eventCategory={TxFlowType.UPDATE_SAFE}
+      ReviewTransactionComponent={UpdateSafeReview}
+    />
   )
 }
 

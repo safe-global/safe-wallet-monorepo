@@ -27,35 +27,54 @@ inputs:
     description: 'Cypress cloud tag key'
     required: false
 
+  parallel:
+    description: 'Enable Cypress Cloud parallel mode'
+    required: false
+    default: 'true'
+
+  record:
+    description: 'Record results to Cypress Cloud'
+    required: false
+    default: 'true'
+
+  container-index:
+    description: 'Container index for parallel runs (used for artifact naming)'
+    required: false
+    default: '0'
+
 runs:
   using: 'composite'
   steps:
     - uses: ./.github/actions/yarn
 
-    - name: Install Latest stable Chrome Version
-      shell: bash
-      run: |
-        curl -O 'https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb'
-        sudo apt-get install ./google-chrome-stable_current_amd64.deb
+    - name: Install Chrome
+      uses: browser-actions/setup-chrome@v1
+      with:
+        chrome-version: '134'
+      id: setup-chrome
 
     - uses: ./.github/actions/build
       with:
         secrets: ${{ inputs.secrets }}
-        e2e_mnemonic: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_CYPRESS_MNEMONIC }}
+      env:
+        NODE_ENV: cypress
 
     - uses: cypress-io/github-action@v6
       with:
         spec: ${{ inputs.spec }}
-        group: ${{ inputs.group }}
-        parallel: true
-        browser: chrome
-        record: true
-        tag: ${{ inputs.tag }}
+        group: ${{ inputs.record == 'true' && inputs.group || '' }}
+        parallel: ${{ inputs.record == 'true' && inputs.parallel == 'true' }}
+        browser: ${{ steps.setup-chrome.outputs.chrome-path }}
+        record: ${{ inputs.record == 'true' }}
+        tag: ${{ inputs.record == 'true' && inputs.tag || '' }}
         config: baseUrl=http://localhost:8080
         install: false
         start: yarn workspace @safe-global/web serve
+        wait-on: 'http://localhost:8080'
+        wait-on-timeout: 120
         working-directory: apps/web
       env:
+        NODE_ENV: cypress
         CYPRESS_RECORD_KEY: ${{ inputs.record_key || fromJSON(inputs.secrets).CYPRESS_RECORD_KEY }}
         GITHUB_TOKEN: ${{ fromJSON(inputs.secrets).GITHUB_TOKEN }}
         CYPRESS_PROJECT_ID: ${{ inputs.project_id }}

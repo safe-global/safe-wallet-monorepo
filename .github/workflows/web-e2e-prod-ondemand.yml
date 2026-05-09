@@ -2,8 +2,6 @@ name: Web Production health check tests
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '30 5 * * 1-5'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -11,14 +9,14 @@ concurrency:
 
 jobs:
   e2e:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Cypress production health check tests
     strategy:
       fail-fast: false
       matrix:
         containers: [1]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: ./.github/actions/cypress
         with:
@@ -30,7 +28,7 @@ jobs:
 
       - name: Python setup
         if: always()
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.x'
 

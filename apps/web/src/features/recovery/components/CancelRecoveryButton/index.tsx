@@ -12,12 +12,12 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { dispatchRecoverySkipExpired } from '@/features/recovery/services/recovery-sender'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackError, Errors } from '@/services/exceptions'
-import { asError } from '@/services/exceptions/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
 import { RecoveryListItemContext } from '../RecoveryListItem/RecoveryListItemContext'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
-export function CancelRecoveryButton({
+export default function CancelRecoveryButton({
   recovery,
   compact = false,
 }: {
@@ -67,7 +67,7 @@ export function CancelRecoveryButton({
             onClick={onClick}
             variant="danger"
             disabled={isDisabled}
-            size={compact ? 'small' : 'stretched'}
+            size={compact ? 'small' : 'large'}
           >
             Cancel
           </Button>

@@ -73,4 +73,84 @@ describe('WalletInfo', () => {
 
     expect(mockOnboard.disconnectWallet).toHaveBeenCalled()
   })
+
+  it('calls onSwitch when Switch wallet is clicked', () => {
+    const onSwitch = jest.fn()
+    const { getByText } = render(
+      <WalletInfo
+        wallet={mockWallet}
+        onboard={mockOnboard}
+        addressBook={{}}
+        handleClose={jest.fn()}
+        balance={undefined}
+        currentChainId="1"
+        onSwitch={onSwitch}
+      />,
+    )
+
+    act(() => {
+      getByText('Switch wallet').click()
+    })
+
+    expect(onSwitch).toHaveBeenCalledTimes(1)
+  })
+
+  it('calls onDisconnect when Disconnect is clicked', () => {
+    const onDisconnect = jest.fn()
+    const { getByText } = render(
+      <WalletInfo
+        wallet={mockWallet}
+        onboard={mockOnboard}
+        addressBook={{}}
+        handleClose={jest.fn()}
+        balance={undefined}
+        currentChainId="1"
+        onDisconnect={onDisconnect}
+      />,
+    )
+
+    act(() => {
+      getByText('Disconnect').click()
+    })
+
+    expect(onDisconnect).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not throw when onSwitch is not provided', () => {
+    const { getByText } = render(
+      <WalletInfo
+        wallet={mockWallet}
+        onboard={mockOnboard}
+        addressBook={{}}
+        handleClose={jest.fn()}
+        balance={undefined}
+        currentChainId="1"
+      />,
+    )
+
+    expect(() => {
+      act(() => {
+        getByText('Switch wallet').click()
+      })
+    }).not.toThrow()
+  })
+
+  it('does not throw when onDisconnect is not provided', () => {
+    const { getByText } = render(
+      <WalletInfo
+        wallet={mockWallet}
+        onboard={mockOnboard}
+        addressBook={{}}
+        handleClose={jest.fn()}
+        balance={undefined}
+        currentChainId="1"
+      />,
+    )
+
+    expect(() => {
+      act(() => {
+        getByText('Disconnect').click()
+      })
+    }).not.toThrow()
+  })
 })

@@ -1,4 +1,4 @@
-# Safe{Wallet} mobile app 📱
+# Safe{Mobile} app 📱
 
 This project is now part of the **@safe-global/safe-wallet** monorepo! The monorepo setup allows centralized management
 of multiple
@@ -32,20 +32,19 @@ yarn install
 
 ## Running the app
 
-There is a .env.development file in the root of the mobile app that contains the following environment variables:
-
-```bash
-APP_VARIANT=production
-GOOGLE_SERVICES_PLIST_DEV=./GoogleService-Info.plist
-GOOGLE_SERVICES_JSON=./google-services.json
-GOOGLE_SERVICES_PLIST=./GoogleService-Info.plist
-```
-
-When any expo command runs it will automatically load the `.env.development` file. If you want to make modifications
-to the environment variables, you can create a `.env.local` file in the root of the mobile app.
+There is a `.env.example` file in the root of the mobile app. Create a `.env.local` file and paste the contents of the `.env.example`
+file into it and set the correct values for the environment variables.
 
 For local development you need to place the `google-services.json` and `GoogleService-Info.plist` files in the root of
 the mobile app.
+
+If you use EAS to manage your environement variables you can issue the
+
+```bash
+eas env:pull
+```
+
+command. This will pull the variables from your eas project and place them in the .env.local file.
 
 ### Running on iOS
 
@@ -106,6 +105,23 @@ To View stories press `i` on iOS or `a` on Android.
 
 We use [Maestro](https://maestro.mobile.dev/) for E2E testing. Before running tests, install Maestro following the
 documentation for your OS.
+
+### Configure env variables
+
+Maestro tests rely on environment variables that must be set before running tests. The
+`app-start.yml` utility provides sensible defaults when variables are unset, but Maestro Studio does **not** read defaults from YAML files, so you must pass them explicitly.
+
+| Variable           | Description                                                          | iOS (production)            | iOS (dev)                       | Android (production)    | Android (dev)               |
+| ------------------ | -------------------------------------------------------------------- | --------------------------- | ------------------------------- | ----------------------- | --------------------------- |
+| `APP_ID`           | Bundle / package identifier of the installed app                     | `global.safe.mobileapp.ios` | `global.safe.mobileapp.ios.dev` | `global.safe.mobileapp` | `global.safe.mobileapp.dev` |
+| `IS_DEV_MODE`      | Set to `"true"` to dismiss dev-only dialogs on start                 | `false` (default)           | `true`                          | `false` (default)       | `true`                      |
+| `SKIP_CLEAN_START` | Set to `"true"` to preserve app state between tests (used in suites) | `false` (default)           |
+
+> [!TIP]
+>
+> When `APP_ID` is not set, `app-start.yml` defaults to the production bundle ID for the current platform. If you
+> built the app with `APP_VARIANT=development`, you **must** pass the dev bundle ID or Maestro will hang at the
+> "Launch app" step because it cannot find the app.
 
 ### Run a dev build and E2E tests
 

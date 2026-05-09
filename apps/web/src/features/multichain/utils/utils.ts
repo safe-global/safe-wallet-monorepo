@@ -1,37 +1,26 @@
-import type { DecodedDataResponse, ChainInfo, SafeOverview } from '@safe-global/safe-gateway-typescript-sdk'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import semverSatisfies from 'semver/functions/satisfies'
 import memoize from 'lodash/memoize'
 import { keccak256, ethers, solidityPacked, getCreate2Address, type Provider } from 'ethers'
+import type { SafeSetup } from '../types'
 
-import { type UndeployedSafesState, type ReplayedSafeProps } from '@/store/slices'
-import { sameAddress } from '@/utils/addresses'
-import { Safe_proxy_factory__factory } from '@/types/contracts'
-import { extractCounterfactualSafeSetup } from '@/features/counterfactual/utils'
+import {
+  type UndeployedSafesState,
+  type ReplayedSafeProps,
+} from '@safe-global/utils/features/counterfactual/store/types'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { areOwnersMatching } from '@safe-global/utils/utils/safe-setup-comparison'
+import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
+import { extractCounterfactualSafeSetup } from '@/features/counterfactual/services'
 import { encodeSafeSetupCall } from '@/components/new-safe/create/logic'
-import { FEATURES, hasFeature } from '@/utils/chains'
-import { type SafeItem } from '@/features/myAccounts/hooks/useAllSafes'
-import { type MultiChainSafeItem } from '@/features/myAccounts/hooks/useAllSafesGrouped'
-import { LATEST_SAFE_VERSION } from '@/config/constants'
+import { type SafeItem } from '@/hooks/safes'
+import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { MIN_SAFE_VERSION_FOR_MULTICHAIN } from '../constants'
 
-type SafeSetup = {
-  owners: string[]
-  threshold: number
-  chainId: string
-}
-
-export const isChangingSignerSetup = (decodedData: DecodedDataResponse | undefined) => {
-  return decodedData?.method === 'addOwnerWithThreshold' || decodedData?.method === 'removeOwner'
-}
-
-export const isMultiChainSafeItem = (safe: SafeItem | MultiChainSafeItem): safe is MultiChainSafeItem => {
-  if ('safes' in safe && 'address' in safe) {
-    return true
-  }
-  return false
-}
-
-const areOwnersMatching = (owners1: string[], owners2: string[]) =>
-  owners1.length === owners2.length && owners1.every((owner) => owners2.some((owner2) => sameAddress(owner, owner2)))
+// Re-export from shared hooks for backward compatibility
+export { isMultiChainSafeItem } from '@/hooks/safes'
 
 export const getSafeSetups = (
   safes: SafeItem[],
@@ -101,36 +90,48 @@ const memoizedGetProxyCreationCode = memoize(
   async (factoryAddress, provider) => `${factoryAddress}${(await provider.getNetwork()).chainId}`,
 )
 
-export const predictAddressBasedOnReplayData = async (safeCreationData: ReplayedSafeProps, provider: Provider) => {
-  const setupData = encodeSafeSetupCall(safeCreationData.safeAccountConfig)
-
+export const predictSafeAddress = async (
+  setupData: { initializer: string; saltNonce: string; singleton: string },
+  factoryAddress: string,
+  provider: Provider,
+) => {
   // Step 1: Hash the initializer
-  const initializerHash = keccak256(setupData)
+  const initializerHash = keccak256(setupData.initializer)
 
   // Step 2: Encode the initializerHash and saltNonce using abi.encodePacked equivalent
-  const encoded = ethers.concat([initializerHash, solidityPacked(['uint256'], [safeCreationData.saltNonce])])
+  const encoded = ethers.concat([initializerHash, solidityPacked(['uint256'], [setupData.saltNonce])])
 
   // Step 3: Hash the encoded value to get the final salt
   const salt = keccak256(encoded)
 
   // Get Proxy creation code
-  const proxyCreationCode = await memoizedGetProxyCreationCode(safeCreationData.factoryAddress, provider)
+  const proxyCreationCode = await memoizedGetProxyCreationCode(factoryAddress, provider)
 
-  const constructorData = safeCreationData.masterCopy
-  const initCode = proxyCreationCode + solidityPacked(['uint256'], [constructorData]).slice(2)
-  return getCreate2Address(safeCreationData.factoryAddress, salt, keccak256(initCode))
+  const initCode = proxyCreationCode + solidityPacked(['uint256'], [setupData.singleton]).slice(2)
+  return getCreate2Address(factoryAddress, salt, keccak256(initCode))
 }
 
-const canMultichain = (chain: ChainInfo) => {
-  const MIN_SAFE_VERSION = '1.4.1'
-  return hasFeature(chain, FEATURES.COUNTERFACTUAL) && semverSatisfies(LATEST_SAFE_VERSION, `>=${MIN_SAFE_VERSION}`)
+export const predictAddressBasedOnReplayData = async (safeCreationData: ReplayedSafeProps, provider: Provider) => {
+  const initializer = encodeSafeSetupCall(safeCreationData.safeAccountConfig)
+  return predictSafeAddress(
+    { initializer, saltNonce: safeCreationData.saltNonce, singleton: safeCreationData.masterCopy },
+    safeCreationData.factoryAddress,
+    provider,
+  )
 }
 
-export const hasMultiChainCreationFeatures = (chain: ChainInfo): boolean => {
+const canMultichain = (chain: Chain) => {
+  return (
+    hasFeature(chain, FEATURES.COUNTERFACTUAL) &&
+    semverSatisfies(LATEST_SAFE_VERSION, `>=${MIN_SAFE_VERSION_FOR_MULTICHAIN}`)
+  )
+}
+
+export const hasMultiChainCreationFeatures = (chain: Chain): boolean => {
   return hasFeature(chain, FEATURES.MULTI_CHAIN_SAFE_CREATION) && canMultichain(chain)
 }
 
-export const hasMultiChainAddNetworkFeature = (chain: ChainInfo | undefined): boolean => {
+export const hasMultiChainAddNetworkFeature = (chain: Chain | undefined): boolean => {
   if (!chain) return false
   return hasFeature(chain, FEATURES.MULTI_CHAIN_SAFE_ADD_NETWORK) && canMultichain(chain)
 }

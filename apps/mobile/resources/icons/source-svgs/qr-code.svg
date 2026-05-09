@@ -1,10 +1,14 @@
-<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M9 2H4C2.89543 2 2 2.89543 2 4V9C2 10.1046 2.89543 11 4 11H9C10.1046 11 11 10.1046 11 9V4C11 2.89543 10.1046 2 9 2ZM4 9V4H9V9H4Z" fill="black"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M9 13H4C2.89543 13 2 13.8954 2 15V20C2 21.1046 2.89543 22 4 22H9C10.1046 22 11 21.1046 11 20V15C11 13.8954 10.1046 13 9 13ZM4 20V15H9V20H4Z" fill="black"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M20 2H15C13.8954 2 13 2.89543 13 4V9C13 10.1046 13.8954 11 15 11H20C21.1046 11 22 10.1046 22 9V4C22 2.89543 21.1046 2 20 2ZM15 9V4H20V9H15Z" fill="black"/>
-<rect width="3" height="3" rx="0.5" transform="matrix(-1 0 0 1 16 13)" fill="black"/>
-<rect width="3" height="3" rx="0.5" transform="matrix(-1 0 0 1 22 13)" fill="black"/>
-<rect width="3" height="3" rx="0.5" transform="matrix(-1 0 0 1 19 16)" fill="black"/>
-<rect width="3" height="3" rx="0.5" transform="matrix(-1 0 0 1 22 19)" fill="black"/>
-<rect width="3" height="3" rx="0.5" transform="matrix(-1 0 0 1 16 19)" fill="black"/>
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g transform="translate(1.9999, 1.9998)">
+<g id="Group">
+<path id="Rectangle" d="M4.2002 0C4.86284 0.000109059 5.40039 0.537522 5.40039 1.2002V4.2002C5.40028 4.86278 4.86278 5.40028 4.2002 5.40039H1.2002C0.537522 5.40039 0.000109059 4.86284 0 4.2002V1.2002C0 0.537455 0.537455 0 1.2002 0H4.2002ZM1.2002 4.2002H4.2002V1.2002H1.2002V4.2002Z" fill="black"/>
+<path id="Rectangle Copy 3" d="M4.2002 6.59997C4.86284 6.60008 5.40039 7.13749 5.40039 7.80017V10.8002C5.40028 11.4627 4.86278 12.0003 4.2002 12.0004H1.2002C0.537522 12.0004 0.000109059 11.4628 0 10.8002V7.80017C0 7.13743 0.537455 6.59997 1.2002 6.59997H4.2002ZM1.2002 10.8002H4.2002V7.80017H1.2002V10.8002Z" fill="black"/>
+<path id="Rectangle Copy 2" d="M10.8001 0C11.4628 0.000109059 12.0003 0.537522 12.0003 1.2002V4.2002C12.0002 4.86278 11.4627 5.40028 10.8001 5.40039H7.80011C7.13744 5.40039 6.60003 4.86284 6.59992 4.2002V1.2002C6.59992 0.537455 7.13737 0 7.80011 0H10.8001ZM7.80011 4.2002H10.8001V1.2002H7.80011V4.2002Z" fill="black"/>
+<rect id="Rectangle Copy 8" width="1.8" height="1.8" rx="0.333333" transform="matrix(-1 0 0 1 8.39991 6.59997)" fill="black"/>
+<rect id="Rectangle Copy 9" width="1.8" height="1.8" rx="0.333333" transform="matrix(-1 0 0 1 11.9999 6.59997)" fill="black"/>
+<rect id="Rectangle Copy 10" width="1.8" height="1.8" rx="0.333333" transform="matrix(-1 0 0 1 10.1999 8.39997)" fill="black"/>
+<rect id="Rectangle Copy 11" width="1.8" height="1.8" rx="0.333333" transform="matrix(-1 0 0 1 11.9999 10.2)" fill="black"/>
+<rect id="Rectangle Copy 12" width="1.8" height="1.8" rx="0.333333" transform="matrix(-1 0 0 1 8.39991 10.2)" fill="black"/>
+</g>
+</g>
 </svg>

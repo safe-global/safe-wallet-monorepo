@@ -4,27 +4,24 @@ import { SafeListItem } from '@/src/components/SafeListItem'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import type { Cancellation } from '@safe-global/store/gateway/types'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { SafeListItemProps } from '@/src/components/SafeListItem/SafeListItem'
 
-interface TxRejectionCardProps {
-  bordered?: boolean
+type TxRejectionCardProps = {
   txInfo: Cancellation
-  inQueue?: boolean
   executionInfo?: Transaction['executionInfo']
-}
+} & Partial<SafeListItemProps>
 
-export function TxRejectionCard({ bordered, executionInfo, txInfo, inQueue }: TxRejectionCardProps) {
+export function TxRejectionCard({ txInfo, ...rest }: TxRejectionCardProps) {
   return (
     <SafeListItem
       type="Rejected"
-      executionInfo={executionInfo}
       label={txInfo.methodName || 'On-chain rejection'}
-      inQueue={inQueue}
-      bordered={bordered}
       leftNode={
         <View borderRadius={100} padding="$2" backgroundColor="$errorDark">
-          <SafeFontIcon color="$error" name="close-outlined" />
+          <SafeFontIcon color="$error" name="close-outlined" size={16} />
         </View>
       }
+      {...rest}
     />
   )
 }

@@ -7,7 +7,6 @@ import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { BRAND_NAME } from '@/config/constants'
 
 const overrideComponents: MDXComponents = {
-  // @ts-expect-error
   a: CustomLink,
 }
 
@@ -20,7 +19,7 @@ const Terms: NextPage = () => {
         <title>{`${BRAND_NAME} – Terms`}</title>
       </Head>
 
-      <main>{isOfficialHost && <SafeTerms components={overrideComponents} />}</main>
+      <main style={{ lineHeight: '1.5' }}>{isOfficialHost && <SafeTerms components={overrideComponents} />}</main>
     </>
   )
 }

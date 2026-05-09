@@ -9,17 +9,14 @@ let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
-describe('Sidebar tests', () => {
+// Skipping these tests - they will be moved to sidebar_new.ts for the new UI
+describe.skip('Sidebar tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
   beforeEach(() => {
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
-  })
-
-  it('Verify Current network is displayed at the top', () => {
-    sideBar.verifyNetworkIsDisplayed(constants.networks.sepolia)
   })
 
   // Added to prod

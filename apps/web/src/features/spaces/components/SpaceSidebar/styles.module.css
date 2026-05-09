@@ -1,0 +1,9 @@
+.container {
+  height: 100vh;
+  padding-top: var(--header-height);
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  background-color: var(--color-background-paper);
+  width: 230px;
+}

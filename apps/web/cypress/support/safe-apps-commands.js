@@ -1,5 +1,5 @@
 import { INFO_MODAL_KEY } from '../e2e/safe-apps/constants'
-import safes from '../fixtures/safes/static.json'
+import safes from '../fixtures/safes/static.js'
 
 const allowedApps = ['https://safe-test-app.com']
 

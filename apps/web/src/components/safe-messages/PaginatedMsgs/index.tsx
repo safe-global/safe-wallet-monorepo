@@ -11,8 +11,8 @@ import InfiniteScroll from '@/components/common/InfiniteScroll'
 import PagePlaceholder from '@/components/common/PagePlaceholder'
 import MsgList from '@/components/safe-messages/MsgList'
 import SkeletonTxList from '@/components/common/PaginatedTxns/SkeletonTxList'
-import { HelpCenterArticle } from '@/config/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 const NoMessages = (): ReactElement => {
   return (

@@ -1,46 +1,30 @@
 import React from 'react'
-import { Spinner, View } from 'tamagui'
+import { View } from 'tamagui'
 
-import { Alert } from '@/src/components/Alert'
-import { DropdownLabel } from '@/src/components/Dropdown'
 import { Fiat } from '@/src/components/Fiat'
-import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-
-import { ChainsDisplay } from '@/src/components/ChainsDisplay'
-import { useRouter } from 'expo-router'
+import { SafeSkeleton } from '@/src/components/SafeSkeleton'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectCurrency } from '@/src/store/settingsSlice'
 
 interface BalanceProps {
-  activeChainId: string
   isLoading: boolean
-  chains: Chain[]
   balanceAmount: string
-  chainName: string
 }
 
-export function Balance({ activeChainId, chains, isLoading, balanceAmount, chainName }: BalanceProps) {
-  const router = useRouter()
+export function Balance({ isLoading, balanceAmount }: BalanceProps) {
+  const currency = useAppSelector(selectCurrency)
+
+  const showSkeleton = isLoading || !balanceAmount
 
   return (
-    <View>
-      <View marginBottom="$8">
-        {activeChainId && (
-          <DropdownLabel
-            label={chainName}
-            leftNode={<ChainsDisplay activeChainId={activeChainId} chains={chains} max={1} />}
-            onPress={() => {
-              router.push('/networks-sheet')
-            }}
-          />
-        )}
-
-        {isLoading ? (
-          <Spinner />
-        ) : balanceAmount ? (
-          <Fiat baseAmount={balanceAmount} />
-        ) : (
-          <Alert type="error" message="error while getting the balance of your wallet" />
-        )}
-      </View>
+    <View alignItems="center" justifyContent="center" paddingVertical="$4" width="100%">
+      <SafeSkeleton.Group show={showSkeleton}>
+        <SafeSkeleton width={220}>
+          <View alignItems="center">
+            <Fiat value={balanceAmount} currency={currency} precise />
+          </View>
+        </SafeSkeleton>
+      </SafeSkeleton.Group>
     </View>
   )
 }

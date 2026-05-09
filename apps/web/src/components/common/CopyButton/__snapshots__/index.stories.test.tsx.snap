@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./index.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <span
+    aria-label="Copy to clipboard"
+    class=""
+    data-mui-internal-clone-element="true"
+    style="cursor: pointer;"
+  >
+    <button
+      aria-label="Copy to clipboard"
+      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-uneijd-MuiButtonBase-root-MuiIconButton-root"
+      tabindex="0"
+      type="button"
+    >
+      <mock-icon
+        aria-hidden=""
+        class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall mui-style-gvpe62-MuiSvgIcon-root"
+        data-testid="copy-btn-icon"
+        focusable="false"
+      />
+    </button>
+  </span>
+</div>
+`;

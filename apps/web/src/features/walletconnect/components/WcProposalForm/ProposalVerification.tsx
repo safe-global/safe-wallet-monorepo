@@ -2,7 +2,7 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import { Alert, SvgIcon } from '@mui/material'
 import AlertIcon from '@/public/images/notifications/alert.svg'
 import type { ReactElement } from 'react'
-import { getPeerName } from '@/features/walletconnect/services/utils'
+import { getPeerName } from '../../services/utils'
 import css from './styles.module.css'
 
 const ProposalVerification = ({ proposal }: { proposal: WalletKitTypes.SessionProposal }): ReactElement | null => {

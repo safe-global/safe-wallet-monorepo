@@ -1,23 +1,23 @@
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { Dispatch, ReactElement, SetStateAction } from 'react'
 import { Backdrop, Typography, Box, IconButton, Accordion, AccordionDetails, AccordionSummary } from '@mui/material'
 import { ClickAwayListener } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import useTxQueue from '@/hooks/useTxQueue'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
 import styles from './styles.module.css'
 import { getQueuedTransactionCount } from '@/utils/transactions'
 import { BatchExecuteHoverProvider } from '@/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import BatchExecuteButton from '@/components/transactions/BatchExecuteButton'
-import type { TransactionListPage } from '@safe-global/safe-gateway-typescript-sdk'
 
 type Props = {
   expanded: boolean
   visible: boolean
   setExpanded: Dispatch<SetStateAction<boolean>>
   onDismiss: () => void
-  transactions: TransactionListPage
+  transactions: QueuedItemPage
 }
 
 const TransactionQueueBar = ({

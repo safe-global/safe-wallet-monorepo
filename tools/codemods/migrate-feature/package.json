@@ -1,0 +1,27 @@
+{
+  "name": "@safe-wallet/migrate-feature-codemod",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Codemod tool to migrate features to v3 architecture",
+  "type": "module",
+  "bin": {
+    "migrate-feature": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "migrate": "node dist/index.js"
+  },
+  "dependencies": {
+    "@types/node": "^22.13.1",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "inquirer": "^11.1.0",
+    "jscodeshift": "^17.1.1",
+    "typescript": "~5.9.2"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/jscodeshift": "^0.12.0"
+  }
+}

@@ -1,0 +1,11 @@
+.slider {
+  overflow: hidden;
+  width: 100%;
+  touch-action: pan-y;
+  display: flex;
+  cursor: grab;
+}
+
+.grabbing {
+  cursor: grabbing;
+}

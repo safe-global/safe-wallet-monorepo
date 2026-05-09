@@ -95,6 +95,7 @@ describe('Replace Owners tests', () => {
     owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
     createTx.changeNonce(0)
     owner.clickOnNextBtn()
+    createTx.clickOnContinueSignTransactionBtn()
     createTx.clickOnSignTransactionBtn()
     createTx.clickViewTransaction()
     createTx.verifyReplacedSigner(ownerName)

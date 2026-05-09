@@ -1,7 +1,8 @@
 import { Camera, useCodeScanner, useCameraDevice, Code, CameraPermissionStatus } from 'react-native-vision-camera'
-import { View, Theme, H3 } from 'tamagui'
-import { Dimensions, Linking, Pressable, StyleSheet } from 'react-native'
-import React, { useCallback } from 'react'
+import { View, Theme, H3, getTokenValue } from 'tamagui'
+import { Dimensions, Pressable, StyleSheet, useWindowDimensions } from 'react-native'
+import { useTheme } from '@/src/theme/hooks/useTheme'
+import React from 'react'
 import { useRouter } from 'expo-router'
 
 const { width } = Dimensions.get('window')
@@ -16,6 +17,47 @@ type QrCameraProps = {
   onScan: (code: Code[]) => void
   isCameraActive: boolean
   permission: CameraPermissionStatus
+  onActivateCamera: () => void
+  onRequestPermission: () => void | Promise<unknown>
+  onPressSettings: () => void
+}
+
+type LensButtonConfig = {
+  label: string
+  onPress: () => void | Promise<unknown>
+  testID?: string
+}
+
+// Returns the in-lens CTA for the current permission state, or null when the
+// camera is live and no button should render. The 'denied' branch must NOT
+// auto-redirect to Settings — it surfaces an explicit "Open Settings" button
+// that the user has to tap (Apple guideline 5.1.1(iv)).
+function getLensButtonConfig({
+  permission,
+  isCameraActive,
+  onActivateCamera,
+  onRequestPermission,
+  onPressSettings,
+}: {
+  permission: CameraPermissionStatus
+  isCameraActive: boolean
+  onActivateCamera: () => void
+  onRequestPermission: () => void | Promise<unknown>
+  onPressSettings: () => void
+}): LensButtonConfig | null {
+  if (permission === 'granted') {
+    if (isCameraActive) {
+      return null
+    }
+    return { label: 'Continue', onPress: onActivateCamera, testID: 'camera-continue' }
+  }
+
+  if (permission === 'not-determined') {
+    return { label: 'Continue', onPress: onRequestPermission, testID: 'camera-request-permission' }
+  }
+
+  // 'denied' or 'restricted'
+  return { label: 'Open Settings', onPress: onPressSettings, testID: 'camera-open-settings' }
 }
 
 function CameraHeader({ heading }: { heading: React.ReactNode }) {
@@ -28,6 +70,7 @@ function CameraHeader({ heading }: { heading: React.ReactNode }) {
           onPress={() => {
             router.back()
           }}
+          testID="close-camera"
         >
           <Badge themeName="badge_background" circleSize="$9" content={<SafeFontIcon size={20} name="close" />} />
         </Pressable>
@@ -48,63 +91,103 @@ function CameraFooter(props: { footer: React.ReactNode }) {
   )
 }
 
-function CameraLens({ denied, onPress }: { denied: boolean; onPress: () => Promise<void> }) {
+function CameraLens({
+  permission,
+  isCameraActive,
+  onActivateCamera,
+  onRequestPermission,
+  onPressSettings,
+}: {
+  permission: CameraPermissionStatus
+  isCameraActive: boolean
+  onActivateCamera: () => void
+  onRequestPermission: () => void | Promise<unknown>
+  onPressSettings: () => void
+}) {
+  const { isDark } = useTheme()
+  const color = isDark ? getTokenValue('$color.textPrimaryDark') : getTokenValue('$color.textPrimaryLight')
+
+  const denied = permission === 'denied' || permission === 'restricted'
+  const button = getLensButtonConfig({
+    permission,
+    isCameraActive,
+    onActivateCamera,
+    onRequestPermission,
+    onPressSettings,
+  })
+
+  // Only let taps on the wrapper trigger the in-lens action when the camera is
+  // ready to activate. For 'not-determined' / 'denied' / 'restricted' the
+  // wrapper must be inert so that Settings (and the OS prompt) only ever fires
+  // from an explicit tap on the labeled SafeButton — Apple guideline 5.1.1(iv).
+  const wrapperPress =
+    permission === 'granted' && !isCameraActive
+      ? () => {
+          void onActivateCamera()
+        }
+      : undefined
+
   return (
-    <View style={[styles.transparentBox, denied && { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}>
-      {/* Green corners */}
+    <Pressable
+      style={[styles.transparentBox, denied && { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}
+      onPress={wrapperPress}
+      disabled={!wrapperPress}
+      testID="camera-lens-wrapper"
+    >
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.topLeft]} />
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.topRight]} />
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.bottomLeft]} />
       <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.bottomRight]} />
 
-      {denied && (
+      {button && (
         <View style={styles.deniedCameraContainer}>
-          <SafeFontIcon name={'camera'} size={40} color={'$error'} />
-          <SafeButton rounded secondary onPress={onPress} marginTop={20}>
-            Enable camera
+          <SafeFontIcon name={'camera'} size={40} color={denied ? '$error' : color} />
+          <SafeButton rounded secondary onPress={button.onPress} marginTop={20} testID={button.testID}>
+            {button.label}
           </SafeButton>
         </View>
       )}
-    </View>
+    </Pressable>
   )
 }
 
-export const QrCamera = ({ heading = 'Scan a QR Code', footer, onScan, isCameraActive, permission }: QrCameraProps) => {
+export const QrCamera = ({
+  heading = 'Scan a QR Code',
+  footer,
+  onScan,
+  isCameraActive,
+  permission,
+  onActivateCamera,
+  onRequestPermission,
+  onPressSettings,
+}: QrCameraProps) => {
   const device = useCameraDevice('back')
-
+  const { height } = useWindowDimensions()
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
-    onCodeScanned: (codes) => {
-      onScan(codes)
-    },
+    onCodeScanned: onScan,
   })
 
-  const openSettings = useCallback(async () => {
-    await Linking.openSettings()
-  }, [])
-
-  const denied = permission === 'denied'
+  const denied = permission === 'denied' || permission === 'restricted'
+  const granted = permission === 'granted'
 
   return (
     <Theme name={'dark'}>
       <View style={styles.container}>
-        {/* Camera View */}
-        {device && (
+        {device && granted && (
           <Camera style={StyleSheet.absoluteFill} device={device} isActive={isCameraActive} codeScanner={codeScanner} />
         )}
 
-        {/* Overlay with blurred edges */}
         <View style={styles.overlay}>
           <View flex={1}>
             <BlurView
-              style={[styles.blurTop, denied && styles.deniedCameraBlur]}
+              style={[styles.blurTop, denied && styles.deniedCameraBlur, { height: height * 0.3 }]}
               intensity={30}
               tint={'systemUltraThinMaterialDark'}
             >
               <CameraHeader heading={heading} />
             </BlurView>
 
-            {/* Middle with transparent center */}
             <View style={styles.transparentCenter}>
               <BlurView
                 style={[styles.sideBlur, denied && styles.deniedCameraBlur]}
@@ -112,7 +195,13 @@ export const QrCamera = ({ heading = 'Scan a QR Code', footer, onScan, isCameraA
                 tint={'systemUltraThinMaterialDark'}
               />
 
-              <CameraLens denied={denied} onPress={openSettings} />
+              <CameraLens
+                permission={permission}
+                isCameraActive={isCameraActive}
+                onActivateCamera={onActivateCamera}
+                onRequestPermission={onRequestPermission}
+                onPressSettings={onPressSettings}
+              />
               <BlurView
                 style={[styles.sideBlur, denied && styles.deniedCameraBlur]}
                 intensity={30}
@@ -120,7 +209,6 @@ export const QrCamera = ({ heading = 'Scan a QR Code', footer, onScan, isCameraA
               />
             </View>
 
-            {/* Bottom Blur */}
             <BlurView
               style={[styles.blur, denied && styles.deniedCameraBlur]}
               intensity={30}
@@ -135,8 +223,8 @@ export const QrCamera = ({ heading = 'Scan a QR Code', footer, onScan, isCameraA
   )
 }
 
-const BOX_RADIUS = 5 // Rounded corners
-const CORNER_SIZE = 30 // Size of the green corners
+const BOX_RADIUS = 5
+const CORNER_SIZE = 30
 
 const styles = StyleSheet.create({
   container: {
@@ -147,12 +235,11 @@ const styles = StyleSheet.create({
   },
   blur: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Simulates blur
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
   blurTop: {
     flex: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Simulates blur
-    height: 250,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
   topContainer: {
     flex: 1,
@@ -162,28 +249,27 @@ const styles = StyleSheet.create({
   },
   sideBlur: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Simulates blur
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
   transparentBox: {
     width: width * 0.6,
     height: width * 0.6,
-    borderRadius: BOX_RADIUS, // Rounded corners
-    overflow: 'hidden', // Prevents content leaking outside the corners
-    position: 'relative', // For positioning corners
+    borderRadius: BOX_RADIUS,
+    overflow: 'hidden',
+    position: 'relative',
     backgroundColor: 'transparent',
   },
   corner: {
     position: 'absolute',
     width: CORNER_SIZE,
     height: CORNER_SIZE,
-    borderColor: '#00FF00',
   },
   topLeft: {
     top: 0,
     left: 0,
     borderTopWidth: 2,
     borderLeftWidth: 2,
-    borderTopLeftRadius: BOX_RADIUS, // Matches the box's radius
+    borderTopLeftRadius: BOX_RADIUS,
   },
   topRight: {
     top: 0,

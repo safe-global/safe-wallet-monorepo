@@ -1,0 +1,36 @@
+appId: ${APP_ID}
+tags:
+  - onboarding
+  - suite
+---
+# Onboarding Test Suite
+# Runs all onboarding tests with a single app launch for optimal performance
+
+# Clean app start ONCE at the beginning
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Run all onboarding tests with SKIP_CLEAN_START
+- runFlow:
+    file: ./add-existing-safe.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./enhanced-onboarding-flow.yml
+
+- runFlow:
+    file: ./import-signer-private-key.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./import-signer-seed-phrase.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./import-signer.yml
+
+- runFlow:
+    file: ./new-user-onboarding.yml

@@ -3,101 +3,103 @@
 exports[`PendingTransactions should render the pending transactions in fullWidth layout 1`] = `
 <View>
   <View
-    accessibilityState={
-      {
-        "busy": undefined,
-        "checked": undefined,
-        "disabled": false,
-        "expanded": undefined,
-        "selected": undefined,
-      }
-    }
-    accessibilityValue={
-      {
-        "max": undefined,
-        "min": undefined,
-        "now": undefined,
-        "text": undefined,
-      }
-    }
-    accessible={true}
-    collapsable={false}
-    focusable={true}
-    onClick={[Function]}
-    onResponderGrant={[Function]}
-    onResponderMove={[Function]}
-    onResponderRelease={[Function]}
-    onResponderTerminate={[Function]}
-    onResponderTerminationRequest={[Function]}
-    onStartShouldSetResponder={[Function]}
     style={
       {
-        "opacity": 1,
+        "flex": 1,
       }
     }
-    testID="pending-transactions"
+    testID="theme-light"
   >
     <View
-      style={
+      accessibilityState={
         {
-          "flexDirection": "row",
-          "justifyContent": "center",
-          "width": "100%",
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
         }
       }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "opacity": 1,
+        }
+      }
+      testID="pending-transactions"
     >
       <View
         style={
           {
             "alignItems": "center",
-            "backgroundColor": "#fff0e0",
-            "borderBottomLeftRadius": 5,
-            "borderBottomRightRadius": 5,
-            "borderTopLeftRadius": 5,
-            "borderTopRightRadius": 5,
+            "backgroundColor": "#FFECC2",
+            "borderBottomLeftRadius": 8,
+            "borderBottomRightRadius": 8,
+            "borderTopLeftRadius": 8,
+            "borderTopRightRadius": 8,
             "flexDirection": "row",
-            "gap": 12,
-            "justifyContent": "center",
+            "justifyContent": "space-between",
             "paddingBottom": 12,
-            "paddingLeft": 28,
-            "paddingRight": 28,
+            "paddingLeft": 12,
+            "paddingRight": 12,
             "paddingTop": 12,
             "width": "100%",
           }
         }
       >
         <View
-          testID="alert-start-icon"
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+              "gap": 8,
+            }
+          }
         >
           <View
             style={
               {
                 "alignItems": "center",
-                "backgroundColor": "#FFF1E0",
-                "borderBottomLeftRadius": 100000,
-                "borderBottomRightRadius": 100000,
-                "borderTopLeftRadius": 100000,
-                "borderTopRightRadius": 100000,
-                "flexDirection": "column",
-                "height": 28,
+                "alignSelf": "flex-start",
+                "backgroundColor": "#FF8C00",
+                "borderBottomLeftRadius": 8,
+                "borderBottomRightRadius": 8,
+                "borderTopLeftRadius": 8,
+                "borderTopRightRadius": 8,
+                "gap": 4,
                 "justifyContent": "center",
-                "maxHeight": 28,
-                "maxWidth": 28,
-                "minHeight": 28,
-                "minWidth": 28,
-                "paddingBottom": 0,
-                "paddingLeft": 0,
-                "paddingRight": 0,
-                "paddingTop": 0,
-                "width": 28,
+                "minWidth": 24,
+                "paddingBottom": 1,
+                "paddingLeft": 4,
+                "paddingRight": 4,
+                "paddingTop": 1,
               }
             }
           >
             <Text
               style={
                 {
-                  "color": "#fff0e0",
-                  "fontSize": 14,
+                  "color": "#6C2D19",
+                  "fontSize": 16,
+                  "fontWeight": 700,
+                  "lineHeight": 22,
                 }
               }
               suppressHighlighting={true}
@@ -105,52 +107,41 @@ exports[`PendingTransactions should render the pending transactions in fullWidth
               2
             </Text>
           </View>
-        </View>
-        <View
-          style={
-            {
-              "gap": 4,
-            }
-          }
-        >
           <Text
             style={
               {
-                "color": "#FF8C00",
-                "fontFamily": "DMSans-SemiBold",
-                "fontSize": 16,
+                "color": "#6C2D19",
+                "fontSize": 14,
+                "fontWeight": 600,
+                "letterSpacing": -0.1,
               }
             }
             suppressHighlighting={true}
           >
-            Pending Transactions
+            Pending transactions
           </Text>
         </View>
-        <View
-          testID="alert-end-icon"
+        <Text
+          allowFontScaling={false}
+          selectable={false}
+          style={
+            [
+              {
+                "color": "#6C2D19",
+                "fontSize": 24,
+              },
+              undefined,
+              {
+                "fontFamily": "SafeIcons",
+                "fontStyle": "normal",
+                "fontWeight": "normal",
+              },
+              {},
+            ]
+          }
         >
-          <Text
-            allowFontScaling={false}
-            selectable={false}
-            style={
-              [
-                {
-                  "color": "#FF8C00",
-                  "fontSize": 20,
-                },
-                undefined,
-                {
-                  "fontFamily": "SafeIcons",
-                  "fontStyle": "normal",
-                  "fontWeight": "normal",
-                },
-                {},
-              ]
-            }
-          >
-            
-          </Text>
-        </View>
+          
+        </Text>
       </View>
     </View>
   </View>

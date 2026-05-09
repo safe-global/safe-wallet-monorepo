@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import local from '@/services/local-storage/local'
 import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
 import useChainId from '@/hooks/useChainId'

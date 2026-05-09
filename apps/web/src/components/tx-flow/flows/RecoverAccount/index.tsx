@@ -1,12 +1,11 @@
-import { START_RECOVERY_CATEGORY } from '@/services/analytics/events/recovery'
+import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
-import type { AddressEx } from '@safe-global/safe-gateway-typescript-sdk'
-
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import useTxStepper from '../../useTxStepper'
 import { RecoverAccountFlowReview } from './RecoverAccountFlowReview'
 import { RecoverAccountFlowSetup } from './RecoverAccountFlowSetup'
+import { TxFlowType } from '@/services/analytics'
 
 export enum RecoverAccountFlowFields {
   owners = 'owners',
@@ -15,7 +14,7 @@ export enum RecoverAccountFlowFields {
 
 export type RecoverAccountFlowProps = {
   // RHF accept primitive field arrays
-  [RecoverAccountFlowFields.owners]: Array<AddressEx>
+  [RecoverAccountFlowFields.owners]: Array<AddressInfo>
   [RecoverAccountFlowFields.threshold]: string
 }
 
@@ -25,7 +24,7 @@ function RecoverAccountFlow(): ReactElement {
       [RecoverAccountFlowFields.owners]: [{ value: '' }],
       [RecoverAccountFlowFields.threshold]: '1',
     },
-    START_RECOVERY_CATEGORY,
+    TxFlowType.START_RECOVERY,
   )
 
   const steps = [

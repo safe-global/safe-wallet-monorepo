@@ -1,7 +1,6 @@
 .container {
   padding: var(--space-2);
-  margin: var(--space-2) 0;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 .container.error {
@@ -26,6 +25,11 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-1);
+}
+
+/* Ensure body text uses 14px font-size */
+.message :global .MuiTypography-body2 {
+  font-size: 14px;
 }
 
 .message button {

@@ -1,5 +1,5 @@
 import { act, render, waitFor } from '@/tests/test-utils'
-import { checksumAddress } from '@/utils/addresses'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { faker } from '@faker-js/faker'
 import CopyAddressButton from '..'
 

@@ -1,34 +1,40 @@
-import OrderId from '@/features/swap/components/OrderId'
-import { formatDateTime, formatTimeInWords, getPeriod } from '@/utils/date'
+import { TransactionInfoType } from '@safe-global/store/gateway/types'
+import type {
+  DataDecoded,
+  SwapOrderTransactionInfo,
+  SwapTransferTransactionInfo,
+  TwapOrderTransactionInfo,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { StartTimeValue } from '@safe-global/store/gateway/types'
+import OrderId from '../OrderId'
+import { formatDateTime, formatTimeInWords, getPeriod } from '@safe-global/utils/utils/date'
 import { Fragment, type ReactElement } from 'react'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { DataTable } from '@/components/common/Table/DataTable'
 import { compareAsc } from 'date-fns'
 import { Alert, Typography } from '@mui/material'
-import { formatAmount } from '@/utils/formatNumber'
-import { getLimitPrice, getOrderClass, getSlippageInPercent } from '@/features/swap/helpers/utils'
-import type { DataDecoded, SwapOrder, SwapTransferOrder, TwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
-import { StartTimeValue, TransactionInfoType } from '@safe-global/safe-gateway-typescript-sdk'
-import SwapTokens from '@/features/swap/components/SwapTokens'
+import { formatAmount } from '@safe-global/utils/utils/formatNumber'
+import { getLimitPrice, getOrderClass, getSlippageInPercent } from '../../helpers/utils'
+import SwapTokens from '../SwapTokens'
 import AlertIcon from '@/public/images/common/alert.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import css from './styles.module.css'
 import NamedAddress from '@/components/common/NamedAddressInfo'
-import { PartDuration } from '@/features/swap/components/SwapOrder/rows/PartDuration'
-import { PartSellAmount } from '@/features/swap/components/SwapOrder/rows/PartSellAmount'
-import { PartBuyAmount } from '@/features/swap/components/SwapOrder/rows/PartBuyAmount'
-import { OrderFeeConfirmationView } from '@/features/swap/components/SwapOrderConfirmationView/OrderFeeConfirmationView'
-import { isSettingTwapFallbackHandler } from '@/features/swap/helpers/utils'
-import { TwapFallbackHandlerWarning } from '@/features/swap/components/TwapFallbackHandlerWarning'
+import { PartDuration } from '../SwapOrder/rows/PartDuration'
+import { PartSellAmount } from '../SwapOrder/rows/PartSellAmount'
+import { PartBuyAmount } from '../SwapOrder/rows/PartBuyAmount'
+import { OrderFeeConfirmationView } from './OrderFeeConfirmationView'
+import { isSettingTwapFallbackHandler } from '../../helpers/utils'
+import { TwapFallbackHandlerWarning } from '../TwapFallbackHandlerWarning'
 
 type SwapOrderProps = {
-  order: SwapOrder | SwapTransferOrder | TwapOrder
+  order: SwapOrderTransactionInfo | SwapTransferTransactionInfo | TwapOrderTransactionInfo
   settlementContract: string
-  decodedData?: DataDecoded
+  decodedData?: DataDecoded | null
 }
 
-export const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapOrderProps): ReactElement => {
-  const { owner, kind, validUntil, sellToken, buyToken, sellAmount, buyAmount, explorerUrl, receiver } = order
+const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapOrderProps): ReactElement => {
+  const { owner, kind, validUntil, sellToken, buyToken, sellAmount, buyAmount, receiver } = order
 
   const isTwapOrder = order.type === TransactionInfoType.TWAP_ORDER
 
@@ -40,6 +46,7 @@ export const SwapOrderConfirmation = ({ order, decodedData, settlementContract }
   const slippage = getSlippageInPercent(order)
   const isSellOrder = kind === 'sell'
   const isChangingFallbackHandler = decodedData && isSettingTwapFallbackHandler(decodedData)
+  const explorerUrl = !isTwapOrder ? order.explorerUrl : undefined
 
   return (
     <>
@@ -90,12 +97,15 @@ export const SwapOrderConfirmation = ({ order, decodedData, settlementContract }
           ),
           !isTwapOrder ? (
             <DataRow datatestid="order-id" key="Order ID" title="Order ID">
-              <OrderId orderId={order.uid} href={explorerUrl} />
+              <OrderId orderId={order.uid} href={explorerUrl!} />
             </DataRow>
           ) : (
             <></>
           ),
-          <OrderFeeConfirmationView key="SurplusFee" order={order} />,
+          <OrderFeeConfirmationView
+            key="SurplusFee"
+            order={order as { fullAppData?: Record<string, unknown> | null }}
+          />,
           <DataRow datatestid="interact-wth" key="Interact with" title="Interact with">
             <NamedAddress address={settlementContract} onlyName hasExplorer shortAddress={false} avatarSize={24} />
           </DataRow>,

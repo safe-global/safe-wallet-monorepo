@@ -1,0 +1,8 @@
+.assetInput {
+  display: flex;
+  flex-direction: row;
+  margin-top: var(--space-3);
+  gap: var(--space-1);
+  align-items: center;
+  justify-content: center;
+}

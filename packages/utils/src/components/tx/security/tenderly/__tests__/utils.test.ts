@@ -1,0 +1,302 @@
+import { toBeHex } from 'ethers'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import {
+  getStateOverwrites,
+  THRESHOLD_STORAGE_POSITION,
+  THRESHOLD_OVERWRITE,
+  NONCE_STORAGE_POSITION,
+  GUARD_STORAGE_POSITION,
+  getCallTraceErrors,
+  getSimulationStatus,
+  getSimulationLink,
+} from '../utils'
+import { ImplementationVersionState } from '@safe-global/store/gateway/types'
+import type { SafeTransaction, SafeSignature } from '@safe-global/types-kit'
+import type { SingleTransactionSimulationParams } from '../utils'
+import { faker } from '@faker-js/faker'
+import { EthSafeSignature } from '@safe-global/protocol-kit'
+import { FETCH_STATUS, type TenderlySimulation } from '../types'
+import type { UseSimulationReturn } from '../useSimulation'
+import { TENDERLY_ORG_NAME, TENDERLY_PROJECT_NAME } from '@safe-global/utils/config/constants'
+
+describe('getStateOverwrites', () => {
+  const mockOwners = [faker.finance.ethereumAddress(), faker.finance.ethereumAddress(), faker.finance.ethereumAddress()]
+  const safeAddress = faker.finance.ethereumAddress()
+  const mockSafe = {
+    address: { value: safeAddress },
+    chainId: '1',
+    nonce: 5,
+    threshold: 2,
+    guard: { value: ZERO_ADDRESS },
+    version: '1.4.1',
+    owners: mockOwners.map((owner) => ({ value: owner })),
+    implementation: { value: ZERO_ADDRESS },
+    implementationVersionState: ImplementationVersionState.UP_TO_DATE,
+    modules: [],
+    fallbackHandler: { value: ZERO_ADDRESS },
+    collectiblesTag: '0',
+    txQueuedTag: '0',
+    txHistoryTag: '0',
+    messagesTag: '0',
+  }
+  const mockSafeWithGuard = {
+    ...mockSafe,
+    guard: { value: faker.finance.ethereumAddress() },
+  }
+
+  const mockSignature = new EthSafeSignature(mockOwners[0], faker.string.hexadecimal({ length: 66 }))
+
+  const mockTransaction: SafeTransaction = {
+    data: {
+      to: faker.finance.ethereumAddress(),
+      value: '0',
+      data: '0x',
+      operation: 0,
+      safeTxGas: '0',
+      baseGas: '0',
+      gasPrice: '0',
+      gasToken: ZERO_ADDRESS,
+      refundReceiver: ZERO_ADDRESS,
+      nonce: 5,
+    },
+    signatures: new Map<string, SafeSignature>(),
+    getSignature: () => undefined,
+    addSignature: () => {},
+    encodedSignatures: () => '',
+  }
+
+  mockTransaction.signatures.set(mockOwners[0], mockSignature)
+
+  it('should return empty object when no overwrites are needed', () => {
+    // Threshold 2, one signature in the tx and the execution owner is the second owner
+    const params: SingleTransactionSimulationParams = {
+      safe: mockSafe,
+      executionOwner: mockOwners[1],
+      transactions: mockTransaction,
+    }
+
+    const result = getStateOverwrites(params)
+    expect(result).toEqual({})
+  })
+
+  it('should include threshold overwrite when signatures are below threshold', () => {
+    const params: SingleTransactionSimulationParams = {
+      safe: { ...mockSafe, threshold: 3 },
+      executionOwner: mockOwners[1],
+      transactions: mockTransaction,
+    }
+
+    const result = getStateOverwrites(params)
+    expect(result).toEqual({
+      [THRESHOLD_STORAGE_POSITION]: THRESHOLD_OVERWRITE,
+    })
+  })
+
+  it('should include nonce overwrite when transaction nonce is higher than safe nonce', () => {
+    const params: SingleTransactionSimulationParams = {
+      safe: mockSafe,
+      executionOwner: mockOwners[1],
+      transactions: { ...mockTransaction, data: { ...mockTransaction.data, nonce: 6 } },
+    }
+
+    const result = getStateOverwrites(params)
+    expect(result).toEqual({
+      [NONCE_STORAGE_POSITION]: toBeHex('0x6', 32),
+    })
+  })
+
+  it('should include guard overwrite when safe has a guard', () => {
+    const params: SingleTransactionSimulationParams = {
+      safe: mockSafeWithGuard,
+      executionOwner: mockOwners[1],
+      transactions: mockTransaction,
+    }
+
+    const result = getStateOverwrites(params)
+    expect(result).toEqual({
+      [GUARD_STORAGE_POSITION]: toBeHex(ZERO_ADDRESS, 32),
+    })
+  })
+
+  it('should combine multiple overwrites when multiple conditions are met', () => {
+    const params: SingleTransactionSimulationParams = {
+      safe: { ...mockSafe, guard: { value: faker.finance.ethereumAddress() }, threshold: 3 },
+      executionOwner: mockOwners[1],
+      transactions: {
+        ...mockTransaction,
+        data: {
+          ...mockTransaction.data,
+          nonce: 6,
+        },
+      },
+    }
+
+    const result = getStateOverwrites(params)
+    expect(result).toEqual({
+      [THRESHOLD_STORAGE_POSITION]: THRESHOLD_OVERWRITE,
+      [NONCE_STORAGE_POSITION]: toBeHex('0x6', 32),
+      [GUARD_STORAGE_POSITION]: toBeHex(ZERO_ADDRESS, 32),
+    })
+  })
+})
+
+describe('getCallTraceErrors', () => {
+  it('should return empty array if no simulation', () => {
+    expect(getCallTraceErrors(undefined)).toEqual([])
+  })
+
+  it('should return empty array if simulation status is false', () => {
+    const simulation: TenderlySimulation = {
+      simulation: { status: false },
+      transaction: { call_trace: [] },
+    } as any
+    expect(getCallTraceErrors(simulation)).toEqual([])
+  })
+
+  it('should return calls with errors', () => {
+    const simulation: TenderlySimulation = {
+      simulation: { status: true },
+      transaction: {
+        call_trace: [
+          { error: undefined },
+          { error: 'Execution reverted' },
+          { error: undefined },
+          { error: 'Out of gas' },
+        ],
+      },
+    } as any
+    const errors = getCallTraceErrors(simulation)
+    expect(errors).toHaveLength(2)
+    expect(errors[0].error).toBe('Execution reverted')
+    expect(errors[1].error).toBe('Out of gas')
+  })
+})
+
+describe('getSimulationLink', () => {
+  const simulationId = '123'
+
+  it('should fallback to the default dashboard URL when no custom Tenderly configuration is provided', () => {
+    const result = getSimulationLink(simulationId)
+
+    expect(result).toEqual(
+      `https://dashboard.tenderly.co/public/${TENDERLY_ORG_NAME}/${TENDERLY_PROJECT_NAME}/simulator/${simulationId}`,
+    )
+  })
+
+  it('should build a public dashboard URL when a custom Tenderly URL is provided without an access token', () => {
+    const result = getSimulationLink(simulationId, {
+      url: 'https://api.tenderly.co/api/v2/project/my-org/my-project/simulate',
+      accessToken: '',
+    })
+
+    expect(result).toEqual('https://dashboard.tenderly.co/public/my-org/my-project/simulator/123')
+  })
+
+  it('should build a private dashboard URL when a custom Tenderly URL and access token are provided', () => {
+    const result = getSimulationLink(simulationId, {
+      url: 'https://api.tenderly.co/api/v1/account/my-org/project/my-project/simulate',
+      accessToken: 'token',
+    })
+
+    expect(result).toEqual('https://dashboard.tenderly.co/my-org/my-project/simulator/123')
+  })
+
+  it('should fallback to defaults when the provided URL cannot be parsed', () => {
+    const result = getSimulationLink(simulationId, {
+      url: 'not-a-url',
+      accessToken: 'token',
+    })
+
+    expect(result).toEqual(
+      `https://dashboard.tenderly.co/public/${TENDERLY_ORG_NAME}/${TENDERLY_PROJECT_NAME}/simulator/${simulationId}`,
+    )
+  })
+})
+
+describe('getSimulationStatus', () => {
+  it('should return loading status', () => {
+    const simulation: UseSimulationReturn = {
+      _simulationRequestStatus: FETCH_STATUS.LOADING,
+      simulationData: undefined,
+    } as any
+    const status = getSimulationStatus(simulation)
+    expect(status).toEqual({
+      isLoading: true,
+      isFinished: false,
+      isSuccess: false,
+      isCallTraceError: false,
+      isError: false,
+    })
+  })
+
+  it('should return error status', () => {
+    const simulation: UseSimulationReturn = {
+      _simulationRequestStatus: FETCH_STATUS.ERROR,
+      simulationData: undefined,
+    } as any
+    const status = getSimulationStatus(simulation)
+    expect(status).toEqual({
+      isLoading: false,
+      isFinished: true,
+      isSuccess: false,
+      isCallTraceError: false,
+      isError: true,
+    })
+  })
+
+  it('should return success status without errors', () => {
+    const simulation: UseSimulationReturn = {
+      _simulationRequestStatus: FETCH_STATUS.SUCCESS,
+      simulationData: {
+        simulation: { status: true },
+        transaction: { call_trace: [] },
+      } as any,
+    } as any
+    const status = getSimulationStatus(simulation)
+    expect(status).toEqual({
+      isLoading: false,
+      isFinished: true,
+      isSuccess: true,
+      isCallTraceError: false,
+      isError: false,
+    })
+  })
+
+  it('should return partial revert status when simulation succeeds with call trace errors', () => {
+    const simulation: UseSimulationReturn = {
+      _simulationRequestStatus: FETCH_STATUS.SUCCESS,
+      simulationData: {
+        simulation: { status: true },
+        transaction: {
+          call_trace: [{ error: undefined }, { error: 'Execution reverted' }],
+        },
+      } as any,
+    } as any
+    const status = getSimulationStatus(simulation)
+    expect(status).toEqual({
+      isLoading: false,
+      isFinished: true,
+      isSuccess: true,
+      isCallTraceError: true,
+      isError: false,
+    })
+  })
+
+  it('should return failed status when simulation status is false', () => {
+    const simulation: UseSimulationReturn = {
+      _simulationRequestStatus: FETCH_STATUS.SUCCESS,
+      simulationData: {
+        simulation: { status: false },
+        transaction: { call_trace: [] },
+      } as any,
+    } as any
+    const status = getSimulationStatus(simulation)
+    expect(status).toEqual({
+      isLoading: false,
+      isFinished: true,
+      isSuccess: false,
+      isCallTraceError: false,
+      isError: false,
+    })
+  })
+})

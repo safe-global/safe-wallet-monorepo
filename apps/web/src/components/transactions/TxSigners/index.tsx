@@ -1,259 +1,243 @@
-import { useState, type ReactElement } from 'react'
-import {
-  Box,
-  Link,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  type Palette,
-  SvgIcon,
-  Typography,
-  type ListItemIconProps,
-} from '@mui/material'
-import type {
-  AddressEx,
-  DetailedExecutionInfo,
-  TransactionDetails,
-  TransactionSummary,
-} from '@safe-global/safe-gateway-typescript-sdk'
+import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { type ReactElement } from 'react'
+import { Alert, Box, IconButton, SvgIcon, Tooltip } from '@mui/material'
+import CopyIcon from '@mui/icons-material/ContentCopy'
+import TxConfirmations from '@/components/transactions/TxConfirmations'
+import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
-import { isCancellationTxInfo, isExecutable, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import EthHashInfo from '@/components/common/EthHashInfo'
+import {
+  isCancellationTxInfo,
+  isExecutable,
+  isModuleDetailedExecutionInfo,
+  isMultisigDetailedExecutionInfo,
+} from '@/utils/transaction-guards'
+import ExplorerFallbackIcon from '@/public/images/common/link.svg'
 
-import css from './styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import CreatedIcon from '@/public/images/common/created.svg'
-import DotIcon from '@/public/images/common/dot.svg'
-import CircleIcon from '@/public/images/common/circle.svg'
-import CheckIcon from '@/public/images/common/circle-check.svg'
-import CancelIcon from '@/public/images/common/cancel.svg'
 import useTransactionStatus from '@/hooks/useTransactionStatus'
+import useAddressBook from '@/hooks/useAddressBook'
+import { useCurrentChain } from '@/hooks/useChains'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
+import { CopyDeeplinkLabels } from '@/services/analytics'
+import TxShareLinkWrapper from '@/components/transactions/TxShareLink/TxShareLink'
+import ExplorerButton from '@/components/common/ExplorerButton'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 
-// Icons
-const Created = () => (
-  <SvgIcon
-    component={CreatedIcon}
-    inheritViewBox
-    className={css.icon}
-    sx={{
-      '& path:last-of-type': { fill: ({ palette }) => palette.background.paper },
-    }}
-  />
-)
-const MissingConfirmation = () => <SvgIcon component={CircleIcon} inheritViewBox className={css.icon} />
-const Check = () => (
-  <SvgIcon
-    component={CheckIcon}
-    inheritViewBox
-    className={css.icon}
-    sx={{
-      '& path:last-of-type': { fill: ({ palette }) => palette.background.paper },
-    }}
-  />
-)
-const Cancel = () => <SvgIcon component={CancelIcon} inheritViewBox className={css.icon} />
-const Dot = () => <SvgIcon component={DotIcon} inheritViewBox className={css.dot} />
-
-enum StepState {
-  CONFIRMED = 'CONFIRMED',
-  ACTIVE = 'ACTIVE',
-  DISABLED = 'DISABLED',
-  ERROR = 'ERROR',
-}
-
-const getStepColor = (state: StepState, palette: Palette): string => {
-  const colors: { [_key in StepState]: string } = {
-    [StepState.CONFIRMED]: palette.primary.main,
-    [StepState.ACTIVE]: palette.warning.dark,
-    [StepState.DISABLED]: palette.border.main,
-    [StepState.ERROR]: palette.error.main,
-  }
-  return colors[state]
-}
-
-const StyledListItemIcon = ({
-  $state,
-  ...rest
-}: {
-  $state: StepState
-} & ListItemIconProps) => (
-  <ListItemIcon
-    sx={({ palette }) => ({
-      '.MuiSvgIcon-root': {
-        color: getStepColor($state, palette),
-        alignItems: 'center',
-      },
-    })}
-    {...rest}
-  />
-)
-
-const shouldHideConfirmations = (detailedExecutionInfo?: DetailedExecutionInfo): boolean => {
-  if (!detailedExecutionInfo || !isMultisigDetailedExecutionInfo(detailedExecutionInfo)) {
-    return true
-  }
-
-  const confirmationsNeeded = detailedExecutionInfo.confirmationsRequired - detailedExecutionInfo.confirmations.length
-  const isConfirmed = confirmationsNeeded <= 0
-
-  // Threshold reached or more than 3 confirmations
-  return isConfirmed || detailedExecutionInfo.confirmations.length > 3
-}
+const WAITING_STATUSES = new Set([
+  'Awaiting confirmations',
+  'Awaiting execution',
+  'Needs your confirmation',
+  'Awaiting review',
+])
+const shortenAuditStatus = (status: string): string => (WAITING_STATUSES.has(status) ? 'Waiting' : status)
 
 type TxSignersProps = {
   txDetails: TransactionDetails
-  txSummary: TransactionSummary
+  txSummary: Transaction
   isTxFromProposer: boolean
-  proposer?: AddressEx
+  proposer?: string
+  isExpired?: boolean
 }
 
-export const TxSigners = ({
+const TxAuditLogActions = ({
+  txId,
+  explorerLink,
+}: {
+  txId: string
+  explorerLink?: { title: string; href: string }
+}) => (
+  <>
+    <TxShareLinkWrapper id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
+      <Tooltip title="Copy transaction link" placement="top">
+        <IconButton size="small" sx={{ color: 'inherit' }}>
+          <CopyIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    </TxShareLinkWrapper>
+    {explorerLink ? (
+      <ExplorerButton {...explorerLink} isCompact />
+    ) : (
+      <Tooltip title="Available after execution" placement="top">
+        <span>
+          <IconButton size="small" disabled>
+            <SvgIcon component={ExplorerFallbackIcon} inheritViewBox fontSize="small" />
+          </IconButton>
+        </span>
+      </Tooltip>
+    )}
+  </>
+)
+
+const TxSigners = ({
   txDetails,
   txSummary,
   isTxFromProposer,
   proposer,
+  isExpired,
 }: TxSignersProps): ReactElement | null => {
   const { detailedExecutionInfo, txInfo, txId } = txDetails
-  const [hideConfirmations, setHideConfirmations] = useState<boolean>(shouldHideConfirmations(detailedExecutionInfo))
   const isPending = useIsPending(txId)
   const txStatus = useTransactionStatus(txSummary)
   const wallet = useWallet()
   const { safe } = useSafeInfo()
+  const addressBook = useAddressBook()
+  const chain = useCurrentChain()
 
-  const toggleHide = () => {
-    setHideConfirmations((prev) => !prev)
+  const isMultisig = isMultisigDetailedExecutionInfo(detailedExecutionInfo)
+  const isModule = isModuleDetailedExecutionInfo(detailedExecutionInfo)
+
+  // Lookup the EOA that submitted the transaction on-chain (for module and incoming txs)
+  const readOnlyProvider = useWeb3ReadOnly()
+  const [onChainFrom] = useAsync(async () => {
+    if (isMultisig || !txDetails.txHash || !readOnlyProvider) return undefined
+    const tx = await readOnlyProvider.getTransaction(txDetails.txHash)
+    return tx?.from
+  }, [isMultisig, txDetails.txHash, readOnlyProvider])
+
+  const explorerLink = chain && txDetails.txHash ? getBlockExplorerLink(chain, txDetails.txHash) : undefined
+
+  const resolveName = (address: string | undefined, apiFallback?: string | null): string | undefined =>
+    address ? addressBook[address] || apiFallback || undefined : undefined
+
+  if (!isMultisig && !isModule) {
+    if (!txDetails.executedAt) return null
+
+    return (
+      <Box data-testid="transaction-actions-list">
+        <AuditLogHeader actions={<TxAuditLogActions txId={txId} explorerLink={explorerLink} />} />
+        <AuditRow
+          label="Executed"
+          actionType="executed"
+          address={onChainFrom}
+          name={resolveName(onChainFrom)}
+          timestamp={txDetails.executedAt}
+          isLast
+        />
+      </Box>
+    )
   }
 
-  if (!detailedExecutionInfo || !isMultisigDetailedExecutionInfo(detailedExecutionInfo)) {
-    return null
+  // Module-executed transaction: Created (initiator EOA) + Executed (module)
+  if (isModule && detailedExecutionInfo) {
+    const moduleAddress = detailedExecutionInfo.address.value
+    // "AllowanceModule" → "Allowance Module"
+    const moduleName = detailedExecutionInfo.address.name?.replace(/([a-z])([A-Z])/g, '$1 $2')
+
+    return (
+      <Box data-testid="transaction-actions-list">
+        <AuditLogHeader actions={<TxAuditLogActions txId={txId} explorerLink={explorerLink} />} />
+
+        <AuditRow
+          label="Created"
+          actionType="created"
+          address={onChainFrom}
+          name={resolveName(onChainFrom)}
+          timestamp={txDetails.executedAt}
+        />
+
+        <AuditRow
+          label="Executed"
+          actionType="executed"
+          address={moduleAddress}
+          name={resolveName(moduleAddress, moduleName)}
+          timestamp={txDetails.executedAt}
+          isLast
+        />
+      </Box>
+    )
   }
 
-  const { confirmations, confirmationsRequired, executor } = detailedExecutionInfo
+  // Multisig transaction: full audit log with confirmations
+  // At this point isMultisig is true and both !isMultisig and isModule branches have returned
+  const multisigInfo = detailedExecutionInfo!
+  const { confirmations, confirmationsRequired, executor, submittedAt } = multisigInfo
 
-  // TODO: Refactor to use `isConfirmableBy`
-  const confirmationsCount = confirmations.length
   const canExecute = wallet?.address ? isExecutable(txSummary, wallet.address, safe) : false
   const confirmationsNeeded = confirmationsRequired - confirmations.length
   const isConfirmed = confirmationsNeeded <= 0 || canExecute
 
+  const isCancellation = isCancellationTxInfo(txInfo)
+
+  const creationLabel = isTxFromProposer ? 'Proposed' : 'Created'
+  const signingLabel = (idx: number) => `Signed (${idx + 1}/${confirmationsRequired})`
+
+  const executionStatus = executor
+    ? 'Executed'
+    : isPending
+      ? txStatus
+      : shortenAuditStatus(isTxFromProposer && !isConfirmed ? 'Awaiting review' : txStatus)
+
+  const showExecutionRow = isConfirmed || !!executor || txDetails.txStatus !== 'AWAITING_CONFIRMATIONS'
+
   return (
-    <>
-      <List data-testid="transaction-actions-list" className={css.signers}>
-        <ListItem>
-          {isCancellationTxInfo(txInfo) ? (
-            <>
-              <StyledListItemIcon $state={StepState.ERROR}>
-                <Cancel />
-              </StyledListItemIcon>
-              <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>On-chain rejection created</ListItemText>
-            </>
-          ) : (
-            <>
-              <StyledListItemIcon $state={StepState.CONFIRMED}>
-                <Created />
-              </StyledListItemIcon>
-              <ListItemText data-testid="create-action" primaryTypographyProps={{ fontWeight: 700 }}>
-                Created
-              </ListItemText>
-            </>
-          )}
-        </ListItem>
-
-        {proposer && (
-          <ListItem key={proposer.value} sx={{ py: 0 }}>
-            <StyledListItemIcon $state={StepState.CONFIRMED}>
-              <Dot />
-            </StyledListItemIcon>
-            <ListItemText data-testid="signer">
-              <EthHashInfo address={proposer.value} hasExplorer showCopyButton />
-            </ListItemText>
-          </ListItem>
-        )}
-
-        {confirmations.length > 0 && (
-          <ListItem>
-            <StyledListItemIcon $state={isConfirmed ? StepState.CONFIRMED : StepState.ACTIVE}>
-              {isConfirmed ? <Check /> : <MissingConfirmation />}
-            </StyledListItemIcon>
-            <ListItemText data-testid="confirmation-action" primaryTypographyProps={{ fontWeight: 700 }}>
-              Confirmations{' '}
-              <Box className={css.confirmationsTotal}>({`${confirmationsCount} of ${confirmationsRequired}`})</Box>
-            </ListItemText>
-          </ListItem>
-        )}
-
-        {!hideConfirmations &&
-          confirmations.map(({ signer }) => (
-            <ListItem key={signer.value} sx={{ py: 0 }}>
-              <StyledListItemIcon $state={StepState.CONFIRMED}>
-                <Dot />
-              </StyledListItemIcon>
-              <ListItemText data-testid="signer">
-                <EthHashInfo address={signer.value} name={signer.name} hasExplorer showCopyButton />
-              </ListItemText>
-            </ListItem>
-          ))}
-        {confirmations.length > 0 && (
-          <ListItem>
-            <StyledListItemIcon $state={StepState.CONFIRMED}>
-              <Dot />
-            </StyledListItemIcon>
-            <ListItemText>
-              <Link
-                data-testid="confirmation-visibility-btn"
-                component="button"
-                onClick={toggleHide}
-                sx={{
-                  fontSize: 'medium',
-                }}
-              >
-                {hideConfirmations ? 'Show all' : 'Hide all'}
-              </Link>
-            </ListItemText>
-          </ListItem>
-        )}
-        <ListItem sx={{ alignItems: 'flex-start' }}>
-          <StyledListItemIcon $state={executor ? StepState.CONFIRMED : StepState.DISABLED}>
-            {executor ? <Check /> : <MissingConfirmation />}
-          </StyledListItemIcon>
-          <ListItemText
-            primary={
-              executor ? 'Executed' : isPending ? txStatus : isTxFromProposer ? 'Signer review' : 'Can be executed'
-            }
-            secondary={
-              isTxFromProposer
-                ? 'This transaction was created by a Proposer. Please review and either confirm or reject it. Once confirmed, it can be finalized and executed.'
-                : undefined
-            }
-            data-testid="tx-action-status"
-            primaryTypographyProps={{ fontWeight: 700 }}
-            secondaryTypographyProps={{ mt: 1 }}
+    <Box data-testid="transaction-actions-list">
+      <AuditLogHeader
+        chip={
+          <TxConfirmations
+            submittedConfirmations={confirmations.length}
+            requiredConfirmations={confirmationsRequired}
           />
-        </ListItem>
-      </List>
-      {executor ? (
-        <Box data-testid="executor" className={css.listFooter}>
-          <EthHashInfo
-            address={executor.value}
-            name={executor.name}
-            customAvatar={executor.logoUri}
-            hasExplorer
-            showCopyButton
-          />
-        </Box>
-      ) : (
-        !isConfirmed && (
-          <Box className={css.listFooter}>
-            <Typography sx={({ palette }) => ({ color: palette.border.main })}>
-              Can be executed once the threshold is reached
-            </Typography>
-          </Box>
-        )
+        }
+        actions={<TxAuditLogActions txId={txId} explorerLink={explorerLink} />}
+      />
+
+      <AuditRow
+        label={creationLabel}
+        actionType="created"
+        address={proposer}
+        name={resolveName(proposer, multisigInfo.proposer?.name || multisigInfo.proposedByDelegate?.name)}
+        timestamp={submittedAt}
+        isLast={confirmations.length === 0 && !showExecutionRow}
+      />
+
+      {confirmations.map(({ signer, submittedAt: signedAt }, idx) => (
+        <AuditRow
+          key={signer.value}
+          label={signingLabel(idx)}
+          actionType="signed"
+          address={signer.value}
+          name={resolveName(signer.value, signer.name)}
+          timestamp={signedAt}
+          isLast={idx === confirmations.length - 1 && !showExecutionRow}
+        />
+      ))}
+
+      {showExecutionRow && (
+        <AuditRow
+          label={executionStatus}
+          actionType="executed"
+          address={executor?.value}
+          name={resolveName(executor?.value, executor?.name)}
+          timestamp={txDetails.executedAt}
+          isLast
+        />
       )}
-    </>
+
+      {confirmationsNeeded > 0 && !executor && !isExpired && (
+        <Alert severity="info" sx={{ mt: 2, py: 0.5 }}>
+          {isCancellation
+            ? 'Cancellation can be executed once the required approvals are collected.'
+            : 'Can be executed once the threshold is reached.'}
+        </Alert>
+      )}
+
+      {isTxFromProposer && !executor && !isExpired && (
+        <Alert severity="info" sx={{ mt: 2, py: 0.5 }}>
+          {isCancellation
+            ? 'This on-chain rejection was initiated by a proposer. Please review and approve or dismiss it.'
+            : 'This transaction was created by a proposer. Please review and either confirm or reject it.'}
+        </Alert>
+      )}
+
+      {isExpired && (
+        <Alert severity="warning" sx={{ mt: 2, py: 0.5 }}>
+          This order has expired. Reject this transaction and try again.
+        </Alert>
+      )}
+    </Box>
   )
 }
 

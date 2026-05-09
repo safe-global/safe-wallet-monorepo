@@ -12,6 +12,10 @@ function loadSafesModule(categoryKey) {
     throw new Error(`Category key '${categoryKey}' is not recognized.`)
   }
 
+  if (category === 'static') {
+    return import('../../fixtures/safes/static.js').then((module) => module.default)
+  }
+
   return cy.fixture(`safes/${category}.json`).then((data) => {
     return data
   })

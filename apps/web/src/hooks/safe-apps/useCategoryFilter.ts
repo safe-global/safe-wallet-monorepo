@@ -1,7 +1,7 @@
 import { type Dispatch, type SetStateAction, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { getCategoryOptions } from '@/components/safe-apps/SafeAppsFilters'
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 const useCategoryFilter = ({
   safeAppsList,

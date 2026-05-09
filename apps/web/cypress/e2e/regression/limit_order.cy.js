@@ -21,17 +21,20 @@ describe('Limit order tests', { defaultCommandTimeout: 30000 }, () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify limit order confirmation details', { defaultCommandTimeout: 60000 }, () => {
+  // Skipped: Test needs to be updated from starting the tx from the widget to signing queue tx
+  it.skip('Verify limit order confirmation details', { defaultCommandTimeout: 60000 }, () => {
     const limitPrice = swaps.createRegex(swapOrder.DAIeqCOW, 'COW')
     const widgetFee = swaps.getWidgetFee()
     const orderID = swaps.getOrderID()
 
+    cy.intercept('GET', constants.transactionHistoryEndpoint).as('History')
     cy.visit(constants.swapUrl + staticSafes.SEP_STATIC_SAFE_27)
-    main.waitForHistoryCallToComplete()
+    cy.wait('@History', { timeout: 20000 })
     wallet.connectSigner(signer)
     iframeSelector = `iframe[src*="${constants.swapWidget}"]`
     swaps.acceptLegalDisclaimer()
     main.getIframeBody(iframeSelector).within(() => {
+      cy.wait(20000) // Need more time to load UI
       swaps.switchToLimit()
       swaps.selectInputCurrency(swaps.swapTokens.cow)
       swaps.setInputValue(500)

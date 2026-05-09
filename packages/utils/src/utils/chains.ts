@@ -1,0 +1,163 @@
+import { getEip3770NetworkPrefixFromChainId, getChainIdFromEip3770NetworkPrefix } from '@safe-global/protocol-kit'
+import { getExplorerLink } from '@safe-global/utils/utils/gateway'
+import type { SafeVersion } from '@safe-global/types-kit'
+import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
+import semverSatisfies from 'semver/functions/satisfies'
+import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+
+export enum FEATURES {
+  ERC721 = 'ERC721',
+  SAFE_APPS = 'SAFE_APPS',
+  DOMAIN_LOOKUP = 'DOMAIN_LOOKUP',
+  SPENDING_LIMIT = 'SPENDING_LIMIT',
+  EIP1559 = 'EIP1559',
+  SAFE_TX_GAS_OPTIONAL = 'SAFE_TX_GAS_OPTIONAL',
+  TX_SIMULATION = 'TX_SIMULATION',
+  DEFAULT_TOKENLIST = 'DEFAULT_TOKENLIST',
+  RELAYING = 'RELAYING',
+  EIP1271 = 'EIP1271',
+  RISK_MITIGATION = 'RISK_MITIGATION',
+  PUSH_NOTIFICATIONS = 'PUSH_NOTIFICATIONS',
+  NATIVE_WALLETCONNECT = 'NATIVE_WALLETCONNECT',
+  RECOVERY = 'RECOVERY',
+  COUNTERFACTUAL = 'COUNTERFACTUAL',
+  DELETE_TX = 'DELETE_TX',
+  SPEED_UP_TX = 'SPEED_UP_TX',
+  SAP_BANNER = 'SAP_BANNER',
+  NATIVE_SWAPS = 'NATIVE_SWAPS',
+  NATIVE_SWAPS_USE_COW_STAGING_SERVER = 'NATIVE_SWAPS_USE_COW_STAGING_SERVER',
+  NATIVE_SWAPS_FEE_ENABLED = 'NATIVE_SWAPS_FEE_ENABLED',
+  NATIVE_SWAPS_COW = 'NATIVE_SWAPS_COW',
+  ZODIAC_ROLES = 'ZODIAC_ROLES',
+  STAKING = 'STAKING',
+  STAKING_PROMO = 'STAKING_PROMO',
+  MULTI_CHAIN_SAFE_CREATION = 'MULTI_CHAIN_SAFE_CREATION',
+  MULTI_CHAIN_SAFE_ADD_NETWORK = 'MULTI_CHAIN_SAFE_ADD_NETWORK',
+  PROPOSERS = 'PROPOSERS',
+  TARGETED_SURVEY = 'TARGETED_SURVEY',
+  BRIDGE = 'BRIDGE',
+  RENEW_NOTIFICATIONS_TOKEN = 'RENEW_NOTIFICATIONS_TOKEN',
+  TX_NOTES = 'TX_NOTES',
+  NESTED_SAFES = 'NESTED_SAFES',
+  MASS_PAYOUTS = 'MASS_PAYOUTS',
+  SPACES = 'SPACES',
+  PRIVATE_ADDRESS_BOOK = 'PRIVATE_ADDRESS_BOOK',
+  EARN = 'EARN',
+  EARN_PROMO = 'EARN_PROMO',
+  MIXPANEL = 'MIXPANEL',
+  POSITIONS = 'POSITIONS',
+  PORTFOLIO_ENDPOINT = 'PORTFOLIO_ENDPOINT',
+  NATIVE_COW_SWAP_FEE_V2 = 'NATIVE_COW_SWAP_FEE_V2',
+  CSV_TX_EXPORT = 'CSV_TX_EXPORT',
+  SAFE_LABS_TERMS_DISABLED = 'SAFE_LABS_TERMS_DISABLED',
+  NO_FEE_NOVEMBER = 'NO_FEE_NOVEMBER',
+  HYPERNATIVE = 'HYPERNATIVE',
+  HYPERNATIVE_RELAX_GUARD_CHECK = 'HYPERNATIVE_RELAX_GUARD_CHECK',
+  HYPERNATIVE_QUEUE_SCAN = 'HYPERNATIVE_QUEUE_SCAN',
+  EURCV_BOOST = 'EURCV_BOOST',
+  MY_ACCOUNTS = 'MY_ACCOUNTS',
+  SEND_FLOW = 'SEND_FLOW',
+  BATCHING = 'BATCHING',
+  OIDC_AUTH = 'OIDC_AUTH',
+  HIDE_NATIVE_TOKEN = 'HIDE_NATIVE_TOKEN',
+  TEMPO_GAS_TOKEN = 'TEMPO_GAS_TOKEN',
+  SUPPORT_CHAT = 'SUPPORT_CHAT',
+  GTF = 'GTF',
+  SAFE_STAKING = 'SAFE_STAKING',
+  WELCOME_ACCOUNTS_REDESIGN = 'WELCOME_ACCOUNTS_REDESIGN',
+}
+
+const MIN_SAFE_VERSION = '1.3.0'
+
+export const hasFeature = (chain: Pick<Chain, 'features'>, feature: FEATURES): boolean => {
+  return (chain.features as string[]).includes(feature)
+}
+
+export type NativeTokenDisplay = {
+  showNativeInBalances: boolean
+  showGasFeeEstimation: boolean
+  showWalletBalance: boolean
+  showInsufficientFundsWarning: boolean
+  showFeeInConfirmationText: boolean
+  showUndeployedNativeValue: boolean
+  showStablecoinFeeInfo: boolean
+}
+
+export const NATIVE_TOKEN_DISPLAY_DEFAULT: NativeTokenDisplay = {
+  showNativeInBalances: true,
+  showGasFeeEstimation: true,
+  showWalletBalance: true,
+  showInsufficientFundsWarning: true,
+  showFeeInConfirmationText: true,
+  showUndeployedNativeValue: true,
+  showStablecoinFeeInfo: false,
+}
+
+const HIDE_NATIVE: NativeTokenDisplay = {
+  showNativeInBalances: false,
+  showGasFeeEstimation: false,
+  showWalletBalance: false,
+  showInsufficientFundsWarning: false,
+  showFeeInConfirmationText: false,
+  showUndeployedNativeValue: false,
+  showStablecoinFeeInfo: true,
+}
+
+/**
+ * Derives granular display capabilities from the HIDE_NATIVE_TOKEN chain feature.
+ * Use with components that already have a chain object.
+ * For React hooks, use useNativeTokenDisplay from apps/web/src/hooks/.
+ */
+export const getNativeTokenDisplay = (chain: Pick<Chain, 'features'>): NativeTokenDisplay => {
+  return hasFeature(chain, FEATURES.HIDE_NATIVE_TOKEN) ? HIDE_NATIVE : NATIVE_TOKEN_DISPLAY_DEFAULT
+}
+
+export const getBlockExplorerLink = (
+  chain: Pick<Chain, 'blockExplorerUriTemplate'>,
+  address: string,
+): { href: string; title: string } | undefined => {
+  if (chain.blockExplorerUriTemplate) {
+    return getExplorerLink(address, chain.blockExplorerUriTemplate)
+  }
+}
+export const getLatestSafeVersion = (
+  chain: Pick<Chain, 'recommendedMasterCopyVersion' | 'chainId'> | undefined,
+): SafeVersion => {
+  const recommendedVersion = chain?.recommendedMasterCopyVersion || LATEST_SAFE_VERSION
+
+  // For chains registered in safe-deployments, cap at the latest deployed version
+  // to avoid using a version that isn't actually deployed on-chain yet.
+  const deployedVersion = getSafeSingletonDeployment({ network: chain?.chainId, released: true })?.version
+
+  if (deployedVersion) {
+    return (
+      semverSatisfies(deployedVersion, `<=${recommendedVersion}`) ? deployedVersion : recommendedVersion
+    ) as SafeVersion
+  }
+
+  // For chains not in safe-deployments, trust the CGW's recommended version directly
+  return recommendedVersion as SafeVersion
+}
+
+export const isNonCriticalUpdate = (version?: string | null) => {
+  return version && semverSatisfies(version, `>= ${MIN_SAFE_VERSION}`)
+}
+
+/** Returns the EIP-3770 short name for a given chainId, or undefined if not found. */
+export const getEip3770ShortName = (chainId: string | bigint): string | undefined => {
+  try {
+    return getEip3770NetworkPrefixFromChainId(BigInt(chainId))
+  } catch {
+    return undefined
+  }
+}
+
+/** Returns the chainId (as a string) for a given EIP-3770 short name, or undefined if not found. */
+export const getEip3770ChainId = (shortName: string): string | undefined => {
+  try {
+    return getChainIdFromEip3770NetworkPrefix(shortName).toString()
+  } catch {
+    return undefined
+  }
+}

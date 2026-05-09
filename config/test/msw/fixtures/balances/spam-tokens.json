@@ -1,0 +1,607 @@
+{
+  "fiatTotal": "83609079.95353994",
+  "items": [
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+        "decimals": 18,
+        "symbol": "STETH",
+        "name": "Lido Staked Ether",
+        "logoUri": "https://assets.coingecko.com/coins/images/13442/thumb/steth_logo.png?1696513206"
+      },
+      "balance": "14129295652539030594001",
+      "fiatBalance": "39709678.966678314",
+      "fiatBalance24hChange": "-6.354257911926932",
+      "fiatConversion": "2810.45"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+        "decimals": 18,
+        "symbol": "WSTETH",
+        "name": "Wrapped stETH",
+        "logoUri": "https://assets.coingecko.com/coins/images/18834/thumb/wstETH.png?1696518295"
+      },
+      "balance": "6222000000000000000000",
+      "fiatBalance": "21477970.68",
+      "fiatBalance24hChange": "-6.574887415307728",
+      "fiatConversion": "3451.94"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x6810e776880C02933D47DB1b9fc05908e5386b96",
+        "decimals": 18,
+        "symbol": "GNO",
+        "name": "Gnosis",
+        "logoUri": "https://assets.coingecko.com/coins/images/662/thumb/logo_square_simple_300px.png?1696501854"
+      },
+      "balance": "154381057108782645449576",
+      "fiatBalance": "20745726.454278212",
+      "fiatBalance24hChange": "-5.018244889089103",
+      "fiatConversion": "134.38"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB",
+        "decimals": 18,
+        "symbol": "COW",
+        "name": "CoW Protocol Token",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xDEf1CA1fb7FBcDC777520aa7f396b4E015F497aB.png"
+      },
+      "balance": "5094723562452327307059033",
+      "fiatBalance": "907900.1177232545",
+      "fiatBalance24hChange": "-9.062316138218327",
+      "fiatConversion": "0.178204"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32",
+        "decimals": 18,
+        "symbol": "LDO",
+        "name": "Lido DAO",
+        "logoUri": "https://assets.coingecko.com/coins/images/13573/thumb/Lido_DAO.png?1696513326"
+      },
+      "balance": "728085559418036149806534",
+      "fiatBalance": "348063.48593647045",
+      "fiatBalance24hChange": "-9.298891211083069",
+      "fiatConversion": "0.478053"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x5aFE3855358E112B5647B952709E6165e1c1eEEe",
+        "decimals": 18,
+        "symbol": "SAFE",
+        "name": "Safe Token",
+        "logoUri": "https://safe-transaction-assets.safe.global/tokens/logos/0x5aFE3855358E112B5647B952709E6165e1c1eEEe.png"
+      },
+      "balance": "2041370498413453871452698",
+      "fiatBalance": "281976.5483163488",
+      "fiatBalance24hChange": "-7.484727585248757",
+      "fiatConversion": "0.138131"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x93ED3FBe21207Ec2E8f2d3c3de6e058Cb73Bc04d",
+        "decimals": 18,
+        "symbol": "PNK",
+        "name": "Kleros",
+        "logoUri": "https://assets.coingecko.com/coins/images/3833/thumb/kleros.png?1696504500"
+      },
+      "balance": "7697953909159227079999015",
+      "fiatBalance": "111135.82246376632",
+      "fiatBalance24hChange": "-4.452786003070742",
+      "fiatConversion": "0.01443706"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD",
+        "decimals": 18,
+        "symbol": "SUSDS",
+        "name": "sUSDS",
+        "logoUri": "https://assets.coingecko.com/coins/images/52721/thumb/sUSDS_Coin.png?1734086971"
+      },
+      "balance": "18245260355038121984362",
+      "fiatBalance": "19759.616964506284",
+      "fiatBalance24hChange": "0.12433869659888351",
+      "fiatConversion": "1.083"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x1A5F9352Af8aF974bFC03399e3767DF6370d82e4",
+        "decimals": 18,
+        "symbol": "OWL",
+        "name": "OWL Token",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x1A5F9352Af8aF974bFC03399e3767DF6370d82e4.png"
+      },
+      "balance": "722650120650684931506846",
+      "fiatBalance": "6289.4335685579",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0.00870329"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x255Aa6DF07540Cb5d3d297f0D0D4D84cb52bc8e6",
+        "decimals": 18,
+        "symbol": "RDN",
+        "name": "Raiden Network",
+        "logoUri": "https://assets.coingecko.com/coins/images/1132/thumb/raiden-logo.jpg?1696502225"
+      },
+      "balance": "741764259043046184070265",
+      "fiatBalance": "577.8714460074851",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0.00077905"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39",
+        "decimals": 8,
+        "symbol": "HEX",
+        "name": "HEX",
+        "logoUri": "https://assets.coingecko.com/coins/images/10103/thumb/HEX-logo.png?1696510130"
+      },
+      "balance": "100000000000",
+      "fiatBalance": "0.71964",
+      "fiatBalance24hChange": "-8.181086414347762",
+      "fiatConversion": "0.00071964"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x6226e00bCAc68b0Fe55583B90A1d727C14fAB77f",
+        "decimals": 18,
+        "symbol": "MTV",
+        "name": "MultiVAC",
+        "logoUri": "https://assets.coingecko.com/coins/images/4937/thumb/MultiVAC.png?1696505477"
+      },
+      "balance": "1000000000000000000000",
+      "fiatBalance": "0.22489",
+      "fiatBalance24hChange": "-0.904534949056304",
+      "fiatConversion": "0.00022489"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x7D25d9f10Cd224EcCe0Bc824A2eC800Db81C01d7",
+        "decimals": 18,
+        "symbol": "OPT",
+        "name": "ethopt.io",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x7D25d9f10Cd224EcCe0Bc824A2eC800Db81C01d7.png"
+      },
+      "balance": "140000000000000000",
+      "fiatBalance": "0.0058859024",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0.04204216"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x9783B81438C24848f85848f8df31845097341771",
+        "decimals": 18,
+        "symbol": "COLLAR",
+        "name": "Dog Collar",
+        "logoUri": "https://assets.coingecko.com/coins/images/18324/thumb/dcLogo.png?1696517815"
+      },
+      "balance": "10000000000000000000000000",
+      "fiatBalance": "0.0022474200000000004",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0.000000000224742"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xE52d53c8C9aa7255F8c2FA9f7093FEa7192D2933",
+        "decimals": 18,
+        "symbol": "YIELDX",
+        "name": "yield-farming.io",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xE52d53c8C9aa7255F8c2FA9f7093FEa7192D2933.png"
+      },
+      "balance": "199270500000000000000",
+      "fiatBalance": "0.00178147827",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0.00000894"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xbaA70614C7AAfB568a93E62a98D55696bcc85DFE",
+        "decimals": 18,
+        "symbol": "UCAP",
+        "name": "UniCap.finance",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xbaA70614C7AAfB568a93E62a98D55696bcc85DFE.png"
+      },
+      "balance": "30000000000000000",
+      "fiatBalance": "0.0008143194",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0.02714398"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x3A4A0D5b8dfAcd651EE28ed4fFEBf91500345489",
+        "decimals": 18,
+        "symbol": "BRX",
+        "name": "BerryXToken",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x3A4A0D5b8dfAcd651EE28ed4fFEBf91500345489.png"
+      },
+      "balance": "8000000000000000000",
+      "fiatBalance": "0.00077224",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0.00009653"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x543Ff227F64Aa17eA132Bf9886cAb5DB55DCAddf",
+        "decimals": 18,
+        "symbol": "GEN",
+        "name": "DAOstack",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x543Ff227F64Aa17eA132Bf9886cAb5DB55DCAddf.png"
+      },
+      "balance": "356970434886646493729979",
+      "fiatBalance": "0.00010869749742298384",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0.0000000003045"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x0d4b4DA5fb1a7d55E85f8e22f728701cEB6E44C9",
+        "decimals": 18,
+        "symbol": "DGMT",
+        "name": "DigiMax",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0d4b4DA5fb1a7d55E85f8e22f728701cEB6E44C9.png"
+      },
+      "balance": "22000000000000000000",
+      "fiatBalance": "0.00002244",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0.00000102"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xf0814d0E47F2390a8082C4a1BD819FDDe50f9bFc",
+        "decimals": 8,
+        "symbol": "XPT",
+        "name": "XPToken.io",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xf0814d0E47F2390a8082C4a1BD819FDDe50f9bFc.png"
+      },
+      "balance": "100000",
+      "fiatBalance": "0.00000201423",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0.00201423"
+    },
+    {
+      "tokenInfo": {
+        "type": "NATIVE_TOKEN",
+        "address": "0x0000000000000000000000000000000000000000",
+        "decimals": 18,
+        "symbol": "ETH",
+        "name": "Ether",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+      },
+      "balance": "0",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": "-6.469606473380263",
+      "fiatConversion": "2815.9"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xe9048e7190e03dd900FA8d70ee7362ECEB41fe1c",
+        "decimals": 18,
+        "symbol": "$",
+        "name": "+ $50 000 FOR FREE (ETH-AirdropsEvent.com)",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xe9048e7190e03dd900FA8d70ee7362ECEB41fe1c.png"
+      },
+      "balance": "50000000000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x53fFFB19BAcD44b82e204d036D579E86097E5D09",
+        "decimals": 18,
+        "symbol": "BGBG",
+        "name": "BigMouthFrog",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x53fFFB19BAcD44b82e204d036D579E86097E5D09.png"
+      },
+      "balance": "491051000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x154C5875b1B0DB1794f88D003730DaD160E6b38e",
+        "decimals": 0,
+        "symbol": "!$ Claim $200K at ETH200k.com",
+        "name": "!$ Claim $200K at ETH200k.com",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x154C5875b1B0DB1794f88D003730DaD160E6b38e.png"
+      },
+      "balance": "200",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x08918171758171A13050cdE6Cc6eB90172Af5737",
+        "decimals": 18,
+        "symbol": "maker.gift",
+        "name": "Claim Rewards On maker.gift",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x08918171758171A13050cdE6Cc6eB90172Af5737.png"
+      },
+      "balance": "1500000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xD057B63f5E69CF1B929b356b579Cba08D7688048",
+        "decimals": 18,
+        "symbol": "vCOW",
+        "name": "CoW Protocol Virtual Token",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xD057B63f5E69CF1B929b356b579Cba08D7688048.png"
+      },
+      "balance": "9934880071000326987866136",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xeF1344bDf80BEf3Ff4428d8bECEC3eea4A2cF574",
+        "decimals": 18,
+        "symbol": "ES",
+        "name": "Era Swap",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xeF1344bDf80BEf3Ff4428d8bECEC3eea4A2cF574.png"
+      },
+      "balance": "25000000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xC6d3D201530a6D4aD9dFbAAd39C5f68A9A470a69",
+        "decimals": 0,
+        "symbol": "$ ETH35.com",
+        "name": "$ ETH35.com - Visit to claim bonus rewards",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xC6d3D201530a6D4aD9dFbAAd39C5f68A9A470a69.png"
+      },
+      "balance": "9283",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x4C6fDc0476B2FE0daFf0B5824c3A918673d6014E",
+        "decimals": 0,
+        "symbol": "$ EthAave.com",
+        "name": "$ EthAave.com - Visit to claim staking rewards",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x4C6fDc0476B2FE0daFf0B5824c3A918673d6014E.png"
+      },
+      "balance": "100",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xF2dE943065C0b42d920dB03eC8A56f674126253f",
+        "decimals": 0,
+        "symbol": "$ LidoV2LP.com",
+        "name": "$ LidoV2LP.com - Visit to claim bonus rewards",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xF2dE943065C0b42d920dB03eC8A56f674126253f.png"
+      },
+      "balance": "329562",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xA90e85666A40022932402EF957DbCc4512CD0739",
+        "decimals": 0,
+        "symbol": "$ LidoV2LR.com",
+        "name": "$ LidoV2LR.com  - Visit to claim bonus rewards",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA90e85666A40022932402EF957DbCc4512CD0739.png"
+      },
+      "balance": "9283",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x2b0c6B5622cDE003403a66016d53Fb9857752925",
+        "decimals": 18,
+        "symbol": "OHBABY",
+        "name": "OhBabyGames",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x2b0c6B5622cDE003403a66016d53Fb9857752925.png"
+      },
+      "balance": "297005030233563204177751673",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x9aE357521153FB07bE6F5792CE7a49752638fbb7",
+        "decimals": 18,
+        "symbol": "SAFE",
+        "name": "Safe Token",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x9aE357521153FB07bE6F5792CE7a49752638fbb7.png"
+      },
+      "balance": "250000000000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x2b23BF339F5cc3393a558373E0A73a576F0838D3",
+        "decimals": 2,
+        "symbol": "# SPK Genesis Rewards",
+        "name": "SPK Genesis Rewards (https://spkprotocol.com)",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x2b23BF339F5cc3393a558373E0A73a576F0838D3.png"
+      },
+      "balance": "82500000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x9e1D136564F3f5898ca80866EC639336840DF984",
+        "decimals": 18,
+        "symbol": "ERC20",
+        "name": "Token",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x9e1D136564F3f5898ca80866EC639336840DF984.png"
+      },
+      "balance": "2738359383999782968105292395626931112100006300200837056239134730020057566225",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x635701CC5fE41FE8AbD02aa74Beb02e3540E9BB2",
+        "decimals": 0,
+        "symbol": "# aBonusLP.com",
+        "name": "Visit aBonusLP.com to claim $9283 in rewards",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x635701CC5fE41FE8AbD02aa74Beb02e3540E9BB2.png"
+      },
+      "balance": "9283",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xbb20789e69359aBA3E42505c0A3987ebB4aeC2E4",
+        "decimals": 6,
+        "symbol": "# aeth.network",
+        "name": "Visit https://aeth.network to claim rewards",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xbb20789e69359aBA3E42505c0A3987ebB4aeC2E4.png"
+      },
+      "balance": "1400000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0xf4961E2cABe7315cCc23C0EFcc557fdAeef825bf",
+        "decimals": 6,
+        "symbol": "# makertoken.net",
+        "name": "Visit makertoken.net to claim rewards",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xf4961E2cABe7315cCc23C0EFcc557fdAeef825bf.png"
+      },
+      "balance": "1500000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x76988Eb5d8a81F44919d87328c36179FdCca044a",
+        "decimals": 0,
+        "symbol": "$ UrgentDT.com",
+        "name": "$ Visit UrgentDT.com ASAP to secure your wallet. A hacker ha",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x76988Eb5d8a81F44919d87328c36179FdCca044a.png"
+      },
+      "balance": "100",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x186139529A4dDaA52D28d18e32f26EC257b3f8B9",
+        "decimals": 6,
+        "symbol": "# LiquidETH.us",
+        "name": "Visit website LiquidETH.us to claim rewards",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x186139529A4dDaA52D28d18e32f26EC257b3f8B9.png"
+      },
+      "balance": "1700000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x78A25F62c52973aBdb2f467116DF97A1F57fe211",
+        "decimals": 18,
+        "symbol": "! stethLido.win",
+        "name": "Visit website stethLido.win to claim rewards",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x78A25F62c52973aBdb2f467116DF97A1F57fe211.png"
+      },
+      "balance": "5700000000000000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x5807daC5CC59F02dFA88154dE7F9f2174C263814",
+        "decimals": 0,
+        "symbol": "$ wBTCLP.com",
+        "name": "$ wBTCLP.com - Visit to claim bonus rewards",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x5807daC5CC59F02dFA88154dE7F9f2174C263814.png"
+      },
+      "balance": "98127",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    },
+    {
+      "tokenInfo": {
+        "type": "ERC20",
+        "address": "0x57b9d10157f66D8C00a815B5E289a152DeDBE7ed",
+        "decimals": 6,
+        "symbol": "HQG",
+        "name": "环球股",
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x57b9d10157f66D8C00a815B5E289a152DeDBE7ed.png"
+      },
+      "balance": "1000000",
+      "fiatBalance": "0",
+      "fiatBalance24hChange": null,
+      "fiatConversion": "0"
+    }
+  ]
+}

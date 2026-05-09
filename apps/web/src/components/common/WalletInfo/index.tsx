@@ -6,11 +6,15 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import ChainSwitcher from '@/components/common/ChainSwitcher'
 import useOnboard, { type ConnectedWallet, switchWallet } from '@/hooks/wallets/useOnboard'
 import useAddressBook from '@/hooks/useAddressBook'
-import { useAppSelector } from '@/store'
-import { selectChainById } from '@/store/chainsSlice'
+import { useAppDispatch } from '@/store'
+import { useChain } from '@/hooks/useChains'
 import madProps from '@/utils/mad-props'
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew'
 import useChainId from '@/hooks/useChainId'
+import { useAuthLogoutV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import { setUnauthenticated } from '@/store/authSlice'
+import { logError, Errors } from '@/services/exceptions'
+import { getNativeTokenDisplay, NATIVE_TOKEN_DISPLAY_DEFAULT } from '@safe-global/utils/utils/chains'
 
 type WalletInfoProps = {
   wallet: ConnectedWallet
@@ -19,23 +23,45 @@ type WalletInfoProps = {
   onboard: ReturnType<typeof useOnboard>
   addressBook: ReturnType<typeof useAddressBook>
   handleClose: () => void
+  onSwitch?: () => void
+  onDisconnect?: () => void
 }
 
-export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBook, handleClose }: WalletInfoProps) => {
-  const chainInfo = useAppSelector((state) => selectChainById(state, wallet.chainId))
+export const WalletInfo = ({
+  wallet,
+  balance,
+  currentChainId,
+  onboard,
+  addressBook,
+  handleClose,
+  onSwitch,
+  onDisconnect,
+}: WalletInfoProps) => {
+  const [authLogout] = useAuthLogoutV1Mutation()
+  const dispatch = useAppDispatch()
+  const chainInfo = useChain(wallet.chainId)
   const prefix = chainInfo?.shortName
+  const { showWalletBalance } = chainInfo ? getNativeTokenDisplay(chainInfo) : NATIVE_TOKEN_DISPLAY_DEFAULT
 
   const handleSwitchWallet = () => {
     if (onboard) {
+      onSwitch?.()
       handleClose()
       switchWallet(onboard)
     }
   }
 
-  const handleDisconnect = () => {
+  const handleDisconnect = async () => {
+    onDisconnect?.()
     onboard?.disconnectWallet({
       label: wallet.label,
     })
+    try {
+      await authLogout()
+      dispatch(setUnauthenticated())
+    } catch (error) {
+      logError(Errors._108, error)
+    }
 
     handleClose()
   }
@@ -66,22 +92,24 @@ export const WalletInfo = ({ wallet, balance, currentChainId, onboard, addressBo
           <Typography variant="body2">{wallet.label}</Typography>
         </Box>
 
-        <Box className={css.row}>
-          <Typography variant="body2" color="primary.light">
-            Balance
-          </Typography>
-          <Typography variant="body2" textAlign="right">
-            <WalletBalance balance={balance} />
+        {showWalletBalance && (
+          <Box className={css.row}>
+            <Typography variant="body2" color="primary.light">
+              Balance
+            </Typography>
+            <Typography variant="body2" textAlign="right">
+              <WalletBalance balance={balance} />
 
-            {currentChainId !== chainInfo?.chainId && (
-              <>
-                <Typography variant="body2" color="primary.light">
-                  ({chainInfo?.chainName || 'Unknown chain'})
-                </Typography>
-              </>
-            )}
-          </Typography>
-        </Box>
+              {currentChainId !== chainInfo?.chainId && (
+                <>
+                  <Typography variant="body2" color="primary.light">
+                    ({chainInfo?.chainName || 'Unknown chain'})
+                  </Typography>
+                </>
+              )}
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       <Box display="flex" flexDirection="column" gap={2} width={1}>

@@ -1,4 +1,4 @@
-import { undeployedSafesSlice } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { undeployedSafesSlice } from '@/features/counterfactual/store'
 import { DialogContent, Alert, AlertTitle, DialogActions, Button, Box, SvgIcon } from '@mui/material'
 import type { ReactElement, Dispatch, SetStateAction } from 'react'
 

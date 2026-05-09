@@ -1,5 +1,5 @@
 // https://github.com/gnosis/safe-contracts/blob/main/docs/error_codes.md
-export enum ContractErrorCodes {
+enum ContractErrorCodes {
   // General init related
   GS000 = 'Could not finish initialization',
   GS001 = 'Threshold needs to be defined',

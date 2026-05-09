@@ -1,0 +1,63 @@
+appId: ${APP_ID}
+tags:
+  - app-update
+  - smoke
+---
+# Soft Update Prompt E2E Test
+# Verifies that when a soft update is recommended, a dismissable
+# bottom sheet appears with the correct UI elements.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+# Set up an onboarded account so the app loads normally first
+- tapOn:
+    id: 'e2eOnboardedAccount'
+
+# Wait for the home screen to confirm app loaded normally
+- assertVisible:
+    id: 'home-tab'
+
+# Trigger soft update scenario via hidden test control
+- tapOn:
+    id: 'e2eSoftUpdate'
+
+# ============================================
+# Verify Soft Update Prompt
+# ============================================
+
+# The bottom sheet should now be visible
+- assertVisible:
+    id: 'soft-update-prompt'
+
+# Verify the heading text
+- assertVisible: 'Update available'
+
+# Verify the description text
+- assertVisible: '.*Update for the latest features and improvements.*'
+
+# Verify the update button is present
+- assertVisible:
+    id: 'soft-update-button'
+
+# The home tab is not visible while the bottom sheet is displayed
+- assertNotVisible:
+    id: 'home-tab'
+
+# ============================================
+# Dismiss the Soft Update Prompt
+# ============================================
+
+# Swipe down to dismiss the bottom sheet
+- swipe:
+    id: 'soft-update-prompt'
+    direction: DOWN
+    duration: 500
+
+# Verify the bottom sheet is gone
+- assertNotVisible:
+    id: 'soft-update-prompt'
+
+# Verify app is still usable
+- assertVisible:
+    id: 'home-tab'

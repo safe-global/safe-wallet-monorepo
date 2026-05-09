@@ -1,24 +1,22 @@
-import { Stack } from 'expo-router'
+import { Stack, router } from 'expo-router'
+import { getDefaultScreenOptions } from '@/src/navigation/hooks/utils'
+import { useScreenProtection } from '@/src/hooks/useScreenProtection'
 import { HeaderBackButton } from '@react-navigation/elements'
-import { useTheme } from 'tamagui'
+import { View } from 'tamagui'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 export default function ImportSignersLayout() {
-  const theme = useTheme()
+  useScreenProtection()
+
+  const handleLedgerSuccessClose = () => {
+    router.dismissAll()
+    router.navigate('/signers')
+  }
 
   return (
     <Stack
       screenOptions={({ navigation }) => ({
-        headerBackButtonDisplayMode: 'minimal',
-        headerShadowVisible: false,
-        headerLeft: (props) => (
-          <HeaderBackButton
-            {...props}
-            tintColor={theme.primary.get()}
-            testID={'go-back'}
-            onPress={navigation.goBack}
-            displayMode={'minimal'}
-          />
-        ),
+        ...getDefaultScreenOptions(navigation.goBack),
       })}
     >
       <Stack.Screen name="index" options={{ headerShown: true, title: '' }} />
@@ -42,6 +40,70 @@ export default function ImportSignersLayout() {
         options={{
           presentation: 'modal',
           headerShown: false,
+        }}
+      />
+      <Stack.Screen name="name-signer" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen
+        name="connect-signer-success"
+        options={{
+          presentation: 'containedModal',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="connect-signer-error"
+        options={{
+          presentation: 'containedModal',
+          headerShown: true,
+          title: '',
+          headerShadowVisible: false,
+          headerTransparent: true,
+          headerLeft: () => null,
+        }}
+      />
+      <Stack.Screen
+        name="reconnect-error"
+        options={{
+          presentation: 'containedModal',
+          headerShown: true,
+          title: '',
+          headerShadowVisible: false,
+          headerTransparent: true,
+          headerLeft: () => null,
+        }}
+      />
+      <Stack.Screen name="hardware-devices" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="ledger-connect" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="ledger-pairing" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="ledger-addresses" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen
+        name="ledger-success"
+        options={{
+          // presentation: 'modal',
+          headerShown: true,
+          title: '',
+          headerShadowVisible: false,
+          headerTransparent: true,
+          headerLeft: () => (
+            <HeaderBackButton
+              style={{ marginLeft: -8 }}
+              testID="ledger-success-close"
+              onPress={handleLedgerSuccessClose}
+              backImage={() => (
+                <View
+                  backgroundColor="$backgroundSkeleton"
+                  alignItems="center"
+                  justifyContent="center"
+                  borderRadius={16}
+                  height={32}
+                  width={32}
+                >
+                  <SafeFontIcon name="close" size={16} color="$color" />
+                </View>
+              )}
+              displayMode="minimal"
+            />
+          ),
         }}
       />
     </Stack>

@@ -32,8 +32,37 @@ build:
     - eas/run_fastlane
 
     - eas/find_and_upload_build_artifacts
-    - eas/maestro_test:
+
+    - eas/install_maestro
+    - eas/start_ios_simulator
+    - run:
+        command: |
+          # shopt -s nullglob is necessary not to try to install
+          # SEARCH_PATH literally if there are no matching files.
+          shopt -s nullglob
+
+          SEARCH_PATH="ios/build/Build/Products/*simulator/*.app"
+          FILES_FOUND=false
+
+          for APP_PATH in $SEARCH_PATH; do
+            FILES_FOUND=true
+            echo "Installing \\"$APP_PATH\\""
+            xcrun simctl install booted "$APP_PATH"
+            # Trigger biometric enrollment change to allow biometric authentication
+            xcrun simctl spawn booted notifyutil -s com.apple.BiometricKit.enrollmentChanged '1' && xcrun simctl spawn booted notifyutil -p com.apple.BiometricKit.enrollmentChanged
+          done
+
+          if ! $FILES_FOUND; then
+            echo "No files found matching \\"$SEARCH_PATH\\". Are you sure you've built a Simulator app?"
+            exit 1
+          fi
+    - run:
+        command: |
+          maestro test --env="IS_DEV_MODE=true" --env="APP_ID=global.safe.mobileapp.ios.dev" e2e
+    - eas/upload_artifact:
+        name: Upload test artifact
+        if: ${ always() }
         inputs:
-          flow_path: |
-            e2e/onboarding.yml
-            e2e/onboarded-user.yml
+          type: build-artifact
+          path: ${ eas.env.HOME }/.maestro/tests
+

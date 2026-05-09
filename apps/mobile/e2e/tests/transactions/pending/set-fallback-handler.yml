@@ -1,0 +1,19 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - pending
+---
+- runFlow:
+    file: ../../../utils/setup/app-start.yml
+
+# Direct navigation to Pending Tx Safe 3
+- tapOn:
+    id: 'e2ePendingTxsSafe3'
+
+# Verify we're on the pending transactions screen
+- assertVisible:
+    id: 'pending-tx-list'
+
+# Test setFallbackHandler transaction
+- runFlow:
+    file: ../../../utils/components/pending-tx/setFallbackHandler-tx-card.yml

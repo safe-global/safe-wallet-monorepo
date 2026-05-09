@@ -14,12 +14,14 @@ const bSafe = 'Safe B'
 const safe14 = 'Safe 14'
 const safe15 = 'Safe 15'
 
-describe('Sidebar sorting tests', () => {
+// These tests are obsolete as there is no sorting in the new UI
+describe.skip('Sidebar sorting tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify the same safe of the different networks is ordered by most recent', () => {
+  // Unskip when chains are available
+  it.skip('Verify the same safe of the different networks is ordered by most recent', () => {
     let safe_eth = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'eth')
     let safe_gno = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'gno')
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
@@ -37,7 +39,8 @@ describe('Sidebar sorting tests', () => {
     sideBar.verifyAddedSafesExistByIndex(2, constants.networks.ethereum)
   })
 
-  it('Verify the same safe of the different networks is ordered by name', () => {
+  // Unskip when chains are available
+  it.skip('Verify the same safe of the different networks is ordered by name', () => {
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.undeployedSet)
     main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safes2)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
@@ -46,7 +49,7 @@ describe('Sidebar sorting tests', () => {
 
     sideBar.clickOnOpenSidebarBtn()
     sideBar.searchSafe('96')
-    sideBar.verifySafeCount(3)
+    sideBar.verifySafeCount(1)
     sideBar.expandGroupSafes(0)
     sideBar.openSortOptionsMenu()
     sideBar.selectSortOption(sideBar.sortOptions.name)
@@ -55,31 +58,27 @@ describe('Sidebar sorting tests', () => {
   })
 
   it('Verify that a pinned safe can be sorted by name and last visited', () => {
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.pagination)
-    main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__visitedSafes, ls.visitedSafes.set1)
     cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_9)
-    cy.intercept('GET', constants.safeListEndpoint, {
-      11155111: [sideBar.sideBarSafes.safe1, sideBar.sideBarSafes.safe2],
-    })
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addressBook, ls.addressBookData.pagination)
+    main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__visitedSafes, ls.visitedSafes.set1)
+    main.addToAppLocalStorage(
+      constants.localStorageKeys.SAFE_v2__addedSafes,
+      ls.addedSafes.sidebarTrustedSafesForSorting,
+    )
+    cy.reload()
     wallet.connectSigner(signer)
     sideBar.clickOnOpenSidebarBtn()
-    sideBar.searchSafe('15')
-    cy.wait(1000)
-    sideBar.clickOnBookmarkBtn(sideBar.sideBarSafes.safe2short)
-    sideBar.clearSearchInput()
-    sideBar.searchSafe('14')
-    cy.wait(1000)
-    sideBar.clickOnBookmarkBtn(sideBar.sideBarSafes.safe1short)
-    sideBar.clearSearchInput()
 
     sideBar.verifyPinnedSafe(sideBar.sideBarSafes.safe2short)
     sideBar.verifyPinnedSafe(sideBar.sideBarSafes.safe1short)
 
     sideBar.openSortOptionsMenu()
     sideBar.selectSortOption(sideBar.sortOptions.name)
-    sideBar.verifyAddedSafesExistByIndex(1, safe14)
-    sideBar.verifyAddedSafesExistByIndex(2, safe15)
+    // 3 trusted safes: Safe 14 (0), Safe 15 (1), Safe 4/visited (2)
+    sideBar.verifyAddedSafesExistByIndex(0, safe14)
+    sideBar.verifyAddedSafesExistByIndex(1, safe15)
     sideBar.selectSortOption(sideBar.sortOptions.lastVisited)
+    // Safe 4/visited is most recent (0), then Safe 15 (1), Safe 14 (2)
     sideBar.verifyAddedSafesExistByIndex(1, safe15)
     sideBar.verifyAddedSafesExistByIndex(2, safe14)
   })

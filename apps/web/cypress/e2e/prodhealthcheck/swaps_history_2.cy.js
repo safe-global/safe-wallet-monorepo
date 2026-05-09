@@ -5,7 +5,8 @@ import * as swaps_data from '../../fixtures/swaps_data.json'
 import * as data from '../../fixtures/txhistory_data_data.json'
 import * as swaps from '../pages/swaps.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import { acceptCookies2 } from '../pages/main.page.js'
+import { acceptCookies2, closeSecurityNotice } from '../pages/main.page.js'
+import * as createTx from '../pages/create_tx.pages.js'
 
 let staticSafes = []
 
@@ -21,6 +22,8 @@ describe('[PROD] Swaps history tests 2', () => {
     cy.visit(
       constants.prodbaseUrl + constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_1 + swaps.swapTxs.buy2actions,
     )
+    cy.contains(createTx.txDetailsStr, { timeout: 10000 })
+    closeSecurityNotice()
     acceptCookies2()
     const eq = swaps.createRegex(swapsHistory.oneGNOFull, 'COW')
     const atMost = swaps.createRegex(swapsHistory.forAtMostCow, 'COW')
@@ -49,6 +52,8 @@ describe('[PROD] Swaps history tests 2', () => {
       )
       const dai = swaps.createRegex(swapsHistory.forAtLeastFullDai, 'DAI')
       const eq = swaps.createRegex(swapsHistory.DAIeqCOW, 'COW')
+      cy.contains(createTx.txDetailsStr, { timeout: 10000 })
+      closeSecurityNotice()
       acceptCookies2()
       main.verifyValuesExist(create_tx.transactionItem, [swapsHistory.title])
       create_tx.verifySummaryByName(swapsHistory.title, null, [typeGeneral.statusOk])

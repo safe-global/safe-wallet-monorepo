@@ -1,21 +1,20 @@
-import TxSummary from '@/components/transactions/TxSummary/index'
-import * as pending from '@/hooks/useIsPending'
-import { render } from '@/tests/test-utils'
+import type { MultisigTransaction, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+
 import {
   ConflictType,
   DetailedExecutionInfoType,
-  type Transaction,
   TransactionListItemType,
   TransactionStatus,
-  type TransactionSummary,
-} from '@safe-global/safe-gateway-typescript-sdk'
-import {
+  TransferDirection,
   TransactionInfoType,
   TransactionTokenType,
-  TransferDirection,
-} from '@safe-global/safe-gateway-typescript-sdk/dist/types/transactions'
+} from '@safe-global/store/gateway/types'
 
-const mockTransaction: Transaction = {
+import TxSummary from '@/components/transactions/TxSummary/index'
+import * as pending from '@/hooks/useIsPending'
+import { render } from '@/tests/test-utils'
+
+const mockTransaction: MultisigTransaction = {
   type: TransactionListItemType.TRANSACTION,
   transaction: {
     timestamp: Date.now(),
@@ -38,7 +37,7 @@ const mockTransaction: Transaction = {
       },
     },
     txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-  } as unknown as TransactionSummary,
+  } as unknown as Transaction,
   conflictType: ConflictType.HAS_NEXT,
 }
 
@@ -82,19 +81,19 @@ describe('TxSummary', () => {
   it('should display confirmations if transactions is in queue', () => {
     const { getByText } = render(<TxSummary item={mockTransaction} isConflictGroup={false} />)
 
-    expect(getByText('1 out of 3')).toBeInTheDocument()
+    expect(getByText('1/3')).toBeInTheDocument()
   })
 
   it('should not display confirmations if transactions is already executed', () => {
     const { queryByText } = render(<TxSummary item={mockTransactionInHistory} isConflictGroup={false} />)
 
-    expect(queryByText('1 out of 3')).not.toBeInTheDocument()
+    expect(queryByText('1/3')).not.toBeInTheDocument()
   })
 
   it('should not display confirmations if there is no executionInfo', () => {
     const { queryByText } = render(<TxSummary item={mockTransactionWithoutExecutionInfo} isConflictGroup={false} />)
 
-    expect(queryByText('1 out of 3')).not.toBeInTheDocument()
+    expect(queryByText('1/3')).not.toBeInTheDocument()
   })
 
   it('should display a Sign button if confirmations are missing', () => {

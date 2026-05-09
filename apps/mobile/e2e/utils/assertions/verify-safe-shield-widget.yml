@@ -1,0 +1,114 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# ===========================================
+# SafeShield Widget Verification (Reusable)
+# ===========================================
+# Verifies the SafeShield widget on Confirm transaction screen
+#
+# Environment variables:
+#   WIDGET_HEADER: Expected header text (e.g., "Issues found", "Review details", "Risk detected")
+#   LABEL_1: First analysis label (e.g., "Known contract", "Unknown recipient")
+#   LABEL_2: Second analysis label (optional)
+#   LABEL_3: Third analysis label (optional)
+#   RUN_SIMULATION: Set to "true" to run simulation (default: false)
+#   SIMULATION_RESULT: Expected result - "success" or "fail" (only when RUN_SIMULATION is true)
+#   VERIFY_DISCLAIMER: Set to "true" to verify and tap the risk disclaimer checkbox (for CRITICAL severity)
+
+# Wait for widget to load
+- extendedWaitUntil:
+    visible:
+      text: '${WIDGET_HEADER}'
+    timeout: 15000
+
+# Verify widget header
+- assertVisible:
+    text: '${WIDGET_HEADER}'
+
+# Verify first label (required)
+- assertVisible:
+    text: '${LABEL_1}'
+
+# Verify second label (optional)
+- evalScript: '${output.hasLabel2 = (typeof LABEL_2 !== "undefined" && LABEL_2 !== "")}'
+- runFlow:
+    when:
+      true: '${output.hasLabel2 === true}'
+    commands:
+      - assertVisible:
+          text: '${LABEL_2}'
+
+# Verify third label (optional)
+- evalScript: '${output.hasLabel3 = (typeof LABEL_3 !== "undefined" && LABEL_3 !== "")}'
+- runFlow:
+    when:
+      true: '${output.hasLabel3 === true}'
+    commands:
+      - assertVisible:
+          text: '${LABEL_3}'
+
+# Verify simulation section
+- assertVisible:
+    text: 'Transaction simulation'
+- assertVisible:
+    text: 'Run'
+
+# Run simulation (optional)
+- evalScript: '${output.shouldRun = (typeof RUN_SIMULATION !== "undefined" && RUN_SIMULATION === "true")}'
+- evalScript: '${output.expectSuccess = (typeof SIMULATION_RESULT !== "undefined" && SIMULATION_RESULT === "success")}'
+- evalScript: '${output.expectFail = (typeof SIMULATION_RESULT !== "undefined" && SIMULATION_RESULT === "fail")}'
+
+- runFlow:
+    when:
+      true: '${output.shouldRun === true}'
+    commands:
+      - tapOn:
+          text: 'Run'
+      - extendedWaitUntil:
+          visible:
+            text: 'View'
+          timeout: 30000
+      - runFlow:
+          when:
+            true: '${output.expectSuccess === true}'
+          commands:
+            - assertVisible:
+                text: 'Simulation successful'
+      - runFlow:
+          when:
+            true: '${output.expectFail === true}'
+          commands:
+            - assertVisible:
+                text: 'Simulation failed'
+      - assertVisible:
+          text: 'View'
+
+# Verify risk disclaimer flow (optional, for CRITICAL severity)
+# Flow: Try Continue without disclaimer -> stays on screen -> tap disclaimer -> Continue -> goes to Review -> go back
+- evalScript: '${output.verifyDisclaimer = (typeof VERIFY_DISCLAIMER !== "undefined" && VERIFY_DISCLAIMER === "true")}'
+- runFlow:
+    when:
+      true: '${output.verifyDisclaimer === true}'
+    commands:
+      - scroll
+      - assertVisible:
+          text: '.*I understand the risks.*'
+      # Tap Continue without accepting disclaimer
+      - tapOn:
+          text: 'Continue'
+      # Verify user stays on Confirm transaction screen
+      - assertVisible:
+          text: 'Confirm transaction'
+      # Now tap the disclaimer checkbox
+      - tapOn:
+          text: '.*I understand the risks.*'
+      # Tap Continue again
+      - tapOn:
+          text: 'Continue'
+      # Verify user navigates to Review and confirm screen
+      - assertVisible:
+          text: 'Review and confirm'
+      # Go back to Confirm transaction screen
+      - tapOn:
+          id: 'go-back'

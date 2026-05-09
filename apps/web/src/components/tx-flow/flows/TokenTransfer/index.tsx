@@ -1,68 +1,64 @@
-import TxLayout from '@/components/tx-flow/common/TxLayout'
-import useTxStepper from '../../useTxStepper'
 import CreateTokenTransfer from './CreateTokenTransfer'
 import ReviewTokenTx from '@/components/tx-flow/flows/TokenTransfer/ReviewTokenTx'
 import AssetsIcon from '@/public/images/sidebar/assets.svg'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
-import { TokenAmountFields } from '@/components/common/TokenAmountInput'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { useMemo } from 'react'
+import { TxFlowType } from '@/services/analytics'
+import { TxFlow } from '../../TxFlow'
+import { TxFlowStep } from '../../TxFlowStep'
+import { TokenTransferType, type MultiTokenTransferParams, type TokenTransferParams } from './types'
 
-export enum TokenTransferType {
-  multiSig = 'multiSig',
-  spendingLimit = 'spendingLimit',
-}
+export {
+  TokenTransferFields,
+  TokenTransferType,
+  MultiTransfersFields,
+  MultiTokenTransferFields,
+  type TokenTransferParams,
+  type MultiTokenTransferParams,
+} from './types'
 
-enum Fields {
-  recipient = 'recipient',
-  type = 'type',
-}
-
-export const TokenTransferFields = { ...Fields, ...TokenAmountFields }
-
-export type TokenTransferParams = {
-  [TokenTransferFields.recipient]: string
-  [TokenTransferFields.tokenAddress]: string
-  [TokenTransferFields.amount]: string
-  [TokenTransferFields.type]: TokenTransferType
-}
-
-type TokenTransferFlowProps = Partial<TokenTransferParams> & {
+type MultiTokenTransferFlowProps = {
+  recipients?: Partial<TokenTransferParams>[]
   txNonce?: number
 }
 
-const defaultParams: TokenTransferParams = {
-  recipient: '',
-  tokenAddress: ZERO_ADDRESS,
-  amount: '',
+const defaultParams: MultiTokenTransferParams = {
+  recipients: [
+    {
+      recipient: '',
+      tokenAddress: ZERO_ADDRESS,
+      amount: '',
+    },
+  ],
   type: TokenTransferType.multiSig,
 }
 
-const TokenTransferFlow = ({ txNonce, ...params }: TokenTransferFlowProps) => {
-  const { data, step, nextStep, prevStep } = useTxStepper<TokenTransferParams>({
-    ...defaultParams,
-    ...params,
-  })
-
-  const steps = [
-    <CreateTokenTransfer
-      key={0}
-      params={data}
-      txNonce={txNonce}
-      onSubmit={(formData) => nextStep({ ...data, ...formData })}
-    />,
-
-    <ReviewTokenTx key={1} params={data} txNonce={txNonce} onSubmit={() => null} />,
-  ]
+const TokenTransferFlow = ({ txNonce, ...params }: MultiTokenTransferFlowProps) => {
+  const initialData = useMemo<MultiTokenTransferParams>(
+    () => ({
+      ...defaultParams,
+      recipients: params.recipients
+        ? params.recipients.map((recipient) => ({
+            ...defaultParams.recipients[0],
+            ...recipient,
+          }))
+        : defaultParams.recipients,
+    }),
+    [params.recipients],
+  )
 
   return (
-    <TxLayout
-      title={step === 0 ? 'New transaction' : 'Confirm transaction'}
-      subtitle="Send tokens"
+    <TxFlow
+      initialData={initialData}
       icon={AssetsIcon}
-      step={step}
-      onBack={prevStep}
+      subtitle="Send tokens"
+      eventCategory={TxFlowType.TOKEN_TRANSFER}
+      ReviewTransactionComponent={ReviewTokenTx}
     >
-      {steps}
-    </TxLayout>
+      <TxFlowStep title="New transaction">
+        <CreateTokenTransfer txNonce={txNonce} />
+      </TxFlowStep>
+    </TxFlow>
   )
 }
 

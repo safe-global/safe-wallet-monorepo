@@ -2,7 +2,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useMemo } from 'react'
-import { WIDGET_PRODUCTION_URL, WIDGET_TESTNET_URL } from '@/features/stake/constants'
+import { WIDGET_PRODUCTION_URL, WIDGET_TESTNET_URL } from '../constants'
 
 export const useGetStakeWidgetUrl = (asset?: string) => {
   let url = WIDGET_PRODUCTION_URL

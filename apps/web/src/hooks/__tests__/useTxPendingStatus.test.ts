@@ -1,7 +1,7 @@
 import * as useChainIdHook from '@/hooks/useChainId'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import useTxPendingStatuses, { useTxMonitor } from '@/hooks/useTxPendingStatuses'
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import * as txMonitor from '@/services/tx/txMonitor'
 import {
@@ -17,19 +17,22 @@ import { renderHook } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import type { JsonRpcProvider } from 'ethers'
 
+const TEST_CHAIN_ID = '11155111'
+const TEST_SAFE_ADDRESS = '0x0000000000000000000000000000000000000001'
+
 describe('useTxMonitor', () => {
   let mockProvider
   beforeEach(() => {
     jest.clearAllMocks()
 
-    jest.spyOn(useChainIdHook, 'default').mockReturnValue('11155111')
+    jest.spyOn(useChainIdHook, 'default').mockReturnValue(TEST_CHAIN_ID)
 
     mockProvider = jest.fn() as unknown as JsonRpcProvider
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(mockProvider)
   })
 
   it('should not monitor transactions if provider is not available', () => {
-    jest.spyOn(web3, 'useWeb3ReadOnly').mockReturnValue(undefined)
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(undefined)
     const mockWaitForTx = jest.spyOn(txMonitor, 'waitForTx')
     const mockWaitForRelayedTx = jest.spyOn(txMonitor, 'waitForRelayedTx')
 
@@ -126,6 +129,8 @@ describe('useTxPendingStatuses', () => {
     txDispatch(TxEvent.SIGNATURE_PROPOSED, {
       nonce: 1,
       txId: mockTxId,
+      chainId: TEST_CHAIN_ID,
+      safeAddress: TEST_SAFE_ADDRESS,
       signerAddress: mockSignerAddress,
     })
 
@@ -152,6 +157,8 @@ describe('useTxPendingStatuses', () => {
     txDispatch(TxEvent.PROCESSING, {
       nonce: 1,
       txId: mockTxId,
+      chainId: TEST_CHAIN_ID,
+      safeAddress: TEST_SAFE_ADDRESS,
       txHash: mockTxHash,
       signerNonce: mockNonce,
       signerAddress: mockSignerAddress,
@@ -188,6 +195,8 @@ describe('useTxPendingStatuses', () => {
     txDispatch(TxEvent.PROCESSING, {
       nonce: 1,
       txId: mockTxId,
+      chainId: TEST_CHAIN_ID,
+      safeAddress: TEST_SAFE_ADDRESS,
       txHash: mockTxHash,
       signerNonce: mockNonce,
       signerAddress: mockSignerAddress,
@@ -218,6 +227,8 @@ describe('useTxPendingStatuses', () => {
     txDispatch(TxEvent.EXECUTING, {
       nonce: 1,
       txId: mockTxId,
+      chainId: TEST_CHAIN_ID,
+      safeAddress: TEST_SAFE_ADDRESS,
     })
 
     expect(setPendingTx).toHaveBeenCalledWith({
@@ -237,7 +248,8 @@ describe('useTxPendingStatuses', () => {
     txDispatch(TxEvent.PROCESSED, {
       nonce: 1,
       txId: mockTxId,
-      safeAddress: faker.finance.ethereumAddress(),
+      chainId: TEST_CHAIN_ID,
+      safeAddress: TEST_SAFE_ADDRESS,
     })
 
     expect(setPendingTx).toHaveBeenCalledWith({
@@ -258,6 +270,8 @@ describe('useTxPendingStatuses', () => {
     txDispatch(TxEvent.RELAYING, {
       nonce: 1,
       txId: mockTxId,
+      chainId: TEST_CHAIN_ID,
+      safeAddress: TEST_SAFE_ADDRESS,
       taskId: mockTaskId,
     })
 
@@ -279,6 +293,8 @@ describe('useTxPendingStatuses', () => {
     txDispatch(TxEvent.SUCCESS, {
       nonce: 1,
       txId: mockTxId,
+      chainId: TEST_CHAIN_ID,
+      safeAddress: TEST_SAFE_ADDRESS,
     })
 
     expect(setPendingTx).not.toHaveBeenCalled()
@@ -306,6 +322,8 @@ describe('useTxPendingStatuses', () => {
     txDispatch(TxEvent.REVERTED, {
       nonce: 1,
       txId: mockTxId,
+      chainId: TEST_CHAIN_ID,
+      safeAddress: TEST_SAFE_ADDRESS,
       error: new Error('Transaction reverted'),
     })
 
@@ -321,6 +339,8 @@ describe('useTxPendingStatuses', () => {
     txDispatch(TxEvent.FAILED, {
       nonce: 1,
       txId: mockTxId,
+      chainId: TEST_CHAIN_ID,
+      safeAddress: TEST_SAFE_ADDRESS,
       error: new Error('Transaction failed'),
     })
 

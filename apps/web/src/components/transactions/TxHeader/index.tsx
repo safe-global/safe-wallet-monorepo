@@ -1,19 +1,19 @@
 import type { ReactElement, ReactNode } from 'react'
 
 import PageHeader from '@/components/common/PageHeader'
-import css from '@/components/common/PageHeader/styles.module.css'
+import cssPageHeader from '@/components/common/PageHeader/styles.module.css'
+import css from './styles.module.css'
 import TxNavigation from '@/components/transactions/TxNavigation'
 
 const TxHeader = ({ children }: { children?: ReactNode }): ReactElement => {
   return (
     <PageHeader
-      title="Transactions"
       action={
-        <div className={css.pageHeader}>
-          <div className={css.navWrapper}>
+        <div className={cssPageHeader.pageHeader}>
+          <div className={cssPageHeader.navWrapper}>
             <TxNavigation />
           </div>
-          {children && <div className={css.actionsWrapper}>{children}</div>}
+          {children && <div className={`${cssPageHeader.actionsWrapper} ${css.actionsWrapper}`}>{children}</div>}
         </div>
       }
     />

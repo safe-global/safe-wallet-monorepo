@@ -8,6 +8,7 @@ describe('TxContractInteractionCard', () => {
   it('should render the default markup', () => {
     const { getByText, getByLabelText } = render(
       <TxContractInteractionCard
+        onPress={() => null}
         txInfo={
           mockTransferWithInfo({
             type: TransactionInfoType.CUSTOM,
@@ -26,8 +27,9 @@ describe('TxContractInteractionCard', () => {
   })
 
   it('should render a fallback in the label and icon if the contract is missing name and logoUri', () => {
-    const { getByText } = render(
+    const { getAllByText } = render(
       <TxContractInteractionCard
+        onPress={() => null}
         txInfo={
           mockTransferWithInfo({
             type: TransactionInfoType.CUSTOM,
@@ -39,6 +41,6 @@ describe('TxContractInteractionCard', () => {
       />,
     )
 
-    expect(getByText('Contract interaction')).toBeTruthy()
+    expect(getAllByText('Contract interaction').length).toBeGreaterThan(0)
   })
 })

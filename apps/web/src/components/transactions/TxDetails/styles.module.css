@@ -2,6 +2,12 @@
   display: flex;
   width: 100%;
   overflow-x: auto;
+  background-color: var(--color-background-paper);
+  border-radius: 6px;
+}
+
+.detailsWrapper {
+  position: relative;
 }
 
 .details {
@@ -16,6 +22,16 @@
   justify-content: flex-end;
   margin: var(--space-1);
   margin-bottom: -40px;
+}
+
+.inlineSimulation {
+  display: flex;
+  justify-content: flex-end;
+  margin: var(--space-2);
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1;
 }
 
 .txNote {
@@ -41,6 +57,10 @@
   border-bottom: 1px solid var(--color-border-light);
 }
 
+.txData:empty {
+  display: none;
+}
+
 .txSummary,
 .advancedDetails {
   height: 100%;
@@ -52,6 +72,8 @@
   flex-direction: column;
   padding: var(--space-3);
   border-left: 1px solid var(--color-border-light);
+  gap: var(--space-2);
+  position: relative;
 }
 
 .delegateCall .alert {
@@ -69,7 +91,6 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
-  margin-top: var(--space-2);
 }
 
 .buttons > * {
@@ -93,5 +114,11 @@
     width: 100%;
     border-left: 0;
     border-top: 1px solid var(--color-border-light);
+  }
+}
+
+@media (max-width: 1350px) {
+  .inlineSimulation {
+    position: relative;
   }
 }

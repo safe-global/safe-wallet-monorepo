@@ -39,3 +39,8 @@
   position: absolute;
   right: 0;
 }
+
+.nonce {
+  min-width: 170px;
+  justify-content: flex-end;
+}

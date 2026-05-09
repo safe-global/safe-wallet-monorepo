@@ -1,20 +1,22 @@
+import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Paper, Typography, SvgIcon } from '@mui/material'
 import type { PaperProps } from '@mui/material'
-import type { AddressEx } from '@safe-global/safe-gateway-typescript-sdk'
 import type { ReactElement } from 'react'
 
 import PlusIcon from '@/public/images/common/plus.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
 
 import css from './styles.module.css'
-import { maybePlural } from '@/utils/formatters'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 export function OwnerList({
   title,
+  icon,
   owners,
   sx,
 }: {
-  owners: Array<AddressEx>
+  owners: Array<AddressInfo>
+  icon?: React.ElementType
   title?: string
   sx?: PaperProps['sx']
 }): ReactElement {
@@ -25,10 +27,11 @@ export function OwnerList({
           color: 'text.secondary',
           display: 'flex',
           alignItems: 'center',
+          fontSize: 'inherit',
         }}
       >
-        <SvgIcon component={PlusIcon} inheritViewBox fontSize="small" sx={{ mr: 1 }} />
-        {title ?? `New signer${maybePlural(owners)}`}
+        <SvgIcon component={icon ?? PlusIcon} inheritViewBox fontSize="small" sx={{ mr: 1 }} />
+        {title ?? `Add owner${maybePlural(owners)}`}
       </Typography>
       {owners.map((newOwner) => (
         <EthHashInfo

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SrcEthHashInfo from './index'
 import { Paper } from '@mui/material'
+import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
   component: SrcEthHashInfo,
@@ -11,9 +12,11 @@ const meta = {
   decorators: [
     (Story) => {
       return (
-        <Paper sx={{ padding: 2 }}>
-          <Story />
-        </Paper>
+        <StoreDecorator initialState={{}}>
+          <Paper sx={{ padding: 2 }}>
+            <Story />
+          </Paper>
+        </StoreDecorator>
       )
     },
   ],

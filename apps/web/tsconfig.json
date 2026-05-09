@@ -21,7 +21,11 @@
       "@gnosis.pm/zodiac/*": ["../../node_modules/@gnosis.pm/zodiac/*"],
       "@cowprotocol/app-data": ["../../node_modules/@cowprotocol/app-data"],
       "@/public/*": ["./public/*"],
-      "@safe-global/store/*": ["../../packages/store/src/*"]
+      "@safe-global/theme/*": ["../../packages/theme/src/*"],
+      "@safe-global/store/*": ["../../packages/store/src/*"],
+      "@safe-global/utils/*": ["../../packages/utils/src/*"],
+      "@safe-global/test/*": ["../../config/test/*"],
+      "@/storybook/*": ["./.storybook/*"]
     },
     "plugins": [
       {
@@ -38,8 +42,13 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx",
+    ".storybook-vite/**/*.ts",
+    ".storybook-vite/**/*.tsx",
     "./jest.setup.js",
-    "./eslint.config.mjs"
+    "./eslint.config.mjs",
+    "../../config/test/**/*.ts"
   ],
   "exclude": ["node_modules", "src/types/contracts"]
 }

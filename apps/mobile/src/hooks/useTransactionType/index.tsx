@@ -29,7 +29,7 @@ const getTxTo = ({ txInfo }: Pick<Transaction, 'txInfo'>): AddressInfo | undefin
   }
 }
 
-interface TxType {
+export interface TxType {
   text: string
   icon?: string | React.ReactElement
   image: string | React.ReactElement
@@ -96,11 +96,25 @@ export const getTransactionType = (tx: Transaction): TxType => {
         text: 'TWAP order',
       }
     }
+    case 'SwapAndBridge': {
+      return {
+        image: <SafeFontIcon name={'transaction-swap'} />,
+        icon: <SafeFontIcon name={'transaction-swap'} />,
+        text: 'Bridge transaction',
+      }
+    }
+    case 'Swap': {
+      return {
+        image: <SafeFontIcon name={'transaction-swap'} />,
+        icon: <SafeFontIcon name={'transaction-swap'} />,
+        text: 'LiFi swap',
+      }
+    }
     case TransactionInfoType.CUSTOM: {
       if (isMultiSendTxInfo(tx.txInfo) && !tx.safeAppInfo) {
         return {
           image: <SafeFontIcon name={'safe'} />,
-          icon: <SafeFontIcon name={'transaction-Batch'} />,
+          icon: <SafeFontIcon name={'transaction-batch'} />,
           text: 'Batch',
         }
       }

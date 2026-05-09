@@ -1,3 +1,4 @@
+import { SpacesEnhancedSidebar } from '@/features/spaces/components/Sidebar/SpacesEnhancedSidebar'
 import { useRouter } from 'next/router'
 import { useEffect, type ReactElement } from 'react'
 import { IconButton, Drawer, useMediaQuery } from '@mui/material'
@@ -6,20 +7,21 @@ import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRightRo
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeftRounded'
 
 import classnames from 'classnames'
-import Sidebar from '@/components/sidebar/Sidebar'
 import css from './styles.module.css'
-import useDebounce from '@/hooks/useDebounce'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 
 type SideDrawerProps = {
   isOpen: boolean
   onToggle: (isOpen: boolean) => void
+  onSidebarOpenChange?: (open: boolean) => void
 }
 
-const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
+const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps): ReactElement => {
   const { breakpoints } = useTheme()
   const isSmallScreen = useMediaQuery(breakpoints.down('md'))
   const [, isSafeAppRoute] = useIsSidebarRoute()
+
   const showSidebarToggle = isSafeAppRoute && !isSmallScreen
   // Keep the sidebar hidden on small screens via CSS until we collapse it via JS.
   // With a small delay to avoid flickering.
@@ -52,11 +54,16 @@ const SideDrawer = ({ isOpen, onToggle }: SideDrawerProps): ReactElement => {
           // fixes a bug on small screens where the drawer is not visible,
           // but it steals all the events from the rest of the page
           position: 'relative',
+          '& .MuiPaper-root': { zIndex: 1250 },
         }}
         className={smDrawerHidden ? css.smDrawerHidden : undefined}
       >
         <aside>
-          <Sidebar />
+          <SpacesEnhancedSidebar
+            isDrawerOpen={isOpen}
+            onDrawerClose={() => onToggle(false)}
+            onOpenChange={onSidebarOpenChange}
+          />
         </aside>
       </Drawer>
 

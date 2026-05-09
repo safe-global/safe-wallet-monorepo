@@ -1,9 +1,9 @@
+import { TransactionStatus } from '@safe-global/store/gateway/types'
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ReplaceTxHoverContext } from '@/components/transactions/GroupedTxListItems/ReplaceTxHoverProvider'
 import { useAppSelector } from '@/store'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
 import { isCancelledSwapOrder, isSignableBy } from '@/utils/transaction-guards'
-import type { TransactionSummary } from '@safe-global/safe-gateway-typescript-sdk'
-import { TransactionStatus } from '@safe-global/safe-gateway-typescript-sdk'
 import { useContext } from 'react'
 import useWallet from './wallets/useWallet'
 
@@ -31,7 +31,7 @@ const WALLET_STATUS_LABELS: Record<TxLocalStatus, string> = {
   [TransactionStatus.AWAITING_CONFIRMATIONS]: 'Needs your confirmation',
 }
 
-const useTransactionStatus = (txSummary: TransactionSummary): string => {
+const useTransactionStatus = (txSummary: Transaction): string => {
   const { txStatus, id } = txSummary
 
   const { replacedTxIds } = useContext(ReplaceTxHoverContext)

@@ -1,8 +1,7 @@
-import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
-import { ConfirmationViewTypes, type BaselineConfirmationView } from '@safe-global/safe-gateway-typescript-sdk'
-import { safeParseUnits } from '@/utils/formatters'
+import type { MetaTransactionData } from '@safe-global/types-kit'
+import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { Interface } from 'ethers'
-import { sameAddress } from '@/utils/addresses'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 // CryptoKitties Contract Addresses by network
 // This is an exception made for a popular NFT that's not ERC721 standard-compatible,
@@ -61,27 +60,5 @@ export const createNftTransferParams = (
     to: tokenAddress,
     value: '0',
     data,
-  }
-}
-
-export const getNativeTransferData = ({
-  to,
-  value,
-}: Pick<MetaTransactionData, 'to' | 'value'>): BaselineConfirmationView => {
-  return {
-    type: ConfirmationViewTypes.GENERIC,
-    method: '',
-    parameters: [
-      {
-        name: 'to',
-        type: 'address',
-        value: to,
-      },
-      {
-        name: 'value',
-        type: 'uint256',
-        value,
-      },
-    ],
   }
 }

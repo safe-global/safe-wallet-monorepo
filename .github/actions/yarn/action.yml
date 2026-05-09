@@ -1,14 +1,38 @@
 name: 'Yarn'
 
-description: 'Install the dependencies'
+description: 'Set up Node.js and install dependencies'
+
+inputs:
+  after-install:
+    description: 'Run web after-install step to generate contract types'
+    required: false
+    default: 'true'
+  turbo-token:
+    description: 'Turborepo remote cache token (Vercel PAT)'
+    required: false
+    default: ''
+  turbo-team:
+    description: 'Turborepo remote cache team slug'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
   steps:
-    # We require yarn v4 and installing through corepack is the easiest way to get it
-    - uses: actions/checkout@v4
-
     - uses: ./.github/actions/corepack
+
+    - uses: actions/setup-node@v6
+      with:
+        node-version: '24.14.0'
+        cache: 'yarn'
+
+    - name: Export Turbo remote cache env
+      if: inputs.turbo-token != ''
+      shell: bash
+      run: |
+        echo "TURBO_TOKEN=${{ inputs.turbo-token }}" >> "$GITHUB_ENV"
+        echo "TURBO_TEAM=${{ inputs.turbo-team }}" >> "$GITHUB_ENV"
+        echo "TURBO_REMOTE_ONLY=false" >> "$GITHUB_ENV"
 
     - name: Restore Yarn Cache & Types
       id: restore-yarn-types
@@ -24,14 +48,12 @@ runs:
     - name: Yarn install
       if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'
       shell: bash
-      run: |
-        yarn install --immutable
+      run: yarn install --immutable
 
     - name: Yarn after-install to generate contracts types
-      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'
+      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true' && inputs.after-install == 'true'
       shell: bash
-      run: |        
-        yarn workspace @safe-global/web after-install
+      run: yarn workspace @safe-global/web after-install
 
     - name: Save Yarn Cache & Types
       if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'

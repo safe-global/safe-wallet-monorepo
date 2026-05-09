@@ -1,4 +1,4 @@
-import type { SafeAppData } from '@safe-global/safe-gateway-typescript-sdk'
+import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 export enum PermissionStatus {
   GRANTED = 'granted',
@@ -50,4 +50,7 @@ export const isBrowserFeature = (featureKey: string): featureKey is AllowedFeatu
 
 export type AllowedFeatureSelection = { feature: AllowedFeatures; checked: boolean }
 
-export type SafeAppDataWithPermissions = SafeAppData & { safeAppsPermissions: AllowedFeatures[] }
+export type SafeAppDataWithPermissions = SafeAppData & {
+  safeAppsPermissions: AllowedFeatures[]
+  originalUrl?: string
+}

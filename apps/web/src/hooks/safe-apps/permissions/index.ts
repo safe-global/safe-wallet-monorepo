@@ -1,6 +1,6 @@
 import { RestrictedMethods } from '@safe-global/safe-apps-sdk'
 import type { AllowedFeatures } from '@/components/safe-apps/types'
-import { capitalize } from '@/utils/formatters'
+import { capitalize } from '@safe-global/utils/utils/formatters'
 
 type PermissionsDisplayType = {
   displayName: string

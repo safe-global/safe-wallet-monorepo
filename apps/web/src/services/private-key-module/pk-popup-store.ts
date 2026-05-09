@@ -1,4 +1,4 @@
-import ExternalStore from '@/services/ExternalStore'
+import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import { sessionItem } from '@/services/local-storage/session'
 
 type PkModulePopupStore = {

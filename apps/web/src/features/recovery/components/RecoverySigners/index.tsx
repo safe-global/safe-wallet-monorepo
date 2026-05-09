@@ -1,85 +1,64 @@
-import { Box, List, ListItem, ListItemIcon, ListItemText, SvgIcon, Typography } from '@mui/material'
+import { Alert, Box } from '@mui/material'
 import type { ReactElement } from 'react'
 
-import CircleIcon from '@/public/images/common/circle.svg'
-import CheckIcon from '@/public/images/common/circle-check.svg'
-import EthHashInfo from '@/components/common/EthHashInfo'
+import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 import { Countdown } from '@/components/common/Countdown'
-import { ExecuteRecoveryButton } from '../ExecuteRecoveryButton'
-import { CancelRecoveryButton } from '../CancelRecoveryButton'
+import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
+import CancelRecoveryButton from '../CancelRecoveryButton'
 import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
-import { formatDateTime } from '@/utils/date'
+import { formatAuditDateTime } from '@/components/common/AuditLog'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import useAddressBook from '@/hooks/useAddressBook'
 
-import txSignersCss from '@/components/transactions/TxSigners/styles.module.css'
-
-export function RecoverySigners({ item }: { item: RecoveryQueueItem }): ReactElement {
+export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): ReactElement {
   const { isExecutable, isExpired, isNext, remainingSeconds } = useRecoveryTxState(item)
+  const addressBook = useAddressBook()
 
-  const desc = isExecutable ? (
-    item.expiresAt !== null ? (
-      <>
-        The recovery proposal can be executed{' '}
-        <Typography
-          sx={{
-            color: 'primary.main',
-          }}
-        >
-          until {formatDateTime(Number(item.expiresAt))}.
-        </Typography>
-      </>
-    ) : (
-      'The recovery proposal can be executed now.'
-    )
-  ) : isExpired ? (
-    'The recovery proposal has expired and needs to be cancelled before a new one can be created.'
-  ) : (
-    'The recovery proposal can be executed after the review window has passed:'
-  )
+  const executionLabel = isExpired ? 'Expired' : isExecutable ? 'Executable' : 'Waiting'
+  const executionActionType = isExpired ? 'expired' : isExecutable ? 'executed' : 'pending'
+
+  const expiresAtFormatted = item.expiresAt !== null ? formatAuditDateTime(Number(item.expiresAt)) : null
+
+  const desc = isExecutable
+    ? expiresAtFormatted
+      ? `The recovery proposal can be executed until ${expiresAtFormatted}.`
+      : 'The recovery proposal can be executed now.'
+    : isExpired
+      ? 'The recovery proposal has expired and needs to be cancelled before a new one can be created.'
+      : 'The recovery proposal can be executed after the review window has passed.'
 
   return (
     <>
-      <List className={txSignersCss.signers}>
-        <ListItem>
-          <ListItemIcon>
-            <SvgIcon
-              component={CheckIcon}
-              inheritViewBox
-              className={txSignersCss.icon}
-              sx={{
-                '& path:last-of-type': { fill: ({ palette }) => palette.background.paper },
-              }}
-            />
-          </ListItemIcon>
-          <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>Created</ListItemText>
-        </ListItem>
-        <ListItem sx={{ py: 0, pb: 1, ml: 4 }}>
-          <EthHashInfo address={item.executor} hasExplorer showCopyButton />
-        </ListItem>
-        <ListItem sx={{ py: 0 }}>
-          <ListItemIcon>
-            <SvgIcon
-              component={CircleIcon}
-              inheritViewBox
-              className={txSignersCss.icon}
-              sx={{ color: ({ palette }) => palette.border.main }}
-            />
-          </ListItemIcon>
-          <ListItemText primaryTypographyProps={{ fontWeight: 700 }}>Can be executed</ListItemText>
-        </ListItem>
-      </List>
-      <Box className={txSignersCss.listFooter}>
-        <Typography sx={({ palette }) => ({ color: palette.border.main, mb: 1 })}>{desc}</Typography>
+      <Box>
+        <AuditLogHeader />
 
-        {isNext && <Countdown seconds={remainingSeconds} />}
+        <AuditRow
+          label="Created"
+          actionType="created"
+          address={item.executor}
+          name={addressBook[item.executor]}
+          timestamp={Number(item.timestamp)}
+        />
+
+        <AuditRow label={executionLabel} actionType={executionActionType} isLast />
+
+        <Alert severity={isExpired ? 'warning' : 'info'} sx={{ mt: 2, py: 0.5 }}>
+          {desc}
+        </Alert>
+
+        {isNext && remainingSeconds > 0 && (
+          <Box mt={2}>
+            <Countdown seconds={remainingSeconds} />
+          </Box>
+        )}
       </Box>
+
       <Box
         sx={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           gap: 1,
-          mt: 2,
         }}
       >
         <ExecuteRecoveryButton recovery={item} />

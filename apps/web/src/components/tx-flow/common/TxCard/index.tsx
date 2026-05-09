@@ -1,12 +1,12 @@
 import type { ReactNode } from 'react'
-import { Card, CardContent } from '@mui/material'
+import { Card, CardActions, CardContent, Stack, type SxProps } from '@mui/material'
 import css from '../styles.module.css'
 
-const sx = { my: 2, border: 0 }
+const sxBase = { my: 2, border: 0 }
 
-const TxCard = ({ children }: { children: ReactNode }) => {
+const TxCard = ({ children, sx = {} }: { children: ReactNode; sx?: SxProps }) => {
   return (
-    <Card sx={sx}>
+    <Card sx={{ ...sxBase, ...sx }}>
       <CardContent data-testid="card-content" className={css.cardContent}>
         {children}
       </CardContent>
@@ -15,3 +15,19 @@ const TxCard = ({ children }: { children: ReactNode }) => {
 }
 
 export default TxCard
+
+export const TxCardActions = ({ children, sx }: { children: ReactNode; sx?: SxProps }) => {
+  return (
+    <CardActions sx={sx}>
+      <Stack
+        sx={{
+          width: ['100%', '100%', '100%', 'auto'],
+        }}
+        direction={{ xs: 'column-reverse', lg: 'row' }}
+        spacing={{ xs: 2, md: 2 }}
+      >
+        {children}
+      </Stack>
+    </CardActions>
+  )
+}

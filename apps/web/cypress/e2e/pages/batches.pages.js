@@ -1,58 +1,57 @@
 import * as constants from '../../support/constants'
+import * as main from './main.page'
+import { clickOnContinueSignTransactionBtn, selectComboButtonOption, tokenSelector } from './create_tx.pages'
 
-const tokenSelectorText = 'G(ö|oe)rli Ether'
-const noLaterString = 'No, later'
-const yesExecuteString = 'Yes, execute'
 export const newTransactionBtnStr = 'New transaction'
 const sendTokensButn = 'Send tokens'
-const nextBtn = 'Next'
-const executeBtn = 'Execute'
 export const addToBatchBtn = 'Add to batch'
 const confirmBatchBtn = 'Confirm batch'
 export const batchedTxs = 'Batched transactions'
 
 export const closeModalBtnBtn = '[data-testid="CloseIcon"]'
 export const deleteTransactionbtn = '[title="Delete transaction"]'
-export const batchTxTopBar = '[data-track="batching: Batch sidebar open"]'
-export const batchTxCounter = '[data-track="batching: Batch sidebar open"] span > span'
+export const batchTxTopBar = '[data-track="batching: Batch sidebar open"] button'
+export const batchTxCounter = '[data-track="batching: Batch sidebar open"] button'
 export const addNewTxBatch = '[data-track="batching: Add new tx to batch"]'
 export const batchedTransactionsStr = 'Batched transactions'
 export const addInitialTransactionStr = 'Add an initial transaction to the batch'
 export const transactionAddedToBatchStr = 'Transaction is added to batch'
 export const addNewStransactionStr = 'Add new transaction'
+export const allActionsSection = '[data-testid="all-actions"]'
+export const accordionActionItem = '[data-testid="action-item"]'
 
-const recipientInput = 'input[name="recipient"]'
-const tokenAddressInput = 'input[name="tokenAddress"]'
+const recipientInput = 'input[name^="recipients."][name$=".recipient"]'
 const listBox = 'ul[role="listbox"]'
-const amountInput = '[name="amount"]'
+const amountInput = 'input[name^="recipients."][name$=".amount"]'
 const nonceInput = 'input[name="nonce"]'
 const executeOptionsContainer = 'div[role="radiogroup"]'
 const expandedItem = 'div[class*="MuiCollapse-entered"]'
 const collapsedItem = 'div[class*="MuiCollapse-hidden"]'
 
-export function addToBatch(EOA, currentNonce, amount, verify = false) {
+export function addToBatch(EOA, currentNonce, amount) {
   fillTransactionData(EOA, amount)
   setNonceAndProceed(currentNonce)
-  // Execute the transaction if verification is required
-  if (verify) {
-    executeTransaction()
-  }
+  clickOnContinueSignTransactionBtn()
+
+  selectComboButtonOption('addToBatch')
+
   addToBatchButton()
-  cy.contains(transactionAddedToBatchStr).click().should('not.be.visible')
+  cy.contains(transactionAddedToBatchStr).click({ force: true })
+  cy.contains(transactionAddedToBatchStr).should('not.exist')
 }
 
 function fillTransactionData(EOA, amount) {
   cy.get(recipientInput).type(EOA, { delay: 1 })
   // Click on the Token selector
-  cy.get(tokenAddressInput).prev().click()
+  cy.get(tokenSelector).click()
   cy.get(listBox).contains(constants.tokenNames.sepoliaEther).click()
   cy.get(amountInput).type(amount)
-  cy.contains(nextBtn).click()
+  cy.contains(main.nextBtnStr).click()
 }
 
 function setNonceAndProceed(currentNonce) {
   cy.get(nonceInput).clear().type(currentNonce, { force: true }).blur()
-  cy.contains(executeBtn).scrollIntoView()
+  cy.contains(main.executeBtnStr).scrollIntoView()
 }
 
 function executeTransaction() {
@@ -68,13 +67,13 @@ function addToBatchButton() {
   cy.get('button').contains(addToBatchBtn).click()
 }
 
-export function checkAddToBatchBtnDisabled() {
-  cy.get('button').contains(addToBatchBtn).should('be.disabled')
-}
-
 export function openBatchtransactionsModal() {
   cy.get(batchTxTopBar).should('be.visible').click()
   cy.contains(batchedTransactionsStr).should('be.visible')
+}
+
+export function closeBatchtransactionsModal() {
+  cy.get('aside').find('[aria-label="close"]').click()
 }
 
 export function openNewTransactionModal() {
@@ -107,12 +106,9 @@ export function verifyBatchTransactionsCount(count) {
 export function clickOnBatchCounter() {
   cy.get(batchTxCounter).click()
 }
-export function verifyTransactionAdded() {
-  cy.contains(transactionAddedToBatchStr).should('be.visible')
-}
 
 export function verifyBatchIconCount(count) {
-  cy.get(batchTxCounter).contains(count)
+  cy.get(`[data-track="batching: Batch sidebar open"] [aria-label="${count} batched transactions"]`).should('exist')
 }
 
 export function verifyNewTxButtonStatus(param) {
@@ -126,4 +122,7 @@ export function isTxExpanded(index, option) {
     .within(() => {
       cy.get('li').eq(index).find(item)
     })
+}
+export function verifyCountOfActions(count) {
+  main.verifyElementsCount(accordionActionItem, count)
 }

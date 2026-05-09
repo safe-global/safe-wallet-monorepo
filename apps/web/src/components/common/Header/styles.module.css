@@ -1,3 +1,6 @@
+/* @deprecated Legacy MUI Header styles. Remove together with Header/index.tsx
+   once the Header migration to TopBar is complete. */
+
 .container {
   height: var(--header-height);
   display: flex;
@@ -7,15 +10,22 @@
   position: relative;
   border-radius: 0 !important;
   background-color: var(--color-background-paper);
-  border-bottom: 1px solid var(--color-border-light);
+  padding-right: var(--space-2);
+  border-bottom: 1px solid var(--color-background-main);
 }
 
 .element {
   height: 100%;
-  border-right: 1px solid var(--color-border-light);
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.rightSideGroup {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
 }
 
 .element :global(.MuiBadge-standard) {
@@ -38,6 +48,11 @@
 
 .logoMobile {
   display: none;
+  height: 20px !important;
+}
+
+.logoMobile svg {
+  height: 20px;
 }
 
 .logo img,
@@ -46,11 +61,10 @@
   width: auto;
   display: block;
   color: var(--color-logo-main);
-  height: 20px;
 }
 
 .logo {
-  padding: var(--space-2);
+  padding: var(--space-1) var(--space-2);
 }
 
 .menuButton {
@@ -63,6 +77,12 @@
 
 .connectWallet {
   flex-shrink: 0;
+  margin-left: 6px;
+}
+
+.signOut {
+  flex-shrink: 0;
+  margin-left: 6px;
 }
 
 @media (max-width: 899.95px) {

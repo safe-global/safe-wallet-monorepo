@@ -1,6 +1,6 @@
+import type { TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Typography } from '@mui/material'
-import { formatVisualAmount } from '@/utils/formatters'
-import { type TwapOrder } from '@safe-global/safe-gateway-typescript-sdk'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { Box } from '@mui/system'
 
@@ -8,7 +8,7 @@ export const PartBuyAmount = ({
   order,
   addonText = '',
 }: {
-  order: Pick<TwapOrder, 'minPartLimit' | 'buyToken'>
+  order: Pick<TwapOrderTransactionInfo, 'minPartLimit' | 'buyToken'>
   addonText?: string
 }) => {
   const { minPartLimit, buyToken } = order
