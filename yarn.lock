@@ -14122,7 +14122,7 @@ __metadata:
     "@walletconnect/core": "npm:^2.21.10"
     "@walletconnect/utils": "npm:^2.21.10"
     "@web3-onboard/coinbase": "npm:^2.4.2"
-    "@web3-onboard/core": "npm:^2.24.1"
+    "@web3-onboard/core": "patch:@web3-onboard/core@npm%3A2.24.1#~/.yarn/patches/@web3-onboard-core-npm-2.24.1-56d6bba493.patch"
     "@web3-onboard/hw-common": "npm:^2.3.3"
     "@web3-onboard/injected-wallets": "npm:^2.11.3"
     "@web3-onboard/walletconnect": "npm:2.6.2"
@@ -21269,7 +21269,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@web3-onboard/core@npm:^2.24.1":
+"@web3-onboard/core@npm:2.24.1":
   version: 2.24.1
   resolution: "@web3-onboard/core@npm:2.24.1"
   dependencies:
@@ -21286,6 +21286,26 @@ __metadata:
     svelte-i18n: "npm:^4.0.1"
     viem: "npm:2.12.0"
   checksum: 10/ce3808b2884574049b82a223cebfd8da0d31010a36fa139ce1c97db4b068224c6d1f3999792fd575191d4c3e12a89d4e18b9ac1f43a17573c35c72861f78b0b6
+  languageName: node
+  linkType: hard
+
+"@web3-onboard/core@patch:@web3-onboard/core@npm%3A2.24.1#~/.yarn/patches/@web3-onboard-core-npm-2.24.1-56d6bba493.patch":
+  version: 2.24.1
+  resolution: "@web3-onboard/core@patch:@web3-onboard/core@npm%3A2.24.1#~/.yarn/patches/@web3-onboard-core-npm-2.24.1-56d6bba493.patch::version=2.24.1&hash=44ef30"
+  dependencies:
+    "@web3-onboard/common": "npm:^2.4.1"
+    bnc-sdk: "npm:^4.6.7"
+    bowser: "npm:^2.11.0"
+    eventemitter3: "npm:^4.0.7"
+    joi: "npm:17.9.1"
+    lodash.merge: "npm:^4.6.2"
+    lodash.partition: "npm:^4.6.0"
+    nanoid: "npm:^4.0.0"
+    rxjs: "npm:^7.5.5"
+    svelte: "npm:^3.49.0"
+    svelte-i18n: "npm:^4.0.1"
+    viem: "npm:2.12.0"
+  checksum: 10/1c14c1d17e9240c8c07b007910e0b5418d7f455b923329d48047f56d5d6c9fac5cb36b218c366368163551e310312ef2984b57d9a118a2510281dc5647d97600
   languageName: node
   linkType: hard
 
