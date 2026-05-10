@@ -6,6 +6,7 @@ const defaultData: HistoryFeesData = {
   totalFee: { amount: '0.005', currency: 'ETH', fiatAmount: '$15.12' },
   executionFee: { label: 'Execution fee (0.5%)', amount: '0.002730', currency: 'ETH', isFree: true },
   gasFee: { label: 'Gas fee', amount: '0.005', currency: 'ETH', fiatAmount: '$15.12' },
+  paidFrom: 'signer',
 }
 
 describe('HistoryFeesAccordion', () => {
@@ -24,6 +25,7 @@ describe('HistoryFeesAccordion', () => {
       totalFee: { amount: '0.010', currency: 'ETH', fiatAmount: '$30.00' },
       executionFee: { label: 'Execution fee (0.5%)', amount: '0.002730', currency: 'ETH', isFree: true },
       gasFee: { label: 'Gas fee', amount: '0.005', currency: 'ETH', fiatAmount: '$15.12' },
+      paidFrom: 'signer',
     }
 
     render(<HistoryFeesAccordion data={data} />)
@@ -68,11 +70,22 @@ describe('HistoryFeesAccordion', () => {
       ...defaultData,
       totalFee: { amount: '0.005', currency: 'ETH' },
       gasFee: { label: 'Gas fee', amount: '0.008', currency: 'ETH' },
+      paidFrom: 'signer',
     }
 
     render(<HistoryFeesAccordion data={data} />)
 
     expect(screen.queryByText('$15.12')).not.toBeInTheDocument()
+  })
+
+  it('shows "Paid from the signer" subtitle when paidFrom is signer', () => {
+    render(<HistoryFeesAccordion data={{ ...defaultData, paidFrom: 'signer' }} />)
+    expect(screen.getByText('Paid from the signer')).toBeInTheDocument()
+  })
+
+  it('shows "Paid from the Safe" subtitle when paidFrom is safe', () => {
+    render(<HistoryFeesAccordion data={{ ...defaultData, paidFrom: 'safe' }} />)
+    expect(screen.getByText('Paid from the Safe')).toBeInTheDocument()
   })
 
   it('renders non-free execution fee without FREE badge', () => {

@@ -16,6 +16,11 @@
   width: 100%;
 }
 
+.summaryLeftColumn {
+  display: flex;
+  flex-direction: column;
+}
+
 .summaryLeft {
   display: flex;
   align-items: center;

@@ -19,6 +19,7 @@ export type HistoryFeesData = {
   totalFee: { amount: string; currency: string; fiatAmount?: string }
   executionFee: FeeRow
   gasFee: FeeRow
+  paidFrom: 'safe' | 'signer'
 }
 
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
@@ -28,10 +29,16 @@ const formatFiat = (gasWei: bigint, decimals: number, fiatConversion: string | u
     ? undefined
     : formatCurrencyMinimal(Number(formatUnits(gasWei, decimals)) * Number(fiatConversion), 'usd')
 
-const buildFees = (amount: string, currency: string, fiatAmount: string | undefined): HistoryFeesData => ({
+const buildFees = (
+  amount: string,
+  currency: string,
+  fiatAmount: string | undefined,
+  paidFrom: 'safe' | 'signer',
+): HistoryFeesData => ({
   totalFee: { amount, currency, fiatAmount },
   executionFee: EXECUTION_FEE,
   gasFee: { label: 'Gas fee', amount, currency, fiatAmount },
+  paidFrom,
 })
 
 /**
@@ -83,7 +90,7 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
     const amount = formatVisualAmount(gasWei, decimals)
     const fiatAmount = formatFiat(gasWei, decimals, fiatConversion)
 
-    return buildFees(amount, symbol, fiatAmount)
+    return buildFees(amount, symbol, fiatAmount, 'safe')
   }, [
     isGtfEnabled,
     executedAt,
@@ -121,7 +128,7 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
     const amount = formatVisualAmount(gasWei, decimals)
     const fiatAmount = formatFiat(gasWei, decimals, fiatConversion)
 
-    return buildFees(amount, symbol, fiatAmount)
+    return buildFees(amount, symbol, fiatAmount, 'signer')
   }, [receipt, chain?.nativeCurrency.decimals, chain?.nativeCurrency.symbol, fiatConversion])
 
   return safePaidData ?? signerPaidData ?? null

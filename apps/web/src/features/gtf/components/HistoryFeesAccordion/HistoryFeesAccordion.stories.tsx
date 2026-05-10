@@ -15,6 +15,7 @@ const defaultData: HistoryFeesData = {
   totalFee: { amount: '0.005', currency: 'ETH', fiatAmount: '$15.12' },
   executionFee: { label: 'Execution fee (0.5%)', amount: '0.002730', currency: 'ETH', isFree: true },
   gasFee: { label: 'Gas fee', amount: '0.005', currency: 'ETH', fiatAmount: '$15.12' },
+  paidFrom: 'signer',
 }
 
 export const Collapsed: Story = {
@@ -49,6 +50,7 @@ export const NonNativeGasToken: Story = {
       totalFee: { amount: '3.50', currency: 'USDC', fiatAmount: '$3.50' },
       executionFee: { label: 'Execution fee (0.5%)', amount: '0.50', currency: 'USDC', isFree: true },
       gasFee: { label: 'Gas fee', amount: '3.50', currency: 'USDC', fiatAmount: '$3.50' },
+      paidFrom: 'safe',
     },
   },
 }
@@ -59,6 +61,7 @@ export const NoFiat: Story = {
       totalFee: { amount: '0.005', currency: 'ETH' },
       executionFee: { label: 'Execution fee (0.5%)', amount: '0.002730', currency: 'ETH', isFree: true },
       gasFee: { label: 'Gas fee', amount: '0.005', currency: 'ETH' },
+      paidFrom: 'signer',
     },
   },
 }

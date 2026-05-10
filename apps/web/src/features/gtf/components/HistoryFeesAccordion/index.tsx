@@ -107,15 +107,20 @@ const HistoryFeesAccordion = ({
         data-testid="history-fees-summary"
       >
         <div className={css.summaryContent}>
-          <div className={css.summaryLeft}>
-            <Typography variant="subtitle2" fontWeight={700}>
-              Fees
+          <div className={css.summaryLeftColumn}>
+            <div className={css.summaryLeft}>
+              <Typography variant="subtitle2" fontWeight={700}>
+                Fees
+              </Typography>
+              <Tooltip title={FEES_TOOLTIP} placement="top" arrow>
+                <span className={css.tooltipIcon}>
+                  <SvgIcon component={InfoIcon} inheritViewBox sx={{ fontSize: '16px' }} color="border" />
+                </span>
+              </Tooltip>
+            </div>
+            <Typography variant="caption" color="text.secondary">
+              {data.paidFrom === 'safe' ? 'Paid from the Safe' : 'Paid from the signer'}
             </Typography>
-            <Tooltip title={FEES_TOOLTIP} placement="top" arrow>
-              <span className={css.tooltipIcon}>
-                <SvgIcon component={InfoIcon} inheritViewBox sx={{ fontSize: '16px' }} color="border" />
-              </span>
-            </Tooltip>
           </div>
 
           <div className={css.summaryRight}>
