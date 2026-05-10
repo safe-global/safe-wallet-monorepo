@@ -337,7 +337,7 @@ describe('useFeesPreview', () => {
     expect(result.current.selectedGasToken).toBe(ETH_ADDRESS)
   })
 
-  it('preserves user selection across a transient empty-candidates render (PLA-1399)', () => {
+  it('preserves user selection across a transient empty-candidates render', () => {
     // Simulates Back/Forward between flow steps: useGasTokenCandidates re-mounts and reports
     // an empty candidates list for one tick before the new probes resolve. The cleanup must NOT
     // wipe the persisted selection during that window.
@@ -399,6 +399,21 @@ describe('useFeesPreview', () => {
     expect(result.current.gasFee.amount).toBeDefined()
     expect(result.current.gasFee.currency).toBe('ETH')
     expect(result.current.totalOutgoing).toBeUndefined()
+  })
+
+  it('skips the preview query and forces signer fallback when no Safe-side gas tokens are available', () => {
+    jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
+      candidates: [],
+      defaultAddress: undefined,
+    })
+    const previewSpy = jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    expect(previewSpy.mock.calls.at(-1)?.[0]).toBe(skipToken)
+    expect(result.current.canCoverFees).toBe(false)
+    expect(result.current.availableGasTokens).toEqual([])
+    expect(result.current.gasFee.currency).toBe('ETH')
   })
 
   describe('signer-pays mode (Safe→Signer toggle)', () => {

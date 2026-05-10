@@ -245,10 +245,14 @@ export const useFeesPreview = (): FeesPreviewData => {
   const isSignerMode = !isConfirmation && gtfPaymentMode === 'signer'
 
   // Confirmers render the fee locked in the signed payload, not a fresh CGW quote.
+  // Skip the query when the Safe holds no eligible gas token — without this the CGW endpoint
+  // can still return a quote priced in native against ZERO_ADDRESS, surfacing "Pay from Safe"
+  // with an empty token dropdown. The signer fallback below then takes over.
   const preview = useGetGtfFeePreviewQuery(
     !isConfirmation &&
       !isSignerMode &&
       !isLegacySigned &&
+      candidates.length > 0 &&
       txPayload &&
       chain?.chainId &&
       safeAddress &&
