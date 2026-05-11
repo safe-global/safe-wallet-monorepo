@@ -31,6 +31,10 @@
   background: none !important;
 }
 
+.fixedLayout {
+  table-layout: fixed;
+}
+
 .mobileLabel {
   display: none;
 }
