@@ -10,7 +10,7 @@ import useLogout from '@/hooks/useLogout'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import InitialsAvatar from '../InitialsAvatar'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 import css from './styles.module.css'
 
 export interface SidebarProfileViewProps {

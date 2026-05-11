@@ -1,14 +1,29 @@
-import { formatDate, buildActivityEvents } from '../ActivityLog'
+import { render, screen } from '@testing-library/react'
+import ActivityLog, { formatDate, buildActivityEvents } from '../ActivityLog'
 import type { AddressBookEntry } from '../SpaceAddressBookTable'
+import { faker } from '@faker-js/faker'
+
+jest.mock('@/components/common/Identicon', () => {
+  const Identicon = ({ address }: { address: string }) => <span data-testid="identicon">{address}</span>
+  return Identicon
+})
+jest.mock('@/components/common/EthHashInfo', () => {
+  const EthHashInfo = ({ address }: { address: string }) => <span data-testid="eth-hash-info">{address}</span>
+  return EthHashInfo
+})
+jest.mock('@/components/common/InitialsAvatar', () => {
+  const InitialsAvatar = ({ name }: { name: string }) => <span data-testid="initials-avatar" data-name={name} />
+  return InitialsAvatar
+})
 
 const makeEntry = (overrides: Partial<AddressBookEntry> = {}): AddressBookEntry => ({
   name: 'Alice',
   address: '0x1234567890abcdef1234567890abcdef12345678',
   chainIds: ['1'],
   createdBy: '0xaaaa',
-  createdByUserId: 0,
+  createdByUserId: 1,
   lastUpdatedBy: '0xbbbb',
-  lastUpdatedByUserId: 0,
+  lastUpdatedByUserId: 2,
   createdAt: '',
   updatedAt: '',
   isLocal: false,
@@ -62,7 +77,7 @@ describe('ActivityLog', () => {
 
       expect(events).toHaveLength(1)
       expect(events[0].type).toBe('added')
-      expect(events[0].actor).toBe('0xaaaa')
+      expect(events[0].actor.value).toBe('0xaaaa')
       expect(events[0].date).toBe('2025-01-01T10:00:00Z')
     })
 
@@ -75,9 +90,9 @@ describe('ActivityLog', () => {
 
       expect(events).toHaveLength(2)
       expect(events[0].type).toBe('updated')
-      expect(events[0].actor).toBe('0xbbbb')
+      expect(events[0].actor.value).toBe('0xbbbb')
       expect(events[1].type).toBe('added')
-      expect(events[1].actor).toBe('0xaaaa')
+      expect(events[1].actor.value).toBe('0xaaaa')
     })
 
     it('does not create "updated" event when updatedAt equals createdAt', () => {
@@ -131,6 +146,36 @@ describe('ActivityLog', () => {
       expect(events[0]).toMatchObject({ type: 'updated', entry: { name: 'First' } })
       expect(events[1]).toMatchObject({ type: 'added', entry: { name: 'Second' } })
       expect(events[2]).toMatchObject({ type: 'added', entry: { name: 'First' } })
+    })
+  })
+
+  describe('rendering', () => {
+    it('renders Identicon + EthHashInfo when actor is an address', () => {
+      const address = '0x1234567890abcdef1234567890abcdef12345678'
+      const entry = makeEntry({ createdBy: address, createdAt: '2025-01-01T10:00:00Z' })
+
+      render(<ActivityLog entries={[entry]} />)
+
+      expect(screen.getByTestId('identicon')).toHaveTextContent(address)
+      expect(screen.getByTestId('eth-hash-info')).toHaveTextContent(address)
+      expect(screen.queryByTestId('initials-avatar')).not.toBeInTheDocument()
+    })
+
+    it('renders InitialsAvatar + plain email when actor is an email', () => {
+      const email = faker.internet.email()
+      const entry = makeEntry({ createdBy: email, createdAt: '2025-01-01T10:00:00Z' })
+
+      render(<ActivityLog entries={[entry]} />)
+
+      expect(screen.getByTestId('initials-avatar')).toHaveAttribute('data-name', email)
+      expect(screen.getByText(email)).toBeInTheDocument()
+      expect(screen.queryByTestId('identicon')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('eth-hash-info')).not.toBeInTheDocument()
+    })
+
+    it('renders empty state when no events', () => {
+      render(<ActivityLog entries={[]} />)
+      expect(screen.getByText('No activity yet.')).toBeInTheDocument()
     })
   })
 })

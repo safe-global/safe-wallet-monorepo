@@ -47,7 +47,7 @@ jest.mock('@/components/ui/skeleton', () => ({
   Skeleton: ({ className }: { className?: string }) => <div data-testid="skeleton" className={className} />,
 }))
 
-jest.mock('@/features/spaces/components/InitialsAvatar', () => ({
+jest.mock('@/components/common/InitialsAvatar', () => ({
   __esModule: true,
   default: ({ name }: { name: string }) => <div data-testid="initials-avatar">{name}</div>,
 }))
