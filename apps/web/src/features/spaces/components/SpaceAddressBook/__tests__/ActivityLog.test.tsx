@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import ActivityLog, { formatDate, buildActivityEvents } from '../ActivityLog'
 import type { AddressBookEntry } from '../SpaceAddressBookTable'
+import { faker } from '@faker-js/faker'
 
 jest.mock('@/components/common/Identicon', () => {
   const Identicon = ({ address }: { address: string }) => <span data-testid="identicon">{address}</span>
@@ -161,7 +162,7 @@ describe('ActivityLog', () => {
     })
 
     it('renders InitialsAvatar + plain email when actor is an email', () => {
-      const email = 'alice@safe.global'
+      const email = faker.internet.email()
       const entry = makeEntry({ createdBy: email, createdAt: '2025-01-01T10:00:00Z' })
 
       render(<ActivityLog entries={[entry]} />)

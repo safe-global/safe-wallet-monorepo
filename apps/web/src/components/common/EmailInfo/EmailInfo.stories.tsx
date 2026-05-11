@@ -15,7 +15,14 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
-    email: 'alice@safe.global',
+    email: 'alice@example.com',
+  },
+}
+
+export const WithTooltip: Story = {
+  args: {
+    email: 'alice@example.com',
+    showTooltip: true,
   },
 }
 
@@ -32,14 +39,14 @@ export const LongEmailTruncated: Story = {
 
 export const SquareAvatar: Story = {
   args: {
-    email: 'bob@safe.global',
+    email: 'bob@example.com',
     rounded: false,
   },
 }
 
 export const AllSizes: Story = {
   args: {
-    email: 'alice@safe.global',
+    email: 'alice@example.com',
   },
   render: ({ email }) => (
     <Stack spacing={2} alignItems="flex-start">
@@ -48,5 +55,27 @@ export const AllSizes: Story = {
       <EmailInfo email={email} size="medium" />
       <EmailInfo email={email} size="large" />
     </Stack>
+  ),
+}
+
+export const EmptyEmail: Story = {
+  args: {
+    email: '',
+  },
+  render: (args) => (
+    <Box width={240}>
+      <EmailInfo {...args} />
+    </Box>
+  ),
+}
+
+export const WhitespaceOnly: Story = {
+  args: {
+    email: '   ',
+  },
+  render: (args) => (
+    <Box width={240}>
+      <EmailInfo {...args} />
+    </Box>
   ),
 }

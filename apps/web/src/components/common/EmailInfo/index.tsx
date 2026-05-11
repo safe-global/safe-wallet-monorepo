@@ -10,7 +10,14 @@ export type EmailInfoProps = {
   showTooltip?: boolean
 }
 
-const EmailInfo = ({ email, size = 'medium', rounded = true, showTooltip = true }: EmailInfoProps): ReactElement => {
+const EmailInfo = ({
+  email,
+  size = 'medium',
+  rounded = true,
+  showTooltip = false,
+}: EmailInfoProps): ReactElement | null => {
+  if (!email || !email.trim()) return null
+
   const emailNode = (
     <Box component="span" className={css.email}>
       {email}

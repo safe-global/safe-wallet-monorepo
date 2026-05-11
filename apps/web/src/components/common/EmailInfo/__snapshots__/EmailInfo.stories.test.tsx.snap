@@ -11,64 +11,56 @@ exports[`./EmailInfo.stories AllSizes 1`] = `
       class="container"
     >
       <div
-        class="initialsAvatar MuiBox-root mui-style-i53eir"
+        class="initialsAvatar MuiBox-root mui-style-efynn7"
       >
         a
       </div>
       <span
-        aria-label="alice@safe.global"
         class="email MuiBox-root mui-style-0"
-        data-mui-internal-clone-element="true"
       >
-        alice@safe.global
+        alice@example.com
       </span>
     </div>
     <div
       class="container"
     >
       <div
-        class="initialsAvatar MuiBox-root mui-style-1jru28y"
+        class="initialsAvatar MuiBox-root mui-style-1b9h2ff"
       >
         a
       </div>
       <span
-        aria-label="alice@safe.global"
         class="email MuiBox-root mui-style-0"
-        data-mui-internal-clone-element="true"
       >
-        alice@safe.global
+        alice@example.com
       </span>
     </div>
     <div
       class="container"
     >
       <div
-        class="initialsAvatar MuiBox-root mui-style-1cq109p"
+        class="initialsAvatar MuiBox-root mui-style-9xpjgb"
       >
         a
       </div>
       <span
-        aria-label="alice@safe.global"
         class="email MuiBox-root mui-style-0"
-        data-mui-internal-clone-element="true"
       >
-        alice@safe.global
+        alice@example.com
       </span>
     </div>
     <div
       class="container"
     >
       <div
-        class="initialsAvatar MuiBox-root mui-style-dl5gmi"
+        class="initialsAvatar MuiBox-root mui-style-543i2x"
       >
         a
       </div>
       <span
-        aria-label="alice@safe.global"
         class="email MuiBox-root mui-style-0"
-        data-mui-internal-clone-element="true"
       >
-        alice@safe.global
+        alice@example.com
       </span>
     </div>
   </div>
@@ -83,18 +75,26 @@ exports[`./EmailInfo.stories Default 1`] = `
     class="container"
   >
     <div
-      class="initialsAvatar MuiBox-root mui-style-1cq109p"
+      class="initialsAvatar MuiBox-root mui-style-9xpjgb"
     >
       a
     </div>
     <span
-      aria-label="alice@safe.global"
       class="email MuiBox-root mui-style-0"
-      data-mui-internal-clone-element="true"
     >
-      alice@safe.global
+      alice@example.com
     </span>
   </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories EmptyEmail 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiBox-root mui-style-p20wo7"
+  />
 </div>
 `;
 
@@ -114,9 +114,7 @@ exports[`./EmailInfo.stories LongEmailTruncated 1`] = `
         a
       </div>
       <span
-        aria-label="a-very-long-address-that-will-not-fit@some-very-long-domain.example.com"
         class="email MuiBox-root mui-style-0"
-        data-mui-internal-clone-element="true"
       >
         a-very-long-address-that-will-not-fit@some-very-long-domain.example.com
       </span>
@@ -133,16 +131,47 @@ exports[`./EmailInfo.stories SquareAvatar 1`] = `
     class="container"
   >
     <div
-      class="initialsAvatar MuiBox-root mui-style-1nezy3a"
+      class="initialsAvatar MuiBox-root mui-style-x5ifb2"
     >
       b
     </div>
     <span
-      aria-label="bob@safe.global"
+      class="email MuiBox-root mui-style-0"
+    >
+      bob@example.com
+    </span>
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories WhitespaceOnly 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiBox-root mui-style-p20wo7"
+  />
+</div>
+`;
+
+exports[`./EmailInfo.stories WithTooltip 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="container"
+  >
+    <div
+      class="initialsAvatar MuiBox-root mui-style-9xpjgb"
+    >
+      a
+    </div>
+    <span
+      aria-label="alice@example.com"
       class="email MuiBox-root mui-style-0"
       data-mui-internal-clone-element="true"
     >
-      bob@safe.global
+      alice@example.com
     </span>
   </div>
 </div>
