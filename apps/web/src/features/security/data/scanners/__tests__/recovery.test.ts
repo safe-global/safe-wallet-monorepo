@@ -1,5 +1,5 @@
 import { recoveryScanner } from '../recovery'
-import { ZERO_ADDRESS } from '../constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { createMockContext } from '../test-helpers'
 
 describe('recoveryScanner', () => {

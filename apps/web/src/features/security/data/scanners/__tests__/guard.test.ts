@@ -1,5 +1,6 @@
 import { guardScanner } from '../guard'
-import { ZERO_ADDRESS, HIGH_VALUE_THRESHOLD_USD } from '../constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { HIGH_VALUE_THRESHOLD_USD } from '../constants'
 import { createMockContext } from '../test-helpers'
 
 describe('guardScanner', () => {

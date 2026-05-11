@@ -18,3 +18,17 @@ export const SEVERITY_RANK: Record<SecurityGrade, number> = {
   Medium: 2,
   Low: 3,
 }
+
+/** Score thresholds that bucket a numeric score into a SecurityGrade. */
+export const SEVERITY_SCORE_THRESHOLDS: Array<{ minScore: number; severity: SecurityGrade }> = [
+  { minScore: 80, severity: 'Low' },
+  { minScore: 50, severity: 'Medium' },
+  { minScore: 20, severity: 'High' },
+  { minScore: 0, severity: 'Critical' },
+]
+
+/** Derives a SecurityGrade from a numeric score (0–100) via SEVERITY_SCORE_THRESHOLDS. */
+export const getSeverityFromScore = (score: number): SecurityGrade => {
+  const match = SEVERITY_SCORE_THRESHOLDS.find((t) => score >= t.minScore)
+  return match?.severity ?? 'Critical'
+}

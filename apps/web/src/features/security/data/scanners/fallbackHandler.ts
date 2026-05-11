@@ -4,17 +4,13 @@ import {
 } from '@safe-global/safe-deployments'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SafeVersion } from '@safe-global/types-kit'
 import type { SecurityScanner } from './types'
-import { ZERO_ADDRESS } from './constants'
+import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '@/features/swap'
 
 // Only 1.3.0+ has the CompatibilityFallbackHandler; older versions used different handler contracts
 const COMPATIBILITY_HANDLER_VERSIONS: SafeVersion[] = ['1.3.0', '1.4.1']
-
-// CoW Protocol TWAP fallback handler — local constant to avoid cross-feature import from swap
-// https://github.com/cowprotocol/composable-cow/blob/main/networks.json
-const TWAP_FALLBACK_HANDLER = '0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5'
-const TWAP_FALLBACK_HANDLER_NETWORKS = ['1', '100', '137', '11155111', '8453', '42161', '43114', '232', '59144', '9745']
 
 /** Check if address matches an ExtensibleFallbackHandler deployment (v1.5.0+, not in SafeVersion type yet). */
 const isExtensibleFallbackHandler = (address: string, chainId: string): boolean => {
@@ -63,6 +59,7 @@ export const fallbackHandlerScanner: SecurityScanner = {
       }
     }
 
+    const handlerLabel = fallbackHandler.name ?? `${fallbackHandler.value.slice(0, 10)}...`
     const match = identifyFallbackHandler(fallbackHandler.value, chainId)
 
     if (match) {
@@ -71,7 +68,7 @@ export const fallbackHandlerScanner: SecurityScanner = {
         severity: 'Low',
         score: 100,
         evidence: [
-          { label: 'Handler', value: fallbackHandler.name ?? `${fallbackHandler.value.slice(0, 10)}...` },
+          { label: 'Handler', value: handlerLabel },
           { label: 'Status', value: HANDLER_LABELS[match] },
         ],
         remediation: '',
@@ -79,7 +76,6 @@ export const fallbackHandlerScanner: SecurityScanner = {
       }
     }
 
-    const handlerLabel = fallbackHandler.name ?? `${fallbackHandler.value.slice(0, 10)}...`
     return {
       status: 'issue',
       severity: 'High',

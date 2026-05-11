@@ -21,6 +21,18 @@ describe('accountSetupScanner', () => {
     expect(result.score).toBe(15)
   })
 
+  it('recommends 2 of 2 for a 1/2 Safe (never suggests the existing threshold)', async () => {
+    const ctx = createMockContext({
+      owners: [
+        { value: '0x1111111111111111111111111111111111111111' },
+        { value: '0x2222222222222222222222222222222222222222' },
+      ],
+      threshold: 1,
+    })
+    const result = await accountSetupScanner.scan(ctx)
+    expect(result.remediation).toContain('2 of 2')
+  })
+
   it('returns partial for threshold below simple majority', async () => {
     const ctx = createMockContext({
       owners: [

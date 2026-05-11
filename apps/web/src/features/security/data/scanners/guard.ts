@@ -1,10 +1,15 @@
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { ContractVersions, KnownContracts, type SupportedNetworks } from '@gnosis.pm/zodiac'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SecurityScanner } from './types'
-import { ZERO_ADDRESS, HIGH_VALUE_THRESHOLD_USD } from './constants'
+import { HIGH_VALUE_THRESHOLD_USD } from './constants'
 
-/** Name fragments that identify a trusted guard (case-insensitive match). */
-const TRUSTED_GUARD_NAMES = ['hypernative', 'scope guard', 'meta guard']
+/** Canonical (case-insensitive) guard names tagged as trusted. */
+const HYPERNATIVE_GUARD_NAME = 'hypernative'
+const SCOPE_GUARD_NAME = 'scope guard'
+const META_GUARD_NAME = 'meta guard'
+
+const TRUSTED_GUARD_NAMES = [HYPERNATIVE_GUARD_NAME, SCOPE_GUARD_NAME, META_GUARD_NAME]
 
 /** Zodiac guard contracts to check addresses against. */
 const ZODIAC_GUARD_CONTRACTS = [KnownContracts.SCOPE_GUARD, KnownContracts.META_GUARD]
@@ -24,9 +29,13 @@ const isKnownZodiacGuard = (chainId: string, guardAddress: string): boolean => {
   }
 }
 
-const isHypernativeGuard = (name?: string | null): boolean => {
+// Pure name-only heuristic to decide whether to tag a result with the hypernative partner.
+// The authoritative on-chain check (`features/hypernative/services/hypernativeGuardCheck.ts`)
+// needs a JSON-RPC provider, which the scanner intentionally avoids. We start the name with
+// the canonical prefix to keep false positives down.
+const nameSuggestsHypernativeGuard = (name?: string | null): boolean => {
   if (!name) return false
-  return name.toLowerCase().includes('hypernative')
+  return name.trim().toLowerCase().startsWith(HYPERNATIVE_GUARD_NAME)
 }
 
 /**
@@ -73,7 +82,7 @@ export const guardScanner: SecurityScanner = {
 
     // Tier 2: Known trusted guard
     if (hasGuard && isTrustedGuard(guard.name, chainId, guard.value)) {
-      const isHypernative = isHypernativeGuard(guard.name)
+      const isHypernative = nameSuggestsHypernativeGuard(guard.name)
       return {
         status: 'clear',
         severity: 'Low',

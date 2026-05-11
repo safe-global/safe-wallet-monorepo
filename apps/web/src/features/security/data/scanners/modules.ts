@@ -1,8 +1,11 @@
 import { ContractVersions, KnownContracts, type SupportedNetworks } from '@gnosis.pm/zodiac'
 import { getAllowanceModuleDeployment } from '@safe-global/safe-modules-deployments'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SecurityScanner } from './types'
-import { ZERO_ADDRESS } from './constants'
+
+/** Safe Allowance Module deployment versions to check against. */
+const ALLOWANCE_MODULE_VERSIONS = ['0.1.0', '0.1.1']
 
 /**
  * Known module name fragments (case-insensitive).
@@ -57,7 +60,7 @@ const isKnownZodiacModule = (chainId: string, moduleAddress: string): boolean =>
  * Check if a module address matches a known Safe Allowance Module deployment.
  */
 const isKnownAllowanceModule = (chainId: string, moduleAddress: string): boolean => {
-  for (const version of ['0.1.0', '0.1.1']) {
+  for (const version of ALLOWANCE_MODULE_VERSIONS) {
     const deployment = getAllowanceModuleDeployment({ version })
     const addr = deployment?.networkAddresses[chainId]
     if (addr && sameAddress(addr, moduleAddress)) {
@@ -103,6 +106,8 @@ export const modulesScanner: SecurityScanner = {
     const untrusted = activeModules.filter((m) => !isKnownModule(chainId, m.value, m.name))
 
     const moduleLabel = (m: { value: string; name?: string | null }) => m.name || `${m.value.slice(0, 10)}...`
+    const trustedEvidence = trusted.map((m) => ({ label: 'Trusted module', value: moduleLabel(m) }))
+    const untrustedEvidence = untrusted.map((m) => ({ label: 'Unverified module', value: moduleLabel(m) }))
 
     // Tier 2: All modules are trusted
     if (untrusted.length === 0) {
@@ -110,7 +115,7 @@ export const modulesScanner: SecurityScanner = {
         status: 'clear',
         severity: 'Low',
         score: 100,
-        evidence: trusted.map((m) => ({ label: 'Trusted module', value: moduleLabel(m) })),
+        evidence: trustedEvidence,
         remediation: '',
         lastChecked: now,
       }
@@ -122,10 +127,7 @@ export const modulesScanner: SecurityScanner = {
         status: 'partial',
         severity: 'Medium',
         score: 50,
-        evidence: [
-          ...trusted.map((m) => ({ label: 'Trusted module', value: moduleLabel(m) })),
-          ...untrusted.map((m) => ({ label: 'Unverified module', value: moduleLabel(m) })),
-        ],
+        evidence: [...trustedEvidence, ...untrustedEvidence],
         remediation:
           'One installed module could not be verified as a known Safe ecosystem module. Review it in Settings to ensure it is from a trusted source.',
         lastChecked: now,
@@ -137,10 +139,7 @@ export const modulesScanner: SecurityScanner = {
       status: 'issue',
       severity: 'High',
       score: 20,
-      evidence: [
-        ...trusted.map((m) => ({ label: 'Trusted module', value: moduleLabel(m) })),
-        ...untrusted.map((m) => ({ label: 'Unverified module', value: moduleLabel(m) })),
-      ],
+      evidence: [...trustedEvidence, ...untrustedEvidence],
       remediation:
         'Unverified modules have full control over your Safe and can execute transactions without signer approval. Review and remove any modules you do not recognize.',
       lastChecked: now,
