@@ -5,6 +5,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { isEmptyHexData } from '@safe-global/utils/utils/hex'
 
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -78,6 +79,21 @@ type TotalOutgoingInputs = {
   gasSymbol: string
   gasDecimals: number
   balances: Balances
+}
+
+const getSendInGasToken = (safeTx: SafeTransaction, gasTokenAddress: string): bigint => {
+  const { to, value, data } = safeTx.data
+  if (!data || isEmptyHexData(data)) {
+    return sameAddress(gasTokenAddress, ZERO_ADDRESS) ? BigInt(value) : 0n
+  }
+  if (data.startsWith(TRANSFER_SELECTOR) && sameAddress(to, gasTokenAddress)) {
+    try {
+      return ERC20_INTERFACE.decodeFunctionData('transfer', data)[1] as bigint
+    } catch {
+      return 0n
+    }
+  }
+  return 0n
 }
 
 const computeTotalOutgoing = ({
@@ -286,7 +302,9 @@ export const useFeesPreview = (): FeesPreviewData => {
     const gasFiatUsd = gasTokenBalance
       ? Number(formatUnits(gasWei, gasDecimals)) * Number(gasTokenBalance.fiatConversion)
       : 0
-    const safeHasEnoughGas = gasTokenBalance ? BigInt(gasTokenBalance.balance) >= gasWei : false
+    const safeHasEnoughGas = gasTokenBalance
+      ? BigInt(gasTokenBalance.balance) >= gasWei + getSendInGasToken(safeTx, selectedAddress)
+      : false
 
     const totalOutgoing = computeTotalOutgoing({
       safeTx,
@@ -405,7 +423,9 @@ export const useFeesPreview = (): FeesPreviewData => {
     const gasWei = (BigInt(txData.safeTxGas) + BigInt(txData.baseGas)) * BigInt(txData.gasPrice)
     const gasAmount = formatVisualAmount(gasWei, gasDecimals)
     const gasTokenBalance = balances.items.find((b) => sameAddress(b.tokenInfo.address, selectedAddress))
-    const safeHasEnoughGas = gasTokenBalance ? BigInt(gasTokenBalance.balance) >= gasWei : false
+    const safeHasEnoughGas = gasTokenBalance
+      ? BigInt(gasTokenBalance.balance) >= gasWei + getSendInGasToken(safeTx, selectedAddress)
+      : false
     const totalOutgoing = computeTotalOutgoing({
       safeTx,
       gasWei,
