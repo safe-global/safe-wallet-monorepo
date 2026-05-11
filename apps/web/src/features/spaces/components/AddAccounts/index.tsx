@@ -426,6 +426,7 @@ const AddAccounts = ({
                               onToggle={(check) => handleSelectAll('all', check)}
                               label="Select all"
                               showCount
+                              countTooltip="Multi-chain safes count once per network"
                               testId="select-all-global"
                             />
                             {capReached && (
