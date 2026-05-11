@@ -16,7 +16,7 @@ jobs:
       pull-requests: write # Comment on PRs
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
         with:
           fetch-depth: 0 # Required for TurboSnap git history analysis
 
@@ -34,7 +34,7 @@ jobs:
       # Uses the selected branch (from GitHub UI) as the baseline
       # TurboSnap is always enabled to only test changed stories
       - name: Run Chromatic
-        uses: chromaui/action@latest
+        uses: chromaui/action@8d925269a481085d451544f6bd9aa2ab3af55b5d # v16.9.1
         with:
           workingDir: apps/web
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
