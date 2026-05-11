@@ -3,7 +3,7 @@ import { useContext, useRef, useState } from 'react'
 import { Alert, Divider, MenuItem, Popover, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import OutgoingIcon from '@/public/images/transactions/outgoing.svg'
+import ArrowUpRightIcon from '@/public/images/common/arrow-up-right.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
 import TokenIcon from '@/components/common/TokenIcon'
@@ -334,7 +334,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
         </Typography>
         <a href={HOW_FEES_WORK_URL} target="_blank" rel="noreferrer" className={css.howFeesWork}>
           How fees work
-          <SvgIcon component={OutgoingIcon} inheritViewBox className={css.howFeesWorkIcon} sx={{ fontSize: '16px' }} />
+          <SvgIcon component={ArrowUpRightIcon} inheritViewBox sx={{ fontSize: '16px' }} />
         </a>
       </div>
 

@@ -33,10 +33,6 @@
   line-height: 16px;
 }
 
-.howFeesWorkIcon path {
-  fill: currentColor;
-}
-
 .howFeesWork:hover {
   opacity: 0.85;
 }
