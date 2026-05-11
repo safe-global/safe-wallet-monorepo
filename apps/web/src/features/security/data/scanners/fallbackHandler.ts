@@ -7,7 +7,10 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SafeVersion } from '@safe-global/types-kit'
 import type { SecurityScanner } from './types'
-import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '@/features/swap'
+// Import directly from helpers/utils (not from '@/features/swap') to avoid pulling
+// the swap feature handle (via createFeatureHandle) into the scanner module graph —
+// that creates a circular dependency with @/features/__core__ in test environments.
+import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '@/features/swap/helpers/utils'
 
 // Only 1.3.0+ has the CompatibilityFallbackHandler; older versions used different handler contracts
 const COMPATIBILITY_HANDLER_VERSIONS: SafeVersion[] = ['1.3.0', '1.4.1']
