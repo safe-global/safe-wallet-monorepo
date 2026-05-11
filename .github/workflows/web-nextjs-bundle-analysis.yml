@@ -22,7 +22,7 @@ jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
 
       - name: Install dependencies
         uses: ./.github/actions/yarn
@@ -38,7 +38,7 @@ jobs:
           npx -p nextjs-bundle-analysis report
 
       - name: Upload bundle
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: bundle
           path: apps/web/.next/analyze/__bundle_analysis.json
@@ -83,7 +83,7 @@ jobs:
           echo EOF >> $GITHUB_OUTPUT
 
       - name: Comment
-        uses: marocchino/sticky-pull-request-comment@v3
+        uses: marocchino/sticky-pull-request-comment@d4d6b0936434b21bc8345ad45a440c5f7d2c40ff # v3.0.3
         with:
           header: next-bundle-analysis
           message: ${{ steps.get-comment-body.outputs.body }}
