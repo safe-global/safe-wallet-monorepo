@@ -28,6 +28,7 @@ import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
+import StatusCell from '../StatusCell/StatusCell'
 
 const DASH = '—'
 
@@ -49,6 +50,14 @@ type ScoreCellProps = {
   isScanning?: boolean
   getStrengthLevel: SecurityContract['getStrengthLevel']
   getStrengthColor: SecurityContract['getStrengthColor']
+}
+
+/** Worst-grade ranking matches the SafeGrade ordering used by the top filter chips. */
+const SAFE_GRADE_RANK: Record<SafeGrade, number> = {
+  critical: 0,
+  at_risk: 1,
+  needs_attention: 2,
+  passing: 3,
 }
 
 const ScoreCell = ({ summary, isScanning, getStrengthLevel, getStrengthColor }: ScoreCellProps) => {
@@ -174,6 +183,33 @@ const getAggregateSummary = (
   }
 }
 
+/**
+ * Worst SafeGrade across a multichain Safe's chain entries. Used for the collapsed
+ * parent row's Status cell so it reflects the most severe chain (matching the badge
+ * counting semantics in WorkspaceHealthCard).
+ */
+const getAggregateSafeGrade = (
+  safe: SpaceSafeEntry,
+  scanResults: Record<string, Record<string, ScanResult>>,
+  scanKey: SecurityContract['scanKey'],
+  getSafeGrade: SecurityContract['getSafeGrade'],
+): SafeGrade | null => {
+  let worstRank = SAFE_GRADE_RANK.passing + 1
+  let worstGrade: SafeGrade | null = null
+  for (const chain of safe.chainEntries) {
+    const key = scanKey(safe.address, chain.chainId)
+    const results = scanResults[key]
+    if (!results) continue
+    const grade = getSafeGrade(results)
+    const rank = SAFE_GRADE_RANK[grade]
+    if (rank < worstRank) {
+      worstRank = rank
+      worstGrade = grade
+    }
+  }
+  return worstGrade
+}
+
 const hasMultichainWarning = (
   safe: SpaceSafeEntry,
   scanResults: Record<string, Record<string, ScanResult>>,
@@ -282,7 +318,7 @@ const SecuritySafesTable = ({
   if (!security.$isReady) return <></>
 
   // After the $isReady check, services are guaranteed to be defined.
-  const { scanKey, computeSummary, formatTimestamp, getStrengthLevel, getStrengthColor } = security
+  const { scanKey, computeSummary, formatTimestamp, getStrengthLevel, getStrengthColor, getSafeGrade } = security
 
   return (
     <Table
@@ -323,14 +359,15 @@ const SecuritySafesTable = ({
     >
       <TableHead>
         <TableRow>
-          <TableCell sx={{ width: '26%' }}>Account</TableCell>
-          <TableCell sx={{ width: '12%' }}>Network</TableCell>
-          <TableCell sx={{ width: '10%' }}>Balance</TableCell>
-          <TableCell sx={{ width: '10%' }}>Threshold</TableCell>
-          <TableCell sx={{ width: '9%' }}>Version</TableCell>
-          <TableCell sx={{ width: '11%' }}>Score</TableCell>
-          <TableCell sx={{ width: '13%' }}>Last scanned</TableCell>
-          <TableCell sx={{ width: '9%' }} />
+          <TableCell sx={{ width: '22%' }}>Account</TableCell>
+          <TableCell sx={{ width: '11%' }}>Network</TableCell>
+          <TableCell sx={{ width: '9%' }}>Balance</TableCell>
+          <TableCell sx={{ width: '9%' }}>Threshold</TableCell>
+          <TableCell sx={{ width: '8%' }}>Version</TableCell>
+          <TableCell sx={{ width: '11%' }}>Status</TableCell>
+          <TableCell sx={{ width: '10%' }}>Score</TableCell>
+          <TableCell sx={{ width: '12%' }}>Last scanned</TableCell>
+          <TableCell sx={{ width: '8%' }} />
         </TableRow>
       </TableHead>
       <AnimatePresence mode="wait">
@@ -348,6 +385,7 @@ const SecuritySafesTable = ({
             if (!isMultichain) {
               const key = scanKey(safe.address, safe.chainId)
               const summary = scanResults[key] ? computeSummary(scanResults[key]) : null
+              const grade = scanResults[key] ? getSafeGrade(scanResults[key]) : null
               const isSelected = selectedSafe?.address === safe.address && selectedSafe?.chainId === safe.chainId
               const isScanning = scanningKeys?.has(key)
 
@@ -407,6 +445,9 @@ const SecuritySafesTable = ({
                     <VersionCell results={scanResults[key]} isScanning={isScanning} />
                   </TableCell>
                   <TableCell>
+                    <StatusCell grade={grade} isScanning={isScanning} />
+                  </TableCell>
+                  <TableCell>
                     <ScoreCell
                       summary={summary}
                       isScanning={isScanning}
@@ -440,6 +481,7 @@ const SecuritySafesTable = ({
             }
 
             const aggregateSummary = getAggregateSummary(safe, scanResults, security)
+            const aggregateGrade = getAggregateSafeGrade(safe, scanResults, scanKey, getSafeGrade)
             const aggregateScanning = isAnyChainScanning(safe, scanningKeys, scanKey)
             const showMultichainWarning = hasMultichainWarning(safe, scanResults, scanKey)
             const totalBalance = safe.chainEntries.reduce(
@@ -532,6 +574,9 @@ const SecuritySafesTable = ({
                     </Typography>
                   </TableCell>
                   <TableCell>
+                    <StatusCell grade={aggregateGrade} isScanning={aggregateScanning} />
+                  </TableCell>
+                  <TableCell>
                     <ScoreCell
                       summary={aggregateSummary}
                       isScanning={aggregateScanning}
@@ -551,6 +596,7 @@ const SecuritySafesTable = ({
                   safe.chainEntries.map((chain, childIdx) => {
                     const key = scanKey(safe.address, chain.chainId)
                     const summary = scanResults[key] ? computeSummary(scanResults[key]) : null
+                    const childGrade = scanResults[key] ? getSafeGrade(scanResults[key]) : null
                     const isSelected = selectedSafe?.address === safe.address && selectedSafe?.chainId === chain.chainId
                     const isScanning = scanningKeys?.has(key)
                     const childHref = getSafeSecurityHref(safe.address, chain.chainId)
@@ -597,6 +643,9 @@ const SecuritySafesTable = ({
                         </TableCell>
                         <TableCell>
                           <VersionCell results={scanResults[key]} isScanning={isScanning} />
+                        </TableCell>
+                        <TableCell>
+                          <StatusCell grade={childGrade} isScanning={isScanning} />
                         </TableCell>
                         <TableCell>
                           <ScoreCell
