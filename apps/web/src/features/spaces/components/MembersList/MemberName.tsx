@@ -1,4 +1,4 @@
-import InitialsAvatar from '../InitialsAvatar'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { Stack, Typography } from '@mui/material'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'

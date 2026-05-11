@@ -1,6 +1,6 @@
 import { Typography, Paper, Box, Stack } from '@mui/material'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import InitialsAvatar from '../InitialsAvatar'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 import css from './styles.module.css'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { isAuthenticated } from '@/store/authSlice'

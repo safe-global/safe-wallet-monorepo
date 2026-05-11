@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import EmailInfo from '@/components/common/EmailInfo'
 import { NetworkLogosList } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { BookUser, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
@@ -117,13 +119,17 @@ function SpaceAddressBookTable({
               {hasMiddleColumn && (
                 <TableCell>
                   {showAddedBy && entry.createdBy ? (
-                    <EthHashInfo
-                      address={entry.createdBy}
-                      avatarSize={20}
-                      onlyName
-                      showPrefix={false}
-                      showCopyButton={false}
-                    />
+                    isAddress(entry.createdBy) ? (
+                      <EthHashInfo
+                        address={entry.createdBy}
+                        avatarSize={20}
+                        onlyName
+                        showPrefix={false}
+                        showCopyButton={false}
+                      />
+                    ) : (
+                      <EmailInfo email={entry.createdBy} size="xsmall" />
+                    )
                   ) : showLastUpdated ? (
                     <span className="text-muted-foreground text-xs">
                       {formatDate(entry.updatedAt || entry.createdAt)}
