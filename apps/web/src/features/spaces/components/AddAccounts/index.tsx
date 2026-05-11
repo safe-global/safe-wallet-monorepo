@@ -45,10 +45,11 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
+import SelectAllToggle from './SelectAllToggle'
+import { useSelectAll } from './useSelectAll'
+import type { AddAccountsFormValues } from './types'
 
-export type AddAccountsFormValues = {
-  selectedSafes: Record<string, boolean>
-}
+export type { AddAccountsFormValues } from './types'
 
 function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
   const flatSafeItems = flattenSafeItems(spaceSafes)
@@ -203,6 +204,16 @@ const AddAccounts = ({
   const removedSafesCount = getRemovedSafes(selectedSafes, spaceSafes).length
   const isFormDirty = selectedSafesLength > 0 || removedSafesCount > 0
   const { isSubmitting } = formState
+
+  const visibleTrusted = debouncedSearchQuery ? filteredTrusted : trustedSafes
+  const visibleOwned = debouncedSearchQuery ? filteredOwned : ownedSafes
+
+  const { trustedSelection, ownedSelection, globalSelection, handleSelectAll, capReached } = useSelectAll({
+    visibleTrusted,
+    visibleOwned,
+    selectedSafes,
+    setValue,
+  })
 
   // Reset form when modal opens
   useEffect(() => {
@@ -400,12 +411,48 @@ const AddAccounts = ({
                       <Typography variant="paragraph" align="center" color="muted" className="py-8">
                         No safes on your list
                       </Typography>
+                    ) : globalSelection.total === 0 && debouncedSearchQuery ? (
+                      <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                        No safes match your search
+                      </Typography>
                     ) : (
-                      <OnboardingSafesList
-                        trustedSafes={debouncedSearchQuery ? filteredTrusted : trustedSafes}
-                        ownedSafes={debouncedSearchQuery ? filteredOwned : ownedSafes}
-                        similarAddresses={similarAddresses}
-                      />
+                      <>
+                        {globalSelection.total > 0 && (
+                          <div className="flex items-center justify-between pb-1">
+                            <SelectAllToggle
+                              state={globalSelection.state}
+                              count={globalSelection.selectedCount}
+                              total={globalSelection.total}
+                              onToggle={(check) => handleSelectAll('all', check)}
+                              label="Select all"
+                              showCount
+                              testId="select-all-global"
+                            />
+                            {capReached && (
+                              <Typography variant="paragraph" color="muted" className="text-xs">
+                                Limit of {SAFE_ACCOUNTS_LIMIT} reached
+                              </Typography>
+                            )}
+                          </div>
+                        )}
+                        <OnboardingSafesList
+                          trustedSafes={visibleTrusted}
+                          ownedSafes={visibleOwned}
+                          similarAddresses={similarAddresses}
+                          trustedSelectAll={{
+                            state: trustedSelection.state,
+                            count: trustedSelection.selectedCount,
+                            total: trustedSelection.total,
+                            onToggle: (check) => handleSelectAll('trusted', check),
+                          }}
+                          ownedSelectAll={{
+                            state: ownedSelection.state,
+                            count: ownedSelection.selectedCount,
+                            total: ownedSelection.total,
+                            onToggle: (check) => handleSelectAll('owned', check),
+                          }}
+                        />
+                      </>
                     )}
                   </div>
 
