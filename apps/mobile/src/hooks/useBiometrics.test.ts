@@ -2,7 +2,7 @@ import { act, waitFor } from '@testing-library/react-native'
 import { renderHook, type TestStore } from '@/src/tests/test-utils'
 import { useBiometrics } from './useBiometrics'
 import * as Keychain from 'react-native-keychain'
-import { Linking } from 'react-native'
+import { Alert, Linking } from 'react-native'
 
 const mockGetSupportedBiometryType = Keychain.getSupportedBiometryType as jest.Mock
 const mockSetGenericPassword = Keychain.setGenericPassword as jest.Mock
@@ -113,7 +113,8 @@ describe('useBiometrics', () => {
       const store = hookResult.store as TestStore
 
       await act(async () => {
-        await hookResult.result.current.toggleBiometrics(true)
+        const returnValue = await hookResult.result.current.toggleBiometrics(true)
+        expect(returnValue).toEqual({ status: 'enabled' })
       })
 
       await waitFor(() => {
@@ -130,7 +131,8 @@ describe('useBiometrics', () => {
       const store = hookResult.store as TestStore
 
       await act(async () => {
-        await hookResult.result.current.toggleBiometrics(false)
+        const returnValue = await hookResult.result.current.toggleBiometrics(false)
+        expect(returnValue).toEqual({ status: 'disabled' })
       })
 
       await waitFor(() => {
@@ -152,7 +154,7 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await hookResult.result.current.toggleBiometrics(true)
-        expect(returnValue).toBe(false)
+        expect(returnValue).toEqual({ status: 'cancelled' })
       })
 
       await waitFor(() => {
@@ -172,7 +174,7 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await result.current.toggleBiometrics(true)
-        expect(returnValue).toBe(false)
+        expect(returnValue).toEqual({ status: 'cancelled' })
       })
     })
 
@@ -188,7 +190,7 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await result.current.toggleBiometrics(true)
-        expect(returnValue).toBe(false)
+        expect(returnValue).toEqual({ status: 'cancelled' })
       })
     })
 
@@ -204,26 +206,38 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await result.current.toggleBiometrics(true)
-        expect(returnValue).toBe(false)
+        expect(returnValue).toEqual({ status: 'cancelled' })
       })
     })
 
-    it('does not enable when biometrics is not supported', async () => {
+    it('returns os-not-configured when biometrics is not available, without redirecting to Settings', async () => {
+      // Compliance invariant: enabling biometrics must NEVER call Linking.openURL or
+      // Linking.openSettings as a side effect. The caller renders an in-app explainer
+      // with an explicit "Open Settings" button.
       mockGetSupportedBiometryType.mockResolvedValue(null)
+      const openURLSpy = jest.spyOn(Linking, 'openURL').mockImplementation(jest.fn())
+      const openSettingsSpy = jest.spyOn(Linking, 'openSettings').mockImplementation(jest.fn())
 
       const hookResult = renderHook(() => useBiometrics())
       const store = hookResult.store as TestStore
 
       await act(async () => {
-        await hookResult.result.current.toggleBiometrics(true)
+        const returnValue = await hookResult.result.current.toggleBiometrics(true)
+        expect(returnValue).toEqual({ status: 'os-not-configured' })
       })
 
       expect(store.getState().biometrics.isEnabled).toBe(false)
+      expect(openURLSpy).not.toHaveBeenCalled()
+      expect(openSettingsSpy).not.toHaveBeenCalled()
+
+      openURLSpy.mockRestore()
+      openSettingsSpy.mockRestore()
     })
 
     it('handles unexpected errors during biometrics setup', async () => {
       mockGetSupportedBiometryType.mockResolvedValue(Keychain.BIOMETRY_TYPE.FACE_ID)
-      mockSetGenericPassword.mockRejectedValue(new Error('Unexpected storage error'))
+      const thrown = new Error('Unexpected storage error')
+      mockSetGenericPassword.mockRejectedValue(thrown)
       mockResetGenericPassword.mockResolvedValue(true)
 
       const hookResult = renderHook(() => useBiometrics())
@@ -231,7 +245,7 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await hookResult.result.current.toggleBiometrics(true)
-        expect(returnValue).toBe(false)
+        expect(returnValue).toEqual({ status: 'error', error: thrown })
       })
 
       expect(store.getState().biometrics.isEnabled).toBe(false)
@@ -248,8 +262,65 @@ describe('useBiometrics', () => {
 
       await act(async () => {
         const returnValue = await result.current.toggleBiometrics(true)
-        expect(returnValue).toBe(false)
+        expect(returnValue).toEqual({
+          status: 'error',
+          error: expect.objectContaining({ message: 'Failed to verify biometrics setup' }),
+        })
       })
+    })
+
+    it('returns error when disable fails to reset the keychain', async () => {
+      const resetError = new Error('Keychain unavailable')
+      mockResetGenericPassword.mockRejectedValue(resetError)
+
+      const hookResult = renderHook(() => useBiometrics(), {
+        biometrics: { isEnabled: true, isSupported: true, type: 'FACE_ID', userAttempts: 0 },
+      })
+      const store = hookResult.store as TestStore
+
+      await act(async () => {
+        const returnValue = await hookResult.result.current.toggleBiometrics(false)
+        expect(returnValue).toEqual({ status: 'error', error: resetError })
+      })
+
+      // Redux still flips to disabled to match user intent.
+      expect(store.getState().biometrics.isEnabled).toBe(false)
+    })
+  })
+
+  describe('promptBiometricsSetup', () => {
+    it('shows an Alert with explicit Cancel and Open Settings buttons', () => {
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
+      const { result } = renderHook(() => useBiometrics())
+
+      result.current.promptBiometricsSetup()
+
+      expect(alertSpy).toHaveBeenCalledTimes(1)
+      const [, , buttons] = alertSpy.mock.calls[0]
+      expect(buttons).toEqual([
+        expect.objectContaining({ text: 'Cancel', style: 'cancel' }),
+        expect.objectContaining({ text: 'Open Settings' }),
+      ])
+
+      alertSpy.mockRestore()
+    })
+
+    it('only invokes Linking when the user taps Open Settings', () => {
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
+      const openURLSpy = jest.spyOn(Linking, 'openURL').mockImplementation(jest.fn())
+      const { result } = renderHook(() => useBiometrics())
+
+      result.current.promptBiometricsSetup()
+      expect(openURLSpy).not.toHaveBeenCalled()
+
+      // Simulate the user tapping the Open Settings button.
+      const buttons = alertSpy.mock.calls[0][2] as { text: string; onPress?: () => void }[]
+      buttons.find((b) => b.text === 'Open Settings')?.onPress?.()
+
+      expect(openURLSpy).toHaveBeenCalledWith('app-settings:')
+
+      alertSpy.mockRestore()
+      openURLSpy.mockRestore()
     })
   })
 
@@ -278,6 +349,27 @@ describe('useBiometrics', () => {
       await waitFor(() => {
         expect(store.getState().biometrics.isEnabled).toBe(false)
       })
+    })
+
+    it('does not redirect to Settings when OS-level biometrics is disabled on mount', async () => {
+      // Background re-evaluation must not auto-redirect either.
+      mockGetSupportedBiometryType.mockResolvedValue(null)
+      mockResetGenericPassword.mockResolvedValue(true)
+      const openURLSpy = jest.spyOn(Linking, 'openURL').mockImplementation(jest.fn())
+      const openSettingsSpy = jest.spyOn(Linking, 'openSettings').mockImplementation(jest.fn())
+
+      renderHook(() => useBiometrics(), {
+        biometrics: { isEnabled: true, isSupported: true, type: 'FACE_ID', userAttempts: 0 },
+      })
+
+      await waitFor(() => {
+        expect(mockResetGenericPassword).toHaveBeenCalled()
+      })
+      expect(openURLSpy).not.toHaveBeenCalled()
+      expect(openSettingsSpy).not.toHaveBeenCalled()
+
+      openURLSpy.mockRestore()
+      openSettingsSpy.mockRestore()
     })
   })
 })

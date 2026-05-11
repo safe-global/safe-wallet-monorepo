@@ -39,10 +39,18 @@ tags:
 - tapOn:
     id: 'e2eSwitchToOwnerState'
 
-# Tap "Connect a different wallet"
+# Tap "Connect a different wallet" — ConnectSignerError dismisses + re-runs initiateConnection
 - tapOn:
     id: 'connect-signer-error-done'
 
-# Verify Name Signer screen appears (owner address accepted)
+# Wait for the dismiss animation to settle before asserting the new screen
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Verify the error screen is gone and the retry routed to the Name screen
+- extendedWaitUntil:
+    notVisible:
+      id: 'connect-signer-error'
+    timeout: 5000
 - assertVisible: 'Name your signer'
 - assertVisible: 'E2E Wallet - 3472'

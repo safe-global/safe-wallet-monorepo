@@ -427,14 +427,33 @@
             }
           },
           {
-            "name": "fiatCode",
+            "name": "sync",
             "required": false,
             "in": "query",
-            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
+            "description": "If true, waits for position data to be aggregated before responding (up to 30s)",
             "schema": {
-              "default": "USD",
-              "example": "USD",
-              "type": "string"
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "excludeDust",
+            "required": false,
+            "in": "query",
+            "description": "If true, filters out dust positions (balance < $0.001 USD)",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "If true, only returns trusted tokens",
+            "schema": {
+              "example": true,
+              "type": "boolean"
             }
           },
           {
@@ -448,36 +467,13 @@
             }
           },
           {
-            "name": "trusted",
+            "name": "fiatCode",
             "required": false,
             "in": "query",
-            "description": "If true, only returns trusted tokens",
+            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
             "schema": {
-              "default": true,
-              "example": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "excludeDust",
-            "required": false,
-            "in": "query",
-            "description": "If true, filters out dust positions (balance < $0.001 USD)",
-            "schema": {
-              "default": true,
-              "example": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "sync",
-            "required": false,
-            "in": "query",
-            "description": "If true, waits for position data to be aggregated before responding (up to 30s)",
-            "schema": {
-              "default": false,
-              "example": false,
-              "type": "boolean"
+              "example": "USD",
+              "type": "string"
             }
           }
         ],
@@ -5357,28 +5353,10 @@
             }
           },
           {
-            "name": "safe",
+            "name": "cursor",
             "required": false,
             "in": "query",
-            "description": "Filter by Safe address",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegate",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegate address",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegator",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegator address",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -5393,10 +5371,28 @@
             }
           },
           {
-            "name": "cursor",
+            "name": "delegator",
             "required": false,
             "in": "query",
-            "description": "Pagination cursor for retrieving the next set of results",
+            "description": "Filter by delegator address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safe",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Safe address",
             "schema": {
               "type": "string"
             }
@@ -5587,28 +5583,10 @@
             }
           },
           {
-            "name": "safe",
+            "name": "cursor",
             "required": false,
             "in": "query",
-            "description": "Filter by Safe address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegate",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegate address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegator",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegator address (0x prefixed hex string)",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -5623,10 +5601,28 @@
             }
           },
           {
-            "name": "cursor",
+            "name": "delegator",
             "required": false,
             "in": "query",
-            "description": "Pagination cursor for retrieving the next set of results",
+            "description": "Filter by delegator address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safe",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Safe address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -6123,6 +6119,10 @@
           "signerAddress": {
             "type": "string",
             "description": "Wallet signer address. Present only for SIWE-authenticated users."
+          },
+          "email": {
+            "type": "string",
+            "description": "Verified email address. Present only for OIDC-authenticated users when stored."
           }
         },
         "required": [
@@ -8596,10 +8596,20 @@
             }
           },
           "createdBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Email or wallet address of the creator, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "createdByUserId": {
+            "type": "number",
+            "description": "User ID of the creator"
           },
           "lastUpdatedBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Email or wallet address of the last editor, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "lastUpdatedByUserId": {
+            "type": "number",
+            "description": "User ID of the last editor"
           },
           "createdAt": {
             "format": "date-time",
@@ -8615,7 +8625,9 @@
           "address",
           "chainIds",
           "createdBy",
+          "createdByUserId",
           "lastUpdatedBy",
+          "lastUpdatedByUserId",
           "createdAt",
           "updatedAt"
         ]
@@ -9100,11 +9112,16 @@
               "PENDING",
               "ACTIVE"
             ]
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
           "id",
-          "status"
+          "status",
+          "email"
         ]
       },
       "MemberDto": {

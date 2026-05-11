@@ -71,31 +71,17 @@ class NotificationsService {
     }
   }
 
-  async getAllPermissions(shouldOpenSettings = false) {
+  async getAllPermissions() {
     try {
       const promises: Promise<string>[] = notificationChannels.map((channel: AndroidChannel) =>
         withTimeout(this.createChannel(channel), 5000),
       )
       // 1 - Creates android's notifications channel
       await Promise.allSettled(promises)
-      const { authorizationStatus } = await notifee.requestPermission()
-      // 2 - Verifies blocked notifications
+      // 2 - Request OS permission (may show prompt; status only — never auto-redirects to Settings)
+      await notifee.requestPermission()
+      // 3 - Verifies blocked notifications
       const blockedNotifications = await withTimeout(this.getBlockedNotifications(), 5000)
-      /**
-       * 3 - If permission has not being granted already or blocked notifications are found, open device's settings
-       * so that user can enable DEVICE notifications, but ONLY if explicitly requested via shouldOpenSettings
-       **/
-      if (shouldOpenSettings && authorizationStatus === AuthorizationStatus.DENIED) {
-        const settings = await notifee.getNotificationSettings()
-
-        if (
-          settings.authorizationStatus === AuthorizationStatus.NOT_DETERMINED ||
-          settings.authorizationStatus === AuthorizationStatus.DENIED
-        ) {
-          await this.openDeviceSettings()
-        }
-      }
-
       // 4 - Check if the user has enabled device notifications
       const permission = await withTimeout(this.checkCurrentPermissions(), 5000)
 
@@ -132,8 +118,10 @@ class NotificationsService {
     return status === AuthorizationStatus.DENIED
   }
 
+  // Pure side-effect: opens OS Settings. Never re-requests permission, so denial of an OS prompt
+  // can never chain into a Settings redirect. Apple App Store guideline 5.1.1(iv): Settings may
+  // only be opened from an explicit user tap, never as a side effect of a permission denial.
   async openDeviceSettings() {
-    await notifee.requestPermission()
     try {
       if (Platform.OS === 'ios') {
         Linking.openURL('app-settings:')
@@ -141,7 +129,7 @@ class NotificationsService {
         Linking.openSettings()
       }
     } catch (error) {
-      Logger.error('Error checking if a user has push notifications permission', error)
+      Logger.error('Error opening device settings for notifications', error)
     }
   }
 

@@ -277,5 +277,36 @@ describe('DatadogProvider', () => {
         expect(filterRumEvent(buildErrorEvent({ message }), {} as any)).toBe(false)
       }
     })
+
+    it('drops errors auto-captured from console.error (source=console)', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const event = buildErrorEvent({
+        source: 'console',
+        message: 'Failed to copy address: PermissionDenied',
+        stack: 'at copy (https://app.safe.global/_next/static/chunks/main.js:1:1)',
+      })
+      expect(filterRumEvent(event, {} as any)).toBe(false)
+    })
+
+    it('drops errors auto-captured from the Browser Reporting API (source=report)', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      const event = buildErrorEvent({
+        source: 'report',
+        message: "csp_violation: 'eval' blocked by 'script-src' directive",
+      })
+      expect(filterRumEvent(event, {} as any)).toBe(false)
+    })
+
+    it('keeps errors from user-impacting sources (unhandled exceptions, network, custom)', async () => {
+      const { filterRumEvent } = await import('../datadog')
+      for (const source of ['source', 'network', 'custom', undefined]) {
+        const event = buildErrorEvent({
+          source,
+          message: 'Boom',
+          stack: 'at handler (https://app.safe.global/_next/static/chunks/main.js:1:1)',
+        })
+        expect(filterRumEvent(event, {} as any)).toBe(true)
+      }
+    })
   })
 })

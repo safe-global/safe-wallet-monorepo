@@ -10,6 +10,8 @@ import {
   switchToOwnerState,
   setupWcGateReconnect,
   setupWcGateWrongNetwork,
+  setupWcGateReconnectWrongWallet,
+  setupConnectSignerCollision,
 } from '../setup/connectSignerSetup'
 import { setupOnboardedAccountForAssets } from '../setup/assetsSetup'
 import { setupPositionsTestSafe } from '../setup/positionsSetup'
@@ -248,6 +250,18 @@ export function TestCtrls() {
         <Pressable
           testID="e2eWcGateWrongNetwork"
           onPress={() => setupWcGateWrongNetwork(dispatch, router)}
+          accessibilityRole="button"
+          style={BTN}
+        />
+        <Pressable
+          testID="e2eWcGateReconnectWrongWallet"
+          onPress={() => setupWcGateReconnectWrongWallet(dispatch, router)}
+          accessibilityRole="button"
+          style={BTN}
+        />
+        <Pressable
+          testID="e2eConnectSignerCollision"
+          onPress={() => setupConnectSignerCollision(dispatch, router)}
           accessibilityRole="button"
           style={BTN}
         />

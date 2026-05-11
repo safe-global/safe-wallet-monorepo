@@ -10,6 +10,9 @@ function useOpenExplorer(address: string) {
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
 
   const viewOnExplorer = () => {
+    if (!activeChain?.blockExplorerUriTemplate) {
+      return
+    }
     const link = getExplorerLink(address, activeChain.blockExplorerUriTemplate)
     Linking.openURL(link.href)
   }

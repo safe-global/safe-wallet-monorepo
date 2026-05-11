@@ -30,7 +30,7 @@ export const useNotificationManager = () => {
   const pendingPermissionRequestRef = useRef(false)
 
   const requestAndRegister = useCallback(
-    async (updateNotificationSettings = true, openSettingsOnDenied = false) => {
+    async (updateNotificationSettings = true) => {
       const { permission } = await NotificationsService.getAllPermissions()
 
       if (permission === 'granted') {
@@ -40,14 +40,11 @@ export const useNotificationManager = () => {
 
         if (!loading && !error) {
           dispatch(toggleDeviceNotifications(true))
-          return true
+          return { success: true, permission } as const
         }
-      } else if (openSettingsOnDenied) {
-        pendingPermissionRequestRef.current = true
-        await NotificationsService.getAllPermissions(true)
       }
 
-      return false
+      return { success: false, permission } as const
     },
     [dispatch, registerForNotifications],
   )
@@ -68,10 +65,13 @@ export const useNotificationManager = () => {
         return false
       } else if (promptAttempts < promptThreshold) {
         dispatch(updatePromptAttempts(promptAttempts + 1))
-        return await requestAndRegister()
+        const { success } = await requestAndRegister()
+        return success
       } else {
+        // Threshold reached — surface the in-app explainer Alert so the user can EXPLICITLY tap
+        // "Turn on" to open Settings. Never auto-redirect on denial (Apple 5.1.1(iv)).
         pendingPermissionRequestRef.current = true
-        await NotificationsService.getAllPermissions(true)
+        await NotificationsService.requestPushNotificationsPermission()
       }
     } catch (error) {
       pendingPermissionRequestRef.current = false
@@ -102,11 +102,19 @@ export const useNotificationManager = () => {
 
       if (!isSubscribed) {
         if (!deviceNotificationStatus) {
-          const success = await requestAndRegister(false, true)
+          const { success, permission } = await requestAndRegister(false)
           if (success) {
             return true
           }
-          // Don't clear the flag here if not granted immediately
+          // Only show the Settings explainer when the OS permission was actually denied.
+          // Registration failures with a granted permission (network, backend) must not push
+          // the user to Settings — Settings won't help and would leave pendingPermissionRequestRef
+          // stuck true. Apple 5.1.1(iv) compliance is unaffected: Settings is still only opened
+          // from an explicit "Turn on" tap inside the Alert.
+          if (permission === 'denied') {
+            pendingPermissionRequestRef.current = true
+            await NotificationsService.requestPushNotificationsPermission()
+          }
         } else {
           await registerForNotifications(false)
         }
