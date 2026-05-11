@@ -1,11 +1,11 @@
 import type { ReactElement, ReactNode } from 'react'
 import { useContext, useRef, useState } from 'react'
 import { Alert, Divider, MenuItem, Popover, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import OutgoingIcon from '@/public/images/transactions/outgoing.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
+import CaretDownIcon from '@/public/images/common/caret-down.svg'
 import TokenIcon from '@/components/common/TokenIcon'
 import { useCurrentChain } from '@/hooks/useChains'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -103,6 +103,10 @@ const PAYMENT_SOURCES = ['safe', 'signer'] as const satisfies readonly GtfPaymen
 
 const paymentSourceLabel = (source: GtfPaymentMode) => (source === 'safe' ? 'Safe' : 'Signer')
 
+const SelectorCaret = ({ open }: { open: boolean }): ReactElement => (
+  <CaretDownIcon className={`${css.selectorCaret} ${open ? css.selectorCaretOpen : ''}`} />
+)
+
 const PaymentSourceSelector = ({
   value,
   onChange,
@@ -130,19 +134,24 @@ const PaymentSourceSelector = ({
         <Typography variant="body2" fontWeight={700} letterSpacing="0.1px">
           {paymentSourceLabel(value)}
         </Typography>
-        <ArrowDropDownIcon sx={{ fontSize: '16px', color: 'text.secondary' }} />
+        <SelectorCaret open={open} />
       </div>
 
       <Popover
         open={open}
         anchorEl={anchorRef.current}
         onClose={() => setOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{ paper: { sx: { mt: 0.5, minWidth: 100, borderRadius: '8px' } } }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+        slotProps={{ paper: { className: css.selectorPopoverPaper } }}
       >
         {PAYMENT_SOURCES.map((source) => (
-          <MenuItem key={source} selected={source === value} onClick={() => handleSelect(source)}>
+          <MenuItem
+            key={source}
+            selected={source === value}
+            onClick={() => handleSelect(source)}
+            className={css.selectorMenuItem}
+          >
             <Typography variant="body2" fontWeight={700}>
               {paymentSourceLabel(source)}
             </Typography>
@@ -195,7 +204,7 @@ const GasTokenSelector = ({
             </span>
           </Tooltip>
         ) : (
-          <ArrowDropDownIcon sx={{ fontSize: '16px', color: 'text.secondary' }} />
+          <SelectorCaret open={open} />
         )}
       </div>
 
@@ -203,16 +212,16 @@ const GasTokenSelector = ({
         open={open}
         anchorEl={anchorRef.current}
         onClose={() => setOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{ paper: { sx: { mt: 0.5, minWidth: 140, borderRadius: '8px' } } }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+        slotProps={{ paper: { className: css.selectorPopoverPaper } }}
       >
         {availableGasTokens?.map((token) => (
           <MenuItem
             key={token.address}
             selected={sameAddress(token.address, selectedGasToken)}
             onClick={() => handleSelect(token.address)}
-            className={css.gasTokenMenuItem}
+            className={`${css.selectorMenuItem} ${css.gasTokenMenuItem}`}
           >
             <TokenIcon logoUri={token.logoUri} tokenSymbol={token.symbol} size={24} />
             <div>

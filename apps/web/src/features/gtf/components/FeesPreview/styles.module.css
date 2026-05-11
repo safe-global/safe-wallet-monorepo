@@ -99,7 +99,34 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
+}
+
+.selectorPopoverPaper {
+  margin-top: 4px;
+  border-radius: 16px;
+  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 4px;
+}
+
+.selectorMenuItem {
+  border-radius: 14px;
+  padding: 8px 12px;
+}
+
+.selectorMenuItem:global(.Mui-selected),
+.selectorMenuItem:global(.Mui-selected:hover) {
+  background-color: var(--color-background-skeleton);
+}
+
+.selectorCaret {
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-secondary);
+  transition: transform 120ms ease;
+}
+
+.selectorCaretOpen {
+  transform: rotate(180deg);
 }
 
 .feeRow {
