@@ -1,12 +1,9 @@
 import type { SafeGrade, ScanResult } from './types'
 import type { SecurityGrade } from '../securityTypes'
 import { getGrade } from '../securityScoring'
-import { SEVERITY_RANK } from './constants'
+import { SCANNER_TIMEOUT_MS, SEVERITY_RANK } from './constants'
 
-export const scanKey = (address: string, chainId: string) => `${address}:${chainId}`
-
-/** Maximum time a single scanner is allowed to run before being rejected. */
-export const SCANNER_TIMEOUT_MS = 15_000
+export const scanKey = (address: string, chainId: string) => `${address.toLowerCase()}:${chainId}`
 
 /**
  * Wraps a scanner promise with a timeout. If the scanner doesn't resolve within

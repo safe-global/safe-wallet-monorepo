@@ -1,4 +1,5 @@
-import { computeSummary, severityRank, scanKey, formatTimestamp } from '../utils'
+import { computeSummary, severityRank, scanKey, formatTimestamp, withScannerTimeout, getSafeGrade } from '../utils'
+import { SCANNER_TIMEOUT_MS } from '../constants'
 import type { ScanResult } from '../types'
 
 const makeScanResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
@@ -12,8 +13,13 @@ const makeScanResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
 })
 
 describe('scanKey', () => {
-  it('produces address:chainId format', () => {
-    expect(scanKey('0xABC', '1')).toBe('0xABC:1')
+  it('produces address:chainId format with lowercased address', () => {
+    expect(scanKey('0xABC', '1')).toBe('0xabc:1')
+  })
+
+  it('produces the same key for checksummed and lowercase addresses', () => {
+    const checksummed = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
+    expect(scanKey(checksummed, '1')).toBe(scanKey(checksummed.toLowerCase(), '1'))
   })
 })
 
@@ -165,5 +171,90 @@ describe('computeSummary', () => {
     expect(summary!.hasCriticalIssue).toBe(true)
     // 2/4 = 50% → Medium
     expect(summary!.grade).toBe('Medium')
+  })
+})
+
+describe('withScannerTimeout', () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  it('resolves with the scanner result when it completes in time', async () => {
+    const result = await withScannerTimeout(Promise.resolve('done'))
+    expect(result).toBe('done')
+  })
+
+  it('propagates the scanner error when it rejects before the timeout', async () => {
+    const failure = new Error('scanner exploded')
+    await expect(withScannerTimeout(Promise.reject(failure))).rejects.toBe(failure)
+  })
+
+  it('rejects with "Scanner timed out" when the scanner exceeds SCANNER_TIMEOUT_MS', async () => {
+    const hanging = new Promise<never>(() => {
+      /* never resolves */
+    })
+    const wrapped = withScannerTimeout(hanging)
+    const assertion = expect(wrapped).rejects.toThrow('Scanner timed out')
+    jest.advanceTimersByTime(SCANNER_TIMEOUT_MS)
+    await assertion
+  })
+})
+
+describe('getSafeGrade', () => {
+  it('returns "passing" when no results exist', () => {
+    expect(getSafeGrade({})).toBe('passing')
+  })
+
+  it('returns "passing" when every applicable result is clear', () => {
+    const results = {
+      a: makeScanResult({ status: 'clear' }),
+      b: makeScanResult({ status: 'clear' }),
+    }
+    expect(getSafeGrade(results)).toBe('passing')
+  })
+
+  it('ignores not_applicable and inconclusive results', () => {
+    const results = {
+      a: makeScanResult({ status: 'not_applicable' }),
+      b: makeScanResult({ status: 'inconclusive' }),
+    }
+    expect(getSafeGrade(results)).toBe('passing')
+  })
+
+  it('returns "needs_attention" when only partial issues exist', () => {
+    const results = {
+      a: makeScanResult({ status: 'clear' }),
+      b: makeScanResult({ status: 'partial', severity: 'Medium' }),
+    }
+    expect(getSafeGrade(results)).toBe('needs_attention')
+  })
+
+  it('returns "at_risk" when any non-critical issue exists', () => {
+    const results = {
+      a: makeScanResult({ status: 'clear' }),
+      b: makeScanResult({ status: 'partial', severity: 'Low' }),
+      c: makeScanResult({ status: 'issue', severity: 'High' }),
+    }
+    expect(getSafeGrade(results)).toBe('at_risk')
+  })
+
+  it('returns "critical" as soon as any Critical-severity result is seen', () => {
+    const results = {
+      a: makeScanResult({ status: 'clear' }),
+      b: makeScanResult({ status: 'issue', severity: 'Critical' }),
+      c: makeScanResult({ status: 'partial', severity: 'Medium' }),
+    }
+    expect(getSafeGrade(results)).toBe('critical')
+  })
+
+  it('treats a Critical-severity result as critical even with status partial', () => {
+    const results = {
+      a: makeScanResult({ status: 'partial', severity: 'Critical' }),
+    }
+    expect(getSafeGrade(results)).toBe('critical')
   })
 })
