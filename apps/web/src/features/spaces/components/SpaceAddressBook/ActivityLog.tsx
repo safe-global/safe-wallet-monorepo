@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
+import { isAddress } from 'ethers'
 import Identicon from '@/components/common/Identicon'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 import type { AddressBookEntry } from './SpaceAddressBookTable'
 
 export function formatDate(dateStr: string): string {
@@ -22,11 +24,23 @@ export function formatDate(dateStr: string): string {
   return `${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} at ${timeStr}`
 }
 
+type ActivityActor = {
+  value: string
+  isWalletAddress: boolean
+}
+
 export type ActivityEvent = {
   type: 'added' | 'updated'
   entry: AddressBookEntry
   date: string
-  actor: string
+  actor: ActivityActor
+}
+
+function buildActivityActor(actor: string): ActivityActor {
+  return {
+    value: actor,
+    isWalletAddress: isAddress(actor),
+  }
 }
 
 export function buildActivityEvents(entries: AddressBookEntry[]): ActivityEvent[] {
@@ -38,7 +52,7 @@ export function buildActivityEvents(entries: AddressBookEntry[]): ActivityEvent[
         type: 'added',
         entry,
         date: entry.createdAt,
-        actor: entry.createdBy,
+        actor: buildActivityActor(entry.createdBy),
       })
     }
     if (entry.updatedAt && entry.createdAt && entry.updatedAt !== entry.createdAt) {
@@ -46,19 +60,30 @@ export function buildActivityEvents(entries: AddressBookEntry[]): ActivityEvent[
         type: 'updated',
         entry,
         date: entry.updatedAt,
-        actor: entry.lastUpdatedBy,
+        actor: buildActivityActor(entry.lastUpdatedBy),
       })
     }
   }
 
-  events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  return events
+  return events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 }
 
-function ActorName({ address }: { address: string }) {
+function ActorAvatar({ actor }: { actor: ActivityActor }) {
+  return actor.isWalletAddress ? (
+    <Identicon address={actor.value} size={32} />
+  ) : (
+    <InitialsAvatar name={actor.value} size="medium" rounded />
+  )
+}
+
+function ActorName({ actor }: { actor: ActivityActor }) {
+  if (!actor.isWalletAddress) {
+    return <span className="min-w-0 font-bold break-all">{actor.value}</span>
+  }
+
   return (
     <span className="inline-flex font-bold [&>div]:inline-flex [&>div]:items-center">
-      <EthHashInfo address={address} showAvatar={false} onlyName showPrefix={false} showCopyButton={false} />
+      <EthHashInfo address={actor.value} showAvatar={false} onlyName showPrefix={false} showCopyButton={false} />
     </span>
   )
 }
@@ -75,15 +100,16 @@ function ActivityLog({ entries }: { entries: AddressBookEntry[] }) {
       {events.map((event, i) => (
         <div key={`${event.entry.address}-${event.type}-${i}`} className="flex items-start gap-3 py-3">
           <div className="shrink-0 pt-0.5">
-            <Identicon address={event.actor} size={32} />
+            <ActorAvatar actor={event.actor} />
           </div>
 
           <div className="min-w-0 flex-1">
             <p className="flex flex-wrap items-center gap-x-1 text-sm">
-              <ActorName address={event.actor} />
+              <ActorName actor={event.actor} />
               <span>{event.type}</span>
               <span className="font-bold">{event.entry.name}</span>
             </p>
+
             <p className="text-muted-foreground mt-0.5 text-xs">{formatDate(event.date)}</p>
           </div>
         </div>
