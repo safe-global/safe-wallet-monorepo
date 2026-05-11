@@ -43,7 +43,7 @@ export const useGasTokenCandidates = (tx: FeePreviewTx | undefined): GasTokenCan
     return balances.items
       .filter((b) => BigInt(b.balance) > 0n)
       .filter((b) => {
-        // Native always passes — required for chains absent from the allowlist (e.g. Polygon),
+        // Native always passes — required for chains absent from the allowlist,
         // where POL is returned with a non-ZERO address and would otherwise be filtered out.
         if (b.tokenInfo.type === 'NATIVE_TOKEN' || sameAddress(b.tokenInfo.address, ZERO_ADDRESS)) return true
         return isAllowlistedGasToken(chain.chainId, b.tokenInfo.address)
