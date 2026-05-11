@@ -21,7 +21,7 @@ import type {
 import type { isKnownModuleByName } from './data/scanners/modules'
 import type { getStrengthLevel, getStrengthColor } from './data/securityScoring'
 import type { CHECK_DEFS } from './data/securityChecks'
-import type { ZERO_ADDRESS } from './data/scanners/constants'
+import type { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { getScanResultsCache, evictScanCache } from './hooks/useSecurityScan'
 
 export interface SecurityContract {

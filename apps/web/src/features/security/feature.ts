@@ -11,9 +11,9 @@
  */
 import type { SecurityContract } from './contract'
 
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { SCANNERS } from './data/scanners/registry'
 import { CHECK_DEFS } from './data/securityChecks'
-import { ZERO_ADDRESS } from './data/scanners/constants'
 import {
   scanKey,
   computeSummary,
