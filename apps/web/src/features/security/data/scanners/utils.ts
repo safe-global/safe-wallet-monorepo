@@ -1,6 +1,7 @@
-import type { ScanResult } from './types'
+import type { SafeGrade, ScanResult } from './types'
 import type { SecurityGrade } from '../securityTypes'
 import { getGrade } from '../securityScoring'
+import { SEVERITY_RANK } from './constants'
 
 export const scanKey = (address: string, chainId: string) => `${address}:${chainId}`
 
@@ -47,13 +48,7 @@ export const computeSummary = (results: Record<string, ScanResult>): GradeSummar
   return { passing, applicableCount: applicable.length, grade: getGrade(clearRatio), hasCriticalIssue }
 }
 
-export const severityRank = (severity: string): number => {
-  const order: Record<string, number> = { Critical: 0, High: 1, Medium: 2, Low: 3 }
-  return order[severity] ?? 4
-}
-
-/** Per-Safe grade based on its worst check result. */
-export type SafeGrade = 'critical' | 'at_risk' | 'needs_attention' | 'passing'
+export const severityRank = (severity: SecurityGrade): number => SEVERITY_RANK[severity]
 
 export const getSafeGrade = (results: Record<string, ScanResult>): SafeGrade => {
   let hasIssue = false

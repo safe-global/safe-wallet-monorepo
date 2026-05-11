@@ -22,7 +22,6 @@ describe('severityRank', () => {
   it('maps High → 1', () => expect(severityRank('High')).toBe(1))
   it('maps Medium → 2', () => expect(severityRank('Medium')).toBe(2))
   it('maps Low → 3', () => expect(severityRank('Low')).toBe(3))
-  it('maps unknown → 4', () => expect(severityRank('Unknown')).toBe(4))
 })
 
 describe('formatTimestamp', () => {

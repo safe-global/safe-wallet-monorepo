@@ -49,3 +49,6 @@ export type SecurityScanner = {
   id: string
   scan: (ctx: ScanContext) => Promise<ScanResult>
 }
+
+/** Per-Safe grade based on its worst check result. */
+export type SafeGrade = 'critical' | 'at_risk' | 'needs_attention' | 'passing'
