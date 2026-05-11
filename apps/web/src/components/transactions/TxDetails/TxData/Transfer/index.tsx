@@ -31,7 +31,7 @@ const TransferTxInfoMain = ({ txInfo, txStatus, trusted, imitation }: TransferTx
       <Typography variant="body2" fontWeight={700} sx={{ minWidth: 40 }}>
         {direction === TransferDirection.INCOMING ? 'Received' : isQueued ? 'Send' : 'Sent'}
       </Typography>
-      <TransferTx info={txInfo} omitSign preciseAmount />
+      <TransferTx info={txInfo} omitSign preciseAmount iconSize={32} />
       {fiatValue != null && (
         <Typography variant="body2" color="text.secondary" component="span">
           (<FiatValue value={fiatValue} />)

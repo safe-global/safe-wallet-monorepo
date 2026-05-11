@@ -169,7 +169,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
                           arrow
                         >
                           <span style={{ display: 'inline-flex' }}>
-                            <TokenIcon logoUri={gasTokenLogo} tokenSymbol={gasTokenSymbol} size={20} />
+                            <TokenIcon logoUri={gasTokenLogo} tokenSymbol={gasTokenSymbol} size={16} />
                           </span>
                         </Tooltip>
                       )}
