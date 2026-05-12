@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesCreateV1Mutation, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppDispatch } from '@/store'
-import { setLastUsedSpace } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -48,8 +47,6 @@ const useSpaceSubmit = (
     if (response.data) {
       const newSpaceId = response.data.id.toString()
       trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: newSpaceId }, { workspace_id: newSpaceId })
-
-      dispatch(setLastUsedSpace(newSpaceId))
 
       dispatch(
         showNotification({

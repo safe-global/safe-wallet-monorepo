@@ -35,10 +35,6 @@ jest.mock('@/store', () => ({
   useAppDispatch: () => mockDispatch,
 }))
 
-jest.mock('@/store/authSlice', () => ({
-  setLastUsedSpace: (id: string) => ({ type: 'auth/setLastUsedSpace', payload: id }),
-}))
-
 jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (payload: unknown) => ({ type: 'notifications/show', payload }),
 }))
