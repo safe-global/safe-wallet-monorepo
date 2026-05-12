@@ -1,19 +1,10 @@
 import { useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { useAppDispatch } from '@/store'
-import { setLastUsedSpace } from '@/store/authSlice'
 import { AppRoutes } from '@/config/routes'
 
 const useOnboardingNavigation = () => {
   const router = useRouter()
-  const dispatch = useAppDispatch()
   const spaceId = router.query.spaceId as string | undefined
-
-  useEffect(() => {
-    if (spaceId) {
-      dispatch(setLastUsedSpace(spaceId))
-    }
-  }, [spaceId, dispatch])
 
   useEffect(() => {
     if (router.isReady && !spaceId) {
