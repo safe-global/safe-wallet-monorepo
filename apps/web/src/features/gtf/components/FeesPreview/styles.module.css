@@ -2,10 +2,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-}
-
-.container > .totalOutgoing {
-  margin-top: var(--space-1);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 .header {
