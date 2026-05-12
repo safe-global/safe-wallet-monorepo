@@ -22,7 +22,7 @@ import type { isKnownModuleByName } from './data/scanners/modules'
 import type { getStrengthLevel, getStrengthColor } from './data/securityScoring'
 import type { CHECK_DEFS } from './data/securityChecks'
 import type { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import type { getScanResultsCache, evictScanCache } from './hooks/useSecurityScan'
+import type { getCachedScan, setCachedScan } from './data/scanResultsCache'
 
 export interface SecurityContract {
   // Scanner registry
@@ -39,9 +39,9 @@ export interface SecurityContract {
   isKnownModuleByName: typeof isKnownModuleByName
   getStrengthLevel: typeof getStrengthLevel
   getStrengthColor: typeof getStrengthColor
-  // Module-level scan-result cache accessors
-  getScanResultsCache: typeof getScanResultsCache
-  evictScanCache: typeof evictScanCache
+  // Module-level scan-result cache accessors (the cache itself stays private)
+  getCachedScan: typeof getCachedScan
+  setCachedScan: typeof setCachedScan
   // Shared constants
   zeroAddress: typeof ZERO_ADDRESS
 }

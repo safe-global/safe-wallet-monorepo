@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import useAutoScan, { type AutoScanServices } from '../useAutoScan'
-import type { ScanContext, ScanResult, SecurityScanner } from '@/features/security/types'
+import type { ScanContext, ScanResult, ScannerId, SecurityScanner } from '@/features/security/types'
 import type { SpaceSafeEntry, SelectedSafe } from '@/features/spaces/components/SecurityHub'
 
 // useSafeScanContext is mocked to return the value we inject via `mockScanContext`
@@ -64,28 +64,31 @@ const mkContext = (): ScanContext => ({
 })
 
 /** A scanner that resolves on the next tick with a static result. */
-const mkScanner = (id: string, result: ScanResult = mkResult()): SecurityScanner => ({
+const mkScanner = (id: ScannerId, result: ScanResult = mkResult()): SecurityScanner => ({
   id,
   scan: jest.fn(() => Promise.resolve(result)),
 })
 
 /** A scanner that rejects — simulates a failure that should NOT block the queue. */
-const mkFailingScanner = (id: string, error: Error = new Error('boom')): SecurityScanner => ({
+const mkFailingScanner = (id: ScannerId, error: Error = new Error('boom')): SecurityScanner => ({
   id,
   scan: jest.fn(() => Promise.reject(error)),
 })
 
-/** Build the services bundle with sensible defaults + a real cache Map. */
-const mkServices = (scanners: SecurityScanner[]): AutoScanServices & { cache: Map<string, unknown> } => {
-  const cache = new Map<string, unknown>()
+/** Build the services bundle with sensible defaults + an in-test setCachedScan spy. */
+const mkServices = (
+  scanners: SecurityScanner[],
+): AutoScanServices & { writes: Map<string, { results: Record<string, ScanResult>; timestamp: number }> } => {
+  const writes = new Map<string, { results: Record<string, ScanResult>; timestamp: number }>()
   return {
     scanners,
     scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
-    getScanResultsCache: () => cache as never,
-    evictScanCache: jest.fn(),
+    setCachedScan: jest.fn((key: string, results, timestamp) => {
+      writes.set(key, { results: results as Record<string, ScanResult>, timestamp })
+    }),
     // Pass-through timeout wrapper for tests (real version races with a 15s timer)
     withScannerTimeout: <T>(p: Promise<T>) => p,
-    cache,
+    writes,
   }
 }
 
@@ -105,7 +108,7 @@ describe('useAutoScan', () => {
   })
 
   it('returns initial idle state', () => {
-    const { result } = renderHook(() => useAutoScan([], [], {}, mkServices([mkScanner('a')]), jest.fn()))
+    const { result } = renderHook(() => useAutoScan([], [], {}, mkServices([mkScanner('account_setup')]), jest.fn()))
     expect(result.current.isRunning).toBe(false)
     expect(result.current.justCompleted).toBe(false)
     expect(result.current.scanningKeys.size).toBe(0)
@@ -127,7 +130,7 @@ describe('useAutoScan', () => {
   })
 
   it('populates scanningKeys and starts running when startScan is called', () => {
-    const services = mkServices([mkScanner('a')])
+    const services = mkServices([mkScanner('account_setup')])
     const queue = [mkSelected(SAFE_A), mkSelected(SAFE_B)]
     const { result } = renderHook(() => useAutoScan(queue, [mkSafe(SAFE_A), mkSafe(SAFE_B)], {}, services, jest.fn()))
 
@@ -164,7 +167,7 @@ describe('useAutoScan', () => {
     )
   })
 
-  it('writes completed results to the shared cache via getScanResultsCache', async () => {
+  it('writes completed results to the shared cache via setCachedScan', async () => {
     const scanner = mkScanner('account_setup')
     const services = mkServices([scanner])
     mockScanContext = mkContext()
@@ -176,8 +179,12 @@ describe('useAutoScan', () => {
       result.current.startScan()
     })
 
-    await waitFor(() => expect(services.cache.has(`${SAFE_A}:${CHAIN}`)).toBe(true))
-    expect(services.evictScanCache).toHaveBeenCalled()
+    await waitFor(() => expect(services.writes.has(`${SAFE_A}:${CHAIN}`)).toBe(true))
+    expect(services.setCachedScan).toHaveBeenCalledWith(
+      `${SAFE_A}:${CHAIN}`,
+      expect.objectContaining({ account_setup: expect.any(Object) }),
+      expect.any(Number),
+    )
   })
 
   it('advances past failing scanners — queue still drains', async () => {

@@ -45,8 +45,21 @@ export type ScanResult = {
   partner?: 'hypernative'
 }
 
+export type ScannerId =
+  | 'account_setup'
+  | 'multichain_setup'
+  | 'contract_version'
+  | 'modules'
+  | 'guard'
+  | 'pending_tx'
+  | 'recovery'
+  | 'transaction_scanning'
+  | 'fallback_handler'
+  | 'factory_validation'
+  | 'signer_integrity'
+
 export type SecurityScanner = {
-  id: string
+  id: ScannerId
   scan: (ctx: ScanContext) => Promise<ScanResult>
 }
 

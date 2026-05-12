@@ -18,8 +18,7 @@ const SCAN_CONTEXT_BAIL_MS = 2_000
 export type AutoScanServices = {
   scanners: SecurityScanner[]
   scanKey: SecurityContract['scanKey']
-  getScanResultsCache: SecurityContract['getScanResultsCache']
-  evictScanCache: SecurityContract['evictScanCache']
+  setCachedScan: SecurityContract['setCachedScan']
   withScannerTimeout: SecurityContract['withScannerTimeout']
 }
 
@@ -82,7 +81,7 @@ const useAutoScan = (
   useEffect(() => {
     if (!scanContext || !currentTarget || !isRunning || !services) return
 
-    const { scanners, scanKey, getScanResultsCache, evictScanCache, withScannerTimeout } = services
+    const { scanners, scanKey, setCachedScan, withScannerTimeout } = services
     const key = scanKey(currentTarget.address, currentTarget.chainId)
     if (completedRef.current.has(key)) {
       setCurrentIndex((i) => i + 1)
@@ -113,10 +112,9 @@ const useAutoScan = (
             completedRef.current.add(key)
             scanningRef.current = null
             const timestamp = Date.now()
-            // Share results with useSecurityScan's module-level cache so the drawer reuses
-            // them instead of re-scanning when the user opens this Safe's report.
-            getScanResultsCache().set(key, { results, timestamp })
-            evictScanCache()
+            // Share results with the module-level cache so the drawer reuses them
+            // instead of re-scanning when the user opens this Safe's report.
+            setCachedScan(key, results, timestamp)
             onCompleteRef.current(currentTarget.address, currentTarget.chainId, timestamp, results)
             setScanningKeys((prev) => {
               const next = new Set(prev)

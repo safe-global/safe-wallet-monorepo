@@ -1,9 +1,10 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import useSecurityScan from '../useSecurityScan'
-import type { ScanContext, ScanResult, SecurityScanner } from '../../data/scanners/types'
+import type { ScanContext, ScanResult, ScannerId, SecurityScanner } from '../../data/scanners/types'
 import { createMockContext } from '../../data/scanners/test-helpers'
+import { clearScanCache } from '../../data/scanResultsCache'
 
-const makeScanner = (id: string, result?: Partial<ScanResult>, delayMs = 0): SecurityScanner => ({
+const makeScanner = (id: ScannerId, result?: Partial<ScanResult>, delayMs = 0): SecurityScanner => ({
   id,
   scan: () =>
     new Promise((resolve) =>
@@ -23,7 +24,10 @@ const makeScanner = (id: string, result?: Partial<ScanResult>, delayMs = 0): Sec
     ),
 })
 
-const mockScanners = [makeScanner('test_a'), makeScanner('test_b')]
+const ID_A: ScannerId = 'account_setup'
+const ID_B: ScannerId = 'modules'
+
+const mockScanners = [makeScanner(ID_A), makeScanner(ID_B)]
 
 jest.mock('../../data/scanners/registry', () => ({
   get SCANNERS() {
@@ -33,8 +37,9 @@ jest.mock('../../data/scanners/registry', () => ({
 
 describe('useSecurityScan', () => {
   beforeEach(() => {
+    clearScanCache()
     mockScanners.length = 0
-    mockScanners.push(makeScanner('test_a'), makeScanner('test_b'))
+    mockScanners.push(makeScanner(ID_A), makeScanner(ID_B))
   })
 
   it('auto-scans when context is provided', async () => {
@@ -45,8 +50,8 @@ describe('useSecurityScan', () => {
       expect(result.current.isComplete).toBe(true)
     })
 
-    expect(result.current.results.test_a).toBeDefined()
-    expect(result.current.results.test_b).toBeDefined()
+    expect(result.current.results[ID_A]).toBeDefined()
+    expect(result.current.results[ID_B]).toBeDefined()
     expect(result.current.lastScannedAt).not.toBeNull()
   })
 
@@ -102,8 +107,8 @@ describe('useSecurityScan', () => {
     // First scanner resolves slowly, second resolves instantly
     mockScanners.length = 0
     mockScanners.push(
-      makeScanner('slow', { status: 'issue', severity: 'High', score: 30 }, 200),
-      makeScanner('fast', { status: 'clear', severity: 'Low', score: 100 }, 0),
+      makeScanner(ID_A, { status: 'issue', severity: 'High', score: 30 }, 200),
+      makeScanner(ID_B, { status: 'clear', severity: 'Low', score: 100 }, 0),
     )
 
     const ctx1 = createMockContext({ chainId: '1', safeAddress: '0xSafe1' })
@@ -159,9 +164,9 @@ describe('useSecurityScan', () => {
       unmount()
 
       // Second: new hook instance should use cached results without scanning
-      const scanSpy = jest.fn().mockResolvedValue(makeScanner('test_a').scan(ctx))
+      const scanSpy = jest.fn().mockResolvedValue(makeScanner(ID_A).scan(ctx))
       mockScanners.length = 0
-      mockScanners.push({ id: 'test_a', scan: scanSpy })
+      mockScanners.push({ id: ID_A, scan: scanSpy })
 
       const { result: result2 } = renderHook(() => useSecurityScan(ctx))
 
@@ -170,7 +175,7 @@ describe('useSecurityScan', () => {
       })
 
       expect(scanSpy).not.toHaveBeenCalled()
-      expect(result2.current.results.test_a).toBeDefined()
+      expect(result2.current.results[ID_A]).toBeDefined()
       expect(result2.current.isComplete).toBe(true)
     })
 
@@ -200,7 +205,7 @@ describe('useSecurityScan', () => {
 
   it('reports progress correctly', async () => {
     mockScanners.length = 0
-    mockScanners.push(makeScanner('fast', {}, 0), makeScanner('slow', {}, 100))
+    mockScanners.push(makeScanner(ID_A, {}, 0), makeScanner(ID_B, {}, 100))
 
     const ctx = createMockContext()
     const { result } = renderHook(() => useSecurityScan(ctx))
