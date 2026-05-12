@@ -37,6 +37,8 @@ const SectionRow = ({ label, selectAll, testId }: { label: string; selectAll?: S
         total={selectAll.total}
         onToggle={selectAll.onToggle}
         label="Select all"
+        showCount
+        countTooltip="Multi-chain safes count once per network"
         testId={testId}
         className="py-0"
       />

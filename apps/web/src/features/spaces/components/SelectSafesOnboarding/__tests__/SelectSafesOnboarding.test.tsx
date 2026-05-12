@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { render, screen } from '@/tests/test-utils'
 import SelectSafesOnboarding from '../index'
 import type { AllSafeItems } from '@/hooks/safes'
 
@@ -95,15 +95,15 @@ describe('SelectSafesOnboarding — SelectAll wiring', () => {
     mockOwnedSafes = []
   })
 
-  it('does not render SelectAllHeader when there are no safes', () => {
+  it('does not render global select-all toggle', () => {
     render(<SelectSafesOnboarding />)
     expect(screen.queryByTestId('select-all-global')).not.toBeInTheDocument()
   })
 
-  it('renders SelectAllHeader when safes are present', () => {
+  it('never renders global select-all toggle even when safes are present', () => {
     mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
     render(<SelectSafesOnboarding />)
-    expect(screen.getByTestId('select-all-global')).toBeInTheDocument()
+    expect(screen.queryByTestId('select-all-global')).not.toBeInTheDocument()
   })
 
   it('passes trustedSelectAll and ownedSelectAll to OnboardingSafesList', () => {
@@ -125,22 +125,26 @@ describe('SelectSafesOnboarding — SelectAll wiring', () => {
     expect(trusted.state).toBe('none')
   })
 
-  it('shows the count in the global toggle', () => {
+  it('passes count info to section toggles via OnboardingSafesList props', () => {
     mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
     render(<SelectSafesOnboarding />)
-    expect(screen.getByText('(0/1)')).toBeInTheDocument()
+    const trusted = capturedListProps.trustedSelectAll as { total: number; count: number }
+    expect(trusted.total).toBe(1)
+    expect(trusted.count).toBe(0)
   })
 
-  it('shows cap message when limit is reached', () => {
-    // Pre-fill 10 safes — hitting the mocked SAFE_ACCOUNTS_LIMIT of 10
+  it('shows cap message when section select-all hits the limit', () => {
+    // Pre-fill 11 safes — exceeding the mocked SAFE_ACCOUNTS_LIMIT of 10
     mockTrustedSafes = Array.from({ length: 11 }, (_, i) =>
       makeSafe('1', `0x${i.toString().padStart(40, '0')}`),
     ) as AllSafeItems
 
     render(<SelectSafesOnboarding />)
 
-    const selectAllBtn = screen.getByTestId('select-all-global')
-    fireEvent.click(selectAllBtn)
+    // Simulate clicking "Select all" for the trusted section via captured props
+    const trustedSelectAll = capturedListProps.trustedSelectAll as { onToggle: (check: boolean) => void }
+    const { act } = require('@testing-library/react')
+    act(() => trustedSelectAll.onToggle(true))
 
     expect(screen.getByText('Limit of 10 reached')).toBeInTheDocument()
   })

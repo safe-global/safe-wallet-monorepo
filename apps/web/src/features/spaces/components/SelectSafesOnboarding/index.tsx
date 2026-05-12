@@ -14,8 +14,8 @@ import OnboardingSafesList from './components/OnboardingSafesList'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
-import SelectAllHeader from '@/features/spaces/components/AddAccounts/SelectAllHeader'
 import { useSelectAll } from '@/features/spaces/components/AddAccounts/useSelectAll'
+import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/constants'
 
 const ONBOARDING_STEP = 2
 const TOTAL_STEPS = 3
@@ -35,7 +35,7 @@ const SelectSafesOnboarding = (): ReactElement => {
 
   const { control, setValue } = formMethods
 
-  const { trustedSelection, ownedSelection, globalSelection, handleSelectAll, capReached } = useSelectAll({
+  const { trustedSelection, ownedSelection, handleSelectAll, capReached } = useSelectAll({
     visibleTrusted: trustedSafes,
     visibleOwned: ownedSafes,
     control,
@@ -94,13 +94,11 @@ const SelectSafesOnboarding = (): ReactElement => {
                   className="relative min-h-0 min-w-0 w-full flex-1 overflow-hidden overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent"
                   data-testid="onboarding-safes-list-scroll-region"
                 >
-                  <SelectAllHeader
-                    state={globalSelection.state}
-                    selectedCount={globalSelection.selectedCount}
-                    total={globalSelection.total}
-                    onToggle={(check) => handleSelectAll('all', check)}
-                    capReached={capReached}
-                  />
+                  {capReached && (
+                    <Typography variant="paragraph" color="muted" className="text-xs pb-1">
+                      Limit of {SAFE_ACCOUNTS_LIMIT} reached
+                    </Typography>
+                  )}
                   <OnboardingSafesList
                     trustedSafes={trustedSafes}
                     ownedSafes={ownedSafes}

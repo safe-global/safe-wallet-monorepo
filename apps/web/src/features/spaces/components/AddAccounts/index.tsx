@@ -45,7 +45,6 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
-import SelectAllHeader from './SelectAllHeader'
 import { useSelectAll } from './useSelectAll'
 import type { AddAccountsFormValues } from './types'
 
@@ -208,7 +207,7 @@ const AddAccounts = ({
   const visibleTrusted = debouncedSearchQuery ? filteredTrusted : trustedSafes
   const visibleOwned = debouncedSearchQuery ? filteredOwned : ownedSafes
 
-  const { trustedSelection, ownedSelection, globalSelection, handleSelectAll, capReached } = useSelectAll({
+  const { trustedSelection, ownedSelection, handleSelectAll, capReached } = useSelectAll({
     visibleTrusted,
     visibleOwned,
     control,
@@ -411,19 +410,17 @@ const AddAccounts = ({
                       <Typography variant="paragraph" align="center" color="muted" className="py-8">
                         No safes on your list
                       </Typography>
-                    ) : globalSelection.total === 0 && debouncedSearchQuery ? (
+                    ) : trustedSelection.total === 0 && ownedSelection.total === 0 && debouncedSearchQuery ? (
                       <Typography variant="paragraph" align="center" color="muted" className="py-8">
                         No safes match your search
                       </Typography>
                     ) : (
                       <>
-                        <SelectAllHeader
-                          state={globalSelection.state}
-                          selectedCount={globalSelection.selectedCount}
-                          total={globalSelection.total}
-                          onToggle={(check) => handleSelectAll('all', check)}
-                          capReached={capReached}
-                        />
+                        {capReached && (
+                          <Typography variant="paragraph" color="muted" className="text-xs pb-1">
+                            Limit of {SAFE_ACCOUNTS_LIMIT} reached
+                          </Typography>
+                        )}
                         <OnboardingSafesList
                           trustedSafes={visibleTrusted}
                           ownedSafes={visibleOwned}
