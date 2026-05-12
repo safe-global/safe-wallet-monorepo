@@ -4,7 +4,6 @@ import AuthState from './index'
 const mockUseSpacesGetOneV1Query = jest.fn()
 const mockUseUsersGetWithWalletsV1Query = jest.fn()
 const mockUseHasFeature = jest.fn()
-const mockDispatch = jest.fn()
 let mockIsAuthenticated = true
 let mockIsOidcLoginPending = false
 
@@ -14,13 +13,11 @@ jest.mock('@/store', () => ({
     if (selector === 'selectIsOidcLoginPending') return mockIsOidcLoginPending
     return undefined
   },
-  useAppDispatch: () => mockDispatch,
 }))
 
 jest.mock('@/store/authSlice', () => ({
   isAuthenticated: 'isAuthenticated',
   selectIsOidcLoginPending: 'selectIsOidcLoginPending',
-  setLastUsedSpace: (id: string) => ({ type: 'setLastUsedSpace', payload: id }),
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
