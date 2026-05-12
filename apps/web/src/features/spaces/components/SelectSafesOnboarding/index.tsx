@@ -14,6 +14,8 @@ import OnboardingSafesList from './components/OnboardingSafesList'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
+import SelectAllHeader from '@/features/spaces/components/AddAccounts/SelectAllHeader'
+import { useSelectAll } from '@/features/spaces/components/AddAccounts/useSelectAll'
 
 const ONBOARDING_STEP = 2
 const TOTAL_STEPS = 3
@@ -30,6 +32,15 @@ const SelectSafesOnboarding = (): ReactElement => {
     redirectToNextStep,
     allSafes,
   )
+
+  const { control, setValue } = formMethods
+
+  const { trustedSelection, ownedSelection, globalSelection, handleSelectAll, capReached } = useSelectAll({
+    visibleTrusted: trustedSafes,
+    visibleOwned: ownedSafes,
+    control,
+    setValue,
+  })
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
@@ -83,10 +94,29 @@ const SelectSafesOnboarding = (): ReactElement => {
                   className="relative min-h-0 min-w-0 w-full flex-1 overflow-hidden overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent"
                   data-testid="onboarding-safes-list-scroll-region"
                 >
+                  <SelectAllHeader
+                    state={globalSelection.state}
+                    selectedCount={globalSelection.selectedCount}
+                    total={globalSelection.total}
+                    onToggle={(check) => handleSelectAll('all', check)}
+                    capReached={capReached}
+                  />
                   <OnboardingSafesList
                     trustedSafes={trustedSafes}
                     ownedSafes={ownedSafes}
                     similarAddresses={similarAddresses}
+                    trustedSelectAll={{
+                      state: trustedSelection.state,
+                      count: trustedSelection.selectedCount,
+                      total: trustedSelection.total,
+                      onToggle: (check) => handleSelectAll('trusted', check),
+                    }}
+                    ownedSelectAll={{
+                      state: ownedSelection.state,
+                      count: ownedSelection.selectedCount,
+                      total: ownedSelection.total,
+                      onToggle: (check) => handleSelectAll('owned', check),
+                    }}
                   />
                 </div>
 

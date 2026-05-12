@@ -45,7 +45,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
-import SelectAllToggle from './SelectAllToggle'
+import SelectAllHeader from './SelectAllHeader'
 import { useSelectAll } from './useSelectAll'
 import type { AddAccountsFormValues } from './types'
 
@@ -197,7 +197,7 @@ const AddAccounts = ({
     },
   })
 
-  const { handleSubmit, watch, setValue, reset, formState } = formMethods
+  const { handleSubmit, watch, setValue, reset, formState, control } = formMethods
 
   const selectedSafes = watch(`selectedSafes`)
   const selectedSafesLength = getSelectedSafes(selectedSafes, spaceSafes).length
@@ -211,7 +211,7 @@ const AddAccounts = ({
   const { trustedSelection, ownedSelection, globalSelection, handleSelectAll, capReached } = useSelectAll({
     visibleTrusted,
     visibleOwned,
-    selectedSafes,
+    control,
     setValue,
   })
 
@@ -417,25 +417,13 @@ const AddAccounts = ({
                       </Typography>
                     ) : (
                       <>
-                        {globalSelection.total > 0 && (
-                          <div className="flex items-center justify-between pb-1">
-                            <SelectAllToggle
-                              state={globalSelection.state}
-                              count={globalSelection.selectedCount}
-                              total={globalSelection.total}
-                              onToggle={(check) => handleSelectAll('all', check)}
-                              label="Select all"
-                              showCount
-                              countTooltip="Multi-chain safes count once per network"
-                              testId="select-all-global"
-                            />
-                            {capReached && (
-                              <Typography variant="paragraph" color="muted" className="text-xs">
-                                Limit of {SAFE_ACCOUNTS_LIMIT} reached
-                              </Typography>
-                            )}
-                          </div>
-                        )}
+                        <SelectAllHeader
+                          state={globalSelection.state}
+                          selectedCount={globalSelection.selectedCount}
+                          total={globalSelection.total}
+                          onToggle={(check) => handleSelectAll('all', check)}
+                          capReached={capReached}
+                        />
                         <OnboardingSafesList
                           trustedSafes={visibleTrusted}
                           ownedSafes={visibleOwned}

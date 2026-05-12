@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import type { UseFormSetValue } from 'react-hook-form'
+import { useWatch, type Control, type UseFormSetValue } from 'react-hook-form'
 import { type AllSafeItems } from '@/hooks/safes'
 import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
@@ -11,11 +11,12 @@ type Scope = 'all' | 'trusted' | 'owned'
 interface Args {
   visibleTrusted: AllSafeItems
   visibleOwned: AllSafeItems
-  selectedSafes: AddAccountsFormValues['selectedSafes']
+  control: Control<AddAccountsFormValues>
   setValue: UseFormSetValue<AddAccountsFormValues>
 }
 
-export function useSelectAll({ visibleTrusted, visibleOwned, selectedSafes, setValue }: Args) {
+export function useSelectAll({ visibleTrusted, visibleOwned, control, setValue }: Args) {
+  const selectedSafes = useWatch({ control, name: 'selectedSafes' }) ?? {}
   const trustedSelection = useMemo(
     () => getSelectionState(visibleTrusted, selectedSafes),
     [visibleTrusted, selectedSafes],
