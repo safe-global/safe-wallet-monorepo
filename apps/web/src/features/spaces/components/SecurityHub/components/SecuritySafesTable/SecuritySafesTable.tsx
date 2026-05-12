@@ -1,26 +1,13 @@
-import { type ReactElement, useState, useCallback, useEffect, useMemo, useRef, Fragment, forwardRef } from 'react'
-import {
-  Box,
-  IconButton,
-  Skeleton,
-  Stack,
-  Table,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography,
-} from '@mui/material'
-import { motion, AnimatePresence } from 'framer-motion'
+import { type ReactElement, useState, useCallback, useEffect, useMemo, useRef, Fragment } from 'react'
+import { IconButton, Stack, Table, TableCell, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
+import { AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
-import type { ScanResult, GradeSummary, SafeGrade } from '@/features/security/types'
+import type { ScanResult, SafeGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
-import type { SecurityContract } from '@/features/security'
-import { SAFE_GRADE_RANK } from '@/features/security/data/scanners/constants'
 import Identicon from '@/components/common/Identicon'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosList } from '@/features/multichain'
@@ -30,204 +17,15 @@ import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
 import StatusCell from '../StatusCell/StatusCell'
-
-const DASH = '—'
-
-// motion-enabled elements for table animations
-const MotionTableRow = motion.create(
-  forwardRef<HTMLTableRowElement, React.ComponentProps<typeof TableRow>>(function MotionTableRowInner(props, ref) {
-    return <TableRow ref={ref} {...props} />
-  }),
-)
-const MotionTbody = motion.create('tbody')
-
-const ROW_VARIANTS = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-}
-
-type ScoreCellProps = {
-  summary: GradeSummary | null
-  isScanning?: boolean
-  getStrengthLevel: SecurityContract['getStrengthLevel']
-  getStrengthColor: SecurityContract['getStrengthColor']
-}
-
-const ScoreCell = ({ summary, isScanning, getStrengthLevel, getStrengthColor }: ScoreCellProps) => {
-  if (!summary) {
-    if (isScanning) return <Skeleton variant="rounded" width={60} height={20} />
-    return (
-      <Typography variant="body2" color="text.secondary">
-        {DASH}
-      </Typography>
-    )
-  }
-  const clearRatio = summary.applicableCount > 0 ? summary.passing / summary.applicableCount : 0
-  const score = Math.round(clearRatio * 100)
-  const level = getStrengthLevel(clearRatio, summary.hasCriticalIssue)
-  const color = getStrengthColor(level)
-
-  return (
-    <Stack direction="row" alignItems="center" spacing={0.75}>
-      <Box
-        sx={{
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          backgroundColor: color,
-          flexShrink: 0,
-        }}
-      />
-      <Typography variant="body2" fontWeight={600}>
-        {score}
-      </Typography>
-      <Typography variant="caption" color="text.secondary">
-        / 100
-      </Typography>
-    </Stack>
-  )
-}
-
-/** Extract a specific evidence label's value from a ScanResult. */
-const getEvidence = (
-  results: Record<string, ScanResult> | undefined,
-  scannerId: string,
-  label: string,
-): string | null => {
-  const evidence = results?.[scannerId]?.evidence
-  if (!evidence) return null
-  for (const item of evidence) {
-    if (typeof item !== 'string' && item.label === label) return item.value
-  }
-  return null
-}
-
-const ThresholdCell = ({ results, isScanning }: { results?: Record<string, ScanResult>; isScanning?: boolean }) => {
-  if (!results && isScanning) return <Skeleton variant="rounded" width={50} height={20} />
-  const threshold = getEvidence(results, 'account_setup', 'Threshold')
-  return (
-    <Typography variant="body2" color="text.primary">
-      {threshold ?? DASH}
-    </Typography>
-  )
-}
-
-const VersionCell = ({ results, isScanning }: { results?: Record<string, ScanResult>; isScanning?: boolean }) => {
-  if (!results && isScanning) return <Skeleton variant="rounded" width={50} height={20} />
-  const version = getEvidence(results, 'contract_version', 'Current version')
-  return (
-    <Typography variant="body2" color="text.primary">
-      {version ?? DASH}
-    </Typography>
-  )
-}
-
-const formatBalance = (fiatTotal?: string | null): string => {
-  const value = Number(fiatTotal)
-  if (!fiatTotal || !Number.isFinite(value) || value === 0) return DASH
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`
-  return `$${value.toFixed(0)}`
-}
-
-const BalanceCell = ({ value, isScanning }: { value?: string; isScanning?: boolean }) => (
-  <Typography variant="body2" color="text.primary">
-    {!value && isScanning ? <Skeleton variant="rounded" width={50} height={20} /> : formatBalance(value)}
-  </Typography>
-)
-
-// Pure helper functions — extracted from component body for testability and to avoid recreation per render.
-// Utilities are threaded in via parameters (not imported) to comply with feature architecture —
-// callers obtain them from useLoadFeature(SecurityFeature).
-type SecurityUtils = Pick<SecurityContract, 'scanKey' | 'computeSummary' | 'severityRank'>
-
-const getAggregateSummary = (
-  safe: SpaceSafeEntry,
-  scanResults: Record<string, Record<string, ScanResult>>,
-  utils: SecurityUtils,
-): GradeSummary | null => {
-  let totalPassing = 0
-  let totalApplicable = 0
-  let worstGradeRank = 4
-  let hasCriticalIssue = false
-  let hasAny = false
-
-  for (const chain of safe.chainEntries) {
-    const key = utils.scanKey(safe.address, chain.chainId)
-    const results = scanResults[key]
-    if (!results) continue
-    const summary = utils.computeSummary(results)
-    if (!summary) continue
-    hasAny = true
-    totalPassing += summary.passing
-    totalApplicable += summary.applicableCount
-    if (summary.hasCriticalIssue) hasCriticalIssue = true
-    const rank = utils.severityRank(summary.grade)
-    if (rank < worstGradeRank) worstGradeRank = rank
-  }
-
-  if (!hasAny) return null
-  const gradeMap = ['Critical', 'High', 'Medium', 'Low'] as const
-  return {
-    passing: totalPassing,
-    applicableCount: totalApplicable,
-    grade: gradeMap[worstGradeRank] ?? 'Low',
-    hasCriticalIssue,
-  }
-}
-
-/**
- * Worst SafeGrade across a multichain Safe's chain entries. Used for the collapsed
- * parent row's Status cell so it reflects the most severe chain (matching the badge
- * counting semantics in WorkspaceHealthCard).
- */
-const getAggregateSafeGrade = (
-  safe: SpaceSafeEntry,
-  scanResults: Record<string, Record<string, ScanResult>>,
-  scanKey: SecurityContract['scanKey'],
-  getSafeGrade: SecurityContract['getSafeGrade'],
-): SafeGrade | null => {
-  let worstRank = SAFE_GRADE_RANK.passing + 1
-  let worstGrade: SafeGrade | null = null
-  for (const chain of safe.chainEntries) {
-    const key = scanKey(safe.address, chain.chainId)
-    const results = scanResults[key]
-    if (!results) continue
-    const grade = getSafeGrade(results)
-    const rank = SAFE_GRADE_RANK[grade]
-    if (rank < worstRank) {
-      worstRank = rank
-      worstGrade = grade
-    }
-  }
-  return worstGrade
-}
-
-const hasMultichainWarning = (
-  safe: SpaceSafeEntry,
-  scanResults: Record<string, Record<string, ScanResult>>,
-  scanKey: SecurityContract['scanKey'],
-): boolean => {
-  for (const chain of safe.chainEntries) {
-    const key = scanKey(safe.address, chain.chainId)
-    const results = scanResults[key]
-    if (!results) continue
-    const multichainResult = results['multichain_setup']
-    if (multichainResult && multichainResult.status !== 'clear' && multichainResult.status !== 'not_applicable') {
-      return true
-    }
-  }
-  return false
-}
-
-const isAnyChainScanning = (
-  safe: SpaceSafeEntry,
-  scanningKeys: Set<string> | undefined,
-  scanKey: SecurityContract['scanKey'],
-): boolean => {
-  if (!scanningKeys) return false
-  return safe.chainEntries.some((c) => scanningKeys.has(scanKey(safe.address, c.chainId)))
-}
+import { BalanceCell, ScoreCell, ThresholdCell, VersionCell } from './cells'
+import { DASH, MotionTableRow, MotionTbody, ROW_VARIANTS } from './constants'
+import {
+  formatBalance,
+  getAggregateSafeGrade,
+  getAggregateSummary,
+  hasMultichainWarning,
+  isAnyChainScanning,
+} from './utils'
 
 type SecuritySafesTableProps = {
   safes: SpaceSafeEntry[]

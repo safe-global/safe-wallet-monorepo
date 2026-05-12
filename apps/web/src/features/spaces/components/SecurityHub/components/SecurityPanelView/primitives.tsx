@@ -10,6 +10,7 @@ import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
 import Link from 'next/link'
 import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/types'
 import type { SecurityContract } from '@/features/security'
+import { SEVERITY_RANK } from '@/features/security/data/scanners/constants'
 
 export type SectionRow = { key: string; severity: SecurityGrade; isPassing: boolean; node: ReactNode }
 
@@ -22,8 +23,6 @@ export type Cta = { label: string; href: string }
  */
 export const isPassingStatus = (s: ScanResult['status']) =>
   s === 'clear' || s === 'not_applicable' || s === 'inconclusive'
-
-const SEVERITY_RANK: Record<SecurityGrade, number> = { Critical: 0, High: 1, Medium: 2, Low: 3 }
 
 /** Sort row entries with most severe first, falling back to original order. */
 export const sortBySeverity = <T extends { severity: SecurityGrade }>(items: T[]): T[] =>
