@@ -11,6 +11,16 @@ import type { SpaceSafeEntry } from '../../types'
  */
 export type SecurityUtils = Pick<SecurityContract, 'scanKey' | 'computeSummary' | 'severityRank'>
 
+/** Superset used by row components: SecurityUtils + the formatters/grade helpers they render. */
+export type RowSecurity = SecurityUtils &
+  Pick<SecurityContract, 'formatTimestamp' | 'getStrengthLevel' | 'getStrengthColor' | 'getSafeGrade'>
+
+/** Builder returning a Safe's home URL for a given (address, chainId), or undefined if the chain has no short name. */
+export type GetSafeSecurityHref = (
+  address: string,
+  chainId: string,
+) => { pathname: string; query: { safe: string } } | undefined
+
 /** Extract a specific evidence label's value from a ScanResult. */
 export const getEvidence = (
   results: Record<string, ScanResult> | undefined,
