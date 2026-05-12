@@ -23,9 +23,6 @@ const NOOP: Decision = { action: 'noop' }
 
 const isSpacesPath = (pathname: string): boolean => pathname === '/spaces' || pathname.startsWith('/spaces/')
 
-// Optimistic-enable: treat undefined (flags not loaded yet) as enabled.
-const enabled = (flag: boolean | undefined): boolean => flag !== false
-
 export const decide = (input: DecideInput): Decision => {
   const {
     requireLogin,
@@ -39,8 +36,11 @@ export const decide = (input: DecideInput): Decision => {
     spacesError,
   } = input
 
-  // Row 1: legacy mode — both flags must be ON for anything to happen.
-  if (requireLogin === false && enabled(classicEnabled)) return NOOP
+  // Row 1 (master switch): REQUIRE_SPACES_LOGIN off → fully inert.
+  // Per spec: the app behaves exactly as today when this flag is off, regardless of
+  // CLASSIC_UI_ENABLED. (CLASSIC_UI_ENABLED is a sub-switch that only takes effect
+  // once the new flow is required.)
+  if (requireLogin === false) return NOOP
 
   // Row 2: excluded route or OIDC handshake in flight.
   if (isExcludedRoute(pathname)) return NOOP
@@ -56,9 +56,6 @@ export const decide = (input: DecideInput): Decision => {
   }
 
   // Signed-in path.
-
-  // Row 6: REQUIRE_LOGIN off — new flow is gated off.
-  if (requireLogin === false) return NOOP
 
   // Row 7: don't kick a working session if the spaces query failed.
   if (spacesError) return NOOP

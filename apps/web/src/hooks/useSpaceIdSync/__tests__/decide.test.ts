@@ -15,8 +15,11 @@ const baseInput: DecideInput = {
 const make = (overrides: Partial<DecideInput> = {}): DecideInput => ({ ...baseInput, ...overrides })
 
 describe('decide', () => {
-  it('row 1 — REQUIRE_LOGIN off + CLASSIC on → noop', () => {
+  it('row 1 — REQUIRE_LOGIN off → noop regardless of CLASSIC', () => {
     expect(decide(make({ requireLogin: false, classicEnabled: true }))).toEqual<Decision>({ action: 'noop' })
+    // Same noop even when CLASSIC is also off (e.g. local dev: chain config returns neither flag).
+    expect(decide(make({ requireLogin: false, classicEnabled: false }))).toEqual<Decision>({ action: 'noop' })
+    expect(decide(make({ requireLogin: false, classicEnabled: undefined }))).toEqual<Decision>({ action: 'noop' })
   })
 
   it('row 2 — excluded route always noop, regardless of flags / auth', () => {

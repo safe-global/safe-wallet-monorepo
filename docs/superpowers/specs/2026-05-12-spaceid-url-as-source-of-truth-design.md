@@ -54,7 +54,7 @@ Evaluated top-down; the first matching row wins.
 
 | #   | `REQUIRE_LOGIN` | `CLASSIC_ENABLED` | Auth       | Has spaces?                  | `?spaceId` | Pathname    | Action                                         |
 | --- | --------------- | ----------------- | ---------- | ---------------------------- | ---------- | ----------- | ---------------------------------------------- |
-| 1   | OFF             | ON                | \*         | \*                           | \*         | \*          | no-op (legacy mode)                            |
+| 1   | OFF             | \*                | \*         | \*                           | \*         | \*          | no-op (master switch: fully inert)             |
 | 2   | \*              | \*                | \*         | \*                           | \*         | excluded    | no-op                                          |
 | 3   | \*              | OFF               | signed-out | n/a                          | \*         | any         | `replace('/welcome/spaces?redirect=<asPath>')` |
 | 4   | \*              | \*                | signed-out | n/a                          | yes        | any         | `replace('/welcome/spaces?redirect=<asPath>')` |
