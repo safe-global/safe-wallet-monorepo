@@ -246,7 +246,7 @@ export const useFeesPreview = (): FeesPreviewData => {
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
-  const isSignerMode = !isConfirmation && gtfPaymentMode === 'signer'
+  const isSignerMode = !isConfirmation && (gtfPaymentMode === 'signer' || candidates.length === 0)
 
   // Confirmers render the fee locked in the signed payload, not a fresh CGW quote.
   // Skip the query when the Safe holds no eligible gas token — without this the CGW endpoint

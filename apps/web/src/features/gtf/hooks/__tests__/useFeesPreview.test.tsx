@@ -401,7 +401,7 @@ describe('useFeesPreview', () => {
     expect(result.current.totalOutgoing).toBeUndefined()
   })
 
-  it('skips the preview query and forces signer fallback when no Safe-side gas tokens are available', () => {
+  it('skips the preview query and routes to signer-pays when no Safe-side gas tokens are available', () => {
     jest.spyOn(useGasTokenCandidatesModule, 'useGasTokenCandidates').mockReturnValue({
       candidates: [],
       defaultAddress: undefined,
@@ -411,9 +411,9 @@ describe('useFeesPreview', () => {
     const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
 
     expect(previewSpy.mock.calls.at(-1)?.[0]).toBe(skipToken)
-    expect(result.current.canCoverFees).toBe(false)
+    expect(result.current.canCoverFees).toBe(true)
     expect(result.current.availableGasTokens).toEqual([])
-    expect(result.current.gasFee.currency).toBe('ETH')
+    expect(result.current.gasFee.note).toBe('Paid by executor')
   })
 
   describe('signer-pays mode (Safe→Signer toggle)', () => {
