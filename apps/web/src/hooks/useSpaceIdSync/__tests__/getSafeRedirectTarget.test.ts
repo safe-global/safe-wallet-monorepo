@@ -23,6 +23,12 @@ describe('getSafeRedirectTarget', () => {
     expect(getSafeRedirectTarget('../etc/passwd')).toBeNull()
   })
 
+  it('keeps URL-encoded slashes inside the pathname (no origin escape)', () => {
+    // After URL parsing, %2f stays inside pathname — does not flip the origin.
+    // Same-origin same-path; just a quirky path string.
+    expect(getSafeRedirectTarget('/%2fevil.com')).toBe('/%2fevil.com')
+  })
+
   it('rejects non-string and empty values', () => {
     expect(getSafeRedirectTarget('')).toBeNull()
     expect(getSafeRedirectTarget(undefined)).toBeNull()
