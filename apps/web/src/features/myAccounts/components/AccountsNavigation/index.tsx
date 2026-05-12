@@ -35,8 +35,9 @@ const navItems: NavItems = [
 const AccountsNavigation = () => {
   const router = useRouter()
   const isClassicEnabled = useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)
-  const visibleItems =
-    isClassicEnabled === false ? navItems.filter((item) => item.url !== AppRoutes.welcome.accounts) : navItems
+
+  // Classic killed → only Spaces remains; with one option the tabs widget is noise.
+  if (isClassicEnabled === false) return null
 
   const isActiveNavigation = (pathname: string) => {
     return router.pathname === pathname
@@ -50,7 +51,7 @@ const AccountsNavigation = () => {
 
   return (
     <nav className={css.nav}>
-      {visibleItems.map((item) => (
+      {navItems.map((item) => (
         <Link
           key={item.url}
           href={item.url}

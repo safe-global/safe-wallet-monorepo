@@ -126,9 +126,14 @@ The rest of the app reads `spaceId` via the existing `useCurrentSpaceId()`, whic
 
 ## Welcome navigation tabs
 
-The welcome page exposes two tabs in `AccountsNavigation`: "Accounts" (classic) and "Spaces" (new flow). The "Accounts" tab is part of the classic UI and must hide once classic is killed.
+The welcome page exposes two tabs in `AccountsNavigation`: "Accounts" (classic) and "Spaces" (new flow). Both belong to the classic experience — once classic is killed there's only one place to go, so the tabs widget itself is hidden and `/welcome/accounts` redirects to `/welcome/spaces`.
 
-Gate: when `useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)` returns `false` (explicitly disabled), filter the Accounts entry out of the tab list. While the flag is `undefined` (chain config loading) or `true`, both tabs render — preserves the existing welcome page during the coexistence window.
+Gate: when `useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)` returns `false` (explicitly disabled):
+
+- `AccountsNavigation` returns `null` — the entire tabs widget disappears (no single-option strip).
+- `/welcome/accounts` page issues `router.replace('/welcome/spaces')` — Spaces becomes the effective default landing.
+
+While the flag is `undefined` (chain config loading) or `true`, both tabs render and `/welcome/accounts` works as before. The redirect lives in the page (not in `useSpaceIdSync`) because it's a route-specific fallback, not a global URL invariant.
 
 ## Sign-in → return-to-original-URL flow
 

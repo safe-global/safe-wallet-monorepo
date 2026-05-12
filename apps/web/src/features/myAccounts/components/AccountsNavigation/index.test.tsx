@@ -21,10 +21,12 @@ describe('AccountsNavigation', () => {
     expect(screen.getByText('Spaces')).toBeInTheDocument()
   })
 
-  it('hides the Accounts tab when CLASSIC_UI_ENABLED is explicitly disabled', () => {
+  it('renders nothing when CLASSIC_UI_ENABLED is explicitly disabled', () => {
     jest.spyOn(useChainsModule, 'useHasDefaultChainFeature').mockReturnValue(false)
-    render(<AccountsNavigation />)
+    const { container } = render(<AccountsNavigation />)
+    // With classic killed, only Spaces remains — the single-tab widget is hidden.
     expect(screen.queryByText('Accounts')).not.toBeInTheDocument()
-    expect(screen.getByText('Spaces')).toBeInTheDocument()
+    expect(screen.queryByText('Spaces')).not.toBeInTheDocument()
+    expect(container).toBeEmptyDOMElement()
   })
 })
