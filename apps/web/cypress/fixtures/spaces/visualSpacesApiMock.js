@@ -11,7 +11,7 @@ export const visualSpacesApiMockSpace = {
       id: 1,
       role: 'ADMIN',
       name: 'Admin User',
-      invitedBy: 'system',
+      invitedBy: null,
       status: 'ACTIVE',
       createdAt: '2025-01-01T00:00:00.000Z',
       updatedAt: '2025-01-01T00:00:00.000Z',

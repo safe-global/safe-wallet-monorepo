@@ -8890,6 +8890,10 @@
             "type": "string"
           },
           "invitedBy": {
+            "type": "number",
+            "nullable": true
+          },
+          "invitedByName": {
             "type": "string"
           },
           "status": {
@@ -9097,7 +9101,7 @@
             ]
           },
           "invitedBy": {
-            "type": "string",
+            "type": "number",
             "nullable": true
           }
         },
@@ -9106,7 +9110,8 @@
           "name",
           "spaceId",
           "role",
-          "status"
+          "status",
+          "invitedBy"
         ]
       },
       "AcceptInviteDto": {
@@ -9175,7 +9180,7 @@
             "nullable": true
           },
           "invitedBy": {
-            "type": "string",
+            "type": "number",
             "nullable": true
           },
           "createdAt": {
@@ -9195,6 +9200,7 @@
           "role",
           "status",
           "name",
+          "invitedBy",
           "createdAt",
           "updatedAt",
           "user"
