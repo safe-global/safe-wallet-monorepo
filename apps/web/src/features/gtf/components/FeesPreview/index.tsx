@@ -243,8 +243,10 @@ const GasTokenSelector = ({
 
 const SignerFeeNotice = ({
   availableGasTokens,
+  isLocked,
 }: {
   availableGasTokens: FeesPreviewData['availableGasTokens']
+  isLocked?: boolean
 }): ReactElement => {
   const chain = useCurrentChain()
   // Fall back to the chain's native currency when no candidate is available — happens when
@@ -271,9 +273,11 @@ const SignerFeeNotice = ({
           </span>
         </Tooltip>
       </div>
-      <Typography variant="body2" color="text.secondary">
-        Fees can&apos;t currently be paid from your Safe.
-      </Typography>
+      {!isLocked && (
+        <Typography variant="body2" color="text.secondary">
+          Fees can&apos;t currently be paid from your Safe.
+        </Typography>
+      )}
     </div>
   )
 }
@@ -351,7 +355,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
         {/* Confirmer on a non-Safe-pays signed payload — pay from signer, also locked */}
         {isLegacySigned && (
           <>
-            <SignerFeeNotice availableGasTokens={availableGasTokens} />
+            <SignerFeeNotice availableGasTokens={availableGasTokens} isLocked />
 
             <Divider sx={{ mx: -2 }} />
           </>
