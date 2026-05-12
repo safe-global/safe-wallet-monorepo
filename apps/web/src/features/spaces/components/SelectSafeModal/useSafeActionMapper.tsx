@@ -86,6 +86,19 @@ const useSafeActionMapper = ({ onReceiveComplete }: UseSafeActionMapperOptions):
           query: { ...(txBuilderLink.query as Record<string, string>), safe: safeParam },
         })
       },
+
+      [ESafeAction.SpendingLimit]: async (safe) => {
+        const safeParam = getSafeQueryParam(safe)
+        await router.push({
+          pathname: AppRoutes.spaces.policies,
+          query: {
+            ...(router.query.spaceId ? { spaceId: router.query.spaceId } : {}),
+            policy: 'spendingLimit',
+            step: 'wallet',
+            safe: safeParam,
+          },
+        })
+      },
     }),
     [router, setTxFlow, getSafeQueryParam, navigateToSafe, onReceiveComplete, resetActiveSafe, txBuilderLink],
   )
