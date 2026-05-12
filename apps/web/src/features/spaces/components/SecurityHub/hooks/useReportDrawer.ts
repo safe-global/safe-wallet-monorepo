@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { ScanContext } from '@/features/security/types'
 import type { useLoadFeature } from '@/features/__core__'
 import type { SecurityContract } from '@/features/security'
@@ -32,14 +33,22 @@ const useReportDrawer = ({ security, safes, overviewMap }: UseReportDrawerParams
 
   const openReport = useCallback((address: string, chainId: string) => {
     setSelectedSafe((prev) => {
-      if (prev && prev.address === address && prev.chainId === chainId) return null
+      if (prev && sameAddress(prev.address, address) && prev.chainId === chainId) return null
       return { address, chainId }
     })
   }, [])
 
   const closeReport = useCallback(() => setSelectedSafe(null), [])
 
-  const selectedEntry = useMemo(() => safes.find((s) => s.address === selectedSafe?.address), [safes, selectedSafe])
+  const selectedEntry = useMemo(() => {
+    if (!selectedSafe) return undefined
+    // Multichain Safes share the same address across chains, so a plain address match
+    // can return a row whose chainEntries don't include the selected chain.
+    return safes.find(
+      (s) =>
+        sameAddress(s.address, selectedSafe.address) && s.chainEntries.some((c) => c.chainId === selectedSafe.chainId),
+    )
+  }, [safes, selectedSafe])
 
   const drawerOverview =
     selectedSafe && security.$isReady

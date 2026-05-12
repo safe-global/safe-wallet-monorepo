@@ -38,19 +38,11 @@ const useAutoScanOrchestrator = ({
         ? {
             scanners: security.scanners,
             scanKey: security.scanKey,
-            getScanResultsCache: security.getScanResultsCache,
-            evictScanCache: security.evictScanCache,
+            setCachedScan: security.setCachedScan,
             withScannerTimeout: security.withScannerTimeout,
           }
         : null,
-    [
-      security.$isReady,
-      security.scanners,
-      security.scanKey,
-      security.getScanResultsCache,
-      security.evictScanCache,
-      security.withScannerTimeout,
-    ],
+    [security.$isReady, security.scanners, security.scanKey, security.setCachedScan, security.withScannerTimeout],
   )
 
   const autoScan = useAutoScan(deployedEntries, safes, overviewMap, services, onScanComplete)

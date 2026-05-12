@@ -7,27 +7,36 @@ export const flattenSafes = (
   allSafes: Array<SafeItem | MultiChainSafeItem>,
   undeployedSafes: UndeployedSafesState,
 ): SpaceSafeEntry[] =>
-  allSafes.map((item) => {
+  allSafes.flatMap<SpaceSafeEntry>((item) => {
     if (isMultiChainSafeItem(item)) {
-      return {
-        address: item.address,
-        chainId: item.safes[0]?.chainId ?? '1',
-        name: item.name,
-        isMultichain: true,
-        chainEntries: item.safes.map((s) => ({
-          chainId: s.chainId,
-          isDeployed: !undeployedSafes[s.chainId]?.[s.address],
-        })),
-      }
+      // A multichain group with no chains is malformed (the grouping logic upstream
+      // never produces one in practice). Skip rather than synthesising a mainnet
+      // entry — a bogus chainId would queue scans for a Safe that doesn't exist there.
+      const firstChainId = item.safes[0]?.chainId
+      if (!firstChainId) return []
+      return [
+        {
+          address: item.address,
+          chainId: firstChainId,
+          name: item.name,
+          isMultichain: true,
+          chainEntries: item.safes.map((s) => ({
+            chainId: s.chainId,
+            isDeployed: !undeployedSafes[s.chainId]?.[s.address],
+          })),
+        },
+      ]
     }
     const isDeployed = !undeployedSafes[item.chainId]?.[item.address]
-    return {
-      address: item.address,
-      chainId: item.chainId,
-      name: item.name,
-      isMultichain: false,
-      chainEntries: [{ chainId: item.chainId, isDeployed }],
-    }
+    return [
+      {
+        address: item.address,
+        chainId: item.chainId,
+        name: item.name,
+        isMultichain: false,
+        chainEntries: [{ chainId: item.chainId, isDeployed }],
+      },
+    ]
   })
 
 /** Collect all deployed chain entries across all safes. */

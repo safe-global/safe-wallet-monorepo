@@ -43,10 +43,9 @@ const startScanFn = jest.fn()
 const mkSecurity = (isReady = true) =>
   ({
     $isReady: isReady,
-    scanners: [{ id: 'a', scan: jest.fn() }],
+    scanners: [{ id: 'account_setup', scan: jest.fn() }],
     scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
-    getScanResultsCache: jest.fn(),
-    evictScanCache: jest.fn(),
+    setCachedScan: jest.fn(),
     withScannerTimeout: jest.fn(),
   }) as unknown as Parameters<typeof useAutoScanOrchestrator>[0]['security']
 
@@ -82,8 +81,7 @@ describe('useAutoScanOrchestrator', () => {
     expect(lastServices).toMatchObject({
       scanners: security.scanners,
       scanKey: security.scanKey,
-      getScanResultsCache: security.getScanResultsCache,
-      evictScanCache: security.evictScanCache,
+      setCachedScan: security.setCachedScan,
       withScannerTimeout: security.withScannerTimeout,
     })
   })
