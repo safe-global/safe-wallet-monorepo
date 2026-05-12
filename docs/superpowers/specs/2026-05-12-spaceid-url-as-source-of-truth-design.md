@@ -76,7 +76,7 @@ Routes never touched by `useSpaceIdSync`:
 - Legal: `/imprint`, `/privacy`, `/cookie`, `/terms`, `/licenses`, `/safe-labs-terms`
 - Share / import: `/share/*`, `/import/*`
 - Auth callbacks: `/hypernative/oauth-callback`, any future `/oidc/*`
-- `/404`
+- Error pages: `/404`, `/403`
 
 Implemented as a `STARTS_WITH` + exact-match union so future subroutes under `/share`, `/import`, `/welcome` are auto-covered.
 
