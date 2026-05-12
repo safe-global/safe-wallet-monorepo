@@ -5,14 +5,14 @@ import * as useChainsModule from '@/hooks/useChains'
 import * as spacesApi from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-type AuthState = { isAuthenticated?: boolean; isOidcLoginPending?: boolean }
+type AuthState = { isAuthenticated?: boolean; isOidcLoginPending?: boolean; isStoreHydrated?: boolean }
 
-const mockAuth = ({ isAuthenticated = false, isOidcLoginPending = false }: AuthState = {}) => {
+const mockAuth = ({ isAuthenticated = false, isOidcLoginPending = false, isStoreHydrated = true }: AuthState = {}) => {
   jest.spyOn(store, 'useAppSelector').mockImplementation((selector) => {
     const fakeState = {
       auth: {
         sessionExpiresAt: isAuthenticated ? Date.now() + 60_000 : null,
-        isStoreHydrated: true,
+        isStoreHydrated,
         isOidcLoginPending,
       },
     }
@@ -192,6 +192,27 @@ describe('useSpaceIdSync', () => {
 
     renderHook(() => useSpaceIdSync(), {
       routerProps: { isReady: false, pathname: '/home', asPath: '/home', query: {}, replace },
+    })
+
+    expect(replace).not.toHaveBeenCalled()
+  })
+
+  it('does not act before redux-persist hydration completes', () => {
+    // Pre-hydration: sessionExpiresAt isn't restored yet so isAuthenticated reads false,
+    // but a freshly opened deep link with ?spaceId could otherwise bounce the user.
+    mockAuth({ isAuthenticated: false, isStoreHydrated: false })
+    mockFlags()
+    mockSpaces(null)
+    const replace = jest.fn()
+
+    renderHook(() => useSpaceIdSync(), {
+      routerProps: {
+        isReady: true,
+        pathname: '/home',
+        asPath: '/home?spaceId=42',
+        query: { spaceId: '42' },
+        replace,
+      },
     })
 
     expect(replace).not.toHaveBeenCalled()

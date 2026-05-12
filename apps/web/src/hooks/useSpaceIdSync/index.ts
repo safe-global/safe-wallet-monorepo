@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppSelector } from '@/store'
-import { isAuthenticated, selectIsOidcLoginPending } from '@/store/authSlice'
+import { isAuthenticated, selectIsOidcLoginPending, selectIsStoreHydrated } from '@/store/authSlice'
 import { useHasDefaultChainFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
@@ -22,12 +22,17 @@ export const useSpaceIdSync = (): void => {
   const router = useRouter()
   const isSignedIn = useAppSelector(isAuthenticated)
   const isOidcPending = useAppSelector(selectIsOidcLoginPending)
+  const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const requireLogin = useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN)
   const classicEnabled = useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)
   const { data: spaces, isError: spacesError } = useSpacesGetV1Query(undefined, { skip: !isSignedIn })
 
   useEffect(() => {
     if (!router.isReady) return
+    // Wait for redux-persist to rehydrate the session before deciding anything —
+    // otherwise an actually signed-in user can be bounced to /welcome/spaces on
+    // first render (where they then get stuck because /welcome/* is excluded).
+    if (!isStoreHydrated) return
 
     const decision = decide({
       requireLogin,
@@ -62,5 +67,5 @@ export const useSpaceIdSync = (): void => {
         })
         return
     }
-  }, [router, isSignedIn, isOidcPending, requireLogin, classicEnabled, spaces, spacesError])
+  }, [router, isSignedIn, isOidcPending, isStoreHydrated, requireLogin, classicEnabled, spaces, spacesError])
 }
