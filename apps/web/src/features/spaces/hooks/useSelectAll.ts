@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useWatch, type Control, type UseFormSetValue } from 'react-hook-form'
 import { type AllSafeItems } from '@/hooks/safes'
-import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
-import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
+import { SAFE_ACCOUNTS_LIMIT } from '../components/Sidebar/constants'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '../components/SelectSafesOnboarding/constants'
 import { collectSafeKeys, collectParentKeys, getSelectionState } from './selectAllHelpers'
-import type { AddAccountsFormValues } from './types'
+import type { AddAccountsFormValues } from './useSelectAll.types'
 
 type Scope = 'all' | 'trusted' | 'owned'
 

@@ -14,7 +14,7 @@ import ConnectWalletPrompt from './components/ConnectWalletPrompt'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
-import { useSelectAll } from '@/features/spaces/components/AddAccounts/useSelectAll'
+import { useSelectAll } from '@/features/spaces/hooks/useSelectAll'
 import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/constants'
 
 const ONBOARDING_STEP = 2

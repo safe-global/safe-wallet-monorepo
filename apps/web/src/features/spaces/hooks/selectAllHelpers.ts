@@ -1,6 +1,6 @@
 import { type AllSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
-import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
-import type { AddAccountsFormValues } from './types'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '../components/SelectSafesOnboarding/constants'
+import type { AddAccountsFormValues } from './useSelectAll.types'
 
 export type SelectAllState = 'none' | 'some' | 'all'
 

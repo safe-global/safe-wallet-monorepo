@@ -1,6 +1,6 @@
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import { collectSafeKeys, collectParentKeys, getSelectionState } from '../selectAllHelpers'
-import { MULTICHAIN_SAFE_KEY_PREFIX } from '../../SelectSafesOnboarding/constants'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '../../components/SelectSafesOnboarding/constants'
 
 const makeSafe = (chainId: string, address: string): SafeItem => ({
   chainId,

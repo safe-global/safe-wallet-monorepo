@@ -1,13 +1,12 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import { FormProvider, useForm } from 'react-hook-form'
 import type { AllSafeItems, MultiChainSafeItem, SafeItem } from '@/hooks/safes'
-import SelectAllHeader from '@/features/spaces/components/AddAccounts/SelectAllHeader'
-import SelectAllToggle from '@/features/spaces/components/AddAccounts/SelectAllToggle'
-import { useSelectAll } from '@/features/spaces/components/AddAccounts/useSelectAll'
-import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/types'
+import SelectAllToggle from '@/features/spaces/components/SelectAllToggle/SelectAllToggle'
+import { useSelectAll } from '@/features/spaces/hooks/useSelectAll'
+import type { AddAccountsFormValues } from '@/features/spaces/hooks/useSelectAll.types'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 
-jest.mock('../../Sidebar/constants', () => ({
+jest.mock('@/features/spaces/components/Sidebar/constants', () => ({
   SAFE_ACCOUNTS_LIMIT: 10,
 }))
 
@@ -47,7 +46,7 @@ const OnboardingSelectAllHarness = ({
 
   getSelectedSafesRef.current = () => getValues('selectedSafes')
 
-  const { globalSelection, trustedSelection, ownedSelection, handleSelectAll, capReached } = useSelectAll({
+  const { globalSelection, trustedSelection, ownedSelection, handleSelectAll } = useSelectAll({
     visibleTrusted: trusted,
     visibleOwned: owned,
     control,
@@ -56,12 +55,14 @@ const OnboardingSelectAllHarness = ({
 
   return (
     <FormProvider {...formMethods}>
-      <SelectAllHeader
+      <SelectAllToggle
         state={globalSelection.state}
-        selectedCount={globalSelection.selectedCount}
+        count={globalSelection.selectedCount}
         total={globalSelection.total}
         onToggle={(check) => handleSelectAll('all', check)}
-        capReached={capReached}
+        label="Select all"
+        showCount
+        testId="select-all-global"
       />
       <div className="flex flex-col gap-2">
         <SelectAllToggle

@@ -2,13 +2,13 @@ import { renderHook, act } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { FormProvider, useForm, useFormContext } from 'react-hook-form'
 import type { AllSafeItems, MultiChainSafeItem, SafeItem } from '@/hooks/safes'
-import { MULTICHAIN_SAFE_KEY_PREFIX } from '../../SelectSafesOnboarding/constants'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '../../components/SelectSafesOnboarding/constants'
 
-jest.mock('../../Sidebar/constants', () => ({
+jest.mock('../../components/Sidebar/constants', () => ({
   SAFE_ACCOUNTS_LIMIT: 3,
 }))
 
-import type { AddAccountsFormValues } from '../types'
+import type { AddAccountsFormValues } from '../useSelectAll.types'
 import { useSelectAll } from '../useSelectAll'
 
 const makeSafe = (chainId: string, address: string): SafeItem => ({

@@ -46,10 +46,10 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
-import { useSelectAll } from './useSelectAll'
-import type { AddAccountsFormValues } from './types'
+import { useSelectAll } from '../../hooks/useSelectAll'
+import type { AddAccountsFormValues } from '../../hooks/useSelectAll.types'
 
-export type { AddAccountsFormValues } from './types'
+export type { AddAccountsFormValues } from '../../hooks/useSelectAll.types'
 
 function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
   const flatSafeItems = flattenSafeItems(spaceSafes)

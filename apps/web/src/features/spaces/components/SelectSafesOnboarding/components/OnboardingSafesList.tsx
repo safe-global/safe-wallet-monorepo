@@ -1,7 +1,7 @@
 import { type AllSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
 import SafeCard from './SafeCard'
 import SimilarAddressAlert from './SimilarAddressAlert'
-import SelectAllToggle, { type SelectAllState } from '@/features/spaces/components/AddAccounts/SelectAllToggle'
+import SelectAllToggle, { type SelectAllState } from '@/features/spaces/components/SelectAllToggle/SelectAllToggle'
 
 interface SectionSelectAll {
   state: SelectAllState
