@@ -20,6 +20,7 @@ import type { ScanResult, GradeSummary, SafeGrade } from '@/features/security/ty
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import type { SecurityContract } from '@/features/security'
+import { SAFE_GRADE_RANK } from '@/features/security/data/scanners/constants'
 import Identicon from '@/components/common/Identicon'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosList } from '@/features/multichain'
@@ -50,14 +51,6 @@ type ScoreCellProps = {
   isScanning?: boolean
   getStrengthLevel: SecurityContract['getStrengthLevel']
   getStrengthColor: SecurityContract['getStrengthColor']
-}
-
-/** Worst-grade ranking matches the SafeGrade ordering used by the top filter chips. */
-const SAFE_GRADE_RANK: Record<SafeGrade, number> = {
-  critical: 0,
-  at_risk: 1,
-  needs_attention: 2,
-  passing: 3,
 }
 
 const ScoreCell = ({ summary, isScanning, getStrengthLevel, getStrengthColor }: ScoreCellProps) => {
