@@ -4,9 +4,7 @@ import {
   selectIsOidcLoginPending,
   setAuthenticated,
   setUnauthenticated,
-  setLastUsedSpace,
   isAuthenticated,
-  lastUsedSpace,
 } from '../authSlice'
 import type { RootState } from '@/store'
 
@@ -36,26 +34,11 @@ describe('authSlice', () => {
     })
   })
 
-  describe('setLastUsedSpace', () => {
-    it('should set lastUsedSpace', () => {
-      const state = reducer(undefined, setLastUsedSpace('space-123'))
-
-      expect(state.lastUsedSpace).toBe('space-123')
-    })
-
-    it('should accept null', () => {
-      const withSpace = reducer(undefined, setLastUsedSpace('space-123'))
-      const state = reducer(withSpace, setLastUsedSpace(null))
-
-      expect(state.lastUsedSpace).toBeNull()
-    })
-  })
-
   describe('isAuthenticated selector', () => {
     it('returns true when session has not expired', () => {
       const futureExpiry = Date.now() + 60000
       const rootState = {
-        auth: { sessionExpiresAt: futureExpiry, lastUsedSpace: null, isStoreHydrated: false },
+        auth: { sessionExpiresAt: futureExpiry, isStoreHydrated: false },
       } as unknown as RootState
 
       expect(isAuthenticated(rootState)).toBe(true)
@@ -64,7 +47,7 @@ describe('authSlice', () => {
     it('returns false when session has expired', () => {
       const pastExpiry = Date.now() - 60000
       const rootState = {
-        auth: { sessionExpiresAt: pastExpiry, lastUsedSpace: null, isStoreHydrated: false },
+        auth: { sessionExpiresAt: pastExpiry, isStoreHydrated: false },
       } as unknown as RootState
 
       expect(isAuthenticated(rootState)).toBe(false)
@@ -72,20 +55,10 @@ describe('authSlice', () => {
 
     it('returns false when sessionExpiresAt is null', () => {
       const rootState = {
-        auth: { sessionExpiresAt: null, lastUsedSpace: null, isStoreHydrated: false },
+        auth: { sessionExpiresAt: null, isStoreHydrated: false },
       } as unknown as RootState
 
       expect(isAuthenticated(rootState)).toBe(false)
-    })
-  })
-
-  describe('lastUsedSpace selector', () => {
-    it('returns the last used space', () => {
-      const rootState = {
-        auth: { sessionExpiresAt: null, lastUsedSpace: 'space-abc', isStoreHydrated: false },
-      } as unknown as RootState
-
-      expect(lastUsedSpace(rootState)).toBe('space-abc')
     })
   })
 
