@@ -18,6 +18,7 @@ import {
   EllipsisVertical,
   Shield,
   History,
+  Scale,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
@@ -49,6 +50,11 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
     label: 'Activity',
     href: AppRoutes.spaces.activity,
     activeMemberOnly: true,
+  },
+  {
+    icon: Scale,
+    label: 'Policies',
+    href: AppRoutes.spaces.policies,
   },
 ]
 

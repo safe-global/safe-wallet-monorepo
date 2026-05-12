@@ -32,6 +32,7 @@ import SpaceMembersPage from './components/Members/Page'
 import SpaceSafeAccountsPage from './components/SafeAccounts/Page'
 import SpaceAddressBookPage from './components/SpaceAddressBook/Page'
 import SpaceSettingsPage from './components/SpaceSettings/Page'
+import SpacePoliciesPage from './components/Policies/Page'
 import CreateSpaceOnboarding from './components/CreateSpaceOnboarding'
 import SelectSafesOnboarding from './components/SelectSafesOnboarding'
 import InviteMembersOnboarding from './components/InviteMembersOnboarding'
@@ -80,6 +81,7 @@ const feature: SpacesContract = {
   SpaceSettingsPage,
   SecurityHubPage,
   SpaceActivityLogPage,
+  SpacePoliciesPage,
 
   // Services
   isUnauthorized,
