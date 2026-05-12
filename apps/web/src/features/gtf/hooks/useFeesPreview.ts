@@ -240,18 +240,6 @@ export const useFeesPreview = (): FeesPreviewData => {
     }
   }, [gtfSelectedGasToken, candidates, setGtfSelectedGasToken])
 
-  // Persist the implicit default — `mergeGtfFeeParams` bails without a selection.
-  // Skip for legacy signed txs: a residual selection here would later trip ExecuteForm's
-  // requiresRelay path and try to send the tx through Gelato, which would fail since the
-  // signed payload doesn't carry refundReceiver.
-  useEffect(() => {
-    if (gtfPaymentMode !== 'safe') return
-    if (gtfSelectedGasToken) return
-    if (!defaultAddress) return
-    if (isLegacySigned) return
-    setGtfSelectedGasToken(defaultAddress)
-  }, [gtfPaymentMode, gtfSelectedGasToken, defaultAddress, isLegacySigned, setGtfSelectedGasToken])
-
   const availableGasTokens = isConfirmation && lockedCandidate ? [lockedCandidate] : candidates
   const selectedAddress = lockedGasToken ?? gtfSelectedGasToken ?? defaultAddress ?? ZERO_ADDRESS
   const selectedCandidate = availableGasTokens.find((c) => sameAddress(c.address, selectedAddress))
@@ -280,6 +268,35 @@ export const useFeesPreview = (): FeesPreviewData => {
         }
       : skipToken,
   )
+
+  // Sync `gtfSelectedGasToken` with the latest preview state
+  //  - preview unavailable (errored / no eligible token after settling): drop the persisted
+  //    selection so `mergeGtfFeeParams` bails and the tx is signed as signer-pays.
+  //  - preview succeeded and the user hasn't picked anything yet: persist the implicit
+  //    default.
+  useEffect(() => {
+    if (gtfPaymentMode !== 'safe') return
+    if (isLegacySigned) return
+    if (preview.isLoading || preview.isFetching) return
+
+    if (preview.error || !preview.data) {
+      if (gtfSelectedGasToken) setGtfSelectedGasToken(undefined)
+      return
+    }
+    if (!gtfSelectedGasToken && defaultAddress) {
+      setGtfSelectedGasToken(defaultAddress)
+    }
+  }, [
+    gtfPaymentMode,
+    isLegacySigned,
+    preview.isLoading,
+    preview.isFetching,
+    preview.error,
+    preview.data,
+    gtfSelectedGasToken,
+    defaultAddress,
+    setGtfSelectedGasToken,
+  ])
 
   // Fallback local estimation — drives the gas fee shown in the EOA fallback variant.
   const { gasLimit, gasLimitError, gasLimitLoading } = useGasLimit(safeTx)

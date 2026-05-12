@@ -33,6 +33,7 @@ import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isGtfSafePaid } from '@/features/gtf/utils/isGtfSafePaid'
+import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 
 export type TxFlowContextType<T extends unknown = any> = {
   step: number
@@ -165,7 +166,7 @@ const TxFlowProvider = <T extends unknown>({
   const { safe } = useSafeInfo()
   const isProposer = useIsWalletProposer()
   const chainId = useChainId()
-  const { safeTx, txOrigin, gtfPaymentMode } = useContext(SafeTxContext)
+  const { safeTx, txOrigin } = useContext(SafeTxContext)
   const isCorrectNonce = useValidateNonce(safeTx)
   const { transactionExecution } = useAppSelector(selectSettings)
   const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
@@ -206,20 +207,25 @@ const TxFlowProvider = <T extends unknown>({
   }, [])
 
   const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
-  const gasPaymentSource =
-    !isGtfChain || !safeTx
-      ? undefined
-      : safeTx.signatures.size > 0
-        ? isGtfSafePaid(safeTx.data)
-          ? 'safe'
-          : 'signing_wallet'
-        : gtfPaymentMode === 'safe'
-          ? 'safe'
-          : 'signing_wallet'
 
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
       const { data: details } = await trigger({ chainId, id: txId })
+
+      const exec =
+        details && isMultisigDetailedExecutionInfo(details.detailedExecutionInfo)
+          ? details.detailedExecutionInfo
+          : undefined
+      const gasPaymentSource = !isGtfChain
+        ? undefined
+        : exec &&
+            isGtfSafePaid({
+              gasPrice: exec.gasPrice,
+              baseGas: exec.baseGas,
+              refundReceiver: exec.refundReceiver?.value,
+            })
+          ? 'safe'
+          : 'signing_wallet'
       // Compute isMassPayout from data (recipients.length > 1)
       const isMassPayout = (data as any)?.recipients?.length > 1
       // Track tx event
@@ -236,7 +242,7 @@ const TxFlowProvider = <T extends unknown>({
         gasPaymentSource,
       )
     },
-    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, data, safe.threshold, gasPaymentSource],
+    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, data, safe.threshold, isGtfChain],
   )
 
   const value = {
