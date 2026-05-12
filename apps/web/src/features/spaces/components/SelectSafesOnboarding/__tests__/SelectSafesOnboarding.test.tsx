@@ -56,7 +56,7 @@ jest.mock('../hooks/useOnboardingSafes', () => ({
 
 jest.mock('../hooks/useOnboardingSubmit', () => ({
   __esModule: true,
-  default: (_spaceId: unknown, _onSuccess: unknown, _allSafes: unknown) => {
+  default: function useOnboardingSubmitMock() {
     const { useForm } = require('react-hook-form')
     const formMethods = useForm({ defaultValues: { selectedSafes: {} } })
     return {
@@ -69,9 +69,11 @@ jest.mock('../hooks/useOnboardingSubmit', () => ({
   },
 }))
 
+let mockWalletValue: { address: string } | null = { address: '0xWallet' }
+
 jest.mock('@/hooks/wallets/useWallet', () => ({
   __esModule: true,
-  default: () => ({ address: '0xWallet' }),
+  default: () => mockWalletValue,
 }))
 
 jest.mock('@/hooks/useDarkMode', () => ({
@@ -93,6 +95,7 @@ describe('SelectSafesOnboarding — SelectAll wiring', () => {
     capturedListProps = {}
     mockTrustedSafes = []
     mockOwnedSafes = []
+    mockWalletValue = { address: '0xWallet' }
   })
 
   it('does not render global select-all toggle', () => {
@@ -147,5 +150,40 @@ describe('SelectSafesOnboarding — SelectAll wiring', () => {
     act(() => trustedSelectAll.onToggle(true))
 
     expect(screen.getByText('Limit of 10 reached')).toBeInTheDocument()
+  })
+})
+
+describe('SelectSafesOnboarding — wallet connection state', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    capturedListProps = {}
+    mockTrustedSafes = []
+    mockOwnedSafes = []
+    mockWalletValue = { address: '0xWallet' }
+  })
+
+  it('renders the safes list and Continue button when a wallet is connected', () => {
+    render(<SelectSafesOnboarding />)
+
+    expect(screen.getByTestId('onboarding-safes-list')).toBeInTheDocument()
+    expect(screen.getByTestId('select-safes-continue-button')).toBeInTheDocument()
+    expect(screen.queryByTestId('select-safes-connect-wallet-button')).not.toBeInTheDocument()
+  })
+
+  it('renders the ConnectWalletPrompt when no wallet is connected', () => {
+    mockWalletValue = null
+    render(<SelectSafesOnboarding />)
+
+    expect(screen.getByTestId('select-safes-connect-wallet-button')).toBeInTheDocument()
+    expect(screen.getByText('Connect your wallet to access all your Safes')).toBeInTheDocument()
+    expect(screen.queryByTestId('onboarding-safes-list')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('select-safes-continue-button')).not.toBeInTheDocument()
+  })
+
+  it('still shows the Skip button when no wallet is connected', () => {
+    mockWalletValue = null
+    render(<SelectSafesOnboarding />)
+
+    expect(screen.getByTestId('select-safes-skip-button')).toBeInTheDocument()
   })
 })

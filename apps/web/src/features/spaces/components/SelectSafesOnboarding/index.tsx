@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ChevronLeft, Search, Loader2, Wallet } from 'lucide-react'
+import { ChevronLeft, Search, Loader2 } from 'lucide-react'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
 import useWallet from '@/hooks/wallets/useWallet'
-import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import StepIndicator from './components/StepIndicator'
 import OnboardingSafesList from './components/OnboardingSafesList'
+import ConnectWalletPrompt from './components/ConnectWalletPrompt'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
@@ -23,7 +23,6 @@ const TOTAL_STEPS = 3
 const SelectSafesOnboarding = (): ReactElement => {
   const isDarkMode = useDarkMode()
   const wallet = useWallet()
-  const connectWallet = useConnectWallet()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
   const { trustedSafes, ownedSafes, similarAddresses, handleSearch } = useOnboardingSafes()
   const allSafes = useMemo(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
@@ -150,19 +149,7 @@ const SelectSafesOnboarding = (): ReactElement => {
               </>
             ) : (
               <div className="flex flex-col mt-8 items-center justify-center gap-4">
-                <Wallet className="size-12 text-muted-foreground" />
-                <Typography variant="paragraph" align="center" color="muted">
-                  Connect your wallet to see your safes
-                </Typography>
-                <Button
-                  data-testid="select-safes-connect-wallet-button"
-                  type="button"
-                  size="lg"
-                  onClick={connectWallet}
-                  className="w-full max-w-[300px]"
-                >
-                  Connect wallet
-                </Button>
+                <ConnectWalletPrompt testId="select-safes-connect-wallet-button" />
                 <Button
                   data-testid="select-safes-skip-button"
                   type="button"

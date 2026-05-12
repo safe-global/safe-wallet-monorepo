@@ -14,6 +14,7 @@ import {
 import AddManually, { type AddManuallyFormValues } from './AddManually'
 import { getSafeId } from './SafesList'
 import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingSafesList'
+import ConnectWalletPrompt from '../SelectSafesOnboarding/components/ConnectWalletPrompt'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
 import {
@@ -112,7 +113,8 @@ const AddAccounts = ({
   const isDarkMode = useDarkMode()
 
   // Get wallet and chain info
-  const { address: walletAddress = '' } = useWallet() || {}
+  const wallet = useWallet()
+  const walletAddress = wallet?.address ?? ''
   const { configs } = useChains()
   const allChainIds = useMemo(() => configs.map((c) => c.chainId), [configs])
 
@@ -340,6 +342,7 @@ const AddAccounts = ({
   }, [debouncedSearchQuery])
 
   const hasAvailableSafes = trustedSafes.length > 0 || ownedSafes.length > 0
+  const showConnectWalletPrompt = !wallet
 
   return (
     <>
@@ -406,11 +409,14 @@ const AddAccounts = ({
                     className="relative min-h-[30dvh] min-w-0 w-full max-h-[25rem] overflow-y-auto overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]"
                     data-testid="add-accounts-safes-list-scroll-region"
                   >
-                    {!hasAvailableSafes && !debouncedSearchQuery ? (
+                    {!hasAvailableSafes && !debouncedSearchQuery && !showConnectWalletPrompt ? (
                       <Typography variant="paragraph" align="center" color="muted" className="py-8">
                         No safes on your list
                       </Typography>
-                    ) : trustedSelection.total === 0 && ownedSelection.total === 0 && debouncedSearchQuery ? (
+                    ) : trustedSelection.total === 0 &&
+                      ownedSelection.total === 0 &&
+                      debouncedSearchQuery &&
+                      !showConnectWalletPrompt ? (
                       <Typography variant="paragraph" align="center" color="muted" className="py-8">
                         No safes match your search
                       </Typography>
@@ -441,6 +447,10 @@ const AddAccounts = ({
                       </>
                     )}
                   </div>
+
+                  {showConnectWalletPrompt && (
+                    <ConnectWalletPrompt className="shrink-0 py-4" testId="add-accounts-connect-wallet-button" />
+                  )}
 
                   {error && (
                     <Alert variant="destructive" className="shrink-0">
