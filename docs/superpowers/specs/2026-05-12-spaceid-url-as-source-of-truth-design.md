@@ -18,7 +18,7 @@ This spec covers only the dual-flag rollout machinery and the URL/redirect contr
 
 ## Feature flags
 
-Two new entries in `FEATURES` (`packages/utils/src/utils/chains.ts`), both looked up against **mainnet (`chainId === '1'`)** regardless of the user's current chain. The flags are uniform across chains; mainnet is the canonical source.
+Two new entries in `FEATURES` (`packages/utils/src/utils/chains.ts`), both looked up against the **default chain** (`DEFAULT_CHAIN_ID` from `apps/web/src/config/constants.ts` — mainnet in production, Sepolia in staging) regardless of the user's current chain. The flags are uniform across chains; the default chain is the canonical source and lets staging exercise the flags via Sepolia while production reads them from mainnet.
 
 | Flag                   | When ON                                                                                                                                                                          | When OFF                                                                                                                                       |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -35,17 +35,16 @@ The split lets us independently roll back either dimension without a code revert
 
 ### Lookup helper
 
-Add `useHasMainnetFeature(feature: FEATURES): boolean | undefined` to `apps/web/src/hooks/useChains.ts`:
+Add `useHasDefaultChainFeature(feature: FEATURES): boolean | undefined` to `apps/web/src/hooks/useChains.ts`:
 
 ```ts
-export const useHasMainnetFeature = (feature: FEATURES): boolean | undefined => {
-  const { data } = useChainsGetAllV1Query()
-  const mainnet = data?.results.find((c) => c.chainId === '1')
-  return mainnet ? hasFeature(mainnet, feature) : undefined
+import { DEFAULT_CHAIN_ID } from '@/config/constants'
+
+export const useHasDefaultChainFeature = (feature: FEATURES): boolean | undefined => {
+  const defaultChain = useChain(String(DEFAULT_CHAIN_ID))
+  return defaultChain ? hasFeature(defaultChain, feature) : undefined
 }
 ```
-
-(Exact query name to match the existing chains endpoint; verify against `packages/store/src/gateway/chains/`.)
 
 A `undefined` return means "chains haven't loaded yet". `useSpaceIdSync` treats `undefined` as **enabled** (optimistic) to avoid a first-paint flash of classic UI for signed-in users. This matches the pattern used by `AuthState` for `FEATURES.SPACES`.
 
@@ -171,7 +170,7 @@ Delete:
 
 **Hook tests (`renderHook`):**
 
-- `useHasMainnetFeature` — returns mainnet's flag even when the user's current chain is non-mainnet; returns `undefined` before chains load.
+- `useHasDefaultChainFeature` — returns the default chain's flag even when the user's current chain differs from it; returns `undefined` before chains load.
 - `useSpaceIdSync` — for each matrix row, asserts the right `router.replace` call (or no call). Includes OIDC-pending short-circuit, `router.isReady=false` short-circuit, feature-flag-OFF short-circuit (no-op).
 - `useSignInRedirect` — honors `redirect` query, ignores unsafe values, falls back to createSpace for zero-space new users when no `redirect` is set.
 - `useIsSpaceRoute` — pure-pathname; tests already exist.
@@ -191,13 +190,13 @@ Delete:
 - `apps/web/src/hooks/useSpaceIdSync/__tests__/excludedRoutes.test.ts`
 - `apps/web/src/hooks/useSpaceIdSync/__tests__/useSpaceIdSync.test.ts`
 - `apps/web/src/hooks/__tests__/useIsSpaceRoute.test.ts` (already in tree)
-- `apps/web/src/hooks/__tests__/useHasMainnetFeature.test.ts`
+- `apps/web/src/hooks/__tests__/useHasDefaultChainFeature.test.ts`
 - `apps/web/cypress/e2e/spaces/spaceid-redirect.cy.ts`
 
 **Modified:**
 
 - `packages/utils/src/utils/chains.ts` — add `REQUIRE_SPACES_LOGIN`, `CLASSIC_UI_ENABLED` to `FEATURES`.
-- `apps/web/src/hooks/useChains.ts` — add `useHasMainnetFeature`.
+- `apps/web/src/hooks/useChains.ts` — add `useHasDefaultChainFeature`.
 - `apps/web/src/hooks/useIsSpaceRoute.ts` — drop `lastUsedSpace`.
 - `apps/web/src/pages/_app.tsx` — mount `useSpaceIdSync` in `InitApp`.
 - `apps/web/src/store/authSlice.ts` — remove `lastUsedSpace` field, action, selector.
@@ -212,6 +211,6 @@ Delete:
 
 ## Risks / not verified
 
-- Mainnet `chainId === '1'` assumes chains list always contains mainnet. If a deploy ever ships without it, both flags resolve to `undefined` → optimistic-enable → both behaviors active. This is the desired failure mode, but worth confirming the chains endpoint always returns mainnet.
+- `DEFAULT_CHAIN_ID` assumes the chains list always contains the configured default chain (mainnet in prod, Sepolia in staging). If a deploy ever ships without it, both flags resolve to `undefined` → optimistic-enable → both behaviors active. This is the desired failure mode, but worth confirming the chains endpoint always returns the default chain in every env.
 - `useSpacesGetV1Query` cache behavior across navigations — assumes RTK Query keeps the result cached so `useSpaceIdSync` doesn't refetch on every navigation. Verify during implementation.
 - Existing prototype tests in the tree currently mock `useCurrentSpaceId` but the prototype hook reads `useSpacesGetV1Query` directly — those tests pass for unrelated reasons. The new test file will mock `useSpacesGetV1Query` explicitly.

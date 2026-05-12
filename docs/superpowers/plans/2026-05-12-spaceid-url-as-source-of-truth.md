@@ -4,13 +4,13 @@
 
 **Goal:** Make `?spaceId` the only source of truth for the current space, with a two-flag rollout that keeps classic UI available for ~1 month.
 
-**Architecture:** One global hook (`useSpaceIdSync`) mounted in `InitApp` reads auth state, the user's spaces, and two mainnet feature flags. It delegates the entire state-transition matrix to a pure `decide()` function that returns one of five actions, which the hook then dispatches via `router.replace`. The pre-existing `lastUsedSpace` Redux field and all its dispatchers are deleted; the URL becomes the only persisted spaceId.
+**Architecture:** One global hook (`useSpaceIdSync`) mounted in `InitApp` reads auth state, the user's spaces, and two cross-chain feature flags read from the default chain (`DEFAULT_CHAIN_ID`: mainnet in prod, Sepolia in staging). It delegates the entire state-transition matrix to a pure `decide()` function that returns one of five actions, which the hook then dispatches via `router.replace`. The pre-existing `lastUsedSpace` Redux field and all its dispatchers are deleted; the URL becomes the only persisted spaceId.
 
 **Tech Stack:** Next.js (pages router), React 18, Redux Toolkit + RTK Query, Jest + Testing Library, Cypress.
 
 **Spec:** `docs/superpowers/specs/2026-05-12-spaceid-url-as-source-of-truth-design.md`
 
-**Reference (do not copy verbatim):** Uncommitted prototype code exists in the working tree (`apps/web/src/hooks/useSpaceIdSync.ts`, the modified `authSlice.ts`, `useCurrentSpaceId.ts`, `useIsSpaceRoute.ts`, etc.). Read it for intent but rebuild from the spec — it lacks the dual-flag logic, the mainnet lookup, and the pure-`decide` decomposition.
+**Reference (do not copy verbatim):** Uncommitted prototype code exists in the working tree (`apps/web/src/hooks/useSpaceIdSync.ts`, the modified `authSlice.ts`, `useCurrentSpaceId.ts`, `useIsSpaceRoute.ts`, etc.). Read it for intent but rebuild from the spec — it lacks the dual-flag logic, the default-chain lookup, and the pure-`decide` decomposition.
 
 ---
 
@@ -19,8 +19,8 @@
 **New files:**
 
 - `packages/utils/src/utils/chains.ts` — extended with two enum entries (modified, not new)
-- `apps/web/src/hooks/useChains.ts` — extended with `useHasMainnetFeature` (modified)
-- `apps/web/src/hooks/__tests__/useHasMainnetFeature.test.ts` — new
+- `apps/web/src/hooks/useChains.ts` — extended with `useHasDefaultChainFeature` (modified)
+- `apps/web/src/hooks/__tests__/useHasDefaultChainFeature.test.ts` — new
 - `apps/web/src/hooks/useSpaceIdSync/excludedRoutes.ts` — new
 - `apps/web/src/hooks/useSpaceIdSync/decide.ts` — new
 - `apps/web/src/hooks/useSpaceIdSync/getSafeRedirectTarget.ts` — new
@@ -538,97 +538,105 @@ EOF
 
 ---
 
-## Task 5: `useHasMainnetFeature` hook
+## Task 5: `useHasDefaultChainFeature` hook
 
 **Files:**
 
 - Modify: `apps/web/src/hooks/useChains.ts`
-- Test: `apps/web/src/hooks/__tests__/useHasMainnetFeature.test.ts`
+- Test: `apps/web/src/hooks/__tests__/useHasDefaultChainFeature.test.ts`
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
-// apps/web/src/hooks/__tests__/useHasMainnetFeature.test.ts
+// apps/web/src/hooks/__tests__/useHasDefaultChainFeature.test.ts
 import { renderHook } from '@/tests/test-utils'
-import { useHasMainnetFeature } from '../useChains'
+import { useHasDefaultChainFeature } from '../useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import * as useChainsModule from '../useChains'
+import { DEFAULT_CHAIN_ID } from '@/config/constants'
 
-describe('useHasMainnetFeature', () => {
+describe('useHasDefaultChainFeature', () => {
   afterEach(() => {
     jest.restoreAllMocks()
   })
 
-  it('returns true when mainnet has the feature enabled', () => {
+  it('returns true when the default chain has the feature enabled', () => {
     jest
       .spyOn(useChainsModule, 'useChain')
-      .mockReturnValue({ chainId: '1', features: ['REQUIRE_SPACES_LOGIN'] } as never)
+      .mockReturnValue({ chainId: String(DEFAULT_CHAIN_ID), features: ['REQUIRE_SPACES_LOGIN'] } as never)
 
-    const { result } = renderHook(() => useHasMainnetFeature(FEATURES.REQUIRE_SPACES_LOGIN))
+    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN))
     expect(result.current).toBe(true)
   })
 
-  it('returns false when mainnet does not have the feature', () => {
-    jest.spyOn(useChainsModule, 'useChain').mockReturnValue({ chainId: '1', features: ['SPACES'] } as never)
+  it('returns false when the default chain does not have the feature', () => {
+    jest
+      .spyOn(useChainsModule, 'useChain')
+      .mockReturnValue({ chainId: String(DEFAULT_CHAIN_ID), features: ['SPACES'] } as never)
 
-    const { result } = renderHook(() => useHasMainnetFeature(FEATURES.REQUIRE_SPACES_LOGIN))
+    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN))
     expect(result.current).toBe(false)
   })
 
   it('returns undefined when chains have not loaded', () => {
     jest.spyOn(useChainsModule, 'useChain').mockReturnValue(undefined)
 
-    const { result } = renderHook(() => useHasMainnetFeature(FEATURES.REQUIRE_SPACES_LOGIN))
+    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN))
     expect(result.current).toBeUndefined()
   })
 
-  it('looks up mainnet regardless of the user current chain', () => {
-    const useChainSpy = jest.spyOn(useChainsModule, 'useChain').mockReturnValue({ chainId: '1', features: [] } as never)
+  it('looks up DEFAULT_CHAIN_ID regardless of the user current chain', () => {
+    const useChainSpy = jest
+      .spyOn(useChainsModule, 'useChain')
+      .mockReturnValue({ chainId: String(DEFAULT_CHAIN_ID), features: [] } as never)
 
-    renderHook(() => useHasMainnetFeature(FEATURES.CLASSIC_UI_ENABLED))
+    renderHook(() => useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED))
 
-    expect(useChainSpy).toHaveBeenCalledWith('1')
+    expect(useChainSpy).toHaveBeenCalledWith(String(DEFAULT_CHAIN_ID))
   })
 })
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `yarn workspace @safe-global/web test apps/web/src/hooks/__tests__/useHasMainnetFeature.test.ts`
-Expected: FAIL — `useHasMainnetFeature` not exported.
+Run: `yarn workspace @safe-global/web test apps/web/src/hooks/__tests__/useHasDefaultChainFeature.test.ts`
+Expected: FAIL — `useHasDefaultChainFeature` not exported.
 
 - [ ] **Step 3: Add the hook**
 
 Open `apps/web/src/hooks/useChains.ts` and, immediately after the existing `useHasFeature` export (around line 55, after `return currentChain ? hasFeature(currentChain, feature) : undefined`), add:
 
 ```ts
-const MAINNET_CHAIN_ID = '1'
+import { DEFAULT_CHAIN_ID } from '@/config/constants'
 
 /**
- * Checks if a feature is enabled on Ethereum mainnet. Used for global / cross-chain
- * feature flags (e.g. rollout toggles) whose value must not depend on the user's
- * currently selected chain. The flag is expected to be uniform across chains;
- * mainnet is the canonical source.
+ * Checks if a feature is enabled on the deploy's default chain (mainnet in
+ * production, Sepolia in staging — see `DEFAULT_CHAIN_ID`). Used for global,
+ * cross-chain feature flags (e.g. rollout toggles) whose value must not depend
+ * on the user's currently selected chain. The flag is expected to be uniform
+ * across chains; the default chain is the canonical source.
  *
  * Returns `undefined` while the chain config is loading.
  */
-export const useHasMainnetFeature = (feature: FEATURES): boolean | undefined => {
-  const mainnet = useChain(MAINNET_CHAIN_ID)
-  return mainnet ? hasFeature(mainnet, feature) : undefined
+export const useHasDefaultChainFeature = (feature: FEATURES): boolean | undefined => {
+  const defaultChain = useChain(String(DEFAULT_CHAIN_ID))
+  return defaultChain ? hasFeature(defaultChain, feature) : undefined
 }
 ```
 
+Note: `DEFAULT_CHAIN_ID` is a `number` (see `apps/web/src/config/constants.ts`); convert to string before passing to `useChain`.
+
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `yarn workspace @safe-global/web test apps/web/src/hooks/__tests__/useHasMainnetFeature.test.ts`
+Run: `yarn workspace @safe-global/web test apps/web/src/hooks/__tests__/useHasDefaultChainFeature.test.ts`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add apps/web/src/hooks/useChains.ts apps/web/src/hooks/__tests__/useHasMainnetFeature.test.ts
+git add apps/web/src/hooks/useChains.ts apps/web/src/hooks/__tests__/useHasDefaultChainFeature.test.ts
 git -c commit.gpgsign=true commit -S -m "$(cat <<'EOF'
-feat: add useHasMainnetFeature hook for global rollout flags
+feat: add useHasDefaultChainFeature hook for global rollout flags
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -674,7 +682,7 @@ const mockFlags = ({
   requireLogin = true,
   classicEnabled = true,
 }: { requireLogin?: boolean | undefined; classicEnabled?: boolean | undefined } = {}) => {
-  jest.spyOn(useChainsModule, 'useHasMainnetFeature').mockImplementation((feature) => {
+  jest.spyOn(useChainsModule, 'useHasDefaultChainFeature').mockImplementation((feature) => {
     if (feature === 'REQUIRE_SPACES_LOGIN') return requireLogin
     if (feature === 'CLASSIC_UI_ENABLED') return classicEnabled
     return undefined
@@ -896,7 +904,7 @@ import { useRouter } from 'next/router'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppSelector } from '@/store'
 import { isAuthenticated, selectIsOidcLoginPending } from '@/store/authSlice'
-import { useHasMainnetFeature } from '@/hooks/useChains'
+import { useHasDefaultChainFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
 import { decide } from './decide'
@@ -915,8 +923,8 @@ export const useSpaceIdSync = (): void => {
   const router = useRouter()
   const isSignedIn = useAppSelector(isAuthenticated)
   const isOidcPending = useAppSelector(selectIsOidcLoginPending)
-  const requireLogin = useHasMainnetFeature(FEATURES.REQUIRE_SPACES_LOGIN)
-  const classicEnabled = useHasMainnetFeature(FEATURES.CLASSIC_UI_ENABLED)
+  const requireLogin = useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN)
+  const classicEnabled = useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)
   const { data: spaces, isError: spacesError } = useSpacesGetV1Query(undefined, { skip: !isSignedIn })
 
   useEffect(() => {
