@@ -7,6 +7,8 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
+import { useHasDefaultChainFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 type Item = {
   label: string
@@ -32,6 +34,9 @@ const navItems: NavItems = [
 
 const AccountsNavigation = () => {
   const router = useRouter()
+  const isClassicEnabled = useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)
+  const visibleItems =
+    isClassicEnabled === false ? navItems.filter((item) => item.url !== AppRoutes.welcome.accounts) : navItems
 
   const isActiveNavigation = (pathname: string) => {
     return router.pathname === pathname
@@ -45,7 +50,7 @@ const AccountsNavigation = () => {
 
   return (
     <nav className={css.nav}>
-      {navItems.map((item) => (
+      {visibleItems.map((item) => (
         <Link
           key={item.url}
           href={item.url}

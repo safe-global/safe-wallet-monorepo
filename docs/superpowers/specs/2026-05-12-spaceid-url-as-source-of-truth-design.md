@@ -124,6 +124,12 @@ The rest of the app reads `spaceId` via the existing `useCurrentSpaceId()`, whic
 
 `SPACES_ROUTES` stays as the explicit allowlist already in the file (`/spaces`, `/spaces/settings`, `/spaces/members`, `/spaces/safe-accounts`, `/spaces/address-book`). `/welcome/spaces` and `/spaces/create-space` correctly return `false` (the existing test covers this).
 
+## Welcome navigation tabs
+
+The welcome page exposes two tabs in `AccountsNavigation`: "Accounts" (classic) and "Spaces" (new flow). The "Accounts" tab is part of the classic UI and must hide once classic is killed.
+
+Gate: when `useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)` returns `false` (explicitly disabled), filter the Accounts entry out of the tab list. While the flag is `undefined` (chain config loading) or `true`, both tabs render — preserves the existing welcome page during the coexistence window.
+
 ## Sign-in → return-to-original-URL flow
 
 1. Signed-out user opens `/home?spaceId=42&safe=eth:0xabc`.
