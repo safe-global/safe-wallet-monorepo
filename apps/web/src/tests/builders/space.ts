@@ -13,7 +13,7 @@ export function spaceMemberBuilder(): IBuilder<SpaceMemberDto> {
   return Builder.new<SpaceMemberDto>().with({
     role: 'MEMBER',
     name: faker.person.firstName(),
-    invitedBy: null,
+    invitedBy: faker.number.int({ min: 1, max: 10 }),
     status: 'ACTIVE',
     user: spaceMemberUserBuilder().build(),
   })
