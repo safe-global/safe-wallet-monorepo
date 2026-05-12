@@ -5,7 +5,7 @@ import useChainId from './useChainId'
 import type { FEATURES } from '@safe-global/utils/utils/chains'
 import { hasFeature } from '@safe-global/utils/utils/chains'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { CONFIG_SERVICE_KEY } from '@/config/constants'
+import { CONFIG_SERVICE_KEY, DEFAULT_CHAIN_ID } from '@/config/constants'
 
 const useChains = (): { configs: Chain[]; error?: string; loading?: boolean } => {
   const { data, error, isLoading } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
@@ -52,4 +52,18 @@ export const useCurrentChain = (): Chain | undefined => {
 export const useHasFeature = (feature: FEATURES): boolean | undefined => {
   const currentChain = useCurrentChain()
   return currentChain ? hasFeature(currentChain, feature) : undefined
+}
+
+/**
+ * Checks if a feature is enabled on the deploy's default chain (mainnet in
+ * production, Sepolia in staging — see `DEFAULT_CHAIN_ID`). Used for global,
+ * cross-chain feature flags (e.g. rollout toggles) whose value must not depend
+ * on the user's currently selected chain. The flag is expected to be uniform
+ * across chains; the default chain is the canonical source.
+ *
+ * Returns `undefined` while the chain config is loading.
+ */
+export const useHasDefaultChainFeature = (feature: FEATURES): boolean | undefined => {
+  const defaultChain = useChain(String(DEFAULT_CHAIN_ID))
+  return defaultChain ? hasFeature(defaultChain, feature) : undefined
 }
