@@ -34,7 +34,7 @@ const SelectSafesOnboarding = (): ReactElement => {
 
   const { control, setValue } = formMethods
 
-  const { trustedSelection, ownedSelection, handleSelectAll, capReached } = useSelectAll({
+  const { trustedSelection, ownedSelection, handleSelectAll, isAtLimit } = useSelectAll({
     visibleTrusted: trustedSafes,
     visibleOwned: ownedSafes,
     control,
@@ -93,7 +93,7 @@ const SelectSafesOnboarding = (): ReactElement => {
                   className="relative min-h-0 min-w-0 w-full flex-1 overflow-hidden overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent"
                   data-testid="onboarding-safes-list-scroll-region"
                 >
-                  {capReached && (
+                  {isAtLimit && (
                     <Typography variant="paragraph" color="muted" className="text-xs pb-1">
                       Limit of {SAFE_ACCOUNTS_LIMIT} reached
                     </Typography>

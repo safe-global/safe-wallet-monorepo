@@ -80,7 +80,7 @@ describe('useSelectAll', () => {
     const state = getSelectedSafes()
     expect(state['1:0xA']).toBe(true)
     expect(state['10:0xB']).toBe(true)
-    expect(result.current.capReached).toBe(false)
+    expect(result.current.isAtLimit).toBe(false)
   })
 
   it('checks the multi-chain parent key only when every sub-safe is selected', () => {
@@ -97,7 +97,7 @@ describe('useSelectAll', () => {
     expect(state[parentKey]).toBe(true)
   })
 
-  it('respects the SAFE_ACCOUNTS_LIMIT cap and flags capReached', () => {
+  it('respects the SAFE_ACCOUNTS_LIMIT cap and flags isAtLimit', () => {
     const trusted = [makeSafe('1', '0xA'), makeSafe('1', '0xB'), makeSafe('1', '0xC'), makeSafe('1', '0xD')]
 
     const { result, getSelectedSafes } = renderUseSelectAll(trusted, [], {})
@@ -109,7 +109,7 @@ describe('useSelectAll', () => {
       ([k, v]) => v && !k.startsWith(MULTICHAIN_SAFE_KEY_PREFIX),
     ).length
     expect(selectedCount).toBe(3) // SAFE_ACCOUNTS_LIMIT mocked to 3
-    expect(result.current.capReached).toBe(true)
+    expect(result.current.isAtLimit).toBe(true)
   })
 
   it('keeps the multi-chain parent unchecked when capping leaves only some sub-safes selected', () => {
@@ -125,7 +125,7 @@ describe('useSelectAll', () => {
     const subCount = ['1:0xC', '137:0xC', '10:0xC'].filter((id) => state[id]).length
     expect(subCount).toBe(2)
     expect(state[parentKey]).toBe(false)
-    expect(result.current.capReached).toBe(true)
+    expect(result.current.isAtLimit).toBe(true)
   })
 
   it('deselects every visible safe (and parents) when check=false', () => {

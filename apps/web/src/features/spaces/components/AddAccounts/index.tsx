@@ -49,8 +49,6 @@ import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 import { useSelectAll } from '../../hooks/useSelectAll'
 import type { AddAccountsFormValues } from '../../hooks/useSelectAll.types'
 
-export type { AddAccountsFormValues } from '../../hooks/useSelectAll.types'
-
 function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
   const flatSafeItems = flattenSafeItems(spaceSafes)
 
@@ -209,7 +207,7 @@ const AddAccounts = ({
   const visibleTrusted = debouncedSearchQuery ? filteredTrusted : trustedSafes
   const visibleOwned = debouncedSearchQuery ? filteredOwned : ownedSafes
 
-  const { trustedSelection, ownedSelection, handleSelectAll, capReached } = useSelectAll({
+  const { trustedSelection, ownedSelection, handleSelectAll, isAtLimit } = useSelectAll({
     visibleTrusted,
     visibleOwned,
     control,
@@ -422,7 +420,7 @@ const AddAccounts = ({
                       </Typography>
                     ) : (
                       <>
-                        {capReached && (
+                        {isAtLimit && (
                           <Typography variant="paragraph" color="muted" className="text-xs pb-1">
                             Limit of {SAFE_ACCOUNTS_LIMIT} reached
                           </Typography>

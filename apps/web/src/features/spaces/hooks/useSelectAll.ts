@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useWatch, type Control, type UseFormSetValue } from 'react-hook-form'
 import { type AllSafeItems } from '@/hooks/safes'
 import { SAFE_ACCOUNTS_LIMIT } from '../components/Sidebar/constants'
@@ -27,11 +27,15 @@ export function useSelectAll({ visibleTrusted, visibleOwned, control, setValue }
     [visibleTrusted, visibleOwned, selectedSafes],
   )
 
-  const [capReached, setCapReached] = useState(false)
+  const isAtLimit = useMemo(
+    () =>
+      Object.entries(selectedSafes).filter(([k, v]) => v && !k.startsWith(MULTICHAIN_SAFE_KEY_PREFIX)).length >=
+      SAFE_ACCOUNTS_LIMIT,
+    [selectedSafes],
+  )
 
   const handleSelectAll = useCallback(
     (scope: Scope, check: boolean) => {
-      setCapReached(false)
       const target =
         scope === 'all' ? [...visibleTrusted, ...visibleOwned] : scope === 'trusted' ? visibleTrusted : visibleOwned
       const safeKeys = collectSafeKeys(target)
@@ -65,11 +69,9 @@ export function useSelectAll({ visibleTrusted, visibleOwned, control, setValue }
         const allChecked = subs.every((id) => allowed.has(id))
         setValue(`selectedSafes.${parentId}`, allChecked, { shouldValidate: true })
       })
-
-      if (orderedIds.length > remaining) setCapReached(true)
     },
     [visibleTrusted, visibleOwned, selectedSafes, setValue],
   )
 
-  return { trustedSelection, ownedSelection, globalSelection, handleSelectAll, capReached, setCapReached }
+  return { trustedSelection, ownedSelection, globalSelection, handleSelectAll, isAtLimit }
 }
