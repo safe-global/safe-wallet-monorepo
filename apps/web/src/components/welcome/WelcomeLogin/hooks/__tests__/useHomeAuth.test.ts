@@ -46,7 +46,6 @@ const setupMocks = ({ isAuthenticated = false, loading = false }: SetupOptions =
     const fakeState = {
       auth: {
         sessionExpiresAt: isAuthenticated ? Date.now() + 86400000 : null,
-        lastUsedSpace: null,
         isStoreHydrated: true,
       },
     }

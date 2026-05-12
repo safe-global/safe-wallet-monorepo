@@ -54,7 +54,6 @@ const setupMocks = ({ isAuthenticated = true, isOidcLoginPending = false, router
     const fakeState = {
       auth: {
         sessionExpiresAt: isAuthenticated ? Date.now() + 86400000 : null,
-        lastUsedSpace: null,
         isStoreHydrated: true,
         isOidcLoginPending,
       },
@@ -278,7 +277,6 @@ describe('useSignInRedirect', () => {
         const fakeState = {
           auth: {
             sessionExpiresAt: Date.now() + 86400000,
-            lastUsedSpace: null,
             isStoreHydrated: true,
             isOidcLoginPending: false,
           },

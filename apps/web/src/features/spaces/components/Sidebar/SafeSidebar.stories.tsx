@@ -67,7 +67,6 @@ const notInSpaceStoryState = {
   ...safeSidebarStoryState,
   auth: {
     sessionExpiresAt: null,
-    lastUsedSpace: null,
     isStoreHydrated: true,
   },
 } as unknown as Partial<RootState>
