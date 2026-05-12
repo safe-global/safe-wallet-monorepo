@@ -228,6 +228,40 @@ describe('useSignInRedirect', () => {
     })
   })
 
+  // -----------------------------------------------------------------------
+  // ?redirect query param
+  // -----------------------------------------------------------------------
+
+  describe('when a ?redirect query param is present', () => {
+    it('redirects to safe ?redirect target after sign-in, ignoring isNewUser flow', async () => {
+      setupMocks({ routerQuery: { redirect: '/home?spaceId=42' } })
+
+      const { result } = renderHook(() => useSignInRedirect(defaultProps))
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).toHaveBeenCalledWith('/home?spaceId=42')
+      expect(mockPush).not.toHaveBeenCalledWith({
+        pathname: AppRoutes.welcome.createSpace,
+        query: { redirect: '/home?spaceId=42' },
+      })
+    })
+
+    it('ignores unsafe ?redirect values', async () => {
+      setupMocks({ routerQuery: { redirect: '//evil.com' } })
+
+      const { result } = renderHook(() => useSignInRedirect({ ...defaultProps, spacesAmount: 1 }))
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).not.toHaveBeenCalledWith('//evil.com')
+    })
+  })
+
   describe('when OIDC sign-in completes', () => {
     it('should redirect new users to create space page after OIDC login', async () => {
       // Start with OIDC login pending

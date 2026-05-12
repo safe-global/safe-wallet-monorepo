@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { useAppSelector } from '@/store'
 import { isAuthenticated, selectIsOidcLoginPending } from '@/store/authSlice'
+import { getSafeRedirectTarget } from '@/hooks/useSpaceIdSync/getSafeRedirectTarget'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 
@@ -38,15 +39,23 @@ export const useSignInRedirect = ({ spacesAmount, inviteAmount, isSpacesLoading,
   }, [isOidcLoginPending, isUserSignedIn])
 
   useEffect(() => {
-    const isNewUser = !inviteAmount && !isSpacesLoading && spacesAmount === 0 && isUserSignedIn
+    if (!hasSignedIn || !isUserSignedIn) return
+
+    const redirectTarget = getSafeRedirectTarget(router.query.redirect)
+    if (redirectTarget) {
+      setRedirectLoading(true)
+      router.push(redirectTarget)
+      return
+    }
 
     if (error && !hasNotFoundSpaces(error)) return
 
-    if (hasSignedIn && (isNewUser || hasNotFoundSpaces(error))) {
+    const isNewUser = !inviteAmount && !isSpacesLoading && spacesAmount === 0
+    if (isNewUser || hasNotFoundSpaces(error)) {
       setRedirectLoading(true)
       router.push({ pathname: AppRoutes.welcome.createSpace, query: router.query })
     }
-  }, [hasSignedIn, isSpacesLoading, spacesAmount, inviteAmount, isUserSignedIn, error])
+  }, [hasSignedIn, isSpacesLoading, spacesAmount, inviteAmount, isUserSignedIn, error, router])
 
   return { setHasSignedIn, redirectLoading }
 }
