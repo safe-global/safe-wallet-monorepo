@@ -13,7 +13,7 @@ import {
   makeBuildCta,
   sortBySeverity,
   type SectionRow,
-} from './primitives'
+} from '../primitives'
 
 export type UseSecurityChecksResult = {
   isReady: boolean
