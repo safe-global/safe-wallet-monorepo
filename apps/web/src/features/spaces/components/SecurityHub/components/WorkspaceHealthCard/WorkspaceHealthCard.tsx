@@ -4,7 +4,10 @@ import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import type { ScanResult, SafeGrade, StrengthLevel } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
+import SafeGradeChip, { SAFE_GRADE_LABEL } from '../SafeGradeChip/SafeGradeChip'
 import type { SpaceSafeEntry } from '../../types'
+
+const FILTER_GRADES: SafeGrade[] = ['critical', 'at_risk', 'needs_attention', 'passing']
 
 type WorkspaceHealthCardProps = {
   safes: SpaceSafeEntry[]
@@ -188,67 +191,16 @@ const WorkspaceHealthCard = ({
             Combined score from all security checks across your accounts.
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            {(
-              [
-                {
-                  grade: 'critical' as const,
-                  label: 'Critical',
-                  activeBg: 'error.dark',
-                  inactiveBg: 'error.background',
-                  text: 'error.dark',
-                  count: gradeCounts.critical,
-                },
-                {
-                  grade: 'at_risk' as const,
-                  label: 'At risk',
-                  activeBg: 'error.main',
-                  inactiveBg: 'error.background',
-                  text: 'error.main',
-                  count: gradeCounts.at_risk,
-                },
-                {
-                  grade: 'needs_attention' as const,
-                  label: 'Needs review',
-                  activeBg: 'warning.main',
-                  inactiveBg: 'warning.background',
-                  text: 'warning.main',
-                  count: gradeCounts.needs_attention,
-                },
-                {
-                  grade: 'passing' as const,
-                  label: 'Healthy',
-                  activeBg: 'success.main',
-                  inactiveBg: 'success.background',
-                  text: 'success.main',
-                  count: gradeCounts.passing,
-                },
-              ] as const
-            )
-              .filter((c) => c.count > 0)
-              .map((c) => {
-                const isActive = activeFilter === c.grade
-                return (
-                  <Chip
-                    key={c.grade}
-                    label={`${c.count} ${c.label}`}
-                    size="small"
-                    onClick={() => onFilterChange(c.grade)}
-                    sx={{
-                      cursor: 'pointer',
-                      fontWeight: 700,
-                      transition: 'background-color 0.15s, color 0.15s',
-                      '& .MuiChip-root:active, & .MuiTouchRipple-root': { display: 'none' },
-                      backgroundColor: isActive ? c.activeBg : c.inactiveBg,
-                      color: isActive ? 'background.paper' : c.text,
-                      '&:hover': {
-                        backgroundColor: isActive ? c.activeBg : c.inactiveBg,
-                        color: isActive ? 'background.paper' : c.text,
-                        opacity: 0.8,
-                      },
-                    }}
-                  />
-                )
-              })}
+            {FILTER_GRADES.filter((grade) => gradeCounts[grade] > 0).map((grade) => (
+              <SafeGradeChip
+                key={grade}
+                grade={grade}
+                active={activeFilter === grade}
+                label={`${gradeCounts[grade]} ${SAFE_GRADE_LABEL[grade]}`}
+                onClick={() => onFilterChange(grade)}
+                sx={{ '& .MuiChip-root:active, & .MuiTouchRipple-root': { display: 'none' } }}
+              />
+            ))}
           </Stack>
 
           {lastScannedAt && (

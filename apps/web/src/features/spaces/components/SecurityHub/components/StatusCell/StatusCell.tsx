@@ -1,21 +1,8 @@
-import { Chip, Skeleton, Typography } from '@mui/material'
+import { Skeleton, Typography } from '@mui/material'
 import type { SafeGrade } from '@/features/security/types'
+import SafeGradeChip from '../SafeGradeChip/SafeGradeChip'
 
 const DASH = '—'
-
-const STATUS_LABELS: Record<SafeGrade, string> = {
-  critical: 'Critical',
-  at_risk: 'At risk',
-  needs_attention: 'Needs review',
-  passing: 'Healthy',
-}
-
-const STATUS_PALETTE: Record<SafeGrade, { bg: string; text: string }> = {
-  critical: { bg: 'error.background', text: 'error.dark' },
-  at_risk: { bg: 'error.background', text: 'error.main' },
-  needs_attention: { bg: 'warning.background', text: 'warning.main' },
-  passing: { bg: 'success.background', text: 'success.main' },
-}
 
 export type StatusCellProps = {
   grade: SafeGrade | null
@@ -31,20 +18,7 @@ const StatusCell = ({ grade, isScanning }: StatusCellProps) => {
       </Typography>
     )
   }
-  const { bg, text } = STATUS_PALETTE[grade]
-  return (
-    <Chip
-      label={STATUS_LABELS[grade]}
-      size="small"
-      sx={{
-        backgroundColor: bg,
-        color: text,
-        fontWeight: 700,
-        height: 22,
-        '& .MuiChip-label': { px: 1 },
-      }}
-    />
-  )
+  return <SafeGradeChip grade={grade} sx={{ height: 22 }} />
 }
 
 export default StatusCell
