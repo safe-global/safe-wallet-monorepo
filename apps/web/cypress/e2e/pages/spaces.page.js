@@ -359,6 +359,17 @@ export function verifyUrlIncludesPath(path) {
   cy.url().should('include', path)
 }
 
+export function verifyBouncedToSignInWithRedirect(originalAsPath) {
+  cy.url({ timeout: 30000 })
+    .should('include', constants.spacesUrl)
+    .and('include', 'redirect=')
+    .and('include', encodeURIComponent(originalAsPath))
+}
+
+export function verifyHomeUrlIncludesSpaceId(spaceId) {
+  cy.url({ timeout: 30000 }).should('include', '/home').and('include', `spaceId=${spaceId}`)
+}
+
 // ===========================================
 // Sidebar verify functions
 // ===========================================
