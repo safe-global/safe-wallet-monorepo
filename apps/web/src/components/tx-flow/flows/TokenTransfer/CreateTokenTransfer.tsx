@@ -26,6 +26,7 @@ import {
   MultiTransfersFields,
 } from './types'
 import TxCard from '../../common/TxCard'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
@@ -50,7 +51,7 @@ import { useLoadFeature } from '@/features/__core__'
 import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
 import uniq from 'lodash/uniq'
 
-export const AutocompleteItem = ({ tokenInfo }: { tokenInfo: Balance['tokenInfo'] }): ReactElement => (
+export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
   <Grid
     container
     sx={{
@@ -58,18 +59,25 @@ export const AutocompleteItem = ({ tokenInfo }: { tokenInfo: Balance['tokenInfo'
       gap: 1,
     }}
   >
-    <TokenIcon logoUri={tokenInfo.logoUri} key={tokenInfo.address} tokenSymbol={tokenInfo.symbol} size={32} />
+    <TokenIcon
+      logoUri={item.tokenInfo.logoUri}
+      key={item.tokenInfo.address}
+      tokenSymbol={item.tokenInfo.symbol}
+      size={32}
+    />
 
     <Grid item xs data-testid="token-item">
       <Typography
         variant="body2"
         sx={{
           whiteSpace: 'normal',
-          fontWeight: 700,
-          letterSpacing: '0.1px',
         }}
       >
-        {tokenInfo.name}
+        {item.tokenInfo.name}
+      </Typography>
+
+      <Typography variant="caption" component="p">
+        {formatVisualAmount(item.balance, item.tokenInfo.decimals)} {item.tokenInfo.symbol}
       </Typography>
     </Grid>
   </Grid>

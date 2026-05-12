@@ -3,7 +3,6 @@ import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/Creat
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
 import { Button, Divider, FormControl, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
-import CaretDownIcon from '@/public/images/common/caret-down.svg'
 import classNames from 'classnames'
 import { useCallback, useMemo } from 'react'
 import { get, useFormContext } from 'react-hook-form'
@@ -166,11 +165,6 @@ const TokenAmountInput = ({
             InputProps={{
               disableUnderline: true,
             }}
-            slotProps={{
-              select: {
-                IconComponent: CaretDownIcon,
-              },
-            }}
             className={css.select}
             {...register(tokenAddressField, {
               required: true,
@@ -181,7 +175,7 @@ const TokenAmountInput = ({
           >
             {balances.map((item) => (
               <MenuItem data-testid="token-item" key={item.tokenInfo.address} value={item.tokenInfo.address}>
-                <AutocompleteItem tokenInfo={item.tokenInfo} />
+                <AutocompleteItem {...item} />
               </MenuItem>
             ))}
           </TextField>
