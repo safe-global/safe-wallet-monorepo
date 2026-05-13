@@ -37,7 +37,7 @@ jest.mock('@/components/common/Track', () => ({
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
-jest.mock('@/components/sidebar/QrCodeButton', () => ({
+jest.mock('@/components/common/QrCodeButton', () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
