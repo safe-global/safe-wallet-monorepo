@@ -1,7 +1,14 @@
 import { faker } from '@faker-js/faker'
+import { configureStore } from '@reduxjs/toolkit'
+import { http, HttpResponse } from 'msw'
 import { cgwApi, type TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
+import { GATEWAY_URL } from '@/src/config/constants'
+import { server } from '@/src/tests/server'
 import draftTxReducer, { clearAllDrafts, clearDraft, selectDraftByHash, setDraft, type DraftTx } from './draftTxSlice'
 import type { RootState } from '@/src/store'
+
+setBaseUrl(GATEWAY_URL)
 
 const buildDraft = (overrides: Partial<DraftTx> = {}): DraftTx => {
   const safeTxHash =
@@ -20,6 +27,20 @@ const buildDraft = (overrides: Partial<DraftTx> = {}): DraftTx => {
     ...overrides,
   }
 }
+
+const createTestStore = () =>
+  configureStore({
+    reducer: {
+      draftTx: draftTxReducer,
+      [cgwClient.reducerPath]: cgwClient.reducer,
+    },
+    middleware: (gdm) => gdm({ serializableCheck: false }).concat(cgwClient.middleware),
+  })
+
+type TestStore = ReturnType<typeof createTestStore>
+type TestRootState = ReturnType<TestStore['getState']>
+
+const selectDrafts = (state: TestRootState) => state.draftTx.drafts
 
 describe('draftTxSlice', () => {
   it('starts with no drafts', () => {
@@ -57,42 +78,80 @@ describe('draftTxSlice', () => {
     expect(state.drafts).toEqual({})
   })
 
-  describe('extraReducers — CGW confirmed a tx for this hash', () => {
-    // Construct an action shape that satisfies the matcher's predicate.
-    // RTK Query's matchFulfilled checks endpointName + requestStatus on meta.
-    const fulfilledAction = (id: string) => ({
-      type: `${cgwApi.reducerPath}/executeQuery/fulfilled`,
-      payload: { txId: id } as TransactionDetails,
-      meta: {
-        arg: {
-          type: 'query' as const,
-          endpointName: 'transactionsGetTransactionByIdV1',
-          originalArgs: { chainId: '1', id },
-        },
-        requestId: 'test-request',
-        requestStatus: 'fulfilled' as const,
-        fulfilledTimeStamp: Date.now(),
-      },
-    })
-
-    it('drops the draft when a getTransactionById query for the same id is fulfilled', () => {
+  describe('CGW confirms a tx for this hash', () => {
+    it('drops the matching draft when getTransactionById returns data', async () => {
+      const store = createTestStore()
       const draft = buildDraft()
-      // sanity: the matcher recognises our action shape
-      expect(cgwApi.endpoints.transactionsGetTransactionByIdV1.matchFulfilled(fulfilledAction(draft.safeTxHash))).toBe(
-        true,
+      store.dispatch(setDraft(draft))
+      expect(selectDrafts(store.getState())[draft.safeTxHash]).toBeDefined()
+
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/${draft.chainId}/transactions/${draft.safeTxHash}`, () =>
+          HttpResponse.json({ txId: draft.safeTxHash, safeAddress: draft.safeAddress } as TransactionDetails),
+        ),
       )
-      let state = draftTxReducer(undefined, setDraft(draft))
-      state = draftTxReducer(state, fulfilledAction(draft.safeTxHash))
-      expect(state.drafts[draft.safeTxHash]).toBeUndefined()
+
+      await store
+        .dispatch(
+          cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate({
+            chainId: draft.chainId,
+            id: draft.safeTxHash,
+          }),
+        )
+        .unwrap()
+
+      expect(selectDrafts(store.getState())[draft.safeTxHash]).toBeUndefined()
     })
 
-    it('leaves unrelated drafts untouched', () => {
-      const drafts = [buildDraft(), buildDraft()]
-      let state = draftTxReducer(undefined, setDraft(drafts[0]))
-      state = draftTxReducer(state, setDraft(drafts[1]))
-      state = draftTxReducer(state, fulfilledAction(drafts[0].safeTxHash))
-      expect(state.drafts[drafts[0].safeTxHash]).toBeUndefined()
-      expect(state.drafts[drafts[1].safeTxHash]).toBeDefined()
+    it('leaves unrelated drafts untouched when CGW resolves a different id', async () => {
+      const store = createTestStore()
+      const targetDraft = buildDraft()
+      const otherDraft = buildDraft()
+      store.dispatch(setDraft(targetDraft))
+      store.dispatch(setDraft(otherDraft))
+
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/${targetDraft.chainId}/transactions/${targetDraft.safeTxHash}`, () =>
+          HttpResponse.json({ txId: targetDraft.safeTxHash } as TransactionDetails),
+        ),
+      )
+
+      await store
+        .dispatch(
+          cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate({
+            chainId: targetDraft.chainId,
+            id: targetDraft.safeTxHash,
+          }),
+        )
+        .unwrap()
+
+      const drafts = selectDrafts(store.getState())
+      expect(drafts[targetDraft.safeTxHash]).toBeUndefined()
+      expect(drafts[otherDraft.safeTxHash]).toBeDefined()
+    })
+
+    it('leaves the draft in place when the query errors out', async () => {
+      const store = createTestStore()
+      const draft = buildDraft()
+      store.dispatch(setDraft(draft))
+
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/${draft.chainId}/transactions/${draft.safeTxHash}`, () =>
+          HttpResponse.json({ message: 'not found' }, { status: 404 }),
+        ),
+      )
+
+      await store
+        .dispatch(
+          cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate({
+            chainId: draft.chainId,
+            id: draft.safeTxHash,
+          }),
+        )
+        .unwrap()
+        .catch(() => undefined)
+
+      expect(selectDrafts(store.getState())[draft.safeTxHash]).toBeDefined()
     })
   })
 
