@@ -319,7 +319,14 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
   } = props
   const { gtfPaymentMode, setGtfPaymentMode } = useContext(SafeTxContext)
 
-  const isSafeWallet = gtfPaymentMode === 'safe'
+  // No eligible gas token in the Safe → Safe-pays isn't actually an option for this tx.
+  // Lock the UI to signer-pays so the dropdown isn't shown empty and the user can't pick
+  // "Safe" expecting it to work (PLA-1435). The hook already routes to signer-pays internally
+  // (canCoverFees stays true), so we just override the rendering here.
+  const noEligibleGasToken =
+    !isConfirmation && !isLegacySigned && (availableGasTokens?.length ?? 0) === 0 && canCoverFees
+
+  const isSafeWallet = gtfPaymentMode === 'safe' && !noEligibleGasToken
   const displayedOutgoing = totalOutgoing && !isSafeWallet ? { ...totalOutgoing, fees: undefined } : totalOutgoing
 
   const handlePaymentSourceChange = (source: GtfPaymentMode) => {
@@ -352,8 +359,9 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
           </>
         )}
 
-        {/* Confirmer on a non-Safe-pays signed payload — pay from signer, also locked */}
-        {isLegacySigned && (
+        {/* Confirmer on a non-Safe-pays signed payload — pay from signer, also locked.
+            Same lock when the Safe holds no eligible gas token (PLA-1435). */}
+        {(isLegacySigned || noEligibleGasToken) && (
           <>
             <SignerFeeNotice availableGasTokens={availableGasTokens} isLocked />
 
@@ -362,7 +370,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
         )}
 
         {/* First signer, Safe can cover fees */}
-        {!isConfirmation && canCoverFees && (
+        {!isConfirmation && canCoverFees && !noEligibleGasToken && (
           <>
             <div className={css.paymentRow}>
               <div className={css.paymentRowGroup}>

@@ -163,26 +163,26 @@ describe('FeesPreview', () => {
     it('renders the warning when safeHasEnoughGas is false', () => {
       render(<FeesPreview {...defaultProps} safeHasEnoughGas={false} />)
 
-      expect(screen.getByText(/doesn't currently hold enough/)).toBeInTheDocument()
-      expect(screen.getByText(/will fail at execution/)).toBeInTheDocument()
+      expect(screen.getByText(/Insufficient .* balance to cover the gas fee/)).toBeInTheDocument()
+      expect(screen.getByText(/Top up before execution/)).toBeInTheDocument()
     })
 
     it('does not render the warning when safeHasEnoughGas is true', () => {
       render(<FeesPreview {...defaultProps} safeHasEnoughGas />)
 
-      expect(screen.queryByText(/doesn't currently hold enough/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Insufficient .* balance to cover the gas fee/)).not.toBeInTheDocument()
     })
 
     it('does not render the warning when safeHasEnoughGas is undefined (non-Safe-pays paths)', () => {
       render(<FeesPreview {...defaultProps} />)
 
-      expect(screen.queryByText(/doesn't currently hold enough/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Insufficient .* balance to cover the gas fee/)).not.toBeInTheDocument()
     })
 
     it('does not render the warning while loading (avoids a flash before data arrives)', () => {
       render(<FeesPreview {...defaultProps} safeHasEnoughGas={false} loading />)
 
-      expect(screen.queryByText(/doesn't currently hold enough/)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Insufficient .* balance to cover the gas fee/)).not.toBeInTheDocument()
     })
   })
 })
