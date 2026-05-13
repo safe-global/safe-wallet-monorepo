@@ -8,12 +8,12 @@ import { selectDraftByHash } from '@/src/store/draftTxSlice'
  * Resolves a transaction by id from either the local draft slice
  * (un-proposed transactions composed on this device) or CGW.
  *
- * CGW is always queried — it resolves transactions by safeTxHash, so
- * a draft on this device may correspond to a tx already proposed by a
- * cosigner from another device. When CGW returns data, it is
- * authoritative and overrides the local draft. Otherwise we fall
- * back to the synthesized draft so the review screens render
- * normally during compose.
+ * The draft slice's extraReducer drops a draft as soon as CGW
+ * confirms the transaction, so by the time `query.data` is set the
+ * draft is already gone and this hook returns the query result
+ * directly. The draft branch below is therefore only hit while the
+ * server has no record of the tx (compose phase, or transient 404
+ * between propose and the cache invalidation).
  */
 export const useTransactionData = (txId: string) => {
   const activeSafe = useDefinedActiveSafe()
@@ -30,17 +30,12 @@ export const useTransactionData = (txId: string) => {
   )
 
   return useMemo(() => {
-    // No local draft → standard query behaviour.
     if (!draft) {
       return query
     }
-    // Server has data for this id → server wins.
-    if (query.data) {
-      return query
-    }
-    // Otherwise present the synthesized draft. The query is still
-    // in-flight or has 404'd; we suppress its error/loading state so
-    // the screens see a fulfilled result with the draft details.
+    // Synthesized fallback while the server has no record of the tx.
+    // The query is still in-flight or has 404'd; we suppress its
+    // error/loading state so the screens see a fulfilled result.
     return {
       ...query,
       data: draft.txDetails,

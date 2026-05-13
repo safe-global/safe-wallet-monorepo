@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SafeTransactionDataPartial } from '@safe-global/types-kit'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { RootState } from '@/src/store'
@@ -44,6 +45,19 @@ export const draftTxSlice = createSlice({
     clearAllDrafts: (state) => {
       state.drafts = {}
     },
+  },
+  extraReducers: (builder) => {
+    // The moment CGW confirms a transaction by safeTxHash, the local
+    // draft for that hash is stale — drop it. Handles both our own
+    // propose (where the propose response feeds the cache) and the
+    // case where a cosigner from another device beat us to it.
+    builder.addMatcher(cgwApi.endpoints.transactionsGetTransactionByIdV1.matchFulfilled, (state, action) => {
+      const id = action.meta.arg.originalArgs.id
+      if (state.drafts[id]) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+        delete state.drafts[id]
+      }
+    })
   },
 })
 

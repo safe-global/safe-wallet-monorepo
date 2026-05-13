@@ -16,8 +16,14 @@ jest.mock('@/src/services/tx/tx-sender/sign')
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
   useTransactionsAddConfirmationV1Mutation: jest.fn(),
   cgwApi: {
+    reducerPath: 'cgwApi',
     util: {
       invalidateTags: jest.fn(() => ({ type: 'cgwApi/invalidateTags' })),
+    },
+    endpoints: {
+      transactionsGetTransactionByIdV1: {
+        matchFulfilled: Object.assign(() => false, { type: 'cgwApi/test/matchFulfilled' }),
+      },
     },
   },
 }))

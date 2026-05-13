@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@/src/tests/test-utils'
+import { renderHook, waitFor, type RootState } from '@/src/tests/test-utils'
 import { useTransactionData } from './useTransactionData'
 import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
@@ -362,6 +362,33 @@ describe('useTransactionData', () => {
         expect(result.current.data).toEqual(cgwDetails)
       })
       expect(result.current.data).not.toBe(draftDetails)
+    })
+
+    it('drops the local draft once CGW confirms the tx so subsequent renders read straight from the query', async () => {
+      const safeTxHash = `0x${faker.string.hexadecimal({ length: 64, prefix: '' })}`
+      const draftDetails = createMockTransactionDetails({ txId: safeTxHash })
+      const cgwDetails = createMockTransactionDetails({ txId: `multisig_real_${safeTxHash}` })
+
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/${mockActiveSafe.chainId}/transactions/${safeTxHash}`, () =>
+          HttpResponse.json(cgwDetails),
+        ),
+      )
+
+      const hookResult = renderHook(() => useTransactionData(safeTxHash), seedDraft(safeTxHash, draftDetails))
+      const store = hookResult.store as { getState: () => RootState }
+
+      // Draft is in place initially.
+      expect(store.getState().draftTx.drafts[safeTxHash]).toBeDefined()
+
+      await waitFor(() => {
+        expect(hookResult.result.current.data).toEqual(cgwDetails)
+      })
+
+      // Once the server responds, the draft is cleared.
+      await waitFor(() => {
+        expect(store.getState().draftTx.drafts[safeTxHash]).toBeUndefined()
+      })
     })
 
     it('falls back to the CGW query when no matching draft exists', async () => {

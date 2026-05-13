@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { cgwApi, type TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import draftTxReducer, { clearAllDrafts, clearDraft, selectDraftByHash, setDraft, type DraftTx } from './draftTxSlice'
 import type { RootState } from '@/src/store'
 
@@ -55,6 +55,45 @@ describe('draftTxSlice', () => {
     state = draftTxReducer(state, setDraft(b))
     state = draftTxReducer(state, clearAllDrafts())
     expect(state.drafts).toEqual({})
+  })
+
+  describe('extraReducers — CGW confirmed a tx for this hash', () => {
+    // Construct an action shape that satisfies the matcher's predicate.
+    // RTK Query's matchFulfilled checks endpointName + requestStatus on meta.
+    const fulfilledAction = (id: string) => ({
+      type: `${cgwApi.reducerPath}/executeQuery/fulfilled`,
+      payload: { txId: id } as TransactionDetails,
+      meta: {
+        arg: {
+          type: 'query' as const,
+          endpointName: 'transactionsGetTransactionByIdV1',
+          originalArgs: { chainId: '1', id },
+        },
+        requestId: 'test-request',
+        requestStatus: 'fulfilled' as const,
+        fulfilledTimeStamp: Date.now(),
+      },
+    })
+
+    it('drops the draft when a getTransactionById query for the same id is fulfilled', () => {
+      const draft = buildDraft()
+      // sanity: the matcher recognises our action shape
+      expect(cgwApi.endpoints.transactionsGetTransactionByIdV1.matchFulfilled(fulfilledAction(draft.safeTxHash))).toBe(
+        true,
+      )
+      let state = draftTxReducer(undefined, setDraft(draft))
+      state = draftTxReducer(state, fulfilledAction(draft.safeTxHash))
+      expect(state.drafts[draft.safeTxHash]).toBeUndefined()
+    })
+
+    it('leaves unrelated drafts untouched', () => {
+      const drafts = [buildDraft(), buildDraft()]
+      let state = draftTxReducer(undefined, setDraft(drafts[0]))
+      state = draftTxReducer(state, setDraft(drafts[1]))
+      state = draftTxReducer(state, fulfilledAction(drafts[0].safeTxHash))
+      expect(state.drafts[drafts[0].safeTxHash]).toBeUndefined()
+      expect(state.drafts[drafts[1].safeTxHash]).toBeDefined()
+    })
   })
 
   describe('selectDraftByHash', () => {
