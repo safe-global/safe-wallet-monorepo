@@ -10,7 +10,7 @@ import { HeaderNavigation } from './HeaderNavigation'
  * The notifications icon can display a badge when there are unread messages.
  */
 const meta = {
-  title: 'Features/Spaces/HeaderNavigation',
+  title: 'Common/Header/HeaderNavigation',
   component: HeaderNavigation,
   parameters: {
     layout: 'centered',
