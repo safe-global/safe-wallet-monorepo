@@ -32,6 +32,15 @@ jest.mock('@/src/services/ledger/ledger-safe-signing.service')
 jest.mock('@/src/features/WalletConnect/context/WalletConnectContext', () => ({
   useWalletConnectContext: jest.fn(() => ({ sign: jest.fn(), hasProvider: false })),
 }))
+jest.mock('@/src/hooks/useSafeInfo', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    safe: {
+      version: '1.4.1',
+      owners: [{ value: '0x456', name: null, logoUri: null }],
+    },
+  })),
+}))
 jest.mock('@/src/services/tx/tx-sender/create', () => ({
   createTx: jest.fn(),
   addSignaturesToTx: jest.fn(),
@@ -355,7 +364,6 @@ describe('useTransactionSigning', () => {
             [draftSafeTxHash]: {
               chainId: '1',
               safeAddress: '0x123',
-              sender: '0x456',
               buildParams: { to: '0xRecipient', value: '0', data: '0x', nonce: 0 },
               safeTxHash: draftSafeTxHash,
               txDetails: { txId: draftSafeTxHash } as TransactionDetails,
@@ -431,6 +439,68 @@ describe('useTransactionSigning', () => {
       })
 
       expect((store.getState() as RootState).draftTx.drafts[draftSafeTxHash]).toBeUndefined()
+    })
+
+    it('refuses to sign a draft when the active chain no longer matches', async () => {
+      const fakeSafeTx = { data: { to: '0xRecipient' } } as unknown as Awaited<ReturnType<typeof createTx>>
+      mockedCreateTx.mockResolvedValue(fakeSafeTx)
+      mockGetPrivateKey.mockResolvedValue('private-key')
+
+      // Draft is on chain '1', active safe is on chain '137'
+      const mismatchedState = {
+        ...buildDraftState(),
+        activeSafe: { chainId: '137', address: '0x123' as `0x${string}` },
+      }
+
+      const { result } = renderHook(
+        () => useTransactionSigning({ txId: draftSafeTxHash, signerAddress: '0x456' }),
+        mismatchedState,
+      )
+
+      await act(async () => {
+        try {
+          await result.current.executeSign()
+        } catch (err) {
+          expect((err as Error).message).toMatch(/chain/i)
+        }
+      })
+
+      await waitFor(() => {
+        expect(result.current.status).toBe('error')
+      })
+
+      expect(mockedProposeNewTransaction).not.toHaveBeenCalled()
+      expect(mockSignTx).not.toHaveBeenCalled()
+    })
+
+    it('refuses to sign a draft when the active Safe address no longer matches', async () => {
+      const fakeSafeTx = { data: { to: '0xRecipient' } } as unknown as Awaited<ReturnType<typeof createTx>>
+      mockedCreateTx.mockResolvedValue(fakeSafeTx)
+      mockGetPrivateKey.mockResolvedValue('private-key')
+
+      const mismatchedState = {
+        ...buildDraftState(),
+        activeSafe: { chainId: '1', address: '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef' as `0x${string}` },
+      }
+
+      const { result } = renderHook(
+        () => useTransactionSigning({ txId: draftSafeTxHash, signerAddress: '0x456' }),
+        mismatchedState,
+      )
+
+      await act(async () => {
+        try {
+          await result.current.executeSign()
+        } catch (err) {
+          expect((err as Error).message).toMatch(/different Safe/i)
+        }
+      })
+
+      await waitFor(() => {
+        expect(result.current.status).toBe('error')
+      })
+
+      expect(mockedProposeNewTransaction).not.toHaveBeenCalled()
     })
 
     it('does not propose or clear the draft if signing fails', async () => {

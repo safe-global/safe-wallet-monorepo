@@ -49,12 +49,35 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
     setStatus(SigningStatus.LOADING)
     dispatch(startSigning(txId))
     try {
+      if (draft) {
+        // Guard against the active Safe/chain having changed since the
+        // draft was composed. Sign-time uses the singleton SDK + active
+        // chain/safe to build the EIP-712 domain; if these no longer
+        // match the draft we'd produce a signature bound to the wrong
+        // Safe — never silently proceed.
+        if (draft.chainId !== activeSafe.chainId) {
+          throw new Error(
+            `Cannot sign: draft was composed on chain ${draft.chainId} but active chain is ${activeSafe.chainId}.`,
+          )
+        }
+        if (draft.safeAddress.toLowerCase() !== activeSafe.address.toLowerCase()) {
+          throw new Error('Cannot sign: draft was composed for a different Safe than the one currently active.')
+        }
+      }
+
+      // Defence in depth: the signer must be a current owner of the
+      // active Safe. Upstream UI already filters the picker, but
+      // asserting locally prevents future regressions if a deep link
+      // or notification routes a non-owner address into this hook.
+      const ownerMatches = safe.owners?.some((owner) => owner.value.toLowerCase() === signerAddress.toLowerCase())
+      if (!ownerMatches) {
+        throw new Error('Selected signer is not an owner of this Safe.')
+      }
+
       // For drafts (un-proposed transactions composed on this device) we
       // build the SafeTransaction from the stored params so the sign
       // services don't have to fetch a non-existent tx from CGW.
-      const prebuiltSafeTx = draft
-        ? await createTx(draft.buildParams, draft.buildParams.nonce as number | undefined)
-        : undefined
+      const prebuiltSafeTx = draft ? await createTx(draft.buildParams) : undefined
 
       let signedTx: SigningResponse
 
@@ -119,8 +142,11 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
           signedTx: prebuiltSafeTx,
           safeTxHash: signedTx.safeTransactionHash,
           dispatch,
-          origin: draft.origin,
         })
+        // Explicit clear: propose is a mutation, not a query, so the
+        // slice's matchFulfilled extraReducer (which only fires on
+        // getTransactionByIdV1) won't catch it. Manual dispatch
+        // guarantees the draft is gone before we navigate to success.
         dispatch(clearDraft(draft.safeTxHash))
       } else {
         await addConfirmation({
@@ -148,7 +174,19 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
       // Re-throw error so it can be handled imperatively by the caller
       throw error
     }
-  }, [activeChain, activeSafe, txId, signerAddress, addConfirmation, signer, safe.version, dispatch, signWithWc, draft])
+  }, [
+    activeChain,
+    activeSafe,
+    txId,
+    signerAddress,
+    addConfirmation,
+    signer,
+    safe.version,
+    safe.owners,
+    dispatch,
+    signWithWc,
+    draft,
+  ])
 
   const retry = useCallback(() => {
     executeSign()

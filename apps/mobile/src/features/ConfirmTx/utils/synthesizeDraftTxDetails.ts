@@ -58,15 +58,24 @@ export const synthesizeDraftTxDetails = ({
     confirmationsRequired: threshold,
     confirmations: [],
     rejectors: [],
-    trusted: true,
+    // `trusted` is a CGW server signal that the transaction has been
+    // validated by their pipeline. A locally-synthesized draft has not
+    // — flip it to false so any future consumer that gates security UI
+    // on this flag (e.g. shield/risk badges) treats drafts cautiously.
+    trusted: false,
     proposer: null,
     proposedByDelegate: null,
   }
 
+  // For 1-of-N Safes the very first signature also executes the tx, so
+  // a freshly composed draft conceptually skips the confirmation gate.
+  // For multisig, signatures still need to be collected from cosigners.
+  const txStatus: TransactionDetails['txStatus'] = threshold <= 1 ? 'AWAITING_EXECUTION' : 'AWAITING_CONFIRMATIONS'
+
   return {
     safeAddress,
     txId: safeTxHash,
-    txStatus: 'AWAITING_CONFIRMATIONS',
+    txStatus,
     txInfo: preview.txInfo,
     txData: preview.txData,
     detailedExecutionInfo,

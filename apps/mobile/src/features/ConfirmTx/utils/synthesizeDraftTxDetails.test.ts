@@ -62,7 +62,7 @@ describe('synthesizeDraftTxDetails', () => {
 
     expect(details.txId).toBe(safeTxHash)
     expect(details.safeAddress).toBe(safeAddress)
-    expect(details.txStatus).toBe('AWAITING_CONFIRMATIONS')
+    expect(details.txStatus).toBe('AWAITING_CONFIRMATIONS') // threshold=2 → still needs confirmations
     expect(details.txInfo).toBe(preview.txInfo)
     expect(details.txData).toBe(preview.txData)
     expect(details.txHash).toBeNull()
@@ -86,8 +86,21 @@ describe('synthesizeDraftTxDetails', () => {
     expect(exec.confirmationsRequired).toBe(2)
     expect(exec.signers).toEqual(owners)
     expect(exec.safeTxHash).toBe(safeTxHash)
-    expect(exec.trusted).toBe(true)
+    expect(exec.trusted).toBe(false)
     expect(exec.rejectors).toEqual([])
+  })
+
+  it('sets txStatus to AWAITING_EXECUTION for 1-of-N Safes', () => {
+    const details = synthesizeDraftTxDetails({
+      safeAddress,
+      safeTxHash: `0x${faker.string.hexadecimal({ length: 64, prefix: '' })}`,
+      buildParams: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', nonce: 0 },
+      owners: [owner(ownerA)],
+      threshold: 1,
+      preview: buildPreview(),
+    })
+
+    expect(details.txStatus).toBe('AWAITING_EXECUTION')
   })
 
   it('leaves the proposer null — the proposer is set at sign time, not compose time', () => {
