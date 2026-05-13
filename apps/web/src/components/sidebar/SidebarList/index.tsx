@@ -10,6 +10,7 @@ import Box from '@mui/material/Box'
 
 import css from './styles.module.css'
 
+/** @deprecated Replaced by the new UI; pending removal. The `SidebarListItemCounter` lives on as `CountBadge` in `@/components/common/CountBadge`. */
 export const SidebarList = ({ children, ...rest }: Omit<ListProps, 'className'>): ReactElement => (
   <List className={css.list} {...rest}>
     {children}

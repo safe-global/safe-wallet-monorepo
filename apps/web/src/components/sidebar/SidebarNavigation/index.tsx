@@ -40,6 +40,7 @@ const customSidebarEvents: { [key: string]: { event: any; label: string } } = {
   [AppRoutes.earn]: { event: EARN_EVENTS.OPEN_EARN_PAGE, label: EARN_LABELS.sidebar },
 }
 
+/** @deprecated Replaced by the new UI; pending removal. The `./config` module remains live and is consumed by other navigation components. */
 const Navigation = (): ReactElement | null => {
   const chain = useCurrentChain()
   const router = useRouter()

@@ -15,6 +15,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 import IndexingStatus from '@/components/sidebar/IndexingStatus'
 
+/** @deprecated Replaced by the new UI; pending removal. */
 const SidebarFooter = (): ReactElement => {
   const dispatch = useAppDispatch()
   const chain = useCurrentChain()

@@ -29,6 +29,7 @@ import CopyTooltip from '@/components/common/CopyTooltip'
 import { NestedSafesButton } from '@/components/sidebar/NestedSafesButton'
 import SafeHeaderInfo from './SafeHeaderInfo'
 
+/** @deprecated Replaced by the new UI; pending removal. */
 const SafeHeader = (): ReactElement => {
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()

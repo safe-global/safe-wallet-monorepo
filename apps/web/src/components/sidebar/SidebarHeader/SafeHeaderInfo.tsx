@@ -18,6 +18,7 @@ import { useLoadFeature } from '@/features/__core__'
 
 import css from './styles.module.css'
 
+/** @deprecated Replaced by the new UI; pending removal. */
 const SafeHeaderInfo = (): ReactElement => {
   const { balances } = useVisibleBalances()
   const safeAddress = useSafeAddress()

@@ -6,6 +6,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch } from '@/store'
 import { LS_KEY } from '@/config/gateway'
 
+/** @deprecated Replaced by the new UI; pending removal. */
 const DebugToggle = (): ReactElement => {
   const dispatch = useAppDispatch()
   const isDarkMode = useDarkMode()

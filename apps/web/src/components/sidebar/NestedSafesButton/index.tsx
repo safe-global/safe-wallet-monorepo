@@ -13,6 +13,7 @@ import headerCss from '@/components/sidebar/SidebarHeader/styles.module.css'
 import css from './styles.module.css'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
+/** @deprecated Replaced by the new UI; pending removal. */
 export function NestedSafesButton({
   chainId,
   safeAddress,

@@ -7,6 +7,7 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
 import { NewTxFlow } from '@/components/tx-flow/flows'
 
+/** @deprecated Replaced by the new UI; pending removal. */
 const NewTxButton = (): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
   const isCounterfactualSafe = useIsCounterfactualSafe()

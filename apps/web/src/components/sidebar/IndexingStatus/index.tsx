@@ -20,6 +20,7 @@ const useIndexingStatus = () => {
   )
 }
 
+/** @deprecated Replaced by the new UI; pending removal. */
 const STATUSES = {
   synced: {
     color: 'success',
