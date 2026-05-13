@@ -3,12 +3,14 @@ import SearchIcon from '@/public/images/common/search.svg'
 import { useCallback } from 'react'
 import { debounce } from 'lodash'
 
+/** @deprecated Unused; prefer `GlobalSearchInput` from `@/features/global-search`. Slated for removal. */
 interface SearchInputProps {
   placeholder?: string
   onSearch: (value: string) => void
   debounceTime?: number
 }
 
+/** @deprecated Unused; prefer `GlobalSearchInput`. Deprecated, stated to removal. */
 const SearchInput = ({ onSearch, debounceTime = 300 }: SearchInputProps) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleSearch = useCallback(debounce(onSearch, debounceTime), [onSearch, debounceTime])

@@ -12,6 +12,7 @@ import { trackEvent, OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/ana
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
 
+/** @deprecated Old MUI-based sidebar shell. Replaced by `SpacesEnhancedSidebar`. */
 const Sidebar = (): ReactElement => {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false)
   const { MyAccounts } = useLoadFeature(MyAccountsFeature)
