@@ -30,7 +30,9 @@ const useAdjustUrl = () => {
       return
     }
 
-    if (isReady && !query.safe && SAFE_ROUTES.includes(pathname)) {
+    // `?spaceId` is a valid deep link without `?safe` — defer to useSpaceIdSync,
+    // which decides whether to bounce to sign-in or inject a Safe.
+    if (isReady && !query.safe && !query.spaceId && SAFE_ROUTES.includes(pathname)) {
       router.replace({ pathname: AppRoutes.index })
     }
   }, [router])
