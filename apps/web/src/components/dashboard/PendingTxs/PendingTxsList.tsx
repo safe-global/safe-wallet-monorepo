@@ -16,7 +16,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
-import { SidebarListItemCounter } from '@/components/sidebar/SidebarList'
+import { CountBadge } from '@/components/common/CountBadge'
 
 const PendingRecoveryListItem = dynamic(() => import('./PendingRecoveryListItem'))
 
@@ -121,7 +121,7 @@ const PendingTxsList = (): ReactElement | null => {
     >
       <Stack direction="row" justifyContent="space-between" sx={{ px: 1.5, mb: 1 }}>
         <Typography fontWeight={700} className={css.pendingTxHeader}>
-          Pending transactions <SidebarListItemCounter count={queueSize} />
+          Pending transactions <CountBadge count={queueSize} />
         </Typography>
         {totalTxs > 0 && <ViewAllLink url={queueUrl} />}
       </Stack>

@@ -2,7 +2,7 @@ import { useState, useRef, type ReactElement, type ReactNode } from 'react'
 import { Card, Stack, Typography, Collapse, IconButton } from '@mui/material'
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 
-import { SidebarListItemCounter } from '@/components/sidebar/SidebarList'
+import { CountBadge } from '@/components/common/CountBadge'
 import { useWarningCount } from './useWarningCount'
 import css from './styles.module.css'
 
@@ -74,7 +74,7 @@ export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): Rea
         data-testid="action-required-panel-toggle"
       >
         <Typography fontWeight={700} className={css.headerText}>
-          Action required <SidebarListItemCounter count={warningCount.toString()} variant="subtle" />
+          Action required <CountBadge count={warningCount.toString()} variant="subtle" />
         </Typography>
 
         <IconButton
