@@ -43,7 +43,7 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
-import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
+import { SAFE_ACCOUNTS_LIMIT } from '@/components/common/Sidebar/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 
 export type AddAccountsFormValues = {

@@ -18,7 +18,7 @@ jest.mock('@/components/ui/dialog', () => ({
   DialogContent: ({ children }: { children: ReactNode }) => <div data-testid="dialog-content">{children}</div>,
 }))
 
-jest.mock('../../../../AddToSpacePopupModal/AddToSpacePopupModal', () => ({
+jest.mock('@/features/spaces/components/AddToSpacePopupModal/AddToSpacePopupModal', () => ({
   AddToSpacePopupModal: () => <div data-testid="add-to-space-popup-modal" />,
 }))
 
