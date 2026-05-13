@@ -3,6 +3,7 @@ import { Box, Collapse, Divider, Typography } from '@mui/material'
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
 import UnfoldLessRoundedIcon from '@mui/icons-material/UnfoldLessRounded'
 import UnfoldMoreRoundedIcon from '@mui/icons-material/UnfoldMoreRounded'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import SectionPanel from './SectionPanel'
 import { useSecurityChecks } from './hooks/useSecurityChecks'
@@ -42,7 +43,7 @@ const SecurityChecksSection = ({
         >
           <CheckCircleRoundedIcon sx={{ color: 'success.main', fontSize: 18 }} />
           <Typography variant="body2" fontWeight={600} sx={{ flex: 1 }}>
-            {passingRows.length} {passingRows.length === 1 ? 'check passing' : 'checks passing'}
+            {`${passingRows.length} check${maybePlural(passingRows)} passing`}
           </Typography>
           {/* UnfoldMore/Less signals a *group* expansion, distinct from the single-row chevron. */}
           {passingExpanded ? (

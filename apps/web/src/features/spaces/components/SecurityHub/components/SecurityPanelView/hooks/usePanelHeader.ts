@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { ScanResult, StrengthLevel } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
@@ -42,9 +43,7 @@ export const usePanelHeader = (results: Record<string, ScanResult>, isComplete: 
   const color = security.getStrengthColor(level)
   const failureCount = summary.applicableCount - summary.passing
   const actionLine =
-    failureCount === 0
-      ? 'All checks passing.'
-      : `${failureCount} ${failureCount === 1 ? 'issue' : 'issues'} need attention.`
+    failureCount === 0 ? 'All checks passing.' : `${failureCount} issue${maybePlural(failureCount)} need attention.`
 
   return { status: 'ready', score, level, color, actionLine }
 }

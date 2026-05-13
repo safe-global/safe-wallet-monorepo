@@ -38,6 +38,9 @@ export const SecurityFeature = createFeatureHandle<SecurityContract>('security',
 // Contract type (for explicit annotations if needed)
 export type { SecurityContract } from './contract'
 
+// Pure data constants — eagerly available, no need to go through the feature handle
+export { SEVERITY_RANK, SAFE_GRADE_RANK } from './data/scanners/constants'
+
 // Hooks exported directly — always loaded, not lazy
 export { default as useSecurityScan } from './hooks/useSecurityScan'
 export { default as useSecurityHubFeatureRedirect } from './hooks/useSecurityHubFeatureRedirect'

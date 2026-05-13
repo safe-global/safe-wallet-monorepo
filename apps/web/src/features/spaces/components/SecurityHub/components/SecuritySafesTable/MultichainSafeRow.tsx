@@ -9,6 +9,7 @@ import Identicon from '@/components/common/Identicon'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosList } from '@/features/multichain'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import StatusCell from '../StatusCell/StatusCell'
 import { BalanceCell, ScoreCell, ThresholdCell, VersionCell } from './cells'
 import { DASH, MotionTableRow, ROW_VARIANTS } from './constants'
@@ -72,7 +73,7 @@ const MultichainChildRow = ({
   const results = scanResults[key]
   const summary = results ? computeSummary(results) : null
   const childGrade = results ? getSafeGrade(results) : null
-  const isSelected = selectedSafe?.address === safe.address && selectedSafe?.chainId === chain.chainId
+  const isSelected = sameAddress(selectedSafe?.address, safe.address) && selectedSafe?.chainId === chain.chainId
   const isScanning = scanningKeys?.has(key)
   const childHref = getSafeSecurityHref(safe.address, chain.chainId)
 

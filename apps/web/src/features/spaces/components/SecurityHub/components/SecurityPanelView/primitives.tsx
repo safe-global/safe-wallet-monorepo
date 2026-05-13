@@ -9,8 +9,7 @@ import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutl
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
 import Link from 'next/link'
 import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/types'
-import type { SecurityContract } from '@/features/security'
-import { SEVERITY_RANK } from '@/features/security/data/scanners/constants'
+import { SEVERITY_RANK, type SecurityContract } from '@/features/security'
 
 export type SectionRow = { key: string; severity: SecurityGrade; isPassing: boolean; node: ReactNode }
 
@@ -217,8 +216,7 @@ export const EvidenceList = ({
 /** Build expanded body for a row backed by a ScanResult. Returns undefined when there's nothing to show. */
 export const buildExpanded = (result: ScanResult | undefined, cta?: Cta | null): ReactNode => {
   if (!result) return cta ? <EvidenceList cta={cta} /> : undefined
-  const isOk = result.status === 'clear' || result.status === 'not_applicable'
-  const intro = !isOk && result.remediation ? result.remediation : undefined
+  const intro = !isPassingStatus(result.status) && result.remediation ? result.remediation : undefined
   const hasEvidence = result.evidence && result.evidence.length > 0
   if (!intro && !hasEvidence && !cta) return undefined
   return <EvidenceList intro={intro} evidence={result.evidence} cta={cta} />

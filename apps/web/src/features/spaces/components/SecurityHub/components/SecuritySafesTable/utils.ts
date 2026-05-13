@@ -1,8 +1,13 @@
 import type { GradeSummary, SafeGrade, ScanResult } from '@/features/security/types'
-import type { SecurityContract } from '@/features/security'
-import { SAFE_GRADE_RANK } from '@/features/security/data/scanners/constants'
+import type { SecurityGrade } from '@/features/security/types'
+import { SAFE_GRADE_RANK, SEVERITY_RANK, type SecurityContract } from '@/features/security'
 import { DASH } from './constants'
 import type { SpaceSafeEntry } from '../../types'
+
+/** Inverse of `SEVERITY_RANK` — rank index → SecurityGrade. Single source of truth for ordering. */
+const SEVERITY_BY_RANK = (Object.entries(SEVERITY_RANK) as Array<[SecurityGrade, number]>)
+  .sort(([, a], [, b]) => a - b)
+  .map(([grade]) => grade)
 
 /**
  * The subset of the security feature handle that the table's pure helpers need.
@@ -74,11 +79,10 @@ export const getAggregateSummary = (
   }
 
   if (!hasAny) return null
-  const gradeMap = ['Critical', 'High', 'Medium', 'Low'] as const
   return {
     passing: totalPassing,
     applicableCount: totalApplicable,
-    grade: gradeMap[worstGradeRank] ?? 'Low',
+    grade: SEVERITY_BY_RANK[worstGradeRank] ?? 'Low',
     hasCriticalIssue,
   }
 }

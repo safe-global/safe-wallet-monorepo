@@ -3,6 +3,7 @@ import { Box, Collapse, Divider, Typography } from '@mui/material'
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
 import UnfoldLessRoundedIcon from '@mui/icons-material/UnfoldLessRounded'
 import UnfoldMoreRoundedIcon from '@mui/icons-material/UnfoldMoreRounded'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import SectionPanel from './SectionPanel'
 import { useSignerRows } from './hooks/useSignerRows'
@@ -44,8 +45,7 @@ const SignersSection = ({ scanContext, results, safeQueryParam }: SignersSection
           >
             <CheckCircleRoundedIcon sx={{ color: 'success.main', fontSize: 18 }} />
             <Typography variant="body2" fontWeight={600} sx={{ flex: 1 }}>
-              {passingSigners.length}{' '}
-              {passingSigners.length === 1 ? 'signer not blocklisted' : 'signers not blocklisted'}
+              {`${passingSigners.length} signer${maybePlural(passingSigners)} not blocklisted`}
             </Typography>
             {passingExpanded ? (
               <UnfoldLessRoundedIcon sx={{ color: 'text.secondary', fontSize: 18 }} />
