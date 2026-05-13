@@ -1,29 +1,21 @@
 import { SafeBottomSheet } from '@/src/components/SafeBottomSheet'
 import React, { useCallback, useMemo } from 'react'
-import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { SignersCard } from '@/src/components/transactions-list/Card/SignersCard'
 import { Badge } from '@/src/components/Badge'
 import { Text, View } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Address } from '@/src/types/address'
-import {
-  AddressInfo,
-  MultisigExecutionDetails,
-  useTransactionsGetTransactionByIdV1Query,
-} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { AddressInfo, MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { selectSigners } from '@/src/store/signersSlice'
 import { useAppSelector } from '@/src/store/hooks'
 import { ContactDisplayNameContainer } from '../AddressBook'
+import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
 
 export const ConfirmationsSheetContainer = () => {
-  const activeSafe = useDefinedActiveSafe()
   const importedSigners = useAppSelector(selectSigners)
   const txId = useRoute<RouteProp<{ params: { txId: string } }>>().params.txId
-  const { data, isLoading } = useTransactionsGetTransactionByIdV1Query({
-    chainId: activeSafe.chainId,
-    id: txId,
-  })
+  const { data, isLoading } = useTransactionData(txId)
 
   const { confirmations, signers, proposer } = data?.detailedExecutionInfo as MultisigExecutionDetails
 
