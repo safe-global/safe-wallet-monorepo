@@ -309,73 +309,59 @@ describe('useTransactionData', () => {
   })
 
   describe('draft branch', () => {
-    it('returns the synthetic txDetails from the draftTx slice without calling CGW', async () => {
-      const safeTxHash = `0x${faker.string.hexadecimal({ length: 64, prefix: '' })}`
-      const draftDetails = createMockTransactionDetails({ txId: safeTxHash })
-
-      let cgwCalled = false
-      server.use(
-        http.get(`${GATEWAY_URL}/v1/chains/${mockActiveSafe.chainId}/transactions/${safeTxHash}`, () => {
-          cgwCalled = true
-          return HttpResponse.json(createMockTransactionDetails())
-        }),
-      )
-
-      const { result } = renderHook(() => useTransactionData(safeTxHash), {
-        draftTx: {
-          drafts: {
-            [safeTxHash]: {
-              chainId: mockActiveSafe.chainId,
-              safeAddress: mockActiveSafe.address,
-              buildParams: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', nonce: 0 },
-              safeTxHash,
-              txDetails: draftDetails,
-            },
+    const seedDraft = (safeTxHash: string, txDetails: TransactionDetails) => ({
+      draftTx: {
+        drafts: {
+          [safeTxHash]: {
+            chainId: mockActiveSafe.chainId,
+            safeAddress: mockActiveSafe.address,
+            buildParams: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', nonce: 0 },
+            safeTxHash,
+            txDetails,
           },
         },
-      })
-
-      // Synchronously fulfilled from the slice
-      expect(result.current.isLoading).toBe(false)
-      expect(result.current.isSuccess).toBe(true)
-      expect(result.current.isUninitialized).toBe(false)
-      expect(result.current.data).toBe(draftDetails)
-      expect(result.current.currentData).toBe(draftDetails)
-      expect(result.current.error).toBeUndefined()
-      expect(cgwCalled).toBe(false)
+      },
     })
 
-    it('returns a no-op refetch for drafts so callers cannot trigger a CGW 404', async () => {
+    it('returns the synthetic draft details when CGW has no record of the tx', async () => {
       const safeTxHash = `0x${faker.string.hexadecimal({ length: 64, prefix: '' })}`
       const draftDetails = createMockTransactionDetails({ txId: safeTxHash })
 
-      let cgwCalled = false
       server.use(
         http.get(`${GATEWAY_URL}/v1/chains/${mockActiveSafe.chainId}/transactions/${safeTxHash}`, () => {
-          cgwCalled = true
-          return HttpResponse.json(createMockTransactionDetails())
+          return HttpResponse.json({ message: 'not found' }, { status: 404 })
         }),
       )
 
-      const { result } = renderHook(() => useTransactionData(safeTxHash), {
-        draftTx: {
-          drafts: {
-            [safeTxHash]: {
-              chainId: mockActiveSafe.chainId,
-              safeAddress: mockActiveSafe.address,
-              buildParams: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', nonce: 0 },
-              safeTxHash,
-              txDetails: draftDetails,
-            },
-          },
-        },
+      const { result } = renderHook(() => useTransactionData(safeTxHash), seedDraft(safeTxHash, draftDetails))
+
+      // Synchronously fulfilled from the slice; the CGW 404 is suppressed.
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true)
       })
-
-      await result.current.refetch()
-
-      // Synthetic data is still in place after refetch, and no CGW call was made.
       expect(result.current.data).toBe(draftDetails)
-      expect(cgwCalled).toBe(false)
+      expect(result.current.currentData).toBe(draftDetails)
+      expect(result.current.isError).toBe(false)
+      expect(result.current.error).toBeUndefined()
+    })
+
+    it('lets CGW data override the local draft when the server has the tx (e.g. a cosigner proposed it)', async () => {
+      const safeTxHash = `0x${faker.string.hexadecimal({ length: 64, prefix: '' })}`
+      const draftDetails = createMockTransactionDetails({ txId: safeTxHash })
+      const cgwDetails = createMockTransactionDetails({ txId: `multisig_real_${safeTxHash}` })
+
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/${mockActiveSafe.chainId}/transactions/${safeTxHash}`, () =>
+          HttpResponse.json(cgwDetails),
+        ),
+      )
+
+      const { result } = renderHook(() => useTransactionData(safeTxHash), seedDraft(safeTxHash, draftDetails))
+
+      await waitFor(() => {
+        expect(result.current.data).toEqual(cgwDetails)
+      })
+      expect(result.current.data).not.toBe(draftDetails)
     })
 
     it('falls back to the CGW query when no matching draft exists', async () => {

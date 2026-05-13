@@ -5,27 +5,15 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { selectDraftByHash } from '@/src/store/draftTxSlice'
 
 /**
- * RTK Query's `refetch` ignores the `skip` option, so even when the
- * underlying query is skipped a caller can still trigger a real GET
- * /transactions/<id>. For drafts that would 404 and clobber the
- * synthesized data — we replace refetch with a no-op that mimics the
- * QueryActionCreatorResult shape consumers expect.
- */
-const draftRefetchNoop = (() => {
-  const promise = Promise.resolve(undefined) as unknown as ReturnType<
-    ReturnType<typeof useTransactionsGetTransactionByIdV1Query>['refetch']
-  >
-  return () => promise
-})()
-
-/**
  * Resolves a transaction by id from either the local draft slice
  * (un-proposed transactions composed on this device) or CGW.
  *
- * The draft branch short-circuits before RTK Query is involved, so a
- * synthetic txId (the safeTxHash of a draft) never produces a network
- * request — neither on the initial fetch (via `skip`) nor on any
- * subsequent caller-triggered refetch (via the overridden no-op).
+ * CGW is always queried — it resolves transactions by safeTxHash, so
+ * a draft on this device may correspond to a tx already proposed by a
+ * cosigner from another device. When CGW returns data, it is
+ * authoritative and overrides the local draft. Otherwise we fall
+ * back to the synthesized draft so the review screens render
+ * normally during compose.
  */
 export const useTransactionData = (txId: string) => {
   const activeSafe = useDefinedActiveSafe()
@@ -37,18 +25,22 @@ export const useTransactionData = (txId: string) => {
       id: txId,
     },
     {
-      skip: !!draft || !txId || !activeSafe?.chainId,
+      skip: !txId || !activeSafe?.chainId,
     },
   )
 
   return useMemo(() => {
+    // No local draft → standard query behaviour.
     if (!draft) {
       return query
     }
-    // Override the RTK Query result with the synthetic draft details
-    // while keeping the rest of its API surface (status, isUninitialized
-    // etc.) for compatibility with all existing consumers. `refetch`
-    // is replaced because the RTK one ignores `skip`.
+    // Server has data for this id → server wins.
+    if (query.data) {
+      return query
+    }
+    // Otherwise present the synthesized draft. The query is still
+    // in-flight or has 404'd; we suppress its error/loading state so
+    // the screens see a fulfilled result with the draft details.
     return {
       ...query,
       data: draft.txDetails,
@@ -59,7 +51,6 @@ export const useTransactionData = (txId: string) => {
       isSuccess: true,
       isUninitialized: false,
       error: undefined,
-      refetch: draftRefetchNoop,
-    } as typeof query
+    } as unknown as typeof query
   }, [draft, query])
 }
