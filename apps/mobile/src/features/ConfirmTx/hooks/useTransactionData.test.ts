@@ -345,6 +345,39 @@ describe('useTransactionData', () => {
       expect(cgwCalled).toBe(false)
     })
 
+    it('returns a no-op refetch for drafts so callers cannot trigger a CGW 404', async () => {
+      const safeTxHash = `0x${faker.string.hexadecimal({ length: 64, prefix: '' })}`
+      const draftDetails = createMockTransactionDetails({ txId: safeTxHash })
+
+      let cgwCalled = false
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/${mockActiveSafe.chainId}/transactions/${safeTxHash}`, () => {
+          cgwCalled = true
+          return HttpResponse.json(createMockTransactionDetails())
+        }),
+      )
+
+      const { result } = renderHook(() => useTransactionData(safeTxHash), {
+        draftTx: {
+          drafts: {
+            [safeTxHash]: {
+              chainId: mockActiveSafe.chainId,
+              safeAddress: mockActiveSafe.address,
+              buildParams: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', nonce: 0 },
+              safeTxHash,
+              txDetails: draftDetails,
+            },
+          },
+        },
+      })
+
+      await result.current.refetch()
+
+      // Synthetic data is still in place after refetch, and no CGW call was made.
+      expect(result.current.data).toBe(draftDetails)
+      expect(cgwCalled).toBe(false)
+    })
+
     it('falls back to the CGW query when no matching draft exists', async () => {
       const txId = faker.string.alphanumeric(10)
       server.use(
