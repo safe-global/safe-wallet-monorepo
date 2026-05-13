@@ -48,7 +48,7 @@ runs:
     - uses: ./.github/actions/yarn
 
     - name: Install Chrome
-      uses: browser-actions/setup-chrome@v1
+      uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce # v1.7.3
       with:
         chrome-version: '134'
       id: setup-chrome
@@ -59,7 +59,7 @@ runs:
       env:
         NODE_ENV: cypress
 
-    - uses: cypress-io/github-action@v6
+    - uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6.10.9
       with:
         spec: ${{ inputs.spec }}
         group: ${{ inputs.record == 'true' && inputs.group || '' }}

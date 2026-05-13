@@ -28,7 +28,7 @@ jobs:
       # Post a PR comment before deploying
       - name: Post a comment while building
         if: github.event.number
-        uses: mshick/add-pr-comment@v3
+        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
         with:
           message-id: praul
           message: |
@@ -37,7 +37,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]'
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
@@ -53,7 +53,7 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -92,7 +92,7 @@ jobs:
       # Comment
       - name: Post a deployment link in the PR
         if: always() && github.event.number
-        uses: mshick/add-pr-comment@v3
+        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
         with:
           message-id: praul
           message: |
