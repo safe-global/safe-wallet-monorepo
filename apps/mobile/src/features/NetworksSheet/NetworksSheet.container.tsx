@@ -1,17 +1,19 @@
 import { SafeBottomSheet } from '@/src/components/SafeBottomSheet'
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { RootState } from '@/src/store'
 import { selectAllChains, selectChainById } from '@/src/store/chains'
 import { switchActiveChain } from '@/src/store/activeSafeSlice'
 import { ChainItems } from '../Assets/components/Balance/ChainItems'
-import { makeSafeId } from '@/src/utils/formatters'
 import { POLLING_INTERVAL } from '@/src/config/constants'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { shouldDisplayPreciseBalance } from '@/src/utils/balance'
 import { selectCurrency } from '@/src/store/settingsSlice'
-import { useSafeOverviewsQuery } from '@/src/hooks/services/useSafeOverviewsQuery'
+import { selectSafeInfo } from '@/src/store/safesSlice'
+import { useSafeKnownChainsOverview } from '@/src/hooks/services/useSafeKnownChainsOverview'
+import { useScanForNewNetworks } from './hooks/useScanForNewNetworks'
+import { NetworksSheetFooter } from './NetworksSheetFooter'
 
 export const NetworksSheetContainer = () => {
   const dispatch = useAppDispatch()
@@ -19,28 +21,44 @@ export const NetworksSheetContainer = () => {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
   const currency = useAppSelector(selectCurrency)
-  const { data } = useSafeOverviewsQuery(
-    {
-      safes: chains.map((chain) => makeSafeId(chain.chainId, activeSafe.address)),
-      currency,
-      trusted: true,
-      excludeSpam: true,
-    },
-    {
-      pollingInterval: POLLING_INTERVAL,
-      skip: chains.length === 0,
-    },
-  )
+  const safeInfo = useAppSelector((state: RootState) => selectSafeInfo(state, activeSafe.address))
+
+  // Polling refreshes balances for chains the safe is already known to be on.
+  // Discovery of new chain deployments happens via the explicit "Scan for new networks"
+  // action in the footer — never as an implicit side effect of opening this sheet.
+  useSafeKnownChainsOverview(activeSafe.address, { pollingInterval: POLLING_INTERVAL })
+
+  const items = useMemo(() => Object.values(safeInfo ?? {}), [safeInfo])
+
+  const { scan, phase, lastResult, errorMessage, isPressable } = useScanForNewNetworks(activeSafe.address)
+  const newChainIdSet = useMemo(() => new Set(lastResult?.newChainIds ?? []), [lastResult])
 
   const handleChainChange = (chainId: string) => {
     dispatch(switchActiveChain({ chainId }))
   }
 
+  const FooterComponent = useCallback(
+    function NetworksSheetFooterSlot() {
+      return (
+        <NetworksSheetFooter
+          phase={phase}
+          lastResult={lastResult}
+          errorMessage={errorMessage}
+          isPressable={isPressable}
+          onScan={scan}
+          chains={chains}
+        />
+      )
+    },
+    [phase, lastResult, errorMessage, isPressable, scan, chains],
+  )
+
   return (
     <SafeBottomSheet
       title="Select network"
-      items={data}
+      items={items}
       keyExtractor={({ item }) => item.chainId}
+      FooterComponent={FooterComponent}
       renderItem={({ item, onClose }) => (
         <ChainItems
           onSelect={(chainId: string) => {
@@ -55,6 +73,7 @@ export const NetworksSheetContainer = () => {
           }
           chains={chains}
           chainId={item.chainId}
+          isNewlyDiscovered={newChainIdSet.has(item.chainId)}
           key={item.chainId}
         />
       )}

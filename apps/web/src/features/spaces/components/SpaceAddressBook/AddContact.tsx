@@ -1,5 +1,6 @@
-import { Alert, DialogActions, Stack, Button, DialogContent, Typography, CircularProgress, Box } from '@mui/material'
+import { Alert, DialogActions, Button, DialogContent } from '@mui/material'
 import { Button as ShadcnButton } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
 import { Plus } from 'lucide-react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
@@ -22,7 +23,7 @@ export type ContactField = {
   networks: Chain[]
 }
 
-const AddContact = () => {
+const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -44,7 +45,6 @@ const AddContact = () => {
   })
 
   const { handleSubmit, formState, control, reset } = methods
-
   const { errors } = formState
 
   const handleClose = () => {
@@ -89,14 +89,14 @@ const AddContact = () => {
 
       dispatch(
         showNotification({
-          message: `Added contact`,
+          message: 'Added contact',
           variant: 'success',
           groupKey: 'add-contact-success',
         }),
       )
 
       handleClose()
-    } catch (error) {
+    } catch {
       setError('Something went wrong. Please try again.')
     } finally {
       setIsSubmitting(false)
@@ -107,24 +107,21 @@ const AddContact = () => {
     <>
       <ShadcnButton size="lg" className="font-bold px-4 py-0" onClick={handleOpen}>
         <Plus className="size-4 mr-1 text-green-500" />
-        Add contact
+        {label}
       </ShadcnButton>
       <ModalDialog open={open} onClose={handleClose} dialogTitle="Add contact" hideChainIndicator>
         <FormProvider {...methods}>
           <form onSubmit={onSubmit}>
             <DialogContent sx={{ py: 2 }}>
-              <Stack spacing={3}>
+              <div className="flex flex-col gap-6">
                 <NameInput name="name" label="Name" required />
-
                 <AddressInput name="address" label="Address" required showPrefix={false} />
 
-                <Box>
-                  <Typography variant="h5" fontWeight={700} display="inline-flex" alignItems="center" gap={1} mb={1}>
-                    Select networks
-                  </Typography>
-                  <Typography variant="body2" mb={2}>
-                    Add contact on all networks or only on specific ones of your choice.{' '}
-                  </Typography>
+                <div>
+                  <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
+                  <p className="text-muted-foreground mb-2 text-sm">
+                    Add contact on all networks or only on specific ones of your choice.
+                  </p>
                   <Controller
                     name="networks"
                     control={control}
@@ -139,8 +136,8 @@ const AddContact = () => {
                     )}
                     rules={{ required: true }}
                   />
-                </Box>
-              </Stack>
+                </div>
+              </div>
 
               {error && (
                 <Alert severity="error" sx={{ mt: 2 }}>
@@ -153,8 +150,8 @@ const AddContact = () => {
               <Button data-testid="cancel-btn" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button type="submit" variant="contained" disableElevation>
-                {isSubmitting ? <CircularProgress size={20} /> : 'Add contact'}
+              <Button type="submit" variant="contained" disabled={!formState.isValid || isSubmitting} disableElevation>
+                {isSubmitting ? <Spinner className="size-5" /> : 'Add contact'}
               </Button>
             </DialogActions>
           </form>

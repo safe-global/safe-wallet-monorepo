@@ -49,6 +49,7 @@ import pendingTxsListeners from '@/src/store/middleware/pendingTxs'
 import signingState from './signingStateSlice'
 import signerImportFlow from './signerImportFlowSlice'
 import executingState from './executingStateSlice'
+import { withE2EReset } from './resetE2EState'
 
 setBaseUrl(GATEWAY_URL)
 
@@ -110,7 +111,7 @@ const persistConfig = {
   migrate,
 }
 
-export const rootReducer = combineReducers({
+const combinedReducer = combineReducers({
   txHistory,
   safes,
   activeSigner,
@@ -134,6 +135,8 @@ export const rootReducer = combineReducers({
   [cgwClient.reducerPath]: cgwClient.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
 })
+
+export const rootReducer = withE2EReset(combinedReducer)
 
 // Define the type for the root reducer
 export type RootReducerState = ReturnType<typeof rootReducer>

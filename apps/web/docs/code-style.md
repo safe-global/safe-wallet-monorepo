@@ -37,3 +37,58 @@ Infamously, the hardest problem in computer science.
   - `restoreStoredValue` 👍
 - Try to name boolean vars with `is`, e.g. `isLoading` vs `loading`
 - If something needs to be exported just for unit tests, export it with a `_` prefix, e.g. `_getOnboardConfig`
+
+## Code Complexity
+
+When writing utility scripts or complex logic, follow these patterns to keep cyclomatic complexity low. These guidelines apply to both the web and mobile codebases.
+
+### Prevent High Complexity
+
+1. **Use lookup tables instead of conditional chains**
+
+   ```typescript
+   // ❌ Bad: 5+ if-else conditions
+   if (type === 'a') doA()
+   else if (type === 'b') doB()
+   else if (type === 'c') doC()
+
+   // ✅ Good: Lookup table
+   const handlers = { a: doA, b: doB, c: doC }
+   handlers[type]?.()
+   ```
+
+2. **Extract helper functions for nested conditions**
+
+   ```typescript
+   // ❌ Bad: 3+ levels of nesting
+   if (condition1) {
+     if (condition2) {
+       if (condition3) {
+         /* ... */
+       }
+     }
+   }
+
+   // ✅ Good: Early returns + helpers
+   if (!condition1) return
+   if (!condition2) return
+   handleCondition3()
+   ```
+
+3. **Use switch for type discrimination**
+
+   ```typescript
+   // ❌ Bad: Multiple type checks
+   if (obj.type === 'a') { ... }
+   else if (obj.type === 'b') { ... }
+
+   // ✅ Good: Switch statement
+   switch (obj.type) {
+     case 'a': return handleA()
+     case 'b': return handleB()
+   }
+   ```
+
+4. **Keep functions under 20 lines** – Extract when longer
+5. **Maximum 3 levels of nesting** – Refactor if deeper
+6. **Single responsibility** – One function, one job
