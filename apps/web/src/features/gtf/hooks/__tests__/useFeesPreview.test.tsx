@@ -425,12 +425,12 @@ describe('useFeesPreview', () => {
       expect(previewSpy.mock.calls.at(-1)?.[0]).toBe(skipToken)
     })
 
-    it('shows "Paid by executor" note for multi-signer Safes (executor unknown at sign time)', () => {
+    it('shows "Calculated at execution" note for multi-signer Safes (executor unknown at sign time)', () => {
       jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
 
       const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx, 'signer') })
 
-      expect(result.current.gasFee.note).toBe('Paid by executor')
+      expect(result.current.gasFee.note).toBe('Calculated at execution')
       expect(result.current.gasFee.amount).toBeUndefined()
       expect(result.current.gasFee.currency).toBeUndefined()
       expect(result.current.canCoverFees).toBe(true)
@@ -570,7 +570,7 @@ describe('useFeesPreview', () => {
       jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
       // Signer-pays signed tx: gasPrice/baseGas are zero and refundReceiver is ZERO_ADDRESS, so
       // it's not a Safe-pays confirmer. The hook locks the UI anyway (no editable selectors)
-      // and surfaces "Paid by executor" — same as a pre-M2 queue item.
+      // and surfaces "Calculated at execution" — same as a pre-M2 queue item.
       const signedSignerPaysTx = buildSafeTx(
         { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: ETH_ADDRESS },
         new Map([['0xSigner', {}]]),
@@ -580,7 +580,7 @@ describe('useFeesPreview', () => {
 
       expect(result.current.isLegacySigned).toBe(true)
       expect(result.current.isConfirmation).toBe(true)
-      expect(result.current.gasFee.note).toBe('Paid by executor')
+      expect(result.current.gasFee.note).toBe('Calculated at execution')
       expect(result.current.gasFee.amount).toBeUndefined()
     })
 

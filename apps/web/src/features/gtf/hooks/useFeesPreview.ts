@@ -27,7 +27,7 @@ export type FeeRow = {
   currency?: string
   fiatAmount?: string
   isFree?: boolean
-  /** When set, replaces the amount/currency/fiat slot with explanatory copy (e.g. "Paid by executor"). */
+  /** When set, replaces the amount/currency/fiat slot with explanatory copy (e.g. "Calculated at execution"). */
   note?: string
 }
 
@@ -352,7 +352,7 @@ export const useFeesPreview = (): FeesPreviewData => {
   }
 
   // Signed payload without GTF fee setup. Locked confirmer-style UI: no selectors, gas fee
-  // shown as "Paid by executor" (multi-sig — executor unknown) or local EOA estimate (1/1).
+  // shown as "Calculated at execution" (multi-sig — executor unknown) or local EOA estimate (1/1).
   if (isLegacySigned && safeTx) {
     if (safe.threshold > 1) {
       return {
@@ -360,7 +360,7 @@ export const useFeesPreview = (): FeesPreviewData => {
         isConfirmation: true,
         isLegacySigned: true,
         canCoverFees: true,
-        gasFee: { label: 'Gas fee', note: 'Paid by executor' },
+        gasFee: { label: 'Gas fee', note: 'Calculated at execution' },
         loading: false,
         error: false,
       }
@@ -387,7 +387,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       return {
         ...base,
         canCoverFees: true,
-        gasFee: { label: 'Gas fee', note: 'Paid by executor' },
+        gasFee: { label: 'Gas fee', note: 'Calculated at execution' },
         loading: false,
         error: false,
       }
