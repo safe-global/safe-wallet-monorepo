@@ -18,7 +18,6 @@ import type { FeeRow as FeeRowType } from '../../hooks/useFeesPreview'
 import css from './styles.module.css'
 import accordionCss from '@/styles/accordion.module.css'
 
-const FEES_TOOLTIP = 'Total fees paid for this transaction, including execution and network costs.'
 const EXECUTION_FEE_TOOLTIP =
   'Covers third-party services required to securely execute this transaction. Based on the transaction amount. Currently free while the new model is introduced.'
 const GAS_FEE_TOOLTIP = 'Network cost required to process this transaction on the blockchain.'
@@ -112,11 +111,6 @@ const HistoryFeesAccordion = ({
               <Typography variant="subtitle2" fontWeight={700}>
                 Fees
               </Typography>
-              <Tooltip title={FEES_TOOLTIP} placement="top" arrow>
-                <span className={css.tooltipIcon}>
-                  <SvgIcon component={InfoIcon} inheritViewBox sx={{ fontSize: '16px' }} color="border" />
-                </span>
-              </Tooltip>
             </div>
             <Typography variant="caption" color="text.secondary">
               {data.paidFrom === 'safe' ? 'Paid from the Safe' : 'Paid from the signer'}
