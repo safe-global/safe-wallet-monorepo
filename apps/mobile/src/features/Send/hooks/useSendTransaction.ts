@@ -2,7 +2,8 @@ import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppDispatch } from '@/src/store/hooks'
-import { proposeSendTransaction } from '../services/proposeSendTransaction'
+import useSafeInfo from '@/src/hooks/useSafeInfo'
+import { prepareSendDraft } from '../services/prepareSendDraft'
 import logger from '@/src/utils/logger'
 
 interface UseSendTransactionArgs {
@@ -32,6 +33,7 @@ export function useSendTransaction({
 }: UseSendTransactionArgs): UseSendTransactionResult {
   const router = useRouter()
   const activeSafe = useDefinedActiveSafe()
+  const { safe } = useSafeInfo()
   const dispatch = useAppDispatch()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isSubmittingRef = useRef(false)
@@ -51,7 +53,7 @@ export function useSendTransaction({
     setSubmitError(undefined)
 
     try {
-      const txId = await proposeSendTransaction({
+      const safeTxHash = await prepareSendDraft({
         recipient: recipientAddress,
         tokenAddress: tokenAddress,
         amount: tokenAmount,
@@ -61,15 +63,16 @@ export function useSendTransaction({
         sender,
         dispatch,
         nonce: selectedNonce,
+        safe,
       })
 
       router.push({
         pathname: '/confirm-transaction',
-        params: { txId },
+        params: { txId: safeTxHash },
       })
     } catch (e) {
       const message = e instanceof Error ? e.message : 'Failed to create transaction'
-      logger.error('Send transaction proposal failed:', e)
+      logger.error('Send transaction preview failed:', e)
       setSubmitError(message)
     } finally {
       isSubmittingRef.current = false
@@ -84,6 +87,7 @@ export function useSendTransaction({
     tokenAmount,
     decimals,
     activeSafe,
+    safe,
     dispatch,
     router,
     selectedNonce,

@@ -308,6 +308,64 @@ describe('useTransactionData', () => {
     })
   })
 
+  describe('draft branch', () => {
+    it('returns the synthetic txDetails from the draftTx slice without calling CGW', async () => {
+      const safeTxHash = `0x${faker.string.hexadecimal({ length: 64, prefix: '' })}`
+      const draftDetails = createMockTransactionDetails({ txId: safeTxHash })
+
+      let cgwCalled = false
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/${mockActiveSafe.chainId}/transactions/${safeTxHash}`, () => {
+          cgwCalled = true
+          return HttpResponse.json(createMockTransactionDetails())
+        }),
+      )
+
+      const { result } = renderHook(() => useTransactionData(safeTxHash), {
+        draftTx: {
+          drafts: {
+            [safeTxHash]: {
+              chainId: mockActiveSafe.chainId,
+              safeAddress: mockActiveSafe.address,
+              sender: faker.finance.ethereumAddress(),
+              buildParams: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', nonce: 0 },
+              safeTxHash,
+              txDetails: draftDetails,
+            },
+          },
+        },
+      })
+
+      // Synchronously fulfilled from the slice
+      expect(result.current.isLoading).toBe(false)
+      expect(result.current.isSuccess).toBe(true)
+      expect(result.current.isUninitialized).toBe(false)
+      expect(result.current.data).toBe(draftDetails)
+      expect(result.current.currentData).toBe(draftDetails)
+      expect(result.current.error).toBeUndefined()
+      expect(cgwCalled).toBe(false)
+    })
+
+    it('falls back to the CGW query when no matching draft exists', async () => {
+      const txId = faker.string.alphanumeric(10)
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/chains/${mockActiveSafe.chainId}/transactions/${txId}`, () =>
+          HttpResponse.json(mockTransactionDetails),
+        ),
+      )
+
+      const { result } = renderHook(() => useTransactionData(txId), {
+        draftTx: { drafts: {} },
+      })
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false)
+      })
+
+      expect(result.current.data).toEqual(mockTransactionDetails)
+    })
+  })
+
   describe('caching behavior', () => {
     it('should use RTK Query caching mechanism', async () => {
       const txId = faker.string.alphanumeric(10)
