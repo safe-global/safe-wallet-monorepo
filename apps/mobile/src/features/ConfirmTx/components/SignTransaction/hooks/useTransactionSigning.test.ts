@@ -22,7 +22,10 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
     },
     endpoints: {
       transactionsGetTransactionByIdV1: {
-        matchFulfilled: Object.assign(() => false, { type: 'cgwApi/test/matchFulfilled' }),
+        matchFulfilled: Object.assign(() => false, { type: 'cgwApi/test/get/matchFulfilled' }),
+      },
+      transactionsProposeTransactionV1: {
+        matchFulfilled: Object.assign(() => false, { type: 'cgwApi/test/propose/matchFulfilled' }),
       },
     },
   },
@@ -414,32 +417,10 @@ describe('useTransactionSigning', () => {
       expect(mockAddConfirmation).not.toHaveBeenCalled()
     })
 
-    it('clears the draft from the store after a successful propose', async () => {
-      const fakeSafeTx = { data: { to: '0xRecipient' } } as unknown as Awaited<ReturnType<typeof createTx>>
-      mockedCreateTx.mockResolvedValue(fakeSafeTx)
-      mockedProposeNewTransaction.mockResolvedValue({ txId: 'multisig_real_tx_id' } as TransactionDetails)
-      mockGetPrivateKey.mockResolvedValue('private-key')
-      mockSignTx.mockResolvedValue(mockSignedTx)
-
-      const hookResult = renderHook(
-        () => useTransactionSigning({ txId: draftSafeTxHash, signerAddress: '0x456' }),
-        buildDraftState(),
-      )
-      const { result } = hookResult
-      const store = hookResult.store as { getState: () => RootState }
-
-      expect(store.getState().draftTx.drafts[draftSafeTxHash]).toBeDefined()
-
-      await act(async () => {
-        await result.current.executeSign()
-      })
-
-      await waitFor(() => {
-        expect(result.current.status).toBe('success')
-      })
-
-      expect((store.getState() as RootState).draftTx.drafts[draftSafeTxHash]).toBeUndefined()
-    })
+    // Cleanup of the draft after a successful propose is the slice's
+    // responsibility via the transactionsProposeTransactionV1.matchFulfilled
+    // extraReducer — see draftTxSlice.test.ts for that coverage. This file
+    // only verifies the hook's orchestration (above).
 
     it('refuses to sign a draft when the active chain no longer matches', async () => {
       const fakeSafeTx = { data: { to: '0xRecipient' } } as unknown as Awaited<ReturnType<typeof createTx>>

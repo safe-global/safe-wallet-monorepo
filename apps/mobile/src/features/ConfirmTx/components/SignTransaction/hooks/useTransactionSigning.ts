@@ -17,7 +17,7 @@ import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useAppDispatch } from '@/src/store/hooks'
 import { setSigningError, setSigningSuccess, startSigning } from '@/src/store/signingStateSlice'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { selectDraftByHash, clearDraft } from '@/src/store/draftTxSlice'
+import { selectDraftByHash } from '@/src/store/draftTxSlice'
 import { addSignaturesToTx, createTx } from '@/src/services/tx/tx-sender/create'
 import proposeNewTransaction from '@/src/services/tx/proposeNewTransaction'
 export enum SigningStatus {
@@ -133,7 +133,9 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
         // CGW creates the queue entry and registers the first confirmation
         // in a single round-trip (mirrors web's behaviour). The signer at
         // sign time becomes the proposer recorded by CGW — not whoever
-        // happened to be selected on the compose screen.
+        // happened to be selected on the compose screen. The draft is
+        // cleared automatically by the slice's extraReducer matching
+        // transactionsProposeTransactionV1.matchFulfilled.
         addSignaturesToTx(prebuiltSafeTx, { [signerAddress]: signedTx.signature })
         await proposeNewTransaction({
           chainId: draft.chainId,
@@ -143,11 +145,6 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
           safeTxHash: signedTx.safeTransactionHash,
           dispatch,
         })
-        // Explicit clear: propose is a mutation, not a query, so the
-        // slice's matchFulfilled extraReducer (which only fires on
-        // getTransactionByIdV1) won't catch it. Manual dispatch
-        // guarantees the draft is gone before we navigate to success.
-        dispatch(clearDraft(draft.safeTxHash))
       } else {
         await addConfirmation({
           chainId: activeSafe.chainId,

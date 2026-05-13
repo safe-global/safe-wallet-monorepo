@@ -80,10 +80,25 @@ export const draftTxSlice = createSlice({
       .addCase(clearActiveSafe, (state) => {
         state.drafts = {}
       })
-      // The moment CGW confirms a transaction by safeTxHash, the local
-      // draft for that hash is stale — drop it. Handles both our own
-      // propose (where the propose response feeds the cache) and the
-      // case where a cosigner from another device beat us to it.
+      // Our own /propose call succeeded — the tx is now on CGW under
+      // the safeTxHash we composed it with. Drop the draft so any
+      // future render reads through to the server data.
+      .addMatcher(cgwApi.endpoints.transactionsProposeTransactionV1.matchFulfilled, (state, action) => {
+        const { chainId, proposeTransactionDto } = action.meta.arg.originalArgs
+        const safeTxHash = proposeTransactionDto?.safeTxHash
+        if (!safeTxHash) {
+          return
+        }
+        const draft = state.drafts[safeTxHash]
+        if (draft && draft.chainId === chainId) {
+          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+          delete state.drafts[safeTxHash]
+        }
+      })
+      // The moment CGW confirms a transaction by safeTxHash via a GET,
+      // the local draft for that hash is stale — drop it. Covers the
+      // cosigner-proposed-from-another-device case as well as any
+      // refetch that follows our own propose tag invalidation.
       .addMatcher(cgwApi.endpoints.transactionsGetTransactionByIdV1.matchFulfilled, (state, action) => {
         const { id, chainId } = action.meta.arg.originalArgs
         const draft = state.drafts[id]

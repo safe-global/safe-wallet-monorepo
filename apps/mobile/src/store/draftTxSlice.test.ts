@@ -130,6 +130,43 @@ describe('draftTxSlice', () => {
       expect(drafts[otherDraft.safeTxHash]).toBeDefined()
     })
 
+    it('drops the matching draft when our own /propose succeeds', async () => {
+      const store = createTestStore()
+      const draft = buildDraft()
+      store.dispatch(setDraft(draft))
+
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/${draft.chainId}/transactions/${draft.safeAddress}/propose`, () =>
+          HttpResponse.json({ txId: `multisig_${draft.safeAddress}_${draft.safeTxHash}` } as TransactionDetails),
+        ),
+      )
+
+      await store
+        .dispatch(
+          cgwApi.endpoints.transactionsProposeTransactionV1.initiate({
+            chainId: draft.chainId,
+            safeAddress: draft.safeAddress,
+            proposeTransactionDto: {
+              to: draft.buildParams.to,
+              value: String(draft.buildParams.value ?? '0'),
+              data: (draft.buildParams.data as string | null) ?? null,
+              nonce: String(draft.buildParams.nonce ?? 0),
+              operation: 0,
+              safeTxGas: '0',
+              baseGas: '0',
+              gasPrice: '0',
+              gasToken: '0x0000000000000000000000000000000000000000',
+              refundReceiver: '0x0000000000000000000000000000000000000000',
+              safeTxHash: draft.safeTxHash,
+              sender: faker.finance.ethereumAddress(),
+            },
+          }),
+        )
+        .unwrap()
+
+      expect(selectDrafts(store.getState())[draft.safeTxHash]).toBeUndefined()
+    })
+
     it('leaves the draft in place when the query errors out', async () => {
       const store = createTestStore()
       const draft = buildDraft()
