@@ -10,21 +10,18 @@ import { createTokenTransferParams } from './tokenTransferParams'
 import type { SendTransactionParams } from '../types'
 import type { AppDispatch } from '@/src/store'
 
-interface PrepareSendDraftArgs extends SendTransactionParams {
+interface PrepareSendDraftArgs extends Omit<SendTransactionParams, 'sender'> {
   dispatch: AppDispatch
   nonce?: number
   safe: SafeState
 }
 
-function validateAddresses(recipient: string, tokenAddress: string, sender: string): void {
+function validateAddresses(recipient: string, tokenAddress: string): void {
   if (!isAddress(recipient)) {
     throw new Error(`Invalid recipient address: ${recipient}`)
   }
   if (!isAddress(tokenAddress)) {
     throw new Error(`Invalid token address: ${tokenAddress}`)
-  }
-  if (!isAddress(sender)) {
-    throw new Error(`Invalid sender address: ${sender}`)
   }
 }
 
@@ -46,7 +43,8 @@ async function getVerifiedSafeSDK(chainId: string) {
  * Validates inputs, builds a SafeTransaction locally, asks CGW for a
  * preview, and stashes a draft so the existing sign/review screens can
  * render it without a CGW round-trip via /propose. The actual /propose
- * call only happens when the user signs.
+ * call only happens when the user signs — the signer at sign time
+ * becomes the proposer recorded by CGW.
  *
  * Returns the `safeTxHash` (used as the synthetic txId for the
  * downstream review screens).
@@ -58,12 +56,11 @@ export const prepareSendDraft = async ({
   decimals,
   chainId,
   safeAddress,
-  sender,
   dispatch,
   nonce,
   safe,
 }: PrepareSendDraftArgs): Promise<string> => {
-  validateAddresses(recipient, tokenAddress, sender)
+  validateAddresses(recipient, tokenAddress)
 
   const safeSDK = await getVerifiedSafeSDK(chainId)
   const txData = createTokenTransferParams(getAddress(recipient), amount, decimals, getAddress(tokenAddress))
@@ -87,7 +84,6 @@ export const prepareSendDraft = async ({
     throw asError('error' in previewResult ? previewResult.error : new Error('Preview unavailable'))
   }
 
-  const senderAddress = getAddress(sender)
   const txDetails = synthesizeDraftTxDetails({
     safeAddress,
     safeTxHash,
@@ -95,13 +91,11 @@ export const prepareSendDraft = async ({
     owners: safe.owners,
     threshold: safe.threshold,
     preview: previewResult.data,
-    sender: senderAddress,
   })
 
   const draft: DraftTx = {
     chainId,
     safeAddress,
-    sender: senderAddress,
     buildParams: safeTx.data,
     safeTxHash,
     txDetails,

@@ -21,7 +21,6 @@ interface SynthesizeInput {
   owners: AddressInfo[]
   threshold: number
   preview: TransactionPreview
-  sender?: string
 }
 
 /**
@@ -31,7 +30,8 @@ interface SynthesizeInput {
  *
  * The synthetic `detailedExecutionInfo` lists every owner as a
  * "missing signer" with zero confirmations — exactly what an
- * unproposed tx looks like.
+ * unproposed tx looks like. The proposer is intentionally null: it's
+ * resolved at sign time from the active signer, not at compose time.
  */
 export const synthesizeDraftTxDetails = ({
   safeAddress,
@@ -40,16 +40,7 @@ export const synthesizeDraftTxDetails = ({
   owners,
   threshold,
   preview,
-  sender,
 }: SynthesizeInput): TransactionDetails => {
-  const senderInfo: AddressInfo | undefined = sender
-    ? (owners.find((owner) => owner.value.toLowerCase() === sender.toLowerCase()) ?? {
-        value: sender,
-        name: null,
-        logoUri: null,
-      })
-    : undefined
-
   const detailedExecutionInfo: MultisigExecutionDetails = {
     type: 'MULTISIG',
     submittedAt: Date.now(),
@@ -68,7 +59,7 @@ export const synthesizeDraftTxDetails = ({
     confirmations: [],
     rejectors: [],
     trusted: true,
-    proposer: senderInfo ?? null,
+    proposer: null,
     proposedByDelegate: null,
   }
 

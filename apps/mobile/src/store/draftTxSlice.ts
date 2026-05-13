@@ -16,7 +16,6 @@ import type { RootState } from '@/src/store'
 export interface DraftTx {
   chainId: string
   safeAddress: string
-  sender: string
   buildParams: SafeTransactionDataPartial
   safeTxHash: string
   origin?: string

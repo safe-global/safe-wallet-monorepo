@@ -58,7 +58,6 @@ describe('synthesizeDraftTxDetails', () => {
       owners,
       threshold: 2,
       preview,
-      sender: ownerA,
     })
 
     expect(details.txId).toBe(safeTxHash)
@@ -78,7 +77,6 @@ describe('synthesizeDraftTxDetails', () => {
       owners,
       threshold: 2,
       preview: buildPreview(),
-      sender: ownerA,
     })
 
     const exec = details.detailedExecutionInfo as MultisigExecutionDetails
@@ -92,7 +90,7 @@ describe('synthesizeDraftTxDetails', () => {
     expect(exec.rejectors).toEqual([])
   })
 
-  it('marks the sender as the proposer when the sender matches a known owner', () => {
+  it('leaves the proposer null — the proposer is set at sign time, not compose time', () => {
     const details = synthesizeDraftTxDetails({
       safeAddress,
       safeTxHash: `0x${faker.string.hexadecimal({ length: 64, prefix: '' })}`,
@@ -100,27 +98,10 @@ describe('synthesizeDraftTxDetails', () => {
       owners,
       threshold: 1,
       preview: buildPreview(),
-      sender: ownerA,
     })
 
     const exec = details.detailedExecutionInfo as MultisigExecutionDetails
-    expect(exec.proposer?.value.toLowerCase()).toBe(ownerA.toLowerCase())
-  })
-
-  it('falls back to a synthetic AddressInfo when the sender is not a known owner', () => {
-    const externalSender = faker.finance.ethereumAddress()
-    const details = synthesizeDraftTxDetails({
-      safeAddress,
-      safeTxHash: `0x${faker.string.hexadecimal({ length: 64, prefix: '' })}`,
-      buildParams: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', nonce: 0 },
-      owners,
-      threshold: 1,
-      preview: buildPreview(),
-      sender: externalSender,
-    })
-
-    const exec = details.detailedExecutionInfo as MultisigExecutionDetails
-    expect(exec.proposer?.value).toBe(externalSender)
+    expect(exec.proposer).toBeNull()
   })
 
   it('coerces non-numeric gas fields to strings and a non-numeric nonce to a number', () => {

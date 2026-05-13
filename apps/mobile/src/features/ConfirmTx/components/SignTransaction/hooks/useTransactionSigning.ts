@@ -108,12 +108,14 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
       if (draft && prebuiltSafeTx) {
         // Draft path: bundle the signature into a fresh /propose call so
         // CGW creates the queue entry and registers the first confirmation
-        // in a single round-trip (mirrors web's behaviour).
+        // in a single round-trip (mirrors web's behaviour). The signer at
+        // sign time becomes the proposer recorded by CGW — not whoever
+        // happened to be selected on the compose screen.
         addSignaturesToTx(prebuiltSafeTx, { [signerAddress]: signedTx.signature })
         await proposeNewTransaction({
           chainId: draft.chainId,
           safeAddress: draft.safeAddress,
-          sender: draft.sender,
+          sender: signerAddress,
           signedTx: prebuiltSafeTx,
           safeTxHash: signedTx.safeTransactionHash,
           dispatch,

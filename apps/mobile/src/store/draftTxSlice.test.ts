@@ -9,7 +9,6 @@ const buildDraft = (overrides: Partial<DraftTx> = {}): DraftTx => {
   return {
     chainId: '1',
     safeAddress: faker.finance.ethereumAddress(),
-    sender: faker.finance.ethereumAddress(),
     buildParams: {
       to: faker.finance.ethereumAddress(),
       value: '0',
@@ -36,10 +35,10 @@ describe('draftTxSlice', () => {
 
   it('overwrites an existing draft with the same safeTxHash', () => {
     const draft = buildDraft()
-    const updated = buildDraft({ safeTxHash: draft.safeTxHash, sender: '0xnew' })
+    const updated = buildDraft({ safeTxHash: draft.safeTxHash, chainId: '137' })
     let state = draftTxReducer(undefined, setDraft(draft))
     state = draftTxReducer(state, setDraft(updated))
-    expect(state.drafts[draft.safeTxHash].sender).toBe('0xnew')
+    expect(state.drafts[draft.safeTxHash].chainId).toBe('137')
   })
 
   it('removes a draft via clearDraft', () => {

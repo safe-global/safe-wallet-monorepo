@@ -13,7 +13,7 @@ interface UseSendTransactionArgs {
   decimals: number
   isValid: boolean
   selectedNonce: number | undefined
-  sender: string | undefined
+  hasSigner: boolean
 }
 
 interface UseSendTransactionResult {
@@ -29,7 +29,7 @@ export function useSendTransaction({
   decimals,
   isValid,
   selectedNonce,
-  sender,
+  hasSigner,
 }: UseSendTransactionArgs): UseSendTransactionResult {
   const router = useRouter()
   const activeSafe = useDefinedActiveSafe()
@@ -44,7 +44,7 @@ export function useSendTransaction({
       return
     }
 
-    const cannotSubmit = !isValid || isSubmitting || !sender
+    const cannotSubmit = !isValid || isSubmitting || !hasSigner
     if (cannotSubmit) {
       return
     }
@@ -60,7 +60,6 @@ export function useSendTransaction({
         decimals,
         chainId: activeSafe.chainId,
         safeAddress: activeSafe.address,
-        sender,
         dispatch,
         nonce: selectedNonce,
         safe,
@@ -81,7 +80,7 @@ export function useSendTransaction({
   }, [
     isValid,
     isSubmitting,
-    sender,
+    hasSigner,
     recipientAddress,
     tokenAddress,
     tokenAmount,
