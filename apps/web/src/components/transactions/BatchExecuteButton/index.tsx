@@ -137,7 +137,7 @@ const BatchExecuteButton = () => {
             </Typography>
           </DialogContent>
 
-          <DialogActions sx={{ justifyContent: 'flex-end', '&::after': { display: 'none' } }}>
+          <DialogActions sx={{ justifyContent: 'space-between', '&::after': { display: 'none' } }}>
             <Button size="small" sx={{ height: 36 }} disableElevation onClick={() => setShowMixedWarning(false)}>
               Cancel
             </Button>
