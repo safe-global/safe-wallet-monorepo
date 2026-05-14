@@ -241,18 +241,9 @@ const GasTokenSelector = ({
   )
 }
 
-const SignerFeeNotice = ({
-  availableGasTokens,
-  isLocked,
-}: {
-  availableGasTokens: FeesPreviewData['availableGasTokens']
-  isLocked?: boolean
-}): ReactElement => {
+const SignerFeeNotice = ({ isLocked }: { isLocked?: boolean }): ReactElement => {
   const chain = useCurrentChain()
-  // Fall back to the chain's native currency when no candidate is available — happens when
-  // the CGW fees endpoint errors out (e.g. 429) and every probe rejects. Signer always pays
-  // in the chain's native gas, so the chain config is the correct deterministic fallback.
-  const nativeToken = availableGasTokens?.[0] ?? {
+  const nativeToken = {
     symbol: chain?.nativeCurrency.symbol ?? '',
     logoUri: chain?.nativeCurrency.logoUri ?? '',
   }
@@ -360,10 +351,10 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
         )}
 
         {/* Confirmer on a non-Safe-pays signed payload — pay from signer, also locked.
-            Same lock when the Safe holds no eligible gas token (PLA-1435). */}
+            Same lock when the Safe holds no eligible gas token. */}
         {(isLegacySigned || noEligibleGasToken) && (
           <>
-            <SignerFeeNotice availableGasTokens={availableGasTokens} isLocked />
+            <SignerFeeNotice isLocked />
 
             <Divider sx={{ mx: -2 }} />
           </>
@@ -399,7 +390,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
         {/* Safe can't cover fees — fall back to signer */}
         {!canCoverFees && (
           <>
-            <SignerFeeNotice availableGasTokens={availableGasTokens} />
+            <SignerFeeNotice />
 
             <Divider sx={{ mx: -2 }} />
           </>

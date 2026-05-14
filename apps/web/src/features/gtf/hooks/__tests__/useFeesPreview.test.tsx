@@ -413,7 +413,7 @@ describe('useFeesPreview', () => {
     expect(previewSpy.mock.calls.at(-1)?.[0]).toBe(skipToken)
     expect(result.current.canCoverFees).toBe(true)
     expect(result.current.availableGasTokens).toEqual([])
-    expect(result.current.gasFee.note).toBe('Paid by executor')
+    expect(result.current.gasFee.note).toBe('Calculated at execution')
   })
 
   describe('signer-pays mode (Safe→Signer toggle)', () => {

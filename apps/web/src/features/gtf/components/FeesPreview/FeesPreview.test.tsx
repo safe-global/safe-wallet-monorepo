@@ -138,16 +138,14 @@ describe('FeesPreview', () => {
       expect(screen.queryByText('Total outgoing')).not.toBeInTheDocument()
     })
 
-    it('falls back to chain native currency when availableGasTokens is missing (PLA-1417)', () => {
-      // Probes errored out (e.g. 429) — candidates empty. The notice must still render
-      // a token name from the chain config rather than a blank slot.
+    it('always renders the chain native currency when no availableGasTokens', () => {
       render(<FeesPreview {...fallbackProps} availableGasTokens={undefined} />)
 
       const notice = screen.getByText(/Fees will be paid from the signer/).parentElement
       expect(notice).toHaveTextContent('ETH')
     })
 
-    it('prefers the first available candidate when present (regression)', () => {
+    it('does not surface a Safe ERC-20 candidate as the signer-pays token', () => {
       const props: FeesPreviewData = {
         ...fallbackProps,
         availableGasTokens: [{ address: '0xUSDC', symbol: 'USDC', logoUri: '' }],
@@ -155,7 +153,8 @@ describe('FeesPreview', () => {
       render(<FeesPreview {...props} />)
 
       const notice = screen.getByText(/Fees will be paid from the signer/).parentElement
-      expect(notice).toHaveTextContent('USDC')
+      expect(notice).toHaveTextContent('ETH')
+      expect(notice).not.toHaveTextContent('USDC')
     })
   })
 
