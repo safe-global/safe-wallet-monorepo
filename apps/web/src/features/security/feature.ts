@@ -24,7 +24,7 @@ import {
 } from './data/scanners/utils'
 import { getStrengthLevel, getStrengthColor } from './data/securityScoring'
 import { isKnownModuleByName } from './data/scanners/modules'
-import { getScanResultsCache, evictScanCache } from './hooks/useSecurityScan'
+import { getCachedScan, setCachedScan } from './data/scanResultsCache'
 
 const feature: SecurityContract = {
   // Scanner registry + UI metadata
@@ -41,8 +41,8 @@ const feature: SecurityContract = {
   getStrengthLevel,
   getStrengthColor,
   // Module-level cache accessors
-  getScanResultsCache,
-  evictScanCache,
+  getCachedScan,
+  setCachedScan,
   // Shared constants
   zeroAddress: ZERO_ADDRESS,
 }

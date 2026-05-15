@@ -7,6 +7,7 @@ import HomeIcon from '@/public/images/sidebar/home.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import MembersIcon from '@/public/images/sidebar/members.svg'
 import AccountsIcon from '@/public/images/sidebar/wallet.svg'
+import SecurityIcon from '@mui/icons-material/ShieldOutlined'
 import { SvgIcon } from '@mui/material'
 
 export type DynamicNavItem = {
@@ -45,6 +46,12 @@ export const navItems: DynamicNavItem[] = [
     label: 'Address book',
     icon: <SvgIcon component={ABIcon} inheritViewBox />,
     href: AppRoutes.spaces.addressBook,
+  },
+  {
+    label: 'Security',
+    icon: <SecurityIcon />,
+    href: AppRoutes.spaces.security,
+    activeMemberOnly: true,
   },
   {
     label: 'Settings',
