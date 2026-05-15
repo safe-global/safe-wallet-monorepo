@@ -14,6 +14,8 @@ const createMultisigExecutionInfo = (overrides = {}) => ({
   gasPrice: '1000000000',
   safeTxGas: '50000',
   gasToken: '0x0000000000000000000000000000000000000000',
+  fee: '0',
+  payment: '0',
   refundReceiver: { value: '0x0000000000000000000000000000000000000000' },
   submittedAt: Date.now(),
   safeTxHash: generateSafeTxHash(),
