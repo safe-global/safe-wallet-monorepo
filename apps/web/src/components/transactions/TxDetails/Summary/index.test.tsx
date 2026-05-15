@@ -86,6 +86,8 @@ const txDetails = createMockTransactionDetails({
     baseGas: '0',
     gasPrice: '0',
     gasToken: '0x0000000000000000000000000000000000000000',
+    fee: '0',
+    payment: '0',
     refundReceiver: {
       value: '0x0000000000000000000000000000000000000000',
       name: 'MetaMultiSigWallet',
