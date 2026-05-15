@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./SecurityReportDrawer.stories Closed 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="MuiBox-root mui-style-111477h"
+  >
+    <main />
+  </div>
+</div>
+`;
+
+exports[`./SecurityReportDrawer.stories OpenWithContext 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="MuiBox-root mui-style-111477h"
+  >
+    <main />
+  </div>
+</div>
+`;

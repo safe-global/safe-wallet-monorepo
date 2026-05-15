@@ -1,0 +1,213 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./WorkspaceHealthCard.stories CriticalFilterActive 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-a6mz0g-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <div
+        class="MuiStack-root mui-style-19f0b8n-MuiStack-root"
+      >
+        <span
+          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
+          style="width: 120px; height: 120px;"
+        />
+        <div
+          class="MuiBox-root mui-style-1fjtzvx"
+        >
+          <span
+            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-fxtlyh-MuiSkeleton-root"
+            style="width: 180px; height: 24px;"
+          />
+          <span
+            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-53wl0q-MuiSkeleton-root"
+            style="width: 320px; height: 16px;"
+          />
+          <span
+            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-1x7xl34-MuiSkeleton-root"
+            style="width: 260px; height: 16px;"
+          />
+          <div
+            class="MuiStack-root mui-style-niqf4j-MuiStack-root"
+          >
+            <span
+              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
+              style="width: 80px; height: 20px;"
+            />
+            <span
+              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
+              style="width: 100px; height: 20px;"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./WorkspaceHealthCard.stories Healthy 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-a6mz0g-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <div
+        class="MuiStack-root mui-style-19f0b8n-MuiStack-root"
+      >
+        <span
+          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
+          style="width: 120px; height: 120px;"
+        />
+        <div
+          class="MuiBox-root mui-style-1fjtzvx"
+        >
+          <span
+            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-fxtlyh-MuiSkeleton-root"
+            style="width: 180px; height: 24px;"
+          />
+          <span
+            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-53wl0q-MuiSkeleton-root"
+            style="width: 320px; height: 16px;"
+          />
+          <span
+            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-1x7xl34-MuiSkeleton-root"
+            style="width: 260px; height: 16px;"
+          />
+          <div
+            class="MuiStack-root mui-style-niqf4j-MuiStack-root"
+          >
+            <span
+              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
+              style="width: 80px; height: 20px;"
+            />
+            <span
+              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
+              style="width: 100px; height: 20px;"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./WorkspaceHealthCard.stories MixedGrades 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-a6mz0g-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <div
+        class="MuiStack-root mui-style-19f0b8n-MuiStack-root"
+      >
+        <span
+          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
+          style="width: 120px; height: 120px;"
+        />
+        <div
+          class="MuiBox-root mui-style-1fjtzvx"
+        >
+          <span
+            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-fxtlyh-MuiSkeleton-root"
+            style="width: 180px; height: 24px;"
+          />
+          <span
+            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-53wl0q-MuiSkeleton-root"
+            style="width: 320px; height: 16px;"
+          />
+          <span
+            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-1x7xl34-MuiSkeleton-root"
+            style="width: 260px; height: 16px;"
+          />
+          <div
+            class="MuiStack-root mui-style-niqf4j-MuiStack-root"
+          >
+            <span
+              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
+              style="width: 80px; height: 20px;"
+            />
+            <span
+              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
+              style="width: 100px; height: 20px;"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./WorkspaceHealthCard.stories Scanning 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-a6mz0g-MuiPaper-root"
+      style="--Paper-shadow: none;"
+    >
+      <div
+        class="MuiStack-root mui-style-19f0b8n-MuiStack-root"
+      >
+        <span
+          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
+          style="width: 120px; height: 120px;"
+        />
+        <div
+          class="MuiBox-root mui-style-1fjtzvx"
+        >
+          <span
+            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-fxtlyh-MuiSkeleton-root"
+            style="width: 180px; height: 24px;"
+          />
+          <span
+            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-53wl0q-MuiSkeleton-root"
+            style="width: 320px; height: 16px;"
+          />
+          <span
+            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-1x7xl34-MuiSkeleton-root"
+            style="width: 260px; height: 16px;"
+          />
+          <div
+            class="MuiStack-root mui-style-niqf4j-MuiStack-root"
+          >
+            <span
+              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
+              style="width: 80px; height: 20px;"
+            />
+            <span
+              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
+              style="width: 100px; height: 20px;"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
