@@ -167,15 +167,20 @@ const GasTokenSelector = ({
   selectedGasToken,
   onGasTokenChange,
   locked,
+  forcedDisplay,
 }: {
   availableGasTokens: FeesPreviewData['availableGasTokens']
   selectedGasToken: string
   onGasTokenChange?: (address: string) => void
   locked?: boolean
+  forcedDisplay?: { symbol: string; logoUri: string }
 }): ReactElement => {
   // EVM addresses are case-insensitive; strict `===` would silently fall back to [0] when the
   // stored address and the candidate address differ in checksum casing.
-  const selected = availableGasTokens?.find((t) => sameAddress(t.address, selectedGasToken)) ?? availableGasTokens?.[0]
+  const selected =
+    forcedDisplay ??
+    availableGasTokens?.find((t) => sameAddress(t.address, selectedGasToken)) ??
+    availableGasTokens?.[0]
   const anchorRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
 
@@ -309,6 +314,11 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
     safeHasEnoughGas,
   } = props
   const { gtfPaymentMode, setGtfPaymentMode } = useContext(SafeTxContext)
+  const chain = useCurrentChain()
+  const nativeDisplay = {
+    symbol: chain?.nativeCurrency.symbol ?? '',
+    logoUri: chain?.nativeCurrency.logoUri ?? '',
+  }
 
   // No eligible gas token in the Safe → Safe-pays isn't actually an option for this tx.
   // Lock the UI to signer-pays so the dropdown isn't shown empty and the user can't pick
@@ -379,6 +389,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
                   selectedGasToken={isSafeWallet ? (selectedGasToken ?? '') : (availableGasTokens?.[0]?.address ?? '')}
                   onGasTokenChange={props.onGasTokenChange}
                   locked={!isSafeWallet}
+                  forcedDisplay={!isSafeWallet ? nativeDisplay : undefined}
                 />
               </div>
             </div>
