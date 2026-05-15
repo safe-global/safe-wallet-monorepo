@@ -1,6 +1,7 @@
 import { IS_PRODUCTION } from '@/config/constants'
 import type { SafeVersion } from '@safe-global/types-kit'
 import type { SecurityGrade } from '../securityTypes'
+import type { SafeGrade } from './types'
 
 /** Maximum time a single scanner is allowed to run before being rejected. */
 export const SCANNER_TIMEOUT_MS = 15_000
@@ -17,6 +18,18 @@ export const SEVERITY_RANK: Record<SecurityGrade, number> = {
   High: 1,
   Medium: 2,
   Low: 3,
+}
+
+/**
+ * Sort order for SafeGrade — overall per-Safe assessment. Distinct from `SEVERITY_RANK`,
+ * which ranks per-check `SecurityGrade`. Lower number = worse, so a "worst-grade-first"
+ * scan picks the smallest rank across a multichain Safe's chain entries.
+ */
+export const SAFE_GRADE_RANK: Record<SafeGrade, number> = {
+  critical: 0,
+  at_risk: 1,
+  needs_attention: 2,
+  passing: 3,
 }
 
 /** Score thresholds that bucket a numeric score into a SecurityGrade. */
