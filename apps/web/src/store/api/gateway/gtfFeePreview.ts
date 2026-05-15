@@ -31,7 +31,7 @@ export type FeePreviewResponse = {
     phase: number
     priceSource: string
     priceTimestamp: number
-    gasVolatilityBuffer: number
+    gasPriceVolatilityBuffer: number
   }
 }
 

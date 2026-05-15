@@ -46,7 +46,7 @@ describe('resolveFeeParams', () => {
       numberSignatures: 3,
     },
     relayCostUsd: 38.22,
-    pricingContextSnapshot: { phase: 1, priceSource: 'coingecko', priceTimestamp: 0, gasVolatilityBuffer: 1.3 },
+    pricingContextSnapshot: { phase: 1, priceSource: 'coingecko', priceTimestamp: 0, gasPriceVolatilityBuffer: 1.3 },
   }
 
   beforeEach(() => {

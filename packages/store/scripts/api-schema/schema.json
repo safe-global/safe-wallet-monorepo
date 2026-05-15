@@ -8138,9 +8138,9 @@
             "description": "Price snapshot Unix timestamp",
             "example": 1700000000
           },
-          "gasVolatilityBuffer": {
+          "gasPriceVolatilityBuffer": {
             "type": "number",
-            "description": "Gas volatility buffer multiplier",
+            "description": "Gas price volatility buffer multiplier",
             "example": 1.3
           }
         },
@@ -8148,7 +8148,7 @@
           "phase",
           "priceSource",
           "priceTimestamp",
-          "gasVolatilityBuffer"
+          "gasPriceVolatilityBuffer"
         ]
       },
       "FeePreviewResponse": {
@@ -12684,6 +12684,12 @@
           "gasToken": {
             "type": "string"
           },
+          "fee": {
+            "type": "string"
+          },
+          "payment": {
+            "type": "string"
+          },
           "refundReceiver": {
             "$ref": "#/components/schemas/AddressInfo"
           },
@@ -12761,6 +12767,8 @@
           "baseGas",
           "gasPrice",
           "gasToken",
+          "fee",
+          "payment",
           "refundReceiver",
           "safeTxHash",
           "signers",
@@ -13011,6 +13019,9 @@
           "fee": {
             "type": "object"
           },
+          "payment": {
+            "type": "object"
+          },
           "origin": {
             "type": "object"
           },
@@ -13053,6 +13064,7 @@
           "ethGasPrice",
           "gasUsed",
           "fee",
+          "payment",
           "origin",
           "confirmationsRequired",
           "confirmations",

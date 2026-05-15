@@ -111,7 +111,7 @@ const mockSuccessfulPreview = {
       phase: 2,
       priceSource: 'COINGECKO',
       priceTimestamp: 1776428854,
-      gasVolatilityBuffer: 1.3,
+      gasPriceVolatilityBuffer: 1.3,
     },
   },
   isLoading: false,
