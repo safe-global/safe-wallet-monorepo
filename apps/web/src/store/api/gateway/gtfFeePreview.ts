@@ -4,54 +4,10 @@ import type { OperationType } from '@safe-global/types-kit'
 import { GATEWAY_URL } from '@/config/gateway'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
-const SUPPORTED_FIAT_CODES = new Set([
-  'USD',
-  'AED',
-  'ARS',
-  'AUD',
-  'BDT',
-  'BHD',
-  'BMD',
-  'BRL',
-  'CAD',
-  'CHF',
-  'CLP',
-  'CNY',
-  'CZK',
-  'DKK',
-  'EUR',
-  'GBP',
-  'GEL',
-  'HKD',
-  'HUF',
-  'IDR',
-  'ILS',
-  'INR',
-  'JPY',
-  'KRW',
-  'KWD',
-  'LKR',
-  'MMK',
-  'MXN',
-  'MYR',
-  'NGN',
-  'NOK',
-  'NZD',
-  'PHP',
-  'PKR',
-  'PLN',
-  'RUB',
-  'SAR',
-  'SEK',
-  'SGD',
-  'THB',
-  'TRY',
-  'TWD',
-  'UAH',
-  'VEF',
-  'VND',
-  'ZAR',
-])
+// prettier-ignore
+const SUPPORTED_FIAT_CODES = new Set(
+  'USD AED ARS AUD BDT BHD BMD BRL CAD CHF CLP CNY CZK DKK EUR GBP GEL HKD HUF IDR ILS INR JPY KRW KWD LKR MMK MXN MYR NGN NOK NZD PHP PKR PLN RUB SAR SEK SGD THB TRY TWD UAH VEF VND ZAR BTC ETH'.split(' '),
+)
 
 /**
  * The CGW only accepts ISO 4217 fiat codes. The user's display currency may be
