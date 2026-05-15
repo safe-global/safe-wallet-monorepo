@@ -876,6 +876,8 @@ export type MultisigExecutionDetails = {
   baseGas: string
   gasPrice: string
   gasToken: string
+  fee: string
+  payment: string
   refundReceiver: AddressInfo
   safeTxHash: string
   executor?: AddressInfo | null
@@ -951,6 +953,7 @@ export type TxsMultisigTransaction = {
   ethGasPrice: object
   gasUsed: object
   fee: object
+  payment: object
   origin: object
   confirmationsRequired: number
   confirmations: object

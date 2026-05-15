@@ -28,6 +28,8 @@ describe('HnSecurityReportBtnWithTxHash', () => {
       baseGas: '0',
       gasPrice: '0',
       gasToken: faker.finance.ethereumAddress(),
+      fee: '0',
+      payment: '0',
       refundReceiver: {
         value: faker.finance.ethereumAddress(),
         name: null,
