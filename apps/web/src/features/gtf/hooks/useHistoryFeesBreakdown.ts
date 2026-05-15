@@ -57,12 +57,12 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   const exec = isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) ? txDetails.detailedExecutionInfo : null
 
   // Scalars — stable across balance polling.
-  const safeTxGas = exec?.safeTxGas
-  const baseGas = exec?.baseGas
   const gasPrice = exec?.gasPrice
+  const baseGas = exec?.baseGas
   const gasToken = exec?.gasToken ?? ZERO_ADDRESS
   const gasTokenSymbol = exec?.gasTokenInfo?.symbol
   const gasTokenDecimals = exec?.gasTokenInfo?.decimals
+  const payment = exec?.payment
   const refundReceiver = exec?.refundReceiver?.value
   const { txHash, executedAt } = txDetails
 
@@ -77,27 +77,26 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
     return entry?.fiatConversion
   }, [balances.items, gasToken, isSafePaid])
 
-  // Safe-pays: sync derivation from the signed payload.
+  // Safe-pays: use the `payment` field — the actual amount transferred to the refundReceiver,
+  // denominated in `gasToken` base units. Falls back to native chain metadata when the gas
+  // token is the zero address.
   const safePaidData = useMemo<HistoryFeesData | null>(() => {
     if (!isGtfEnabled || !executedAt || !exec || !isSafePaid) return null
-    if (!safeTxGas || !baseGas || !gasPrice) return null
+    if (!payment) return null
 
     const isNative = sameAddress(gasToken, ZERO_ADDRESS)
     const decimals = isNative ? (chain?.nativeCurrency.decimals ?? 18) : (gasTokenDecimals ?? 18)
     const symbol = isNative ? (chain?.nativeCurrency.symbol ?? 'ETH') : (gasTokenSymbol ?? '')
-    // Safe-pays: on-chain handlePayment transfers (safeTxGas + baseGas) × gasPrice to the refundReceiver.
-    const gasWei = (BigInt(safeTxGas) + BigInt(baseGas)) * BigInt(gasPrice)
-    const amount = formatVisualAmount(gasWei, decimals)
-    const fiatAmount = formatFiat(gasWei, decimals, fiatConversion)
+    const paymentWei = BigInt(payment)
+    const amount = formatVisualAmount(paymentWei, decimals)
+    const fiatAmount = formatFiat(paymentWei, decimals, fiatConversion)
 
     return buildFees(amount, symbol, fiatAmount, 'safe')
   }, [
     isGtfEnabled,
     executedAt,
     isSafePaid,
-    safeTxGas,
-    baseGas,
-    gasPrice,
+    payment,
     gasToken,
     gasTokenSymbol,
     gasTokenDecimals,
