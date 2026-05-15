@@ -8,12 +8,15 @@ import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { isEmptyHexData } from '@safe-global/utils/utils/hex'
 
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { useAppSelector } from '@/store'
+import { selectCurrency } from '@/store/settingsSlice'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useBalances from '@/hooks/useBalances'
 import useGasLimit from '@/hooks/useGasLimit'
 import useGasPrice from '@/hooks/useGasPrice'
 import { useGetGtfFeePreviewQuery } from '@/store/api/gateway'
+import { toSupportedFiatCode } from '@/store/api/gateway/gtfFeePreview'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
@@ -72,7 +75,8 @@ const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 type TotalOutgoingInputs = {
   safeTx: SafeTransaction
   gasWei: bigint
-  relayCostUsd: number
+  relayCostFiat: number
+  relayCostFiatCode: string
   nativeSymbol: string
   nativeDecimals: number
   gasTokenAddress: string
@@ -99,7 +103,8 @@ const getSendInGasToken = (safeTx: SafeTransaction, gasTokenAddress: string): bi
 const computeTotalOutgoing = ({
   safeTx,
   gasWei,
-  relayCostUsd,
+  relayCostFiat,
+  relayCostFiatCode,
   nativeSymbol,
   nativeDecimals,
   gasTokenAddress,
@@ -120,13 +125,13 @@ const computeTotalOutgoing = ({
     if (gasIsNative) {
       return {
         primary: { amount: formatVisualAmount(sendWei + gasWei, nativeDecimals), currency: nativeSymbol },
-        fiatTotal: formatCurrencyMinimal(sendFiat + relayCostUsd, 'usd'),
+        fiatTotal: formatCurrencyMinimal(sendFiat + relayCostFiat, relayCostFiatCode),
       }
     }
     return {
       primary: { amount: formatVisualAmount(sendWei, nativeDecimals), currency: nativeSymbol },
       fees: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
-      fiatTotal: formatCurrencyMinimal(sendFiat + relayCostUsd, 'usd'),
+      fiatTotal: formatCurrencyMinimal(sendFiat + relayCostFiat, relayCostFiatCode),
     }
   }
 
@@ -149,14 +154,14 @@ const computeTotalOutgoing = ({
             amount: formatVisualAmount(transferValue + gasWei, token.tokenInfo.decimals),
             currency: token.tokenInfo.symbol,
           },
-          fiatTotal: formatCurrencyMinimal(sendFiat + relayCostUsd, 'usd'),
+          fiatTotal: formatCurrencyMinimal(sendFiat + relayCostFiat, relayCostFiatCode),
         }
       }
 
       return {
         primary: { amount: sendAmount, currency: token.tokenInfo.symbol },
         fees: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
-        fiatTotal: formatCurrencyMinimal(sendFiat + relayCostUsd, 'usd'),
+        fiatTotal: formatCurrencyMinimal(sendFiat + relayCostFiat, relayCostFiatCode),
       }
     } catch {
       return undefined
@@ -167,7 +172,7 @@ const computeTotalOutgoing = ({
   if (isEmptyData) {
     return {
       primary: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
-      fiatTotal: formatCurrencyMinimal(relayCostUsd, 'usd'),
+      fiatTotal: formatCurrencyMinimal(relayCostFiat, relayCostFiatCode),
     }
   }
 
@@ -179,6 +184,7 @@ export const useFeesPreview = (): FeesPreviewData => {
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
   const { balances } = useBalances()
+  const currency = useAppSelector(selectCurrency)
 
   const nativeSymbol = chain?.nativeCurrency.symbol ?? 'ETH'
   const nativeDecimals = chain?.nativeCurrency.decimals ?? 18
@@ -264,7 +270,12 @@ export const useFeesPreview = (): FeesPreviewData => {
       ? {
           chainId: chain.chainId,
           safeAddress,
-          tx: { ...txPayload, gasToken: selectedAddress, numberSignatures: safe.threshold },
+          tx: {
+            ...txPayload,
+            gasToken: selectedAddress,
+            numberSignatures: safe.threshold,
+            fiatCode: toSupportedFiatCode(currency),
+          },
         }
       : skipToken,
   )
@@ -326,7 +337,8 @@ export const useFeesPreview = (): FeesPreviewData => {
     const totalOutgoing = computeTotalOutgoing({
       safeTx,
       gasWei,
-      relayCostUsd: gasFiatUsd,
+      relayCostFiat: gasFiatUsd,
+      relayCostFiatCode: currency,
       nativeSymbol,
       nativeDecimals,
       gasTokenAddress: selectedAddress,
@@ -398,7 +410,8 @@ export const useFeesPreview = (): FeesPreviewData => {
       ? computeTotalOutgoing({
           safeTx,
           gasWei: localGasWei,
-          relayCostUsd: 0,
+          relayCostFiat: 0,
+          relayCostFiatCode: currency,
           nativeSymbol,
           nativeDecimals,
           gasTokenAddress: ZERO_ADDRESS,
@@ -436,7 +449,9 @@ export const useFeesPreview = (): FeesPreviewData => {
 
   // Happy path — fresh, error-free response.
   if (preview.data && !preview.error && safeTx) {
-    const { txData, relayCostUsd } = preview.data
+    const { txData, relayCost } = preview.data
+    const relayCostFiat = Number(relayCost.fiatValue)
+    const relayCostFiatCode = relayCost.fiatCode
     const gasWei = (BigInt(txData.safeTxGas) + BigInt(txData.baseGas)) * BigInt(txData.gasPrice)
     const gasAmount = formatVisualAmount(gasWei, gasDecimals)
     const gasTokenBalance = balances.items.find((b) => sameAddress(b.tokenInfo.address, selectedAddress))
@@ -446,7 +461,8 @@ export const useFeesPreview = (): FeesPreviewData => {
     const totalOutgoing = computeTotalOutgoing({
       safeTx,
       gasWei,
-      relayCostUsd,
+      relayCostFiat,
+      relayCostFiatCode,
       nativeSymbol,
       nativeDecimals,
       gasTokenAddress: selectedAddress,
@@ -462,7 +478,7 @@ export const useFeesPreview = (): FeesPreviewData => {
         label: 'Gas fee',
         amount: gasAmount,
         currency: gasSymbol,
-        fiatAmount: formatCurrencyMinimal(relayCostUsd, 'usd'),
+        fiatAmount: formatCurrencyMinimal(relayCostFiat, relayCostFiatCode),
       },
       totalOutgoing,
       safeHasEnoughGas,

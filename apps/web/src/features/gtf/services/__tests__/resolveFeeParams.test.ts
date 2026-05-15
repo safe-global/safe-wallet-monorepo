@@ -45,7 +45,7 @@ describe('resolveFeeParams', () => {
       refundReceiver: '0xc918e75504D1B0c741Eb4236B72Dae7A52401E95',
       numberSignatures: 3,
     },
-    relayCostUsd: 38.22,
+    relayCost: { fiatCode: 'USD', fiatValue: '38.22' },
     pricingContextSnapshot: { phase: 1, priceSource: 'coingecko', priceTimestamp: 0, gasPriceVolatilityBuffer: 1.3 },
   }
 

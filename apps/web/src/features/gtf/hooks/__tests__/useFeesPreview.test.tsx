@@ -106,7 +106,7 @@ const mockSuccessfulPreview = {
       refundReceiver: '0x0000000000000000000000000000000000000000',
       numberSignatures: 2,
     },
-    relayCostUsd: 0.12410833692950203,
+    relayCost: { fiatCode: 'USD', fiatValue: '0.12410833692950203' },
     pricingContextSnapshot: {
       phase: 2,
       priceSource: 'COINGECKO',

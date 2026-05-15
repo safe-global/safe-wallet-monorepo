@@ -4,6 +4,64 @@ import type { OperationType } from '@safe-global/types-kit'
 import { GATEWAY_URL } from '@/config/gateway'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
+const SUPPORTED_FIAT_CODES = new Set([
+  'USD',
+  'AED',
+  'ARS',
+  'AUD',
+  'BDT',
+  'BHD',
+  'BMD',
+  'BRL',
+  'CAD',
+  'CHF',
+  'CLP',
+  'CNY',
+  'CZK',
+  'DKK',
+  'EUR',
+  'GBP',
+  'GEL',
+  'HKD',
+  'HUF',
+  'IDR',
+  'ILS',
+  'INR',
+  'JPY',
+  'KRW',
+  'KWD',
+  'LKR',
+  'MMK',
+  'MXN',
+  'MYR',
+  'NGN',
+  'NOK',
+  'NZD',
+  'PHP',
+  'PKR',
+  'PLN',
+  'RUB',
+  'SAR',
+  'SEK',
+  'SGD',
+  'THB',
+  'TRY',
+  'TWD',
+  'UAH',
+  'VEF',
+  'VND',
+  'ZAR',
+])
+
+/**
+ * The CGW only accepts ISO 4217 fiat codes. The user's display currency may be
+ * a non-fiat (e.g. ETH/BTC) — fall back to USD when unsupported.
+ */
+export const toSupportedFiatCode = (currency: string | undefined): string => {
+  const upper = (currency ?? '').toUpperCase()
+  return SUPPORTED_FIAT_CODES.has(upper) ? upper : 'USD'
+}
+
 export type FeePreviewTransactionDto = {
   to: string
   value: string
@@ -11,6 +69,7 @@ export type FeePreviewTransactionDto = {
   operation: OperationType
   gasToken: string
   numberSignatures: number
+  fiatCode?: string
 }
 
 export type FeePreviewTxData = {
@@ -24,9 +83,14 @@ export type FeePreviewTxData = {
   numberSignatures: number
 }
 
+export type FeePreviewRelayCost = {
+  fiatCode: string
+  fiatValue: string
+}
+
 export type FeePreviewResponse = {
   txData: FeePreviewTxData
-  relayCostUsd: number
+  relayCost: FeePreviewRelayCost
   pricingContextSnapshot: {
     phase: number
     priceSource: string
@@ -45,7 +109,7 @@ const isFeePreviewResponse = (value: unknown): value is FeePreviewResponse =>
   typeof value === 'object' &&
   value !== null &&
   'txData' in value &&
-  'relayCostUsd' in value &&
+  'relayCost' in value &&
   'pricingContextSnapshot' in value
 
 export const gtfFeePreviewEndpoints = (builder: EndpointBuilder<any, 'Submissions', 'gatewayApi'>) => ({

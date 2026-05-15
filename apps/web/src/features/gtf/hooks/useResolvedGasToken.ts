@@ -7,6 +7,9 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useBalances from '@/hooks/useBalances'
 import { useGetGtfFeePreviewQuery } from '@/store/api/gateway'
+import { toSupportedFiatCode } from '@/store/api/gateway/gtfFeePreview'
+import { useAppSelector } from '@/store'
+import { selectCurrency } from '@/store/settingsSlice'
 
 /**
  * The encoded transaction payload the fees endpoint needs to probe a gas token.
@@ -48,6 +51,7 @@ export const useResolvedGasToken = (
   const { balances } = useBalances()
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
+  const currency = useAppSelector(selectCurrency)
 
   const candidates = useMemo(() => {
     if (!balances?.items || !sentTokenAddress) return []
@@ -81,6 +85,7 @@ export const useResolvedGasToken = (
             ...tx,
             gasToken: currentCandidate,
             numberSignatures: safe.threshold,
+            fiatCode: toSupportedFiatCode(currency),
           },
         }
       : skipToken,

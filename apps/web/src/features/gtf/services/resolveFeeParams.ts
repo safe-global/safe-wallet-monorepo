@@ -35,7 +35,7 @@ export const resolveFeeParams = async ({
       {
         chainId,
         safeAddress,
-        tx: { to, value, data, operation, gasToken, numberSignatures },
+        tx: { to, value, data, operation, gasToken, numberSignatures, fiatCode: 'USD' },
       },
       { forceRefetch: true },
     ),

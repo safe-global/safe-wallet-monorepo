@@ -8044,6 +8044,11 @@
             "description": "Number of signatures required for execution",
             "example": 2,
             "minimum": 1
+          },
+          "fiatCode": {
+            "type": "string",
+            "description": "Fiat currency code for relay cost conversion (e.g. EUR, GBP). Defaults to USD.",
+            "example": "EUR"
           }
         },
         "required": [
@@ -8110,6 +8115,25 @@
           "numberSignatures"
         ]
       },
+      "FeePreviewRelayCost": {
+        "type": "object",
+        "properties": {
+          "fiatCode": {
+            "type": "string",
+            "description": "Fiat currency code",
+            "example": "USD"
+          },
+          "fiatValue": {
+            "type": "string",
+            "description": "Relay cost as a string",
+            "example": "0.0025"
+          }
+        },
+        "required": [
+          "fiatCode",
+          "fiatValue"
+        ]
+      },
       "PriceSource": {
         "type": "string",
         "enum": [
@@ -8157,10 +8181,8 @@
           "txData": {
             "$ref": "#/components/schemas/FeePreviewTxData"
           },
-          "relayCostUsd": {
-            "type": "number",
-            "description": "Relay cost in USD",
-            "example": 38.22
+          "relayCost": {
+            "$ref": "#/components/schemas/FeePreviewRelayCost"
           },
           "pricingContextSnapshot": {
             "$ref": "#/components/schemas/FeePreviewPricingContext"
@@ -8168,7 +8190,7 @@
         },
         "required": [
           "txData",
-          "relayCostUsd",
+          "relayCost",
           "pricingContextSnapshot"
         ]
       },
