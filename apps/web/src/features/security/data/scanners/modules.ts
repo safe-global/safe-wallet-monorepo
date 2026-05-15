@@ -3,6 +3,7 @@ import { getAllowanceModuleDeployment } from '@safe-global/safe-modules-deployme
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SecurityScanner } from './types'
+import { getSeverityFromScore } from './constants'
 
 /** Safe Allowance Module deployment versions to check against. */
 const ALLOWANCE_MODULE_VERSIONS = ['0.1.0', '0.1.1']
@@ -92,10 +93,11 @@ export const modulesScanner: SecurityScanner = {
 
     // Tier 1: No modules — perfectly fine for most Safes
     if (activeModules.length === 0) {
+      const score = 100
       return {
         status: 'clear',
-        severity: 'Low',
-        score: 100,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [{ label: 'Status', value: 'No modules installed' }],
         remediation: '',
         lastChecked: now,
@@ -111,10 +113,11 @@ export const modulesScanner: SecurityScanner = {
 
     // Tier 2: All modules are trusted
     if (untrusted.length === 0) {
+      const score = 100
       return {
         status: 'clear',
-        severity: 'Low',
-        score: 100,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: trustedEvidence,
         remediation: '',
         lastChecked: now,
@@ -123,10 +126,11 @@ export const modulesScanner: SecurityScanner = {
 
     // Tier 3: Mix of trusted and untrusted
     if (trusted.length > 0 && untrusted.length === 1) {
+      const score = 50
       return {
         status: 'partial',
-        severity: 'Medium',
-        score: 50,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [...trustedEvidence, ...untrustedEvidence],
         remediation:
           'One installed module could not be verified as a known Safe ecosystem module. Review it in Settings to ensure it is from a trusted source.',
@@ -135,10 +139,11 @@ export const modulesScanner: SecurityScanner = {
     }
 
     // Tier 4: All untrusted, or more than 1 untrusted
+    const score = 20
     return {
       status: 'issue',
-      severity: 'High',
-      score: 20,
+      severity: getSeverityFromScore(score),
+      score,
       evidence: [...trustedEvidence, ...untrustedEvidence],
       remediation:
         'Unverified modules have full control over your Safe and can execute transactions without signer approval. Review and remove any modules you do not recognize.',

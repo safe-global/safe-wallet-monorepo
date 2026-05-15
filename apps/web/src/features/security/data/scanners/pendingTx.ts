@@ -1,4 +1,11 @@
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { SecurityScanner } from './types'
+import { getSeverityFromScore } from './constants'
+
+/** Up to this many queued txs is fine — clear status. */
+const CLEAR_QUEUE_MAX = 2
+/** From this many queued txs onwards the queue is treated as a high-severity issue. */
+const LARGE_QUEUE_MIN = 5
 
 export const pendingTxScanner: SecurityScanner = {
   id: 'pending_tx',
@@ -6,18 +13,19 @@ export const pendingTxScanner: SecurityScanner = {
     const { queuedTxCount } = ctx
     const now = new Date().toISOString()
 
-    if (queuedTxCount <= 2) {
+    if (queuedTxCount <= CLEAR_QUEUE_MAX) {
+      const score = 100
       return {
         status: 'clear',
-        severity: 'Low',
-        score: 100,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [
           {
             label: 'Status',
             value:
               queuedTxCount === 0
                 ? 'No pending transactions'
-                : `${queuedTxCount} pending transaction${queuedTxCount === 1 ? '' : 's'}`,
+                : `${queuedTxCount} pending transaction${maybePlural(queuedTxCount)}`,
           },
         ],
         remediation: '',
@@ -25,11 +33,12 @@ export const pendingTxScanner: SecurityScanner = {
       }
     }
 
-    if (queuedTxCount >= 5) {
+    if (queuedTxCount >= LARGE_QUEUE_MIN) {
+      const score = 25
       return {
         status: 'issue',
-        severity: 'High',
-        score: 25,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [{ label: 'Queued', value: `${queuedTxCount} transactions` }],
         remediation:
           'A large queue increases the risk of executing outdated or malicious transactions. Stale transactions can be front-run or may interact with contracts that have changed state. Review and reject any that are no longer needed.',
@@ -37,10 +46,11 @@ export const pendingTxScanner: SecurityScanner = {
       }
     }
 
+    const score = 60
     return {
       status: 'partial',
-      severity: 'Medium',
-      score: 60,
+      severity: getSeverityFromScore(score),
+      score,
       evidence: [{ label: 'Queued', value: `${queuedTxCount} transactions` }],
       remediation:
         'Pending transactions that sit unexecuted can become stale and may not reflect current intentions. Review your queue to ensure all transactions are still valid.',

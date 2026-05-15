@@ -1,4 +1,5 @@
 import type { SecurityScanner } from './types'
+import { getSeverityFromScore } from './constants'
 
 export const accountSetupScanner: SecurityScanner = {
   id: 'account_setup',
@@ -8,10 +9,11 @@ export const accountSetupScanner: SecurityScanner = {
     const now = new Date().toISOString()
 
     if (ownerCount === 0) {
+      const score = 50
       return {
         status: 'partial',
-        severity: 'Medium',
-        score: 50,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: ['Signer data not yet available'],
         remediation: 'Open this Safe directly to load signer information.',
         lastChecked: now,
@@ -25,10 +27,11 @@ export const accountSetupScanner: SecurityScanner = {
 
     // Single signer = no multisig protection
     if (ownerCount === 1) {
+      const score = 10
       return {
         status: 'issue',
-        severity: 'Critical',
-        score: 10,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: baseEvidence,
         remediation: 'Add additional signers and increase the threshold for better security.',
         lastChecked: now,
@@ -38,11 +41,12 @@ export const accountSetupScanner: SecurityScanner = {
     // Threshold of 1 with multiple owners = any single signer can execute.
     // Always recommend at least 2/N so 1/2 Safes don't get told to "raise threshold to 1 of 2".
     if (threshold === 1) {
+      const score = 15
       const recommendedThreshold = Math.max(Math.ceil(ownerCount / 2), 2)
       return {
         status: 'issue',
-        severity: 'Critical',
-        score: 15,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [...baseEvidence, 'Any single signer can approve transactions'],
         remediation: `Increase the threshold to at least ${recommendedThreshold} of ${ownerCount}.`,
         lastChecked: now,
@@ -52,10 +56,11 @@ export const accountSetupScanner: SecurityScanner = {
     // Threshold below simple majority = suboptimal
     const simpleMajority = Math.ceil(ownerCount / 2)
     if (threshold < simpleMajority) {
+      const score = 60
       return {
         status: 'partial',
-        severity: 'Medium',
-        score: 60,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [...baseEvidence, { label: 'Recommended', value: `at least ${simpleMajority} of ${ownerCount}` }],
         remediation: `Consider increasing the threshold to ${simpleMajority} of ${ownerCount} for stronger security.`,
         lastChecked: now,
@@ -63,10 +68,11 @@ export const accountSetupScanner: SecurityScanner = {
     }
 
     // Good setup: threshold >= simple majority
+    const score = 100
     return {
       status: 'clear',
-      severity: 'Low',
-      score: 100,
+      severity: getSeverityFromScore(score),
+      score,
       evidence: baseEvidence,
       remediation: '',
       lastChecked: now,

@@ -2,7 +2,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { ContractVersions, KnownContracts, type SupportedNetworks } from '@gnosis.pm/zodiac'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SecurityScanner } from './types'
-import { HIGH_VALUE_THRESHOLD_USD } from './constants'
+import { HIGH_VALUE_THRESHOLD_USD, getSeverityFromScore } from './constants'
 
 /** Canonical (case-insensitive) guard names tagged as trusted. */
 const HYPERNATIVE_GUARD_NAME = 'hypernative'
@@ -64,11 +64,12 @@ export const guardScanner: SecurityScanner = {
 
     // Tier 1: Untrusted guard detected
     if (hasGuard && !isTrustedGuard(guard.name, chainId, guard.value)) {
+      const score = 30
       const guardLabel = guard.name || `${guard.value.slice(0, 10)}...`
       return {
         status: 'issue',
-        severity: 'High',
-        score: 30,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [
           { label: 'Guard', value: guardLabel },
           { label: 'Status', value: 'Unverified guard contract' },
@@ -82,11 +83,12 @@ export const guardScanner: SecurityScanner = {
 
     // Tier 2: Known trusted guard
     if (hasGuard && isTrustedGuard(guard.name, chainId, guard.value)) {
+      const score = 100
       const isHypernative = nameSuggestsHypernativeGuard(guard.name)
       return {
         status: 'clear',
-        severity: 'Low',
-        score: 100,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [
           { label: 'Guard', value: guard.name ?? 'Trusted Guard' },
           { label: 'Status', value: 'Active protection' },
@@ -99,10 +101,11 @@ export const guardScanner: SecurityScanner = {
 
     // Tier 3: No guard, high-value Safe on a chain that supports enterprise-grade protection
     if (!hasGuard && chainSupportsHypernative && ctx.balanceUsd > HIGH_VALUE_THRESHOLD_USD) {
+      const score = 60
       return {
         status: 'partial',
-        severity: 'Medium',
-        score: 60,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [{ label: 'Status', value: 'No transaction guard configured' }],
         remediation:
           'For high-value accounts, a transaction guard adds pre-execution validation. Enterprise-grade protection is available.',
@@ -113,10 +116,11 @@ export const guardScanner: SecurityScanner = {
     }
 
     // Tier 4: No guard — normal (low-value Safe or unsupported chain)
+    const score = 100
     return {
       status: 'clear',
-      severity: 'Low',
-      score: 100,
+      severity: getSeverityFromScore(score),
+      score,
       evidence: [{ label: 'Status', value: 'No guard required' }],
       remediation: '',
       lastChecked: now,

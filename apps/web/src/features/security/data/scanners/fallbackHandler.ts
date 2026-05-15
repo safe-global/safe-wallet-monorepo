@@ -7,6 +7,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SafeVersion } from '@safe-global/types-kit'
 import type { SecurityScanner } from './types'
+import { getSeverityFromScore } from './constants'
 // Import directly from helpers/utils (not from '@/features/swap') to avoid pulling
 // the swap feature handle (via createFeatureHandle) into the scanner module graph —
 // that creates a circular dependency with @/features/__core__ in test environments.
@@ -52,10 +53,11 @@ export const fallbackHandlerScanner: SecurityScanner = {
     const hasHandler = fallbackHandler !== null && fallbackHandler.value !== ZERO_ADDRESS
 
     if (!hasHandler) {
+      const score = 100
       return {
         status: 'clear',
-        severity: 'Low',
-        score: 100,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [{ label: 'Status', value: 'No fallback handler set' }],
         remediation: '',
         lastChecked: now,
@@ -66,10 +68,11 @@ export const fallbackHandlerScanner: SecurityScanner = {
     const match = identifyFallbackHandler(fallbackHandler.value, chainId)
 
     if (match) {
+      const score = 100
       return {
         status: 'clear',
-        severity: 'Low',
-        score: 100,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [
           { label: 'Handler', value: handlerLabel },
           { label: 'Status', value: HANDLER_LABELS[match] },
@@ -79,10 +82,11 @@ export const fallbackHandlerScanner: SecurityScanner = {
       }
     }
 
+    const score = 20
     return {
       status: 'issue',
-      severity: 'High',
-      score: 20,
+      severity: getSeverityFromScore(score),
+      score,
       evidence: [
         { label: 'Handler', value: handlerLabel },
         { label: 'Status', value: 'Unrecognized fallback handler' },

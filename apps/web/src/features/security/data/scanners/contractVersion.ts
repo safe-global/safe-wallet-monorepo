@@ -3,7 +3,7 @@ import { getSafeSingletonDeployments, getSafeL2SingletonDeployments } from '@saf
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { SecurityScanner } from './types'
-import { KNOWN_SAFE_VERSIONS } from './constants'
+import { KNOWN_SAFE_VERSIONS, getSeverityFromScore } from './constants'
 
 const isKnownImplementation = (address: string, chainId: string): boolean =>
   hasMatchingDeployment(getSafeSingletonDeployments, address, chainId, KNOWN_SAFE_VERSIONS) ||
@@ -36,10 +36,11 @@ export const contractVersionScanner: SecurityScanner = {
         implementationVersionState,
       } as Pick<SafeState, 'nonce' | 'chainId' | 'implementationVersionState'> as SafeState)
 
+      const score = 10
       return {
         status: 'issue',
-        severity: 'Critical',
-        score: 10,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [
           { label: 'Current version', value: versionLabel },
           { label: 'Status', value: 'Unsupported' },
@@ -55,10 +56,11 @@ export const contractVersionScanner: SecurityScanner = {
 
     // Outdated — same checks as OutdatedMastercopyWarning
     if (implementationVersionState === 'OUTDATED' && !isNonCriticalUpdate && masterCopyDeployer === 'Gnosis') {
+      const score = 30
       return {
         status: 'issue',
-        severity: 'High',
-        score: 30,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [
           { label: 'Current version', value: versionLabel },
           { label: 'Latest version', value: latestVersion },
@@ -71,10 +73,11 @@ export const contractVersionScanner: SecurityScanner = {
 
     // Version is current but implementation address is not a recognized Safe deployment
     if (!isKnownImplementation(implementationAddress, chainId)) {
+      const score = 30
       return {
         status: 'issue',
-        severity: 'High',
-        score: 30,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [
           { label: 'Current version', value: versionLabel },
           { label: 'Implementation', value: `${implementationAddress.slice(0, 10)}...` },
@@ -88,10 +91,11 @@ export const contractVersionScanner: SecurityScanner = {
 
     // Check if original deployment used a recognized implementation
     if (creationInfo?.masterCopy && !isKnownImplementation(creationInfo.masterCopy, chainId)) {
+      const score = 60
       return {
         status: 'partial',
-        severity: 'Medium',
-        score: 60,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [
           { label: 'Current version', value: versionLabel },
           { label: 'Original implementation', value: `${creationInfo.masterCopy.slice(0, 10)}...` },
@@ -103,10 +107,11 @@ export const contractVersionScanner: SecurityScanner = {
       }
     }
 
+    const score = 100
     return {
       status: 'clear',
-      severity: 'Low',
-      score: 100,
+      severity: getSeverityFromScore(score),
+      score,
       evidence: [
         { label: 'Current version', value: versionLabel },
         { label: 'Status', value: 'Up to date' },

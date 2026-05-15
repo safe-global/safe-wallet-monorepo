@@ -2,6 +2,7 @@ import { ContractVersions, KnownContracts, type SupportedNetworks } from '@gnosi
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SecurityScanner } from './types'
+import { getSeverityFromScore } from './constants'
 
 /** Canonical names CGW returns for Zodiac Delay Modifier (case- and whitespace-insensitive). */
 const DELAY_MODIFIER_NAMES = ['delay', 'delay modifier', 'zodiac delay modifier']
@@ -39,10 +40,11 @@ export const recoveryScanner: SecurityScanner = {
     const now = new Date().toISOString()
 
     if (!chainSupportsRecovery) {
+      const score = 100
       return {
         status: 'not_applicable',
-        severity: 'Low',
-        score: 100,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [{ label: 'Status', value: 'Not available on this network' }],
         remediation: '',
         lastChecked: now,
@@ -53,10 +55,11 @@ export const recoveryScanner: SecurityScanner = {
 
     // No modules at all — recovery is definitely not configured
     if (activeModules.length === 0) {
+      const score = 20
       return {
         status: 'issue',
-        severity: 'High',
-        score: 20,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [{ label: 'Status', value: 'No recovery configured' }],
         remediation:
           'If all signers lose access, this Safe cannot be recovered. Set up a recovery mechanism to protect against key loss.',
@@ -68,10 +71,11 @@ export const recoveryScanner: SecurityScanner = {
     const hasDelayModifier = activeModules.some((m) => isDelayModifier(chainId, m.value, m.name))
 
     if (hasDelayModifier) {
+      const score = 100
       return {
         status: 'clear',
-        severity: 'Low',
-        score: 100,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [{ label: 'Status', value: 'Recovery module configured' }],
         remediation: '',
         lastChecked: now,
@@ -79,10 +83,11 @@ export const recoveryScanner: SecurityScanner = {
     }
 
     // Modules exist but none are a recognized Delay Modifier
+    const score = 60
     return {
       status: 'partial',
-      severity: 'Medium',
-      score: 60,
+      severity: getSeverityFromScore(score),
+      score,
       evidence: [{ label: 'Status', value: 'Recovery not confirmed' }],
       remediation:
         'This Safe has modules installed but none were recognized as a recovery module. Verify that account recovery is configured.',
