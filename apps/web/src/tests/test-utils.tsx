@@ -92,12 +92,16 @@ function customRenderHook<Result, Props>(
   render: (initialProps: Props) => Result,
   options?: RenderHookOptions<Props> & { routerProps?: Partial<NextRouter>; initialReduxState?: Partial<RootState> },
 ) {
-  const wrapper = getProviders({
+  const Providers = getProviders({
     routerProps: options?.routerProps || {},
     initialReduxState: options?.initialReduxState,
   })
+  const InnerWrapper = options?.wrapper
+  const wrapper: React.JSXElementConstructor<{ children: React.ReactNode }> = ({ children }) => (
+    <Providers>{InnerWrapper ? <InnerWrapper>{children}</InnerWrapper> : children}</Providers>
+  )
 
-  return renderHook(render, { wrapper, ...options })
+  return renderHook(render, { ...options, wrapper })
 }
 
 export const fakerChecksummedAddress = () => checksumAddress(faker.finance.ethereumAddress())
