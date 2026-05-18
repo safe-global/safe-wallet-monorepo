@@ -70,6 +70,14 @@ export type FeesPreviewData = {
    * if the balance isn't covered by execution time.
    */
   safeHasEnoughGas?: boolean
+  /**
+   * SafeTx merged with the CGW resolved GTF fee fields (safeTxGas / baseGas / gasPrice /
+   * gasToken / refundReceiver). Only set in the first-signer Safe-pays happy path when this
+   * is the version that will actually be signed and simulated. Consumers (e.g. threat analysis)
+   * use it to run against the same payload the user will sign, so checks like "Safe holds
+   * enough gas token to cover refund" don't fall through with default zero values.
+   */
+  previewedSafeTx?: SafeTransaction
 }
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()
@@ -571,6 +579,18 @@ export const useFeesPreview = (): FeesPreviewData => {
       balances,
     })
 
+    const previewedSafeTx = {
+      data: {
+        ...safeTx.data,
+        safeTxGas: txData.safeTxGas,
+        baseGas: txData.baseGas,
+        gasPrice: txData.gasPrice,
+        gasToken: txData.gasToken,
+        refundReceiver: txData.refundReceiver,
+      },
+      signatures: safeTx.signatures,
+    } as SafeTransaction
+
     return {
       ...base,
       canCoverFees: true,
@@ -582,6 +602,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       },
       totalOutgoing,
       safeHasEnoughGas,
+      previewedSafeTx,
       loading: false,
       error: false,
     }
