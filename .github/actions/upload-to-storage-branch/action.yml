@@ -50,6 +50,17 @@ runs:
         COMMIT_MESSAGE: ${{ inputs.commit_message }}
         README_TITLE: ${{ inputs.readme_title }}
       run: |
+        set -euo pipefail
+
+        # Constrain storage_branch to a known shape so callers cannot pass
+        # paths or unexpected refs. A follow-up will tighten this to
+        # `^pr-\d+(-storybook)?-screenshots$` once all callers pass a
+        # PR-number-based branch name.
+        if ! [[ "$STORAGE_BRANCH" =~ ^[a-z0-9_-]+-screenshots$ ]]; then
+          echo "::error::Invalid storage_branch: '$STORAGE_BRANCH'"
+          exit 1
+        fi
+
         # Check if source directory exists and has files
         if [ ! -d "$SOURCE_DIR" ]; then
           echo "Source directory does not exist: $SOURCE_DIR"
