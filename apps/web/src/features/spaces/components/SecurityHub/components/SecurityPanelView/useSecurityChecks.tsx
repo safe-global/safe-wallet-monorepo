@@ -124,7 +124,12 @@ export const useSecurityChecks = (
   const factoryResult = results['factory_validation']
   if (factoryResult) {
     const ok = isPassingStatus(factoryResult.status)
-    const title = ok ? 'Deployed via official Safe factory' : 'Deployed from an unrecognized source'
+    const title =
+      factoryResult.status === 'clear'
+        ? 'Deployed via official Safe factory'
+        : factoryResult.status === 'inconclusive'
+          ? 'Deployment origin not yet verified'
+          : 'Deployed from an unrecognized source'
     items.push({
       key: 'factory',
       severity: factoryResult.severity,

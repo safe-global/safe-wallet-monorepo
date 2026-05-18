@@ -13,12 +13,16 @@ export const factoryValidationScanner: SecurityScanner = {
     const now = new Date().toISOString()
 
     if (!creationInfo) {
+      // Creation transaction data isn't loaded — distinct from "loaded and missing a
+      // factory". Return `inconclusive` so we don't penalize the score or label the Safe
+      // as deployed from an unrecognized source: we genuinely don't know yet, and the
+      // user shouldn't see the result flip between scans once creationTx resolves.
       return {
-        status: 'partial',
+        status: 'inconclusive',
         severity: 'Low',
-        score: 70,
-        evidence: [{ label: 'Status', value: 'Creation data not available' }],
-        remediation: 'Deployment origin could not be verified because creation data is not yet available.',
+        score: 50,
+        evidence: [{ label: 'Status', value: 'Creation data not yet available' }],
+        remediation: 'Deployment origin will be verified once creation data loads.',
         lastChecked: now,
       }
     }
