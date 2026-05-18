@@ -107,7 +107,6 @@ jobs:
 
       - name: Resolve PR number
         id: pr
-        if: steps.artifact.outputs.found == 'true'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
@@ -164,24 +163,47 @@ jobs:
           readme_title: 'Page Screenshots Storage'
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Post or update PR comment
-        if: steps.artifact.outputs.found == 'true' && steps.pr.outputs.skip == 'false'
+      - name: Post, update, or delete PR comment
+        if: steps.pr.outputs.skip == 'false'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           STALE: ${{ steps.pr.outputs.stale }}
+          FOUND: ${{ steps.artifact.outputs.found }}
         with:
           script: |
             const fs = require('fs')
             const prNumber = Number(process.env.PR_NUMBER)
             const stale = process.env.STALE === 'true'
+            const found = process.env.FOUND === 'true'
+            const { owner, repo } = context.repo
+            const MARKER = '📸 Page Screenshots'
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: prNumber,
+            })
+            const existing = comments.find(
+              (c) => c.user.type === 'Bot' && c.body.includes(MARKER),
+            )
+
+            if (!found) {
+              if (existing) {
+                await github.rest.issues.deleteComment({
+                  owner,
+                  repo,
+                  comment_id: existing.id,
+                })
+              }
+              return
+            }
 
             const screenshots = fs
               .readdirSync('page-screenshots')
               .filter((f) => f.endsWith('.png'))
               .sort()
 
-            const { owner, repo } = context.repo
             const storageBranch = `pr-${prNumber}-screenshots`
             const baseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${storageBranch}/page-screenshots/${prNumber}`
 
@@ -192,7 +214,7 @@ jobs:
                 .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
                 .join(' ')
 
-            let body = '## 📸 Page Screenshots\n\n'
+            let body = `## ${MARKER}\n\n`
             if (stale) {
               body +=
                 '> **STALE:** The PR was updated after these screenshots were captured. ' +
@@ -218,15 +240,6 @@ jobs:
             body += '\n---\n'
             body += '*Screenshots are automatically captured from pages affected by changed files.*'
 
-            const { data: comments } = await github.rest.issues.listComments({
-              owner,
-              repo,
-              issue_number: prNumber,
-            })
-            const existing = comments.find(
-              (c) => c.user.type === 'Bot' && c.body.includes('📸 Page Screenshots'),
-            )
-
             if (existing) {
               await github.rest.issues.updateComment({
                 owner,
@@ -240,45 +253,5 @@ jobs:
                 repo,
                 issue_number: prNumber,
                 body,
-              })
-            }
-
-      - name: Clean up stale comment when no screenshots
-        if: steps.artifact.outputs.found != 'true'
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        env:
-          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-        with:
-          script: |
-            const headSha = process.env.HEAD_SHA
-            const { data: prs } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: headSha,
-            })
-            const sameRepo = `${context.repo.owner}/${context.repo.repo}`
-            const candidates = prs.filter(
-              (pr) =>
-                pr.state === 'open' &&
-                pr.head.sha === headSha &&
-                pr.head.repo.full_name === sameRepo,
-            )
-            if (candidates.length !== 1) {
-              return
-            }
-            const prNumber = candidates[0].number
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-            })
-            const existing = comments.find(
-              (c) => c.user.type === 'Bot' && c.body.includes('📸 Page Screenshots'),
-            )
-            if (existing) {
-              await github.rest.issues.deleteComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
               })
             }

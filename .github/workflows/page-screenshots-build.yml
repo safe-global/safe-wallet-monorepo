@@ -35,15 +35,23 @@ jobs:
         run: |
           # Install Playwright into a fresh directory outside the checked-out
           # workspace so the repo's own `package.json` cannot influence what
-          # gets installed. `--ignore-scripts` skips lifecycle scripts; the
-          # version is pinned to keep installs reproducible.
+          # gets installed. `enableScripts: false` blocks lifecycle scripts;
+          # the version is pinned to keep installs reproducible.
           INSTALL_DIR="$RUNNER_TEMP/playwright-install"
           mkdir -p "$INSTALL_DIR"
           cd "$INSTALL_DIR"
-          npm init -y >/dev/null
-          npm install --ignore-scripts playwright@1.60.0
-          npx --prefix "$INSTALL_DIR" playwright install --with-deps chromium
-          echo "NODE_PATH=$INSTALL_DIR/node_modules" >> "$GITHUB_ENV"
+          cat > package.json <<'JSON'
+          {"name":"playwright-install","private":true}
+          JSON
+          cat > .yarnrc.yml <<'YAML'
+          nodeLinker: node-modules
+          enableScripts: false
+          enableTelemetry: false
+          YAML
+          corepack enable
+          yarn add playwright@1.60.0
+          yarn playwright install --with-deps chromium
+          echo "PLAYWRIGHT_PATH=$INSTALL_DIR/node_modules/playwright" >> "$GITHUB_ENV"
 
       - name: Get changed files
         id: changed-files
