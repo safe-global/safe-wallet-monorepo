@@ -84,9 +84,11 @@ const TotalOutgoingSection = ({ totalOutgoing }: { totalOutgoing: TotalOutgoing 
       Total outgoing
     </Typography>
     <div className={css.totalOutgoingValue}>
-      <Typography variant="body2" fontWeight={700}>
-        {totalOutgoing.primary.amount} {totalOutgoing.primary.currency}
-      </Typography>
+      {totalOutgoing.primary.map((line) => (
+        <Typography key={line.currency} variant="body2" fontWeight={700}>
+          {line.amount} {line.currency}
+        </Typography>
+      ))}
       {totalOutgoing.fees && (
         <Typography variant="body2" fontWeight={700}>
           {totalOutgoing.fees.amount} {totalOutgoing.fees.currency}

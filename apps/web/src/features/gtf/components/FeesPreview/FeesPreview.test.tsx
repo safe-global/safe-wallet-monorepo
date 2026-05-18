@@ -10,7 +10,7 @@ const defaultProps: FeesPreviewData = {
   canCoverFees: true,
   executionFee: { label: 'Execution fee', isFree: true },
   gasFee: { label: 'Gas fee', amount: '0.0002733', currency: 'ETH', fiatAmount: '$97.30' },
-  totalOutgoing: { primary: { amount: '0.60126', currency: 'ETH' }, fiatTotal: '$1,768.85' },
+  totalOutgoing: { primary: [{ amount: '0.60126', currency: 'ETH' }], fiatTotal: '$1,768.85' },
   availableGasTokens: [{ address: '0x0000000000000000000000000000000000000000', symbol: 'ETH', logoUri: '' }],
   selectedGasToken: '0x0000000000000000000000000000000000000000',
   onGasTokenChange: jest.fn(),
@@ -73,7 +73,7 @@ describe('FeesPreview', () => {
     const props: FeesPreviewData = {
       ...defaultProps,
       totalOutgoing: {
-        primary: { amount: '0.5466', currency: 'ETH' },
+        primary: [{ amount: '0.5466', currency: 'ETH' }],
         fees: { amount: '3.50', currency: 'USDC' },
         fiatTotal: '$1,068.00',
       },

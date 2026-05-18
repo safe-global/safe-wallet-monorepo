@@ -234,9 +234,9 @@ describe('useFeesPreview', () => {
     const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
 
     expect(result.current.totalOutgoing).toBeDefined()
-    expect(result.current.totalOutgoing?.primary.currency).toBe('ETH')
+    expect(result.current.totalOutgoing?.primary[0].currency).toBe('ETH')
     // 0.0001 ETH send + ~0.0000526 ETH gas ≈ 0.0001526 ETH
-    expect(result.current.totalOutgoing?.primary.amount).toMatch(/^0\.00015/)
+    expect(result.current.totalOutgoing?.primary[0].amount).toMatch(/^0\.00015/)
     expect(result.current.totalOutgoing?.fees).toBeUndefined()
     expect(result.current.totalOutgoing?.fiatTotal).toBeDefined()
   })
@@ -247,7 +247,7 @@ describe('useFeesPreview', () => {
     const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(erc20SafeTx) })
 
     expect(result.current.totalOutgoing).toBeDefined()
-    expect(result.current.totalOutgoing?.primary).toEqual({ amount: '0.0045', currency: 'WETH' })
+    expect(result.current.totalOutgoing?.primary).toEqual([{ amount: '0.0045', currency: 'WETH' }])
     expect(result.current.totalOutgoing?.fees?.currency).toBe('ETH')
     expect(result.current.totalOutgoing?.fees?.amount).toMatch(/^0\.00005/)
     expect(result.current.totalOutgoing?.fiatTotal).toBeDefined()
@@ -269,9 +269,9 @@ describe('useFeesPreview', () => {
     const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(rejectTx) })
 
     expect(result.current.totalOutgoing).toBeDefined()
-    expect(result.current.totalOutgoing?.primary.currency).toBe('ETH')
+    expect(result.current.totalOutgoing?.primary[0].currency).toBe('ETH')
     // gasWei = (2409 + 68568) * 741064438 ≈ 5.26e13 → ~0.00005 ETH
-    expect(result.current.totalOutgoing?.primary.amount).toMatch(/^0\.00005/)
+    expect(result.current.totalOutgoing?.primary[0].amount).toMatch(/^0\.00005/)
     expect(result.current.totalOutgoing?.fees).toBeUndefined()
     expect(result.current.totalOutgoing?.fiatTotal).toBeDefined()
   })
@@ -587,8 +587,8 @@ describe('useFeesPreview', () => {
       const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(lockedReject) })
 
       expect(result.current.totalOutgoing).toBeDefined()
-      expect(result.current.totalOutgoing?.primary.currency).toBe('ETH')
-      expect(result.current.totalOutgoing?.primary.amount).toMatch(/^0\.00005/)
+      expect(result.current.totalOutgoing?.primary[0].currency).toBe('ETH')
+      expect(result.current.totalOutgoing?.primary[0].amount).toMatch(/^0\.00005/)
       expect(result.current.totalOutgoing?.fees).toBeUndefined()
     })
 
@@ -626,7 +626,7 @@ describe('useFeesPreview', () => {
       const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(lockedRejectWeth) })
 
       expect(result.current.totalOutgoing).toBeDefined()
-      expect(result.current.totalOutgoing?.primary.currency).toBe('WETH')
+      expect(result.current.totalOutgoing?.primary[0].currency).toBe('WETH')
       expect(result.current.totalOutgoing?.fees).toBeUndefined()
     })
   })
