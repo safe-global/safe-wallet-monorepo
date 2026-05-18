@@ -33,8 +33,6 @@ jobs:
           ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.workflow_run.head_branch }}
           fetch-depth: 0
 
-      - uses: ./.github/actions/yarn
-
       - name: Install Playwright
         run: |
           # Install playwright locally in .github/scripts so node can find it
