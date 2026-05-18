@@ -487,10 +487,20 @@ export const useFeesPreview = (): FeesPreviewData => {
     }
   }
 
-  // Fallback — endpoint errored or not queryable. Use local estimation for the EOA-paid gas fee.
+  // Fallback — endpoint errored or not queryable.
   const fallbackLoading = !safeTx || gasLimitLoading || gasPriceLoading
-  const fallbackError = !fallbackLoading && (!!gasLimitError || !!gasPriceError || !gasLimit || !gasPrice?.maxFeePerGas)
+  const canLocallyEstimate = !!gasLimit && !!gasPrice?.maxFeePerGas && !gasLimitError && !gasPriceError
   const fallbackAmount = getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain)
+
+  if (safe.threshold > 1 || (!fallbackLoading && !canLocallyEstimate)) {
+    return {
+      ...base,
+      canCoverFees: false,
+      gasFee: { label: 'Gas fee', note: 'Calculated at execution' },
+      loading: false,
+      error: false,
+    }
+  }
 
   return {
     ...base,
@@ -501,6 +511,6 @@ export const useFeesPreview = (): FeesPreviewData => {
       currency: nativeSymbol,
     },
     loading: fallbackLoading,
-    error: fallbackError,
+    error: false,
   }
 }

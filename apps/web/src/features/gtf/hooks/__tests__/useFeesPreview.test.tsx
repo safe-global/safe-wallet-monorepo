@@ -390,15 +390,34 @@ describe('useFeesPreview', () => {
     expect(result.current.canCoverFees).toBe(true)
   })
 
-  it('falls back to local gas estimation when preview returns no data (canCoverFees = false)', () => {
+  it('shows "Calculated at execution" when preview is unavailable on a multi-sig Safe (PLA-1465)', () => {
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+
+    const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+    expect(result.current.canCoverFees).toBe(false)
+    expect(result.current.gasFee.note).toBe('Calculated at execution')
+    expect(result.current.gasFee.amount).toBeUndefined()
+    expect(result.current.gasFee.currency).toBeUndefined()
+    expect(result.current.error).toBe(false)
+    expect(result.current.totalOutgoing).toBeUndefined()
+  })
+
+  it('falls back to local gas estimation for single-signer Safes when preview is unavailable', () => {
+    jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+    const singleSignerSafe = extendedSafeInfoBuilder().with({ threshold: 1 }).build()
+    jest.spyOn(useSafeInfoModule, 'default').mockReturnValue({
+      safe: singleSignerSafe,
+      safeAddress: singleSignerSafe.address.value,
+      safeLoaded: true,
+      safeLoading: false,
+    })
 
     const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
 
     expect(result.current.canCoverFees).toBe(false)
     expect(result.current.gasFee.amount).toBeDefined()
     expect(result.current.gasFee.currency).toBe('ETH')
-    expect(result.current.totalOutgoing).toBeUndefined()
   })
 
   it('skips the preview query and routes to signer-pays when no Safe-side gas tokens are available', () => {
@@ -455,9 +474,16 @@ describe('useFeesPreview', () => {
     })
   })
 
-  it('falls back to ETH when chain is unavailable', () => {
+  it('falls back to ETH when chain is unavailable (single-signer Safe)', () => {
     jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(undefined)
     jest.spyOn(gatewayApi, 'useGetGtfFeePreviewQuery').mockReturnValue(emptyPreview)
+    const singleSignerSafe = extendedSafeInfoBuilder().with({ threshold: 1 }).build()
+    jest.spyOn(useSafeInfoModule, 'default').mockReturnValue({
+      safe: singleSignerSafe,
+      safeAddress: singleSignerSafe.address.value,
+      safeLoaded: true,
+      safeLoading: false,
+    })
 
     const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(undefined) })
 
