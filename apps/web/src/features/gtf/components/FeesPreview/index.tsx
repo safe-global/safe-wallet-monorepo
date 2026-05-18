@@ -145,18 +145,20 @@ const PaymentSourceSelector = ({
         transformOrigin={{ vertical: 'top', horizontal: 'center' }}
         slotProps={{ paper: { className: css.selectorPopoverPaper } }}
       >
-        {PAYMENT_SOURCES.map((source) => (
-          <MenuItem
-            key={source}
-            selected={source === value}
-            onClick={() => handleSelect(source)}
-            className={css.selectorMenuItem}
-          >
-            <Typography variant="body2" fontWeight={700}>
-              {paymentSourceLabel(source)}
-            </Typography>
-          </MenuItem>
-        ))}
+        <div className={css.selectorPopoverInner}>
+          {PAYMENT_SOURCES.map((source) => (
+            <MenuItem
+              key={source}
+              selected={source === value}
+              onClick={() => handleSelect(source)}
+              className={css.selectorMenuItem}
+            >
+              <Typography variant="body2" fontWeight={700}>
+                {paymentSourceLabel(source)}
+              </Typography>
+            </MenuItem>
+          ))}
+        </div>
       </Popover>
     </>
   )
@@ -221,26 +223,28 @@ const GasTokenSelector = ({
         transformOrigin={{ vertical: 'top', horizontal: 'center' }}
         slotProps={{ paper: { className: css.selectorPopoverPaper } }}
       >
-        {availableGasTokens?.map((token) => (
-          <MenuItem
-            key={token.address}
-            selected={sameAddress(token.address, selectedGasToken)}
-            onClick={() => handleSelect(token.address)}
-            className={`${css.selectorMenuItem} ${css.gasTokenMenuItem}`}
-          >
-            <TokenIcon logoUri={token.logoUri} tokenSymbol={token.symbol} size={24} />
-            <div>
-              <Typography variant="body2" fontWeight={700}>
-                {token.symbol}
-              </Typography>
-              {token.fiatBalance && (
-                <Typography variant="caption" color="text.secondary">
-                  {formatCurrency(token.fiatBalance, 'usd')}
+        <div className={css.selectorPopoverInner}>
+          {availableGasTokens?.map((token) => (
+            <MenuItem
+              key={token.address}
+              selected={sameAddress(token.address, selectedGasToken)}
+              onClick={() => handleSelect(token.address)}
+              className={`${css.selectorMenuItem} ${css.gasTokenMenuItem}`}
+            >
+              <TokenIcon logoUri={token.logoUri} tokenSymbol={token.symbol} size={24} />
+              <div>
+                <Typography variant="body2" fontWeight={700}>
+                  {token.symbol}
                 </Typography>
-              )}
-            </div>
-          </MenuItem>
-        ))}
+                {token.fiatBalance && (
+                  <Typography variant="caption" color="text.secondary">
+                    {formatCurrency(token.fiatBalance, 'usd')}
+                  </Typography>
+                )}
+              </div>
+            </MenuItem>
+          ))}
+        </div>
       </Popover>
     </>
   )

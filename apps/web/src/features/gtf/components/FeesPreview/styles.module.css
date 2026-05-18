@@ -92,23 +92,32 @@
 .gasTokenMenuItem {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
-.selectorPopoverPaper {
+.selectorPopoverPaper:global(.MuiPaper-root) {
   margin-top: 4px;
   border-radius: 16px;
   box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.08);
-  padding: 4px;
+  padding: 0;
+}
+
+.selectorPopoverInner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 2px;
+  border-radius: 14px;
 }
 
 .selectorMenuItem {
   border-radius: 14px;
-  padding: 8px 12px;
+  padding: 2px 4px;
 }
 
 .selectorMenuItem:global(.Mui-selected),
 .selectorMenuItem:global(.Mui-selected:hover) {
+  border-radius: 12px;
   background-color: var(--color-background-skeleton);
 }
 
