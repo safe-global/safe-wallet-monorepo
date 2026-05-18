@@ -36,7 +36,6 @@ export const useRouterGuard = ({ useGuard }: useRouterGuardProps) => {
       if (success) {
         setIsCheckingAccess(false)
       } else {
-        console.log('### redirectTo', redirectTo)
         // we do not want to set isCheckingAccess to false here because we want
         // the checking access to be reseted only after the redirect is done
         router.replace(redirectTo ?? AppRoutes.welcome.index)
