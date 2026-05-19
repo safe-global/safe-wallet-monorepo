@@ -110,6 +110,36 @@ describe('LedgerEthereumService', () => {
       expect(mockGetAddress).toHaveBeenCalledWith("44'/60'/0'/0")
     })
 
+    it('should use BIP44 derivation path when specified', async () => {
+      mockGetAddress.mockReturnValue({
+        observable: {
+          subscribe: ({ next }: { next: (state: unknown) => void }) => {
+            next({ status: 'completed', output: { address: '0x123' } })
+          },
+        },
+      })
+
+      const service = LedgerEthereumService.getInstance()
+      await service.getEthereumAddresses(mockSessionId, 1, 0, 'bip44')
+
+      expect(mockGetAddress).toHaveBeenCalledWith("44'/60'/0'/0/0")
+    })
+
+    it('should use correct BIP44 path for non-zero index', async () => {
+      mockGetAddress.mockReturnValue({
+        observable: {
+          subscribe: ({ next }: { next: (state: unknown) => void }) => {
+            next({ status: 'completed', output: { address: '0x123' } })
+          },
+        },
+      })
+
+      const service = LedgerEthereumService.getInstance()
+      await service.getEthereumAddresses(mockSessionId, 1, 5, 'bip44')
+
+      expect(mockGetAddress).toHaveBeenCalledWith("44'/60'/0'/0/5")
+    })
+
     it('should continue on address fetch error', async () => {
       let callCount = 0
       mockGetAddress.mockImplementation(() => ({
