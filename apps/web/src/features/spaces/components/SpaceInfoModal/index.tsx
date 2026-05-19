@@ -85,7 +85,7 @@ const SpaceInfoModal = ({ showButtons = true, onClose }: { showButtons?: boolean
               </ListItem>
             </List>
 
-            <Typography mt={1}>
+            <Typography mt={5}>
               Read the <ExternalLink href={SPACE_HELP_ARTICLE_LINK}>Spaces help article</ExternalLink>
             </Typography>
 
