@@ -266,7 +266,6 @@ export const SPACE_EVENTS = {
 export enum SPACE_LABELS {
   space_list_page = 'space_list_page',
   safe_dashboard_banner = 'safe_dashboard_banner',
-  info_modal = 'info_modal',
   space_selector = 'space_selector',
   accounts_page = 'accounts_page',
   preview_banner = 'preview_banner',
