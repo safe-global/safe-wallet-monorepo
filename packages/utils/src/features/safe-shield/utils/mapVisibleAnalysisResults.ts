@@ -26,7 +26,7 @@ const METADATA_KEYS = ['name', 'logoUrl', 'request_id', 'BALANCE_CHANGE'] as con
 
 export const mapVisibleAnalysisResults = (
   addressesResultsMap: RecipientAnalysisResults | ContractAnalysisResults | ThreatAnalysisResults,
-  multiResultGroups: StatusGroup[] = [],
+  expandedGroups: StatusGroup[] = [],
 ): AnalysisResult[] => {
   // Filter out metadata fields that should not be treated as analysis result groups
   const addressResults: GroupedAnalysisResults[] = Object.entries(addressesResultsMap)
@@ -39,7 +39,7 @@ export const mapVisibleAnalysisResults = (
     for (const [groupKey, groupResults] of Object.entries(addressResults[0])) {
       if (!Array.isArray(groupResults)) continue
 
-      if (multiResultGroups.includes(groupKey as StatusGroup)) {
+      if (expandedGroups.includes(groupKey as StatusGroup)) {
         results.push(...sortBySeverity(groupResults as AnalysisResult[]))
         continue
       }

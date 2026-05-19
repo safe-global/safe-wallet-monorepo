@@ -223,7 +223,7 @@ describe('mapVisibleAnalysisResults', () => {
   })
 })
 
-describe('mapVisibleAnalysisResults with multiResultGroups', () => {
+describe('mapVisibleAnalysisResults with expandedGroups', () => {
   const threat = (title: string, severity: Severity) => ({
     severity,
     type: ThreatStatus.MODERATE as const,
@@ -231,7 +231,7 @@ describe('mapVisibleAnalysisResults with multiResultGroups', () => {
     description: `desc ${title}`,
   })
 
-  it('still collapses to primary when multiResultGroups is empty (default)', () => {
+  it('still collapses to primary when expandedGroups is empty (default)', () => {
     const address = faker.finance.ethereumAddress()
     const input: RecipientAnalysisResults = {
       [address]: {
