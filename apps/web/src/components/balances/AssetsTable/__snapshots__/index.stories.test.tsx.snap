@@ -5,11 +5,11 @@ exports[`./index.stories Default 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-hxb3pb-MuiPaper-root-MuiCard-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-2tdm0y-MuiPaper-root-MuiCard-root"
       style="--Paper-shadow: none;"
     >
       <div
@@ -19,7 +19,7 @@ exports[`./index.stories Default 1`] = `
           class="MuiBox-root mui-style-dzaqf9"
         >
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-15l0b46-MuiPaper-root-MuiTableContainer-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-1uh4fgc-MuiPaper-root-MuiTableContainer-root"
             data-testid="table-container"
             style="--Paper-shadow: none;"
           >
@@ -707,7 +707,7 @@ exports[`./index.stories Default 1`] = `
             </table>
           </div>
           <div
-            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root mui-style-htyoc3-MuiPaper-root"
+            class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root mui-style-wm16xp-MuiPaper-root"
             style="--Paper-shadow: none;"
           />
         </div>
@@ -722,15 +722,15 @@ exports[`./index.stories EmptyBalance 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
       style="--Paper-shadow: none;"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-hxb3pb-MuiPaper-root-MuiCard-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-2tdm0y-MuiPaper-root-MuiCard-root"
         style="--Paper-shadow: none;"
       >
         <div
@@ -740,7 +740,7 @@ exports[`./index.stories EmptyBalance 1`] = `
             class="MuiBox-root mui-style-dzaqf9"
           >
             <div
-              class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-15l0b46-MuiPaper-root-MuiTableContainer-root"
+              class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-1uh4fgc-MuiPaper-root-MuiTableContainer-root"
               data-testid="table-container"
               style="--Paper-shadow: none;"
             >
@@ -1428,7 +1428,7 @@ exports[`./index.stories EmptyBalance 1`] = `
               </table>
             </div>
             <div
-              class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root mui-style-htyoc3-MuiPaper-root"
+              class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root mui-style-wm16xp-MuiPaper-root"
               style="--Paper-shadow: none;"
             />
           </div>
@@ -1444,15 +1444,15 @@ exports[`./index.stories WhalePortfolio 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xulk7h-MuiPaper-root"
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
       style="--Paper-shadow: none;"
     >
       <div
-        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-hxb3pb-MuiPaper-root-MuiCard-root"
+        class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-2tdm0y-MuiPaper-root-MuiCard-root"
         style="--Paper-shadow: none;"
       >
         <div
@@ -1462,7 +1462,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
             class="MuiBox-root mui-style-dzaqf9"
           >
             <div
-              class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-15l0b46-MuiPaper-root-MuiTableContainer-root"
+              class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-1uh4fgc-MuiPaper-root-MuiTableContainer-root"
               data-testid="table-container"
               style="--Paper-shadow: none;"
             >
@@ -2150,7 +2150,7 @@ exports[`./index.stories WhalePortfolio 1`] = `
               </table>
             </div>
             <div
-              class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root mui-style-htyoc3-MuiPaper-root"
+              class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiBox-root mui-style-wm16xp-MuiPaper-root"
               style="--Paper-shadow: none;"
             />
           </div>

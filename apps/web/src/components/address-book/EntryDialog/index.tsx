@@ -1,5 +1,5 @@
 import type { ReactElement, BaseSyntheticEvent } from 'react'
-import { Box, Button, DialogActions, DialogContent } from '@mui/material'
+import { Box, Button, DialogActions, DialogContent, type SxProps, type Theme } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 
 import AddressInput from '@/components/common/AddressInput'
@@ -24,12 +24,14 @@ function EntryDialog({
   disableAddressInput = false,
   chainIds,
   currentChainId,
+  sx,
 }: {
   handleClose: () => void
   defaultValues?: AddressEntry
   disableAddressInput?: boolean
   chainIds?: string[]
   currentChainId?: string
+  sx?: SxProps<Theme>
 }): ReactElement {
   const chainId = useChainId()
   const actualChainId = currentChainId ?? chainId
@@ -61,6 +63,7 @@ function EntryDialog({
       dialogTitle={defaultValues.name ? 'Edit entry' : 'Create entry'}
       hideChainIndicator={chainIds && chainIds.length > 1}
       chainId={chainIds?.[0]}
+      sx={sx}
     >
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>

@@ -21,6 +21,7 @@ import {
   txHistoryListener,
   txQueueListener,
   authListener,
+  counterfactualSyncListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
@@ -62,12 +63,15 @@ const rootReducer = combineReducers({
   [slices.pendingSafeMessagesSlice.name]: slices.pendingSafeMessagesSlice.reducer,
   [slices.batchSlice.name]: slices.batchSlice.reducer,
   [slices.undeployedSafesSlice.name]: slices.undeployedSafesSlice.reducer,
+  [slices.pendingCfDeletesSlice.name]: slices.pendingCfDeletesSlice.reducer,
   [slices.swapParamsSlice.name]: slices.swapParamsSlice.reducer,
   [slices.visitedSafesSlice.name]: slices.visitedSafesSlice.reducer,
   [slices.orderByPreferenceSlice.name]: slices.orderByPreferenceSlice.reducer,
   [slices.hnStateSlice.name]: slices.hnStateSlice.reducer,
   [slices.hnQueueAssessmentsSlice.name]: slices.hnQueueAssessmentsSlice.reducer,
   [slices.calendlySlice.name]: slices.calendlySlice.reducer,
+  [slices.globalSearchSlice.name]: slices.globalSearchSlice.reducer,
+  [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
@@ -87,6 +91,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.pendingSafeMessagesSlice.name,
   slices.batchSlice.name,
   slices.undeployedSafesSlice.name,
+  slices.pendingCfDeletesSlice.name,
   slices.swapParamsSlice.name,
   slices.swapOrderSlice.name,
   slices.visitedSafesSlice.name,
@@ -118,6 +123,7 @@ const listeners = [
   swapOrderListener,
   swapOrderStatusListener,
   authListener,
+  counterfactualSyncListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
@@ -145,8 +151,15 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
       nextState[slices.batchSlice.name] = migrateBatchTxs(nextState[slices.batchSlice.name])
     }
 
-    // Mark the store as hydrated so guards wait for persisted auth state
-    nextState.auth = { ...nextState.auth, isStoreHydrated: true }
+    // Mark the store as hydrated so guards wait for persisted auth state.
+    // Reset cfSafeSynced so consumers wait for a fresh backend sync each page load.
+    // Reset isOidcLoginPending to avoid stale state from a previous session.
+    nextState.auth = {
+      ...nextState.auth,
+      isStoreHydrated: true,
+      cfSafeSynced: false,
+      isOidcLoginPending: false,
+    }
 
     return nextState
   }

@@ -1,4 +1,4 @@
-import { SENTINEL_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import memoize from 'lodash/memoize'
 import { getMultiSendCallOnlyDeployments } from '@safe-global/safe-deployments'
 import { getChainAgnosticAddress } from '@safe-global/utils/services/contracts/deployments'
@@ -9,7 +9,7 @@ import { toBeHex, type JsonRpcProvider, type TransactionReceipt } from 'ethers'
 import { trimTrailingSlash } from '@/utils/url'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
-import { decodeMultiSendData } from '@safe-global/protocol-kit/dist/src/utils'
+import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import { multicall } from '@safe-global/utils/utils/multicall'
 
 export const MAX_RECOVERER_PAGE_SIZE = 100

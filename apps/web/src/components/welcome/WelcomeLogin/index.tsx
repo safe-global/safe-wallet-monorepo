@@ -34,7 +34,13 @@ const WelcomeLogin = () => {
 
         <Box className={css.fullWidth}>
           <Track {...OVERVIEW_EVENTS.OPEN_ONBOARD} label={OVERVIEW_LABELS.welcome_page}>
-            <WalletLogin onLogin={performAuth} onContinue={performAuth} fullWidth isLoading={loading} />
+            <WalletLogin
+              onLogin={performAuth}
+              onContinue={performAuth}
+              fullWidth
+              isLoading={loading}
+              buttonStyle="walletBtnStatic"
+            />
           </Track>
         </Box>
 

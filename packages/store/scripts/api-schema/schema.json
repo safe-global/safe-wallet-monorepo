@@ -24,6 +24,32 @@
         ]
       }
     },
+    "/v1/auth/me": {
+      "get": {
+        "description": "Returns the authenticated user session if a valid session cookie is present, 403 otherwise. The response includes the user ID, the authentication method used, and (for SIWE users) the wallet signer address.",
+        "operationId": "authGetMeV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Authenticated user session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSession"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authenticated"
+          }
+        },
+        "summary": "Get authenticated user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/v1/auth/nonce": {
       "get": {
         "description": "Generates and returns a unique nonce that must be signed by the client for authentication. The nonce is used in the Sign-In with Ethereum (SiWE) message.",
@@ -91,6 +117,128 @@
           }
         },
         "summary": "Logout user",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/logout/redirect": {
+      "post": {
+        "description": "Clears the authentication cookie and redirects the browser. For OIDC users, redirects through identity platform to clear their session cookie. For SiWe users, redirects directly to the app.",
+        "operationId": "authLogoutWithRedirectV1",
+        "parameters": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Redirects to identity platform logout (OIDC) or directly to the app."
+          },
+          "400": {
+            "description": "Invalid redirect URL"
+          }
+        },
+        "summary": "Logout (with redirect)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/oidc/authorize": {
+      "get": {
+        "description": "Redirects the browser to OIDC provider login page with a generated state value stored in an HTTP-only cookie.",
+        "operationId": "oidcAuthAuthorizeV1",
+        "parameters": [
+          {
+            "name": "redirect_url",
+            "required": false,
+            "in": "query",
+            "description": "URL to redirect to after successful login. Must be same-origin as the configured post-login redirect URI.",
+            "schema": {
+              "example": "/settings",
+              "type": "string"
+            }
+          },
+          {
+            "name": "connection",
+            "required": false,
+            "in": "query",
+            "description": "OIDC connection name to route to a specific identity provider.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to OIDC authorize endpoint"
+          }
+        },
+        "summary": "Start OIDC authorization code flow",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/v1/auth/oidc/callback": {
+      "get": {
+        "description": "Exchanges the OIDC authorization code for user information, mints the internal JWT cookie, and redirects to the provided post-login URL or a configured default one.",
+        "operationId": "oidcAuthCallbackV1",
+        "parameters": [
+          {
+            "name": "code",
+            "required": false,
+            "in": "query",
+            "description": "Authorization code returned by the OIDC provider",
+            "schema": {
+              "example": "SplxlOBeZQQYbYS6WxSbIA",
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "required": false,
+            "in": "query",
+            "description": "State parameter returned by the OIDC provider",
+            "schema": {
+              "example": "af0ifjsldkj",
+              "type": "string"
+            }
+          },
+          {
+            "name": "error",
+            "required": false,
+            "in": "query",
+            "description": "Error parameter returned by the OIDC provider",
+            "schema": {
+              "example": "access_denied",
+              "type": "string"
+            }
+          },
+          {
+            "name": "error_description",
+            "required": false,
+            "in": "query",
+            "description": "Description of the error returned by the OIDC provider (if failed)",
+            "schema": {
+              "example": "The user has denied the request",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to the post-login URL. On error, includes error query parameter."
+          }
+        },
+        "summary": "Handle OIDC authorization callback",
         "tags": [
           "auth"
         ]
@@ -279,14 +427,33 @@
             }
           },
           {
-            "name": "fiatCode",
+            "name": "sync",
             "required": false,
             "in": "query",
-            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
+            "description": "If true, waits for position data to be aggregated before responding (up to 30s)",
             "schema": {
-              "default": "USD",
-              "example": "USD",
-              "type": "string"
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "excludeDust",
+            "required": false,
+            "in": "query",
+            "description": "If true, filters out dust positions (balance < $0.001 USD)",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "If true, only returns trusted tokens",
+            "schema": {
+              "example": true,
+              "type": "boolean"
             }
           },
           {
@@ -300,36 +467,13 @@
             }
           },
           {
-            "name": "trusted",
+            "name": "fiatCode",
             "required": false,
             "in": "query",
-            "description": "If true, only returns trusted tokens",
+            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
             "schema": {
-              "default": true,
-              "example": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "excludeDust",
-            "required": false,
-            "in": "query",
-            "description": "If true, filters out dust positions (balance < $0.001 USD)",
-            "schema": {
-              "default": true,
-              "example": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "sync",
-            "required": false,
-            "in": "query",
-            "description": "If true, waits for position data to be aggregated before responding (up to 30s)",
-            "schema": {
-              "default": false,
-              "example": false,
-              "type": "boolean"
+              "example": "USD",
+              "type": "string"
             }
           }
         ],
@@ -1291,6 +1435,63 @@
         ]
       }
     },
+    "/v1/chains/{chainId}/fees/{safeAddress}/preview": {
+      "post": {
+        "description": "Calculates the estimated fees for executing a transaction via Pay with Safe, including gas costs, relay fees, and total costs in USD.",
+        "operationId": "feesGetFeePreviewV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Transaction data for fee calculation including recipient, value, data, operation type, gas token, and number of signatures",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeePreviewTransactionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fee preview with transaction data, relay cost, and pricing context",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeePreviewResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid transaction data or Pay with Safe not available for this chain"
+          }
+        },
+        "summary": "Get transaction fee preview",
+        "tags": [
+          "fees"
+        ]
+      }
+    },
     "/v1/chains/{chainId}/messages/{messageHash}": {
       "get": {
         "description": "Retrieves a specific message by its hash, including signatures, confirmations, and message content.",
@@ -1789,6 +1990,316 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/address-book/private": {
+      "get": {
+        "description": "Retrieves the authenticated user's private address book entries for a specific space.",
+        "operationId": "userAddressBookGetPrivateItemsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Private address book items retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAddressBookDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "User is not a member of this space"
+          }
+        },
+        "summary": "Get private address book",
+        "tags": [
+          "spaces"
+        ]
+      },
+      "put": {
+        "description": "Creates or updates the authenticated user's private address book entries for a space.",
+        "operationId": "userAddressBookUpsertPrivateItemsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Address book items to create or update",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertAddressBookItemsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Private address book updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAddressBookDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "User is not a member of this space or wallet authentication required"
+          }
+        },
+        "summary": "Upsert private address book entries",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/private/{address}": {
+      "delete": {
+        "description": "Removes a specific address from the user's private address book.",
+        "operationId": "userAddressBookDeletePrivateItemV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Address to remove (0x prefixed)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Private address book entry deleted successfully"
+          },
+          "403": {
+            "description": "User is not a member or wallet authentication required"
+          },
+          "404": {
+            "description": "Entry not found"
+          }
+        },
+        "summary": "Delete a private address book entry",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/requests": {
+      "get": {
+        "description": "Retrieves pending requests to add contacts to the space address book. Admins see all pending requests, members see only their own.",
+        "operationId": "addressBookRequestsGetPendingRequestsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pending requests retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressBookRequestsDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "User is not a member of this space"
+          }
+        },
+        "summary": "Get pending address book requests",
+        "tags": [
+          "spaces"
+        ]
+      },
+      "post": {
+        "description": "Creates a request to add a private contact to the shared space address book. Requires the contact to exist in the private address book first.",
+        "operationId": "addressBookRequestsCreateRequestV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Address of the private contact to request adding",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAddressBookRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Request created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressBookRequestItemDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "User is not a member or wallet authentication required"
+          },
+          "404": {
+            "description": "Private contact not found"
+          }
+        },
+        "summary": "Request to add a private contact to the space address book",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/requests/{requestId}/approve": {
+      "put": {
+        "description": "Admin approves a pending request. The contact is added to the shared space address book.",
+        "operationId": "addressBookRequestsApproveRequestV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "requestId",
+            "required": true,
+            "in": "path",
+            "description": "Request ID to approve",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request approved successfully"
+          },
+          "400": {
+            "description": "Only pending requests can be approved"
+          },
+          "403": {
+            "description": "User is not an admin or wallet authentication required"
+          },
+          "404": {
+            "description": "Request not found"
+          }
+        },
+        "summary": "Approve a pending address book request",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/requests/{requestId}/reject": {
+      "put": {
+        "description": "Admin rejects a pending request. The contact stays in the private address book.",
+        "operationId": "addressBookRequestsRejectRequestV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "requestId",
+            "required": true,
+            "in": "path",
+            "description": "Request ID to reject",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request rejected successfully"
+          },
+          "400": {
+            "description": "Only pending requests can be rejected"
+          },
+          "403": {
+            "description": "User is not an admin or wallet authentication required"
+          },
+          "404": {
+            "description": "Request not found"
+          }
+        },
+        "summary": "Reject a pending address book request",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces": {
       "post": {
         "description": "Creates a new space for the authenticated user. A space is a collaborative workspace where users can manage multiple Safes together.",
@@ -1821,9 +2332,6 @@
           },
           "403": {
             "description": "Forbidden resource - user lacks permission to create spaces"
-          },
-          "404": {
-            "description": "User not found - the authenticated wallet is not associated with any user"
           }
         },
         "summary": "Create space",
@@ -1854,9 +2362,6 @@
           },
           "403": {
             "description": "Forbidden resource - user lacks permission to view spaces"
-          },
-          "404": {
-            "description": "User not found - the authenticated wallet is not associated with any user"
           }
         },
         "summary": "Get user spaces",
@@ -1867,7 +2372,8 @@
     },
     "/v1/spaces/create-with-user": {
       "post": {
-        "description": "Creates a new space and automatically creates a user account if one does not exist for the authenticated wallet.",
+        "deprecated": true,
+        "description": "Creates a new space for the authenticated user. This endpoint is deprecated, please use POST /v1/spaces instead.",
         "operationId": "spacesCreateWithUserV1",
         "parameters": [],
         "requestBody": {
@@ -1883,7 +2389,7 @@
         },
         "responses": {
           "200": {
-            "description": "Space and user created successfully",
+            "description": "Space created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -1899,7 +2405,7 @@
             "description": "Forbidden resource - user lacks permission to create spaces"
           }
         },
-        "summary": "Create space with user",
+        "summary": "Create space with user (deprecated)",
         "tags": [
           "spaces"
         ]
@@ -1939,7 +2445,7 @@
             "description": "Forbidden resource - user is not a member of this space"
           },
           "404": {
-            "description": "Space not found or user not found"
+            "description": "Space not found"
           }
         },
         "summary": "Get space by ID",
@@ -1991,7 +2497,7 @@
             "description": "Forbidden resource - user is not an admin of this space"
           },
           "404": {
-            "description": "User or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Update space",
@@ -2025,7 +2531,7 @@
             "description": "Forbidden resource - user is not an admin of this space"
           },
           "404": {
-            "description": "User or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Delete space",
@@ -2364,19 +2870,59 @@
             "description": "Membership deleted"
           },
           "401": {
-            "description": "Signer address not provided"
+            "description": "Not authenticated"
           },
           "403": {
-            "description": "Signer not authorized"
+            "description": "User not authorized"
           },
           "404": {
-            "description": "Signer or space not found"
+            "description": "Space not found"
           },
           "409": {
             "description": "Cannot remove last admin"
           }
         },
         "summary": "Leave a space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/membership": {
+      "get": {
+        "description": "Returns the membership record of the authenticated user for the given space. Returns 403 if the caller has no ACTIVE or INVITED membership in the space.",
+        "operationId": "membersGetMembershipV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID to fetch the caller's membership for",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Membership retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "Access forbidden - user not authenticated, or has no ACTIVE/INVITED membership in this space"
+          }
+        },
+        "summary": "Get the authenticated user's membership in a space",
         "tags": [
           "spaces"
         ]
@@ -2471,10 +3017,10 @@
             "description": "Alias updated"
           },
           "403": {
-            "description": "Signer not authorized"
+            "description": "User not authorized"
           },
           "404": {
-            "description": "Signer, space or member not found"
+            "description": "Space or member not found"
           }
         },
         "summary": "Update member alias",
@@ -2527,6 +3073,130 @@
           }
         },
         "summary": "Remove member from space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/users/counterfactual-safes": {
+      "post": {
+        "description": "Stores the CREATE2 deployment parameters for one or more counterfactual (undeployed) Safes. These parameters are needed to deploy the Safe later.",
+        "operationId": "counterfactualSafesCreateV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Counterfactual Safe creation parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCounterfactualSafesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Counterfactual Safes saved successfully"
+          },
+          "401": {
+            "description": "Authentication required"
+          }
+        },
+        "summary": "Save counterfactual Safe creation parameters",
+        "tags": [
+          "counterfactual-safes"
+        ]
+      },
+      "get": {
+        "description": "Retrieves all counterfactual (undeployed) Safes for the authenticated user, grouped by chain ID.",
+        "operationId": "counterfactualSafesGetV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Counterfactual Safes retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCounterfactualSafesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          }
+        },
+        "summary": "Get counterfactual Safes",
+        "tags": [
+          "counterfactual-safes"
+        ]
+      },
+      "delete": {
+        "description": "Removes counterfactual Safe records for the authenticated user, typically after successful deployment.",
+        "operationId": "counterfactualSafesDeleteV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteCounterfactualSafesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Counterfactual Safes deleted successfully"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "404": {
+            "description": "Counterfactual Safe not found"
+          }
+        },
+        "summary": "Delete counterfactual Safes",
+        "tags": [
+          "counterfactual-safes"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/counterfactual-safes": {
+      "get": {
+        "description": "Retrieves creation parameters for all counterfactual (undeployed) Safes that are associated with a space. Uses a join between space_safes and counterfactual_safes to provide full transparency on Safe ownership and deployment parameters to all space members.",
+        "operationId": "spaceCounterfactualSafesGetV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Counterfactual Safes retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCounterfactualSafesResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required or user is not a member of this space"
+          },
+          "404": {
+            "description": "Space not found"
+          }
+        },
+        "summary": "Get counterfactual Safes in a space",
         "tags": [
           "spaces"
         ]
@@ -2786,6 +3456,15 @@
             "required": true,
             "in": "path",
             "description": "Safe contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeTxHash",
+            "required": false,
+            "in": "query",
+            "description": "Safe transaction hash (0x prefixed hex string). Required for chains enabled for relay-fee relayer",
             "schema": {
               "type": "string"
             }
@@ -4674,28 +5353,10 @@
             }
           },
           {
-            "name": "safe",
+            "name": "cursor",
             "required": false,
             "in": "query",
-            "description": "Filter by Safe address",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegate",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegate address",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegator",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegator address",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -4710,10 +5371,28 @@
             }
           },
           {
-            "name": "cursor",
+            "name": "delegator",
             "required": false,
             "in": "query",
-            "description": "Pagination cursor for retrieving the next set of results",
+            "description": "Filter by delegator address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safe",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Safe address",
             "schema": {
               "type": "string"
             }
@@ -4904,28 +5583,10 @@
             }
           },
           {
-            "name": "safe",
+            "name": "cursor",
             "required": false,
             "in": "query",
-            "description": "Filter by Safe address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegate",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegate address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegator",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegator address (0x prefixed hex string)",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -4940,10 +5601,28 @@
             }
           },
           {
-            "name": "cursor",
+            "name": "delegator",
             "required": false,
             "in": "query",
-            "description": "Pagination cursor for retrieving the next set of results",
+            "description": "Filter by delegator address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safe",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Safe address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -5424,6 +6103,33 @@
           "name"
         ]
       },
+      "UserSession": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "authMethod": {
+            "type": "string",
+            "enum": [
+              "siwe",
+              "oidc"
+            ]
+          },
+          "signerAddress": {
+            "type": "string",
+            "description": "Wallet signer address. Present only for SIWE-authenticated users."
+          },
+          "email": {
+            "type": "string",
+            "description": "Verified email address. Present only for OIDC-authenticated users when stored."
+          }
+        },
+        "required": [
+          "id",
+          "authMethod"
+        ]
+      },
       "AuthNonce": {
         "type": "object",
         "properties": {
@@ -5449,6 +6155,15 @@
           "message",
           "signature"
         ]
+      },
+      "LogoutDto": {
+        "type": "object",
+        "properties": {
+          "redirect_url": {
+            "type": "string",
+            "description": "Post-logout redirect URL (must be same-origin as pre-configured URL)"
+          }
+        }
       },
       "NativeToken": {
         "type": "object",
@@ -6224,47 +6939,6 @@
           "enabled"
         ]
       },
-      "ContractAddresses": {
-        "type": "object",
-        "properties": {
-          "safeSingletonAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "safeProxyFactoryAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "multiSendAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "multiSendCallOnlyAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "fallbackHandlerAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "signMessageLibAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "createCallAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "simulateTxAccessorAddress": {
-            "type": "string",
-            "nullable": true
-          },
-          "safeWebAuthnSignerFactoryAddress": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
       "RpcUri": {
         "type": "object",
         "properties": {
@@ -6350,9 +7024,6 @@
           "balancesProvider": {
             "$ref": "#/components/schemas/BalancesProvider"
           },
-          "contractAddresses": {
-            "$ref": "#/components/schemas/ContractAddresses"
-          },
           "features": {
             "type": "array",
             "items": {
@@ -6408,7 +7079,6 @@
           "beaconChainExplorerUriTemplate",
           "disabledWallets",
           "balancesProvider",
-          "contractAddresses",
           "features",
           "gasPrice",
           "publicRpcUri",
@@ -7344,6 +8014,186 @@
           "safeTxGas"
         ]
       },
+      "FeePreviewTransactionDto": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "operation": {
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
+          },
+          "gasToken": {
+            "type": "string",
+            "description": "Gas token address (0x0...0 for native token)",
+            "example": "0x0000000000000000000000000000000000000000"
+          },
+          "numberSignatures": {
+            "type": "number",
+            "description": "Number of signatures required for execution",
+            "example": 2,
+            "minimum": 1
+          },
+          "fiatCode": {
+            "type": "string",
+            "description": "Fiat currency code for relay cost conversion (e.g. EUR, GBP). Defaults to USD.",
+            "example": "EUR"
+          }
+        },
+        "required": [
+          "to",
+          "value",
+          "data",
+          "operation",
+          "gasToken",
+          "numberSignatures"
+        ]
+      },
+      "FeePreviewTxData": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "number",
+            "description": "Chain ID",
+            "example": 1
+          },
+          "safeAddress": {
+            "type": "string",
+            "description": "Safe address",
+            "example": "0x..."
+          },
+          "safeTxGas": {
+            "type": "string",
+            "description": "Safe transaction gas",
+            "example": "150000"
+          },
+          "baseGas": {
+            "type": "string",
+            "description": "Base gas for relay overhead",
+            "example": "48564"
+          },
+          "gasPrice": {
+            "type": "string",
+            "description": "Gas price per gas unit. Denominated in wei when `gasToken` is the native token (zero address), or in the ERC20 gas token atomic units per gas otherwise",
+            "example": "195000000000000"
+          },
+          "gasToken": {
+            "type": "string",
+            "description": "Gas token address",
+            "example": "0x0000000000000000000000000000000000000000"
+          },
+          "refundReceiver": {
+            "type": "string",
+            "description": "Refund receiver address",
+            "example": "0x0000000000000000000000000000000000000000"
+          },
+          "numberSignatures": {
+            "type": "number",
+            "description": "Number of signatures",
+            "example": 2
+          }
+        },
+        "required": [
+          "chainId",
+          "safeAddress",
+          "safeTxGas",
+          "baseGas",
+          "gasPrice",
+          "gasToken",
+          "refundReceiver",
+          "numberSignatures"
+        ]
+      },
+      "FeePreviewRelayCost": {
+        "type": "object",
+        "properties": {
+          "fiatCode": {
+            "type": "string",
+            "description": "Fiat currency code",
+            "example": "USD"
+          },
+          "fiatValue": {
+            "type": "string",
+            "description": "Relay cost as a string",
+            "example": "0.0025"
+          }
+        },
+        "required": [
+          "fiatCode",
+          "fiatValue"
+        ]
+      },
+      "PriceSource": {
+        "type": "string",
+        "enum": [
+          "COINGECKO"
+        ],
+        "description": "Price data source"
+      },
+      "FeePreviewPricingContext": {
+        "type": "object",
+        "properties": {
+          "phase": {
+            "type": "number",
+            "description": "Pricing phase"
+          },
+          "priceSource": {
+            "description": "Price data source",
+            "example": "COINGECKO",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PriceSource"
+              }
+            ]
+          },
+          "priceTimestamp": {
+            "type": "number",
+            "description": "Price snapshot Unix timestamp",
+            "example": 1700000000
+          },
+          "gasPriceVolatilityBuffer": {
+            "type": "number",
+            "description": "Gas price volatility buffer multiplier",
+            "example": 1.3
+          }
+        },
+        "required": [
+          "phase",
+          "priceSource",
+          "priceTimestamp",
+          "gasPriceVolatilityBuffer"
+        ]
+      },
+      "FeePreviewResponse": {
+        "type": "object",
+        "properties": {
+          "txData": {
+            "$ref": "#/components/schemas/FeePreviewTxData"
+          },
+          "relayCost": {
+            "$ref": "#/components/schemas/FeePreviewRelayCost"
+          },
+          "pricingContextSnapshot": {
+            "$ref": "#/components/schemas/FeePreviewPricingContext"
+          }
+        },
+        "required": [
+          "txData",
+          "relayCost",
+          "pricingContextSnapshot"
+        ]
+      },
       "TypedDataParameter": {
         "type": "object",
         "properties": {
@@ -7768,9 +8618,27 @@
             }
           },
           "createdBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Email or wallet address of the creator, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "createdByUserId": {
+            "type": "number",
+            "description": "User ID of the creator"
           },
           "lastUpdatedBy": {
+            "type": "string",
+            "description": "Email or wallet address of the last editor, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "lastUpdatedByUserId": {
+            "type": "number",
+            "description": "User ID of the last editor"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
             "type": "string"
           }
         },
@@ -7779,7 +8647,11 @@
           "address",
           "chainIds",
           "createdBy",
-          "lastUpdatedBy"
+          "createdByUserId",
+          "lastUpdatedBy",
+          "lastUpdatedByUserId",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "SpaceAddressBookDto": {
@@ -7836,6 +8708,137 @@
           "items"
         ]
       },
+      "UserAddressBookItemDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "object"
+          },
+          "updatedAt": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "name",
+          "address",
+          "chainIds",
+          "createdBy",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UserAddressBookDto": {
+        "type": "object",
+        "properties": {
+          "spaceId": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserAddressBookItemDto"
+            }
+          }
+        },
+        "required": [
+          "spaceId",
+          "data"
+        ]
+      },
+      "AddressBookRequestItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "requestedBy": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "APPROVED",
+              "REJECTED"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "address",
+          "chainIds",
+          "requestedBy",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AddressBookRequestsDto": {
+        "type": "object",
+        "properties": {
+          "spaceId": {
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressBookRequestItemDto"
+            }
+          }
+        },
+        "required": [
+          "spaceId",
+          "data"
+        ]
+      },
+      "CreateAddressBookRequestDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Address of the private contact to request adding to space"
+          }
+        },
+        "required": [
+          "address"
+        ]
+      },
       "CreateSpaceDto": {
         "type": "object",
         "properties": {
@@ -7873,7 +8876,7 @@
           "id"
         ]
       },
-      "MemberDto": {
+      "SpaceMemberDto": {
         "type": "object",
         "properties": {
           "role": {
@@ -7921,7 +8924,7 @@
           "members": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MemberDto"
+              "$ref": "#/components/schemas/SpaceMemberDto"
             }
           },
           "safeCount": {
@@ -8131,14 +9134,19 @@
               "PENDING",
               "ACTIVE"
             ]
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
           "id",
-          "status"
+          "status",
+          "email"
         ]
       },
-      "Member": {
+      "MemberDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -8198,7 +9206,7 @@
           "members": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Member"
+              "$ref": "#/components/schemas/MemberDto"
             }
           }
         },
@@ -8233,6 +9241,220 @@
           "alias"
         ]
       },
+      "CounterfactualSafeDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "factoryAddress": {
+            "type": "string"
+          },
+          "masterCopy": {
+            "type": "string"
+          },
+          "saltNonce": {
+            "type": "string"
+          },
+          "safeVersion": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fallbackHandler": {
+            "type": "string",
+            "nullable": true
+          },
+          "to": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "type": "string"
+          },
+          "paymentToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "payment": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentReceiver": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "chainId",
+          "address",
+          "factoryAddress",
+          "masterCopy",
+          "saltNonce",
+          "safeVersion",
+          "threshold",
+          "owners",
+          "data"
+        ]
+      },
+      "CreateCounterfactualSafesDto": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CounterfactualSafeDto"
+            }
+          }
+        },
+        "required": [
+          "safes"
+        ]
+      },
+      "GetCounterfactualSafeItem": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "factoryAddress": {
+            "type": "string"
+          },
+          "masterCopy": {
+            "type": "string"
+          },
+          "saltNonce": {
+            "type": "string"
+          },
+          "safeVersion": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fallbackHandler": {
+            "type": "string",
+            "nullable": true
+          },
+          "to": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "type": "string"
+          },
+          "paymentToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "payment": {
+            "type": "string",
+            "nullable": true
+          },
+          "paymentReceiver": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "address",
+          "factoryAddress",
+          "masterCopy",
+          "saltNonce",
+          "safeVersion",
+          "threshold",
+          "owners",
+          "fallbackHandler",
+          "to",
+          "data",
+          "paymentToken",
+          "payment",
+          "paymentReceiver"
+        ]
+      },
+      "GetCounterfactualSafesResponse": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/GetCounterfactualSafeItem"
+              }
+            },
+            "example": {
+              "{chainId}": [
+                {
+                  "address": "0x...",
+                  "factoryAddress": "0x...",
+                  "masterCopy": "0x...",
+                  "saltNonce": "1712000000000",
+                  "safeVersion": "1.4.1",
+                  "threshold": 1,
+                  "owners": [
+                    "0x..."
+                  ],
+                  "fallbackHandler": "0x...",
+                  "to": null,
+                  "data": "0x...",
+                  "paymentToken": null,
+                  "payment": null,
+                  "paymentReceiver": null
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "safes"
+        ]
+      },
+      "DeleteCounterfactualSafeDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "address"
+        ]
+      },
+      "DeleteCounterfactualSafesDto": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeleteCounterfactualSafeDto"
+            }
+          }
+        },
+        "required": [
+          "safes"
+        ]
+      },
       "SafeList": {
         "type": "object",
         "properties": {
@@ -8263,6 +9485,10 @@
             "type": "string",
             "nullable": true,
             "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider (Gelato)."
+          },
+          "safeTxHash": {
+            "type": "string",
+            "description": "Safe transaction hash for relay-fee eligibility check"
           }
         },
         "required": [
@@ -11480,6 +12706,12 @@
           "gasToken": {
             "type": "string"
           },
+          "fee": {
+            "type": "string"
+          },
+          "payment": {
+            "type": "string"
+          },
           "refundReceiver": {
             "$ref": "#/components/schemas/AddressInfo"
           },
@@ -11557,6 +12789,8 @@
           "baseGas",
           "gasPrice",
           "gasToken",
+          "fee",
+          "payment",
           "refundReceiver",
           "safeTxHash",
           "signers",
@@ -11807,6 +13041,9 @@
           "fee": {
             "type": "object"
           },
+          "payment": {
+            "type": "object"
+          },
           "origin": {
             "type": "object"
           },
@@ -11849,6 +13086,7 @@
           "ethGasPrice",
           "gasUsed",
           "fee",
+          "payment",
           "origin",
           "confirmationsRequired",
           "confirmations",

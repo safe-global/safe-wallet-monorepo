@@ -172,8 +172,7 @@ export function verifyTooltiptext(text) {
 }
 
 export function clickOnWalletExpandMoreIcon() {
-  cy.get(expandMoreIcon).eq(0).click({ force: true })
-  cy.get(sentinelStart).next().should('be.visible')
+  cy.get('[data-testid="open-account-center"]').click()
 }
 
 export function clickOnDisconnectBtn() {
@@ -277,4 +276,10 @@ export function clickOnThresholdNextBtn() {
   //TODO: Remove extra wait when init sdk is merged
   cy.wait(3000)
   cy.get(thresholdNextBtn).click()
+}
+
+export function verifyInconsistentSignersWarning(network) {
+  cy.contains(
+    `Signers are not consistent across networks on this account. Changing signers will only affect the account on ${network}`,
+  ).should('exist')
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent } from '@/src/tests/test-utils'
+import { render, screen, fireEvent, waitFor } from '@/src/tests/test-utils'
 import { MyAccountsContainer } from './MyAccounts.container'
 import { mockedChains } from '@/src/store/constants'
 import { server } from '@/src/tests/server'
@@ -78,10 +78,13 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
 
 describe('MyAccountsContainer', () => {
   const mockOnClose = jest.fn()
+  let safesParams: URLSearchParams[] = []
 
   beforeEach(() => {
+    safesParams = []
     server.use(
-      http.get(`${GATEWAY_URL}/v2/safes`, () => {
+      http.get(`${GATEWAY_URL}/v2/safes`, ({ request }) => {
+        safesParams.push(new URL(request.url).searchParams)
         return HttpResponse.json([
           {
             address: { value: '0x123', name: 'Test Safe' },
@@ -99,6 +102,22 @@ describe('MyAccountsContainer', () => {
   afterEach(() => {
     jest.clearAllMocks()
     server.resetHandlers()
+  })
+
+  it('only refreshes balances for the safe’s known chains (no implicit discovery probe)', async () => {
+    render(<MyAccountsContainer item={mockSafeItem} onClose={mockOnClose} />, {
+      initialStore: {
+        safes: {
+          [mockSafeAddress]: mockSafeItem.info,
+        },
+      },
+    })
+
+    // The mocked safe is known on a single chain — '1'. The request must reflect that,
+    // not the entire system chain list (which is what the old per-row probe sent).
+    await waitFor(() => expect(safesParams.length).toBeGreaterThan(0))
+    const probedSafes = safesParams[0].get('safes') ?? ''
+    expect(probedSafes.split(',')).toEqual([`1:${mockSafeAddress}`])
   })
 
   it('renders account item with correct data but no contact exists in address book', () => {

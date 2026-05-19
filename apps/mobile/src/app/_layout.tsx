@@ -37,8 +37,7 @@ import { SigningMonitor } from '@/src/components/SigningMonitor'
 import { ExecutingMonitor } from '@/src/components/ExecutingMonitor'
 import { useDatadogConsent } from '@/src/hooks/useDatadogConsent'
 import { DatadogWrapper } from '@/src/providers/DatadogWrapper'
-import { AppKit, AppKitProvider } from '@reown/appkit-react-native'
-import { appKit } from '@/src/config/appKit'
+import { AppKitInitializer } from '@/src/features/WalletConnect/components/AppKitInitializer'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -146,11 +145,11 @@ function RootLayout() {
       <GestureHandlerRootView>
         <KeyboardProvider>
           <Provider store={store}>
-            <AppKitProvider instance={appKit}>
-              <DataFetchProvider>
-                <NotificationsProvider>
-                  <PortalProvider shouldAddRootHost>
-                    <PersistGate loading={null} persistor={persistor}>
+            <DataFetchProvider>
+              <NotificationsProvider>
+                <PortalProvider shouldAddRootHost>
+                  <PersistGate loading={null} persistor={persistor}>
+                    <AppKitInitializer>
                       <SafeThemeProvider>
                         <BottomSheetModalProvider>
                           <SafeToastProvider>
@@ -165,12 +164,11 @@ function RootLayout() {
                           </SafeToastProvider>
                         </BottomSheetModalProvider>
                       </SafeThemeProvider>
-                      <AppKit />
-                    </PersistGate>
-                  </PortalProvider>
-                </NotificationsProvider>
-              </DataFetchProvider>
-            </AppKitProvider>
+                    </AppKitInitializer>
+                  </PersistGate>
+                </PortalProvider>
+              </NotificationsProvider>
+            </DataFetchProvider>
           </Provider>
         </KeyboardProvider>
       </GestureHandlerRootView>

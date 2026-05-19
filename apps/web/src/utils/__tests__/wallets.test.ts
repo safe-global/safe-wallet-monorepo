@@ -1,5 +1,5 @@
 import { type JsonRpcProvider, toBeHex } from 'ethers'
-import { EMPTY_DATA } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { EMPTY_DATA } from '@safe-global/utils/utils/constants'
 
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import {

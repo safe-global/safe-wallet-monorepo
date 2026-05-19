@@ -31,7 +31,7 @@ jobs:
         containers: [1, 2, 3, 4, 5]
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
         with:
           fetch-depth: 0
 
@@ -49,7 +49,7 @@ jobs:
     permissions: {}
     steps:
       - name: Notify Slack on failure
-        uses: slackapi/slack-github-action@v2.1.1
+        uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_DEV_ALERT }}
           webhook-type: incoming-webhook

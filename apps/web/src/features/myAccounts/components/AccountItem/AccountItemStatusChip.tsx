@@ -12,6 +12,7 @@ export interface AccountItemStatusChipProps {
 
 const ActivationChip = ({ isActivating }: { isActivating: boolean }) => (
   <Chip
+    data-testid="pending-activation-chip"
     className={css.chip}
     sx={{
       backgroundColor: isActivating ? 'var(--color-info-light)' : 'var(--color-warning-background)',

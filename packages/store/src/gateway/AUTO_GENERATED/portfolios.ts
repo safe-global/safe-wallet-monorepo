@@ -10,11 +10,11 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/portfolio/${queryArg.address}`,
           params: {
-            fiatCode: queryArg.fiatCode,
-            chainIds: queryArg.chainIds,
-            trusted: queryArg.trusted,
-            excludeDust: queryArg.excludeDust,
             sync: queryArg.sync,
+            excludeDust: queryArg.excludeDust,
+            trusted: queryArg.trusted,
+            chainIds: queryArg.chainIds,
+            fiatCode: queryArg.fiatCode,
           },
         }),
         providesTags: ['portfolio'],
@@ -31,16 +31,16 @@ export type PortfolioGetPortfolioV1ApiResponse = /** status 200  */ Portfolio
 export type PortfolioGetPortfolioV1ApiArg = {
   /** Wallet address (0x prefixed hex string) */
   address: string
-  /** Fiat currency code for balance conversion (e.g., USD, EUR) */
-  fiatCode?: string
-  /** Comma-separated list of chain IDs to filter by. If omitted, returns data for all chains. */
-  chainIds?: string
-  /** If true, only returns trusted tokens */
-  trusted?: boolean
-  /** If true, filters out dust positions (balance < $0.001 USD) */
-  excludeDust?: boolean
   /** If true, waits for position data to be aggregated before responding (up to 30s) */
   sync?: boolean
+  /** If true, filters out dust positions (balance < $0.001 USD) */
+  excludeDust?: boolean
+  /** If true, only returns trusted tokens */
+  trusted?: boolean
+  /** Comma-separated list of chain IDs to filter by. If omitted, returns data for all chains. */
+  chainIds?: string
+  /** Fiat currency code for balance conversion (e.g., USD, EUR) */
+  fiatCode?: string
 }
 export type PortfolioClearPortfolioV1ApiResponse = unknown
 export type PortfolioClearPortfolioV1ApiArg = {

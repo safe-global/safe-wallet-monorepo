@@ -108,13 +108,19 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
     try {
       setIsSubmitting(true)
-      trackEvent({ ...SPACE_EVENTS.ADD_MEMBER, label: spaceId }, { spaceId })
       const response = await inviteMembers({
         spaceId: Number(spaceId),
         inviteUsersDto: { users: [{ address: data.address, role: data.role, name: data.name }] },
       })
 
       if (response.data) {
+        response.data.forEach((invitation) => {
+          trackEvent(
+            { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: spaceId },
+            { workspace_id: spaceId, user_id: invitation.userId, role: invitation.role.toLowerCase() },
+          )
+        })
+
         if (router.pathname !== AppRoutes.spaces.members) {
           router.push({ pathname: AppRoutes.spaces.members, query: { spaceId } })
         }

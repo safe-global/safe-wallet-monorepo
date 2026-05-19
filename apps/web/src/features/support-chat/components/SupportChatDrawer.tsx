@@ -229,30 +229,29 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
   if (!open) return null
 
   return (
-    <Box
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
-      sx={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 1300,
-        pointerEvents: 'none',
-      }}
-    >
+    <>
+      <Box
+        aria-hidden
+        onClick={onClose}
+        sx={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 1300,
+          bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.2)'),
+        }}
+      />
       <Box
         sx={{
           position: 'fixed',
           bottom: { xs: 0, sm: 72 },
-          right: { xs: 0, sm: 24 },
+          left: { xs: 0, sm: 24 },
           width: { xs: '100vw', sm: chatWidth },
           maxWidth: { xs: '100vw', sm: chatWidth },
           height: { xs: '100vh', sm: 'auto' },
           maxHeight: { xs: '100vh', sm: 'calc(100vh - 88px)' },
-          zIndex: 1300,
-          pointerEvents: 'auto',
+          zIndex: 1301,
           animation: 'supportChatOpen 150ms ease-out',
-          transformOrigin: 'bottom right',
+          transformOrigin: 'bottom left',
           '@keyframes supportChatOpen': {
             from: { opacity: 0, transform: 'scale(0.95) translateY(8px)' },
             to: { opacity: 1, transform: 'scale(1) translateY(0)' },
@@ -272,7 +271,7 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
             borderRadius: showPlaceholder ? { xs: 0, sm: 2 } : 0,
             overflow: 'visible',
             boxShadow: showPlaceholder ? { xs: 'none', sm: 8 } : 'none',
-            alignSelf: 'flex-end',
+            alignSelf: 'flex-start',
             flexShrink: 0,
             transition: 'background-color 120ms ease, box-shadow 120ms ease',
           }}
@@ -343,7 +342,7 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
           )}
         </Box>
       </Box>
-    </Box>
+    </>
   )
 }
 

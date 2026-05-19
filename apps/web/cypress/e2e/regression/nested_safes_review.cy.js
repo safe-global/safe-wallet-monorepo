@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as sideBar from '../pages/sidebar.pages.js'
+import * as safeNav from '../pages/safe_navigation.pages.js'
 import * as ls from '../../support/localstorage_data.js'
 import * as nsafes from '../pages/nestedsafes.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -23,7 +24,7 @@ describe('Nested safes review step tests', () => {
     main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__addedSafes, ls.addedSafes.nestedParentSafe45)
     cy.reload()
     wallet.connectSigner(signer)
-    sideBar.clickOnOpenNestedSafeListBtn()
+    safeNav.clickOnNestedSafesBtn()
     // This safe has no existing nested safes, so no intro screen - just click add
     nsafes.clickOnAddNestedSafeBtn()
   })

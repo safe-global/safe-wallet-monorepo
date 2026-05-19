@@ -45,7 +45,7 @@ const OverviewWidget = ({ safeName, networks }: { safeName: string; networks: Ch
             <Typography variant="body2" color="border.main" textAlign="center" width={1} mb={1}>
               Connect your wallet to continue
             </Typography>
-            <ConnectWalletButton />
+            <ConnectWalletButton fullWidth />
           </Box>
         )}
       </Card>

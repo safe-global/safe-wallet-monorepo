@@ -266,6 +266,61 @@ describe('useFlowActivationGuard', () => {
 
       expect(guardResult).toEqual({ success: true })
     })
+
+    it('should preserve ?safe= in the welcome/spaces redirect when unauthenticated on a spaces path', async () => {
+      setupMocks({
+        pathname: AppRoutes.spaces.createSpace,
+        query: { safe: '1:0xdeadbeef' },
+        wallet: { address: '0x123' },
+        walletContext: { isReady: true },
+        isStoreHydrated: true,
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef`,
+      })
+    })
+
+    it('should preserve ?safe= in the welcome redirect when unauthenticated on a non-spaces route', async () => {
+      setupMocks({
+        pathname: '/other',
+        query: { safe: '5:0xcafe' },
+        wallet: { address: '0x123' },
+        walletContext: { isReady: true },
+        isStoreHydrated: true,
+        isAuthenticated: false,
+        isSpaceRoute: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.index}?safe=5%3A0xcafe`,
+      })
+    })
+
+    it('should not append ?safe= when safe query param is not a string', async () => {
+      setupMocks({
+        pathname: AppRoutes.spaces.createSpace,
+        query: { safe: ['a', 'b'] } as unknown as Record<string, string>,
+        wallet: { address: '0x123' },
+        walletContext: { isReady: true },
+        isStoreHydrated: true,
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+    })
   })
 
   // -----------------------------------------------------------------------
@@ -303,6 +358,40 @@ describe('useFlowActivationGuard', () => {
 
       expect(guardResult).toEqual({ success: true })
     })
+
+    it('should preserve ?safe= when redirecting to create space onboarding', async () => {
+      setupMocks({
+        pathname: AppRoutes.spaces.createSpace,
+        query: { safe: '1:0xdeadbeef' },
+        spaces: [],
+        isSpaceRoute: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.createSpace}?safe=1%3A0xdeadbeef`,
+      })
+    })
+
+    it('should not append ?safe= to onboarding redirect when safe param is absent', async () => {
+      setupMocks({
+        pathname: AppRoutes.spaces.createSpace,
+        query: {},
+        spaces: [],
+        isSpaceRoute: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: AppRoutes.welcome.createSpace,
+      })
+    })
   })
 
   // -----------------------------------------------------------------------
@@ -321,6 +410,22 @@ describe('useFlowActivationGuard', () => {
       const guardResult = await result.current.activationGuard()
 
       expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.spaces.createSpace })
+    })
+
+    it('should preserve ?safe= when redirecting to spaces create page', async () => {
+      setupMocks({
+        pathname: AppRoutes.welcome.createSpace,
+        query: { safe: '1:0xdeadbeef' },
+        spaces: defaultSpaces,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.spaces.createSpace}?safe=1%3A0xdeadbeef`,
+      })
     })
 
     it('should allow onboarding route when spaceId is present', async () => {

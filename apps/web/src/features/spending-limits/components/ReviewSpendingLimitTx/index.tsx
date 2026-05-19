@@ -8,7 +8,7 @@ import useBalances from '@/hooks/useBalances'
 import useSpendingLimit from '../../hooks/useSpendingLimit'
 import useSpendingLimitGas from '../../hooks/useSpendingLimitGas'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
-import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -124,7 +124,7 @@ const ReviewSpendingLimitTx = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <TxCard sx={{ mt: 0 }}>
+      <TxCard sx={{ mt: 0, borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
         <Typography variant="body2">
           Spending limit transactions only appear in the interface once they are successfully processed and indexed.
           Pending transactions can only be viewed in your signer wallet application or under your wallet address on a

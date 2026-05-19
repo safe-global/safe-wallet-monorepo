@@ -61,7 +61,7 @@ const SingleTxDecoded = ({
   }
 
   return (
-    <Accordion variant={variant} expanded={expanded} onChange={onChange}>
+    <Accordion data-testid="action-accordion" variant={variant} expanded={expanded} onChange={onChange}>
       <AccordionSummary data-testid="action-item" expandIcon={<ExpandMoreIcon />} className={accordionCss.accordion}>
         <div className={css.summary}>
           <CodeIcon color="border" fontSize="small" />

@@ -14,7 +14,7 @@ const config: ConfigFile = {
       filterEndpoints: [/^about/],
     },
     '../src/gateway/AUTO_GENERATED/auth.ts': {
-      filterEndpoints: [/^auth/],
+      filterEndpoints: [/^(auth|oidcAuth)/],
     },
     '../src/gateway/AUTO_GENERATED/balances.ts': {
       filterEndpoints: [/^balances/],
@@ -71,7 +71,10 @@ const config: ConfigFile = {
       filterEndpoints: [/^users/],
     },
     '../src/gateway/AUTO_GENERATED/spaces.ts': {
-      filterEndpoints: [/^(spaces|members|spaceSafes|addressBooks)/],
+      filterEndpoints: [/^(spaces|members|spaceSafes|spaceCounterfactualSafes|addressBook|userAddressBook)/],
+    },
+    '../src/gateway/AUTO_GENERATED/counterfactual-safes.ts': {
+      filterEndpoints: [/^counterfactualSafes/],
     },
     '../src/gateway/AUTO_GENERATED/positions.ts': {
       filterEndpoints: [/^positions/],

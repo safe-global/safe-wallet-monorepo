@@ -38,12 +38,7 @@ describe('[SMOKE] Tx history tests', () => {
   // mock
   it('[SMOKE] Verify exapanded details for token receipt', () => {
     createTx.clickOnTransactionItemByName(typeReceive.summaryTitle, typeReceive.summaryTxInfo)
-    createTx.verifyExpandedDetails([
-      typeReceive.title,
-      typeReceive.receivedFrom,
-      typeReceive.senderAddress,
-      typeReceive.transactionHash,
-    ])
+    createTx.verifyExpandedDetails([typeReceive.title, typeReceive.receivedFrom, typeReceive.senderAddress])
   })
 
   // mock

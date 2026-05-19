@@ -30,10 +30,22 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_BOT_TOKEN }}
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_tag_gpgsign: true
+          git_config_global: true
+          git_committer_name: 'github-actions[bot]'
+          git_committer_email: 'github-actions[bot]@users.noreply.github.com'
 
       - name: Verify PR commits are in main
         if: github.event.pull_request.merged != true
@@ -56,7 +68,7 @@ jobs:
 
       - name: Create a git tag
         if: steps.version.outputs.version
-        run: git tag ${{ steps.version.outputs.version }} && git push --tags
+        run: git tag -s ${{ steps.version.outputs.version }} -m "${{ steps.version.outputs.version }}" && git push --tags
 
       - name: Trigger Docker Hub release
         if: steps.version.outputs.version
@@ -94,14 +106,14 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
         with:
           ref: main
           fetch-depth: 0
 
       - name: Create GitHub release (draft)
         if: needs.tag.outputs.version
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         id: create_release
         with:
           draft: true
@@ -132,7 +144,7 @@ jobs:
         working-directory: apps/web
 
       - name: Generate artifact attestation
-        uses: actions/attest@v4
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
           subject-path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 
@@ -141,19 +153,19 @@ jobs:
         working-directory: apps/web
 
       - name: Upload archive as release asset
-        uses: shogo82148/actions-upload-release-asset@v1
+        uses: shogo82148/actions-upload-release-asset@ee2ae851dc5d938b90075b3ef12c540abfd1ee72 # v1.10.1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 
       - name: Upload checksum as release asset
-        uses: shogo82148/actions-upload-release-asset@v1
+        uses: shogo82148/actions-upload-release-asset@ee2ae851dc5d938b90075b3ef12c540abfd1ee72 # v1.10.1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}

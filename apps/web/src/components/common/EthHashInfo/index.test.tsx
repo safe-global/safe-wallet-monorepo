@@ -48,7 +48,11 @@ describe('EthHashInfo', () => {
       chainIds: [MOCK_CHAIN_ID],
       address: MOCK_SAFE_ADDRESS,
       createdBy: '0x123',
+      createdByUserId: 0,
       lastUpdatedBy: '0x123',
+      lastUpdatedByUserId: 0,
+      createdAt: '',
+      updatedAt: '',
       source: ContactSource.local,
     }))
 

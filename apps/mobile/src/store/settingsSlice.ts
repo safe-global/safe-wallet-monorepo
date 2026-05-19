@@ -4,6 +4,7 @@ import { RootState } from '.'
 import merge from 'lodash/merge'
 
 import type { EnvState } from '@safe-global/store/settingsSlice'
+import { resetE2EState } from './resetE2EState'
 
 export enum TOKEN_LISTS {
   TRUSTED = 'TRUSTED',
@@ -18,6 +19,7 @@ export interface SettingsState {
   hideDust: boolean
   preferFiatInput: boolean
   dataCollectionConsented: boolean
+  screenProtectionDisabled: boolean
   env: EnvState
 }
 
@@ -29,6 +31,7 @@ const initialState: SettingsState = {
   hideDust: true,
   preferFiatInput: true,
   dataCollectionConsented: false,
+  screenProtectionDisabled: false,
   env: {
     rpc: {},
     tenderly: {
@@ -63,6 +66,9 @@ const settingsSlice = createSlice({
     setDataCollectionConsented: (state, { payload }: PayloadAction<boolean>) => {
       state.dataCollectionConsented = payload
     },
+    setScreenProtectionDisabled: (state, { payload }: PayloadAction<boolean>) => {
+      state.screenProtectionDisabled = payload
+    },
     setRpc: (state, { payload }: PayloadAction<{ chainId: string; rpc: string }>) => {
       const { chainId, rpc } = payload
       if (rpc) {
@@ -75,6 +81,16 @@ const settingsSlice = createSlice({
     setTenderly: (state, { payload }: PayloadAction<EnvState['tenderly']>) => {
       state.env.tenderly = merge({}, state.env.tenderly, payload)
     },
+  },
+  extraReducers: (builder) => {
+    // E2E reset preserves `onboardingVersionSeen` so setup paths that skip
+    // setupBaseConfig don't accidentally surface the onboarding screen.
+    // Everything else is reset so per-test settings (theme/currency/RPC etc.)
+    // don't leak across the suite.
+    builder.addCase(resetE2EState, (state) => ({
+      ...initialState,
+      onboardingVersionSeen: state.onboardingVersionSeen,
+    }))
   },
 })
 
@@ -106,6 +122,11 @@ export const selectRpc = createSelector(selectSettingsState, (settings) => {
 
 export const selectTenderly = createSelector(selectSettingsState, (settings) => settings?.env?.tenderly)
 
+export const selectScreenProtectionDisabled = createSelector(
+  selectSettingsState,
+  (settings) => settings.screenProtectionDisabled ?? false,
+)
+
 export const {
   updateSettings,
   resetSettings,
@@ -114,5 +135,6 @@ export const {
   setHideDust,
   setPreferFiatInput,
   setDataCollectionConsented,
+  setScreenProtectionDisabled,
 } = settingsSlice.actions
 export default settingsSlice.reducer

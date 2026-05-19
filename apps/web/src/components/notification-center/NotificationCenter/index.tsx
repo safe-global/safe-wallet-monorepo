@@ -1,7 +1,6 @@
 import { useState, useMemo, type ReactElement, type MouseEvent } from 'react'
 import ButtonBase from '@mui/material/ButtonBase'
 import Popover from '@mui/material/Popover'
-import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import MuiLink from '@mui/material/Link'
@@ -144,71 +143,70 @@ const NotificationCenter = (): ReactElement => {
           },
         }}
         transitionDuration={0}
+        slotProps={{ paper: { className: css.popoverContainer } }}
       >
-        <Paper className={css.popoverContainer}>
-          <div className={css.popoverHeader}>
-            <div>
-              <Typography data-testid="notifications-title" variant="h4" component="span" fontWeight={700}>
-                Notifications
-              </Typography>
-              {hasUnread && (
-                <Typography variant="caption" className={css.unreadCount}>
-                  {unreadCount}
-                </Typography>
-              )}
-            </div>
-            {notifications.length > 0 && (
-              <MuiLink onClick={handleClear} variant="body2" component="button" sx={{ textDecoration: 'unset' }}>
-                Clear all
-              </MuiLink>
-            )}
-          </div>
-
+        <div className={css.popoverHeader}>
           <div>
-            <NotificationCenterList notifications={notificationsToShow} handleClose={handleClose} />
-          </div>
-
-          <div className={css.popoverFooter}>
-            {canExpand && (
-              <>
-                <IconButton onClick={() => setShowAll((prev) => !prev)} disableRipple className={css.expandButton}>
-                  <UnreadBadge
-                    invisible={showAll || unreadCount <= NOTIFICATION_CENTER_LIMIT}
-                    anchorOrigin={{
-                      vertical: 'top',
-                      horizontal: 'left',
-                    }}
-                  >
-                    <ExpandIcon color="border" />
-                  </UnreadBadge>
-                </IconButton>
-                <Typography sx={{ color: ({ palette }) => palette.border.main }}>
-                  {showAll ? 'Hide' : `${notifications.length - NOTIFICATION_CENTER_LIMIT} other notifications`}
-                </Typography>
-              </>
+            <Typography data-testid="notifications-title" variant="h4" component="span" fontWeight={700}>
+              Notifications
+            </Typography>
+            {hasUnread && (
+              <Typography variant="caption" className={css.unreadCount}>
+                {unreadCount}
+              </Typography>
             )}
+          </div>
+          {notifications.length > 0 && (
+            <MuiLink onClick={handleClear} variant="body2" component="button" sx={{ textDecoration: 'unset' }}>
+              Clear all
+            </MuiLink>
+          )}
+        </div>
 
-            {hasPushNotifications && (
-              <Link
-                href={{
-                  pathname: AppRoutes.settings.notifications,
-                  query: router.query,
-                }}
-                passHref
-                legacyBehavior
-              >
-                <MuiLink
-                  data-testid="notifications-button"
-                  className={css.settingsLink}
-                  variant="body2"
-                  onClick={onSettingsClick}
+        <div>
+          <NotificationCenterList notifications={notificationsToShow} handleClose={handleClose} />
+        </div>
+
+        <div className={css.popoverFooter}>
+          {canExpand && (
+            <>
+              <IconButton onClick={() => setShowAll((prev) => !prev)} disableRipple className={css.expandButton}>
+                <UnreadBadge
+                  invisible={showAll || unreadCount <= NOTIFICATION_CENTER_LIMIT}
+                  anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left',
+                  }}
                 >
-                  <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" /> Push notifications settings
-                </MuiLink>
-              </Link>
-            )}
-          </div>
-        </Paper>
+                  <ExpandIcon color="border" />
+                </UnreadBadge>
+              </IconButton>
+              <Typography sx={{ color: ({ palette }) => palette.border.main }}>
+                {showAll ? 'Hide' : `${notifications.length - NOTIFICATION_CENTER_LIMIT} other notifications`}
+              </Typography>
+            </>
+          )}
+
+          {hasPushNotifications && (
+            <Link
+              href={{
+                pathname: AppRoutes.settings.notifications,
+                query: router.query,
+              }}
+              passHref
+              legacyBehavior
+            >
+              <MuiLink
+                data-testid="notifications-button"
+                className={css.settingsLink}
+                variant="body2"
+                onClick={onSettingsClick}
+              >
+                <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" /> Push notifications settings
+              </MuiLink>
+            </Link>
+          )}
+        </div>
       </Popover>
     </>
   )

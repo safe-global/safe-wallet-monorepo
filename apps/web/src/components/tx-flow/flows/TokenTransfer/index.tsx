@@ -1,7 +1,7 @@
 import CreateTokenTransfer from './CreateTokenTransfer'
 import ReviewTokenTx from '@/components/tx-flow/flows/TokenTransfer/ReviewTokenTx'
 import AssetsIcon from '@/public/images/sidebar/assets.svg'
-import { ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { useMemo } from 'react'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'

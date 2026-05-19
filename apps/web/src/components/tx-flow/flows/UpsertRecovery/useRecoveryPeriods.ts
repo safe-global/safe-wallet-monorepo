@@ -1,4 +1,4 @@
-import chains from '@/config/chains'
+import chains from '@safe-global/utils/config/chains'
 import { useCurrentChain } from '@/hooks/useChains'
 
 export const DAY_IN_SECONDS = 60 * 60 * 24

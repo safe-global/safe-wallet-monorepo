@@ -9,16 +9,9 @@ import TxInfo from '@/components/transactions/TxInfo'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import Identicon from '@/components/common/Identicon'
 import { AppRoutes } from '@/config/routes'
-import { networks } from '@safe-global/protocol-kit/dist/src/utils/eip-3770/config'
+import { getEip3770ShortName } from '@safe-global/utils/utils/chains'
 import { cn } from '@/utils/cn'
 import css from './styles.module.css'
-
-type Chains = Record<string, string>
-
-const chainIdToShortName = networks.reduce<Chains>((result, { shortName, chainId }) => {
-  result[chainId.toString()] = shortName.toString()
-  return result
-}, {})
 
 /** Transaction with safeAddress and chainId from the space pending-transactions API */
 type SpacePendingTxItem = TransactionQueuedItem & { safeAddress?: string; chainId?: string }
@@ -62,7 +55,7 @@ const PendingTxWidget = ({
   if (isEmpty) {
     return (
       <SafeWidget title="Pending" testId="space-dashboard-pending-widget">
-        <SafeWidget.EmptyState icon={<Users className="size-6" />} text="No pending transactions" />
+        <SafeWidget.EmptyState icon={<Users className="size-6 text-green-500" />} text="No pending transactions" />
       </SafeWidget>
     )
   }
@@ -75,7 +68,7 @@ const PendingTxWidget = ({
         <p className="px-4 py-3 text-sm text-muted-foreground">No pending transactions</p>
       ) : (
         transactions.map((tx) => {
-          const shortName = tx.chainId ? chainIdToShortName[tx.chainId] : undefined
+          const shortName = getEip3770ShortName(tx.chainId ?? '')
           const safeParam = shortName && tx.safeAddress ? `${shortName}:${tx.safeAddress}` : undefined
           const href = safeParam ? `${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${safeParam}` : undefined
 

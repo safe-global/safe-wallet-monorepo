@@ -1,0 +1,99 @@
+name: Store Codegen Drift
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check-drift:
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+      - uses: ./.github/actions/yarn
+        with:
+          after-install: 'false'
+      - run: yarn workspace @safe-global/store build:dev
+      - name: Check for drift
+        id: drift
+        run: git diff --exit-code -- packages/store/scripts/api-schema/schema.json packages/store/src/gateway/AUTO_GENERATED/
+
+      - name: Capture changed files
+        if: failure() && steps.drift.outcome == 'failure'
+        run: git diff --name-only -- packages/store/scripts/api-schema/schema.json packages/store/src/gateway/AUTO_GENERATED/ > "${RUNNER_TEMP}/drift-files.txt"
+
+      - name: Open or update drift issue
+        if: failure() && steps.drift.outcome == 'failure'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const fs = require('fs')
+            const path = require('path')
+            const marker = '<!-- store-codegen-drift -->'
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            const driftPath = path.join(process.env.RUNNER_TEMP, 'drift-files.txt')
+            const raw = fs.existsSync(driftPath) ? fs.readFileSync(driftPath, 'utf8') : ''
+            const files = raw.trim() || '(no files listed)'
+            const body = [
+              marker,
+              'The scheduled `Store Codegen Drift` workflow detected that `packages/store/src/gateway/AUTO_GENERATED/` is out of sync with the staging CGW schema.',
+              '',
+              `**Failing run:** ${runUrl}`,
+              '',
+              '**Fix:**',
+              '```bash',
+              'yarn workspace @safe-global/store build:dev',
+              '# commit the resulting changes',
+              '```',
+              '',
+              '**Changed files:**',
+              '```',
+              files,
+              '```',
+              '',
+              'This issue will auto-close the next time the workflow succeeds.',
+            ].join('\n')
+            const q = `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open in:body "${marker}" author:app/github-actions`
+            const { data } = await github.rest.search.issuesAndPullRequests({ q })
+            if (data.items.length > 0) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: data.items[0].number,
+                body: `New drift detected in run ${runUrl}.\n\nChanged files:\n\`\`\`\n${files}\n\`\`\``,
+              })
+            } else {
+              await github.rest.issues.create({
+                ...context.repo,
+                title: 'CI: store codegen drift detected',
+                body,
+              })
+            }
+
+      - name: Close drift issue on success
+        if: success()
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const marker = '<!-- store-codegen-drift -->'
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            const q = `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open in:body "${marker}" author:app/github-actions`
+            const { data } = await github.rest.search.issuesAndPullRequests({ q })
+            for (const issue of data.items) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: issue.number,
+                body: `Drift resolved in run ${runUrl}. Auto-closing.`,
+              })
+              await github.rest.issues.update({
+                ...context.repo,
+                issue_number: issue.number,
+                state: 'closed',
+              })
+            }

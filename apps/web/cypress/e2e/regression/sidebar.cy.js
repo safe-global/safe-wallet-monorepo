@@ -9,7 +9,8 @@ let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
-describe('Sidebar tests', () => {
+// Skipping these tests - they will be moved to sidebar_new.ts for the new UI
+describe.skip('Sidebar tests', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })

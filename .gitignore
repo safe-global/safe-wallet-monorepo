@@ -62,6 +62,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# turborepo
+.turbo/
+**/.turbo/
+
 # typescript
 *.tsbuildinfo
 
@@ -114,6 +118,7 @@ apps/tx-builder/vite.config.d.ts
 todos/*
 /docs/plans/
 /docs/todos/
+/docs/brainstorms/
 
 .codemod
 .serena

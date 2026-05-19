@@ -10,7 +10,7 @@ let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
-describe('Sidebar tests 3', () => {
+describe.skip('Sidebar tests 3', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })

@@ -38,7 +38,8 @@ jest.mock('../tx/tx-sender/create', () => ({
   createExistingTx: (...args: unknown[]) => mockCreateExistingTx(...args),
 }))
 
-jest.mock('@safe-global/protocol-kit/dist/src/utils/eip-712', () => ({
+jest.mock('@safe-global/protocol-kit', () => ({
+  ...jest.requireActual('@safe-global/protocol-kit'),
   generateTypedData: (...args: unknown[]) => mockGenerateTypedData(...args),
 }))
 

@@ -2,7 +2,7 @@
 
 exports[`./NoFeeCampaignBanner.stories Default 1`] = `
 <div
-  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-t31lyp-MuiPaper-root-MuiCard-root"
+  class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root banner css-fmnm4n-MuiPaper-root-MuiCard-root"
   style="--Paper-shadow: none;"
 >
   <div
@@ -34,7 +34,7 @@ exports[`./NoFeeCampaignBanner.stories Default 1`] = `
          
         <a
           class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways css-dhjj49-MuiTypography-root-MuiLink-root"
-          href="https://help.safe.global/en/articles/484423-no-fee-january-campaign"
+          href="https://help.safe.global/articles/9605526657-no-fee-january-campaign"
           rel="noopener noreferrer"
           target="_blank"
         >

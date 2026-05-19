@@ -14,7 +14,7 @@ import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield
 
 // Mock dependencies
 jest.mock('@safe-global/utils/utils/safeTransaction')
-jest.mock('@safe-global/protocol-kit/dist/src/utils', () => ({
+jest.mock('@safe-global/protocol-kit', () => ({
   calculateSafeTransactionHash: jest.fn(),
 }))
 jest.mock('@safe-global/store/hypernative/hypernativeApi', () => ({
@@ -33,7 +33,7 @@ const mockUseAssessMessageMutation = hypernativeApi.useAssessMessageMutation as 
 >
 
 // Import the mocked function
-import { calculateSafeTransactionHash } from '@safe-global/protocol-kit/dist/src/utils'
+import { calculateSafeTransactionHash } from '@safe-global/protocol-kit'
 const mockCalculateSafeTransactionHash = calculateSafeTransactionHash as jest.MockedFunction<
   typeof calculateSafeTransactionHash
 >

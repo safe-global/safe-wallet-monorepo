@@ -1,3 +1,6 @@
+/* @deprecated Legacy MUI Header styles. Remove together with Header/index.tsx
+   once the Header migration to TopBar is complete. */
+
 .container {
   height: var(--header-height);
   display: flex;
@@ -73,6 +76,11 @@
 }
 
 .connectWallet {
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+
+.signOut {
   flex-shrink: 0;
   margin-left: 6px;
 }

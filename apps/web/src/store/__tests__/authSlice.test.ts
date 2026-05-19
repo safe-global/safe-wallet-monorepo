@@ -1,10 +1,14 @@
 import {
   authSlice,
+  setIsOidcLoginPending,
+  selectIsOidcLoginPending,
   setAuthenticated,
   setUnauthenticated,
   setLastUsedSpace,
+  setCfSafeSynced,
   isAuthenticated,
   lastUsedSpace,
+  selectCfSafeSynced,
 } from '../authSlice'
 import type { RootState } from '@/store'
 
@@ -31,6 +35,13 @@ describe('authSlice', () => {
       const state = reducer(authedState, setUnauthenticated())
 
       expect(state.sessionExpiresAt).toBeNull()
+    })
+
+    it('should reset cfSafeSynced to false', () => {
+      const syncedState = reducer(undefined, setCfSafeSynced(true))
+      const state = reducer(syncedState, setUnauthenticated())
+
+      expect(state.cfSafeSynced).toBe(false)
     })
   })
 
@@ -84,6 +95,60 @@ describe('authSlice', () => {
       } as unknown as RootState
 
       expect(lastUsedSpace(rootState)).toBe('space-abc')
+    })
+  })
+
+  describe('setCfSafeSynced', () => {
+    it('should set cfSafeSynced to true', () => {
+      const state = reducer(undefined, setCfSafeSynced(true))
+
+      expect(state.cfSafeSynced).toBe(true)
+    })
+
+    it('should set cfSafeSynced to false', () => {
+      const syncedState = reducer(undefined, setCfSafeSynced(true))
+      const state = reducer(syncedState, setCfSafeSynced(false))
+
+      expect(state.cfSafeSynced).toBe(false)
+    })
+  })
+
+  describe('selectCfSafeSynced selector', () => {
+    it('returns the cfSafeSynced value', () => {
+      const rootState = {
+        auth: { sessionExpiresAt: null, lastUsedSpace: null, isStoreHydrated: false, cfSafeSynced: true },
+      } as unknown as RootState
+
+      expect(selectCfSafeSynced(rootState)).toBe(true)
+    })
+  })
+
+  describe('setIsOidcLoginPending', () => {
+    it('should default to false', () => {
+      const state = authSlice.reducer(undefined, { type: 'unknown' })
+
+      expect(state.isOidcLoginPending).toBe(false)
+    })
+
+    it('should set isOidcLoginPending to true', () => {
+      const state = authSlice.reducer(undefined, setIsOidcLoginPending(true))
+
+      expect(state.isOidcLoginPending).toBe(true)
+    })
+
+    it('should set isOidcLoginPending back to false', () => {
+      const prev = authSlice.reducer(undefined, setIsOidcLoginPending(true))
+      const state = authSlice.reducer(prev, setIsOidcLoginPending(false))
+
+      expect(state.isOidcLoginPending).toBe(false)
+    })
+  })
+
+  describe('selectIsOidcLoginPending', () => {
+    it('should return the current pending state', () => {
+      const state = authSlice.reducer(undefined, setIsOidcLoginPending(true))
+
+      expect(selectIsOidcLoginPending({ auth: state } as unknown as RootState)).toBe(true)
     })
   })
 })

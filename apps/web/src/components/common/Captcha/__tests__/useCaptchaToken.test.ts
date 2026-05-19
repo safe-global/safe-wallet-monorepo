@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@/tests/test-utils'
 import {
   sharedTokenRef,
   resolveCaptchaReady,
-  resetCaptchaPromise,
+  registerWidgetRefreshCallback,
 } from '@/components/common/Captcha/captchaHeadersInit'
 import { useCaptchaToken } from '@/components/common/Captcha/useCaptchaToken'
 
@@ -10,7 +10,7 @@ import { useCaptchaToken } from '@/components/common/Captcha/useCaptchaToken'
 jest.mock('@/components/common/Captcha/captchaHeadersInit', () => ({
   sharedTokenRef: { current: null },
   resolveCaptchaReady: jest.fn(),
-  resetCaptchaPromise: jest.fn(),
+  registerWidgetRefreshCallback: jest.fn(),
 }))
 
 jest.mock('@safe-global/utils/config/constants', () => ({
@@ -78,6 +78,24 @@ describe('useCaptchaToken', () => {
       mountContainer(result)
       await waitFor(() => expect(mockTurnstile.render).toHaveBeenCalledTimes(1))
     })
+
+    it('registers the widget refresh callback after rendering', async () => {
+      const { result } = renderHook(() => useCaptchaToken({ isScriptReady: true }))
+      mountContainer(result)
+      await waitFor(() => expect(mockTurnstile.render).toHaveBeenCalledTimes(1))
+
+      expect(registerWidgetRefreshCallback).toHaveBeenCalledTimes(1)
+      expect(registerWidgetRefreshCallback).toHaveBeenCalledWith(expect.any(Function))
+    })
+
+    it('disables auto-refresh on silent TTL expiry so the widget never challenges in the background', async () => {
+      const { result } = renderHook(() => useCaptchaToken({ isScriptReady: true }))
+      mountContainer(result)
+      await waitFor(() => expect(mockTurnstile.render).toHaveBeenCalledTimes(1))
+
+      const renderOptions = mockTurnstile.render.mock.calls[0][1]
+      expect(renderOptions['refresh-expired']).toBe('never')
+    })
   })
 
   describe('token callback', () => {
@@ -136,8 +154,9 @@ describe('useCaptchaToken', () => {
 
       expect(result.current.token).toBeNull()
       expect((sharedTokenRef as { current: string | null }).current).toBeNull()
-      expect(resetCaptchaPromise).toHaveBeenCalled()
-      expect(mockTurnstile.reset).toHaveBeenCalledWith('widget-id-1')
+      // Lazy rotation: don't reset the widget on silent expiry — next protected
+      // request triggers a fresh challenge via captchaHeadersInit.
+      expect(mockTurnstile.reset).not.toHaveBeenCalled()
     })
   })
 

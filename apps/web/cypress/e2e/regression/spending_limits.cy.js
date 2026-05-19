@@ -169,4 +169,33 @@ describe('Spending limits tests', () => {
   it('Verify explorer links contain Sepolia link', () => {
     tx.verifyNumberOfExternalLinks(3)
   })
+
+  it('Verify that the enableModule action shows the correct AllowanceModule address for Sepolia', () => {
+    spendinglimit.visitSpendingLimitsPage(staticSafes.SEP_STATIC_SAFE_47)
+    wallet.connectSigner(signer)
+    spendinglimit.clickOnNewSpendingLimitBtn()
+    spendinglimit.enterBeneficiaryAddress(signerAddress)
+    spendinglimit.enterSpendingLimitAmount(1)
+    spendinglimit.clickOnNextBtn()
+
+    spendinglimit.verifyActionNames([spendinglimit.actionNames.enableModule])
+    spendinglimit.verifyEnableModuleAddress(constants.ALLOWANCE_MODULE_V0_1_0)
+  })
+
+  it('Verify that the enableModule action shows the correct AllowanceModule address for Polygon', () => {
+    // setupSafeSettingsWithAllTokens is required: the Polygon safe has near-zero MATIC balance
+    // which triggers the "hide small tokens" filter, leaving the token selector empty
+    spendinglimit.visitSpendingLimitsPage(staticSafes.MATIC_STATIC_SAFE_34)
+    main.setupSafeSettingsWithAllTokens().then(() => {
+      spendinglimit.visitSpendingLimitsPage(staticSafes.MATIC_STATIC_SAFE_34)
+      wallet.connectSigner(signer)
+      spendinglimit.clickOnNewSpendingLimitBtn()
+      spendinglimit.enterBeneficiaryAddress(signerAddress)
+      spendinglimit.enterSpendingLimitAmount(1)
+      spendinglimit.clickOnNextBtn()
+
+      spendinglimit.verifyActionNames([spendinglimit.actionNames.enableModule])
+      spendinglimit.verifyEnableModuleAddress(constants.ALLOWANCE_MODULE_V0_1_1)
+    })
+  })
 })

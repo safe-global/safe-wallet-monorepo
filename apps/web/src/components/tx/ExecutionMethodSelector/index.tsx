@@ -148,7 +148,7 @@ const _ExecutionMethodSelector = ({
                                     USDe holders enjoy gasless transactions on Ethereum Mainnet this January.{' '}
                                     <Typography component="span" fontWeight="bold">
                                       <Link
-                                        href="https://help.safe.global/en/articles/484423-no-fee-january-campaign"
+                                        href="https://help.safe.global/articles/9605526657-no-fee-january-campaign"
                                         style={{ textDecoration: 'underline', fontWeight: 'bold' }}
                                         target="_blank"
                                         rel="noopener noreferrer"

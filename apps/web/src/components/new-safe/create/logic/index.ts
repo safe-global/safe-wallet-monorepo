@@ -13,7 +13,7 @@ import Safe, { predictSafeAddress, SafeProvider } from '@safe-global/protocol-ki
 import type { PredictedSafeProps } from '@safe-global/protocol-kit'
 
 import { backOff } from 'exponential-backoff'
-import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/protocol-kit/dist/src/utils/constants'
+import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import {
   getCompatibilityFallbackHandlerDeployment,
   getCompatibilityFallbackHandlerDeployments,

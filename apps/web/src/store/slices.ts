@@ -22,6 +22,12 @@ export {
   selectUndeployedSafes,
   selectUndeployedSafe,
   selectIsUndeployedSafe,
+  pendingCfDeletesSlice,
+  enqueuePendingCfDelete,
+  removePendingCfDelete,
+  clearPendingCfDeletes,
+  selectPendingCfDeletes,
+  counterfactualSyncListener,
 } from '@/features/counterfactual/store'
 export * from '@/features/swap/store'
 export * from './swapOrderSlice'
@@ -31,3 +37,19 @@ export * from './visitedSafesSlice'
 export * from './orderByPreferenceSlice'
 export * from './authSlice'
 export * from '@/features/hypernative/store'
+export {
+  globalSearchSlice,
+  openGlobalSearch,
+  closeGlobalSearch,
+  toggleGlobalSearch,
+  selectGlobalSearchOpen,
+} from '@/features/global-search/store'
+export {
+  safeActionsModalSlice,
+  ESafeAction,
+  openSafeActionsModal,
+  closeSafeActionsModal,
+  selectSafeActionsModal,
+  selectSafeActionsModalOpen,
+  selectSafeActionsModalType,
+} from '@/features/spaces/store'

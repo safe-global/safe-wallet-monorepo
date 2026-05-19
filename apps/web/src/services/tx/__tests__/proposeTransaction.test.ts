@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { createMockSafeTransaction } from '@/tests/transactions'
-import { generatePreValidatedSignature } from '@safe-global/protocol-kit/dist/src/utils/signatures'
+import { generatePreValidatedSignature } from '@safe-global/protocol-kit'
 import proposeTx from '../proposeTransaction'
 import { makeStore, setStoreInstance } from '@/store'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -93,6 +93,8 @@ describe('proposeTx', () => {
         baseGas: '0',
         gasPrice: '0',
         gasToken: '0x0000000000000000000000000000000000000000',
+        fee: '0',
+        payment: '0',
         refundReceiver: { value: '0x0000000000000000000000000000000000000000' },
         safeTxHash: '0x0',
         signers: [],

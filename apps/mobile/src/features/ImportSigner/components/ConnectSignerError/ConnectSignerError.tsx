@@ -1,37 +1,20 @@
 import React from 'react'
 import { ScrollView } from 'react-native'
 import { Text, View, useTheme } from 'tamagui'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import { SafeButton } from '@/src/components/SafeButton/SafeButton'
 import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
 import { WalletConnectBadge } from '@/src/features/WalletConnect/components/WalletConnectBadge'
-import Logger from '@/src/utils/logger'
-import { useAppSelector } from '@/src/store/hooks'
-import { selectPendingSafe } from '@/src/store/signerImportFlowSlice'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
 
 export function ConnectSignerError() {
   const { address, walletIcon } = useLocalSearchParams<{ address: string; walletIcon: string }>()
-  const router = useRouter()
   const theme = useTheme()
-  const pendingSafe = useAppSelector(selectPendingSafe)
+  const { initiateConnection } = useWalletConnectContext()
 
-  const handleDonePress = async () => {
-    try {
-      router.dismissAll()
-      if (pendingSafe) {
-        router.dismissTo({
-          pathname: '/(import-accounts)/signers',
-          params: {
-            safeAddress: pendingSafe.address,
-            safeName: pendingSafe.name,
-          },
-        })
-      } else {
-        router.dismissTo('/signers')
-      }
-    } catch (error) {
-      Logger.error('Navigation error:', error)
-    }
+  const handleTryAgainPress = async () => {
+    router.dismiss()
+    initiateConnection()
   }
 
   return (
@@ -69,8 +52,8 @@ export function ConnectSignerError() {
       </View>
 
       <View paddingHorizontal="$4">
-        <SafeButton onPress={handleDonePress} testID="connect-signer-error-done">
-          Done
+        <SafeButton onPress={handleTryAgainPress} testID="connect-signer-error-done">
+          Connect a different wallet
         </SafeButton>
       </View>
     </View>

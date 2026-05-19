@@ -33,7 +33,6 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
-    trackEvent({ ...SPACE_EVENTS.ACCEPT_INVITE_SUBMIT, label: String(space.id) }, { spaceId: String(space.id) })
 
     try {
       setIsSubmitting(true)
@@ -42,6 +41,11 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
       if (response.error) {
         throw response.error
       }
+
+      trackEvent(
+        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: String(space.id) },
+        { workspace_id: String(space.id), user_id: currentUser?.id },
+      )
 
       if (router.pathname === AppRoutes.welcome.spaces) {
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.id } })
