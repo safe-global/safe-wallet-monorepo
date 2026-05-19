@@ -63,10 +63,11 @@
 
 .paymentSourceSelector {
   display: inline-flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 4px;
   height: 32px;
-  padding: 2px 6px 2px 15px;
+  width: 87px;
+  padding: 6px 12px;
   border-radius: 16px;
   border: 1px solid var(--color-border-light);
   background-color: var(--color-background-paper);
@@ -93,6 +94,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  min-height: 40px;
+  padding: 0 4px;
 }
 
 .selectorPopoverPaper:global(.MuiPaper-root) {
@@ -102,22 +105,33 @@
   padding: 0;
 }
 
+.selectorPopoverPaperPayment {
+  width: 87px;
+}
+
+.selectorPopoverPaperGasToken {
+  width: 102px;
+}
+
 .selectorPopoverInner {
   display: flex;
   flex-direction: column;
-  gap: 8px;
   padding: 2px;
   border-radius: 14px;
 }
 
+.selectorPopoverInnerGasToken {
+  gap: 8px;
+}
+
 .selectorMenuItem {
   border-radius: 14px;
-  padding: 2px 4px;
+  min-height: 28px;
+  padding: 0 12px;
 }
 
 .selectorMenuItem:global(.Mui-selected),
 .selectorMenuItem:global(.Mui-selected:hover) {
-  border-radius: 12px;
   background-color: var(--color-background-skeleton);
 }
 

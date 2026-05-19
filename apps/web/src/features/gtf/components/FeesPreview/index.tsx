@@ -147,7 +147,9 @@ const PaymentSourceSelector = ({
         onClose={() => setOpen(false)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-        slotProps={{ paper: { className: css.selectorPopoverPaper } }}
+        slotProps={{
+          paper: { className: `${css.selectorPopoverPaper} ${css.selectorPopoverPaperPayment}` },
+        }}
       >
         <div className={css.selectorPopoverInner}>
           {PAYMENT_SOURCES.map((source) => (
@@ -226,9 +228,11 @@ const GasTokenSelector = ({
         onClose={() => setOpen(false)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-        slotProps={{ paper: { className: css.selectorPopoverPaper } }}
+        slotProps={{
+          paper: { className: `${css.selectorPopoverPaper} ${css.selectorPopoverPaperGasToken}` },
+        }}
       >
-        <div className={css.selectorPopoverInner}>
+        <div className={`${css.selectorPopoverInner} ${css.selectorPopoverInnerGasToken}`}>
           {availableGasTokens?.map((token) => (
             <MenuItem
               key={token.address}
