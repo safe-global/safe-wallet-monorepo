@@ -9,6 +9,15 @@ export type DecideInput = {
   asPath: string
   querySpaceId: string | null
   lastUsedSpaceId: string | null
+  /**
+   * Whether the safe currently in the URL belongs to `lastUsedSpaceId`.
+   *  - `true` — the safe is part of the last-used space.
+   *  - `false` — there's a safe in the URL and we know it's NOT in the last-used space.
+   *  - `undefined` — not applicable (no safe in URL, no last-used space, still loading…).
+   * When `false`, row 13 stays inert so the user views the Safe outside any space
+   * context rather than under a misleading sidebar.
+   */
+  lastUsedSpaceContainsCurrentSafe: boolean | undefined
   userSpaceIds: string[] | undefined
   spacesError: boolean
 }
@@ -34,6 +43,7 @@ export const decide = (input: DecideInput): Decision => {
     asPath,
     querySpaceId,
     lastUsedSpaceId,
+    lastUsedSpaceContainsCurrentSafe,
     userSpaceIds,
     spacesError,
   } = input
@@ -85,6 +95,11 @@ export const decide = (input: DecideInput): Decision => {
 
   // Row 13: no ?spaceId — inject the last used space (if still valid), otherwise the first owned space.
   // The "last used space" preserves context across in-app navigation that strips ?spaceId from the URL.
+  //
+  // Exception: if the URL has a safe and we can prove it doesn't belong to lastUsedSpace, stay inert.
+  // Otherwise we'd silently frame the Safe under a sidebar/Space context it doesn't belong to.
+  if (lastUsedSpaceContainsCurrentSafe === false) return NOOP
+
   const injected = lastUsedSpaceId && userSpaceIds.includes(lastUsedSpaceId) ? lastUsedSpaceId : userSpaceIds[0]
   return { action: 'inject', spaceId: injected }
 }

@@ -9,6 +9,7 @@ const baseInput: DecideInput = {
   asPath: '/home',
   querySpaceId: null,
   lastUsedSpaceId: null,
+  lastUsedSpaceContainsCurrentSafe: undefined,
   userSpaceIds: undefined,
   spacesError: false,
 }
@@ -165,6 +166,36 @@ describe('decide', () => {
         }),
       ),
     ).toEqual<Decision>({ action: 'inject', spaceId: '7' })
+  })
+
+  it('row 13 — stays inert when the URL safe is known NOT to be in the last-used space', () => {
+    expect(
+      decide(
+        make({
+          isSignedIn: true,
+          userSpaceIds: ['7', '9'],
+          querySpaceId: null,
+          lastUsedSpaceId: '9',
+          lastUsedSpaceContainsCurrentSafe: false,
+          pathname: '/home',
+        }),
+      ),
+    ).toEqual<Decision>({ action: 'noop' })
+  })
+
+  it('row 13 — injects when the URL safe IS in the last-used space', () => {
+    expect(
+      decide(
+        make({
+          isSignedIn: true,
+          userSpaceIds: ['7', '9'],
+          querySpaceId: null,
+          lastUsedSpaceId: '9',
+          lastUsedSpaceContainsCurrentSafe: true,
+          pathname: '/home',
+        }),
+      ),
+    ).toEqual<Decision>({ action: 'inject', spaceId: '9' })
   })
 
   it('treats undefined flags as enabled (optimistic)', () => {

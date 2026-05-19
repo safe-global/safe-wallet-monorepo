@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useSpaceSafesGetV1Query, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
   isAuthenticated,
@@ -11,6 +11,9 @@ import {
 } from '@/store/authSlice'
 import { useHasDefaultChainFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { useUrlChainId } from '@/hooks/useChainId'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { AppRoutes } from '@/config/routes'
 import { decide } from './decide'
 
@@ -35,6 +38,23 @@ export const useSpaceIdSync = (): void => {
   const requireLogin = useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN)
   const classicEnabled = useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)
   const { data: spaces, isError: spacesError } = useSpacesGetV1Query(undefined, { skip: !isSignedIn })
+
+  // Only check membership when there's both a Safe in the URL and a last-used space.
+  // Skipped when not signed in, no last space, or no current safe — caller should treat
+  // an undefined result as "no information".
+  const urlChainId = useUrlChainId()
+  const urlSafeAddress = useSafeAddressFromUrl()
+  const skipSafeCheck = !isSignedIn || !lastUsedSpaceId || !urlChainId || !urlSafeAddress
+  const { currentData: lastSpaceSafes } = useSpaceSafesGetV1Query(
+    { spaceId: Number(lastUsedSpaceId) },
+    { skip: skipSafeCheck },
+  )
+
+  const lastUsedSpaceContainsCurrentSafe = useMemo<boolean | undefined>(() => {
+    if (skipSafeCheck || !lastSpaceSafes) return undefined
+    const addresses = lastSpaceSafes.safes[urlChainId] ?? []
+    return addresses.some((a) => sameAddress(a, urlSafeAddress))
+  }, [skipSafeCheck, lastSpaceSafes, urlChainId, urlSafeAddress])
 
   useEffect(() => {
     if (!isReady) return
@@ -61,6 +81,7 @@ export const useSpaceIdSync = (): void => {
       asPath,
       querySpaceId,
       lastUsedSpaceId,
+      lastUsedSpaceContainsCurrentSafe,
       userSpaceIds: spaces ? spaces.map((s) => String(s.id)) : undefined,
       spacesError,
     })
@@ -93,6 +114,7 @@ export const useSpaceIdSync = (): void => {
     isOidcPending,
     isStoreHydrated,
     lastUsedSpaceId,
+    lastUsedSpaceContainsCurrentSafe,
     requireLogin,
     classicEnabled,
     spaces,

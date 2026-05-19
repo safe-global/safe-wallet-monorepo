@@ -2,6 +2,8 @@ import { renderHook } from '@/tests/test-utils'
 import { useSpaceIdSync } from '../index'
 import * as store from '@/store'
 import * as useChainsModule from '@/hooks/useChains'
+import * as useChainIdModule from '@/hooks/useChainId'
+import * as useSafeAddressFromUrlModule from '@/hooks/useSafeAddressFromUrl'
 import * as spacesApi from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
@@ -54,6 +56,21 @@ const mockSpaces = (spaceIds: string[] | null, isError = false) => {
     isFetching: false,
     refetch: jest.fn(),
   } as never)
+}
+
+const mockSpaceSafes = (safes: Record<string, string[]> | undefined) => {
+  jest.spyOn(spacesApi, 'useSpaceSafesGetV1Query').mockReturnValue({
+    currentData: safes ? { safes } : undefined,
+    isError: false,
+    isLoading: !safes,
+    isFetching: false,
+    refetch: jest.fn(),
+  } as never)
+}
+
+const mockCurrentSafe = (chainId: string | undefined, address: string) => {
+  jest.spyOn(useChainIdModule, 'useUrlChainId').mockReturnValue(chainId)
+  jest.spyOn(useSafeAddressFromUrlModule, 'useSafeAddressFromUrl').mockReturnValue(address)
 }
 
 describe('useSpaceIdSync', () => {
@@ -285,5 +302,55 @@ describe('useSpaceIdSync', () => {
     })
 
     expect(replace).toHaveBeenCalledWith({ pathname: '/home', query: { spaceId: '7' } }, undefined, { shallow: true })
+  })
+
+  it('does not inject lastUsedSpace when the URL safe is not part of it', () => {
+    mockAuth({ isAuthenticated: true, lastUsedSpace: '9' })
+    mockFlags()
+    mockSpaces(['7', '9'])
+    mockCurrentSafe('1', '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+    // Last used space '9' only contains a different safe — not the one in the URL.
+    mockSpaceSafes({ '1': ['0xFFffFFffFFffFFffFFffFFffFFffFFffFFffFFff'] })
+    const replace = jest.fn()
+
+    renderHook(() => useSpaceIdSync(), {
+      routerProps: {
+        isReady: true,
+        pathname: '/home',
+        asPath: '/home?safe=eth:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        query: { safe: 'eth:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
+        replace,
+      },
+    })
+
+    expect(replace).not.toHaveBeenCalled()
+  })
+
+  it('injects lastUsedSpace when the URL safe IS part of it', () => {
+    mockAuth({ isAuthenticated: true, lastUsedSpace: '9' })
+    mockFlags()
+    mockSpaces(['7', '9'])
+    mockCurrentSafe('1', '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+    mockSpaceSafes({ '1': ['0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'] })
+    const replace = jest.fn()
+
+    renderHook(() => useSpaceIdSync(), {
+      routerProps: {
+        isReady: true,
+        pathname: '/home',
+        asPath: '/home?safe=eth:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        query: { safe: 'eth:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' },
+        replace,
+      },
+    })
+
+    expect(replace).toHaveBeenCalledWith(
+      {
+        pathname: '/home',
+        query: { safe: 'eth:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', spaceId: '9' },
+      },
+      undefined,
+      { shallow: true },
+    )
   })
 })
