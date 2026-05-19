@@ -95,7 +95,7 @@ const SelectSafesOnboarding = (): ReactElement => {
                 >
                   {isAtLimit && (
                     <Typography variant="paragraph" color="muted" className="text-xs pb-1">
-                      Limit of {SAFE_ACCOUNTS_LIMIT} reached
+                      Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
                     </Typography>
                   )}
                   <OnboardingSafesList
