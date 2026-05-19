@@ -1,8 +1,9 @@
 import type { Dispatch, SetStateAction } from 'react'
 import { useContext, useMemo, useRef, type ReactElement } from 'react'
 import { Menu } from 'lucide-react'
-
+import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { AppRoutes } from '@/config/routes'
 import { HeaderNavigation } from '@/features/spaces/components/HeaderNavigation'
 import { useLoadFeature } from '@/features/__core__'
 import { WalletFeature, useWalletPopover } from '@/features/wallet'
@@ -15,6 +16,7 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { openGlobalSearch } from '@/features/global-search/store/globalSearchSlice'
 import useSafeAddress from '@/hooks/useSafeAddress'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
@@ -22,6 +24,7 @@ import NotificationsPopover, { type NotificationsPopoverRef } from './Notificati
 import { useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import SafeLogo from '@/components/common/SafeLogo'
 import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import SafenetStakingButton from './SafenetStakingButton'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
@@ -54,6 +57,10 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const notifications = useAppSelector(selectNotifications)
   const spaceId = useCurrentSpaceId()
   const isSpaceRoute = useIsSpaceRoute()
+  const pathname = usePathname()
+  const isWelcomeListRoute = pathname === AppRoutes.welcome.accounts || pathname === AppRoutes.welcome.spaces
+  const urlSafeAddress = useSafeAddressFromUrl()
+  const isSettingsWithoutSafe = pathname?.startsWith(AppRoutes.settings.index) === true && !urlSafeAddress
   const safeAddress = useSafeAddress()
   const isProposer = useIsWalletProposer()
   const isSafeOwner = useIsSafeOwner()
@@ -84,7 +91,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   return (
     <>
       <header
-        className={`flex flex-wrap items-start gap-y-2 px-6 py-4 bg-secondary dark:bg-background ${
+        className={`flex flex-wrap ${isSettingsWithoutSafe ? 'items-center' : 'items-start'} gap-y-2 px-6 py-4 bg-secondary dark:bg-background ${
           showMenuButton ? 'justify-between pl-2' : 'justify-between'
         }`}
       >
@@ -101,7 +108,13 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
         {/* Left content: SpaceSafeBar must not shrink so its children stay on one line */}
         <div className="shrink-0 max-md:order-last flex items-center max-md:basis-full max-md:mt-2">
-          {showSpaceSafeBar ? <SpaceSafeBar /> : <GlobalSearchInput className="w-64 md:w-80" />}
+          {isSettingsWithoutSafe ? (
+            <SafeLogo />
+          ) : showSpaceSafeBar ? (
+            <SpaceSafeBar />
+          ) : (
+            <GlobalSearchInput className="w-64 md:w-80" />
+          )}
         </div>
 
         {/* Right content: navigation buttons — wraps to next row when viewport is narrow */}
@@ -120,7 +133,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             walletLabel={wallet?.label}
             walletOpen={walletOpen}
             messages={unreadCount}
-            showSearch={!isSpaceRoute}
+            showSearch={!isSpaceRoute && !isWelcomeListRoute}
             onSearchClick={() => dispatch(openGlobalSearch())}
             onNotificationsClick={(e) => notificationsRef.current?.handleClick(e)}
             onWalletClick={handleWalletClick}

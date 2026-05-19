@@ -51,6 +51,20 @@
   /* we need it in order to have higher importance than the .main class */
   && {
     padding-top: var(--topbar-height);
+
+    @media (max-width: 640px) {
+      padding-top: 0;
+    }
+  }
+}
+
+/* Compact variant: settings page without an active safe — topbar collapses
+   to a single row (logo only) so we shrink the reserved space accordingly.
+   The topbar is ~76px tall (header --header-height plus the wallet button row),
+   so we leave one space-3 of breathing room below it. */
+@media (min-width: 900px) {
+  .mainSpace.mainSpaceCompact {
+    padding-top: calc(var(--header-height) + var(--space-3));
   }
 }
 

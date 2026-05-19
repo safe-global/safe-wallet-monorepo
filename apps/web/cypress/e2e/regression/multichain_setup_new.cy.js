@@ -11,7 +11,6 @@ import * as create_wallet from '../pages/create_wallet.pages.js'
 import * as owner from '../pages/owners.pages.js'
 
 import { suspendOutreachModal } from '../pages/modals.page.js'
-import { isThisYear } from 'date-fns'
 
 let staticSafes = []
 
@@ -52,7 +51,7 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
     cy.contains(sidebarNavItem, 'Apps').should('be.disabled')
   })
 
-  isThisYear('Verify notification if the owner set up was changed in original safe', () => {
+  it('Verify notification if the owner set up was changed in original safe', () => {
     const safeAddress = staticSafes.MATIC_STATIC_SAFE_28.split(':')[1]
     // Mock /v2/safes to return deviating owners across chains — triggers InconsistentSignerSetupWarning
     cy.intercept('GET', '**/v2/safes**', [

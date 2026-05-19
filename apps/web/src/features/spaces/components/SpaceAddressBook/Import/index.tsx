@@ -9,7 +9,7 @@ const ImportAddressBook = () => {
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+      <Button variant="outline" size="lg" className="font-bold px-4 py-0" onClick={() => setOpen(true)}>
         <SvgIcon component={ImportIcon} inheritViewBox fontSize="small" />
         Import
       </Button>
