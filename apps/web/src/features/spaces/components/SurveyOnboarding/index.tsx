@@ -2,14 +2,12 @@ import type { ReactElement } from 'react'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { ArrowLeftRight, Banknote, Gift, Landmark, Sprout, Terminal, type LucideIcon } from 'lucide-react'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import {
   useSurveysGetStateV1Query,
   useSurveysSubmitResponseV1Mutation,
   type SurveyOption,
 } from '@safe-global/store/gateway/surveys'
 import { AppRoutes } from '@/config/routes'
-import { useHasFeature } from '@/hooks/useChains'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -46,11 +44,10 @@ const SurveyOnboarding = (): ReactElement | null => {
   const isDarkMode = useDarkMode()
   const router = useRouter()
   const spaceId = router.query.spaceId as string | undefined
-  const isSurveyEnabled = useHasFeature(FEATURES.SPACE_ONBOARDING_SURVEY)
 
   const { data, isLoading, error } = useSurveysGetStateV1Query(
     { spaceId: spaceId ?? '', slug: SURVEY_SLUG },
-    { skip: !spaceId || isSurveyEnabled !== true },
+    { skip: !spaceId },
   )
   const [submit, { isLoading: isSubmitting, error: submitError }] = useSurveysSubmitResponseV1Mutation()
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -61,21 +58,16 @@ const SurveyOnboarding = (): ReactElement | null => {
     }
   }, [router, spaceId])
 
-  useEffect(() => {
-    if (isSurveyEnabled === false && spaceId) {
-      router.replace({ pathname: AppRoutes.spaces.index, query: { spaceId } })
-    }
-  }, [isSurveyEnabled, router, spaceId])
-
-  // Treat a 404 from the state endpoint as "no active survey" and exit silently
-  // — same UX as the flag being off. Real errors (5xx, network) still surface.
+  // Treat a 404 from the state endpoint as "no active survey" (admin turned it
+  // off via surveys.is_active = false) and exit silently to the Space dashboard.
+  // Real errors (5xx, network) still surface in the alert below.
   useEffect(() => {
     if (isNotFoundError(error) && spaceId) {
       router.replace({ pathname: AppRoutes.spaces.index, query: { spaceId } })
     }
   }, [error, router, spaceId])
 
-  if (!spaceId || isSurveyEnabled !== true) return null
+  if (!spaceId) return null
 
   const toggle = (key: string): void => {
     setSelected((prev) => {
