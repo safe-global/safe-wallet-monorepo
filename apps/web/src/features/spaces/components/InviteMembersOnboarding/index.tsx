@@ -13,7 +13,7 @@ import useInviteNavigation from './hooks/useInviteNavigation'
 import useInviteForm from './hooks/useInviteForm'
 
 const ONBOARDING_STEP = 3
-const TOTAL_STEPS = 3
+const TOTAL_STEPS = 4
 
 const InviteMembersOnboarding = (): ReactElement => {
   const isDarkMode = useDarkMode()

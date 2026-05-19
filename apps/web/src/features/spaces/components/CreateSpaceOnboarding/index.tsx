@@ -18,7 +18,7 @@ import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 import { containerVariants, itemVariants, iconVariants } from './utils'
 
-const ONBOARDING_TOTAL_STEPS = 3
+const ONBOARDING_TOTAL_STEPS = 4
 
 const CreateSpaceOnboarding = (): ReactElement => {
   const router = useRouter()
