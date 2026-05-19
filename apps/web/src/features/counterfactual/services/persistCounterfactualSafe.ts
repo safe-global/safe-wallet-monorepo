@@ -6,6 +6,7 @@ import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/s
 import { toBackendDto } from './counterfactualSafeMapper'
 import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
+import { parseSpaceId } from '@/utils/spaces'
 
 type PersistArgs = {
   chainId: string
@@ -58,10 +59,13 @@ export const persistCounterfactualSafe = async ({
       return { ok: false, error: toPersistError(userResult.error) }
     }
 
-    if (spaceId) {
+    // Guard against persisted/legacy lastUsedSpace values that don't parse to
+    // a finite number — Number('abc') is NaN and would silently hit the API.
+    const numericSpaceId = parseSpaceId(spaceId)
+    if (numericSpaceId !== null) {
       const spaceResult = await dispatch(
         spacesApi.endpoints.spaceSafesCreateV1.initiate({
-          spaceId: Number(spaceId),
+          spaceId: numericSpaceId,
           createSpaceSafesDto: { safes: [{ chainId, address: safeAddress }] },
         }),
       )

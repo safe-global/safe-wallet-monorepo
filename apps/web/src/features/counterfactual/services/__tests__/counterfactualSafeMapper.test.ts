@@ -85,6 +85,33 @@ describe('counterfactualSafeMapper', () => {
       expect(result.props.safeAccountConfig.paymentToken).toBeUndefined()
       expect(result.props.safeAccountConfig.payment).toBeUndefined()
     })
+
+    it('normalizes nullable address fields from the schema to ZERO_ADDRESS', () => {
+      // CGW's CounterfactualSafeDto / GetCounterfactualSafeItem mark
+      // fallbackHandler, to, and paymentReceiver as nullable; downstream FE
+      // code relies on string addresses, so the mapper must coerce null.
+      const result = fromBackendDto({
+        chainId: '1',
+        address: '0xSafeAddress',
+        factoryAddress: '0xF',
+        masterCopy: '0xM',
+        saltNonce: '0',
+        safeVersion: '1.4.1',
+        threshold: 1,
+        owners: ['0xabc'],
+        data: '0x',
+        fallbackHandler: null,
+        to: null,
+        paymentReceiver: null,
+        paymentToken: null,
+        payment: null,
+      })
+
+      const ZERO = '0x0000000000000000000000000000000000000000'
+      expect(result.props.safeAccountConfig.fallbackHandler).toBe(ZERO)
+      expect(result.props.safeAccountConfig.to).toBe(ZERO)
+      expect(result.props.safeAccountConfig.paymentReceiver).toBe(ZERO)
+    })
   })
 
   describe('round-trip', () => {

@@ -1,9 +1,12 @@
 import type { SafeVersion } from '@safe-global/types-kit'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { ReplayedSafeProps } from '../types'
 
 /**
- * Flat DTO matching the backend counterfactual-safes API schema.
- * All fields from safeAccountConfig are top-level.
+ * Flat DTO matching the backend counterfactual-safes API schema. Nullable
+ * fields mirror the CGW OpenAPI schema (CounterfactualSafeDto +
+ * GetCounterfactualSafeItem). `fromBackendDto` normalizes nullable address
+ * fields to ZERO_ADDRESS so downstream FE code can rely on string values.
  */
 export type BackendCfSafeDto = {
   chainId: string
@@ -14,12 +17,12 @@ export type BackendCfSafeDto = {
   safeVersion: string
   threshold: number
   owners: string[]
-  fallbackHandler: string
-  to: string
+  fallbackHandler?: string | null
+  to?: string | null
   data: string
   paymentToken?: string | null
   payment?: string | null
-  paymentReceiver: string
+  paymentReceiver?: string | null
 }
 
 export const toBackendDto = (chainId: string, address: string, props: ReplayedSafeProps): BackendCfSafeDto => {
@@ -67,12 +70,12 @@ export const fromBackendDto = (
       safeAccountConfig: {
         threshold: dto.threshold,
         owners: dto.owners,
-        fallbackHandler: dto.fallbackHandler,
-        to: dto.to,
+        fallbackHandler: dto.fallbackHandler ?? ZERO_ADDRESS,
+        to: dto.to ?? ZERO_ADDRESS,
         data: dto.data,
         paymentToken: dto.paymentToken ?? undefined,
         payment: dto.payment != null ? Number(dto.payment) : undefined,
-        paymentReceiver: dto.paymentReceiver,
+        paymentReceiver: dto.paymentReceiver ?? ZERO_ADDRESS,
       },
     },
   }

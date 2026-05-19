@@ -169,6 +169,15 @@ describe('useCounterfactualSafeSync', () => {
     expect(spaceInitiate).toHaveBeenCalledTimes(2)
   })
 
+  it('does not call the space endpoint when spaceId is non-numeric (legacy persisted state)', async () => {
+    mockSelectors(true, true, 'abc')
+    renderHook(() => useCounterfactualSafeSync())
+    await flush()
+
+    expect(userInitiate).toHaveBeenCalledTimes(1)
+    expect(spaceInitiate).not.toHaveBeenCalled()
+  })
+
   it('does not re-fetch when the same spaceId is retained across rerenders', async () => {
     mockSelectors(true, true, '1')
     const { rerender } = renderHook(() => useCounterfactualSafeSync())

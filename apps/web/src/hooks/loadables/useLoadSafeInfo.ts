@@ -93,7 +93,11 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
     return undeployedSafe ? undeployedError : undefined
   }, [cgwError, undeployedSafe, undeployedError, suppressCgwError])
 
-  const loading = cgwLoading || awaitingCfSync
+  // Only block on CF sync while we don't yet have on-chain data — a deployed
+  // safe (cgwData truthy) shouldn't wait for the CF sync round-trip. Combined
+  // with useCounterfactualSafeSync's bounded retry + always-settle behavior,
+  // this also bounds the loading window when the CF endpoint 500s.
+  const loading = cgwLoading || (!cgwData && awaitingCfSync)
 
   return useMemo(() => [safeData, error, loading], [safeData, error, loading])
 }

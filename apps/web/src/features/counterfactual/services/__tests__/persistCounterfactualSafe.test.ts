@@ -226,6 +226,22 @@ describe('persistCounterfactualSafe', () => {
     expect(result.ok).toBe(false)
   })
 
+  it('skips the space POST when spaceId is non-numeric (legacy persisted state)', async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: 'abc',
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    expect(userInitiate).toHaveBeenCalledTimes(1)
+    expect(spaceInitiate).not.toHaveBeenCalled()
+    expect(replayImpl).toHaveBeenCalled()
+    expect(result.ok).toBe(true)
+  })
+
   it('skips backend calls entirely when user is not authenticated but still updates Redux', async () => {
     const dispatch = jest.fn() as unknown as AppDispatch
 

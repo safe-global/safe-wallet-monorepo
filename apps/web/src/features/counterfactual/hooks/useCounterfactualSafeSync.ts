@@ -6,13 +6,13 @@ import { addUndeployedSafe, selectUndeployedSafes } from '../store/undeployedSaf
 import { removePendingCfDelete, selectPendingCfDeletes } from '../store/pendingCfDeletesSlice'
 import { fromBackendDto } from '../services/counterfactualSafeMapper'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
-import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import {
   cgwApi as counterfactualSafesApi,
   type GetCounterfactualSafeItem,
   type GetCounterfactualSafesResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { parseSpaceId } from '@/utils/spaces'
 
 const SYNC_RETRY_DELAY_MS = 2000
 
@@ -76,9 +76,13 @@ const useCounterfactualSafeSync = () => {
 
       // Fetch CF safes from user endpoint and space endpoint
       const userQuery = dispatch(counterfactualSafesApi.endpoints.counterfactualSafesGetV1.initiate(undefined))
-      const spaceQuery = spaceId
-        ? dispatch(spacesApi.endpoints.spaceCounterfactualSafesGetV1.initiate({ spaceId: Number(spaceId) }))
-        : null
+      // Guard against persisted/legacy lastUsedSpace values that aren't a clean
+      // integer — Number('abc') is NaN and would silently hit the API with NaN.
+      const numericSpaceId = parseSpaceId(spaceId)
+      const spaceQuery =
+        numericSpaceId !== null
+          ? dispatch(spacesApi.endpoints.spaceCounterfactualSafesGetV1.initiate({ spaceId: numericSpaceId }))
+          : null
 
       try {
         const userResponse = await userQuery.unwrap()
@@ -120,14 +124,7 @@ const useCounterfactualSafeSync = () => {
             // The local self-heal already removed it because CGW reports it deployed.
             if (blockedByPendingDelete.has(`${chainId}:${remoteSafe.address}`)) continue
 
-            const { props } = fromBackendDto({
-              ...remoteSafe,
-              chainId,
-              // CGW schema allows null; FE downstream relies on a string address.
-              paymentReceiver: remoteSafe.paymentReceiver ?? ZERO_ADDRESS,
-              fallbackHandler: remoteSafe.fallbackHandler ?? ZERO_ADDRESS,
-              to: remoteSafe.to ?? ZERO_ADDRESS,
-            })
+            const { props } = fromBackendDto({ ...remoteSafe, chainId })
             dispatch(
               addUndeployedSafe({
                 chainId,

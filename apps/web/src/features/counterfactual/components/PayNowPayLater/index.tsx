@@ -21,7 +21,7 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { useSiwe } from '@/services/siwe/useSiwe'
 import { useAppDispatch } from '@/store'
-import { setAuthenticated } from '@/store/authSlice'
+import { setAuthenticated, SESSION_LIFETIME_MS } from '@/store/authSlice'
 
 const PayNowPayLater = ({
   totalFee,
@@ -47,8 +47,7 @@ const PayNowPayLater = ({
     if (signingIn) return
     const result = await signIn()
     if (result && !result.error) {
-      const oneDayInMs = 24 * 60 * 60 * 1000
-      dispatch(setAuthenticated(Date.now() + oneDayInMs))
+      dispatch(setAuthenticated(Date.now() + SESSION_LIFETIME_MS))
       setPayMethod(PayMethod.PayLater)
     }
   }

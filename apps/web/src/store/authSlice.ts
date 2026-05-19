@@ -3,6 +3,9 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { cgwApi as usersApi } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 
+/** Shared session expiry duration used wherever the FE dispatches setAuthenticated. */
+export const SESSION_LIFETIME_MS = 24 * 60 * 60 * 1000
+
 type AuthPayload = {
   sessionExpiresAt: number | null
   lastUsedSpace: string | null
