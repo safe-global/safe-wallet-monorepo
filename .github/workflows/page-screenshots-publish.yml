@@ -14,6 +14,13 @@ on:
 
 permissions: {}
 
+# Serialize publish runs targeting the same PR so two rapid pushes don't race
+# at the comment / storage-branch layer. `cancel-in-progress: false` lets the
+# earlier run finish posting its comment before the newer one supersedes it.
+concurrency:
+  group: page-screenshots-publish-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     if: >

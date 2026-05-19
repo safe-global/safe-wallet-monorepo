@@ -13,6 +13,8 @@
 const fs = require('fs')
 
 const MARKER = '📸 Page Screenshots'
+const COMMENT_HEADER = `## ${MARKER}`
+const BOT_LOGIN = 'github-actions[bot]'
 const FILENAME_REGEX = /^([a-z0-9_]+)__(desktop|mobile)\.png$/
 const COLLAPSIBLE_THRESHOLD = 8
 
@@ -24,7 +26,7 @@ const slugToLabel = (slug) =>
     .join(' ')
 
 const buildBody = ({ stale, screenshots, baseUrl }) => {
-  let body = `## ${MARKER}\n\n`
+  let body = `${COMMENT_HEADER}\n\n`
   if (stale) {
     body +=
       '> **STALE:** The PR was updated after these screenshots were captured. ' + 'A new run will refresh them.\n\n'
@@ -61,12 +63,19 @@ module.exports = async ({ github, context, core }) => {
   }
   const { owner, repo } = context.repo
 
-  const { data: comments } = await github.rest.issues.listComments({
+  // Paginate: long-discussion PRs can push the sticky comment past page 1,
+  // and matching the wrong comment would create duplicates instead of
+  // updating in place.
+  const comments = await github.paginate(github.rest.issues.listComments, {
     owner,
     repo,
     issue_number: prNumber,
+    per_page: 100,
   })
-  const existing = comments.find((c) => c.user.type === 'Bot' && c.body.includes(MARKER))
+  // Restrict to comments authored by this workflow's bot and starting with
+  // the exact header `buildBody` writes — otherwise a quoted MARKER in any
+  // other bot's comment would be edited or deleted on the next run.
+  const existing = comments.find((c) => c.user.login === BOT_LOGIN && c.body.startsWith(COMMENT_HEADER))
 
   if (!found) {
     if (existing) {
@@ -106,6 +115,8 @@ module.exports = async ({ github, context, core }) => {
 }
 
 module.exports.MARKER = MARKER
+module.exports.COMMENT_HEADER = COMMENT_HEADER
+module.exports.BOT_LOGIN = BOT_LOGIN
 module.exports.FILENAME_REGEX = FILENAME_REGEX
 module.exports.slugToLabel = slugToLabel
 module.exports.buildBody = buildBody
