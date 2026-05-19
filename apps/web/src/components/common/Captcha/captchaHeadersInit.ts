@@ -26,6 +26,7 @@ const CAPTCHA_PROTECTED_ROUTES = [
   /\/v2\/owners\/[^/]+\/safes/,
   /\/v3\/owners\/[^/]+\/safes/,
   /\/v1\/chains\/[^/]+\/safes\/[^/]+\/positions\/[^/]+/,
+  /\/v1\/portfolio\/[^/]+/,
 ]
 
 export function isProtectedEndpoint(url: string): boolean {

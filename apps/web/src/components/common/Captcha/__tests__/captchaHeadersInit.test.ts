@@ -56,6 +56,11 @@ describe('captchaHeadersInit', () => {
       expect(isProtectedEndpoint('/v1/chains/100/safes/0xDEF/positions/EUR')).toBe(true)
     })
 
+    it('returns true for /v1/portfolio/{address}', () => {
+      expect(isProtectedEndpoint('/v1/portfolio/0xABC')).toBe(true)
+      expect(isProtectedEndpoint('/v1/portfolio/0xDEF?sync=true&excludeDust=false')).toBe(true)
+    })
+
     it('returns false for unrelated endpoints', () => {
       expect(isProtectedEndpoint('/v1/chains/1/safes')).toBe(false)
       expect(isProtectedEndpoint('/v1/chains/1/owners/0xABC/safes')).toBe(false)
@@ -71,6 +76,11 @@ describe('captchaHeadersInit', () => {
     it('returns false for partial positions path matches (no /{fiatCode} suffix)', () => {
       expect(isProtectedEndpoint('/v1/chains/1/safes/0xABC/positions')).toBe(false)
       expect(isProtectedEndpoint('/v1/chains/1/safes/0xABC/positions/')).toBe(false)
+    })
+
+    it('returns false for partial portfolio path matches (no /{address} suffix)', () => {
+      expect(isProtectedEndpoint('/v1/portfolio')).toBe(false)
+      expect(isProtectedEndpoint('/v1/portfolio/')).toBe(false)
     })
   })
 
