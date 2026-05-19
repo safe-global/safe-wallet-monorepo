@@ -18,7 +18,7 @@ import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 import { containerVariants, itemVariants, iconVariants } from './utils'
 
-const ONBOARDING_TOTAL_STEPS = 3
+const ONBOARDING_TOTAL_STEPS = 4
 
 const CreateSpaceOnboarding = (): ReactElement => {
   const router = useRouter()
@@ -105,7 +105,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
           <motion.div variants={itemVariants}>
             <Typography variant="h2" align="center">
-              Create a Space
+              Create a Workspace
             </Typography>
           </motion.div>
 
@@ -119,17 +119,17 @@ const CreateSpaceOnboarding = (): ReactElement => {
             <div className="relative">
               <Input
                 data-testid="space-name-input"
-                placeholder="Name your Space"
+                placeholder="Name your Workspace"
                 autoComplete="off"
                 autoFocus={!isEditMode}
                 disabled={isCheckingAccess || isSpaceLoading}
                 className="h-11 rounded-sm bg-card px-4"
                 {...register('name', {
                   required: true,
-                  maxLength: { value: 30, message: 'Space name must be 30 characters or less' },
+                  maxLength: { value: 30, message: 'Workspace name must be 30 characters or less' },
                   pattern: {
                     value: /^[a-zA-Z0-9 ]+$/,
-                    message: 'Space name must not contain special characters',
+                    message: 'Workspace name must not contain special characters',
                   },
                   validate: (value) => value?.trim() !== '',
                 })}
@@ -155,7 +155,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
               data-testid="create-space-onboarding-continue-button"
               type="submit"
               disabled={!isValid || isSubmitting || isCheckingAccess || isSpaceLoading}
-              className="h-10 w-full"
+              className="w-full"
               size="lg"
             >
               {isSubmitting ? <Spinner /> : 'Continue'}

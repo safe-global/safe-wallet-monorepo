@@ -71,7 +71,7 @@ export const ReviewTransactionContent = ({
 
         <Slot name={SlotName.Main} />
 
-        <Divider sx={{ mt: 2, mx: -3 }} />
+        <Divider sx={{ mt: 2, mx: -3, borderColor: '#f0f0f0' }} />
 
         {safeTxError && (
           <ErrorMessage error={safeTxError}>
@@ -94,7 +94,27 @@ export const ReviewTransactionContent = ({
                   type="submit"
                   onClick={onContinueClick}
                   disabled={!isOk || isSubmitDisabled || (needsRiskConfirmation && !isRiskConfirmed)}
-                  sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
+                  sx={{
+                    minWidth: '82px',
+                    order: '1',
+                    width: ['100%', '100%', '100%', 'auto'],
+                    backgroundColor: '#121312',
+                    borderRadius: '8px',
+                    fontFamily: '"DM Sans", sans-serif',
+                    fontWeight: 600,
+                    fontSize: '14px',
+                    textTransform: 'none',
+                    boxShadow: 'none',
+                    height: '40px',
+                    '&:hover': {
+                      backgroundColor: '#1a3d2a',
+                      boxShadow: 'none',
+                    },
+                    '&.Mui-disabled': {
+                      backgroundColor: '#e5e7eb',
+                      color: '#a1a3a7',
+                    },
+                  }}
                 >
                   {isSubmitLoading ? <CircularProgress size={20} /> : 'Continue'}
                 </Button>

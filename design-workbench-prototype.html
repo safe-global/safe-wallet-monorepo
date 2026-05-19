@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Workbench — Safe</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+<style>
+  /* ── Safe Design Tokens ── */
+  :root {
+    --font: 'DM Sans', system-ui, sans-serif;
+
+    /* Core palette (light, from vars.css) */
+    --background: #ffffff;
+    --background-default: #f5f5f5;
+    --foreground: #0a0a0a;
+    --card: #ffffff;
+    --card-foreground: #0a0a0a;
+    --primary: #171717;
+    --primary-foreground: #fafafa;
+    --secondary: #f5f5f5;
+    --secondary-foreground: #171717;
+    --muted: #f5f5f5;
+    --muted-foreground: #737373;
+    --accent: #f5f5f5;
+    --accent-foreground: #171717;
+    --accent-secondary: #c4fddd;
+    --accent-secondary-foreground: #121312;
+    --destructive: #dc2626;
+    --border: #e5e5e5;
+    --ring: #d4d4d4;
+
+    /* Safe brand */
+    --safe-green: #12ff80;
+    --safe-green-dark: #0fda6d;
+    --safe-green-light: #b0ffc9;
+    --safe-green-bg: #effff4;
+    --safe-black: #121312;
+    --safe-gray: #636669;
+    --safe-gray-light: #a1a3a7;
+    --safe-border-light: #dcdee0;
+    --safe-bg-light: #f4f4f4;
+
+    /* Status */
+    --success: #00b460;
+    --success-bg: #effaf1;
+    --warning: #ff8061;
+    --warning-bg: #fff1e0;
+    --info: #00bfe5;
+    --info-bg: #cef0fd;
+    --error: #ff5f72;
+    --error-bg: #ffe6ea;
+
+    /* Sidebar */
+    --sidebar-bg: #ffffff;
+    --sidebar-border: #e5e5e5;
+    --sidebar-accent: #f0fdf4;
+    --sidebar-width: 240px;
+
+    /* Spacing (8px base) */
+    --space-1: 8px;
+    --space-2: 16px;
+    --space-3: 24px;
+    --space-4: 32px;
+    --space-5: 40px;
+    --space-6: 48px;
+
+    /* Radius */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-2xl: 24px;
+  }
+
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--background-default);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── App Shell ── */
+  .app {
+    display: flex;
+    height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .sidebar-header {
+    padding: var(--space-2);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .sidebar-logo {
+    width: 32px;
+    height: 32px;
+    background: var(--safe-black);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar-logo svg { width: 18px; height: 18px; }
+
+  .sidebar-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  .sidebar-subtitle {
+    font-size: 11px;
+    color: var(--muted-foreground);
+  }
+
+  .sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-1);
+  }
+
+  .sidebar-group-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--safe-gray-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: var(--space-1) var(--space-1);
+    margin-top: var(--space-1);
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 6px var(--space-1);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: var(--foreground);
+    cursor: pointer;
+    transition: background 0.15s;
+    text-decoration: none;
+  }
+
+  .sidebar-item:hover { background: var(--muted); }
+  .sidebar-item.active {
+    background: var(--sidebar-accent);
+    font-weight: 600;
+  }
+  .sidebar-item.active .sidebar-item-icon { color: var(--safe-green-dark); }
+
+  .sidebar-item-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--muted-foreground);
+    flex-shrink: 0;
+  }
+
+  .sidebar-item-badge {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    background: var(--muted);
+    padding: 1px 6px;
+    border-radius: 999px;
+  }
+
+  .sidebar-footer {
+    padding: var(--space-1);
+    border-top: 1px solid var(--sidebar-border);
+  }
+
+  .sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 6px var(--space-1);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+
+  .sidebar-user:hover { background: var(--muted); }
+
+  .avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .avatar-iva { background: #6366f1; }
+  .avatar-max { background: #f59e0b; }
+  .avatar-sara { background: #ec4899; }
+  .avatar-pm { background: #8b5cf6; }
+
+  /* ── Main content ── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    height: 52px;
+    background: var(--background);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-3);
+    gap: var(--space-2);
+    flex-shrink: 0;
+  }
+
+  .topbar-breadcrumb {
+    font-size: 14px;
+    color: var(--muted-foreground);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .topbar-breadcrumb strong {
+    color: var(--foreground);
+    font-weight: 600;
+  }
+
+  .topbar-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    padding: 0 10px;
+    height: 36px;
+    text-decoration: none;
+  }
+
+  .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  .btn-primary {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border-color: transparent;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+
+  .btn-outline {
+    background: rgba(255,255,255,0.1);
+    color: var(--foreground);
+    border-color: var(--border);
+  }
+  .btn-outline:hover { background: rgba(0,0,0,0.03); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--foreground);
+  }
+  .btn-ghost:hover { background: var(--muted); }
+
+  .btn-sm { height: 32px; font-size: 13px; padding: 0 8px; }
+  .btn-xs { height: 24px; font-size: 12px; padding: 0 6px; border-radius: 4px; }
+
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+  }
+  .btn-icon.btn-sm { width: 32px; height: 32px; }
+
+  /* ── Content area ── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-3);
+  }
+
+  /* ── Screen: Index ── */
+  .screen { display: none; }
+  .screen.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+  .index-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3);
+    padding-bottom: 0;
+  }
+
+  .index-header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 28.8px;
+  }
+
+  .index-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 0 var(--space-3);
+    margin-top: var(--space-2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .index-tab {
+    padding: var(--space-1) var(--space-2);
+    font-size: 14px;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+    font-weight: 500;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: var(--font);
+  }
+
+  .index-tab:hover { color: var(--foreground); }
+  .index-tab.active {
+    color: var(--foreground);
+    border-bottom-color: var(--foreground);
+    font-weight: 600;
+  }
+
+  .prototype-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-2);
+    padding: var(--space-3);
+    overflow-y: auto;
+  }
+
+  /* ── Prototype Card ── */
+  .proto-card {
+    background: var(--card);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .proto-card:hover {
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+  }
+
+  .proto-card-preview {
+    height: 160px;
+    background: var(--background-default);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .proto-card-preview-inner {
+    width: 85%;
+    height: 80%;
+    background: var(--background);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    display: flex;
+    overflow: hidden;
+  }
+
+  .preview-sidebar-mock {
+    width: 30%;
+    background: var(--muted);
+    border-right: 1px solid var(--border);
+    padding: 8px;
+  }
+
+  .preview-sidebar-mock .bar {
+    height: 4px;
+    border-radius: 2px;
+    margin-bottom: 4px;
+  }
+
+  .preview-content-mock {
+    flex: 1;
+    padding: 8px;
+  }
+
+  .preview-content-mock .bar {
+    height: 4px;
+    border-radius: 2px;
+    margin-bottom: 4px;
+  }
+
+  .bar-dark { background: var(--safe-gray-light); opacity: 0.3; }
+  .bar-green { background: var(--safe-green); opacity: 0.5; }
+  .bar-light { background: var(--border); }
+  .bar-w50 { width: 50%; }
+  .bar-w70 { width: 70%; }
+  .bar-w40 { width: 40%; }
+  .bar-w80 { width: 80%; }
+  .bar-w60 { width: 60%; }
+  .bar-h8 { height: 8px; }
+  .bar-h12 { height: 12px; }
+
+  .proto-card-status {
+    position: absolute;
+    top: var(--space-1);
+    right: var(--space-1);
+  }
+
+  .status-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  .status-draft { background: var(--muted); color: var(--muted-foreground); }
+  .status-review { background: var(--info-bg); color: #15566a; }
+  .status-handed-off { background: var(--success-bg); color: #028d4c; }
+  .status-archived { background: var(--safe-bg-light); color: var(--safe-gray); }
+
+  .proto-card-body {
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+  }
+
+  .proto-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--foreground);
+  }
+
+  .proto-card-desc {
+    font-size: 13px;
+    color: var(--muted-foreground);
+    line-height: 1.4;
+  }
+
+  .proto-card-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-top: auto;
+    padding-top: var(--space-1);
+  }
+
+  .proto-card-meta .avatar { width: 20px; height: 20px; font-size: 10px; }
+
+  .proto-card-meta-text {
+    font-size: 12px;
+    color: var(--muted-foreground);
+  }
+
+  .proto-card-branches {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--muted-foreground);
+  }
+
+  .proto-card-branches svg { width: 14px; height: 14px; }
+
+  /* ── Screen: Editor ── */
+  .editor-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .editor-preview {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--background-default);
+  }
+
+  .editor-preview-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-1) var(--space-2);
+    background: var(--background);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .viewport-toggle {
+    display: flex;
+    background: var(--muted);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+  }
+
+  .viewport-btn {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font);
+  }
+
+  .viewport-btn.active {
+    background: var(--background);
+    color: var(--foreground);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  }
+
+  .editor-canvas {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: var(--space-3);
+    overflow: auto;
+  }
+
+  .editor-frame {
+    width: 100%;
+    max-width: 1200px;
+    min-height: 500px;
+    background: var(--background);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+    overflow: hidden;
+  }
+
+  /* Mock prototype content inside the frame */
+  .mock-app-shell {
+    display: flex;
+    height: 500px;
+  }
+
+  .mock-sidebar {
+    width: 200px;
+    background: var(--background);
+    border-right: 1px solid var(--border);
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .mock-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-bottom: var(--space-1);
+  }
+
+  .mock-sidebar-logo {
+    width: 28px;
+    height: 28px;
+    background: var(--safe-black);
+    border-radius: var(--radius-sm);
+  }
+
+  .mock-sidebar-name {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .mock-nav-item {
+    padding: 6px var(--space-1);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--muted-foreground);
+  }
+
+  .mock-nav-item.mock-active {
+    background: var(--sidebar-accent);
+    color: var(--foreground);
+    font-weight: 600;
+  }
+
+  .mock-main {
+    flex: 1;
+    padding: var(--space-3);
+    background: var(--background-default);
+  }
+
+  .mock-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-2);
+  }
+
+  .mock-h1 {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .mock-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2);
+  }
+
+  .mock-card {
+    background: var(--background);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2);
+  }
+
+  .mock-card-amount {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .mock-card-label {
+    font-size: 12px;
+    color: var(--muted-foreground);
+  }
+
+  .mock-card-bar {
+    height: 4px;
+    border-radius: 2px;
+    margin-top: var(--space-1);
+  }
+
+  /* ── Right panel (AI chat + components) ── */
+  .editor-panel {
+    width: 360px;
+    border-left: 1px solid var(--border);
+    background: var(--background);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .panel-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-tab {
+    flex: 1;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted-foreground);
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: none;
+    font-family: var(--font);
+    transition: all 0.15s;
+  }
+
+  .panel-tab:hover { color: var(--foreground); }
+  .panel-tab.active {
+    color: var(--foreground);
+    font-weight: 600;
+    border-bottom-color: var(--foreground);
+  }
+
+  .panel-content {
+    flex: 1;
+    overflow-y: auto;
+    display: none;
+  }
+
+  .panel-content.active { display: flex; flex-direction: column; }
+
+  /* AI Chat */
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .chat-msg {
+    display: flex;
+    gap: var(--space-1);
+    align-items: flex-start;
+  }
+
+  .chat-msg-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: white;
+  }
+
+  .chat-msg-ai { background: var(--safe-black); }
+
+  .chat-msg-bubble {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--foreground);
+    padding: var(--space-1) var(--space-1) var(--space-1) 0;
+  }
+
+  .chat-msg-bubble code {
+    background: var(--muted);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+
+  .chat-input-area {
+    padding: var(--space-1) var(--space-2) var(--space-2);
+    border-top: 1px solid var(--border);
+  }
+
+  .chat-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    background: var(--muted);
+    border-radius: var(--radius-md);
+    padding: 6px 10px;
+  }
+
+  .chat-input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-size: 13px;
+    font-family: var(--font);
+    outline: none;
+    color: var(--foreground);
+  }
+
+  .chat-input::placeholder { color: var(--safe-gray-light); }
+
+  .chat-send {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    background: var(--primary);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chat-send svg { width: 14px; height: 14px; color: var(--primary-foreground); }
+
+  /* Component Browser */
+  .comp-browser {
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .comp-search {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-family: var(--font);
+    background: var(--background);
+    outline: none;
+  }
+
+  .comp-search:focus { border-color: var(--ring); }
+
+  .comp-group-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--safe-gray-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: var(--space-1);
+  }
+
+  .comp-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .comp-item:hover {
+    border-color: var(--safe-green-dark);
+    background: var(--safe-green-bg);
+  }
+
+  .comp-item-preview {
+    width: 40px;
+    height: 28px;
+    background: var(--muted);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .comp-item-preview .mini-btn {
+    width: 28px;
+    height: 14px;
+    background: var(--primary);
+    border-radius: 3px;
+  }
+
+  .comp-item-preview .mini-card {
+    width: 30px;
+    height: 20px;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+  }
+
+  .comp-item-preview .mini-input {
+    width: 30px;
+    height: 12px;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+
+  .comp-item-preview .mini-sidebar {
+    width: 10px;
+    height: 20px;
+    background: var(--border);
+    border-radius: 2px 0 0 2px;
+    margin-right: 1px;
+  }
+
+  .comp-item-preview .mini-content {
+    width: 18px;
+    height: 20px;
+    background: var(--muted);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .comp-item-info {
+    min-width: 0;
+  }
+
+  .comp-item-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--foreground);
+  }
+
+  .comp-item-variants {
+    font-size: 11px;
+    color: var(--muted-foreground);
+  }
+
+  .comp-item-add {
+    margin-left: auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--background);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .comp-item:hover .comp-item-add { opacity: 1; }
+
+  .comp-item-add svg { width: 14px; height: 14px; color: var(--muted-foreground); }
+
+  /* ── Branch indicator ── */
+  .branch-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 6px var(--space-2);
+    background: var(--safe-green-bg);
+    border-bottom: 1px solid var(--safe-green-light);
+    font-size: 13px;
+  }
+
+  .branch-bar svg { width: 14px; height: 14px; color: var(--safe-green-dark); }
+
+  .branch-name {
+    font-weight: 600;
+    color: var(--safe-black);
+  }
+
+  .branch-from {
+    color: var(--muted-foreground);
+  }
+
+  .branch-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 6px;
+  }
+
+  /* ── Branches panel ── */
+  .branches-content {
+    padding: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .branch-card {
+    padding: var(--space-1) var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .branch-card:hover { border-color: var(--safe-green-dark); }
+  .branch-card.active { border-color: var(--safe-green-dark); background: var(--safe-green-bg); }
+
+  .branch-card-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .branch-card-name { font-size: 13px; font-weight: 600; }
+  .branch-card-meta { font-size: 12px; color: var(--muted-foreground); }
+
+  .branch-card-tag {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 999px;
+  }
+
+  .tag-main { background: var(--primary); color: var(--primary-foreground); }
+  .tag-active { background: var(--safe-green-bg); color: var(--safe-green-dark); border: 1px solid var(--safe-green-light); }
+
+  /* ── Empty state / New prototype ── */
+  .new-proto-card {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted-foreground);
+    min-height: 240px;
+  }
+
+  .new-proto-card:hover {
+    border-color: var(--safe-green-dark);
+    color: var(--foreground);
+    background: var(--safe-green-bg);
+  }
+
+  .new-proto-card svg { width: 32px; height: 32px; margin-bottom: var(--space-1); }
+  .new-proto-card span { font-size: 14px; font-weight: 500; }
+
+  /* ── PR Banner ── */
+  .pr-banner {
+    display: none;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 10px var(--space-2);
+    background: var(--success-bg);
+    border-bottom: 1px solid #b0ffc9;
+    font-size: 13px;
+  }
+
+  .pr-banner.visible { display: flex; }
+
+  .pr-banner svg { width: 16px; height: 16px; color: var(--success); flex-shrink: 0; }
+
+  .pr-banner a {
+    color: var(--success);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* ── Utility ── */
+  .gap-1 { gap: var(--space-1); }
+  .gap-2 { gap: var(--space-2); }
+  .ml-auto { margin-left: auto; }
+  .text-muted { color: var(--muted-foreground); }
+  .text-sm { font-size: 13px; }
+  .text-xs { font-size: 12px; }
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .flex-col { flex-direction: column; }
+  .w-full { width: 100%; }
+  .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ── Screen transitions ── */
+  .screen { animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--safe-gray-light); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" fill="#12ff80"/></svg>
+      </div>
+      <div>
+        <div class="sidebar-title">Workbench</div>
+        <div class="sidebar-subtitle">Safe Design</div>
+      </div>
+    </div>
+
+    <div class="sidebar-content">
+      <div class="sidebar-group-label">Workspace</div>
+      <div class="sidebar-item active" onclick="showScreen('index')">
+        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        All Prototypes
+        <span class="sidebar-item-badge">8</span>
+      </div>
+      <div class="sidebar-item" onclick="showScreen('index')">
+        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Recent
+      </div>
+      <div class="sidebar-item">
+        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+        Starred
+      </div>
+
+      <div class="sidebar-group-label">Projects</div>
+      <div class="sidebar-item">
+        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
+        Spaces Redesign
+        <span class="sidebar-item-badge">3</span>
+      </div>
+      <div class="sidebar-item">
+        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9"/></svg>
+        Swap Flow v2
+        <span class="sidebar-item-badge">2</span>
+      </div>
+      <div class="sidebar-item">
+        <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Onboarding
+        <span class="sidebar-item-badge">3</span>
+      </div>
+
+      <div class="sidebar-group-label">Team</div>
+      <div class="sidebar-item">
+        <div class="avatar avatar-max" style="width:20px;height:20px;font-size:9px;">M</div>
+        Max's prototypes
+      </div>
+      <div class="sidebar-item">
+        <div class="avatar avatar-sara" style="width:20px;height:20px;font-size:9px;">S</div>
+        Sara's prototypes
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar avatar-iva">I</div>
+        <div>
+          <div style="font-size:13px;font-weight:500;">Iva</div>
+          <div style="font-size:11px;color:var(--muted-foreground);">Design Lead</div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+
+    <!-- ════════ INDEX SCREEN ════════ -->
+    <div class="screen active" id="screen-index">
+      <div class="topbar">
+        <div class="topbar-breadcrumb">
+          <strong>All Prototypes</strong>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-outline btn-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            Search
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="showScreen('editor')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            New Prototype
+          </button>
+        </div>
+      </div>
+
+      <div class="index-tabs">
+        <button class="index-tab active">All</button>
+        <button class="index-tab">In Progress</button>
+        <button class="index-tab">In Review</button>
+        <button class="index-tab">Handed Off</button>
+      </div>
+
+      <div class="prototype-grid">
+        <!-- Card 1 -->
+        <div class="proto-card" onclick="showScreen('editor')">
+          <div class="proto-card-preview">
+            <div class="proto-card-preview-inner">
+              <div class="preview-sidebar-mock">
+                <div class="bar bar-dark bar-w70"></div>
+                <div class="bar bar-light bar-w50"></div>
+                <div class="bar bar-green bar-w80"></div>
+                <div class="bar bar-light bar-w60"></div>
+                <div class="bar bar-light bar-w40"></div>
+              </div>
+              <div class="preview-content-mock">
+                <div class="bar bar-dark bar-w50 bar-h8" style="margin-bottom:8px"></div>
+                <div class="bar bar-light bar-w80"></div>
+                <div class="bar bar-light bar-w70"></div>
+                <div class="bar bar-light bar-w60" style="margin-top:8px"></div>
+              </div>
+            </div>
+            <div class="proto-card-status">
+              <span class="status-badge status-draft">Draft</span>
+            </div>
+          </div>
+          <div class="proto-card-body">
+            <div class="proto-card-title">Spaces Dashboard Redesign</div>
+            <div class="proto-card-desc">New layout with consolidated widget view and improved Safe selector</div>
+            <div class="proto-card-meta">
+              <div class="avatar avatar-iva">I</div>
+              <span class="proto-card-meta-text">Iva · 2h ago</span>
+              <div class="proto-card-branches">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/></svg>
+                3
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="proto-card" onclick="showScreen('editor')">
+          <div class="proto-card-preview" style="background:#f0fdf4">
+            <div class="proto-card-preview-inner">
+              <div class="preview-content-mock" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+                <div class="bar bar-dark bar-w60 bar-h8"></div>
+                <div class="bar bar-green bar-w40 bar-h12" style="border-radius:4px"></div>
+                <div class="bar bar-light bar-w80"></div>
+                <div class="bar bar-light bar-w70"></div>
+              </div>
+            </div>
+            <div class="proto-card-status">
+              <span class="status-badge status-review">In Review</span>
+            </div>
+          </div>
+          <div class="proto-card-body">
+            <div class="proto-card-title">Swap Flow — Token Selector</div>
+            <div class="proto-card-desc">Redesigned token picker with search, favorites, and recent tokens</div>
+            <div class="proto-card-meta">
+              <div class="avatar avatar-max">M</div>
+              <span class="proto-card-meta-text">Max · 1d ago</span>
+              <div class="proto-card-branches">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/></svg>
+                2
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="proto-card" onclick="showScreen('editor')">
+          <div class="proto-card-preview">
+            <div class="proto-card-preview-inner">
+              <div class="preview-content-mock">
+                <div class="bar bar-dark bar-w40 bar-h8" style="margin-bottom:6px"></div>
+                <div style="display:flex;gap:4px;margin-bottom:6px">
+                  <div style="flex:1;height:40px;background:var(--muted);border-radius:4px"></div>
+                  <div style="flex:1;height:40px;background:var(--muted);border-radius:4px"></div>
+                  <div style="flex:1;height:40px;background:var(--muted);border-radius:4px"></div>
+                </div>
+                <div class="bar bar-green bar-w40 bar-h8" style="border-radius:4px"></div>
+              </div>
+            </div>
+            <div class="proto-card-status">
+              <span class="status-badge status-handed-off">Handed Off</span>
+            </div>
+          </div>
+          <div class="proto-card-body">
+            <div class="proto-card-title">Onboarding — Create Space</div>
+            <div class="proto-card-desc">Step-by-step flow for creating a new space with member invitations</div>
+            <div class="proto-card-meta">
+              <div class="avatar avatar-iva">I</div>
+              <span class="proto-card-meta-text">Iva · 3d ago</span>
+              <div class="proto-card-branches">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/></svg>
+                1
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="proto-card" onclick="showScreen('editor')">
+          <div class="proto-card-preview">
+            <div class="proto-card-preview-inner">
+              <div class="preview-sidebar-mock">
+                <div class="bar bar-dark bar-w60"></div>
+                <div class="bar bar-light bar-w80"></div>
+                <div class="bar bar-light bar-w50"></div>
+              </div>
+              <div class="preview-content-mock">
+                <div class="bar bar-dark bar-w70 bar-h8" style="margin-bottom:6px"></div>
+                <div style="display:flex;gap:4px">
+                  <div style="flex:1;height:60px;background:var(--muted);border-radius:4px"></div>
+                  <div style="flex:1;height:60px;background:var(--muted);border-radius:4px"></div>
+                </div>
+              </div>
+            </div>
+            <div class="proto-card-status">
+              <span class="status-badge status-draft">Draft</span>
+            </div>
+          </div>
+          <div class="proto-card-body">
+            <div class="proto-card-title">Settings — Notifications Panel</div>
+            <div class="proto-card-desc">Notification preferences and alert configuration for space members</div>
+            <div class="proto-card-meta">
+              <div class="avatar avatar-sara">S</div>
+              <span class="proto-card-meta-text">Sara · 5d ago</span>
+              <div class="proto-card-branches">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/></svg>
+                0
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="proto-card" onclick="showScreen('editor')">
+          <div class="proto-card-preview" style="background: #cef0fd44">
+            <div class="proto-card-preview-inner">
+              <div class="preview-content-mock" style="display:flex;flex-direction:column;gap:4px;justify-content:center;align-items:center">
+                <div style="width:36px;height:36px;border-radius:50%;background:var(--safe-green-bg);border:2px solid var(--safe-green-light)"></div>
+                <div class="bar bar-dark bar-w50 bar-h8"></div>
+                <div class="bar bar-light bar-w70"></div>
+              </div>
+            </div>
+            <div class="proto-card-status">
+              <span class="status-badge status-review">In Review</span>
+            </div>
+          </div>
+          <div class="proto-card-body">
+            <div class="proto-card-title">Pending Tx — Confirmation Screen</div>
+            <div class="proto-card-desc">New confirmation layout with gas estimation and signer status</div>
+            <div class="proto-card-meta">
+              <div class="avatar avatar-pm">L</div>
+              <span class="proto-card-meta-text">Lukas · 1w ago</span>
+              <div class="proto-card-branches">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/></svg>
+                4
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New Card -->
+        <div class="new-proto-card" onclick="showScreen('editor')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+          <span>New Prototype</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════ EDITOR SCREEN ════════ -->
+    <div class="screen" id="screen-editor">
+      <div class="topbar">
+        <div class="topbar-breadcrumb">
+          <span style="cursor:pointer" onclick="showScreen('index')">All Prototypes</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          <strong>Spaces Dashboard Redesign</strong>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-ghost btn-sm" onclick="copyLink()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+            Share Link
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="createBranch()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/></svg>
+            Branch
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="openPR()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 00-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 004 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65S8.93 17.38 9 18v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+            Open PR
+          </button>
+        </div>
+      </div>
+
+      <!-- Branch bar -->
+      <div class="branch-bar" id="branch-bar" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/></svg>
+        <span class="branch-name">iva/dashboard-card-layout</span>
+        <span class="branch-from">branched from main</span>
+        <div class="branch-actions">
+          <button class="btn btn-xs btn-outline" onclick="hideBranch()">← Back to main</button>
+        </div>
+      </div>
+
+      <!-- PR Banner -->
+      <div class="pr-banner" id="pr-banner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+        <span>PR <a href="#">#347</a> opened on <strong>safe-wallet-monorepo</strong></span>
+        <span class="text-muted text-xs ml-auto">feat/spaces-dashboard-redesign → main</span>
+      </div>
+
+      <div class="editor-layout">
+        <!-- Preview area -->
+        <div class="editor-preview">
+          <div class="editor-preview-toolbar">
+            <div class="viewport-toggle">
+              <button class="viewport-btn active">Desktop</button>
+              <button class="viewport-btn">Tablet</button>
+              <button class="viewport-btn">Mobile</button>
+            </div>
+            <span style="font-size:12px;color:var(--muted-foreground);margin-left:auto">1280 × 800</span>
+          </div>
+          <div class="editor-canvas">
+            <div class="editor-frame">
+              <!-- Mock Safe Spaces Dashboard inside the frame -->
+              <div class="mock-app-shell">
+                <div class="mock-sidebar">
+                  <div class="mock-sidebar-brand">
+                    <div class="mock-sidebar-logo"></div>
+                    <div class="mock-sidebar-name">My Space</div>
+                  </div>
+                  <div class="mock-nav-item mock-active">Dashboard</div>
+                  <div class="mock-nav-item">Assets</div>
+                  <div class="mock-nav-item">Transactions</div>
+                  <div class="mock-nav-item">Address Book</div>
+                  <div class="mock-nav-item">Apps</div>
+                  <div style="margin-top:auto">
+                    <div class="mock-nav-item">Settings</div>
+                  </div>
+                </div>
+                <div class="mock-main">
+                  <div class="mock-header-row">
+                    <div class="mock-h1">Dashboard</div>
+                    <div class="flex gap-1">
+                      <div style="padding:6px 12px;border-radius:var(--radius-sm);background:var(--primary);color:var(--primary-foreground);font-size:13px;font-weight:500">New Transaction</div>
+                    </div>
+                  </div>
+                  <div class="mock-card-grid">
+                    <div class="mock-card">
+                      <div class="mock-card-amount">$124,830</div>
+                      <div class="mock-card-label">Total Balance</div>
+                      <div class="mock-card-bar" style="background:var(--safe-green);width:80%"></div>
+                    </div>
+                    <div class="mock-card">
+                      <div class="mock-card-amount">3</div>
+                      <div class="mock-card-label">Pending Transactions</div>
+                      <div class="mock-card-bar" style="background:var(--warning);width:30%"></div>
+                    </div>
+                    <div class="mock-card">
+                      <div class="mock-card-amount">5 / 7</div>
+                      <div class="mock-card-label">Signers Online</div>
+                      <div class="mock-card-bar" style="background:var(--info);width:71%"></div>
+                    </div>
+                  </div>
+                  <div style="margin-top:var(--space-2)">
+                    <div style="font-size:14px;font-weight:600;margin-bottom:var(--space-1)">Recent Activity</div>
+                    <div style="background:var(--background);border-radius:var(--radius-lg);overflow:hidden">
+                      <div style="display:flex;align-items:center;padding:12px var(--space-2);border-bottom:1px solid var(--border)">
+                        <div style="width:8px;height:8px;border-radius:50%;background:var(--safe-green);margin-right:var(--space-1)"></div>
+                        <div style="font-size:13px">Sent 2.5 ETH to 0x1a2b…</div>
+                        <div style="margin-left:auto;font-size:12px;color:var(--muted-foreground)">2m ago</div>
+                      </div>
+                      <div style="display:flex;align-items:center;padding:12px var(--space-2);border-bottom:1px solid var(--border)">
+                        <div style="width:8px;height:8px;border-radius:50%;background:var(--warning);margin-right:var(--space-1)"></div>
+                        <div style="font-size:13px">Awaiting 2/3 confirmations</div>
+                        <div style="margin-left:auto;font-size:12px;color:var(--muted-foreground)">15m ago</div>
+                      </div>
+                      <div style="display:flex;align-items:center;padding:12px var(--space-2)">
+                        <div style="width:8px;height:8px;border-radius:50%;background:var(--safe-green);margin-right:var(--space-1)"></div>
+                        <div style="font-size:13px">Added signer 0x8f3c…</div>
+                        <div style="margin-left:auto;font-size:12px;color:var(--muted-foreground)">1h ago</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right panel -->
+        <div class="editor-panel">
+          <div class="panel-tabs">
+            <button class="panel-tab active" onclick="switchPanel('chat', this)">AI Chat</button>
+            <button class="panel-tab" onclick="switchPanel('components', this)">Components</button>
+            <button class="panel-tab" onclick="switchPanel('branches', this)">Branches</button>
+          </div>
+
+          <!-- AI Chat panel -->
+          <div class="panel-content active" id="panel-chat">
+            <div class="chat-messages">
+              <div class="chat-msg">
+                <div class="chat-msg-avatar chat-msg-ai">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#12ff80"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z"/></svg>
+                </div>
+                <div class="chat-msg-bubble">
+                  I've set up the Spaces Dashboard using your Storybook components — <code>Sidebar</code>, <code>Card</code>, <code>Button</code>, and <code>SidebarMenuButton</code>. The layout follows the existing Spaces pattern with a floating sidebar variant. What would you like to iterate on?
+                </div>
+              </div>
+              <div class="chat-msg">
+                <div class="chat-msg-avatar avatar-iva" style="font-size:10px">I</div>
+                <div class="chat-msg-bubble">
+                  Move the balance cards into a single consolidated widget card. Make it look more like a summary strip, not 3 separate cards.
+                </div>
+              </div>
+              <div class="chat-msg">
+                <div class="chat-msg-avatar chat-msg-ai">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#12ff80"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z"/></svg>
+                </div>
+                <div class="chat-msg-bubble">
+                  Done — I've combined the three stats into a single <code>Card</code> component with a horizontal layout. The total balance is now the primary element, with pending txs and signer count as secondary indicators. Want me to adjust the hierarchy?
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-area">
+              <div class="chat-input-wrapper">
+                <input class="chat-input" placeholder="Describe what to change..." />
+                <button class="chat-send">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Components panel -->
+          <div class="panel-content" id="panel-components">
+            <div class="comp-browser">
+              <input class="comp-search" placeholder="Search components…" />
+
+              <div class="comp-group-label">Layout</div>
+              <div class="comp-item">
+                <div class="comp-item-preview"><div style="display:flex;width:100%;height:100%"><div class="mini-sidebar"></div><div class="mini-content"></div></div></div>
+                <div class="comp-item-info">
+                  <div class="comp-item-name">Sidebar</div>
+                  <div class="comp-item-variants">sidebar · floating · inset</div>
+                </div>
+                <button class="comp-item-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+              <div class="comp-item">
+                <div class="comp-item-preview"><div class="mini-card"></div></div>
+                <div class="comp-item-info">
+                  <div class="comp-item-name">Card</div>
+                  <div class="comp-item-variants">default · sm</div>
+                </div>
+                <button class="comp-item-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+
+              <div class="comp-group-label">Actions</div>
+              <div class="comp-item">
+                <div class="comp-item-preview"><div class="mini-btn"></div></div>
+                <div class="comp-item-info">
+                  <div class="comp-item-name">Button</div>
+                  <div class="comp-item-variants">default · outline · ghost · destructive</div>
+                </div>
+                <button class="comp-item-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+
+              <div class="comp-group-label">Form</div>
+              <div class="comp-item">
+                <div class="comp-item-preview"><div class="mini-input"></div></div>
+                <div class="comp-item-info">
+                  <div class="comp-item-name">Input</div>
+                  <div class="comp-item-variants">text · search · password</div>
+                </div>
+                <button class="comp-item-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+
+              <div class="comp-group-label">Navigation</div>
+              <div class="comp-item">
+                <div class="comp-item-preview" style="font-size:8px;color:var(--muted-foreground);font-weight:600">TABS</div>
+                <div class="comp-item-info">
+                  <div class="comp-item-name">Tabs</div>
+                  <div class="comp-item-variants">default · line · underline</div>
+                </div>
+                <button class="comp-item-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+
+              <div class="comp-group-label">Data Display</div>
+              <div class="comp-item">
+                <div class="comp-item-preview" style="font-size:8px;color:var(--muted-foreground);font-weight:600">Av</div>
+                <div class="comp-item-info">
+                  <div class="comp-item-name">InitialsAvatar</div>
+                  <div class="comp-item-variants">xsmall · small · medium · large</div>
+                </div>
+                <button class="comp-item-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+              <div class="comp-item">
+                <div class="comp-item-preview" style="font-size:7px;color:var(--muted-foreground);font-weight:600">BADGE</div>
+                <div class="comp-item-info">
+                  <div class="comp-item-name">Badge</div>
+                  <div class="comp-item-variants">default · secondary · outline · destructive</div>
+                </div>
+                <button class="comp-item-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+
+              <div class="comp-group-label">Spaces</div>
+              <div class="comp-item">
+                <div class="comp-item-preview"><div class="mini-card"></div></div>
+                <div class="comp-item-info">
+                  <div class="comp-item-name">SpaceCard</div>
+                  <div class="comp-item-variants">default · compact</div>
+                </div>
+                <button class="comp-item-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+              <div class="comp-item">
+                <div class="comp-item-preview" style="font-size:7px;color:var(--muted-foreground);font-weight:600">TX</div>
+                <div class="comp-item-info">
+                  <div class="comp-item-name">PendingTxWidget</div>
+                  <div class="comp-item-variants">default</div>
+                </div>
+                <button class="comp-item-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+              <div class="comp-item">
+                <div class="comp-item-preview" style="font-size:7px;color:var(--muted-foreground);font-weight:600">HDR</div>
+                <div class="comp-item-info">
+                  <div class="comp-item-name">DashboardHeader</div>
+                  <div class="comp-item-variants">default</div>
+                </div>
+                <button class="comp-item-add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Branches panel -->
+          <div class="panel-content" id="panel-branches">
+            <div class="branches-content">
+              <div class="branch-card active">
+                <div class="branch-card-header">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--safe-green-dark)" stroke-width="2"><path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/></svg>
+                  <span class="branch-card-name">main</span>
+                  <span class="branch-card-tag tag-main">source</span>
+                </div>
+                <div class="branch-card-meta">Iva · Updated 2h ago · 12 iterations</div>
+              </div>
+
+              <div class="branch-card" onclick="showBranch()">
+                <div class="branch-card-header">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/></svg>
+                  <span class="branch-card-name">iva/card-layout</span>
+                  <span class="branch-card-tag tag-active">active</span>
+                </div>
+                <div class="branch-card-meta">Iva · Consolidated widget cards</div>
+              </div>
+
+              <div class="branch-card">
+                <div class="branch-card-header">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/></svg>
+                  <span class="branch-card-name">max/dark-theme</span>
+                </div>
+                <div class="branch-card-meta">Max · Dark mode exploration</div>
+              </div>
+
+              <div class="branch-card">
+                <div class="branch-card-header">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12M18 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM18 9a9 9 0 01-9 9"/></svg>
+                  <span class="branch-card-name">sara/sidebar-compact</span>
+                </div>
+                <div class="branch-card-meta">Sara · Collapsed sidebar variant</div>
+              </div>
+
+              <button class="btn btn-outline btn-sm w-full" style="margin-top:var(--space-1)" onclick="createBranch()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+                New Branch
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Screen switching
+  function showScreen(name) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + name).classList.add('active');
+
+    // Update sidebar active state
+    const items = document.querySelectorAll('.sidebar-item');
+    items.forEach(item => item.classList.remove('active'));
+    if (name === 'index') items[0].classList.add('active');
+  }
+
+  // Panel switching
+  function switchPanel(panel, tab) {
+    document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel-content').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + panel).classList.add('active');
+  }
+
+  // Viewport toggle
+  document.querySelectorAll('.viewport-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.viewport-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const frame = document.querySelector('.editor-frame');
+      const label = document.querySelector('.editor-preview-toolbar span:last-child');
+      if (btn.textContent === 'Mobile') {
+        frame.style.maxWidth = '375px';
+        label.textContent = '375 × 667';
+      } else if (btn.textContent === 'Tablet') {
+        frame.style.maxWidth = '768px';
+        label.textContent = '768 × 1024';
+      } else {
+        frame.style.maxWidth = '1200px';
+        label.textContent = '1280 × 800';
+      }
+    });
+  });
+
+  // Tab switching on index
+  document.querySelectorAll('.index-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.index-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  // Branch actions
+  function createBranch() {
+    document.getElementById('branch-bar').style.display = 'flex';
+  }
+
+  function hideBranch() {
+    document.getElementById('branch-bar').style.display = 'none';
+  }
+
+  function showBranch() {
+    document.getElementById('branch-bar').style.display = 'flex';
+  }
+
+  function openPR() {
+    document.getElementById('pr-banner').classList.add('visible');
+  }
+
+  function copyLink() {
+    // Visual feedback
+    const btn = event.target.closest('.btn');
+    const original = btn.innerHTML;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg> Copied!';
+    setTimeout(() => { btn.innerHTML = original; }, 2000);
+  }
+</script>
+</body>
+</html>

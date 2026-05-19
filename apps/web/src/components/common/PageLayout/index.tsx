@@ -20,19 +20,24 @@ import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
+import FlowSelector from '@/features/spaces/components/FlowSelector'
+import OldInterfaceBanner, { BANNER_HEIGHT } from '@/features/spaces/components/OldInterfaceBanner'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
+  AppRoutes.welcome.howWillYouUseSafe,
 ]
 
 const NO_HEADER_ROUTES = [
   AppRoutes.safeLabsTerms,
   AppRoutes.welcome.index,
+  AppRoutes.welcome.spaces,
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
+  AppRoutes.welcome.howWillYouUseSafe,
   AppRoutes.spaces.createSpace,
 ]
 
@@ -62,8 +67,14 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
     setFullWidth(!isSidebarVisible)
   }, [isSidebarVisible, setFullWidth])
 
+  const isOldInterface = pathname === AppRoutes.welcome.accounts
+
+  const bannerOffset = isOldInterface ? BANNER_HEIGHT : 0
+
   return (
     <>
+      {isOldInterface && <OldInterfaceBanner />}
+
       {!hideHeader && (
         <div
           className={classnames(css.topbar, {
@@ -71,6 +82,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
             [css.topbarNoSidebar]: !isSidebarVisible || !isSidebarRoute,
             [css.topbarElevated]: isTopbarElevated,
           })}
+          style={bannerOffset ? { top: bannerOffset } : undefined}
         >
           <Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
         </div>
@@ -92,6 +104,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           [css.mainSpace]: !hideHeader,
           [css.mainSpaceCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
         })}
+        style={bannerOffset ? { marginTop: bannerOffset } : undefined}
       >
         <div className={css.content}>
           <SafeLoadingError>
@@ -121,6 +134,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       </div>
 
       <SelectSafeModal />
+
+      {(hideHeader || isOnboardingRoute) && <FlowSelector />}
     </>
   )
 }

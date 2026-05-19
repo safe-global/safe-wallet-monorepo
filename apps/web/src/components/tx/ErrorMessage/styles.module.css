@@ -1,24 +1,26 @@
 .container {
-  padding: var(--space-2);
-  border-radius: 6px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .container.error {
-  background-color: var(--color-error-background);
-  color: var(--color-error-dark);
+  background-color: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
 }
 
 .container.warning {
-  background-color: var(--color-warning-background);
+  background-color: #fffbeb;
+  color: #92400e;
 }
 
 .container.info {
-  background-color: var(--color-info-background);
-  color: var(--color-primary-main);
+  background-color: #f5f5f5;
+  color: #121312;
 }
 
 .container.info svg {
-  color: var(--color-text-secondary);
+  color: #737373;
 }
 
 .message {
@@ -30,15 +32,18 @@
 /* Ensure body text uses 14px font-size */
 .message :global .MuiTypography-body2 {
   font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .message button {
   vertical-align: baseline;
   text-decoration: underline;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .details {
   margin-top: var(--space-1);
-  color: var(--color-primary-light);
+  color: #737373;
   word-break: break-word;
+  font-size: 13px;
 }

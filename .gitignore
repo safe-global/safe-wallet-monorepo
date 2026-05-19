@@ -121,4 +121,4 @@ todos/*
 /docs/brainstorms/
 
 .codemod
-.serena
+.serena.claude/worktrees/

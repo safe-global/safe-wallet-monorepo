@@ -81,6 +81,8 @@ export const AppRoutes = {
     createSpace: '/welcome/create-space',
     selectSafes: '/welcome/select-safes',
     inviteMembers: '/welcome/invite-members',
+    howWillYouUseSafe: '/welcome/how-will-you-use-safe',
+    emptyDashboard: '/welcome/empty-dashboard',
   },
 }
 

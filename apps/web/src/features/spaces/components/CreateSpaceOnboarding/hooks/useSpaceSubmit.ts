@@ -9,6 +9,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
+import { getActiveFlow } from '../../FlowSelector'
 import type { UseFormHandleSubmit } from 'react-hook-form'
 
 const useSpaceSubmit = (
@@ -59,8 +60,12 @@ const useSpaceSubmit = (
         }),
       )
 
+      const nextRoute = getActiveFlow() === 'new-user-no-safes'
+        ? AppRoutes.welcome.emptyDashboard
+        : AppRoutes.welcome.selectSafes
+
       router.push({
-        pathname: AppRoutes.welcome.selectSafes,
+        pathname: nextRoute,
         query: { spaceId: newSpaceId, ...(safe ? { safe } : {}) },
       })
     }

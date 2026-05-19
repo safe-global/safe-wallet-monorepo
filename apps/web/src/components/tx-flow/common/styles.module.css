@@ -2,7 +2,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-3);
+  padding: 24px;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .cardContent :global .errorMessage {
@@ -10,7 +11,8 @@
 }
 
 .nestedDivider {
-  margin: 0 calc(-1 * var(--space-3));
+  margin: 0 calc(-1 * 24px);
+  border-color: #f0f0f0;
 }
 
 .form > :global(.MuiFormControl-root) {

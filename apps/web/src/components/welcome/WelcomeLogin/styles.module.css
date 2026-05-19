@@ -48,7 +48,8 @@
 .walletBtnPrimary {
   color: var(--color-text-contrast);
   background-color: var(--color-primary-main);
-  min-height: 42px;
+  height: 44px;
+  min-height: 44px;
 }
 
 .walletBtnPrimary:hover {
@@ -58,12 +59,13 @@
 .walletBtnSecondary {
   background-color: var(--color-background-main);
   color: var(--color-text-primary);
-  border-radius: 16px;
-  padding: 10px 28px;
-  font-weight: 600;
+  border-radius: 12px;
+  padding: 8px 28px;
+  font-weight: 700;
   font-size: 14px;
   text-transform: none;
-  min-height: 36px;
+  height: auto;
+  min-height: 44px;
 }
 
 .walletBtnSecondary:hover {
@@ -73,7 +75,8 @@
 .walletBtnStatic {
   color: #fff;
   background-color: #121312;
-  min-height: 42px;
+  height: 44px;
+  min-height: 44px;
 }
 
 .walletBtnStatic:hover {

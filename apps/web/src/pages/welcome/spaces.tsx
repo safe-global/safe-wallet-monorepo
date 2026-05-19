@@ -1,23 +1,18 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { SpacesFeature, useFeatureFlagRedirect } from '@/features/spaces'
-import { useLoadFeature } from '@/features/__core__'
+import dynamic from 'next/dynamic'
 import { BRAND_NAME } from '@/config/constants'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+
+const WelcomeSignIn = dynamic(() => import('@/features/spaces/components/WelcomeSignIn'), { ssr: false })
 
 const Spaces: NextPage = () => {
-  const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
-  const spaces = useLoadFeature(SpacesFeature)
-  useFeatureFlagRedirect()
-
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Spaces`}</title>
+        <title>{`${BRAND_NAME} – Welcome`}</title>
       </Head>
 
-      {isSpacesFeatureEnabled && <spaces.SpacesList />}
+      <WelcomeSignIn />
     </>
   )
 }

@@ -29,7 +29,7 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
-import { Search, Plus, X, Loader2 } from 'lucide-react'
+import { Search, Plus, X, Loader2, ChevronRight } from 'lucide-react'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
@@ -45,6 +45,8 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
 
 export type AddAccountsFormValues = {
   selectedSafes: Record<string, boolean>
@@ -96,7 +98,9 @@ const AddAccounts = ({
   onExternalClose,
 }: AddAccountsProps = {}) => {
   const isAdmin = useIsAdmin()
+  const router = useRouter()
   const [open, setOpen] = useState<boolean>(false)
+  const [chooserOpen, setChooserOpen] = useState<boolean>(false)
   const isOpen = externalOpen ?? open
   const [error, setError] = useState<string>()
   const [manualSafes, setManualSafes] = useState<SafeItems>([])
@@ -344,7 +348,7 @@ const AddAccounts = ({
               { ...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED, label: spaceId },
               { workspace_id: spaceId, entry_point: 'dashboard' },
             )
-            setOpen(true)
+            setChooserOpen(true)
           }}
           title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
           data-testid="add-space-account-button"
@@ -356,6 +360,64 @@ const AddAccounts = ({
           />
           {buttonLabel}
         </Button>
+      )}
+
+      {/* ── Add Safe Account chooser ── */}
+      {chooserOpen && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setChooserOpen(false)}
+        >
+          <div
+            className="w-[420px] overflow-hidden rounded-2xl bg-background shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+              <Typography variant="h4" className="text-[17px] font-bold">Add Safe Account</Typography>
+              <button
+                type="button"
+                onClick={() => setChooserOpen(false)}
+                className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* Options */}
+            <div className="flex flex-col gap-2 p-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setChooserOpen(false)
+                  setOpen(true)
+                }}
+                className="group flex w-full items-center gap-3 rounded-xl bg-secondary px-4 py-3.5 text-left transition-colors hover:bg-secondary/70"
+              >
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[#f0fdf4] dark:bg-[#12FF80]/10">
+                  <Search className="size-4 text-[#16a34a] dark:text-[#12FF80]" />
+                </div>
+                <span className="flex-1 text-[15px] font-semibold text-foreground">Add existing account</span>
+                <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setChooserOpen(false)
+                  router.push(AppRoutes.newSafe.create)
+                }}
+                className="group flex w-full items-center gap-3 rounded-xl bg-secondary px-4 py-3.5 text-left transition-colors hover:bg-secondary/70"
+              >
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-[#f0fdf4] dark:bg-[#12FF80]/10">
+                  <Plus className="size-4 text-[#16a34a] dark:text-[#12FF80]" />
+                </div>
+                <span className="flex-1 text-[15px] font-semibold text-foreground">Create new account</span>
+                <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <ModalDialog open={isOpen} fullScreen hideChainIndicator>

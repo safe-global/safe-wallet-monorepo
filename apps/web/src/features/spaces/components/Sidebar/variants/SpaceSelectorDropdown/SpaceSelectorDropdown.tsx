@@ -237,10 +237,7 @@ export const SpaceSelectorDropdown = ({
           )
         })()}
 
-        <DropdownMenuItem onClick={handleViewSpaces} className={MENU_ITEM_CLASS}>
-          <LayoutGrid className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
-          <span>View all</span>
-        </DropdownMenuItem>
+        {/* View all removed per design */}
       </DropdownMenuContent>
     </DropdownMenu>
   )

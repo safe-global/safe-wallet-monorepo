@@ -42,7 +42,12 @@ const CustomPopper = function ({
 const NonceFormHeader = memo(function NonceFormSubheader({ children, ...props }: ListSubheaderProps) {
   return (
     <ListSubheader {...props} disableSticky>
-      <Typography variant="caption" fontWeight={700} color="text.secondary">
+      <Typography
+        variant="caption"
+        fontWeight={600}
+        color="text.secondary"
+        sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '11px', color: '#a1a3a7' }}
+      >
         {children}
       </Typography>
     </ListSubheader>
@@ -74,7 +79,7 @@ const NonceFormOption = memo(function NonceFormOption({
 
   return (
     <MenuItem {...menuItemProps}>
-      <Typography variant="body2">
+      <Typography variant="body2" sx={{ fontFamily: '"DM Sans", sans-serif' }}>
         <b>{nonce}</b>&nbsp;- {label}
       </Typography>
     </MenuItem>
@@ -180,7 +185,12 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
       render={({ field, fieldState }) => {
         if (readOnly) {
           return (
-            <Typography variant="body2" fontWeight={700} ml={-1}>
+            <Typography
+              variant="body2"
+              fontWeight={600}
+              ml={-1}
+              sx={{ fontFamily: '"DM Sans", sans-serif', fontVariantNumeric: 'tabular-nums' }}
+            >
               {nonce}
             </Typography>
           )
@@ -231,7 +241,7 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
             disableClearable
             componentsProps={{
               paper: {
-                elevation: 2,
+                elevation: 0,
               },
             }}
             renderInput={(params) => {
@@ -301,16 +311,37 @@ const TxNonce = ({ canEdit = true }: { canEdit?: boolean } = {}) => {
 
   return (
     <Box data-testid="nonce-fld" display="flex" alignItems="center" gap={1} className={css.nonce}>
-      Nonce{' '}
-      <Typography component="span" fontWeight={700}>
+      <Typography
+        component="span"
+        sx={{
+          fontFamily: '"DM Sans", sans-serif',
+          fontSize: '13px',
+          fontWeight: 500,
+          color: '#737373',
+        }}
+      >
+        Nonce
+      </Typography>
+      <Typography
+        component="span"
+        sx={{
+          fontWeight: 600,
+          fontFamily: '"DM Sans", sans-serif',
+          color: '#737373',
+        }}
+      >
         #
       </Typography>
       {nonce === undefined || recommendedNonce === undefined ? (
-        <Skeleton width={skeletonMinWidth} height="38px" />
+        <Skeleton width={skeletonMinWidth} height="38px" sx={{ borderRadius: '12px' }} />
       ) : canEdit && !isReadOnly ? (
         <TxNonceForm nonce={nonce.toString()} recommendedNonce={recommendedNonce.toString()} />
       ) : (
-        <Typography ml={-1} fontWeight={700}>
+        <Typography
+          ml={-1}
+          fontWeight={600}
+          sx={{ fontFamily: '"DM Sans", sans-serif', fontVariantNumeric: 'tabular-nums' }}
+        >
           {nonce}
         </Typography>
       )}

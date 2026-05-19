@@ -8,8 +8,8 @@
 }
 
 .error :global .MuiAccordionSummary-root.Mui-expanded {
-  background-color: var(--color-error-background);
-  border-bottom: 1px solid var(--color-error-light);
+  background-color: rgba(239, 68, 68, 0.06);
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .error :global .MuiAccordionSummary-expandIconWrapper {
@@ -24,26 +24,29 @@
 
 .feeAmount {
   font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .strikethrough {
   text-decoration: line-through;
-  color: var(--color-text-secondary);
+  color: #737373;
   font-size: 0.75rem;
 }
 
 .noFeeCampaignTag {
   background: linear-gradient(90deg, #b0ffc9 0%, #d7f6ff 99.5%);
-  color: black;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 400;
-  letter-spacing: 1px;
+  color: #121312;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .remainingCounter {
-  color: var(--color-text-secondary);
-  font-size: 0.75rem;
-  font-weight: 400;
+  color: #737373;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
 }

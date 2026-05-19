@@ -1,15 +1,17 @@
 import { TxFlowContext } from '../../TxFlowProvider'
 import { type ReactNode, useContext } from 'react'
-import { Box, Container, Grid2 as Grid, Typography, Button, Paper, useMediaQuery, Stack } from '@mui/material'
+import { Box, Container, Grid2 as Grid, Typography, Button, Paper, useMediaQuery, Card, Stack } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useTheme } from '@mui/material/styles'
 import classnames from 'classnames'
 import { ProgressBar } from '@/components/common/ProgressBar'
 import css from './styles.module.css'
+import ChainIndicator from '@/components/common/ChainIndicator'
 import TxStatusWidget from '@/components/tx-flow/common/TxStatusWidget'
 import SafeShieldWidget from '@/features/safe-shield'
 import { TxLayoutHeader } from '../TxLayout'
 import { Slot, SlotName } from '../../slots'
+import SafeInfo from '@/components/tx-flow/common/SafeInfo'
 
 /**
  * TxFlowContent is a component that renders the main content of the transaction flow.
@@ -43,11 +45,22 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'))
 
   return (
-    <Grid container className={css.container}>
+    <Grid container className={css.container} sx={{ fontFamily: '"DM Sans", sans-serif' }}>
       {!isReplacement && !isSmallScreen && (
         <Grid sx={{ width: 200 }} pt={5}>
           <aside>
             <Stack gap={3} position="fixed">
+              <Card
+                className={css.safeInfoCard}
+                sx={{
+                  borderRadius: '16px',
+                  boxShadow: 'none',
+                  border: '1px solid #f0f0f0',
+                }}
+              >
+                <SafeInfo />
+              </Card>
+
               <TxStatusWidget
                 isLastStep={step === childrenArray.length - 1}
                 txSummary={txSummary}
@@ -70,18 +83,29 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
                   variant="h3"
                   component="div"
                   className={css.title}
-                  sx={{ fontWeight: '700' }}
+                  sx={{
+                    fontWeight: 600,
+                    fontFamily: '"DM Sans", sans-serif',
+                    fontSize: '28px',
+                    letterSpacing: '-0.5px',
+                    lineHeight: 1.2,
+                    color: '#121312',
+                  }}
                 >
                   {title}
                 </Typography>
+
+                <ChainIndicator inline />
               </div>
 
               <Paper
                 data-testid="modal-header"
                 className={css.header}
                 sx={{
-                  borderTopLeftRadius: !hideProgress ? '0' : '16px',
-                  borderTopRightRadius: !hideProgress ? '0' : '16px',
+                  borderRadius: '24px 24px 0 0',
+                  boxShadow: 'none',
+                  border: '1px solid #f0f0f0',
+                  borderBottom: 'none',
                 }}
               >
                 {!hideProgress && (
@@ -103,6 +127,19 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
                     onClick={onPrev}
                     className={css.backButton}
                     startIcon={<ArrowBackIcon fontSize="small" />}
+                    sx={{
+                      fontFamily: '"DM Sans", sans-serif',
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      borderRadius: '8px',
+                      textTransform: 'none',
+                      border: isDesktop ? '1px solid #dcdee0' : 'none',
+                      color: '#121312',
+                      '&:hover': {
+                        backgroundColor: '#f0f0f0',
+                        borderColor: '#c0c0c0',
+                      },
+                    }}
                   >
                     Back
                   </Button>

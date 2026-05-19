@@ -74,9 +74,41 @@ export default function SplitMenuButton({
   const { label, id } = useMemo(() => options[selectedIndex] || {}, [options, selectedIndex])
   const maxCharLen = Math.max(...options.map(({ id, label }) => (label || id).length)) + 2
 
+  const buttonSx = {
+    backgroundColor: '#121312',
+    color: '#ffffff',
+    fontFamily: '"DM Sans", sans-serif',
+    fontWeight: 600,
+    fontSize: '14px',
+    textTransform: 'none' as const,
+    boxShadow: 'none',
+    height: '40px',
+    '&:hover': {
+      backgroundColor: '#1a3d2a',
+      boxShadow: 'none',
+    },
+    '&.Mui-disabled': {
+      backgroundColor: '#e5e7eb',
+      color: '#a1a3a7',
+      borderColor: '#e5e7eb',
+    },
+  }
+
   return (
     <>
-      <ButtonGroup variant="contained" ref={anchorRef} aria-label="Button group with a nested menu" fullWidth>
+      <ButtonGroup
+        variant="contained"
+        ref={anchorRef}
+        aria-label="Button group with a nested menu"
+        fullWidth
+        sx={{
+          borderRadius: '8px',
+          boxShadow: 'none',
+          '& .MuiButtonGroup-grouped:not(:last-of-type)': {
+            borderColor: 'rgba(255, 255, 255, 0.2)',
+          },
+        }}
+      >
         <Tooltip title={tooltip} placement="top">
           <Box flex={1}>
             <Button
@@ -84,9 +116,13 @@ export default function SplitMenuButton({
               onClick={handleClick}
               type="submit"
               disabled={disabled}
-              sx={{ minWidth: `${maxCharLen}ch !important`, height: '100%' }}
+              sx={{
+                ...buttonSx,
+                minWidth: `${maxCharLen}ch !important`,
+                borderRadius: options.length > 1 ? '8px 0 0 8px' : '8px',
+              }}
             >
-              {loading ? <CircularProgress size={20} /> : label || id}
+              {loading ? <CircularProgress size={20} sx={{ color: '#ffffff' }} /> : label || id}
             </Button>
           </Box>
         </Tooltip>
@@ -99,7 +135,13 @@ export default function SplitMenuButton({
             onClick={handleToggle}
             disabled={loading}
             data-testid="combo-submit-dropdown"
-            sx={{ minWidth: '0 !important', maxWidth: 48, px: 1.5, height: '100%' }}
+            sx={{
+              ...buttonSx,
+              minWidth: '0 !important',
+              maxWidth: 48,
+              px: 1.5,
+              borderRadius: '0 8px 8px 0',
+            }}
           >
             <ArrowDropDownIcon />
           </Button>
@@ -117,6 +159,14 @@ export default function SplitMenuButton({
         transformOrigin={{ horizontal: 'right', vertical: -2 }}
         slotProps={{
           root: { slotProps: { backdrop: { sx: { backgroundColor: 'transparent' } } } },
+          paper: {
+            sx: {
+              borderRadius: '12px',
+              border: '1px solid #f0f0f0',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              fontFamily: '"DM Sans", sans-serif',
+            },
+          },
         }}
         data-testid="combo-submit-popover"
       >
@@ -127,10 +177,25 @@ export default function SplitMenuButton({
               selected={index === selectedIndex}
               disabled={disabledIndex === index}
               onClick={(event) => handleMenuItemClick(event, index)}
-              sx={{ gap: 2 }}
+              sx={{
+                gap: 2,
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: '14px',
+                borderRadius: '8px',
+                mx: 0.5,
+                '&:hover': {
+                  backgroundColor: '#f5f5f5',
+                },
+                '&.Mui-selected': {
+                  backgroundColor: '#f0fdf4',
+                },
+                '&.Mui-selected:hover': {
+                  backgroundColor: '#f0fdf4',
+                },
+              }}
             >
-              <ListItemText>{option.label || option.id}</ListItemText>
-              {index === selectedIndex ? <CheckIcon /> : <Box sx={{ width: 24 }} />}
+              <ListItemText sx={{ fontFamily: '"DM Sans", sans-serif' }}>{option.label || option.id}</ListItemText>
+              {index === selectedIndex ? <CheckIcon sx={{ color: '#22c55e' }} /> : <Box sx={{ width: 24 }} />}
             </MenuItem>
           ))}
         </MenuList>

@@ -1,11 +1,12 @@
 .status {
   padding: 0;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .status::before {
   content: '';
   position: absolute;
-  border-left: 2px solid var(--color-border-light);
+  border-left: 2px solid #f0f0f0;
   left: 7px;
   top: 20px;
   height: calc(100% - 40px);
@@ -21,7 +22,7 @@
 }
 
 .status :global .MuiListItemIcon-root {
-  color: var(--color-primary-main);
+  color: #22c55e;
   justify-content: center;
   min-width: auto;
   padding: var(--space-1);
@@ -30,17 +31,17 @@
 }
 
 [data-theme='light'] .status :global .MuiListItemIcon-root {
-  color: var(--color-primary-main);
+  color: #22c55e;
 }
 
 .incomplete > * {
-  color: var(--color-text-secondary) !important;
+  color: #a1a3a7 !important;
 }
 
 .close {
   color: var(--color-border-main);
   padding: var(--space-2);
-  border-left: 1px solid var(--color-border-light);
+  border-left: 1px solid #f0f0f0;
   border-radius: 0;
   margin-left: auto;
   display: none;
@@ -49,14 +50,17 @@
 .badge {
   margin-left: var(--space-1);
   padding-right: 2px;
-  border-radius: 50%;
+  border-radius: 9999px;
   width: 20px;
   height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-text-primary);
-  color: var(--color-logo-background);
+  background-color: #121312;
+  color: #12FF80;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 [data-theme='dark'] .badge {

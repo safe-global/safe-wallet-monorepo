@@ -11,7 +11,7 @@ const StepIndicator = ({ totalSteps, currentStep }: StepIndicatorProps) => {
       {Array.from({ length: totalSteps }, (_, index) => (
         <div
           key={index}
-          className={cn('size-1.5 rounded-full transition-colors', index < currentStep ? 'bg-foreground' : 'bg-border')}
+          className={cn('size-1.5 rounded-full transition-colors', index < currentStep ? 'bg-muted-foreground' : 'bg-border')}
           aria-current={index === currentStep - 1 ? 'step' : undefined}
         />
       ))}

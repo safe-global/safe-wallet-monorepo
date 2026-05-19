@@ -1,5 +1,6 @@
 .container {
   margin-top: 10px;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .contentContainer {
@@ -10,14 +11,17 @@
 .header {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
 }
 
 .headerInner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-3);
-  border-bottom: 1px solid var(--color-border-light);
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .safeInfoCard {
@@ -27,6 +31,7 @@
   overflow: visible;
   position: fixed;
   top: 62px;
+  border-radius: 16px;
 }
 
 .step {
@@ -59,31 +64,46 @@
 }
 
 .icon {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  border-radius: 6px;
-  border: 1px solid var(--color-border-light);
+  border-radius: 12px;
+  border: 1px solid #f0f0f0;
   margin-right: var(--space-2);
+  background: #FAFAFA;
 }
 
 .icon svg {
-  height: 16px;
+  height: 18px;
   width: auto;
+  color: #121312;
 }
 
 .step :global(.MuiAccordionSummary-content),
 .step :global(.MuiAccordionSummary-content) p {
-  font-weight: bold;
+  font-weight: 600;
   font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .step :global(.MuiAccordionSummary-expandIconWrapper) {
   margin-left: var(--space-2);
+}
+
+/* Style accordion panels */
+.step :global(.MuiAccordion-root) {
+  border-radius: 16px !important;
+  border: 1px solid #f0f0f0;
+  box-shadow: none;
+  margin-top: 0 !important;
+}
+
+.step :global(.MuiAccordion-root::before) {
+  display: none;
 }
 
 .sidebarSlot {
@@ -103,12 +123,118 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-2);
+  margin-bottom: 12px;
 }
 
 .widget {
   /* Height of transaction type title */
   margin-top: 30px;
+}
+
+/* Style all MUI Typography inside the flow */
+.container :global(.MuiTypography-root) {
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Style all MUI buttons */
+.container :global(.MuiButton-contained) {
+  background-color: #121312;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: none;
+  box-shadow: none;
+  padding: 0 14px;
+  height: 40px;
+}
+
+.container :global(.MuiButton-contained:hover) {
+  background-color: #1a3d2a;
+  box-shadow: none;
+}
+
+/* Style outlined buttons */
+.container :global(.MuiButton-outlined) {
+  border: 1px solid #dcdee0;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  text-transform: none;
+  color: #121312;
+}
+
+.container :global(.MuiButton-outlined:hover) {
+  background-color: #f0f0f0;
+  border-color: #c0c0c0;
+}
+
+/* Style text buttons */
+.container :global(.MuiButton-text) {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  text-transform: none;
+  border-radius: 8px;
+}
+
+/* Style MUI Paper inside steps (cards) */
+.step :global(.MuiPaper-root) {
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Dividers */
+.container :global(.MuiDivider-root) {
+  border-color: #f0f0f0;
+}
+
+/* Input fields */
+.container :global(.MuiOutlinedInput-root) {
+  border-radius: 12px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.container :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: #e5e7eb;
+}
+
+.container :global(.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline) {
+  border-color: #c0c0c0;
+}
+
+/* ButtonGroup (SplitMenuButton) */
+.container :global(.MuiButtonGroup-root) {
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.container :global(.MuiButtonGroup-root .MuiButton-root) {
+  background-color: #121312;
+  color: #ffffff;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: none;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  height: 40px;
+}
+
+.container :global(.MuiButtonGroup-root .MuiButton-root:hover) {
+  background-color: #1a3d2a;
+}
+
+.container :global(.MuiButtonGroup-root .MuiButton-root:first-of-type) {
+  border-radius: 8px 0 0 8px;
+}
+
+.container :global(.MuiButtonGroup-root .MuiButton-root:last-of-type) {
+  border-radius: 0 8px 8px 0;
+}
+
+.container :global(.MuiButtonGroup-root .MuiButton-root.Mui-disabled) {
+  background-color: #e5e7eb;
+  color: #a1a3a7;
 }
 
 @media (max-width: 1199px) {

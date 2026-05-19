@@ -27,11 +27,13 @@ import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 const GasDetail = ({ name, value, isLoading }: { name: string; value: string; isLoading: boolean }): ReactElement => {
   const valueSkeleton = <Skeleton variant="text" sx={{ minWidth: '5em' }} />
   return (
-    <Grid container>
+    <Grid container sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#737373', py: 0.5 }}>
       <Grid item xs>
         {name}
       </Grid>
-      <Grid item>{value || (isLoading ? valueSkeleton : '-')}</Grid>
+      <Grid item sx={{ fontVariantNumeric: 'tabular-nums', fontWeight: 500, color: '#121312' }}>
+        {value || (isLoading ? valueSkeleton : '-')}
+      </Grid>
     </Grid>
   )
 }
@@ -96,8 +98,16 @@ export const _GasParams = ({
           component="button"
           onClick={onEditClick}
           sx={{
-            fontSize: 'medium',
+            fontSize: '13px',
             mt: 2,
+            fontFamily: '"DM Sans", sans-serif',
+            fontWeight: 500,
+            color: '#121312',
+            textDecoration: 'underline',
+            textDecorationColor: '#c0c0c0',
+            '&:hover': {
+              color: '#22c55e',
+            },
           }}
         >
           Edit
@@ -114,14 +124,34 @@ export const _GasParams = ({
         elevation={0}
         onChange={onChangeExpand}
         className={classnames({ [css.withExecutionMethod]: isExecution })}
+        sx={{
+          borderRadius: '16px !important',
+          border: '1px solid #f0f0f0',
+          boxShadow: 'none',
+          fontFamily: '"DM Sans", sans-serif',
+          '&::before': { display: 'none' },
+          '&.Mui-expanded': { margin: 0 },
+        }}
       >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} className={accordionCss.accordion}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon sx={{ color: '#a1a3a7' }} />}
+          className={accordionCss.accordion}
+          sx={{
+            fontFamily: '"DM Sans", sans-serif',
+            '&:hover': { backgroundColor: '#FAFAFA' },
+            borderRadius: '16px',
+          }}
+        >
           {isExecution ? (
             <Typography
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 width: 1,
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: '14px',
+                fontWeight: 600,
+                color: '#121312',
               }}
             >
               <span style={{ flex: '1' }}>Estimated fee </span>
@@ -131,12 +161,12 @@ export const _GasParams = ({
                     component={WarningIcon}
                     inheritViewBox
                     fontSize="small"
-                    sx={{ color: 'var(--color-error-main)', mr: 'var(--space-1)' }}
+                    sx={{ color: '#ef4444', mr: 'var(--space-1)' }}
                   />
-                  <span style={{ fontWeight: 'normal' }}>Cannot estimate</span>
+                  <span style={{ fontWeight: 400, color: '#737373' }}>Cannot estimate</span>
                 </>
               ) : isLoading ? (
-                <Skeleton variant="text" sx={{ display: 'inline-block', minWidth: '7em' }} />
+                <Skeleton variant="text" sx={{ display: 'inline-block', minWidth: '7em', borderRadius: '8px' }} />
               ) : (
                 <div className={css.feeContainer}>
                   {noFeeCampaign?.isEligible ? (
@@ -151,16 +181,18 @@ export const _GasParams = ({
                       </Tooltip>
                     </>
                   ) : (
-                    <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>
+                    <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}
+                    </span>
                   )}
                 </div>
               )}
             </Typography>
           ) : (
-            <Typography>
+            <Typography sx={{ fontFamily: '"DM Sans", sans-serif', fontSize: '14px', fontWeight: 600 }}>
               Signing the transaction with nonce&nbsp;
               {nonce !== undefined ? (
-                nonce
+                <span style={{ fontVariantNumeric: 'tabular-nums' }}>{nonce}</span>
               ) : (
                 <Skeleton variant="text" sx={{ display: 'inline-block', minWidth: '2em' }} />
               )}
@@ -168,7 +200,7 @@ export const _GasParams = ({
           )}
         </AccordionSummary>
 
-        <AccordionDetails>
+        <AccordionDetails sx={{ fontFamily: '"DM Sans", sans-serif', pt: 1 }}>
           {nonce !== undefined && (
             <GasDetail isLoading={false} name="Safe Account transaction nonce" value={nonce.toString()} />
           )}

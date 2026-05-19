@@ -17,7 +17,7 @@ const useInviteNavigation = () => {
   }, [router, spaceId])
 
   const redirectToNextStep = useCallback(() => {
-    router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
+    router.push({ pathname: AppRoutes.welcome.howWillYouUseSafe, query: { spaceId } })
   }, [router, spaceId])
 
   return {

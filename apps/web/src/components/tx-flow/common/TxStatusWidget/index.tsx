@@ -17,8 +17,12 @@ const StatusLabel = styled(Typography)(({ theme }) => ({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  letterSpacing: 1,
+  letterSpacing: 0,
+  fontFamily: '"DM Sans", sans-serif',
+  fontSize: '13px',
+  fontWeight: 500,
   ...theme.typography.caption,
+  fontFamily: '"DM Sans", sans-serif',
 }))
 
 const TxStatusWidget = ({
@@ -51,7 +55,13 @@ const TxStatusWidget = ({
   const canSign = txSummary ? isSignableBy(txSummary, wallet?.address || '') : !isProposing
 
   return (
-    <Paper sx={{ backgroundColor: 'transparent' }}>
+    <Paper
+      sx={{
+        backgroundColor: 'transparent',
+        boxShadow: 'none',
+        fontFamily: '"DM Sans", sans-serif',
+      }}
+    >
       <List className={css.status}>
         <ListItem>
           <ListItemIcon>

@@ -4,16 +4,23 @@
   min-width: 70px;
   font-size: 12px;
   justify-content: center;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .inlineIndicator {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   min-width: 70px;
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 500;
   line-height: normal;
   text-align: center;
-  border-radius: 4px;
-  padding: 4px 8px;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-family: 'DM Sans', sans-serif;
+  color: #737373;
+  background-color: #FAFAFA;
 }
 
 .withLogo {
@@ -24,6 +31,7 @@
   min-width: 115px;
   font-size: 14px;
   justify-content: flex-start;
+  font-family: 'DM Sans', sans-serif;
 }
 
 .onlyLogo {

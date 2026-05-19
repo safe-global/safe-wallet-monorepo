@@ -26,7 +26,13 @@ const SafeInfo = (): ReactElement => {
   const copyPrefix = settings.shortName.copy
 
   return (
-    <Stack data-testid="tx-flow-safe-info" direction="row" gap={1} alignItems="center">
+    <Stack
+      data-testid="tx-flow-safe-info"
+      direction="row"
+      gap={1}
+      alignItems="center"
+      sx={{ fontFamily: '"DM Sans", sans-serif' }}
+    >
       <Box data-testid="safe-icon">
         {safeAddress ? (
           <SafeIcon address={safeAddress} size={32} />
@@ -41,15 +47,27 @@ const SafeInfo = (): ReactElement => {
             {name && (
               <Typography
                 variant="body2"
-                fontWeight={700}
+                fontWeight={600}
                 overflow="hidden"
                 textOverflow="ellipsis"
                 whiteSpace="nowrap"
+                sx={{
+                  fontFamily: '"DM Sans", sans-serif',
+                  fontSize: '14px',
+                  color: '#121312',
+                }}
               >
                 {name}
               </Typography>
             )}
-            <Typography variant="body2">
+            <Typography
+              variant="body2"
+              sx={{
+                fontFamily: '"DM Sans", sans-serif',
+                fontSize: '13px',
+                color: '#737373',
+              }}
+            >
               <CopyAddressButton address={safeAddress} prefix={prefix} copyPrefix={copyPrefix}>
                 {prefix && <b>{prefix}:</b>}
                 {shortenAddress(safeAddress)}

@@ -31,6 +31,9 @@ import type SpaceSettingsPage from './components/SpaceSettings/Page'
 import type CreateSpaceOnboarding from './components/CreateSpaceOnboarding'
 import type SelectSafesOnboarding from './components/SelectSafesOnboarding'
 import type InviteMembersOnboarding from './components/InviteMembersOnboarding'
+import type HowWillYouUseSafeOnboarding from './components/HowWillYouUseSafeOnboarding'
+import type WelcomeSignIn from './components/WelcomeSignIn'
+import type EmptyDashboardOnboarding from './components/EmptyDashboardOnboarding'
 import type SelectSafeModal from './components/SelectSafeModal'
 
 // Utility services
@@ -71,6 +74,9 @@ export interface SpacesContract {
   CreateSpaceOnboarding: typeof CreateSpaceOnboarding
   SelectSafesOnboarding: typeof SelectSafesOnboarding
   InviteMembersOnboarding: typeof InviteMembersOnboarding
+  HowWillYouUseSafeOnboarding: typeof HowWillYouUseSafeOnboarding
+  WelcomeSignIn: typeof WelcomeSignIn
+  EmptyDashboardOnboarding: typeof EmptyDashboardOnboarding
 
   // Services (camelCase) - undefined when not ready
   isUnauthorized: typeof isUnauthorized
