@@ -16,11 +16,6 @@ import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@mui/icons-material/Close'
 import CreateSpaceInfo from '@/public/images/spaces/create_space_info.png'
 import Image from 'next/image'
-import { AppRoutes } from '@/config/routes'
-import Link from 'next/link'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
-import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import ExternalLink from '@/components/common/ExternalLink'
 
 const ListIcon = () => (
@@ -49,15 +44,7 @@ const ListIcon = () => (
 const SPACE_HELP_ARTICLE_LINK =
   'https://help.safe.global/articles/8240597068-Spaces:-Team-Collaboration-for-Safe-Accounts'
 
-const SpaceInfoModal = ({
-  showButtons = true,
-  onClose,
-  onCreateSpace,
-}: {
-  showButtons?: boolean
-  onClose: () => void
-  onCreateSpace?: () => void
-}) => {
+const SpaceInfoModal = ({ showButtons = true, onClose }: { showButtons?: boolean; onClose: () => void }) => {
   return (
     <Dialog open PaperProps={{ style: { width: '870px', maxWidth: '98%', borderRadius: '16px' } }} onClose={onClose}>
       <DialogContent dividers sx={{ p: 0, border: 0 }}>
@@ -104,36 +91,8 @@ const SpaceInfoModal = ({
 
             {showButtons && (
               <Stack gap={2} mt={{ xs: 3, md: 'auto' }}>
-                {onCreateSpace ? (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
-                        entry_point: WorkspaceCreateEntryPoint.EMPTY_STATE,
-                      })
-                      onClose()
-                      onCreateSpace()
-                    }}
-                  >
-                    Create a space
-                  </Button>
-                ) : (
-                  <Link href={AppRoutes.welcome.spaces} passHref legacyBehavior>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() =>
-                        trackEvent({ ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.info_modal })
-                      }
-                    >
-                      Create a space
-                    </Button>
-                  </Link>
-                )}
-
                 <Button variant="text" color="primary" onClick={onClose}>
-                  Maybe later
+                  Close
                 </Button>
               </Stack>
             )}
