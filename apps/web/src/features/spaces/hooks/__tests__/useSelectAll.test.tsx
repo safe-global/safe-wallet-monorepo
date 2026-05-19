@@ -58,15 +58,14 @@ const renderUseSelectAll = (
 }
 
 describe('useSelectAll', () => {
-  it('reports global tri-state across both sections', () => {
+  it('reports per-section tri-state independently', () => {
     const trusted = [makeSafe('1', '0xA')]
     const owned = [makeSafe('10', '0xB')]
 
     const { result } = renderUseSelectAll(trusted, owned, { '1:0xA': true })
 
-    expect(result.current.globalSelection).toEqual({ state: 'some', selectedCount: 1, total: 2 })
-    expect(result.current.trustedSelection.state).toBe('all')
-    expect(result.current.ownedSelection.state).toBe('none')
+    expect(result.current.trustedSelection).toEqual({ state: 'all', selectedCount: 1, total: 1 })
+    expect(result.current.ownedSelection).toEqual({ state: 'none', selectedCount: 0, total: 1 })
   })
 
   it('selects every visible safe when scope=all and check=true', () => {

@@ -6,7 +6,7 @@ describe('SelectAllToggle', () => {
     const onToggle = jest.fn()
     render(<SelectAllToggle state="none" count={0} total={3} onToggle={onToggle} />)
 
-    fireEvent.click(screen.getByRole('button', { name: /select all/i }))
+    fireEvent.click(screen.getByRole('checkbox', { name: /select all/i }))
     expect(onToggle).toHaveBeenCalledWith(true)
   })
 
@@ -14,7 +14,7 @@ describe('SelectAllToggle', () => {
     const onToggle = jest.fn()
     render(<SelectAllToggle state="some" count={1} total={3} onToggle={onToggle} />)
 
-    fireEvent.click(screen.getByRole('button', { name: /select all/i }))
+    fireEvent.click(screen.getByRole('checkbox', { name: /select all/i }))
     expect(onToggle).toHaveBeenCalledWith(true)
   })
 
@@ -22,7 +22,7 @@ describe('SelectAllToggle', () => {
     const onToggle = jest.fn()
     render(<SelectAllToggle state="all" count={3} total={3} onToggle={onToggle} />)
 
-    fireEvent.click(screen.getByRole('button', { name: /select all/i }))
+    fireEvent.click(screen.getByRole('checkbox', { name: /select all/i }))
     expect(onToggle).toHaveBeenCalledWith(false)
   })
 
@@ -42,7 +42,7 @@ describe('SelectAllToggle', () => {
     const onToggle = jest.fn()
     render(<SelectAllToggle state="none" count={0} total={0} onToggle={onToggle} />)
 
-    const button = screen.getByRole('button')
+    const button = screen.getByRole('checkbox')
     expect(button).toBeDisabled()
     fireEvent.click(button)
     expect(onToggle).not.toHaveBeenCalled()

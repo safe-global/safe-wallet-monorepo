@@ -149,7 +149,7 @@ describe('SelectSafesOnboarding — SelectAll wiring', () => {
     const { act } = require('@testing-library/react')
     act(() => trustedSelectAll.onToggle(true))
 
-    expect(screen.getByText('Limit of 10 reached')).toBeInTheDocument()
+    expect(screen.getByText('Limit of 10 accounts reached')).toBeInTheDocument()
   })
 })
 

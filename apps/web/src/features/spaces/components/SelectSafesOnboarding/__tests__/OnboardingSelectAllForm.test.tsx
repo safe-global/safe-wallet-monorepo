@@ -46,7 +46,7 @@ const OnboardingSelectAllHarness = ({
 
   getSelectedSafesRef.current = () => getValues('selectedSafes')
 
-  const { globalSelection, trustedSelection, ownedSelection, handleSelectAll } = useSelectAll({
+  const { trustedSelection, ownedSelection, handleSelectAll } = useSelectAll({
     visibleTrusted: trusted,
     visibleOwned: owned,
     control,
@@ -55,15 +55,6 @@ const OnboardingSelectAllHarness = ({
 
   return (
     <FormProvider {...formMethods}>
-      <SelectAllToggle
-        state={globalSelection.state}
-        count={globalSelection.selectedCount}
-        total={globalSelection.total}
-        onToggle={(check) => handleSelectAll('all', check)}
-        label="Select all"
-        showCount
-        testId="select-all-global"
-      />
       <div className="flex flex-col gap-2">
         <SelectAllToggle
           state={trustedSelection.state}
@@ -71,6 +62,7 @@ const OnboardingSelectAllHarness = ({
           total={trustedSelection.total}
           onToggle={(check) => handleSelectAll('trusted', check)}
           label="Select all"
+          showCount
           testId="select-all-trusted"
         />
         <SelectAllToggle
@@ -79,6 +71,7 @@ const OnboardingSelectAllHarness = ({
           total={ownedSelection.total}
           onToggle={(check) => handleSelectAll('owned', check)}
           label="Select all"
+          showCount
           testId="select-all-owned"
         />
       </div>
@@ -86,7 +79,8 @@ const OnboardingSelectAllHarness = ({
   )
 }
 
-const globalCountText = () => screen.getByTestId('select-all-global').parentElement?.textContent ?? ''
+const trustedCountText = () => screen.getByTestId('select-all-trusted').parentElement?.textContent ?? ''
+const ownedCountText = () => screen.getByTestId('select-all-owned').parentElement?.textContent ?? ''
 
 describe('SelectSafesOnboarding — select-all form behavior (mirrors screen wiring)', () => {
   beforeEach(() => {
@@ -95,26 +89,29 @@ describe('SelectSafesOnboarding — select-all form behavior (mirrors screen wir
 
   const getSelected = () => getSelectedSafesRef.current?.() ?? {}
 
-  it('global select all: second click clears selection and count returns to (0/total)', () => {
+  it('select all sections: toggling trusted then owned selects everything, second toggle clears each section', () => {
     const trusted = [makeSafe('1', '0xA')] as AllSafeItems
     const owned = [makeSafe('10', '0xB')] as AllSafeItems
 
     render(<OnboardingSelectAllHarness trusted={trusted} owned={owned} />)
 
-    expect(globalCountText()).toContain('(0/2)')
+    expect(trustedCountText()).toContain('(0/1)')
+    expect(ownedCountText()).toContain('(0/1)')
 
-    fireEvent.click(screen.getByTestId('select-all-global'))
-    expect(globalCountText()).toContain('(2/2)')
+    fireEvent.click(screen.getByTestId('select-all-trusted'))
+    fireEvent.click(screen.getByTestId('select-all-owned'))
+    expect(trustedCountText()).toContain('(1/1)')
+    expect(ownedCountText()).toContain('(1/1)')
 
-    fireEvent.click(screen.getByTestId('select-all-global'))
-    expect(globalCountText()).toContain('(0/2)')
+    fireEvent.click(screen.getByTestId('select-all-trusted'))
+    fireEvent.click(screen.getByTestId('select-all-owned'))
 
     const selected = getSelected()
     expect(selected['1:0xA']).toBe(false)
     expect(selected['10:0xB']).toBe(false)
   })
 
-  it('global select all: when everything is already selected, first click clears (same as Add Accounts)', () => {
+  it('clearing both sections when everything is pre-selected deselects all', () => {
     const trusted = [makeSafe('1', '0xA')] as AllSafeItems
     const owned = [makeSafe('10', '0xB')] as AllSafeItems
     const initialSelected = { '1:0xA': true, '10:0xB': true }
@@ -128,10 +125,11 @@ describe('SelectSafesOnboarding — select-all form behavior (mirrors screen wir
       />,
     )
 
-    expect(globalCountText()).toContain('(2/2)')
+    expect(trustedCountText()).toContain('(1/1)')
+    expect(ownedCountText()).toContain('(1/1)')
 
-    fireEvent.click(screen.getByTestId('select-all-global'))
-    expect(globalCountText()).toContain('(0/2)')
+    fireEvent.click(screen.getByTestId('select-all-trusted'))
+    fireEvent.click(screen.getByTestId('select-all-owned'))
 
     const selected = getSelected()
     expect(selected['1:0xA']).toBe(false)
@@ -168,7 +166,7 @@ describe('SelectSafesOnboarding — select-all form behavior (mirrors screen wir
     expect(getSelected()['1:0xA']).toBeUndefined()
   })
 
-  it('global deselect clears multichain parent and every sub-safe key', () => {
+  it('trusted deselect clears multichain parent and every sub-safe key', () => {
     const trusted = [makeMulti('0xC', ['1', '137'])] as AllSafeItems
     const owned: AllSafeItems = []
 
@@ -185,9 +183,9 @@ describe('SelectSafesOnboarding — select-all form behavior (mirrors screen wir
       />,
     )
 
-    expect(globalCountText()).toContain('(2/2)')
+    expect(trustedCountText()).toContain('(2/2)')
 
-    fireEvent.click(screen.getByTestId('select-all-global'))
+    fireEvent.click(screen.getByTestId('select-all-trusted'))
 
     const selected = getSelected()
     expect(selected['1:0xC']).toBe(false)
