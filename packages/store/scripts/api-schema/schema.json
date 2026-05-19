@@ -151,99 +151,6 @@
         ]
       }
     },
-    "/v1/auth/oidc/authorize": {
-      "get": {
-        "description": "Redirects the browser to OIDC provider login page with a generated state value stored in an HTTP-only cookie.",
-        "operationId": "oidcAuthAuthorizeV1",
-        "parameters": [
-          {
-            "name": "redirect_url",
-            "required": false,
-            "in": "query",
-            "description": "URL to redirect to after successful login. Must be same-origin as the configured post-login redirect URI.",
-            "schema": {
-              "example": "/settings",
-              "type": "string"
-            }
-          },
-          {
-            "name": "connection",
-            "required": false,
-            "in": "query",
-            "description": "OIDC connection name to route to a specific identity provider.",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "302": {
-            "description": "Redirect to OIDC authorize endpoint"
-          }
-        },
-        "summary": "Start OIDC authorization code flow",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/v1/auth/oidc/callback": {
-      "get": {
-        "description": "Exchanges the OIDC authorization code for user information, mints the internal JWT cookie, and redirects to the provided post-login URL or a configured default one.",
-        "operationId": "oidcAuthCallbackV1",
-        "parameters": [
-          {
-            "name": "code",
-            "required": false,
-            "in": "query",
-            "description": "Authorization code returned by the OIDC provider",
-            "schema": {
-              "example": "SplxlOBeZQQYbYS6WxSbIA",
-              "type": "string"
-            }
-          },
-          {
-            "name": "state",
-            "required": false,
-            "in": "query",
-            "description": "State parameter returned by the OIDC provider",
-            "schema": {
-              "example": "af0ifjsldkj",
-              "type": "string"
-            }
-          },
-          {
-            "name": "error",
-            "required": false,
-            "in": "query",
-            "description": "Error parameter returned by the OIDC provider",
-            "schema": {
-              "example": "access_denied",
-              "type": "string"
-            }
-          },
-          {
-            "name": "error_description",
-            "required": false,
-            "in": "query",
-            "description": "Description of the error returned by the OIDC provider (if failed)",
-            "schema": {
-              "example": "The user has denied the request",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "302": {
-            "description": "Redirect to the post-login URL. On error, includes error query parameter."
-          }
-        },
-        "summary": "Handle OIDC authorization callback",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
     "/v1/chains/{chainId}/safes/{safeAddress}/balances/{fiatCode}": {
       "get": {
         "description": "Retrieves token balances for a Safe on a specific chain, converted to the specified fiat currency. Includes native tokens, ERC-20 tokens, and their current market values.",
@@ -1295,86 +1202,6 @@
         "summary": "Decode transaction data",
         "tags": [
           "data-decoded"
-        ]
-      }
-    },
-    "/v1/chains/{chainId}/safes/{safeAddress}/recovery": {
-      "post": {
-        "operationId": "recoveryAddRecoveryModuleV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "safeAddress",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddRecoveryModuleDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "recovery"
-        ]
-      }
-    },
-    "/v1/chains/{chainId}/safes/{safeAddress}/recovery/{moduleAddress}": {
-      "delete": {
-        "operationId": "recoveryDeleteRecoveryModuleV1",
-        "parameters": [
-          {
-            "name": "chainId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "moduleAddress",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "safeAddress",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "recovery"
         ]
       }
     },
@@ -2668,6 +2495,52 @@
           }
         },
         "summary": "Remove Safes from space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/transactions/queued": {
+      "get": {
+        "description": "Retrieves a paginated list of queued (pending) transactions across all Safes in a space, ordered by nonce ascending (oldest first).",
+        "operationId": "spaceTransactionsGetTransactionQueueV1",
+        "parameters": [
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID to fetch queued transactions for",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of queued transactions for the space",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueuedItemPage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Space not found"
+          }
+        },
+        "summary": "Get space transaction queue",
         "tags": [
           "spaces"
         ]
@@ -6077,7 +5950,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main",
+    "version": "",
     "contact": {}
   },
   "tags": [],
@@ -7956,17 +7829,6 @@
           "method"
         ]
       },
-      "AddRecoveryModuleDto": {
-        "type": "object",
-        "properties": {
-          "moduleAddress": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "moduleAddress"
-        ]
-      },
       "GetEstimationDto": {
         "type": "object",
         "properties": {
@@ -9028,6 +8890,1957 @@
         },
         "required": [
           "safes"
+        ]
+      },
+      "ConflictHeaderQueuedItem": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CONFLICT_HEADER"
+            ]
+          },
+          "nonce": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "type",
+          "nonce"
+        ]
+      },
+      "LabelQueuedItem": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "LABEL"
+            ]
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "label"
+        ]
+      },
+      "TransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Bridge",
+              "Creation",
+              "Custom",
+              "NativeStakingDeposit",
+              "NativeStakingValidatorsExit",
+              "NativeStakingWithdraw",
+              "SettingsChange",
+              "Swap",
+              "SwapAndBridge",
+              "SwapOrder",
+              "SwapTransfer",
+              "Transfer",
+              "TwapOrder",
+              "VaultDeposit",
+              "VaultRedeem"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "CreationTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Creation"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "creator": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "transactionHash": {
+            "type": "string"
+          },
+          "implementation": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressInfo"
+              }
+            ]
+          },
+          "factory": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "saltNonce": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "creator",
+          "transactionHash"
+        ]
+      },
+      "CustomTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Custom"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "to": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "dataSize": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "isCancellation": {
+            "type": "boolean"
+          },
+          "methodName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "to",
+          "dataSize",
+          "isCancellation"
+        ]
+      },
+      "MultiSendTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Custom"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "to": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "dataSize": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "isCancellation": {
+            "type": "boolean"
+          },
+          "methodName": {
+            "type": "string",
+            "enum": [
+              "multiSend"
+            ]
+          },
+          "actionCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "type",
+          "to",
+          "dataSize",
+          "isCancellation",
+          "methodName",
+          "actionCount"
+        ]
+      },
+      "AddOwner": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_OWNER"
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "threshold": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "type",
+          "owner",
+          "threshold"
+        ]
+      },
+      "ChangeMasterCopy": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CHANGE_MASTER_COPY"
+            ]
+          },
+          "implementation": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "implementation"
+        ]
+      },
+      "ChangeThreshold": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "CHANGE_THRESHOLD"
+            ]
+          },
+          "threshold": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "type",
+          "threshold"
+        ]
+      },
+      "DeleteGuard": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "DELETE_GUARD"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "DisableModule": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "DISABLE_MODULE"
+            ]
+          },
+          "module": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "module"
+        ]
+      },
+      "EnableModule": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ENABLE_MODULE"
+            ]
+          },
+          "module": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "module"
+        ]
+      },
+      "RemoveOwner": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "REMOVE_OWNER"
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "threshold": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "type",
+          "owner",
+          "threshold"
+        ]
+      },
+      "SetFallbackHandler": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SET_FALLBACK_HANDLER"
+            ]
+          },
+          "handler": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "handler"
+        ]
+      },
+      "SetGuard": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SET_GUARD"
+            ]
+          },
+          "guard": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "guard"
+        ]
+      },
+      "SettingsChange": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_OWNER",
+              "CHANGE_MASTER_COPY",
+              "CHANGE_THRESHOLD",
+              "DELETE_GUARD",
+              "DISABLE_MODULE",
+              "ENABLE_MODULE",
+              "REMOVE_OWNER",
+              "SET_FALLBACK_HANDLER",
+              "SET_GUARD",
+              "SWAP_OWNER"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "SwapOwner": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SWAP_OWNER"
+            ]
+          },
+          "oldOwner": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "newOwner": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "oldOwner",
+          "newOwner"
+        ]
+      },
+      "SettingsChangeTransaction": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SettingsChange"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataDecoded": {
+            "$ref": "#/components/schemas/DataDecoded"
+          },
+          "settingsInfo": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AddOwner"
+              },
+              {
+                "$ref": "#/components/schemas/ChangeMasterCopy"
+              },
+              {
+                "$ref": "#/components/schemas/ChangeThreshold"
+              },
+              {
+                "$ref": "#/components/schemas/DeleteGuard"
+              },
+              {
+                "$ref": "#/components/schemas/DisableModule"
+              },
+              {
+                "$ref": "#/components/schemas/EnableModule"
+              },
+              {
+                "$ref": "#/components/schemas/RemoveOwner"
+              },
+              {
+                "$ref": "#/components/schemas/SetFallbackHandler"
+              },
+              {
+                "$ref": "#/components/schemas/SetGuard"
+              },
+              {
+                "$ref": "#/components/schemas/SwapOwner"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "dataDecoded",
+          "settingsInfo"
+        ]
+      },
+      "Erc20Transfer": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC20"
+            ]
+          },
+          "tokenAddress": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "tokenName": {
+            "type": "string",
+            "nullable": true
+          },
+          "tokenSymbol": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "decimals": {
+            "type": "number",
+            "nullable": true
+          },
+          "trusted": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "imitation": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "tokenAddress",
+          "value",
+          "imitation"
+        ]
+      },
+      "Erc721Transfer": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC721"
+            ]
+          },
+          "tokenAddress": {
+            "type": "string"
+          },
+          "tokenId": {
+            "type": "string"
+          },
+          "tokenName": {
+            "type": "string",
+            "nullable": true
+          },
+          "tokenSymbol": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "trusted": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "tokenAddress",
+          "tokenId"
+        ]
+      },
+      "NativeCoinTransfer": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "NATIVE_COIN"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "Transfer": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "NATIVE_COIN",
+              "ERC20",
+              "ERC721"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "TransferTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Transfer"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "sender": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "INCOMING",
+              "OUTGOING",
+              "UNKNOWN"
+            ]
+          },
+          "transferInfo": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Erc20Transfer"
+              },
+              {
+                "$ref": "#/components/schemas/Erc721Transfer"
+              },
+              {
+                "$ref": "#/components/schemas/NativeCoinTransfer"
+              }
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Transfer"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "sender",
+          "recipient",
+          "direction",
+          "transferInfo"
+        ]
+      },
+      "BridgeFee": {
+        "type": "object",
+        "properties": {
+          "tokenAddress": {
+            "type": "string"
+          },
+          "integratorFee": {
+            "type": "string"
+          },
+          "lifiFee": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "tokenAddress",
+          "integratorFee",
+          "lifiFee"
+        ]
+      },
+      "TokenInfo": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "The token address"
+          },
+          "decimals": {
+            "type": "number",
+            "description": "The token decimals"
+          },
+          "logoUri": {
+            "type": "string",
+            "nullable": true,
+            "description": "The logo URI for the token"
+          },
+          "name": {
+            "type": "string",
+            "description": "The token name"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "The token symbol"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "The token trusted status"
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "name",
+          "symbol",
+          "trusted"
+        ]
+      },
+      "BridgeAndSwapTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SwapAndBridge"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "fromToken": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "explorerUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NOT_FOUND",
+              "INVALID",
+              "PENDING",
+              "DONE",
+              "FAILED",
+              "UNKNOWN",
+              "AWAITING_EXECUTION"
+            ]
+          },
+          "substatus": {
+            "type": "string",
+            "enum": [
+              "WAIT_SOURCE_CONFIRMATIONS",
+              "WAIT_DESTINATION_TRANSACTION",
+              "BRIDGE_NOT_AVAILABLE",
+              "CHAIN_NOT_AVAILABLE",
+              "REFUND_IN_PROGRESS",
+              "UNKNOWN_ERROR",
+              "COMPLETED",
+              "PARTIAL",
+              "REFUNDED",
+              "INSUFFICIENT_ALLOWANCE",
+              "INSUFFICIENT_BALANCE",
+              "OUT_OF_GAS",
+              "EXPIRED",
+              "SLIPPAGE_EXCEEDED",
+              "UNKNOWN_FAILED_ERROR",
+              "UNKNOWN",
+              "AWAITING_EXECUTION"
+            ]
+          },
+          "fees": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BridgeFee"
+              }
+            ]
+          },
+          "fromAmount": {
+            "type": "string"
+          },
+          "toChain": {
+            "type": "string"
+          },
+          "toToken": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
+          },
+          "toAmount": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "fromToken",
+          "recipient",
+          "explorerUrl",
+          "status",
+          "substatus",
+          "fees",
+          "fromAmount",
+          "toChain",
+          "toToken",
+          "toAmount"
+        ]
+      },
+      "SwapOrderTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SwapOrder"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "uid": {
+            "type": "string",
+            "description": "The order UID"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "presignaturePending",
+              "open",
+              "fulfilled",
+              "cancelled",
+              "expired",
+              "unknown"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "buy",
+              "sell",
+              "unknown"
+            ]
+          },
+          "orderClass": {
+            "type": "string",
+            "enum": [
+              "market",
+              "limit",
+              "liquidity",
+              "unknown"
+            ]
+          },
+          "validUntil": {
+            "type": "number",
+            "description": "The timestamp when the order expires"
+          },
+          "sellAmount": {
+            "type": "string",
+            "description": "The sell token raw amount (no decimals)"
+          },
+          "buyAmount": {
+            "type": "string",
+            "description": "The buy token raw amount (no decimals)"
+          },
+          "executedSellAmount": {
+            "type": "string",
+            "description": "The executed sell token raw amount (no decimals)"
+          },
+          "executedBuyAmount": {
+            "type": "string",
+            "description": "The executed buy token raw amount (no decimals)"
+          },
+          "sellToken": {
+            "description": "The sell token of the order",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
+          },
+          "buyToken": {
+            "description": "The buy token of the order",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
+          },
+          "explorerUrl": {
+            "type": "string",
+            "description": "The URL to the explorer page of the order"
+          },
+          "executedFee": {
+            "type": "string",
+            "description": "The amount of fees paid for this order."
+          },
+          "executedFeeToken": {
+            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
+          },
+          "receiver": {
+            "type": "string",
+            "nullable": true,
+            "description": "The (optional) address to receive the proceeds of the trade"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "fullAppData": {
+            "type": "object",
+            "nullable": true,
+            "description": "The App Data for this order"
+          }
+        },
+        "required": [
+          "type",
+          "uid",
+          "status",
+          "kind",
+          "orderClass",
+          "validUntil",
+          "sellAmount",
+          "buyAmount",
+          "executedSellAmount",
+          "executedBuyAmount",
+          "sellToken",
+          "buyToken",
+          "explorerUrl",
+          "executedFee",
+          "executedFeeToken",
+          "owner"
+        ]
+      },
+      "SwapTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Swap"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "fees": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BridgeFee"
+              }
+            ]
+          },
+          "fromToken": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "fromAmount": {
+            "type": "string"
+          },
+          "toToken": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "toAmount": {
+            "type": "string"
+          },
+          "lifiExplorerUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "recipient",
+          "fees",
+          "fromToken",
+          "fromAmount",
+          "toToken",
+          "toAmount",
+          "lifiExplorerUrl"
+        ]
+      },
+      "SwapTransferTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SwapTransfer"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "sender": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "recipient": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "transferInfo": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Erc20Transfer"
+              },
+              {
+                "$ref": "#/components/schemas/Erc721Transfer"
+              },
+              {
+                "$ref": "#/components/schemas/NativeCoinTransfer"
+              }
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Transfer"
+              }
+            ]
+          },
+          "uid": {
+            "type": "string",
+            "description": "The order UID"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "presignaturePending",
+              "open",
+              "fulfilled",
+              "cancelled",
+              "expired",
+              "unknown"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "buy",
+              "sell",
+              "unknown"
+            ]
+          },
+          "orderClass": {
+            "type": "string",
+            "enum": [
+              "market",
+              "limit",
+              "liquidity",
+              "unknown"
+            ]
+          },
+          "validUntil": {
+            "type": "number",
+            "description": "The timestamp when the order expires"
+          },
+          "sellAmount": {
+            "type": "string",
+            "description": "The sell token raw amount (no decimals)"
+          },
+          "buyAmount": {
+            "type": "string",
+            "description": "The buy token raw amount (no decimals)"
+          },
+          "executedSellAmount": {
+            "type": "string",
+            "description": "The executed sell token raw amount (no decimals)"
+          },
+          "executedBuyAmount": {
+            "type": "string",
+            "description": "The executed buy token raw amount (no decimals)"
+          },
+          "sellToken": {
+            "description": "The sell token of the order",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
+          },
+          "buyToken": {
+            "description": "The buy token of the order",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
+          },
+          "explorerUrl": {
+            "type": "string",
+            "description": "The URL to the explorer page of the order"
+          },
+          "executedFee": {
+            "type": "string",
+            "description": "The amount of fees paid for this order."
+          },
+          "executedFeeToken": {
+            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
+          },
+          "receiver": {
+            "type": "string",
+            "nullable": true,
+            "description": "The (optional) address to receive the proceeds of the trade"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "fullAppData": {
+            "type": "object",
+            "nullable": true,
+            "description": "The App Data for this order"
+          }
+        },
+        "required": [
+          "type",
+          "sender",
+          "recipient",
+          "direction",
+          "transferInfo",
+          "uid",
+          "status",
+          "kind",
+          "orderClass",
+          "validUntil",
+          "sellAmount",
+          "buyAmount",
+          "executedSellAmount",
+          "executedBuyAmount",
+          "sellToken",
+          "buyToken",
+          "explorerUrl",
+          "executedFee",
+          "executedFeeToken",
+          "owner"
+        ]
+      },
+      "DurationAuto": {
+        "type": "object",
+        "properties": {
+          "durationType": {
+            "type": "string",
+            "enum": [
+              "AUTO"
+            ]
+          }
+        },
+        "required": [
+          "durationType"
+        ]
+      },
+      "DurationLimit": {
+        "type": "object",
+        "properties": {
+          "durationType": {
+            "type": "string",
+            "enum": [
+              "LIMIT_DURATION"
+            ]
+          },
+          "duration": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "durationType",
+          "duration"
+        ]
+      },
+      "StartTimeAtMining": {
+        "type": "object",
+        "properties": {
+          "startType": {
+            "type": "string",
+            "enum": [
+              "AT_MINING_TIME"
+            ]
+          }
+        },
+        "required": [
+          "startType"
+        ]
+      },
+      "StartTimeAtEpoch": {
+        "type": "object",
+        "properties": {
+          "startType": {
+            "type": "string",
+            "enum": [
+              "AT_EPOCH"
+            ]
+          },
+          "epoch": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "startType",
+          "epoch"
+        ]
+      },
+      "TwapOrderTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "TwapOrder"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "The TWAP status",
+            "enum": [
+              "presignaturePending",
+              "open",
+              "fulfilled",
+              "cancelled",
+              "expired",
+              "unknown"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "buy",
+              "sell",
+              "unknown"
+            ]
+          },
+          "class": {
+            "type": "string",
+            "enum": [
+              "market",
+              "limit",
+              "liquidity",
+              "unknown"
+            ]
+          },
+          "activeOrderUid": {
+            "type": "string",
+            "nullable": true,
+            "description": "The order UID of the active order, or null if none is active"
+          },
+          "validUntil": {
+            "type": "number",
+            "description": "The timestamp when the TWAP expires"
+          },
+          "sellAmount": {
+            "type": "string",
+            "description": "The sell token raw amount (no decimals)"
+          },
+          "buyAmount": {
+            "type": "string",
+            "description": "The buy token raw amount (no decimals)"
+          },
+          "executedSellAmount": {
+            "type": "string",
+            "nullable": true,
+            "description": "The executed sell token raw amount (no decimals), or null if there are too many parts"
+          },
+          "executedBuyAmount": {
+            "type": "string",
+            "nullable": true,
+            "description": "The executed buy token raw amount (no decimals), or null if there are too many parts"
+          },
+          "executedFee": {
+            "type": "string",
+            "nullable": true,
+            "description": "The executed surplus fee raw amount (no decimals), or null if there are too many parts"
+          },
+          "executedFeeToken": {
+            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
+          },
+          "sellToken": {
+            "description": "The sell token of the TWAP",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
+          },
+          "buyToken": {
+            "description": "The buy token of the TWAP",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokenInfo"
+              }
+            ]
+          },
+          "receiver": {
+            "type": "string",
+            "description": "The address to receive the proceeds of the trade"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "fullAppData": {
+            "type": "object",
+            "nullable": true,
+            "description": "The App Data for this TWAP"
+          },
+          "numberOfParts": {
+            "type": "string",
+            "description": "The number of parts in the TWAP"
+          },
+          "partSellAmount": {
+            "type": "string",
+            "description": "The amount of sellToken to sell in each part"
+          },
+          "minPartLimit": {
+            "type": "string",
+            "description": "The amount of buyToken that must be bought in each part"
+          },
+          "timeBetweenParts": {
+            "type": "number",
+            "description": "The duration of the TWAP interval"
+          },
+          "durationOfPart": {
+            "description": "Whether the TWAP is valid for the entire interval or not",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DurationAuto"
+              },
+              {
+                "$ref": "#/components/schemas/DurationLimit"
+              }
+            ]
+          },
+          "startTime": {
+            "description": "The start time of the TWAP",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/StartTimeAtMining"
+              },
+              {
+                "$ref": "#/components/schemas/StartTimeAtEpoch"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "status",
+          "kind",
+          "validUntil",
+          "sellAmount",
+          "buyAmount",
+          "executedFeeToken",
+          "sellToken",
+          "buyToken",
+          "receiver",
+          "owner",
+          "numberOfParts",
+          "partSellAmount",
+          "minPartLimit",
+          "timeBetweenParts",
+          "durationOfPart",
+          "startTime"
+        ]
+      },
+      "NativeStakingDepositTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "NativeStakingDeposit"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NOT_STAKED",
+              "ACTIVATING",
+              "DEPOSIT_IN_PROGRESS",
+              "ACTIVE",
+              "EXIT_REQUESTED",
+              "EXITING",
+              "EXITED",
+              "SLASHED"
+            ]
+          },
+          "estimatedEntryTime": {
+            "type": "number"
+          },
+          "estimatedExitTime": {
+            "type": "number"
+          },
+          "estimatedWithdrawalTime": {
+            "type": "number"
+          },
+          "fee": {
+            "type": "number"
+          },
+          "monthlyNrr": {
+            "type": "number"
+          },
+          "annualNrr": {
+            "type": "number"
+          },
+          "value": {
+            "type": "string"
+          },
+          "numValidators": {
+            "type": "number"
+          },
+          "expectedAnnualReward": {
+            "type": "string"
+          },
+          "expectedMonthlyReward": {
+            "type": "string"
+          },
+          "expectedFiatAnnualReward": {
+            "type": "number"
+          },
+          "expectedFiatMonthlyReward": {
+            "type": "number"
+          },
+          "tokenInfo": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "validators": {
+            "nullable": true,
+            "description": "Populated after transaction has been executed",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "status",
+          "estimatedEntryTime",
+          "estimatedExitTime",
+          "estimatedWithdrawalTime",
+          "fee",
+          "monthlyNrr",
+          "annualNrr",
+          "value",
+          "numValidators",
+          "expectedAnnualReward",
+          "expectedMonthlyReward",
+          "expectedFiatAnnualReward",
+          "expectedFiatMonthlyReward",
+          "tokenInfo"
+        ]
+      },
+      "NativeStakingValidatorsExitTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "NativeStakingValidatorsExit"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NOT_STAKED",
+              "ACTIVATING",
+              "DEPOSIT_IN_PROGRESS",
+              "ACTIVE",
+              "EXIT_REQUESTED",
+              "EXITING",
+              "EXITED",
+              "SLASHED"
+            ]
+          },
+          "estimatedExitTime": {
+            "type": "number"
+          },
+          "estimatedWithdrawalTime": {
+            "type": "number"
+          },
+          "value": {
+            "type": "string"
+          },
+          "numValidators": {
+            "type": "number"
+          },
+          "tokenInfo": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "validators": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "status",
+          "estimatedExitTime",
+          "estimatedWithdrawalTime",
+          "value",
+          "numValidators",
+          "tokenInfo",
+          "validators"
+        ]
+      },
+      "NativeStakingWithdrawTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "NativeStakingWithdraw"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string"
+          },
+          "tokenInfo": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "validators": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "value",
+          "tokenInfo",
+          "validators"
+        ]
+      },
+      "VaultInfo": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "dashboardUri": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUri": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "address",
+          "name",
+          "description",
+          "logoUri"
+        ]
+      },
+      "VaultExtraReward": {
+        "type": "object",
+        "properties": {
+          "tokenInfo": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "nrr": {
+            "type": "number"
+          },
+          "claimable": {
+            "type": "string"
+          },
+          "claimableNext": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "tokenInfo",
+          "nrr",
+          "claimable",
+          "claimableNext"
+        ]
+      },
+      "VaultDepositTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "VaultDeposit"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string"
+          },
+          "baseNrr": {
+            "type": "number"
+          },
+          "fee": {
+            "type": "number"
+          },
+          "tokenInfo": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "vaultInfo": {
+            "$ref": "#/components/schemas/VaultInfo"
+          },
+          "currentReward": {
+            "type": "string"
+          },
+          "additionalRewardsNrr": {
+            "type": "number"
+          },
+          "additionalRewards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VaultExtraReward"
+            }
+          },
+          "expectedMonthlyReward": {
+            "type": "string"
+          },
+          "expectedAnnualReward": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "value",
+          "baseNrr",
+          "fee",
+          "tokenInfo",
+          "vaultInfo",
+          "currentReward",
+          "additionalRewardsNrr",
+          "additionalRewards",
+          "expectedMonthlyReward",
+          "expectedAnnualReward"
+        ]
+      },
+      "VaultRedeemTransactionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "VaultRedeem"
+            ]
+          },
+          "humanDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string"
+          },
+          "baseNrr": {
+            "type": "number"
+          },
+          "fee": {
+            "type": "number"
+          },
+          "tokenInfo": {
+            "$ref": "#/components/schemas/TokenInfo"
+          },
+          "vaultInfo": {
+            "$ref": "#/components/schemas/VaultInfo"
+          },
+          "currentReward": {
+            "type": "string"
+          },
+          "additionalRewardsNrr": {
+            "type": "number"
+          },
+          "additionalRewards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VaultExtraReward"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "value",
+          "baseNrr",
+          "fee",
+          "tokenInfo",
+          "vaultInfo",
+          "currentReward",
+          "additionalRewardsNrr",
+          "additionalRewards"
+        ]
+      },
+      "ModuleExecutionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MODULE"
+            ]
+          },
+          "address": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "address"
+        ]
+      },
+      "MultisigExecutionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MULTISIG"
+            ]
+          },
+          "nonce": {
+            "type": "number"
+          },
+          "confirmationsRequired": {
+            "type": "number"
+          },
+          "confirmationsSubmitted": {
+            "type": "number"
+          },
+          "missingSigners": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressInfo"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "nonce",
+          "confirmationsRequired",
+          "confirmationsSubmitted"
+        ]
+      },
+      "SafeAppInfo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "logoUri": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name",
+          "url"
+        ]
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "txInfo": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CreationTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/CustomTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/MultiSendTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SettingsChangeTransaction"
+              },
+              {
+                "$ref": "#/components/schemas/TransferTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SwapOrderTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/BridgeAndSwapTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SwapTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SwapTransferTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/TwapOrderTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/NativeStakingDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/NativeStakingValidatorsExitTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/NativeStakingWithdrawTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
+              }
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransactionInfo"
+              }
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "txHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "number"
+          },
+          "txStatus": {
+            "type": "string",
+            "enum": [
+              "SUCCESS",
+              "FAILED",
+              "CANCELLED",
+              "AWAITING_CONFIRMATIONS",
+              "AWAITING_EXECUTION"
+            ]
+          },
+          "executionInfo": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MultisigExecutionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/ModuleExecutionInfo"
+              }
+            ],
+            "nullable": true
+          },
+          "safeAppInfo": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeAppInfo"
+              }
+            ]
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "txInfo",
+          "id",
+          "timestamp",
+          "txStatus"
+        ]
+      },
+      "TransactionQueuedItem": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "TRANSACTION"
+            ]
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/Transaction"
+          },
+          "conflictType": {
+            "type": "string",
+            "enum": [
+              "None",
+              "HasNext",
+              "End"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "transaction",
+          "conflictType"
+        ]
+      },
+      "QueuedItemPage": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "nullable": true
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ConflictHeaderQueuedItem"
+                },
+                {
+                  "$ref": "#/components/schemas/LabelQueuedItem"
+                },
+                {
+                  "$ref": "#/components/schemas/TransactionQueuedItem"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "results"
         ]
       },
       "InviteUserDto": {
@@ -10922,1680 +12735,6 @@
           "completed"
         ]
       },
-      "TransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "Bridge",
-              "Creation",
-              "Custom",
-              "NativeStakingDeposit",
-              "NativeStakingValidatorsExit",
-              "NativeStakingWithdraw",
-              "SettingsChange",
-              "Swap",
-              "SwapAndBridge",
-              "SwapOrder",
-              "SwapTransfer",
-              "Transfer",
-              "TwapOrder",
-              "VaultDeposit",
-              "VaultRedeem"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "type"
-        ]
-      },
-      "CreationTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "Creation"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "creator": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "transactionHash": {
-            "type": "string"
-          },
-          "implementation": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AddressInfo"
-              }
-            ]
-          },
-          "factory": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "saltNonce": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "type",
-          "creator",
-          "transactionHash"
-        ]
-      },
-      "CustomTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "Custom"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "to": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "dataSize": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string",
-            "nullable": true
-          },
-          "isCancellation": {
-            "type": "boolean"
-          },
-          "methodName": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "type",
-          "to",
-          "dataSize",
-          "isCancellation"
-        ]
-      },
-      "MultiSendTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "Custom"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "to": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "dataSize": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string",
-            "nullable": true
-          },
-          "isCancellation": {
-            "type": "boolean"
-          },
-          "methodName": {
-            "type": "string",
-            "enum": [
-              "multiSend"
-            ]
-          },
-          "actionCount": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "type",
-          "to",
-          "dataSize",
-          "isCancellation",
-          "methodName",
-          "actionCount"
-        ]
-      },
-      "AddOwner": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "ADD_OWNER"
-            ]
-          },
-          "owner": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "threshold": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "type",
-          "owner",
-          "threshold"
-        ]
-      },
-      "ChangeMasterCopy": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "CHANGE_MASTER_COPY"
-            ]
-          },
-          "implementation": {
-            "$ref": "#/components/schemas/AddressInfo"
-          }
-        },
-        "required": [
-          "type",
-          "implementation"
-        ]
-      },
-      "ChangeThreshold": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "CHANGE_THRESHOLD"
-            ]
-          },
-          "threshold": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "type",
-          "threshold"
-        ]
-      },
-      "DeleteGuard": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "DELETE_GUARD"
-            ]
-          }
-        },
-        "required": [
-          "type"
-        ]
-      },
-      "DisableModule": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "DISABLE_MODULE"
-            ]
-          },
-          "module": {
-            "$ref": "#/components/schemas/AddressInfo"
-          }
-        },
-        "required": [
-          "type",
-          "module"
-        ]
-      },
-      "EnableModule": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "ENABLE_MODULE"
-            ]
-          },
-          "module": {
-            "$ref": "#/components/schemas/AddressInfo"
-          }
-        },
-        "required": [
-          "type",
-          "module"
-        ]
-      },
-      "RemoveOwner": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "REMOVE_OWNER"
-            ]
-          },
-          "owner": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "threshold": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "type",
-          "owner",
-          "threshold"
-        ]
-      },
-      "SetFallbackHandler": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "SET_FALLBACK_HANDLER"
-            ]
-          },
-          "handler": {
-            "$ref": "#/components/schemas/AddressInfo"
-          }
-        },
-        "required": [
-          "type",
-          "handler"
-        ]
-      },
-      "SetGuard": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "SET_GUARD"
-            ]
-          },
-          "guard": {
-            "$ref": "#/components/schemas/AddressInfo"
-          }
-        },
-        "required": [
-          "type",
-          "guard"
-        ]
-      },
-      "SettingsChange": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "ADD_OWNER",
-              "CHANGE_MASTER_COPY",
-              "CHANGE_THRESHOLD",
-              "DELETE_GUARD",
-              "DISABLE_MODULE",
-              "ENABLE_MODULE",
-              "REMOVE_OWNER",
-              "SET_FALLBACK_HANDLER",
-              "SET_GUARD",
-              "SWAP_OWNER"
-            ]
-          }
-        },
-        "required": [
-          "type"
-        ]
-      },
-      "SwapOwner": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "SWAP_OWNER"
-            ]
-          },
-          "oldOwner": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "newOwner": {
-            "$ref": "#/components/schemas/AddressInfo"
-          }
-        },
-        "required": [
-          "type",
-          "oldOwner",
-          "newOwner"
-        ]
-      },
-      "SettingsChangeTransaction": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "SettingsChange"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "dataDecoded": {
-            "$ref": "#/components/schemas/DataDecoded"
-          },
-          "settingsInfo": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/AddOwner"
-              },
-              {
-                "$ref": "#/components/schemas/ChangeMasterCopy"
-              },
-              {
-                "$ref": "#/components/schemas/ChangeThreshold"
-              },
-              {
-                "$ref": "#/components/schemas/DeleteGuard"
-              },
-              {
-                "$ref": "#/components/schemas/DisableModule"
-              },
-              {
-                "$ref": "#/components/schemas/EnableModule"
-              },
-              {
-                "$ref": "#/components/schemas/RemoveOwner"
-              },
-              {
-                "$ref": "#/components/schemas/SetFallbackHandler"
-              },
-              {
-                "$ref": "#/components/schemas/SetGuard"
-              },
-              {
-                "$ref": "#/components/schemas/SwapOwner"
-              }
-            ]
-          }
-        },
-        "required": [
-          "type",
-          "dataDecoded",
-          "settingsInfo"
-        ]
-      },
-      "Erc20Transfer": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "ERC20"
-            ]
-          },
-          "tokenAddress": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string"
-          },
-          "tokenName": {
-            "type": "string",
-            "nullable": true
-          },
-          "tokenSymbol": {
-            "type": "string",
-            "nullable": true
-          },
-          "logoUri": {
-            "type": "string",
-            "nullable": true
-          },
-          "decimals": {
-            "type": "number",
-            "nullable": true
-          },
-          "trusted": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "imitation": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "type",
-          "tokenAddress",
-          "value",
-          "imitation"
-        ]
-      },
-      "Erc721Transfer": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "ERC721"
-            ]
-          },
-          "tokenAddress": {
-            "type": "string"
-          },
-          "tokenId": {
-            "type": "string"
-          },
-          "tokenName": {
-            "type": "string",
-            "nullable": true
-          },
-          "tokenSymbol": {
-            "type": "string",
-            "nullable": true
-          },
-          "logoUri": {
-            "type": "string",
-            "nullable": true
-          },
-          "trusted": {
-            "type": "boolean",
-            "nullable": true
-          }
-        },
-        "required": [
-          "type",
-          "tokenAddress",
-          "tokenId"
-        ]
-      },
-      "NativeCoinTransfer": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "NATIVE_COIN"
-            ]
-          },
-          "value": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "type"
-        ]
-      },
-      "Transfer": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "NATIVE_COIN",
-              "ERC20",
-              "ERC721"
-            ]
-          }
-        },
-        "required": [
-          "type"
-        ]
-      },
-      "TransferTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "Transfer"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "sender": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "recipient": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "direction": {
-            "type": "string",
-            "enum": [
-              "INCOMING",
-              "OUTGOING",
-              "UNKNOWN"
-            ]
-          },
-          "transferInfo": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Erc20Transfer"
-              },
-              {
-                "$ref": "#/components/schemas/Erc721Transfer"
-              },
-              {
-                "$ref": "#/components/schemas/NativeCoinTransfer"
-              }
-            ],
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Transfer"
-              }
-            ]
-          }
-        },
-        "required": [
-          "type",
-          "sender",
-          "recipient",
-          "direction",
-          "transferInfo"
-        ]
-      },
-      "BridgeFee": {
-        "type": "object",
-        "properties": {
-          "tokenAddress": {
-            "type": "string"
-          },
-          "integratorFee": {
-            "type": "string"
-          },
-          "lifiFee": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "tokenAddress",
-          "integratorFee",
-          "lifiFee"
-        ]
-      },
-      "TokenInfo": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string",
-            "description": "The token address"
-          },
-          "decimals": {
-            "type": "number",
-            "description": "The token decimals"
-          },
-          "logoUri": {
-            "type": "string",
-            "nullable": true,
-            "description": "The logo URI for the token"
-          },
-          "name": {
-            "type": "string",
-            "description": "The token name"
-          },
-          "symbol": {
-            "type": "string",
-            "description": "The token symbol"
-          },
-          "trusted": {
-            "type": "boolean",
-            "description": "The token trusted status"
-          }
-        },
-        "required": [
-          "address",
-          "decimals",
-          "name",
-          "symbol",
-          "trusted"
-        ]
-      },
-      "BridgeAndSwapTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "SwapAndBridge"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "fromToken": {
-            "$ref": "#/components/schemas/TokenInfo"
-          },
-          "recipient": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "explorerUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "NOT_FOUND",
-              "INVALID",
-              "PENDING",
-              "DONE",
-              "FAILED",
-              "UNKNOWN",
-              "AWAITING_EXECUTION"
-            ]
-          },
-          "substatus": {
-            "type": "string",
-            "enum": [
-              "WAIT_SOURCE_CONFIRMATIONS",
-              "WAIT_DESTINATION_TRANSACTION",
-              "BRIDGE_NOT_AVAILABLE",
-              "CHAIN_NOT_AVAILABLE",
-              "REFUND_IN_PROGRESS",
-              "UNKNOWN_ERROR",
-              "COMPLETED",
-              "PARTIAL",
-              "REFUNDED",
-              "INSUFFICIENT_ALLOWANCE",
-              "INSUFFICIENT_BALANCE",
-              "OUT_OF_GAS",
-              "EXPIRED",
-              "SLIPPAGE_EXCEEDED",
-              "UNKNOWN_FAILED_ERROR",
-              "UNKNOWN",
-              "AWAITING_EXECUTION"
-            ]
-          },
-          "fees": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/BridgeFee"
-              }
-            ]
-          },
-          "fromAmount": {
-            "type": "string"
-          },
-          "toChain": {
-            "type": "string"
-          },
-          "toToken": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TokenInfo"
-              }
-            ]
-          },
-          "toAmount": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "type",
-          "fromToken",
-          "recipient",
-          "explorerUrl",
-          "status",
-          "substatus",
-          "fees",
-          "fromAmount",
-          "toChain",
-          "toToken",
-          "toAmount"
-        ]
-      },
-      "SwapOrderTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "SwapOrder"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "uid": {
-            "type": "string",
-            "description": "The order UID"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "presignaturePending",
-              "open",
-              "fulfilled",
-              "cancelled",
-              "expired",
-              "unknown"
-            ]
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "buy",
-              "sell",
-              "unknown"
-            ]
-          },
-          "orderClass": {
-            "type": "string",
-            "enum": [
-              "market",
-              "limit",
-              "liquidity",
-              "unknown"
-            ]
-          },
-          "validUntil": {
-            "type": "number",
-            "description": "The timestamp when the order expires"
-          },
-          "sellAmount": {
-            "type": "string",
-            "description": "The sell token raw amount (no decimals)"
-          },
-          "buyAmount": {
-            "type": "string",
-            "description": "The buy token raw amount (no decimals)"
-          },
-          "executedSellAmount": {
-            "type": "string",
-            "description": "The executed sell token raw amount (no decimals)"
-          },
-          "executedBuyAmount": {
-            "type": "string",
-            "description": "The executed buy token raw amount (no decimals)"
-          },
-          "sellToken": {
-            "description": "The sell token of the order",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TokenInfo"
-              }
-            ]
-          },
-          "buyToken": {
-            "description": "The buy token of the order",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TokenInfo"
-              }
-            ]
-          },
-          "explorerUrl": {
-            "type": "string",
-            "description": "The URL to the explorer page of the order"
-          },
-          "executedFee": {
-            "type": "string",
-            "description": "The amount of fees paid for this order."
-          },
-          "executedFeeToken": {
-            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders).",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TokenInfo"
-              }
-            ]
-          },
-          "receiver": {
-            "type": "string",
-            "nullable": true,
-            "description": "The (optional) address to receive the proceeds of the trade"
-          },
-          "owner": {
-            "type": "string"
-          },
-          "fullAppData": {
-            "type": "object",
-            "nullable": true,
-            "description": "The App Data for this order"
-          }
-        },
-        "required": [
-          "type",
-          "uid",
-          "status",
-          "kind",
-          "orderClass",
-          "validUntil",
-          "sellAmount",
-          "buyAmount",
-          "executedSellAmount",
-          "executedBuyAmount",
-          "sellToken",
-          "buyToken",
-          "explorerUrl",
-          "executedFee",
-          "executedFeeToken",
-          "owner"
-        ]
-      },
-      "SwapTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "Swap"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "recipient": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "fees": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/BridgeFee"
-              }
-            ]
-          },
-          "fromToken": {
-            "$ref": "#/components/schemas/TokenInfo"
-          },
-          "fromAmount": {
-            "type": "string"
-          },
-          "toToken": {
-            "$ref": "#/components/schemas/TokenInfo"
-          },
-          "toAmount": {
-            "type": "string"
-          },
-          "lifiExplorerUrl": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "type",
-          "recipient",
-          "fees",
-          "fromToken",
-          "fromAmount",
-          "toToken",
-          "toAmount",
-          "lifiExplorerUrl"
-        ]
-      },
-      "SwapTransferTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "SwapTransfer"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "sender": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "recipient": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "direction": {
-            "type": "string"
-          },
-          "transferInfo": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Erc20Transfer"
-              },
-              {
-                "$ref": "#/components/schemas/Erc721Transfer"
-              },
-              {
-                "$ref": "#/components/schemas/NativeCoinTransfer"
-              }
-            ],
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Transfer"
-              }
-            ]
-          },
-          "uid": {
-            "type": "string",
-            "description": "The order UID"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "presignaturePending",
-              "open",
-              "fulfilled",
-              "cancelled",
-              "expired",
-              "unknown"
-            ]
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "buy",
-              "sell",
-              "unknown"
-            ]
-          },
-          "orderClass": {
-            "type": "string",
-            "enum": [
-              "market",
-              "limit",
-              "liquidity",
-              "unknown"
-            ]
-          },
-          "validUntil": {
-            "type": "number",
-            "description": "The timestamp when the order expires"
-          },
-          "sellAmount": {
-            "type": "string",
-            "description": "The sell token raw amount (no decimals)"
-          },
-          "buyAmount": {
-            "type": "string",
-            "description": "The buy token raw amount (no decimals)"
-          },
-          "executedSellAmount": {
-            "type": "string",
-            "description": "The executed sell token raw amount (no decimals)"
-          },
-          "executedBuyAmount": {
-            "type": "string",
-            "description": "The executed buy token raw amount (no decimals)"
-          },
-          "sellToken": {
-            "description": "The sell token of the order",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TokenInfo"
-              }
-            ]
-          },
-          "buyToken": {
-            "description": "The buy token of the order",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TokenInfo"
-              }
-            ]
-          },
-          "explorerUrl": {
-            "type": "string",
-            "description": "The URL to the explorer page of the order"
-          },
-          "executedFee": {
-            "type": "string",
-            "description": "The amount of fees paid for this order."
-          },
-          "executedFeeToken": {
-            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders).",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TokenInfo"
-              }
-            ]
-          },
-          "receiver": {
-            "type": "string",
-            "nullable": true,
-            "description": "The (optional) address to receive the proceeds of the trade"
-          },
-          "owner": {
-            "type": "string"
-          },
-          "fullAppData": {
-            "type": "object",
-            "nullable": true,
-            "description": "The App Data for this order"
-          }
-        },
-        "required": [
-          "type",
-          "sender",
-          "recipient",
-          "direction",
-          "transferInfo",
-          "uid",
-          "status",
-          "kind",
-          "orderClass",
-          "validUntil",
-          "sellAmount",
-          "buyAmount",
-          "executedSellAmount",
-          "executedBuyAmount",
-          "sellToken",
-          "buyToken",
-          "explorerUrl",
-          "executedFee",
-          "executedFeeToken",
-          "owner"
-        ]
-      },
-      "DurationAuto": {
-        "type": "object",
-        "properties": {
-          "durationType": {
-            "type": "string",
-            "enum": [
-              "AUTO"
-            ]
-          }
-        },
-        "required": [
-          "durationType"
-        ]
-      },
-      "DurationLimit": {
-        "type": "object",
-        "properties": {
-          "durationType": {
-            "type": "string",
-            "enum": [
-              "LIMIT_DURATION"
-            ]
-          },
-          "duration": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "durationType",
-          "duration"
-        ]
-      },
-      "StartTimeAtMining": {
-        "type": "object",
-        "properties": {
-          "startType": {
-            "type": "string",
-            "enum": [
-              "AT_MINING_TIME"
-            ]
-          }
-        },
-        "required": [
-          "startType"
-        ]
-      },
-      "StartTimeAtEpoch": {
-        "type": "object",
-        "properties": {
-          "startType": {
-            "type": "string",
-            "enum": [
-              "AT_EPOCH"
-            ]
-          },
-          "epoch": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "startType",
-          "epoch"
-        ]
-      },
-      "TwapOrderTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "TwapOrder"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "description": "The TWAP status",
-            "enum": [
-              "presignaturePending",
-              "open",
-              "fulfilled",
-              "cancelled",
-              "expired",
-              "unknown"
-            ]
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "buy",
-              "sell",
-              "unknown"
-            ]
-          },
-          "class": {
-            "type": "string",
-            "enum": [
-              "market",
-              "limit",
-              "liquidity",
-              "unknown"
-            ]
-          },
-          "activeOrderUid": {
-            "type": "string",
-            "nullable": true,
-            "description": "The order UID of the active order, or null if none is active"
-          },
-          "validUntil": {
-            "type": "number",
-            "description": "The timestamp when the TWAP expires"
-          },
-          "sellAmount": {
-            "type": "string",
-            "description": "The sell token raw amount (no decimals)"
-          },
-          "buyAmount": {
-            "type": "string",
-            "description": "The buy token raw amount (no decimals)"
-          },
-          "executedSellAmount": {
-            "type": "string",
-            "nullable": true,
-            "description": "The executed sell token raw amount (no decimals), or null if there are too many parts"
-          },
-          "executedBuyAmount": {
-            "type": "string",
-            "nullable": true,
-            "description": "The executed buy token raw amount (no decimals), or null if there are too many parts"
-          },
-          "executedFee": {
-            "type": "string",
-            "nullable": true,
-            "description": "The executed surplus fee raw amount (no decimals), or null if there are too many parts"
-          },
-          "executedFeeToken": {
-            "description": "The token in which the fee was paid, expressed by SURPLUS tokens (BUY tokens for SELL orders and SELL tokens for BUY orders).",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TokenInfo"
-              }
-            ]
-          },
-          "sellToken": {
-            "description": "The sell token of the TWAP",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TokenInfo"
-              }
-            ]
-          },
-          "buyToken": {
-            "description": "The buy token of the TWAP",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TokenInfo"
-              }
-            ]
-          },
-          "receiver": {
-            "type": "string",
-            "description": "The address to receive the proceeds of the trade"
-          },
-          "owner": {
-            "type": "string"
-          },
-          "fullAppData": {
-            "type": "object",
-            "nullable": true,
-            "description": "The App Data for this TWAP"
-          },
-          "numberOfParts": {
-            "type": "string",
-            "description": "The number of parts in the TWAP"
-          },
-          "partSellAmount": {
-            "type": "string",
-            "description": "The amount of sellToken to sell in each part"
-          },
-          "minPartLimit": {
-            "type": "string",
-            "description": "The amount of buyToken that must be bought in each part"
-          },
-          "timeBetweenParts": {
-            "type": "number",
-            "description": "The duration of the TWAP interval"
-          },
-          "durationOfPart": {
-            "description": "Whether the TWAP is valid for the entire interval or not",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/DurationAuto"
-              },
-              {
-                "$ref": "#/components/schemas/DurationLimit"
-              }
-            ]
-          },
-          "startTime": {
-            "description": "The start time of the TWAP",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/StartTimeAtMining"
-              },
-              {
-                "$ref": "#/components/schemas/StartTimeAtEpoch"
-              }
-            ]
-          }
-        },
-        "required": [
-          "type",
-          "status",
-          "kind",
-          "validUntil",
-          "sellAmount",
-          "buyAmount",
-          "executedFeeToken",
-          "sellToken",
-          "buyToken",
-          "receiver",
-          "owner",
-          "numberOfParts",
-          "partSellAmount",
-          "minPartLimit",
-          "timeBetweenParts",
-          "durationOfPart",
-          "startTime"
-        ]
-      },
-      "NativeStakingDepositTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "NativeStakingDeposit"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "NOT_STAKED",
-              "ACTIVATING",
-              "DEPOSIT_IN_PROGRESS",
-              "ACTIVE",
-              "EXIT_REQUESTED",
-              "EXITING",
-              "EXITED",
-              "SLASHED"
-            ]
-          },
-          "estimatedEntryTime": {
-            "type": "number"
-          },
-          "estimatedExitTime": {
-            "type": "number"
-          },
-          "estimatedWithdrawalTime": {
-            "type": "number"
-          },
-          "fee": {
-            "type": "number"
-          },
-          "monthlyNrr": {
-            "type": "number"
-          },
-          "annualNrr": {
-            "type": "number"
-          },
-          "value": {
-            "type": "string"
-          },
-          "numValidators": {
-            "type": "number"
-          },
-          "expectedAnnualReward": {
-            "type": "string"
-          },
-          "expectedMonthlyReward": {
-            "type": "string"
-          },
-          "expectedFiatAnnualReward": {
-            "type": "number"
-          },
-          "expectedFiatMonthlyReward": {
-            "type": "number"
-          },
-          "tokenInfo": {
-            "$ref": "#/components/schemas/TokenInfo"
-          },
-          "validators": {
-            "nullable": true,
-            "description": "Populated after transaction has been executed",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "type",
-          "status",
-          "estimatedEntryTime",
-          "estimatedExitTime",
-          "estimatedWithdrawalTime",
-          "fee",
-          "monthlyNrr",
-          "annualNrr",
-          "value",
-          "numValidators",
-          "expectedAnnualReward",
-          "expectedMonthlyReward",
-          "expectedFiatAnnualReward",
-          "expectedFiatMonthlyReward",
-          "tokenInfo"
-        ]
-      },
-      "NativeStakingValidatorsExitTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "NativeStakingValidatorsExit"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "NOT_STAKED",
-              "ACTIVATING",
-              "DEPOSIT_IN_PROGRESS",
-              "ACTIVE",
-              "EXIT_REQUESTED",
-              "EXITING",
-              "EXITED",
-              "SLASHED"
-            ]
-          },
-          "estimatedExitTime": {
-            "type": "number"
-          },
-          "estimatedWithdrawalTime": {
-            "type": "number"
-          },
-          "value": {
-            "type": "string"
-          },
-          "numValidators": {
-            "type": "number"
-          },
-          "tokenInfo": {
-            "$ref": "#/components/schemas/TokenInfo"
-          },
-          "validators": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "type",
-          "status",
-          "estimatedExitTime",
-          "estimatedWithdrawalTime",
-          "value",
-          "numValidators",
-          "tokenInfo",
-          "validators"
-        ]
-      },
-      "NativeStakingWithdrawTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "NativeStakingWithdraw"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "value": {
-            "type": "string"
-          },
-          "tokenInfo": {
-            "$ref": "#/components/schemas/TokenInfo"
-          },
-          "validators": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "type",
-          "value",
-          "tokenInfo",
-          "validators"
-        ]
-      },
-      "VaultInfo": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "dashboardUri": {
-            "type": "string",
-            "nullable": true
-          },
-          "logoUri": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "address",
-          "name",
-          "description",
-          "logoUri"
-        ]
-      },
-      "VaultExtraReward": {
-        "type": "object",
-        "properties": {
-          "tokenInfo": {
-            "$ref": "#/components/schemas/TokenInfo"
-          },
-          "nrr": {
-            "type": "number"
-          },
-          "claimable": {
-            "type": "string"
-          },
-          "claimableNext": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "tokenInfo",
-          "nrr",
-          "claimable",
-          "claimableNext"
-        ]
-      },
-      "VaultDepositTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "VaultDeposit"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "value": {
-            "type": "string"
-          },
-          "baseNrr": {
-            "type": "number"
-          },
-          "fee": {
-            "type": "number"
-          },
-          "tokenInfo": {
-            "$ref": "#/components/schemas/TokenInfo"
-          },
-          "vaultInfo": {
-            "$ref": "#/components/schemas/VaultInfo"
-          },
-          "currentReward": {
-            "type": "string"
-          },
-          "additionalRewardsNrr": {
-            "type": "number"
-          },
-          "additionalRewards": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/VaultExtraReward"
-            }
-          },
-          "expectedMonthlyReward": {
-            "type": "string"
-          },
-          "expectedAnnualReward": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "type",
-          "value",
-          "baseNrr",
-          "fee",
-          "tokenInfo",
-          "vaultInfo",
-          "currentReward",
-          "additionalRewardsNrr",
-          "additionalRewards",
-          "expectedMonthlyReward",
-          "expectedAnnualReward"
-        ]
-      },
-      "VaultRedeemTransactionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "VaultRedeem"
-            ]
-          },
-          "humanDescription": {
-            "type": "string",
-            "nullable": true
-          },
-          "value": {
-            "type": "string"
-          },
-          "baseNrr": {
-            "type": "number"
-          },
-          "fee": {
-            "type": "number"
-          },
-          "tokenInfo": {
-            "$ref": "#/components/schemas/TokenInfo"
-          },
-          "vaultInfo": {
-            "$ref": "#/components/schemas/VaultInfo"
-          },
-          "currentReward": {
-            "type": "string"
-          },
-          "additionalRewardsNrr": {
-            "type": "number"
-          },
-          "additionalRewards": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/VaultExtraReward"
-            }
-          }
-        },
-        "required": [
-          "type",
-          "value",
-          "baseNrr",
-          "fee",
-          "tokenInfo",
-          "vaultInfo",
-          "currentReward",
-          "additionalRewardsNrr",
-          "additionalRewards"
-        ]
-      },
       "TransactionData": {
         "type": "object",
         "properties": {
@@ -12816,25 +12955,6 @@
         "required": [
           "type",
           "address"
-        ]
-      },
-      "SafeAppInfo": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
-          },
-          "logoUri": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "name",
-          "url"
         ]
       },
       "TransactionDetails": {
@@ -13120,165 +13240,6 @@
           "results"
         ]
       },
-      "ModuleExecutionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "MODULE"
-            ]
-          },
-          "address": {
-            "$ref": "#/components/schemas/AddressInfo"
-          }
-        },
-        "required": [
-          "type",
-          "address"
-        ]
-      },
-      "MultisigExecutionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "MULTISIG"
-            ]
-          },
-          "nonce": {
-            "type": "number"
-          },
-          "confirmationsRequired": {
-            "type": "number"
-          },
-          "confirmationsSubmitted": {
-            "type": "number"
-          },
-          "missingSigners": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AddressInfo"
-            }
-          }
-        },
-        "required": [
-          "type",
-          "nonce",
-          "confirmationsRequired",
-          "confirmationsSubmitted"
-        ]
-      },
-      "Transaction": {
-        "type": "object",
-        "properties": {
-          "txInfo": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/CreationTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/CustomTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/MultiSendTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/SettingsChangeTransaction"
-              },
-              {
-                "$ref": "#/components/schemas/TransferTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/SwapOrderTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/BridgeAndSwapTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/SwapTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/SwapTransferTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/TwapOrderTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/NativeStakingDepositTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/NativeStakingValidatorsExitTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/NativeStakingWithdrawTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/VaultDepositTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
-              }
-            ],
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TransactionInfo"
-              }
-            ]
-          },
-          "id": {
-            "type": "string"
-          },
-          "txHash": {
-            "type": "string",
-            "nullable": true
-          },
-          "timestamp": {
-            "type": "number"
-          },
-          "txStatus": {
-            "type": "string",
-            "enum": [
-              "SUCCESS",
-              "FAILED",
-              "CANCELLED",
-              "AWAITING_CONFIRMATIONS",
-              "AWAITING_EXECUTION"
-            ]
-          },
-          "executionInfo": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/MultisigExecutionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/ModuleExecutionInfo"
-              }
-            ],
-            "nullable": true
-          },
-          "safeAppInfo": {
-            "nullable": true,
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SafeAppInfo"
-              }
-            ]
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "txInfo",
-          "id",
-          "timestamp",
-          "txStatus"
-        ]
-      },
       "MultisigTransaction": {
         "type": "object",
         "properties": {
@@ -13548,105 +13509,6 @@
         "required": [
           "txInfo",
           "txData"
-        ]
-      },
-      "ConflictHeaderQueuedItem": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "CONFLICT_HEADER"
-            ]
-          },
-          "nonce": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "type",
-          "nonce"
-        ]
-      },
-      "LabelQueuedItem": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "LABEL"
-            ]
-          },
-          "label": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "type",
-          "label"
-        ]
-      },
-      "TransactionQueuedItem": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "TRANSACTION"
-            ]
-          },
-          "transaction": {
-            "$ref": "#/components/schemas/Transaction"
-          },
-          "conflictType": {
-            "type": "string",
-            "enum": [
-              "None",
-              "HasNext",
-              "End"
-            ]
-          }
-        },
-        "required": [
-          "type",
-          "transaction",
-          "conflictType"
-        ]
-      },
-      "QueuedItemPage": {
-        "type": "object",
-        "properties": {
-          "count": {
-            "type": "number",
-            "nullable": true
-          },
-          "next": {
-            "type": "string",
-            "nullable": true
-          },
-          "previous": {
-            "type": "string",
-            "nullable": true
-          },
-          "results": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ConflictHeaderQueuedItem"
-                },
-                {
-                  "$ref": "#/components/schemas/LabelQueuedItem"
-                },
-                {
-                  "$ref": "#/components/schemas/TransactionQueuedItem"
-                }
-              ]
-            }
-          }
-        },
-        "required": [
-          "results"
         ]
       },
       "TransactionItem": {
