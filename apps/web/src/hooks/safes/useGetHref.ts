@@ -14,6 +14,8 @@ export const useGetHref = (router: NextRouter) => {
   const isWelcomePage = router.pathname === AppRoutes.welcome.accounts
   const isSingleTxPage = router.pathname === AppRoutes.transactions.tx
 
+  const spaceId = typeof router.query.spaceId === 'string' ? router.query.spaceId : undefined
+
   return useCallback(
     (chain: Chain, address: string) => {
       return {
@@ -23,9 +25,14 @@ export const useGetHref = (router: NextRouter) => {
             : isSingleTxPage
               ? AppRoutes.transactions.history
               : router.pathname,
-        query: { ...(!isSpacePage && router.query), safe: `${chain.shortName}:${address}` },
+        query: {
+          ...(!isSpacePage && router.query),
+          // Always carry spaceId so navigating from a Space to a Safe keeps the active space in the URL.
+          ...(spaceId ? { spaceId } : {}),
+          safe: `${chain.shortName}:${address}`,
+        },
       }
     },
-    [isSingleTxPage, isWelcomePage, isSpacePage, router.pathname, router.query],
+    [isSingleTxPage, isWelcomePage, isSpacePage, router.pathname, router.query, spaceId],
   )
 }

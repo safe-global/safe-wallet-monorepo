@@ -10,7 +10,7 @@ const EXACT_EXCLUDED: ReadonlyArray<string> = [
   '/hypernative/oauth-callback',
 ]
 
-const PREFIX_EXCLUDED: ReadonlyArray<string> = ['/welcome', '/share', '/import', '/oidc']
+const PREFIX_EXCLUDED: ReadonlyArray<string> = ['/welcome', '/share', '/import', '/oidc', '/new-safe']
 
 export const isExcludedRoute = (pathname: string): boolean => {
   if (!pathname) return false

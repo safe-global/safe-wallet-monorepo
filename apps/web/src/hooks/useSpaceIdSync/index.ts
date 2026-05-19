@@ -20,6 +20,7 @@ const getQuerySpaceId = (query: Record<string, string | string[] | undefined>): 
  */
 export const useSpaceIdSync = (): void => {
   const router = useRouter()
+  const { isReady, pathname, asPath, query, replace } = router
   const isSignedIn = useAppSelector(isAuthenticated)
   const isOidcPending = useAppSelector(selectIsOidcLoginPending)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
@@ -28,7 +29,7 @@ export const useSpaceIdSync = (): void => {
   const { data: spaces, isError: spacesError } = useSpacesGetV1Query(undefined, { skip: !isSignedIn })
 
   useEffect(() => {
-    if (!router.isReady) return
+    if (!isReady) return
     // Wait for redux-persist to rehydrate the session before deciding anything —
     // otherwise an actually signed-in user can be bounced to /welcome/spaces on
     // first render (where they then get stuck because /welcome/* is excluded).
@@ -39,9 +40,9 @@ export const useSpaceIdSync = (): void => {
       classicEnabled,
       isSignedIn,
       isOidcPending,
-      pathname: router.pathname,
-      asPath: router.asPath,
-      querySpaceId: getQuerySpaceId(router.query),
+      pathname,
+      asPath,
+      querySpaceId: getQuerySpaceId(query),
       userSpaceIds: spaces ? spaces.map((s) => String(s.id)) : undefined,
       spacesError,
     })
@@ -51,21 +52,30 @@ export const useSpaceIdSync = (): void => {
         return
       case 'inject':
       case 'overwrite':
-        router.replace(
-          { pathname: router.pathname, query: { ...router.query, spaceId: decision.spaceId } },
-          undefined,
-          { shallow: true },
-        )
+        replace({ pathname, query: { ...query, spaceId: decision.spaceId } }, undefined, { shallow: true })
         return
       case 'forceOnboarding':
-        router.replace({ pathname: AppRoutes.spaces.index })
+        replace({ pathname: AppRoutes.spaces.index })
         return
       case 'bounceToSignIn':
-        router.replace({
+        replace({
           pathname: AppRoutes.welcome.spaces,
           query: { redirect: decision.redirect },
         })
         return
     }
-  }, [router, isSignedIn, isOidcPending, isStoreHydrated, requireLogin, classicEnabled, spaces, spacesError])
+  }, [
+    isReady,
+    pathname,
+    asPath,
+    query,
+    replace,
+    isSignedIn,
+    isOidcPending,
+    isStoreHydrated,
+    requireLogin,
+    classicEnabled,
+    spaces,
+    spacesError,
+  ])
 }

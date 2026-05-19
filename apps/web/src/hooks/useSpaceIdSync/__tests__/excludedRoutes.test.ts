@@ -19,6 +19,10 @@ describe('isExcludedRoute', () => {
     ['/import/foo'],
     ['/hypernative/oauth-callback'],
     ['/oidc/callback'],
+    ['/new-safe'],
+    ['/new-safe/load'],
+    ['/new-safe/create'],
+    ['/new-safe/advanced-create'],
     ['/404'],
     ['/403'],
   ])('returns true for excluded route %s', (path) => {

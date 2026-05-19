@@ -67,4 +67,95 @@ describe('useAdjustUrl', () => {
 
     expect(replace).toHaveBeenCalledWith({ pathname: '/' })
   })
+
+  it('should not redirect to / on a safe route when ?safe is present without ?spaceId', () => {
+    const replace = jest.fn(() => Promise.resolve(true))
+
+    renderHook(() => useAdjustUrl(), {
+      routerProps: {
+        asPath: '/home?safe=eth:0x0000000000000000000000000000000000000000',
+        pathname: '/home',
+        query: { safe: 'eth:0x0000000000000000000000000000000000000000' },
+        replace,
+      },
+    })
+
+    expect(replace).not.toHaveBeenCalled()
+  })
+
+  it('should not redirect to / on a safe route when both ?safe and ?spaceId are present', () => {
+    const replace = jest.fn(() => Promise.resolve(true))
+
+    renderHook(() => useAdjustUrl(), {
+      routerProps: {
+        asPath: '/home?safe=eth:0x0000000000000000000000000000000000000000&spaceId=42',
+        pathname: '/home',
+        query: { safe: 'eth:0x0000000000000000000000000000000000000000', spaceId: '42' },
+        replace,
+      },
+    })
+
+    expect(replace).not.toHaveBeenCalled()
+  })
+
+  it('should defer to useSpaceIdSync when ?spaceId is the only param on a non-safe route', () => {
+    const replace = jest.fn(() => Promise.resolve(true))
+
+    renderHook(() => useAdjustUrl(), {
+      routerProps: {
+        asPath: '/welcome?spaceId=42',
+        pathname: '/welcome',
+        query: { spaceId: '42' },
+        replace,
+      },
+    })
+
+    expect(replace).not.toHaveBeenCalled()
+  })
+
+  it('should not redirect when the route is not in SAFE_ROUTES even without ?safe', () => {
+    const replace = jest.fn(() => Promise.resolve(true))
+
+    renderHook(() => useAdjustUrl(), {
+      routerProps: {
+        asPath: '/welcome/spaces',
+        pathname: '/welcome/spaces',
+        query: {},
+        replace,
+      },
+    })
+
+    expect(replace).not.toHaveBeenCalled()
+  })
+
+  it('should not redirect before the router is ready', () => {
+    const replace = jest.fn(() => Promise.resolve(true))
+
+    renderHook(() => useAdjustUrl(), {
+      routerProps: {
+        asPath: '/home',
+        pathname: '/home',
+        query: {},
+        replace,
+        isReady: false,
+      },
+    })
+
+    expect(replace).not.toHaveBeenCalled()
+  })
+
+  it('should defer to useSpaceIdSync on every safe route when ?spaceId is set, even with no ?safe', () => {
+    const replace = jest.fn(() => Promise.resolve(true))
+
+    renderHook(() => useAdjustUrl(), {
+      routerProps: {
+        asPath: '/transactions/history?spaceId=7',
+        pathname: '/transactions/history',
+        query: { spaceId: '7' },
+        replace,
+      },
+    })
+
+    expect(replace).not.toHaveBeenCalled()
+  })
 })

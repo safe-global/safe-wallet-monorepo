@@ -23,6 +23,8 @@ const hasNotFoundSpaces = (error?: RtkError) => {
 export const useSignInRedirect = ({ spacesAmount, inviteAmount, isSpacesLoading, error }: UseSignInRedirectProps) => {
   const [hasSignedIn, setHasSignedIn] = useState(false)
   const router = useRouter()
+  const { query, push } = router
+  const redirectParam = query.redirect
   const [redirectLoading, setRedirectLoading] = useState(false)
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isOidcLoginPending = useAppSelector(selectIsOidcLoginPending)
@@ -41,10 +43,10 @@ export const useSignInRedirect = ({ spacesAmount, inviteAmount, isSpacesLoading,
   useEffect(() => {
     if (!hasSignedIn || !isUserSignedIn) return
 
-    const redirectTarget = getSafeRedirectTarget(router.query.redirect)
+    const redirectTarget = getSafeRedirectTarget(redirectParam)
     if (redirectTarget) {
       setRedirectLoading(true)
-      router.push(redirectTarget)
+      push(redirectTarget)
       return
     }
 
@@ -53,9 +55,9 @@ export const useSignInRedirect = ({ spacesAmount, inviteAmount, isSpacesLoading,
     const isNewUser = !inviteAmount && !isSpacesLoading && spacesAmount === 0
     if (isNewUser || hasNotFoundSpaces(error)) {
       setRedirectLoading(true)
-      router.push({ pathname: AppRoutes.welcome.createSpace, query: router.query })
+      push({ pathname: AppRoutes.welcome.createSpace, query })
     }
-  }, [hasSignedIn, isSpacesLoading, spacesAmount, inviteAmount, isUserSignedIn, error, router])
+  }, [hasSignedIn, isSpacesLoading, spacesAmount, inviteAmount, isUserSignedIn, error, redirectParam, query, push])
 
   return { setHasSignedIn, redirectLoading }
 }

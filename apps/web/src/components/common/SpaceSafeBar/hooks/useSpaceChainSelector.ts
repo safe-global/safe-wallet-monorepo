@@ -57,7 +57,10 @@ export function useSpaceChainSelector() {
           [MixpanelEventParams.CHAIN_ID]: chainId,
         },
       )
-      router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${safeAddress}` } })
+      router.push({
+        pathname: AppRoutes.home,
+        query: { safe: `${chain.shortName}:${safeAddress}`, ...(spaceId ? { spaceId } : {}) },
+      })
     },
     [chainConfigs, router, safeAddress, spaceId],
   )
