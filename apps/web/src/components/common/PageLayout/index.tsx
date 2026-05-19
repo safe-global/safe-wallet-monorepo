@@ -96,6 +96,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         <div className={css.content}>
           <SafeLoadingError>
             {!hideHeader && parentSafe && <Breadcrumbs />}
+
             {isOnboardingRoute ? (
               <AnimatePresence mode="wait">
                 <motion.div

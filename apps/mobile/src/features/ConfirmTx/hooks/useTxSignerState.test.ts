@@ -57,6 +57,8 @@ const createMockExecutionDetails = (overrides: Partial<MultisigExecutionDetails>
   baseGas: faker.number.int({ min: 21000, max: 50000 }).toString(),
   gasPrice: faker.number.bigInt({ min: 1000000000n, max: 50000000000n }).toString(),
   gasToken: '0x0000000000000000000000000000000000000000',
+  fee: '0',
+  payment: '0',
   refundReceiver: { value: '0x0000000000000000000000000000000000000000', name: null, logoUri: null },
   safeTxHash: faker.string.hexadecimal({ length: 64, prefix: '0x' }),
   executor: { value: faker.finance.ethereumAddress(), name: null, logoUri: null },
