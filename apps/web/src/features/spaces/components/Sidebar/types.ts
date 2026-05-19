@@ -4,7 +4,7 @@ export interface SidebarItemConfig {
   icon: LucideIcon
   label: string
   href: string
-  badge?: number
+  badge?: number | string
   isActive?: boolean
   activeMemberOnly?: boolean
 }

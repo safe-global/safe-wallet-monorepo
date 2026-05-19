@@ -10,6 +10,7 @@ const chainNavigationButton = '[data-testid="space-chain-navigation-button"]'
 export const createSafeMsg = (network) => `Successfully added your account on ${network}`
 
 export function clickChainNavigationButton() {
+  cy.wait(1000)
   cy.get(chainNavigationButton).should('be.visible').click()
   cy.get(allNetworksAccordion).should('be.visible')
 }
@@ -25,7 +26,7 @@ export function clickAddNetworkBtn(chainName) {
 }
 
 export function clickModalAddNetworkBtn() {
-  cy.get(modalAddNetworkBtn).should('be.visible').click()
+  cy.get(modalAddNetworkBtn).should('be.visible').and('not.be.disabled').click()
 }
 
 export function verifyModalAddNetworkBtnDisabled() {

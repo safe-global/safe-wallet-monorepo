@@ -109,7 +109,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Wallet>
           {(isOk) => {
             const sendDisabled = !isOk || isBlockedCountry || noAssets

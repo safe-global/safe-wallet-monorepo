@@ -93,12 +93,15 @@ export const SafeSidebarContent = ({
     })
     return { ...safeDefiGroup, items: filteredItems }
   }, [chain, isBlockedCountry])
-
   // tx queue badge
+
   const mainNavWithBadges = useMemo(() => {
     return visibleMainNavigation.map((item) => {
       if (item.href === AppRoutes.transactions.history) {
-        return { ...item, badge: Number(queueSize) }
+        const parsedQueueSize = Number(queueSize)
+        const badge = !parsedQueueSize ? queueSize : parsedQueueSize
+
+        return { ...item, badge }
       }
       return item
     })
