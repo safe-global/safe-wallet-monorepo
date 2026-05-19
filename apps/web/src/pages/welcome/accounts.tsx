@@ -16,11 +16,12 @@ const Accounts: NextPage = () => {
   const { MyAccounts, MyAccountsV2 } = useLoadFeature(MyAccountsFeature)
   const { isLoading } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
   const isRedesignEnabled = useHasFeature(FEATURES.WELCOME_ACCOUNTS_REDESIGN)
-  const isClassicEnabled = useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)
+  // Chain flag is a kill switch: set to true → classic OFF; unset/false/undefined → classic ON.
+  const isClassicEnabled = useHasDefaultChainFeature(FEATURES.DISABLE_CLASSIC_UI) !== true
 
   // When classic UI is killed, /welcome/accounts no longer has a place — push to /welcome/spaces.
   useEffect(() => {
-    if (isClassicEnabled === false) {
+    if (!isClassicEnabled) {
       router.replace(AppRoutes.welcome.spaces)
     }
   }, [isClassicEnabled, router])
@@ -28,7 +29,7 @@ const Accounts: NextPage = () => {
   const isFlagResolved = !isLoading && isRedesignEnabled !== undefined
 
   const renderAccounts = () => {
-    if (!isFlagResolved || isClassicEnabled === false) {
+    if (!isFlagResolved || !isClassicEnabled) {
       return (
         <div className="flex w-full justify-center py-16">
           <Spinner className="text-muted-foreground size-6" />

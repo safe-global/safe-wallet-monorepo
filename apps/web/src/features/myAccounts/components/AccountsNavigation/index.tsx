@@ -34,10 +34,11 @@ const navItems: NavItems = [
 
 const AccountsNavigation = () => {
   const router = useRouter()
-  const isClassicEnabled = useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)
+  // Chain flag is a kill switch: set to true → classic OFF; unset/false/undefined → classic ON.
+  const isClassicEnabled = useHasDefaultChainFeature(FEATURES.DISABLE_CLASSIC_UI) !== true
 
   // Classic killed → only Spaces remains; with one option the tabs widget is noise.
-  if (isClassicEnabled === false) return null
+  if (!isClassicEnabled) return null
 
   const isActiveNavigation = (pathname: string) => {
     return router.pathname === pathname

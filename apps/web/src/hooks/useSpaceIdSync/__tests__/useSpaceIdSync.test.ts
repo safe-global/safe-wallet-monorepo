@@ -33,13 +33,18 @@ const mockAuth = ({
   })
 }
 
+// Helper takes semantic-level inputs (e.g. requireLogin === true → login required).
+// Chain flags are inverted kill switches, so we mock the chain hook accordingly:
+// semantic ON → chain flag false; semantic OFF → chain flag true; undefined passes through.
 const mockFlags = ({
   requireLogin = true,
   classicEnabled = true,
 }: { requireLogin?: boolean | undefined; classicEnabled?: boolean | undefined } = {}) => {
+  const toChainFlag = (semantic: boolean | undefined): boolean | undefined =>
+    semantic === undefined ? undefined : !semantic
   jest.spyOn(useChainsModule, 'useHasDefaultChainFeature').mockImplementation((feature) => {
-    if (feature === 'REQUIRE_SPACES_LOGIN') return requireLogin
-    if (feature === 'CLASSIC_UI_ENABLED') return classicEnabled
+    if (feature === 'DISABLE_SPACES_LOGIN') return toChainFlag(requireLogin)
+    if (feature === 'DISABLE_CLASSIC_UI') return toChainFlag(classicEnabled)
     return undefined
   })
 }
@@ -180,7 +185,7 @@ describe('useSpaceIdSync', () => {
     })
   })
 
-  it('is inert when REQUIRE_SPACES_LOGIN is off (legacy mode)', () => {
+  it('is inert when DISABLE_SPACES_LOGIN is set (legacy mode)', () => {
     mockAuth({ isAuthenticated: true })
     mockFlags({ requireLogin: false, classicEnabled: true })
     mockSpaces(['7'])

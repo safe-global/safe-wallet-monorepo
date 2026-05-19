@@ -20,13 +20,13 @@ describe('useHasDefaultChainFeature', () => {
             chainId: String(DEFAULT_CHAIN_ID),
             chainName: 'Ethereum',
             isTestnet: false,
-            features: ['REQUIRE_SPACES_LOGIN'],
+            features: ['DISABLE_SPACES_LOGIN'],
           },
         },
       },
     } as never)
 
-    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN))
+    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.DISABLE_SPACES_LOGIN))
     expect(result.current).toBe(true)
   })
 
@@ -45,7 +45,7 @@ describe('useHasDefaultChainFeature', () => {
       },
     } as never)
 
-    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN))
+    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.DISABLE_SPACES_LOGIN))
     expect(result.current).toBe(false)
   })
 
@@ -54,7 +54,7 @@ describe('useHasDefaultChainFeature', () => {
       data: undefined,
     } as never)
 
-    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN))
+    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.DISABLE_SPACES_LOGIN))
     expect(result.current).toBeUndefined()
   })
 
@@ -74,7 +74,7 @@ describe('useHasDefaultChainFeature', () => {
       },
     } as never)
 
-    renderHook(() => useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED))
+    renderHook(() => useHasDefaultChainFeature(FEATURES.DISABLE_CLASSIC_UI))
 
     expect(useGetChainsConfigV2QueryMock).toHaveBeenCalledWith('WALLET_WEB')
   })

@@ -20,16 +20,18 @@ This spec covers only the dual-flag rollout machinery and the URL/redirect contr
 
 Two new entries in `FEATURES` (`packages/utils/src/utils/chains.ts`), both looked up against the **default chain** (`DEFAULT_CHAIN_ID` from `apps/web/src/config/constants.ts` — mainnet in production, Sepolia in staging) regardless of the user's current chain. The flags are uniform across chains; the default chain is the canonical source and lets staging exercise the flags via Sepolia while production reads them from mainnet.
 
-| Flag                   | When ON                                                                                                                                                                          | When OFF                                                                                                                                       |
+Both flags are **kill switches**: chain config unset / `false` → feature **ON**; chain config explicitly `true` → feature **OFF**.
+
+| Flag                   | Chain flag UNSET (feature ON)                                                                                                                                                    | Chain flag TRUE (feature OFF)                                                                                                                  |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `REQUIRE_SPACES_LOGIN` | Signed-in users get the full new flow: `spaceId` auto-injection, invalid-`spaceId` overwrite, redirect to `/spaces` when no spaces exist, bounce on `?spaceId` while signed-out. | `useSpaceIdSync` is fully inert. App behaves exactly as today.                                                                                 |
-| `CLASSIC_UI_ENABLED`   | Signed-out users can browse all non-spaces routes as today.                                                                                                                      | Signed-out users on any non-excluded route are bounced to `/welcome/spaces?redirect=<asPath>`, regardless of whether `?spaceId` is in the URL. |
+| `DISABLE_SPACES_LOGIN` | Signed-in users get the full new flow: `spaceId` auto-injection, invalid-`spaceId` overwrite, redirect to `/spaces` when no spaces exist, bounce on `?spaceId` while signed-out. | `useSpaceIdSync` is fully inert. App behaves exactly as today.                                                                                 |
+| `DISABLE_CLASSIC_UI`   | Signed-out users can browse all non-spaces routes as today.                                                                                                                      | Signed-out users on any non-excluded route are bounced to `/welcome/spaces?redirect=<asPath>`, regardless of whether `?spaceId` is in the URL. |
 
 **Rollout:**
 
-- Coexistence month: both flags **ON**.
-- Day-30 cutover: flip `CLASSIC_UI_ENABLED` → **OFF**.
-- Later: `REQUIRE_SPACES_LOGIN` stays ON; the flag and its branches are removed in a cleanup PR.
+- Coexistence month: both flags unset (both features ON).
+- Day-30 cutover: set `DISABLE_CLASSIC_UI` → **true** to kill the classic flow.
+- Later: classic flow stays killed; the flags and their branches are removed in a cleanup PR.
 
 The split lets us independently roll back either dimension without a code revert.
 
@@ -128,7 +130,7 @@ The rest of the app reads `spaceId` via the existing `useCurrentSpaceId()`, whic
 
 The welcome page exposes two tabs in `AccountsNavigation`: "Accounts" (classic) and "Spaces" (new flow). Both belong to the classic experience — once classic is killed there's only one place to go, so the tabs widget itself is hidden and `/welcome/accounts` redirects to `/welcome/spaces`.
 
-Gate: when `useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)` returns `false` (explicitly disabled):
+Gate: when `useHasDefaultChainFeature(FEATURES.DISABLE_CLASSIC_UI)` returns `true` (classic killed):
 
 - `AccountsNavigation` returns `null` — the entire tabs widget disappears (no single-option strip).
 - `/welcome/accounts` page issues `router.replace('/welcome/spaces')` — Spaces becomes the effective default landing.
@@ -169,7 +171,7 @@ Delete:
 4. **OIDC pending.** The hook short-circuits while `selectIsOidcLoginPending` is true to avoid racing the OIDC callback.
 5. **Sign-out side effect.** After `setUnauthenticated`, the hook re-runs; if `?spaceId` is still in the URL it will bounce to `/welcome/spaces`. Acceptable — callers that want a softer landing should `router.push('/')` themselves on sign-out.
 6. **Chains query in flight on first paint.** Both feature-flag hooks return `undefined`. Optimistic-enable means the hook behaves as if both flags are ON until chains load — i.e. signed-in users get sync, signed-out users with `?spaceId` get bounced. This is the desired behavior.
-7. **`spaces` query errors with `REQUIRE_SPACES_LOGIN` ON.** Row 7: no-op. Better to leave the user on a working page than redirect them to `/spaces` based on a transient API error.
+7. **`spaces` query errors while spaces login is required (`DISABLE_SPACES_LOGIN` flag unset).** Row 7: no-op. Better to leave the user on a working page than redirect them to `/spaces` based on a transient API error.
 
 ## Test plan
 
@@ -206,7 +208,7 @@ Delete:
 
 **Modified:**
 
-- `packages/utils/src/utils/chains.ts` — add `REQUIRE_SPACES_LOGIN`, `CLASSIC_UI_ENABLED` to `FEATURES`.
+- `packages/utils/src/utils/chains.ts` — add `DISABLE_SPACES_LOGIN`, `DISABLE_CLASSIC_UI` to `FEATURES`.
 - `apps/web/src/hooks/useChains.ts` — add `useHasDefaultChainFeature`.
 - `apps/web/src/hooks/useIsSpaceRoute.ts` — drop `lastUsedSpace`.
 - `apps/web/src/pages/_app.tsx` — mount `useSpaceIdSync` in `InitApp`.

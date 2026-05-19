@@ -7,8 +7,10 @@ describe('AccountsNavigation', () => {
     jest.restoreAllMocks()
   })
 
-  it('shows both Accounts and Spaces tabs when CLASSIC_UI_ENABLED is enabled', () => {
-    jest.spyOn(useChainsModule, 'useHasDefaultChainFeature').mockReturnValue(true)
+  // DISABLE_CLASSIC_UI is a kill switch: chain flag unset/false → classic ON; true → OFF.
+
+  it('shows both Accounts and Spaces tabs when DISABLE_CLASSIC_UI flag is unset (classic ON)', () => {
+    jest.spyOn(useChainsModule, 'useHasDefaultChainFeature').mockReturnValue(false)
     render(<AccountsNavigation />)
     expect(screen.getByText('Accounts')).toBeInTheDocument()
     expect(screen.getByText('Spaces')).toBeInTheDocument()
@@ -21,8 +23,8 @@ describe('AccountsNavigation', () => {
     expect(screen.getByText('Spaces')).toBeInTheDocument()
   })
 
-  it('renders nothing when CLASSIC_UI_ENABLED is explicitly disabled', () => {
-    jest.spyOn(useChainsModule, 'useHasDefaultChainFeature').mockReturnValue(false)
+  it('renders nothing when DISABLE_CLASSIC_UI flag is true (classic killed)', () => {
+    jest.spyOn(useChainsModule, 'useHasDefaultChainFeature').mockReturnValue(true)
     const { container } = render(<AccountsNavigation />)
     // With classic killed, only Spaces remains — the single-tab widget is hidden.
     expect(screen.queryByText('Accounts')).not.toBeInTheDocument()

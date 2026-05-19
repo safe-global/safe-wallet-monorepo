@@ -35,8 +35,9 @@ export const useSpaceIdSync = (): void => {
   const isOidcPending = useAppSelector(selectIsOidcLoginPending)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const lastUsedSpaceId = useAppSelector(selectLastUsedSpace)
-  const requireLogin = useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN)
-  const classicEnabled = useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)
+  // Chain flags are kill switches: set to true → feature OFF; unset/false/undefined → feature ON.
+  const requireLogin = useHasDefaultChainFeature(FEATURES.DISABLE_SPACES_LOGIN) !== true
+  const classicEnabled = useHasDefaultChainFeature(FEATURES.DISABLE_CLASSIC_UI) !== true
   const { data: spaces, isError: spacesError } = useSpacesGetV1Query(undefined, { skip: !isSignedIn })
 
   // Only check membership when there's both a Safe in the URL and a last-used space.

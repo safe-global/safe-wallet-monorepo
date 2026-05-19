@@ -48,10 +48,10 @@ export const decide = (input: DecideInput): Decision => {
     spacesError,
   } = input
 
-  // Row 1 (master switch): REQUIRE_SPACES_LOGIN off → fully inert.
-  // Per spec: the app behaves exactly as today when this flag is off, regardless of
-  // CLASSIC_UI_ENABLED. (CLASSIC_UI_ENABLED is a sub-switch that only takes effect
-  // once the new flow is required.)
+  // Row 1 (master switch): login not required (DISABLE_SPACES_LOGIN chain flag set) → fully inert.
+  // Per spec: the app behaves exactly as today when login is not required, regardless of
+  // whether classic UI is enabled. (Classic-UI kill switch is a sub-switch that only takes
+  // effect once the new flow is required.)
   if (requireLogin === false) return NOOP
 
   // Row 2: excluded route or OIDC handshake in flight.

@@ -69,8 +69,8 @@
 Open `packages/utils/src/utils/chains.ts` and find the closing `}` of the `FEATURES` enum (currently the line `WELCOME_ACCOUNTS_REDESIGN = 'WELCOME_ACCOUNTS_REDESIGN',` followed by `}`). Add two new entries before the closing brace:
 
 ```ts
-  REQUIRE_SPACES_LOGIN = 'REQUIRE_SPACES_LOGIN',
-  CLASSIC_UI_ENABLED = 'CLASSIC_UI_ENABLED',
+  DISABLE_SPACES_LOGIN = 'DISABLE_SPACES_LOGIN',
+  DISABLE_CLASSIC_UI = 'DISABLE_CLASSIC_UI',
 ```
 
 - [ ] **Step 2: Type-check**
@@ -83,7 +83,7 @@ Expected: PASS, no errors.
 ```bash
 git add packages/utils/src/utils/chains.ts
 git -c commit.gpgsign=true commit -S -m "$(cat <<'EOF'
-feat: add REQUIRE_SPACES_LOGIN and CLASSIC_UI_ENABLED feature flags
+feat: add DISABLE_SPACES_LOGIN and DISABLE_CLASSIC_UI feature flags
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -563,9 +563,9 @@ describe('useHasDefaultChainFeature', () => {
   it('returns true when the default chain has the feature enabled', () => {
     jest
       .spyOn(useChainsModule, 'useChain')
-      .mockReturnValue({ chainId: String(DEFAULT_CHAIN_ID), features: ['REQUIRE_SPACES_LOGIN'] } as never)
+      .mockReturnValue({ chainId: String(DEFAULT_CHAIN_ID), features: ['DISABLE_SPACES_LOGIN'] } as never)
 
-    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN))
+    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.DISABLE_SPACES_LOGIN))
     expect(result.current).toBe(true)
   })
 
@@ -574,14 +574,14 @@ describe('useHasDefaultChainFeature', () => {
       .spyOn(useChainsModule, 'useChain')
       .mockReturnValue({ chainId: String(DEFAULT_CHAIN_ID), features: ['SPACES'] } as never)
 
-    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN))
+    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.DISABLE_SPACES_LOGIN))
     expect(result.current).toBe(false)
   })
 
   it('returns undefined when chains have not loaded', () => {
     jest.spyOn(useChainsModule, 'useChain').mockReturnValue(undefined)
 
-    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN))
+    const { result } = renderHook(() => useHasDefaultChainFeature(FEATURES.DISABLE_SPACES_LOGIN))
     expect(result.current).toBeUndefined()
   })
 
@@ -590,7 +590,7 @@ describe('useHasDefaultChainFeature', () => {
       .spyOn(useChainsModule, 'useChain')
       .mockReturnValue({ chainId: String(DEFAULT_CHAIN_ID), features: [] } as never)
 
-    renderHook(() => useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED))
+    renderHook(() => useHasDefaultChainFeature(FEATURES.DISABLE_CLASSIC_UI))
 
     expect(useChainSpy).toHaveBeenCalledWith(String(DEFAULT_CHAIN_ID))
   })
@@ -683,8 +683,8 @@ const mockFlags = ({
   classicEnabled = true,
 }: { requireLogin?: boolean | undefined; classicEnabled?: boolean | undefined } = {}) => {
   jest.spyOn(useChainsModule, 'useHasDefaultChainFeature').mockImplementation((feature) => {
-    if (feature === 'REQUIRE_SPACES_LOGIN') return requireLogin
-    if (feature === 'CLASSIC_UI_ENABLED') return classicEnabled
+    if (feature === 'DISABLE_SPACES_LOGIN') return requireLogin
+    if (feature === 'DISABLE_CLASSIC_UI') return classicEnabled
     return undefined
   })
 }
@@ -810,7 +810,7 @@ describe('useSpaceIdSync', () => {
     })
   })
 
-  it('is inert when REQUIRE_SPACES_LOGIN is off (legacy mode)', () => {
+  it('is inert when DISABLE_SPACES_LOGIN is off (legacy mode)', () => {
     mockAuth({ isAuthenticated: true })
     mockFlags({ requireLogin: false, classicEnabled: true })
     mockSpaces(['7'])
@@ -923,8 +923,8 @@ export const useSpaceIdSync = (): void => {
   const router = useRouter()
   const isSignedIn = useAppSelector(isAuthenticated)
   const isOidcPending = useAppSelector(selectIsOidcLoginPending)
-  const requireLogin = useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN)
-  const classicEnabled = useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)
+  const requireLogin = useHasDefaultChainFeature(FEATURES.DISABLE_SPACES_LOGIN)
+  const classicEnabled = useHasDefaultChainFeature(FEATURES.DISABLE_CLASSIC_UI)
   const { data: spaces, isError: spacesError } = useSpacesGetV1Query(undefined, { skip: !isSignedIn })
 
   useEffect(() => {
@@ -1569,7 +1569,7 @@ Expected: no matches.
 
 - [ ] **Confirm flag wiring**
 
-Run: `grep -rn "REQUIRE_SPACES_LOGIN\|CLASSIC_UI_ENABLED" apps/web/src packages/utils/src`
+Run: `grep -rn "DISABLE_SPACES_LOGIN\|DISABLE_CLASSIC_UI" apps/web/src packages/utils/src`
 Expected: matches in `packages/utils/src/utils/chains.ts`, `apps/web/src/hooks/useSpaceIdSync/index.ts`, and the test files only.
 
 ---
