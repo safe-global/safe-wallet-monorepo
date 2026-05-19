@@ -1,0 +1,118 @@
+# Build half of a two-workflow pair. Keep the following invariants:
+# workflow-level `permissions: {}`, no `secrets.*` references in any step,
+# and no cache-write steps (no actions/cache save; no wrapper actions that
+# write the yarn cache). Uses `workflow_run` to run after the deploy
+# completes so the preview URL is available.
+# Companion publish workflow: page-screenshots-publish.yml.
+name: Page Screenshots Build
+
+on:
+  workflow_run:
+    workflows: ['Web Deploy to dev/staging']
+    types:
+      - completed
+
+permissions: {}
+
+jobs:
+  build:
+    # Only run for in-repo PRs where the upstream deploy succeeded.
+    # Fork PRs are gated upstream in web-deploy-dev.yml; this check keeps
+    # the chain honest if that ever changes.
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      # Pin to the commit SHA the deploy ran against. If the PR head moves
+      # between the deploy finishing and this workflow starting, head_branch
+      # would resolve to the new tip, mismatching the deployed preview.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Playwright
+        run: |
+          # Install Playwright into a fresh directory outside the checked-out
+          # workspace so the repo's own `package.json` cannot influence what
+          # gets installed. `enableScripts: false` blocks lifecycle scripts;
+          # the version is pinned to keep installs reproducible.
+          INSTALL_DIR="$RUNNER_TEMP/playwright-install"
+          mkdir -p "$INSTALL_DIR"
+          cd "$INSTALL_DIR"
+          cat > package.json <<'JSON'
+          {"name":"playwright-install","private":true}
+          JSON
+          cat > .yarnrc.yml <<'YAML'
+          nodeLinker: node-modules
+          enableScripts: false
+          enableTelemetry: false
+          YAML
+          corepack enable
+          yarn add playwright@1.60.0
+          yarn playwright install --with-deps chromium
+          echo "PLAYWRIGHT_PATH=$INSTALL_DIR/node_modules/playwright" >> "$GITHUB_ENV"
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          BASE_SHA="${{ github.event.workflow_run.pull_requests[0].base.sha }}"
+          HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
+          if [ -z "$BASE_SHA" ] || [ -z "$HEAD_SHA" ]; then
+            echo "Missing base/head SHA; skipping screenshots"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
+            | grep -E '\.(tsx?|jsx?)$' \
+            | grep -v '\.test\.' \
+            | grep -v '\.stories\.' \
+            | grep -E '^(apps/web/src|packages/)' || true)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No relevant source files changed"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Changed source files:"
+            echo "$CHANGED_FILES"
+            {
+              echo "files<<EOF"
+              echo "$CHANGED_FILES"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Normalize branch name
+        if: steps.changed-files.outputs.has_changes == 'true'
+        id: branch
+        env:
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
+          echo "normalized=$NORMALIZED" >> "$GITHUB_OUTPUT"
+
+      - name: Map files to routes
+        if: steps.changed-files.outputs.has_changes == 'true'
+        id: routes
+        env:
+          CHANGED_FILES: ${{ steps.changed-files.outputs.files }}
+          BRANCH_NAME: ${{ steps.branch.outputs.normalized }}
+        run: node ./.github/scripts/map-files-to-routes.js
+
+      - name: Take screenshots
+        if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
+        run: node ./.github/scripts/capture-page-screenshots.js
+
+      - name: Upload screenshots
+        if: steps.changed-files.outputs.has_changes == 'true' && steps.routes.outputs.has_routes == 'true'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: page-screenshots
+          path: page-screenshots/*.png
+          if-no-files-found: ignore
+          retention-days: 5
