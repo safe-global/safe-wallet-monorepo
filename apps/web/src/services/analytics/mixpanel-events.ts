@@ -39,6 +39,7 @@ export enum MixpanelEvent {
   TRUSTED_SAFE_REMOVED = 'Trusted Safe Removed',
   HYPERNATIVE_LOGIN_CLICKED = 'Hypernative Login Clicked',
   HYPERNATIVE_CONNECTED = 'Hypernative Connected',
+  HN_VIEW_FULL_REPORT_CLICKED = 'HN View Full Report Clicked',
   FALSE_RESULT_REPORTED = 'False Result Reported',
   WORKSPACE_DASHBOARD_VIEWED = 'Workspace Dashboard Viewed',
   AUTH_LOGIN_SUCCEEDED = 'Auth Login Succeeded',

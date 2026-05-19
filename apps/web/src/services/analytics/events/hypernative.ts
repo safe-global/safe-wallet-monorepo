@@ -33,6 +33,10 @@ export const HYPERNATIVE_EVENTS = {
     action: 'Hypernative Connected',
     category: HYPERNATIVE_CATEGORY,
   },
+  HN_VIEW_FULL_REPORT_CLICKED: {
+    action: 'HN View Full Report Clicked',
+    category: HYPERNATIVE_CATEGORY,
+  },
 }
 
 export enum HYPERNATIVE_SOURCE {
