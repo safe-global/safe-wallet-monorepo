@@ -8,6 +8,7 @@ let userResponse: unknown = { safes: {} }
 let spaceResponse: unknown = { safes: {} }
 let deleteShouldFail = false
 let pendingDeletesState: { chainId: string; address: string }[] = []
+let userFailureCount = 0
 
 const makeThunk = (data: unknown) => ({
   unwrap: () => Promise.resolve(data),
@@ -20,6 +21,13 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes', () =
       counterfactualSafesGetV1: {
         initiate: (...args: unknown[]) => {
           userInitiate(...args)
+          if (userFailureCount > 0) {
+            userFailureCount--
+            return {
+              unwrap: () => Promise.reject(new Error('transient GET failure')),
+              unsubscribe: jest.fn(),
+            }
+          }
           return makeThunk(userResponse)
         },
       },
@@ -107,6 +115,7 @@ describe('useCounterfactualSafeSync', () => {
     spaceResponse = { safes: {} }
     deleteShouldFail = false
     pendingDeletesState = []
+    userFailureCount = 0
     ;(useAppSelector as jest.Mock).mockReset()
   })
 
@@ -340,5 +349,84 @@ describe('useCounterfactualSafeSync', () => {
     expect(config.paymentReceiver).toBe('0x0000000000000000000000000000000000000000')
     expect(config.fallbackHandler).toBe('0x0000000000000000000000000000000000000000')
     expect(config.to).toBe('0x0000000000000000000000000000000000000000')
+  })
+
+  it('retries once after a transient GET failure and applies the result on success', async () => {
+    // Without the retry, a single network blip stuck users who land on a
+    // space-mate's CF safe URL on "Safe couldn't be loaded".
+    jest.useFakeTimers()
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    userFailureCount = 1
+    userResponse = {
+      safes: {
+        '1': [
+          {
+            address: '0xRetry',
+            factoryAddress: '0xF',
+            masterCopy: '0xM',
+            saltNonce: '0',
+            safeVersion: '1.4.1',
+            threshold: 1,
+            owners: ['0xabc'],
+            fallbackHandler: '0xFH',
+            to: '0x0',
+            data: '0x',
+            paymentToken: null,
+            payment: null,
+            paymentReceiver: '0x0',
+          },
+        ],
+      },
+    }
+    mockSelectors(true, true, null)
+
+    renderHook(() => useCounterfactualSafeSync())
+    // First attempt fails → catch schedules setTimeout(retry, 2000)
+    await act(async () => {})
+    expect(userInitiate).toHaveBeenCalledTimes(1)
+
+    // Advance past the retry backoff so the second attempt runs
+    await act(async () => {
+      jest.advanceTimersByTime(2000)
+    })
+    await act(async () => {})
+
+    expect(userInitiate).toHaveBeenCalledTimes(2)
+
+    const addActions = dispatched.filter(
+      (d): d is { type: string; payload: { address: string } } =>
+        typeof d === 'object' && d !== null && (d as { type?: string }).type === 'addUndeployedSafe',
+    )
+    expect(addActions.find((a) => a.payload.address === '0xRetry')).toBeDefined()
+
+    jest.useRealTimers()
+    consoleSpy.mockRestore()
+  })
+
+  it('settles cfSafeSynced=true even when both attempts fail so consumers do not wait forever', async () => {
+    jest.useFakeTimers()
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    userFailureCount = 2
+    mockSelectors(true, true, null)
+
+    renderHook(() => useCounterfactualSafeSync())
+    await act(async () => {})
+    await act(async () => {
+      jest.advanceTimersByTime(2000)
+    })
+    await act(async () => {})
+
+    expect(userInitiate).toHaveBeenCalledTimes(2)
+
+    const syncedActions = dispatched.filter(
+      (d): d is { type: string; payload: boolean } =>
+        typeof d === 'object' && d !== null && (d as { type?: string }).type === 'setCfSafeSynced',
+    )
+    expect(syncedActions.some((a) => a.payload === true)).toBe(true)
+
+    jest.useRealTimers()
+    consoleSpy.mockRestore()
   })
 })

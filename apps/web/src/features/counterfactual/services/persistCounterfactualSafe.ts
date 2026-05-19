@@ -5,6 +5,7 @@ import { cgwApi as counterfactualSafesApi } from '@safe-global/store/gateway/AUT
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { toBackendDto } from './counterfactualSafeMapper'
 import { replayCounterfactualSafeDeployment } from './safeDeployment'
+import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
 
 type PersistArgs = {
   chainId: string
@@ -67,13 +68,18 @@ export const persistCounterfactualSafe = async ({
       if ('error' in spaceResult) {
         // Roll back the user-level entry so the backend doesn't end up with
         // a safe that the user "created" but failed to associate with their
-        // active space. Failure here is non-fatal: the next sign-in's sync
-        // will surface the orphan locally and the user can retry.
-        await dispatch(
+        // active space.
+        const rollbackResult = await dispatch(
           counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
             deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
           }),
         )
+        if ('error' in rollbackResult) {
+          // Rollback also failed — orphan now exists server-side. Queue the
+          // cleanup so the next sign-in's sync flushes it, otherwise the GET
+          // would re-surface the orphan locally as "Not activated".
+          dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
+        }
         return { ok: false, error: new Error('Failed to add Safe Account to space') }
       }
     }

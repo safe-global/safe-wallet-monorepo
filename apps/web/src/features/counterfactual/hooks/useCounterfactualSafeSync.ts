@@ -14,6 +14,8 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
+const SYNC_RETRY_DELAY_MS = 2000
+
 /**
  * Syncs counterfactual safes from the backend into Redux on app load.
  * Backend is the source of truth. Fetches from both the user endpoint
@@ -43,48 +45,44 @@ const useCounterfactualSafeSync = () => {
       dispatch(setCfSafeSynced(false))
     }
 
-    const sync = async () => {
+    const fetchAndMerge = async () => {
+      // Flush any DELETEs that were queued while the user wasn't SIWE-authenticated
+      // (e.g. they activated a CF safe before signing in). Must happen before the
+      // fetch below — otherwise the backend would still report those safes as CF
+      // and we'd re-add them to the undeployed slice, regressing the activated state.
+      const pendingDeletes = selectPendingCfDeletes(getStoreInstance().getState())
+      // Snapshot the queue keys before the flush so the merge below can skip
+      // re-adding any safe we just tried to delete — covers two cases:
+      //   1. DELETE succeeded but the space-CF endpoint still returns the safe
+      //      (backend join lag, or a co-member's stale record at the same address).
+      //   2. DELETE failed and the safe is still in the user-CF endpoint response.
+      const blockedByPendingDelete = new Set(pendingDeletes.map(({ chainId, address }) => `${chainId}:${address}`))
+      if (pendingDeletes.length > 0) {
+        await Promise.all(
+          pendingDeletes.map(async ({ chainId, address }) => {
+            try {
+              await dispatch(
+                counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
+                  deleteCounterfactualSafesDto: { safes: [{ chainId, address }] },
+                }),
+              ).unwrap()
+              dispatch(removePendingCfDelete({ chainId, address }))
+            } catch (e) {
+              console.error('[CF Sync] Failed to flush pending CF delete', e)
+            }
+          }),
+        )
+      }
+
+      // Fetch CF safes from user endpoint and space endpoint
+      const userQuery = dispatch(counterfactualSafesApi.endpoints.counterfactualSafesGetV1.initiate(undefined))
+      const spaceQuery = spaceId
+        ? dispatch(spacesApi.endpoints.spaceCounterfactualSafesGetV1.initiate({ spaceId: Number(spaceId) }))
+        : null
+
       try {
-        // Flush any DELETEs that were queued while the user wasn't SIWE-authenticated
-        // (e.g. they activated a CF safe before signing in). Must happen before the
-        // fetch below — otherwise the backend would still report those safes as CF
-        // and we'd re-add them to the undeployed slice, regressing the activated state.
-        const pendingDeletes = selectPendingCfDeletes(getStoreInstance().getState())
-        // Snapshot the queue keys before the flush so the merge below can skip
-        // re-adding any safe we just tried to delete — covers two cases:
-        //   1. DELETE succeeded but the space-CF endpoint still returns the safe
-        //      (backend join lag, or a co-member's stale record at the same address).
-        //   2. DELETE failed and the safe is still in the user-CF endpoint response.
-        const blockedByPendingDelete = new Set(pendingDeletes.map(({ chainId, address }) => `${chainId}:${address}`))
-        if (pendingDeletes.length > 0) {
-          await Promise.all(
-            pendingDeletes.map(async ({ chainId, address }) => {
-              try {
-                await dispatch(
-                  counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
-                    deleteCounterfactualSafesDto: { safes: [{ chainId, address }] },
-                  }),
-                ).unwrap()
-                dispatch(removePendingCfDelete({ chainId, address }))
-              } catch (e) {
-                console.error('[CF Sync] Failed to flush pending CF delete', e)
-              }
-            }),
-          )
-        }
-
-        // Fetch CF safes from user endpoint and space endpoint
-        const userQuery = dispatch(counterfactualSafesApi.endpoints.counterfactualSafesGetV1.initiate(undefined))
-        const spaceQuery = spaceId
-          ? dispatch(spacesApi.endpoints.spaceCounterfactualSafesGetV1.initiate({ spaceId: Number(spaceId) }))
-          : null
-
         const userResponse = await userQuery.unwrap()
         const spaceResponse = spaceQuery ? await spaceQuery.unwrap() : null
-
-        // Clean up RTK Query subscriptions
-        userQuery.unsubscribe()
-        spaceQuery?.unsubscribe()
 
         type RemoteSafe = GetCounterfactualSafeItem & { isCreator: boolean }
 
@@ -141,15 +139,32 @@ const useCounterfactualSafeSync = () => {
             )
           }
         }
-
-        lastSyncedKey.current = syncKey
-        dispatch(setCfSafeSynced(true))
-      } catch (e) {
-        console.error('[CF Sync] Failed to sync counterfactual safes', e)
-        // Unblock consumers on failure and record the attempt so we don't retry in a tight loop
-        lastSyncedKey.current = syncKey
-        dispatch(setCfSafeSynced(true))
+      } finally {
+        // Always release RTK Query subscriptions, success or failure.
+        userQuery.unsubscribe()
+        spaceQuery?.unsubscribe()
       }
+    }
+
+    const sync = async () => {
+      // One bounded retry on transient errors before unblocking consumers.
+      // Without this, a single network blip during sync leaves users who land
+      // on a space-mate's CF safe URL stuck on "Safe couldn't be loaded".
+      try {
+        await fetchAndMerge()
+      } catch (firstError) {
+        console.error('[CF Sync] Initial sync failed, retrying once', firstError)
+        await new Promise((resolve) => setTimeout(resolve, SYNC_RETRY_DELAY_MS))
+        try {
+          await fetchAndMerge()
+        } catch (retryError) {
+          console.error('[CF Sync] Retry also failed, giving up until next auth/space change', retryError)
+        }
+      }
+      // Settle regardless of outcome — leaving consumers waiting forever is worse
+      // than surfacing a 404 the user can recover from by retrying the action.
+      lastSyncedKey.current = syncKey
+      dispatch(setCfSafeSynced(true))
     }
 
     sync()

@@ -166,5 +166,47 @@ describe('useSpaceAccountsData', () => {
       expect(result.current.accounts).toHaveLength(1)
       expect(result.current.accounts[0].owners).toBe('2/3')
     })
+
+    it('finds CF owners when the CF entry is on a chain other than safe.safes[0]', () => {
+      // Regression: previously only `safe.safes[0].chainId` was consulted, so a
+      // group whose CF entry lived on a later chain in the array rendered as
+      // owners='' even though the data was present.
+      const address = '0xMultiCfOnSecondChain'
+      const safes: AllSafeItems = [
+        {
+          address,
+          safes: [makeSafeItem({ chainId: '1', address }), makeSafeItem({ chainId: '137', address })],
+          isPinned: false,
+          lastVisited: 0,
+          name: undefined,
+        },
+      ]
+
+      const { result } = renderHook(() => useSpaceAccountsData(safes), {
+        initialReduxState: {
+          undeployedSafes: {
+            // No entry on chain '1' — only on '137' (index 1 in safe.safes).
+            '137': {
+              [address]: {
+                props: {
+                  safeAccountConfig: {
+                    threshold: 2,
+                    owners: ['0xOwnerA', '0xOwnerB', '0xOwnerC', '0xOwnerD'],
+                  },
+                  factoryAddress: '0xFactory',
+                  masterCopy: '0xMasterCopy',
+                  saltNonce: '0',
+                  safeVersion: '1.3.0',
+                },
+                status: { status: 'AWAITING_EXECUTION', type: 'counterfactual' },
+              },
+            },
+          },
+        } as unknown as Partial<RootState>,
+      })
+
+      expect(result.current.accounts).toHaveLength(1)
+      expect(result.current.accounts[0].owners).toBe('2/4')
+    })
   })
 })

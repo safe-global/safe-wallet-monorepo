@@ -7,6 +7,14 @@ const userInitiate = jest.fn()
 const userDeleteInitiate = jest.fn()
 const spaceInitiate = jest.fn()
 const replayImpl = jest.fn()
+const enqueueImpl = jest.fn()
+
+jest.mock('../../store/pendingCfDeletesSlice', () => ({
+  enqueuePendingCfDelete: (payload: unknown) => {
+    enqueueImpl(payload)
+    return { type: 'enqueuePendingCfDelete', payload }
+  },
+}))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes', () => ({
   cgwApi: {
@@ -73,6 +81,7 @@ describe('persistCounterfactualSafe', () => {
     userDeleteInitiate.mockClear()
     spaceInitiate.mockClear()
     replayImpl.mockClear()
+    enqueueImpl.mockClear()
   })
 
   it('POSTs to user endpoint then calls replayCounterfactualSafeDeployment on success (no space)', async () => {
@@ -171,6 +180,50 @@ describe('persistCounterfactualSafe', () => {
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result).toEqual({ ok: false, error: expect.any(Error) })
     if (!result.ok) expect(result.error.message).toMatch(/space/i)
+  })
+
+  it('queues a pending CF delete when both the space POST and the rollback DELETE fail', async () => {
+    // Double-failure mode: backend has the user-level CF safe but no space link,
+    // and rollback couldn't clean it up. The orphan must be queued so the next
+    // sync flushes it instead of re-adding it as "Not activated".
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') return { error: { status: 500 } }
+      if (action.type === 'user-delete-thunk') return { error: { status: 500 } }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: '42',
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    expect(userInitiate).toHaveBeenCalled()
+    expect(spaceInitiate).toHaveBeenCalled()
+    expect(userDeleteInitiate).toHaveBeenCalled()
+    expect(enqueueImpl).toHaveBeenCalledWith({ chainId: '100', address: '0xSafe' })
+    expect(replayImpl).not.toHaveBeenCalled()
+    expect(result.ok).toBe(false)
+  })
+
+  it('does NOT queue a pending CF delete when the rollback DELETE succeeds', async () => {
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') return { error: { status: 500 } }
+      // user-delete-thunk resolves successfully (no error in result)
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: '42',
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    expect(userDeleteInitiate).toHaveBeenCalled()
+    expect(enqueueImpl).not.toHaveBeenCalled()
+    expect(result.ok).toBe(false)
   })
 
   it('skips backend calls entirely when user is not authenticated but still updates Redux', async () => {

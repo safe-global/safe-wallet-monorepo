@@ -70,9 +70,13 @@ const formatMultichainAccount = (
     }
   })
 
+  // CF entries are per-chain; pick the first chain in the group that has one
+  // rather than assuming index 0 — chain ordering in `safe.safes` isn't tied
+  // to which chain the user created the CF safe on.
+  const cfChainId = safe.safes.find((s) => undeployedSafes[s.chainId]?.[safe.address])?.chainId
   const owners = firstOverview
     ? `${firstOverview.threshold}/${firstOverview.owners.length}`
-    : (getCfOwners(safe.address, safe.safes[0]?.chainId, undeployedSafes) ?? '')
+    : ((cfChainId && getCfOwners(safe.address, cfChainId, undeployedSafes)) ?? '')
 
   return {
     name,
