@@ -27,6 +27,8 @@ export const authSlice = createSlice({
 
     setUnauthenticated: (state) => {
       state.sessionExpiresAt = null
+      // Clear the per-user sticky space so the next signed-in user doesn't inherit it.
+      state.lastUsedSpace = null
     },
 
     setLastUsedSpace: (state, { payload }: PayloadAction<AuthPayload['lastUsedSpace']>) => {

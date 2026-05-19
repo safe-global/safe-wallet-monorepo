@@ -3,8 +3,10 @@ import {
   setIsOidcLoginPending,
   selectIsOidcLoginPending,
   setAuthenticated,
+  setLastUsedSpace,
   setUnauthenticated,
   isAuthenticated,
+  selectLastUsedSpace,
 } from '../authSlice'
 import type { RootState } from '@/store'
 
@@ -31,6 +33,30 @@ describe('authSlice', () => {
       const state = reducer(authedState, setUnauthenticated())
 
       expect(state.sessionExpiresAt).toBeNull()
+    })
+
+    it('clears lastUsedSpace so the next signed-in user does not inherit it', () => {
+      const prev = reducer(undefined, setLastUsedSpace('42'))
+      expect(prev.lastUsedSpace).toBe('42')
+
+      const state = reducer(prev, setUnauthenticated())
+      expect(state.lastUsedSpace).toBeNull()
+    })
+  })
+
+  describe('setLastUsedSpace', () => {
+    it('stores the given space id', () => {
+      const state = reducer(undefined, setLastUsedSpace('7'))
+
+      expect(state.lastUsedSpace).toBe('7')
+      expect(selectLastUsedSpace({ auth: state } as unknown as RootState)).toBe('7')
+    })
+
+    it('accepts null to clear', () => {
+      const prev = reducer(undefined, setLastUsedSpace('7'))
+      const state = reducer(prev, setLastUsedSpace(null))
+
+      expect(state.lastUsedSpace).toBeNull()
     })
   })
 
