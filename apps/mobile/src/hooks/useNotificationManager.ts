@@ -52,7 +52,6 @@ export const useNotificationManager = () => {
   const enableNotification = useCallback(async () => {
     try {
       Logger.info('enableNotification :: STARTED', { promptAttempts })
-      // Check if device notifications are enabled
       const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
 
       if (deviceNotificationStatus) {
@@ -63,16 +62,28 @@ export const useNotificationManager = () => {
           return true
         }
         return false
-      } else if (promptAttempts < promptThreshold) {
+      }
+
+      // Once iOS auth status is DENIED (user said "no" to the native prompt or disabled in Settings),
+      // notifee.requestPermission() is a silent no-op — looping through the threshold just burns
+      // taps invisibly. Go straight to the in-app explainer Alert so the user can EXPLICITLY tap
+      // "Turn on" to open Settings. Apple 5.1.1(iv): never auto-redirect on denial.
+      if (await NotificationsService.isAuthorizationDenied()) {
+        pendingPermissionRequestRef.current = true
+        await NotificationsService.requestPushNotificationsPermission()
+        return false
+      }
+
+      // NOT_DETERMINED: the native OS prompt can still be shown. Use the threshold to limit how
+      // many times we attempt it before falling back to the explainer.
+      if (promptAttempts < promptThreshold) {
         dispatch(updatePromptAttempts(promptAttempts + 1))
         const { success } = await requestAndRegister()
         return success
-      } else {
-        // Threshold reached — surface the in-app explainer Alert so the user can EXPLICITLY tap
-        // "Turn on" to open Settings. Never auto-redirect on denial (Apple 5.1.1(iv)).
-        pendingPermissionRequestRef.current = true
-        await NotificationsService.requestPushNotificationsPermission()
       }
+
+      pendingPermissionRequestRef.current = true
+      await NotificationsService.requestPushNotificationsPermission()
     } catch (error) {
       pendingPermissionRequestRef.current = false
       Logger.error('Error enabling push notifications', error)
