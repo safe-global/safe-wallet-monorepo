@@ -168,7 +168,7 @@ describe('useSpaceChainSelector', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/home',
-      query: { safe: 'matic:0xSafe2', spaceId: '42' },
+      query: { safe: 'matic:0xSafe2' },
     })
   })
 
@@ -224,23 +224,7 @@ describe('useSpaceChainSelector', () => {
     expect(mockPush).toHaveBeenCalledTimes(1)
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/home',
-      query: { safe: 'eth:0xSafe2', spaceId: '42' },
-    })
-  })
-
-  it('omits spaceId from the URL when no current space is set', () => {
-    setupDefaults({ allSafes: [multiChainSafe], safeAddress: '0xSafe2' })
-    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(null)
-
-    const { result } = renderHook(() => useSpaceChainSelector())
-
-    act(() => {
-      result.current.handleChainChange('137')
-    })
-
-    expect(mockPush).toHaveBeenCalledWith({
-      pathname: '/home',
-      query: { safe: 'matic:0xSafe2' },
+      query: { safe: 'eth:0xSafe2' },
     })
   })
 

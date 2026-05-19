@@ -16,7 +16,6 @@ import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
@@ -46,7 +45,6 @@ const SafeCardReadOnly = ({
 }: SafeCardReadOnlyProps) => {
   const [copied, setCopied] = useState(false)
   const router = useRouter()
-  const spaceId = useCurrentSpaceId()
   const isMultiChain = isMultiChainSafeItem(safe)
   const { name, fiatValue, threshold, ownersCount, elementRef } = useSafeCardData(safe)
   const safes = useMemo<SafeItem[]>(
@@ -92,7 +90,6 @@ const SafeCardReadOnly = ({
       pathname: AppRoutes.home,
       query: {
         safe: `${chain.shortName}:${singleSafe.address}`,
-        ...(spaceId ? { spaceId } : {}),
       },
     })
   }

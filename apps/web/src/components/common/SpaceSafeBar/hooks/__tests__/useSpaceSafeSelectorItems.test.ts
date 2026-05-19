@@ -340,20 +340,6 @@ describe('useSpaceSafeSelectorItems', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/home',
-      query: { safe: 'eth:0xNewSafe', spaceId: '42' },
-    })
-  })
-
-  it('omits spaceId from navigation when no current space is set', () => {
-    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(null)
-    const { result } = renderHook(() => useSpaceSafeSelectorItems())
-
-    act(() => {
-      result.current.handleItemSelect('1:0xNewSafe')
-    })
-
-    expect(mockPush).toHaveBeenCalledWith({
-      pathname: '/home',
       query: { safe: 'eth:0xNewSafe' },
     })
   })

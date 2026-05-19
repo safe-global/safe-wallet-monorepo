@@ -33,7 +33,7 @@ describe('useGetHref', () => {
     })
   })
 
-  it('drops the existing query and carries spaceId when on a space page', () => {
+  it('drops the existing query when on a space page', () => {
     jest.spyOn(useIsSpaceRouteModule, 'useIsSpaceRoute').mockReturnValue(true)
     const router = buildRouter({
       pathname: AppRoutes.spaces.safeAccounts,
@@ -43,20 +43,7 @@ describe('useGetHref', () => {
 
     expect(result.current(chain, '0xNew')).toEqual({
       pathname: AppRoutes.home,
-      query: { spaceId: '42', safe: 'eth:0xNew' },
-    })
-  })
-
-  it('keeps spaceId when navigating from a Safe page', () => {
-    const router = buildRouter({
-      pathname: AppRoutes.home,
-      query: { safe: 'eth:0xOld', spaceId: '7' },
-    })
-    const { result } = renderHook(() => useGetHref(router))
-
-    expect(result.current(chain, '0xNew')).toEqual({
-      pathname: AppRoutes.home,
-      query: { spaceId: '7', safe: 'eth:0xNew' },
+      query: { safe: 'eth:0xNew' },
     })
   })
 

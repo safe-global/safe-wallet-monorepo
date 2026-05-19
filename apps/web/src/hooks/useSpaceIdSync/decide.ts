@@ -8,6 +8,7 @@ export type DecideInput = {
   pathname: string
   asPath: string
   querySpaceId: string | null
+  lastUsedSpaceId: string | null
   userSpaceIds: string[] | undefined
   spacesError: boolean
 }
@@ -32,6 +33,7 @@ export const decide = (input: DecideInput): Decision => {
     pathname,
     asPath,
     querySpaceId,
+    lastUsedSpaceId,
     userSpaceIds,
     spacesError,
   } = input
@@ -75,10 +77,14 @@ export const decide = (input: DecideInput): Decision => {
     if (userSpaceIds.includes(querySpaceId)) return NOOP
     // Row 11: not a member but on /spaces/* — AuthState handles Unauthorized.
     if (isSpacesPath(pathname)) return NOOP
-    // Row 12: not a member on a non-spaces page — overwrite silently.
-    return { action: 'overwrite', spaceId: userSpaceIds[0] }
+    // Row 12: not a member on a non-spaces page — overwrite silently with the last
+    // used space if it's still valid, otherwise fall back to the first owned space.
+    const fallback = lastUsedSpaceId && userSpaceIds.includes(lastUsedSpaceId) ? lastUsedSpaceId : userSpaceIds[0]
+    return { action: 'overwrite', spaceId: fallback }
   }
 
-  // Row 13: no ?spaceId — inject the first owned space.
-  return { action: 'inject', spaceId: userSpaceIds[0] }
+  // Row 13: no ?spaceId — inject the last used space (if still valid), otherwise the first owned space.
+  // The "last used space" preserves context across in-app navigation that strips ?spaceId from the URL.
+  const injected = lastUsedSpaceId && userSpaceIds.includes(lastUsedSpaceId) ? lastUsedSpaceId : userSpaceIds[0]
+  return { action: 'inject', spaceId: injected }
 }

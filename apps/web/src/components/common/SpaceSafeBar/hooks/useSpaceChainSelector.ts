@@ -59,7 +59,7 @@ export function useSpaceChainSelector() {
       )
       router.push({
         pathname: AppRoutes.home,
-        query: { safe: `${chain.shortName}:${safeAddress}`, ...(spaceId ? { spaceId } : {}) },
+        query: { safe: `${chain.shortName}:${safeAddress}` },
       })
     },
     [chainConfigs, router, safeAddress, spaceId],

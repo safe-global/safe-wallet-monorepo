@@ -5,12 +5,14 @@ import { cgwApi as usersApi } from '@safe-global/store/gateway/AUTO_GENERATED/us
 
 type AuthPayload = {
   sessionExpiresAt: number | null
+  lastUsedSpace: string | null
   isStoreHydrated: boolean
   isOidcLoginPending: boolean
 }
 
 const initialState: AuthPayload = {
   sessionExpiresAt: null,
+  lastUsedSpace: null,
   isStoreHydrated: false,
   isOidcLoginPending: false,
 }
@@ -27,16 +29,24 @@ export const authSlice = createSlice({
       state.sessionExpiresAt = null
     },
 
+    setLastUsedSpace: (state, { payload }: PayloadAction<AuthPayload['lastUsedSpace']>) => {
+      state.lastUsedSpace = payload
+    },
+
     setIsOidcLoginPending: (state, { payload }: PayloadAction<boolean>) => {
       state.isOidcLoginPending = payload
     },
   },
 })
 
-export const { setAuthenticated, setUnauthenticated, setIsOidcLoginPending } = authSlice.actions
+export const { setAuthenticated, setUnauthenticated, setLastUsedSpace, setIsOidcLoginPending } = authSlice.actions
 
 export const isAuthenticated = (state: RootState): boolean => {
   return !!state.auth.sessionExpiresAt && state.auth.sessionExpiresAt > Date.now()
+}
+
+export const selectLastUsedSpace = (state: RootState): string | null => {
+  return state.auth.lastUsedSpace
 }
 
 export const selectIsStoreHydrated = (state: RootState): boolean => {

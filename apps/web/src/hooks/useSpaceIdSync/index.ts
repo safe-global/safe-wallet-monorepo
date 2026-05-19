@@ -1,8 +1,14 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useAppSelector } from '@/store'
-import { isAuthenticated, selectIsOidcLoginPending, selectIsStoreHydrated } from '@/store/authSlice'
+import { useAppDispatch, useAppSelector } from '@/store'
+import {
+  isAuthenticated,
+  selectIsOidcLoginPending,
+  selectIsStoreHydrated,
+  selectLastUsedSpace,
+  setLastUsedSpace,
+} from '@/store/authSlice'
 import { useHasDefaultChainFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
@@ -21,9 +27,11 @@ const getQuerySpaceId = (query: Record<string, string | string[] | undefined>): 
 export const useSpaceIdSync = (): void => {
   const router = useRouter()
   const { isReady, pathname, asPath, query, replace } = router
+  const dispatch = useAppDispatch()
   const isSignedIn = useAppSelector(isAuthenticated)
   const isOidcPending = useAppSelector(selectIsOidcLoginPending)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
+  const lastUsedSpaceId = useAppSelector(selectLastUsedSpace)
   const requireLogin = useHasDefaultChainFeature(FEATURES.REQUIRE_SPACES_LOGIN)
   const classicEnabled = useHasDefaultChainFeature(FEATURES.CLASSIC_UI_ENABLED)
   const { data: spaces, isError: spacesError } = useSpacesGetV1Query(undefined, { skip: !isSignedIn })
@@ -35,6 +43,15 @@ export const useSpaceIdSync = (): void => {
     // first render (where they then get stuck because /welcome/* is excluded).
     if (!isStoreHydrated) return
 
+    const querySpaceId = getQuerySpaceId(query)
+
+    // Remember the active space whenever the URL exposes a valid one, so that
+    // subsequent navigations that strip ?spaceId can restore the same context
+    // instead of falling back to the user's first owned space.
+    if (querySpaceId && querySpaceId !== lastUsedSpaceId) {
+      dispatch(setLastUsedSpace(querySpaceId))
+    }
+
     const decision = decide({
       requireLogin,
       classicEnabled,
@@ -42,7 +59,8 @@ export const useSpaceIdSync = (): void => {
       isOidcPending,
       pathname,
       asPath,
-      querySpaceId: getQuerySpaceId(query),
+      querySpaceId,
+      lastUsedSpaceId,
       userSpaceIds: spaces ? spaces.map((s) => String(s.id)) : undefined,
       spacesError,
     })
@@ -70,9 +88,11 @@ export const useSpaceIdSync = (): void => {
     asPath,
     query,
     replace,
+    dispatch,
     isSignedIn,
     isOidcPending,
     isStoreHydrated,
+    lastUsedSpaceId,
     requireLogin,
     classicEnabled,
     spaces,

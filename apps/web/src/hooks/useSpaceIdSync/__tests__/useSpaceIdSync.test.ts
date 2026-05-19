@@ -5,13 +5,24 @@ import * as useChainsModule from '@/hooks/useChains'
 import * as spacesApi from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-type AuthState = { isAuthenticated?: boolean; isOidcLoginPending?: boolean; isStoreHydrated?: boolean }
+type AuthState = {
+  isAuthenticated?: boolean
+  isOidcLoginPending?: boolean
+  isStoreHydrated?: boolean
+  lastUsedSpace?: string | null
+}
 
-const mockAuth = ({ isAuthenticated = false, isOidcLoginPending = false, isStoreHydrated = true }: AuthState = {}) => {
+const mockAuth = ({
+  isAuthenticated = false,
+  isOidcLoginPending = false,
+  isStoreHydrated = true,
+  lastUsedSpace = null,
+}: AuthState = {}) => {
   jest.spyOn(store, 'useAppSelector').mockImplementation((selector) => {
     const fakeState = {
       auth: {
         sessionExpiresAt: isAuthenticated ? Date.now() + 60_000 : null,
+        lastUsedSpace,
         isStoreHydrated,
         isOidcLoginPending,
       },
@@ -248,5 +259,31 @@ describe('useSpaceIdSync', () => {
     })
 
     expect(replace).not.toHaveBeenCalled()
+  })
+
+  it('injects the last used space (not the first owned) when ?spaceId is missing', () => {
+    mockAuth({ isAuthenticated: true, lastUsedSpace: '9' })
+    mockFlags()
+    mockSpaces(['7', '9'])
+    const replace = jest.fn()
+
+    renderHook(() => useSpaceIdSync(), {
+      routerProps: { isReady: true, pathname: '/home', asPath: '/home', query: {}, replace },
+    })
+
+    expect(replace).toHaveBeenCalledWith({ pathname: '/home', query: { spaceId: '9' } }, undefined, { shallow: true })
+  })
+
+  it('falls back to the first owned space when lastUsedSpace is no longer a member', () => {
+    mockAuth({ isAuthenticated: true, lastUsedSpace: '999' })
+    mockFlags()
+    mockSpaces(['7', '9'])
+    const replace = jest.fn()
+
+    renderHook(() => useSpaceIdSync(), {
+      routerProps: { isReady: true, pathname: '/home', asPath: '/home', query: {}, replace },
+    })
+
+    expect(replace).toHaveBeenCalledWith({ pathname: '/home', query: { spaceId: '7' } }, undefined, { shallow: true })
   })
 })

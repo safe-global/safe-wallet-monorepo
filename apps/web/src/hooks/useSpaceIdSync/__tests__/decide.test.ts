@@ -8,6 +8,7 @@ const baseInput: DecideInput = {
   pathname: '/home',
   asPath: '/home',
   querySpaceId: null,
+  lastUsedSpaceId: null,
   userSpaceIds: undefined,
   spacesError: false,
 }
@@ -104,9 +105,65 @@ describe('decide', () => {
     ).toEqual<Decision>({ action: 'overwrite', spaceId: '7' })
   })
 
+  it('row 12 — overwrite prefers lastUsedSpaceId when it is still a member', () => {
+    expect(
+      decide(
+        make({
+          isSignedIn: true,
+          userSpaceIds: ['7', '9'],
+          querySpaceId: '42',
+          lastUsedSpaceId: '9',
+          pathname: '/home',
+        }),
+      ),
+    ).toEqual<Decision>({ action: 'overwrite', spaceId: '9' })
+  })
+
+  it('row 12 — overwrite falls back to first owned when lastUsedSpaceId is no longer a member', () => {
+    expect(
+      decide(
+        make({
+          isSignedIn: true,
+          userSpaceIds: ['7', '9'],
+          querySpaceId: '42',
+          lastUsedSpaceId: '999',
+          pathname: '/home',
+        }),
+      ),
+    ).toEqual<Decision>({ action: 'overwrite', spaceId: '7' })
+  })
+
   it('row 13 — signed-in + no ?spaceId → inject first owned', () => {
     expect(
       decide(make({ isSignedIn: true, userSpaceIds: ['7', '9'], querySpaceId: null, pathname: '/home' })),
+    ).toEqual<Decision>({ action: 'inject', spaceId: '7' })
+  })
+
+  it('row 13 — inject prefers lastUsedSpaceId when it is still a member', () => {
+    expect(
+      decide(
+        make({
+          isSignedIn: true,
+          userSpaceIds: ['7', '9'],
+          querySpaceId: null,
+          lastUsedSpaceId: '9',
+          pathname: '/home',
+        }),
+      ),
+    ).toEqual<Decision>({ action: 'inject', spaceId: '9' })
+  })
+
+  it('row 13 — inject falls back to first owned when lastUsedSpaceId is no longer a member', () => {
+    expect(
+      decide(
+        make({
+          isSignedIn: true,
+          userSpaceIds: ['7', '9'],
+          querySpaceId: null,
+          lastUsedSpaceId: '999',
+          pathname: '/home',
+        }),
+      ),
     ).toEqual<Decision>({ action: 'inject', spaceId: '7' })
   })
 

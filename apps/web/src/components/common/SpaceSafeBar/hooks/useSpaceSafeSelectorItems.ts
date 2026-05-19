@@ -188,7 +188,7 @@ export function useSpaceSafeSelectorItems() {
       )
       router.push({
         pathname: AppRoutes.home,
-        query: { safe: `${chain.shortName}:${address}`, ...(spaceId ? { spaceId } : {}) },
+        query: { safe: `${chain.shortName}:${address}` },
       })
     },
     [chainConfigs, router, spaceId],
