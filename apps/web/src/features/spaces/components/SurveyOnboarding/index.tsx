@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { ArrowLeftRight, Banknote, Gift, Landmark, Sprout, Terminal, type LucideIcon } from 'lucide-react'
+import { ArrowLeftRight, Banknote, ChevronLeft, Gift, Landmark, Sprout, Terminal, type LucideIcon } from 'lucide-react'
 import {
   useSurveysGetStateV1Query,
   useSurveysSubmitResponseV1Mutation,
@@ -67,7 +67,9 @@ const SurveyOnboarding = (): ReactElement | null => {
     }
   }, [error, router, spaceId])
 
-  if (!spaceId) return null
+  // Note: don't early-return null on missing spaceId — the outer motion.div in
+  // PageLayout only fades in if its child renders something. The redirect effect
+  // above handles the missing-spaceId case while we render a static shell.
 
   const toggle = (key: string): void => {
     setSelected((prev) => {
@@ -78,8 +80,12 @@ const SurveyOnboarding = (): ReactElement | null => {
     })
   }
 
+  const goBack = (): void => {
+    router.push({ pathname: AppRoutes.welcome.inviteMembers, query: { spaceId } })
+  }
+
   const onFinish = async (): Promise<void> => {
-    if (selected.size === 0) return
+    if (!spaceId || selected.size === 0) return
     await submit({
       spaceId,
       slug: SURVEY_SLUG,
@@ -92,6 +98,17 @@ const SurveyOnboarding = (): ReactElement | null => {
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
       <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
         <div className="flex w-full max-w-[1100px] flex-col items-center gap-8">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={goBack}
+            aria-label="Go back"
+            className="self-start rounded-md border border-card shadow-sm"
+          >
+            <ChevronLeft className="size-5" />
+          </Button>
+
           <StepIndicator currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
 
           <div className="flex flex-col items-center gap-2">
@@ -150,13 +167,13 @@ const SurveyOnboarding = (): ReactElement | null => {
                           </Typography>
                         )}
                       </div>
-                      <Checkbox
-                        checked={isChecked}
-                        onCheckedChange={() => toggle(opt.key)}
-                        onClick={(e) => e.stopPropagation()}
-                        aria-label={`Select ${opt.label}`}
-                        tabIndex={-1}
-                      />
+                      {/*
+                        Visual-only indicator. The Card itself owns the click /
+                        keyboard interaction and exposes role="checkbox" +
+                        aria-checked, so the inner Checkbox is hidden from a11y
+                        and ignores pointer events to avoid double-toggling.
+                      */}
+                      <Checkbox checked={isChecked} aria-hidden="true" tabIndex={-1} className="pointer-events-none" />
                     </div>
                   </Card>
                 )
@@ -174,7 +191,7 @@ const SurveyOnboarding = (): ReactElement | null => {
             data-testid="survey-finish-button"
             type="button"
             size="lg"
-            disabled={selected.size === 0 || isSubmitting}
+            disabled={!spaceId || selected.size === 0 || isSubmitting}
             onClick={onFinish}
             className="w-full max-w-[400px]"
           >
