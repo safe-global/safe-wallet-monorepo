@@ -73,6 +73,9 @@ const config: ConfigFile = {
     '../src/gateway/AUTO_GENERATED/spaces.ts': {
       filterEndpoints: [/^(spaces|members|spaceSafes|addressBook|userAddressBook)/],
     },
+    '../src/gateway/AUTO_GENERATED/surveys.ts': {
+      filterEndpoints: [/^surveys/],
+    },
     '../src/gateway/AUTO_GENERATED/positions.ts': {
       filterEndpoints: [/^positions/],
     },

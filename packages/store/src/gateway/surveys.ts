@@ -1,0 +1,90 @@
+/**
+ * Manual RTK Query endpoint injection for the CGW surveys module.
+ *
+ * Replace with AUTO_GENERATED/surveys.ts once CGW is deployed and the
+ * OpenAPI schema is fetched + regenerated:
+ *   yarn workspace @safe-global/store fetch-schema
+ *   yarn workspace @safe-global/store generate-api
+ *
+ * Backend endpoints (see safe-client-gateway src/modules/surveys/):
+ *   GET  /v1/spaces/:spaceId/surveys/:slug/state
+ *   POST /v1/spaces/:spaceId/surveys/:slug/responses
+ */
+import { cgwClient as api } from './cgwClient'
+
+export type SurveyOption = {
+  key: string
+  label: string
+  description?: string
+  icon?: string
+}
+
+export type SurveyContent = {
+  multiSelect: boolean
+  options: SurveyOption[]
+}
+
+export type SurveyDto = {
+  id: number
+  slug: string
+  version: number
+  title: string
+  subtitle: string | null
+  surveyContent: SurveyContent
+}
+
+export type SpaceSurveyResponse = {
+  surveyVersion: number
+  selections: string[]
+  submittedAt: string
+  answeredByUserId: number | null
+}
+
+export type SurveyStateDto = {
+  survey: SurveyDto
+  spaceResponse: SpaceSurveyResponse | null
+}
+
+export type SurveyResponseResultDto = {
+  id: number
+  spaceId: number
+  surveySlug: string
+  surveyVersion: number
+  selections: string[]
+  submittedAt: string
+  answeredByUserId: number | null
+}
+
+export type SurveysGetStateV1ApiArg = {
+  spaceId: number | string
+  slug: string
+}
+
+export type SurveysSubmitResponseV1ApiArg = {
+  spaceId: number | string
+  slug: string
+  submitSurveyResponseDto: { selections: string[] }
+}
+
+export const surveysApi = api
+  .enhanceEndpoints({ addTagTypes: ['surveys'] })
+  .injectEndpoints({
+    endpoints: (build) => ({
+      surveysGetStateV1: build.query<SurveyStateDto, SurveysGetStateV1ApiArg>({
+        query: ({ spaceId, slug }) => ({
+          url: `/v1/spaces/${spaceId}/surveys/${slug}/state`,
+        }),
+        providesTags: ['surveys'],
+      }),
+      surveysSubmitResponseV1: build.mutation<SurveyResponseResultDto, SurveysSubmitResponseV1ApiArg>({
+        query: ({ spaceId, slug, submitSurveyResponseDto }) => ({
+          url: `/v1/spaces/${spaceId}/surveys/${slug}/responses`,
+          method: 'POST',
+          body: submitSurveyResponseDto,
+        }),
+        invalidatesTags: ['surveys'],
+      }),
+    }),
+  })
+
+export const { useSurveysGetStateV1Query, useSurveysSubmitResponseV1Mutation } = surveysApi
