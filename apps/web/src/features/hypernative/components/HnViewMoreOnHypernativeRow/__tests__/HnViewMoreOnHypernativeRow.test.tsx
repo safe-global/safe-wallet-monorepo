@@ -25,7 +25,7 @@ describe('HnViewMoreOnHypernativeRow', () => {
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', 'https://hn.example/report')
     expect(link).toHaveAttribute('target', '_blank')
-    expect(link.getAttribute('rel') ?? '').toMatch(/noopener/)
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
 
   it('tracks analytics on click', async () => {
