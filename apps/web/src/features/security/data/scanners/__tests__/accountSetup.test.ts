@@ -1,0 +1,83 @@
+import { accountSetupScanner } from '../accountSetup'
+import { createMockContext } from '../test-helpers'
+
+describe('accountSetupScanner', () => {
+  it('returns critical issue for single signer', async () => {
+    const ctx = createMockContext({
+      owners: [{ value: '0x1111111111111111111111111111111111111111' }],
+      threshold: 1,
+    })
+    const result = await accountSetupScanner.scan(ctx)
+    expect(result.status).toBe('issue')
+    expect(result.severity).toBe('Critical')
+    expect(result.score).toBe(10)
+  })
+
+  it('returns critical issue for threshold of 1 with multiple owners', async () => {
+    const ctx = createMockContext({ threshold: 1 })
+    const result = await accountSetupScanner.scan(ctx)
+    expect(result.status).toBe('issue')
+    expect(result.severity).toBe('Critical')
+    expect(result.score).toBe(15)
+  })
+
+  it('recommends 2 of 2 for a 1/2 Safe (never suggests the existing threshold)', async () => {
+    const ctx = createMockContext({
+      owners: [
+        { value: '0x1111111111111111111111111111111111111111' },
+        { value: '0x2222222222222222222222222222222222222222' },
+      ],
+      threshold: 1,
+    })
+    const result = await accountSetupScanner.scan(ctx)
+    expect(result.remediation).toContain('2 of 2')
+  })
+
+  it('returns partial for threshold below simple majority', async () => {
+    const ctx = createMockContext({
+      owners: [
+        { value: '0x1111111111111111111111111111111111111111' },
+        { value: '0x2222222222222222222222222222222222222222' },
+        { value: '0x3333333333333333333333333333333333333333' },
+        { value: '0x4444444444444444444444444444444444444444' },
+      ],
+      threshold: 1,
+    })
+    const result = await accountSetupScanner.scan(ctx)
+    expect(result.status).toBe('issue')
+    expect(result.severity).toBe('Critical')
+  })
+
+  it('returns partial for threshold below majority (e.g., 2 of 5)', async () => {
+    const ctx = createMockContext({
+      owners: Array.from({ length: 5 }, (_, i) => ({
+        value: `0x${String(i + 1).padStart(40, '0')}`,
+      })),
+      threshold: 2,
+    })
+    const result = await accountSetupScanner.scan(ctx)
+    expect(result.status).toBe('partial')
+    expect(result.severity).toBe('Medium')
+  })
+
+  it('returns clear for threshold at simple majority', async () => {
+    const ctx = createMockContext({ threshold: 2 })
+    const result = await accountSetupScanner.scan(ctx)
+    expect(result.status).toBe('clear')
+    expect(result.severity).toBe('Low')
+    expect(result.score).toBe(100)
+  })
+
+  it('returns clear for threshold above simple majority', async () => {
+    const ctx = createMockContext({ threshold: 3 })
+    const result = await accountSetupScanner.scan(ctx)
+    expect(result.status).toBe('clear')
+  })
+
+  it('returns partial when no owners available', async () => {
+    const ctx = createMockContext({ owners: [] })
+    const result = await accountSetupScanner.scan(ctx)
+    expect(result.status).toBe('partial')
+    expect(result.severity).toBe('Medium')
+  })
+})
