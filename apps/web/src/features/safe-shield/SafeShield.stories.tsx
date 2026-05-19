@@ -325,6 +325,54 @@ export const HypernativeMaliciousThreat: Story = {
   },
 }
 
+// WA-2333 repro: multiple THREAT and CUSTOM_CHECKS findings with the same severity.
+// Expected: both sections should list all findings. Actual: only the first per group renders.
+export const MultipleFindingsSameSeverity: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty()
+      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
+      .threat(ThreatAnalysisBuilder.multipleFindingsSameSeverity())
+      .build(),
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
+  },
+  tags: ['!chromatic'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'WA-2333 reproduction: two threat findings and two custom check findings, all at the same severity. Verifies that the Custom Checks card renders alongside Threat Analysis and that all findings in each group are listed.',
+      },
+    },
+  },
+}
+
+// Top-3 cap + overflow row: 5 THREAT + 4 CUSTOM_CHECKS findings
+export const OverflowFindings: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty().threat(ThreatAnalysisBuilder.overflowFindings()).build(),
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
+  },
+  tags: ['!chromatic'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '5 THREAT + 4 CUSTOM_CHECKS findings — both sections should cap at top 3 and show "+N More" overflow row linking to Hypernative.',
+      },
+    },
+  },
+}
+
 // Hypernative guard - logged in with custom check failed result
 export const HypernativeCustomCheckFailed: Story = {
   args: {
