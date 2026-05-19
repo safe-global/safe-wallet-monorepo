@@ -35,6 +35,13 @@ const ICON_MAP: Record<string, LucideIcon> = {
   bank: Landmark,
 }
 
+// RTK Query surfaces FetchBaseQueryError | SerializedError. The first shape carries
+// the HTTP status; treat 404 as "no active survey" (admin turned it off via
+// surveys.is_active = false) rather than a real failure.
+const isNotFoundError = (err: unknown): boolean => {
+  return typeof err === 'object' && err !== null && 'status' in err && (err as { status: unknown }).status === 404
+}
+
 const SurveyOnboarding = (): ReactElement | null => {
   const isDarkMode = useDarkMode()
   const router = useRouter()
@@ -59,6 +66,14 @@ const SurveyOnboarding = (): ReactElement | null => {
       router.replace({ pathname: AppRoutes.spaces.index, query: { spaceId } })
     }
   }, [isSurveyEnabled, router, spaceId])
+
+  // Treat a 404 from the state endpoint as "no active survey" and exit silently
+  // — same UX as the flag being off. Real errors (5xx, network) still surface.
+  useEffect(() => {
+    if (isNotFoundError(error) && spaceId) {
+      router.replace({ pathname: AppRoutes.spaces.index, query: { spaceId } })
+    }
+  }, [error, router, spaceId])
 
   if (!spaceId || isSurveyEnabled !== true) return null
 
@@ -100,7 +115,7 @@ const SurveyOnboarding = (): ReactElement | null => {
 
           {isLoading && <Spinner />}
 
-          {error && (
+          {error && !isNotFoundError(error) && (
             <Alert variant="destructive">
               <AlertDescription>Failed to load survey. Please refresh.</AlertDescription>
             </Alert>
