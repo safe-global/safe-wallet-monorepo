@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { ArrowLeftRight, Banknote, Gift, Landmark, Sprout, Terminal, type LucideIcon } from 'lucide-react'
 import {
@@ -45,12 +45,13 @@ const SurveyOnboarding = (): ReactElement | null => {
   const [submit, { isLoading: isSubmitting, error: submitError }] = useSurveysSubmitResponseV1Mutation()
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
-  if (!spaceId) {
-    if (typeof window !== 'undefined' && router.isReady) {
+  useEffect(() => {
+    if (router.isReady && !spaceId) {
       router.replace({ pathname: AppRoutes.welcome.createSpace })
     }
-    return null
-  }
+  }, [router, spaceId])
+
+  if (!spaceId) return null
 
   const toggle = (key: string): void => {
     setSelected((prev) => {
@@ -138,6 +139,7 @@ const SurveyOnboarding = (): ReactElement | null => {
                         onCheckedChange={() => toggle(opt.key)}
                         onClick={(e) => e.stopPropagation()}
                         aria-label={`Select ${opt.label}`}
+                        tabIndex={-1}
                       />
                     </div>
                   </Card>
