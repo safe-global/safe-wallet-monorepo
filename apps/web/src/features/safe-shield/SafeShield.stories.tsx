@@ -325,8 +325,7 @@ export const HypernativeMaliciousThreat: Story = {
   },
 }
 
-// WA-2333 repro: multiple THREAT and CUSTOM_CHECKS findings with the same severity.
-// Expected: both sections should list all findings. Actual: only the first per group renders.
+// Two THREAT and two CUSTOM_CHECKS findings, all at the same severity — under the top-3 cap.
 export const MultipleFindingsSameSeverity: Story = {
   args: {
     ...FullAnalysisBuilder.empty()

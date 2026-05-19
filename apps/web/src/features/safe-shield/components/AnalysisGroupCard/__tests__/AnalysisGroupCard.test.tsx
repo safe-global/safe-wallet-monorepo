@@ -15,7 +15,7 @@ describe('AnalysisGroupCard with expandedGroups', () => {
                 { severity: Severity.INFO, type: ThreatStatus.MODERATE, title: 'Threat C', description: 'desc-c' },
               ],
             },
-          } as any
+          } as unknown as Parameters<typeof AnalysisGroupCard>[0]['data']
         }
         expandedGroups={[StatusGroup.THREAT]}
       />,
@@ -44,7 +44,7 @@ describe('AnalysisGroupCard with expandedGroups', () => {
                 { severity: Severity.WARN, type: ThreatStatus.MODERATE, title: 'Threat B', description: 'desc-b' },
               ],
             },
-          } as any
+          } as unknown as Parameters<typeof AnalysisGroupCard>[0]['data']
         }
       />,
     )
