@@ -83,6 +83,8 @@ describe('SwapOrderHeader', () => {
     baseGas: '21000',
     gasPrice: '20000000000',
     gasToken: '0x0',
+    fee: '0',
+    payment: '0',
     refundReceiver: {
       value: '0x789',
       name: 'Refund Receiver',
