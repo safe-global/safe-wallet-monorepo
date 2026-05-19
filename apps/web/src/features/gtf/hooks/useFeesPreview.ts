@@ -462,7 +462,7 @@ export const useFeesPreview = (): FeesPreviewData => {
         label: 'Gas fee',
         amount: gasAmount,
         currency: gasSymbol,
-        fiatAmount: formatCurrencyMinimal(gasFiatUsd, 'usd'),
+        fiatAmount: formatCurrencyMinimal(gasFiatUsd, currency),
       },
       totalOutgoing,
       safeHasEnoughGas,

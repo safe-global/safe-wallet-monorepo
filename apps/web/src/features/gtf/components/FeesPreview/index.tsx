@@ -8,6 +8,8 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
 import TokenIcon from '@/components/common/TokenIcon'
 import { useCurrentChain } from '@/hooks/useChains'
+import { useAppSelector } from '@/store'
+import { selectCurrency } from '@/store/settingsSlice'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { GtfPaymentMode } from '@/features/gtf/types'
 import type { FeesPreviewData, FeeRow as FeeRowType, TotalOutgoing } from '../../hooks/useFeesPreview'
@@ -179,6 +181,7 @@ const GasTokenSelector = ({
   locked?: boolean
   forcedDisplay?: { symbol: string; logoUri: string }
 }): ReactElement => {
+  const currency = useAppSelector(selectCurrency)
   // EVM addresses are case-insensitive; strict `===` would silently fall back to [0] when the
   // stored address and the candidate address differ in checksum casing.
   const selected =
@@ -240,7 +243,7 @@ const GasTokenSelector = ({
                 </Typography>
                 {token.fiatBalance && (
                   <Typography variant="caption" color="text.secondary">
-                    {formatCurrency(token.fiatBalance, 'usd')}
+                    {formatCurrency(token.fiatBalance, currency)}
                   </Typography>
                 )}
               </div>

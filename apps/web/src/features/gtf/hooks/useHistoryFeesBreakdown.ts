@@ -10,6 +10,8 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import useBalances from '@/hooks/useBalances'
+import { useAppSelector } from '@/store'
+import { selectCurrency } from '@/store/settingsSlice'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { Errors, logError } from '@/services/exceptions'
 import type { FeeRow } from './useFeesPreview'
@@ -24,10 +26,10 @@ export type HistoryFeesData = {
 
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 
-const formatFiat = (gasWei: bigint, decimals: number, fiatConversion: string | undefined) =>
+const formatFiat = (gasWei: bigint, decimals: number, fiatConversion: string | undefined, currency: string) =>
   fiatConversion === undefined
     ? undefined
-    : formatCurrencyMinimal(Number(formatUnits(gasWei, decimals)) * Number(fiatConversion), 'usd')
+    : formatCurrencyMinimal(Number(formatUnits(gasWei, decimals)) * Number(fiatConversion), currency)
 
 const buildFees = (
   amount: string,
@@ -53,6 +55,7 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   const chain = useCurrentChain()
   const { balances } = useBalances()
   const provider = useWeb3ReadOnly()
+  const currency = useAppSelector(selectCurrency)
 
   const exec = isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) ? txDetails.detailedExecutionInfo : null
 
@@ -89,7 +92,7 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
     const symbol = isNative ? (chain?.nativeCurrency.symbol ?? 'ETH') : (gasTokenSymbol ?? '')
     const paymentWei = BigInt(payment)
     const amount = formatVisualAmount(paymentWei, decimals)
-    const fiatAmount = formatFiat(paymentWei, decimals, fiatConversion)
+    const fiatAmount = formatFiat(paymentWei, decimals, fiatConversion, currency)
 
     return buildFees(amount, symbol, fiatAmount, 'safe')
   }, [
@@ -103,6 +106,7 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
     chain?.nativeCurrency.decimals,
     chain?.nativeCurrency.symbol,
     fiatConversion,
+    currency,
   ])
 
   // Signer-pays: fetch receipt once per txHash. Deps are primitives so polling balances
@@ -125,10 +129,10 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
     // Signer-pays: EOA paid the network in native gas — gasUsed × gasPrice from the tx receipt.
     const gasWei = receipt.gasUsed * receipt.gasPrice
     const amount = formatVisualAmount(gasWei, decimals)
-    const fiatAmount = formatFiat(gasWei, decimals, fiatConversion)
+    const fiatAmount = formatFiat(gasWei, decimals, fiatConversion, currency)
 
     return buildFees(amount, symbol, fiatAmount, 'signer')
-  }, [receipt, chain?.nativeCurrency.decimals, chain?.nativeCurrency.symbol, fiatConversion])
+  }, [receipt, chain?.nativeCurrency.decimals, chain?.nativeCurrency.symbol, fiatConversion, currency])
 
   return safePaidData ?? signerPaidData ?? null
 }
