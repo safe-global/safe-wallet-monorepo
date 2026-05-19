@@ -50,6 +50,17 @@ runs:
         COMMIT_MESSAGE: ${{ inputs.commit_message }}
         README_TITLE: ${{ inputs.readme_title }}
       run: |
+        set -euo pipefail
+
+        # Constrain storage_branch to a known shape so callers cannot pass
+        # paths or unexpected refs. A follow-up will tighten this to
+        # `^pr-\d+(-storybook)?-screenshots$` once all callers pass a
+        # PR-number-based branch name.
+        if ! [[ "$STORAGE_BRANCH" =~ ^[a-z0-9_-]+-screenshots$ ]]; then
+          echo "::error::Invalid storage_branch: '$STORAGE_BRANCH'"
+          exit 1
+        fi
+
         # Check if source directory exists and has files
         if [ ! -d "$SOURCE_DIR" ]; then
           echo "Source directory does not exist: $SOURCE_DIR"
@@ -75,8 +86,9 @@ runs:
         cd /tmp
         rm -rf storage-upload
 
-        # Clone or create storage branch
-        if git ls-remote --heads origin "$STORAGE_BRANCH" | grep -q "$STORAGE_BRANCH"; then
+        # Clone or create storage branch. `--heads <name>` is an exact-match
+        # filter server-side, so a non-empty result means the branch exists.
+        if [ -n "$(git ls-remote --heads origin "$STORAGE_BRANCH")" ]; then
           echo "Cloning existing storage branch: $STORAGE_BRANCH"
           git clone --depth 1 --branch "$STORAGE_BRANCH" \
             "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" storage-upload
@@ -101,8 +113,10 @@ runs:
           DEST_PATH="."
         fi
 
-        # Copy files
-        cp "$GITHUB_WORKSPACE/$SOURCE_DIR"/$FILE_PATTERN "$DEST_PATH/" 2>/dev/null || true
+        # Copy files. The caller has already validated file count > 0 and the
+        # filenames in the artifact, so any cp failure here is a real bug —
+        # let it fail loudly.
+        cp "$GITHUB_WORKSPACE/$SOURCE_DIR"/$FILE_PATTERN "$DEST_PATH/"
 
         # Commit and push with retry logic for concurrent runs
         git add .

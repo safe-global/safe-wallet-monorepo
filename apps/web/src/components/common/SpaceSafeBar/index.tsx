@@ -16,6 +16,7 @@ import useChainId from '@/hooks/useChainId'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { useAllSafes } from '@/hooks/safes'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
@@ -29,6 +30,11 @@ const HIDDEN_ROUTES = [
   AppRoutes.welcome.spaces,
   AppRoutes.newSafe.create,
   AppRoutes.newSafe.load,
+  AppRoutes.terms,
+  AppRoutes.privacy,
+  AppRoutes.licenses,
+  AppRoutes.imprint,
+  AppRoutes.cookie,
 ]
 
 function DropdownHeader({ isPinned, onPin }: { isPinned: boolean; onPin: () => void }) {
@@ -83,6 +89,7 @@ function ConnectWalletFooter({ onConnect, onClose }: { onConnect: () => void; on
 
 function SpaceSafeBar() {
   const pathname = usePathname()
+  const urlSafeAddress = useSafeAddressFromUrl()
   const dispatch = useAppDispatch()
   const isQualifiedSafe = useIsQualifiedSafe()
   const { items, selectedItemId, handleItemSelect, isLoading, isError, refetch } = useSpaceSafeSelectorItems()
@@ -97,6 +104,8 @@ function SpaceSafeBar() {
   const { txFlow } = useContext(TxModalContext)
 
   if (HIDDEN_ROUTES.includes(pathname ?? '')) return null
+  // /settings/* serves both per-safe (URL has ?safe=) and global pages — hide when no safe context.
+  if (pathname?.startsWith(AppRoutes.settings.index) && !urlSafeAddress) return null
 
   // Check if current safe is pinned on any chain
   const isPinned = Boolean(addedSafes[chainId]?.[safeAddress])
