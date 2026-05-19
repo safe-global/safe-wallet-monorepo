@@ -6,8 +6,10 @@ import { addUndeployedSafe, selectUndeployedSafes } from '../store/undeployedSaf
 import { removePendingCfDelete, selectPendingCfDeletes } from '../store/pendingCfDeletesSlice'
 import { fromBackendDto } from '../services/counterfactualSafeMapper'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import {
   cgwApi as counterfactualSafesApi,
+  type GetCounterfactualSafeItem,
   type GetCounterfactualSafesResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -84,7 +86,7 @@ const useCounterfactualSafeSync = () => {
         userQuery.unsubscribe()
         spaceQuery?.unsubscribe()
 
-        type RemoteSafe = { address: string; isCreator: boolean; [key: string]: unknown }
+        type RemoteSafe = GetCounterfactualSafeItem & { isCreator: boolean }
 
         // Collect safes by chain. Entries from the user endpoint are owned by the
         // current user (isCreator=true). Entries only seen via the space endpoint
@@ -123,7 +125,11 @@ const useCounterfactualSafeSync = () => {
             const { props } = fromBackendDto({
               ...remoteSafe,
               chainId,
-            } as unknown as Parameters<typeof fromBackendDto>[0])
+              // CGW schema allows null; FE downstream relies on a string address.
+              paymentReceiver: remoteSafe.paymentReceiver ?? ZERO_ADDRESS,
+              fallbackHandler: remoteSafe.fallbackHandler ?? ZERO_ADDRESS,
+              to: remoteSafe.to ?? ZERO_ADDRESS,
+            })
             dispatch(
               addUndeployedSafe({
                 chainId,

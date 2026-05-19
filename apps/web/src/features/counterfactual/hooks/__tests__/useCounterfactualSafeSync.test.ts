@@ -297,4 +297,48 @@ describe('useCounterfactualSafeSync', () => {
     expect(byAddress.get('0xMine')).toBe(true)
     expect(byAddress.get('0xOther')).toBe(false)
   })
+
+  it('normalizes nullable address fields from CGW to ZERO_ADDRESS', async () => {
+    // CGW schema permits null for paymentReceiver / fallbackHandler / to;
+    // downstream code requires strings, so the sync hook must coerce them.
+    userResponse = {
+      safes: {
+        '1': [
+          {
+            address: '0xNullable',
+            factoryAddress: '0xF',
+            masterCopy: '0xM',
+            saltNonce: '0',
+            safeVersion: '1.4.1',
+            threshold: 1,
+            owners: ['0xabc'],
+            data: '0x',
+            paymentToken: null,
+            payment: null,
+            fallbackHandler: null,
+            to: null,
+            paymentReceiver: null,
+          },
+        ],
+      },
+    }
+
+    mockSelectors(true, true, null)
+    renderHook(() => useCounterfactualSafeSync())
+    await flush()
+
+    const addAction = dispatched.find(
+      (
+        d,
+      ): d is {
+        type: string
+        payload: { address: string; safeProps: { safeAccountConfig: Record<string, unknown> } }
+      } => typeof d === 'object' && d !== null && (d as { type?: string }).type === 'addUndeployedSafe',
+    )
+    expect(addAction).toBeDefined()
+    const config = addAction!.payload.safeProps.safeAccountConfig
+    expect(config.paymentReceiver).toBe('0x0000000000000000000000000000000000000000')
+    expect(config.fallbackHandler).toBe('0x0000000000000000000000000000000000000000')
+    expect(config.to).toBe('0x0000000000000000000000000000000000000000')
+  })
 })
