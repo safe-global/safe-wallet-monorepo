@@ -2,12 +2,14 @@ import type { ReactElement } from 'react'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { ArrowLeftRight, Banknote, Gift, Landmark, Sprout, Terminal, type LucideIcon } from 'lucide-react'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import {
   useSurveysGetStateV1Query,
   useSurveysSubmitResponseV1Mutation,
   type SurveyOption,
 } from '@safe-global/store/gateway/surveys'
 import { AppRoutes } from '@/config/routes'
+import { useHasFeature } from '@/hooks/useChains'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -37,10 +39,11 @@ const SurveyOnboarding = (): ReactElement | null => {
   const isDarkMode = useDarkMode()
   const router = useRouter()
   const spaceId = router.query.spaceId as string | undefined
+  const isSurveyEnabled = useHasFeature(FEATURES.SPACE_ONBOARDING_SURVEY)
 
   const { data, isLoading, error } = useSurveysGetStateV1Query(
     { spaceId: spaceId ?? '', slug: SURVEY_SLUG },
-    { skip: !spaceId },
+    { skip: !spaceId || isSurveyEnabled !== true },
   )
   const [submit, { isLoading: isSubmitting, error: submitError }] = useSurveysSubmitResponseV1Mutation()
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -51,7 +54,13 @@ const SurveyOnboarding = (): ReactElement | null => {
     }
   }, [router, spaceId])
 
-  if (!spaceId) return null
+  useEffect(() => {
+    if (isSurveyEnabled === false && spaceId) {
+      router.replace({ pathname: AppRoutes.spaces.index, query: { spaceId } })
+    }
+  }, [isSurveyEnabled, router, spaceId])
+
+  if (!spaceId || isSurveyEnabled !== true) return null
 
   const toggle = (key: string): void => {
     setSelected((prev) => {
