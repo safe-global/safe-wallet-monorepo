@@ -42,6 +42,9 @@ const SelectAllToggle = ({
     <div className={cn('inline-flex items-center gap-1', className)}>
       <button
         type="button"
+        role="checkbox"
+        aria-checked={indeterminate ? 'mixed' : checked}
+        aria-label={showCountText ? `${label} (${count}/${total})` : label}
         onClick={handleChange}
         disabled={disabled || total === 0}
         data-testid={testId}
@@ -55,7 +58,6 @@ const SelectAllToggle = ({
           <Tooltip>
             <TooltipTrigger
               render={<span />}
-              tabIndex={0}
               className="cursor-help text-sm text-muted-foreground underline decoration-dotted underline-offset-2"
             >
               ({count}/{total})
