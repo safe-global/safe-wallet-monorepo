@@ -2,10 +2,14 @@ import { factoryValidationScanner } from '../factoryValidation'
 import { createMockContext } from '../test-helpers'
 
 describe('factoryValidationScanner', () => {
-  it('returns partial when no creation data is available', async () => {
+  it('returns inconclusive when creation data has not loaded yet', async () => {
+    // `inconclusive` is skipped in the workspace aggregate and per-Safe grade, so a
+    // missing creation transaction (still loading or gateway returned no data yet)
+    // won't penalize the score or surface a misleading "unrecognized source" entry.
+    // It also keeps the result stable across rescans once creationTx resolves.
     const result = await factoryValidationScanner.scan(createMockContext({ creationInfo: null }))
-    expect(result.status).toBe('partial')
-    expect(result.score).toBe(70)
+    expect(result.status).toBe('inconclusive')
+    expect(result.score).toBe(50)
   })
 
   it('returns partial when factory address is not recorded', async () => {

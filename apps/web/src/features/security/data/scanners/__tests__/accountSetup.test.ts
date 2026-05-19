@@ -74,10 +74,12 @@ describe('accountSetupScanner', () => {
     expect(result.status).toBe('clear')
   })
 
-  it('returns partial when no owners available', async () => {
+  it('returns inconclusive when owner data has not loaded yet', async () => {
+    // ownerCount === 0 is impossible for a real Safe — treat it as transient missing
+    // data, not a security concern, so the score isn't penalized while safeInfo loads.
     const ctx = createMockContext({ owners: [] })
     const result = await accountSetupScanner.scan(ctx)
-    expect(result.status).toBe('partial')
-    expect(result.severity).toBe('Medium')
+    expect(result.status).toBe('inconclusive')
+    expect(result.severity).toBe('Low')
   })
 })
