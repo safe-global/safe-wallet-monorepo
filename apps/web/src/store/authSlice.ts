@@ -7,6 +7,7 @@ type AuthPayload = {
   sessionExpiresAt: number | null
   lastUsedSpace: string | null
   isStoreHydrated: boolean
+  cfSafeSynced: boolean
   isOidcLoginPending: boolean
 }
 
@@ -14,6 +15,7 @@ const initialState: AuthPayload = {
   sessionExpiresAt: null,
   lastUsedSpace: null,
   isStoreHydrated: false,
+  cfSafeSynced: false,
   isOidcLoginPending: false,
 }
 
@@ -27,10 +29,16 @@ export const authSlice = createSlice({
 
     setUnauthenticated: (state) => {
       state.sessionExpiresAt = null
+      // Reset so CF sync re-runs on next sign-in
+      state.cfSafeSynced = false
     },
 
     setLastUsedSpace: (state, { payload }: PayloadAction<AuthPayload['lastUsedSpace']>) => {
       state.lastUsedSpace = payload
+    },
+
+    setCfSafeSynced: (state, { payload }: PayloadAction<boolean>) => {
+      state.cfSafeSynced = payload
     },
 
     setIsOidcLoginPending: (state, { payload }: PayloadAction<boolean>) => {
@@ -39,7 +47,8 @@ export const authSlice = createSlice({
   },
 })
 
-export const { setAuthenticated, setUnauthenticated, setLastUsedSpace, setIsOidcLoginPending } = authSlice.actions
+export const { setAuthenticated, setUnauthenticated, setLastUsedSpace, setCfSafeSynced, setIsOidcLoginPending } =
+  authSlice.actions
 
 export const isAuthenticated = (state: RootState): boolean => {
   return !!state.auth.sessionExpiresAt && state.auth.sessionExpiresAt > Date.now()
@@ -51,6 +60,10 @@ export const lastUsedSpace = (state: RootState) => {
 
 export const selectIsStoreHydrated = (state: RootState): boolean => {
   return state.auth.isStoreHydrated
+}
+
+export const selectCfSafeSynced = (state: RootState): boolean => {
+  return state.auth.cfSafeSynced
 }
 
 export const selectIsOidcLoginPending = (state: RootState): boolean => {
