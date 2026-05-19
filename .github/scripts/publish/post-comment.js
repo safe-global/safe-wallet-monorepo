@@ -12,10 +12,7 @@
 
 const fs = require('fs')
 
-const MARKER = '📸 Page Screenshots'
-const COMMENT_HEADER = `## ${MARKER}`
 const BOT_LOGIN = 'github-actions[bot]'
-const FILENAME_REGEX = /^([a-z0-9_]+)__(desktop|mobile)\.png$/
 const COLLAPSIBLE_THRESHOLD = 8
 
 const slugToLabel = (slug) =>
@@ -25,18 +22,46 @@ const slugToLabel = (slug) =>
     .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
     .join(' ')
 
-const buildBody = ({ stale, screenshots, baseUrl }) => {
-  let body = `${COMMENT_HEADER}\n\n`
+const ARTIFACT_PROFILES = {
+  page: {
+    marker: '📸 Page Screenshots',
+    dir: 'page-screenshots',
+    storageSegment: 'page-screenshots',
+    filenameRegex: /^([a-z0-9_]+)__(desktop|mobile)\.png$/,
+    summary: (count) => `Found ${count} screenshot(s) for pages affected by changes in this PR.`,
+    footer: '*Screenshots are automatically captured from pages affected by changed files.*',
+    label: (file, match) => (match ? `${slugToLabel(match[1])} (${match[2]})` : file),
+  },
+  storybook: {
+    marker: '📸 Storybook Component Screenshots',
+    dir: 'web-storybook-screenshots',
+    storageSegment: 'web-storybook-screenshots',
+    filenameRegex: /^([A-Za-z0-9_-]+)--([A-Za-z0-9_]+)(-ERROR)?\.png$/,
+    summary: (count) => `Found ${count} screenshot(s) for Storybook components modified in this PR.`,
+    footer: '*Screenshots captured from deployed Storybook preview.*',
+    label: (file, match) => (match ? `${match[1]} — ${match[2]}${match[3] ? ' (ERROR)' : ''}` : file),
+  },
+}
+
+// Backwards-compatible exports for any caller importing the page-screenshots
+// values directly.
+const MARKER = ARTIFACT_PROFILES.page.marker
+const COMMENT_HEADER = `## ${MARKER}`
+const FILENAME_REGEX = ARTIFACT_PROFILES.page.filenameRegex
+
+const buildBody = ({ stale, screenshots, baseUrl, profile }) => {
+  const header = `## ${profile.marker}`
+  let body = `${header}\n\n`
   if (stale) {
     body +=
       '> **STALE:** The PR was updated after these screenshots were captured. ' + 'A new run will refresh them.\n\n'
   }
-  body += `Found ${screenshots.length} screenshot(s) for pages affected by changes in this PR.\n\n`
+  body += `${profile.summary(screenshots.length)}\n\n`
 
   const useCollapsible = screenshots.length >= COLLAPSIBLE_THRESHOLD
   for (const file of screenshots) {
-    const match = file.match(FILENAME_REGEX)
-    const label = match ? `${slugToLabel(match[1])} (${match[2]})` : file
+    const match = file.match(profile.filenameRegex)
+    const label = profile.label(file, match)
     const imageUrl = `${baseUrl}/${file}`
     if (useCollapsible) {
       body += `<details>\n<summary>${label}</summary>\n\n`
@@ -49,11 +74,19 @@ const buildBody = ({ stale, screenshots, baseUrl }) => {
   }
 
   body += '\n---\n'
-  body += '*Screenshots are automatically captured from pages affected by changed files.*'
+  body += profile.footer
   return body
 }
 
 module.exports = async ({ github, context, core }) => {
+  const artifactType = process.env.ARTIFACT_TYPE || 'page'
+  const profile = ARTIFACT_PROFILES[artifactType]
+  if (!profile) {
+    core.setFailed(`Unknown ARTIFACT_TYPE: ${artifactType}`)
+    return
+  }
+  const commentHeader = `## ${profile.marker}`
+
   const prNumber = Number(process.env.PR_NUMBER)
   const stale = process.env.STALE === 'true'
   const found = process.env.FOUND === 'true'
@@ -72,10 +105,10 @@ module.exports = async ({ github, context, core }) => {
     issue_number: prNumber,
     per_page: 100,
   })
-  // Restrict to comments authored by this workflow's bot and starting with
-  // the exact header `buildBody` writes — otherwise a quoted MARKER in any
-  // other bot's comment would be edited or deleted on the next run.
-  const existing = comments.find((c) => c.user.login === BOT_LOGIN && c.body.startsWith(COMMENT_HEADER))
+  // Match comments authored by this workflow's bot whose body starts with
+  // the exact header `buildBody` writes, so we update the existing sticky
+  // comment in place rather than matching a quoted marker elsewhere.
+  const existing = comments.find((c) => c.user.login === BOT_LOGIN && c.body.startsWith(commentHeader))
 
   if (!found) {
     if (existing) {
@@ -89,13 +122,14 @@ module.exports = async ({ github, context, core }) => {
   }
 
   const screenshots = fs
-    .readdirSync('page-screenshots')
+    .readdirSync(profile.dir)
     .filter((f) => f.endsWith('.png'))
     .sort()
 
-  const storageBranch = `pr-${prNumber}-screenshots`
-  const baseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${storageBranch}/page-screenshots/${prNumber}`
-  const body = buildBody({ stale, screenshots, baseUrl })
+  const storageBranch =
+    artifactType === 'storybook' ? `pr-${prNumber}-storybook-screenshots` : `pr-${prNumber}-screenshots`
+  const baseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${storageBranch}/${profile.storageSegment}/${prNumber}`
+  const body = buildBody({ stale, screenshots, baseUrl, profile })
 
   if (existing) {
     await github.rest.issues.updateComment({
@@ -118,5 +152,6 @@ module.exports.MARKER = MARKER
 module.exports.COMMENT_HEADER = COMMENT_HEADER
 module.exports.BOT_LOGIN = BOT_LOGIN
 module.exports.FILENAME_REGEX = FILENAME_REGEX
+module.exports.ARTIFACT_PROFILES = ARTIFACT_PROFILES
 module.exports.slugToLabel = slugToLabel
 module.exports.buildBody = buildBody
