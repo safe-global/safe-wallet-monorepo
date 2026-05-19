@@ -22,11 +22,6 @@ export function useSelectAll({ visibleTrusted, visibleOwned, control, setValue }
     [visibleTrusted, selectedSafes],
   )
   const ownedSelection = useMemo(() => getSelectionState(visibleOwned, selectedSafes), [visibleOwned, selectedSafes])
-  const globalSelection = useMemo(
-    () => getSelectionState([...visibleTrusted, ...visibleOwned], selectedSafes),
-    [visibleTrusted, visibleOwned, selectedSafes],
-  )
-
   const isAtLimit = useMemo(
     () =>
       Object.entries(selectedSafes).filter(([k, v]) => v && !k.startsWith(MULTICHAIN_SAFE_KEY_PREFIX)).length >=
@@ -73,5 +68,5 @@ export function useSelectAll({ visibleTrusted, visibleOwned, control, setValue }
     [visibleTrusted, visibleOwned, selectedSafes, setValue],
   )
 
-  return { trustedSelection, ownedSelection, globalSelection, handleSelectAll, isAtLimit }
+  return { trustedSelection, ownedSelection, handleSelectAll, isAtLimit }
 }
