@@ -27,9 +27,8 @@ const ByHypernativeFooter = () => (
  * Stacks an optional overflow row above the "by Hypernative" footer.
  * Strips requestId to hide the "Report false result" link (Blockaid-only).
  */
-// eslint-disable-next-line unused-imports/no-unused-vars
 export const HnAnalysisGroupCard = ({
-  requestId,
+  requestId: _requestId, // eslint-disable-line unused-imports/no-unused-vars
   overflowRow,
   ...props
 }: HnAnalysisGroupCardProps): ReactElement | null => {
