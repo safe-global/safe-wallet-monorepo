@@ -105,9 +105,9 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    expect(screen.getByText(/no spaces found/i)).toBeInTheDocument()
-    // The "Create space" CTA link is rendered (Button + NextLink composition).
-    expect(screen.getByRole('link', { name: /create space/i })).toBeInTheDocument()
+    expect(screen.getByText(/no workspaces found/i)).toBeInTheDocument()
+    // The "Create workspace" CTA link is rendered (Button + NextLink composition).
+    expect(screen.getByRole('link', { name: /create workspace/i })).toBeInTheDocument()
 
     // Sign in card must NOT render in this branch.
     expect(screen.queryByTestId('sign-in-options')).not.toBeInTheDocument()

@@ -37,7 +37,7 @@ const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?
       onClick={disabled ? undefined : onClick}
     >
       <AddIcon className="size-5 fill-primary-foreground" />
-      Create space
+      Create workspace
     </Button>
   )
 
@@ -59,7 +59,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
       </Typography>
 
       <Typography color="text.secondary" mb={3}>
-        Sign in to view or create a Space.
+        Sign in to view or create a workspace.
       </Typography>
 
       <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
@@ -79,11 +79,11 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
         <Box mb={3}>
           <Typography color="text.secondary" mb={1}>
-            No spaces found.
+            No workspaces found.
             <br />
           </Typography>
           <Link onClick={() => setIsInfoOpen(true)} href="#">
-            What are spaces?
+            What are workspaces?
           </Link>
         </Box>
         <div className="h-12">

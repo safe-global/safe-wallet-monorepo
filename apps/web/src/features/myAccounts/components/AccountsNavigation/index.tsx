@@ -23,7 +23,7 @@ const navItems: NavItems = [
     url: AppRoutes.welcome.accounts,
   },
   {
-    label: 'Spaces',
+    label: 'Workspaces',
     url: AppRoutes.welcome.spaces,
     trackEvent: { ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.accounts_page },
     beta: true,

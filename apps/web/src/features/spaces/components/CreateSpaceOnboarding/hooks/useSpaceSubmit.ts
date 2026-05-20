@@ -33,7 +33,7 @@ const useSpaceSubmit = (
 
     dispatch(
       showNotification({
-        message: `Updated space name to ${name}.`,
+        message: `Updated workspace name to ${name}.`,
         variant: 'success',
         groupKey: 'update-space-success',
       }),
@@ -53,7 +53,7 @@ const useSpaceSubmit = (
 
       dispatch(
         showNotification({
-          message: `Created space with name ${name}.`,
+          message: `Created workspace with name ${name}.`,
           variant: 'success',
           groupKey: 'create-space-success',
         }),
@@ -85,7 +85,7 @@ const useSpaceSubmit = (
       const errorMessage =
         error instanceof Error
           ? error.message
-          : `Failed ${isEditMode ? 'updating' : 'creating'} the space. Please try again.`
+          : `Failed ${isEditMode ? 'updating' : 'creating'} the workspace. Please try again.`
       setError(errorMessage)
       setIsSubmitting(false)
     }

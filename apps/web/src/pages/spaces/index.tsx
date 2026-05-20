@@ -15,7 +15,7 @@ export default function SpacePage() {
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Space dashboard`}</title>
+        <title>{`${BRAND_NAME} – Workspace dashboard`}</title>
       </Head>
 
       <main className="!pt-0">

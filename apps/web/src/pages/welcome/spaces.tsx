@@ -14,7 +14,7 @@ const Spaces: NextPage = () => {
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Spaces`}</title>
+        <title>{`${BRAND_NAME} – Workspaces`}</title>
       </Head>
 
       {isSpacesFeatureEnabled && <spaces.SpacesList />}

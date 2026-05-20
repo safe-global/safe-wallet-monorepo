@@ -199,7 +199,7 @@ const useOnboardingSubmit = (
 
       dispatch(
         showNotification({
-          message: 'Updated Safe Account(s) in space',
+          message: 'Updated Safe Account(s) in workspace',
           variant: 'success',
           groupKey: 'update-safe-accounts-success',
         }),
