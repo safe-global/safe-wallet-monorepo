@@ -1,6 +1,7 @@
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { useChain } from '@/hooks/useChains'
 import { DEFAULT_CHAIN_ID, IS_TEST_E2E } from '@/config/constants'
+import { useIsClassicViewOptedIn } from '@/hooks/useClassicView'
 
 /**
  * Whether the "must log in to Spaces" gate is active.
@@ -16,13 +17,22 @@ import { DEFAULT_CHAIN_ID, IS_TEST_E2E } from '@/config/constants'
  * Cypress runs (IS_TEST_E2E) are forced OFF so the existing smoke / regression
  * suite doesn't have to know about the gate.
  *
+ * The classic-view escape hatch overrides the gate per-session: once a user
+ * has opted in via /welcome/spaces, the gate stays OFF until the tab is
+ * closed or they sign in. The override does NOT depend on the
+ * CLASSIC_VIEW_DISABLED flag — if a user previously opted in and the flag is
+ * subsequently turned on, we still honour their opt-in for the session rather
+ * than yanking them back to the login page mid-flow.
+ *
  * Returns `undefined` while the chains config is still loading so that
  * callers can avoid redirecting before they know the answer.
  */
 export const useIsRequireLoginEnabled = (): boolean | undefined => {
   const chain = useChain(String(DEFAULT_CHAIN_ID))
+  const isClassicViewOptedIn = useIsClassicViewOptedIn()
 
   if (IS_TEST_E2E) return false
+  if (isClassicViewOptedIn) return false
   if (!chain) return undefined
   return !hasFeature(chain, FEATURES.REQUIRE_LOGIN_DISABLED)
 }

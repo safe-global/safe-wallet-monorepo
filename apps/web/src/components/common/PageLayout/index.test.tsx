@@ -8,6 +8,12 @@ jest.mock('@/components/common/Header/Topbar', () => {
   return { __esModule: true, default: MockTopbar }
 })
 
+jest.mock('@/components/common/ClassicViewBanner', () => {
+  const MockClassicViewBanner = () => <div data-testid="classic-view-banner" />
+  MockClassicViewBanner.displayName = 'ClassicViewBanner'
+  return { __esModule: true, default: MockClassicViewBanner }
+})
+
 jest.mock('@/components/common/SafeLogo', () => {
   const MockSafeLogo = ({ href }: { href?: string }) => <a data-testid="safe-logo" href={href} />
   MockSafeLogo.displayName = 'SafeLogo'

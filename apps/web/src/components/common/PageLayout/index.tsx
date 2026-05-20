@@ -22,6 +22,7 @@ import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import ClassicViewBanner from '@/components/common/ClassicViewBanner'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -78,6 +79,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
+      <ClassicViewBanner />
+
       {!hideHeader && (
         <div
           className={classnames(css.topbar, {
