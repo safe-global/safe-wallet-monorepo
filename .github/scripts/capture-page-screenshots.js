@@ -6,7 +6,16 @@
 
 const fs = require('fs')
 const path = require('path')
-const { chromium } = require('playwright')
+
+// Playwright is installed into an isolated directory outside the workspace by
+// the build workflow. Resolve by absolute path so a stray local `node_modules`
+// can never shadow the pinned install.
+const playwrightPath = process.env.PLAYWRIGHT_PATH
+if (!playwrightPath) {
+  console.error('PLAYWRIGHT_PATH env var is required')
+  process.exit(1)
+}
+const { chromium } = require(playwrightPath)
 
 // LocalStorage values to dismiss modals/banners (from Cypress e2e setup)
 const COOKIE_CONSENT = JSON.stringify({
@@ -66,10 +75,21 @@ async function capturePageScreenshots() {
 
   const page = await context.newPage()
 
-  // Capture each route
+  // Capture each route. Filenames follow the strict convention
+  // `<routeSlug>__<viewport>.png` where routeSlug matches [a-z0-9_]+ and
+  // viewport is `desktop` or `mobile`. The publish workflow validates this
+  // shape and rejects anything that doesn't match.
   for (let i = 0; i < routes.length; i++) {
     const { url, route, name, waitForSelector } = routes[i]
-    const screenshotName = name.replace(/\s+/g, '-').toLowerCase()
+    const routeSlug = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+    if (!routeSlug) {
+      console.log(`[${i + 1}/${routes.length}] Skipping: empty slug for "${name}"`)
+      continue
+    }
+    const screenshotName = `${routeSlug}__desktop`
     console.log(`[${i + 1}/${routes.length}] Capturing: ${name} (${route})`)
 
     try {
@@ -115,8 +135,11 @@ async function capturePageScreenshots() {
 
       // Try to capture error screenshot
       try {
-        const errorPath = path.join('page-screenshots', `${screenshotName}-ERROR.png`)
-        await page.screenshot({ path: errorPath, fullPage: true })
+        // Error screenshots use the same convention so they pass the
+        // publish-side filename validation. Suffix the slug, not the viewport.
+        const errorPath = path.join('page-screenshots', `${routeSlug}_error__desktop.png`)
+        // Viewport-only to stay within the publish-side size cap.
+        await page.screenshot({ path: errorPath, fullPage: false })
         console.log(`  Error screenshot saved: ${errorPath}`)
       } catch (screenshotError) {
         console.error('  Could not capture error screenshot:', screenshotError.message)
