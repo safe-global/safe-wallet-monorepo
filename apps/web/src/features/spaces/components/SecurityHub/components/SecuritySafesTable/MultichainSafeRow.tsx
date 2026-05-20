@@ -147,7 +147,7 @@ const MultichainChildRow = ({
           <Tooltip title="Safe not yet deployed on this network">
             <Typography
               variant="caption"
-              color="text.disabled"
+              color="text.secondary"
               sx={{ display: 'inline-block', whiteSpace: 'normal', lineHeight: 1.2, fontSize: '0.65rem' }}
             >
               Not deployed
