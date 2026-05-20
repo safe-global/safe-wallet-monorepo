@@ -1,11 +1,12 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useState, useEffect } from 'react'
-import { Box, Button, CardActions, Divider, Tooltip } from '@mui/material'
+import { Box, CardActions, Divider, Tooltip } from '@mui/material'
 import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain } from '@/hooks/useChains'
+import { useSigner } from '@/hooks/wallets/useWallet'
 import { getTxOptions } from '@/utils/transactions'
 import useIsValidExecution from '@/hooks/useIsValidExecution'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -184,6 +185,13 @@ export const ExecuteForm = ({
   })
 
   const cannotPropose = !isOwner && !onlyExecute
+
+  // Parent Safe as executor cannot pay gas from the (child) Safe. The relay path doesn't
+  // support this nested execution flow at this moment. Block Execute when both conditions hold so
+  // the user can't submit a tx that would dead end at sign time.
+  const signer = useSigner()
+  const blockSafePaysFromNestedExecutor = signer?.isSafe === true && !!requiresRelay
+
   const submitDisabled =
     !safeTx ||
     isSubmitDisabled ||
@@ -192,6 +200,7 @@ export const ExecuteForm = ({
     isExecutionLoop ||
     cannotPropose ||
     relayUnavailableForGtf ||
+    blockSafePaysFromNestedExecutor ||
     (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
@@ -239,20 +248,11 @@ export const ExecuteForm = ({
             Cannot execute a transaction from the Safe Account itself, please connect a different account.
           </ErrorMessage>
         ) : relayUnavailableForGtf ? (
-          <ErrorMessage>
-            Safe-paid fees require Gelato relay, which is currently unavailable.
-            <Box sx={{ mt: 1 }}>
-              <Button
-                size="small"
-                variant="contained"
-                onClick={() => {
-                  setGtfPaymentMode('signer')
-                  setGtfSelectedGasToken(undefined)
-                }}
-              >
-                Switch to Signer
-              </Button>
-            </Box>
+          <ErrorMessage>Safe-paid fees require Gelato relay, which is currently unavailable.</ErrorMessage>
+        ) : blockSafePaysFromNestedExecutor ? (
+          <ErrorMessage level="info">
+            Can&apos;t pay gas from this Safe Account when executing through a parent Safe Account. Sign the
+            transaction, or switch to another signer to execute.
           </ErrorMessage>
         ) : !walletCanPay && !willRelay && !willNoFeeCampaign ? (
           <ErrorMessage level="info">
