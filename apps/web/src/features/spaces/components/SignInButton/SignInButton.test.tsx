@@ -31,11 +31,13 @@ jest.mock('@/services/siwe/useSiwe', () => ({
 
 jest.mock('@/store', () => ({
   useAppDispatch: () => mockDispatch,
+  useAppSelector: (selector: (state: unknown) => unknown) => selector({ auth: { sessionExpiresAt: null } }),
 }))
 
 jest.mock('@/store/authSlice', () => ({
   setAuthenticated: (value: number) => ({ type: 'auth/setAuthenticated', payload: value }),
   SESSION_LIFETIME_MS: 24 * 60 * 60 * 1000,
+  isAuthenticated: () => false,
 }))
 
 jest.mock('@/store/notificationsSlice', () => ({
