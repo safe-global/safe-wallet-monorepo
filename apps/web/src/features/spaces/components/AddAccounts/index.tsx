@@ -336,7 +336,7 @@ const AddAccounts = ({
       {externalOpen === undefined && (
         <Button
           size="lg"
-          className="font-bold px-4 py-0"
+          className="font-normal px-4 py-0"
           variant={buttonVariant}
           disabled={!isAdmin}
           onClick={() => {
@@ -350,7 +350,7 @@ const AddAccounts = ({
           data-testid="add-space-account-button"
         >
           <Plus
-            className={cn('size-4 mr-1', {
+            className={cn('size-4', {
               'text-green-500': buttonVariant === 'default',
             })}
           />

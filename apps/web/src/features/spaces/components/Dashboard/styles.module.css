@@ -36,12 +36,10 @@
 }
 
 .widgetItemLabel {
-  @apply truncate;
+  @apply flex items-center truncate;
+  font-weight: 600;
 
-  &,
   & > div {
-    display: inline-block;
-    vertical-align: top;
     font-weight: 600;
   }
 }

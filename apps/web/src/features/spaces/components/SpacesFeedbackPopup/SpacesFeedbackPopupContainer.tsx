@@ -35,5 +35,3 @@ export function SpacesFeedbackPopupContainer(): ReactElement | null {
 
   return <SpacesFeedbackPopup {...POPUP_CONTENT} onClose={() => setDismissed(true)} />
 }
-
-export default SpacesFeedbackPopupContainer
