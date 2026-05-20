@@ -31,6 +31,13 @@ describe('sanitizeNextUrl', () => {
   it('rejects bare "/" since it just redirects to /welcome/spaces', () => {
     expect(sanitizeNextUrl('/')).toBeNull()
   })
+
+  it('rejects /welcome and /welcome/spaces (both self-redirecting)', () => {
+    expect(sanitizeNextUrl('/welcome')).toBeNull()
+    expect(sanitizeNextUrl('/welcome/spaces')).toBeNull()
+    expect(sanitizeNextUrl('/welcome?chain=eth')).toBeNull()
+    expect(sanitizeNextUrl('/welcome/spaces#section')).toBeNull()
+  })
 })
 
 describe('buildCurrentNextUrl', () => {
