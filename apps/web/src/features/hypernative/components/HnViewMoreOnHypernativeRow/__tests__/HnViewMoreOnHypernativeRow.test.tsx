@@ -32,7 +32,7 @@ describe('HnViewMoreOnHypernativeRow', () => {
     const user = userEvent.setup()
     render(<HnViewMoreOnHypernativeRow overflowCount={2} assessmentUrl="https://hn.example/report" />)
     await user.click(screen.getByRole('link'))
-    expect(trackEventMock).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.HN_VIEW_FULL_REPORT_CLICKED)
+    expect(trackEventMock).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.HYPERNATIVE_FULL_REPORT_CLICKED)
   })
 
   it('returns null when assessmentUrl is null', () => {

@@ -29,7 +29,7 @@ export const HnViewMoreOnHypernativeRow = ({
       target="_blank"
       rel="noopener noreferrer"
       underline="none"
-      onClick={() => trackEvent(HYPERNATIVE_EVENTS.HN_VIEW_FULL_REPORT_CLICKED)}
+      onClick={() => trackEvent(HYPERNATIVE_EVENTS.HYPERNATIVE_FULL_REPORT_CLICKED)}
       sx={{ display: 'block', color: 'text.primary' }}
     >
       <Box
