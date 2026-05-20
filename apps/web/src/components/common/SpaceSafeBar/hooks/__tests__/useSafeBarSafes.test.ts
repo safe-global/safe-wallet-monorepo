@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import { useSafeBarSafes } from '../useSafeBarSafes'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import type { AllSafeItems } from '@/hooks/safes'
 
 // ── mocks ──────────────────────────────────────────────────────────────
@@ -32,12 +32,15 @@ jest.mock('@/hooks/useChainId', () => ({
 }))
 
 const mockAllSafes = jest.fn<SafeItem[] | undefined, []>(() => undefined)
-jest.mock('@/hooks/safes', () => ({
-  useAllSafes: () => mockAllSafes(),
-  useAllSafesGrouped: (items: SafeItem[]) => ({
+const mockGrouped = jest.fn<{ allMultiChainSafes: MultiChainSafeItem[]; allSingleSafes: SafeItem[] }, [SafeItem[]]>(
+  (items: SafeItem[]) => ({
     allMultiChainSafes: [],
     allSingleSafes: items,
   }),
+)
+jest.mock('@/hooks/safes', () => ({
+  useAllSafes: () => mockAllSafes(),
+  useAllSafesGrouped: (items: SafeItem[]) => mockGrouped(items),
 }))
 
 const mockIsSpaceRoute = jest.fn(() => false)
@@ -67,6 +70,11 @@ describe('useSafeBarSafes', () => {
     mockReduxSafeAddress.mockReturnValue('')
     mockChainId.mockReturnValue('1')
     mockAllSafes.mockReturnValue(undefined)
+    // Default: pass-through. Tests needing multi-chain grouping override per-case.
+    mockGrouped.mockImplementation((items: SafeItem[]) => ({
+      allMultiChainSafes: [],
+      allSingleSafes: items,
+    }))
   })
 
   it('returns empty lists when allSafes is undefined', () => {
@@ -255,5 +263,60 @@ describe('useSafeBarSafes', () => {
     const injected = result.current.dropdownSafes[0] as SafeItem
     expect(injected.name).toBe('Known Name')
     expect(injected.isReadOnly).toBe(false)
+  })
+
+  const groupByAddress = (items: SafeItem[]) => {
+    const byAddress: Record<string, SafeItem[]> = {}
+    for (const s of items) {
+      ;(byAddress[s.address] ??= []).push(s)
+    }
+    const allMultiChainSafes: MultiChainSafeItem[] = Object.entries(byAddress)
+      .filter(([, group]) => group.length > 1)
+      .map(([address, group]) => ({
+        address,
+        safes: group,
+        isPinned: group.some((s) => s.isPinned),
+        lastVisited: 0,
+        name: undefined,
+      }))
+    const multiAddresses = new Set(allMultiChainSafes.map((m) => m.address))
+    const allSingleSafes = items.filter((s) => !multiAddresses.has(s.address))
+    return { allMultiChainSafes, allSingleSafes }
+  }
+
+  // A wallet may own a safe on more chains than it has pinned; the current safe
+  // row must reflect all of them.
+  it('uses multi-chain representation of current safe even when only one chain is pinned', () => {
+    const sepoliaPinned = createSafe('0xMultiSafe', true, '11155111')
+    const mainnetOwned = createSafe('0xMultiSafe', false, '1')
+    mockAllSafes.mockReturnValue([sepoliaPinned, mainnetOwned])
+    mockSafeAddress.mockReturnValue('0xMultiSafe')
+    mockGrouped.mockImplementation(groupByAddress)
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    // Current safe row should reflect both chains so the user can switch.
+    expect(result.current.dropdownSafes).toHaveLength(1)
+    const item = result.current.dropdownSafes[0] as MultiChainSafeItem
+    expect(item.address).toBe('0xMultiSafe')
+    expect('safes' in item).toBe(true)
+    expect(item.safes.map((s) => s.chainId).sort()).toEqual(['1', '11155111'])
+  })
+
+  it('keeps other pinned safes alongside the multi-chain current safe', () => {
+    const sepoliaPinned = createSafe('0xMultiSafe', true, '11155111')
+    const mainnetOwned = createSafe('0xMultiSafe', false, '1')
+    const otherPinned = createSafe('0xOtherPinned', true, '1')
+    mockAllSafes.mockReturnValue([sepoliaPinned, mainnetOwned, otherPinned])
+    mockSafeAddress.mockReturnValue('0xMultiSafe')
+    mockGrouped.mockImplementation(groupByAddress)
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    expect(result.current.dropdownSafes).toHaveLength(2)
+    const current = result.current.dropdownSafes[0] as MultiChainSafeItem
+    expect(current.address).toBe('0xMultiSafe')
+    expect(current.safes).toHaveLength(2)
+    expect(result.current.dropdownSafes[1].address).toBe('0xOtherPinned')
   })
 })

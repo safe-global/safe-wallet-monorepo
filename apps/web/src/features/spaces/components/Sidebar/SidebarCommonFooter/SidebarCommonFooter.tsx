@@ -80,8 +80,13 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
             data-testid="list-item-need-help"
             onClick={handleHelpClick}
           >
-            <icons.CircleHelp />
-            <span>Help</span>
+            <Tooltip>
+              <TooltipTrigger render={<span />} className="flex min-w-0 cursor-pointer items-center gap-3">
+                <icons.CircleHelp />
+                <span className="truncate group-data-[collapsible=icon]:hidden">Help</span>
+              </TooltipTrigger>
+              <TooltipContent side="right">Help center</TooltipContent>
+            </Tooltip>
           </SidebarMenuButton>
           <Tooltip>
             <TooltipTrigger

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
 import { SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import css from '../styles.module.css'
@@ -28,14 +29,19 @@ export const ApiCtaSidebar = (): ReactElement => {
           aria-label="API"
           render={isIconCollapsed ? <a href={API_DOCS_URL} target="_blank" rel="noopener noreferrer" /> : undefined}
         >
-          <Image
-            src="/images/spaces/api-sidebar.svg"
-            alt="API"
-            width={16}
-            height={16}
-            className="dark:brightness-0 dark:invert"
-          />
-          <span className="min-w-0 flex-1 truncate group-data-[collapsible=icon]:hidden">API</span>
+          <Tooltip>
+            <TooltipTrigger render={<span />} className="flex min-w-0 cursor-pointer items-center gap-3">
+              <Image
+                src="/images/spaces/api-sidebar.svg"
+                alt="API"
+                width={16}
+                height={16}
+                className="dark:brightness-0 dark:invert"
+              />
+              <span className="min-w-0 flex-1 truncate group-data-[collapsible=icon]:hidden">API</span>
+            </TooltipTrigger>
+            <TooltipContent side="right">API</TooltipContent>
+          </Tooltip>
         </SidebarMenuButton>
         <div
           className={cn(css.footerHelpStatus, !isIconCollapsed && 'cursor-pointer')}

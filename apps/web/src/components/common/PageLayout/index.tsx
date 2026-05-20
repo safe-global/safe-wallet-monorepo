@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState, type ReactElement } from 'react'
 import classnames from 'classnames'
 import { AnimatePresence, motion } from 'motion/react'
-
 import Topbar from '@/components/common/Header/Topbar'
+import SafeLogo from '@/components/common/SafeLogo'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import css from './styles.module.css'
 import SafeLoadingError from '../SafeLoadingError'
@@ -20,6 +20,7 @@ import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -27,6 +28,8 @@ const ONBOARDING_ROUTES = [
   AppRoutes.welcome.inviteMembers,
   AppRoutes.welcome.survey,
 ]
+
+const STATIC_PAGE_ROUTES = [AppRoutes.terms, AppRoutes.privacy, AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
 
 const NO_HEADER_ROUTES = [
   AppRoutes.safeLabsTerms,
@@ -36,6 +39,7 @@ const NO_HEADER_ROUTES = [
   AppRoutes.welcome.inviteMembers,
   AppRoutes.welcome.survey,
   AppRoutes.spaces.createSpace,
+  ...STATIC_PAGE_ROUTES,
 ]
 
 const PageLayout = ({ pathname, children }: { pathname: string; children: ReactElement }): ReactElement => {
@@ -47,9 +51,12 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const { BatchSidebar } = useLoadFeature(BatchingFeature)
   const { SelectSafeModal } = useLoadFeature(SpacesFeature)
   const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
+  const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
+  const urlSafeAddress = useSafeAddressFromUrl()
+  const isSettingsWithoutSafe = pathname.startsWith(AppRoutes.settings.index) && !urlSafeAddress
   const parentSafe = useParentSafe()
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
 
@@ -78,6 +85,12 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
         </div>
       )}
 
+      {isStaticPage && (
+        <div className="px-6 py-4">
+          <SafeLogo />
+        </div>
+      )}
+
       {isSidebarRoute ? (
         <SideDrawer
           isOpen={isSidebarVisible}
@@ -92,12 +105,14 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           [css.mainAnimated]: isSidebarRoute && isAnimated,
           [css.mainNoHeader]: hideHeader,
           [css.mainSpace]: !hideHeader,
+          [css.mainSpaceCompact]: isSettingsWithoutSafe,
           [css.mainSpaceCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
         })}
       >
         <div className={css.content}>
           <SafeLoadingError>
             {!hideHeader && parentSafe && <Breadcrumbs />}
+
             {isOnboardingRoute ? (
               <AnimatePresence mode="wait">
                 <motion.div

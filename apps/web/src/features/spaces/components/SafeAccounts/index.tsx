@@ -1,6 +1,7 @@
 import AddAccounts from '../AddAccounts'
 import EmptySafeAccounts from './EmptySafeAccounts'
-import { Stack, Typography } from '@mui/material'
+import { Stack } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
@@ -75,16 +76,18 @@ const SpaceSafeAccounts = () => {
   return (
     <>
       {isInvited && <PreviewInvite />}
-      <Typography variant="h1" mb={3}>
-        Safe Accounts
-      </Typography>
-      {isAdmin && (
-        <Stack direction="row" justifyContent="flex-end" mt={-3} mb={3}>
-          <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
-            <AddAccounts />
-          </Track>
-        </Stack>
-      )}
+      <div className="mb-6 flex flex-col gap-6">
+        <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
+          Safe Accounts
+        </Typography>
+        {isAdmin && (
+          <Stack direction="row" justifyContent="flex-start">
+            <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
+              <AddAccounts buttonVariant="default" />
+            </Track>
+          </Stack>
+        )}
+      </div>
 
       {isSpaceSafesError ? (
         <div className="flex items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4">

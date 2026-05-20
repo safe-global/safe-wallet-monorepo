@@ -50,6 +50,11 @@ jest.mock('@/hooks/useSafeAddress', () => ({
   default: () => '',
 }))
 
+const mockUseSafeAddressFromUrl = jest.fn<string, []>(() => '')
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
+}))
+
 jest.mock('@/hooks/useIsSafeOwner', () => ({
   __esModule: true,
   default: () => false,
@@ -62,6 +67,12 @@ jest.mock('@/hooks/useProposers', () => ({
 const mockIsSpaceRoute = jest.fn(() => true)
 jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: () => mockIsSpaceRoute(),
+}))
+
+const mockUsePathname = jest.fn<string, []>(() => '/home')
+jest.mock('next/navigation', () => ({
+  ...jest.requireActual('next/navigation'),
+  usePathname: () => mockUsePathname(),
 }))
 
 jest.mock('@/components/common/SpaceSafeBar', () => {
@@ -122,6 +133,8 @@ describe('Topbar', () => {
     jest.clearAllMocks()
     mockUseIsMobile.mockReturnValue(false)
     mockIsSpaceRoute.mockReturnValue(true)
+    mockUsePathname.mockReturnValue('/home')
+    mockUseSafeAddressFromUrl.mockReturnValue('')
     mockUseLoadFeature.mockReturnValue({
       WalletPopover: () => null,
       GlobalSearchModal: () => null,
@@ -186,6 +199,59 @@ describe('Topbar', () => {
         </TxModalContext.Provider>,
       )
       expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
+    })
+
+    it('renders SafeLogo on settings routes when no safe address is in the URL', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/settings/setup')
+      mockUseSafeAddressFromUrl.mockReturnValue('')
+      const { container } = render(<Topbar />)
+      expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+      expect(screen.getByTestId('logo-image')).toBeInTheDocument()
+      // Logo row is short — header centers items vertically so the logo aligns with the right-side button group
+      expect(container.querySelector('header')?.className).toMatch(/items-center/)
+      expect(container.querySelector('header')?.className).not.toMatch(/items-start/)
+    })
+
+    it('renders SpaceSafeBar on settings routes when a safe address is in the URL', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/settings/setup')
+      mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
+      const { container } = render(<Topbar />)
+      expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
+      expect(screen.queryByTestId('logo-image')).not.toBeInTheDocument()
+      // Default top alignment is preserved when the SpaceSafeBar is shown
+      expect(container.querySelector('header')?.className).toMatch(/items-start/)
+    })
+  })
+
+  describe('search button visibility', () => {
+    it('shows the search button on non-space, non-welcome routes', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/home')
+      render(<Topbar />)
+      expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument()
+    })
+
+    it('hides the search button on /welcome/accounts', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/welcome/accounts')
+      render(<Topbar />)
+      expect(screen.queryByRole('button', { name: /search/i })).not.toBeInTheDocument()
+    })
+
+    it('hides the search button on /welcome/spaces', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/welcome/spaces')
+      render(<Topbar />)
+      expect(screen.queryByRole('button', { name: /search/i })).not.toBeInTheDocument()
+    })
+
+    it('shows the search button on other welcome subpaths', () => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUsePathname.mockReturnValue('/welcome')
+      render(<Topbar />)
+      expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument()
     })
   })
 
