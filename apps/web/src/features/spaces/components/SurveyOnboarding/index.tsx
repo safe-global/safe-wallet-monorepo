@@ -84,12 +84,19 @@ const SurveyOnboarding = (): ReactElement | null => {
     router.push({ pathname: AppRoutes.welcome.inviteMembers, query: { spaceId } })
   }
 
+  // For now the survey only has one page; this is the page we render and submit.
+  // When multi-page lands, replace this with a current-page selector + per-page
+  // selections state.
+  const page = data?.survey.surveyContent.pages[0]
+
   const onFinish = async (): Promise<void> => {
-    if (!spaceId || selected.size === 0) return
+    if (!spaceId || !page || selected.size === 0) return
     await submit({
       spaceId,
       slug: SURVEY_SLUG,
-      submitSurveyResponseDto: { selections: Array.from(selected) },
+      submitSurveyResponseDto: {
+        selections: { [page.id]: Array.from(selected) },
+      },
     }).unwrap()
     router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
   }
@@ -113,11 +120,11 @@ const SurveyOnboarding = (): ReactElement | null => {
 
           <div className="flex flex-col items-center gap-2">
             <Typography variant="h2" align="center">
-              {data?.survey.title ?? 'How will you use Safe?'}
+              {page?.title ?? 'How will you use Safe?'}
             </Typography>
-            {data?.survey.subtitle && (
+            {page?.subtitle && (
               <Typography variant="paragraph" align="center" color="muted">
-                {data.survey.subtitle}
+                {page.subtitle}
               </Typography>
             )}
           </div>
@@ -130,9 +137,9 @@ const SurveyOnboarding = (): ReactElement | null => {
             </Alert>
           )}
 
-          {data?.survey.surveyContent.options && (
+          {page?.options && (
             <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {data.survey.surveyContent.options.map((opt: SurveyOption) => {
+              {page.options.map((opt: SurveyOption) => {
                 const Icon = opt.icon ? ICON_MAP[opt.icon] : undefined
                 const isChecked = selected.has(opt.key)
                 return (

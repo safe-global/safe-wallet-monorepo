@@ -9,6 +9,9 @@
  * Backend endpoints (see safe-client-gateway src/modules/surveys/):
  *   GET  /v1/spaces/:spaceId/surveys/:slug/state
  *   POST /v1/spaces/:spaceId/surveys/:slug/responses
+ *
+ * survey_content is structured as { pages: [...] } so future multi-page
+ * surveys add data without breaking the Mixpanel event property schema.
  */
 import { cgwClient as api } from './cgwClient'
 
@@ -19,9 +22,16 @@ export type SurveyOption = {
   icon?: string
 }
 
-export type SurveyContent = {
+export type SurveyPage = {
+  id: string
+  title: string
+  subtitle?: string | null
   multiSelect: boolean
   options: SurveyOption[]
+}
+
+export type SurveyContent = {
+  pages: SurveyPage[]
 }
 
 export type SurveyDto = {
@@ -33,9 +43,12 @@ export type SurveyDto = {
   surveyContent: SurveyContent
 }
 
+/** Map from page id → selected option keys on that page. */
+export type SurveySelections = Record<string, string[]>
+
 export type SpaceSurveyResponse = {
   surveyVersion: number
-  selections: string[]
+  selections: SurveySelections
   submittedAt: string
   answeredByUserId: number | null
 }
@@ -50,7 +63,7 @@ export type SurveyResponseResultDto = {
   spaceId: number
   surveySlug: string
   surveyVersion: number
-  selections: string[]
+  selections: SurveySelections
   submittedAt: string
   answeredByUserId: number | null
 }
@@ -63,28 +76,26 @@ export type SurveysGetStateV1ApiArg = {
 export type SurveysSubmitResponseV1ApiArg = {
   spaceId: number | string
   slug: string
-  submitSurveyResponseDto: { selections: string[] }
+  submitSurveyResponseDto: { selections: SurveySelections }
 }
 
-export const surveysApi = api
-  .enhanceEndpoints({ addTagTypes: ['surveys'] })
-  .injectEndpoints({
-    endpoints: (build) => ({
-      surveysGetStateV1: build.query<SurveyStateDto, SurveysGetStateV1ApiArg>({
-        query: ({ spaceId, slug }) => ({
-          url: `/v1/spaces/${spaceId}/surveys/${slug}/state`,
-        }),
-        providesTags: ['surveys'],
+export const surveysApi = api.enhanceEndpoints({ addTagTypes: ['surveys'] }).injectEndpoints({
+  endpoints: (build) => ({
+    surveysGetStateV1: build.query<SurveyStateDto, SurveysGetStateV1ApiArg>({
+      query: ({ spaceId, slug }) => ({
+        url: `/v1/spaces/${spaceId}/surveys/${slug}/state`,
       }),
-      surveysSubmitResponseV1: build.mutation<SurveyResponseResultDto, SurveysSubmitResponseV1ApiArg>({
-        query: ({ spaceId, slug, submitSurveyResponseDto }) => ({
-          url: `/v1/spaces/${spaceId}/surveys/${slug}/responses`,
-          method: 'POST',
-          body: submitSurveyResponseDto,
-        }),
-        invalidatesTags: ['surveys'],
-      }),
+      providesTags: ['surveys'],
     }),
-  })
+    surveysSubmitResponseV1: build.mutation<SurveyResponseResultDto, SurveysSubmitResponseV1ApiArg>({
+      query: ({ spaceId, slug, submitSurveyResponseDto }) => ({
+        url: `/v1/spaces/${spaceId}/surveys/${slug}/responses`,
+        method: 'POST',
+        body: submitSurveyResponseDto,
+      }),
+      invalidatesTags: ['surveys'],
+    }),
+  }),
+})
 
 export const { useSurveysGetStateV1Query, useSurveysSubmitResponseV1Mutation } = surveysApi
