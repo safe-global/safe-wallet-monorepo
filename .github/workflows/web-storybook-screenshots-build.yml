@@ -1,0 +1,149 @@
+# Build half of a two-workflow pair. This half runs with `permissions: {}`,
+# does not reference secrets, and does not write any caches. It runs after
+# the deploy completes so the Storybook preview URL is available.
+# Companion publish workflow: web-storybook-screenshots-publish.yml.
+name: Web Storybook Screenshots Build
+
+on:
+  workflow_run:
+    workflows: ['Web Deploy to dev/staging']
+    types:
+      - completed
+
+permissions: {}
+
+jobs:
+  build:
+    # Only run for in-repo PRs where the upstream deploy succeeded.
+    # Fork PRs are filtered upstream in web-deploy-dev.yml; this check
+    # mirrors that filter locally.
+    if: >
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      # Pin to the commit SHA the deploy ran against so the checked-out tree
+      # matches the deployed preview even if the PR head has moved since.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Playwright
+        run: |
+          # Install Playwright into a fresh directory outside the workspace
+          # so the install is independent of the repo's own package.json.
+          # Lifecycle scripts are disabled and the version is pinned for
+          # reproducible installs.
+          INSTALL_DIR="$RUNNER_TEMP/playwright-install"
+          mkdir -p "$INSTALL_DIR"
+          cd "$INSTALL_DIR"
+          cat > package.json <<'JSON'
+          {"name":"playwright-install","private":true}
+          JSON
+          cat > .yarnrc.yml <<'YAML'
+          nodeLinker: node-modules
+          enableScripts: false
+          enableTelemetry: false
+          YAML
+          corepack enable
+          yarn add playwright@1.60.0
+          yarn playwright install --with-deps chromium
+          echo "PLAYWRIGHT_PATH=$INSTALL_DIR/node_modules/playwright" >> "$GITHUB_ENV"
+          # Allow capture script (loaded via NODE_PATH) to resolve playwright
+          # from the install directory regardless of cwd.
+          echo "NODE_PATH=$INSTALL_DIR/node_modules" >> "$GITHUB_ENV"
+
+      - name: Get changed story files
+        id: changed-stories
+        run: |
+          BASE_SHA="${{ github.event.workflow_run.pull_requests[0].base.sha }}"
+          HEAD_SHA="${{ github.event.workflow_run.head_sha }}"
+          if [ -z "$BASE_SHA" ] || [ -z "$HEAD_SHA" ]; then
+            echo "Missing base/head SHA; skipping screenshots"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Get all changed source files in web app. The story lookup below
+          # only checks `.tsx?` extensions, which matches the repo (TS-only
+          # stories); keep these two lists in sync.
+          ALL_CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
+            | grep -E '^apps/web/src/.*\.tsx?$' \
+            | grep -v '\.test\.' || true)
+
+          STORY_FILES=""
+
+          for file in $ALL_CHANGED; do
+            # If it's already a story file, include it
+            if [[ "$file" =~ \.(stories|story)\.tsx?$ ]]; then
+              STORY_FILES="$STORY_FILES$file"$'\n'
+              continue
+            fi
+
+            # For component files, check if a corresponding story file exists
+            dir=$(dirname "$file")
+            base=$(basename "$file" | sed -E 's/\.tsx?$//')
+
+            for ext in stories.tsx story.tsx stories.ts story.ts; do
+              story_file="$dir/$base.$ext"
+              if [ -f "$story_file" ]; then
+                STORY_FILES="$STORY_FILES$story_file"$'\n'
+                break
+              fi
+            done
+          done
+
+          # Remove duplicates and empty lines
+          STORY_FILES=$(echo "$STORY_FILES" | sort -u | grep -v '^$' || true)
+
+          if [ -z "$STORY_FILES" ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No story files found for changed components"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "Story files with changes:"
+            echo "$STORY_FILES"
+            {
+              echo "files<<EOF"
+              echo "$STORY_FILES"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Normalize branch name
+        if: steps.changed-stories.outputs.has_changes == 'true'
+        id: branch
+        env:
+          BRANCH_NAME: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          NORMALIZED=$(echo "$BRANCH_NAME" | sed 's/[^a-z0-9]/_/ig' | sed 's/[A-Z]/\L&/g')
+          echo "normalized=$NORMALIZED" >> "$GITHUB_OUTPUT"
+
+      - name: Generate story URLs
+        if: steps.changed-stories.outputs.has_changes == 'true'
+        id: story-urls
+        env:
+          CHANGED_FILES: ${{ steps.changed-stories.outputs.files }}
+          STORYBOOK_BASE_URL: https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/storybook
+        run: node ./.github/scripts/generate-web-story-urls.js
+
+      - name: Take screenshots
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.story-urls.outputs.has_urls == 'true'
+        env:
+          STORYBOOK_BASE_URL: https://${{ steps.branch.outputs.normalized }}--walletweb.review.5afe.dev/storybook
+        run: node ./.github/scripts/capture-web-storybook-screenshots.js
+
+      - name: Upload screenshots
+        if: steps.changed-stories.outputs.has_changes == 'true' && steps.story-urls.outputs.has_urls == 'true'
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: web-storybook-screenshots
+          # `generate-web-story-urls.js` writes `story-urls.json` into the
+          # same directory; the artifact deliberately uploads PNGs only,
+          # which is all the publish workflow consumes.
+          path: web-storybook-screenshots/*.png
+          if-no-files-found: ignore
+          retention-days: 5
