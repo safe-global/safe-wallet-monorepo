@@ -5,6 +5,17 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { DEFAULT_CHAIN_ID } from '@/config/constants'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
+const mockIsTestE2E = jest.fn(() => false)
+jest.mock('@/config/constants', () => {
+  const actual = jest.requireActual('@/config/constants')
+  return {
+    ...actual,
+    get IS_TEST_E2E() {
+      return mockIsTestE2E()
+    },
+  }
+})
+
 const mockChain = (features: FEATURES[]): Chain =>
   ({ chainId: String(DEFAULT_CHAIN_ID), features: features as unknown as string[] }) as Chain
 
@@ -43,5 +54,17 @@ describe('useIsRequireLoginEnabled', () => {
     renderHook(() => useIsRequireLoginEnabled())
 
     expect(useChainSpy).toHaveBeenCalledWith(String(DEFAULT_CHAIN_ID))
+  })
+
+  it('forces the gate OFF under Cypress (IS_TEST_E2E)', () => {
+    // Even if the chain config would normally produce gate ON, Cypress runs bypass it.
+    jest.spyOn(useChainsModule, 'useChain').mockReturnValue(mockChain([]))
+    mockIsTestE2E.mockReturnValue(true)
+
+    const { result } = renderHook(() => useIsRequireLoginEnabled())
+
+    expect(result.current).toBe(false)
+
+    mockIsTestE2E.mockReturnValue(false)
   })
 })
