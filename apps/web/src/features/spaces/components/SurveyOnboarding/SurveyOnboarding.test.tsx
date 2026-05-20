@@ -101,6 +101,30 @@ describe('SurveyOnboarding', () => {
     expect(finish).not.toBeDisabled()
   })
 
+  it('deselects a card when clicked a second time', () => {
+    render(<SurveyOnboarding />)
+
+    const card = screen.getByText('Run payments').closest('[role="checkbox"]')!
+    const finish = screen.getByTestId('survey-finish-button')
+
+    fireEvent.click(card)
+    expect(card).toHaveAttribute('aria-checked', 'true')
+    expect(finish).not.toBeDisabled()
+
+    fireEvent.click(card)
+    expect(card).toHaveAttribute('aria-checked', 'false')
+    expect(finish).toBeDisabled()
+  })
+
+  it('renders the loading spinner while the survey state query is in flight', () => {
+    setQueryResult({ isLoading: true })
+
+    render(<SurveyOnboarding />)
+
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument()
+    expect(screen.queryByText('Run payments')).not.toBeInTheDocument()
+  })
+
   it('submits selections nested under the page id and routes to the Space dashboard', async () => {
     render(<SurveyOnboarding />)
 
