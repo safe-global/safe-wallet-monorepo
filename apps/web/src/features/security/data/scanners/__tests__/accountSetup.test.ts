@@ -60,6 +60,43 @@ describe('accountSetupScanner', () => {
     expect(result.severity).toBe('Medium')
   })
 
+  it('returns partial for 2 of 4 (half is not a simple majority)', async () => {
+    const ctx = createMockContext({
+      owners: Array.from({ length: 4 }, (_, i) => ({
+        value: `0x${String(i + 1).padStart(40, '0')}`,
+      })),
+      threshold: 2,
+    })
+    const result = await accountSetupScanner.scan(ctx)
+    expect(result.status).toBe('partial')
+    expect(result.severity).toBe('Medium')
+    expect(result.remediation).toContain('3 of 4')
+  })
+
+  it('returns clear for 3 of 4 (strict majority)', async () => {
+    const ctx = createMockContext({
+      owners: Array.from({ length: 4 }, (_, i) => ({
+        value: `0x${String(i + 1).padStart(40, '0')}`,
+      })),
+      threshold: 3,
+    })
+    const result = await accountSetupScanner.scan(ctx)
+    expect(result.status).toBe('clear')
+    expect(result.severity).toBe('Low')
+  })
+
+  it('recommends 3 of 4 for a 1/4 Safe (strict majority, not half)', async () => {
+    const ctx = createMockContext({
+      owners: Array.from({ length: 4 }, (_, i) => ({
+        value: `0x${String(i + 1).padStart(40, '0')}`,
+      })),
+      threshold: 1,
+    })
+    const result = await accountSetupScanner.scan(ctx)
+    expect(result.status).toBe('issue')
+    expect(result.remediation).toContain('3 of 4')
+  })
+
   it('returns clear for threshold at simple majority', async () => {
     const ctx = createMockContext({ threshold: 2 })
     const result = await accountSetupScanner.scan(ctx)
