@@ -34,11 +34,12 @@ const navItems: NavItems = [
 
 const AccountsNavigation = () => {
   const router = useRouter()
-  // Chain flag is a kill switch: set to true → classic OFF; unset/false/undefined → classic ON.
-  const isClassicEnabled = useHasDefaultChainFeature(FEATURES.DISABLE_CLASSIC_UI) !== true
+  // When the new spaces flow is the default landing (DISABLE_SPACES_LOGIN unset), Accounts
+  // is no longer surfaced from the welcome page — hide the tabs so /welcome/spaces is the
+  // single, unambiguous entry. Show them again in legacy mode where classic is the default.
+  const isLegacyMode = useHasDefaultChainFeature(FEATURES.DISABLE_SPACES_LOGIN) === true
 
-  // Classic killed → only Spaces remains; with one option the tabs widget is noise.
-  if (!isClassicEnabled) return null
+  if (!isLegacyMode) return null
 
   const isActiveNavigation = (pathname: string) => {
     return router.pathname === pathname

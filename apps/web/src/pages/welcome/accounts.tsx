@@ -16,20 +16,20 @@ const Accounts: NextPage = () => {
   const { MyAccounts, MyAccountsV2 } = useLoadFeature(MyAccountsFeature)
   const { isLoading } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
   const isRedesignEnabled = useHasFeature(FEATURES.WELCOME_ACCOUNTS_REDESIGN)
-  // Chain flag is a kill switch: set to true → classic OFF; unset/false/undefined → classic ON.
-  const isClassicEnabled = useHasDefaultChainFeature(FEATURES.DISABLE_CLASSIC_UI) !== true
+  // Default landing is /welcome/spaces while the new flow is on (DISABLE_SPACES_LOGIN unset),
+  // so /welcome/accounts redirects there. Only stay here in legacy mode.
+  const isLegacyMode = useHasDefaultChainFeature(FEATURES.DISABLE_SPACES_LOGIN) === true
 
-  // When classic UI is killed, /welcome/accounts no longer has a place — push to /welcome/spaces.
   useEffect(() => {
-    if (!isClassicEnabled) {
+    if (!isLegacyMode) {
       router.replace(AppRoutes.welcome.spaces)
     }
-  }, [isClassicEnabled, router])
+  }, [isLegacyMode, router])
 
   const isFlagResolved = !isLoading && isRedesignEnabled !== undefined
 
   const renderAccounts = () => {
-    if (!isFlagResolved || !isClassicEnabled) {
+    if (!isFlagResolved || !isLegacyMode) {
       return (
         <div className="flex w-full justify-center py-16">
           <Spinner className="text-muted-foreground size-6" />
