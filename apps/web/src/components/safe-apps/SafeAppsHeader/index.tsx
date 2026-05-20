@@ -4,7 +4,7 @@ import type { ReactElement } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 
 import NavTabs from '@/components/common/NavTabs'
-import { safeAppsNavItems } from '@/components/sidebar/SidebarNavigation/config'
+import { safeAppsNavItems } from '@/config/navigation'
 import css from './styles.module.css'
 
 const SafeAppsHeader = (): ReactElement => {
