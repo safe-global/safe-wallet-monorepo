@@ -27,6 +27,10 @@ describe('sanitizeNextUrl', () => {
     expect(sanitizeNextUrl('')).toBeNull()
     expect(sanitizeNextUrl('foo')).toBeNull()
   })
+
+  it('rejects bare "/" since it just redirects to /welcome/spaces', () => {
+    expect(sanitizeNextUrl('/')).toBeNull()
+  })
 })
 
 describe('buildCurrentNextUrl', () => {
