@@ -34,24 +34,12 @@ runs:
         echo "TURBO_TEAM=${{ inputs.turbo-team }}" >> "$GITHUB_ENV"
         echo "TURBO_REMOTE_ONLY=false" >> "$GITHUB_ENV"
 
-    - name: Restore Yarn Cache
-      id: restore-yarn-types
-      uses: ./.github/actions/cache-deps
+    - name: Cache Yarn install-state
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
-        mode: restore-yarn
-
-    - name: Echo cache hit
-      shell: bash
-      run: |
-        echo "Yarn cache hit: ${{ steps.restore-yarn-types.outputs.cache-hit-yarn }}"
+        path: ${{ github.workspace }}/.yarn/install-state.gz
+        key: ${{ runner.os }}-yarn-install-state-${{ hashFiles('**/yarn.lock') }}
 
     - name: Yarn install
       shell: bash
       run: yarn install --immutable ${{ inputs.verify_cache == 'true' && '--check-cache' || '' }}
-
-    - name: Save Yarn Cache
-      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true' && github.event_name != 'workflow_run' && github.event_name != 'pull_request_target'
-      uses: ./.github/actions/cache-deps
-      with:
-        mode: save-yarn
-        key: ${{ steps.restore-yarn-types.outputs.computed-cache-key-yarn }}
