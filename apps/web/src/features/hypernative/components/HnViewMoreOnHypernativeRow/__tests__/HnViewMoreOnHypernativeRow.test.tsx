@@ -16,7 +16,8 @@ describe('HnViewMoreOnHypernativeRow', () => {
 
   it('renders the overflow count and CTA text', () => {
     render(<HnViewMoreOnHypernativeRow overflowCount={2} assessmentUrl="https://hn.example/report" />)
-    expect(screen.getByText(/\+2 More issues found/)).toBeInTheDocument()
+    expect(screen.getByText('+2')).toBeInTheDocument()
+    expect(screen.getByText('More issues found')).toBeInTheDocument()
     expect(screen.getByText('View full report on Hypernative')).toBeInTheDocument()
   })
 

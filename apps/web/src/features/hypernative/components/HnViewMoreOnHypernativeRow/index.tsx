@@ -1,11 +1,8 @@
 import type { ReactElement } from 'react'
-import { Box, Link, Stack, Typography } from '@mui/material'
+import { Alert, Box, Link, Stack, Typography } from '@mui/material'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
-import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
 import { trackEvent } from '@/services/analytics'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
-import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
 type HnViewMoreOnHypernativeRowProps = {
   overflowCount: number
@@ -32,27 +29,42 @@ export const HnViewMoreOnHypernativeRow = ({
       onClick={() => trackEvent(HYPERNATIVE_EVENTS.HYPERNATIVE_FULL_REPORT_CLICKED)}
       sx={{ display: 'block', color: 'text.primary' }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1.5,
-          padding: '12px',
-          borderRadius: '4px',
-          bgcolor: SEVERITY_COLORS[Severity.WARN].background,
-        }}
+      <Alert
+        severity="warning"
+        sx={{ py: 0, px: 1 }}
+        icon={
+          <Box p={0}>
+            <Box
+              sx={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                px: 0.75,
+                py: 0.25,
+                borderRadius: 2,
+                bgcolor: 'warning.light',
+                color: 'warning.dark',
+                fontSize: 12,
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              +{overflowCount}
+            </Box>
+          </Box>
+        }
+        action={
+          <Box pr={1} pt={1}>
+            <ChevronRightIcon fontSize="small" sx={{ color: 'text.secondary', alignSelf: 'center' }} />
+          </Box>
+        }
       >
-        <WarningAmberRoundedIcon sx={{ color: SEVERITY_COLORS[Severity.WARN].main }} />
-        <Stack flex={1} gap={0}>
-          <Typography variant="body2" fontWeight={600}>
-            +{overflowCount} More issues found
-          </Typography>
+        <Stack gap={0} p={0}>
+          <Typography variant="body2">More issues found</Typography>
           <Typography variant="caption" color="text.secondary">
             View full report on Hypernative
           </Typography>
         </Stack>
-        <ChevronRightIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-      </Box>
+      </Alert>
     </Link>
   )
 }
