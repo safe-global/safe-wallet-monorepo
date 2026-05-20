@@ -1,9 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import WorkspaceHealthCard from '../components/WorkspaceHealthCard/WorkspaceHealthCard'
+import { scanKey } from '@/features/security/data/scanners/utils'
 import type { ScanResult } from '@/features/security/types'
 import type { SpaceSafeEntry } from '../types'
-
-const scanKey = (address: string, chainId: string) => `${address}:${chainId}`
 
 jest.mock('@/features/__core__', () => {
   const securityFeatureImpl = require('@/features/security/feature').default

@@ -13,10 +13,11 @@ export const accountSetupScanner: SecurityScanner = {
       // for a real Safe). Return inconclusive so a transient missing-data state during
       // scan doesn't penalize the score or flag the Safe with a "weak threshold" entry
       // that flips on rescan once `safeInfo.owners` populates.
+      const score = 50
       return {
         status: 'inconclusive',
-        severity: 'Low',
-        score: 50,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: ['Signer data not yet available'],
         remediation: 'Signer information will load shortly.',
         lastChecked: now,

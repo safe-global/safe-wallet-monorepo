@@ -1,7 +1,7 @@
 import { getProxyFactoryDeployments } from '@safe-global/safe-deployments'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import type { SecurityScanner } from './types'
-import { KNOWN_SAFE_VERSIONS } from './constants'
+import { KNOWN_SAFE_VERSIONS, getSeverityFromScore } from './constants'
 
 const isKnownFactory = (address: string, chainId: string): boolean =>
   hasMatchingDeployment(getProxyFactoryDeployments, address, chainId, KNOWN_SAFE_VERSIONS)
@@ -17,10 +17,11 @@ export const factoryValidationScanner: SecurityScanner = {
       // factory". Return `inconclusive` so we don't penalize the score or label the Safe
       // as deployed from an unrecognized source: we genuinely don't know yet, and the
       // user shouldn't see the result flip between scans once creationTx resolves.
+      const score = 50
       return {
         status: 'inconclusive',
-        severity: 'Low',
-        score: 50,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [{ label: 'Status', value: 'Creation data not yet available' }],
         remediation: 'Deployment origin will be verified once creation data loads.',
         lastChecked: now,
@@ -28,10 +29,11 @@ export const factoryValidationScanner: SecurityScanner = {
     }
 
     if (!creationInfo.factoryAddress) {
+      const score = 60
       return {
         status: 'partial',
-        severity: 'Medium',
-        score: 60,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [{ label: 'Status', value: 'No factory address recorded' }],
         remediation:
           'The deployment factory could not be determined. This may indicate a non-standard deployment method.',
@@ -40,10 +42,11 @@ export const factoryValidationScanner: SecurityScanner = {
     }
 
     if (isKnownFactory(creationInfo.factoryAddress, chainId)) {
+      const score = 100
       return {
         status: 'clear',
-        severity: 'Low',
-        score: 100,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [
           { label: 'Factory', value: `${creationInfo.factoryAddress.slice(0, 10)}...` },
           { label: 'Status', value: 'Official Safe factory' },
@@ -53,10 +56,11 @@ export const factoryValidationScanner: SecurityScanner = {
       }
     }
 
+    const score = 60
     return {
       status: 'partial',
-      severity: 'Medium',
-      score: 60,
+      severity: getSeverityFromScore(score),
+      score,
       evidence: [
         { label: 'Factory', value: `${creationInfo.factoryAddress.slice(0, 10)}...` },
         { label: 'Status', value: 'Unrecognized factory' },
