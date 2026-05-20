@@ -57,6 +57,15 @@ const guardRules: GuardRule[] = [
     action: () => allow(),
   },
 
+  // The gate flag is read from chains config (which is loaded async). Until we
+  // know whether the gate is on we must NOT fall through to the legacy rules —
+  // doing so would, e.g., redirect a logged-out deep link to /welcome and drop
+  // the `next` round-trip. Stay put until the value resolves.
+  {
+    match: ({ isRequireLoginEnabled }) => isRequireLoginEnabled === undefined,
+    action: () => allow(),
+  },
+
   // ---------------------------------------------------------------------
   // "Must log in to Spaces" gate — only when the feature is enabled
   // ---------------------------------------------------------------------
@@ -66,7 +75,7 @@ const guardRules: GuardRule[] = [
   // is the canonical Spaces list for signed-in users.
   {
     match: ({ isRequireLoginEnabled, isWelcomeSpacesPath, isSiweAuthenticated, hasSpaces, query }) =>
-      isRequireLoginEnabled &&
+      isRequireLoginEnabled === true &&
       isWelcomeSpacesPath &&
       isSiweAuthenticated &&
       hasSpaces &&
@@ -79,7 +88,11 @@ const guardRules: GuardRule[] = [
   // safe= is left out of the onboarding URL itself because it lives inside next=.
   {
     match: ({ isRequireLoginEnabled, isSiweAuthenticated, hasSpaces, isOnboardingRoute, pathname }) =>
-      isRequireLoginEnabled && isSiweAuthenticated && !hasSpaces && !isOnboardingRoute && !isAlwaysPublic(pathname),
+      isRequireLoginEnabled === true &&
+      isSiweAuthenticated &&
+      !hasSpaces &&
+      !isOnboardingRoute &&
+      !isAlwaysPublic(pathname),
     action: ({ query, currentUrl }) => {
       let target = AppRoutes.welcome.createSpace
       const fallbackNext =
@@ -96,12 +109,15 @@ const guardRules: GuardRule[] = [
   // We deliberately do NOT preserve safe= on the redirect target itself, since
   // it's already embedded inside `next` (e.g. next=/balances?safe=…) and a
   // top-level safe= would just be redundant noise on the login URL.
+  //
+  // Onboarding routes count as protected too: a logged-out user landing on
+  // /welcome/create-space should round-trip through /welcome/spaces and only
+  // hit onboarding once authenticated.
   {
-    match: ({ isRequireLoginEnabled, isSiweAuthenticated, isWelcomeSpacesPath, isOnboardingRoute, pathname }) => {
-      if (!isRequireLoginEnabled) return false
+    match: ({ isRequireLoginEnabled, isSiweAuthenticated, isWelcomeSpacesPath, pathname }) => {
+      if (isRequireLoginEnabled !== true) return false
       if (isSiweAuthenticated) return false
       if (isWelcomeSpacesPath) return false
-      if (isOnboardingRoute) return false
       return !isAlwaysPublic(pathname)
     },
     action: ({ query, currentUrl }) => {
@@ -183,7 +199,7 @@ export const useFlowActivationGuard: UseGuard = () => {
   const isWalletReady = (walletContext?.isReady ?? false) && isStoreHydrated
   const isSiweAuthenticated = useAppSelector(isAuthenticated)
   const isSpaceRoute = useIsSpaceRoute()
-  const isRequireLoginEnabled = useIsRequireLoginEnabled() ?? false
+  const isRequireLoginEnabled = useIsRequireLoginEnabled()
 
   const [fetchSpaces] = useLazySpacesGetV1Query()
 

@@ -42,7 +42,7 @@ interface SetupOptions {
   isStoreHydrated?: boolean
   spaces?: Array<{ id: number; name: string }> | undefined
   isSpaceRoute?: boolean
-  isRequireLoginEnabled?: boolean
+  isRequireLoginEnabled?: boolean | undefined
 }
 
 const defaultSpaces = [
@@ -718,6 +718,35 @@ describe('useFlowActivationGuard', () => {
 
       expect(guardResult.success).toBe(false)
       expect(guardResult.redirectTo).toBe(`${AppRoutes.welcome.spaces}?next=${encodeURIComponent(AppRoutes.home)}`)
+    })
+
+    it('does not run legacy redirects while the gate flag is still loading (undefined)', async () => {
+      setupMocks({
+        pathname: '/home',
+        isAuthenticated: false,
+        isRequireLoginEnabled: undefined,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
+    })
+
+    it('redirects an unauthenticated user on an onboarding route to /welcome/spaces (not /welcome)', async () => {
+      setupMocks({
+        pathname: AppRoutes.welcome.createSpace,
+        isAuthenticated: false,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.spaces}?next=${encodeURIComponent(AppRoutes.welcome.createSpace)}`,
+      })
     })
 
     it('still waits for the store to hydrate before deciding', async () => {

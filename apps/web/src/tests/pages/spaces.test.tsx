@@ -22,10 +22,18 @@ jest.mock('@/features/spaces', () => ({
 
 const SpaceDashboardPageMock = ({ spaceId }: { spaceId: string }) => <div data-testid="dash">space {spaceId}</div>
 
-const setup = ({ isReady = true, spaceId }: { isReady?: boolean; spaceId?: string }) => {
+const setup = ({
+  isReady = true,
+  spaceId,
+  query,
+}: {
+  isReady?: boolean
+  spaceId?: string
+  query?: Record<string, string>
+}) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({
     isReady,
-    query: spaceId ? { spaceId } : {},
+    query: query ?? (spaceId ? { spaceId } : {}),
     replace: mockReplace,
   })
   ;(featureModule.useLoadFeature as jest.Mock).mockReturnValue({ SpaceDashboardPage: SpaceDashboardPageMock })
@@ -37,12 +45,12 @@ describe('SpacePage (/spaces)', () => {
     jest.clearAllMocks()
   })
 
-  it('redirects to /welcome/spaces when there is no spaceId', async () => {
+  it('redirects to /welcome/spaces when there is no spaceId, preserving query params', async () => {
     setup({ spaceId: undefined })
 
     render(<SpacePage />)
 
-    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith(AppRoutes.welcome.spaces))
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.spaces, query: {} }))
   })
 
   it('renders the space dashboard when spaceId is present', async () => {
@@ -52,6 +60,19 @@ describe('SpacePage (/spaces)', () => {
 
     expect(await findByTestId('dash')).toHaveTextContent('space 7')
     expect(mockReplace).not.toHaveBeenCalled()
+  })
+
+  it('forwards safe/chain query params when redirecting', async () => {
+    setup({ query: { safe: 'eth:0xabc', chain: 'eth' } })
+
+    render(<SpacePage />)
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: AppRoutes.welcome.spaces,
+        query: { safe: 'eth:0xabc', chain: 'eth' },
+      }),
+    )
   })
 
   it('does not redirect before the router is ready', () => {
