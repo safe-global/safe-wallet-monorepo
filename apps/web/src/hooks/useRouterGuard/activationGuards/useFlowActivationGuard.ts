@@ -55,9 +55,11 @@ const appendSafeParam = (target: string, safe: string | undefined): string => {
 }
 
 const guardRules: GuardRule[] = [
-  // Wallet provider not ready — keep current page visible
+  // Store not hydrated — we can't trust isSiweAuthenticated yet, keep page visible.
+  // (We deliberately do NOT wait for full wallet readiness here: that meant the
+  // page would render briefly on /home etc. before the auth check fired.)
   {
-    match: ({ isWalletReady }) => !isWalletReady,
+    match: ({ isStoreHydrated }) => !isStoreHydrated,
     action: () => allow(),
   },
 
@@ -222,6 +224,7 @@ export const useFlowActivationGuard: UseGuard = () => {
         isOnboardingRoute,
         isSpacesPath,
         isWelcomeSpacesPath,
+        isStoreHydrated,
         isWalletReady,
         isSiweAuthenticated,
         hasSpaces,
