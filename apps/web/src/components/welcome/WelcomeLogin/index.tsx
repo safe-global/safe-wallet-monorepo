@@ -7,14 +7,20 @@ import Track from '@/components/common/Track'
 import WalletLogin from './WalletLogin'
 import { useHomeAuth } from './hooks/useHomeAuth'
 import { useRouter } from 'next/router'
+import { useHasDefaultChainFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const WelcomeLogin = () => {
   const wallet = useWallet()
   const router = useRouter()
+  // Same kill switch as `pages/index.tsx`: when the new flow is active the wallet-connect
+  // handoff lands on /welcome/spaces; in legacy mode we keep routing to /welcome/accounts.
+  const isNewFlowActive = useHasDefaultChainFeature(FEATURES.DISABLE_SPACES_LOGIN) !== true
 
   const { performAuth, loading } = useHomeAuth({
     onSuccess: () => {
-      router.push({ pathname: AppRoutes.welcome.accounts, query: { ...router.query } })
+      const pathname = isNewFlowActive ? AppRoutes.welcome.spaces : AppRoutes.welcome.accounts
+      router.push({ pathname, query: { ...router.query } })
     },
     skipSiwe: true,
   })
