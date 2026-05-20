@@ -14,6 +14,8 @@ import { useSidebarHydrated } from '../hooks/useSidebarHydrated'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
 import { SidebarSkeleton } from '../SidebarSkeleton'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 interface SpacesEnhancedSidebarProps {
   /** When true (e.g. parent drawer is open on small screens), the mobile Sheet is open. */
@@ -42,6 +44,7 @@ export const SpacesEnhancedSidebar = ({
   isContainedInDrawer = false,
 }: SpacesEnhancedSidebarProps = {}): ReactElement => {
   const isHydrated = useSidebarHydrated()
+  const isDarkMode = useDarkMode()
   const spacesSidebarWidth = 'min(230px, 100%)'
 
   return (
@@ -50,7 +53,7 @@ export const SpacesEnhancedSidebar = ({
       openMobile={isDrawerOpen}
       onOpenMobileChange={(open) => !open && onDrawerClose?.()}
       style={{ '--sidebar-width': spacesSidebarWidth } as CSSProperties}
-      className={isContainedInDrawer ? 'h-dvh' : undefined}
+      className={cn('shadcn-scope', isDarkMode && 'dark', isContainedInDrawer && 'h-dvh')}
     >
       <SidebarStateReporter onOpenChange={onOpenChange} />
       {isHydrated ? (

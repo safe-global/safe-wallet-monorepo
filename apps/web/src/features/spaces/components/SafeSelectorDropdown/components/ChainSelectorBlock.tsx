@@ -54,6 +54,7 @@ function ChainSelectorBlock({
     <DropdownMenu open={open} onOpenChange={handleOpenChange} modal={false}>
       <DropdownMenuTrigger
         disabled={disabled}
+        nativeButton={false}
         render={
           <span
             role="button"
