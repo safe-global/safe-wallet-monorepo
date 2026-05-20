@@ -3,8 +3,8 @@ import { Box, Drawer, IconButton } from '@mui/material'
 import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRightRounded'
 import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeftRounded'
 
-import Sidebar from '@/components/sidebar/Sidebar'
-import Header from '@/components/common/Header'
+import { EnhancedSidebar } from '@/components/common/Sidebar'
+import Topbar from '@/components/common/Header/Topbar'
 
 /** Sidebar width matching the real app (230px) */
 const SIDEBAR_WIDTH = 230
@@ -78,7 +78,7 @@ export const LayoutDecorator = ({ children, showSidebar = true, showHeader = tru
             }}
           >
             <aside>
-              <Sidebar />
+              <EnhancedSidebar type="safe" />
             </aside>
           </Drawer>
 
@@ -132,7 +132,7 @@ export const LayoutDecorator = ({ children, showSidebar = true, showHeader = tru
               zIndex: 1100,
             }}
           >
-            <Header onMenuToggle={showSidebar ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
+            <Topbar onMenuToggle={showSidebar ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
           </Box>
         )}
 
