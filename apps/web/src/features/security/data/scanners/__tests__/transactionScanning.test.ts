@@ -12,7 +12,7 @@ describe('transactionScanningScanner', () => {
   it('returns not_applicable when chain does not support transaction scanning', async () => {
     const result = await transactionScanningScanner.scan(createMockContext({ chainSupportsTransactionScanning: false }))
     expect(result.status).toBe('not_applicable')
-    expect(result.severity).toBe('Medium')
+    expect(result.severity).toBe('Low')
     expect(result.score).toBe(70)
   })
 

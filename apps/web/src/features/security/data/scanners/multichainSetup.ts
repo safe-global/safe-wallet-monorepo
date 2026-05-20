@@ -11,7 +11,7 @@ export const multichainSetupScanner: SecurityScanner = {
       const score = 100
       return {
         status: 'not_applicable',
-        severity: getSeverityFromScore(score),
+        severity: getSeverityFromScore(score, { excluded: true }),
         score,
         evidence: [{ label: 'Result', value: 'Deployed on a single network' }],
         remediation: '',

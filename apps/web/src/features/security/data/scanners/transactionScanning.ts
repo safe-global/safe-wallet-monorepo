@@ -22,7 +22,7 @@ export const transactionScanningScanner: SecurityScanner = {
     const score = 70
     return {
       status: 'not_applicable',
-      severity: getSeverityFromScore(score),
+      severity: getSeverityFromScore(score, { excluded: true }),
       score,
       evidence: [{ label: 'Status', value: 'Transaction scanning not available on this network' }],
       remediation: '',

@@ -20,7 +20,7 @@ export const factoryValidationScanner: SecurityScanner = {
       const score = 50
       return {
         status: 'inconclusive',
-        severity: getSeverityFromScore(score),
+        severity: getSeverityFromScore(score, { excluded: true }),
         score,
         evidence: [{ label: 'Status', value: 'Creation data not yet available' }],
         remediation: 'Deployment origin will be verified once creation data loads.',

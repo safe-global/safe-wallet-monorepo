@@ -23,7 +23,7 @@ export const signerIntegrityScanner: SecurityScanner = {
     const score = 50
     return {
       status: 'inconclusive',
-      severity: getSeverityFromScore(score),
+      severity: getSeverityFromScore(score, { excluded: true }),
       score,
       evidence: [
         { label: 'Status', value: 'Signer screening not yet available' },

@@ -16,7 +16,7 @@ export const accountSetupScanner: SecurityScanner = {
       const score = 50
       return {
         status: 'inconclusive',
-        severity: getSeverityFromScore(score),
+        severity: getSeverityFromScore(score, { excluded: true }),
         score,
         evidence: ['Signer data not yet available'],
         remediation: 'Signer information will load shortly.',

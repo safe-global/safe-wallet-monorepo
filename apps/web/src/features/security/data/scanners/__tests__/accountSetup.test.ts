@@ -80,6 +80,6 @@ describe('accountSetupScanner', () => {
     const ctx = createMockContext({ owners: [] })
     const result = await accountSetupScanner.scan(ctx)
     expect(result.status).toBe('inconclusive')
-    expect(result.severity).toBe('Medium')
+    expect(result.severity).toBe('Low')
   })
 })

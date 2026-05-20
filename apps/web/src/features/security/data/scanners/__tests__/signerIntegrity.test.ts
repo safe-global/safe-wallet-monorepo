@@ -10,7 +10,7 @@ describe('signerIntegrityScanner', () => {
     ]
     const result = await signerIntegrityScanner.scan(createMockContext({ owners }))
     expect(result.status).toBe('inconclusive')
-    expect(result.severity).toBe('Medium')
+    expect(result.severity).toBe('Low')
     expect(result.score).toBe(50)
     expect(result.evidence).toEqual(expect.arrayContaining([expect.objectContaining({ label: 'Signers', value: '3' })]))
   })
