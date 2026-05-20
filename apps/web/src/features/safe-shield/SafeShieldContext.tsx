@@ -148,7 +148,13 @@ export const useSafeShieldForTxData = (txData: SafeTransaction | undefined) => {
   const lastDataKeyRef = useRef<string | undefined>(undefined)
 
   useEffect(() => {
-    if (!txData) return
+    if (!txData) {
+      if (lastDataKeyRef.current !== undefined) {
+        lastDataKeyRef.current = undefined
+        setSafeTx(undefined)
+      }
+      return
+    }
     const key = JSON.stringify(txData.data)
     if (key === lastDataKeyRef.current) return
     lastDataKeyRef.current = key
