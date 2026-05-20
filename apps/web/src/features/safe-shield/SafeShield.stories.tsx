@@ -331,31 +331,6 @@ export const HypernativeMaliciousThreat: Story = {
   },
 }
 
-// Two THREAT and two CUSTOM_CHECKS findings, all at the same severity — under the top-3 cap.
-export const MultipleFindingsSameSeverity: Story = {
-  args: {
-    ...FullAnalysisBuilder.empty()
-      .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
-      .threat(ThreatAnalysisBuilder.multipleFindingsSameSeverity())
-      .build(),
-    hypernativeAuth: {
-      isAuthenticated: true,
-      isTokenExpired: false,
-      initiateLogin: () => {},
-      logout: () => {},
-    },
-  },
-  tags: ['!chromatic'],
-  parameters: {
-    docs: {
-      description: {
-        story:
-          'WA-2333 reproduction: two threat findings and two custom check findings, all at the same severity. Verifies that the Custom Checks card renders alongside Threat Analysis and that all findings in each group are listed.',
-      },
-    },
-  },
-}
-
 // Top-3 cap + overflow row: 5 THREAT + 4 CUSTOM_CHECKS findings.
 // useSafeShieldAssessmentUrl reads from SafeTxContext + safeInfoSlice to compute
 // the Hypernative URL, so the decorator below seeds both.

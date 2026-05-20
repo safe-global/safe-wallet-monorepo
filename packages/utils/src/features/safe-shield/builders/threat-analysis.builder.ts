@@ -1,5 +1,5 @@
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { type ThreatAnalysisResults, type ThreatAnalysisResult, Severity } from '../types'
+import type { ThreatAnalysisResults, ThreatAnalysisResult } from '../types'
 import { ThreatAnalysisResultBuilder } from './threat-analysis-result.builder'
 
 export class ThreatAnalysisBuilder {
@@ -150,50 +150,6 @@ export class ThreatAnalysisBuilder {
         ThreatAnalysisResultBuilder.customCheckFailed()
           .title('Custom check 4 failed')
           .description('Fourth custom check failed.')
-          .build(),
-      )
-      .build()
-  }
-
-  /**
-   * Repro fixture for WA-2333: two THREAT findings and two CUSTOM_CHECKS findings,
-   * all WARN severity, with distinct titles so duplicates are visible if rendered.
-   */
-  static multipleFindingsSameSeverity() {
-    return new ThreatAnalysisBuilder()
-      .createThreat(
-        ThreatAnalysisResultBuilder.moderate()
-          .title('Moderate threat A')
-          .issues({
-            [Severity.WARN]: [
-              {
-                description: 'Moderate threat A. Review before processing.',
-              },
-            ],
-            [Severity.CRITICAL]: [
-              {
-                description: 'Critical issue.',
-              },
-            ],
-            [Severity.INFO]: [
-              {
-                description: 'Informational issue.',
-              },
-            ],
-          })
-          .build(),
-      )
-      .addThreat(ThreatAnalysisResultBuilder.moderate().title('Moderate threat B').build())
-      .createCustomCheck(
-        ThreatAnalysisResultBuilder.customCheckFailed()
-          .title('Custom check A failed')
-          .description('First custom check failed. Review before processing.')
-          .build(),
-      )
-      .addCustomCheck(
-        ThreatAnalysisResultBuilder.customCheckFailed()
-          .title('Custom check B failed')
-          .description('Second custom check failed. Review before processing.')
           .build(),
       )
       .build()
