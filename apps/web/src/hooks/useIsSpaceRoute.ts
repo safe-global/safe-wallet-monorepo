@@ -9,6 +9,7 @@ const SPACES_ROUTES = [
   AppRoutes.spaces.members,
   AppRoutes.spaces.safeAccounts,
   AppRoutes.spaces.addressBook,
+  AppRoutes.spaces.security,
 ]
 
 export const useIsSpaceRoute = (): boolean => {

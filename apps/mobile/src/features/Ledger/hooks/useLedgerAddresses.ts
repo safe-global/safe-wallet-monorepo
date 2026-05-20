@@ -5,7 +5,7 @@ import { ledgerEthereumService } from '@/src/services/ledger/ledger-ethereum.ser
 import logger from '@/src/utils/logger'
 import { useAddresses, type BaseAddress } from '@/src/hooks/useAddresses'
 
-export type DerivationPathType = 'ledger-live' | 'legacy-ledger'
+export type DerivationPathType = 'ledger-live' | 'legacy-ledger' | 'bip44'
 
 interface UseLedgerAddressesParams {
   sessionId?: string

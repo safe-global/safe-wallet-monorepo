@@ -1,0 +1,88 @@
+# Publish half of a two-workflow pair. This workflow has write tokens and
+# secrets available, so it must only check out the default branch and only
+# consume the named artifact produced by the build half (validated below).
+# It must not run scripts or local composite actions from a workspace
+# populated by a head-ref checkout.
+# Companion build workflow: page-screenshots-build.yml.
+name: Page Screenshots Publish
+
+on:
+  workflow_run:
+    workflows: ['Page Screenshots Build']
+    types:
+      - completed
+
+permissions: {}
+
+# Serialize publish runs targeting the same PR so two rapid pushes don't race
+# at the comment / storage-branch layer. `cancel-in-progress: false` lets the
+# earlier run finish posting its comment before the newer one supersedes it.
+concurrency:
+  group: page-screenshots-publish-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      actions: read
+    steps:
+      # Check out the default branch only. The workspace must not contain
+      # head-branch contents — the validated artifact is the only thing
+      # this workflow consumes from the build half.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+        with:
+          ref: dev
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Resolve, download, and validate artifact
+        id: artifact
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        with:
+          # Loaded from the `dev` checkout above. See script header for details.
+          script: |
+            const script = require('./.github/scripts/publish/download-artifact.js')
+            await script({ github, context, core })
+
+      - name: Resolve PR number
+        id: pr
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        with:
+          script: |
+            const script = require('./.github/scripts/publish/resolve-pr.js')
+            await script({ github, context, core })
+
+      - name: Upload screenshots to storage branch
+        if: steps.artifact.outputs.found == 'true' && steps.pr.outputs.skip == 'false'
+        # Local composite action resolved from the `dev` checkout above.
+        uses: ./.github/actions/upload-to-storage-branch
+        with:
+          storage_branch: pr-${{ steps.pr.outputs.number }}-screenshots
+          source_dir: page-screenshots
+          target_dir: page-screenshots/${{ steps.pr.outputs.number }}
+          file_pattern: '*.png'
+          commit_message: 'Add page screenshots for PR ${{ steps.pr.outputs.number }}'
+          readme_title: 'Page Screenshots Storage'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post, update, or delete PR comment
+        if: steps.pr.outputs.skip == 'false'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          STALE: ${{ steps.pr.outputs.stale }}
+          FOUND: ${{ steps.artifact.outputs.found }}
+        with:
+          script: |
+            const script = require('./.github/scripts/publish/post-comment.js')
+            await script({ github, context, core })
