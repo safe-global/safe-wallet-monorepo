@@ -21,6 +21,7 @@ import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/
 import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -33,7 +34,6 @@ const STATIC_PAGE_ROUTES = [AppRoutes.terms, AppRoutes.privacy, AppRoutes.licens
 const NO_HEADER_ROUTES = [
   AppRoutes.safeLabsTerms,
   AppRoutes.welcome.index,
-  AppRoutes.welcome.spaces,
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
@@ -51,7 +51,13 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const { SelectSafeModal } = useLoadFeature(SpacesFeature)
   const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
-  const hideHeader = NO_HEADER_ROUTES.includes(pathname)
+  const isRequireLoginEnabled = useIsRequireLoginEnabled() === true
+  // /welcome/spaces is the canonical login page when the require-login gate is
+  // on (and the Topbar's URL-derived hooks then add SSR hydration noise on top
+  // of being pointless). When the gate is off the page is the legacy Spaces
+  // list and keeps its Topbar.
+  const hideHeader =
+    NO_HEADER_ROUTES.includes(pathname) || (isRequireLoginEnabled && pathname === AppRoutes.welcome.spaces)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
   const urlSafeAddress = useSafeAddressFromUrl()

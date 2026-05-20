@@ -71,6 +71,10 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
 }))
 
+jest.mock('@/hooks/useIsRequireLoginEnabled', () => ({
+  useIsRequireLoginEnabled: jest.fn(() => false),
+}))
+
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(() => ({
     BatchSidebar: () => null,
@@ -128,6 +132,34 @@ describe('PageLayout', () => {
         expect(screen.getByTestId('topbar')).toBeInTheDocument()
       },
     )
+  })
+
+  describe('/welcome/spaces topbar gating', () => {
+    const useIsRequireLoginEnabledModule = jest.requireMock('@/hooks/useIsRequireLoginEnabled') as {
+      useIsRequireLoginEnabled: jest.Mock
+    }
+
+    afterEach(() => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+    })
+
+    it('renders Topbar on /welcome/spaces when the gate is OFF', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
+
+    it('hides Topbar on /welcome/spaces when the gate is ON', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(true)
+      renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+    })
+
+    it('still shows Topbar while the flag is loading (undefined)', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
+      renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
   })
 
   describe('settings route padding-top', () => {
