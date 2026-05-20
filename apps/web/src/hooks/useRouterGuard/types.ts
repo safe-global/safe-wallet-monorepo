@@ -25,7 +25,7 @@ export interface GuardContext {
   isSiweAuthenticated: boolean
   hasSpaces: boolean
   isPartOfSpaceUrl: boolean
-  isRequireLoginEnabled: boolean
+  isRequireLoginEnabled: boolean | undefined
   currentUrl: string
 }
 

@@ -14,7 +14,9 @@ export default function SpacePage() {
 
   useEffect(() => {
     if (router.isReady && !spaceId) {
-      router.replace(AppRoutes.welcome.spaces)
+      // Preserve any context the user was carrying (e.g. ?safe=, ?chain=, tracking
+      // params); the route guard / login flow will round-trip them through next=.
+      router.replace({ pathname: AppRoutes.welcome.spaces, query: router.query })
     }
   }, [router, spaceId])
 
