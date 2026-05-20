@@ -9,6 +9,8 @@ import { useLazySpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERAT
 import type { GuardRule } from '../types'
 import { allow, evaluateGuard, redirect } from '../utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import { buildCurrentNextUrl, sanitizeNextUrl } from '@/utils/nextUrl'
 
 // ---------------------------------------------------------------------------
 // Route classifications
@@ -20,16 +22,109 @@ const ONBOARDING_ROUTES = [
   AppRoutes.welcome.inviteMembers,
 ]
 
-const guardRules: GuardRule[] = [
-  // Public and welcome routes are always accessible
-  {
-    match: ({ isPublicRoute }) => isPublicRoute,
-    action: () => allow(),
-  },
+// Routes always reachable without authentication when the "must log in"
+// gate is enabled. Anything not on this list (and not an onboarding route or
+// the login page itself) requires a signed-in user with at least one Space.
+const ALWAYS_PUBLIC_ROUTES = [
+  AppRoutes['403'],
+  AppRoutes['404'],
+  AppRoutes._offline,
+  AppRoutes.terms,
+  AppRoutes.privacy,
+  AppRoutes.cookie,
+  AppRoutes.imprint,
+  AppRoutes.licenses,
+  AppRoutes.safeLabsTerms,
+  AppRoutes.hypernative.oauthCallback,
+]
 
+const isAlwaysPublic = (pathname: string): boolean => {
+  return ALWAYS_PUBLIC_ROUTES.includes(pathname) || pathname.startsWith('/share/')
+}
+
+const appendNextParam = (target: string, currentUrl: string): string => {
+  if (!currentUrl) return target
+  const separator = target.includes('?') ? '&' : '?'
+  return `${target}${separator}next=${encodeURIComponent(currentUrl)}`
+}
+
+const appendSafeParam = (target: string, safe: string | undefined): string => {
+  if (!safe) return target
+  const separator = target.includes('?') ? '&' : '?'
+  return `${target}${separator}safe=${encodeURIComponent(safe)}`
+}
+
+const guardRules: GuardRule[] = [
   // Wallet provider not ready — keep current page visible
   {
     match: ({ isWalletReady }) => !isWalletReady,
+    action: () => allow(),
+  },
+
+  // ---------------------------------------------------------------------
+  // "Must log in to Spaces" gate — only when the feature is enabled
+  // ---------------------------------------------------------------------
+
+  // While on the login page, follow ?next= onward once the user is signed in.
+  // If no ?next= is present we allow the page to render — `/welcome/spaces`
+  // is the canonical Spaces list for signed-in users.
+  {
+    match: ({ isRequireLoginEnabled, isWelcomeSpacesPath, isSiweAuthenticated, hasSpaces, query }) =>
+      isRequireLoginEnabled &&
+      isWelcomeSpacesPath &&
+      isSiweAuthenticated &&
+      hasSpaces &&
+      sanitizeNextUrl(query.next) !== null,
+    action: ({ query }) => redirect(sanitizeNextUrl(query.next) as string),
+  },
+
+  // Signed in but no Space yet — send to onboarding (unless they're on a
+  // legal/error/static page, which should remain reachable even without a Space).
+  {
+    match: ({ isRequireLoginEnabled, isSiweAuthenticated, hasSpaces, isOnboardingRoute, pathname }) =>
+      isRequireLoginEnabled && isSiweAuthenticated && !hasSpaces && !isOnboardingRoute && !isAlwaysPublic(pathname),
+    action: ({ query, currentUrl }) => {
+      const safe = typeof query.safe === 'string' ? query.safe : undefined
+      let target = AppRoutes.welcome.createSpace
+      target = appendSafeParam(target, safe)
+      const existingNext = sanitizeNextUrl(query.next)
+      if (existingNext) {
+        target = appendNextParam(target, existingNext)
+      } else if (currentUrl && !currentUrl.startsWith(AppRoutes.welcome.createSpace)) {
+        target = appendNextParam(target, currentUrl)
+      }
+      return redirect(target)
+    },
+  },
+
+  // Not signed in on a protected page — bounce to the login page with ?next=.
+  {
+    match: ({ isRequireLoginEnabled, isSiweAuthenticated, isWelcomeSpacesPath, isOnboardingRoute, pathname }) => {
+      if (!isRequireLoginEnabled) return false
+      if (isSiweAuthenticated) return false
+      if (isWelcomeSpacesPath) return false
+      if (isOnboardingRoute) return false
+      return !isAlwaysPublic(pathname)
+    },
+    action: ({ query, currentUrl }) => {
+      const safe = typeof query.safe === 'string' ? query.safe : undefined
+      let target = AppRoutes.welcome.spaces
+      target = appendSafeParam(target, safe)
+      const existingNext = sanitizeNextUrl(query.next) ?? currentUrl
+      if (existingNext) {
+        target = appendNextParam(target, existingNext)
+      }
+      return redirect(target)
+    },
+  },
+
+  // ---------------------------------------------------------------------
+  // Existing Spaces flow (feature flag OFF — original behaviour)
+  // ---------------------------------------------------------------------
+
+  // Public and welcome routes are always accessible
+  {
+    match: ({ isPublicRoute }) => isPublicRoute,
     action: () => allow(),
   },
 
@@ -92,6 +187,7 @@ export const useFlowActivationGuard: UseGuard = () => {
   const isWalletReady = (walletContext?.isReady ?? false) && isStoreHydrated
   const isSiweAuthenticated = useAppSelector(isAuthenticated)
   const isSpaceRoute = useIsSpaceRoute()
+  const isRequireLoginEnabled = useIsRequireLoginEnabled() ?? false
 
   const [fetchSpaces] = useLazySpacesGetV1Query()
 
@@ -115,6 +211,9 @@ export const useFlowActivationGuard: UseGuard = () => {
 
     const isSpacesPath = pathname.startsWith('/spaces')
     const isOnboardingRoute = ONBOARDING_ROUTES.some((route) => pathname.startsWith(route))
+    const isWelcomeSpacesPath = pathname === AppRoutes.welcome.spaces
+    const currentUrl = buildCurrentNextUrl(pathname, query)
+
     return evaluateGuard(
       {
         pathname,
@@ -122,14 +221,26 @@ export const useFlowActivationGuard: UseGuard = () => {
         isPublicRoute: !isOnboardingRoute && !isSpaceRoute && !isSpacesPath,
         isOnboardingRoute,
         isSpacesPath,
+        isWelcomeSpacesPath,
         isWalletReady,
         isSiweAuthenticated,
         hasSpaces,
         isPartOfSpaceUrl,
+        isRequireLoginEnabled,
+        currentUrl,
       },
       guardRules,
     )
-  }, [pathname, query, isReady, isWalletReady, isSiweAuthenticated, isStoreHydrated, fetchSpaces])
+  }, [
+    pathname,
+    query,
+    isReady,
+    isWalletReady,
+    isSiweAuthenticated,
+    isStoreHydrated,
+    fetchSpaces,
+    isRequireLoginEnabled,
+  ])
 
   return {
     activationGuard,

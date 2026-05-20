@@ -2,6 +2,7 @@ import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import SpaceCard from 'src/features/spaces/components/SpaceCard'
 import SignInOptions from '../SignInOptions'
+import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -102,6 +103,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
+  const isRequireLoginEnabled = useIsRequireLoginEnabled() ?? false
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
@@ -129,7 +131,7 @@ const SpacesList = () => {
     <Box className={css.container}>
       <Box className={css.mySpaces}>
         <Box className={css.spacesHeader}>
-          <AccountsNavigation />
+          {!isRequireLoginEnabled && <AccountsNavigation />}
 
           {isUserSignedIn && activeSpaces.length > 0 && (
             <AddSpaceButton

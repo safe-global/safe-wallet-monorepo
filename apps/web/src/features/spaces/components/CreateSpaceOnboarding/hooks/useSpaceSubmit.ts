@@ -9,6 +9,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
+import { sanitizeNextUrl } from '@/utils/nextUrl'
 import type { UseFormHandleSubmit } from 'react-hook-form'
 
 const useSpaceSubmit = (
@@ -39,7 +40,11 @@ const useSpaceSubmit = (
       }),
     )
 
-    router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId, ...(safe ? { safe } : {}) } })
+    const next = sanitizeNextUrl(router.query.next)
+    router.push({
+      pathname: AppRoutes.welcome.selectSafes,
+      query: { spaceId, ...(safe ? { safe } : {}), ...(next ? { next } : {}) },
+    })
   }
 
   const createSpace = async (name: string) => {
@@ -59,9 +64,10 @@ const useSpaceSubmit = (
         }),
       )
 
+      const next = sanitizeNextUrl(router.query.next)
       router.push({
         pathname: AppRoutes.welcome.selectSafes,
-        query: { spaceId: newSpaceId, ...(safe ? { safe } : {}) },
+        query: { spaceId: newSpaceId, ...(safe ? { safe } : {}), ...(next ? { next } : {}) },
       })
     }
 

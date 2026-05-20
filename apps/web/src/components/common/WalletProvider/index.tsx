@@ -45,6 +45,11 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
   useEffect(() => {
     if (!onboard) return
 
+    // Sync immediately: connectLastWallet may have populated onboard.state
+    // before this subscription runs, in which case the observable would not
+    // re-emit and `wallet` would stay stuck at the initial null.
+    setWallet(getConnectedWallet(onboard.state.get().wallets || []))
+
     const walletSubscription = onboard.state.select('wallets').subscribe((wallets) => {
       const newWallet = getConnectedWallet(wallets)
 

@@ -3,6 +3,11 @@ import { useSignInRedirect } from '../useSignInRedirect'
 import * as router from 'next/router'
 import * as store from '@/store'
 import { AppRoutes } from '@/config/routes'
+import * as useIsRequireLoginEnabledModule from '@/hooks/useIsRequireLoginEnabled'
+
+jest.mock('@/hooks/useIsRequireLoginEnabled', () => ({
+  useIsRequireLoginEnabled: jest.fn(() => false),
+}))
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -266,6 +271,57 @@ describe('useSignInRedirect', () => {
       setupMocks({ isAuthenticated: true, isOidcLoginPending: false })
 
       renderHook(() => useSignInRedirect(defaultProps))
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+  })
+
+  // -----------------------------------------------------------------------
+  // Require-login gate (REQUIRE_LOGIN_DISABLED off → gate ON)
+  // -----------------------------------------------------------------------
+
+  describe('require-login gate enabled', () => {
+    beforeEach(() => {
+      ;(useIsRequireLoginEnabledModule.useIsRequireLoginEnabled as jest.Mock).mockReturnValue(true)
+    })
+
+    afterEach(() => {
+      ;(useIsRequireLoginEnabledModule.useIsRequireLoginEnabled as jest.Mock).mockReturnValue(false)
+    })
+
+    it('redirects an existing user with spaces to ?next= after sign-in', async () => {
+      setupMocks({ routerQuery: { next: '/balances' } })
+
+      const { result } = renderHook(() => useSignInRedirect({ ...defaultProps, spacesAmount: 2 }))
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).toHaveBeenCalledWith('/balances')
+      expect(result.current.redirectLoading).toBe(true)
+    })
+
+    it('does not redirect an existing user when next is missing (stays on /welcome/spaces, which is the Spaces list)', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() => useSignInRedirect({ ...defaultProps, spacesAmount: 2 }))
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+
+    it('does not redirect when next is unsafe (protocol-relative)', async () => {
+      setupMocks({ routerQuery: { next: '//evil.com/owned' } })
+
+      const { result } = renderHook(() => useSignInRedirect({ ...defaultProps, spacesAmount: 2 }))
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
 
       expect(mockPush).not.toHaveBeenCalled()
     })
