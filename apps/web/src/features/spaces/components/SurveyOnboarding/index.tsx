@@ -155,7 +155,7 @@ const SurveyOnboarding = (): ReactElement | null => {
                         toggle(opt.key)
                       }
                     }}
-                    className="cursor-pointer transition-colors"
+                    className="cursor-pointer outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
                     <div className="flex items-start justify-between gap-3 p-4">
                       {Icon && (

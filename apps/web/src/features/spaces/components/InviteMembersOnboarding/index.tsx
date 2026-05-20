@@ -90,7 +90,7 @@ const InviteMembersOnboarding = (): ReactElement => {
               disabled={!formState.isValid || isSubmitting}
               className="w-full"
             >
-              {isSubmitting ? <Spinner /> : 'Finish'}
+              {isSubmitting ? <Spinner /> : 'Continue'}
             </Button>
 
             <Button
