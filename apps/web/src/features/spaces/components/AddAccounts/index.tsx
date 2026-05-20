@@ -403,51 +403,48 @@ const AddAccounts = ({
                     </InputGroup>
                   </div>
 
-                  <div
-                    className="relative min-h-[30dvh] min-w-0 w-full max-h-[25rem] overflow-y-auto overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]"
-                    data-testid="add-accounts-safes-list-scroll-region"
-                  >
-                    {!hasAvailableSafes && !debouncedSearchQuery && !showConnectWalletPrompt ? (
-                      <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                        No safes on your list
-                      </Typography>
-                    ) : trustedSelection.total === 0 &&
-                      ownedSelection.total === 0 &&
-                      debouncedSearchQuery &&
-                      !showConnectWalletPrompt ? (
-                      <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                        No safes match your search
-                      </Typography>
-                    ) : (
-                      <>
-                        {isAtLimit && (
-                          <Typography variant="paragraph" color="muted" className="text-xs pb-1">
-                            Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
-                          </Typography>
-                        )}
-                        <OnboardingSafesList
-                          trustedSafes={visibleTrusted}
-                          ownedSafes={visibleOwned}
-                          similarAddresses={similarAddresses}
-                          trustedSelectAll={{
-                            state: trustedSelection.state,
-                            count: trustedSelection.selectedCount,
-                            total: trustedSelection.total,
-                            onToggle: (check) => handleSelectAll('trusted', check),
-                          }}
-                          ownedSelectAll={{
-                            state: ownedSelection.state,
-                            count: ownedSelection.selectedCount,
-                            total: ownedSelection.total,
-                            onToggle: (check) => handleSelectAll('owned', check),
-                          }}
-                        />
-                      </>
-                    )}
-                  </div>
-
-                  {showConnectWalletPrompt && (
+                  {showConnectWalletPrompt ? (
                     <ConnectWalletPrompt className="shrink-0 py-4" testId="add-accounts-connect-wallet-button" />
+                  ) : (
+                    <div
+                      className="relative min-h-[30dvh] min-w-0 w-full max-h-[25rem] overflow-y-auto overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]"
+                      data-testid="add-accounts-safes-list-scroll-region"
+                    >
+                      {!hasAvailableSafes && !debouncedSearchQuery ? (
+                        <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                          No safes on your list
+                        </Typography>
+                      ) : trustedSelection.total === 0 && ownedSelection.total === 0 && debouncedSearchQuery ? (
+                        <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                          No safes match your search
+                        </Typography>
+                      ) : (
+                        <>
+                          {isAtLimit && (
+                            <Typography variant="paragraph" color="muted" className="text-xs pb-1">
+                              Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
+                            </Typography>
+                          )}
+                          <OnboardingSafesList
+                            trustedSafes={visibleTrusted}
+                            ownedSafes={visibleOwned}
+                            similarAddresses={similarAddresses}
+                            trustedSelectAll={{
+                              state: trustedSelection.state,
+                              count: trustedSelection.selectedCount,
+                              total: trustedSelection.total,
+                              onToggle: (check) => handleSelectAll('trusted', check),
+                            }}
+                            ownedSelectAll={{
+                              state: ownedSelection.state,
+                              count: ownedSelection.selectedCount,
+                              total: ownedSelection.total,
+                              onToggle: (check) => handleSelectAll('owned', check),
+                            }}
+                          />
+                        </>
+                      )}
+                    </div>
                   )}
 
                   {error && (

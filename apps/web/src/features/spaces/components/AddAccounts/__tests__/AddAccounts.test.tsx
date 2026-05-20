@@ -96,16 +96,16 @@ describe('AddAccounts — wallet connection state', () => {
     expect(screen.getByText('Connect your wallet to access all your Safes')).toBeInTheDocument()
   })
 
-  it('renders the safes list above the ConnectWalletPrompt even when wallet is disconnected', () => {
+  it('replaces the safes list with the ConnectWalletPrompt when wallet is disconnected', () => {
     mockWalletValue = null
     render(<AddAccounts externalOpen onExternalClose={() => {}} />)
 
-    // Both should be visible — trusted safes (if any) still render; prompt sits below
-    expect(screen.getByTestId('onboarding-safes-list')).toBeInTheDocument()
+    expect(screen.queryByTestId('add-accounts-safes-list-scroll-region')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('onboarding-safes-list')).not.toBeInTheDocument()
     expect(screen.getByTestId('add-accounts-connect-wallet-button')).toBeInTheDocument()
   })
 
-  it('suppresses the "No safes on your list" empty state when wallet is disconnected', () => {
+  it('does not show the "No safes on your list" empty state when wallet is disconnected', () => {
     mockWalletValue = null
     render(<AddAccounts externalOpen onExternalClose={() => {}} />)
 
