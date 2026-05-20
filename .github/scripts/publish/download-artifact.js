@@ -89,7 +89,7 @@ module.exports = async ({ github, context, core }) => {
   // Storybook: `<componentName>--<storyName>[-ERROR].png`.
   const entries = fs
     .readdirSync(ARTIFACT_DIR, { withFileTypes: true })
-    .filter((e) => e.isFile() && e.name !== '')
+    .filter((e) => e.isFile())
     .map((e) => e.name)
 
   const invalid = entries.filter((f) => !filenameRegex.test(f))

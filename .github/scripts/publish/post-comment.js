@@ -27,6 +27,7 @@ const ARTIFACT_PROFILES = {
     marker: '📸 Page Screenshots',
     dir: 'page-screenshots',
     storageSegment: 'page-screenshots',
+    storageBranchSuffix: 'screenshots',
     filenameRegex: /^([a-z0-9_]+)__(desktop|mobile)\.png$/,
     summary: (count) => `Found ${count} screenshot(s) for pages affected by changes in this PR.`,
     footer: '*Screenshots are automatically captured from pages affected by changed files.*',
@@ -36,6 +37,7 @@ const ARTIFACT_PROFILES = {
     marker: '📸 Storybook Component Screenshots',
     dir: 'web-storybook-screenshots',
     storageSegment: 'web-storybook-screenshots',
+    storageBranchSuffix: 'storybook-screenshots',
     filenameRegex: /^([A-Za-z0-9_-]+)--([A-Za-z0-9_]+)(-ERROR)?\.png$/,
     summary: (count) => `Found ${count} screenshot(s) for Storybook components modified in this PR.`,
     footer: '*Screenshots captured from deployed Storybook preview.*',
@@ -126,8 +128,7 @@ module.exports = async ({ github, context, core }) => {
     .filter((f) => f.endsWith('.png'))
     .sort()
 
-  const storageBranch =
-    artifactType === 'storybook' ? `pr-${prNumber}-storybook-screenshots` : `pr-${prNumber}-screenshots`
+  const storageBranch = `pr-${prNumber}-${profile.storageBranchSuffix}`
   const baseUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${storageBranch}/${profile.storageSegment}/${prNumber}`
   const body = buildBody({ stale, screenshots, baseUrl, profile })
 

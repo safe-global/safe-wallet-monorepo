@@ -67,23 +67,25 @@ jobs:
             exit 0
           fi
 
-          # Get all changed source files in web app
+          # Get all changed source files in web app. The story lookup below
+          # only checks `.tsx?` extensions, which matches the repo (TS-only
+          # stories); keep these two lists in sync.
           ALL_CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
-            | grep -E '^apps/web/src/.*\.(tsx?|jsx?)$' \
+            | grep -E '^apps/web/src/.*\.tsx?$' \
             | grep -v '\.test\.' || true)
 
           STORY_FILES=""
 
           for file in $ALL_CHANGED; do
             # If it's already a story file, include it
-            if [[ "$file" =~ \.(stories|story)\.(tsx?|jsx?)$ ]]; then
+            if [[ "$file" =~ \.(stories|story)\.tsx?$ ]]; then
               STORY_FILES="$STORY_FILES$file"$'\n'
               continue
             fi
 
             # For component files, check if a corresponding story file exists
             dir=$(dirname "$file")
-            base=$(basename "$file" | sed -E 's/\.(tsx?|jsx?)$//')
+            base=$(basename "$file" | sed -E 's/\.tsx?$//')
 
             for ext in stories.tsx story.tsx stories.ts story.ts; do
               story_file="$dir/$base.$ext"
@@ -139,8 +141,9 @@ jobs:
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: web-storybook-screenshots
-          # The capture script writes `story-urls.json` alongside the PNGs;
-          # the artifact only includes the PNGs the publish workflow consumes.
+          # `generate-web-story-urls.js` writes `story-urls.json` into the
+          # same directory; the artifact deliberately uploads PNGs only,
+          # which is all the publish workflow consumes.
           path: web-storybook-screenshots/*.png
           if-no-files-found: ignore
           retention-days: 5
