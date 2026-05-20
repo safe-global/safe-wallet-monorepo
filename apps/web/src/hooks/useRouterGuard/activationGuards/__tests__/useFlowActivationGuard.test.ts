@@ -702,6 +702,36 @@ describe('useFlowActivationGuard', () => {
       expect(guardResult).toEqual({ success: true })
     })
 
+    it('redirects unauthenticated users even when the wallet system is not ready yet', async () => {
+      setupMocks({
+        pathname: '/home',
+        walletContext: { isReady: false },
+        wallet: null,
+        isAuthenticated: false,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult.success).toBe(false)
+      expect(guardResult.redirectTo).toBe(`${AppRoutes.welcome.spaces}?next=${encodeURIComponent(AppRoutes.home)}`)
+    })
+
+    it('still waits for the store to hydrate before deciding', async () => {
+      setupMocks({
+        pathname: '/home',
+        isAuthenticated: false,
+        isStoreHydrated: false,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
+    })
+
     it('does not add next= when the unauthenticated user is on `/` (bare index is pointless as next)', async () => {
       setupMocks({
         pathname: '/',
