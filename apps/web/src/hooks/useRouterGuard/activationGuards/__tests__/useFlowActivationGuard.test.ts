@@ -702,6 +702,19 @@ describe('useFlowActivationGuard', () => {
       expect(guardResult).toEqual({ success: true })
     })
 
+    it('does not add next= when the unauthenticated user is on `/` (bare index is pointless as next)', async () => {
+      setupMocks({
+        pathname: '/',
+        isAuthenticated: false,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+    })
+
     it('ignores a protocol-relative next= value (treated as no next, so stays on login page)', async () => {
       setupMocks({
         pathname: AppRoutes.welcome.spaces,

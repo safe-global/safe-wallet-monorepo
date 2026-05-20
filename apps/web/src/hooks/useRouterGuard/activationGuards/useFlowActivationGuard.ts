@@ -87,11 +87,11 @@ const guardRules: GuardRule[] = [
       const safe = typeof query.safe === 'string' ? query.safe : undefined
       let target = AppRoutes.welcome.createSpace
       target = appendSafeParam(target, safe)
-      const existingNext = sanitizeNextUrl(query.next)
+      const fallbackNext =
+        currentUrl && !currentUrl.startsWith(AppRoutes.welcome.createSpace) ? sanitizeNextUrl(currentUrl) : null
+      const existingNext = sanitizeNextUrl(query.next) ?? fallbackNext
       if (existingNext) {
         target = appendNextParam(target, existingNext)
-      } else if (currentUrl && !currentUrl.startsWith(AppRoutes.welcome.createSpace)) {
-        target = appendNextParam(target, currentUrl)
       }
       return redirect(target)
     },
@@ -110,7 +110,7 @@ const guardRules: GuardRule[] = [
       const safe = typeof query.safe === 'string' ? query.safe : undefined
       let target = AppRoutes.welcome.spaces
       target = appendSafeParam(target, safe)
-      const existingNext = sanitizeNextUrl(query.next) ?? currentUrl
+      const existingNext = sanitizeNextUrl(query.next) ?? sanitizeNextUrl(currentUrl)
       if (existingNext) {
         target = appendNextParam(target, existingNext)
       }
