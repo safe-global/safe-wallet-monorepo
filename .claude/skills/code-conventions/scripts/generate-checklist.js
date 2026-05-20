@@ -65,7 +65,7 @@ function renderChecklist(rules, projects) {
 
   lines.push('# PR Self-Review Checklist')
   lines.push('')
-  lines.push('Generated from `docs/engineering/rules.json`. Do not commit this file.')
+  lines.push('Generated from `docs/engineering/sources/rules.json`. Do not commit this file.')
   if (projects.length > 0) {
     lines.push(`Projects: general + ${projects.join(', ')}`)
   }
@@ -99,7 +99,7 @@ function renderChecklist(rules, projects) {
 function main() {
   const { root, out, projects } = parseArgs(process.argv)
   const resolvedRoot = path.resolve(root)
-  const rulesPath = path.join(resolvedRoot, 'docs', 'engineering', 'rules.json')
+  const rulesPath = path.join(resolvedRoot, 'docs', 'engineering', 'sources', 'rules.json')
 
   if (!fs.existsSync(rulesPath)) {
     throw new Error(`Missing required file: ${rulesPath}`)

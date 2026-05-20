@@ -10,8 +10,8 @@ only when a rule is unclear or the agent needs source evidence.
 
 Read the active docs defined in `references/convention-docs-schema.md`.
 
-Do not read `docs/engineering/working/*` unless a specific rule needs source
-context or the user asks for traceability.
+Do not read `docs/engineering/sources/working/*` unless a specific rule needs
+source context or the user asks for traceability.
 
 ## Generate Checklist
 

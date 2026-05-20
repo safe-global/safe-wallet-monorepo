@@ -10,7 +10,7 @@ function usage() {
 function parseArgs(argv) {
   const args = {
     root: process.cwd(),
-    out: 'docs/engineering/rules.generated.md',
+    out: 'docs/engineering/sources/rules.generated.md',
   }
 
   for (let i = 2; i < argv.length; i += 1) {
@@ -250,14 +250,14 @@ export function renderRulesMarkdown(rules, engineeringRoot) {
 function main() {
   const { root, out } = parseArgs(process.argv)
   const resolvedRoot = path.resolve(root)
-  const engineeringRoot = path.join(resolvedRoot, 'docs', 'engineering')
-  const rulesPath = path.join(engineeringRoot, 'rules.json')
+  const sourcesRoot = path.join(resolvedRoot, 'docs', 'engineering', 'sources')
+  const rulesPath = path.join(sourcesRoot, 'rules.json')
 
   if (!fs.existsSync(rulesPath)) {
     throw new Error(`Missing required file: ${rulesPath}`)
   }
 
-  const markdown = renderRulesMarkdown(readJson(rulesPath), engineeringRoot)
+  const markdown = renderRulesMarkdown(readJson(rulesPath), sourcesRoot)
   const outPath = path.resolve(resolvedRoot, out)
   fs.mkdirSync(path.dirname(outPath), { recursive: true })
   fs.writeFileSync(outPath, markdown)

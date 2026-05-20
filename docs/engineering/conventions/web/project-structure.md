@@ -5,7 +5,7 @@ files. Read the repo-wide conventions in
 [../project-structure.md](../project-structure.md) first.
 
 The detailed feature architecture reference is
-[`apps/web/docs/feature-architecture.md`](../../../apps/web/docs/feature-architecture.md).
+[`apps/web/docs/feature-architecture.md`](../../../../apps/web/docs/feature-architecture.md).
 
 ## Feature Folders
 

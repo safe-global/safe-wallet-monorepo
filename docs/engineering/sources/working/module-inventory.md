@@ -5,7 +5,7 @@ legacy / special-case areas ("don't copy this") in the monorepo, used
 by the convention skill to ground rule generalization.
 
 This is a maintenance document. Normal coding agents should read
-[../project-structure.md](../project-structure.md), not this file.
+[../../conventions/project-structure.md](../../conventions/project-structure.md), not this file.
 
 ## Workspaces
 

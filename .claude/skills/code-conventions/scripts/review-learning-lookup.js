@@ -136,8 +136,8 @@ function printLearning(learning, repo, includeGithub) {
 function main() {
   const { root, rule, learning, github } = parseArgs(process.argv)
   const resolvedRoot = path.resolve(root)
-  const rulesPath = path.join(resolvedRoot, 'docs', 'engineering', 'rules.json')
-  const learningsPath = path.join(resolvedRoot, 'docs', 'engineering', 'working', 'review-learnings.json')
+  const rulesPath = path.join(resolvedRoot, 'docs', 'engineering', 'sources', 'rules.json')
+  const learningsPath = path.join(resolvedRoot, 'docs', 'engineering', 'sources', 'working', 'review-learnings.json')
 
   if (!fs.existsSync(rulesPath)) {
     throw new Error(`Missing required file: ${rulesPath}`)

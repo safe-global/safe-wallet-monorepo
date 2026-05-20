@@ -6,80 +6,89 @@ between active docs for daily work and working docs for maintenance.
 
 ## Output Classes
 
-Active docs are read by normal coding agents:
+Active docs are read by normal coding agents (live under `conventions/`):
 
 - `docs/engineering/README.md`
-- `docs/engineering/project-structure.md`
-- `docs/engineering/rules.generated.md` (generated from `rules.json`; do not
-  edit by hand)
-- `docs/engineering/rules.json`
-- `docs/engineering/examples/**/*.md` for cross-project code shape examples
-- `docs/engineering/<project>/examples/**/*.md` for project-specific code
-  shape examples
+- `docs/engineering/conventions/project-structure.md`
+- `docs/engineering/conventions/<project>/project-structure.md` for
+  project-specific structure (optional, where the monorepo separates them)
+- `docs/engineering/conventions/<topic>.md` for the organized per-topic
+  reference (e.g. `conventions/testing.md`)
 
-Machine-contract files are committed and validated:
+Sources are committed audit-trail artifacts, read for backref but not by daily
+coding agents:
 
-- `docs/engineering/rules.schema.json` (schema for `rules.json`)
-- `docs/engineering/working/review-learnings.schema.json` (schema for review
-  learnings)
+- `docs/engineering/sources/rules.json` (canonical PR rule checklist)
+- `docs/engineering/sources/rules.generated.md` (generated from `rules.json`;
+  do not edit by hand)
+- `docs/engineering/sources/examples/**/*.md` for cross-project code shape
+  examples
+- `docs/engineering/sources/<project>/examples/**/*.md` for project-specific
+  code shape examples
+- `docs/engineering/sources/rules.schema.json` (schema for `rules.json`)
+- `docs/engineering/sources/working/review-learnings.schema.json` (schema for
+  review learnings)
 
-Working docs are read by this convention skill and by humans maintaining the
-system:
+Working docs are read by this convention skill (bot-only):
 
-- `docs/engineering/working/module-inventory.md`
-- `docs/engineering/working/open-question-options.md`
-- `docs/engineering/working/review-learnings.json`
-- `docs/engineering/working/review-learning-ledger.json`
+- `docs/engineering/sources/working/module-inventory.md`
+- `docs/engineering/sources/working/open-question-options.md`
+- `docs/engineering/sources/working/review-learnings.json`
+- `docs/engineering/sources/working/review-learning-ledger.json`
 - raw or legacy review-learning files such as `REVIEW_LEARNINGS.md`
 
-Normal-agent routing should point to active docs only. Raw review-learning files
-and `working/*` are evidence sources, not daily coding guides.
+Normal-agent routing should point to `conventions/*` only. Sources and
+`sources/working/*` are evidence/audit-trail, not daily coding guides.
 
 ## Recommended Directory Structure
 
 ```text
 docs/engineering/
   README.md
-  project-structure.md
-  rules.json
-  rules.schema.json
-  rules.generated.md
-  examples/
-    general/
-      schemas-and-validation.md
-      testing.md
-      mocks.md
-      database.md
-  web/
+  conventions/
     project-structure.md
+    testing.md
+    web/
+      project-structure.md
+    mobile/
+      project-structure.md
+  sources/
+    rules.json
+    rules.schema.json
+    rules.generated.md
     examples/
-      features.md
-  mobile/
-    project-structure.md
-    examples/
-      permissions.md
-  working/
-    module-inventory.md
-    open-question-options.md
-    review-learnings.json
-    review-learnings.schema.json
-    review-learning-ledger.json
+      general/
+        schemas-and-validation.md
+        testing.md
+        mocks.md
+        database.md
+    web/
+      examples/
+        features.md
+    mobile/
+      examples/
+        permissions.md
+    working/
+      module-inventory.md
+      open-question-options.md
+      review-learnings.json
+      review-learnings.schema.json
+      review-learning-ledger.json
 ```
 
-Monorepos may add supplementary placement guides below this root, for example
-`docs/engineering/web/project-structure.md` or
-`docs/engineering/mobile/project-structure.md`. Keep the rule checklist
-centralized in `docs/engineering/rules.json`; use the optional `project` field
-for app/package routing. Put project-specific examples inside that project's
-folder, for example `docs/engineering/web/examples/feature-boundaries.md`, so
-there is only one project-specific doc subtree per project.
+`conventions/` is the action layer (what to read when coding). `sources/` is
+the audit trail (rules + examples + working). Monorepos add supplementary
+placement guides under `conventions/<project>/project-structure.md`; keep the
+rule checklist centralized in `sources/rules.json`; put project-specific
+examples inside that project's folder under `sources/`, for example
+`sources/web/examples/feature-boundaries.md`.
 
 The `examples/` filenames above are recommendations, not a fixed taxonomy.
 Adapt the example files to the repo's framework and review surface. A backend
-might use `examples/repositories.md` and `examples/testing.md`; a wallet
-monorepo might use `examples/general/hooks-and-state.md`,
-`web/examples/features.md`, `mobile/examples/permissions.md`, and
-`examples/general/testing.md`.
+might use `sources/examples/repositories.md` and `sources/examples/testing.md`;
+a wallet monorepo might use `sources/examples/general/hooks-and-state.md`,
+`sources/web/examples/features.md`, `sources/mobile/examples/permissions.md`,
+and `sources/examples/general/testing.md`.
 
 ## Invariants
 
@@ -155,8 +164,8 @@ Rule IDs do not belong in `project-structure.md` headings.
 
 ## JSON Files
 
-`docs/engineering/rules.json` is the canonical active rule checklist. It is an
-array of objects:
+`docs/engineering/sources/rules.json` is the canonical active rule checklist.
+It is an array of objects:
 
 ```json
 [
@@ -183,14 +192,15 @@ Field intent:
 - `title`: human-readable title
 - `rule`: durable repo preference
 - `check`: executable question/action to run before PR
-- `exampleRefs`: compact refs relative to `docs/engineering/`, such as
+- `exampleRefs`: compact refs relative to `docs/engineering/sources/`, such as
   `examples/general/testing.md#faker-values` or
   `mobile/examples/permissions.md#settings-button`; empty array if no example
   is needed. In monorepos, project-specific examples live under the matching
-  project folder instead of under `examples/<project>/`.
+  project folder under `sources/` (e.g. `sources/web/examples/`,
+  `sources/mobile/examples/`).
 - `reviewLearningIds`: `RL-*` IDs that informed this rule
 
-`docs/engineering/working/review-learnings.json` is the source learning store.
+`docs/engineering/sources/working/review-learnings.json` is the source learning store.
 It is an array of objects.
 
 Example for a learning derived from a fetched window of closed PRs (`CLOSED-*`):
@@ -267,8 +277,8 @@ or fetch source details with `gh api`.
 
 Commit JSON Schema files next to their data files:
 
-- `docs/engineering/rules.schema.json`
-- `docs/engineering/working/review-learnings.schema.json`
+- `docs/engineering/sources/rules.schema.json`
+- `docs/engineering/sources/working/review-learnings.schema.json`
 
 The schema files are the machine-readable contract for humans, agents, and
 validators. Keep them strict: required fields, typed arrays, ID patterns, and

@@ -8,7 +8,7 @@ For app-specific guidance, read the relevant project guide:
 - Web — [web/project-structure.md](./web/project-structure.md)
 - Mobile — [mobile/project-structure.md](./mobile/project-structure.md)
 
-Pre-PR rules live in [rules.json](./rules.json), with a generated
+Pre-PR rules live in [rules.json](../sources/rules.json), with a generated
 human-readable view in [rules.generated.md](./rules.generated.md).
 Generate `pr-self-review-checklist.generated.md` before opening or
 finishing a PR.

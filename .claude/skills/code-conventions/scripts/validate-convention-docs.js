@@ -121,17 +121,17 @@ function validateOpenQuestions(root, openQuestionsPath) {
     lines.forEach((line, index) => {
       if (/^#{1,4}\s+Open Questions?\b/i.test(line)) {
         errors.push(
-          `${relative}:${index + 1}: open-question heading belongs in docs/engineering/working/open-question-options.md`,
+          `${relative}:${index + 1}: open-question heading belongs in docs/engineering/sources/working/open-question-options.md`,
         )
       }
       if (/^Question:\s*$/i.test(line)) {
         errors.push(
-          `${relative}:${index + 1}: question block belongs in docs/engineering/working/open-question-options.md`,
+          `${relative}:${index + 1}: question block belongs in docs/engineering/sources/working/open-question-options.md`,
         )
       }
       if (/^Decision Needed:\s*$/i.test(line)) {
         errors.push(
-          `${relative}:${index + 1}: decision-needed block belongs in docs/engineering/working/open-question-options.md`,
+          `${relative}:${index + 1}: decision-needed block belongs in docs/engineering/sources/working/open-question-options.md`,
         )
       }
     })
@@ -148,7 +148,7 @@ function validateActiveDocRouting(root) {
     if (!file.endsWith('.md')) {
       continue
     }
-    if (path.relative(docsDir, file).startsWith(`working${path.sep}`)) {
+    if (path.relative(docsDir, file).startsWith(`sources${path.sep}`)) {
       continue
     }
     files.push(relative)
@@ -166,11 +166,11 @@ function validateActiveDocRouting(root) {
       errors.push(`${relative}: active docs must not route or link to raw REVIEW_LEARNINGS.md`)
     }
     if (
-      /\]\([^)]*(docs\/engineering\/working|working\/)[^)]*\)|\bread\s+[`"]?(docs\/engineering\/working|working\/)/i.test(
+      /\]\([^)]*(docs\/engineering\/sources\/working|sources\/working\/)[^)]*\)|\bread\s+[`"]?(docs\/engineering\/sources\/working|sources\/working\/)/i.test(
         text,
       )
     ) {
-      errors.push(`${relative}: active docs must not route normal agents to docs/engineering/working`)
+      errors.push(`${relative}: active docs must not route normal agents to docs/engineering/sources/working`)
     }
   }
 
@@ -184,7 +184,7 @@ function validateProjectStructureShape(projectStructureText) {
   while ((match = headingPattern.exec(projectStructureText)) !== null) {
     const line = projectStructureText.slice(0, match.index).split('\n').length
     errors.push(
-      `docs/engineering/project-structure.md:${line}: project structure headings must not be rule-ID based (${match[1]})`,
+      `docs/engineering/conventions/project-structure.md:${line}: project structure headings must not be rule-ID based (${match[1]})`,
     )
   }
 
@@ -467,12 +467,13 @@ function main() {
   const resolvedRoot = path.resolve(root)
   const docsDir = path.join(resolvedRoot, 'docs', 'engineering')
 
+  const sourcesDir = path.join(docsDir, 'sources')
   const readmePath = path.join(docsDir, 'README.md')
-  const projectStructurePath = path.join(docsDir, 'project-structure.md')
-  const rulesPath = path.join(docsDir, 'rules.json')
-  const rulesSchemaPath = path.join(docsDir, 'rules.schema.json')
-  const rulesMdPath = path.join(docsDir, 'rules.generated.md')
-  const workingDir = path.join(docsDir, 'working')
+  const projectStructurePath = path.join(docsDir, 'conventions', 'project-structure.md')
+  const rulesPath = path.join(sourcesDir, 'rules.json')
+  const rulesSchemaPath = path.join(sourcesDir, 'rules.schema.json')
+  const rulesMdPath = path.join(sourcesDir, 'rules.generated.md')
+  const workingDir = path.join(sourcesDir, 'working')
   const moduleInventoryPath = path.join(workingDir, 'module-inventory.md')
   const openQuestionsPath = path.join(workingDir, 'open-question-options.md')
   const reviewLearningsPath = path.join(workingDir, 'review-learnings.json')
@@ -503,9 +504,9 @@ function main() {
   errors.push(...validateRulesJson(rules))
   errors.push(...validateReviewLearningsJson(reviewLearnings))
   errors.push(...validateMappings(rules, reviewLearnings))
-  errors.push(...validateRulesMarkdown(rules, rulesMdPath, docsDir))
-  errors.push(...validateLegacySourceIds(docsDir))
-  errors.push(...validateObsoleteFiles(docsDir))
+  errors.push(...validateRulesMarkdown(rules, rulesMdPath, sourcesDir))
+  errors.push(...validateLegacySourceIds(sourcesDir))
+  errors.push(...validateObsoleteFiles(sourcesDir))
   errors.push(...validateGeneratedChecklistIgnore(resolvedRoot))
 
   if (errors.length > 0) {
