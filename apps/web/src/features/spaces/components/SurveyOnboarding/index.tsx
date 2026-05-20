@@ -155,10 +155,7 @@ const SurveyOnboarding = (): ReactElement | null => {
                         toggle(opt.key)
                       }
                     }}
-                    className={cn(
-                      'cursor-pointer transition-colors',
-                      isChecked && 'border-primary ring-1 ring-primary',
-                    )}
+                    className="cursor-pointer transition-colors"
                   >
                     <div className="flex items-start justify-between gap-3 p-4">
                       {Icon && (
