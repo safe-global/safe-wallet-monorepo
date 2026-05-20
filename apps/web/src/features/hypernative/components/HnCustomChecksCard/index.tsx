@@ -6,7 +6,7 @@ import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import { AnalysisGroupCardDisabled } from '@/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
 import { HnAnalysisGroupCard } from '../HnAnalysisGroupCard'
 import { HnViewMoreOnHypernativeRow } from '@/features/hypernative/components/HnViewMoreOnHypernativeRow'
-import { useSafeShieldAssessmentUrl } from '../../hooks/useSafeShieldAssessmentUrl'
+import { useSafeShieldAssessmentUrl } from '@/features/hypernative/hooks/useSafeShieldAssessmentUrl'
 import type { HypernativeAuthStatus } from '../../hooks/useHypernativeOAuth'
 
 const VISIBLE_CAP = 3
