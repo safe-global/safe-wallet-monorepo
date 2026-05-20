@@ -31,12 +31,10 @@ runs:
       uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: |
-          **/node_modules
           /home/runner/.cache/Cypress
           ~/.yarn/berry/cache
           ${{ github.workspace }}/.yarn/install-state.gz
-          ${{ github.workspace }}/packages/utils/src/types
-        key: ${{ runner.os }}-web-core-modules-${{ hashFiles('**/package.json','**/yarn.lock') }}
+        key: ${{ runner.os }}-v2-web-core-modules-${{ hashFiles('**/package.json','**/yarn.lock') }}
 
     - name: Set composite outputs yarn
       if: ${{ inputs.mode == 'restore-yarn' }}
@@ -50,11 +48,9 @@ runs:
       uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: |
-          **/node_modules
           /home/runner/.cache/Cypress
           ~/.yarn/berry/cache
           ${{ github.workspace }}/.yarn/install-state.gz
-          ${{ github.workspace }}/packages/utils/src/types
         key: ${{inputs.key}}
 
     - name: Restore Next.js

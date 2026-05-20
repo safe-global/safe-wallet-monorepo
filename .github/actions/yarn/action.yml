@@ -3,10 +3,10 @@ name: 'Yarn'
 description: 'Set up Node.js and install dependencies'
 
 inputs:
-  after-install:
-    description: 'Run web after-install step to generate contract types'
+  verify_cache:
+    description: 'Verify Yarn cache tarball checksums against the lockfile (--check-cache). Slow; reserve for release jobs that publish artifacts.'
     required: false
-    default: 'true'
+    default: 'false'
   turbo-token:
     description: 'Turborepo remote cache token (Vercel PAT)'
     required: false
@@ -34,7 +34,7 @@ runs:
         echo "TURBO_TEAM=${{ inputs.turbo-team }}" >> "$GITHUB_ENV"
         echo "TURBO_REMOTE_ONLY=false" >> "$GITHUB_ENV"
 
-    - name: Restore Yarn Cache & Types
+    - name: Restore Yarn Cache
       id: restore-yarn-types
       uses: ./.github/actions/cache-deps
       with:
@@ -46,17 +46,11 @@ runs:
         echo "Yarn cache hit: ${{ steps.restore-yarn-types.outputs.cache-hit-yarn }}"
 
     - name: Yarn install
-      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'
       shell: bash
-      run: yarn install --immutable
+      run: yarn install --immutable ${{ inputs.verify_cache == 'true' && '--check-cache' || '' }}
 
-    - name: Yarn after-install to generate contracts types
-      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true' && inputs.after-install == 'true'
-      shell: bash
-      run: yarn workspace @safe-global/web after-install
-
-    - name: Save Yarn Cache & Types
-      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'
+    - name: Save Yarn Cache
+      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true' && github.event_name != 'workflow_run' && github.event_name != 'pull_request_target'
       uses: ./.github/actions/cache-deps
       with:
         mode: save-yarn
