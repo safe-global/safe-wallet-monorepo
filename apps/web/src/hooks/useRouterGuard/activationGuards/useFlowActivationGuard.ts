@@ -48,12 +48,6 @@ const appendNextParam = (target: string, currentUrl: string): string => {
   return `${target}${separator}next=${encodeURIComponent(currentUrl)}`
 }
 
-const appendSafeParam = (target: string, safe: string | undefined): string => {
-  if (!safe) return target
-  const separator = target.includes('?') ? '&' : '?'
-  return `${target}${separator}safe=${encodeURIComponent(safe)}`
-}
-
 const guardRules: GuardRule[] = [
   // Store not hydrated — we can't trust isSiweAuthenticated yet, keep page visible.
   // (We deliberately do NOT wait for full wallet readiness here: that meant the
@@ -82,13 +76,12 @@ const guardRules: GuardRule[] = [
 
   // Signed in but no Space yet — send to onboarding (unless they're on a
   // legal/error/static page, which should remain reachable even without a Space).
+  // safe= is left out of the onboarding URL itself because it lives inside next=.
   {
     match: ({ isRequireLoginEnabled, isSiweAuthenticated, hasSpaces, isOnboardingRoute, pathname }) =>
       isRequireLoginEnabled && isSiweAuthenticated && !hasSpaces && !isOnboardingRoute && !isAlwaysPublic(pathname),
     action: ({ query, currentUrl }) => {
-      const safe = typeof query.safe === 'string' ? query.safe : undefined
       let target = AppRoutes.welcome.createSpace
-      target = appendSafeParam(target, safe)
       const fallbackNext =
         currentUrl && !currentUrl.startsWith(AppRoutes.welcome.createSpace) ? sanitizeNextUrl(currentUrl) : null
       const existingNext = sanitizeNextUrl(query.next) ?? fallbackNext
@@ -100,6 +93,9 @@ const guardRules: GuardRule[] = [
   },
 
   // Not signed in on a protected page — bounce to the login page with ?next=.
+  // We deliberately do NOT preserve safe= on the redirect target itself, since
+  // it's already embedded inside `next` (e.g. next=/balances?safe=…) and a
+  // top-level safe= would just be redundant noise on the login URL.
   {
     match: ({ isRequireLoginEnabled, isSiweAuthenticated, isWelcomeSpacesPath, isOnboardingRoute, pathname }) => {
       if (!isRequireLoginEnabled) return false
@@ -109,9 +105,7 @@ const guardRules: GuardRule[] = [
       return !isAlwaysPublic(pathname)
     },
     action: ({ query, currentUrl }) => {
-      const safe = typeof query.safe === 'string' ? query.safe : undefined
       let target = AppRoutes.welcome.spaces
-      target = appendSafeParam(target, safe)
       const existingNext = sanitizeNextUrl(query.next) ?? sanitizeNextUrl(currentUrl)
       if (existingNext) {
         target = appendNextParam(target, existingNext)

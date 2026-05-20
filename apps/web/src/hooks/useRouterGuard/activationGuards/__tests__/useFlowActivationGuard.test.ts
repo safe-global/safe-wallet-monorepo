@@ -583,7 +583,7 @@ describe('useFlowActivationGuard', () => {
       })
     })
 
-    it('preserves an existing safe= param on the login redirect', async () => {
+    it('keeps the safe= inside next= but does NOT duplicate it on the redirect target', async () => {
       setupMocks({
         pathname: '/balances',
         query: { safe: '1:0xabc' },
@@ -594,8 +594,10 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
+      // safe is preserved inside the encoded next= URL, not as a top-level
+      // duplicate on /welcome/spaces.
       expect(guardResult.redirectTo).toBe(
-        `${AppRoutes.welcome.spaces}?safe=1%3A0xabc&next=${encodeURIComponent('/balances?safe=1%3A0xabc')}`,
+        `${AppRoutes.welcome.spaces}?next=${encodeURIComponent('/balances?safe=1%3A0xabc')}`,
       )
     })
 
