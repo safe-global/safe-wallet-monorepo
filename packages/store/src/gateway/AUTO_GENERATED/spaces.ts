@@ -403,7 +403,10 @@ export type UserAddressBookItemDto = {
   name: string
   address: string
   chainIds: string[]
+  /** Email or wallet address of the creator, "Unknown user" if the user has no display identity, or "Deleted user" */
   createdBy: string
+  /** User ID of the creator */
+  createdByUserId: number
   createdAt: object
   updatedAt: object
 }
@@ -416,7 +419,14 @@ export type AddressBookRequestItemDto = {
   name: string
   address: string
   chainIds: string[]
+  /** Email or wallet address of the requester, "Unknown user" if the user has no display identity, or "Deleted user" */
   requestedBy: string
+  /** User ID of the requester */
+  requestedByUserId: number
+  /** Email or wallet address of the reviewing admin, "Unknown user", "Deleted user", or null when still PENDING */
+  reviewedBy: string | null
+  /** User ID of the reviewing admin, null when still PENDING */
+  reviewedByUserId: number | null
   status: 'PENDING' | 'APPROVED' | 'REJECTED'
   createdAt: string
   updatedAt: string
