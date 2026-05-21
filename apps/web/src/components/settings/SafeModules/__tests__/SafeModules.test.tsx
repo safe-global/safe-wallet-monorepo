@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { fireEvent, render, waitFor } from '@/tests/test-utils'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
@@ -6,6 +7,18 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import SafeModules from '..'
 import { zeroPadValue } from 'ethers'
 import type { ReactElement } from 'react'
+import type { RecoveryStateItem } from '@/features/recovery/services/recovery-state'
+
+const buildDelayModifier = (overrides: Partial<RecoveryStateItem> = {}): RecoveryStateItem => ({
+  address: faker.finance.ethereumAddress(),
+  recoverers: [],
+  expiry: 0n,
+  delay: 0n,
+  txNonce: 0n,
+  queueNonce: 0n,
+  queue: [],
+  ...overrides,
+})
 
 const MOCK_MODULE_1 = zeroPadValue('0x01', 20)
 const MOCK_MODULE_2 = zeroPadValue('0x02', 20)
@@ -115,10 +128,10 @@ describe('SafeModules', () => {
 
   it('should open the remove recovery flow for a recovery module', async () => {
     const setTxFlow = jest.fn()
-    const delayModifier = { address: MOCK_MODULE_1 }
+    const delayModifier = buildDelayModifier({ address: MOCK_MODULE_1 })
 
     jest.spyOn(recoveryHooks, 'useDelayModifierByAddress').mockReturnValue({
-      delayModifier: delayModifier as never,
+      delayModifier,
       loading: false,
     })
     jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({

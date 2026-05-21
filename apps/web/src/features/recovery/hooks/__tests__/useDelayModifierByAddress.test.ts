@@ -4,19 +4,25 @@ import * as useRecoveryHook from '../useRecovery'
 import { useDelayModifierByAddress } from '../useDelayModifierByAddress'
 import type { RecoveryStateItem } from '../../services/recovery-state'
 
+const buildDelayModifier = (overrides: Partial<RecoveryStateItem> = {}): RecoveryStateItem => ({
+  address: faker.finance.ethereumAddress(),
+  recoverers: [],
+  expiry: 0n,
+  delay: 0n,
+  txNonce: 0n,
+  queueNonce: 0n,
+  queue: [],
+  ...overrides,
+})
+
 describe('useDelayModifierByAddress', () => {
   afterEach(() => {
     jest.restoreAllMocks()
   })
 
   it('should return the matching delay modifier', () => {
-    const delayModifier1 = {
-      address: faker.finance.ethereumAddress(),
-    } as unknown as RecoveryStateItem
-
-    const delayModifier2 = {
-      address: faker.finance.ethereumAddress(),
-    } as unknown as RecoveryStateItem
+    const delayModifier1 = buildDelayModifier()
+    const delayModifier2 = buildDelayModifier()
 
     jest.spyOn(useRecoveryHook, 'default').mockReturnValue([[delayModifier1, delayModifier2], undefined, false])
 

@@ -1,7 +1,11 @@
 import useRecovery from './useRecovery'
 import { selectDelayModifierByAddress } from '../services/selectors'
+import type { RecoveryStateItem } from '../services/recovery-state'
 
-export function useDelayModifierByAddress(moduleAddress: string) {
+export function useDelayModifierByAddress(moduleAddress: string): {
+  delayModifier: RecoveryStateItem | undefined
+  loading: boolean
+} {
   const [recovery, , loading] = useRecovery()
 
   return {
