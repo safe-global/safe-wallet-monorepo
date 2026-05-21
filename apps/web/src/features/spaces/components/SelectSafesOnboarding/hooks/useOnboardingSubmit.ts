@@ -10,8 +10,6 @@ import {
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useAppDispatch } from '@/store'
-import { showNotification } from '@/store/notificationsSlice'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
@@ -60,7 +58,6 @@ const useOnboardingSubmit = (
   const router = useRouter()
   const { configs: chains } = useChains()
   const safeFromUrl = useSafeQueryParam() || undefined
-  const dispatch = useAppDispatch()
   const { allSafes: spaceSafes } = useSpaceSafes()
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
@@ -196,14 +193,6 @@ const useOnboardingSubmit = (
     try {
       trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNTS })
       await processSelectedSafes(data.selectedSafes, Number(spaceId))
-
-      dispatch(
-        showNotification({
-          message: 'Updated Safe Account(s) in space',
-          variant: 'success',
-          groupKey: 'update-safe-accounts-success',
-        }),
-      )
 
       onSuccess()
     } catch (e) {

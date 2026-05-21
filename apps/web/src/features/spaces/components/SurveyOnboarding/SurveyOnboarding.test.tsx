@@ -54,8 +54,8 @@ jest.mock('@safe-global/store/gateway/surveys', () => ({
   useSurveysSubmitResponseV1Mutation: () => [mockSubmit, { isLoading: false, error: undefined }],
 }))
 
-jest.mock('@/hooks/useDarkMode', () => ({
-  useDarkMode: () => false,
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  useSpacesGetOneV1Query: () => ({ data: undefined }),
 }))
 
 jest.mock('@/config/routes', () => ({
@@ -66,6 +66,23 @@ jest.mock('@/config/routes', () => ({
     },
     spaces: { index: '/spaces' },
   },
+}))
+
+jest.mock('@/features/spaces/components/OnboardingLayout', () => ({
+  OnboardingLayout: ({ main, footer }: { main: React.ReactNode; footer?: React.ReactNode }) => (
+    <div>
+      {main}
+      {footer}
+    </div>
+  ),
+  StepCounter: () => <div data-testid="step-counter" />,
+  SpaceSidePanel: () => <div data-testid="space-side-panel" />,
+  deriveSidePanelAccountsFromSpace: () => [],
+  useSafeNameLookup: () => new Map<string, string>(),
+}))
+
+jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
+  useSpaceSafes: () => ({ allSafes: [], isLoading: false, isError: false, error: undefined, refetch: jest.fn() }),
 }))
 
 function setQueryResult(result: Partial<typeof queryResult>): void {
@@ -86,33 +103,33 @@ describe('SurveyOnboarding', () => {
     render(<SurveyOnboarding />)
 
     expect(screen.getByText('How will you use Safe?')).toBeInTheDocument()
-    expect(screen.getByText('Run payments')).toBeInTheDocument()
-    expect(screen.getByText('Hold assets')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Run payments' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Hold assets' })).toBeInTheDocument()
   })
 
-  it('keeps the Finish button disabled until at least one card is selected', () => {
+  it('keeps the Create Space button disabled until at least one chip is selected', () => {
     render(<SurveyOnboarding />)
 
     const finish = screen.getByTestId('survey-finish-button')
     expect(finish).toBeDisabled()
 
-    fireEvent.click(screen.getByText('Run payments').closest('[role="checkbox"]')!)
+    fireEvent.click(screen.getByRole('button', { name: 'Run payments' }))
 
     expect(finish).not.toBeDisabled()
   })
 
-  it('deselects a card when clicked a second time', () => {
+  it('deselects a chip when clicked a second time', () => {
     render(<SurveyOnboarding />)
 
-    const card = screen.getByText('Run payments').closest('[role="checkbox"]')!
+    const chip = screen.getByRole('button', { name: 'Run payments' })
     const finish = screen.getByTestId('survey-finish-button')
 
-    fireEvent.click(card)
-    expect(card).toHaveAttribute('aria-checked', 'true')
+    fireEvent.click(chip)
+    expect(chip).toHaveAttribute('aria-pressed', 'true')
     expect(finish).not.toBeDisabled()
 
-    fireEvent.click(card)
-    expect(card).toHaveAttribute('aria-checked', 'false')
+    fireEvent.click(chip)
+    expect(chip).toHaveAttribute('aria-pressed', 'false')
     expect(finish).toBeDisabled()
   })
 
@@ -122,14 +139,14 @@ describe('SurveyOnboarding', () => {
     render(<SurveyOnboarding />)
 
     expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument()
-    expect(screen.queryByText('Run payments')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Run payments' })).not.toBeInTheDocument()
   })
 
   it('submits selections nested under the page id and routes to the Space dashboard', async () => {
     render(<SurveyOnboarding />)
 
-    fireEvent.click(screen.getByText('Run payments').closest('[role="checkbox"]')!)
-    fireEvent.click(screen.getByText('Hold assets').closest('[role="checkbox"]')!)
+    fireEvent.click(screen.getByRole('button', { name: 'Run payments' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Hold assets' }))
     fireEvent.click(screen.getByTestId('survey-finish-button'))
 
     await waitFor(() => {

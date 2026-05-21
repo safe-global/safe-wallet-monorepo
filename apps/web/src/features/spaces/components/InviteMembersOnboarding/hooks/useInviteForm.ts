@@ -2,8 +2,6 @@ import { useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { isAddress } from 'ethers'
 import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useAppDispatch } from '@/store'
-import { showNotification } from '@/store/notificationsSlice'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
@@ -18,7 +16,6 @@ export interface InviteMembersFormValues {
 }
 
 const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
-  const dispatch = useAppDispatch()
   const [inviteMembers] = useMembersInviteUserV1Mutation()
 
   const [error, setError] = useState<string>()
@@ -85,14 +82,6 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
           },
         )
       })
-
-      dispatch(
-        showNotification({
-          message: `Invited ${validMembers.length} member(s) to space`,
-          variant: 'success',
-          groupKey: 'invite-member-success',
-        }),
-      )
 
       onSuccess()
     } catch {

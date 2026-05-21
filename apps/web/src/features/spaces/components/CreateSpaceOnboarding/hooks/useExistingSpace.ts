@@ -26,6 +26,7 @@ const useExistingSpace = (setValue: UseFormSetValue<{ name: string }>) => {
     spaceId,
     isEditMode,
     isSpaceLoading,
+    existingSpace,
   }
 }
 

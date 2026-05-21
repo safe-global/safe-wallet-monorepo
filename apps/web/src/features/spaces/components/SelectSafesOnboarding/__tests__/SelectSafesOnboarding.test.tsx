@@ -17,11 +17,6 @@ jest.mock('../components/OnboardingSafesList', () => ({
   },
 }))
 
-jest.mock('../components/StepIndicator', () => ({
-  __esModule: true,
-  default: () => <div data-testid="step-indicator" />,
-}))
-
 jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => ({
   __esModule: true,
   default: () => jest.fn(),

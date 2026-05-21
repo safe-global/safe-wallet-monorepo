@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import { useSpacesCreateV1Mutation, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppDispatch } from '@/store'
 import { setLastUsedSpace } from '@/store/authSlice'
-import { showNotification } from '@/store/notificationsSlice'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
@@ -31,14 +30,6 @@ const useSpaceSubmit = (
       throw new Error(getRtkQueryErrorMessage(response.error))
     }
 
-    dispatch(
-      showNotification({
-        message: `Updated space name to ${name}.`,
-        variant: 'success',
-        groupKey: 'update-space-success',
-      }),
-    )
-
     router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId, ...(safe ? { safe } : {}) } })
   }
 
@@ -50,14 +41,6 @@ const useSpaceSubmit = (
       trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: newSpaceId }, { workspace_id: newSpaceId })
 
       dispatch(setLastUsedSpace(newSpaceId))
-
-      dispatch(
-        showNotification({
-          message: `Created space with name ${name}.`,
-          variant: 'success',
-          groupKey: 'create-space-success',
-        }),
-      )
 
       router.push({
         pathname: AppRoutes.welcome.selectSafes,
