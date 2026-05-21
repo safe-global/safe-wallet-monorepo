@@ -81,6 +81,7 @@ describe('resolveFeeParams', () => {
           operation: safeTx.data.operation,
           gasToken: '0xa0b86991000000000000000000000000000000aa',
           numberSignatures: 3,
+          fiatCode: 'USD',
         },
       },
       { forceRefetch: true },
