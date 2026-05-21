@@ -17,7 +17,11 @@ const LocalSafesAlert = () => {
       data-testid="local-safes-alert"
       sx={{
         mb: 2,
+        mx: 'auto',
         p: 2,
+        width: '100%',
+        maxWidth: 350,
+        textAlign: 'left',
         borderRadius: 1,
         border: '1px solid',
         borderColor: 'success.main',
