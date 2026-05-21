@@ -16,6 +16,18 @@ jest.mock('@/store/authSlice', () => ({
   isAuthenticated: jest.fn(() => 'isAuthenticated'),
 }))
 
+jest.mock('@/hooks/useIsRequireLoginEnabled', () => ({
+  useIsRequireLoginEnabled: () => false,
+}))
+
+jest.mock('@/hooks/useClassicView', () => ({
+  useIsClassicViewFeatureEnabled: () => false,
+}))
+
+jest.mock('@/hooks/useDarkMode', () => ({
+  useDarkMode: () => false,
+}))
+
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetV1Query: (...args: unknown[]) => mockUseSpacesGetV1Query(...args),
 }))
