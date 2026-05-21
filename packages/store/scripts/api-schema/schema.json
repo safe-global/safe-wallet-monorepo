@@ -2070,7 +2070,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "User is not a member of this space or wallet authentication required"
+            "description": "User is not a member of this space"
           }
         },
         "summary": "Upsert private address book entries",
@@ -2109,7 +2109,7 @@
             "description": "Private address book entry deleted successfully"
           },
           "403": {
-            "description": "User is not a member or wallet authentication required"
+            "description": "User is not a member of this space"
           },
           "404": {
             "description": "Entry not found"
@@ -2198,7 +2198,7 @@
             }
           },
           "403": {
-            "description": "User is not a member or wallet authentication required"
+            "description": "User is not a member of this space"
           },
           "404": {
             "description": "Private contact not found"
@@ -2243,7 +2243,7 @@
             "description": "Only pending requests can be approved"
           },
           "403": {
-            "description": "User is not an admin or wallet authentication required"
+            "description": "User is not an admin of this space"
           },
           "404": {
             "description": "Request not found"
@@ -2288,7 +2288,7 @@
             "description": "Only pending requests can be rejected"
           },
           "403": {
-            "description": "User is not an admin or wallet authentication required"
+            "description": "User is not an admin of this space"
           },
           "404": {
             "description": "Request not found"
@@ -8724,7 +8724,12 @@
             }
           },
           "createdBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Email or wallet address of the creator, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "createdByUserId": {
+            "type": "number",
+            "description": "User ID of the creator"
           },
           "createdAt": {
             "type": "object"
@@ -8738,6 +8743,7 @@
           "address",
           "chainIds",
           "createdBy",
+          "createdByUserId",
           "createdAt",
           "updatedAt"
         ]
@@ -8779,7 +8785,22 @@
             }
           },
           "requestedBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Email or wallet address of the requester, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "requestedByUserId": {
+            "type": "number",
+            "description": "User ID of the requester"
+          },
+          "reviewedBy": {
+            "type": "string",
+            "nullable": true,
+            "description": "Email or wallet address of the reviewing admin, \"Unknown user\", \"Deleted user\", or null when still PENDING"
+          },
+          "reviewedByUserId": {
+            "type": "number",
+            "nullable": true,
+            "description": "User ID of the reviewing admin, null when still PENDING"
           },
           "status": {
             "type": "string",
@@ -8804,6 +8825,9 @@
           "address",
           "chainIds",
           "requestedBy",
+          "requestedByUserId",
+          "reviewedBy",
+          "reviewedByUserId",
           "status",
           "createdAt",
           "updatedAt"
