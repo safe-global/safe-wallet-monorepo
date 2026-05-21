@@ -480,7 +480,7 @@ describe('SpaceSelectorDropdown', () => {
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
       fireEvent.click(trigger)
 
-      expect(screen.getByText('Space')).toBeInTheDocument()
+      expect(screen.getByText('Workspace')).toBeInTheDocument()
     })
 
     it('handles spaces with very long names', () => {
@@ -559,16 +559,16 @@ describe('SpaceSelectorDropdown', () => {
       // First cycle
       fireEvent.click(trigger)
       expect(trigger).toHaveAttribute('aria-expanded', 'true')
-      expect(screen.getByText('Spaces')).toBeInTheDocument()
+      expect(screen.getByText('Workspaces')).toBeInTheDocument()
 
       fireEvent.click(trigger)
       expect(trigger).toHaveAttribute('aria-expanded', 'false')
-      expect(screen.queryByText('Spaces')).not.toBeInTheDocument()
+      expect(screen.queryByText('Workspaces')).not.toBeInTheDocument()
 
       // Second cycle
       fireEvent.click(trigger)
       expect(trigger).toHaveAttribute('aria-expanded', 'true')
-      expect(screen.getByText('Spaces')).toBeInTheDocument()
+      expect(screen.getByText('Workspaces')).toBeInTheDocument()
     })
 
     it('correctly displays checkmark only for the selected space after re-renders', () => {
