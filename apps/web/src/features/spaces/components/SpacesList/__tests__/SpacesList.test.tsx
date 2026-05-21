@@ -28,6 +28,14 @@ jest.mock('@/components/welcome/WelcomeLogin/hooks/useSignInRedirect', () => ({
   useSignInRedirect: (...args: unknown[]) => mockUseSignInRedirect(...args),
 }))
 
+jest.mock('@/hooks/useIsRequireLoginEnabled', () => ({
+  useIsRequireLoginEnabled: jest.fn(() => false),
+}))
+
+jest.mock('@/hooks/useClassicView', () => ({
+  useIsClassicViewFeatureEnabled: jest.fn(() => false),
+}))
+
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({ AccountsNavigation: () => <nav data-testid="accounts-nav" /> }),
   createFeatureHandle: () => ({}),
