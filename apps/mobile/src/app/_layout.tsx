@@ -1,3 +1,4 @@
+import '@/src/features/WalletConnect/shared/compat'
 import '@/src/platform/fetch'
 import '@/src/platform/crypto-shims'
 import '@/src/platform/intl-polyfills'

@@ -1,4 +1,3 @@
-import '@walletconnect/react-native-compat'
 import { createAppKit } from '@reown/appkit-react-native'
 import { EthersAdapter } from '@reown/appkit-ethers-react-native'
 import type { Network, Storage } from '@reown/appkit-common-react-native'
