@@ -59,7 +59,7 @@ const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
 const safeLevelNavigation = '[data-testid="safe-level-navigation"]'
 const spaceSafesNavigationBlock = '[data-testid="space-safes-navigation-block"]'
 const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"]'
-const backToSpaceBtn = '[aria-label="Back to space"]'
+const backToSpaceBtn = '[aria-label="Back to workspace"]'
 const safeLevelNavigationBackToSpaceBtn = `${safeLevelNavigation} ${backToSpaceBtn}`
 
 // -- Space sidebar items --
@@ -111,7 +111,7 @@ export const importAddressBookLabel = 'Import address book'
 export const dashboardAddMemberBtn = '[data-testid="add-member-button"]'
 export const inviteMemberLabel = 'Add member'
 export const learnMoreBtn = '[data-testid="spaces-learn-more-button"]'
-export const exploreSpacesLabel = 'Introducing spaces'
+export const exploreSpacesLabel = 'Introducing workspaces'
 
 // ===========================================
 // Labels & regex patterns
