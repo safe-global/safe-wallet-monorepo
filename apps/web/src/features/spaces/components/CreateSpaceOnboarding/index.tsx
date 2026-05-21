@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
 import { ChevronLeft } from 'lucide-react'
 import OnboardingLayout from '../OnboardingLayout'
+import OnboardingIllustration from '../OnboardingLayout/Illustration'
 import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
 import { AppRoutes } from '@/config/routes'
 import useExistingSpace from './hooks/useExistingSpace'
@@ -23,7 +24,10 @@ const CreateSpaceOnboarding = (): ReactElement => {
     handleSubmit,
     formState: { isValid, errors },
     setValue,
+    watch,
   } = useForm<{ name: string }>({ mode: 'onChange' })
+
+  const spaceName = watch('name')
 
   const { spaceId, isEditMode, isSpaceLoading } = useExistingSpace(setValue)
   const { error, isSubmitting, onSubmit } = useSpaceSubmit(handleSubmit, spaceId, isEditMode)
@@ -36,6 +40,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
         step={{ current: 1, total: ONBOARDING_TOTAL_STEPS }}
         title="Create a Space"
         description="Your team's home for managing Safes, tracking activity, and collaborating."
+        illustration={<OnboardingIllustration variant="create" spaceName={spaceName} />}
         footer={
           <>
             <Button

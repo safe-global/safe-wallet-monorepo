@@ -6,7 +6,9 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ChevronLeft, Search, Loader2 } from 'lucide-react'
 import useWallet from '@/hooks/wallets/useWallet'
+import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import OnboardingLayout from '../OnboardingLayout'
+import OnboardingIllustration from '../OnboardingLayout/Illustration'
 import OnboardingSafesList from './components/OnboardingSafesList'
 import ConnectWalletPrompt from './components/ConnectWalletPrompt'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
@@ -21,6 +23,7 @@ const TOTAL_STEPS = 3
 const SelectSafesOnboarding = (): ReactElement => {
   const wallet = useWallet()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
+  const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
   const { trustedSafes, ownedSafes, similarAddresses, handleSearch } = useOnboardingSafes()
   const allSafes = useMemo(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
   const { formMethods, onSubmit, selectedSafesLength, error, isSubmitting } = useOnboardingSubmit(
@@ -45,6 +48,7 @@ const SelectSafesOnboarding = (): ReactElement => {
           step={{ current: ONBOARDING_STEP, total: TOTAL_STEPS }}
           title="Add Safes"
           description="Add existing Safes to your Space, or skip to add them later."
+          illustration={<OnboardingIllustration variant="add-safes" spaceName={space?.name} />}
           footer={
             <>
               <Button

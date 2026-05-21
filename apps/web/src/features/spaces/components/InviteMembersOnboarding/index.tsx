@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
+import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import OnboardingLayout from '../OnboardingLayout'
+import OnboardingIllustration from '../OnboardingLayout/Illustration'
 import MemberInviteRow from './components/MemberInviteRow'
 import useInviteNavigation from './hooks/useInviteNavigation'
 import useInviteForm from './hooks/useInviteForm'
@@ -15,6 +17,7 @@ const TOTAL_STEPS = 3
 
 const InviteMembersOnboarding = (): ReactElement => {
   const { spaceId, goBack, redirectToNextStep } = useInviteNavigation()
+  const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
   const { control, formState, register, setValue, trigger, fields, append, remove, onSubmit, error, isSubmitting } =
     useInviteForm(spaceId, redirectToNextStep)
 
@@ -24,6 +27,7 @@ const InviteMembersOnboarding = (): ReactElement => {
         step={{ current: ONBOARDING_STEP, total: TOTAL_STEPS }}
         title="Invite team members"
         description="Add people to collaborate on this Space."
+        illustration={<OnboardingIllustration variant="invite-members" spaceName={space?.name} />}
         footer={
           <>
             <Button
