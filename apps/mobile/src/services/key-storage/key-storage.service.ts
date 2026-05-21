@@ -1,7 +1,9 @@
 import DeviceCrypto from 'react-native-device-crypto'
 import * as Keychain from 'react-native-keychain'
 import DeviceInfo from 'react-native-device-info'
+import { DdRum, ErrorSource } from 'expo-datadog'
 import { IKeyStorageService, PrivateKeyStorageOptions } from './types'
+import { BiometryInvalidationError, isBiometryInvalidationError } from './errors'
 import Logger from '@/src/utils/logger'
 import { Platform } from 'react-native'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -51,7 +53,21 @@ export class KeyStorageService implements IKeyStorageService {
     try {
       return await this.getKey(userId, options.requireAuthentication ?? true)
     } catch (err) {
+      if (err === 'user password not found') {
+        return undefined
+      }
+
       Logger.error('Error getting private key:', asError(err).message)
+
+      if (isBiometryInvalidationError(err)) {
+        DdRum.addError('BiometryInvalidationError', ErrorSource.SOURCE, asError(err).stack ?? '', {
+          userId,
+          location: 'getPrivateKey',
+          platform: Platform.OS,
+        })
+        throw new BiometryInvalidationError(err)
+      }
+
       return undefined
     }
   }
@@ -131,7 +147,7 @@ export class KeyStorageService implements IKeyStorageService {
       // Reset retry counter on successful storage
       this.storeTries = 0
     } catch (error) {
-      if (this.isKeyPermanentlyInvalidatedError(error)) {
+      if (this.storeTries === 0 && isBiometryInvalidationError(error)) {
         try {
           await this.handleKeyInvalidation(userId, requireAuth)
           this.storeTries++
@@ -166,11 +182,6 @@ export class KeyStorageService implements IKeyStorageService {
       this.BIOMETRIC_PROMPTS.STANDARD,
     )
     return decryptedPrivateKey
-  }
-
-  private isKeyPermanentlyInvalidatedError(error: unknown): boolean {
-    const errorMessage = asError(error).message
-    return errorMessage.includes('Key permanently invalidated')
   }
 
   private async handleKeyInvalidation(userId: string, requireAuth: boolean): Promise<void> {

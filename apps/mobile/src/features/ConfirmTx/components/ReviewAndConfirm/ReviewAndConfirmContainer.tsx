@@ -10,6 +10,7 @@ import { useTransactionSigner } from '@/src/features/ConfirmTx/hooks/useTransact
 import { useTransactionSigningState } from '@/src/hooks/useTransactionSigningState'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { useIsMounted } from '@/src/hooks/useIsMounted'
+import { BIOMETRY_ROTATION_DESCRIPTION, BiometryInvalidationError } from '@/src/services/key-storage'
 
 export function ReviewAndConfirmContainer() {
   const { txId } = useLocalSearchParams<{ txId: string }>()
@@ -60,7 +61,12 @@ export function ReviewAndConfirmContainer() {
         })
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to sign transaction'
+      const errorMessage =
+        err instanceof BiometryInvalidationError
+          ? BIOMETRY_ROTATION_DESCRIPTION
+          : err instanceof Error
+            ? err.message
+            : 'Failed to sign transaction'
 
       if (isMounted()) {
         router.push({

@@ -4,7 +4,7 @@ import { removeSigner } from '@/src/store/signersSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { removeSafe, SafesSliceItem } from '@/src/store/safesSlice'
 import { setEditMode } from '@/src/store/myAccountsSlice'
-import { keyStorageService } from '@/src/services/key-storage'
+import { BiometryInvalidationError, keyStorageService } from '@/src/services/key-storage'
 import Logger from '@/src/utils/logger'
 import { CommonActions } from '@react-navigation/native'
 import { Alert } from 'react-native'
@@ -122,11 +122,21 @@ export const cleanupSinglePrivateKey = async (
   dispatch: AppDispatch,
 ): Promise<StandardErrorResult<{ success: true }>> => {
   try {
-    const privateKey = await keyStorageService.getPrivateKey(ownerAddress)
+    let privateKey: string | undefined
+    try {
+      privateKey = await keyStorageService.getPrivateKey(ownerAddress)
+    } catch (err) {
+      if (err instanceof BiometryInvalidationError) {
+        Logger.warn('Skipping delegate cleanup: signer encryption key invalidated', { ownerAddress })
+      } else {
+        throw err
+      }
+    }
+
     if (!privateKey) {
-      return createErrorResult(ErrorType.STORAGE_ERROR, 'Private key not found for the specified address', null, {
-        ownerAddress,
-      })
+      await keyStorageService.removePrivateKey(ownerAddress, { requireAuthentication: false })
+      dispatch(removeSigner(ownerAddress))
+      return createSuccessResult({ success: true as const })
     }
 
     // Remove delegates (includes notification cleanup)
