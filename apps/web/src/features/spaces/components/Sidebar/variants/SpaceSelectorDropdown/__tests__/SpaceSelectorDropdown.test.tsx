@@ -644,7 +644,7 @@ describe('SpaceSelectorDropdown', () => {
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
       fireEvent.click(trigger)
 
-      expect(screen.getByText(`You can have up to ${SPACES_LIMIT} workspaces`)).toBeInTheDocument()
+      expect(screen.getByText(`Limit of ${SPACES_LIMIT} workspaces reached`)).toBeInTheDocument()
     })
 
     it('does not disable "Add new space" button when spaces are below the limit', () => {
@@ -675,7 +675,7 @@ describe('SpaceSelectorDropdown', () => {
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
       fireEvent.click(trigger)
 
-      expect(screen.queryByText(`You can have up to ${SPACES_LIMIT} workspaces`)).not.toBeInTheDocument()
+      expect(screen.queryByText(`Limit of ${SPACES_LIMIT} workspaces reached`)).not.toBeInTheDocument()
     })
 
     it('disables "Add new space" button when spaces exceed the limit', () => {
@@ -706,7 +706,7 @@ describe('SpaceSelectorDropdown', () => {
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
       fireEvent.click(trigger)
 
-      expect(screen.getByText(`You can have up to ${SPACES_LIMIT} workspaces`)).toBeInTheDocument()
+      expect(screen.getByText(`Limit of ${SPACES_LIMIT} workspaces reached`)).toBeInTheDocument()
     })
   })
 })

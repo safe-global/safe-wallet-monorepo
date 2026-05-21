@@ -25,7 +25,7 @@ const AddFundsToGetStarted = () => {
       p={2}
       gap={2}
       alignItems={{ xs: 'flex-start', md: 'center' }}
-      borderRadius={1}
+      borderRadius={4}
     >
       <Box
         width="40px"

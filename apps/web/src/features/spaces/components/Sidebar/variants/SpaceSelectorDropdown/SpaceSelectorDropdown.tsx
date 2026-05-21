@@ -232,7 +232,7 @@ export const SpaceSelectorDropdown = ({
           return (
             <Tooltip key="add-space-tooltip">
               <TooltipTrigger render={<div className="block w-full" />}>{addSpaceMenuItem}</TooltipTrigger>
-              <TooltipContent side="right">You can have up to {SPACES_LIMIT} workspaces</TooltipContent>
+              <TooltipContent side="right">Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
             </Tooltip>
           )
         })()}
