@@ -20,7 +20,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
 }))
 jest.mock('@/src/utils/logger')
 jest.mock('@/src/services/ledger/ledger-safe-signing.service')
-jest.mock('@/src/features/WalletConnect/context/WalletConnectContext', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/context/WalletConnectContext', () => ({
   useWalletConnectContext: jest.fn(() => ({ sign: jest.fn(), hasProvider: false })),
 }))
 

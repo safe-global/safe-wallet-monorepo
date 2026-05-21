@@ -38,7 +38,7 @@ import { SigningMonitor } from '@/src/components/SigningMonitor'
 import { ExecutingMonitor } from '@/src/components/ExecutingMonitor'
 import { useDatadogConsent } from '@/src/hooks/useDatadogConsent'
 import { DatadogWrapper } from '@/src/providers/DatadogWrapper'
-import { AppKitInitializer } from '@/src/features/WalletConnect/components/AppKitInitializer'
+import { AppKitInitializer } from '@/src/features/WalletConnect/Signer/components/AppKitInitializer'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers

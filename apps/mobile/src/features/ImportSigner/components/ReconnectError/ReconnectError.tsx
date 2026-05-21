@@ -6,7 +6,7 @@ import { Badge } from '@/src/components/Badge/Badge'
 import { SafeButton } from '@/src/components/SafeButton/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { AbsoluteLinearGradient } from '@/src/components/LinearGradient'
-import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/Signer/context/WalletConnectContext'
 
 export function ReconnectError() {
   const { address: expectedAddress } = useLocalSearchParams<{ address: string }>()
