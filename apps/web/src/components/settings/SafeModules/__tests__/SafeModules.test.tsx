@@ -101,7 +101,10 @@ describe('SafeModules', () => {
   it('should open the remove module flow for a regular module', async () => {
     const setTxFlow = jest.fn()
 
-    jest.spyOn(recoveryHooks, 'useDelayModifierByAddress').mockReturnValue(undefined)
+    jest.spyOn(recoveryHooks, 'useDelayModifierByAddress').mockReturnValue({
+      delayModifier: undefined,
+      loading: false,
+    })
     jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
       safe: {
         ...extendedSafeInfo,
@@ -126,7 +129,10 @@ describe('SafeModules', () => {
     const setTxFlow = jest.fn()
     const delayModifier = { address: MOCK_MODULE_1 }
 
-    jest.spyOn(recoveryHooks, 'useDelayModifierByAddress').mockReturnValue(delayModifier as never)
+    jest.spyOn(recoveryHooks, 'useDelayModifierByAddress').mockReturnValue({
+      delayModifier: delayModifier as never,
+      loading: false,
+    })
     jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
       safe: {
         ...extendedSafeInfo,
@@ -145,5 +151,56 @@ describe('SafeModules', () => {
     expect(setTxFlow).toHaveBeenCalledTimes(1)
     const txFlow = setTxFlow.mock.calls[0]?.[0] as RemoveRecoveryFlowElement
     expect(txFlow.props.delayModifier).toBe(delayModifier)
+  })
+
+  it('should disable the remove button while recovery state is loading', async () => {
+    const setTxFlow = jest.fn()
+
+    jest.spyOn(recoveryHooks, 'useDelayModifierByAddress').mockReturnValue({
+      delayModifier: undefined,
+      loading: true,
+    })
+    jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+      safe: {
+        ...extendedSafeInfo,
+        modules: [{ value: MOCK_MODULE_1 }],
+      },
+      safeAddress: '0x123',
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    }))
+
+    const { getByTestId } = renderWithTxContext(<SafeModules />, { setTxFlow })
+
+    const button = getByTestId('module-remove-btn') as HTMLButtonElement
+    expect(button.disabled).toBe(true)
+
+    fireEvent.click(button)
+    expect(setTxFlow).not.toHaveBeenCalled()
+  })
+
+  it('should enable the remove button once recovery state has loaded', async () => {
+    const setTxFlow = jest.fn()
+
+    jest.spyOn(recoveryHooks, 'useDelayModifierByAddress').mockReturnValue({
+      delayModifier: undefined,
+      loading: false,
+    })
+    jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+      safe: {
+        ...extendedSafeInfo,
+        modules: [{ value: MOCK_MODULE_1 }],
+      },
+      safeAddress: '0x123',
+      safeError: undefined,
+      safeLoading: false,
+      safeLoaded: true,
+    }))
+
+    const { getByTestId } = renderWithTxContext(<SafeModules />, { setTxFlow })
+
+    const button = getByTestId('module-remove-btn') as HTMLButtonElement
+    expect(button.disabled).toBe(false)
   })
 })

@@ -22,7 +22,7 @@ describe('useDelayModifierByAddress', () => {
 
     const { result } = renderHook(() => useDelayModifierByAddress(delayModifier2.address))
 
-    expect(result.current).toStrictEqual(delayModifier2)
+    expect(result.current).toStrictEqual({ delayModifier: delayModifier2, loading: false })
   })
 
   it('should return undefined when recovery state is not available', () => {
@@ -30,6 +30,14 @@ describe('useDelayModifierByAddress', () => {
 
     const { result } = renderHook(() => useDelayModifierByAddress(faker.finance.ethereumAddress()))
 
-    expect(result.current).toBeUndefined()
+    expect(result.current).toStrictEqual({ delayModifier: undefined, loading: false })
+  })
+
+  it('should pass through the loading flag from useRecovery', () => {
+    jest.spyOn(useRecoveryHook, 'default').mockReturnValue([undefined, undefined, true])
+
+    const { result } = renderHook(() => useDelayModifierByAddress(faker.finance.ethereumAddress()))
+
+    expect(result.current).toStrictEqual({ delayModifier: undefined, loading: true })
   })
 })
