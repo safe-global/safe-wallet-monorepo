@@ -5,8 +5,8 @@ export const BIOMETRY_ROTATION_DESCRIPTION =
   'Re-import the signer from Settings → Signers to restore signing'
 
 export class BiometryInvalidationError extends Error {
-  constructor(public readonly cause: unknown) {
-    super('Signer encryption key is no longer usable')
+  constructor(cause: unknown) {
+    super('Signer encryption key is no longer usable', { cause })
     this.name = 'BiometryInvalidationError'
   }
 }

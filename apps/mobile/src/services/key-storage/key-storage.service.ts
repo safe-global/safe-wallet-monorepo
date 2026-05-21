@@ -9,7 +9,6 @@ import { Platform } from 'react-native'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export class KeyStorageService implements IKeyStorageService {
-  private storeTries = 0
   private readonly BIOMETRIC_PROMPTS = {
     SKIP: {
       biometryTitle: '',
@@ -33,13 +32,12 @@ export class KeyStorageService implements IKeyStorageService {
     privateKey: string,
     options: PrivateKeyStorageOptions = { requireAuthentication: true },
   ): Promise<void> {
-    this.storeTries = 0
     try {
       const { requireAuthentication = true } = options
       // On the Android emulator there is no Strongbox, but the library can work without it
       // On iOS simulator we can't use the secureEnclave as there is none
       const isEmulator = Platform.OS === 'android' ? false : await DeviceInfo.isEmulator()
-      await this.storeKey(userId, privateKey, requireAuthentication, isEmulator)
+      await this.storeKey(userId, privateKey, requireAuthentication, isEmulator, 0)
     } catch (err) {
       Logger.error('Error storing private key:', asError(err).message)
       throw new Error('Failed to store private key')
@@ -57,9 +55,8 @@ export class KeyStorageService implements IKeyStorageService {
         return undefined
       }
 
-      Logger.error('Error getting private key:', asError(err).message)
-
       if (isBiometryInvalidationError(err)) {
+        Logger.warn('Signer encryption key is invalidated:', asError(err).message)
         DdRum.addError('BiometryInvalidationError', ErrorSource.SOURCE, asError(err).stack ?? '', {
           userId,
           location: 'getPrivateKey',
@@ -68,6 +65,7 @@ export class KeyStorageService implements IKeyStorageService {
         throw new BiometryInvalidationError(err)
       }
 
+      Logger.error('Error getting private key:', asError(err).message)
       return undefined
     }
   }
@@ -123,7 +121,13 @@ export class KeyStorageService implements IKeyStorageService {
     }
   }
 
-  private async storeKey(userId: string, privateKey: string, requireAuth: boolean, isEmulator: boolean): Promise<void> {
+  private async storeKey(
+    userId: string,
+    privateKey: string,
+    requireAuth: boolean,
+    isEmulator: boolean,
+    attempt: number,
+  ): Promise<void> {
     const keyName = this.getKeyNameDeviceCrypto(userId)
 
     if (Platform.OS === 'android') {
@@ -157,15 +161,11 @@ export class KeyStorageService implements IKeyStorageService {
           this.BIOMETRIC_PROMPTS.SAVE,
         )
       }
-
-      // Reset retry counter on successful storage
-      this.storeTries = 0
     } catch (error) {
-      if (this.storeTries === 0 && isBiometryInvalidationError(error)) {
+      if (attempt === 0 && isBiometryInvalidationError(error)) {
         try {
           await this.handleKeyInvalidation(userId, requireAuth)
-          this.storeTries++
-          return await this.storeKey(userId, privateKey, requireAuth, isEmulator)
+          return await this.storeKey(userId, privateKey, requireAuth, isEmulator, attempt + 1)
         } catch (_error) {
           throw new Error('Failed to store private key')
         }
