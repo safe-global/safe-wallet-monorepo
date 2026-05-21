@@ -99,8 +99,10 @@ export const TenderlySimulation = ({
   const nestedIsFinished = isNested ? nestedTx.status.isFinished : true
   const isSimulationFinished = mainIsFinished && nestedIsFinished
 
-  const mainIsSuccess = status.isSuccess && !status.isError
-  const nestedIsSuccess = isNested ? nestedTx.status.isSuccess && !nestedTx.status.isError : true
+  const mainIsSuccess = status.isSuccess && !status.isError && !status.isCallTraceError
+  const nestedIsSuccess = isNested
+    ? nestedTx.status.isSuccess && !nestedTx.status.isError && !nestedTx.status.isCallTraceError
+    : true
   const isSimulationSuccess = mainIsSuccess && nestedIsSuccess
 
   const isLoading = status.isLoading || (isNested && nestedTx.status.isLoading)
