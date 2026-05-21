@@ -28,6 +28,12 @@ jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: jest.fn(() => undefined),
 }))
 
+let mockIsSignedIn = false
+jest.mock('@/store', () => ({
+  __esModule: true,
+  useAppSelector: jest.fn(() => mockIsSignedIn),
+}))
+
 const mockedUseChain = useChain as jest.MockedFunction<typeof useChain>
 
 const setMockChain = (chain: Chain | undefined) => {
@@ -42,6 +48,7 @@ describe('useIsRequireLoginEnabled', () => {
     sessionStorage.clear()
     localStorage.clear()
     setMockChain(undefined)
+    mockIsSignedIn = false
   })
 
   afterEach(() => {
@@ -112,5 +119,18 @@ describe('useIsRequireLoginEnabled', () => {
     const { result } = renderHook(() => useIsRequireLoginEnabled())
 
     expect(result.current).toBe(false)
+  })
+
+  it('re-engages the gate when an opted-in user signs in, so the post-login flow takes over', () => {
+    // Otherwise the "signed in but no Spaces → onboarding" redirect would
+    // never trigger for an opted-in user who later signs in within the same
+    // tab — the override is signed-out-only.
+    setMockChain(mockChain([]))
+    enableClassicView()
+    mockIsSignedIn = true
+
+    const { result } = renderHook(() => useIsRequireLoginEnabled())
+
+    expect(result.current).toBe(true)
   })
 })
