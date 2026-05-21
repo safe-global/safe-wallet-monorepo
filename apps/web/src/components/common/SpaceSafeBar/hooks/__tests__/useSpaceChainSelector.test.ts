@@ -36,6 +36,9 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeAddressFromUrl: jest.fn(),
+}))
 jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
   default: jest.fn(),
@@ -57,6 +60,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useRouter } from 'next/router'
@@ -103,6 +107,7 @@ function setupDefaults(
   ;(useSafeBarSafes as jest.Mock).mockReturnValue({ chainSelectorSafes: allSafes })
   ;(useCurrentSpaceId as jest.Mock).mockReturnValue('42')
   ;(useSafeInfo as jest.Mock).mockReturnValue({ safeAddress: overrides.safeAddress ?? '0xSafe1' })
+  ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('')
   ;(useChainId as jest.Mock).mockReturnValue(overrides.currentChainId ?? '1')
   ;(useChains as jest.Mock).mockReturnValue({ configs: chainConfigs })
   ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush })
@@ -184,6 +189,63 @@ describe('useSpaceChainSelector', () => {
     expect(result.current.deployedChains).toHaveLength(1)
   })
 
+  it('prefers the URL safe address when Redux still points to the previous safe', () => {
+    setupDefaults({
+      allSafes: [singleChainSafe, multiChainSafe],
+      safeAddress: '0xSafe1',
+      currentChainId: '137',
+    })
+    ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xSafe2')
+
+    const { result } = renderHook(() => useSpaceChainSelector())
+
+    expect(result.current.safeAddress).toBe('0xSafe2')
+    expect(result.current.deployedChainIds).toEqual(['1', '137'])
+    expect(result.current.safeName).toBe('Multi Safe')
+  })
+
+  // Regression guard: when the user just navigated to a new safe, the URL updates synchronously
+  // but Redux's safeAddress lags behind. handleChainChange must push the URL safe, not the
+  // Redux one — otherwise the chain switcher rewrites the URL with the previous safe's address.
+  it('navigates with the URL safe address when Redux is stale (handleChainChange uses URL, not Redux)', () => {
+    setupDefaults({
+      allSafes: [singleChainSafe, multiChainSafe],
+      safeAddress: '0xSafe1',
+      currentChainId: '137',
+    })
+    ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xSafe2')
+
+    const { result } = renderHook(() => useSpaceChainSelector())
+
+    act(() => {
+      result.current.handleChainChange('1')
+    })
+
+    expect(mockPush).toHaveBeenCalledTimes(1)
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/home',
+      query: { safe: 'eth:0xSafe2' },
+    })
+  })
+
+  it('recomputes deployedChains/safeName when only urlSafeAddress changes between renders', () => {
+    setupDefaults({
+      allSafes: [singleChainSafe, multiChainSafe],
+      safeAddress: '0xSafe1',
+    })
+    ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xSafe1')
+
+    const { result, rerender } = renderHook(() => useSpaceChainSelector())
+
+    expect(result.current.safeName).toBe('My Safe')
+    expect(result.current.deployedChainIds).toEqual(['1'])
+    ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xSafe2')
+    rerender()
+
+    expect(result.current.safeName).toBe('Multi Safe')
+    expect(result.current.deployedChainIds).toEqual(['1', '137'])
+  })
+
   it('falls back to null for chainLogoUri when chain config exists but chainLogoUri is missing', () => {
     ;(useChains as jest.Mock).mockReturnValue({
       configs: [{ chainId: '1', chainName: 'Ethereum', shortName: 'eth' }],
@@ -218,7 +280,7 @@ describe('useSpaceChainSelector', () => {
     })
   })
 
-  it('returns safeAddress from useSafeInfo', () => {
+  it('returns safeAddress from Redux when URL is empty', () => {
     const { result } = renderHook(() => useSpaceChainSelector())
     expect(result.current.safeAddress).toBe('0xSafe1')
   })

@@ -17,6 +17,7 @@ import {
   PanelRight,
   EllipsisVertical,
   Scale,
+  Shield,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
@@ -58,13 +59,12 @@ export const spacesSetupGroup: SidebarGroupConfig = {
       label: 'Team',
       href: AppRoutes.spaces.members,
     },
-    // TODO: Activate when Spaces Security page is ready
-    // {
-    //   icon: Shield,
-    //   label: 'Security',
-    //   href: AppRoutes.spaces.security,
-    //   activeMemberOnly: true,
-    // },
+    {
+      icon: Shield,
+      label: 'Security',
+      href: AppRoutes.spaces.security,
+      activeMemberOnly: true,
+    },
     {
       icon: Settings,
       label: 'Settings',

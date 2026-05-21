@@ -10,11 +10,11 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/chains/${queryArg.chainId}/delegates`,
           params: {
-            safe: queryArg.safe,
-            delegate: queryArg.delegate,
-            delegator: queryArg.delegator,
-            label: queryArg.label,
             cursor: queryArg.cursor,
+            label: queryArg.label,
+            delegator: queryArg.delegator,
+            delegate: queryArg.delegate,
+            safe: queryArg.safe,
           },
         }),
         providesTags: ['delegates'],
@@ -39,11 +39,11 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v2/chains/${queryArg.chainId}/delegates`,
           params: {
-            safe: queryArg.safe,
-            delegate: queryArg.delegate,
-            delegator: queryArg.delegator,
-            label: queryArg.label,
             cursor: queryArg.cursor,
+            label: queryArg.label,
+            delegator: queryArg.delegator,
+            delegate: queryArg.delegate,
+            safe: queryArg.safe,
           },
         }),
         providesTags: ['delegates'],
@@ -73,16 +73,16 @@ export type DelegatesGetDelegatesV1ApiResponse =
 export type DelegatesGetDelegatesV1ApiArg = {
   /** Chain ID where delegates are registered */
   chainId: string
-  /** Filter by Safe address */
-  safe?: string
-  /** Filter by delegate address */
-  delegate?: string
-  /** Filter by delegator address */
-  delegator?: string
-  /** Filter by delegate label */
-  label?: string
   /** Pagination cursor for retrieving the next set of results */
   cursor?: string
+  /** Filter by delegate label */
+  label?: string
+  /** Filter by delegator address */
+  delegator?: string
+  /** Filter by delegate address */
+  delegate?: string
+  /** Filter by Safe address */
+  safe?: string
 }
 export type DelegatesPostDelegateV1ApiResponse = unknown
 export type DelegatesPostDelegateV1ApiArg = {
@@ -105,16 +105,16 @@ export type DelegatesGetDelegatesV2ApiResponse =
 export type DelegatesGetDelegatesV2ApiArg = {
   /** Chain ID where delegates are registered */
   chainId: string
-  /** Filter by Safe address (0x prefixed hex string) */
-  safe?: string
-  /** Filter by delegate address (0x prefixed hex string) */
-  delegate?: string
-  /** Filter by delegator address (0x prefixed hex string) */
-  delegator?: string
-  /** Filter by delegate label or name */
-  label?: string
   /** Pagination cursor for retrieving the next set of results */
   cursor?: string
+  /** Filter by delegate label or name */
+  label?: string
+  /** Filter by delegator address (0x prefixed hex string) */
+  delegator?: string
+  /** Filter by delegate address (0x prefixed hex string) */
+  delegate?: string
+  /** Filter by Safe address (0x prefixed hex string) */
+  safe?: string
 }
 export type DelegatesPostDelegateV2ApiResponse = unknown
 export type DelegatesPostDelegateV2ApiArg = {

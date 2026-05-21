@@ -46,7 +46,7 @@ export const SpaceSelectorDropdown = ({
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
   const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
-  const triggerAriaLabel = triggerVariant === 'addToWorkspace' ? 'Add Safe to workspace' : 'Open workspace selector'
+  const triggerAriaLabel = triggerVariant === 'addToWorkspace' ? 'Add Safe to space' : 'Open workspace selector'
   const safe = useSafeQueryParam() || undefined
 
   const { addToSpace, loadingSpaceId } = useAddSafeToSpace({ spaces, onSpaceAdded })
@@ -159,7 +159,7 @@ export const SpaceSelectorDropdown = ({
             <span className={css.addSafeToWorkspaceRing}>
               <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} strokeWidth={2.5} />
             </span>
-            <span className={css.addSafeToWorkspaceLabel}>Add Safe to workspace</span>
+            <span className={css.addSafeToWorkspaceLabel}>Add Safe to space</span>
           </>
         ) : (
           <>
@@ -232,7 +232,7 @@ export const SpaceSelectorDropdown = ({
           return (
             <Tooltip key="add-space-tooltip">
               <TooltipTrigger render={<div className="block w-full" />}>{addSpaceMenuItem}</TooltipTrigger>
-              <TooltipContent side="right">You can have up to {SPACES_LIMIT} workspaces</TooltipContent>
+              <TooltipContent side="right">Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
             </Tooltip>
           )
         })()}

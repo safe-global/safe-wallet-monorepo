@@ -30,7 +30,7 @@ export const useNotificationManager = () => {
   const pendingPermissionRequestRef = useRef(false)
 
   const requestAndRegister = useCallback(
-    async (updateNotificationSettings = true, openSettingsOnDenied = false) => {
+    async (updateNotificationSettings = true) => {
       const { permission } = await NotificationsService.getAllPermissions()
 
       if (permission === 'granted') {
@@ -40,14 +40,11 @@ export const useNotificationManager = () => {
 
         if (!loading && !error) {
           dispatch(toggleDeviceNotifications(true))
-          return true
+          return { success: true, permission } as const
         }
-      } else if (openSettingsOnDenied) {
-        pendingPermissionRequestRef.current = true
-        await NotificationsService.getAllPermissions(true)
       }
 
-      return false
+      return { success: false, permission } as const
     },
     [dispatch, registerForNotifications],
   )
@@ -55,7 +52,6 @@ export const useNotificationManager = () => {
   const enableNotification = useCallback(async () => {
     try {
       Logger.info('enableNotification :: STARTED', { promptAttempts })
-      // Check if device notifications are enabled
       const deviceNotificationStatus = await NotificationsService.isDeviceNotificationEnabled()
 
       if (deviceNotificationStatus) {
@@ -66,13 +62,28 @@ export const useNotificationManager = () => {
           return true
         }
         return false
-      } else if (promptAttempts < promptThreshold) {
-        dispatch(updatePromptAttempts(promptAttempts + 1))
-        return await requestAndRegister()
-      } else {
-        pendingPermissionRequestRef.current = true
-        await NotificationsService.getAllPermissions(true)
       }
+
+      // Once iOS auth status is DENIED (user said "no" to the native prompt or disabled in Settings),
+      // notifee.requestPermission() is a silent no-op — looping through the threshold just burns
+      // taps invisibly. Go straight to the in-app explainer Alert so the user can EXPLICITLY tap
+      // "Turn on" to open Settings. Apple 5.1.1(iv): never auto-redirect on denial.
+      if (await NotificationsService.isAuthorizationDenied()) {
+        pendingPermissionRequestRef.current = true
+        await NotificationsService.requestPushNotificationsPermission()
+        return false
+      }
+
+      // NOT_DETERMINED: the native OS prompt can still be shown. Use the threshold to limit how
+      // many times we attempt it before falling back to the explainer.
+      if (promptAttempts < promptThreshold) {
+        dispatch(updatePromptAttempts(promptAttempts + 1))
+        const { success } = await requestAndRegister()
+        return success
+      }
+
+      pendingPermissionRequestRef.current = true
+      await NotificationsService.requestPushNotificationsPermission()
     } catch (error) {
       pendingPermissionRequestRef.current = false
       Logger.error('Error enabling push notifications', error)
@@ -102,11 +113,19 @@ export const useNotificationManager = () => {
 
       if (!isSubscribed) {
         if (!deviceNotificationStatus) {
-          const success = await requestAndRegister(false, true)
+          const { success, permission } = await requestAndRegister(false)
           if (success) {
             return true
           }
-          // Don't clear the flag here if not granted immediately
+          // Only show the Settings explainer when the OS permission was actually denied.
+          // Registration failures with a granted permission (network, backend) must not push
+          // the user to Settings — Settings won't help and would leave pendingPermissionRequestRef
+          // stuck true. Apple 5.1.1(iv) compliance is unaffected: Settings is still only opened
+          // from an explicit "Turn on" tap inside the Alert.
+          if (permission === 'denied') {
+            pendingPermissionRequestRef.current = true
+            await NotificationsService.requestPushNotificationsPermission()
+          }
         } else {
           await registerForNotifications(false)
         }

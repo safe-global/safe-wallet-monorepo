@@ -5,8 +5,13 @@
  * Replaces the real AppKit-based provider with a mock
  * controlled by walletConnectE2eState.
  *
- * - initiateConnection reads connectResult and isOwner from the e2e state
- *   and navigates directly — no real CGW API call needed.
+ * - initiateConnection reads connectResult / isOwner from the e2e state and
+ *   navigates directly — no real CGW API call needed. Mirrors
+ *   useImportSignerFlow's collision-guard branch via the shared
+ *   findCollidingSigner helper.
+ * - reconnect is single-shot: when reconnectMismatch is true it routes to
+ *   /import-signers/reconnect-error and clears the flag, so the retry
+ *   succeeds. Mirrors useReconnectFlow's mismatch routing.
  * - Session/network state is driven by TestCtrls buttons.
  */
 import React, { createContext, useCallback, useContext, useMemo } from 'react'
@@ -15,26 +20,11 @@ import { router } from 'expo-router'
 import { getAddress } from 'ethers'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSigners } from '@/src/store/signersSlice'
+import { findCollidingSigner } from '@/src/features/ImportSigner/utils/findCollidingSigner'
+import { showCollisionAlert } from '@/src/features/ImportSigner/utils/showCollisionAlert'
 import { walletConnectE2eState } from './walletConnectE2eState'
 import Logger from '@/src/utils/logger'
-
-interface WalletConnectContextValue {
-  initiateConnection: () => Promise<void>
-  reconnect: (signerAddress: string) => Promise<void>
-  switchNetwork: (chainId: string) => Promise<void>
-  switchNetworkIfNeeded: () => Promise<void>
-  isWrongNetwork: boolean
-  sign: (params: unknown) => Promise<unknown>
-  hasProvider: boolean
-  provider: undefined
-  isWalletConnectSigner: (address: string) => boolean
-  isConnected: boolean
-  address: string | undefined
-  chainId: number | undefined
-  walletInfo: { name: string; icon?: string } | undefined
-  disconnect: () => Promise<void>
-  open: () => Promise<void>
-}
+import type { WalletConnectContextValue } from './types'
 
 const WalletConnectContext = createContext<WalletConnectContextValue | null>(null)
 
@@ -66,6 +56,15 @@ export function WalletConnectProvider({ children }: WalletConnectProviderProps) 
     [signers],
   )
 
+  const clearSession = useCallback(() => {
+    walletConnectE2eState.set({
+      isConnected: false,
+      address: undefined,
+      walletInfo: undefined,
+      hasProvider: false,
+    })
+  }, [])
+
   const initiateConnection = useCallback(async () => {
     const currentState = walletConnectE2eState.get()
     const { connectResult, connectError, isOwner } = currentState
@@ -93,6 +92,18 @@ export function WalletConnectProvider({ children }: WalletConnectProviderProps) 
 
     // Use isOwner flag from e2e state — no CGW API call needed
     if (isOwner) {
+      // Mirror useImportSignerFlow's collision check via the shared helper.
+      // When an existing signer of a *different* type lives at the address,
+      // production calls Alert.alert + disconnects without navigating.
+      const colliding = findCollidingSigner(signers, checksumAddress, 'walletconnect')
+      if (colliding) {
+        Logger.info(`[E2E] initiateConnection: collision with existing ${colliding.type} signer`)
+        showCollisionAlert(colliding)
+        // Disconnect — clear session state so the user can start over
+        clearSession()
+        return
+      }
+
       router.push({
         pathname: '/import-signers/name-signer',
         params: { address: checksumAddress, walletName },
@@ -103,15 +114,33 @@ export function WalletConnectProvider({ children }: WalletConnectProviderProps) 
         params: { address: checksumAddress, walletIcon },
       })
     }
-  }, [])
+  }, [signers, clearSession])
 
-  const reconnect = useCallback(async (signerAddress: string) => {
-    Logger.info('[E2E] reconnect called — marking session active for', signerAddress)
-    walletConnectE2eState.set({
-      isConnected: true,
-      address: getAddress(signerAddress),
-    })
-  }, [])
+  const reconnect = useCallback(
+    async (signerAddress: string) => {
+      const { reconnectMismatch } = walletConnectE2eState.get()
+      if (reconnectMismatch) {
+        Logger.info('[E2E] reconnect: simulating wrong-wallet mismatch')
+        // Single-shot — clear so the next attempt (typically the retry from
+        // ReconnectError) succeeds. Mirrors useReconnectFlow's mismatch routing.
+        walletConnectE2eState.set({ reconnectMismatch: false })
+        // Mirror production: useReconnectFlow disconnects before routing on
+        // mismatch, so the session state stays consistent with the UI.
+        clearSession()
+        router.push({
+          pathname: '/import-signers/reconnect-error',
+          params: { address: getAddress(signerAddress) },
+        })
+        return
+      }
+      Logger.info('[E2E] reconnect — marking session active for', signerAddress)
+      walletConnectE2eState.set({
+        isConnected: true,
+        address: getAddress(signerAddress),
+      })
+    },
+    [clearSession],
+  )
 
   const switchNetwork = useCallback(async (_chainId: string) => {
     Logger.info('[E2E] switchNetwork called')
@@ -122,18 +151,13 @@ export function WalletConnectProvider({ children }: WalletConnectProviderProps) 
     walletConnectE2eState.set({ isWrongNetwork: false })
   }, [])
 
-  const sign = useCallback(async (_params: unknown): Promise<unknown> => {
+  const sign = useCallback<WalletConnectContextValue['sign']>(async () => {
     throw new Error('E2E: Signing not implemented in test mode')
   }, [])
 
   const disconnect = useCallback(async () => {
-    walletConnectE2eState.set({
-      isConnected: false,
-      address: undefined,
-      walletInfo: undefined,
-      hasProvider: false,
-    })
-  }, [])
+    clearSession()
+  }, [clearSession])
 
   const open = useCallback(async () => {
     Logger.info('[E2E] open called')

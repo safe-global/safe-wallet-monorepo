@@ -71,7 +71,7 @@ const config: ConfigFile = {
       filterEndpoints: [/^users/],
     },
     '../src/gateway/AUTO_GENERATED/spaces.ts': {
-      filterEndpoints: [/^(spaces|members|spaceSafes|addressBooks)/],
+      filterEndpoints: [/^(spaces|members|spaceSafes|addressBook|userAddressBook)/],
     },
     '../src/gateway/AUTO_GENERATED/positions.ts': {
       filterEndpoints: [/^positions/],

@@ -40,3 +40,5 @@ export function useWalletConnectSigning() {
 
   return { sign, hasProvider: Boolean(provider) }
 }
+
+export type WalletConnectSigningResult = ReturnType<typeof useWalletConnectSigning>

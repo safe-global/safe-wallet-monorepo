@@ -37,6 +37,7 @@ import CreateSpaceOnboarding from './components/CreateSpaceOnboarding'
 import SelectSafesOnboarding from './components/SelectSafesOnboarding'
 import InviteMembersOnboarding from './components/InviteMembersOnboarding'
 import SelectSafeModal from './components/SelectSafeModal'
+import SecurityHubPage from './components/SecurityHub/Page'
 
 // Service imports
 import { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -76,6 +77,7 @@ const feature: SpacesContract = {
   SpaceAddressBookPage,
   SpaceSettingsPage,
   SpacePoliciesPage,
+  SecurityHubPage,
 
   // Services
   isUnauthorized,

@@ -168,8 +168,8 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, footer }: Enha
         sx={{
           width: '100%',
           overflowX: ['auto', 'hidden'],
-          borderBottomLeftRadius: showPagination ? 0 : '6px',
-          borderBottomRightRadius: showPagination ? 0 : '6px',
+          borderBottomLeftRadius: showPagination ? 0 : '24px',
+          borderBottomRightRadius: showPagination ? 0 : '24px',
         }}
       >
         <Table
@@ -177,7 +177,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, footer }: Enha
           className={classNames({ [css.mobileColumn]: mobileVariant, [css.compactTable]: compact })}
         >
           <EnhancedTableHead headCells={headCells} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
-          <TableBody>
+          <TableBody className={css.tableBody}>
             {pagedRows.length > 0 ? (
               pagedRows.map((row, index) => {
                 const rowKey = row.key ?? index

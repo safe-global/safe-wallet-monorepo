@@ -90,6 +90,8 @@ export type UserSession = {
   authMethod: 'siwe' | 'oidc'
   /** Wallet signer address. Present only for SIWE-authenticated users. */
   signerAddress?: string
+  /** Verified email address. Present only for OIDC-authenticated users when stored. */
+  email?: string
 }
 export type AuthNonce = {
   nonce: string

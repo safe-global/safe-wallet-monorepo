@@ -82,9 +82,11 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
 
   return (
     <>
-      <Button data-testid="add-manually-button" size="medium" onClick={() => setAddManuallyOpen(true)}>
-        + Add manually
-      </Button>
+      <div className="flex justify-center">
+        <Button data-testid="add-manually-button" size="medium" onClick={() => setAddManuallyOpen(true)}>
+          + Add manually
+        </Button>
+      </div>
       <ModalDialog
         open={addManuallyOpen}
         dialogTitle="Add safe account"
