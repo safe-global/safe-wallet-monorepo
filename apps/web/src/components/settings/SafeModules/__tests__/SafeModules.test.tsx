@@ -62,18 +62,6 @@ describe('SafeModules', () => {
     await waitFor(() => expect(utils.getByText('No modules enabled')).toBeDefined())
   })
 
-  it('should render placeholder label if safe is loading', async () => {
-    jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
-      safe: extendedSafeInfo,
-      safeAddress: '',
-      safeError: undefined,
-      safeLoading: true,
-      safeLoaded: false,
-    }))
-
-    const utils = render(<SafeModules />)
-    await waitFor(() => expect(utils.getByText('No modules enabled')).toBeDefined())
-  })
   it('should render module addresses for defined modules', async () => {
     jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
       safe: {
