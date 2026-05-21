@@ -9,8 +9,7 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
 import { RemoveRecoveryFlow } from '@/components/tx-flow/flows'
-import { RecoveryFeature, useRecovery } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__'
+import { useDelayModifierByAddress } from '@/features/recovery'
 
 import css from '../TransactionGuards/styles.module.css'
 
@@ -24,9 +23,7 @@ const NoModules = () => {
 
 const ModuleDisplay = ({ moduleAddress, chainId, name }: { moduleAddress: string; chainId: string; name?: string }) => {
   const { setTxFlow } = useContext(TxModalContext)
-  const [recovery] = useRecovery()
-  const { selectDelayModifierByAddress, $isReady } = useLoadFeature(RecoveryFeature)
-  const delayModifier = recovery && selectDelayModifierByAddress?.(recovery, moduleAddress)
+  const delayModifier = useDelayModifierByAddress(moduleAddress)
 
   const onRemove = () => {
     if (delayModifier) {
@@ -53,7 +50,7 @@ const ModuleDisplay = ({ moduleAddress, chainId, name }: { moduleAddress: string
             onClick={onRemove}
             color="error"
             size="small"
-            disabled={!isOk || !$isReady}
+            disabled={!isOk}
             title="Remove module"
           >
             <SvgIcon component={DeleteIcon} inheritViewBox color="error" fontSize="small" />
