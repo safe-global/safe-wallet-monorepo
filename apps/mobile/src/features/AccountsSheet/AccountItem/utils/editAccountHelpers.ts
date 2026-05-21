@@ -123,17 +123,28 @@ export const cleanupSinglePrivateKey = async (
 ): Promise<StandardErrorResult<{ success: true }>> => {
   try {
     let privateKey: string | undefined
+    let invalidated = false
     try {
       privateKey = await keyStorageService.getPrivateKey(ownerAddress)
     } catch (err) {
       if (err instanceof BiometryInvalidationError) {
         Logger.warn('Skipping delegate cleanup: signer encryption key invalidated', { ownerAddress })
+        invalidated = true
       } else {
         throw err
       }
     }
 
     if (!privateKey) {
+      // Only force-wipe when we know the wrapping key is unusable. Without
+      // this gate, transient failures (user-cancel, lockout, unknown decrypt
+      // errors) would silently delete the signer despite the user not asking
+      // for it.
+      if (!invalidated) {
+        return createErrorResult(ErrorType.STORAGE_ERROR, 'Private key not found for the specified address', null, {
+          ownerAddress,
+        })
+      }
       await keyStorageService.removePrivateKey(ownerAddress, { requireAuthentication: false })
       dispatch(removeSigner(ownerAddress))
       return createSuccessResult({ success: true as const })

@@ -224,7 +224,7 @@ describe('editAccountHelpers', () => {
       expect(mockDispatch).toHaveBeenCalledWith(removeSigner(mockAddress1))
     })
 
-    it('should cleanly remove the signer when the private key is missing', async () => {
+    it('should NOT wipe the signer when getPrivateKey returns undefined without invalidation', async () => {
       const mockDispatch = jest.fn() as unknown as AppDispatch
       const mockRemoveAllDelegatesForOwner = jest.fn()
 
@@ -232,10 +232,11 @@ describe('editAccountHelpers', () => {
 
       const result = await cleanupSinglePrivateKey(mockAddress1, mockRemoveAllDelegatesForOwner, mockDispatch)
 
-      expect(result.success).toBe(true)
+      expect(result.success).toBe(false)
+      expect(result.error?.type).toBe(ErrorType.STORAGE_ERROR)
       expect(mockRemoveAllDelegatesForOwner).not.toHaveBeenCalled()
-      expect(keyStorageService.removePrivateKey).toHaveBeenCalledWith(mockAddress1, { requireAuthentication: false })
-      expect(mockDispatch).toHaveBeenCalledWith(removeSigner(mockAddress1))
+      expect(keyStorageService.removePrivateKey).not.toHaveBeenCalled()
+      expect(mockDispatch).not.toHaveBeenCalled()
     })
 
     it('should handle delegate removal failure', async () => {
@@ -318,18 +319,17 @@ describe('editAccountHelpers', () => {
       expect(mockDispatch).not.toHaveBeenCalled()
     })
 
-    it('should cleanly remove the signer when the private key is missing', async () => {
+    it('should report STORAGE_ERROR when getPrivateKey returns undefined without invalidation', async () => {
       const mockDispatch = jest.fn() as unknown as AppDispatch
       const mockRemoveAllDelegatesForOwner = jest.fn()
 
       ;(keyStorageService.getPrivateKey as jest.Mock).mockResolvedValue(null)
-      ;(keyStorageService.removePrivateKey as jest.Mock).mockResolvedValue(undefined)
 
       await cleanupPrivateKeysForOwners([mockAddress1], mockRemoveAllDelegatesForOwner, mockDispatch)
 
       expect(mockRemoveAllDelegatesForOwner).not.toHaveBeenCalled()
-      expect(keyStorageService.removePrivateKey).toHaveBeenCalledWith(mockAddress1, { requireAuthentication: false })
-      expect(mockDispatch).toHaveBeenCalledWith(removeSigner(mockAddress1))
+      expect(keyStorageService.removePrivateKey).not.toHaveBeenCalled()
+      expect(mockDispatch).not.toHaveBeenCalled()
     })
 
     it('should cleanly remove the signer when the wrapping key has been biometry-invalidated', async () => {

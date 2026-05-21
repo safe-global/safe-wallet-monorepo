@@ -3,7 +3,6 @@ import { useState } from 'react'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { useRouter } from 'expo-router'
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
-import { keyStorageService } from '@/src/services/key-storage'
 import useDelegate from '@/src/hooks/useDelegate'
 import Logger from '@/src/utils/logger'
 import { detectInputType, InputType } from '@/src/utils/inputDetection'
@@ -60,8 +59,6 @@ export const useImportPrivateKey = () => {
       }
 
       try {
-        // Drop any stale invalidated key entry so the re-import provisions a fresh wrapping key.
-        await keyStorageService.removePrivateKey(wallet.address, { requireAuthentication: false })
         await storePrivateKey(wallet.address, trimmedInput)
 
         // Create a delegate for this owner

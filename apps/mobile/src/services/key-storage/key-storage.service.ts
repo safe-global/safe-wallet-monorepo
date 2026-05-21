@@ -144,6 +144,20 @@ export class KeyStorageService implements IKeyStorageService {
         { accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY, service: this.getKeyService(userId) },
       )
 
+      // On iOS, encrypt uses only the public-key half of the SE asymmetric key
+      // and never surfaces invalidation. Read the blob back so an orphan SE
+      // private key fails here (where the existing self-heal can recover) rather
+      // than at sign time. Android's symmetric encrypt already required auth and
+      // would have thrown above, so this probe is iOS-only.
+      if (Platform.OS === 'ios') {
+        await DeviceCrypto.decrypt(
+          keyName,
+          encryptedPrivateKey.encryptedText,
+          encryptedPrivateKey.iv,
+          this.BIOMETRIC_PROMPTS.SAVE,
+        )
+      }
+
       // Reset retry counter on successful storage
       this.storeTries = 0
     } catch (error) {

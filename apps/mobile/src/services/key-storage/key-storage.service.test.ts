@@ -266,6 +266,34 @@ describe('KeyStorageService', () => {
       expect(mockDeviceCrypto.deleteKey).toHaveBeenCalled()
     })
 
+    it('retries storage when iOS post-store decrypt probe reveals orphan SE key', async () => {
+      // iOS Quick Start migration leaves an orphan SE asymmetric key reference
+      // where encrypt (public-half) succeeds but decrypt (private-half) fails.
+      // The probe should surface this and trigger handleKeyInvalidation.
+      ;(Platform.OS as string) = 'ios'
+      mockDeviceInfo.isEmulator.mockResolvedValue(false)
+      mockDeviceCrypto.getOrCreateAsymmetricKey.mockResolvedValue('key-name')
+
+      mockDeviceCrypto.encrypt.mockResolvedValue({ encryptedText: 'encrypted', iv: 'iv-value' })
+      mockDeviceCrypto.decrypt
+        .mockRejectedValueOnce(new Error('Domain=CryptoTokenKit Code=-3 ... AKSError=-536362999'))
+        .mockResolvedValueOnce('decrypted')
+
+      mockKeychain.getGenericPassword.mockResolvedValue(false)
+      mockKeychain.resetGenericPassword.mockResolvedValue(true)
+      mockDeviceCrypto.deleteKey.mockResolvedValue(undefined as never)
+      mockKeychain.setGenericPassword.mockResolvedValue({
+        service: 'test-service',
+        storage: Keychain.STORAGE_TYPE.AES_GCM,
+      })
+
+      await service.storePrivateKey(userId, privateKey)
+
+      expect(mockDeviceCrypto.encrypt).toHaveBeenCalledTimes(2)
+      expect(mockDeviceCrypto.decrypt).toHaveBeenCalledTimes(2)
+      expect(mockDeviceCrypto.deleteKey).toHaveBeenCalled()
+    })
+
     it('retries storage after key invalidation on Android (KeyPermanentlyInvalidatedException)', async () => {
       ;(Platform.OS as string) = 'android'
       mockDeviceCrypto.getOrCreateSymmetricKey.mockResolvedValue(undefined as never)
