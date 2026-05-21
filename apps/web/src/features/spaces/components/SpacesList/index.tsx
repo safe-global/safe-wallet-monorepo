@@ -2,6 +2,7 @@ import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import SpaceCard from 'src/features/spaces/components/SpaceCard'
 import SignInOptions from '../SignInOptions'
+import LocalSafesAlert from './LocalSafesAlert'
 import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import { useIsClassicViewFeatureEnabled } from '@/hooks/useClassicView'
 import ClassicViewLink from '../ClassicViewLink'
@@ -59,6 +60,8 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
 
   return (
     <>
+      <LocalSafesAlert />
+
       <Card sx={{ p: 5, textAlign: 'center' }}>
         <Typography variant="h3" fontWeight={600} mb={3}>
           Sign in
