@@ -1,5 +1,5 @@
 import React from 'react'
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ImportAddressBookDialog from '../ImportAddressBookDialog'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
@@ -20,6 +20,7 @@ const upsertionSpy = jest
 describe('ImportAddressBookDialog', () => {
   beforeEach(() => {
     mockedUseChains.mockReturnValue({ configs: [{ chainId: '1' } as Chain, { chainId: '5' } as Chain] })
+    upsertionSpyFn.mockReset()
   })
 
   afterAll(() => {
@@ -100,5 +101,37 @@ describe('ImportAddressBookDialog', () => {
         }),
       ]),
     )
+  })
+
+  it('disables the Import button when no contacts are selected', () => {
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x123': 'Alice' },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    expect(screen.getByRole('button', { name: /Import contacts \(0\)/i })).toBeDisabled()
+  })
+
+  it('shows a success message and delays closing after a successful import', async () => {
+    upsertionSpyFn.mockResolvedValue({ data: {} })
+
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x123': 'Alice' },
+    })
+    const handleClose = jest.fn()
+
+    render(<ImportAddressBookDialog handleClose={handleClose} />)
+
+    await userEvent.click(screen.getByText(/Alice/i))
+    await userEvent.click(screen.getByText(/Import contacts \(1\)/i))
+
+    await waitFor(() => {
+      expect(screen.getByText(/Contacts imported successfully/i)).toBeInTheDocument()
+    })
+    expect(handleClose).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: /Import contacts \(1\)/i })).toBeDisabled()
+
+    await waitFor(() => expect(handleClose).toHaveBeenCalledTimes(1), { timeout: 1500 })
   })
 })

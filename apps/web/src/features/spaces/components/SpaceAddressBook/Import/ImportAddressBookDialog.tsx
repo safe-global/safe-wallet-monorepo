@@ -16,7 +16,7 @@ import {
 
 import ModalDialog from '@/components/common/ModalDialog'
 import ContactsList from './ContactsList'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import css from '../../AddAccounts/styles.module.css'
 import SearchIcon from '@/public/images/common/search.svg'
@@ -35,10 +35,13 @@ export type ImportContactsFormValues = {
   contacts: Record<string, string | undefined> // e.g. "1:0x123": "Alice"
 }
 
+const SUCCESS_CLOSE_DELAY_MS = 500
+
 const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) => {
   const [error, setError] = useState<string>()
   const [searchQuery, setSearchQuery] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
   const { configs } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
@@ -64,10 +67,10 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
     },
   })
 
-  const { handleSubmit, formState, watch } = formMethods
+  const { handleSubmit, watch } = formMethods
 
   const selectedContacts = watch('contacts')
-  const selectedContactsLength = Object.values(selectedContacts).filter(Boolean)
+  const selectedCount = Object.values(selectedContacts).filter(Boolean).length
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
@@ -96,13 +99,19 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
       trackEvent(SPACE_EVENTS.IMPORT_ADDRESS_BOOK_SUBMIT)
 
-      handleClose()
+      setIsSuccess(true)
     } catch (e) {
       setError('Something went wrong. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
   })
+
+  useEffect(() => {
+    if (!isSuccess) return
+    const timer = setTimeout(handleClose, SUCCESS_CLOSE_DELAY_MS)
+    return () => clearTimeout(timer)
+  }, [isSuccess, handleClose])
 
   return (
     <ModalDialog
@@ -165,6 +174,12 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
                   </Alert>
                 )}
 
+                {isSuccess && (
+                  <Alert severity="success" sx={{ mt: 2 }}>
+                    Contacts imported successfully!
+                  </Alert>
+                )}
+
                 <DialogActions>
                   <Button data-testid="cancel-btn" onClick={handleClose}>
                     Cancel
@@ -172,14 +187,10 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
                   <Button
                     type="submit"
                     variant="contained"
-                    disabled={!formState.isValid || isSubmitting}
+                    disabled={selectedCount === 0 || isSubmitting || isSuccess}
                     disableElevation
                   >
-                    {isSubmitting ? (
-                      <CircularProgress size={20} />
-                    ) : (
-                      `Import contacts (${selectedContactsLength.length})`
-                    )}
+                    {isSubmitting ? <CircularProgress size={20} /> : `Import contacts (${selectedCount})`}
                   </Button>
                 </DialogActions>
               </form>
