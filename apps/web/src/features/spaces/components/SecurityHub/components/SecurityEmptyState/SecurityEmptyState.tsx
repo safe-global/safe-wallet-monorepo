@@ -7,7 +7,7 @@ import { WidgetEmptyState } from '@/features/spaces/components/SafeWidget'
 
 const SecurityEmptyState = (): ReactElement => {
   return (
-    <div data-testid="security-empty-state" className="rounded-lg border border-border bg-background-paper">
+    <div data-testid="security-empty-state" className="rounded-lg border border-border bg-card">
       <WidgetEmptyState
         className="max-w-[360px] mx-auto py-16"
         icon={<ShieldCheck className="size-6 text-green-500" />}
