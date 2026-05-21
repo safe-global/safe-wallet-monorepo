@@ -3,6 +3,8 @@ import { MyAccountsFeature } from '@/features/myAccounts'
 import SpaceCard from 'src/features/spaces/components/SpaceCard'
 import SignInOptions from '../SignInOptions'
 import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import { useIsClassicViewFeatureEnabled } from '@/hooks/useClassicView'
+import ClassicViewLink from '../ClassicViewLink'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -53,18 +55,24 @@ const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?
 }
 
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
+  const isClassicViewFeatureEnabled = useIsClassicViewFeatureEnabled() === true
+
   return (
-    <Card sx={{ p: 5, textAlign: 'center' }}>
-      <Typography variant="h3" fontWeight={600} mb={3}>
-        Sign in
-      </Typography>
+    <>
+      <Card sx={{ p: 5, textAlign: 'center' }}>
+        <Typography variant="h3" fontWeight={600} mb={3}>
+          Sign in
+        </Typography>
 
-      <Typography color="text.secondary" mb={3}>
-        Sign in to view or create a workspace.
-      </Typography>
+        <Typography color="text.secondary" mb={3}>
+          Sign in to view or create a workspace.
+        </Typography>
 
-      <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
-    </Card>
+        <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+      </Card>
+
+      {isClassicViewFeatureEnabled && <ClassicViewLink />}
+    </>
   )
 }
 
