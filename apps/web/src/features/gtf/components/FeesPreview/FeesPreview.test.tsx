@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { screen, fireEvent } from '@testing-library/react'
+import { render } from '@/tests/test-utils'
 import FeesPreview from './index'
 import type { FeesPreviewData } from '../../hooks/useFeesPreview'
 

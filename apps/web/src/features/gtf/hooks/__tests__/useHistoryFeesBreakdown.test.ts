@@ -62,6 +62,7 @@ const mockSafePaysTx = {
     gasToken: WETH,
     gasTokenInfo: { symbol: 'WETH', decimals: 18, logoUri: 'https://weth.logo' },
     refundReceiver: { value: GELATO_COLLECTOR },
+    payment: '102508541265216',
   },
 } as unknown as TransactionDetails
 
