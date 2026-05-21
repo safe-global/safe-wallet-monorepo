@@ -60,8 +60,6 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
 
   return (
     <>
-      <LocalSafesAlert />
-
       <Card sx={{ p: 5, textAlign: 'center' }}>
         <Typography variant="h3" fontWeight={600} mb={3}>
           Sign in
@@ -70,6 +68,8 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
         <Typography color="text.secondary" mb={3}>
           Sign in to view or create a Space.
         </Typography>
+
+        <LocalSafesAlert />
 
         <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
       </Card>
