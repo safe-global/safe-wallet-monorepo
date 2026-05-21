@@ -1803,5 +1803,17 @@
     "issueCommentIds": [],
     "learning": "Don't hardcode `nestedSafeOwners?.[0]` as the parent safe when resolving threshold for a delegator under edit/delete \u2014 the parent must be derived from the actual delegator address. Hardcoding fetches the wrong parent's threshold and produces signatures attributable to the wrong delegator. Address comparisons in proposer permission checks must remain checksum-insensitive (`sameAddress`), not strict ===.",
     "ruleIds": ["DATA-01"]
+  },
+  {
+    "id": "RL-20260520-001",
+    "title": "Spaces navigation drifted when helpers fell back to the first Space before hydration",
+    "sourceWindowId": "CLOSED-20260506-20260521",
+    "prNumbers": [7853],
+    "prState": "closed",
+    "reviewCommentIds": [3227860325, 3264619112, 3264626004, 3267851980, 3267852227],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A Spaces URL-sync hook could run before redux-persist hydration, treat a still-rehydrating signed-in user as signed out, and redirect a deep link into the welcome flow. Separately, Safe-switch route builders dropped `spaceId`, while `useCurrentSpaceId` silently fell back to the first owned Space; the combination moved users into the wrong workspace after switching Safes. Effects that redirect from persisted auth state must wait for hydration, and Space-scoped navigation should preserve the URL `spaceId` instead of inventing a fallback active Space.",
+    "ruleIds": ["WEB-01", "WEB-04"]
   }
 ]

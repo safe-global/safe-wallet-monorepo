@@ -319,6 +319,57 @@ Hard-coding the Back target sends users from `/entities/create-entity` into
 entities. Use `router.back()` or a pathname-aware target so the control behaves
 correctly in every mount point.
 
+## WEB-01 / WEB-04 — Space URL is the active-workspace source of truth
+
+Source: PR #7853 (RL-20260520-001)
+
+### Avoid
+
+Letting helper hooks invent a Space when the URL is missing, then relying on a
+later sync effect to repair navigation:
+
+```ts
+function useCurrentSpaceId() {
+  const querySpaceId = getQuerySpaceId()
+  const firstSpaceId = spaces?.[0] ? String(spaces[0].id) : null
+
+  return querySpaceId || firstSpaceId
+}
+
+router.push({
+  pathname: AppRoutes.home,
+  query: { safe: `${chain.shortName}:${address}` },
+})
+```
+
+### Prefer
+
+Keep the URL as the active-space owner and carry it through Safe-scoped
+navigation. If hydration has not completed, do not redirect yet:
+
+```ts
+function useCurrentSpaceId() {
+  return getQuerySpaceId()
+}
+
+if (!isStoreHydrated || !router.isReady) return
+
+router.push({
+  pathname: AppRoutes.home,
+  query: {
+    safe: `${chain.shortName}:${address}`,
+    ...(spaceId ? { spaceId } : {}),
+  },
+})
+```
+
+### Why
+
+Falling back to `spaces[0]` made users who switched from one Space to a Safe
+route drift into another workspace. Running the sync effect before persisted
+auth hydration could also redirect an actually signed-in deep link into the
+welcome flow and leave it there because welcome routes are excluded from sync.
+
 ## CODE-02 — Move heavy Tailwind class strings into CSS modules
 
 Source: PR #7454 (RL-20260318-003)

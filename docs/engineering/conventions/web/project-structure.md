@@ -175,3 +175,10 @@ Global header CTAs and Safe App links must build Safe-scoped routes
 from loaded Safe state, not optional query params. If the target route
 is blocked for undeployed Safes, gate the CTA on the same deployment
 state instead of letting users click into a rejected flow.
+
+Spaces navigation treats the URL `spaceId` as the active-space source
+of truth. Route helpers should carry it through Safe switches and
+cross-page pushes when the user is inside a Space. `useCurrentSpaceId`
+style helpers may return `null` when the URL has no Space; do not
+silently fall back to the first owned Space, because that rewrites the
+user's active workspace.

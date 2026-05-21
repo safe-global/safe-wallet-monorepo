@@ -4,87 +4,86 @@
 
 ## 📑 Quick Index
 
-| ID                        | Title                                                                                      | Group                   |
-| ------------------------- | ------------------------------------------------------------------------------------------ | ----------------------- |
-| [`FEAT-01`](#feat-01)     | Use feature public APIs across boundaries                                                  | web / features          |
-| [`FEAT-02`](#feat-02)     | Give new features the standard boundary                                                    | web / features          |
-| [`CODE-01`](#code-01)     | Extract shared UI only when behavior is actually shared                                    | web / abstractions      |
-| [`CODE-02`](#code-02)     | Extract repeated styling into named structure                                              | web / abstractions      |
-| [`WEB-01`](#web-01)       | Make auth/session effects hydration-aware                                                  | web / auth              |
-| [`WEB-02`](#web-02)       | Keep deliberate logout distinct from session expiry                                        | web / auth              |
-| [`WEB-03`](#web-03)       | Use fresh server probes for auth transitions                                               | web / auth              |
-| [`API-01`](#api-01)       | Search consumers when removing public exports                                              | general / api           |
-| [`API-02`](#api-02)       | Make additive hook registration idempotent                                                 | general / api           |
-| [`API-03`](#api-03)       | Do not hand-edit generated clients as durable source                                       | general / api           |
-| [`RTK-01`](#rtk-01)       | Handle RTK mutation results explicitly                                                     | general / state         |
-| [`RTK-02`](#rtk-02)       | Choose loading flags by UX meaning                                                         | general / state         |
-| [`DATA-01`](#data-01)     | Preserve chain scope in address-like merges                                                | general / data          |
-| [`DATA-02`](#data-02)     | Empty-state checks must include every visible collection                                   | general / data          |
-| [`DATA-03`](#data-03)     | Preserve fallback data when adding new response shapes                                     | general / data          |
-| [`DATA-04`](#data-04)     | Normalize through existing bounded helpers                                                 | general / data          |
-| [`CHAIN-01`](#chain-01)   | Resolve contracts from actual deployment data                                              | general / chain         |
-| [`CHAIN-02`](#chain-02)   | Gate multichain UI with compatibility state                                                | web / chain             |
-| [`STATE-01`](#state-01)   | Do not erase session-scoped discoveries on repeat actions                                  | mobile / state          |
-| [`MOB-01`](#mob-01)       | Open system settings only from explicit controls                                           | mobile / permissions    |
-| [`MOB-02`](#mob-02)       | Branch permission UX on the actual permission outcome                                      | mobile / permissions    |
-| [`MOB-03`](#mob-03)       | Use the React Native package entrypoint                                                    | mobile / dependencies   |
-| [`E2E-01`](#e2e-01)       | Target E2E selectors unambiguously                                                         | web / e2e               |
-| [`TEST-01`](#test-01)     | Assertions must fail on the regression they claim to cover                                 | general / testing       |
-| [`TEST-02`](#test-02)     | New branch logic needs branch-specific tests                                               | general / testing       |
-| [`TEST-03`](#test-03)     | Test the pure transformation separately from orchestration                                 | general / testing       |
-| [`TEST-04`](#test-04)     | Moved behavior needs replacement coverage                                                  | general / testing       |
-| [`TX-01`](#tx-01)         | Preserve immutable transaction identity                                                    | web / transactions      |
-| [`TX-02`](#tx-02)         | Submit option state must stay switchable and recoverable                                   | web / transactions      |
-| [`UX-01`](#ux-01)         | Constrained text must truncate or wrap intentionally                                       | web / ui                |
-| [`UX-02`](#ux-02)         | Local rows need local actions                                                              | web / ui                |
-| [`OBS-01`](#obs-01)       | Promote telemetry only when user impact justifies it                                       | web / observability     |
-| [`CACHE-01`](#cache-01)   | Cache stable negative lookups deliberately                                                 | general / cache         |
-| [`CI-01`](#ci-01)         | Scope CI concurrency and generated labels to the real target                               | general / ci            |
-| [`SEC-01`](#sec-01)       | Use own-property checks for user-controlled map keys                                       | web / security          |
-| [`DOC-01`](#doc-01)       | Preserve guidance when splitting docs                                                      | general / docs          |
-| [`DOC-02`](#doc-02)       | Operational docs must name real branches and fallback paths                                | general / docs          |
-| [`PROD-01`](#prod-01)     | Product behavior changes need explicit confirmation                                        | general / product       |
-| [`WEB-04`](#web-04)       | Build Safe-scoped navigation from loaded Safe state                                        | web / navigation        |
-| [`MOB-04`](#mob-04)       | Keep Expo router layouts structural                                                        | mobile / navigation     |
-| [`WEB-05`](#web-05)       | Sanitize auth redirects and outcomes                                                       | web / auth              |
-| [`FEAT-03`](#feat-03)     | Do not self-import feature barrels                                                         | web / features          |
-| [`UI-01`](#ui-01)         | Use theme tokens and hosted assets                                                         | general / ui            |
-| [`CI-02`](#ci-02)         | Release workflows must compute against the pre-change state                                | general / ci            |
-| [`MOB-05`](#mob-05)       | Configure mobile providers from app state and supported config                             | mobile / providers      |
-| [`CONFIG-01`](#config-01) | Match env-var default values to consumer parsers                                           | web / config            |
-| [`UX-03`](#ux-03)         | Shell rewrites must port over user-relied UX features                                      | web / ui                |
-| [`PKG-01`](#pkg-01)       | Do not duplicate shared package files in app source                                        | general / packages      |
-| [`UI-02`](#ui-02)         | Pick z-index from a documented layer scale                                                 | web / ui                |
-| [`REVIEW-01`](#review-01) | Don't bundle unrelated refactors with infra/test PRs                                       | general / review        |
-| [`STATE-02`](#state-02)   | Reset context state when its precondition flips                                            | general / state         |
-| [`TEST-05`](#test-05)     | Pick the right test fixture surface: builders for unit tests, MSW fixtures for integration | web / testing           |
-| [`CODE-03`](#code-03)     | Cap positional parameters; close over shared hook state                                    | general / abstractions  |
-| [`CODE-04`](#code-04)     | Compute once per render before the JSX, not inside it                                      | general / abstractions  |
-| [`PERF-01`](#perf-01)     | Hoist regex literals and stable JSX out of inner loops                                     | general / performance   |
-| [`CODE-05`](#code-05)     | Use named membership checks instead of long `!==` chains                                   | general / abstractions  |
-| [`FEAT-04`](#feat-04)     | Coordinate edits to shared UI primitives with in-flight design-system PRs                  | web / features          |
-| [`OBS-02`](#obs-02)       | Telemetry user-context effects must handle the empty branch                                | general / observability |
-| [`TX-03`](#tx-03)         | Gate submit on token data readiness                                                        | web / transactions      |
-| [`TX-04`](#tx-04)         | Guard transaction submission with a synchronous ref                                        | web / transactions      |
-| [`NUM-01`](#num-01)       | Avoid scientific notation when serializing decimal amounts                                 | general / numerics      |
-| [`STATE-03`](#state-03)   | Retry handlers must reset error state                                                      | general / state         |
-| [`DATA-05`](#data-05)     | Compare addresses with the shared sameAddress helper                                       | general / data          |
-| [`MOB-07`](#mob-07)       | Mount navigators before running navigation effects                                         | mobile / navigation     |
-| [`TX-05`](#tx-05)         | Centralize transaction-derived analyses in SafeShield                                      | web / transactions      |
-| [`RTK-03`](#rtk-03)       | Match RTK Query cache-key strings to the serialized form                                   | general / state         |
-| [`WEB-06`](#web-06)       | Derive reactive parent state from the store, not from child refs                           | web / state             |
-| [`MOB-06`](#mob-06)       | Forward auto theme to native APIs as null                                                  | mobile / theme          |
-| [`E2E-02`](#e2e-02)       | Pass timeout to the Cypress retryable command, not the assertion                           | web / e2e               |
-| [`DATA-06`](#data-06)     | Keep cache-key normalization consistent across all consumers                               | general / data          |
-| [`CHAIN-03`](#chain-03)   | Pass canonical Safe versions through chain-aware deployment helpers                        | general / chain         |
-| [`CI-03`](#ci-03)         | Codegen drift checks must catch untracked outputs and run against PR HEAD                  | general / ci            |
+| ID | Title | Group |
+| --- | --- | --- |
+| [`FEAT-01`](#feat-01) | Use feature public APIs across boundaries | web / features |
+| [`FEAT-02`](#feat-02) | Give new features the standard boundary | web / features |
+| [`CODE-01`](#code-01) | Extract shared UI only when behavior is actually shared | web / abstractions |
+| [`CODE-02`](#code-02) | Extract repeated styling into named structure | web / abstractions |
+| [`WEB-01`](#web-01) | Make auth/session effects hydration-aware | web / auth |
+| [`WEB-02`](#web-02) | Keep deliberate logout distinct from session expiry | web / auth |
+| [`WEB-03`](#web-03) | Use fresh server probes for auth transitions | web / auth |
+| [`API-01`](#api-01) | Search consumers when removing public exports | general / api |
+| [`API-02`](#api-02) | Make additive hook registration idempotent | general / api |
+| [`API-03`](#api-03) | Do not hand-edit generated clients as durable source | general / api |
+| [`RTK-01`](#rtk-01) | Handle RTK mutation results explicitly | general / state |
+| [`RTK-02`](#rtk-02) | Choose loading flags by UX meaning | general / state |
+| [`DATA-01`](#data-01) | Preserve chain scope in address-like merges | general / data |
+| [`DATA-02`](#data-02) | Empty-state checks must include every visible collection | general / data |
+| [`DATA-03`](#data-03) | Preserve fallback data when adding new response shapes | general / data |
+| [`DATA-04`](#data-04) | Normalize through existing bounded helpers | general / data |
+| [`CHAIN-01`](#chain-01) | Resolve contracts from actual deployment data | general / chain |
+| [`CHAIN-02`](#chain-02) | Gate multichain UI with compatibility state | web / chain |
+| [`STATE-01`](#state-01) | Do not erase session-scoped discoveries on repeat actions | mobile / state |
+| [`MOB-01`](#mob-01) | Open system settings only from explicit controls | mobile / permissions |
+| [`MOB-02`](#mob-02) | Branch permission UX on the actual permission outcome | mobile / permissions |
+| [`MOB-03`](#mob-03) | Use the React Native package entrypoint | mobile / dependencies |
+| [`E2E-01`](#e2e-01) | Target E2E selectors unambiguously | web / e2e |
+| [`TEST-01`](#test-01) | Assertions must fail on the regression they claim to cover | general / testing |
+| [`TEST-02`](#test-02) | New branch logic needs branch-specific tests | general / testing |
+| [`TEST-03`](#test-03) | Test the pure transformation separately from orchestration | general / testing |
+| [`TEST-04`](#test-04) | Moved behavior needs replacement coverage | general / testing |
+| [`TX-01`](#tx-01) | Preserve immutable transaction identity | web / transactions |
+| [`TX-02`](#tx-02) | Submit option state must stay switchable and recoverable | web / transactions |
+| [`UX-01`](#ux-01) | Constrained text must truncate or wrap intentionally | web / ui |
+| [`UX-02`](#ux-02) | Local rows need local actions | web / ui |
+| [`OBS-01`](#obs-01) | Promote telemetry only when user impact justifies it | web / observability |
+| [`CACHE-01`](#cache-01) | Cache stable negative lookups deliberately | general / cache |
+| [`CI-01`](#ci-01) | Scope CI concurrency and generated labels to the real target | general / ci |
+| [`SEC-01`](#sec-01) | Use own-property checks for user-controlled map keys | web / security |
+| [`DOC-01`](#doc-01) | Preserve guidance when splitting docs | general / docs |
+| [`DOC-02`](#doc-02) | Operational docs must name real branches and fallback paths | general / docs |
+| [`PROD-01`](#prod-01) | Product behavior changes need explicit confirmation | general / product |
+| [`WEB-04`](#web-04) | Build Safe-scoped navigation from loaded Safe state | web / navigation |
+| [`MOB-04`](#mob-04) | Keep Expo router layouts structural | mobile / navigation |
+| [`WEB-05`](#web-05) | Sanitize auth redirects and outcomes | web / auth |
+| [`FEAT-03`](#feat-03) | Do not self-import feature barrels | web / features |
+| [`UI-01`](#ui-01) | Use theme tokens and hosted assets | general / ui |
+| [`CI-02`](#ci-02) | Release workflows must compute against the pre-change state | general / ci |
+| [`MOB-05`](#mob-05) | Configure mobile providers from app state and supported config | mobile / providers |
+| [`CONFIG-01`](#config-01) | Match env-var default values to consumer parsers | web / config |
+| [`UX-03`](#ux-03) | Shell rewrites must port over user-relied UX features | web / ui |
+| [`PKG-01`](#pkg-01) | Do not duplicate shared package files in app source | general / packages |
+| [`UI-02`](#ui-02) | Pick z-index from a documented layer scale | web / ui |
+| [`REVIEW-01`](#review-01) | Don't bundle unrelated refactors with infra/test PRs | general / review |
+| [`STATE-02`](#state-02) | Reset context state when its precondition flips | general / state |
+| [`TEST-05`](#test-05) | Pick the right test fixture surface: builders for unit tests, MSW fixtures for integration | web / testing |
+| [`CODE-03`](#code-03) | Cap positional parameters; close over shared hook state | general / abstractions |
+| [`CODE-04`](#code-04) | Compute once per render before the JSX, not inside it | general / abstractions |
+| [`PERF-01`](#perf-01) | Hoist regex literals and stable JSX out of inner loops | general / performance |
+| [`CODE-05`](#code-05) | Use named membership checks instead of long `!==` chains | general / abstractions |
+| [`FEAT-04`](#feat-04) | Coordinate edits to shared UI primitives with in-flight design-system PRs | web / features |
+| [`OBS-02`](#obs-02) | Telemetry user-context effects must handle the empty branch | general / observability |
+| [`TX-03`](#tx-03) | Gate submit on token data readiness | web / transactions |
+| [`TX-04`](#tx-04) | Guard transaction submission with a synchronous ref | web / transactions |
+| [`NUM-01`](#num-01) | Avoid scientific notation when serializing decimal amounts | general / numerics |
+| [`STATE-03`](#state-03) | Retry handlers must reset error state | general / state |
+| [`DATA-05`](#data-05) | Compare addresses with the shared sameAddress helper | general / data |
+| [`MOB-07`](#mob-07) | Mount navigators before running navigation effects | mobile / navigation |
+| [`TX-05`](#tx-05) | Centralize transaction-derived analyses in SafeShield | web / transactions |
+| [`RTK-03`](#rtk-03) | Match RTK Query cache-key strings to the serialized form | general / state |
+| [`WEB-06`](#web-06) | Derive reactive parent state from the store, not from child refs | web / state |
+| [`MOB-06`](#mob-06) | Forward auto theme to native APIs as null | mobile / theme |
+| [`E2E-02`](#e2e-02) | Pass timeout to the Cypress retryable command, not the assertion | web / e2e |
+| [`DATA-06`](#data-06) | Keep cache-key normalization consistent across all consumers | general / data |
+| [`CHAIN-03`](#chain-03) | Pass canonical Safe versions through chain-aware deployment helpers | general / chain |
+| [`CI-03`](#ci-03) | Codegen drift checks must catch untracked outputs and run against PR HEAD | general / ci |
 
 ---
 
 ## 🌐 web › features
 
 <a id="feat-01"></a>
-
 ### `FEAT-01` Use feature public APIs across boundaries
 
 > **web** · features · 1 example · ↩ `RL-20260225-001` · `RL-20260318-006` · `RL-20260326-001`
@@ -93,7 +92,6 @@
 Feature code must import another feature through its public API, not through deep internal component, hook, service, data, or generated paths.
 
 **✅ Check**\
-
 > Did this change cross a feature boundary? If yes, are imports going through the target feature's public API?
 
 <details>
@@ -132,7 +130,6 @@ need before other features depend on them.
 ---
 
 <a id="feat-02"></a>
-
 ### `FEAT-02` Give new features the standard boundary
 
 > **web** · features · 1 example · ↩ `RL-20260227-001` · `RL-20260327-004`
@@ -141,7 +138,6 @@ need before other features depend on them.
 New web features need an explicit boundary: public barrel, feature contract or handle where applicable, public types, and hooks exported without lazy-loading hook calls.
 
 **✅ Check**\
-
 > Did this add or expand a feature? If yes, does it have the expected public API boundary instead of making consumers import internals?
 
 <details>
@@ -182,7 +178,6 @@ need before other features depend on them.
 ## 🌐 web › abstractions
 
 <a id="code-01"></a>
-
 ### `CODE-01` Extract shared UI only when behavior is actually shared
 
 > **web** · abstractions · 4 examples · ↩ `RL-20260227-002` · `RL-20260318-011` · `RL-20260327-006` · `RL-20260331-006` · `RL-20260505-006` · `RL-20260505-011`
@@ -191,7 +186,6 @@ need before other features depend on them.
 When two components share form, state, loading, and error flow, prefer one configurable component over near-duplicate implementations.
 
 **✅ Check**\
-
 > Did this add a component that mirrors an existing workflow? If yes, can the existing component accept the small differences as props?
 
 <details>
@@ -410,7 +404,6 @@ The numeric comparison is non-obvious (lower number = higher severity), and inli
 ---
 
 <a id="code-02"></a>
-
 ### `CODE-02` Extract repeated styling into named structure
 
 > **web** · abstractions · 3 examples · ↩ `RL-20260316-001` · `RL-20260318-003` · `RL-20260413-003` · `RL-20260424-001`
@@ -419,7 +412,6 @@ The numeric comparison is non-obvious (lower number = higher severity), and inli
 Repeated or long styling patterns should move into a small component, class helper, or CSS module when that makes call sites readable and consistent.
 
 **✅ Check**\
-
 > Did this repeat a long class list, shadow, or layout pattern? If yes, should it be named once and reused?
 
 <details>
@@ -530,16 +522,14 @@ Splitting the visual definition between a CSS module class and a sibling Tailwin
 ## 🌐 web › auth
 
 <a id="web-01"></a>
-
 ### `WEB-01` Make auth/session effects hydration-aware
 
-> **web** · auth · 1 example · ↩ `RL-20260420-002` · `RL-20260504-001` · `RL-20260506-002`
+> **web** · auth · 1 example · ↩ `RL-20260420-002` · `RL-20260504-001` · `RL-20260506-002` · `RL-20260520-001`
 
 **📜 Rule**\
 Effects that depend on persisted auth state must observe hydration or the relevant hydrated value instead of capturing initial empty state forever.
 
 **✅ Check**\
-
 > Did this effect read persisted auth/session state? If yes, does it re-run after hydration or depend on the hydrated value?
 
 <details>
@@ -585,7 +575,6 @@ never observe the persisted expired session.
 ---
 
 <a id="web-02"></a>
-
 ### `WEB-02` Keep deliberate logout distinct from session expiry
 
 > **web** · auth · 1 example · ↩ `RL-20260506-004`
@@ -594,7 +583,6 @@ never observe the persisted expired session.
 Logout flows must clear client auth state before navigation or otherwise suppress session-expired handling while logout is in flight.
 
 **✅ Check**\
-
 > Did this change logout, auth hydration, or credentialed 403 handling? If yes, can a deliberate logout race show a session-expired toast?
 
 <details>
@@ -639,7 +627,6 @@ session-expired toast.
 ---
 
 <a id="web-03"></a>
-
 ### `WEB-03` Use fresh server probes for auth transitions
 
 > **web** · auth · 2 examples · ↩ `RL-20260324-001` · `RL-20260407-005` · `RL-20260413-001`
@@ -648,7 +635,6 @@ session-expired toast.
 Auth reconciliation and login/logout callbacks must not rely on cached RTK Query data when the backend cookie state is the source of truth.
 
 **✅ Check**\
-
 > Did this check current auth after a login/logout/callback transition? If yes, does it force a fresh backend probe and avoid a lingering subscription?
 
 <details>
@@ -740,7 +726,6 @@ unauthenticated so they re-login.
 ## 🌐 general › api
 
 <a id="api-01"></a>
-
 ### `API-01` Search consumers when removing public exports
 
 > **general** · api · 1 example · ↩ `RL-20260410-002` · `RL-20260428-003` · `RL-20260506-003`
@@ -749,7 +734,6 @@ unauthenticated so they re-login.
 Removing or changing a public export, hook return field, endpoint, or compatibility API requires updating all tests and consumers in the same change.
 
 **✅ Check**\
-
 > Did this remove or rename an exported API? If yes, were tests, namespace imports, dynamic access, generated consumers, and downstream apps searched?
 
 <details>
@@ -806,7 +790,6 @@ signal.
 ---
 
 <a id="api-02"></a>
-
 ### `API-02` Make additive hook registration idempotent
 
 > **general** · api · 1 example · ↩ `RL-20260506-005`
@@ -815,7 +798,6 @@ signal.
 Initializers that append global hooks must be idempotent or retain and call the deregister callback before re-registering.
 
 **✅ Check**\
-
 > Did this replace a setter with an additive hook API or register a global hook? If yes, is repeated initialization safe?
 
 <details>
@@ -870,7 +852,6 @@ callbacks across repeated initialization unless callers guard or deregister.
 ---
 
 <a id="api-03"></a>
-
 ### `API-03` Do not hand-edit generated clients as durable source
 
 > **general** · api · 2 examples · ↩ `RL-20260219-001` · `RL-20260219-004` · `RL-20260415-008`
@@ -879,7 +860,6 @@ callbacks across repeated initialization unless callers guard or deregister.
 Generated gateway files must come from schema/codegen. Temporary hand edits need an explicit generator path or they will be overwritten.
 
 **✅ Check**\
-
 > Did this touch AUTO_GENERATED or schema-derived files? If yes, can codegen reproduce the change?
 
 <details>
@@ -963,7 +943,6 @@ Hand-edited generated types vanish on the next codegen run, breaking every consu
 ## 🌐 general › state
 
 <a id="rtk-01"></a>
-
 ### `RTK-01` Handle RTK mutation results explicitly
 
 > **general** · state · 2 examples · ↩ `RL-20260407-004` · `RL-20260505-004`
@@ -972,7 +951,6 @@ Hand-edited generated types vanish on the next codegen run, breaking every consu
 RTK Query mutation triggers resolve with a result object; use `.unwrap()` or inspect `result.error` before updating success UI or local state.
 
 **✅ Check**\
-
 > Did this call an RTK mutation? If yes, does success state happen only after confirmed success?
 
 <details>
@@ -1068,7 +1046,6 @@ failure.
 ---
 
 <a id="rtk-02"></a>
-
 ### `RTK-02` Choose loading flags by UX meaning
 
 > **general** · state · 2 examples · ↩ `RL-20260302-005` · `RL-20260415-006` · `RL-20260420-001`
@@ -1077,7 +1054,6 @@ failure.
 `isLoading` represents the first load; `isFetching` also covers refetches. Use the flag that matches whether existing data should remain visible.
 
 **✅ Check**\
-
 > Did this show a spinner from RTK Query state? If yes, should refetch hide existing content or only the initial load?
 
 <details>
@@ -1164,7 +1140,6 @@ Add a validity guard on the ID itself to the `skip` predicate.
 ## 🌐 general › data
 
 <a id="data-01"></a>
-
 ### `DATA-01` Preserve chain scope in address-like merges
 
 > **general** · data · 2 examples · ↩ `RL-20260223-001` · `RL-20260313-010` · `RL-20260323-001` · `RL-20260415-003` · `RL-20260505-002` · `RL-20260505-005`
@@ -1173,7 +1148,6 @@ Add a validity guard on the ID itself to the `skip` predicate.
 Address-book and Safe-like merge logic must compare entries at the relevant identity granularity, usually address plus chain ID.
 
 **✅ Check**\
-
 > Did this merge contacts, Safes, or address-scoped records? If yes, are non-overlapping chain IDs preserved?
 
 <details>
@@ -1266,7 +1240,6 @@ for (const owner of overview.owners ?? []) {
 ---
 
 <a id="data-02"></a>
-
 ### `DATA-02` Empty-state checks must include every visible collection
 
 > **general** · data · 2 examples · ↩ `RL-20260320-001` · `RL-20260415-002` · `RL-20260505-003`
@@ -1275,7 +1248,6 @@ for (const owner of overview.owners ?? []) {
 UI empty-state predicates must include every collection that can render tabs, rows, actions, or badges.
 
 **✅ Check**\
-
 > Did this add a new collection to a view? If yes, do empty states and tab visibility include it?
 
 <details>
@@ -1363,7 +1335,6 @@ Counterfactual Safes can hold ERC-20s indexed by an off-chain aggregator (Zerion
 ---
 
 <a id="data-03"></a>
-
 ### `DATA-03` Preserve fallback data when adding new response shapes
 
 > **general** · data · 3 examples · ↩ `RL-20260310-011` · `RL-20260318-009` · `RL-20260409-001`
@@ -1372,7 +1343,6 @@ Counterfactual Safes can hold ERC-20s indexed by an off-chain aggregator (Zerion
 When upstream responses gain a new shape, merge field-by-field and preserve legacy fallback mappings for omitted optional sections.
 
 **✅ Check**\
-
 > Did this add support for a new response shape? If yes, do partial new payloads still preserve legacy data?
 
 <details>
@@ -1513,7 +1483,6 @@ The original `positions: []` patch made portfolio errors look like known-empty; 
 ---
 
 <a id="data-04"></a>
-
 ### `DATA-04` Normalize through existing bounded helpers
 
 > **general** · data · 2 examples · ↩ `RL-20260220-003` · `RL-20260331-002` · `RL-20260402-002` · `RL-20260416-001` · `RL-20260423-001`
@@ -1522,7 +1491,6 @@ The original `positions: []` patch made portfolio errors look like known-empty; 
 Values with established length, version, or encoding limits must go through the existing helper rather than duplicating raw serialization.
 
 **✅ Check**\
-
 > Did this create a tx origin, encoded note, Safe version, or similar bounded value? If yes, did it use the canonical helper?
 
 <details>
@@ -1606,7 +1574,6 @@ If the URL pattern doesn't match the real call, or the mutated path doesn't exis
 ## 🌐 general › chain
 
 <a id="chain-01"></a>
-
 ### `CHAIN-01` Resolve contracts from actual deployment data
 
 > **general** · chain · 1 example · ↩ `RL-20260423-001` · `RL-20260423-002` · `RL-20260428-001`
@@ -1615,7 +1582,6 @@ If the URL pattern doesn't match the real call, or the mutated path doesn't exis
 Contract and chain compatibility logic should derive from Safe version, master copy, chain ID, and safe-deployments data rather than broad chain flags or naive set differences.
 
 **✅ Check**\
-
 > Did this choose a contract address or available chain? If yes, is it based on actual deployment/compatibility data and covered for both web and mobile callers?
 
 <details>
@@ -1663,7 +1629,6 @@ registered deployment for that chain and Safe version.
 ## 🌐 web › chain
 
 <a id="chain-02"></a>
-
 ### `CHAIN-02` Gate multichain UI with compatibility state
 
 > **web** · chain · 1 example · ↩ `RL-20260402-001` · `RL-20260428-001` · `RL-20260428-002`
@@ -1672,7 +1637,6 @@ registered deployment for that chain and Safe version.
 Multichain UI should show only compatible actions, with explicit unavailable/loading/empty states, instead of letting users click into silent failures.
 
 **✅ Check**\
-
 > Did this expose add-network or multichain actions? If yes, are compatibility, loading, unavailable, and empty states explicit and tested?
 
 <details>
@@ -1717,7 +1681,6 @@ compatibility result before they click into a broken flow.
 ## 🌐 mobile › state
 
 <a id="state-01"></a>
-
 ### `STATE-01` Do not erase session-scoped discoveries on repeat actions
 
 > **mobile** · state · ↩ `RL-20260430-001`
@@ -1726,7 +1689,6 @@ compatibility result before they click into a broken flow.
 When a screen promises discoveries for the lifetime of an open session, repeated scans should accumulate or deliberately preserve previous discoveries.
 
 **✅ Check**\
-
 > Did this store scan/discovery results for an open sheet or screen? If yes, does a later empty result unintentionally erase earlier discoveries?
 
 ---
@@ -1734,7 +1696,6 @@ When a screen promises discoveries for the lifetime of an open session, repeated
 ## 🌐 mobile › permissions
 
 <a id="mob-01"></a>
-
 ### `MOB-01` Open system settings only from explicit controls
 
 > **mobile** · permissions · 1 example · ↩ `RL-20260505-006` · `RL-20260506-001`
@@ -1743,7 +1704,6 @@ When a screen promises discoveries for the lifetime of an open session, repeated
 Permission-denied flows must open system Settings only from a clearly labeled user-tapped control, not from wrapper taps or automatic denial handling.
 
 **✅ Check**\
-
 > Did this permission flow call `Linking.openSettings` or an equivalent API? If yes, is that path reachable only from the explicit Settings button?
 
 <details>
@@ -1791,7 +1751,6 @@ Settings must come from the labeled button, not a tap anywhere in the frame.
 ---
 
 <a id="mob-02"></a>
-
 ### `MOB-02` Branch permission UX on the actual permission outcome
 
 > **mobile** · permissions · 1 example · ↩ `RL-20260505-001`
@@ -1800,7 +1759,6 @@ Settings must come from the labeled button, not a tap anywhere in the frame.
 Permission-denied explainers must run only for actual denial/restriction outcomes, not for unrelated registration or network failures.
 
 **✅ Check**\
-
 > Did this permission request have multiple failure modes? If yes, does the Settings explainer branch on a permission result rather than any caught error?
 
 <details>
@@ -1852,7 +1810,6 @@ explainer for every failure sends users to the wrong recovery path.
 ## 🌐 mobile › dependencies
 
 <a id="mob-03"></a>
-
 ### `MOB-03` Use the React Native package entrypoint
 
 > **mobile** · dependencies · ↩ `RL-20260413-006`
@@ -1861,7 +1818,6 @@ explainer for every failure sends users to the wrong recovery path.
 Mobile overrides of third-party UI must import from the same React Native module tree as the provider to avoid duplicate contexts or theme state.
 
 **✅ Check**\
-
 > Did this import from a package internals path? If yes, does it match the React Native entrypoint used by the provider?
 
 ---
@@ -1869,7 +1825,6 @@ Mobile overrides of third-party UI must import from the same React Native module
 ## 🌐 web › e2e
 
 <a id="e2e-01"></a>
-
 ### `E2E-01` Target E2E selectors unambiguously
 
 > **web** · e2e · 2 examples · ↩ `RL-20260225-002` · `RL-20260331-004` · `RL-20260409-002` · `RL-20260409-003` · `RL-20260413-002`
@@ -1878,7 +1833,6 @@ Mobile overrides of third-party UI must import from the same React Native module
 Cypress helpers must target the intended control by stable accessible label, test ID, or scoped container when copy is shared by multiple buttons.
 
 **✅ Check**\
-
 > Did this update an E2E selector? If yes, can another visible control with similar copy be clicked instead?
 
 <details>
@@ -1961,7 +1915,6 @@ correct, so the helper produces false negatives whenever it is used.
 ## 🌐 general › testing
 
 <a id="test-01"></a>
-
 ### `TEST-01` Assertions must fail on the regression they claim to cover
 
 > **general** · testing · 5 examples · ↩ `RL-20260217-001` · `RL-20260218-004` · `RL-20260303-010` · `RL-20260318-002` · `RL-20260331-005` · `RL-20260408-001` · `RL-20260408-002` · `RL-20260409-002` · `RL-20260423-002` · `RL-20260506-006`
@@ -1970,7 +1923,6 @@ correct, so the helper produces false negatives whenever it is used.
 Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears.
 
 **✅ Check**\
-
 > Did this add or update a test assertion? If yes, would it fail if the bug reappeared or fixture data vanished?
 
 <details>
@@ -2185,7 +2137,6 @@ If the helper writes the whole key (not a merge), any state the app would popula
 ---
 
 <a id="test-02"></a>
-
 ### `TEST-02` New branch logic needs branch-specific tests
 
 > **general** · testing · 1 example · ↩ `RL-20260318-001` · `RL-20260324-001` · `RL-20260327-004` · `RL-20260407-001` · `RL-20260417-001` · `RL-20260420-002` · `RL-20260428-002` · `RL-20260429-001` · `RL-20260430-001` · `RL-20260430-002` · `RL-20260504-001` · `RL-20260505-002` · `RL-20260505-006` · `RL-20260506-002`
@@ -2194,7 +2145,6 @@ If the helper writes the whole key (not a merge), any state the app would popula
 New skip, hydration, merge-priority, permission, compatibility, and conditional-rendering branches need focused tests that exercise the new branch, not only the happy path.
 
 **✅ Check**\
-
 > Did this add branching behavior? If yes, is the new branch covered by a test that would fail if the branch were removed?
 
 <details>
@@ -2238,7 +2188,6 @@ New branch logic needs a test that fails if the branch is removed.
 ---
 
 <a id="test-03"></a>
-
 ### `TEST-03` Test the pure transformation separately from orchestration
 
 > **general** · testing · 2 examples · ↩ `RL-20260317-003` · `RL-20260318-005` · `RL-20260413-007`
@@ -2247,7 +2196,6 @@ New branch logic needs a test that fails if the branch is removed.
 When a hook/component only forwards data into a pure conversion helper, test the conversion helper output directly and keep orchestration tests focused on forwarding behavior.
 
 **✅ Check**\
-
 > Did this add conversion logic plus a caller? If yes, are transformation tests separate from orchestration tests?
 
 <details>
@@ -2337,7 +2285,6 @@ Re-declaring the capability shape in two places lets them drift the moment a new
 ---
 
 <a id="test-04"></a>
-
 ### `TEST-04` Moved behavior needs replacement coverage
 
 > **general** · testing · ↩ `RL-20260428-002` · `RL-20260428-003`
@@ -2346,7 +2293,6 @@ Re-declaring the capability shape in two places lets them drift the moment a new
 When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts.
 
 **✅ Check**\
-
 > Did this move or remove a return field, prop, or branch? If yes, did equivalent tests move to the new owner?
 
 ---
@@ -2354,7 +2300,6 @@ When logic moves from one hook/component to another, removed tests must be repla
 ## 🌐 web › transactions
 
 <a id="tx-01"></a>
-
 ### `TX-01` Preserve immutable transaction identity
 
 > **web** · transactions · ↩ `RL-20260410-001`
@@ -2363,13 +2308,11 @@ When logic moves from one hook/component to another, removed tests must be repla
 Existing queued or rejection transactions must not allow edits that change the transaction hash while the user thinks they are confirming the original transaction.
 
 **✅ Check**\
-
 > Did this make transaction fields editable? If yes, are existing queue/rejection flows still locked where identity must be preserved?
 
 ---
 
 <a id="tx-02"></a>
-
 ### `TX-02` Submit option state must stay switchable and recoverable
 
 > **web** · transactions · ↩ `RL-20260417-002`
@@ -2378,7 +2321,6 @@ Existing queued or rejection transactions must not allow edits that change the t
 Tx-flow submit options must not auto-register or set global state in a way that hides alternatives, and submit errors must reset loading state instead of throwing out of the flow.
 
 **✅ Check**\
-
 > Did this add or auto-select a tx-flow submit option? If yes, can the user switch away and can failures reset loading state?
 
 ---
@@ -2386,7 +2328,6 @@ Tx-flow submit options must not auto-register or set global state in a way that 
 ## 🌐 web › ui
 
 <a id="ux-01"></a>
-
 ### `UX-01` Constrained text must truncate or wrap intentionally
 
 > **web** · ui · ↩ `RL-20260217-005` · `RL-20260219-002` · `RL-20260506-001`
@@ -2395,13 +2336,11 @@ Tx-flow submit options must not auto-register or set global state in a way that 
 Long user-provided identifiers such as email addresses and names must fit constrained UI the same way wallet addresses do.
 
 **✅ Check**\
-
 > Did this add user-provided text to a constrained sidebar, card, badge, or menu? If yes, is overflow handled intentionally?
 
 ---
 
 <a id="ux-02"></a>
-
 ### `UX-02` Local rows need local actions
 
 > **web** · ui · 1 example · ↩ `RL-20260415-005`
@@ -2410,7 +2349,6 @@ Long user-provided identifiers such as email addresses and names must fit constr
 Rows that come from local/private data must not show server-backed actions unless they have been promoted or mapped to a server entity.
 
 **✅ Check**\
-
 > Did this merge local/private/server rows into one table? If yes, are row actions valid for that row source?
 
 <details>
@@ -2467,7 +2405,6 @@ server-side store before exposing the action.
 ## 🌐 web › observability
 
 <a id="obs-01"></a>
-
 ### `OBS-01` Promote telemetry only when user impact justifies it
 
 > **web** · observability · 1 example · ↩ `RL-20260319-001` · `RL-20260417-003`
@@ -2476,7 +2413,6 @@ server-side store before exposing the action.
 Observability changes should distinguish warning-level noise from user-impacting errors and avoid flooding SLOs with expected retries, browser noise, or duplicate signals.
 
 **✅ Check**\
-
 > Did this change logging/RUM/error classification? If yes, is the level justified by user impact and duplication risk?
 
 <details>
@@ -2517,7 +2453,6 @@ Free-form keys split a single dimension across multiple property names in Mixpan
 ## 🌐 general › cache
 
 <a id="cache-01"></a>
-
 ### `CACHE-01` Cache stable negative lookups deliberately
 
 > **general** · cache · ↩ `RL-20260420-003`
@@ -2526,7 +2461,6 @@ Free-form keys split a single dimension across multiple property names in Mixpan
 Repeated negative lookups that are expected and stable should be cached with clear TTL/invalidation; transient failures must not be cached as permanent absence.
 
 **✅ Check**\
-
 > Did this resolver repeatedly query for absent data? If yes, is absence cached deliberately without making transient failures permanent?
 
 ---
@@ -2534,7 +2468,6 @@ Repeated negative lookups that are expected and stable should be cached with cle
 ## 🌐 general › ci
 
 <a id="ci-01"></a>
-
 ### `CI-01` Scope CI concurrency and generated labels to the real target
 
 > **general** · ci · 1 example · ↩ `RL-20260302-002` · `RL-20260318-008` · `RL-20260326-003` · `RL-20260407-002` · `RL-20260422-001`
@@ -2543,7 +2476,6 @@ Repeated negative lookups that are expected and stable should be cached with cle
 CI concurrency groups and generated deployment labels must include the branch/ref and any static suffixes that affect the real limit.
 
 **✅ Check**\
-
 > Did this add or edit workflow concurrency, preview URLs, or DNS labels? If yes, is the real full label/ref scoped correctly?
 
 <details>
@@ -2586,7 +2518,6 @@ if: >-
 ## 🌐 web › security
 
 <a id="sec-01"></a>
-
 ### `SEC-01` Use own-property checks for user-controlled map keys
 
 > **web** · security · ↩ `RL-20260423-003`
@@ -2595,7 +2526,6 @@ if: >-
 User-controlled strings used as map keys must not index inherited object properties; use `Object.hasOwn`, a null-prototype object, or `Map`.
 
 **✅ Check**\
-
 > Did this map a query string, server string, or external value through an object? If yes, are inherited keys impossible?
 
 ---
@@ -2603,7 +2533,6 @@ User-controlled strings used as map keys must not index inherited object propert
 ## 🌐 general › docs
 
 <a id="doc-01"></a>
-
 ### `DOC-01` Preserve guidance when splitting docs
 
 > **general** · docs · ↩ `RL-20260303-008` · `RL-20260318-012` · `RL-20260408-003` · `RL-20260430-003`
@@ -2612,13 +2541,11 @@ User-controlled strings used as map keys must not index inherited object propert
 When splitting or moving agent/developer docs, every removed section must be moved, intentionally superseded, or called out for review.
 
 **✅ Check**\
-
 > Did this split, delete, or move docs? If yes, can every removed section be accounted for in the new structure?
 
 ---
 
 <a id="doc-02"></a>
-
 ### `DOC-02` Operational docs must name real branches and fallback paths
 
 > **general** · docs · ↩ `RL-20260415-001`
@@ -2627,7 +2554,6 @@ When splitting or moving agent/developer docs, every removed section must be mov
 Release and operational docs should describe actual branch names, generated branch patterns, and fallback actions rather than placeholders that look literal.
 
 **✅ Check**\
-
 > Did this edit release/runbook instructions? If yes, would a release manager know the real source branch and fallback command?
 
 ---
@@ -2635,7 +2561,6 @@ Release and operational docs should describe actual branch names, generated bran
 ## 🌐 general › product
 
 <a id="prod-01"></a>
-
 ### `PROD-01` Product behavior changes need explicit confirmation
 
 > **general** · product · ↩ `RL-20260420-004`
@@ -2644,7 +2569,6 @@ Release and operational docs should describe actual branch names, generated bran
 Changes to visible balances, disabled actions, labels, or available flows should cite product/design intent when the behavior is not mechanically implied by the code change.
 
 **✅ Check**\
-
 > Did this alter visible product behavior? If yes, is the product/design decision explicit?
 
 ---
@@ -2652,17 +2576,15 @@ Changes to visible balances, disabled actions, labels, or available flows should
 ## 🌐 web › navigation
 
 <a id="web-04"></a>
-
 ### `WEB-04` Build Safe-scoped navigation from loaded Safe state
 
-> **web** · navigation · 2 examples · ↩ `RL-20260217-002` · `RL-20260402-001` · `RL-20260410-003` · `RL-20260429-002`
+> **web** · navigation · 2 examples · ↩ `RL-20260217-002` · `RL-20260402-001` · `RL-20260410-003` · `RL-20260429-002` · `RL-20260520-001`
 
 **📜 Rule**\
-Safe-scoped CTAs and route builders must use the loaded Safe source of truth and block unavailable flows for undeployed Safes instead of trusting optional query params.
+Safe-scoped CTAs and route builders must use the loaded Safe source of truth and block unavailable flows for undeployed Safes instead of trusting optional query params. Space-scoped navigation must preserve the URL `spaceId` as the source of truth; helper hooks should not silently fall back to the first available Space when the URL is absent.
 
 **✅ Check**\
-
-> Did this add a Safe-scoped link, CTA, or router push? If yes, does it use loaded Safe state and gate undeployed-Safe blocked routes?
+> Did this add a Safe- or Space-scoped link, CTA, or router push? If yes, does it use loaded state, preserve the active `spaceId`, and gate undeployed-Safe blocked routes?
 
 <details>
 <summary><strong>💡 Example 1 of 2</strong> — <code>web/examples/feature-boundaries.md</code> § <em>web-04-reusable-onboarding-components-must-not-hard-code-back-navigation</em></summary>
@@ -2750,7 +2672,6 @@ Route prefixes describe a hierarchy where pathname is the (possibly nested) chil
 ## 🌐 mobile › navigation
 
 <a id="mob-04"></a>
-
 ### `MOB-04` Keep Expo router layouts structural
 
 > **mobile** · navigation · ↩ `RL-20260217-004` · `RL-20260331-001`
@@ -2759,7 +2680,6 @@ Route prefixes describe a hierarchy where pathname is the (possibly nested) chil
 Expo Router layout files should define shell/navigation structure; business cleanup, disconnect, validation, and navigation side effects belong in focused containers, hooks, or screen logic.
 
 **✅ Check**\
-
 > Did this add logic to an Expo Router `_layout.tsx` file? If yes, is it only structural shell code?
 
 ---
@@ -2767,7 +2687,6 @@ Expo Router layout files should define shell/navigation structure; business clea
 ## 🌐 web › auth
 
 <a id="web-05"></a>
-
 ### `WEB-05` Sanitize auth redirects and outcomes
 
 > **web** · auth · 3 examples · ↩ `RL-20260220-001` · `RL-20260312-004` · `RL-20260325-001` · `RL-20260407-003`
@@ -2776,7 +2695,6 @@ Expo Router layout files should define shell/navigation structure; business clea
 Auth redirect URLs must remove transient error/query state and validate externally supplied return targets before sending users through OIDC or callback flows.
 
 **✅ Check**\
-
 > Did this add or change an auth redirect or callback? If yes, is the return URL sanitized and validated?
 
 <details>
@@ -2928,7 +2846,6 @@ Early-return bypasses on payload shape let any cross-origin sender opt out of or
 ## 🌐 web › features
 
 <a id="feat-03"></a>
-
 ### `FEAT-03` Do not self-import feature barrels
 
 > **web** · features · 4 examples · ↩ `RL-20260220-002` · `RL-20260309-001` · `RL-20260309-005` · `RL-20260326-001`
@@ -2937,7 +2854,6 @@ Early-return bypasses on payload shape let any cross-origin sender opt out of or
 Code inside a web feature must not import the feature barrel or lazy feature handle when a direct hook, constant, or feature flag check avoids a circular dependency.
 
 **✅ Check**\
-
 > Did this code inside `features/<name>` import from that feature barrel? If yes, can it import the direct module or shared hook instead?
 
 <details>
@@ -3101,7 +3017,6 @@ External callers go through the public barrel; internals stay relative. Self-imp
 ## 🌐 general › ui
 
 <a id="ui-01"></a>
-
 ### `UI-01` Use theme tokens and hosted assets
 
 > **general** · ui · 1 example · ↩ `RL-20260219-003` · `RL-20260312-003` · `RL-20260317-001` · `RL-20260327-003` · `RL-20260327-005`
@@ -3110,7 +3025,6 @@ External callers go through the public barrel; internals stay relative. Self-imp
 UI colors and reusable assets should use theme variables/tokens and hosted files instead of hardcoded hex values or embedded base64 data.
 
 **✅ Check**\
-
 > Did this add colors, icons, or image assets? If yes, are they theme-backed or hosted rather than hardcoded/embedded?
 
 <details>
@@ -3164,7 +3078,6 @@ Reviewer flagged a 143 KB main-bundle increase from the bundled SVG. CSS mask ke
 ## 🌐 general › ci
 
 <a id="ci-02"></a>
-
 ### `CI-02` Release workflows must compute against the pre-change state
 
 > **general** · ci · ↩ `RL-20260326-002` · `RL-20260326-003` · `RL-20260327-001`
@@ -3173,7 +3086,6 @@ Reviewer flagged a 143 KB main-bundle increase from the bundled SVG. CSS mask ke
 Release workflows must read previous tags, changelog ranges, and duplicate namespaces before creating the new tag or artifact that changes those queries.
 
 **✅ Check**\
-
 > Did this workflow create a tag, release, changelog, or artifact? If yes, are previous-state queries computed before the new state is created?
 
 ---
@@ -3181,7 +3093,6 @@ Release workflows must read previous tags, changelog ranges, and duplicate names
 ## 🌐 mobile › providers
 
 <a id="mob-05"></a>
-
 ### `MOB-05` Configure mobile providers from app state and supported config
 
 > **mobile** · providers · 1 example · ↩ `RL-20260311-012` · `RL-20260327-002` · `RL-20260327-003`
@@ -3190,7 +3101,6 @@ Release workflows must read previous tags, changelog ranges, and duplicate names
 Mobile wallet/provider integrations should sit low enough in the provider tree to read store/config state, use supported network/config sources, and avoid bundle-heavy embedded assets.
 
 **✅ Check**\
-
 > Did this add or move a mobile provider or wallet integration? If yes, can it read store/config state and avoid hardcoded networks or embedded assets?
 
 <details>
@@ -3242,7 +3152,6 @@ Author's response: 'Doesn't matter as I can't manipulate them in production. We 
 ## 🌐 web › config
 
 <a id="config-01"></a>
-
 ### `CONFIG-01` Match env-var default values to consumer parsers
 
 > **web** · config · 1 example · ↩ `RL-20260326-005`
@@ -3251,7 +3160,6 @@ Author's response: 'Doesn't matter as I can't manipulate them in production. We 
 Default values for env-var-driven config must satisfy the same parser or strict check the runtime applies to non-default values. For origin allowlists, omit trailing slashes since browser-supplied origins are slashless.
 
 **✅ Check**\
-
 > Did this introduce or change an env-var default? If yes, run the default through the consuming check; would the strict path accept it without normalization?
 
 <details>
@@ -3304,7 +3212,6 @@ consumer parses: no trailing slash on origin entries.
 ## 🌐 web › ui
 
 <a id="ux-03"></a>
-
 ### `UX-03` Shell rewrites must port over user-relied UX features
 
 > **web** · ui · ↩ `RL-20260302-003` · `RL-20260318-010` · `RL-20260410-004`
@@ -3313,7 +3220,6 @@ consumer parses: no trailing slash on origin entries.
 When replacing a shared shell component (topbar, sidebar, layout, navigation chrome), do an explicit feature delta against the previous version. Carry forward icons, indicators, shortcuts, and entry points users have come to rely on; if you intentionally drop one, document the decision before merge.
 
 **✅ Check**\
-
 > Did this replace shared shell/chrome? If yes, can you list every feature/icon/control that disappeared, and is each removal a deliberate UX call?
 
 ---
@@ -3321,7 +3227,6 @@ When replacing a shared shell component (topbar, sidebar, layout, navigation chr
 ## 🌐 general › packages
 
 <a id="pkg-01"></a>
-
 ### `PKG-01` Do not duplicate shared package files in app source
 
 > **general** · packages · 1 example · ↩ `RL-20260415-007`
@@ -3330,7 +3235,6 @@ When replacing a shared shell component (topbar, sidebar, layout, navigation chr
 When a shared package (`packages/**`) owns a config, type, ABI, or generated file, app code must import from the package's public entrypoint rather than maintaining a parallel app-local copy. Duplication drifts silently and breaks both apps as the source of truth changes.
 
 **✅ Check**\
-
 > Did this add or move a config/types/generated file under `apps/**`? If yes, does an equivalent file already exist in `packages/**`, and should the app import from there instead?
 
 <details>
@@ -3377,7 +3281,6 @@ every consumer.
 ## 🌐 web › ui
 
 <a id="ui-02"></a>
-
 ### `UI-02` Pick z-index from a documented layer scale
 
 > **web** · ui · ↩ `RL-20260317-002`
@@ -3386,7 +3289,6 @@ every consumer.
 When introducing or adjusting a z-index, place it on a documented scale of existing app layers (drawers, popovers, dialogs, notifications) rather than inventing an isolated value, and justify the choice in a comment if it must sit between two known layers.
 
 **✅ Check**\
-
 > Does this z-index reference an existing documented layer or scale, or is it an arbitrary value?
 
 ---
@@ -3394,7 +3296,6 @@ When introducing or adjusting a z-index, place it on a documented scale of exist
 ## 🌐 general › review
 
 <a id="review-01"></a>
-
 ### `REVIEW-01` Don't bundle unrelated refactors with infra/test PRs
 
 > **general** · review · ↩ `RL-20260318-004`
@@ -3403,7 +3304,6 @@ When introducing or adjusting a z-index, place it on a documented scale of exist
 A PR whose stated purpose is CI, tooling, or test-infrastructure should not also contain unrelated production refactors; reviewers should ask the author to split such changes into separate PRs.
 
 **✅ Check**\
-
 > Does this PR contain production-code changes outside its stated scope (test infra, CI, scaffolding)? If yes, split it.
 
 ---
@@ -3411,7 +3311,6 @@ A PR whose stated purpose is CI, tooling, or test-infrastructure should not also
 ## 🌐 general › state
 
 <a id="state-02"></a>
-
 ### `STATE-02` Reset context state when its precondition flips
 
 > **general** · state · 1 example · ↩ `RL-20260318-007`
@@ -3420,7 +3319,6 @@ A PR whose stated purpose is CI, tooling, or test-infrastructure should not also
 When an effect writes derived values into a context based on a boolean precondition, the false branch must explicitly reset those values; do not rely on the next true branch to overwrite them.
 
 **✅ Check**\
-
 > Does this conditional context write also clear the values when the condition becomes false, so downstream consumers never see stale data?
 
 <details>
@@ -3470,7 +3368,6 @@ Without the reset, downstream analysis keeps consuming the previously-decoded me
 ## 🌐 web › testing
 
 <a id="test-05"></a>
-
 ### `TEST-05` Pick the right test fixture surface: builders for unit tests, MSW fixtures for integration
 
 > **web** · testing · 1 example · ↩ `RL-20260313-002`
@@ -3479,7 +3376,6 @@ Without the reset, downstream analysis keeps consuming the previously-decoded me
 Use Builder.new<T>().with({...}) data for unit tests so the field under test is isolated and randomized data exposes hidden assumptions. Reach for MSW fixtures only when the test mocks the network layer and needs a realistic CGW response.
 
 **✅ Check**\
-
 > Unit tests under `*.test.ts(x)` must not import from `config/test/msw/fixtures/`.
 
 <details>
@@ -3527,7 +3423,6 @@ MSW fixtures are scenario-shaped real responses tied to specific Safes. They are
 ## 🌐 general › abstractions
 
 <a id="code-03"></a>
-
 ### `CODE-03` Cap positional parameters; close over shared hook state
 
 > **general** · abstractions · 1 example · ↩ `RL-20260311-005`
@@ -3536,7 +3431,6 @@ MSW fixtures are scenario-shaped real responses tied to specific Safes. They are
 Helper functions called from inside a hook should not take more than 4 positional parameters. When all extra args come from the same hook scope, prefer a local closure (`const buildItem = (chainId, address) => _buildSafeItem(chainId, address, ...deps)`) or a single `deps` object so call sites stay readable.
 
 **✅ Check**\
-
 > Static check: helpers invoked inside `useMemo`/`useCallback` with ≥5 positional args are flagged for review.
 
 <details>
@@ -3587,7 +3481,6 @@ Reviewer flagged six positional args as a refactor smell. The signature obscures
 ---
 
 <a id="code-04"></a>
-
 ### `CODE-04` Compute once per render before the JSX, not inside it
 
 > **general** · abstractions · 1 example · ↩ `RL-20260310-006`
@@ -3596,7 +3489,6 @@ Reviewer flagged six positional args as a refactor smell. The signature obscures
 Pure derivations from props or state — especially ones reused across multiple JSX nodes — should be assigned to a local `const` (or `useMemo` if expensive) above the `return`, not inlined into JSX attributes.
 
 **✅ Check**\
-
 > Lint review: flag identical pure-function calls appearing in multiple JSX `style`/attribute expressions within the same return.
 
 <details>
@@ -3652,7 +3544,6 @@ Reviewer asked to move the derivation outside the render layer. Even when cheap,
 ## 🌐 general › performance
 
 <a id="perf-01"></a>
-
 ### `PERF-01` Hoist regex literals and stable JSX out of inner loops
 
 > **general** · performance · 1 example · ↩ `RL-20260312-007`
@@ -3661,7 +3552,6 @@ Reviewer asked to move the derivation outside the render layer. Even when cheap,
 When iterating across many items, define regex literals and any structurally-identical JSX wrappers outside the loop. Anything that does not depend on the loop variable should be allocated once.
 
 **✅ Check**\
-
 > Code review: regex literals (`/.../`) appearing inside a `for`/`while`/`map`/`forEach` body and not depending on the iteration variable should be lifted.
 
 <details>
@@ -3716,7 +3606,6 @@ Allocating the regex once and collapsing the two near-identical JSX branches rem
 ## 🌐 general › abstractions
 
 <a id="code-05"></a>
-
 ### `CODE-05` Use named membership checks instead of long `!==` chains
 
 > **general** · abstractions · 1 example · ↩ `RL-20260312-008`
@@ -3725,7 +3614,6 @@ Allocating the regex once and collapsing the two near-identical JSX branches rem
 Three or more `value !== 'literal'` checks on the same variable should be rewritten as `!DISALLOWED.includes(value)` against a named const, and the resulting boolean assigned to a named variable before use in JSX.
 
 **✅ Check**\
-
 > Review: ≥3 `!== 'string-literal'` operands joined by `&&` on the same identifier should be rejected in favor of a named constant.
 
 <details>
@@ -3773,7 +3661,6 @@ Reviewers asked to extract this for readability and to centralize the disallowed
 ## 🌐 web › features
 
 <a id="feat-04"></a>
-
 ### `FEAT-04` Coordinate edits to shared UI primitives with in-flight design-system PRs
 
 > **web** · features · ↩ `RL-20260310-009`
@@ -3782,7 +3669,6 @@ Reviewers asked to extract this for readability and to centralize the disallowed
 Before editing files under `apps/web/src/components/ui/*`, check for open PRs that rewrite those files. If one exists, hold the edit, base it on top of the design-system branch, or apply the change in that branch directly.
 
 **✅ Check**\
-
 > PR review checklist: any change to `apps/web/src/components/ui/*` must call out coordination with the design-system rewrite or note that no such PR is open.
 
 ---
@@ -3790,7 +3676,6 @@ Before editing files under `apps/web/src/components/ui/*`, check for open PRs th
 ## 🌐 general › observability
 
 <a id="obs-02"></a>
-
 ### `OBS-02` Telemetry user-context effects must handle the empty branch
 
 > **general** · observability · 1 example · ↩ `RL-20260311-013`
@@ -3799,7 +3684,6 @@ Before editing files under `apps/web/src/components/ui/*`, check for open PRs th
 Any effect that writes user/account context to a telemetry SDK must also clear or overwrite that context when the underlying entity becomes absent. The effect's dependency array must include the absence case, and the effect body must branch on it.
 
 **✅ Check**\
-
 > Review: `useEffect` calls that read `activeSafe?.address` to call `addUserExtraInfo`/`setUser`/`identify` should also call the corresponding reset API in the falsy branch.
 
 <details>
@@ -3853,7 +3737,6 @@ Without the reset, RUM events after the user wipes their last Safe still carry t
 ## 🌐 web › transactions
 
 <a id="tx-03"></a>
-
 ### `TX-03` Gate submit on token data readiness
 
 > **web** · transactions · 1 example · ↩ `RL-20260303-002`
@@ -3862,7 +3745,6 @@ Without the reset, RUM events after the user wipes their last Safe still carry t
 Block transaction submission until token decimals (or other parameters that affect the on-chain amount) are fully loaded. Never let the UI fall back to a default that silently corrupts the value.
 
 **✅ Check**\
-
 > Did this submit path depend on token metadata? If yes, is submission disabled until that metadata is confirmed loaded?
 
 <details>
@@ -3914,7 +3796,6 @@ Defaulting to 18 silently encodes the wrong unit scale; gating on the explicit r
 ---
 
 <a id="tx-04"></a>
-
 ### `TX-04` Guard transaction submission with a synchronous ref
 
 > **web** · transactions · 1 example · ↩ `RL-20260303-003`
@@ -3923,7 +3804,6 @@ Defaulting to 18 silently encodes the wrong unit scale; gating on the explicit r
 Use a synchronous ref (not a state flag) to prevent double-submission in transaction send flows. State updates are async and can race when the user double-clicks or presses Enter while a request is in flight.
 
 **✅ Check**\
-
 > Does this submit handler rely only on a state flag? If yes, switch to a useRef guard set/checked synchronously.
 
 <details>
@@ -3978,7 +3858,6 @@ React state updates are async, so two rapid invocations can both read the old `i
 ## 🌐 general › numerics
 
 <a id="num-01"></a>
-
 ### `NUM-01` Avoid scientific notation when serializing decimal amounts
 
 > **general** · numerics · 1 example · ↩ `RL-20260303-004`
@@ -3987,7 +3866,6 @@ React state updates are async, so two rapid invocations can both read the old `i
 When converting fiat or float values into bigint/decimal-string representations, format intermediate math without scientific notation. JS toString() emits '1e-7' for very small numbers, which downstream BigInt parsers reject.
 
 **✅ Check**\
-
 > Does this code convert a Number to a decimal string for on-chain use? If yes, is it formatted with toFixed/Decimal.js rather than implicit toString?
 
 <details>
@@ -4033,7 +3911,6 @@ JS `toString()` switches to exponent form below ~1e-6. Token amount parsers do n
 ## 🌐 general › state
 
 <a id="state-03"></a>
-
 ### `STATE-03` Retry handlers must reset error state
 
 > **general** · state · 1 example · ↩ `RL-20260306-006`
@@ -4042,7 +3919,6 @@ JS `toString()` switches to exponent form below ~1e-6. Token amount parsers do n
 When a user-initiated retry button calls an async operation, reset prior error state synchronously before re-issuing the call so the new attempt starts from a clean slate.
 
 **✅ Check**\
-
 > Does this retry handler clear the previous error before retrying? If not, stale error UI persists through the new attempt.
 
 <details>
@@ -4089,7 +3965,6 @@ UI components conditionally render error messages on the truthiness of `error`; 
 ## 🌐 general › data
 
 <a id="data-05"></a>
-
 ### `DATA-05` Compare addresses with the shared sameAddress helper
 
 > **general** · data · 1 example · ↩ `RL-20260309-007`
@@ -4098,7 +3973,6 @@ UI components conditionally render error messages on the truthiness of `error`; 
 Use the repo's `sameAddress(a, b)` helper for any address equality check. Direct string comparison silently fails on case/checksum differences; the helper normalizes both sides.
 
 **✅ Check**\
-
 > Did this introduce a `===` or `!==` between two address values? If yes, switch to `sameAddress`.
 
 <details>
@@ -4147,7 +4021,6 @@ function projectRemove(currentOwners: string[], change: { ownerAddress: string }
 ## 🌐 mobile › navigation
 
 <a id="mob-07"></a>
-
 ### `MOB-07` Mount navigators before running navigation effects
 
 > **mobile** · navigation · ↩ `RL-20260303-009`
@@ -4156,7 +4029,6 @@ function projectRemove(currentOwners: string[], change: { ownerAddress: string }
 Effects that call router.replace/push/back must wait until the navigator has mounted; calling navigation before mount silently no-ops in Expo Router.
 
 **✅ Check**\
-
 > Does this effect navigate during initial render? If yes, is it gated on a mount-ready condition?
 
 ---
@@ -4164,7 +4036,6 @@ Effects that call router.replace/push/back must wait until the navigator has mou
 ## 🌐 web › transactions
 
 <a id="tx-05"></a>
-
 ### `TX-05` Centralize transaction-derived analyses in SafeShield
 
 > **web** · transactions · ↩ `RL-20260307-011`
@@ -4173,7 +4044,6 @@ Effects that call router.replace/push/back must wait until the navigator has mou
 Decoded transaction data, simulation results, and risk analyses should run through the SafeShield context rather than being re-derived in individual components. Centralizing avoids divergent results across review surfaces.
 
 **✅ Check**\
-
 > Does this component re-derive transaction data that SafeShield already exposes? If yes, consume the context instead.
 
 ---
@@ -4181,7 +4051,6 @@ Decoded transaction data, simulation results, and risk analyses should run throu
 ## 🌐 general › state
 
 <a id="rtk-03"></a>
-
 ### `RTK-03` Match RTK Query cache-key strings to the serialized form
 
 > **general** · state · ↩ `RL-20260302-001`
@@ -4190,7 +4059,6 @@ Decoded transaction data, simulation results, and risk analyses should run throu
 Persisted RTK Query cache keys must be derived from the same serialization the runtime uses. Mismatched keys silently miss cache hits and refetch on every page load.
 
 **✅ Check**\
-
 > Does this code persist or restore an RTK cache key? If yes, does it use the same `serializeQueryArgs`/default key serializer the runtime uses?
 
 ---
@@ -4198,7 +4066,6 @@ Persisted RTK Query cache keys must be derived from the same serialization the r
 ## 🌐 web › state
 
 <a id="web-06"></a>
-
 ### `WEB-06` Derive reactive parent state from the store, not from child refs
 
 > **web** · state · ↩ `RL-20260302-004`
@@ -4207,7 +4074,6 @@ Persisted RTK Query cache keys must be derived from the same serialization the r
 When a parent needs to react to changes inside a child component, drive that reactivity through Redux/store state rather than imperative refs. Refs don't trigger re-renders, so parent UI ends up stale.
 
 **✅ Check**\
-
 > Does the parent compute layout/visibility from a child ref? If yes, lift the relevant value into the store and read it from a selector.
 
 ---
@@ -4215,7 +4081,6 @@ When a parent needs to react to changes inside a child component, drive that rea
 ## 🌐 mobile › theme
 
 <a id="mob-06"></a>
-
 ### `MOB-06` Forward auto theme to native APIs as null
 
 > **mobile** · theme · ↩ `RL-20260226-001`
@@ -4224,7 +4089,6 @@ When a parent needs to react to changes inside a child component, drive that rea
 When the user picks 'Auto' for theme/appearance, forward that to the native API as `null` so the OS controls the appearance. Forwarding the literal string 'auto' bypasses the OS hook.
 
 **✅ Check**\
-
 > Does this expose a theme setting to native code? If yes, is the auto/system value translated to `null` before crossing the bridge?
 
 ---
@@ -4232,7 +4096,6 @@ When the user picks 'Auto' for theme/appearance, forward that to the native API 
 ## 🌐 web › e2e
 
 <a id="e2e-02"></a>
-
 ### `E2E-02` Pass timeout to the Cypress retryable command, not the assertion
 
 > **web** · e2e · 1 example · ↩ `RL-20260218-001`
@@ -4241,7 +4104,6 @@ When the user picks 'Auto' for theme/appearance, forward that to the native API 
 Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` — passing timeout into `should()` or `expect()` does nothing.
 
 **✅ Check**\
-
 > Did this E2E test increase a timeout to handle async UI? Is the timeout on the retryable command rather than the trailing assertion?
 
 <details>
@@ -4278,7 +4140,6 @@ Cypress retries the chained command using the preceding command's timeout. The t
 ## 🌐 general › data
 
 <a id="data-06"></a>
-
 ### `DATA-06` Keep cache-key normalization consistent across all consumers
 
 > **general** · data · 1 example · ↩ `RL-20260218-002`
@@ -4287,7 +4148,6 @@ Cypress retries the chained command using the preceding command's timeout. The t
 When multiple consumers (selector, hook, persistence layer) build cache keys from the same identifier, they must all normalize identically (e.g. `getAddress`, `toLowerCase`, EIP-55 checksum). Divergent normalization fragments the cache.
 
 **✅ Check**\
-
 > Did this code add a new consumer that builds a cache key from an address/identifier? Does it normalize the same way as every existing consumer?
 
 <details>
@@ -4334,7 +4194,6 @@ RTK Query keys by argument value. Normalizing on read but not on invalidation me
 ## 🌐 general › chain
 
 <a id="chain-03"></a>
-
 ### `CHAIN-03` Pass canonical Safe versions through chain-aware deployment helpers
 
 > **general** · chain · ↩ `RL-20260218-003`
@@ -4343,7 +4202,6 @@ RTK Query keys by argument value. Normalizing on read but not on invalidation me
 When resolving Safe contract metadata for a transaction, route the lookup through a chain-aware helper that respects canonical-fallback ordering. Hard-coding latest-version indices skips chains pinned to older releases.
 
 **✅ Check**\
-
 > Does this code resolve a Safe contract address/version? If yes, is it going through the canonical-version helper rather than picking from a flat list?
 
 ---
@@ -4351,7 +4209,6 @@ When resolving Safe contract metadata for a transaction, route the lookup throug
 ## 🌐 general › ci
 
 <a id="ci-03"></a>
-
 ### `CI-03` Codegen drift checks must catch untracked outputs and run against PR HEAD
 
 > **general** · ci · ↩ `RL-20260217-003`
@@ -4360,7 +4217,6 @@ When resolving Safe contract metadata for a transaction, route the lookup throug
 Drift checks for generated code must (1) include `--include-untracked` so newly generated files trigger the failure and (2) run against the actual PR HEAD, not the merge base.
 
 **✅ Check**\
-
 > Did this change a codegen workflow? If yes, does the drift check call `git status --porcelain --include-untracked` and run after the codegen step on the PR commit?
 
 ---

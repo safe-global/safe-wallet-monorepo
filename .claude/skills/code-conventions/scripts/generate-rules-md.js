@@ -244,7 +244,7 @@ export function renderRulesMarkdown(rules, engineeringRoot) {
     lines.push('')
   }
 
-  return `${lines.join('\n')}\n`
+  return `${lines.join('\n').replace(/\n+$/u, '')}\n`
 }
 
 function main() {

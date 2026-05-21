@@ -63,7 +63,7 @@
     "rule": "Effects that depend on persisted auth state must observe hydration or the relevant hydrated value instead of capturing initial empty state forever.",
     "check": "Did this effect read persisted auth/session state? If yes, does it re-run after hydration or depend on the hydrated value?",
     "exampleRefs": ["examples/general/gateway-hooks.md#hydration-aware-effects"],
-    "reviewLearningIds": ["RL-20260420-002", "RL-20260504-001", "RL-20260506-002"]
+    "reviewLearningIds": ["RL-20260420-002", "RL-20260504-001", "RL-20260506-002", "RL-20260520-001"]
   },
   {
     "id": "WEB-02",
@@ -472,13 +472,13 @@
     "project": "web",
     "area": "navigation",
     "title": "Build Safe-scoped navigation from loaded Safe state",
-    "rule": "Safe-scoped CTAs and route builders must use the loaded Safe source of truth and block unavailable flows for undeployed Safes instead of trusting optional query params.",
-    "check": "Did this add a Safe-scoped link, CTA, or router push? If yes, does it use loaded Safe state and gate undeployed-Safe blocked routes?",
+    "rule": "Safe-scoped CTAs and route builders must use the loaded Safe source of truth and block unavailable flows for undeployed Safes instead of trusting optional query params. Space-scoped navigation must preserve the URL `spaceId` as the source of truth; helper hooks should not silently fall back to the first available Space when the URL is absent.",
+    "check": "Did this add a Safe- or Space-scoped link, CTA, or router push? If yes, does it use loaded state, preserve the active `spaceId`, and gate undeployed-Safe blocked routes?",
     "exampleRefs": [
       "web/examples/feature-boundaries.md#web-04-reusable-onboarding-components-must-not-hard-code-back-navigation",
       "web/examples/feature-boundaries.md#prefix-match-pathname-against-route-not-the-reverse"
     ],
-    "reviewLearningIds": ["RL-20260217-002", "RL-20260402-001", "RL-20260410-003", "RL-20260429-002"]
+    "reviewLearningIds": ["RL-20260217-002", "RL-20260402-001", "RL-20260410-003", "RL-20260429-002", "RL-20260520-001"]
   },
   {
     "id": "MOB-04",
