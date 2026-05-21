@@ -67,7 +67,7 @@ export const prepareSendDraft = async ({
   const safeTx = await createTx(txData, nonce)
   const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 
-  const previewResult = await dispatch(
+  const previewPromise = dispatch(
     cgwApi.endpoints.transactionsPreviewTransactionV1.initiate({
       chainId,
       safeAddress,
@@ -80,18 +80,25 @@ export const prepareSendDraft = async ({
     }),
   )
 
-  if ('error' in previewResult || !previewResult.data) {
-    throw asError('error' in previewResult ? previewResult.error : new Error('Preview unavailable'))
-  }
+  let txDetails
+  try {
+    const previewResult = await previewPromise
 
-  const txDetails = synthesizeDraftTxDetails({
-    safeAddress,
-    safeTxHash,
-    buildParams: safeTx.data,
-    owners: safe.owners,
-    threshold: safe.threshold,
-    preview: previewResult.data,
-  })
+    if ('error' in previewResult || !previewResult.data) {
+      throw asError('error' in previewResult ? previewResult.error : new Error('Preview unavailable'))
+    }
+
+    txDetails = synthesizeDraftTxDetails({
+      safeAddress,
+      safeTxHash,
+      buildParams: safeTx.data,
+      owners: safe.owners,
+      threshold: safe.threshold,
+      preview: previewResult.data,
+    })
+  } finally {
+    previewPromise.reset()
+  }
 
   const draft: DraftTx = {
     chainId,

@@ -70,7 +70,7 @@ export const synthesizeDraftTxDetails = ({
   // For 1-of-N Safes the very first signature also executes the tx, so
   // a freshly composed draft conceptually skips the confirmation gate.
   // For multisig, signatures still need to be collected from cosigners.
-  const txStatus: TransactionDetails['txStatus'] = threshold <= 1 ? 'AWAITING_EXECUTION' : 'AWAITING_CONFIRMATIONS'
+  const txStatus: TransactionDetails['txStatus'] = threshold === 1 ? 'AWAITING_EXECUTION' : 'AWAITING_CONFIRMATIONS'
 
   return {
     safeAddress,

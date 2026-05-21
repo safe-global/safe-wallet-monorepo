@@ -74,7 +74,7 @@ export const signWithWalletConnect = async (params: WalletConnectSigningParams):
   logger.info('Successfully signed transaction via WalletConnect', {
     signerAddress,
     safeTransactionHash,
-    txId,
+    ...(prebuiltSafeTx ? {} : { txId }),
   })
 
   return {

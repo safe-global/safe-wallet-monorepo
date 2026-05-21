@@ -44,8 +44,7 @@ export function useSendTransaction({
       return
     }
 
-    const cannotSubmit = !isValid || isSubmitting || !hasSigner
-    if (cannotSubmit) {
+    if (!isValid || !hasSigner) {
       return
     }
     isSubmittingRef.current = true
@@ -79,7 +78,6 @@ export function useSendTransaction({
     }
   }, [
     isValid,
-    isSubmitting,
     hasSigner,
     recipientAddress,
     tokenAddress,

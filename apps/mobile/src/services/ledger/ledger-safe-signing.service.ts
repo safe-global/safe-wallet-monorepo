@@ -88,7 +88,7 @@ export class LedgerSafeSigningService {
       logger.info('Successfully signed transaction with Ledger', {
         signerAddress,
         safeTransactionHash,
-        txId,
+        ...(prebuiltSafeTx ? {} : { txId }),
       })
 
       return {
@@ -99,7 +99,7 @@ export class LedgerSafeSigningService {
       logger.error('Failed to sign Safe transaction with Ledger', {
         error,
         signerAddress,
-        txId,
+        ...(prebuiltSafeTx ? {} : { txId }),
       })
       throw new Error(`Ledger signing failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
