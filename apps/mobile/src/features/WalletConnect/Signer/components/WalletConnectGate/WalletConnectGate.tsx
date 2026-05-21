@@ -1,8 +1,8 @@
 import React from 'react'
 import { View } from 'tamagui'
 import { SafeButton } from '@/src/components/SafeButton'
-import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
-import { useWalletConnectStatus } from '@/src/features/WalletConnect/hooks/useWalletConnectStatus'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/Signer/context/WalletConnectContext'
+import { useWalletConnectStatus } from '@/src/features/WalletConnect/Signer/hooks/useWalletConnectStatus'
 
 interface WalletConnectGateProps {
   signerAddress: string

@@ -6,7 +6,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { SilentErrorBoundary } from '@/src/components/ErrorBoundary'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
-import { useWalletConnectStatus } from '@/src/features/WalletConnect/hooks/useWalletConnectStatus'
+import { useWalletConnectStatus } from '@/src/features/WalletConnect/Signer/hooks/useWalletConnectStatus'
 
 type BadgeStatus = 'connected' | 'disconnected' | 'error'
 
