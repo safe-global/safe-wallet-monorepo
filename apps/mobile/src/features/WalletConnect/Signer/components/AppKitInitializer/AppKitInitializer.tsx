@@ -1,9 +1,9 @@
 import React, { useRef } from 'react'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectAllChains, selectActiveChain } from '@/src/store/chains'
-import { cgwChainsToReownNetworks } from '@/src/features/WalletConnect/utils/chains'
-import { AppKitInstance, createAppKitInstance } from '@/src/features/WalletConnect/appKit'
-import { WalletConnectProvider } from '@/src/features/WalletConnect/context/WalletConnectContext'
+import { cgwChainsToReownNetworks } from '@/src/features/WalletConnect/Signer/utils/chains'
+import { AppKitInstance, createAppKitInstance } from '@/src/features/WalletConnect/Signer/appKit'
+import { WalletConnectProvider } from '@/src/features/WalletConnect/Signer/context/WalletConnectContext'
 import Logger from '@/src/utils/logger'
 
 /**

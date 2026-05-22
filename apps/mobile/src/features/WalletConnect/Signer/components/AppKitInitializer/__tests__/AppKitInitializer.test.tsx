@@ -4,15 +4,15 @@ import { render } from '@testing-library/react-native'
 import { Provider } from 'react-redux'
 import { createTestStore } from '@/src/tests/test-utils'
 import { AppKitInitializer } from '../AppKitInitializer'
-import { cgwChainsToReownNetworks } from '@/src/features/WalletConnect/utils/chains'
-import { createAppKitInstance } from '@/src/features/WalletConnect/appKit'
+import { cgwChainsToReownNetworks } from '@/src/features/WalletConnect/Signer/utils/chains'
+import { createAppKitInstance } from '@/src/features/WalletConnect/Signer/appKit'
 import { selectAllChains, selectActiveChain } from '@/src/store/chains'
 
-jest.mock('@/src/features/WalletConnect/utils/chains', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/utils/chains', () => ({
   cgwChainsToReownNetworks: jest.fn(),
 }))
 
-jest.mock('@/src/features/WalletConnect/appKit', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/appKit', () => ({
   createAppKitInstance: jest.fn().mockReturnValue({}),
 }))
 
@@ -21,7 +21,7 @@ jest.mock('@/src/store/chains', () => ({
   selectActiveChain: jest.fn().mockReturnValue(null),
 }))
 
-jest.mock('@/src/features/WalletConnect/context/WalletConnectContext', () => {
+jest.mock('@/src/features/WalletConnect/Signer/context/WalletConnectContext', () => {
   const { Text: RNText } = require('react-native')
   const RN = require('react')
 

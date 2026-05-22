@@ -14,12 +14,12 @@ jest.mock('@/src/store/hooks', () => ({
   useAppDispatch: jest.fn(),
 }))
 
-jest.mock('@/src/features/WalletConnect/hooks/useWalletConnectStatus', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/hooks/useWalletConnectStatus', () => ({
   useWalletConnectStatus: jest.fn(),
 }))
 
 const { useAppSelector } = require('@/src/store/hooks')
-const { useWalletConnectStatus } = require('@/src/features/WalletConnect/hooks/useWalletConnectStatus')
+const { useWalletConnectStatus } = require('@/src/features/WalletConnect/Signer/hooks/useWalletConnectStatus')
 
 function renderBadge(props: Partial<React.ComponentProps<typeof WalletConnectBadge>> = {}) {
   return render(<WalletConnectBadge address={mockAddress} testID="wc-badge" {...props} />)

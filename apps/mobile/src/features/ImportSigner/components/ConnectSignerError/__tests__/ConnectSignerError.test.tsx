@@ -15,11 +15,11 @@ jest.mock('expo-router', () => ({
   }),
 }))
 
-jest.mock('@/src/features/WalletConnect/context/WalletConnectContext', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/context/WalletConnectContext', () => ({
   useWalletConnectContext: () => ({ initiateConnection: mockInitiateConnection }),
 }))
 
-jest.mock('@/src/features/WalletConnect/components/WalletConnectBadge', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/components/WalletConnectBadge', () => ({
   WalletConnectBadge: () => null,
 }))
 

@@ -8,7 +8,7 @@ const mockSwitchNetworkIfNeeded = jest.fn()
 const mockIsWalletConnectSigner = jest.fn()
 const mockUseWalletConnectStatus = jest.fn()
 
-jest.mock('@/src/features/WalletConnect/context/WalletConnectContext', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/context/WalletConnectContext', () => ({
   useWalletConnectContext: () => ({
     reconnect: mockReconnect,
     switchNetworkIfNeeded: mockSwitchNetworkIfNeeded,
@@ -17,7 +17,7 @@ jest.mock('@/src/features/WalletConnect/context/WalletConnectContext', () => ({
   }),
 }))
 
-jest.mock('@/src/features/WalletConnect/hooks/useWalletConnectStatus', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/hooks/useWalletConnectStatus', () => ({
   useWalletConnectStatus: (...args: unknown[]) => mockUseWalletConnectStatus(...args),
 }))
 

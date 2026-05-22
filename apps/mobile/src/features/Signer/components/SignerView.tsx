@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SafeListItem } from '@/src/components/SafeListItem'
 import { BadgeWrapper } from '@/src/components/BadgeWrapper'
 import { SignerTypeBadge } from '@/src/components/SignerTypeBadge'
-import { useWalletConnectStatus } from '@/src/features/WalletConnect/hooks/useWalletConnectStatus'
+import { useWalletConnectStatus } from '@/src/features/WalletConnect/Signer/hooks/useWalletConnectStatus'
 
 type Props = {
   signerAddress: string

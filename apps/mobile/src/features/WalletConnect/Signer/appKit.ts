@@ -1,44 +1,12 @@
-import '@walletconnect/react-native-compat'
 import { createAppKit } from '@reown/appkit-react-native'
 import { EthersAdapter } from '@reown/appkit-ethers-react-native'
 import type { Network, Storage } from '@reown/appkit-common-react-native'
-import { createMMKV } from 'react-native-mmkv'
-import { safeJsonParse, safeJsonStringify } from '@walletconnect/safe-json'
-
-const projectId = process.env.EXPO_PUBLIC_REOWN_PROJECT_ID ?? ''
+import { REOWN_PROJECT_ID } from '@/src/features/WalletConnect/shared/projectId'
+import { SAFE_WALLET_METADATA } from '@/src/features/WalletConnect/shared/metadata'
+import { createMmkvStorage } from '@/src/features/WalletConnect/shared/mmkvStorageAdapter'
 
 const ethersAdapter = new EthersAdapter()
-
-const mmkv = createMMKV({ id: 'appkit' })
-
-const storage: Storage = {
-  getKeys: async () => {
-    return mmkv.getAllKeys()
-  },
-  getEntries: async <T = unknown>(): Promise<[string, T][]> => {
-    function parseEntry(key: string): [string, T] {
-      const value = mmkv.getString(key)
-      return [key, safeJsonParse(value ?? '') as T]
-    }
-
-    const keys = mmkv.getAllKeys()
-    return keys.map(parseEntry)
-  },
-  setItem: async <T = unknown>(key: string, value: T) => {
-    return mmkv.set(key, safeJsonStringify(value))
-  },
-  getItem: async <T = unknown>(key: string): Promise<T | undefined> => {
-    const item = mmkv.getString(key)
-    if (typeof item === 'undefined' || item === null) {
-      return undefined
-    }
-
-    return safeJsonParse(item) as T
-  },
-  removeItem: async (key: string) => {
-    await mmkv.remove(key)
-  },
-}
+const storage: Storage = createMmkvStorage('appkit')
 
 export type AppKitInstance = ReturnType<typeof createAppKit>
 
@@ -51,17 +19,12 @@ export type AppKitInstance = ReturnType<typeof createAppKit>
  */
 export function createAppKitInstance(networks: [Network, ...Network[]], defaultNetwork?: Network): AppKitInstance {
   return createAppKit({
-    projectId,
+    projectId: REOWN_PROJECT_ID,
     networks,
     defaultNetwork: defaultNetwork ?? networks[0],
     adapters: [ethersAdapter],
     storage,
-    metadata: {
-      name: 'Safe{Mobile}',
-      description: 'Safe multi-signature wallet',
-      url: 'https://app.safe.global',
-      icons: ['https://app.safe.global/favicons/favicon.ico'],
-    },
+    metadata: SAFE_WALLET_METADATA,
     features: {
       onramp: false,
       swaps: false,
