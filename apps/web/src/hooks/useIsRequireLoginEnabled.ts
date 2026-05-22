@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { useChain } from '@/hooks/useChains'
 import { DEFAULT_CHAIN_ID, IS_TEST_E2E } from '@/config/constants'
@@ -31,11 +32,26 @@ import { isAuthenticated } from '@/store/authSlice'
  * callers can avoid redirecting before they know the answer.
  */
 export const useIsRequireLoginEnabled = (): boolean | undefined => {
+  // useIsClassicViewOptedIn is backed by useSyncExternalStore, which returns
+  // its server snapshot (always `false`) during hydration to avoid SSR
+  // mismatches — the real sessionStorage value only kicks in after the first
+  // effect tick. Without this gate, a logged-out user with classic-view
+  // opt-in opening any deep link sees one render where the hook resolves to
+  // `true`, which is enough for the route guard to fire a redirect to
+  // /welcome/spaces before the opt-in flips. Returning `undefined` until the
+  // first effect has run keeps the route guard's "still loading" branch in
+  // control during that window.
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const chain = useChain(String(DEFAULT_CHAIN_ID))
   const isClassicViewOptedIn = useIsClassicViewOptedIn()
   const isSignedIn = useAppSelector(isAuthenticated)
 
   if (IS_TEST_E2E) return false
+  if (!isMounted) return undefined
   if (isClassicViewOptedIn && !isSignedIn) return false
   if (!chain) return undefined
   return !hasFeature(chain, FEATURES.REQUIRE_LOGIN_DISABLED)

@@ -133,4 +133,25 @@ describe('useIsRequireLoginEnabled', () => {
 
     expect(result.current).toBe(true)
   })
+
+  it('returns undefined on the very first render so the classic-view opt-in (from useSyncExternalStore) has time to settle before consumers act', () => {
+    // useIsClassicViewOptedIn is backed by useSyncExternalStore, which returns
+    // its `false` server snapshot during hydration. If useIsRequireLoginEnabled
+    // returned `true` (gate ON) on that first render, the route guard would
+    // fire a redirect to /welcome/spaces before the real opt-in propagated.
+    // We instead return undefined until the first effect tick, which the
+    // guard treats as "still loading".
+    setMockChain(mockChain([]))
+    enableClassicView()
+
+    const captures: Array<boolean | undefined> = []
+    renderHook(() => {
+      const value = useIsRequireLoginEnabled()
+      captures.push(value)
+      return value
+    })
+
+    expect(captures[0]).toBeUndefined()
+    expect(captures[captures.length - 1]).toBe(false)
+  })
 })
