@@ -50,6 +50,7 @@ export type SpaceSurveyResponse = {
   surveyVersion: number
   selections: SurveySelections
   submittedAt: string
+  updatedAt: string
   answeredByUserId: number | null
 }
 
@@ -65,6 +66,7 @@ export type SurveyResponseResultDto = {
   surveyVersion: number
   selections: SurveySelections
   submittedAt: string
+  updatedAt: string
   answeredByUserId: number | null
 }
 
@@ -79,13 +81,17 @@ export type SurveysSubmitResponseV1ApiArg = {
   submitSurveyResponseDto: { selections: SurveySelections }
 }
 
+// Cache tags are scoped to (spaceId, slug) so a submit only invalidates the
+// state query for the affected Space, not every other Space's cached survey.
+const surveyTag = (spaceId: number | string, slug: string) => ({ type: 'surveys' as const, id: `${spaceId}:${slug}` })
+
 export const surveysApi = api.enhanceEndpoints({ addTagTypes: ['surveys'] }).injectEndpoints({
   endpoints: (build) => ({
     surveysGetStateV1: build.query<SurveyStateDto, SurveysGetStateV1ApiArg>({
       query: ({ spaceId, slug }) => ({
         url: `/v1/spaces/${spaceId}/surveys/${slug}/state`,
       }),
-      providesTags: ['surveys'],
+      providesTags: (_result, _error, { spaceId, slug }) => [surveyTag(spaceId, slug)],
     }),
     surveysSubmitResponseV1: build.mutation<SurveyResponseResultDto, SurveysSubmitResponseV1ApiArg>({
       query: ({ spaceId, slug, submitSurveyResponseDto }) => ({
@@ -93,7 +99,7 @@ export const surveysApi = api.enhanceEndpoints({ addTagTypes: ['surveys'] }).inj
         method: 'POST',
         body: submitSurveyResponseDto,
       }),
-      invalidatesTags: ['surveys'],
+      invalidatesTags: (_result, _error, { spaceId, slug }) => [surveyTag(spaceId, slug)],
     }),
   }),
 })

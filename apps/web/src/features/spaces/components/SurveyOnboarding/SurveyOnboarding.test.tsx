@@ -14,6 +14,7 @@ let queryResult: {
   isLoading: boolean
   error: unknown
 } = { data: undefined, isLoading: false, error: undefined }
+let mutationState: { isLoading: boolean; error: unknown } = { isLoading: false, error: undefined }
 
 const surveyFixture: SurveyStateDto = {
   survey: {
@@ -51,7 +52,7 @@ jest.mock('next/router', () => ({
 
 jest.mock('@safe-global/store/gateway/surveys', () => ({
   useSurveysGetStateV1Query: () => queryResult,
-  useSurveysSubmitResponseV1Mutation: () => [mockSubmit, { isLoading: false, error: undefined }],
+  useSurveysSubmitResponseV1Mutation: () => [mockSubmit, mutationState],
 }))
 
 jest.mock('@/hooks/useDarkMode', () => ({
@@ -78,6 +79,7 @@ describe('SurveyOnboarding', () => {
     routerQuery = { spaceId: '42' }
     routerIsReady = true
     setQueryResult({ data: surveyFixture })
+    mutationState = { isLoading: false, error: undefined }
     mockSubmit.mockReturnValue({ unwrap: mockUnwrap })
     mockUnwrap.mockResolvedValue({})
   })
@@ -125,7 +127,7 @@ describe('SurveyOnboarding', () => {
     expect(screen.queryByText('Run payments')).not.toBeInTheDocument()
   })
 
-  it('submits selections nested under the page id and routes to the Space dashboard', async () => {
+  it('submits selections nested under the page id (sorted) and routes to the Space dashboard', async () => {
     render(<SurveyOnboarding />)
 
     fireEvent.click(screen.getByText('Run payments').closest('[role="checkbox"]')!)
@@ -137,7 +139,9 @@ describe('SurveyOnboarding', () => {
         spaceId: '42',
         slug: 'onboarding',
         submitSurveyResponseDto: {
-          selections: { use_cases: ['run_payments', 'hold_assets'] },
+          // Selections are sorted alphabetically before submit so the same set
+          // always serialises to the same array.
+          selections: { use_cases: ['hold_assets', 'run_payments'] },
         },
       })
     })
@@ -148,6 +152,21 @@ describe('SurveyOnboarding', () => {
         query: { spaceId: '42' },
       })
     })
+  })
+
+  it('shows the submit-error alert and does not navigate when the mutation rejects', async () => {
+    mutationState = { isLoading: false, error: { status: 500, data: { message: 'boom' } } }
+    mockUnwrap.mockRejectedValue(new Error('boom'))
+
+    render(<SurveyOnboarding />)
+
+    fireEvent.click(screen.getByText('Run payments').closest('[role="checkbox"]')!)
+    fireEvent.click(screen.getByTestId('survey-finish-button'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Failed to submit. Please try again.')).toBeInTheDocument()
+    })
+    expect(mockPush).not.toHaveBeenCalled()
   })
 
   it('silently redirects to the Space dashboard when the state endpoint returns 404 (survey turned off)', async () => {
