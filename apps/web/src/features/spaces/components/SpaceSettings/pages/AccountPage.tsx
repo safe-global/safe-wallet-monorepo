@@ -60,7 +60,7 @@ const AccountPage = () => {
 
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4 min-w-0">
-          <InitialsAvatar name={memberName} size="large" />
+          <InitialsAvatar name={memberName} size="large" rounded />
           <div className="flex flex-col min-w-0">
             <Typography variant="paragraph-small-bold" className="block">
               {memberName}
