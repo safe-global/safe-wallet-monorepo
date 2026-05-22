@@ -21,6 +21,11 @@ import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/
 import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
+import { isAlwaysPublic } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
+import ClassicViewToast from '@/components/common/ClassicViewToast'
+import ClassicViewWarningBorder from '@/components/common/ClassicViewWarningBorder'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -50,7 +55,13 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const { SelectSafeModal } = useLoadFeature(SpacesFeature)
   const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
-  const hideHeader = NO_HEADER_ROUTES.includes(pathname)
+  const isRequireLoginEnabled = useIsRequireLoginEnabled() === true
+  // /welcome/spaces is the canonical login page when the require-login gate is
+  // on (and the Topbar's URL-derived hooks then add SSR hydration noise on top
+  // of being pointless). When the gate is off the page is the legacy Spaces
+  // list and keeps its Topbar.
+  const hideHeader =
+    NO_HEADER_ROUTES.includes(pathname) || (isRequireLoginEnabled && pathname === AppRoutes.welcome.spaces)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
   const urlSafeAddress = useSafeAddressFromUrl()
@@ -69,8 +80,26 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
     setFullWidth(!isSidebarVisible)
   }, [isSidebarVisible, setFullWidth])
 
+  // While the require-login gate is keeping the user out of a protected page,
+  // render nothing instead of letting the page's data hooks mount and fire
+  // pending-tx / message toasts before the router guard's redirect resolves.
+  // The login page, onboarding flow and always-public pages stay rendered.
+  const isGateBlocking = useIsAuthGateBlocking()
+  const isGateBlockedRoute =
+    isGateBlocking &&
+    !isAlwaysPublic(pathname) &&
+    pathname !== AppRoutes.welcome.spaces &&
+    !isOnboardingRoute &&
+    !isStaticPage
+  if (isGateBlockedRoute) {
+    return <></>
+  }
+
   return (
     <>
+      <ClassicViewToast />
+      <ClassicViewWarningBorder />
+
       {!hideHeader && (
         <div
           className={classnames(css.topbar, {
