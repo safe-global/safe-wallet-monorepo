@@ -119,7 +119,8 @@ const SpacesList = () => {
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
     currentData: spaces,
-    isFetching: isSpacesLoading,
+    isFetching,
+    isUninitialized,
     error,
   } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
@@ -130,7 +131,12 @@ const SpacesList = () => {
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,
     inviteAmount: inviteAmount || 0,
-    isSpacesLoading: isSpacesLoading || false,
+    // Treat the "skip→unskip" transition as still loading. On the render where
+    // skip flips to false RTK Query returns isFetching=false but hasn't yet
+    // dispatched the fetch (that happens in a useEffect), so isFetching alone
+    // would lead useSignInRedirect to read spacesAmount=0 and bounce existing
+    // users into the create-space flow on re-login.
+    isSpacesLoading: isFetching || isUninitialized,
     error: error || undefined,
   })
 

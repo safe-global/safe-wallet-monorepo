@@ -231,6 +231,27 @@ describe('useSignInRedirect', () => {
 
       expect(mockPush).not.toHaveBeenCalled()
     })
+
+    // Regression: re-login after logout used to bounce existing users into the
+    // create-space flow because on the render where sign-in completed the
+    // spaces query was still in the skip→unskip transition (isFetching=false,
+    // currentData=undefined) and the hook read spacesAmount=0. The fix is at
+    // the SpacesList call site (isSpacesLoading: isFetching || isUninitialized),
+    // and this test pins the contract: while loading, no redirect — even with
+    // spacesAmount=0 and hasSignedIn=true.
+    it('does not redirect when isSpacesLoading=true even if spacesAmount is 0', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({ ...defaultProps, spacesAmount: 0, isSpacesLoading: true }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
   })
 
   describe('when OIDC sign-in completes', () => {
