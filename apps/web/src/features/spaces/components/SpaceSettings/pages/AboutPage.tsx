@@ -92,18 +92,20 @@ const LinkRow = ({
     href={href}
     target={external ? '_blank' : undefined}
     rel={external ? 'noreferrer noopener' : undefined}
-    className="flex items-center gap-3 px-3 py-3 rounded-md text-foreground no-underline transition-colors hover:bg-muted/60"
+    className="group flex items-center gap-3 px-3 py-3 rounded-md text-foreground no-underline transition-colors hover:bg-muted/60"
   >
-    <span className="shrink-0">{icon}</span>
+    <span className="shrink-0 transition-colors [&_svg]:transition-colors [&_svg]:group-hover:text-green-600">
+      {icon}
+    </span>
     <span className="flex-1 min-w-0">
-      <Typography variant="paragraph-small-bold" className="block">
+      <Typography variant="paragraph-small-bold" className="block transition-colors group-hover:text-green-600">
         {title}
       </Typography>
       <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
         {description}
       </Typography>
     </span>
-    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-colors group-hover:text-green-600" />
   </a>
 )
 
@@ -158,20 +160,23 @@ const AboutPage = () => {
             <button
               type="button"
               onClick={handleContactSupportClick}
-              className="flex items-center gap-3 px-3 py-3 rounded-md text-foreground text-left transition-colors hover:bg-muted/60 cursor-pointer w-full"
+              className="group flex items-center gap-3 px-3 py-3 rounded-md text-foreground text-left transition-colors hover:bg-muted/60 cursor-pointer w-full"
             >
               <span className="shrink-0">
-                <LifeBuoy className="h-4 w-4 text-muted-foreground" />
+                <LifeBuoy className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-green-600" />
               </span>
               <span className="flex-1 min-w-0">
-                <Typography variant="paragraph-small-bold" className="block">
+                <Typography
+                  variant="paragraph-small-bold"
+                  className="block transition-colors group-hover:text-green-600"
+                >
                   Contact Support
                 </Typography>
                 <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
                   Get help from our team
                 </Typography>
               </span>
-              <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-colors group-hover:text-green-600" />
             </button>
           )}
         </div>
@@ -190,18 +195,18 @@ const AboutPage = () => {
             type="button"
             onClick={handleCookiePrefs}
             data-testid="cookie-preferences-button"
-            className="flex items-center gap-3 px-3 py-3 rounded-md text-foreground text-left transition-colors hover:bg-muted/60 cursor-pointer"
+            className="group flex items-center gap-3 px-3 py-3 rounded-md text-foreground text-left transition-colors hover:bg-muted/60 cursor-pointer"
           >
-            <Settings2 className="h-4 w-4 text-muted-foreground shrink-0" />
+            <Settings2 className="h-4 w-4 text-muted-foreground shrink-0 transition-colors group-hover:text-green-600" />
             <span className="flex-1 min-w-0">
-              <Typography variant="paragraph-small-bold" className="block">
+              <Typography variant="paragraph-small-bold" className="block transition-colors group-hover:text-green-600">
                 Cookie Preferences
               </Typography>
               <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
                 Manage what&apos;s enabled
               </Typography>
             </span>
-            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-colors group-hover:text-green-600" />
           </button>
         </div>
       </section>

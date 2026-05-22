@@ -23,14 +23,15 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
     setName(space?.name ?? '')
   }, [space?.name])
 
-  const isDirty = !!space && name !== space.name && name.trim().length > 0
+  const trimmedName = name.trim()
+  const isDirty = !!space && trimmedName !== space.name && trimmedName.length > 0
   const canSave = isDirty && isAdmin && !isSaving
 
   const handleSave = async () => {
     if (!space || !canSave) return
     setError(undefined)
     try {
-      await updateSpace({ id: space.id, updateSpaceDto: { name: name.trim() } }).unwrap()
+      await updateSpace({ id: space.id, updateSpaceDto: { name: trimmedName } }).unwrap()
       dispatch(
         showNotification({
           variant: 'success',
