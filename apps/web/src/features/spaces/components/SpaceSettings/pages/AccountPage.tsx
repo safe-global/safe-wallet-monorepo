@@ -10,7 +10,7 @@ import { Typography } from '@/components/ui/typography'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const AccountPage = () => {
-  const { membership, signerAddress, isLoading } = useCurrentMemberProfile()
+  const { membership, signerAddress, email, isLoading } = useCurrentMemberProfile()
   const { logout } = useLogout()
 
   const handleSignOut = () => {
@@ -65,9 +65,15 @@ const AccountPage = () => {
             <Typography variant="paragraph-small-bold" className="block">
               {memberName}
             </Typography>
-            <Typography variant="paragraph-mini" color="muted" className="block mt-0.5 font-mono">
-              {displayName}
-            </Typography>
+            {email ? (
+              <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
+                {email}
+              </Typography>
+            ) : (
+              <Typography variant="paragraph-mini" color="muted" className="block mt-0.5 font-mono">
+                {displayName}
+              </Typography>
+            )}
             <Typography variant="paragraph-mini" color="muted" className="block mt-0.5 capitalize">
               {role}
             </Typography>
