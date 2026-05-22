@@ -35,14 +35,14 @@ type LegalLink = {
 
 const LEGAL_LINKS: LegalLink[] = [
   {
-    title: 'Terms of use',
-    description: 'Conditions for using Safe{Wallet}',
+    title: 'Terms & Conditions',
+    description: 'For using Safe{Wallet}',
     href: AppRoutes.terms,
     icon: <FileText className="h-4 w-4 text-muted-foreground" />,
     external: true,
   },
   {
-    title: 'Privacy policy',
+    title: 'Privacy Policy',
     description: 'What we collect and why',
     href: AppRoutes.privacy,
     icon: <Shield className="h-4 w-4 text-muted-foreground" />,
@@ -57,13 +57,13 @@ const LEGAL_LINKS: LegalLink[] = [
   },
   {
     title: 'Imprint',
-    description: 'Safe Ecosystem Foundation',
+    description: 'Safe Labs GmbH',
     href: AppRoutes.imprint,
     icon: <Building2 className="h-4 w-4 text-muted-foreground" />,
     external: true,
   },
   {
-    title: 'Cookie policy',
+    title: 'Cookie Policy',
     description: 'How cookies are used',
     href: AppRoutes.cookie,
     icon: <Cookie className="h-4 w-4 text-muted-foreground" />,
@@ -123,14 +123,14 @@ const AboutPage = () => {
             href={HELP_CENTER_URL}
             external
             icon={<BookOpen className="h-4 w-4 text-muted-foreground" />}
-            title="Help center"
-            description="Guides, FAQs, and troubleshooting."
+            title="Help Center"
+            description="Guides, FAQs, and troubleshooting"
           />
           <LinkRow
             href={STATUS_PAGE_URL}
             external
             icon={<ActivityIcon className="h-4 w-4 text-green-600" />}
-            title="Service status"
+            title="Service Status"
             description={
               <span>
                 <span className="text-green-600 font-semibold">●</span> All systems operational
@@ -141,16 +141,15 @@ const AboutPage = () => {
             href={HELP_CENTER_URL}
             external
             icon={<LifeBuoy className="h-4 w-4 text-muted-foreground" />}
-            title="Contact support"
-            description="Get help from our team."
+            title="Contact Support"
+            description="Get help from our team"
           />
         </div>
       </section>
 
-      {/* Legal & policies */}
       <section className="bg-card rounded-2xl p-6 mb-3">
         <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
-          Legal &amp; policies
+          Legal &amp; Policies
         </Typography>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 -mx-2">
@@ -166,7 +165,7 @@ const AboutPage = () => {
             <Settings2 className="h-4 w-4 text-muted-foreground shrink-0" />
             <span className="flex-1 min-w-0">
               <Typography variant="paragraph-small-bold" className="block">
-                Cookie preferences
+                Cookie Preferences
               </Typography>
               <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
                 Manage what&apos;s enabled
@@ -207,7 +206,7 @@ const AboutPage = () => {
                 Open source
               </Typography>
               <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
-                {BRAND_NAME} is fully open source.
+                {BRAND_NAME} is fully open source
               </Typography>
             </span>
           </span>
