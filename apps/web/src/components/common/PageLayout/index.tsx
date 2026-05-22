@@ -22,6 +22,8 @@ import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
+import { isAlwaysPublic } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import ClassicViewToast from '@/components/common/ClassicViewToast'
 
 const ONBOARDING_ROUTES = [
@@ -76,6 +78,21 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   useEffect(() => {
     setFullWidth(!isSidebarVisible)
   }, [isSidebarVisible, setFullWidth])
+
+  // While the require-login gate is keeping the user out of a protected page,
+  // render nothing instead of letting the page's data hooks mount and fire
+  // pending-tx / message toasts before the router guard's redirect resolves.
+  // The login page, onboarding flow and always-public pages stay rendered.
+  const isGateBlocking = useIsAuthGateBlocking()
+  const isGateBlockedRoute =
+    isGateBlocking &&
+    !isAlwaysPublic(pathname) &&
+    pathname !== AppRoutes.welcome.spaces &&
+    !isOnboardingRoute &&
+    !isStaticPage
+  if (isGateBlockedRoute) {
+    return <></>
+  }
 
   return (
     <>

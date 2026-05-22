@@ -38,7 +38,7 @@ const ALWAYS_PUBLIC_ROUTES = [
   AppRoutes.hypernative.oauthCallback,
 ]
 
-const isAlwaysPublic = (pathname: string): boolean => {
+export const isAlwaysPublic = (pathname: string): boolean => {
   return ALWAYS_PUBLIC_ROUTES.includes(pathname) || pathname.startsWith('/share/')
 }
 
