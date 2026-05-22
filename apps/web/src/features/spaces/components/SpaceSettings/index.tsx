@@ -19,9 +19,9 @@ const SpaceSettings = ({ activePage = 'general' }: { activePage?: SettingsPageKe
   return (
     <div>
       {isInvited && <PreviewInvite />}
-      <div className="flex items-start gap-12 max-w-[1100px]">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:gap-12 sm:max-w-[1100px]">
         <SettingsRail activePage={activePage} />
-        <div className="flex-1 min-w-0 max-w-[720px]">
+        <div className="flex-1 min-w-0 sm:max-w-[720px]">
           <ActiveContent />
         </div>
       </div>

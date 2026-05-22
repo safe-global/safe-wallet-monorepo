@@ -39,7 +39,7 @@ const SettingsRail = ({ activePage }: { activePage: SettingsPageKey }) => {
   const router = useRouter()
 
   return (
-    <aside className="w-[220px] shrink-0 sticky top-6 flex flex-col gap-2">
+    <aside className="sm:w-[220px] sm:shrink-0 sm:sticky sm:top-6 flex flex-row sm:flex-col gap-1 mb-4 sm:mb-0 overflow-x-auto">
       {RAIL_ITEMS.map((item) => {
         const isActive = activePage === item.key
         return (
@@ -48,7 +48,7 @@ const SettingsRail = ({ activePage }: { activePage: SettingsPageKey }) => {
             href={{ pathname: item.href, query: router.query }}
             data-testid={`settings-rail-${item.key}`}
             className={cn(
-              'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors no-underline',
+              'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors no-underline whitespace-nowrap',
               isActive
                 ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold dark:bg-accent dark:text-primary'
                 : 'text-sidebar-foreground hover:bg-muted',
