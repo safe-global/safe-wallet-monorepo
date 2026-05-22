@@ -41,6 +41,7 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature } from '@/features/counterfactual'
+import useCounterfactualSafeSync from '@/features/counterfactual/hooks/useCounterfactualSafeSync'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -127,6 +128,7 @@ const InitApp = (): null => {
   useVisitedSafes()
   usePortfolioRefetchOnTxHistory()
   useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
+  useCounterfactualSafeSync()
   useOidcLoginCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
