@@ -36,7 +36,7 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
           <Tooltip>
             <TooltipTrigger
               render={
-                <span>
+                <span tabIndex={0}>
                   <Button
                     variant="outline"
                     size="sm"

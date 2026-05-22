@@ -51,7 +51,7 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
   const dispatch = useAppDispatch()
   const [deleteSpace, { isLoading }] = useSpacesDeleteV1Mutation()
 
-  const canConfirm = !!space && confirmName.trim() === space.name && !isLoading
+  const canConfirm = !!space && confirmName.trim() === space.name.trim() && !isLoading
 
   const onDelete = async () => {
     if (!space || !canConfirm) return

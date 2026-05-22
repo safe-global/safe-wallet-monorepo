@@ -28,9 +28,9 @@ const renderWithStore = () => {
 describe('AppearanceSection', () => {
   it('selects "system" by default when no theme preference is set', () => {
     renderWithStore()
-    expect(screen.getByTestId('theme-card-system')).toHaveAttribute('aria-checked', 'true')
-    expect(screen.getByTestId('theme-card-dark')).toHaveAttribute('aria-checked', 'false')
-    expect(screen.getByTestId('theme-card-light')).toHaveAttribute('aria-checked', 'false')
+    expect(screen.getByTestId('theme-card-system')).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByTestId('theme-card-dark')).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByTestId('theme-card-light')).toHaveAttribute('aria-pressed', 'false')
   })
 
   it('persists the theme choice to settingsSlice when a card is clicked', () => {

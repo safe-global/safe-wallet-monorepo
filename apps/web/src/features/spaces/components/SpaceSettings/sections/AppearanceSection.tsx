@@ -31,9 +31,7 @@ const AppearanceSection = () => {
     if (value === current) return
     const nextDarkMode = value === 'dark' ? true : value === 'light' ? false : undefined
     dispatch(setDarkMode(nextDarkMode))
-    if (value !== 'system') {
-      trackEvent({ ...SETTINGS_EVENTS.APPEARANCE.DARK_MODE, label: value === 'dark' })
-    }
+    trackEvent({ ...SETTINGS_EVENTS.APPEARANCE.DARK_MODE, label: value })
   }
 
   return (
@@ -44,15 +42,14 @@ const AppearanceSection = () => {
 
       <div className="flex flex-col gap-2">
         <Label className="text-muted-foreground">Theme</Label>
-        <div role="radiogroup" aria-label="Theme" className="flex flex-col sm:flex-row gap-2">
+        <div aria-label="Theme" className="flex flex-col sm:flex-row gap-2">
           {THEME_OPTIONS.map((opt) => {
             const isSelected = current === opt.value
             return (
               <button
                 key={opt.value}
                 type="button"
-                role="radio"
-                aria-checked={isSelected}
+                aria-pressed={isSelected}
                 onClick={() => handleChange(opt.value)}
                 data-testid={`theme-card-${opt.value}`}
                 className={cn(

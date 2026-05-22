@@ -14,7 +14,7 @@ export default function SpaceSettingsIndexPage() {
 
   return (
     <Head>
-      <title>{`${BRAND_NAME} – Space settings`}</title>
+      <title>{`${BRAND_NAME} – Workspace Settings`}</title>
     </Head>
   )
 }
