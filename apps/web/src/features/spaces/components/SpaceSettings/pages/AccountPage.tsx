@@ -20,8 +20,8 @@ const AccountPage = () => {
 
   if (isLoading && !membership) {
     return (
-      <section className="bg-card rounded-2xl p-6 mb-4">
-        <Typography variant="paragraph-bold" className="mb-4 block">
+      <section className="bg-card rounded-2xl p-6 mb-3">
+        <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
           Signed in
         </Typography>
         <div className="flex items-center gap-4">
@@ -37,9 +37,9 @@ const AccountPage = () => {
 
   if (!membership || membership.status !== MemberStatus.ACTIVE) {
     return (
-      <section className="bg-card rounded-2xl p-6 mb-4" data-testid="settings-account-page">
-        <Typography variant="paragraph-bold" className="mb-2 block">
-          Account
+      <section className="bg-card rounded-2xl p-6 mb-3" data-testid="settings-account-page">
+        <Typography variant="paragraph-bold" className="mb-2 block tracking-tight">
+          Signed in
         </Typography>
         <Typography variant="paragraph-small" color="muted">
           You&apos;re not signed in to this workspace.
@@ -53,34 +53,27 @@ const AccountPage = () => {
   const role = membership.role.toLowerCase()
 
   return (
-    <section className="bg-card rounded-2xl p-6 mb-4" data-testid="settings-account-page">
-      <Typography variant="paragraph-bold" className="mb-4 block">
+    <section className="bg-card rounded-2xl p-6 mb-3" data-testid="settings-account-page">
+      <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
         Signed in
       </Typography>
 
-      <div className="flex items-center gap-4 mb-6">
-        <InitialsAvatar name={memberName} size="large" />
-        <div className="flex-1 min-w-0">
-          <Typography variant="paragraph-small-bold" className="block">
-            {memberName}
-          </Typography>
-          <Typography variant="paragraph-mini" color="muted" className="block mt-0.5 font-mono">
-            {displayName}
-          </Typography>
-          <Typography variant="paragraph-mini" color="muted" className="block mt-0.5 capitalize">
-            {role}
-          </Typography>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4 min-w-0">
+          <InitialsAvatar name={memberName} size="large" />
+          <div className="flex flex-col min-w-0">
+            <Typography variant="paragraph-small-bold" className="block">
+              {memberName}
+            </Typography>
+            <Typography variant="paragraph-mini" color="muted" className="block mt-0.5 font-mono">
+              {displayName}
+            </Typography>
+            <Typography variant="paragraph-mini" color="muted" className="block mt-0.5 capitalize">
+              {role}
+            </Typography>
+          </div>
         </div>
-      </div>
-
-      <div className="pt-4 border-t border-border">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleSignOut}
-          data-testid="settings-account-sign-out"
-          className="text-destructive"
-        >
+        <Button variant="outline" size="sm" onClick={handleSignOut} data-testid="settings-account-sign-out">
           <LogOut className="h-3.5 w-3.5" />
           Sign out
         </Button>

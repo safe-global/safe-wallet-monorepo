@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Upload } from 'lucide-react'
 import { type GetSpaceResponse, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import InitialsAvatar from '../../InitialsAvatar'
 import { useIsAdmin } from '@/features/spaces'
@@ -35,45 +34,38 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
       dispatch(
         showNotification({
           variant: 'success',
-          message: 'Updated space name',
+          message: 'Workspace name updated',
           groupKey: 'space-update-name',
         }),
       )
     } catch (e) {
       console.error(e)
-      setError('Error updating the space. Please try again.')
+      setError("Couldn't update workspace. Please try again.")
     }
   }
 
   return (
-    <section className="bg-card rounded-2xl p-6 mb-4">
-      <Typography variant="paragraph-bold" className="mb-4 block">
+    <section className="bg-card rounded-2xl p-6 mb-3">
+      <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
         Identity
       </Typography>
 
-      <div className="flex items-center gap-4 p-4 bg-muted rounded-lg mb-4">
-        <InitialsAvatar name={space?.name ?? '?'} size="large" />
-        <Typography variant="paragraph-small-bold" className="flex-1 min-w-0">
-          Workspace avatar
-        </Typography>
-        <Button variant="outline" size="sm" disabled aria-label="Upload avatar (coming soon)">
-          <Upload className="h-3.5 w-3.5" />
-          Upload
-        </Button>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="space-name">Workspace name</Label>
-        <Input
-          id="space-name"
-          data-testid="space-name-input"
-          value={name}
-          maxLength={MAX_NAME_LENGTH}
-          onChange={(e) => setName(e.target.value)}
-          disabled={!isAdmin}
-          error={error}
-        />
-        <div className="flex justify-end mt-2">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="space-name" className="text-muted-foreground">
+          Workspace name
+        </Label>
+        <div className="flex items-center gap-3">
+          <InitialsAvatar name={space?.name ?? '?'} size="large" />
+          <Input
+            id="space-name"
+            data-testid="space-name-input"
+            value={name}
+            maxLength={MAX_NAME_LENGTH}
+            onChange={(e) => setName(e.target.value)}
+            disabled={!isAdmin}
+            error={error}
+            className="max-w-md"
+          />
           <Button size="sm" onClick={handleSave} disabled={!canSave} data-testid="space-save-button">
             {isSaving ? 'Saving…' : 'Save'}
           </Button>

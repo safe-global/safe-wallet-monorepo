@@ -17,16 +17,16 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
   const isLastActiveAdmin = useIsLastActiveAdmin()
 
   return (
-    <section className="bg-card rounded-2xl p-6 mb-4">
-      <Typography variant="paragraph-bold" className="mb-4 block">
+    <section className="bg-card rounded-2xl p-6 mb-3">
+      <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
         Manage workspace
       </Typography>
 
-      <div className="flex items-center justify-between gap-6 py-3 border-b border-border">
+      <div className="flex items-center justify-between gap-6 py-4 border-b border-border/60 first:pt-0">
         <Typography variant="paragraph-small-bold" className="flex-1 min-w-0">
           Leave this workspace
         </Typography>
-        <Tooltip title={isLastActiveAdmin ? 'You are the last active admin and cannot leave the space.' : ''}>
+        <Tooltip title={isLastActiveAdmin ? 'You are the last active admin and cannot leave the workspace.' : ''}>
           <span>
             <Button
               variant="outline"
@@ -39,14 +39,14 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
               }}
               className="text-destructive"
             >
-              Leave space
+              Leave workspace
             </Button>
           </span>
         </Tooltip>
       </div>
 
       {isAdmin && (
-        <div className="flex items-center justify-between gap-6 pt-3">
+        <div className="flex items-center justify-between gap-6 py-4 last:pb-0">
           <Typography variant="paragraph-small-bold" className="flex-1 min-w-0">
             Delete workspace
           </Typography>

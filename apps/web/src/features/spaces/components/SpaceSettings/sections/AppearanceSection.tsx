@@ -37,13 +37,13 @@ const AppearanceSection = () => {
   }
 
   return (
-    <section className="bg-card rounded-2xl p-6 mb-4">
-      <Typography variant="paragraph-bold" className="mb-4 block">
+    <section className="bg-card rounded-2xl p-6 mb-3">
+      <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
         Appearance
       </Typography>
 
-      <div className="flex flex-col gap-1.5">
-        <Label>Theme</Label>
+      <div className="flex flex-col gap-2">
+        <Label className="text-muted-foreground">Theme</Label>
         <div role="radiogroup" aria-label="Theme" className="flex flex-col sm:flex-row gap-2">
           {THEME_OPTIONS.map((opt) => {
             const isSelected = current === opt.value

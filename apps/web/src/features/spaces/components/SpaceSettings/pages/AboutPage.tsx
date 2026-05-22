@@ -112,9 +112,74 @@ const AboutPage = () => {
 
   return (
     <div data-testid="settings-about-page">
+      {/* Help */}
+      <section className="bg-card rounded-2xl p-6 mb-3">
+        <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
+          Help
+        </Typography>
+
+        <div className="flex flex-col -mx-2">
+          <LinkRow
+            href={HELP_CENTER_URL}
+            external
+            icon={<BookOpen className="h-4 w-4 text-muted-foreground" />}
+            title="Help center"
+            description="Guides, FAQs, and troubleshooting."
+          />
+          <LinkRow
+            href={STATUS_PAGE_URL}
+            external
+            icon={<ActivityIcon className="h-4 w-4 text-green-600" />}
+            title="Service status"
+            description={
+              <span>
+                <span className="text-green-600 font-semibold">●</span> All systems operational
+              </span>
+            }
+          />
+          <LinkRow
+            href={HELP_CENTER_URL}
+            external
+            icon={<LifeBuoy className="h-4 w-4 text-muted-foreground" />}
+            title="Contact support"
+            description="Get help from our team."
+          />
+        </div>
+      </section>
+
+      {/* Legal & policies */}
+      <section className="bg-card rounded-2xl p-6 mb-3">
+        <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
+          Legal &amp; policies
+        </Typography>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 -mx-2">
+          {LEGAL_LINKS.map((link) => (
+            <LinkRow key={link.title} {...link} />
+          ))}
+          <button
+            type="button"
+            onClick={handleCookiePrefs}
+            data-testid="cookie-preferences-button"
+            className="flex items-center gap-3 px-3 py-3 rounded-md text-foreground text-left transition-colors hover:bg-muted/60 cursor-pointer"
+          >
+            <Settings2 className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="flex-1 min-w-0">
+              <Typography variant="paragraph-small-bold" className="block">
+                Cookie preferences
+              </Typography>
+              <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
+                Manage what&apos;s enabled
+              </Typography>
+            </span>
+            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          </button>
+        </div>
+      </section>
+
       {/* Version */}
-      <section className="bg-card rounded-2xl p-6 mb-4">
-        <Typography variant="paragraph-bold" className="mb-4 block">
+      <section className="bg-card rounded-2xl p-6 mb-3">
+        <Typography variant="paragraph-bold" className="mb-5 block tracking-tight">
           Version
         </Typography>
 
@@ -154,71 +219,6 @@ const AboutPage = () => {
             <ArrowUpRight className="h-3.5 w-3.5" />
             GitHub
           </Button>
-        </div>
-      </section>
-
-      {/* Legal & policies */}
-      <section className="bg-card rounded-2xl p-6 mb-4">
-        <Typography variant="paragraph-bold" className="mb-4 block">
-          Legal &amp; policies
-        </Typography>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 -mx-2">
-          {LEGAL_LINKS.map((link) => (
-            <LinkRow key={link.title} {...link} />
-          ))}
-          <button
-            type="button"
-            onClick={handleCookiePrefs}
-            data-testid="cookie-preferences-button"
-            className="flex items-center gap-3 px-3 py-3 rounded-md text-foreground text-left transition-colors hover:bg-muted/60 cursor-pointer"
-          >
-            <Settings2 className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span className="flex-1 min-w-0">
-              <Typography variant="paragraph-small-bold" className="block">
-                Cookie preferences
-              </Typography>
-              <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
-                Manage what&apos;s enabled
-              </Typography>
-            </span>
-            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-          </button>
-        </div>
-      </section>
-
-      {/* Help & community */}
-      <section className="bg-card rounded-2xl p-6 mb-4">
-        <Typography variant="paragraph-bold" className="mb-4 block">
-          Help &amp; community
-        </Typography>
-
-        <div className="flex flex-col -mx-2">
-          <LinkRow
-            href={HELP_CENTER_URL}
-            external
-            icon={<BookOpen className="h-4 w-4 text-muted-foreground" />}
-            title="Help center"
-            description="Guides, FAQs, and troubleshooting."
-          />
-          <LinkRow
-            href={STATUS_PAGE_URL}
-            external
-            icon={<ActivityIcon className="h-4 w-4 text-green-600" />}
-            title="Service status"
-            description={
-              <span>
-                <span className="text-green-600 font-semibold">●</span> All systems operational
-              </span>
-            }
-          />
-          <LinkRow
-            href={HELP_CENTER_URL}
-            external
-            icon={<LifeBuoy className="h-4 w-4 text-muted-foreground" />}
-            title="Contact support"
-            description="Get help from our team."
-          />
         </div>
       </section>
     </div>

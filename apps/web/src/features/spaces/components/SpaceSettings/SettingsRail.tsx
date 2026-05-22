@@ -23,7 +23,7 @@ const RAIL_ITEMS: RailItem[] = [
   },
   {
     key: 'account',
-    label: 'Account settings',
+    label: 'User settings',
     icon: <User className="h-4 w-4" />,
     href: AppRoutes.spaces.settingsAccount,
   },
