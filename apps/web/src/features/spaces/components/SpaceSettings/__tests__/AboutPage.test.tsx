@@ -111,9 +111,9 @@ describe('AboutPage', () => {
       expect(link).toHaveAttribute('href', HELP_CENTER_URL)
     })
 
-    it('renders Service Status link', () => {
+    it('renders Sync Status link', () => {
       renderWithStore()
-      const link = screen.getByRole('link', { name: /Service Status/i })
+      const link = screen.getByRole('link', { name: /Sync Status/i })
       expect(link).toHaveAttribute('href', 'https://status.safe.global')
     })
   })
