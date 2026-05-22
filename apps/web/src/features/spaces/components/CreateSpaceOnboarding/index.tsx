@@ -78,7 +78,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
             type="button"
             variant="ghost"
             size="icon"
-            onClick={() => router.push(AppRoutes.welcome.spaces)}
+            onClick={() => router.push({ pathname: AppRoutes.welcome.spaces, query: router.query })}
             className="self-start rounded-md border border-card shadow-sm"
           >
             <ChevronLeft className="size-5" />

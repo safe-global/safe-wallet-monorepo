@@ -8,6 +8,18 @@ jest.mock('@/components/common/Header/Topbar', () => {
   return { __esModule: true, default: MockTopbar }
 })
 
+jest.mock('@/components/common/ClassicViewToast', () => {
+  const MockClassicViewToast = () => null
+  MockClassicViewToast.displayName = 'ClassicViewToast'
+  return { __esModule: true, default: MockClassicViewToast }
+})
+
+jest.mock('@/components/common/ClassicViewWarningBorder', () => {
+  const MockClassicViewWarningBorder = () => null
+  MockClassicViewWarningBorder.displayName = 'ClassicViewWarningBorder'
+  return { __esModule: true, default: MockClassicViewWarningBorder }
+})
+
 jest.mock('@/components/common/SafeLogo', () => {
   const MockSafeLogo = ({ href }: { href?: string }) => <a data-testid="safe-logo" href={href} />
   MockSafeLogo.displayName = 'SafeLogo'
@@ -54,9 +66,13 @@ jest.mock('@/hooks/useRouterGuard', () => ({
   useRouterGuard: jest.fn(),
 }))
 
-jest.mock('@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard', () => ({
-  useFlowActivationGuard: jest.fn(),
-}))
+jest.mock('@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard', () => {
+  const actual = jest.requireActual('@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard')
+  return {
+    ...actual,
+    useFlowActivationGuard: jest.fn(),
+  }
+})
 
 jest.mock('@/hooks/useKeyboardObserver', () => ({
   useKeyboardObserver: jest.fn(),
@@ -69,6 +85,15 @@ jest.mock('@/hooks/useTopbarElevation', () => ({
 const mockUseSafeAddressFromUrl = jest.fn<string, []>(() => '')
 jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
+}))
+
+jest.mock('@/hooks/useIsRequireLoginEnabled', () => ({
+  useIsRequireLoginEnabled: jest.fn(() => false),
+}))
+
+const mockUseIsAuthGateBlocking = jest.fn(() => false)
+jest.mock('@/hooks/useIsAuthGateBlocking', () => ({
+  useIsAuthGateBlocking: () => mockUseIsAuthGateBlocking(),
 }))
 
 jest.mock('@/features/__core__', () => ({
@@ -88,6 +113,7 @@ const NON_STATIC_ROUTES = ['/home', '/balances', '/settings/setup', '/welcome/ac
 describe('PageLayout', () => {
   beforeEach(() => {
     mockUseSafeAddressFromUrl.mockReturnValue('')
+    mockUseIsAuthGateBlocking.mockReturnValue(false)
   })
 
   const renderLayout = (pathname: string) =>
@@ -128,6 +154,62 @@ describe('PageLayout', () => {
         expect(screen.getByTestId('topbar')).toBeInTheDocument()
       },
     )
+  })
+
+  describe('/welcome/spaces topbar gating', () => {
+    const useIsRequireLoginEnabledModule = jest.requireMock('@/hooks/useIsRequireLoginEnabled') as {
+      useIsRequireLoginEnabled: jest.Mock
+    }
+
+    afterEach(() => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+    })
+
+    it('renders Topbar on /welcome/spaces when the gate is OFF', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
+
+    it('hides Topbar on /welcome/spaces when the gate is ON', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(true)
+      renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+    })
+
+    it('still shows Topbar while the flag is loading (undefined)', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
+      renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
+  })
+
+  describe('auth gate blocking', () => {
+    beforeEach(() => {
+      mockUseIsAuthGateBlocking.mockReturnValue(true)
+    })
+
+    it('blanks protected pages so background data fetches do not run before the redirect', () => {
+      const { container } = renderLayout('/home')
+      expect(container).toBeEmptyDOMElement()
+      expect(screen.queryByTestId('page-content')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+    })
+
+    it('still renders the login page itself so the user can sign in', () => {
+      renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.getByTestId('page-content')).toBeInTheDocument()
+    })
+
+    it('still renders onboarding routes so a partially-onboarded user can finish the flow', () => {
+      renderLayout(AppRoutes.welcome.createSpace)
+      expect(screen.getByTestId('page-content')).toBeInTheDocument()
+    })
+
+    it.each(STATIC_ROUTES.map((r) => [r]))('still renders the always-public legal page %s', (pathname) => {
+      renderLayout(pathname)
+      expect(screen.getByTestId('page-content')).toBeInTheDocument()
+    })
   })
 
   describe('settings route padding-top', () => {
