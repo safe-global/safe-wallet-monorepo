@@ -94,6 +94,7 @@ import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
 import { useOidcLoginCallback } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
+import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 
@@ -130,6 +131,7 @@ const InitApp = (): null => {
   useCounterfactualSafeSync()
   useOidcLoginCallback()
   useLogoutCallback()
+  useSessionExpiryGuard()
 
   return null
 }

@@ -104,15 +104,15 @@ export const SafeSidebarVariant = ({
                     data-testid="sidebar-settings-item"
                   >
                     <Tooltip>
-                      <TooltipTrigger>
+                      <TooltipTrigger render={<span />} className="flex min-w-0 cursor-pointer items-center gap-3">
                         <span className="relative">
                           <Settings className="text-muted-foreground" />
                           {isOutdated && <span className={css.outdatedDot} aria-hidden />}
                         </span>
+                        <span className="truncate group-data-[collapsible=icon]:hidden">Settings</span>
                       </TooltipTrigger>
                       <TooltipContent side="right">Settings</TooltipContent>
                     </Tooltip>
-                    <span>Settings</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>

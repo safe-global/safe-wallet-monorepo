@@ -15,7 +15,7 @@ exports[`./index.stories Default 1`] = `
         class="MuiBox-root mui-style-dzaqf9"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-1uh4fgc-MuiPaper-root-MuiTableContainer-root"
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiTableContainer-root mui-style-aapmsc-MuiPaper-root-MuiTableContainer-root"
           data-testid="table-container"
           style="--Paper-shadow: none;"
         >
@@ -66,7 +66,7 @@ exports[`./index.stories Default 1`] = `
               </tr>
             </thead>
             <tbody
-              class="MuiTableBody-root mui-style-hvwm6q-MuiTableBody-root"
+              class="MuiTableBody-root tableBody mui-style-hvwm6q-MuiTableBody-root"
             >
               <tr
                 class="MuiTableRow-root mui-style-ee4r5n-MuiTableRow-root"

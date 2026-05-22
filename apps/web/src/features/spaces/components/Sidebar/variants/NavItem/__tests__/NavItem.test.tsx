@@ -170,6 +170,20 @@ describe('NavItem', () => {
     expect(screen.getByText('5')).toBeInTheDocument()
   })
 
+  it('renders a masked string badge such as "20+" without coercing to NaN', () => {
+    const itemWithMaskedBadge = { ...baseItem, badge: '20+' }
+    render(<NavItem item={itemWithMaskedBadge} />)
+
+    expect(screen.getByText('20+')).toBeInTheDocument()
+  })
+
+  it('does not render badge when badge is an empty string', () => {
+    const itemWithEmptyBadge = { ...baseItem, badge: '' }
+    render(<NavItem item={itemWithEmptyBadge} />)
+
+    expect(screen.queryByTestId('queued-tx-info')).not.toBeInTheDocument()
+  })
+
   it('renders badge dot with aria-hidden', () => {
     const itemWithBadge = { ...baseItem, badge: 3 }
     const { container } = render(<NavItem item={itemWithBadge} />)

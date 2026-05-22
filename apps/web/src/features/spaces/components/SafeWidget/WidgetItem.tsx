@@ -17,6 +17,7 @@ interface WidgetItemProps {
   className?: string
   /** Cypress: indexed rows in Space dashboard Accounts widget (`space-dashboard-accounts-row-${n}`). */
   testId?: string
+  fixedActionWidth?: boolean
 }
 
 const WidgetItem = ({
@@ -31,6 +32,7 @@ const WidgetItem = ({
   highlighted = false,
   className,
   testId,
+  fixedActionWidth = false,
 }: WidgetItemProps): ReactElement => {
   const router = useRouter()
 
@@ -87,7 +89,11 @@ const WidgetItem = ({
       {(featuredNode || actionNode) && (
         <div className="ml-auto flex shrink-0 items-center gap-4">
           {featuredNode && <div className="flex items-center justify-center">{featuredNode}</div>}
-          {actionNode && <div className="flex flex-col items-center gap-2 min-w-16">{actionNode}</div>}
+          {actionNode && (
+            <div className={cn('flex flex-col items-center gap-2', fixedActionWidth ? 'w-36' : 'min-w-16')}>
+              {actionNode}
+            </div>
+          )}
         </div>
       )}
     </div>
