@@ -21,8 +21,11 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
   const isAwaitingCacheSync = useRef(false)
 
   useEffect(() => {
+    if (isAwaitingCacheSync.current) {
+      isAwaitingCacheSync.current = false
+      return
+    }
     setName(space?.name ?? '')
-    isAwaitingCacheSync.current = false
   }, [space?.name])
 
   const trimmedName = name.trim()
