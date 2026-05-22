@@ -14,6 +14,12 @@ jest.mock('@/components/common/ClassicViewToast', () => {
   return { __esModule: true, default: MockClassicViewToast }
 })
 
+jest.mock('@/components/common/ClassicViewWarningBorder', () => {
+  const MockClassicViewWarningBorder = () => null
+  MockClassicViewWarningBorder.displayName = 'ClassicViewWarningBorder'
+  return { __esModule: true, default: MockClassicViewWarningBorder }
+})
+
 jest.mock('@/components/common/SafeLogo', () => {
   const MockSafeLogo = ({ href }: { href?: string }) => <a data-testid="safe-logo" href={href} />
   MockSafeLogo.displayName = 'SafeLogo'

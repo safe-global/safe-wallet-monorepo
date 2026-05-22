@@ -25,6 +25,7 @@ import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
 import { isAlwaysPublic } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import ClassicViewToast from '@/components/common/ClassicViewToast'
+import ClassicViewWarningBorder from '@/components/common/ClassicViewWarningBorder'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -97,6 +98,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   return (
     <>
       <ClassicViewToast />
+      <ClassicViewWarningBorder />
 
       {!hideHeader && (
         <div
