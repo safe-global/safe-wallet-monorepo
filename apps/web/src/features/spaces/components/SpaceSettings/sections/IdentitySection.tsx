@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { type GetSpaceResponse, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import InitialsAvatar from '../../InitialsAvatar'
 import { useIsAdmin } from '@/features/spaces'
@@ -18,20 +18,30 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
 
   const [name, setName] = useState(space?.name ?? '')
   const [error, setError] = useState<string>()
+  const isAwaitingCacheSync = useRef(false)
 
   useEffect(() => {
     setName(space?.name ?? '')
+    isAwaitingCacheSync.current = false
   }, [space?.name])
 
   const trimmedName = name.trim()
   const isDirty = !!space && trimmedName !== space.name && trimmedName.length > 0
   const canSave = isDirty && isAdmin && !isSaving
+  const canCancel = !!space && name !== space.name && isAdmin && !isSaving && !isAwaitingCacheSync.current
+
+  const handleCancel = () => {
+    setName(space?.name ?? '')
+    setError(undefined)
+  }
 
   const handleSave = async () => {
     if (!space || !canSave) return
     setError(undefined)
     try {
+      isAwaitingCacheSync.current = true
       await updateSpace({ id: space.id, updateSpaceDto: { name: trimmedName } }).unwrap()
+      setName(trimmedName)
       dispatch(
         showNotification({
           variant: 'success',
@@ -41,6 +51,7 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
       )
     } catch (e) {
       console.error(e)
+      isAwaitingCacheSync.current = false
       setError("Couldn't update workspace. Please try again.")
     }
   }
@@ -63,10 +74,21 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
             value={name}
             maxLength={MAX_NAME_LENGTH}
             onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && canSave) {
+                e.preventDefault()
+                handleSave()
+              }
+            }}
             disabled={!isAdmin}
             error={error}
             className="max-w-md"
           />
+          {canCancel && (
+            <Button size="sm" variant="outline" onClick={handleCancel} data-testid="space-cancel-button">
+              Cancel
+            </Button>
+          )}
           <Button size="sm" onClick={handleSave} disabled={!canSave} data-testid="space-save-button">
             {isSaving ? 'Saving…' : 'Save'}
           </Button>
