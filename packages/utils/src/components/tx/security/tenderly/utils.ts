@@ -99,8 +99,10 @@ export const isTxSimulationEnabled = (chain?: Pick<Chain, 'features'>): boolean 
 }
 
 export const isSimulationError = (status: SimulationStatus, nestedTx: NestedTxStatus, isNested: boolean) => {
-  const mainIsSuccess = status.isSuccess && !status.isError
-  const nestedIsSuccess = isNested ? nestedTx.status.isSuccess && !nestedTx.status.isError : true
+  const mainIsSuccess = status.isSuccess && !status.isError && !status.isCallTraceError
+  const nestedIsSuccess = isNested
+    ? nestedTx.status.isSuccess && !nestedTx.status.isError && !nestedTx.status.isCallTraceError
+    : true
   const isSimulationSuccess = mainIsSuccess && nestedIsSuccess
 
   const mainIsFinished = status.isFinished
