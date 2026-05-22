@@ -20,7 +20,7 @@ describe('ClassicViewLink', () => {
 
     fireEvent.click(screen.getByTestId('classic-view-link'))
 
-    expect(replace).toHaveBeenCalledWith(AppRoutes.welcome.accounts)
+    expect(replace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.accounts })
     expect(renderHook(() => useIsClassicViewOptedIn()).result.current).toBe(true)
   })
 
@@ -32,7 +32,7 @@ describe('ClassicViewLink', () => {
 
     fireEvent.click(screen.getByTestId('classic-view-link'))
 
-    expect(replace).toHaveBeenCalledWith('/home?safe=eth:0x1234')
+    expect(replace).toHaveBeenCalledWith({ pathname: '/home', query: { safe: 'eth:0x1234' } })
   })
 
   it('rejects an unsafe ?next= (protocol-relative URL) and falls back to /welcome/accounts', () => {
@@ -43,6 +43,6 @@ describe('ClassicViewLink', () => {
 
     fireEvent.click(screen.getByTestId('classic-view-link'))
 
-    expect(replace).toHaveBeenCalledWith(AppRoutes.welcome.accounts)
+    expect(replace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.accounts })
   })
 })

@@ -43,7 +43,7 @@ describe('useInviteNavigation', () => {
 
     act(() => result.current.redirectToNextStep())
 
-    expect(mockPush).toHaveBeenCalledWith('/balances?token=eth')
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/balances', query: { token: 'eth' } })
   })
 
   it('rejects an unsafe next URL and falls back to /spaces', () => {

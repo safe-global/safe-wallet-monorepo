@@ -1,12 +1,13 @@
 import { useCallback, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import { sanitizeNextUrl } from '@/utils/nextUrl'
+import { parseNextUrlForRouter, sanitizeNextUrl } from '@/utils/nextUrl'
 
 const useInviteNavigation = () => {
   const router = useRouter()
   const spaceId = router.query.spaceId as string | undefined
-  const next = sanitizeNextUrl(router.query.next)
+  const nextString = sanitizeNextUrl(router.query.next)
+  const nextUrl = parseNextUrlForRouter(router.query.next)
 
   useEffect(() => {
     if (router.isReady && !spaceId) {
@@ -17,17 +18,17 @@ const useInviteNavigation = () => {
   const goBack = useCallback(() => {
     router.push({
       pathname: AppRoutes.welcome.selectSafes,
-      query: { spaceId, ...(next ? { next } : {}) },
+      query: { spaceId, ...(nextString ? { next: nextString } : {}) },
     })
-  }, [router, spaceId, next])
+  }, [router, spaceId, nextString])
 
   const redirectToNextStep = useCallback(() => {
-    if (next) {
-      router.push(next)
+    if (nextUrl) {
+      router.push(nextUrl)
       return
     }
     router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
-  }, [router, spaceId, next])
+  }, [router, spaceId, nextUrl])
 
   return {
     spaceId,

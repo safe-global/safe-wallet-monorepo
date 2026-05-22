@@ -22,6 +22,45 @@ export const sanitizeNextUrl = (next: unknown): string | null => {
   return next
 }
 
+type ParsedNextUrl = {
+  pathname: string
+  query: Record<string, string | string[]>
+  hash?: string
+}
+
+/**
+ * Parse a `next` redirect URL into a structured Next.js router URL object.
+ *
+ * Returns `null` if the URL fails the same-origin/self-redirect checks in
+ * `sanitizeNextUrl`. Otherwise returns `{ pathname, query, hash? }` suitable
+ * for passing to `router.push()` / `router.replace()`.
+ *
+ * Reconstructing the URL from parsed components (rather than passing the raw
+ * string) makes the sanitisation chain explicit to static analysers like
+ * CodeQL, which otherwise flag `router.push(userInput)` as an
+ * open-redirect risk even after the value has been validated.
+ */
+export const parseNextUrlForRouter = (next: unknown): ParsedNextUrl | null => {
+  const sanitized = sanitizeNextUrl(next)
+  if (!sanitized) return null
+
+  const url = new URL(sanitized, 'http://localhost')
+  const query: Record<string, string | string[]> = {}
+  url.searchParams.forEach((value, key) => {
+    const existing = query[key]
+    if (existing === undefined) {
+      query[key] = value
+    } else if (Array.isArray(existing)) {
+      existing.push(value)
+    } else {
+      query[key] = [existing, value]
+    }
+  })
+
+  const hash = url.hash ? url.hash : undefined
+  return hash ? { pathname: url.pathname, query, hash } : { pathname: url.pathname, query }
+}
+
 /**
  * Build the current relative URL from a router `pathname` + `query`, suitable
  * for round-tripping through a `next` query param.

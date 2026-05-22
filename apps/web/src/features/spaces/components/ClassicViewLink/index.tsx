@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { Box, Link } from '@mui/material'
 import { enableClassicView } from '@/hooks/useClassicView'
 import { AppRoutes } from '@/config/routes'
-import { sanitizeNextUrl } from '@/utils/nextUrl'
+import { parseNextUrlForRouter } from '@/utils/nextUrl'
 
 /**
  * Escape-hatch link shown under the sign-in card on /welcome/spaces.
@@ -18,7 +18,7 @@ const ClassicViewLink = () => {
   const router = useRouter()
 
   const onClick = useCallback(() => {
-    const next = sanitizeNextUrl(router.query.next) ?? AppRoutes.welcome.accounts
+    const next = parseNextUrlForRouter(router.query.next) ?? { pathname: AppRoutes.welcome.accounts }
     enableClassicView()
     router.replace(next)
   }, [router])

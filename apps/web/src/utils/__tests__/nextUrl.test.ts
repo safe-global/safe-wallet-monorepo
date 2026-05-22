@@ -1,4 +1,4 @@
-import { buildCurrentNextUrl, sanitizeNextUrl } from '../nextUrl'
+import { buildCurrentNextUrl, parseNextUrlForRouter, sanitizeNextUrl } from '../nextUrl'
 
 describe('sanitizeNextUrl', () => {
   it('returns the path when it is a same-origin relative URL', () => {
@@ -37,6 +37,42 @@ describe('sanitizeNextUrl', () => {
     expect(sanitizeNextUrl('/welcome/spaces')).toBeNull()
     expect(sanitizeNextUrl('/welcome?chain=eth')).toBeNull()
     expect(sanitizeNextUrl('/welcome/spaces#section')).toBeNull()
+  })
+})
+
+describe('parseNextUrlForRouter', () => {
+  it('returns null when sanitizeNextUrl rejects the input', () => {
+    expect(parseNextUrlForRouter(undefined)).toBeNull()
+    expect(parseNextUrlForRouter('//evil.com')).toBeNull()
+    expect(parseNextUrlForRouter('https://evil.com/x')).toBeNull()
+    expect(parseNextUrlForRouter('/')).toBeNull()
+    expect(parseNextUrlForRouter('/welcome/spaces')).toBeNull()
+  })
+
+  it('returns pathname and empty query for a plain path', () => {
+    expect(parseNextUrlForRouter('/balances')).toEqual({ pathname: '/balances', query: {} })
+  })
+
+  it('parses query parameters into an object', () => {
+    expect(parseNextUrlForRouter('/balances?safe=eth%3A0xabc&chain=eth')).toEqual({
+      pathname: '/balances',
+      query: { safe: 'eth:0xabc', chain: 'eth' },
+    })
+  })
+
+  it('preserves a hash fragment when present', () => {
+    expect(parseNextUrlForRouter('/balances?safe=eth%3A0xabc#tokens')).toEqual({
+      pathname: '/balances',
+      query: { safe: 'eth:0xabc' },
+      hash: '#tokens',
+    })
+  })
+
+  it('collects repeated query keys into an array', () => {
+    expect(parseNextUrlForRouter('/transactions?tag=a&tag=b&tag=c')).toEqual({
+      pathname: '/transactions',
+      query: { tag: ['a', 'b', 'c'] },
+    })
   })
 })
 
