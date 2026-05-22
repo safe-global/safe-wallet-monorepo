@@ -96,8 +96,6 @@ export const GnosisPayExecutionForm = ({
       return
     }
 
-    onSubmit?.(Math.random().toString())
-
     if (needsRiskConfirmation && !isRiskConfirmed) {
       return
     }
@@ -109,39 +107,39 @@ export const GnosisPayExecutionForm = ({
       // depending on the mode we dispatch something
       if (!queuedGnosisPayTx && safeTx) {
         const queueResult = await enqueueTx()
-        queueResult?.wait().then((receipt) => {
-          if (receipt === null) {
-            throw new Error('No transaction receipt found')
-          } else if (didRevert(receipt)) {
-            throw new Error('Transaction reverted by EVM')
-          } else {
-            // Success, we update some data
-            dispatch(
-              enqueueTransaction({
-                executableAt: Date.now() + 1000 * 60 * 3,
-                expiresAt: Date.now() + 1000 * 60 * 30,
-                queueNonce: Number(delayModifierNonces.queueNonce),
-                safeAddress: safeInfo.safeAddress,
-                safeTxData: safeTx.data,
-              }),
-            )
-            // We close the modal
-            setTxFlow(undefined)
-          }
-        })
+        const receipt = await queueResult?.wait()
+        if (receipt === null || receipt === undefined) {
+          throw new Error('No transaction receipt found')
+        }
+        if (didRevert(receipt)) {
+          throw new Error('Transaction reverted by EVM')
+        }
+        // Success, we update some data
+        dispatch(
+          enqueueTransaction({
+            executableAt: Date.now() + 1000 * 60 * 3,
+            expiresAt: Date.now() + 1000 * 60 * 30,
+            queueNonce: Number(delayModifierNonces.queueNonce),
+            safeAddress: safeInfo.safeAddress,
+            safeTxData: safeTx.data,
+          }),
+        )
+        onSubmit?.(receipt.hash)
+        // We close the modal
+        setTxFlow(undefined)
       } else if (queuedGnosisPayTx) {
         const executeResult = await executeTx()
-        executeResult?.wait().then((receipt) => {
-          if (receipt === null) {
-            throw new Error('No transaction receipt found')
-          } else if (didRevert(receipt)) {
-            throw new Error('Transaction reverted by EVM')
-          } else {
-            // We remove it from the queue and close the modal
-            dispatch(removeFirst({ safeAddress: safeInfo.safeAddress }))
-            setTxFlow(undefined)
-          }
-        })
+        const receipt = await executeResult?.wait()
+        if (receipt === null || receipt === undefined) {
+          throw new Error('No transaction receipt found')
+        }
+        if (didRevert(receipt)) {
+          throw new Error('Transaction reverted by EVM')
+        }
+        // We remove it from the queue and close the modal
+        dispatch(removeFirst({ safeAddress: safeInfo.safeAddress }))
+        onSubmit?.(receipt.hash, true)
+        setTxFlow(undefined)
       }
     } catch (_err) {
       const err = asError(_err)

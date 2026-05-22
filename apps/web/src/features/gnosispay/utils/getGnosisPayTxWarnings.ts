@@ -66,7 +66,7 @@ const isChangingOwners: TxCheck = (tx, safe) => {
     SAFE_INTERFACE.getFunction('swapOwner').selector,
   ]
   if (sameAddress(tx.to, safe.address.value) && CHANGE_OWNERS_SELECTORS.includes(tx.data.slice(0, 10))) {
-    return 'This transaction changes or adds owners. This change might disrupt your Gnosis Pay functionalitiy.'
+    return 'This transaction changes or adds owners. This change might disrupt your Gnosis Pay functionality.'
   }
 }
 
@@ -77,7 +77,7 @@ const isChangingModulesOrGuards: TxCheck = (tx, safe) => {
     SAFE_INTERFACE.getFunction('disableModule').selector,
   ]
   if (sameAddress(tx.to, safe.address.value) && CHANGE_MODULE_SELECTORS.includes(tx.data.slice(0, 10))) {
-    return 'This transaction changes or adds your Safes modules. This change might cause you to lose access to your Safe or disrupt your Gnosis Pay functionalitiy.'
+    return "This transaction changes or adds your Safe's modules. This change might cause you to lose access to your Safe or disrupt your Gnosis Pay functionality."
   }
 }
 
@@ -90,7 +90,7 @@ const isChangingDelayModifier: TxCheck = (tx, safe) => {
     safe.modules?.map((module) => module.value.toLowerCase()).includes(tx.to.toLowerCase()) &&
     CHANGE_DELAY_SELECTORS.includes(tx.data.slice(0, 10))
   ) {
-    return 'This transaction changes the Delay modifier parameters. This change might disrupt your Gnosis Pay functionalitiy.'
+    return 'This transaction changes the Delay modifier parameters. This change might disrupt your Gnosis Pay functionality.'
   }
 }
 

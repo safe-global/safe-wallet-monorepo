@@ -53,7 +53,9 @@ const CheckWallet = ({
   const isWrongChain = useIsWrongChain()
   const sdk = useSafeSDK()
   const isProposer = useIsWalletProposer()
-  const [isGnosisPaySafe] = useIsGnosisPaySafe()
+  // Only opt into the Gnosis Pay safe detector (per-module eth_getCode on
+  // chain 100) when the caller actually cares about the gnosis pay path.
+  const [isGnosisPaySafe] = useIsGnosisPaySafe({ enabled: !!allowGnosisPaySafe })
 
   const { safe, safeLoaded } = useSafeInfo()
 

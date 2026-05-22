@@ -14,8 +14,10 @@ export const GnosisPayQueue = () => {
   const safeQueue = useAppSelector(selectQueuedGnosisPayTransactions(safe.address.value))
 
   const transactions = useMemo(() => {
+    // queueNonce is unique per safe and the parent selector already scopes the
+    // list to a single safe, so it's a stable, cheap React key on its own.
     return safeQueue.map((item) => {
-      return <GnosisPayQueueItemSummary item={item} key={item.queueNonce + JSON.stringify(item.safeTxData)} />
+      return <GnosisPayQueueItemSummary item={item} key={item.queueNonce} />
     })
   }, [safeQueue])
 

@@ -37,7 +37,15 @@ const CooldownButton = ({
   const isDisabled = remainingSeconds > 0
 
   return (
-    <Button onClick={handleClick} variant="contained" size="small" disabled={isDisabled} {...props}>
+    <Button
+      onClick={handleClick}
+      variant="contained"
+      size="small"
+      {...props}
+      // Spread comes first so caller props can override variant/size; `disabled`
+      // is set last to ensure the cooldown gate can't be bypassed from outside.
+      disabled={isDisabled || props.disabled}
+    >
       <span>
         {children}
         {remainingSeconds > 0 && ` in ${Math.floor(remainingSeconds)}s`}

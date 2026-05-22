@@ -7,17 +7,19 @@ import { type SlotComponentProps, SlotName, withSlot } from '../slots'
 
 const GnosisPay = ({ onSubmitSuccess }: SlotComponentProps<SlotName.Submit>) => {
   const { safeTx } = useContext(SafeTxContext)
-  const { trackTxEvent, isSubmitDisabled } = useContext(TxFlowContext)
+  const { isSubmitDisabled } = useContext(TxFlowContext)
   // Lazy-loaded form chunk — pulls @gnosis.pm/zodiac etc. only when this
   // slot actually renders (i.e., on a Gnosis Pay safe).
   const { GnosisPayExecutionForm } = useLoadFeature(GnosisPayFeature)
 
+  // Gnosis Pay txs go through the Delay modifier as module txs and have no
+  // Gateway tx id, so we skip `trackTxEvent` (which fetches tx details by id)
+  // and only signal modal-close success via `onSubmitSuccess`.
   const handleSubmit = useCallback(
     async (txId: string, isExecuted = false) => {
       onSubmitSuccess?.({ txId, isExecuted })
-      trackTxEvent(txId, isExecuted)
     },
-    [onSubmitSuccess, trackTxEvent],
+    [onSubmitSuccess],
   )
 
   return <GnosisPayExecutionForm safeTx={safeTx} disableSubmit={isSubmitDisabled} onSubmit={handleSubmit} />

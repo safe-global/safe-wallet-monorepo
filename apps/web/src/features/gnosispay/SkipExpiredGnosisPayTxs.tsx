@@ -7,9 +7,12 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { camelCaseToSpaces } from '@safe-global/utils/utils/formatters'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import CheckWallet from '@/components/common/CheckWallet'
+import ErrorMessage from '@/components/tx/ErrorMessage'
 import FieldsGrid from '@/components/tx/FieldsGrid'
-import { type SyntheticEvent, useCallback, useContext } from 'react'
+import { type SyntheticEvent, useCallback, useContext, useState } from 'react'
 import { didRevert } from '@/utils/ethers-utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { trackError, Errors } from '@/services/exceptions'
 import { useAppDispatch } from '@/store'
 import { skipExpired } from '@/store/gnosisPayTxsSlice'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -20,6 +23,8 @@ const SkipExpiredGnosisPayTx = () => {
   const dispatch = useAppDispatch()
   const safeAddress = useSafeAddress()
   const { setTxFlow } = useContext(TxModalContext)
+  const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
+  const [submitError, setSubmitError] = useState<Error | undefined>()
 
   const [delayModifierAddress] = useAsync(
     () => delayModifier?.delayModifier.getAddress(),
@@ -40,19 +45,26 @@ const SkipExpiredGnosisPayTx = () => {
       return
     }
 
-    const result = await executeSkipExpired()
+    setIsSubmittable(false)
+    setSubmitError(undefined)
 
-    result?.wait().then((receipt) => {
-      if (receipt === null) {
+    try {
+      const result = await executeSkipExpired()
+      const receipt = await result?.wait()
+      if (receipt === null || receipt === undefined) {
         throw new Error('No transaction receipt found')
-      } else if (didRevert(receipt)) {
-        throw new Error('Transaction reverted by EVM')
-      } else {
-        // We close the modal
-        dispatch(skipExpired({ safeAddress }))
-        setTxFlow(undefined)
       }
-    })
+      if (didRevert(receipt)) {
+        throw new Error('Transaction reverted by EVM')
+      }
+      dispatch(skipExpired({ safeAddress }))
+      setTxFlow(undefined)
+    } catch (_err) {
+      const err = asError(_err)
+      trackError(Errors._804, err)
+      setIsSubmittable(true)
+      setSubmitError(err)
+    }
   }
 
   return (
@@ -67,13 +79,17 @@ const SkipExpiredGnosisPayTx = () => {
           </Typography>
         </FieldsGrid>
 
+        {submitError && (
+          <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
+        )}
+
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 
         <CardActions>
           {/* Submit button, anyone can skip expired txs */}
           <CheckWallet allowNonOwner>
             {(isOk) => (
-              <Button variant="contained" type="submit" disabled={!isOk} sx={{ minWidth: '112px' }}>
+              <Button variant="contained" type="submit" disabled={!isOk || !isSubmittable} sx={{ minWidth: '112px' }}>
                 Execute
               </Button>
             )}
