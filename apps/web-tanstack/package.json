@@ -41,6 +41,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "cross-env": "^7.0.3",
     "cypress": "^15.9.0",
+    "eslint": "^9.29.0",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.2",
     "vite": "^6.4.2",

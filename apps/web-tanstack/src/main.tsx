@@ -3,9 +3,7 @@
 // Buffer and global at module load). Must run before any wallet code
 // is imported — keep this at the very top of main.tsx.
 import { Buffer } from 'buffer'
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ;(globalThis as any).Buffer = (globalThis as any).Buffer ?? Buffer
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 ;(globalThis as any).global = (globalThis as any).global ?? globalThis
 
 // Sync `require()` polyfill for the two reused files that need it
