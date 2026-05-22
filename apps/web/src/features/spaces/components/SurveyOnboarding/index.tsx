@@ -3,7 +3,17 @@ import { useEffect, useState } from 'react'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { useRouter } from 'next/router'
-import { ArrowLeftRight, Banknote, ChevronLeft, Gift, Landmark, Sprout, Terminal, type LucideIcon } from 'lucide-react'
+import {
+  ArrowLeftRight,
+  Banknote,
+  ChevronLeft,
+  Gift,
+  HelpCircle,
+  Landmark,
+  Sprout,
+  Terminal,
+  type LucideIcon,
+} from 'lucide-react'
 import {
   useSurveysGetStateV1Query,
   useSurveysSubmitResponseV1Mutation,
@@ -24,8 +34,9 @@ const ONBOARDING_STEP = 4
 const TOTAL_STEPS = 4
 const SURVEY_SLUG = 'onboarding'
 
-// Backend-issued icon keys → frontend icon components.
-// Unknown keys fall back to no icon.
+// Backend-issued icon keys → frontend icon components. Unknown keys (e.g. the
+// backend adds a new option before this map is updated) fall back to a generic
+// placeholder so the card never renders iconless.
 const ICON_MAP: Record<string, LucideIcon> = {
   terminal: Terminal,
   gift: Gift,
@@ -34,6 +45,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   swap: ArrowLeftRight,
   bank: Landmark,
 }
+const FALLBACK_ICON: LucideIcon = HelpCircle
 
 // RTK Query surfaces FetchBaseQueryError | SerializedError. The first carries
 // the HTTP status; treat 404 as "no active survey" (admin turned it off via
@@ -153,7 +165,7 @@ const SurveyOnboarding = (): ReactElement | null => {
               className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
             >
               {page.options.map((opt: SurveyOption) => {
-                const Icon = opt.icon ? ICON_MAP[opt.icon] : undefined
+                const Icon = opt.icon ? (ICON_MAP[opt.icon] ?? FALLBACK_ICON) : undefined
                 const isChecked = selected.has(opt.key)
                 return (
                   <Card
