@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 import type { ReactElement } from 'react'
 import { GitMerge } from 'lucide-react'
 
@@ -12,7 +12,7 @@ import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { TxModalContext } from '@/components/tx-flow'
+import { useIsSafeBarControlDisabled } from './hooks/useIsSafeBarControlDisabled'
 import { cn } from '@/utils/cn'
 
 function SpaceNestedSafesButton(): ReactElement | null {
@@ -20,8 +20,7 @@ function SpaceNestedSafesButton(): ReactElement | null {
   const { chainId } = safe
   const safeAddress = safe.address.value
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
-  const { txFlow } = useContext(TxModalContext)
-  const isDisabled = !!txFlow
+  const isDisabled = useIsSafeBarControlDisabled()
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
 
   const { currentData: ownedSafes } = useOwnersGetSafesByOwnerV1Query(
