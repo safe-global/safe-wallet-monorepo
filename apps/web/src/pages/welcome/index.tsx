@@ -16,7 +16,9 @@ const Welcome: NextPage = () => {
     router.replace(AppRoutes.welcome.spaces)
   }, [router, isRequireLoginEnabled])
 
-  if (isRequireLoginEnabled) return null
+  // Keep the page blank while the gate flag is loading too — otherwise the
+  // legacy welcome UI flashes for ~100ms before we know whether to redirect.
+  if (isRequireLoginEnabled !== false) return null
 
   return (
     <>

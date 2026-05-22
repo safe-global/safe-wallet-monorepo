@@ -298,7 +298,7 @@ describe('useSignInRedirect', () => {
         result.current.setHasSignedIn(true)
       })
 
-      expect(mockPush).toHaveBeenCalledWith('/balances')
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/balances', query: {} })
       expect(result.current.redirectLoading).toBe(true)
     })
 
@@ -324,6 +324,25 @@ describe('useSignInRedirect', () => {
       })
 
       expect(mockPush).not.toHaveBeenCalled()
+    })
+
+    it('waits for the gate flag to resolve before redirecting to next', async () => {
+      ;(useIsRequireLoginEnabledModule.useIsRequireLoginEnabled as jest.Mock).mockReturnValue(undefined)
+      setupMocks({ routerQuery: { next: '/balances' } })
+
+      const { result, rerender } = renderHook(() => useSignInRedirect({ ...defaultProps, spacesAmount: 2 }))
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).not.toHaveBeenCalled()
+      ;(useIsRequireLoginEnabledModule.useIsRequireLoginEnabled as jest.Mock).mockReturnValue(true)
+      await act(async () => {
+        rerender()
+      })
+
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/balances', query: {} })
     })
   })
 })

@@ -8,14 +8,13 @@ import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 const useFeatureFlagRedirect = () => {
   const router = useRouter()
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
-  const isRequireLoginEnabled = useIsRequireLoginEnabled() ?? false
+  const isRequireLoginEnabled = useIsRequireLoginEnabled()
 
   useEffect(() => {
-    // When the require-login gate is on, /welcome/spaces is the canonical
-    // login page. Falling through to /welcome/accounts here would create a
-    // ping-pong with the route guard, which then bounces /welcome/accounts
-    // straight back to /welcome/spaces.
-    if (isRequireLoginEnabled) return
+    // Wait until the gate flag has resolved so we don't briefly fall through
+    // to /welcome/accounts (and ping-pong with the route guard) before the
+    // chains config has loaded.
+    if (isRequireLoginEnabled !== false) return
     if (isSpacesFeatureEnabled === false) {
       router.push({ pathname: AppRoutes.welcome.accounts })
     }
