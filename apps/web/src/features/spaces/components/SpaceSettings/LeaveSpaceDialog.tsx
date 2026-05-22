@@ -51,7 +51,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
   }
 
   return (
-    <AlertDialog open onOpenChange={(open) => !open && onClose()}>
+    <AlertDialog open onOpenChange={(open) => !open && !isLoading && onClose()}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <div className="flex items-center justify-center size-10 rounded-full bg-destructive/10 text-destructive shrink-0">
