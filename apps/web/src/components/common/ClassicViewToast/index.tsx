@@ -8,7 +8,7 @@ import { AppRoutes } from '@/config/routes'
 
 export const CLASSIC_VIEW_TOAST_GROUP_KEY = 'classic-view-deprecation'
 export const CLASSIC_VIEW_TOAST_MESSAGE =
-  'Classic view will be deprecated in 1 month. Make sure to log in and create a Space.'
+  'Classic view will be deprecated soon. Make sure to log in and create a workspace.'
 export const CLASSIC_VIEW_TOAST_LINK_TITLE = 'Log in'
 
 /**
