@@ -14,6 +14,8 @@ import { useSidebarHydrated } from '../hooks/useSidebarHydrated'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
 import { SidebarSkeleton } from '../SidebarSkeleton'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 interface SpacesEnhancedSidebarProps {
   /** When true (e.g. parent drawer is open on small screens), the mobile Sheet is open. */
@@ -22,6 +24,8 @@ interface SpacesEnhancedSidebarProps {
   onDrawerClose?: () => void
   /** Called when the sidebar expands or collapses (icon mode). */
   onOpenChange?: (open: boolean) => void
+  /** When true, render the desktop sidebar contained inside a parent drawer instead of fixed to the viewport. */
+  isContainedInDrawer?: boolean
 }
 
 /** Reports sidebar open/collapsed state to parent without interfering with internal state. */
@@ -37,23 +41,31 @@ export const SpacesEnhancedSidebar = ({
   isDrawerOpen,
   onDrawerClose,
   onOpenChange,
+  isContainedInDrawer = false,
 }: SpacesEnhancedSidebarProps = {}): ReactElement => {
   const isHydrated = useSidebarHydrated()
+  const isDarkMode = useDarkMode()
   const spacesSidebarWidth = 'min(230px, 100%)'
 
   return (
     <SidebarProvider
+      open={isContainedInDrawer ? true : undefined}
       openMobile={isDrawerOpen}
       onOpenMobileChange={(open) => !open && onDrawerClose?.()}
       style={{ '--sidebar-width': spacesSidebarWidth } as CSSProperties}
+      className={cn('shadcn-scope', isDarkMode && 'dark', isContainedInDrawer && 'h-dvh')}
     >
       <SidebarStateReporter onOpenChange={onOpenChange} />
-      {isHydrated ? <HydratedSidebar /> : <SidebarSkeleton />}
+      {isHydrated ? (
+        <HydratedSidebar contained={isContainedInDrawer} />
+      ) : (
+        <SidebarSkeleton contained={isContainedInDrawer} />
+      )}
     </SidebarProvider>
   )
 }
 
-const HydratedSidebar = (): ReactElement => {
+const HydratedSidebar = ({ contained = false }: { contained?: boolean }): ReactElement => {
   const router = useRouter()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const resolvedSpaceId = useCurrentSpaceId()
@@ -89,6 +101,7 @@ const HydratedSidebar = (): ReactElement => {
 
   return (
     <EnhancedSidebar
+      contained={contained}
       type={sidebarType}
       selectedSpace={effectiveSelectedSpace}
       spaces={nonDeclinedSpaces}

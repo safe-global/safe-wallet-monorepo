@@ -64,7 +64,17 @@ describe('ReviewStep', () => {
     }
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+      initialReduxState: {
+        auth: {
+          sessionExpiresAt: Date.now() + 60000,
+          lastUsedSpace: null,
+          isStoreHydrated: true,
+          cfSafeSynced: false,
+          isOidcLoginPending: false,
+        },
+      },
+    })
 
     const payLaterOption = screen.getByRole('radio', { name: /Pay later/i })
     expect(payLaterOption).toBeChecked()

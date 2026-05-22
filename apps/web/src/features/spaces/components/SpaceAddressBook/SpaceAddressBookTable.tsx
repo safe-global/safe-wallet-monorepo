@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { NetworkLogosList } from '@/features/multichain'
@@ -9,7 +8,6 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import { BookUser, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from './SpaceAddressBookActions'
-import useChains from '@/hooks/useChains'
 import { cn } from '@/utils/cn'
 import { formatDate } from './ActivityLog'
 
@@ -34,7 +32,6 @@ function SpaceAddressBookTable({
   showLastUpdated = false,
   renderExtraAction,
 }: SpaceAddressBookTableProps) {
-  const chains = useChains()
   const [page, setPage] = useState(0)
 
   useEffect(() => {
@@ -99,11 +96,11 @@ function SpaceAddressBookTable({
                 <Tooltip>
                   <TooltipTrigger>
                     <span className="inline-flex origin-left scale-85">
-                      {chains.configs.length === entry.chainIds.length ? (
-                        <Badge variant="secondary">All</Badge>
-                      ) : (
-                        <NetworkLogosList networks={entry.chainIds.map((chainId) => ({ chainId }))} />
-                      )}
+                      <NetworkLogosList
+                        networks={entry.chainIds.map((chainId) => ({ chainId }))}
+                        showHasMore
+                        maxVisible={3}
+                      />
                     </span>
                   </TooltipTrigger>
                   <TooltipContent>

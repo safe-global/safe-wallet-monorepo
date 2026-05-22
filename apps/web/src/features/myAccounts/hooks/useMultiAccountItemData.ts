@@ -34,6 +34,21 @@ export function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem
     [sortedSafes, undeployedSafes],
   )
 
+  const isFullyUndeployed = useMemo(
+    () => sortedSafes.length > 0 && deployedSafes.length === 0,
+    [sortedSafes, deployedSafes],
+  )
+
+  const isActivating = useMemo(
+    () =>
+      isFullyUndeployed &&
+      sortedSafes.some((safe) => {
+        const record = undeployedSafes[safe.chainId]?.[safe.address]
+        return record ? record.status.status !== 'AWAITING_EXECUTION' : false
+      }),
+    [isFullyUndeployed, sortedSafes, undeployedSafes],
+  )
+
   const currency = useAppSelector(selectCurrency)
   const { address: walletAddress } = useWallet() || {}
 
@@ -78,5 +93,7 @@ export function useMultiAccountItemData(multiSafeAccountItem: MultiChainSafeItem
     isWelcomePage,
     deployedChainIds,
     isSpaceRoute,
+    isFullyUndeployed,
+    isActivating,
   }
 }

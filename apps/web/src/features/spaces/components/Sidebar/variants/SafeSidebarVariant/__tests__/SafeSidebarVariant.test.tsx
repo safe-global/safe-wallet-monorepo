@@ -61,9 +61,7 @@ jest.mock('../../NavItem', () => ({
   NavItem: ({ item }: { item: ResolvedSidebarItem }) => (
     <div data-testid={`sidebar-item-${item.label.toLowerCase()}`}>
       {item.label}
-      {item.badge !== undefined && item.badge > 0 && (
-        <span aria-label={`${item.badge} ${item.label} notifications`}>{item.badge}</span>
-      )}
+      {!!item.badge && <span aria-label={`${item.badge} ${item.label} notifications`}>{item.badge}</span>}
     </div>
   ),
 }))

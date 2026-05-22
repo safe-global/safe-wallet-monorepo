@@ -15,10 +15,10 @@ export default function SpacePage() {
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Space dashboard`}</title>
+        <title>{`${BRAND_NAME} – Workspace dashboard`}</title>
       </Head>
 
-      <main>
+      <main className="!pt-0">
         <spaces.SpaceDashboardPage spaceId={spaceId as string} />
       </main>
     </>

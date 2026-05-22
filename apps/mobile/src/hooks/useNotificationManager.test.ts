@@ -5,6 +5,7 @@ const mockRegisterForNotifications = jest.fn()
 const mockUnregisterForNotifications = jest.fn()
 jest.mock('@/src/services/notifications/NotificationService', () => ({
   isDeviceNotificationEnabled: jest.fn(),
+  isAuthorizationDenied: jest.fn().mockResolvedValue(false),
   getAllPermissions: jest.fn(),
   requestPushNotificationsPermission: jest.fn(),
 }))
@@ -120,6 +121,27 @@ describe('useNotificationManager', () => {
         notifications: { ...mockState.notifications, promptAttempts: 5 },
       } as unknown as RootState
       const { result } = renderHook(() => useNotificationManager(), stateAtThreshold)
+
+      await act(async () => {
+        await result.current.enableNotification()
+      })
+
+      expect(NotificationsService.requestPushNotificationsPermission).toHaveBeenCalled()
+      expect(NotificationsService.getAllPermissions).not.toHaveBeenCalled()
+    })
+
+    // WA-2238 follow-up: when the user disabled push in iOS Settings and returns to the app,
+    // promptAttempts is reset to 0. Without this branch, the hook would call notifee.requestPermission()
+    // (a silent no-op once OS auth is DENIED) and the user would have to tap multiple times before
+    // the explainer Alert appeared.
+    it('enableNotification shows the explainer immediately when OS auth is DENIED, regardless of promptAttempts', async () => {
+      jest.mocked(NotificationsService.isDeviceNotificationEnabled).mockResolvedValue(false)
+      jest.mocked(NotificationsService.isAuthorizationDenied).mockResolvedValueOnce(true)
+      const stateBelowThreshold = {
+        ...mockState,
+        notifications: { ...mockState.notifications, promptAttempts: 0 },
+      } as unknown as RootState
+      const { result } = renderHook(() => useNotificationManager(), stateBelowThreshold)
 
       await act(async () => {
         await result.current.enableNotification()

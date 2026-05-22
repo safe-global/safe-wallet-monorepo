@@ -20,6 +20,8 @@ interface SafeCardLayoutProps {
   threshold: number
   ownersCount: number
   isSimilar?: boolean
+  isUndeployed?: boolean
+  isActivating?: boolean
 }
 
 export const SafeCardLayout = ({
@@ -34,6 +36,8 @@ export const SafeCardLayout = ({
   threshold,
   ownersCount,
   isSimilar,
+  isUndeployed = false,
+  isActivating = false,
 }: SafeCardLayoutProps) => (
   <button
     ref={ref}
@@ -86,7 +90,11 @@ export const SafeCardLayout = ({
     </div>
 
     <div className="flex min-w-0 shrink-0 flex-col items-end gap-2 pl-1 sm:min-w-16 sm:pl-0">
-      <FiatBalance value={fiatValue} />
+      {isUndeployed ? (
+        <AccountItem.StatusChip undeployedSafe isActivating={isActivating} />
+      ) : (
+        <FiatBalance value={fiatValue} />
+      )}
       {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
     </div>
   </button>

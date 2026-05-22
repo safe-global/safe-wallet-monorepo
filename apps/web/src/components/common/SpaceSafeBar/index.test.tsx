@@ -76,6 +76,10 @@ jest.mock('@/features/__core__', () => ({
 
 jest.mock('@/hooks/useSafeInfo', () => () => ({ safeAddress: '0xSafe1' }))
 
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
+  useSafeAddressFromUrl: jest.fn(() => '0xSafe1'),
+}))
+
 jest.mock('@/hooks/useChainId', () => () => '1')
 
 jest.mock('@/hooks/safes', () => ({
@@ -106,11 +110,13 @@ jest.mock('./SpaceBackLink', () => {
 
 import { usePathname } from 'next/navigation'
 import { useIsQualifiedSafe } from '@/features/spaces'
+import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 
 const mockUsePathname = usePathname as jest.Mock
 const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
+const mockUseSafeAddressFromUrl = useSafeAddressFromUrl as jest.Mock
 const mockUseSpaceSafeSelectorItems = useSpaceSafeSelectorItems as jest.Mock
 const mockUseSpaceBackLink = useSpaceBackLink as jest.Mock
 
@@ -118,6 +124,7 @@ describe('SpaceSafeBar', () => {
   beforeEach(() => {
     jest.resetAllMocks()
     mockUsePathname.mockReturnValue('/home')
+    mockUseSafeAddressFromUrl.mockReturnValue('0xSafe1')
     mockUseSpaceSafeSelectorItems.mockReturnValue({
       items: mockItems,
       selectedItemId: '1:0xSafe1',
@@ -250,6 +257,50 @@ describe('SpaceSafeBar', () => {
       expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()
       expect(queryByTestId('space-chain-selector')).not.toBeInTheDocument()
       expect(queryByTestId('nested-safes-button')).not.toBeInTheDocument()
+    },
+  )
+
+  it.each([['/settings/notifications'], ['/settings/cookies'], ['/settings/appearance'], ['/settings']])(
+    'renders nothing on settings route %s when URL has no safe',
+    (pathname) => {
+      mockUsePathname.mockReturnValue(pathname)
+      mockUseSafeAddressFromUrl.mockReturnValue('')
+
+      const { queryByTestId } = render(<SpaceSafeBar />)
+      expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()
+      expect(queryByTestId('space-chain-selector')).not.toBeInTheDocument()
+      expect(queryByTestId('nested-safes-button')).not.toBeInTheDocument()
+    },
+  )
+
+  it.each([['/settings/setup'], ['/settings/security'], ['/settings/notifications']])(
+    'renders normally on settings route %s when URL has a safe',
+    (pathname) => {
+      mockUsePathname.mockReturnValue(pathname)
+      mockUseSafeAddressFromUrl.mockReturnValue('0xSafe1')
+
+      const { getByTestId } = render(<SpaceSafeBar />)
+      expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
+    },
+  )
+
+  it('still renders on non-settings routes when URL has no safe (Redux fallback path unchanged)', () => {
+    mockUsePathname.mockReturnValue('/home')
+    mockUseSafeAddressFromUrl.mockReturnValue('')
+
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
+  })
+
+  it.each([['/terms'], ['/privacy'], ['/licenses'], ['/imprint'], ['/cookie']])(
+    'renders nothing on static page %s',
+    (pathname) => {
+      mockUsePathname.mockReturnValue(pathname)
+
+      const { queryByTestId } = render(<SpaceSafeBar />)
+      expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()
+      expect(queryByTestId('nested-safes-button')).not.toBeInTheDocument()
+      expect(queryByTestId('space-chain-selector')).not.toBeInTheDocument()
     },
   )
 })

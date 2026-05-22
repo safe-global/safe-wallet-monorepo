@@ -427,14 +427,33 @@
             }
           },
           {
-            "name": "fiatCode",
+            "name": "sync",
             "required": false,
             "in": "query",
-            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
+            "description": "If true, waits for position data to be aggregated before responding (up to 30s)",
             "schema": {
-              "default": "USD",
-              "example": "USD",
-              "type": "string"
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "excludeDust",
+            "required": false,
+            "in": "query",
+            "description": "If true, filters out dust positions (balance < $0.001 USD)",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "If true, only returns trusted tokens",
+            "schema": {
+              "example": true,
+              "type": "boolean"
             }
           },
           {
@@ -448,36 +467,13 @@
             }
           },
           {
-            "name": "trusted",
+            "name": "fiatCode",
             "required": false,
             "in": "query",
-            "description": "If true, only returns trusted tokens",
+            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
             "schema": {
-              "default": true,
-              "example": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "excludeDust",
-            "required": false,
-            "in": "query",
-            "description": "If true, filters out dust positions (balance < $0.001 USD)",
-            "schema": {
-              "default": true,
-              "example": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "sync",
-            "required": false,
-            "in": "query",
-            "description": "If true, waits for position data to be aggregated before responding (up to 30s)",
-            "schema": {
-              "default": false,
-              "example": false,
-              "type": "boolean"
+              "example": "USD",
+              "type": "string"
             }
           }
         ],
@@ -5357,28 +5353,10 @@
             }
           },
           {
-            "name": "safe",
+            "name": "cursor",
             "required": false,
             "in": "query",
-            "description": "Filter by Safe address",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegate",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegate address",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegator",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegator address",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -5393,10 +5371,28 @@
             }
           },
           {
-            "name": "cursor",
+            "name": "delegator",
             "required": false,
             "in": "query",
-            "description": "Pagination cursor for retrieving the next set of results",
+            "description": "Filter by delegator address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safe",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Safe address",
             "schema": {
               "type": "string"
             }
@@ -5587,28 +5583,10 @@
             }
           },
           {
-            "name": "safe",
+            "name": "cursor",
             "required": false,
             "in": "query",
-            "description": "Filter by Safe address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegate",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegate address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegator",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegator address (0x prefixed hex string)",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -5623,10 +5601,28 @@
             }
           },
           {
-            "name": "cursor",
+            "name": "delegator",
             "required": false,
             "in": "query",
-            "description": "Pagination cursor for retrieving the next set of results",
+            "description": "Filter by delegator address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safe",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Safe address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -6123,6 +6119,10 @@
           "signerAddress": {
             "type": "string",
             "description": "Wallet signer address. Present only for SIWE-authenticated users."
+          },
+          "email": {
+            "type": "string",
+            "description": "Verified email address. Present only for OIDC-authenticated users when stored."
           }
         },
         "required": [
@@ -8044,6 +8044,11 @@
             "description": "Number of signatures required for execution",
             "example": 2,
             "minimum": 1
+          },
+          "fiatCode": {
+            "type": "string",
+            "description": "Fiat currency code for relay cost conversion (e.g. EUR, GBP). Defaults to USD.",
+            "example": "EUR"
           }
         },
         "required": [
@@ -8110,6 +8115,25 @@
           "numberSignatures"
         ]
       },
+      "FeePreviewRelayCost": {
+        "type": "object",
+        "properties": {
+          "fiatCode": {
+            "type": "string",
+            "description": "Fiat currency code",
+            "example": "USD"
+          },
+          "fiatValue": {
+            "type": "string",
+            "description": "Relay cost as a string",
+            "example": "0.0025"
+          }
+        },
+        "required": [
+          "fiatCode",
+          "fiatValue"
+        ]
+      },
       "PriceSource": {
         "type": "string",
         "enum": [
@@ -8138,9 +8162,9 @@
             "description": "Price snapshot Unix timestamp",
             "example": 1700000000
           },
-          "gasVolatilityBuffer": {
+          "gasPriceVolatilityBuffer": {
             "type": "number",
-            "description": "Gas volatility buffer multiplier",
+            "description": "Gas price volatility buffer multiplier",
             "example": 1.3
           }
         },
@@ -8148,7 +8172,7 @@
           "phase",
           "priceSource",
           "priceTimestamp",
-          "gasVolatilityBuffer"
+          "gasPriceVolatilityBuffer"
         ]
       },
       "FeePreviewResponse": {
@@ -8157,10 +8181,8 @@
           "txData": {
             "$ref": "#/components/schemas/FeePreviewTxData"
           },
-          "relayCostUsd": {
-            "type": "number",
-            "description": "Relay cost in USD",
-            "example": 38.22
+          "relayCost": {
+            "$ref": "#/components/schemas/FeePreviewRelayCost"
           },
           "pricingContextSnapshot": {
             "$ref": "#/components/schemas/FeePreviewPricingContext"
@@ -8168,7 +8190,7 @@
         },
         "required": [
           "txData",
-          "relayCostUsd",
+          "relayCost",
           "pricingContextSnapshot"
         ]
       },
@@ -8596,10 +8618,20 @@
             }
           },
           "createdBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Email or wallet address of the creator, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "createdByUserId": {
+            "type": "number",
+            "description": "User ID of the creator"
           },
           "lastUpdatedBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Email or wallet address of the last editor, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "lastUpdatedByUserId": {
+            "type": "number",
+            "description": "User ID of the last editor"
           },
           "createdAt": {
             "format": "date-time",
@@ -8615,7 +8647,9 @@
           "address",
           "chainIds",
           "createdBy",
+          "createdByUserId",
           "lastUpdatedBy",
+          "lastUpdatedByUserId",
           "createdAt",
           "updatedAt"
         ]
@@ -9100,11 +9134,16 @@
               "PENDING",
               "ACTIVE"
             ]
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
           "id",
-          "status"
+          "status",
+          "email"
         ]
       },
       "MemberDto": {
@@ -12667,6 +12706,12 @@
           "gasToken": {
             "type": "string"
           },
+          "fee": {
+            "type": "string"
+          },
+          "payment": {
+            "type": "string"
+          },
           "refundReceiver": {
             "$ref": "#/components/schemas/AddressInfo"
           },
@@ -12744,6 +12789,8 @@
           "baseGas",
           "gasPrice",
           "gasToken",
+          "fee",
+          "payment",
           "refundReceiver",
           "safeTxHash",
           "signers",
@@ -12994,6 +13041,9 @@
           "fee": {
             "type": "object"
           },
+          "payment": {
+            "type": "object"
+          },
           "origin": {
             "type": "object"
           },
@@ -13036,6 +13086,7 @@
           "ethGasPrice",
           "gasUsed",
           "fee",
+          "payment",
           "origin",
           "confirmationsRequired",
           "confirmations",

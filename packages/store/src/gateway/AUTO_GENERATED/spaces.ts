@@ -196,6 +196,13 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}`, method: 'DELETE' }),
         invalidatesTags: ['spaces'],
       }),
+      spaceCounterfactualSafesGetV1: build.query<
+        SpaceCounterfactualSafesGetV1ApiResponse,
+        SpaceCounterfactualSafesGetV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/counterfactual-safes` }),
+        providesTags: ['spaces'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -372,12 +379,24 @@ export type MembersRemoveUserV1ApiArg = {
   /** User ID of the member to remove */
   userId: number
 }
+export type SpaceCounterfactualSafesGetV1ApiResponse =
+  /** status 200 Counterfactual Safes retrieved successfully */ GetCounterfactualSafesResponse
+export type SpaceCounterfactualSafesGetV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+}
 export type SpaceAddressBookItemDto = {
   name: string
   address: string
   chainIds: string[]
+  /** Email or wallet address of the creator, "Unknown user" if the user has no display identity, or "Deleted user" */
   createdBy: string
+  /** User ID of the creator */
+  createdByUserId: number
+  /** Email or wallet address of the last editor, "Unknown user" if the user has no display identity, or "Deleted user" */
   lastUpdatedBy: string
+  /** User ID of the last editor */
+  lastUpdatedByUserId: number
   createdAt: string
   updatedAt: string
 }
@@ -491,6 +510,7 @@ export type AcceptInviteDto = {
 export type MemberUser = {
   id: number
   status: 'PENDING' | 'ACTIVE'
+  email: string | null
 }
 export type MemberDto = {
   id: number
@@ -512,6 +532,26 @@ export type UpdateRoleDto = {
 export type UpdateMemberAliasDto = {
   /** The new alias for the member */
   alias: string
+}
+export type GetCounterfactualSafeItem = {
+  address: string
+  factoryAddress: string
+  masterCopy: string
+  saltNonce: string
+  safeVersion: string
+  threshold: number
+  owners: string[]
+  fallbackHandler: string | null
+  to: string | null
+  data: string
+  paymentToken: string | null
+  payment: string | null
+  paymentReceiver: string | null
+}
+export type GetCounterfactualSafesResponse = {
+  safes: {
+    [key: string]: GetCounterfactualSafeItem[]
+  }
 }
 export const {
   useAddressBooksGetAddressBookItemsV1Query,
@@ -550,4 +590,6 @@ export const {
   useMembersUpdateRoleV1Mutation,
   useMembersUpdateAliasV1Mutation,
   useMembersRemoveUserV1Mutation,
+  useSpaceCounterfactualSafesGetV1Query,
+  useLazySpaceCounterfactualSafesGetV1Query,
 } = injectedRtkApi

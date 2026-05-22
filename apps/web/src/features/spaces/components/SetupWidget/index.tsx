@@ -48,7 +48,7 @@ const SETUP_STEPS: SetupStep[] = [
     label: 'Invite team members',
     icon: UsersRound,
   },
-  { key: 'explore', label: 'Explore Spaces', icon: Rocket },
+  { key: 'explore', label: 'Explore workspaces', icon: Rocket },
 ]
 
 const DISMISS_STORAGE_KEY = 'setupWidgetDismissed'
@@ -153,7 +153,7 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
         {!dismissed && (
           <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: 'easeInOut' }}>
             <SafeWidget
-              title="Set up your Space"
+              title="Set up your workspace"
               testId="space-dashboard-setup-widget"
               action={
                 <Typography
@@ -171,7 +171,7 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
             >
               <div
                 className={cn('flex flex-col gap-2 px-2 pb-2', {
-                  'flex-row': horizontal,
+                  'sm:flex-row': horizontal,
                 })}
               >
                 {sortedSteps.map(({ key, label, icon: Icon, activeFn }, index) => {
@@ -191,7 +191,7 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
                       className={cn(
                         'flex items-center gap-4 rounded-3xl p-4 transition-colors',
                         isCompleted ? 'cursor-not-allowed bg-muted/50' : 'cursor-pointer bg-muted hover:bg-muted/70',
-                        { 'flex-1': horizontal },
+                        { 'sm:flex-1': horizontal },
                       )}
                     >
                       <div

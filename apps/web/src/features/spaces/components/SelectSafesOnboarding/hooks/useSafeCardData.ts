@@ -10,7 +10,7 @@ const useSafeCardData = (safe: SafeItem | MultiChainSafeItem) => {
   )
 
   if (isMultiChain) {
-    const { name, totalFiatValue, sharedSetup, deployedChainIds } = multiData
+    const { name, totalFiatValue, sharedSetup, deployedChainIds, isFullyUndeployed, isActivating } = multiData
     return {
       name,
       fiatValue: totalFiatValue?.toString(),
@@ -18,10 +18,12 @@ const useSafeCardData = (safe: SafeItem | MultiChainSafeItem) => {
       ownersCount: sharedSetup?.owners.length ?? 0,
       chainIds: deployedChainIds,
       elementRef: undefined,
+      isUndeployed: isFullyUndeployed,
+      isActivating,
     }
   }
 
-  const { name, threshold, owners, safeOverview, elementRef } = singleData
+  const { name, threshold, owners, safeOverview, elementRef, undeployedSafe, isActivating } = singleData
   return {
     name,
     fiatValue: safeOverview?.fiatTotal,
@@ -29,6 +31,8 @@ const useSafeCardData = (safe: SafeItem | MultiChainSafeItem) => {
     ownersCount: owners.length,
     chainIds: [(safe as SafeItem).chainId],
     elementRef,
+    isUndeployed: !!undeployedSafe,
+    isActivating,
   }
 }
 

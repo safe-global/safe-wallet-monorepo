@@ -82,6 +82,8 @@ describe('MultiSafeItemCard', () => {
       isWelcomePage: false,
       deployedChainIds: ['1', '100'],
       isSpaceRoute: false,
+      isFullyUndeployed: false,
+      isActivating: false,
     })
   })
 

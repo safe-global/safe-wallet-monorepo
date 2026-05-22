@@ -6,7 +6,7 @@ import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analyti
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { useSiwe } from '@/services/siwe/useSiwe'
 import { useAppDispatch } from '@/store'
-import { setAuthenticated } from '@/store/authSlice'
+import { setAuthenticated, SESSION_LIFETIME_MS } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
@@ -19,11 +19,11 @@ import { isSmartContractWallet, isLedger } from '@/utils/wallets'
 const getSignInErrorMessage = async (wallet: ConnectedWallet | null): Promise<string> => {
   if (wallet?.address && (await isSmartContractWallet(wallet.chainId, wallet.address))) {
     const walletName = getWalletConnectLabel(wallet) || wallet.label
-    return `${walletName} for logging into Workspace is not supported at the moment.`
+    return `${walletName} for logging into workspace is not supported at the moment.`
   }
 
   if (wallet && isLedger(wallet)) {
-    return 'Ledger for logging into Workspace is not supported at the moment.'
+    return 'Ledger for logging into workspace is not supported at the moment.'
   }
 
   return 'Something went wrong while trying to sign in'
@@ -57,8 +57,7 @@ const SignInButton = ({ afterSignIn, redirectLoading = false, buttonStyle, butto
       }
 
       if (result) {
-        const oneDayInMs = 24 * 60 * 60 * 1000
-        dispatch(setAuthenticated(Date.now() + oneDayInMs))
+        dispatch(setAuthenticated(Date.now() + SESSION_LIFETIME_MS))
         trackEvent(
           { ...SPACE_EVENTS.AUTH_LOGIN_SUCCEEDED, label: spaceId ?? undefined },
           { spaceId, method: AuthLoginMethod.SIWE, timestamp: new Date().toISOString() },

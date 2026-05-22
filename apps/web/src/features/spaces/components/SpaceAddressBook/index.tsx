@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import {
   useIsInvited,
   useIsAdmin,
@@ -74,7 +74,9 @@ const SpaceAddressBook = () => {
       address,
       chainIds: Array.from(chainIds),
       createdBy: walletAddress,
+      createdByUserId: 0,
       lastUpdatedBy: '',
+      lastUpdatedByUserId: 0,
       createdAt: '',
       updatedAt: '',
       isLocal: true,
@@ -120,11 +122,10 @@ const SpaceAddressBook = () => {
       {isInvited && <PreviewInvite />}
 
       <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-        {/* Header row: title + subtitle left, buttons right */}
-        <div className="mt-6 mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <Typography variant="h1">Address book</Typography>
-          </div>
+        <div className="mb-6 flex flex-col gap-6">
+          <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
+            Address book
+          </Typography>
 
           <div className="flex shrink-0 gap-2">
             {isAdmin && activeTab === 'workspace' && (
@@ -149,7 +150,7 @@ const SpaceAddressBook = () => {
               setActiveTab(val)
             }}
           >
-            <TabsList variant="line">
+            <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
               <TabsTrigger value="workspace" className="cursor-pointer">
                 Workspace contacts ({addressBookItems.length})
               </TabsTrigger>

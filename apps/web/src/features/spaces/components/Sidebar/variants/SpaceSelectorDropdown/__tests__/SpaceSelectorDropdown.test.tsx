@@ -209,7 +209,7 @@ describe('SpaceSelectorDropdown', () => {
 
     const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
     fireEvent.click(trigger)
-    fireEvent.click(screen.getByText('Add new space'))
+    fireEvent.click(screen.getByText('Add new workspace'))
 
     expect(trackEvent).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'Workspace create started' }),
@@ -224,7 +224,7 @@ describe('SpaceSelectorDropdown', () => {
 
     const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
     fireEvent.click(trigger)
-    fireEvent.click(screen.getByText('Add new space'))
+    fireEvent.click(screen.getByText('Add new workspace'))
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: AppRoutes.spaces.createSpace,
@@ -469,7 +469,7 @@ describe('SpaceSelectorDropdown', () => {
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
       fireEvent.click(trigger)
 
-      expect(screen.getByText('Add new space')).toBeInTheDocument()
+      expect(screen.getByText('Add new workspace')).toBeInTheDocument()
       expect(screen.getByText('View all')).toBeInTheDocument()
     })
 
@@ -480,7 +480,7 @@ describe('SpaceSelectorDropdown', () => {
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
       fireEvent.click(trigger)
 
-      expect(screen.getByText('Space')).toBeInTheDocument()
+      expect(screen.getByText('Workspace')).toBeInTheDocument()
     })
 
     it('handles spaces with very long names', () => {
@@ -559,16 +559,16 @@ describe('SpaceSelectorDropdown', () => {
       // First cycle
       fireEvent.click(trigger)
       expect(trigger).toHaveAttribute('aria-expanded', 'true')
-      expect(screen.getByText('Spaces')).toBeInTheDocument()
+      expect(screen.getByText('Workspaces')).toBeInTheDocument()
 
       fireEvent.click(trigger)
       expect(trigger).toHaveAttribute('aria-expanded', 'false')
-      expect(screen.queryByText('Spaces')).not.toBeInTheDocument()
+      expect(screen.queryByText('Workspaces')).not.toBeInTheDocument()
 
       // Second cycle
       fireEvent.click(trigger)
       expect(trigger).toHaveAttribute('aria-expanded', 'true')
-      expect(screen.getByText('Spaces')).toBeInTheDocument()
+      expect(screen.getByText('Workspaces')).toBeInTheDocument()
     })
 
     it('correctly displays checkmark only for the selected space after re-renders', () => {
@@ -629,7 +629,7 @@ describe('SpaceSelectorDropdown', () => {
 
       const addNewSpaceButton = screen
         .getAllByRole('button')
-        .find((btn) => btn.querySelector('span')?.textContent === 'Add new space')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Add new workspace')
       expect(addNewSpaceButton).toBeDisabled()
     })
 
@@ -644,7 +644,7 @@ describe('SpaceSelectorDropdown', () => {
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
       fireEvent.click(trigger)
 
-      expect(screen.getByText(`You can have up to ${SPACES_LIMIT} workspaces`)).toBeInTheDocument()
+      expect(screen.getByText(`Limit of ${SPACES_LIMIT} workspaces reached`)).toBeInTheDocument()
     })
 
     it('does not disable "Add new space" button when spaces are below the limit', () => {
@@ -660,7 +660,7 @@ describe('SpaceSelectorDropdown', () => {
 
       const addNewSpaceButton = screen
         .getAllByRole('button')
-        .find((btn) => btn.querySelector('span')?.textContent === 'Add new space')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Add new workspace')
       expect(addNewSpaceButton).not.toBeDisabled()
     })
 
@@ -675,7 +675,7 @@ describe('SpaceSelectorDropdown', () => {
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
       fireEvent.click(trigger)
 
-      expect(screen.queryByText(`You can have up to ${SPACES_LIMIT} workspaces`)).not.toBeInTheDocument()
+      expect(screen.queryByText(`Limit of ${SPACES_LIMIT} workspaces reached`)).not.toBeInTheDocument()
     })
 
     it('disables "Add new space" button when spaces exceed the limit', () => {
@@ -691,7 +691,7 @@ describe('SpaceSelectorDropdown', () => {
 
       const addNewSpaceButton = screen
         .getAllByRole('button')
-        .find((btn) => btn.querySelector('span')?.textContent === 'Add new space')
+        .find((btn) => btn.querySelector('span')?.textContent === 'Add new workspace')
       expect(addNewSpaceButton).toBeDisabled()
     })
 
@@ -706,7 +706,7 @@ describe('SpaceSelectorDropdown', () => {
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
       fireEvent.click(trigger)
 
-      expect(screen.getByText(`You can have up to ${SPACES_LIMIT} workspaces`)).toBeInTheDocument()
+      expect(screen.getByText(`Limit of ${SPACES_LIMIT} workspaces reached`)).toBeInTheDocument()
     })
   })
 })

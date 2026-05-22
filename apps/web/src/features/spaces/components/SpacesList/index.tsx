@@ -22,20 +22,32 @@ import { AppRoutes } from '@/config/routes'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
+import { SPACES_LIMIT } from '../Sidebar/constants'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-const AddSpaceButton = ({ onClick }: { onClick?: () => void }) => {
-  return (
+const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?: boolean }) => {
+  const button = (
     <Button
       data-testid="create-space-button"
       variant="default"
       size="lg"
-      className="h-full rounded-lg px-6 py-3 text-base"
-      render={<NextLink href={AppRoutes.welcome.createSpace} />}
-      onClick={onClick}
+      className={`h-full rounded-lg px-6 py-3 text-base${disabled ? ' cursor-not-allowed opacity-50 grayscale' : ''}`}
+      render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
+      disabled={disabled}
+      onClick={disabled ? undefined : onClick}
     >
       <AddIcon className="size-5 fill-primary-foreground" />
-      Create space
+      Create workspace
     </Button>
+  )
+
+  if (!disabled) return button
+
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<div className="inline-flex" />}>{button}</TooltipTrigger>
+      <TooltipContent>Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
+    </Tooltip>
   )
 }
 
@@ -47,7 +59,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
       </Typography>
 
       <Typography color="text.secondary" mb={3}>
-        Sign in to view or create a Space.
+        Sign in to view or create a workspace.
       </Typography>
 
       <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
@@ -55,7 +67,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
   )
 }
 
-const NoSpacesState = () => {
+const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
 
   return (
@@ -67,15 +79,16 @@ const NoSpacesState = () => {
 
         <Box mb={3}>
           <Typography color="text.secondary" mb={1}>
-            No spaces found.
+            No workspaces found.
             <br />
           </Typography>
           <Link onClick={() => setIsInfoOpen(true)} href="#">
-            What are spaces?
+            What are workspaces?
           </Link>
         </Box>
         <div className="h-12">
           <AddSpaceButton
+            disabled={isAtLimit}
             onClick={() =>
               trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
             }
@@ -99,6 +112,7 @@ const SpacesList = () => {
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
   const inviteAmount = pendingInvites?.length
+  const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
 
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,
@@ -119,6 +133,7 @@ const SpacesList = () => {
 
           {isUserSignedIn && activeSpaces.length > 0 && (
             <AddSpaceButton
+              disabled={isAtSpacesLimit}
               onClick={() =>
                 trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
               }
@@ -143,7 +158,7 @@ const SpacesList = () => {
                 ))}
               </Grid2>
             ) : (
-              <NoSpacesState />
+              <NoSpacesState isAtLimit={isAtSpacesLimit} />
             )}
           </>
         ) : (

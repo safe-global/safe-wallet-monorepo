@@ -14,6 +14,12 @@ jest.mock('../SafeBalanceBlock', () => {
   return { __esModule: true, default: Mock }
 })
 
+jest.mock('@/components/settings/EnvironmentVariables/EnvHintButton', () => {
+  const Mock = () => null
+  Mock.displayName = 'EnvHintButton'
+  return { __esModule: true, default: Mock }
+})
+
 const createItem = (overrides: Partial<SafeItemData> = {}): SafeItemData => ({
   id: '1:0xabc',
   name: 'Space AB Name',

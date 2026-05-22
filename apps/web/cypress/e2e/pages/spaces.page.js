@@ -20,7 +20,7 @@ const spaceSaveBtn = '[data-testid="space-save-button"]'
 const spaceDeleteBtn = '[data-testid="space-delete-button"]'
 const spaceConfirmDeleteBtn = '[data-testid="space-confirm-delete-button"]'
 const spaceCard = '[data-testid="space-card"]'
-const spaceVertMenuIcon = '[data-testid="MoreVertIcon"]'
+const spaceCardContextMenuBtn = '[data-testid="space-card-context-menu-button"]'
 const contectMenuRemoveBtn = '[data-testid="remove-button"]'
 
 // -- Dashboard widgets --
@@ -59,7 +59,7 @@ const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
 const safeLevelNavigation = '[data-testid="safe-level-navigation"]'
 const spaceSafesNavigationBlock = '[data-testid="space-safes-navigation-block"]'
 const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"]'
-const backToSpaceBtn = '[aria-label="Back to space"]'
+const backToSpaceBtn = '[aria-label="Back to workspace"]'
 const safeLevelNavigationBackToSpaceBtn = `${safeLevelNavigation} ${backToSpaceBtn}`
 
 // -- Space sidebar items --
@@ -111,7 +111,7 @@ export const importAddressBookLabel = 'Import address book'
 export const dashboardAddMemberBtn = '[data-testid="add-member-button"]'
 export const inviteMemberLabel = 'Add member'
 export const learnMoreBtn = '[data-testid="spaces-learn-more-button"]'
-export const exploreSpacesLabel = 'Introducing spaces'
+export const exploreSpacesLabel = 'Introducing workspaces'
 
 // ===========================================
 // Labels & regex patterns
@@ -425,28 +425,27 @@ export function deleteSpace(name) {
   cy.contains(spaceCard, name).should('not.exist')
 }
 
-function deleteAllSpaces() {
-  cy.get('body').then(($body) => {
-    if ($body.find(spaceCard).length > 0) {
-      cy.get(spaceCard)
-        .first()
-        .within(() => {
-          cy.get(spaceVertMenuIcon).click({ force: true })
-        })
-      cy.get(contectMenuRemoveBtn).click({ force: true })
-      cy.get(spaceConfirmDeleteBtn).click()
-      cy.wait(1000)
-      deleteAllSpaces()
-    }
-  })
-}
+const MAX_SPACES = 10
 
 export function ensureReadyToCreateSpace() {
-  cy.get('body').then(($body) => {
-    if ($body.find(spaceCard).length > 0) {
-      deleteAllSpaces()
-    }
-  })
+  // Wait for the page to settle: either the spaces list or the create button must be visible
+  cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
+
+  // Use the live jQuery collection so the count reflects what's actually in the DOM now
+  cy.get('body')
+    .find(spaceCard)
+    .then(($cards) => {
+      if ($cards.length >= MAX_SPACES) {
+        // At the limit — delete one space to free a slot
+        cy.wrap($cards.first()).within(() => {
+          cy.get(spaceCardContextMenuBtn).click({ force: true })
+        })
+        cy.get(contectMenuRemoveBtn).click({ force: true })
+        cy.get(spaceConfirmDeleteBtn).click()
+        cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
+      }
+    })
+
   // Wait for either the create button or the create-space form to settle after deletion/redirect
   cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 }

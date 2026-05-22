@@ -69,6 +69,10 @@ jest.mock('@/features/spaces/utils', () => ({
   getNonDeclinedSpaces: (...args: unknown[]) => mockGetNonDeclinedSpaces(...args),
 }))
 
+jest.mock('@/hooks/useDarkMode', () => ({
+  useDarkMode: () => false,
+}))
+
 jest.mock('../../index', () => ({
   EnhancedSidebar: ({ type, selectedSpace }: { type: string; selectedSpace?: { name: string } }) => (
     <div data-testid="enhanced-sidebar">{`${type}:${selectedSpace?.name ?? ''}`}</div>

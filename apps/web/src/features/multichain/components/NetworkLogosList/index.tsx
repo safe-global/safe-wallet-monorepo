@@ -6,20 +6,21 @@ import css from './styles.module.css'
 const NetworkLogosList = ({
   networks,
   showHasMore = false,
+  maxVisible = 4,
 }: {
   networks: Pick<Chain, 'chainId'>[]
   showHasMore?: boolean
+  maxVisible?: number
 }) => {
-  const MAX_NUM_VISIBLE_CHAINS = 4
-  const visibleChains = showHasMore ? networks.slice(0, MAX_NUM_VISIBLE_CHAINS) : networks
+  const visibleChains = showHasMore ? networks.slice(0, maxVisible) : networks
 
   return (
     <Box className={css.networks}>
       {visibleChains.map((chain) => (
         <ChainIndicator key={chain.chainId} chainId={chain.chainId} onlyLogo inline />
       ))}
-      {showHasMore && networks.length > MAX_NUM_VISIBLE_CHAINS && (
-        <Box className={css.moreChainsIndicator}>+{networks.length - MAX_NUM_VISIBLE_CHAINS}</Box>
+      {showHasMore && networks.length > maxVisible && (
+        <Box className={css.moreChainsIndicator}>+{networks.length - maxVisible}</Box>
       )}
     </Box>
   )

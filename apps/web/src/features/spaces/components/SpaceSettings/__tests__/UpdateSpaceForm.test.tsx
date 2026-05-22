@@ -42,7 +42,7 @@ describe('UpdateSpaceForm', () => {
   }
 
   const getFormElements = () => ({
-    input: screen.getByLabelText('Space name') as HTMLInputElement,
+    input: screen.getByLabelText('Workspace name') as HTMLInputElement,
     saveButton: screen.getByTestId('space-save-button'),
   })
 
@@ -140,7 +140,7 @@ describe('UpdateSpaceForm', () => {
       const notifications = state.notifications
       expect(notifications.length).toBeGreaterThan(0)
       const lastNotification = notifications[notifications.length - 1]
-      expect(lastNotification.message).toBe('Updated space name')
+      expect(lastNotification.message).toBe('Updated workspace name')
       expect(lastNotification.variant).toBe('success')
       expect(lastNotification.groupKey).toBe('space-update-name')
     })
@@ -156,7 +156,7 @@ describe('UpdateSpaceForm', () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Error updating the space. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Error updating the workspace. Please try again.')).toBeInTheDocument()
     })
   })
 
@@ -183,7 +183,7 @@ describe('UpdateSpaceForm', () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Error updating the space. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Error updating the workspace. Please try again.')).toBeInTheDocument()
     })
 
     // Second attempt succeeds
@@ -191,7 +191,7 @@ describe('UpdateSpaceForm', () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Error updating the space. Please try again.')).not.toBeInTheDocument()
+      expect(screen.queryByText('Error updating the workspace. Please try again.')).not.toBeInTheDocument()
     })
   })
 })

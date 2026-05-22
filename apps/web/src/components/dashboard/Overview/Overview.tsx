@@ -26,7 +26,7 @@ const Overview = (): ReactElement => {
   if (isLoading) return <OverviewSkeleton />
 
   return (
-    <Card sx={{ border: 0, px: 3, pt: 2.5, borderRadius: '16px', pb: 1.5 }} component="section">
+    <Card sx={{ border: 0, px: 3, pt: 2.5, borderRadius: '24px', pb: 1.5 }} component="section">
       {!portfolio.$isDisabled && (
         <Box display="flex" justifyContent="flex-end" mb={-3}>
           <portfolio.PortfolioRefreshHint entryPoint="Dashboard" />
