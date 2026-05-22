@@ -63,6 +63,13 @@ describe('useIsSafeBarControlDisabled', () => {
     expect(result.current).toBe(false)
   })
 
+  it('returns false on /apps/open when useSafeAppUrl returns an empty string', () => {
+    setRoute(AppRoutes.apps.open)
+    mockUseSafeAppUrl.mockReturnValue('')
+    const { result } = renderHook(() => useIsSafeBarControlDisabled())
+    expect(result.current).toBe(false)
+  })
+
   it('returns false on /apps even when useSafeAppUrl resolves an appUrl', () => {
     setRoute(AppRoutes.apps.index)
     mockUseSafeAppUrl.mockReturnValue('https://example-safe-app.test')
