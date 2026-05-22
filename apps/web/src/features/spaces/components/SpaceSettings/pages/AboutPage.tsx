@@ -11,6 +11,7 @@ import {
   Settings2,
   Shield,
 } from 'lucide-react'
+import { useState, useCallback } from 'react'
 import { useAppDispatch } from '@/store'
 import { openCookieBanner } from '@/store/popupSlice'
 import { CookieAndTermType } from '@/store/cookiesAndTermsSlice'
@@ -21,6 +22,9 @@ import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
+import { useLoadFeature } from '@/features/__core__'
+import { SupportChatFeature, useSupportChat } from '@/features/support-chat'
+import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 
 const STATUS_PAGE_URL = 'https://status.safe.global'
 const RELEASE_URL = `${APP_HOMEPAGE}/releases/tag/web-v${APP_VERSION}`
@@ -105,6 +109,19 @@ const LinkRow = ({
 
 const AboutPage = () => {
   const dispatch = useAppDispatch()
+  const [isSupportOpen, setSupportOpen] = useState(false)
+  const { SupportChatDrawer, $isDisabled } = useLoadFeature(SupportChatFeature)
+  const { config, user } = useSupportChat()
+  const isOfficialHost = useIsOfficialHost()
+  const showSupport = !$isDisabled && isOfficialHost
+
+  const handleContactSupportClick = useCallback(() => {
+    setSupportOpen(true)
+  }, [])
+
+  const handleSupportClose = useCallback(() => {
+    setSupportOpen(false)
+  }, [])
 
   const handleCookiePrefs = () => {
     dispatch(openCookieBanner({ warningKey: CookieAndTermType.NECESSARY }))
@@ -137,13 +154,26 @@ const AboutPage = () => {
               </span>
             }
           />
-          <LinkRow
-            href={HELP_CENTER_URL}
-            external
-            icon={<LifeBuoy className="h-4 w-4 text-muted-foreground" />}
-            title="Contact Support"
-            description="Get help from our team"
-          />
+          {showSupport && (
+            <button
+              type="button"
+              onClick={handleContactSupportClick}
+              className="flex items-center gap-3 px-3 py-3 rounded-md text-foreground text-left transition-colors hover:bg-muted/60 cursor-pointer w-full"
+            >
+              <span className="shrink-0">
+                <LifeBuoy className="h-4 w-4 text-muted-foreground" />
+              </span>
+              <span className="flex-1 min-w-0">
+                <Typography variant="paragraph-small-bold" className="block">
+                  Contact Support
+                </Typography>
+                <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
+                  Get help from our team
+                </Typography>
+              </span>
+              <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+            </button>
+          )}
         </div>
       </section>
 
@@ -220,6 +250,10 @@ const AboutPage = () => {
           </Button>
         </div>
       </section>
+
+      {showSupport && (
+        <SupportChatDrawer open={isSupportOpen} onClose={handleSupportClose} config={config} user={user} />
+      )}
     </div>
   )
 }

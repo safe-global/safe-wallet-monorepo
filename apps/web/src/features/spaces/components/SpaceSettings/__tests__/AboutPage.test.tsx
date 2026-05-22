@@ -7,6 +7,37 @@ import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 import { APP_VERSION, APP_HOMEPAGE } from '@/config/version'
 import { selectCookieBanner } from '@/store/popupSlice'
 import { CookieAndTermType } from '@/store/cookiesAndTermsSlice'
+import { useLoadFeature } from '@/features/__core__'
+import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
+
+const mockSupportChatDrawer = jest.fn()
+
+jest.mock('@/features/__core__', () => ({
+  useLoadFeature: jest.fn(),
+}))
+
+jest.mock('@/features/support-chat', () => ({
+  SupportChatFeature: 'support-chat-feature',
+  useSupportChat: () => ({
+    config: { appId: 'test-app', chatUrl: 'https://chat.test', aliasDomain: 'test.local', allowedParents: [] },
+    user: { email: 'guest@test.local', name: 'Safe{Wallet}' },
+  }),
+}))
+
+jest.mock('@/hooks/useIsOfficialHost', () => ({
+  useIsOfficialHost: jest.fn(),
+}))
+
+const setSupportFeature = ({ disabled, isOfficialHost }: { disabled: boolean; isOfficialHost: boolean }) => {
+  mockSupportChatDrawer.mockImplementation(({ open }: { open: boolean }) =>
+    open ? <div data-testid="support-chat-drawer" /> : null,
+  )
+  ;(useLoadFeature as jest.Mock).mockReturnValue({
+    SupportChatDrawer: mockSupportChatDrawer,
+    $isDisabled: disabled,
+  })
+  ;(useIsOfficialHost as jest.Mock).mockReturnValue(isOfficialHost)
+}
 
 const renderWithStore = () => {
   const store = makeStore(undefined, { skipBroadcast: true })
@@ -21,6 +52,11 @@ const renderWithStore = () => {
 }
 
 describe('AboutPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    setSupportFeature({ disabled: false, isOfficialHost: true })
+  })
+
   describe('legal links', () => {
     it('renders Terms & Conditions with correct href', () => {
       renderWithStore()
@@ -80,11 +116,34 @@ describe('AboutPage', () => {
       const link = screen.getByRole('link', { name: /Service Status/i })
       expect(link).toHaveAttribute('href', 'https://status.safe.global')
     })
+  })
 
-    it('renders Contact Support link pointing to HELP_CENTER_URL', () => {
+  describe('Contact Support', () => {
+    it('renders Contact Support as a button when the support chat feature is available', () => {
       renderWithStore()
-      const link = screen.getByRole('link', { name: /Contact Support/i })
-      expect(link).toHaveAttribute('href', HELP_CENTER_URL)
+      expect(screen.getByRole('button', { name: /Contact Support/i })).toBeInTheDocument()
+      expect(screen.queryByRole('link', { name: /Contact Support/i })).not.toBeInTheDocument()
+    })
+
+    it('does not render Contact Support when the feature is disabled', () => {
+      setSupportFeature({ disabled: true, isOfficialHost: true })
+      renderWithStore()
+      expect(screen.queryByRole('button', { name: /Contact Support/i })).not.toBeInTheDocument()
+    })
+
+    it('does not render Contact Support on unofficial hosts', () => {
+      setSupportFeature({ disabled: false, isOfficialHost: false })
+      renderWithStore()
+      expect(screen.queryByRole('button', { name: /Contact Support/i })).not.toBeInTheDocument()
+    })
+
+    it('opens the support chat drawer when clicked', () => {
+      renderWithStore()
+      expect(screen.queryByTestId('support-chat-drawer')).not.toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: /Contact Support/i }))
+
+      expect(screen.getByTestId('support-chat-drawer')).toBeInTheDocument()
     })
   })
 
