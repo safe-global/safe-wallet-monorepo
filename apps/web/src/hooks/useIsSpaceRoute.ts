@@ -17,5 +17,7 @@ export const useIsSpaceRoute = (): boolean => {
   const route = clientPathname || ''
   const spaceId = useAppSelector(lastUsedSpace)
 
-  return SPACES_ROUTES.includes(route) && !!spaceId
+  const isMatch = SPACES_ROUTES.some((r) => route === r || route.startsWith(r + '/'))
+
+  return isMatch && !!spaceId
 }
