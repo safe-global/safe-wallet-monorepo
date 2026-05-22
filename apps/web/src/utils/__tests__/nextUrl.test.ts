@@ -38,6 +38,12 @@ describe('sanitizeNextUrl', () => {
     expect(sanitizeNextUrl('/welcome?chain=eth')).toBeNull()
     expect(sanitizeNextUrl('/welcome/spaces#section')).toBeNull()
   })
+
+  it('rejects trailing-slash variants of self-redirecting paths', () => {
+    expect(sanitizeNextUrl('/welcome/')).toBeNull()
+    expect(sanitizeNextUrl('/welcome/spaces/')).toBeNull()
+    expect(sanitizeNextUrl('/welcome/spaces/?chain=eth')).toBeNull()
+  })
 })
 
 describe('parseNextUrlForRouter', () => {
@@ -47,6 +53,15 @@ describe('parseNextUrlForRouter', () => {
     expect(parseNextUrlForRouter('https://evil.com/x')).toBeNull()
     expect(parseNextUrlForRouter('/')).toBeNull()
     expect(parseNextUrlForRouter('/welcome/spaces')).toBeNull()
+  })
+
+  it('rejects path-traversal that collapses to a self-redirecting path', () => {
+    // new URL('/foo/..', 'http://localhost').pathname === '/'
+    expect(parseNextUrlForRouter('/foo/..')).toBeNull()
+    // new URL('/welcome/x/..', 'http://localhost').pathname === '/welcome'
+    expect(parseNextUrlForRouter('/welcome/x/..')).toBeNull()
+    // Trailing-slash variant
+    expect(parseNextUrlForRouter('/welcome/spaces/x/../')).toBeNull()
   })
 
   it('returns pathname and empty query for a plain path', () => {

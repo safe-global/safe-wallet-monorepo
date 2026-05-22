@@ -8,7 +8,11 @@ import { AppRoutes } from '@/config/routes'
 
 export default function SpacePage() {
   const router = useRouter()
-  const { spaceId } = router.query
+  // Next.js parses duplicate query keys (`?spaceId=1&spaceId=2`) into a string[].
+  // Treat anything other than a non-empty string as "no spaceId" so we redirect
+  // rather than passing a comma-joined value to the dashboard.
+  const rawSpaceId = router.query.spaceId
+  const spaceId = typeof rawSpaceId === 'string' && rawSpaceId.length > 0 ? rawSpaceId : undefined
   const spaces = useLoadFeature(SpacesFeature)
   useFeatureFlagRedirect()
 
@@ -29,7 +33,7 @@ export default function SpacePage() {
       </Head>
 
       <main className="!pt-0">
-        <spaces.SpaceDashboardPage spaceId={spaceId as string} />
+        <spaces.SpaceDashboardPage spaceId={spaceId} />
       </main>
     </>
   )

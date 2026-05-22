@@ -19,8 +19,12 @@ jest.mock('@/components/welcome/NewSafe', () => ({
   default: () => <div data-testid="legacy-welcome" />,
 }))
 
-const setup = (isRequireLoginEnabled: boolean | undefined) => {
-  ;(router.useRouter as jest.Mock).mockReturnValue({ isReady: true, replace: mockReplace })
+const setup = (
+  isRequireLoginEnabled: boolean | undefined,
+  query: Record<string, string> = {},
+  pathname: string = AppRoutes.welcome.index,
+) => {
+  ;(router.useRouter as jest.Mock).mockReturnValue({ isReady: true, pathname, query, replace: mockReplace })
   ;(useIsRequireLoginEnabledModule.useIsRequireLoginEnabled as jest.Mock).mockReturnValue(isRequireLoginEnabled)
 }
 
@@ -43,8 +47,21 @@ describe('WelcomePage', () => {
 
     const { queryByTestId } = render(<WelcomePage />)
 
-    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith(AppRoutes.welcome.spaces))
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.spaces, query: {} }))
     expect(queryByTestId('legacy-welcome')).not.toBeInTheDocument()
+  })
+
+  it('preserves next/safe/chain query params when redirecting under the gate', async () => {
+    setup(true, { next: '/balances?safe=eth%3A0xabc', safe: 'eth:0xabc', chain: 'eth' })
+
+    render(<WelcomePage />)
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: AppRoutes.welcome.spaces,
+        query: { next: '/balances?safe=eth%3A0xabc', safe: 'eth:0xabc', chain: 'eth' },
+      }),
+    )
   })
 
   it('renders nothing while the gate flag is still loading (no legacy-UI flash)', () => {

@@ -28,12 +28,12 @@ const setup = ({
   query,
 }: {
   isReady?: boolean
-  spaceId?: string
-  query?: Record<string, string>
+  spaceId?: string | string[]
+  query?: Record<string, string | string[]>
 }) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({
     isReady,
-    query: query ?? (spaceId ? { spaceId } : {}),
+    query: query ?? (spaceId !== undefined ? { spaceId } : {}),
     replace: mockReplace,
   })
   ;(featureModule.useLoadFeature as jest.Mock).mockReturnValue({ SpaceDashboardPage: SpaceDashboardPageMock })
@@ -81,5 +81,32 @@ describe('SpacePage (/spaces)', () => {
     render(<SpacePage />)
 
     expect(mockReplace).not.toHaveBeenCalled()
+  })
+
+  it('treats an array spaceId (duplicate ?spaceId=…) as missing and redirects', async () => {
+    setup({ query: { spaceId: ['1', '2'] } })
+
+    const { queryByTestId } = render(<SpacePage />)
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: AppRoutes.welcome.spaces,
+        query: { spaceId: ['1', '2'] },
+      }),
+    )
+    expect(queryByTestId('dash')).not.toBeInTheDocument()
+  })
+
+  it('treats an empty-string spaceId as missing and redirects', async () => {
+    setup({ query: { spaceId: '' } })
+
+    render(<SpacePage />)
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: AppRoutes.welcome.spaces,
+        query: { spaceId: '' },
+      }),
+    )
   })
 })

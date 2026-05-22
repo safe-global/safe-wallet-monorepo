@@ -13,12 +13,22 @@ const SELF_REDIRECTING_PATHS = new Set(['/', '/welcome', '/welcome/spaces'])
  * `/welcome`, `/welcome/spaces`) — round-tripping through them would either
  * loop or land the user on the page they just signed in from.
  */
+// Normalise a path for the self-redirect check: strip query/hash and a trailing
+// slash so `/welcome/spaces/` is treated the same as `/welcome/spaces`. Next.js
+// collapses trailing slashes on `router.push`, so without this a `next` value
+// of `/welcome/spaces/` would slip past the blocklist and then loop straight
+// back here.
+const normalisePathForSelfRedirectCheck = (path: string): string => {
+  const pathOnly = path.split('?')[0].split('#')[0]
+  if (pathOnly.length > 1 && pathOnly.endsWith('/')) return pathOnly.slice(0, -1)
+  return pathOnly
+}
+
 export const sanitizeNextUrl = (next: unknown): string | null => {
   if (typeof next !== 'string' || next.length === 0) return null
   if (!next.startsWith('/')) return null
   if (next.startsWith('//') || next.startsWith('/\\')) return null
-  const pathOnly = next.split('?')[0].split('#')[0]
-  if (SELF_REDIRECTING_PATHS.has(pathOnly)) return null
+  if (SELF_REDIRECTING_PATHS.has(normalisePathForSelfRedirectCheck(next))) return null
   return next
 }
 
@@ -45,6 +55,10 @@ export const parseNextUrlForRouter = (next: unknown): ParsedNextUrl | null => {
   if (!sanitized) return null
 
   const url = new URL(sanitized, 'http://localhost')
+  // Re-check the resolved pathname against the self-redirect blocklist: path
+  // traversal (e.g. `/foo/..`) collapses to `/` after URL normalisation, which
+  // sanitizeNextUrl can't see by inspecting the raw string.
+  if (SELF_REDIRECTING_PATHS.has(normalisePathForSelfRedirectCheck(url.pathname))) return null
   const query: Record<string, string | string[]> = {}
   url.searchParams.forEach((value, key) => {
     const existing = query[key]

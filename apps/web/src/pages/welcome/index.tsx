@@ -12,8 +12,12 @@ const Welcome: NextPage = () => {
   const isRequireLoginEnabled = useIsRequireLoginEnabled()
 
   useEffect(() => {
-    if (!router.isReady || isRequireLoginEnabled !== true) return
-    router.replace(AppRoutes.welcome.spaces)
+    if (!router.isReady || router.pathname !== AppRoutes.welcome.index) return
+    if (isRequireLoginEnabled !== true) return
+    // Preserve any context the user was carrying (next=, safe=, chain=, tracking
+    // params); /welcome/spaces is the canonical landing for the gate, and the
+    // route guard / sign-in flow rely on those round-tripping intact.
+    router.replace({ pathname: AppRoutes.welcome.spaces, query: router.query })
   }, [router, isRequireLoginEnabled])
 
   // Keep the page blank while the gate flag is loading too — otherwise the
