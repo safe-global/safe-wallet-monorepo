@@ -19,11 +19,11 @@ import { isSmartContractWallet, isLedger } from '@/utils/wallets'
 const getSignInErrorMessage = async (wallet: ConnectedWallet | null): Promise<string> => {
   if (wallet?.address && (await isSmartContractWallet(wallet.chainId, wallet.address))) {
     const walletName = getWalletConnectLabel(wallet) || wallet.label
-    return `${walletName} for logging into Workspace is not supported at the moment.`
+    return `${walletName} for logging into workspace is not supported at the moment.`
   }
 
   if (wallet && isLedger(wallet)) {
-    return 'Ledger for logging into Workspace is not supported at the moment.'
+    return 'Ledger for logging into workspace is not supported at the moment.'
   }
 
   return 'Something went wrong while trying to sign in'
