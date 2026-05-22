@@ -148,13 +148,9 @@ const AboutPage = () => {
           <LinkRow
             href={STATUS_PAGE_URL}
             external
-            icon={<ActivityIcon className="h-4 w-4 text-accent-success" />}
-            title="Service Status"
-            description={
-              <span>
-                <span className="text-accent-success font-semibold">●</span> All systems operational
-              </span>
-            }
+            icon={<ActivityIcon className="h-4 w-4 text-muted-foreground" />}
+            title="Sync Status"
+            description="Blockchain sync status across networks"
           />
           {showSupport && (
             <button
