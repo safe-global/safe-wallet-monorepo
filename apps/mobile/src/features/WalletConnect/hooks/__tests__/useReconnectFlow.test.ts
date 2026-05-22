@@ -3,8 +3,14 @@ import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
 import { renderHook, act, waitFor } from '@/src/tests/test-utils'
 import { useReconnectFlow } from '../useReconnectFlow'
-import { UnsupportedChainError, UserRejectedError } from '../useConnect'
+import { ConnectError } from '../useConnect'
 import type { ConnectResult } from '../useConnect'
+import Logger from '@/src/utils/logger'
+
+jest.mock('@/src/utils/logger', () => ({
+  __esModule: true,
+  default: { error: jest.fn(), warn: jest.fn(), info: jest.fn() },
+}))
 
 jest.spyOn(Alert, 'alert').mockImplementation(() => undefined)
 
@@ -13,14 +19,15 @@ const mockOtherAddress = faker.finance.ethereumAddress() as `0x${string}`
 
 const mockRouterPush = jest.fn()
 const mockDisconnect = jest.fn()
+const mockClose = jest.fn()
 const mockSwitchNetworkIfNeeded = jest.fn().mockResolvedValue(undefined)
 
-let mockConnectResolve: (result: ConnectResult) => void
+let mockConnectResolve: (result: ConnectResult | null) => void
 let mockConnectReject: (error: Error) => void
 
 const mockConnect = jest.fn(
   () =>
-    new Promise<ConnectResult>((resolve, reject) => {
+    new Promise<ConnectResult | null>((resolve, reject) => {
       mockConnectResolve = resolve
       mockConnectReject = reject
     }),
@@ -33,7 +40,7 @@ jest.mock('expo-router', () => ({
 }))
 
 jest.mock('@reown/appkit-react-native', () => ({
-  useAppKit: () => ({ disconnect: mockDisconnect }),
+  useAppKit: () => ({ disconnect: mockDisconnect, close: mockClose }),
 }))
 
 jest.mock('../useSwitchNetwork', () => ({
@@ -102,7 +109,7 @@ describe('useReconnectFlow', () => {
     })
   })
 
-  it('shows an alert when wallet does not support the active Safe chain', async () => {
+  it('short-circuits silently when connect resolves null (useConnect handled the cancel/unsupported case)', async () => {
     const { result } = renderReconnectFlow()
 
     act(() => {
@@ -110,31 +117,65 @@ describe('useReconnectFlow', () => {
     })
 
     await act(async () => {
-      mockConnectReject(new UnsupportedChainError())
+      mockConnectResolve(null)
+    })
+
+    expect(mockSwitchNetworkIfNeeded).not.toHaveBeenCalled()
+    expect(mockDisconnect).not.toHaveBeenCalled()
+    expect(mockRouterPush).not.toHaveBeenCalled()
+    expect(Alert.alert).not.toHaveBeenCalled()
+    expect(Logger.error).not.toHaveBeenCalled()
+  })
+
+  it('disconnects, closes the modal, then alerts when connect rejects with a catastrophic ConnectError', async () => {
+    const { result } = renderReconnectFlow()
+    const connectError = new ConnectError('Connection failed')
+
+    act(() => {
+      result.current.reconnect(mockAddress)
+    })
+
+    await act(async () => {
+      mockConnectReject(connectError)
     })
 
     await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith('Unsupported network', expect.any(String), expect.any(Array))
+      expect(Alert.alert).toHaveBeenCalledWith('Error during reconnect', expect.any(String), expect.any(Array))
     })
 
-    expect(mockSwitchNetworkIfNeeded).not.toHaveBeenCalled()
-    expect(mockDisconnect).not.toHaveBeenCalled()
-    expect(mockRouterPush).not.toHaveBeenCalled()
+    expect(Logger.error).toHaveBeenCalledWith('Error during reconnect:', connectError)
+    expect(mockDisconnect).toHaveBeenCalled()
+    expect(mockClose).toHaveBeenCalled()
+    // Modal must dismiss before the alert renders so the alert isn't hosted by
+    // the dismissing modal on iOS.
+    const closeOrder = mockClose.mock.invocationCallOrder[0]
+    const alertOrder = (Alert.alert as jest.Mock).mock.invocationCallOrder[0]
+    expect(closeOrder).toBeLessThan(alertOrder)
   })
 
-  it('does nothing when connect is rejected', async () => {
+  it('captures async rejection from disconnect() during fallback cleanup without dropping close/alert', async () => {
     const { result } = renderReconnectFlow()
+    const connectError = new ConnectError('Connection failed')
+    const disconnectRejection = new Error('relay teardown failed')
+    mockDisconnect.mockRejectedValueOnce(disconnectRejection)
 
     act(() => {
       result.current.reconnect(mockAddress)
     })
 
     await act(async () => {
-      mockConnectReject(new UserRejectedError())
+      mockConnectReject(connectError)
     })
 
-    expect(mockSwitchNetworkIfNeeded).not.toHaveBeenCalled()
-    expect(mockDisconnect).not.toHaveBeenCalled()
-    expect(mockRouterPush).not.toHaveBeenCalled()
+    await waitFor(() => {
+      expect(Logger.warn).toHaveBeenCalledWith(
+        'Failed to disconnect WC session after reconnect error:',
+        disconnectRejection,
+      )
+    })
+
+    expect(mockDisconnect).toHaveBeenCalled()
+    expect(mockClose).toHaveBeenCalled()
+    expect(Alert.alert).toHaveBeenCalledWith('Error during reconnect', expect.any(String), expect.any(Array))
   })
 })

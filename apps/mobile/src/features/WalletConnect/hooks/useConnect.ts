@@ -12,6 +12,12 @@ export interface ConnectResult {
   walletIcon: string
 }
 
+/**
+ * Catastrophic / unknown CONNECT_ERROR rejected to consumers. The known
+ * benign cases (`UnsupportedChain`, `UserRejected`, `ProposalExpired`) are
+ * handled inside `useConnect` itself and surfaced as `connect()` resolving
+ * to `null` (handled cancellations) or transparently retrying.
+ */
 export class ConnectError extends Error {
   constructor(message: string) {
     super(message)
@@ -19,26 +25,7 @@ export class ConnectError extends Error {
   }
 }
 
-export class UserRejectedError extends Error {
-  constructor() {
-    super('User rejected the connection request')
-    this.name = 'UserRejectedError'
-  }
-}
-
-export class UnsupportedChainError extends Error {
-  constructor() {
-    super('Wallet does not support the active chain')
-    this.name = 'UnsupportedChainError'
-  }
-}
-
-/**
- * Shared alert shown when a WalletConnect flow fails with
- * UnsupportedChainError. Colocated with the error class so the
- * copy stays in sync across consumers.
- */
-export const showUnsupportedChainAlert = () => {
+const showUnsupportedChainAlert = () => {
   Alert.alert(
     'Unsupported network',
     "The connected wallet doesn't support the network of the active Safe. Please connect a wallet that supports it, or switch to a different Safe.",
@@ -46,8 +33,16 @@ export const showUnsupportedChainAlert = () => {
   )
 }
 
+// AppKit forwards the underlying SignClient/Universal Provider message verbatim
+// in CONNECT_ERROR. The QR-code pairing proposal expires (~5 min default) before
+// the wallet completes pairing, surfacing as "Proposal expired" — sometimes
+// wrapped (e.g. "Pairing already exists: Proposal expired"). Word boundaries
+// keep the match tight enough to avoid false positives on non-WC errors that
+// happen to contain the substring.
+export const isProposalExpiredMessage = (message: string): boolean => /\bproposal\s+expired\b/i.test(message)
+
 interface PendingConnect {
-  resolve: (result: ConnectResult) => void
+  resolve: (result: ConnectResult | null) => void
   reject: (error: Error) => void
 }
 
@@ -57,14 +52,28 @@ interface PendingConnect {
 // connection state is stale.
 const SWITCH_SETTLE_TIMEOUT_MS = 8000
 
+export interface UseConnectOptions {
+  /** Slug used in internal log messages, e.g. 'signer import'. */
+  flow: string
+}
+
 /**
- * Returns a `connect()` function that opens the AppKit modal and
- * returns a promise resolving with the connected wallet's address
- * and name. Rejects on CONNECT_ERROR, USER_REJECTED, or when the
- * wallet cannot honor the active Safe's chain (UnsupportedChainError).
+ * Returns a `connect()` function that opens the AppKit modal and resolves
+ * with the connected wallet's address and name. The known benign failure
+ * modes are handled inside this hook:
+ *
+ * - **Unsupported chain**: shows "Unsupported network" alert, disconnects,
+ *   resolves to `null`.
+ * - **User rejection**: logs at info level, closes the modal, resolves to `null`.
+ * - **Proposal expired**: logs at warn level, disconnects, transparently
+ *   reopens the modal with a fresh proposal — promise stays pending until
+ *   the user either succeeds or hits one of the other paths.
+ *
+ * Only catastrophic / unrecognised CONNECT_ERROR cases reject (with
+ * `ConnectError`); consumers handle those via `showConnectFallbackAlert`.
  */
-export function useConnect() {
-  const { open, disconnect, switchNetwork } = useAppKit()
+export function useConnect({ flow }: UseConnectOptions) {
+  const { open, close, disconnect, switchNetwork } = useAppKit()
   const { address, isConnected, chain } = useAccount()
   const { walletInfo } = useWalletInfo()
   const activeSafe = useAppSelector(selectActiveSafe)
@@ -83,21 +92,22 @@ export function useConnect() {
     }
   }
 
-  const rejectUnsupported = () => {
+  const resolveUnsupported = () => {
     if (!pendingRef.current) {
       return
     }
-    const { reject } = pendingRef.current
+    const { resolve } = pendingRef.current
     pendingRef.current = null
     clearSwitchTimeout()
     void (async () => {
       try {
         await disconnect()
       } catch (error) {
-        Logger.warn('Failed to disconnect after unsupported-chain connection:', error)
+        Logger.warn(`Failed to disconnect after unsupported-chain connection during ${flow}:`, error)
       }
     })()
-    reject(new UnsupportedChainError())
+    showUnsupportedChainAlert()
+    resolve(null)
   }
 
   // Resolver: only resolve when state is fully connected AND the wallet is on
@@ -130,7 +140,13 @@ export function useConnect() {
     }
 
     const { caipNetworkId } = data.properties
-    const wrongChain = caipNetworkId && caipNetworkId !== expectedCaipId
+
+    // If the wallet is not connected, we don't need to switch network
+    if (!caipNetworkId) {
+      return
+    }
+
+    const wrongChain = caipNetworkId !== expectedCaipId
 
     // Wallet connected on the right chain with an account — resolver will handle it.
     if (data.address && !wrongChain) {
@@ -138,9 +154,9 @@ export function useConnect() {
     }
 
     // Wallet is on a different chain but has an account. Try to switch; if the
-    // switch throws, reject. If it resolves, the resolver useEffect handles
-    // success — with a timeout safety net for wallets that resolve without
-    // actually switching.
+    // switch throws, mark unsupported. If it resolves, the resolver useEffect
+    // handles success — with a timeout safety net for wallets that resolve
+    // without actually switching.
     switchNetwork(expectedCaipId)
       .then(() => {
         if (!pendingRef.current) {
@@ -148,37 +164,60 @@ export function useConnect() {
         }
         switchTimeoutRef.current = setTimeout(() => {
           Logger.warn('switchNetwork resolved but chain did not settle in time')
-          rejectUnsupported()
+          resolveUnsupported()
         }, SWITCH_SETTLE_TIMEOUT_MS)
       })
       .catch((switchError) => {
         Logger.warn('Failed to switch network after unsupported-chain connection:', switchError)
-        rejectUnsupported()
+        resolveUnsupported()
       })
   })
 
-  useStableAppKitEvent('CONNECT_ERROR', () => {
+  useStableAppKitEvent('CONNECT_ERROR', ({ data }) => {
     if (!pendingRef.current) {
       return
     }
+    const message = data.properties?.message || 'Connection failed'
+
+    // Proposal expiry is benign and recoverable: tear down the stale pairing
+    // and reopen the modal with a fresh proposal. pendingRef stays set so
+    // the same promise can resolve once the user successfully scans.
+    if (isProposalExpiredMessage(message)) {
+      Logger.warn(`WalletConnect proposal expired during ${flow}, reopening connect modal`)
+      void (async () => {
+        try {
+          await disconnect()
+        } catch (disconnectError) {
+          Logger.warn(`Failed to disconnect WC session after ${flow} error:`, disconnectError)
+        }
+        if (pendingRef.current) {
+          open({ view: 'Connect' })
+        }
+      })()
+      return
+    }
+
+    // Catastrophic / unrecognised error — surface to caller.
     const { reject } = pendingRef.current
     pendingRef.current = null
     clearSwitchTimeout()
-    reject(new ConnectError('Connection failed'))
+    reject(new ConnectError(message))
   })
 
   useStableAppKitEvent('USER_REJECTED', () => {
     if (!pendingRef.current) {
       return
     }
-    const { reject } = pendingRef.current
+    Logger.info(`User rejected WC connect during ${flow}`)
+    close()
+    const { resolve } = pendingRef.current
     pendingRef.current = null
     clearSwitchTimeout()
-    reject(new UserRejectedError())
+    resolve(null)
   })
 
-  const connect = useCallback(() => {
-    return new Promise<ConnectResult>((resolve, reject) => {
+  const connect = useCallback((): Promise<ConnectResult | null> => {
+    return new Promise<ConnectResult | null>((resolve, reject) => {
       pendingRef.current = { resolve, reject }
       open({ view: 'Connect' })
     })
