@@ -10,7 +10,7 @@
  * this gives a working router-shaped object.
  */
 import { useMemo } from 'react'
-import { useNavigate, useLocation, useRouter as useTanStackRouter, useRouterState } from '@tanstack/react-router'
+import { useNavigate, useRouter as useTanStackRouter, useRouterState } from '@tanstack/react-router'
 
 type Url = string | { pathname?: string; query?: Record<string, string | string[] | undefined>; hash?: string }
 
@@ -73,28 +73,37 @@ const noopEvents: NextRouterLike['events'] = {
 
 export function useRouter(): NextRouterLike {
   const navigate = useNavigate()
-  const location = useLocation()
   const tsRouter = useTanStackRouter()
+  // Subscribe to ONLY the specific primitives we expose. `useLocation()`
+  // returns a fresh object on every internal router state update which
+  // turns this shim into a cascading-re-render bomb: every consumer's
+  // useCallback/useEffect depending on `router` reruns ~50 times per
+  // navigation, producing the Redux action storm observed in dev. By
+  // using `useRouterState({ select })` with primitive selectors, the
+  // subscriber only wakes up when the selected value actually changes.
   const pathname = useRouterState({ select: (s) => s.location.pathname })
+  const href = useRouterState({ select: (s) => s.location.href })
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr })
+  const query = useMemo(() => parseQuery(searchStr ?? ''), [searchStr])
 
   return useMemo<NextRouterLike>(
     () => ({
       pathname,
-      asPath: location.href,
+      asPath: href,
       route: pathname,
       basePath: '',
       isReady: true,
       isFallback: false,
       isPreview: false,
-      query: parseQuery(location.searchStr ?? ''),
+      query,
       push: async (url) => {
-        const href = toHref(url)
-        await navigate({ to: href })
+        const next = toHref(url)
+        await navigate({ to: next })
         return true
       },
       replace: async (url) => {
-        const href = toHref(url)
-        await navigate({ to: href, replace: true })
+        const next = toHref(url)
+        await navigate({ to: next, replace: true })
         return true
       },
       back: () => tsRouter.history.back(),
@@ -106,7 +115,7 @@ export function useRouter(): NextRouterLike {
       beforePopState: () => undefined,
       events: noopEvents,
     }),
-    [navigate, location, tsRouter, pathname],
+    [navigate, tsRouter, pathname, href, query],
   )
 }
 
