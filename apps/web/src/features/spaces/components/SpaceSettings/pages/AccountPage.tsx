@@ -50,7 +50,6 @@ const AccountPage = () => {
   }
 
   const memberName = membership.name || 'User'
-  const displayName = signerAddress ? shortenAddress(signerAddress) : memberName
   const role = membership.role.toLowerCase()
 
   return (
@@ -81,17 +80,13 @@ const AccountPage = () => {
                     />
                   }
                 >
-                  {displayName}
+                  {shortenAddress(signerAddress)}
                 </TooltipTrigger>
                 <TooltipContent side="top" className="font-mono">
                   {signerAddress}
                 </TooltipContent>
               </Tooltip>
-            ) : (
-              <Typography variant="paragraph-mini" color="muted" className="block mt-0.5 font-mono">
-                {displayName}
-              </Typography>
-            )}
+            ) : null}
             <Typography variant="paragraph-mini" color="muted" className="block mt-0.5 capitalize">
               {role}
             </Typography>

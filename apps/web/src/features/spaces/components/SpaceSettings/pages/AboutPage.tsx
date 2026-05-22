@@ -94,18 +94,18 @@ const LinkRow = ({
     rel={external ? 'noreferrer noopener' : undefined}
     className="group flex items-center gap-3 px-3 py-3 rounded-md text-foreground no-underline transition-colors hover:bg-muted/60"
   >
-    <span className="shrink-0 transition-colors [&_svg]:transition-colors [&_svg]:group-hover:text-green-600">
+    <span className="shrink-0 transition-colors [&_svg]:transition-colors [&_svg]:group-hover:text-accent-success">
       {icon}
     </span>
     <span className="flex-1 min-w-0">
-      <Typography variant="paragraph-small-bold" className="block transition-colors group-hover:text-green-600">
+      <Typography variant="paragraph-small-bold" className="block transition-colors group-hover:text-accent-success">
         {title}
       </Typography>
       <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
         {description}
       </Typography>
     </span>
-    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-colors group-hover:text-green-600" />
+    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-colors group-hover:text-accent-success" />
   </a>
 )
 
@@ -148,11 +148,11 @@ const AboutPage = () => {
           <LinkRow
             href={STATUS_PAGE_URL}
             external
-            icon={<ActivityIcon className="h-4 w-4 text-green-600" />}
+            icon={<ActivityIcon className="h-4 w-4 text-accent-success" />}
             title="Service Status"
             description={
               <span>
-                <span className="text-green-600 font-semibold">●</span> All systems operational
+                <span className="text-accent-success font-semibold">●</span> All systems operational
               </span>
             }
           />
@@ -163,12 +163,12 @@ const AboutPage = () => {
               className="group flex items-center gap-3 px-3 py-3 rounded-md text-foreground text-left transition-colors hover:bg-muted/60 cursor-pointer w-full"
             >
               <span className="shrink-0">
-                <LifeBuoy className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-green-600" />
+                <LifeBuoy className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-accent-success" />
               </span>
               <span className="flex-1 min-w-0">
                 <Typography
                   variant="paragraph-small-bold"
-                  className="block transition-colors group-hover:text-green-600"
+                  className="block transition-colors group-hover:text-accent-success"
                 >
                   Contact Support
                 </Typography>
@@ -176,7 +176,7 @@ const AboutPage = () => {
                   Get help from our team
                 </Typography>
               </span>
-              <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-colors group-hover:text-green-600" />
+              <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-colors group-hover:text-accent-success" />
             </button>
           )}
         </div>
@@ -197,16 +197,19 @@ const AboutPage = () => {
             data-testid="cookie-preferences-button"
             className="group flex items-center gap-3 px-3 py-3 rounded-md text-foreground text-left transition-colors hover:bg-muted/60 cursor-pointer"
           >
-            <Settings2 className="h-4 w-4 text-muted-foreground shrink-0 transition-colors group-hover:text-green-600" />
+            <Settings2 className="h-4 w-4 text-muted-foreground shrink-0 transition-colors group-hover:text-accent-success" />
             <span className="flex-1 min-w-0">
-              <Typography variant="paragraph-small-bold" className="block transition-colors group-hover:text-green-600">
+              <Typography
+                variant="paragraph-small-bold"
+                className="block transition-colors group-hover:text-accent-success"
+              >
                 Cookie Preferences
               </Typography>
               <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
                 Manage what&apos;s enabled
               </Typography>
             </span>
-            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-colors group-hover:text-green-600" />
+            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground shrink-0 transition-colors group-hover:text-accent-success" />
           </button>
         </div>
       </section>

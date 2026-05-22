@@ -5,7 +5,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
-import { Tooltip } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
 import DeleteSpaceDialog from '../DeleteSpaceDialog'
 import LeaveSpaceDialog from '../LeaveSpaceDialog'
@@ -32,23 +32,40 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
         <Typography variant="paragraph-small-bold" className="flex-1 min-w-0">
           Leave this workspace
         </Typography>
-        <Tooltip title={isLastActiveAdmin ? 'You are the last active admin and cannot leave the workspace.' : ''}>
-          <span>
-            <Button
-              variant="outline"
-              size="sm"
-              data-testid="space-leave-button"
-              disabled={isLastActiveAdmin || !isActiveMember}
-              onClick={() => {
-                setLeaveOpen(true)
-                trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
-              }}
-              className="text-destructive"
-            >
-              Leave workspace
-            </Button>
-          </span>
-        </Tooltip>
+        {isLastActiveAdmin ? (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    data-testid="space-leave-button"
+                    disabled
+                    className="text-destructive"
+                  >
+                    Leave workspace
+                  </Button>
+                </span>
+              }
+            />
+            <TooltipContent side="top">You are the last active admin and cannot leave the workspace.</TooltipContent>
+          </Tooltip>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            data-testid="space-leave-button"
+            disabled={!isActiveMember}
+            onClick={() => {
+              setLeaveOpen(true)
+              trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
+            }}
+            className="text-destructive"
+          >
+            Leave workspace
+          </Button>
+        )}
       </div>
 
       {isAdmin && (

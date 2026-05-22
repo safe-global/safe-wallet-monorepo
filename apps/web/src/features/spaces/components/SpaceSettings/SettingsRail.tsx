@@ -37,6 +37,7 @@ const RAIL_ITEMS: RailItem[] = [
 
 const SettingsRail = ({ activePage }: { activePage: SettingsPageKey }) => {
   const router = useRouter()
+  const spaceId = typeof router.query.spaceId === 'string' ? router.query.spaceId : undefined
 
   return (
     <aside className="sm:w-[220px] sm:shrink-0 sm:sticky sm:top-6 flex flex-row sm:flex-col gap-1 mb-4 sm:mb-0 overflow-x-auto">
@@ -45,7 +46,7 @@ const SettingsRail = ({ activePage }: { activePage: SettingsPageKey }) => {
         return (
           <Link
             key={item.key}
-            href={{ pathname: item.href, query: router.query }}
+            href={{ pathname: item.href, query: spaceId ? { spaceId } : undefined }}
             data-testid={`settings-rail-${item.key}`}
             className={cn(
               'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors no-underline whitespace-nowrap',
