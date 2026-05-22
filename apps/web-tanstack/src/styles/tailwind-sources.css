@@ -1,0 +1,13 @@
+/* Tell Tailwind v4 to scan apps/web/src for utility classes used in JSX.
+   apps/web's own shadcn.css only declares `@source '../components/ui'`,
+   which is enough under Next.js (Next auto-scans the whole project) but
+   under Vite + @tailwindcss/vite, classes outside that path get dropped
+   from the generated CSS. Symptom: utility classes like `size-3.5`,
+   `absolute -bottom-0.5 -right-0.5` (the wallet provider badge overlay)
+   silently no-op even though the JSX renders them.
+
+   These @source directives are additive — they extend, not replace,
+   apps/web's existing scan path. */
+@source '../../../web/src/**/*.{ts,tsx,js,jsx,mdx}';
+@source '../../../../packages/store/src/**/*.{ts,tsx}';
+@source '../../../../packages/utils/src/**/*.{ts,tsx}';
