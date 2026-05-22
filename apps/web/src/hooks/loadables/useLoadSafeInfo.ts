@@ -53,7 +53,12 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
     },
   )
 
-  const cgwDataWithDeployed = cgwData ? { ...cgwData, deployed: true } : undefined
+  // Memoize so the reference stays stable across renders when cgwData hasn't
+  // changed. Without this, every render produced a new object, which feeds
+  // into `safeData` → `useMemo` deps → `useUpdateStore` effect → re-dispatch
+  // → re-render — a per-render loop that fires ~50 `safeInfo/set` actions
+  // and ~1300 total store actions during a single navigation.
+  const cgwDataWithDeployed = useMemo(() => (cgwData ? { ...cgwData, deployed: true } : undefined), [cgwData])
 
   // Only 404s are suppressed during CF sync — real errors (500, network) must still surface.
   const isCgw404 = !!cgwError && 'status' in cgwError && cgwError.status === 404

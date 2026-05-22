@@ -5,6 +5,6 @@ import { Route as RootRoute } from './__root'
 // page's transitive imports into the initial bundle.
 export const Route = createRoute({
   getParentRoute: () => RootRoute,
-  path: '/welcome',
-  component: lazyRouteComponent(() => import('@/pages/welcome')),
+  path: '/_offline',
+  component: lazyRouteComponent(() => import('@/pages/_offline')),
 })

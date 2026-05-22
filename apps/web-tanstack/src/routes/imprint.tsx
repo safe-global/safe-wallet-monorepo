@@ -1,13 +1,10 @@
-import { createRoute } from '@tanstack/react-router'
+import { createRoute, lazyRouteComponent } from '@tanstack/react-router'
 import { Route as RootRoute } from './__root'
-import Imprint from '@/pages/imprint'
 
-// Imprint is typed as Next's `NextPage`; strip the generics so TanStack's
-// RouteComponent signature accepts it.
-const ImprintRoute = Imprint as unknown as () => React.ReactElement
-
+// Lazy-load the page so navigating to other routes does not drag this
+// page's transitive imports into the initial bundle.
 export const Route = createRoute({
   getParentRoute: () => RootRoute,
   path: '/imprint',
-  component: ImprintRoute,
+  component: lazyRouteComponent(() => import('@/pages/imprint')),
 })

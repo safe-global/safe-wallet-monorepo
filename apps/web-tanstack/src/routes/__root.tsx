@@ -9,7 +9,7 @@ import { HelmetProvider, Helmet } from 'react-helmet-async'
 import { Provider } from 'react-redux'
 import { CacheProvider } from '@emotion/react'
 import CssBaseline from '@mui/material/CssBaseline'
-import { lazy, Suspense, useMemo } from 'react'
+import { lazy, memo, Suspense, useMemo, type ReactElement } from 'react'
 
 // Reused verbatim from apps/web/src — the provider chain itself is exported.
 import { AppProviders } from '@/pages/_app'
@@ -56,6 +56,9 @@ import { useLocation, useSearch } from '@tanstack/react-router'
 
 import '@/styles/globals.css'
 import '@/styles/shadcn.css'
+// Tailwind v4 source-scan expansion — see file header. Must be imported
+// after shadcn.css so it extends the same @theme/utilities layer.
+import '../styles/tailwind-sources.css'
 
 // Initialize observability before React mounts — matches apps/web/src/pages/_app.tsx:102.
 if (typeof window !== 'undefined') {
@@ -120,6 +123,27 @@ const TermsGate = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>
 }
 
+// Memoized subtree — bails out of re-render when pathname and outlet are
+// stable. RootShell otherwise re-renders many times during one navigation
+// (TanStack Router emits internal state updates while loading) and dragged
+// this whole tree through each commit. Wrapping isolates the bulk of the
+// work behind a single props-equality check.
+const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname: string; outlet: ReactElement }) {
+  return (
+    <>
+      <PageLayout pathname={pathname}>{outlet}</PageLayout>
+      <CookieAndTermBanner />
+      <TargetedOutreachPopupLoader />
+      <Notifications />
+      <RecoveryLoader />
+      <CounterfactualHooksLoader />
+      <SpendingLimitsLoaderWrapper />
+      <Analytics />
+      <PkModulePopup />
+    </>
+  )
+})
+
 function RootShell() {
   // decisions.md: keep the useChangedValue page-key trick to force remount on
   // Safe switches until route-level regression tests cover stale state.
@@ -144,15 +168,7 @@ function RootShell() {
                 <LazyWeb3Init />
               </Suspense>
               <TermsGate>
-                <PageLayout pathname={location.pathname}>{outlet}</PageLayout>
-                <CookieAndTermBanner />
-                <TargetedOutreachPopupLoader />
-                <Notifications />
-                <RecoveryLoader />
-                <CounterfactualHooksLoader />
-                <SpendingLimitsLoaderWrapper />
-                <Analytics />
-                <PkModulePopup />
+                <MemoizedTree pathname={location.pathname} outlet={outlet} />
               </TermsGate>
             </CaptchaProvider>
           </AppProviders>

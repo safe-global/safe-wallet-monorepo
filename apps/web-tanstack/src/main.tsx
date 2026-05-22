@@ -13,7 +13,6 @@ import { Buffer } from 'buffer'
 // before the store is constructed.
 import './compat/require-shim'
 
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from '@tanstack/react-router'
 import { router } from './router'
@@ -21,8 +20,6 @@ import { router } from './router'
 const container = document.getElementById('__next')
 if (!container) throw new Error('Mount node #__next not found in index.html')
 
-createRoot(container).render(
-  <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>,
-)
+// Perf experiment: StrictMode disabled to test whether double-renders
+// account for the ~4.8s long-task per navigation.
+createRoot(container).render(<RouterProvider router={router} />)

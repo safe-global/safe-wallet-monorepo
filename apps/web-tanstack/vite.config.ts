@@ -1,6 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import svgr from 'vite-plugin-svgr'
+import mdx from '@mdx-js/rollup'
+import remarkFrontmatter from 'remark-frontmatter'
+import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
+import remarkHeadingId from 'remark-heading-id'
+import remarkGfm from 'remark-gfm'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
@@ -34,6 +40,35 @@ export default defineConfig({
   preview: {
     port: 3001,
     strictPort: true,
+  },
+  // Eagerly pre-bundle the heavy MUI / web3 / Redux subgraph. By default Vite
+  // discovers deps lazily on first import which produces hundreds of tiny
+  // chunks served individually in dev. Forcing inclusion collapses each top
+  // dep into a single optimized chunk.
+  optimizeDeps: {
+    include: [
+      '@mui/material',
+      '@mui/material/styles',
+      '@mui/icons-material',
+      '@mui/system',
+      '@emotion/react',
+      '@emotion/styled',
+      '@emotion/cache',
+      'react',
+      'react/jsx-runtime',
+      'react/jsx-dev-runtime',
+      'react-dom',
+      'react-dom/client',
+      'react-redux',
+      'react-helmet-async',
+      '@reduxjs/toolkit',
+      '@reduxjs/toolkit/query/react',
+      '@tanstack/react-router',
+      'lodash',
+      'date-fns',
+      'ethers',
+      'classnames',
+    ],
   },
   define: {
     __COMMIT_HASH__: JSON.stringify(commitHash),
@@ -105,6 +140,20 @@ export default defineConfig({
     ],
   },
   plugins: [
+    // Tailwind v4 — required for `@apply`, `@reference`, and all utility
+    // classes used both directly in JSX (`flex flex-wrap items-start ...`)
+    // and inside CSS modules (`@apply absolute top-0 right-0`). Without
+    // this, the entire shadcn/Tailwind layer is silently dropped and the
+    // PageLayout positioning collapses.
+    tailwindcss(),
+    // MDX support for .md/.mdx imports (terms, cookie, privacy pages).
+    // Mirrors the remark plugin list documented in
+    // docs/migration/state/plan.md and matches what apps/web's next.config.mjs
+    // uses through @mdx-js/loader. Must run BEFORE react() so React's
+    // JSX transform sees the compiled MDX output.
+    mdx({
+      remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkHeadingId, remarkGfm],
+    }),
     react(),
     svgr({
       // Reused apps/web code does `import Icon from './x.svg'` and renders
