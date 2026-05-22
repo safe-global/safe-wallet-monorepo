@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import ChainSelectorBlock from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
 import { CreateSafeOnNewChain } from '@/features/multichain'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
-import { useIsSafeBarControlDisabled } from './hooks/useIsSafeBarControlDisabled'
+import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 
 function SpaceChainSelectorSkeleton() {

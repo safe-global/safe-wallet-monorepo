@@ -12,7 +12,7 @@ import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useIsSafeBarControlDisabled } from './hooks/useIsSafeBarControlDisabled'
+import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
 import { cn } from '@/utils/cn'
 
 function SpaceNestedSafesButton(): ReactElement | null {
