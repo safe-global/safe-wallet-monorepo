@@ -49,6 +49,8 @@ export const synthesizeDraftTxDetails = ({
     baseGas: buildParams.baseGas?.toString() ?? '0',
     gasPrice: buildParams.gasPrice?.toString() ?? '0',
     gasToken: buildParams.gasToken ?? ZERO_ADDRESS,
+    fee: '0',
+    payment: '0',
     refundReceiver: buildParams.refundReceiver
       ? { value: buildParams.refundReceiver, name: null, logoUri: null }
       : zeroAddressInfo(),
