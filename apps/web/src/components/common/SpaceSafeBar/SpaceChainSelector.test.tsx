@@ -4,11 +4,15 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import SpaceChainSelector from './SpaceChainSelector'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
+import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import type { ChainSelectorBlockProps } from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
+}))
+jest.mock('@/hooks/safe-apps/useSafeAppUrl', () => ({
+  useSafeAppUrl: jest.fn(),
 }))
 jest.mock('./hooks/useSpaceChainSelector')
 jest.mock(
@@ -71,6 +75,7 @@ const multiChain = [
 describe('SpaceChainSelector', () => {
   beforeEach(() => {
     jest.mocked(useRouter).mockReturnValue({ pathname: '/', query: {} } as unknown as ReturnType<typeof useRouter>)
+    jest.mocked(useSafeAppUrl).mockReturnValue(undefined)
     mockUseSpaceChainSelector.mockReturnValue({
       deployedChains: singleChain,
       selectedChainId: '1',
@@ -187,6 +192,7 @@ describe('SpaceChainSelector', () => {
         pathname: AppRoutes.apps.open,
         query: { appUrl: 'https://example-safe-app.test' },
       } as unknown as ReturnType<typeof useRouter>)
+      jest.mocked(useSafeAppUrl).mockReturnValue('https://example-safe-app.test')
 
       render(<SpaceChainSelector />)
 

@@ -4,11 +4,15 @@ import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import SafeSelectorDropdown from '../index'
 import type { SafeItemData } from '../types'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
+}))
+jest.mock('@/hooks/safe-apps/useSafeAppUrl', () => ({
+  useSafeAppUrl: jest.fn(),
 }))
 
 jest.mock('@/components/ui/tooltip', () => ({
@@ -145,6 +149,7 @@ describe('SafeSelectorDropdown', () => {
     jest
       .mocked(useRouter)
       .mockReturnValue({ push: jest.fn(), pathname: '/', query: {} } as unknown as ReturnType<typeof useRouter>)
+    jest.mocked(useSafeAppUrl).mockReturnValue(undefined)
   })
 
   describe('onValueChange filtering by reason', () => {
@@ -343,6 +348,7 @@ describe('SafeSelectorDropdown', () => {
     }
 
     it('disables the Select on /apps/open when an appUrl is present', () => {
+      jest.mocked(useSafeAppUrl).mockReturnValue('https://example-safe-app.test')
       renderAtRoute(AppRoutes.apps.open, { appUrl: 'https://example-safe-app.test' })
 
       const selectRoot = screen.getByTestId('mock-select-root')

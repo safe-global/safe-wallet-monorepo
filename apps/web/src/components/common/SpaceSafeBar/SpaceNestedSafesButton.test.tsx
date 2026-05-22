@@ -2,10 +2,14 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import SpaceNestedSafesButton from './SpaceNestedSafesButton'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
+}))
+jest.mock('@/hooks/safe-apps/useSafeAppUrl', () => ({
+  useSafeAppUrl: jest.fn(),
 }))
 
 const mockStartFiltering = jest.fn()
@@ -75,6 +79,7 @@ describe('SpaceNestedSafesButton', () => {
     jest.clearAllMocks()
 
     jest.mocked(useRouter).mockReturnValue({ pathname: '/', query: {} } as unknown as ReturnType<typeof useRouter>)
+    jest.mocked(useSafeAppUrl).mockReturnValue(undefined)
     mockUseSafeInfo.mockReturnValue({
       safe: { chainId: '1', address: { value: '0xSafe1' }, deployed: true },
     })
@@ -263,6 +268,7 @@ describe('SpaceNestedSafesButton', () => {
         pathname: AppRoutes.apps.open,
         query: { appUrl: 'https://example-safe-app.test' },
       } as unknown as ReturnType<typeof useRouter>)
+      jest.mocked(useSafeAppUrl).mockReturnValue('https://example-safe-app.test')
 
       render(<SpaceNestedSafesButton />)
 

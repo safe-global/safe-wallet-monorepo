@@ -3,16 +3,21 @@ import { renderHook } from '@testing-library/react'
 import { useRouter } from 'next/router'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { AppRoutes } from '@/config/routes'
+import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import { useIsSafeBarControlDisabled } from '../useIsSafeBarControlDisabled'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
+jest.mock('@/hooks/safe-apps/useSafeAppUrl', () => ({
+  useSafeAppUrl: jest.fn(),
+}))
 
 const mockUseRouter = useRouter as jest.Mock
+const mockUseSafeAppUrl = useSafeAppUrl as jest.Mock
 
-function setRoute(pathname: string, query: Record<string, string> = {}) {
-  mockUseRouter.mockReturnValue({ pathname, query })
+function setRoute(pathname: string) {
+  mockUseRouter.mockReturnValue({ pathname })
 }
 
 function wrapperWithTxFlow(txFlow: TxModalContextType['txFlow']) {
@@ -29,6 +34,7 @@ function wrapperWithTxFlow(txFlow: TxModalContextType['txFlow']) {
 describe('useIsSafeBarControlDisabled', () => {
   beforeEach(() => {
     setRoute('/')
+    mockUseSafeAppUrl.mockReturnValue(undefined)
   })
 
   it('returns false on an unrelated route with no tx flow', () => {
@@ -43,26 +49,29 @@ describe('useIsSafeBarControlDisabled', () => {
     expect(result.current).toBe(true)
   })
 
-  it('returns true on /apps/open when appUrl is present', () => {
-    setRoute(AppRoutes.apps.open, { appUrl: 'https://example-safe-app.test' })
+  it('returns true on /apps/open when useSafeAppUrl resolves an appUrl', () => {
+    setRoute(AppRoutes.apps.open)
+    mockUseSafeAppUrl.mockReturnValue('https://example-safe-app.test')
     const { result } = renderHook(() => useIsSafeBarControlDisabled())
     expect(result.current).toBe(true)
   })
 
-  it('returns false on /apps/open without an appUrl', () => {
+  it('returns false on /apps/open when useSafeAppUrl returns undefined', () => {
     setRoute(AppRoutes.apps.open)
+    mockUseSafeAppUrl.mockReturnValue(undefined)
     const { result } = renderHook(() => useIsSafeBarControlDisabled())
     expect(result.current).toBe(false)
   })
 
-  it('returns false on /apps even with a safe query', () => {
-    setRoute(AppRoutes.apps.index, { safe: 'eth:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' })
+  it('returns false on /apps even when useSafeAppUrl resolves an appUrl', () => {
+    setRoute(AppRoutes.apps.index)
+    mockUseSafeAppUrl.mockReturnValue('https://example-safe-app.test')
     const { result } = renderHook(() => useIsSafeBarControlDisabled())
     expect(result.current).toBe(false)
   })
 
   it('returns false on /apps/custom', () => {
-    setRoute(AppRoutes.apps.custom, { safe: 'eth:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' })
+    setRoute(AppRoutes.apps.custom)
     const { result } = renderHook(() => useIsSafeBarControlDisabled())
     expect(result.current).toBe(false)
   })
