@@ -8,6 +8,7 @@ import InitialsAvatar from '../../InitialsAvatar'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 const AccountPage = () => {
   const { membership, signerAddress, email, isLoading } = useCurrentMemberProfile()
@@ -69,6 +70,23 @@ const AccountPage = () => {
               <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
                 {email}
               </Typography>
+            ) : signerAddress ? (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Typography
+                      variant="paragraph-mini"
+                      color="muted"
+                      className="block mt-0.5 font-mono w-fit cursor-default"
+                    />
+                  }
+                >
+                  {displayName}
+                </TooltipTrigger>
+                <TooltipContent side="top" className="font-mono">
+                  {signerAddress}
+                </TooltipContent>
+              </Tooltip>
             ) : (
               <Typography variant="paragraph-mini" color="muted" className="block mt-0.5 font-mono">
                 {displayName}
