@@ -19,7 +19,6 @@ const RESOLVERS: Record<string, unknown> = {
   blo: bloModule,
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const browserRequire = (path: string): any => {
   if (path in RESOLVERS) return RESOLVERS[path]
   throw new Error(
@@ -32,5 +31,5 @@ const browserRequire = (path: string): any => {
 // `require(x)` in transformed source to `__safeBrowserRequire(x)`. Expose
 // the function under that exact name on globalThis so the rewritten calls
 // resolve at runtime.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 ;(globalThis as any).__safeBrowserRequire = browserRequire

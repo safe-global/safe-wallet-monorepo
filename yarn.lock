@@ -13609,6 +13609,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^4.3.4"
     cross-env: "npm:^7.0.3"
     cypress: "npm:^15.9.0"
+    eslint: "npm:^9.29.0"
     react: "npm:19.2.0"
     react-dom: "npm:19.2.0"
     react-helmet-async: "npm:^3.0.0"
