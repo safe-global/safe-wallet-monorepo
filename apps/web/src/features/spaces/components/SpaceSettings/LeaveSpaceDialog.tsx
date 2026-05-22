@@ -31,12 +31,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
     setError(undefined)
 
     try {
-      const res = await leaveSpace({ spaceId: space.id })
-
-      if (res.error) {
-        throw new Error(JSON.stringify(res.error))
-      }
-
+      await leaveSpace({ spaceId: space.id }).unwrap()
       onClose()
 
       trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE })

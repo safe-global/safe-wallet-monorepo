@@ -13,8 +13,8 @@ import LeaveSpaceDialog from '../LeaveSpaceDialog'
 const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [leaveOpen, setLeaveOpen] = useState(false)
-  const isAdmin = useIsAdmin()
-  const isActiveMember = useIsActiveMember()
+  const isAdmin = useIsAdmin(space?.id)
+  const isActiveMember = useIsActiveMember(space?.id)
   const isLastActiveAdmin = useIsLastActiveAdmin()
 
   return (
