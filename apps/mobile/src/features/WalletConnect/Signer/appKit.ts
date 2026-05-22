@@ -6,7 +6,7 @@ import { SAFE_WALLET_METADATA } from '@/src/features/WalletConnect/shared/metada
 import { createMmkvStorage } from '@/src/features/WalletConnect/shared/mmkvStorageAdapter'
 
 const ethersAdapter = new EthersAdapter()
-const storage = createMmkvStorage('appkit') as unknown as Storage
+const storage: Storage = createMmkvStorage('appkit')
 
 export type AppKitInstance = ReturnType<typeof createAppKit>
 
