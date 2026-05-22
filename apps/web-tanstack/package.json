@@ -1,0 +1,46 @@
+{
+  "name": "@safe-global/web-tanstack",
+  "version": "0.1.0",
+  "private": true,
+  "license": "GPL-3.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 3001",
+    "serve": "sh -c 'npx -y serve dist -p ${PORT:=3001}'",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src",
+    "eslint": "eslint",
+    "prettier": "prettier --check . --config ../../.prettierrc --ignore-path ../../.prettierignore",
+    "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore",
+    "test": "echo 'no tests in scaffold yet' && exit 0",
+    "verify": "node ../../scripts/verify.mjs --workspace=web-tanstack",
+    "verify:changed": "node ../../scripts/verify.mjs --changed --workspace=web-tanstack",
+    "cypress:open": "cross-env TZ=UTC cypress open --e2e",
+    "cypress:run": "cross-env TZ=UTC cypress run",
+    "cypress:ci": "cross-env TZ=UTC yarn cypress:run --config baseUrl=http://localhost:3001 --spec cypress/e2e/smoke/*.cy.js"
+  },
+  "dependencies": {
+    "@safe-global/store": "workspace:*",
+    "@safe-global/theme": "workspace:*",
+    "@safe-global/utils": "workspace:*",
+    "@safe-global/web": "workspace:*",
+    "@tanstack/react-router": "1.159.4",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-helmet-async": "^3.0.0",
+    "react-redux": "^9.1.2"
+  },
+  "devDependencies": {
+    "@tanstack/router-devtools": "1.159.4",
+    "@types/react": "~19.2.10",
+    "@types/react-dom": "~19.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "cross-env": "^7.0.3",
+    "cypress": "^15.9.0",
+    "typescript": "~5.9.2",
+    "vite": "^6.4.2",
+    "vite-plugin-svgr": "^4.5.0"
+  }
+}

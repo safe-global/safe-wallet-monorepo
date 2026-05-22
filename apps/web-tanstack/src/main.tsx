@@ -1,0 +1,28 @@
+// Node-global shims for libraries that assume Webpack/Next polyfills
+// (most notably @web3-onboard/core and its wallet modules, which read
+// Buffer and global at module load). Must run before any wallet code
+// is imported — keep this at the very top of main.tsx.
+import { Buffer } from 'buffer'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+;(globalThis as any).Buffer = (globalThis as any).Buffer ?? Buffer
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+;(globalThis as any).global = (globalThis as any).global ?? globalThis
+
+// Sync `require()` polyfill for the two reused files that need it
+// (chains.json for store seeding, 'blo' for blockie avatars). Must run
+// before the store is constructed.
+import './compat/require-shim'
+
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { RouterProvider } from '@tanstack/react-router'
+import { router } from './router'
+
+const container = document.getElementById('__next')
+if (!container) throw new Error('Mount node #__next not found in index.html')
+
+createRoot(container).render(
+  <StrictMode>
+    <RouterProvider router={router} />
+  </StrictMode>,
+)
