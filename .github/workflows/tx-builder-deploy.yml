@@ -28,6 +28,8 @@ concurrency:
 env:
   WORKING_DIRECTORY: apps/tx-builder
 
+permissions: {}
+
 jobs:
   pr-preview:
     name: PR Preview

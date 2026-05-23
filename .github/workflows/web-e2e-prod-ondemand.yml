@@ -7,9 +7,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     name: Cypress production health check tests
     strategy:
       fail-fast: false
