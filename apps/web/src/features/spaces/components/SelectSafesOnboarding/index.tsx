@@ -225,13 +225,13 @@ const SelectSafesOnboarding = (): ReactElement => {
   )
 
   const footer = wallet ? (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-col-reverse gap-3 lg:flex-row lg:items-center">
       <Button
         type="button"
         variant="ghost"
         onClick={handleBack}
         disabled={isSubmitting}
-        className="flex-1 h-12 rounded-lg bg-muted hover:bg-border"
+        className="w-full h-12 rounded-lg bg-muted hover:bg-border lg:flex-1"
       >
         <ChevronLeft className="size-4 mr-1" />
         Back
@@ -241,7 +241,7 @@ const SelectSafesOnboarding = (): ReactElement => {
         type="submit"
         form={FORM_ID}
         disabled={selectedSafesLength === 0 || isSubmitting}
-        className="flex-1 h-12 rounded-lg text-[15px]"
+        className="w-full h-12 rounded-lg text-[15px] lg:flex-1"
       >
         {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Next'}
       </Button>

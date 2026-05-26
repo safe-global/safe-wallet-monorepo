@@ -135,7 +135,7 @@ const SurveyOnboarding = (): ReactElement | null => {
       )}
 
       {page?.options && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
           {page.options.map((opt: SurveyOption) => {
             const isPressed = selected.has(opt.key)
             const Icon = opt.icon ? ICON_MAP[opt.icon] : undefined
@@ -186,13 +186,13 @@ const SurveyOnboarding = (): ReactElement | null => {
   )
 
   const footer = (
-    <div className="flex items-center gap-3">
+    <div className="flex flex-col-reverse gap-3 lg:flex-row lg:items-center">
       <Button
         type="button"
         variant="ghost"
         onClick={goBack}
         disabled={isSubmitting}
-        className="flex-1 h-12 rounded-lg bg-muted hover:bg-border"
+        className="w-full h-12 rounded-lg bg-muted hover:bg-border lg:flex-1"
       >
         <ChevronLeft className="size-4 mr-1" />
         Back
@@ -202,7 +202,7 @@ const SurveyOnboarding = (): ReactElement | null => {
         type="button"
         disabled={!spaceId || selected.size === 0 || isSubmitting}
         onClick={onFinish}
-        className="flex-1 h-12 rounded-lg text-[15px]"
+        className="w-full h-12 rounded-lg text-[15px] lg:flex-1"
       >
         {isSubmitting ? <Spinner /> : 'Create Space'}
       </Button>
