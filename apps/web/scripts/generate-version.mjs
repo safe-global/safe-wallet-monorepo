@@ -19,14 +19,23 @@ const git = (...args) => {
   }
 }
 
-const commit = process.env.GITHUB_SHA || git('rev-parse', 'HEAD') || 'unknown'
+// Prefer the checked-out commit over GITHUB_SHA: on pull_request events GITHUB_SHA is
+// the merge commit, but our deploy workflows check out github.event.pull_request.head.sha
+// — git rev-parse HEAD always matches the artifact that's actually being built.
+const commit = git('rev-parse', 'HEAD') || process.env.GITHUB_SHA || 'unknown'
 const commitShort = commit === 'unknown' ? 'unknown' : commit.slice(0, 7)
 
 const refName = process.env.GITHUB_REF_NAME || ''
 const refType = process.env.GITHUB_REF_TYPE || ''
-const tag = refType === 'tag' ? refName : git('describe', '--tags', '--exact-match') || null
+const headRef = process.env.GITHUB_HEAD_REF || ''
+const tag = git('describe', '--tags', '--exact-match') || (refType === 'tag' ? refName : null) || null
 
-const branch = refName && refType !== 'tag' ? refName : git('rev-parse', '--abbrev-ref', 'HEAD') || null
+// On pull_request events GITHUB_REF_NAME is "<N>/merge" and HEAD is detached, so prefer
+// GITHUB_HEAD_REF (the PR's source branch). Fall back to GITHUB_REF_NAME for push events,
+// then to git (which returns "HEAD" when detached — filter that out).
+const gitBranch = git('rev-parse', '--abbrev-ref', 'HEAD')
+const branch =
+  headRef || (refType === 'branch' ? refName : '') || (gitBranch && gitBranch !== 'HEAD' ? gitBranch : '') || null
 
 const version = {
   version: pkg.version,

@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     permissions:
+      contents: read
       pull-requests: write
       id-token: write
 
@@ -99,6 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     permissions:
+      contents: read
       id-token: write
 
     steps:
