@@ -21,7 +21,7 @@ describe('accountSetupScanner', () => {
     expect(result.score).toBe(15)
   })
 
-  it('recommends 2 of 2 for a 1/2 Safe (never suggests the existing threshold)', async () => {
+  it('recommends adding a signer for a 1/2 Safe (avoids 2/2 single point of failure)', async () => {
     const ctx = createMockContext({
       owners: [
         { value: '0x1111111111111111111111111111111111111111' },
@@ -30,7 +30,11 @@ describe('accountSetupScanner', () => {
       threshold: 1,
     })
     const result = await accountSetupScanner.scan(ctx)
-    expect(result.remediation).toContain('2 of 2')
+    expect(result.status).toBe('issue')
+    expect(result.severity).toBe('Critical')
+    expect(result.score).toBe(15)
+    expect(result.remediation).toContain('Add another signer')
+    expect(result.remediation).not.toContain('2 of 2')
   })
 
   it('returns partial for threshold below simple majority', async () => {

@@ -44,12 +44,18 @@ export const accountSetupScanner: SecurityScanner = {
     // Threshold of 1 with multiple owners = any single signer can execute.
     if (threshold === 1) {
       const score = 15
+      // For a 2-owner Safe, recommending threshold = 2 would create a single point of failure
+      // (losing any one key permanently locks the Safe). Recommend adding a signer instead.
+      const remediation =
+        ownerCount === 2
+          ? 'Add another signer and increase the threshold for stronger security.'
+          : `Increase the threshold to at least ${simpleMajority} of ${ownerCount}.`
       return {
         status: 'issue',
         severity: getSeverityFromScore(score),
         score,
         evidence: [...baseEvidence, 'Any single signer can approve transactions'],
-        remediation: `Increase the threshold to at least ${simpleMajority} of ${ownerCount}.`,
+        remediation,
         lastChecked: now,
       }
     }
