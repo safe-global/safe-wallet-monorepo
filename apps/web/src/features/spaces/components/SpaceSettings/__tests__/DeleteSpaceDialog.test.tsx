@@ -59,12 +59,11 @@ describe('DeleteSpaceDialog', () => {
     expect(screen.getByTestId('space-confirm-delete-button')).toBeDisabled()
   })
 
-  it('confirm button is disabled when name matches but has extra whitespace', () => {
+  it('confirm button is enabled when name matches with leading/trailing whitespace', () => {
     renderDialog()
     fireEvent.change(screen.getByTestId('space-confirm-name-input'), {
       target: { value: '  My Workspace  ' },
     })
-    // trim() is applied, so leading/trailing spaces do not matter — button should be enabled
     expect(screen.getByTestId('space-confirm-delete-button')).not.toBeDisabled()
   })
 
