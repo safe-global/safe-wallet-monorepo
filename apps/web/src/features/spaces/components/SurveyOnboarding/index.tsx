@@ -147,9 +147,7 @@ const SurveyOnboarding = (): ReactElement | null => {
                 onClick={() => toggle(opt.key)}
                 className={cn(
                   'flex cursor-pointer flex-col items-start gap-3 rounded-2xl border bg-card p-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                  isPressed
-                    ? 'border-[#12FF80] bg-[#12FF80]/5'
-                    : 'border-[#ebebeb] hover:border-[#d4d4d4] hover:bg-[#f5f5f5]',
+                  isPressed ? 'border-[#12FF80] bg-[#12FF80]/5' : 'border-[#ebebeb] hover:border-ring hover:bg-muted',
                 )}
               >
                 <div className="flex w-full items-start justify-between">
