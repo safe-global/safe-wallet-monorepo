@@ -9,7 +9,7 @@ import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import {
   walletConnectE2eState,
   WalletConnectE2eState,
-} from '@/src/features/WalletConnect/context/walletConnectE2eState'
+} from '@/src/features/WalletConnect/Signer/context/walletConnectE2eState'
 import {
   mockedActiveAccount,
   mockedActiveSafeInfo,
