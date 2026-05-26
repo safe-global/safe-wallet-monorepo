@@ -147,6 +147,15 @@ const routeTree = RootRoute.addChildren([
 export const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
+  // Next.js normalized `/welcome/` -> `/welcome` automatically. TanStack
+  // doesn't by default, so route lookups like
+  // `NO_HEADER_ROUTES.includes(pathname)` in PageLayout (and several
+  // other places in apps/web/src that compare pathname to a route
+  // constant without a trailing slash) silently miss when the URL has
+  // a trailing slash. `'never'` makes TanStack canonicalize to no
+  // trailing slash, matching the Next.js semantics 175 reused
+  // call-sites expect.
+  trailingSlash: 'never',
 })
 
 declare module '@tanstack/react-router' {

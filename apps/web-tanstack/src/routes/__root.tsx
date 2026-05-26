@@ -56,9 +56,6 @@ import { useLocation, useSearch } from '@tanstack/react-router'
 
 import '@/styles/globals.css'
 import '@/styles/shadcn.css'
-// Tailwind v4 source-scan expansion — see file header. Must be imported
-// after shadcn.css so it extends the same @theme/utilities layer.
-import '../styles/tailwind-sources.css'
 
 // Initialize observability before React mounts — matches apps/web/src/pages/_app.tsx:102.
 if (typeof window !== 'undefined') {
