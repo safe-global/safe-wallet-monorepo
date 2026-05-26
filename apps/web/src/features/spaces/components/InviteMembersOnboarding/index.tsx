@@ -88,10 +88,10 @@ const InviteMembersOnboarding = (): ReactElement => {
       <div className="flex items-center gap-3">
         <Button
           type="button"
-          variant="outline"
+          variant="ghost"
           onClick={goBack}
           disabled={isSubmitting}
-          className="flex-1 h-12 rounded-lg"
+          className="flex-1 h-12 rounded-lg bg-[#f0f0f0] hover:bg-[#e8e8e8]"
         >
           <ChevronLeft className="size-4 mr-1" />
           Back
