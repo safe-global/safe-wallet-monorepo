@@ -25,6 +25,9 @@ export const accountSetupScanner: SecurityScanner = {
       { label: 'Threshold', value: `${threshold} of ${ownerCount}` },
     ]
 
+    // Simple majority = strictly more than half. For even N this is N/2 + 1, not N/2.
+    const simpleMajority = Math.floor(ownerCount / 2) + 1
+
     // Single signer = no multisig protection
     if (ownerCount === 1) {
       const score = 10
@@ -39,22 +42,25 @@ export const accountSetupScanner: SecurityScanner = {
     }
 
     // Threshold of 1 with multiple owners = any single signer can execute.
-    // Always recommend at least 2/N so 1/2 Safes don't get told to "raise threshold to 1 of 2".
     if (threshold === 1) {
       const score = 15
-      const recommendedThreshold = Math.max(Math.ceil(ownerCount / 2), 2)
+      // For a 2-owner Safe, recommending threshold = 2 would create a single point of failure
+      // (losing any one key permanently locks the Safe). Recommend adding a signer instead.
+      const remediation =
+        ownerCount === 2
+          ? 'Add another signer and increase the threshold for stronger security.'
+          : `Increase the threshold to at least ${simpleMajority} of ${ownerCount}.`
       return {
         status: 'issue',
         severity: getSeverityFromScore(score),
         score,
         evidence: [...baseEvidence, 'Any single signer can approve transactions'],
-        remediation: `Increase the threshold to at least ${recommendedThreshold} of ${ownerCount}.`,
+        remediation,
         lastChecked: now,
       }
     }
 
     // Threshold below simple majority = suboptimal
-    const simpleMajority = Math.ceil(ownerCount / 2)
     if (threshold < simpleMajority) {
       const score = 60
       return {
