@@ -35,6 +35,9 @@ const HIDDEN_ROUTES = [
   AppRoutes.licenses,
   AppRoutes.imprint,
   AppRoutes.cookie,
+  AppRoutes['403'],
+  AppRoutes['404'],
+  AppRoutes['_offline'],
 ]
 
 function DropdownHeader({ isPinned, onPin }: { isPinned: boolean; onPin: () => void }) {
