@@ -8,6 +8,8 @@ on:
   pull_request_review_comment:
     types: [created]
 
+permissions: {}
+
 jobs:
   claude-review:
     # Only run when manually triggered or when @claude review is mentioned by a collaborator

@@ -26,9 +26,13 @@ on:
         required: true
         type: string
 
+permissions: {}
+
 jobs:
   dockerhub-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: >-
       github.ref == 'refs/heads/main' ||
       github.ref == 'refs/heads/dev' ||
