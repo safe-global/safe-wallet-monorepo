@@ -1,4 +1,4 @@
-import { parseUnits } from 'ethers'
+import { Interface, parseUnits } from 'ethers'
 import type { MetaTransactionData } from '@safe-global/types-kit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -11,12 +11,16 @@ import {
   getDeployedSpendingLimitModuleAddress,
   getLatestSpendingLimitAddress,
 } from '@/features/spending-limits/services/spendingLimitContracts'
-import { getSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { currentMinutes } from '@safe-global/utils/utils/date'
 
-export type Period = 'day' | 'week' | 'month'
+const safeIface = new Interface(['function enableModule(address module)'])
 
+export type Period = 'once' | 'day' | 'week' | 'month'
+
+// The AllowanceModule reads `resetTimeMin = 0` as a one-time allowance: the
+// spender can withdraw up to the limit once and the policy is exhausted.
 const PERIOD_MIN: Record<Period, number> = {
+  once: 0,
   day: 1440,
   week: 10080,
   month: 43200,
@@ -32,6 +36,8 @@ export type BatchToken = {
 export type BuildBatchInput = {
   chain: Chain
   chainId: string
+  safeAddress: string
+  safeVersion: string
   delegate: string
   amountUsd: number
   period: Period
@@ -46,7 +52,8 @@ export type BuildBatchResult = {
 }
 
 export const buildSpendingLimitBatch = async (input: BuildBatchInput): Promise<BuildBatchResult> => {
-  const { chain, chainId, delegate, amountUsd, period, tokens, safeModules, safeDeployed } = input
+  const { chain, chainId, safeAddress, safeVersion, delegate, amountUsd, period, tokens, safeModules, safeDeployed } =
+    input
 
   if (tokens.length === 0) {
     throw new Error('Pick at least one token')
@@ -66,20 +73,22 @@ export const buildSpendingLimitBatch = async (input: BuildBatchInput): Promise<B
   const txs: MetaTransactionData[] = []
 
   if (!isModuleEnabled) {
-    const sdk = getSafeSDK()
-    if (!sdk) throw new Error('Safe SDK not initialized')
-
     if (!safeDeployed) {
-      const enableTx = await createEnableModuleTx(
-        chain,
-        await sdk.getAddress(),
-        sdk.getContractVersion(),
-        allowanceModuleAddress,
-      )
+      // Counterfactual safes need the Safe deployment + module enable bundled
+      // through the createEnableModuleTx helper which knows the right
+      // contract version.
+      const enableTx = await createEnableModuleTx(chain, safeAddress, safeVersion, allowanceModuleAddress)
       txs.push({ to: enableTx.to, value: '0', data: enableTx.data })
     } else {
-      const enableTx = await sdk.createEnableModuleTx(allowanceModuleAddress)
-      txs.push({ to: enableTx.data.to, value: '0', data: enableTx.data.data })
+      // Deployed safe: a plain enableModule(address) call against the Safe.
+      // Encoding directly avoids the global Safe SDK singleton — that lets us
+      // build the batch for any Safe in the workspace without first switching
+      // the app's active-safe context.
+      txs.push({
+        to: safeAddress,
+        value: '0',
+        data: safeIface.encodeFunctionData('enableModule', [allowanceModuleAddress]),
+      })
     }
   }
 

@@ -1,25 +1,33 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Box, InputBase, Paper, Stack, Typography } from '@mui/material'
+import { Box, Checkbox, InputBase, Paper, Stack, Typography } from '@mui/material'
 import { isAddress } from 'ethers'
 import { CalendarClock, Clock, Loader2, ScrollText, ShieldCheck, Sparkles, Tag, Wallet } from 'lucide-react'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import {
-  CopyAddressButton,
-  SafeIdenticon,
-  ShortAddressWithTooltip,
-} from '@/components/common/SpaceSafeBar/AccountsModal/shared'
+import { SafeIdenticon, ShortAddressWithTooltip } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 import { AppRoutes } from '@/config/routes'
 import { useSpaceSafes } from '@/features/spaces'
 import { isMultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
+import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
+import useChains from '@/hooks/useChains'
+import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useAppDispatch } from '@/store'
+import { upsertAddressBookEntries } from '@/store/addressBookSlice'
+import { TxModalContext } from '@/components/tx-flow'
+import PolicyBatchFlow from '@/components/tx-flow/flows/PolicyBatch'
+import { getRecoveryUpsertTransactions } from '@/features/recovery/services/setup'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
 import {
+  ApplyToStep,
   FormHeader,
   OptionCard,
   PolicySummaryRow,
-  SelectionCheck,
   VerticalWizard,
-  selectedRowStyles,
+  WizardField,
+  WizardLayout,
+  safeKey,
+  type SafeRowItem,
 } from '../wizardCommon'
 
 const STEPS = [
@@ -74,75 +82,26 @@ const EXPIRY_VERBOSE: Record<ExpiryKey, string> = {
   custom: 'expires on the date you set',
 }
 
-type SafeRowItem = {
-  chainId: string
-  address: string
-  name: string
+const DAY_IN_SECONDS = 60 * 60 * 24
+
+// Seconds the Delay Modifier should use for each named option. Custom is handled
+// at submit time using customCooldownDays.
+const COOLDOWN_SECONDS: Record<Exclude<CooldownKey, 'custom'>, number> = {
+  '24h': DAY_IN_SECONDS,
+  '7d': 7 * DAY_IN_SECONDS,
+  '14d': 14 * DAY_IN_SECONDS,
+  '28d': 28 * DAY_IN_SECONDS,
+  '60d': 60 * DAY_IN_SECONDS,
 }
 
-type ApplyToStepProps = {
-  safes: SafeRowItem[]
-  isLoading: boolean
-  selectedKey: string
-  onSelect: (item: SafeRowItem) => void
+// On-chain "expiry" is the proposal lifetime in seconds. Map the wizard's
+// user-friendly options to seconds; 'never' = 0 (the contract treats 0 as no
+// expiry). Custom date is converted at submit time to a duration-from-now.
+const EXPIRY_SECONDS: Record<Exclude<ExpiryKey, 'custom'>, number> = {
+  never: 0,
+  '6m': 180 * DAY_IN_SECONDS,
+  '1y': 365 * DAY_IN_SECONDS,
 }
-
-const safeKey = (s: { chainId: string; address: string }) => `${s.chainId}:${s.address.toLowerCase()}`
-
-const ApplyToStep = ({ safes, isLoading, selectedKey, onSelect }: ApplyToStepProps) => (
-  <>
-    <Typography variant="h2" sx={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.4px', mb: 2.5 }}>
-      Which Safe does this apply to?
-    </Typography>
-
-    {isLoading && safes.length === 0 ? (
-      <Paper elevation={0} sx={{ padding: 4, textAlign: 'center', borderRadius: '14px' }}>
-        <Typography sx={{ color: 'text.secondary' }}>Loading Safes…</Typography>
-      </Paper>
-    ) : safes.length === 0 ? (
-      <Paper elevation={0} sx={{ padding: 4, textAlign: 'center', borderRadius: '14px' }}>
-        <Typography sx={{ color: 'text.secondary' }}>This space has no Safes yet.</Typography>
-      </Paper>
-    ) : (
-      <Stack gap={1}>
-        {safes.map((safe) => {
-          const k = safeKey(safe)
-          const selected = k === selectedKey
-          const name = safe.name || 'Safe'
-          return (
-            <Paper
-              key={k}
-              elevation={0}
-              onClick={() => onSelect(safe)}
-              sx={{
-                cursor: 'pointer',
-                padding: '14px 18px',
-                borderRadius: '14px',
-                border: '1.5px solid transparent',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-                transition: 'background-color 150ms ease, border-color 150ms ease',
-                ...(selected && selectedRowStyles),
-                '&:hover': selected ? {} : { backgroundColor: 'background.main' },
-              }}
-            >
-              <SafeIdenticon address={safe.address} size={36} />
-              <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <Typography sx={{ fontSize: 14, fontWeight: 600, lineHeight: 1.3 }}>{name}</Typography>
-                <Stack direction="row" alignItems="center" gap={0.5} sx={{ minWidth: 0 }}>
-                  <ShortAddressWithTooltip address={safe.address} />
-                  <CopyAddressButton address={safe.address} />
-                </Stack>
-              </Box>
-              <SelectionCheck selected={selected} />
-            </Paper>
-          )
-        })}
-      </Stack>
-    )}
-  </>
-)
 
 type RecovererStepProps = {
   address: string
@@ -152,6 +111,9 @@ type RecovererStepProps = {
   resolvedAddress: string | undefined
   resolving: boolean
   isHexAddress: boolean
+  addressBookName: string | undefined
+  saveToAddressBook: boolean
+  setSaveToAddressBook: (v: boolean) => void
 }
 
 const RecovererStep = ({
@@ -162,12 +124,16 @@ const RecovererStep = ({
   resolvedAddress,
   resolving,
   isHexAddress,
+  addressBookName,
+  saveToAddressBook,
+  setSaveToAddressBook,
 }: RecovererStepProps) => {
   const trimmed = address.trim()
   const valid = !!resolvedAddress
   const isEmpty = trimmed.length === 0
   // Only flag as invalid once we've actually finished trying (skip while resolving).
   const showError = !isEmpty && !valid && !resolving
+  const isKnownContact = valid && !!addressBookName
 
   return (
     <>
@@ -181,79 +147,53 @@ const RecovererStep = ({
             <Typography sx={{ fontSize: 13, fontWeight: 700 }}>Recoverer address</Typography>
             <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>ENS supported</Typography>
           </Stack>
-          <Paper
-            elevation={0}
-            sx={{
-              padding: '12px 14px',
-              borderRadius: '14px',
-              border: '1.5px solid',
-              borderColor: valid ? 'secondary.main' : 'transparent',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-              transition: 'border-color 150ms ease',
-            }}
-          >
-            <Box
-              sx={{
-                width: 32,
-                height: 32,
-                borderRadius: '8px',
-                backgroundColor: 'secondary.background',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <Wallet size={16} color="#1C5538" />
-            </Box>
-            <InputBase
-              fullWidth
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="0x… or name.eth"
-              inputProps={{ spellCheck: false }}
-              sx={{ fontSize: 14, fontFamily: 'inherit' }}
-            />
-            {resolving && (
-              <Box
-                sx={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 0.5,
-                  padding: '4px 10px',
-                  borderRadius: '9999px',
-                  backgroundColor: 'background.main',
-                  color: 'text.secondary',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  flexShrink: 0,
-                }}
-              >
-                <Loader2 size={12} className="animate-spin" />
-                Resolving…
-              </Box>
-            )}
-            {!resolving && valid && (
-              <Box
-                sx={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 0.5,
-                  padding: '4px 10px',
-                  borderRadius: '9999px',
-                  backgroundColor: 'secondary.background',
-                  color: 'success.dark',
-                  fontSize: 12,
-                  fontWeight: 700,
-                  flexShrink: 0,
-                }}
-              >
-                ✓ Valid
-              </Box>
-            )}
-          </Paper>
+          <WizardField
+            icon={<Wallet size={16} color="#1C5538" />}
+            iconBg="accent"
+            value={address}
+            onChange={setAddress}
+            placeholder="0x… or name.eth"
+            state={showError ? 'error' : valid ? 'valid' : 'default'}
+            ariaLabel="Recoverer address"
+            adornment={
+              resolving ? (
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    padding: '4px 10px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'background.main',
+                    color: 'text.secondary',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    flexShrink: 0,
+                  }}
+                >
+                  <Loader2 size={12} className="animate-spin" />
+                  Resolving…
+                </Box>
+              ) : valid ? (
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    padding: '4px 10px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'secondary.background',
+                    color: 'success.dark',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    flexShrink: 0,
+                  }}
+                >
+                  ✓ Valid
+                </Box>
+              ) : undefined
+            }
+          />
           {valid && !isHexAddress && resolvedAddress && (
             <Typography
               sx={{
@@ -273,41 +213,38 @@ const RecovererStep = ({
 
         <Box>
           <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 700 }}>Nickname</Typography>
-            <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>Optional, shown on the Policies page</Typography>
+            <Typography sx={{ fontSize: 13, fontWeight: 700 }}>Name</Typography>
+            <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>
+              {isKnownContact ? 'From your address book' : 'Optional, shown on the Policies page'}
+            </Typography>
           </Stack>
-          <Paper
-            elevation={0}
-            sx={{
-              padding: '12px 14px',
-              borderRadius: '14px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5,
-            }}
-          >
-            <Box
-              sx={{
-                width: 32,
-                height: 32,
-                borderRadius: '8px',
-                backgroundColor: 'background.main',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
+          <WizardField
+            icon={<Tag size={16} color="#737373" />}
+            value={nickname}
+            onChange={setNickname}
+            placeholder={isKnownContact ? addressBookName : 'e.g. Backup wallet'}
+            ariaLabel="Recoverer name"
+          />
+          {valid && !isKnownContact && nickname.trim().length > 0 && (
+            <Stack
+              direction="row"
+              alignItems="center"
+              gap={1}
+              sx={{ mt: 1, ml: 0.25, cursor: 'pointer' }}
+              onClick={() => setSaveToAddressBook(!saveToAddressBook)}
             >
-              <Tag size={16} color="#737373" />
-            </Box>
-            <InputBase
-              fullWidth
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              placeholder="e.g. Backup wallet"
-              sx={{ fontSize: 14, fontFamily: 'inherit' }}
-            />
-          </Paper>
+              <Checkbox
+                checked={saveToAddressBook}
+                onChange={(e) => setSaveToAddressBook(e.target.checked)}
+                size="small"
+                sx={{ p: 0 }}
+                inputProps={{ 'aria-label': 'Save recoverer to address book' }}
+              />
+              <Typography sx={{ fontSize: 12.5, color: 'text.secondary', userSelect: 'none' }}>
+                Save to address book
+              </Typography>
+            </Stack>
+          )}
         </Box>
 
         <Paper
@@ -673,7 +610,7 @@ const RecoveryPolicySummary = ({
   const hasExpiry = !!expiryLabel
 
   return (
-    <Paper elevation={0} sx={{ borderRadius: '18px', padding: 1.5, position: 'sticky', top: 24 }}>
+    <Paper elevation={0} sx={{ borderRadius: '18px', padding: 3, position: 'sticky', top: 24 }}>
       <Stack direction="row" alignItems="center" gap={1} sx={{ px: 0.5, pb: 1.25 }}>
         <Box
           sx={{
@@ -802,8 +739,11 @@ const RecoveryFlow = () => {
     [safesList, selectedSafeKey],
   )
 
+  const { configs: chains } = useChains()
+
   const [recovererAddress, setRecovererAddress] = useState('')
   const [recovererNickname, setRecovererNickname] = useState('')
+  const [saveRecovererToAddressBook, setSaveRecovererToAddressBook] = useState(true)
   const [cooldown, setCooldown] = useState<CooldownKey | null>(null)
   const [customCooldownDays, setCustomCooldownDays] = useState('')
   const [expiry, setExpiry] = useState<ExpiryKey | null>(null)
@@ -819,6 +759,16 @@ const RecoveryFlow = () => {
   )
   const resolvedRecoverer = isHexRecoverer ? trimmedRecoverer : ensResolved
   const isRecovererValid = !!resolvedRecoverer
+
+  // Pre-fill nickname if the resolved address already lives in the user's address book on this chain.
+  const recovererContact = useAddressBookItem(resolvedRecoverer ?? '', selectedSafe?.chainId)
+  const recovererAddressBookName = recovererContact?.name
+  useEffect(() => {
+    if (recovererAddressBookName && !recovererNickname) setRecovererNickname(recovererAddressBookName)
+  }, [recovererAddressBookName, recovererNickname])
+
+  const dispatch = useAppDispatch()
+  const { setTxFlow } = useContext(TxModalContext)
 
   // Auto-suggest defaults on first reach: recommended cooldown = 28d, expiry = never.
   // Only fills if user hasn't picked yet. Lets the right column light up after the user
@@ -851,15 +801,91 @@ const RecoveryFlow = () => {
   }
 
   const submitPolicy = async () => {
+    if (!resolvedRecoverer || !selectedSafe) return
     setSubmitError(null)
     setIsSubmitting(true)
     try {
-      // Stub: real implementation would deploy a Delay Modifier and enable it on the Safe.
-      await new Promise((r) => setTimeout(r, 600))
-      const { policy: _p, step: _s, ...rest } = router.query
-      void router.replace({ pathname: AppRoutes.spaces.policies, query: rest })
+      const chain = chains.find((c) => c.chainId === selectedSafe.chainId)
+      if (!chain) throw new Error(`Chain ${selectedSafe.chainId} is not supported`)
+
+      const customCooldownSec = (() => {
+        const n = parseInt(customCooldownDays, 10)
+        return Number.isFinite(n) && n > 0 ? n * DAY_IN_SECONDS : 0
+      })()
+      const delaySec = cooldown === 'custom' ? customCooldownSec : cooldown ? COOLDOWN_SECONDS[cooldown] : 0
+      if (delaySec <= 0) {
+        throw new Error('Pick a cooldown period before continuing')
+      }
+
+      const customExpirySec = (() => {
+        if (!customExpiryDate) return 0
+        const ms = new Date(customExpiryDate).getTime() - Date.now()
+        return ms > 0 ? Math.floor(ms / 1000) : 0
+      })()
+      const expirySec = expiry === 'custom' ? customExpirySec : expiry ? EXPIRY_SECONDS[expiry] : 0
+
+      // Build with a chain-pure provider so we don't rely on the global
+      // active-safe context being switched (which would re-fetch safe info
+      // and break nested-safe navigation).
+      const provider = createWeb3ReadOnly(chain)
+      if (!provider) throw new Error(`No RPC available for chain ${chain.chainName}`)
+
+      const txs = await getRecoveryUpsertTransactions({
+        recoverer: resolvedRecoverer,
+        delay: String(delaySec),
+        expiry: String(expirySec),
+        customDelay: '',
+        selectedDelay: String(delaySec),
+        provider,
+        chainId: selectedSafe.chainId,
+        safeAddress: selectedSafe.address,
+      })
+
+      // Switch the URL's active Safe right before handing off — the tx-flow
+      // modal reads it via useSafeInfo. This is the ONLY time we touch the
+      // global active-safe state.
+      await router.replace(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, safe: `${chain.shortName}:${selectedSafe.address}` },
+        },
+        undefined,
+        { shallow: true },
+      )
+
+      // Hand the prebuilt batch off to the standard tx-flow modal — review,
+      // Safe Shield, simulation, and the sign/propose step are all owned by
+      // it. We only react to the success callback (address-book save +
+      // redirect).
+      setTxFlow(
+        <PolicyBatchFlow
+          txs={txs}
+          subtitle="Account recovery"
+          onSubmit={(args) => {
+            if (!args?.txId) return
+            const trimmedNick = recovererNickname.trim()
+            if (
+              saveRecovererToAddressBook &&
+              trimmedNick &&
+              !recovererAddressBookName &&
+              resolvedRecoverer &&
+              selectedSafe.chainId
+            ) {
+              dispatch(
+                upsertAddressBookEntries({
+                  chainIds: [selectedSafe.chainId],
+                  address: resolvedRecoverer,
+                  name: trimmedNick,
+                }),
+              )
+            }
+            const { policy: _p, step: _s, safe: _sf, ...rest } = router.query
+            void router.replace({ pathname: AppRoutes.spaces.policies, query: rest })
+          }}
+        />,
+      )
     } catch (e) {
-      setSubmitError(e instanceof Error ? e.message : 'Failed to submit recovery policy.')
+      setSubmitError(asError(e).message)
     } finally {
       setIsSubmitting(false)
     }
@@ -930,20 +956,10 @@ const RecoveryFlow = () => {
   const isReview = stepKey === 'review'
 
   return (
-    <Box sx={{ maxWidth: 1200 }}>
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', md: '200px minmax(0, 1fr) 340px' },
-          gap: { xs: 3, md: 4 },
-          alignItems: 'flex-start',
-        }}
-      >
-        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-          <VerticalWizard steps={STEPS} currentIndex={currentIndex} />
-        </Box>
-
-        <Paper elevation={0} sx={{ borderRadius: '24px', padding: { xs: 3, md: 4 } }}>
+    <WizardLayout
+      wizard={<VerticalWizard steps={STEPS} currentIndex={currentIndex} />}
+      form={
+        <>
           <FormHeader
             currentIndex={currentIndex}
             onBack={goBack}
@@ -971,6 +987,9 @@ const RecoveryFlow = () => {
               resolvedAddress={resolvedRecoverer}
               resolving={ensResolving}
               isHexAddress={isHexRecoverer}
+              addressBookName={recovererAddressBookName}
+              saveToAddressBook={saveRecovererToAddressBook}
+              setSaveToAddressBook={setSaveRecovererToAddressBook}
             />
           )}
 
@@ -1009,21 +1028,20 @@ const RecoveryFlow = () => {
               submitError={submitError}
             />
           )}
-        </Paper>
-
-        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-          <RecoveryPolicySummary
-            safe={selectedSafe}
-            recovererAddress={resolvedRecoverer ?? ''}
-            recovererNickname={recovererNickname}
-            cooldownLabel={
-              cooldown === null || (cooldown === 'custom' && !isCustomCooldownValid) ? null : cooldownDisplay
-            }
-            expiryLabel={expiry === null || (expiry === 'custom' && !isCustomExpiryValid) ? null : expiryDisplay}
-          />
-        </Box>
-      </Box>
-    </Box>
+        </>
+      }
+      summary={
+        <RecoveryPolicySummary
+          safe={selectedSafe}
+          recovererAddress={resolvedRecoverer ?? ''}
+          recovererNickname={recovererNickname}
+          cooldownLabel={
+            cooldown === null || (cooldown === 'custom' && !isCustomCooldownValid) ? null : cooldownDisplay
+          }
+          expiryLabel={expiry === null || (expiry === 'custom' && !isCustomExpiryValid) ? null : expiryDisplay}
+        />
+      }
+    />
   )
 }
 

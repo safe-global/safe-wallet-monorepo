@@ -2,8 +2,6 @@ import { Box, Paper, Stack, Typography } from '@mui/material'
 import { ArrowUpRight, LifeBuoy, Shield, WalletMinimal } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useRouter } from 'next/router'
-import { useAppDispatch } from '@/store'
-import { ESafeAction, openSafeActionsModal } from '@/features/spaces'
 import { AppRoutes } from '@/config/routes'
 import AppliedPolicies from './AppliedPolicies'
 import SpendingLimitFlow from './SpendingLimitFlow'
@@ -146,7 +144,6 @@ const PolicyCard = ({ icon: Icon, title, description, comingSoon = false, onClic
 }
 
 const SpacePolicies = () => {
-  const dispatch = useAppDispatch()
   const router = useRouter()
 
   if (router.query.policy === 'spendingLimit') {
@@ -157,8 +154,8 @@ const SpacePolicies = () => {
     return <RecoveryFlow />
   }
 
-  const openSpendingLimitPicker = () => {
-    dispatch(openSafeActionsModal({ type: ESafeAction.SpendingLimit }))
+  const openSpendingLimitFlow = () => {
+    void router.push({ pathname: AppRoutes.spaces.policies, query: { ...router.query, policy: 'spendingLimit' } })
   }
 
   const openRecoveryFlow = () => {
@@ -190,7 +187,7 @@ const SpacePolicies = () => {
             icon={WalletMinimal}
             title="Spending Limit"
             description="Per-member spending cap."
-            onClick={openSpendingLimitPicker}
+            onClick={openSpendingLimitFlow}
           />
           <PolicyCard icon={Shield} title="Operator Role" description="Scoped DeFi permissions." comingSoon />
           <PolicyCard
