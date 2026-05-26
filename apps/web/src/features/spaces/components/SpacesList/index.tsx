@@ -2,6 +2,10 @@ import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import SpaceCard from 'src/features/spaces/components/SpaceCard'
 import SignInOptions from '../SignInOptions'
+import LocalSafesAlert from './LocalSafesAlert'
+import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import { useIsClassicViewFeatureEnabled } from '@/hooks/useClassicView'
+import ClassicViewLink from '../ClassicViewLink'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -37,7 +41,7 @@ const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?
       onClick={disabled ? undefined : onClick}
     >
       <AddIcon className="size-5 fill-primary-foreground" />
-      Create space
+      Create workspace
     </Button>
   )
 
@@ -52,18 +56,26 @@ const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?
 }
 
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
+  const isClassicViewFeatureEnabled = useIsClassicViewFeatureEnabled() === true
+
   return (
-    <Card sx={{ p: 5, textAlign: 'center' }}>
-      <Typography variant="h3" fontWeight={600} mb={3}>
-        Sign in
-      </Typography>
+    <>
+      <Card sx={{ p: 5, textAlign: 'center' }}>
+        <Typography variant="h3" fontWeight={600} mb={3}>
+          Sign in
+        </Typography>
 
-      <Typography color="text.secondary" mb={3}>
-        Sign in to view or create a Space.
-      </Typography>
+        <Typography color="text.secondary" mb={3}>
+          Sign in to view or create a workspace.
+        </Typography>
 
-      <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
-    </Card>
+        <LocalSafesAlert />
+
+        <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+      </Card>
+
+      {isClassicViewFeatureEnabled && <ClassicViewLink />}
+    </>
   )
 }
 
@@ -79,11 +91,11 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
         <Box mb={3}>
           <Typography color="text.secondary" mb={1}>
-            No spaces found.
+            No workspaces found.
             <br />
           </Typography>
           <Link onClick={() => setIsInfoOpen(true)} href="#">
-            What are spaces?
+            What are workspaces?
           </Link>
         </Box>
         <div className="h-12">
@@ -102,11 +114,13 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
+  const isRequireLoginEnabled = useIsRequireLoginEnabled() ?? false
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
     currentData: spaces,
-    isFetching: isSpacesLoading,
+    isFetching,
+    isUninitialized,
     error,
   } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
@@ -117,7 +131,12 @@ const SpacesList = () => {
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,
     inviteAmount: inviteAmount || 0,
-    isSpacesLoading: isSpacesLoading || false,
+    // Treat the "skip→unskip" transition as still loading. On the render where
+    // skip flips to false RTK Query returns isFetching=false but hasn't yet
+    // dispatched the fetch (that happens in a useEffect), so isFetching alone
+    // would lead useSignInRedirect to read spacesAmount=0 and bounce existing
+    // users into the create-space flow on re-login.
+    isSpacesLoading: isFetching || isUninitialized,
     error: error || undefined,
   })
 
@@ -129,7 +148,7 @@ const SpacesList = () => {
     <Box className={css.container}>
       <Box className={css.mySpaces}>
         <Box className={css.spacesHeader}>
-          <AccountsNavigation />
+          {!isRequireLoginEnabled && <AccountsNavigation />}
 
           {isUserSignedIn && activeSpaces.length > 0 && (
             <AddSpaceButton

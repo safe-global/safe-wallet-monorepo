@@ -86,6 +86,27 @@ export const useSecurityChecks = (
       })
     }
 
+    const multichainResult = results['multichain_setup']
+    if (multichainResult && multichainResult.status !== 'not_applicable') {
+      const ok = isPassingStatus(multichainResult.status)
+      const title = ok ? 'Signers are consistent across networks' : 'Signers differ across networks'
+      items.push({
+        key: 'multichain',
+        severity: multichainResult.severity,
+        isPassing: ok,
+        node: (
+          <Row
+            leadIcon={iconFor(multichainResult)}
+            title={title}
+            expandedContent={buildExpanded(
+              multichainResult,
+              buildCta('multichain_setup', multichainResult, safeQueryParam),
+            )}
+          />
+        ),
+      })
+    }
+
     const recoveryResult = results['recovery']
     if (recoveryResult) {
       const ok = isPassingStatus(recoveryResult.status)

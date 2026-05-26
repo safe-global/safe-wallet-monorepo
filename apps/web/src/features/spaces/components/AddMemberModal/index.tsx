@@ -57,7 +57,9 @@ export const RoleMenuItem = ({
         <>
           <Box gridArea="description">
             <Typography variant="body2" sx={{ maxWidth: '300px', whiteSpace: 'normal', wordWrap: 'break-word' }}>
-              {isAdmin ? 'Admins can create and delete spaces, invite members, and more.' : 'Can view the space data.'}
+              {isAdmin
+                ? 'Admins can create and delete workspaces, invite members, and more.'
+                : 'Can view the workspace data.'}
             </Typography>
           </Box>
           <Box gridArea="checkIcon" sx={{ visibility: selected ? 'visible' : 'hidden', mx: 1 }}>
@@ -154,7 +156,8 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ py: 2 }}>
             <Typography mb={2}>
-              Invite a signer of the Safe Accounts, or any other wallet address. Anyone in the space can see their name.
+              Invite a signer of the Safe Accounts, or any other wallet address. Anyone in the workspace can see their
+              name.
             </Typography>
 
             <Stack spacing={3}>

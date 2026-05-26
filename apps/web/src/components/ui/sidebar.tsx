@@ -292,12 +292,18 @@ function Sidebar({
   variant = 'sidebar',
   collapsible = 'offcanvas',
   className,
+  containerClassName,
+  innerClassName,
+  contained = false,
   children,
   ...props
 }: ComponentProps<'div'> & {
   side?: 'left' | 'right'
   variant?: 'sidebar' | 'floating' | 'inset'
   collapsible?: 'offcanvas' | 'icon' | 'none'
+  containerClassName?: string
+  innerClassName?: string
+  contained?: boolean
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
 
@@ -318,7 +324,7 @@ function Sidebar({
     )
   }
 
-  if (isMobile) {
+  if (isMobile && !contained) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
@@ -343,47 +349,53 @@ function Sidebar({
     )
   }
 
+  const containerBaseClassName = contained
+    ? cn(
+        'relative z-[var(--z-sidebar)] flex h-full min-h-full w-(--sidebar-width) max-w-full',
+        variant === 'floating' || variant === 'inset' ? 'p-2' : '',
+        containerClassName,
+        className,
+      )
+    : cn(
+        'inset-y-0 z-[var(--z-sidebar)] h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear fixed hidden md:flex',
+        side === 'left'
+          ? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
+          : 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
+        variant === 'floating' || variant === 'inset'
+          ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]'
+          : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l',
+        containerClassName,
+        className,
+      )
+
   return (
     <div
-      className="group peer text-sidebar-foreground hidden md:block"
-      data-state={state}
-      data-collapsible={state === 'collapsed' ? collapsible : ''}
+      className={cn('group peer text-sidebar-foreground', contained ? 'block h-full' : 'hidden md:block')}
+      data-state={contained ? 'expanded' : state}
+      data-collapsible={contained ? '' : state === 'collapsed' ? collapsible : ''}
       data-variant={variant}
       data-side={side}
       data-slot="sidebar"
     >
       {/* This is what handles the sidebar gap on desktop */}
-      <div
-        data-slot="sidebar-gap"
-        className={cn(
-          'transition-[width] duration-200 ease-linear relative w-(--sidebar-width) bg-transparent',
-          'group-data-[collapsible=offcanvas]:w-0',
-          'group-data-[side=right]:rotate-180',
-          variant === 'floating' || variant === 'inset'
-            ? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]'
-            : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon)',
-        )}
-      />
-      <div
-        data-slot="sidebar-container"
-        data-testid="sidebar-container"
-        className={cn(
-          'fixed inset-y-0 z-[var(--z-sidebar)] hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex',
-          side === 'left'
-            ? 'left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]'
-            : 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
-          // Adjust the padding for floating and inset variants.
-          variant === 'floating' || variant === 'inset'
-            ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]'
-            : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l',
-          className,
-        )}
-        {...props}
-      >
+      {!contained && (
+        <div
+          data-slot="sidebar-gap"
+          className={cn(
+            'transition-[width] duration-200 ease-linear relative w-(--sidebar-width) bg-transparent',
+            'group-data-[collapsible=offcanvas]:w-0',
+            'group-data-[side=right]:rotate-180',
+            variant === 'floating' || variant === 'inset'
+              ? 'group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]'
+              : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon)',
+          )}
+        />
+      )}
+      <div data-slot="sidebar-container" data-testid="sidebar-container" className={containerBaseClassName} {...props}>
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="bg-sidebar group-data-[variant=floating]:rounded-lg flex size-full flex-col"
+          className={cn('bg-sidebar group-data-[variant=floating]:rounded-lg flex size-full flex-col', innerClassName)}
         >
           {children}
         </div>
