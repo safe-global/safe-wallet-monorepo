@@ -32,7 +32,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
       trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE })
       dispatch(
         showNotification({
-          message: `Left space ${space.name}.`,
+          message: `Left workspace ${space.name}.`,
           variant: 'success',
           groupKey: 'leave-space-success',
         }),
@@ -41,15 +41,15 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
       router.push({ pathname: AppRoutes.welcome.spaces })
     } catch (e) {
       console.error(e)
-      setError('Error leaving the space. Please try again.')
+      setError('Error leaving the workspace. Please try again.')
     }
   }
 
   return (
-    <ModalDialog dialogTitle="Leave space" hideChainIndicator open onClose={onClose}>
+    <ModalDialog dialogTitle="Leave workspace" hideChainIndicator open onClose={onClose}>
       <DialogContent sx={{ mt: 2 }}>
         <Typography mb={2}>
-          Are you sure you want to leave this space? You won’t be able to access its data anymore.
+          Are you sure you want to leave this workspace? You won’t be able to access its data anymore.
         </Typography>
 
         {error && (
@@ -62,7 +62,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button data-testid="space-confirm-leave-button" variant="danger" onClick={onLeave}>
-          Leave space
+          Leave workspace
         </Button>
       </DialogActions>
     </ModalDialog>

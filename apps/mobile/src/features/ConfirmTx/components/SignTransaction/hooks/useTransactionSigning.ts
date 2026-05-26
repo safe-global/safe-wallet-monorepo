@@ -9,7 +9,7 @@ import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gat
 import logger from '@/src/utils/logger'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
 import { SigningResponse, ledgerSafeSigningService } from '@/src/services/ledger/ledger-safe-signing.service'
-import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/Signer/context/WalletConnectContext'
 import { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { SafeVersion } from '@safe-global/types-kit'
 import useSafeInfo from '@/src/hooks/useSafeInfo'

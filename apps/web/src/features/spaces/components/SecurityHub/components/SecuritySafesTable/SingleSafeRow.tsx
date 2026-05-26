@@ -126,7 +126,11 @@ const SingleSafeRow = ({
           />
         ) : (
           <Tooltip title="Safe not yet deployed on this network">
-            <Typography variant="caption" color="text.disabled" noWrap>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: 'inline-block', whiteSpace: 'normal', lineHeight: 1.2 }}
+            >
               Not deployed
             </Typography>
           </Tooltip>

@@ -24,9 +24,12 @@ export const undeployedSafesSlice = createSlice({
         address: string
         type: PayMethod
         safeProps: PredictedSafeProps | ReplayedSafeProps
+        // Default true — locally-initiated creations are always by the current user.
+        // Sync from the space endpoint (safes created by other members) passes false.
+        isCreator?: boolean
       }>,
     ) => {
-      const { chainId, address, type, safeProps } = action.payload
+      const { chainId, address, type, safeProps, isCreator = true } = action.payload
 
       if (!state[chainId]) {
         state[chainId] = {}
@@ -38,6 +41,7 @@ export const undeployedSafesSlice = createSlice({
           status: PendingSafeStatus.AWAITING_EXECUTION,
           type,
         },
+        isCreator,
       }
     },
 
@@ -54,10 +58,12 @@ export const undeployedSafesSlice = createSlice({
 
       if (!state[chainId]?.[address]) return state
 
+      const existing = state[chainId][address]
       state[chainId][address] = {
-        props: state[chainId][address].props,
+        ...existing,
+        props: existing.props,
         status: {
-          ...state[chainId][address].status,
+          ...existing.status,
           ...status,
         },
       }

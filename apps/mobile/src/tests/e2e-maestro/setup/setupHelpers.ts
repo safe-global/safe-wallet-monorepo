@@ -15,7 +15,7 @@ import { setActiveSigner } from '@/src/store/activeSignerSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { resetE2EState } from '@/src/store/resetE2EState'
 import { web3API } from '@/src/store/signersBalance'
-import { walletConnectE2eState } from '@/src/features/WalletConnect/context/walletConnectE2eState'
+import { walletConnectE2eState } from '@/src/features/WalletConnect/Signer/context/walletConnectE2eState'
 
 /**
  * Reset all e2e-relevant state (Redux slices + RTK Query caches +
