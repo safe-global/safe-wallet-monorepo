@@ -15,10 +15,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: write
       id-token: write
 

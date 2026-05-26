@@ -17,9 +17,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   lint:
     permissions:
+      contents: read
       checks: write
       pull-requests: read
       statuses: write
@@ -46,6 +49,7 @@ jobs:
 
   prettier:
     permissions:
+      contents: read
       checks: write
       pull-requests: read
       statuses: write
@@ -61,6 +65,7 @@ jobs:
 
   type-check:
     permissions:
+      contents: read
       checks: write
       pull-requests: read
       statuses: write
@@ -76,6 +81,7 @@ jobs:
 
   knip-exports:
     permissions:
+      contents: read
       checks: write
       pull-requests: read
       statuses: write
