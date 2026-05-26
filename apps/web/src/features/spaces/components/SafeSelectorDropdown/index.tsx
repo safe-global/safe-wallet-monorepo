@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/utils/cn'
@@ -6,9 +6,9 @@ import SafeSelectorTriggerContent from './components/SafeSelectorTriggerContent'
 import SafeDropdownContainer from './components/SafeDropdownContainer'
 import InlineRetryError from '@/components/common/InlineRetryError'
 import { useSafeSelectorState } from './hooks/useSafeSelectorState'
+import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
 import { getSafeSelectorClassVariants } from './utils/classVariants'
 import type { SafeSelectorDropdownProps } from './types'
-import { TxModalContext } from '@/components/tx-flow'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 function SafeSelectorDropdownSkeleton() {
@@ -38,8 +38,7 @@ function SafeSelectorDropdown({
   footer,
 }: SafeSelectorDropdownProps) {
   const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
-  const { txFlow } = useContext(TxModalContext)
-  const isDisabled = !!txFlow
+  const isDisabled = useIsSafeBarControlDisabled()
   const {
     dropdownOpen,
     selectedChainId,
