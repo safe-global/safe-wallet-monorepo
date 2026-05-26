@@ -46,8 +46,10 @@ export const getEvidence = (
  * "known empty" from "unknown / not loaded".
  */
 export const formatBalance = (fiatTotal?: string | null): string => {
-  if (fiatTotal === undefined || fiatTotal === null || fiatTotal === '') return DASH
-  const value = Number(fiatTotal)
+  if (fiatTotal === undefined || fiatTotal === null) return DASH
+  const trimmedFiatTotal = fiatTotal.trim()
+  if (trimmedFiatTotal === '') return DASH
+  const value = Number(trimmedFiatTotal)
   if (!Number.isFinite(value)) return DASH
   if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
   if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`
