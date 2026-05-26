@@ -42,7 +42,7 @@ const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
-  const { SafeSelectionModal } = useLoadFeature(MyAccountsFeature)
+  const { SafeSelectionModal, $isDisabled: isMyAccountsDisabled } = useLoadFeature(MyAccountsFeature)
   const trustedSafesModal = useSafeSelectionModal()
 
   // Use same organization logic as onboarding
@@ -91,16 +91,18 @@ const SpaceSafeAccounts = () => {
               <AddAccounts buttonVariant="default" />
             </Track>
           )}
-          <Button
-            size="lg"
-            variant="outline"
-            className="font-normal px-4 py-0"
-            onClick={trustedSafesModal.open}
-            data-testid="manage-trusted-safes-button"
-          >
-            <BookmarkPlus className="size-4" />
-            Manage trusted Safes
-          </Button>
+          {!isMyAccountsDisabled && (
+            <Button
+              size="lg"
+              variant="outline"
+              className="font-normal px-4 py-0"
+              onClick={trustedSafesModal.open}
+              data-testid="manage-trusted-safes-button"
+            >
+              <BookmarkPlus className="size-4" />
+              Manage trusted Safes
+            </Button>
+          )}
         </Stack>
       </div>
 

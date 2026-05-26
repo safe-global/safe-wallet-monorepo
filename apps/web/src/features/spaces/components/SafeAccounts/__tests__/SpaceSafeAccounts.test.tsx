@@ -122,7 +122,12 @@ describe('SpaceSafeAccounts – Manage trusted Safes entry point', () => {
     })
     ;(useIsInvited as jest.Mock).mockReturnValue(false)
     ;(useSafeSelectionModal as jest.Mock).mockReturnValue(baseModalReturn)
-    ;(useLoadFeature as jest.Mock).mockReturnValue({ SafeSelectionModal: MockSafeSelectionModal })
+    ;(useLoadFeature as jest.Mock).mockReturnValue({
+      SafeSelectionModal: MockSafeSelectionModal,
+      $isDisabled: false,
+      $isReady: true,
+      $error: undefined,
+    })
   })
 
   it('renders the Manage trusted Safes button for non-admin members', () => {
@@ -159,5 +164,20 @@ describe('SpaceSafeAccounts – Manage trusted Safes entry point', () => {
 
     expect(MockSafeSelectionModal).toHaveBeenCalled()
     expect(MockSafeSelectionModal.mock.calls[0][0]).toMatchObject({ modal: baseModalReturn })
+  })
+
+  it('hides the Manage trusted Safes button when MyAccountsFeature is disabled', () => {
+    ;(useIsAdmin as jest.Mock).mockReturnValue(true)
+    ;(useLoadFeature as jest.Mock).mockReturnValue({
+      SafeSelectionModal: MockSafeSelectionModal,
+      $isDisabled: true,
+      $isReady: false,
+      $error: undefined,
+    })
+
+    render(<SpaceSafeAccounts />)
+
+    expect(screen.queryByTestId('manage-trusted-safes-button')).not.toBeInTheDocument()
+    expect(screen.getByTestId('mock-add-accounts')).toBeInTheDocument()
   })
 })
