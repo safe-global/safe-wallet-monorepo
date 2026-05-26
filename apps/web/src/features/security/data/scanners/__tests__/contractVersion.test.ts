@@ -94,6 +94,49 @@ describe('contractVersionScanner', () => {
     expect(result.status).toBe('clear')
   })
 
+  it('defers to gateway and returns issue when implementationVersionState is OUTDATED but version is null', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        implementationVersionState: 'OUTDATED',
+        isNonCriticalUpdate: false,
+        masterCopyDeployer: 'Gnosis',
+        version: null,
+        latestVersion: '1.4.1',
+      }),
+    )
+    expect(result.status).toBe('issue')
+    expect(result.severity).toBe('High')
+    expect(result.score).toBe(30)
+  })
+
+  it('defers to gateway and returns issue when implementationVersionState is OUTDATED but version is not valid semver', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        implementationVersionState: 'OUTDATED',
+        isNonCriticalUpdate: false,
+        masterCopyDeployer: 'Gnosis',
+        version: 'not-a-version',
+        latestVersion: '1.4.1',
+      }),
+    )
+    expect(result.status).toBe('issue')
+    expect(result.severity).toBe('High')
+    expect(result.score).toBe(30)
+  })
+
+  it('trusts semver over gateway OUTDATED when semver confirms version is current (1.4.1+L2 vs 1.4.1)', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        implementationVersionState: 'OUTDATED',
+        isNonCriticalUpdate: true,
+        masterCopyDeployer: 'Gnosis',
+        version: '1.4.1+L2',
+        latestVersion: '1.4.1',
+      }),
+    )
+    expect(result.status).toBe('clear')
+  })
+
   it('returns clear for outdated non-Gnosis deployer', async () => {
     const result = await contractVersionScanner.scan(
       createMockContext({

@@ -11,19 +11,22 @@ const isKnownImplementation = (address: string, chainId: string): boolean =>
   hasMatchingDeployment(getSafeSingletonDeployments, address, chainId, KNOWN_SAFE_VERSIONS) ||
   hasMatchingDeployment(getSafeL2SingletonDeployments, address, chainId, KNOWN_SAFE_VERSIONS)
 
+type VersionComparison = 'older' | 'not-older' | 'unknown'
+
 /**
- * Returns true when the Safe's current version is strictly older than the chain's
- * latest recommended version. Both inputs may carry semver build metadata such as
- * `+L2` or `+Circles`; semver comparison ignores that metadata, so e.g.
- * `1.3.0+L2 < 1.4.1` is true and `1.4.1+L2 < 1.4.1` is false.
+ * Compares a Safe's version against the chain's latest recommended version.
+ * Both inputs may carry semver build metadata such as `+L2` or `+Circles`;
+ * semver comparison ignores that metadata, so `1.3.0+L2 < 1.4.1` is true and
+ * `1.4.1+L2 < 1.4.1` is false.
  *
- * Returns false when either version is missing or not valid semver — in that case
- * we defer to the gateway's `implementationVersionState` flag rather than guessing.
+ * Returns `'unknown'` when either version is missing or not valid semver — in
+ * that case the caller should defer to the gateway's `implementationVersionState`
+ * flag rather than guessing.
  */
-const isVersionOlderThanLatest = (version: string | null, latestVersion: string): boolean => {
-  if (!version) return false
-  if (!semverValid(version) || !semverValid(latestVersion)) return false
-  return semverLt(version, latestVersion)
+const compareVersionToLatest = (version: string | null, latestVersion: string): VersionComparison => {
+  if (!version) return 'unknown'
+  if (!semverValid(version) || !semverValid(latestVersion)) return 'unknown'
+  return semverLt(version, latestVersion) ? 'older' : 'not-older'
 }
 
 export const contractVersionScanner: SecurityScanner = {
@@ -78,10 +81,14 @@ export const contractVersionScanner: SecurityScanner = {
     // mastercopies on chains where a newer one is recommended. Semver build metadata
     // (`+L2`, `+Circles`) is intentionally ignored by `<`, so 1.3.0+L2 is treated as
     // 1.3.0 — outdated when latest is 1.4.1, current when latest is 1.3.0.
+    //
+    // When the version can't be compared (missing or invalid semver) we defer to the
+    // gateway's OUTDATED flag rather than silently marking the Safe as up to date.
+    const versionComparison = compareVersionToLatest(version, latestVersion)
     if (
       implementationVersionState === 'OUTDATED' &&
       masterCopyDeployer === 'Gnosis' &&
-      isVersionOlderThanLatest(version, latestVersion)
+      versionComparison !== 'not-older'
     ) {
       const score = 30
       return {
