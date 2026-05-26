@@ -121,7 +121,6 @@ const buildScanResults = (
       pending_tx: mkResult(),
       transaction_scanning: mkResult(),
       multichain_setup: mkResult('not_applicable'),
-      signer_integrity: mkResult(),
       ...resultOverrides,
     }
   }

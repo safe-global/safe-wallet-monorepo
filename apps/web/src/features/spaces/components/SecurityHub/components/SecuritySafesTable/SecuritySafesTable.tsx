@@ -1,5 +1,5 @@
 import { type ReactElement, useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { Table, TableCell, TableHead, TableRow } from '@mui/material'
+import { Box, Table, TableCell, TableHead, TableRow } from '@mui/material'
 import { AnimatePresence } from 'framer-motion'
 import type { ScanResult, SafeGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
@@ -8,7 +8,7 @@ import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
-import { COLUMNS, MotionTbody, TABLE_SX } from './constants'
+import { COLUMNS, MotionTbody, TABLE_SX, TABLE_WRAPPER_SX } from './constants'
 import SingleSafeRow from './SingleSafeRow'
 import MultichainSafeRow from './MultichainSafeRow'
 import type { GetSafeSecurityHref } from './utils'
@@ -95,53 +95,55 @@ const SecuritySafesTable = ({
   if (!security.$isReady) return <></>
 
   return (
-    <Table sx={TABLE_SX}>
-      <TableHead>
-        <TableRow>
-          {COLUMNS.map((c, i) => (
-            <TableCell key={c.label || `col-${i}`} sx={{ width: c.width }}>
-              {c.label}
-            </TableCell>
-          ))}
-        </TableRow>
-      </TableHead>
-      <AnimatePresence mode="wait">
-        <MotionTbody
-          key={gradeFilter ?? 'all'}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-        >
-          {filteredSafes.map((safe, safeIdx) => {
-            const isMultichain = safe.isMultichain && safe.chainEntries.length > 1
-            const sharedProps = {
-              safe,
-              safeIdx,
-              hasAnimated: hasAnimatedRef.current,
-              selectedSafe,
-              onViewReport,
-              scanResults,
-              scanTimestamps,
-              scanningKeys,
-              balanceMap,
-              security,
-              getSafeSecurityHref,
-            }
-            return isMultichain ? (
-              <MultichainSafeRow
-                key={safe.address}
-                {...sharedProps}
-                isExpanded={expandedAddresses.has(safe.address)}
-                onToggleExpand={toggleExpand}
-              />
-            ) : (
-              <SingleSafeRow key={security.scanKey(safe.address, safe.chainId)} {...sharedProps} />
-            )
-          })}
-        </MotionTbody>
-      </AnimatePresence>
-    </Table>
+    <Box sx={TABLE_WRAPPER_SX}>
+      <Table sx={TABLE_SX}>
+        <TableHead>
+          <TableRow>
+            {COLUMNS.map((c, i) => (
+              <TableCell key={c.label || `col-${i}`} sx={{ width: c.width }}>
+                {c.label}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <AnimatePresence mode="wait">
+          <MotionTbody
+            key={gradeFilter ?? 'all'}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            {filteredSafes.map((safe, safeIdx) => {
+              const isMultichain = safe.isMultichain && safe.chainEntries.length > 1
+              const sharedProps = {
+                safe,
+                safeIdx,
+                hasAnimated: hasAnimatedRef.current,
+                selectedSafe,
+                onViewReport,
+                scanResults,
+                scanTimestamps,
+                scanningKeys,
+                balanceMap,
+                security,
+                getSafeSecurityHref,
+              }
+              return isMultichain ? (
+                <MultichainSafeRow
+                  key={safe.address}
+                  {...sharedProps}
+                  isExpanded={expandedAddresses.has(safe.address)}
+                  onToggleExpand={toggleExpand}
+                />
+              ) : (
+                <SingleSafeRow key={security.scanKey(safe.address, safe.chainId)} {...sharedProps} />
+              )
+            })}
+          </MotionTbody>
+        </AnimatePresence>
+      </Table>
+    </Box>
   )
 }
 

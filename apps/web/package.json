@@ -8,7 +8,7 @@
     "dev": "cross-env USE_RSPACK=1 next dev",
     "dev:full": "cross-env USE_RSPACK=0 ENABLE_PWA=1 ENABLE_EXPERIMENTAL_OPTIMIZATIONS=1 next dev",
     "start": "next dev",
-    "build": "yarn fetch-chains && next build",
+    "build": "yarn fetch-chains && node scripts/generate-version.mjs && next build",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "type-check": "tsc --noEmit",
