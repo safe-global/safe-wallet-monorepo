@@ -6,6 +6,7 @@ import * as useWalletModule from '@/hooks/wallets/useWallet'
 import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
 import * as useIsSpaceRouteModule from '@/hooks/useIsSpaceRoute'
+import * as useIsRequireLoginEnabledModule from '@/hooks/useIsRequireLoginEnabled'
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -20,6 +21,10 @@ jest.mock('next/router', () => ({
 
 jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: jest.fn(() => false),
+}))
+
+jest.mock('@/hooks/useIsRequireLoginEnabled', () => ({
+  useIsRequireLoginEnabled: jest.fn(() => false),
 }))
 
 // ---------------------------------------------------------------------------
@@ -37,6 +42,7 @@ interface SetupOptions {
   isStoreHydrated?: boolean
   spaces?: Array<{ id: number; name: string }> | undefined
   isSpaceRoute?: boolean
+  isRequireLoginEnabled?: boolean | undefined
 }
 
 const defaultSpaces = [
@@ -53,9 +59,11 @@ const setupMocks = ({
   isStoreHydrated = true,
   spaces = defaultSpaces,
   isSpaceRoute = false,
+  isRequireLoginEnabled = false,
 }: SetupOptions = {}) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({ pathname, query, isReady: true })
   ;(useIsSpaceRouteModule.useIsSpaceRoute as jest.Mock).mockReturnValue(isSpaceRoute)
+  ;(useIsRequireLoginEnabledModule.useIsRequireLoginEnabled as jest.Mock).mockReturnValue(isRequireLoginEnabled)
 
   jest.spyOn(useWalletModule, 'default').mockReturnValue(wallet as ReturnType<typeof useWalletModule.default>)
   jest
@@ -536,6 +544,251 @@ describe('useFlowActivationGuard', () => {
       await result.current.activationGuard()
 
       expect(mockFetchSpaces).toHaveBeenCalledWith(undefined)
+    })
+  })
+
+  // -----------------------------------------------------------------------
+  // Require-login gate (REQUIRE_LOGIN_DISABLED feature flag is OFF)
+  // -----------------------------------------------------------------------
+
+  describe('require-login gate enabled', () => {
+    it('redirects unauthenticated users from a protected route to /welcome/spaces with next=', async () => {
+      setupMocks({
+        pathname: '/home',
+        query: { foo: 'bar' },
+        isAuthenticated: false,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult.success).toBe(false)
+      expect(guardResult.redirectTo).toBe(`${AppRoutes.welcome.spaces}?next=${encodeURIComponent('/home?foo=bar')}`)
+    })
+
+    it('redirects unauthenticated users from /balances to /welcome/spaces with next=', async () => {
+      setupMocks({
+        pathname: AppRoutes.balances.index,
+        isAuthenticated: false,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.spaces}?next=${encodeURIComponent(AppRoutes.balances.index)}`,
+      })
+    })
+
+    it('keeps the safe= inside next= but does NOT duplicate it on the redirect target', async () => {
+      setupMocks({
+        pathname: '/balances',
+        query: { safe: '1:0xabc' },
+        isAuthenticated: false,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      // safe is preserved inside the encoded next= URL, not as a top-level
+      // duplicate on /welcome/spaces.
+      expect(guardResult.redirectTo).toBe(
+        `${AppRoutes.welcome.spaces}?next=${encodeURIComponent('/balances?safe=1%3A0xabc')}`,
+      )
+    })
+
+    it('does NOT redirect when on the login page itself', async () => {
+      setupMocks({
+        pathname: AppRoutes.welcome.spaces,
+        isAuthenticated: false,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
+    })
+
+    it('allows the legal static pages even when unauthenticated', async () => {
+      for (const pathname of [
+        AppRoutes.terms,
+        AppRoutes.privacy,
+        AppRoutes.cookie,
+        AppRoutes.imprint,
+        AppRoutes.licenses,
+        AppRoutes['404'],
+      ]) {
+        setupMocks({ pathname, isAuthenticated: false, isRequireLoginEnabled: true })
+        const { result } = renderHook(() => useFlowActivationGuard())
+        const guardResult = await result.current.activationGuard()
+        expect(guardResult).toEqual({ success: true })
+      }
+    })
+
+    it('redirects an authenticated user with no spaces to the onboarding page (carrying next)', async () => {
+      setupMocks({
+        pathname: '/balances',
+        isAuthenticated: true,
+        spaces: [],
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult.redirectTo).toBe(
+        `${AppRoutes.welcome.createSpace}?next=${encodeURIComponent(AppRoutes.balances.index)}`,
+      )
+    })
+
+    it('does NOT redirect when on the onboarding page with no spaces (lets the user finish onboarding)', async () => {
+      setupMocks({
+        pathname: AppRoutes.welcome.createSpace,
+        isAuthenticated: true,
+        spaces: [],
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
+    })
+
+    it('does NOT redirect signed-in users with no spaces away from legal/static pages', async () => {
+      for (const pathname of [
+        AppRoutes.terms,
+        AppRoutes.privacy,
+        AppRoutes.cookie,
+        AppRoutes.licenses,
+        AppRoutes['404'],
+      ]) {
+        setupMocks({ pathname, isAuthenticated: true, spaces: [], isRequireLoginEnabled: true })
+        const { result } = renderHook(() => useFlowActivationGuard())
+        const guardResult = await result.current.activationGuard()
+        expect(guardResult).toEqual({ success: true })
+      }
+    })
+
+    it('forwards an authenticated user with spaces from the login page to ?next=', async () => {
+      setupMocks({
+        pathname: AppRoutes.welcome.spaces,
+        query: { next: '/balances' },
+        isAuthenticated: true,
+        spaces: defaultSpaces,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: '/balances' })
+    })
+
+    it('lets an authenticated user with spaces stay on the login page (which is the Spaces list) when there is no next=', async () => {
+      setupMocks({
+        pathname: AppRoutes.welcome.spaces,
+        isAuthenticated: true,
+        spaces: defaultSpaces,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
+    })
+
+    it('redirects unauthenticated users even when the wallet system is not ready yet', async () => {
+      setupMocks({
+        pathname: '/home',
+        walletContext: { isReady: false },
+        wallet: null,
+        isAuthenticated: false,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult.success).toBe(false)
+      expect(guardResult.redirectTo).toBe(`${AppRoutes.welcome.spaces}?next=${encodeURIComponent(AppRoutes.home)}`)
+    })
+
+    it('does not run legacy redirects while the gate flag is still loading (undefined)', async () => {
+      setupMocks({
+        pathname: '/home',
+        isAuthenticated: false,
+        isRequireLoginEnabled: undefined,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
+    })
+
+    it('redirects an unauthenticated user on an onboarding route to /welcome/spaces (not /welcome)', async () => {
+      setupMocks({
+        pathname: AppRoutes.welcome.createSpace,
+        isAuthenticated: false,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.spaces}?next=${encodeURIComponent(AppRoutes.welcome.createSpace)}`,
+      })
+    })
+
+    it('still waits for the store to hydrate before deciding', async () => {
+      setupMocks({
+        pathname: '/home',
+        isAuthenticated: false,
+        isStoreHydrated: false,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
+    })
+
+    it('does not add next= when the unauthenticated user is on `/` (bare index is pointless as next)', async () => {
+      setupMocks({
+        pathname: '/',
+        isAuthenticated: false,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+    })
+
+    it('ignores a protocol-relative next= value (treated as no next, so stays on login page)', async () => {
+      setupMocks({
+        pathname: AppRoutes.welcome.spaces,
+        query: { next: '//evil.com/owned' },
+        isAuthenticated: true,
+        spaces: defaultSpaces,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
     })
   })
 })

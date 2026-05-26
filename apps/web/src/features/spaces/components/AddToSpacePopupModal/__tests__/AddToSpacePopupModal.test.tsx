@@ -63,7 +63,7 @@ describe('AddToSpacePopupModal', () => {
   it('renders the "Add to Space" title', () => {
     render(<AddToSpacePopupModal />)
 
-    expect(screen.getByText('Add to Space')).toBeInTheDocument()
+    expect(screen.getByText('Add to workspace')).toBeInTheDocument()
   })
 
   it('renders all three benefit items', () => {
@@ -84,7 +84,7 @@ describe('AddToSpacePopupModal', () => {
     mockRouterQuery = { safe: '1:0xdeadbeef' }
     render(<AddToSpacePopupModal />)
 
-    fireEvent.click(screen.getByRole('button', { name: /Create a Space/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Create a workspace/i }))
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: AppRoutes.spaces.createSpace,

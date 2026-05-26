@@ -9,6 +9,7 @@ import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
 import type { SafeItemData } from '../types'
 import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
+import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
 
 export interface SafeSelectorTriggerContentProps {
   selectedItem: SafeItemData
@@ -81,6 +82,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
             {displayName}
           </Typography>
           {!showAddressLine && copyButton}
+          {!showAddressLine && <EnvHintButton chainId={selectedChainId} />}
         </div>
         {showAddressLine && (
           <div className="flex items-center gap-1">
@@ -88,6 +90,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
               {addressWithPrefix}
             </Typography>
             {copyButton}
+            <EnvHintButton chainId={selectedChainId} />
           </div>
         )}
       </div>

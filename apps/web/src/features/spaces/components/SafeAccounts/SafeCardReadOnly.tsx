@@ -46,7 +46,7 @@ const SafeCardReadOnly = ({
   const [copied, setCopied] = useState(false)
   const router = useRouter()
   const isMultiChain = isMultiChainSafeItem(safe)
-  const { name, fiatValue, threshold, ownersCount, elementRef } = useSafeCardData(safe)
+  const { name, fiatValue, threshold, ownersCount, elementRef, isUndeployed, isActivating } = useSafeCardData(safe)
   const safes = useMemo<SafeItem[]>(
     () => (isMultiChain ? (safe as MultiChainSafeItem).safes : [safe as SafeItem]),
     [isMultiChain, safe],
@@ -196,7 +196,11 @@ const SafeCardReadOnly = ({
         </div>
 
         <div className="flex min-w-0 shrink-0 flex-col items-end gap-2 pl-1 sm:min-w-16 sm:pl-0">
-          <FiatBalance value={fiatValue} />
+          {isUndeployed ? (
+            <AccountItem.StatusChip undeployedSafe isActivating={isActivating} />
+          ) : (
+            <FiatBalance value={fiatValue} />
+          )}
           {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
         </div>
 

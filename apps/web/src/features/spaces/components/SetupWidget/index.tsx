@@ -48,7 +48,7 @@ const SETUP_STEPS: SetupStep[] = [
     label: 'Invite team members',
     icon: UsersRound,
   },
-  { key: 'explore', label: 'Explore Spaces', icon: Rocket },
+  { key: 'explore', label: 'Explore workspaces', icon: Rocket },
 ]
 
 const DISMISS_STORAGE_KEY = 'setupWidgetDismissed'
@@ -153,7 +153,7 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
         {!dismissed && (
           <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: 'easeInOut' }}>
             <SafeWidget
-              title="Set up your Space"
+              title="Set up your workspace"
               testId="space-dashboard-setup-widget"
               action={
                 <Typography

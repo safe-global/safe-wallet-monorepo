@@ -60,21 +60,21 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
       router.push({ pathname: AppRoutes.welcome.spaces })
     } catch (e) {
       console.error(e)
-      setError('Error deleting the space. Please try again.')
+      setError('Error deleting the workspace. Please try again.')
     }
   }
 
   return (
-    <ModalDialog dialogTitle="Delete space" hideChainIndicator open onClose={onClose}>
+    <ModalDialog dialogTitle="Delete workspace" hideChainIndicator open onClose={onClose}>
       <DialogContent sx={{ mt: 2 }}>
         <Typography mb={2}>
-          Are you sure you want to delete <b>{space?.name}</b>? Deleting this space:
+          Are you sure you want to delete <b>{space?.name}</b>? Deleting this workspace:
         </Typography>
 
         <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <ListItem disablePadding>
             <ListIcon variant="danger" />
-            Will permanently revoke access to space data for you and its members
+            Will permanently revoke access to workspace data for you and its members
           </ListItem>
           <ListItem disablePadding>
             <ListIcon variant="danger" />
@@ -82,7 +82,7 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
           </ListItem>
           <ListItem disablePadding>
             <ListIcon variant="success" />
-            Will keep access to the Safe Accounts added to this space. They will not be deleted.
+            Will keep access to the Safe Accounts added to this workspace. They will not be deleted.
           </ListItem>
         </List>
 

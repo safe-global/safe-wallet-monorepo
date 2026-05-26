@@ -10,7 +10,7 @@ import { router } from 'expo-router'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { View, Image } from 'tamagui'
 import { useTheme } from '@/src/theme/hooks/useTheme'
-import { useWalletConnectContext } from '@/src/features/WalletConnect/context/WalletConnectContext'
+import { useWalletConnectContext } from '@/src/features/WalletConnect/Signer/context/WalletConnectContext'
 
 const ConnectWalletAppImage = () => {
   const { isDark } = useTheme()
