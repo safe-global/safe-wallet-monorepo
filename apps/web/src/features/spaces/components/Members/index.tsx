@@ -1,6 +1,7 @@
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { Typography } from '@/components/ui/typography'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import AddMemberModal from 'src/features/spaces/components/AddMemberModal'
 import { useState } from 'react'
 import MembersList from '../MembersList'
@@ -37,24 +38,25 @@ const SpaceMembers = () => {
           </Track>
         )}
       </div>
-      <>
-        {invitedMembers.length > 0 && (
-          <>
-            <Typography variant="paragraph-bold" className="font-bold mb-4">
-              Pending invitations ({invitedMembers.length})
-            </Typography>
-            <MembersList members={invitedMembers} />
-          </>
-        )}
-        {activeMembers.length > 0 && (
-          <>
-            <Typography variant="paragraph-bold" className="font-bold mt-2 mb-4">
-              All members ({activeMembers.length})
-            </Typography>
-            <MembersList members={activeMembers} />
-          </>
-        )}
-      </>
+
+      <Tabs defaultValue="members">
+        <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
+          <TabsTrigger value="members" className="cursor-pointer">
+            Members ({activeMembers.length})
+          </TabsTrigger>
+          <TabsTrigger value="pending" className="cursor-pointer">
+            Pending ({invitedMembers.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="members">
+          <MembersList members={activeMembers} />
+        </TabsContent>
+
+        <TabsContent value="pending">
+          <MembersList members={invitedMembers} />
+        </TabsContent>
+      </Tabs>
 
       {openAddMembersModal && <AddMemberModal onClose={() => setOpenAddMembersModal(false)} />}
     </>
