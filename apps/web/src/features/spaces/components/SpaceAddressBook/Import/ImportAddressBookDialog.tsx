@@ -1,26 +1,17 @@
 import { FormProvider, useForm } from 'react-hook-form'
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CircularProgress,
-  Container,
-  DialogActions,
-  DialogContent,
-  InputAdornment,
-  SvgIcon,
-  TextField,
-  Typography,
-} from '@mui/material'
-
-import ModalDialog from '@/components/common/ModalDialog'
-import ContactsList from './ContactsList'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import useAllAddressBooks from '@/hooks/useAllAddressBooks'
-import css from '../../AddAccounts/styles.module.css'
-import SearchIcon from '@/public/images/common/search.svg'
 import { debounce } from 'lodash'
+
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Spinner } from '@/components/ui/spinner'
+
+import ContactsList from './ContactsList'
+import useAllAddressBooks from '@/hooks/useAllAddressBooks'
+import SearchIcon from '@/public/images/common/search.svg'
 import { useContactSearch } from '../useContactSearch'
 import { createContactItems, flattenAddressBook } from '../utils'
 import useChains from '@/hooks/useChains'
@@ -32,7 +23,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 export type ImportContactsFormValues = {
-  contacts: Record<string, string | undefined> // e.g. "1:0x123": "Alice"
+  contacts: Record<string, string | undefined>
 }
 
 const SUCCESS_CLOSE_DELAY_MS = 500
@@ -62,9 +53,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
   const formMethods = useForm<ImportContactsFormValues>({
     mode: 'onChange',
-    defaultValues: {
-      contacts: {},
-    },
+    defaultValues: { contacts: {} },
   })
 
   const { handleSubmit, watch } = formMethods
@@ -114,91 +103,52 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   }, [isSuccess, handleClose])
 
   return (
-    <ModalDialog
-      open
-      onClose={handleClose}
-      hideChainIndicator
-      fullScreen
-      PaperProps={{ sx: { backgroundColor: 'border.background' } }}
-    >
-      <DialogContent sx={{ display: 'flex', alignItems: 'center' }}>
-        <Container fixed maxWidth="sm" disableGutters>
-          <Typography component="div" variant="h1" mb={3}>
-            Import address book
-          </Typography>
-          <Card sx={{ border: '0' }}>
+    <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
+      <DialogContent
+        showCloseButton={false}
+        className="fixed inset-0 top-0 left-0 w-screen h-screen max-w-none translate-x-0 translate-y-0 rounded-none bg-[var(--color-border-background)] overflow-y-auto flex items-center justify-center"
+      >
+        <div className="w-full max-w-[600px] px-4">
+          <DialogHeader className="p-0 mb-6">
+            <DialogTitle className="text-3xl font-bold">Import address book</DialogTitle>
+          </DialogHeader>
+
+          <Card className="border-0 p-0">
             <FormProvider {...formMethods}>
               <form onSubmit={onSubmit}>
-                <Box px={2} pt={2} mb={2}>
-                  <TextField
+                <div className="relative px-4 pt-4 mb-2">
+                  <SearchIcon className="absolute left-6 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+                  <Input
                     id="search-by-name"
                     placeholder="Search"
                     aria-label="Search contact list by name or address"
-                    variant="filled"
-                    hiddenLabel
-                    onChange={(e) => {
-                      handleSearch(e.target.value)
-                    }}
-                    className={css.search}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SvgIcon
-                            component={SearchIcon}
-                            inheritViewBox
-                            fontWeight="bold"
-                            fontSize="small"
-                            sx={{
-                              color: 'var(--color-border-main)',
-                              '.MuiInputBase-root.Mui-focused &': { color: 'var(--color-text-primary)' },
-                            }}
-                          />
-                        </InputAdornment>
-                      ),
-                      disableUnderline: true,
-                    }}
-                    fullWidth
-                    size="small"
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="pl-9"
                   />
-                </Box>
+                </div>
 
-                {searchQuery ? (
-                  <ContactsList contactItems={filteredEntries} />
-                ) : (
-                  <ContactsList contactItems={allContactItems} />
-                )}
+                <ContactsList contactItems={searchQuery ? filteredEntries : allContactItems} />
 
                 {error && (
-                  <Alert severity="error" sx={{ mt: 2 }}>
+                  <Alert variant="destructive" className="mt-2 mx-4">
                     {error}
                   </Alert>
                 )}
 
-                {isSuccess && (
-                  <Alert severity="success" sx={{ mt: 2 }}>
-                    Contacts imported successfully!
-                  </Alert>
-                )}
-
-                <DialogActions>
-                  <Button data-testid="cancel-btn" onClick={handleClose}>
+                <DialogFooter className="flex-row justify-end gap-2 p-4">
+                  <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={selectedCount === 0 || isSubmitting || isSuccess}
-                    disableElevation
-                  >
-                    {isSubmitting ? <CircularProgress size={20} /> : `Import contacts (${selectedCount})`}
+                  <Button type="submit" disabled={selectedCount === 0 || isSubmitting || isSuccess}>
+                    {isSubmitting ? <Spinner className="size-4" /> : `Import contacts (${selectedCount})`}
                   </Button>
-                </DialogActions>
+                </DialogFooter>
               </form>
             </FormProvider>
           </Card>
-        </Container>
+        </div>
       </DialogContent>
-    </ModalDialog>
+    </Dialog>
   )
 }
 

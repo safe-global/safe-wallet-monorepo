@@ -113,7 +113,7 @@ describe('ImportAddressBookDialog', () => {
     expect(screen.getByRole('button', { name: /Import contacts \(0\)/i })).toBeDisabled()
   })
 
-  it('shows a success message and delays closing after a successful import', async () => {
+  it('disables the Import button and delays closing after a successful import', async () => {
     upsertionSpyFn.mockResolvedValue({ data: {} })
 
     mockedUseAllAddressBooks.mockReturnValue({
@@ -127,11 +127,49 @@ describe('ImportAddressBookDialog', () => {
     await userEvent.click(screen.getByText(/Import contacts \(1\)/i))
 
     await waitFor(() => {
-      expect(screen.getByText(/Contacts imported successfully/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /Import contacts \(1\)/i })).toBeDisabled()
     })
     expect(handleClose).not.toHaveBeenCalled()
-    expect(screen.getByRole('button', { name: /Import contacts \(1\)/i })).toBeDisabled()
 
     await waitFor(() => expect(handleClose).toHaveBeenCalledTimes(1), { timeout: 1500 })
+  })
+
+  it('shows an inline error when the mutation returns an error', async () => {
+    upsertionSpyFn.mockResolvedValue({ error: { status: 500 } })
+
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x123': 'Alice' },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    await userEvent.click(screen.getByText(/Alice/i))
+    await userEvent.click(screen.getByText(/Import contacts \(1\)/i))
+
+    await waitFor(() => {
+      expect(screen.getByText(/Something went wrong\. Please try again\./i)).toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: /Import contacts \(1\)/i })).not.toBeDisabled()
+  })
+
+  it('filters the contact list based on the search input', async () => {
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': {
+        '0x123': 'Alice',
+        '0x456': 'Bob',
+      },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    expect(screen.getByText('Alice')).toBeInTheDocument()
+    expect(screen.getByText('Bob')).toBeInTheDocument()
+
+    await userEvent.type(screen.getByPlaceholderText(/Search/i), 'Alice')
+
+    await waitFor(() => {
+      expect(screen.queryByText('Bob')).not.toBeInTheDocument()
+    })
+    expect(screen.getByText('Alice')).toBeInTheDocument()
   })
 })
