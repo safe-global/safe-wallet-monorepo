@@ -4,11 +4,15 @@ import userEvent from '@testing-library/user-event'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import SafeSelectorDropdown from '../index'
 import type { SafeItemData } from '../types'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
+}))
+jest.mock('@/hooks/safe-apps/useSafeAppUrl', () => ({
+  useSafeAppUrl: jest.fn(),
 }))
 
 jest.mock('@/components/ui/tooltip', () => ({
@@ -141,6 +145,13 @@ function SafeSelectorWithSpaceSafeBarNavigation({
 }
 
 describe('SafeSelectorDropdown', () => {
+  beforeEach(() => {
+    jest
+      .mocked(useRouter)
+      .mockReturnValue({ push: jest.fn(), pathname: '/', query: {} } as unknown as ReturnType<typeof useRouter>)
+    jest.mocked(useSafeAppUrl).mockReturnValue(undefined)
+  })
+
   describe('onValueChange filtering by reason', () => {
     it('forwards user item-press picks to onItemSelect', async () => {
       const user = userEvent.setup()
@@ -169,7 +180,9 @@ describe('SafeSelectorDropdown', () => {
      */
     it('ignores base-ui auto-reset (reason=none) and does not navigate', async () => {
       const mockPush = jest.fn()
-      jest.mocked(useRouter).mockReturnValue({ push: mockPush } as unknown as ReturnType<typeof useRouter>)
+      jest
+        .mocked(useRouter)
+        .mockReturnValue({ push: mockPush, pathname: '/', query: {} } as unknown as ReturnType<typeof useRouter>)
 
       const user = userEvent.setup()
       const itemA = createItem()
@@ -239,7 +252,9 @@ describe('SafeSelectorDropdown', () => {
 
     it('performs exactly one router.push across pick → rerender → base-ui auto-reset', async () => {
       const mockPush = jest.fn()
-      jest.mocked(useRouter).mockReturnValue({ push: mockPush } as unknown as ReturnType<typeof useRouter>)
+      jest
+        .mocked(useRouter)
+        .mockReturnValue({ push: mockPush, pathname: '/', query: {} } as unknown as ReturnType<typeof useRouter>)
 
       const user = userEvent.setup()
       const itemA = createItem()
@@ -320,6 +335,49 @@ describe('SafeSelectorDropdown', () => {
       const trigger = screen.getByTestId('open-safes-icon')
       expect(trigger.className).not.toMatch(/cursor-not-allowed/)
       expect(trigger.className).not.toMatch(/opacity-50/)
+    })
+  })
+
+  describe('disabled while inside an opened Safe App', () => {
+    const renderAtRoute = (pathname: string, query: Record<string, string> = {}) => {
+      jest
+        .mocked(useRouter)
+        .mockReturnValue({ push: jest.fn(), pathname, query } as unknown as ReturnType<typeof useRouter>)
+      const itemA = createItem()
+      return render(<SafeSelectorDropdown items={[itemA]} selectedItemId={itemA.id} onItemSelect={jest.fn()} />)
+    }
+
+    it('disables the Select on /apps/open when an appUrl is present', () => {
+      jest.mocked(useSafeAppUrl).mockReturnValue('https://example-safe-app.test')
+      renderAtRoute(AppRoutes.apps.open, { appUrl: 'https://example-safe-app.test' })
+
+      const selectRoot = screen.getByTestId('mock-select-root')
+      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('true')
+      expect(screen.getByTestId('tooltip-content')).toHaveTextContent('Changing the Safe is not allowed in this screen')
+    })
+
+    it('does not disable the Select on /apps/open without an appUrl', () => {
+      renderAtRoute(AppRoutes.apps.open, {})
+
+      const selectRoot = screen.getByTestId('mock-select-root')
+      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('false')
+      expect(screen.queryByTestId('tooltip-content')).not.toBeInTheDocument()
+    })
+
+    it('does not disable the Select on /apps even with a safe query', () => {
+      renderAtRoute(AppRoutes.apps.index, { safe: 'eth:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' })
+
+      const selectRoot = screen.getByTestId('mock-select-root')
+      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('false')
+      expect(screen.queryByTestId('tooltip-content')).not.toBeInTheDocument()
+    })
+
+    it('does not disable the Select on /apps/custom', () => {
+      renderAtRoute(AppRoutes.apps.custom, { safe: 'eth:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' })
+
+      const selectRoot = screen.getByTestId('mock-select-root')
+      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('false')
+      expect(screen.queryByTestId('tooltip-content')).not.toBeInTheDocument()
     })
   })
 })
