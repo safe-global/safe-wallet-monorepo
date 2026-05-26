@@ -9,7 +9,7 @@ type SpaceBackLinkProps = {
 
 function SpaceBackLink({ space, onClick }: SpaceBackLinkProps) {
   return (
-    <BackLink onClick={onClick} ariaLabel="Back to space">
+    <BackLink onClick={onClick} ariaLabel="Back to workspace">
       <Avatar className="size-8 shrink-0">
         <AvatarFallback
           className="rounded-md text-primary-foreground text-sm font-semibold"

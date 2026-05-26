@@ -33,7 +33,7 @@ const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => 
           render={({ field }) => (
             <TextField
               {...field}
-              label="Space name"
+              label="Workspace name"
               fullWidth
               value={field.value || ''}
               slotProps={{ inputLabel: { shrink: true } }}

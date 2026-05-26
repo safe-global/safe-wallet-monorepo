@@ -106,7 +106,7 @@ jest.mock('../../SpaceSelectorDropdown', () => ({
     spaceSelectorDropdownMock(props)
     return props.triggerVariant === 'addToWorkspace' ? (
       <button type="button" data-testid="add-safe-to-workspace-button">
-        Add Safe to space
+        Add Safe to workspace
       </button>
     ) : (
       <div data-testid="space-selector-default">Space selector</div>
@@ -147,7 +147,7 @@ describe('SafeSidebarWorkspaceHeader', () => {
       )
 
       expect(screen.getByText('My Safe Account')).toBeInTheDocument()
-      expect(screen.getByText('Space')).toBeInTheDocument()
+      expect(screen.getByText('Workspace')).toBeInTheDocument()
       expect(screen.getByText('M')).toBeInTheDocument()
       expect(screen.getByText('ChevronLeft')).toBeInTheDocument()
     })
@@ -291,7 +291,7 @@ describe('SafeSidebarWorkspaceHeader', () => {
 
       expect(screen.queryByText('ChevronLeft')).not.toBeInTheDocument()
       expect(screen.getByTestId('dialog-root')).toBeInTheDocument()
-      expect(screen.getByText('Add Safe to space')).toBeInTheDocument()
+      expect(screen.getByText('Add Safe to workspace')).toBeInTheDocument()
       expect(screen.getByTestId('add-to-space-popup-modal')).toBeInTheDocument()
     })
   })

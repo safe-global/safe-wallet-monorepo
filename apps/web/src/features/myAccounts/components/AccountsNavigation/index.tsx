@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
+import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 
 type Item = {
   label: string
@@ -23,7 +24,7 @@ const navItems: NavItems = [
     url: AppRoutes.welcome.accounts,
   },
   {
-    label: 'Spaces',
+    label: 'Workspaces',
     url: AppRoutes.welcome.spaces,
     trackEvent: { ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.accounts_page },
     beta: true,
@@ -32,6 +33,9 @@ const navItems: NavItems = [
 
 const AccountsNavigation = () => {
   const router = useRouter()
+  const isRequireLoginEnabled = useIsRequireLoginEnabled() ?? false
+
+  if (isRequireLoginEnabled) return null
 
   const isActiveNavigation = (pathname: string) => {
     return router.pathname === pathname

@@ -5,7 +5,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { type AllSafeItems, flattenSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
-import type { AddAccountsFormValues } from '@/features/spaces/components/AddAccounts/index'
+import type { AddAccountsFormValues } from '@/features/spaces/hooks/useSelectAll.types'
 import {
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,
@@ -199,7 +199,7 @@ const useOnboardingSubmit = (
 
       dispatch(
         showNotification({
-          message: 'Updated Safe Account(s) in space',
+          message: 'Updated Safe Account(s) in workspace',
           variant: 'success',
           groupKey: 'update-safe-accounts-success',
         }),
