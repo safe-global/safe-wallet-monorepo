@@ -3,6 +3,7 @@ import { SidebarTopBar } from '../SidebarTopBar'
 import { AppRoutes } from '@/config/routes'
 
 const mockUseRouter = jest.fn()
+const mockUseIsRequireLoginEnabled = jest.fn()
 
 jest.mock('next/router', () => ({
   useRouter: () => mockUseRouter(),
@@ -27,10 +28,15 @@ jest.mock('@/components/common/SafeLogo', () => {
   return { __esModule: true, default: MockSafeLogo }
 })
 
+jest.mock('@/hooks/useIsRequireLoginEnabled', () => ({
+  useIsRequireLoginEnabled: () => mockUseIsRequireLoginEnabled(),
+}))
+
 describe('SidebarTopBar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
+    mockUseIsRequireLoginEnabled.mockReturnValue(false)
   })
 
   it('renders all required elements', () => {
@@ -72,6 +78,24 @@ describe('SidebarTopBar', () => {
   })
 
   it('passes /welcome/accounts href to SafeLogo when not on /welcome/accounts', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.index })
+
+    render(<SidebarTopBar />)
+
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.accounts)
+  })
+
+  it('passes /welcome/spaces href to SafeLogo when the require-login gate is on', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
+
+    render(<SidebarTopBar />)
+
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.spaces)
+  })
+
+  it('falls back to the legacy toggle when the require-login gate is still loading', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(undefined)
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.index })
 
     render(<SidebarTopBar />)
