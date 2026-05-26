@@ -1,10 +1,9 @@
 import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { SidebarTopBar } from '../SidebarTopBar'
 import { AppRoutes } from '@/config/routes'
 
-const mockPush = jest.fn()
 const mockUseRouter = jest.fn()
+const mockUseIsRequireLoginEnabled = jest.fn()
 
 jest.mock('next/router', () => ({
   useRouter: () => mockUseRouter(),
@@ -21,10 +20,23 @@ jest.mock('@/components/ui/sidebar', () => ({
   })),
 }))
 
+jest.mock('@/components/common/SafeLogo', () => {
+  const MockSafeLogo = ({ href, 'data-testid': testId }: { href?: string; 'data-testid'?: string }) => (
+    <a data-testid={testId} href={href} />
+  )
+  MockSafeLogo.displayName = 'SafeLogo'
+  return { __esModule: true, default: MockSafeLogo }
+})
+
+jest.mock('@/hooks/useIsRequireLoginEnabled', () => ({
+  useIsRequireLoginEnabled: () => mockUseIsRequireLoginEnabled(),
+}))
+
 describe('SidebarTopBar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseRouter.mockReturnValue({ push: mockPush, pathname: AppRoutes.welcome.accounts })
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
+    mockUseIsRequireLoginEnabled.mockReturnValue(false)
   })
 
   it('renders all required elements', () => {
@@ -32,16 +44,7 @@ describe('SidebarTopBar', () => {
 
     expect(screen.getByTestId('sidebar-top-bar')).toBeInTheDocument()
     expect(screen.getByTestId('logo-container')).toBeInTheDocument()
-    expect(screen.getByTestId('logo-image')).toBeInTheDocument()
     expect(screen.getByTestId('sidebar-trigger')).toBeInTheDocument()
-  })
-
-  it('renders logo with correct attributes', () => {
-    render(<SidebarTopBar />)
-
-    const logo = screen.getByTestId('logo-image')
-    expect(logo).toHaveAttribute('role', 'img')
-    expect(logo).toHaveAttribute('aria-label', 'Safe')
   })
 
   it('applies expanded top bar sizing and state when sidebar is expanded', () => {
@@ -66,25 +69,37 @@ describe('SidebarTopBar', () => {
     expect(topBar).toHaveClass('min-h-16')
   })
 
-  it('navigates to /welcome when on /welcome/accounts', async () => {
-    mockUseRouter.mockReturnValue({ push: mockPush, pathname: AppRoutes.welcome.accounts })
-    const user = userEvent.setup()
+  it('passes /welcome href to SafeLogo when on /welcome/accounts', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
 
     render(<SidebarTopBar />)
 
-    await user.click(screen.getByTestId('logo-container'))
-
-    expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.index)
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.index)
   })
 
-  it('navigates to /welcome/accounts when not on /welcome/accounts', async () => {
-    mockUseRouter.mockReturnValue({ push: mockPush, pathname: AppRoutes.welcome.index })
-    const user = userEvent.setup()
+  it('passes /welcome/accounts href to SafeLogo when not on /welcome/accounts', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.index })
 
     render(<SidebarTopBar />)
 
-    await user.click(screen.getByTestId('logo-container'))
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.accounts)
+  })
 
-    expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.accounts)
+  it('passes /welcome/spaces href to SafeLogo when the require-login gate is on', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
+
+    render(<SidebarTopBar />)
+
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.spaces)
+  })
+
+  it('falls back to the legacy toggle when the require-login gate is still loading', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(undefined)
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.index })
+
+    render(<SidebarTopBar />)
+
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.accounts)
   })
 })

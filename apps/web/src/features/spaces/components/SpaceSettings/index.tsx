@@ -1,5 +1,6 @@
 import { useAppSelector } from '@/store'
-import { Button, Card, Grid2, Stack, Tooltip, Typography } from '@mui/material'
+import { Button, Card, Grid2, Stack, Tooltip } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useState } from 'react'
 import { useCurrentSpaceId, useIsAdmin, useIsInvited, useIsActiveMember } from '@/features/spaces'
@@ -28,18 +29,19 @@ const SpaceSettings = () => {
   return (
     <div>
       {isInvited && <PreviewInvite />}
-      <Typography variant="h2" mb={3}>
+      <Typography variant="h2" className="font-bold leading-[1] tracking-tight mb-6">
         Settings
       </Typography>
       <Card>
         <Grid2 container p={4} spacing={2}>
           <Grid2 size={{ xs: 12, md: 4 }}>
-            <Typography fontWeight="bold">General</Typography>
+            <Typography variant="paragraph-bold">General</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, md: 8 }}>
-            <Typography mb={2}>
-              The space name is visible in the sidebar menu, headings to all its members. Usually it&apos;s a name of
-              the company or a business. <ExternalLink href={AppRoutes.privacy}>How is this data stored?</ExternalLink>
+            <Typography className="mb-4">
+              The workspace name is visible in the sidebar menu, headings to all its members. Usually it&apos;s a name
+              of the company or a business.{' '}
+              <ExternalLink href={AppRoutes.privacy}>How is this data stored?</ExternalLink>
             </Typography>
 
             <UpdateSpaceForm space={space} />
@@ -48,13 +50,13 @@ const SpaceSettings = () => {
 
         <Grid2 container p={4} spacing={2}>
           <Grid2 size={{ xs: 12, md: 4 }}>
-            <Typography fontWeight="bold">Danger Zone</Typography>
+            <Typography variant="paragraph-bold">Danger Zone</Typography>
           </Grid2>
           <Grid2 size={{ xs: 12, md: 8 }}>
-            <Typography mb={2}>This action cannot be undone.</Typography>
+            <Typography className="mb-4">This action cannot be undone.</Typography>
 
             <Stack direction="row" spacing={2}>
-              <Tooltip title={isLastActiveAdmin ? 'You are the last active admin and cannot leave the space.' : ''}>
+              <Tooltip title={isLastActiveAdmin ? 'You are the last active admin and cannot leave the workspace.' : ''}>
                 <span>
                   <Button
                     data-testid="space-leave-button"
@@ -66,7 +68,7 @@ const SpaceSettings = () => {
                     color="error"
                     disabled={isLastActiveAdmin || !isActiveMember}
                   >
-                    Leave space
+                    Leave workspace
                   </Button>
                 </span>
               </Tooltip>
@@ -80,7 +82,7 @@ const SpaceSettings = () => {
                     trackEvent({ ...SPACE_EVENTS.DELETE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
                   }}
                 >
-                  Delete space
+                  Delete workspace
                 </Button>
               )}
             </Stack>

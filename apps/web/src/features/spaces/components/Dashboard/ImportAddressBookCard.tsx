@@ -63,7 +63,7 @@ const AddressBookCard = () => {
           </Typography>
           <Typography variant="body2" color="primary.light">
             Simplify managing your funds collaboratively by importing your local address book. It will be available to
-            all members of the space.
+            all members of the workspace.
           </Typography>
         </Box>
       </Paper>

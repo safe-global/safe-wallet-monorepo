@@ -1,4 +1,5 @@
 import CustomLink from '@/components/common/CustomLink'
+import MarkdownContent from '@/components/common/MarkdownContent'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import SafeTerms from '@/markdown/terms/terms.md'
@@ -19,7 +20,13 @@ const Terms: NextPage = () => {
         <title>{`${BRAND_NAME} – Terms`}</title>
       </Head>
 
-      <main style={{ lineHeight: '1.5' }}>{isOfficialHost && <SafeTerms components={overrideComponents} />}</main>
+      <main style={{ lineHeight: '1.5' }}>
+        {isOfficialHost && (
+          <MarkdownContent>
+            <SafeTerms components={overrideComponents} />
+          </MarkdownContent>
+        )}
+      </main>
     </>
   )
 }

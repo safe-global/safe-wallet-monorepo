@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 
 # Store the initial git status
 initial_status=$(git status --porcelain)

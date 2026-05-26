@@ -180,7 +180,7 @@ export const SpaceSelectorDropdown = ({
               ) : (
                 <span className={css.spaceSelectorName} />
               )}
-              <span className={css.spaceSelectorSubtitle}>Space</span>
+              <span className={css.spaceSelectorSubtitle}>Workspace</span>
             </div>
             <ChevronsUpDown className="ml-auto size-4 shrink-0" aria-hidden />
           </>
@@ -194,7 +194,7 @@ export const SpaceSelectorDropdown = ({
         className={css.spaceSelectorDropdownContent}
         data-testid="space-selector-menu"
       >
-        <div className={cn(css.groupLabel, 'mb-1')}>Spaces</div>
+        <div className={cn(css.groupLabel, 'mb-1')}>Workspaces</div>
         {selectedSpace && (
           <div className="flex items-center gap-2 px-2 py-1.5">
             <Avatar className={css.spaceSelectorAvatar}>
@@ -207,7 +207,7 @@ export const SpaceSelectorDropdown = ({
             </Avatar>
             <div>
               <div className={css.textSmallBold}>{selectedSpace.name}</div>
-              <div className={css.textMini}>Space</div>
+              <div className={css.textMini}>Workspace</div>
             </div>
           </div>
         )}
@@ -223,7 +223,7 @@ export const SpaceSelectorDropdown = ({
           const addSpaceMenuItem = (
             <DropdownMenuItem onClick={handleCreateSpace} disabled={isAtSpacesLimit} className={MENU_ITEM_CLASS}>
               <Plus className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
-              <span>Add new space</span>
+              <span>Add new workspace</span>
             </DropdownMenuItem>
           )
 
@@ -232,7 +232,7 @@ export const SpaceSelectorDropdown = ({
           return (
             <Tooltip key="add-space-tooltip">
               <TooltipTrigger render={<div className="block w-full" />}>{addSpaceMenuItem}</TooltipTrigger>
-              <TooltipContent side="right">You can have up to {SPACES_LIMIT} workspaces</TooltipContent>
+              <TooltipContent side="right">Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
             </Tooltip>
           )
         })()}

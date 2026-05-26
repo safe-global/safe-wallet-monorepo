@@ -122,7 +122,7 @@ const SpaceSidebarSelector = () => {
             }}
             sx={{ fontWeight: 700 }}
           >
-            Create space
+            Create workspace
           </MenuItem>
 
           <MenuItem
@@ -133,7 +133,7 @@ const SpaceSidebarSelector = () => {
             }}
             sx={{ fontWeight: 700 }}
           >
-            View spaces
+            View workspaces
           </MenuItem>
         </Menu>
       </Box>

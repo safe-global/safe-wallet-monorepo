@@ -147,7 +147,7 @@ describe('SafeSidebarWorkspaceHeader', () => {
       )
 
       expect(screen.getByText('My Safe Account')).toBeInTheDocument()
-      expect(screen.getByText('Space')).toBeInTheDocument()
+      expect(screen.getByText('Workspace')).toBeInTheDocument()
       expect(screen.getByText('M')).toBeInTheDocument()
       expect(screen.getByText('ChevronLeft')).toBeInTheDocument()
     })
@@ -286,7 +286,7 @@ describe('SafeSidebarWorkspaceHeader', () => {
       expect(spaceSelectorDropdownMock).toHaveBeenCalled()
     })
 
-    it('renders Add Safe to workspace trigger and popup inside Dialog when not in a Space', () => {
+    it('renders Add Safe to space trigger and popup inside Dialog when not in a Space', () => {
       render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader()} />)
 
       expect(screen.queryByText('ChevronLeft')).not.toBeInTheDocument()

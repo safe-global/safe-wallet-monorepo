@@ -2,6 +2,10 @@ import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import SpaceCard from 'src/features/spaces/components/SpaceCard'
 import SignInOptions from '../SignInOptions'
+import LocalSafesAlert from './LocalSafesAlert'
+import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import { useIsClassicViewFeatureEnabled } from '@/hooks/useClassicView'
+import ClassicViewLink from '../ClassicViewLink'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -22,40 +26,60 @@ import { AppRoutes } from '@/config/routes'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
+import { SPACES_LIMIT } from '../Sidebar/constants'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-const AddSpaceButton = ({ onClick }: { onClick?: () => void }) => {
-  return (
+const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?: boolean }) => {
+  const button = (
     <Button
       data-testid="create-space-button"
       variant="default"
       size="lg"
-      className="h-full rounded-lg px-6 py-3 text-base"
-      render={<NextLink href={AppRoutes.welcome.createSpace} />}
-      onClick={onClick}
+      className={`h-full rounded-lg px-6 py-3 text-base${disabled ? ' cursor-not-allowed opacity-50 grayscale' : ''}`}
+      render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
+      disabled={disabled}
+      onClick={disabled ? undefined : onClick}
     >
       <AddIcon className="size-5 fill-primary-foreground" />
-      Create space
+      Create workspace
     </Button>
+  )
+
+  if (!disabled) return button
+
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<div className="inline-flex" />}>{button}</TooltipTrigger>
+      <TooltipContent>Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
+    </Tooltip>
   )
 }
 
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
+  const isClassicViewFeatureEnabled = useIsClassicViewFeatureEnabled() === true
+
   return (
-    <Card sx={{ p: 5, textAlign: 'center' }}>
-      <Typography variant="h3" fontWeight={600} mb={3}>
-        Sign in
-      </Typography>
+    <>
+      <Card sx={{ p: 5, textAlign: 'center' }}>
+        <Typography variant="h3" fontWeight={600} mb={3}>
+          Sign in
+        </Typography>
 
-      <Typography color="text.secondary" mb={3}>
-        Sign in to view or create a Space.
-      </Typography>
+        <Typography color="text.secondary" mb={3}>
+          Sign in to view or create a workspace.
+        </Typography>
 
-      <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
-    </Card>
+        <LocalSafesAlert />
+
+        <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+      </Card>
+
+      {isClassicViewFeatureEnabled && <ClassicViewLink />}
+    </>
   )
 }
 
-const NoSpacesState = () => {
+const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
 
   return (
@@ -67,15 +91,16 @@ const NoSpacesState = () => {
 
         <Box mb={3}>
           <Typography color="text.secondary" mb={1}>
-            No spaces found.
+            No workspaces found.
             <br />
           </Typography>
           <Link onClick={() => setIsInfoOpen(true)} href="#">
-            What are spaces?
+            What are workspaces?
           </Link>
         </Box>
         <div className="h-12">
           <AddSpaceButton
+            disabled={isAtLimit}
             onClick={() =>
               trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
             }
@@ -89,21 +114,29 @@ const NoSpacesState = () => {
 
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
+  const isRequireLoginEnabled = useIsRequireLoginEnabled() ?? false
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
     currentData: spaces,
-    isFetching: isSpacesLoading,
+    isFetching,
+    isUninitialized,
     error,
   } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
   const inviteAmount = pendingInvites?.length
+  const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
 
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,
     inviteAmount: inviteAmount || 0,
-    isSpacesLoading: isSpacesLoading || false,
+    // Treat the "skip→unskip" transition as still loading. On the render where
+    // skip flips to false RTK Query returns isFetching=false but hasn't yet
+    // dispatched the fetch (that happens in a useEffect), so isFetching alone
+    // would lead useSignInRedirect to read spacesAmount=0 and bounce existing
+    // users into the create-space flow on re-login.
+    isSpacesLoading: isFetching || isUninitialized,
     error: error || undefined,
   })
 
@@ -115,10 +148,11 @@ const SpacesList = () => {
     <Box className={css.container}>
       <Box className={css.mySpaces}>
         <Box className={css.spacesHeader}>
-          <AccountsNavigation />
+          {!isRequireLoginEnabled && <AccountsNavigation />}
 
           {isUserSignedIn && activeSpaces.length > 0 && (
             <AddSpaceButton
+              disabled={isAtSpacesLimit}
               onClick={() =>
                 trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
               }
@@ -143,7 +177,7 @@ const SpacesList = () => {
                 ))}
               </Grid2>
             ) : (
-              <NoSpacesState />
+              <NoSpacesState isAtLimit={isAtSpacesLimit} />
             )}
           </>
         ) : (
