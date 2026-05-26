@@ -5,7 +5,6 @@ import { useRouter } from 'next/router'
 import {
   ArrowLeftRight,
   BarChart3,
-  Check,
   ChevronLeft,
   FileCode,
   HelpCircle,
@@ -34,22 +33,21 @@ import {
 } from '@/features/spaces/components/OnboardingLayout'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { flattenSafeItems } from '@/hooks/safes'
-import { cn } from '@/utils/cn'
+import SurveyOptionCard from './SurveyOptionCard'
 
 const ONBOARDING_STEP = 4
 const TOTAL_STEPS = 4
 const SURVEY_SLUG = 'onboarding'
 
-// Backend-issued icon keys → lucide icons, picked to match the prototype's
-// Step 4 card design. Unknown keys fall back to a generic placeholder so the
-// card never renders iconless.
+// Backend-issued icon keys → lucide icons. Unknown keys fall back to a
+// placeholder so the card never renders iconless.
 const ICON_MAP: Record<string, LucideIcon> = {
-  terminal: FileCode, // Operate a protocol
-  gift: Sparkles, // Distribute tokens
-  cash: Send, // Run payments
-  sprout: BarChart3, // Earn yield
-  swap: ArrowLeftRight, // Trade and provide liquidity
-  bank: Shield, // Hold assets
+  terminal: FileCode,
+  gift: Sparkles,
+  cash: Send,
+  sprout: BarChart3,
+  swap: ArrowLeftRight,
+  bank: Shield,
 }
 const FALLBACK_ICON: LucideIcon = HelpCircle
 
@@ -85,9 +83,6 @@ const SurveyOnboarding = (): ReactElement | null => {
     }
   }, [router, spaceId])
 
-  // Treat a 404 from the state endpoint as "no active survey" (admin turned it
-  // off via surveys.is_active = false) and exit silently to the Space dashboard.
-  // Real errors (5xx, network) still surface in the alert below.
   useEffect(() => {
     if (isNotFoundError(error) && spaceId) {
       router.replace({ pathname: AppRoutes.spaces.index, query: { spaceId } })
@@ -154,41 +149,15 @@ const SurveyOnboarding = (): ReactElement | null => {
 
       {page?.options && (
         <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
-          {page.options.map((opt: SurveyOption) => {
-            const isPressed = selected.has(opt.key)
-            const Icon = opt.icon ? (ICON_MAP[opt.icon] ?? FALLBACK_ICON) : undefined
-            return (
-              <button
-                key={opt.key}
-                type="button"
-                aria-pressed={isPressed}
-                onClick={() => toggle(opt.key)}
-                className={cn(
-                  'flex cursor-pointer flex-col items-start gap-3 rounded-2xl border bg-card p-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                  isPressed ? 'border-foreground' : 'border-border hover:border-ring hover:bg-muted',
-                )}
-              >
-                <div className="flex w-full items-start justify-between">
-                  {/* Icon in green-tinted rounded box — dark-green glyph (Tailwind green-600 / #16a34a in
-                      light, Safe brand green in dark since #16a34a reads too muted on dark surfaces). */}
-                  <div className="flex size-10 items-center justify-center rounded-md bg-[var(--color-static-text-brand)]/15">
-                    {Icon && <Icon className="size-5 text-[var(--color-success-main)]" strokeWidth={1.75} />}
-                  </div>
-                  {/* Checkbox — empty square (border only) or filled black w/ white check when selected. */}
-                  <div
-                    className={cn(
-                      'flex size-5 shrink-0 items-center justify-center rounded-sm border-2 transition-colors',
-                      isPressed ? 'border-foreground bg-foreground' : 'border-muted-foreground/40',
-                    )}
-                  >
-                    {isPressed && <Check className="size-3 text-background" strokeWidth={3} />}
-                  </div>
-                </div>
-                {/* Label — paragraph-small-bold (14px/600) per the design system */}
-                <Typography variant="paragraph-small-bold">{opt.label}</Typography>
-              </button>
-            )
-          })}
+          {page.options.map((opt: SurveyOption) => (
+            <SurveyOptionCard
+              key={opt.key}
+              option={opt}
+              Icon={opt.icon ? (ICON_MAP[opt.icon] ?? FALLBACK_ICON) : undefined}
+              isPressed={selected.has(opt.key)}
+              onToggle={toggle}
+            />
+          ))}
         </div>
       )}
 

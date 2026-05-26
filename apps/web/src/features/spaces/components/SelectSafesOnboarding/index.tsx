@@ -12,10 +12,8 @@ import {
   SpaceSidePanel,
   deriveSidePanelAccountsFromSpace,
 } from '@/features/spaces/components/OnboardingLayout'
-import type { SafeAppMockupAccount } from '@/features/spaces/components/OnboardingLayout'
 import useWallet from '@/hooks/wallets/useWallet'
-import { flattenSafeItems, isMultiChainSafeItem, type AllSafeItems, type SafeItem } from '@/hooks/safes'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { type AllSafeItems } from '@/hooks/safes'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import OnboardingSafesList from './components/OnboardingSafesList'
 import ConnectWalletPrompt from './components/ConnectWalletPrompt'
@@ -24,74 +22,21 @@ import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
 import { useSelectAll } from '@/features/spaces/hooks/useSelectAll'
 import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/constants'
-import { MULTICHAIN_SAFE_KEY_PREFIX } from './constants'
+import {
+  deriveSidePanelAccounts,
+  deriveSelectedBalanceSafes,
+  deriveNameByAddress,
+} from './utils/deriveSelectedAccounts'
 
 const ONBOARDING_STEP = 2
 const TOTAL_STEPS = 4
 const FORM_ID = 'select-safes-form'
 
-/**
- * Derives a deduplicated list of selected safe accounts (by address) for the mockup side panel.
- * Same Safe on multiple chains appears once. The raw SafeItem is threaded through so the mockup
- * can call useSafeCardData per-row to obtain a live fiatValue.
- */
-const deriveSidePanelAccounts = (
-  selectedSafes: Record<string, boolean>,
-  allSafes: AllSafeItems,
-): SafeAppMockupAccount[] => {
-  const seen = new Set<string>()
-  const accounts: SafeAppMockupAccount[] = []
-
-  for (const [key, isSelected] of Object.entries(selectedSafes)) {
-    if (!isSelected) continue
-    // Skip multichain parent keys — sub-safe keys carry the real chain:address info
-    if (key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX)) continue
-
-    const colonIdx = key.indexOf(':')
-    if (colonIdx === -1) continue
-    const chainId = key.slice(0, colonIdx)
-    const address = key.slice(colonIdx + 1)
-
-    if (seen.has(address.toLowerCase())) continue
-    seen.add(address.toLowerCase())
-
-    // Try to find the SafeItem and name from allSafes
-    let name: string | undefined
-    let safeItem: SafeItem | undefined
-
-    for (const safe of allSafes) {
-      if (isMultiChainSafeItem(safe)) {
-        if (safe.address.toLowerCase() === address.toLowerCase()) {
-          name = safe.name
-          safeItem = safe.safes.find((s) => s.chainId === chainId) ?? safe.safes[0]
-          break
-        }
-        const sub = safe.safes.find((s) => s.address.toLowerCase() === address.toLowerCase())
-        if (sub) {
-          name = sub.name ?? safe.name
-          safeItem = sub
-          break
-        }
-      } else {
-        if (safe.address.toLowerCase() === address.toLowerCase()) {
-          name = safe.name
-          safeItem = safe
-          break
-        }
-      }
-    }
-
-    accounts.push({ address, name, _safeItem: safeItem })
-  }
-
-  return accounts
-}
-
 const SelectSafesOnboarding = (): ReactElement => {
   const wallet = useWallet()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
   const { trustedSafes, ownedSafes, similarAddresses, handleSearch } = useOnboardingSafes()
-  const allSafes = useMemo(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
+  const allSafes = useMemo<AllSafeItems>(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
   const { formMethods, onSubmit, selectedSafesLength, error, isSubmitting } = useOnboardingSubmit(
     spaceId,
     redirectToNextStep,
@@ -115,24 +60,7 @@ const SelectSafesOnboarding = (): ReactElement => {
   // populated when the user navigates back from a later step.
   const selectedSafes = useWatch({ control, name: 'selectedSafes' })
 
-  // Build a quick address → name lookup from the user's trusted + owned safes, since
-  // spaceSafes (from useSpaceSafes) only carry names the user manually set in the
-  // Space address book and are usually empty for freshly-added safes.
-  const nameByAddress = useMemo(() => {
-    const map = new Map<string, string>()
-    const add = (address: string, name: string | undefined) => {
-      if (name && !map.has(address.toLowerCase())) map.set(address.toLowerCase(), name)
-    }
-    for (const safe of allSafes) {
-      if (isMultiChainSafeItem(safe)) {
-        add(safe.address, safe.name)
-        for (const sub of safe.safes) add(sub.address, sub.name ?? safe.name)
-      } else {
-        add(safe.address, safe.name)
-      }
-    }
-    return map
-  }, [allSafes])
+  const nameByAddress = useMemo(() => deriveNameByAddress(allSafes), [allSafes])
 
   const sidePanelAccounts = useMemo(() => {
     const isFormInitialized = Object.keys(selectedSafes ?? {}).length > 0
@@ -147,41 +75,10 @@ const SelectSafesOnboarding = (): ReactElement => {
     }))
   }, [selectedSafes, allSafes, spaceSafes, nameByAddress])
 
-  // Flat per-chain SafeItem list for the bulk balance query inside the mockup —
-  // mirrors the real Spaces dashboard's AggregatedBalance pattern. While the form
-  // is initialised, derive from the user's current selection (one entry per
-  // selected chain — multi-chain Safes contribute multiple entries). Before init,
-  // fall back to flattening the persisted Space safes.
-  const balanceSafes = useMemo<SafeItem[]>(() => {
-    const entries = Object.entries(selectedSafes ?? {})
-    if (entries.length === 0) return flattenSafeItems(spaceSafes)
-
-    const result: SafeItem[] = []
-    for (const [key, isSelected] of entries) {
-      if (!isSelected) continue
-      if (key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX)) continue
-      const colonIdx = key.indexOf(':')
-      if (colonIdx === -1) continue
-      const chainId = key.slice(0, colonIdx)
-      const address = key.slice(colonIdx + 1)
-      // Find the matching SafeItem in allSafes (handles both single + multi-chain shapes)
-      let found: SafeItem | undefined
-      for (const safe of allSafes) {
-        if (isMultiChainSafeItem(safe)) {
-          const sub = safe.safes.find((s) => s.chainId === chainId && sameAddress(s.address, address))
-          if (sub) {
-            found = sub
-            break
-          }
-        } else if (safe.chainId === chainId && sameAddress(safe.address, address)) {
-          found = safe
-          break
-        }
-      }
-      if (found) result.push(found)
-    }
-    return result
-  }, [selectedSafes, allSafes, spaceSafes])
+  const balanceSafes = useMemo(
+    () => deriveSelectedBalanceSafes(selectedSafes ?? {}, allSafes, spaceSafes),
+    [selectedSafes, allSafes, spaceSafes],
+  )
 
   const main = (
     <FormProvider {...formMethods}>

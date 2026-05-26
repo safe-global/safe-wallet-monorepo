@@ -5,6 +5,7 @@ import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 interface MemberInvite {
   address: string
@@ -64,9 +65,7 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
       })
 
       if (result.error) {
-        // @ts-ignore
-        const errorMessage = result.error?.data?.message || 'Failed to invite members. Please try again.'
-        setError(errorMessage)
+        setError(getRtkQueryErrorMessage(result.error) || 'Failed to invite members. Please try again.')
         setIsSubmitting(false)
         return
       }

@@ -1,4 +1,5 @@
-import SafeAppMockup, { type SafeAppMockupProps, type SafeAppMockupAccount } from './SafeAppMockup'
+import SafeAppMockup from './SafeAppMockup'
+import type { SafeAppMockupAccount, SafeAppMockupProps } from './mockup/types'
 import type { SafeItem } from '@/hooks/safes'
 
 export type { SafeAppMockupAccount }

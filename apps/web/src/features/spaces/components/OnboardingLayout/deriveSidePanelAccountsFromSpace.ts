@@ -1,18 +1,9 @@
 import { isMultiChainSafeItem, type AllSafeItems, type SafeItem } from '@/hooks/safes'
-import type { SafeAppMockupAccount } from './SafeAppMockup'
+import type { SafeAppMockupAccount } from './mockup/types'
 
 /**
- * Derives the mockup side-panel's Accounts widget rows from a Space's persisted safes.
- *
- * - Dedupes by address: the same Safe on multiple chains shows once.
- * - For a `MultiChainSafeItem`, picks an arbitrary sub-`SafeItem` so the per-row
- *   `useSafeCardData` call inside `SafeAppMockup` can fetch a live fiat value.
- * - If `nameLookup` is supplied, it is used as a fallback for names that are
- *   missing on the persisted safe (Space's own address book is often empty,
- *   while the user's global address book carries the real names).
- *
- * Used by all four onboarding steps to populate the mockup with persisted state
- * when the user navigates back from a later step.
+ * Dedupes by address and falls back to `nameLookup` when a safe has no name —
+ * the persisted Space rarely carries names, but the user's global address book does.
  */
 export const deriveSidePanelAccountsFromSpace = (
   allSafes: AllSafeItems,
