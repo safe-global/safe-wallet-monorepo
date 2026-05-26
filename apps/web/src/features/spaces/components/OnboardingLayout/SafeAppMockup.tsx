@@ -17,7 +17,6 @@ const EMPTY_SAFES: SafeItem[] = []
 const SafeAppMockup = ({ name, highlight, accounts, balanceSafes }: SafeAppMockupProps) => {
   const trimmed = name.trim()
   const displayName = trimmed || 'Your Space'
-  // Empty state initial is 'Y' (from "Your Space"), not '?'.
   const initial = displayName.charAt(0).toUpperCase()
 
   const { address: walletAddress } = useWallet() ?? {}

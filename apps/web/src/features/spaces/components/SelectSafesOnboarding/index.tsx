@@ -54,21 +54,16 @@ const SelectSafesOnboarding = (): ReactElement => {
   const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
 
-  // Watch selected safes to derive real account rows for the mockup side panel.
-  // Until useOnboardingSubmit's init effect resets the form with the persisted Space safes
-  // (form starts at `{selectedSafes: {}}`), fall back to spaceSafes so the mockup stays
-  // populated when the user navigates back from a later step.
   const selectedSafes = useWatch({ control, name: 'selectedSafes' })
 
   const nameByAddress = useMemo(() => deriveNameByAddress(allSafes), [allSafes])
 
+  // Form starts empty; fall back to persisted Space safes so the mockup isn't blank on back-nav.
   const sidePanelAccounts = useMemo(() => {
     const isFormInitialized = Object.keys(selectedSafes ?? {}).length > 0
     if (isFormInitialized) {
       return deriveSidePanelAccounts(selectedSafes ?? {}, allSafes)
     }
-    // Fallback: cross-reference spaceSafes against the trusted/owned name map
-    // so the mockup shows "Positive Ethereum Safe" rather than an empty name.
     return deriveSidePanelAccountsFromSpace(spaceSafes).map((a) => ({
       ...a,
       name: a.name?.trim() || nameByAddress.get(a.address.toLowerCase()),

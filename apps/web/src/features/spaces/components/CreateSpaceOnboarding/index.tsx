@@ -54,26 +54,13 @@ const CreateSpaceOnboarding = (): ReactElement => {
     validate: (value) => value?.trim() !== '',
   })
 
-  // Side-panel state. Logic:
-  //   - User hasn't typed yet (hasUserEdited=false): show whichever name we know about
-  //     (form OR persisted Space). On back-navigation the form is briefly empty before
-  //     useExistingSpace's setValue lands; falling back to existingSpace.name avoids
-  //     the highlight + scale flickering off and back on.
-  //   - User has typed (hasUserEdited=true): trust the form value. Clearing the input
-  //     then correctly resets the switcher to its placeholder + neutral state.
-  // Only show persisted Space safes when the URL carries an explicit spaceId
-  // (edit mode or back-navigation). For a fresh "create new Space" landing
-  // useSpaceSafes/useCurrentSpaceId would otherwise fall back to the user's
-  // lastUsedSpace and leak the previous Space's safes into the mockup.
+  // spaceId gate avoids leaking lastUsedSpace's safes into a fresh "create" landing.
   const { allSafes } = useSpaceSafes()
   const nameLookup = useSafeNameLookup()
   const sidePanelAccounts = useMemo(
     () => (spaceId ? deriveSidePanelAccountsFromSpace(allSafes, nameLookup) : []),
     [spaceId, allSafes, nameLookup],
   )
-  // Flat per-chain SafeItem list for the bulk balance query inside the mockup —
-  // matches the real Spaces dashboard's pattern (multi-chain Safes contribute one
-  // entry per chain so the aggregated total sums correctly across networks).
   const balanceSafes = useMemo(() => (spaceId ? flattenSafeItems(allSafes) : []), [spaceId, allSafes])
   const trimmedWatched = watchedName.trim()
   const trimmedExisting = existingSpace?.name?.trim() ?? ''

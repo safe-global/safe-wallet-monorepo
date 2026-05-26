@@ -17,7 +17,6 @@ const MockupContent = ({ accounts, safeOverviews, totalFormatted, totalFiat, hig
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden bg-muted">
-      {/* Skeleton: top bar (title pill + avatar + action pill) */}
       <div className="flex items-center gap-3 px-6 pb-8 pt-4">
         <div className="h-9 w-60 shrink-0 rounded-xl bg-[var(--color-background-skeleton)]" />
         <div className="flex-1" />
@@ -25,7 +24,6 @@ const MockupContent = ({ accounts, safeOverviews, totalFormatted, totalFiat, hig
         <div className="h-9 w-32 shrink-0 rounded-full bg-[var(--color-background-skeleton)]" />
       </div>
 
-      {/* Real total fiat above skeleton filter chips */}
       <div className="flex flex-col gap-4 px-6 pt-2">
         <div>
           <div className="mb-2 h-3 w-20 rounded-md bg-[var(--color-background-skeleton)]" />
@@ -41,7 +39,6 @@ const MockupContent = ({ accounts, safeOverviews, totalFormatted, totalFiat, hig
         </div>
       </div>
 
-      {/* Accounts widget: real rows when populated, otherwise skeleton rows */}
       <div className="flex min-h-0 flex-1 gap-6 p-6 pt-14">
         <motion.div
           animate={{ scale: highlight === 'accounts' ? 1.05 : 1 }}

@@ -2,12 +2,7 @@ import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
 
-/**
- * Returns a Map of `address (lowercase) → name` built from the user's address books
- * across all chains. Used by the onboarding side-panel mockup to show meaningful
- * Safe names — useSpaceSafes() only carries names from the Space's own address book,
- * which is usually empty for freshly-added safes.
- */
+// useSpaceSafes names are usually empty; this fills in from the user's global address books.
 export const useSafeNameLookup = (): Map<string, string> => {
   const allAddressBooks = useAppSelector(selectAllAddressBooks)
 

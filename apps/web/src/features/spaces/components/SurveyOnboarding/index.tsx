@@ -102,9 +102,6 @@ const SurveyOnboarding = (): ReactElement | null => {
     router.push({ pathname: AppRoutes.welcome.inviteMembers, query: { spaceId } })
   }
 
-  // For now the survey only has one page; this is the page we render and submit.
-  // When multi-page lands, replace this with a current-page selector + per-page
-  // selections state.
   const page = data?.survey.surveyContent.pages[0]
 
   const onFinish = async (): Promise<void> => {
@@ -120,9 +117,7 @@ const SurveyOnboarding = (): ReactElement | null => {
       }).unwrap()
       router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
     } catch {
-      // The mutation hook exposes submitError, which renders the destructive
-      // alert below. Swallow the rejection here so the click handler doesn't
-      // surface an unhandled-promise warning.
+      // submitError feeds the alert below; swallow here to avoid unhandled-promise.
     }
   }
 

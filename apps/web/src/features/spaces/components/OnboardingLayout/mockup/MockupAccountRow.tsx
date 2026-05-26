@@ -9,8 +9,7 @@ const rowFiatFormatter = new Intl.NumberFormat('en-US', {
 })
 const formatRowFiat = (n: number): string => '$' + rowFiatFormatter.format(n)
 
-// Multi-chain Safes are flattened to N overviews (one per chain); summing by
-// address aggregates their balance.
+// Multi-chain Safes appear as N overviews (one per chain); summing by address aggregates them.
 export const sumOverviewsForAddress = (overviews: SafeOverview[] | undefined, address: string): number | null => {
   if (!overviews) return null
   let found = false
@@ -26,7 +25,6 @@ export const sumOverviewsForAddress = (overviews: SafeOverview[] | undefined, ad
 
 interface MockupAccountRowProps {
   account: SafeAppMockupAccount
-  /** Pre-computed fiat (in currency-major units) summed across all chains for this address. */
   fiatValue: number | null
 }
 
@@ -34,7 +32,6 @@ const shortenAddress = (address: string) => `${address.slice(0, 6)}...${address.
 
 const MockupAccountRow = ({ account, fiatValue }: MockupAccountRowProps) => {
   const displayFiat = fiatValue !== null ? formatRowFiat(fiatValue) : undefined
-  // Fall back to the shortened address so the row never renders as a single bare character.
   const primaryText = account.name?.trim() || shortenAddress(account.address)
 
   return (
