@@ -85,13 +85,13 @@ const InviteMembersOnboarding = (): ReactElement => {
 
   const footer = (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col-reverse gap-3 lg:flex-row lg:items-center">
+      <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
         <Button
           type="button"
           variant="ghost"
           onClick={goBack}
           disabled={isSubmitting}
-          className="w-full h-12 rounded-lg bg-muted hover:bg-border lg:flex-1"
+          className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
         >
           <ChevronLeft className="size-4 mr-1" />
           Back
@@ -101,7 +101,7 @@ const InviteMembersOnboarding = (): ReactElement => {
           type="submit"
           form={FORM_ID}
           disabled={!formState.isValid || isSubmitting}
-          className="w-full h-12 rounded-lg text-[15px] lg:flex-1"
+          className="w-full h-12 rounded-lg text-[15px] xl:flex-1"
         >
           {isSubmitting ? <Spinner /> : 'Next'}
         </Button>
