@@ -29,6 +29,7 @@ const HIDDEN_ROUTES = [
   AppRoutes.welcome.accounts,
   AppRoutes.welcome.spaces,
   AppRoutes.newSafe.create,
+  AppRoutes.newSafe.advancedCreate,
   AppRoutes.newSafe.load,
   AppRoutes.terms,
   AppRoutes.privacy,

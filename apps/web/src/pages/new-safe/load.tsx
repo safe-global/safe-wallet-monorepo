@@ -4,7 +4,6 @@ import { useRouter } from 'next/router'
 import LoadSafe, { loadSafeDefaultData } from '@/components/new-safe/load'
 import { BRAND_NAME } from '@/config/constants'
 import SafeLogo from '@/components/common/SafeLogo'
-import { AppRoutes } from '@/config/routes'
 
 const Load: NextPage = () => {
   const router = useRouter()
@@ -14,7 +13,7 @@ const Load: NextPage = () => {
   return (
     <main>
       <div className="fixed top-0 left-0 z-[1300] flex items-center px-6" style={{ height: 'var(--header-height)' }}>
-        <SafeLogo href={AppRoutes.welcome.spaces} />
+        <SafeLogo />
       </div>
       <Head>
         <title>{`${BRAND_NAME} – Add Safe Account`}</title>

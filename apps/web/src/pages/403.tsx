@@ -8,7 +8,7 @@ const Custom403: NextPage = () => {
   return (
     <main>
       <div className="fixed top-0 left-0 z-[1300] flex items-center px-6" style={{ height: 'var(--header-height)' }}>
-        <SafeLogo href={AppRoutes.welcome.spaces} />
+        <SafeLogo />
       </div>
       <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>403 – Access Restricted</h1>
       <p>

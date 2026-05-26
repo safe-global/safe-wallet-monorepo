@@ -49,7 +49,7 @@ const Custom404: NextPage = () => {
   return (
     <main>
       <div className="fixed top-0 left-0 z-[1300] flex items-center px-6" style={{ height: 'var(--header-height)' }}>
-        <SafeLogo href={AppRoutes.welcome.spaces} />
+        <SafeLogo />
       </div>
       {!isRedirecting && <h1 style={{ fontSize: '2rem', fontWeight: 700 }}>404 – Page not found</h1>}
     </main>
