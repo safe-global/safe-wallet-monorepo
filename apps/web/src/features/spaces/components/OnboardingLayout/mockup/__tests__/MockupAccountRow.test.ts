@@ -41,8 +41,8 @@ describe('sumOverviewsForAddress', () => {
     expect(sumOverviewsForAddress(overviews, TARGET)).toBe(42)
   })
 
-  it('treats non-numeric fiatTotal entries as 0 rather than NaN-poisoning the sum', () => {
+  it('returns NaN when any matching entry has a non-numeric fiatTotal (fail-loud, matches real Dashboard)', () => {
     const overviews = [makeOverview(TARGET, 'NaN'), makeOverview(TARGET, '10')]
-    expect(sumOverviewsForAddress(overviews, TARGET)).toBe(10)
+    expect(sumOverviewsForAddress(overviews, TARGET)).toBeNaN()
   })
 })

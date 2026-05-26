@@ -18,7 +18,7 @@ export const sumOverviewsForAddress = (overviews: SafeOverview[] | undefined, ad
   for (const o of overviews) {
     if (sameAddress(o.address.value, address)) {
       found = true
-      total += Number(o.fiatTotal) || 0
+      total += Number(o.fiatTotal)
     }
   }
   return found ? total : null

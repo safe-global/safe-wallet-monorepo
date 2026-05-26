@@ -29,7 +29,7 @@ const SafeAppMockup = ({ name, highlight, accounts, balanceSafes }: SafeAppMocku
     { skip: !isXl },
   )
   const totalFiat = useMemo(
-    () => (safeOverviews ?? []).reduce((sum, o) => sum + (Number(o.fiatTotal) || 0), 0),
+    () => (safeOverviews ?? []).reduce((sum, o) => sum + Number(o.fiatTotal), 0),
     [safeOverviews],
   )
   const formattedTotal = formatCurrencyPrecise(totalFiat, currency)
