@@ -26,7 +26,7 @@ export interface SafeAppMockupProps {
 
 /** Avatar matching the prototype: circular, bright Safe-green bg, first letter of name, no '?' placeholder */
 const SpaceAvatar = ({ initial }: { initial: string }) => (
-  <div className="shrink-0 flex size-9 items-center justify-center rounded-full bg-[#12FF80] text-white text-sm font-semibold overflow-hidden">
+  <div className="shrink-0 flex size-9 items-center justify-center rounded-full bg-[var(--color-static-text-brand)] text-white text-sm font-semibold overflow-hidden">
     {initial}
   </div>
 )
@@ -167,12 +167,12 @@ const SafeAppMockup = ({ name, highlight, accounts }: SafeAppMockupProps) => {
                 scale: highlight === 'switcher' ? 1.18 : 1,
                 boxShadow:
                   highlight === 'switcher'
-                    ? '0 0 0 1px #12FF80, 0 0 5px 5px rgba(18, 255, 128, 0.3)'
-                    : '0 0 0 0 rgba(18, 255, 128, 0)',
+                    ? '0 0 0 1px #12FF80, 0 0 5px 5px rgba(18, 255, 128, 0.3)' // Safe brand green at 30% opacity — no opacity-modifier token available
+                    : '0 0 0 0 rgba(18, 255, 128, 0)', // Safe brand green at 0% opacity — no opacity-modifier token available
               }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
               style={{ transformOrigin: 'left center' }}
-              className="flex items-center gap-3 rounded-xl bg-[#f5f5f5] p-3 transition-colors hover:bg-green-50"
+              className="flex items-center gap-3 rounded-xl bg-muted p-3 transition-colors hover:bg-accent-secondary"
             >
               {/* Avatar: circular, brand green bg, letter initial */}
               <SpaceAvatar initial={initial} />
@@ -197,7 +197,7 @@ const SafeAppMockup = ({ name, highlight, accounts }: SafeAppMockupProps) => {
           </div>
 
           {/* ── Content column ── */}
-          <div className="flex flex-1 flex-col overflow-hidden bg-[#f4f4f4]">
+          <div className="flex flex-1 flex-col overflow-hidden bg-muted">
             {/* Hidden balance probes — one per account, used to aggregate total fiat */}
             {probedAccounts.map((a) => (
               <BalanceProbe key={a.address} safe={a._safeItem!} address={a.address} onLoad={handleBalance} />
@@ -205,26 +205,26 @@ const SafeAppMockup = ({ name, highlight, accounts }: SafeAppMockupProps) => {
 
             {/* TOP BAR skeletons — title pill + round icon + pill, like the real app header */}
             <div className="flex items-center gap-3 px-6 pb-8 pt-4">
-              <div className="h-9 w-60 shrink-0 rounded-xl bg-[#f8f8f8]" />
+              <div className="h-9 w-60 shrink-0 rounded-xl bg-muted" />
               <div className="flex-1" />
-              <div className="size-9 shrink-0 rounded-full bg-[#f8f8f8]" />
-              <div className="h-9 w-32 shrink-0 rounded-full bg-[#f8f8f8]" />
+              <div className="size-9 shrink-0 rounded-full bg-muted" />
+              <div className="h-9 w-32 shrink-0 rounded-full bg-muted" />
             </div>
 
             {/* BALANCE BLOCK — small label skeleton + big $ total + filter chip skeletons */}
             <div className="flex flex-col gap-4 px-6 pt-2">
               <div>
-                <div className="mb-2 h-3 w-20 rounded-md bg-[#f8f8f8]" />
+                <div className="mb-2 h-3 w-20 rounded-md bg-muted" />
                 <span className="text-4xl font-semibold leading-none tracking-tight text-foreground tabular-nums">
                   {totalFiat > 0 ? formatTotalFiat(totalFiat) : <span className="text-muted-foreground">$0</span>}
                 </span>
               </div>
               {/* Filter chips */}
               <div className="flex gap-2">
-                <div className="h-9 w-20 shrink-0 rounded-xl bg-[#f8f8f8]" />
-                <div className="h-9 w-[90px] shrink-0 rounded-xl bg-[#f8f8f8]" />
-                <div className="h-9 w-[70px] shrink-0 rounded-xl bg-[#f8f8f8]" />
-                <div className="h-9 w-32 shrink-0 rounded-xl bg-[#f8f8f8]" />
+                <div className="h-9 w-20 shrink-0 rounded-xl bg-muted" />
+                <div className="h-9 w-[90px] shrink-0 rounded-xl bg-muted" />
+                <div className="h-9 w-[70px] shrink-0 rounded-xl bg-muted" />
+                <div className="h-9 w-32 shrink-0 rounded-xl bg-muted" />
               </div>
             </div>
 
@@ -237,7 +237,8 @@ const SafeAppMockup = ({ name, highlight, accounts }: SafeAppMockupProps) => {
                 style={{ transformOrigin: 'left center' }}
                 className={cn(
                   'flex flex-1 flex-col rounded-3xl bg-card overflow-hidden p-2',
-                  highlight === 'accounts' && 'ring-2 ring-[#12FF80] shadow-[0_0_0_5px_rgba(18,255,128,0.25)]',
+                  highlight === 'accounts' &&
+                    'ring-2 ring-[var(--color-static-text-brand)] shadow-[0_0_0_5px_rgba(18,255,128,0.25)]', // rgba: Safe brand green at 25% opacity — no opacity-modifier token available
                 )}
               >
                 {/* Widget header — aligned with row content (same px-4) */}

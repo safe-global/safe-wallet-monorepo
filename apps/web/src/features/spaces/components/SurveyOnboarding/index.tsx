@@ -147,19 +147,23 @@ const SurveyOnboarding = (): ReactElement | null => {
                 onClick={() => toggle(opt.key)}
                 className={cn(
                   'flex cursor-pointer flex-col items-start gap-3 rounded-2xl border bg-card p-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                  isPressed ? 'border-[#12FF80] bg-[#12FF80]/5' : 'border-[#ebebeb] hover:border-ring hover:bg-muted',
+                  isPressed
+                    ? 'border-[var(--color-static-text-brand)] bg-[var(--color-static-text-brand)]/5'
+                    : 'border-border hover:border-ring hover:bg-muted',
                 )}
               >
                 <div className="flex w-full items-start justify-between">
                   {/* Icon in green-tinted rounded box */}
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-[#12FF80]/15">
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-[var(--color-static-text-brand)]/15">
                     {Icon && <Icon className="size-5 text-foreground" strokeWidth={1.75} />}
                   </div>
                   {/* Checkbox — empty square (border only) or filled (foreground + check) */}
                   <div
                     className={cn(
                       'flex size-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors',
-                      isPressed ? 'border-[#12FF80] bg-[#12FF80]' : 'border-muted-foreground/40',
+                      isPressed
+                        ? 'border-[var(--color-static-text-brand)] bg-[var(--color-static-text-brand)]'
+                        : 'border-muted-foreground/40',
                     )}
                   >
                     {isPressed && <Check className="size-3 text-white" strokeWidth={3} />}
@@ -185,10 +189,10 @@ const SurveyOnboarding = (): ReactElement | null => {
     <div className="flex items-center gap-3">
       <Button
         type="button"
-        variant="ghost"
+        variant="outline"
         onClick={goBack}
         disabled={isSubmitting}
-        className="flex-1 h-12 rounded-lg bg-[#f0f0f0] hover:bg-[#e8e8e8]"
+        className="flex-1 h-12 rounded-lg"
       >
         <ChevronLeft className="size-4 mr-1" />
         Back
