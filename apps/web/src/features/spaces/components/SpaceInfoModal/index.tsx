@@ -51,7 +51,7 @@ const SpaceInfoModal = ({ showButtons = true, onClose }: { showButtons?: boolean
         <Grid2 container>
           <Grid2 size={{ xs: 12, md: 6 }} p={5} display="flex" flexDirection="column">
             <Typography component="div" variant="h1" mb={1} position="relative">
-              Introducing spaces
+              Introducing workspaces
               <Chip
                 label="Beta"
                 size="small"
@@ -66,7 +66,7 @@ const SpaceInfoModal = ({ showButtons = true, onClose }: { showButtons?: boolean
             <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <ListItem disablePadding>
                 <ListIcon />
-                Bring all your Safe Accounts into one shared space.
+                Bring all your Safe Accounts into one shared workspace.
               </ListItem>
 
               <ListItem disablePadding>
@@ -86,7 +86,7 @@ const SpaceInfoModal = ({ showButtons = true, onClose }: { showButtons?: boolean
             </List>
 
             <Typography mt={5}>
-              Read the <ExternalLink href={SPACE_HELP_ARTICLE_LINK}>Spaces help article</ExternalLink>
+              Read the <ExternalLink href={SPACE_HELP_ARTICLE_LINK}>workspaces help article</ExternalLink>
             </Typography>
 
             {showButtons && (

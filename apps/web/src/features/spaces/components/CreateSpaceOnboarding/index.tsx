@@ -78,7 +78,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
             type="button"
             variant="ghost"
             size="icon"
-            onClick={() => router.push(AppRoutes.welcome.spaces)}
+            onClick={() => router.push({ pathname: AppRoutes.welcome.spaces, query: router.query })}
             className="self-start rounded-md border border-card shadow-sm"
           >
             <ChevronLeft className="size-5" />
@@ -105,7 +105,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
           <motion.div variants={itemVariants}>
             <Typography variant="h2" align="center">
-              Create a Space
+              Create a workspace
             </Typography>
           </motion.div>
 
@@ -119,17 +119,17 @@ const CreateSpaceOnboarding = (): ReactElement => {
             <div className="relative">
               <Input
                 data-testid="space-name-input"
-                placeholder="Name your Space"
+                placeholder="Name your workspace"
                 autoComplete="off"
                 autoFocus={!isEditMode}
                 disabled={isCheckingAccess || isSpaceLoading}
                 className="h-11 rounded-sm bg-card px-4"
                 {...register('name', {
                   required: true,
-                  maxLength: { value: 30, message: 'Space name must be 30 characters or less' },
+                  maxLength: { value: 30, message: 'Workspace name must be 30 characters or less' },
                   pattern: {
                     value: /^[a-zA-Z0-9 ]+$/,
-                    message: 'Space name must not contain special characters',
+                    message: 'Workspace name must not contain special characters',
                   },
                   validate: (value) => value?.trim() !== '',
                 })}

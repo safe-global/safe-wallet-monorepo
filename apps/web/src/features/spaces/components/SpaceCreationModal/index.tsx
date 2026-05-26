@@ -37,7 +37,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
 
         dispatch(
           showNotification({
-            message: `Created space with name ${data.name}.`,
+            message: `Created workspace with name ${data.name}.`,
             variant: 'success',
             groupKey: 'create-space-success',
           }),
@@ -49,7 +49,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       }
     } catch (error) {
       // @ts-ignore
-      const errorMessage = error?.data?.message || 'Failed creating the space. Please try again.'
+      const errorMessage = error?.data?.message || 'Failed creating the workspace. Please try again.'
       setError(errorMessage)
     } finally {
       setIsSubmitting(false)
@@ -63,7 +63,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       dialogTitle={
         <>
           <SvgIcon component={SpaceIcon} inheritViewBox sx={{ fill: 'none', mr: 1 }} />
-          Create space
+          Create workspace
         </>
       }
       hideChainIndicator
@@ -97,7 +97,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
               disableElevation
               sx={{ minWidth: '200px' }}
             >
-              {isSubmitting ? <CircularProgress size={20} /> : 'Create space'}
+              {isSubmitting ? <CircularProgress size={20} /> : 'Create workspace'}
             </Button>
           </DialogActions>
         </form>

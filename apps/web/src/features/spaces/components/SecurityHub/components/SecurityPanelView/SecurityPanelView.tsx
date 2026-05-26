@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import PanelHeader from './PanelHeader'
 import SecurityChecksSection from './SecurityChecksSection'
-import SignersSection from './SignersSection'
 
 type SecurityPanelViewProps = {
   scanContext: ScanContext | null
@@ -50,7 +49,6 @@ const SecurityPanelView = ({
         <PanelHeader results={results} isComplete={isComplete} />
       </MotionBox>
       <SecurityChecksSection scanContext={scanContext} results={results} safeQueryParam={safeQueryParam} />
-      <SignersSection scanContext={scanContext} results={results} safeQueryParam={safeQueryParam} />
     </Box>
   )
 }

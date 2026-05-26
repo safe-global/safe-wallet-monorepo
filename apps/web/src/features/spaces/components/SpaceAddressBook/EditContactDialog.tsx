@@ -118,7 +118,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ py: 2 }}>
-            <Typography mb={2}>Edit contact details. Anyone in the space can see it.</Typography>
+            <Typography mb={2}>Edit contact details. Anyone in the workspace can see it.</Typography>
             <Stack spacing={3}>
               <Box pt={1}>
                 <AddressInputReadOnly address={entry.address} chainId={entry.chainIds[0]} />
