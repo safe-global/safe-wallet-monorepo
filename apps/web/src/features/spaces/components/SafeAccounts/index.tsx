@@ -1,6 +1,7 @@
 import AddAccounts from '../AddAccounts'
 import EmptySafeAccounts from './EmptySafeAccounts'
 import { Stack } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
@@ -20,11 +21,13 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useSpaceSafes, useIsAdmin, useIsInvited } from '@/features/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { TriangleAlert, RotateCw } from 'lucide-react'
+import { BookmarkPlus, TriangleAlert, RotateCw } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import AccountsSafesList from './AccountsSafesList'
+import { useLoadFeature } from '@/features/__core__'
+import { MyAccountsFeature, useSafeSelectionModal } from '@/features/myAccounts'
 
 const _groupAndSort = (
   items: SafeItem[],
@@ -39,6 +42,8 @@ const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
+  const { SafeSelectionModal } = useLoadFeature(MyAccountsFeature)
+  const trustedSafesModal = useSafeSelectionModal()
 
   // Use same organization logic as onboarding
   const { orderBy } = useAppSelector(selectOrderByPreference)
@@ -80,13 +85,23 @@ const SpaceSafeAccounts = () => {
         <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
           Safe Accounts
         </Typography>
-        {isAdmin && (
-          <Stack direction="row" justifyContent="flex-start">
+        <Stack direction="row" justifyContent="flex-start" gap={1.5} flexWrap="wrap">
+          {isAdmin && (
             <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
               <AddAccounts buttonVariant="default" />
             </Track>
-          </Stack>
-        )}
+          )}
+          <Button
+            size="lg"
+            variant="outline"
+            className="font-normal px-4 py-0"
+            onClick={trustedSafesModal.open}
+            data-testid="manage-trusted-safes-button"
+          >
+            <BookmarkPlus className="size-4" />
+            Manage trusted Safes
+          </Button>
+        </Stack>
       </div>
 
       {isSpaceSafesError ? (
@@ -112,6 +127,8 @@ const SpaceSafeAccounts = () => {
       ) : (
         <AccountsSafesList safes={displaySafes} similarAddresses={similarAddresses} />
       )}
+
+      <SafeSelectionModal modal={trustedSafesModal} />
     </>
   )
 }
