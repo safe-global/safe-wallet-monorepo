@@ -9,7 +9,7 @@ import { ChevronLeft, Search, Loader2 } from 'lucide-react'
 import {
   OnboardingLayout,
   StepCounter,
-  SpaceSidePanel,
+  SafeAppMockup,
   deriveSidePanelAccountsFromSpace,
 } from '@/features/spaces/components/OnboardingLayout'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -187,7 +187,7 @@ const SelectSafesOnboarding = (): ReactElement => {
       main={main}
       footer={footer}
       sidePanel={
-        <SpaceSidePanel
+        <SafeAppMockup
           name={space?.name ?? ''}
           highlight="accounts"
           accounts={sidePanelAccounts}

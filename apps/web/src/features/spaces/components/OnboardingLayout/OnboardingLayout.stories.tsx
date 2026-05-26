@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { createMockStory } from '@/stories/mocks'
-import { OnboardingLayout, StepCounter, SpaceSidePanel } from '.'
+import { OnboardingLayout, StepCounter, SafeAppMockup } from '.'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
 
@@ -34,7 +34,7 @@ export const Step1WithSwitcherHighlight: Story = {
         <Button size="lg">Next</Button>
       </div>
     ),
-    sidePanel: <SpaceSidePanel name="Treasury Ops" highlight="switcher" />,
+    sidePanel: <SafeAppMockup name="Treasury Ops" highlight="switcher" />,
   },
 }
 
@@ -54,7 +54,7 @@ export const Step2WithAccountsHighlight: Story = {
         <Button size="lg">Next</Button>
       </div>
     ),
-    sidePanel: <SpaceSidePanel name="Treasury Ops" highlight="accounts" />,
+    sidePanel: <SafeAppMockup name="Treasury Ops" highlight="accounts" />,
   },
 }
 
@@ -74,6 +74,6 @@ export const Step4Done: Story = {
         <Button size="lg">Create Space</Button>
       </div>
     ),
-    sidePanel: <SpaceSidePanel name="Treasury Ops" highlight="accounts" />,
+    sidePanel: <SafeAppMockup name="Treasury Ops" highlight="accounts" />,
   },
 }

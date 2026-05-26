@@ -5,8 +5,11 @@ import { useEffect, useState } from 'react'
 // query that only feeds the (invisible) mockup.
 const XL_QUERY = '(min-width: 1280px)'
 
+// Lazy init avoids a one-render skip on xl viewports.
+const getInitialMatch = (): boolean => typeof window !== 'undefined' && window.matchMedia?.(XL_QUERY).matches === true
+
 export function useIsXlViewport(): boolean {
-  const [isXl, setIsXl] = useState(false)
+  const [isXl, setIsXl] = useState(getInitialMatch)
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return

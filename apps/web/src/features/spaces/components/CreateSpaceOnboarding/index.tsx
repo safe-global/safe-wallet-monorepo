@@ -10,7 +10,7 @@ import { ChevronLeft } from 'lucide-react'
 import {
   OnboardingLayout,
   StepCounter,
-  SpaceSidePanel,
+  SafeAppMockup,
   deriveSidePanelAccountsFromSpace,
   useSafeNameLookup,
 } from '@/features/spaces/components/OnboardingLayout'
@@ -160,7 +160,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
       main={main}
       footer={footer}
       sidePanel={
-        <SpaceSidePanel
+        <SafeAppMockup
           name={displayName}
           highlight={isFilled ? 'switcher' : 'none'}
           accounts={sidePanelAccounts}

@@ -27,7 +27,7 @@ import { Typography } from '@/components/ui/typography'
 import {
   OnboardingLayout,
   StepCounter,
-  SpaceSidePanel,
+  SafeAppMockup,
   deriveSidePanelAccountsFromSpace,
   useSafeNameLookup,
 } from '@/features/spaces/components/OnboardingLayout'
@@ -198,7 +198,7 @@ const SurveyOnboarding = (): ReactElement | null => {
       main={main}
       footer={footer}
       sidePanel={
-        <SpaceSidePanel
+        <SafeAppMockup
           name={space?.name ?? ''}
           highlight="accounts"
           accounts={sidePanelAccounts}

@@ -4,12 +4,15 @@ import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
+import type { SafeItem } from '@/hooks/safes'
 import MockupSidebar from './mockup/MockupSidebar'
 import MockupContent from './mockup/MockupContent'
 import { useIsXlViewport } from './mockup/useIsXlViewport'
 import type { SafeAppMockupProps } from './mockup/types'
 
 export type { SafeAppMockupAccount, SafeAppMockupProps } from './mockup/types'
+
+const EMPTY_SAFES: SafeItem[] = []
 
 const SafeAppMockup = ({ name, highlight, accounts, balanceSafes }: SafeAppMockupProps) => {
   const trimmed = name.trim()
@@ -19,16 +22,14 @@ const SafeAppMockup = ({ name, highlight, accounts, balanceSafes }: SafeAppMocku
 
   const { address: walletAddress } = useWallet() ?? {}
   const currency = useAppSelector(selectCurrency)
-  const safesForQuery = balanceSafes ?? []
-  // The side panel is `hidden xl:flex` — skip the gateway round-trip on smaller
-  // viewports where the mockup is not rendered.
+  const safesForQuery = balanceSafes ?? EMPTY_SAFES
   const isXl = useIsXlViewport()
   const { data: safeOverviews } = useGetMultipleSafeOverviewsQuery(
     { safes: safesForQuery, walletAddress, currency },
     { skip: !isXl },
   )
   const totalFiat = useMemo(
-    () => (safeOverviews ?? []).reduce((sum, o) => sum + Number(o.fiatTotal), 0),
+    () => (safeOverviews ?? []).reduce((sum, o) => sum + (Number(o.fiatTotal) || 0), 0),
     [safeOverviews],
   )
   const formattedTotal = formatCurrencyPrecise(totalFiat, currency)

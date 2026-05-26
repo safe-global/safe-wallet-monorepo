@@ -77,7 +77,7 @@ jest.mock('@/features/spaces/components/OnboardingLayout', () => ({
     </div>
   ),
   StepCounter: () => <div data-testid="step-counter" />,
-  SpaceSidePanel: () => <div data-testid="space-side-panel" />,
+  SafeAppMockup: () => <div data-testid="safe-app-mockup" />,
   deriveSidePanelAccountsFromSpace: () => [],
   useSafeNameLookup: () => new Map<string, string>(),
 }))

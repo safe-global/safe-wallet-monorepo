@@ -8,7 +8,7 @@ import { Spinner } from '@/components/ui/spinner'
 import {
   OnboardingLayout,
   StepCounter,
-  SpaceSidePanel,
+  SafeAppMockup,
   deriveSidePanelAccountsFromSpace,
   useSafeNameLookup,
 } from '@/features/spaces/components/OnboardingLayout'
@@ -125,7 +125,7 @@ const InviteMembersOnboarding = (): ReactElement => {
       main={main}
       footer={footer}
       sidePanel={
-        <SpaceSidePanel
+        <SafeAppMockup
           name={space?.name ?? ''}
           highlight="accounts"
           accounts={sidePanelAccounts}
