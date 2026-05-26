@@ -21,7 +21,9 @@ describe('SecurityEmptyState', () => {
 
     expect(screen.getByText('No accounts to check yet')).toBeInTheDocument()
     expect(
-      screen.getByText('Add a Safe account to this space to start running security checks and see its health here.'),
+      screen.getByText(
+        'Add a Safe account to this workspace to start running security checks and see its health here.',
+      ),
     ).toBeInTheDocument()
   })
 

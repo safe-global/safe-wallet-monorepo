@@ -12,9 +12,9 @@ const SecurityEmptyState = (): ReactElement => {
         className="max-w-[360px] mx-auto py-16"
         icon={<ShieldCheck className="size-6 text-green-500" />}
         text="No accounts to check yet"
-        subtitle="Add a Safe account to this space to start running security checks and see its health here."
+        subtitle="Add a Safe account to this workspace to start running security checks and see its health here."
         action={
-          <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
+          <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.security_page}>
             <AddAccounts buttonVariant="default" buttonLabel="Add account" />
           </Track>
         }
