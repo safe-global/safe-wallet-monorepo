@@ -44,7 +44,16 @@ export default defineConfig(({ mode }) => {
     NEXT_PUBLIC_COMMIT_HASH: commitHash,
     NEXT_PUBLIC_APP_VERSION: appVersion,
     NEXT_PUBLIC_APP_HOMEPAGE: pkg.homepage ?? '',
-    NODE_ENV: mode === 'production' ? 'production' : 'development',
+    // Honour an explicit cypress/test NODE_ENV from the host shell so the
+    // existing `cross-env NODE_ENV=cypress cypress run` script can flip
+    // `IS_TEST_E2E` in apps/web/src/config/constants.ts (and the require-login
+    // gate it gates) without needing a separate NEXT_PUBLIC_IS_TEST_E2E flag.
+    NODE_ENV:
+      process.env.NODE_ENV === 'cypress' || process.env.NODE_ENV === 'test'
+        ? process.env.NODE_ENV
+        : mode === 'production'
+          ? 'production'
+          : 'development',
   }
 
   return {
