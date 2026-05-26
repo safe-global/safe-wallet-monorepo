@@ -1,21 +1,41 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Box, Chip, InputBase, Paper, Stack, Typography } from '@mui/material'
+import { Box, Checkbox, Chip, InputBase, Paper, Stack, Typography } from '@mui/material'
 import { isAddress } from 'ethers'
-import { Plus, ScrollText, Search, ShieldCheck, X } from 'lucide-react'
+import { Loader2, Plus, ScrollText, Search, ShieldCheck, Tag, Wallet, X } from 'lucide-react'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
+import useNameResolver from '@/components/common/AddressInput/useNameResolver'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { AppRoutes } from '@/config/routes'
 import useChains from '@/hooks/useChains'
+import { useSpaceSafes } from '@/features/spaces'
+import { isMultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
+import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
+import { useAppDispatch } from '@/store'
+import { upsertAddressBookEntries } from '@/store/addressBookSlice'
+import { TxModalContext } from '@/components/tx-flow'
+import PolicyBatchFlow from '@/components/tx-flow/flows/PolicyBatch'
 import { useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { FormHeader, PolicySummaryRow, SelectionCheck, VerticalWizard, selectedRowStyles } from '../wizardCommon'
+import {
+  ApplyToStep,
+  FormHeader,
+  PolicySummaryRow,
+  SelectionCheck,
+  VerticalWizard,
+  WizardField,
+  WizardLayout,
+  safeKey,
+  selectedRowStyles,
+  type SafeRowItem,
+} from '../wizardCommon'
 import { tokensForChain } from './tokenList'
 import { useSubmitPolicy } from './useSubmitPolicy'
 import type { Period } from './buildBatch'
 
 const STEPS = [
+  { key: 'apply-to', label: 'Apply to' },
   { key: 'wallet', label: 'Spender' },
   { key: 'tokens', label: 'Tokens' },
   { key: 'amount', label: 'Amount' },
@@ -30,6 +50,7 @@ type PolicySummaryProps = {
   chainId: string
   safeAddress: string
   delegate: string
+  delegateNickname: string
   pickedTokens: TokenItem[]
   amount: number
   period: Period
@@ -37,6 +58,7 @@ type PolicySummaryProps = {
 }
 
 const PERIOD_LABELS: Record<Period, string> = {
+  once: 'One-time',
   day: 'Daily',
   week: 'Weekly',
   month: 'Monthly',
@@ -52,12 +74,14 @@ const PolicySummary = ({
   chainId,
   safeAddress,
   delegate,
+  delegateNickname,
   pickedTokens,
   amount,
   period,
   tokenAmounts,
 }: PolicySummaryProps) => {
   const hasDelegate = isAddress(delegate.trim())
+  const nick = delegateNickname.trim()
   const hasTokens = pickedTokens.length > 0
 
   const tokenLines = pickedTokens.map((t) => {
@@ -69,7 +93,7 @@ const PolicySummary = ({
   const hasAnyAmount = tokenLines.some((l) => l.hasValue)
 
   return (
-    <Paper elevation={0} sx={{ borderRadius: '18px', padding: 1.5, position: 'sticky', top: 24 }}>
+    <Paper elevation={0} sx={{ borderRadius: '18px', padding: 3, position: 'sticky', top: 24 }}>
       <Stack direction="row" alignItems="center" gap={1} sx={{ px: 0.5, pb: 1.25 }}>
         <Box
           sx={{
@@ -91,11 +115,12 @@ const PolicySummary = ({
       <PolicySummaryRow
         isFirst
         label="From"
+        pending={!(safeAddress && chainId)}
         value={
           safeAddress && chainId ? (
             <EthHashInfo address={safeAddress} chainId={chainId} shortAddress avatarSize={20} showCopyButton={false} />
           ) : (
-            <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>—</Typography>
+            <Typography sx={{ fontSize: 13, fontWeight: 500, color: 'text.secondary' }}>Not set</Typography>
           )
         }
       />
@@ -105,13 +130,16 @@ const PolicySummary = ({
         pending={!hasDelegate}
         value={
           hasDelegate ? (
-            <EthHashInfo
-              address={delegate.trim()}
-              chainId={chainId}
-              shortAddress
-              avatarSize={20}
-              showCopyButton={false}
-            />
+            <Stack sx={{ minWidth: 0 }}>
+              {nick && <Typography sx={{ fontSize: 13, fontWeight: 700, lineHeight: 1.3 }}>{nick}</Typography>}
+              <EthHashInfo
+                address={delegate.trim()}
+                chainId={chainId}
+                shortAddress
+                avatarSize={nick ? 0 : 20}
+                showCopyButton={false}
+              />
+            </Stack>
           ) : (
             <Typography sx={{ fontSize: 13, fontWeight: 500, color: 'text.secondary' }}>Not set</Typography>
           )
@@ -119,7 +147,7 @@ const PolicySummary = ({
       />
 
       <PolicySummaryRow
-        label={`Per ${period}`}
+        label={period === 'once' ? 'One-time limit' : `Per ${period}`}
         pending={!hasTokens}
         value={
           !hasTokens ? (
@@ -150,11 +178,13 @@ const PolicySummary = ({
       />
 
       <PolicySummaryRow
-        label="Resets"
+        label={period === 'once' ? 'Mode' : 'Resets'}
         pending={!hasAnyAmount}
         value={
           hasAnyAmount ? (
-            <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{PERIOD_LABELS[period]}</Typography>
+            <Typography sx={{ fontSize: 13, fontWeight: 600 }}>
+              {period === 'once' ? 'Single use' : PERIOD_LABELS[period]}
+            </Typography>
           ) : (
             <Typography sx={{ fontSize: 13, fontWeight: 500, color: 'text.secondary' }}>—</Typography>
           )
@@ -674,69 +704,169 @@ const TokensStep = ({
 }
 
 type WalletStepProps = {
-  chainId: string
-  safeAddress: string
-  delegate: string
-  setDelegate: (next: string) => void
+  address: string
+  setAddress: (v: string) => void
+  nickname: string
+  setNickname: (v: string) => void
+  resolvedAddress: string | undefined
+  resolving: boolean
+  isHexAddress: boolean
+  addressBookName: string | undefined
+  saveToAddressBook: boolean
+  setSaveToAddressBook: (v: boolean) => void
 }
 
-const WalletStep = ({ chainId, safeAddress, delegate, setDelegate }: WalletStepProps) => {
-  const { data: safeInfo } = useSafesGetSafeV1Query({ chainId, safeAddress }, { skip: !chainId || !safeAddress })
-  const owners = safeInfo?.owners ?? []
-  const normalizedDelegate = delegate.toLowerCase()
+const WalletStep = ({
+  address,
+  setAddress,
+  nickname,
+  setNickname,
+  resolvedAddress,
+  resolving,
+  isHexAddress,
+  addressBookName,
+  saveToAddressBook,
+  setSaveToAddressBook,
+}: WalletStepProps) => {
+  const trimmed = address.trim()
+  const valid = !!resolvedAddress
+  const isEmpty = trimmed.length === 0
+  const showError = !isEmpty && !valid && !resolving
+  const isKnownContact = valid && !!addressBookName
 
   return (
     <>
       <Typography variant="h2" sx={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.4px', mb: 2.5 }}>
-        Who gets this limit?
+        Who gets this spending limit?
       </Typography>
 
-      {!safeInfo ? (
-        <Paper elevation={0} sx={{ padding: 4, textAlign: 'center', borderRadius: '14px' }}>
-          <Typography sx={{ color: 'text.secondary' }}>Loading signers…</Typography>
-        </Paper>
-      ) : owners.length === 0 ? (
-        <Paper elevation={0} sx={{ padding: 4, textAlign: 'center', borderRadius: '14px' }}>
-          <Typography sx={{ color: 'text.secondary' }}>This Safe has no signers.</Typography>
-        </Paper>
-      ) : (
-        <Stack gap={1}>
-          {owners.map((owner) => {
-            const selected = owner.value.toLowerCase() === normalizedDelegate
-            return (
-              <Paper
-                key={owner.value}
-                elevation={0}
-                onClick={() => setDelegate(owner.value)}
-                sx={{
-                  cursor: 'pointer',
-                  padding: '14px 18px',
-                  borderRadius: '14px',
-                  border: '1.5px solid transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2,
-                  transition: 'background-color 150ms ease, box-shadow 150ms ease, border-color 150ms ease',
-                  ...(selected && selectedRowStyles),
-                  '&:hover': selected ? {} : { backgroundColor: 'background.main' },
-                }}
-              >
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <EthHashInfo
-                    address={owner.value}
-                    chainId={chainId}
-                    shortAddress
-                    avatarSize={32}
-                    showCopyButton={false}
-                    name={owner.name || undefined}
-                  />
+      <Stack gap={2.5}>
+        <Box>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 700 }}>Spender address</Typography>
+            <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>ENS supported</Typography>
+          </Stack>
+          <WizardField
+            icon={<Wallet size={16} color="#1C5538" />}
+            iconBg="accent"
+            value={address}
+            onChange={setAddress}
+            placeholder="0x… or name.eth"
+            state={showError ? 'error' : valid ? 'valid' : 'default'}
+            ariaLabel="Spender address"
+            adornment={
+              resolving ? (
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    padding: '4px 10px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'background.main',
+                    color: 'text.secondary',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    flexShrink: 0,
+                  }}
+                >
+                  <Loader2 size={12} className="animate-spin" />
+                  Resolving…
                 </Box>
-                <SelectionCheck selected={selected} />
-              </Paper>
-            )
-          })}
-        </Stack>
-      )}
+              ) : valid ? (
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                    padding: '4px 10px',
+                    borderRadius: '9999px',
+                    backgroundColor: 'secondary.background',
+                    color: 'success.dark',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    flexShrink: 0,
+                  }}
+                >
+                  ✓ Valid
+                </Box>
+              ) : undefined
+            }
+          />
+          {valid && !isHexAddress && resolvedAddress && (
+            <Typography
+              sx={{
+                fontSize: 12,
+                color: 'text.secondary',
+                mt: 0.75,
+                fontFamily: 'ui-monospace, monospace',
+              }}
+            >
+              Resolves to {resolvedAddress.slice(0, 6)}…{resolvedAddress.slice(-4)}
+            </Typography>
+          )}
+          {showError && (
+            <Typography sx={{ fontSize: 12, color: 'error.main', mt: 0.75 }}>Enter a valid address or ENS.</Typography>
+          )}
+        </Box>
+
+        <Box>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 700 }}>Name</Typography>
+            <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>
+              {isKnownContact ? 'From your address book' : 'Optional, shown on the Policies page'}
+            </Typography>
+          </Stack>
+          <WizardField
+            icon={<Tag size={16} color="#737373" />}
+            value={nickname}
+            onChange={setNickname}
+            placeholder={isKnownContact ? addressBookName : 'e.g. Ops wallet'}
+            ariaLabel="Spender name"
+          />
+          {valid && !isKnownContact && nickname.trim().length > 0 && (
+            <Stack
+              direction="row"
+              alignItems="center"
+              gap={1}
+              sx={{ mt: 1, ml: 0.25, cursor: 'pointer' }}
+              onClick={() => setSaveToAddressBook(!saveToAddressBook)}
+            >
+              <Checkbox
+                checked={saveToAddressBook}
+                onChange={(e) => setSaveToAddressBook(e.target.checked)}
+                size="small"
+                sx={{ p: 0 }}
+                inputProps={{ 'aria-label': 'Save spender to address book' }}
+              />
+              <Typography sx={{ fontSize: 12.5, color: 'text.secondary', userSelect: 'none' }}>
+                Save to address book
+              </Typography>
+            </Stack>
+          )}
+        </Box>
+
+        <Paper
+          elevation={0}
+          sx={{
+            padding: '14px 16px',
+            borderRadius: '14px',
+            backgroundColor: 'background.main',
+            display: 'flex',
+            gap: 1.5,
+            alignItems: 'flex-start',
+          }}
+        >
+          <ShieldCheck size={16} color="#737373" style={{ flexShrink: 0, marginTop: 2 }} />
+          <Typography sx={{ fontSize: 12.5, color: 'text.secondary', lineHeight: 1.5 }}>
+            <Box component="span" sx={{ fontWeight: 700, color: 'text.primary' }}>
+              The spender can be anyone.
+            </Box>{' '}
+            A bot, a teammate, or an external wallet — they don&apos;t have to be a signer. Withdrawals up to the limit
+            you set go through with no further approvals from this Safe.
+          </Typography>
+        </Paper>
+      </Stack>
     </>
   )
 }
@@ -787,6 +917,45 @@ const AmountStep = ({
       </Typography>
 
       <Stack gap={3}>
+        <Stack
+          direction="row"
+          sx={{
+            backgroundColor: 'background.main',
+            borderRadius: '12px',
+            padding: '4px',
+            gap: '4px',
+            alignSelf: 'flex-start',
+          }}
+        >
+          {(
+            [
+              { key: 'recurring', label: 'Recurring', active: period !== 'once' },
+              { key: 'once', label: 'One transaction', active: period === 'once' },
+            ] as const
+          ).map((opt) => (
+            <Box
+              key={opt.key}
+              onClick={() => setPeriod(opt.key === 'once' ? 'once' : period === 'once' ? 'day' : period)}
+              sx={{
+                minWidth: 130,
+                textAlign: 'center',
+                py: 0.75,
+                px: 2,
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: 'pointer',
+                borderRadius: '8px',
+                backgroundColor: opt.active ? 'background.paper' : 'transparent',
+                color: opt.active ? 'text.primary' : 'text.secondary',
+                boxShadow: opt.active ? '0 1px 2px rgba(0, 0, 0, 0.06)' : 'none',
+                transition: 'all 150ms',
+              }}
+            >
+              {opt.label}
+            </Box>
+          ))}
+        </Stack>
+
         <Paper elevation={0} sx={{ borderRadius: '18px', padding: 3 }}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" gap={2}>
             <Typography
@@ -798,43 +967,45 @@ const AmountStep = ({
                 letterSpacing: '0.4px',
               }}
             >
-              Limit
+              {period === 'once' ? 'Single-use limit' : 'Limit'}
             </Typography>
-            <Stack
-              direction="row"
-              sx={{
-                backgroundColor: 'background.main',
-                borderRadius: '10px',
-                padding: '3px',
-                gap: '2px',
-              }}
-            >
-              {PERIODS.map((p) => {
-                const active = period === p.key
-                return (
-                  <Box
-                    key={p.key}
-                    onClick={() => setPeriod(p.key)}
-                    sx={{
-                      minWidth: 60,
-                      textAlign: 'center',
-                      py: 0.5,
-                      px: 1.5,
-                      fontSize: 12,
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      borderRadius: '7px',
-                      backgroundColor: active ? 'background.paper' : 'transparent',
-                      color: active ? 'text.primary' : 'text.secondary',
-                      boxShadow: active ? '0 1px 2px rgba(0, 0, 0, 0.06)' : 'none',
-                      transition: 'all 150ms',
-                    }}
-                  >
-                    {p.label}
-                  </Box>
-                )
-              })}
-            </Stack>
+            {period === 'once' ? null : (
+              <Stack
+                direction="row"
+                sx={{
+                  backgroundColor: 'background.main',
+                  borderRadius: '10px',
+                  padding: '3px',
+                  gap: '2px',
+                }}
+              >
+                {PERIODS.map((p) => {
+                  const active = period === p.key
+                  return (
+                    <Box
+                      key={p.key}
+                      onClick={() => setPeriod(p.key)}
+                      sx={{
+                        minWidth: 60,
+                        textAlign: 'center',
+                        py: 0.5,
+                        px: 1.5,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        borderRadius: '7px',
+                        backgroundColor: active ? 'background.paper' : 'transparent',
+                        color: active ? 'text.primary' : 'text.secondary',
+                        boxShadow: active ? '0 1px 2px rgba(0, 0, 0, 0.06)' : 'none',
+                        transition: 'all 150ms',
+                      }}
+                    >
+                      {p.label}
+                    </Box>
+                  )
+                })}
+              </Stack>
+            )}
           </Stack>
 
           <Box sx={{ position: 'relative', mt: 2, opacity: usdDisabled ? 0.35 : 1 }}>
@@ -897,11 +1068,13 @@ const AmountStep = ({
                 const valid = Number.isFinite(rate) && rate > 0
                 const manualValue = tokenAmounts[token.address.toLowerCase()] ?? 0
                 const equiv = valid ? amount / rate : null
+                // Tight 3-significant precision for "0.342 ETH" style output;
+                // tiny amounts fall back to 4 decimals so they don't read as 0.
                 const display =
                   equiv !== null
-                    ? equiv >= 1
-                      ? equiv.toLocaleString('en-US', { maximumFractionDigits: Math.min(token.decimals, 4) })
-                      : equiv.toLocaleString('en-US', { maximumFractionDigits: 6 })
+                    ? `${equiv.toLocaleString('en-US', {
+                        maximumFractionDigits: equiv >= 1 ? 3 : 4,
+                      })} ${token.symbol}`
                     : null
 
                 const handleManual = (raw: string) => {
@@ -915,28 +1088,34 @@ const AmountStep = ({
                     key={token.address}
                     direction="row"
                     alignItems="center"
-                    justifyContent="space-between"
+                    gap={1}
+                    justifyContent={valid ? 'flex-start' : 'space-between'}
                     sx={{
                       py: 1.25,
                       borderBottom: idx === pickedTokens.length - 1 ? 'none' : '1px solid rgba(0, 0, 0, 0.05)',
                     }}
                   >
-                    <Stack direction="row" alignItems="center" gap={1}>
-                      <TokenLogo token={token} size={22} />
-                      <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{token.symbol}</Typography>
-                    </Stack>
                     {valid ? (
-                      <Typography
-                        sx={{
-                          fontSize: 13,
-                          fontWeight: 600,
-                          color: 'text.primary',
-                          fontVariantNumeric: 'tabular-nums',
-                        }}
-                      >
-                        {display}
-                      </Typography>
+                      <>
+                        <TokenLogo token={token} size={22} />
+                        <Typography
+                          sx={{
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: 'text.primary',
+                            fontVariantNumeric: 'tabular-nums',
+                          }}
+                        >
+                          {display}
+                        </Typography>
+                      </>
                     ) : (
+                      <Stack direction="row" alignItems="center" gap={1}>
+                        <TokenLogo token={token} size={22} />
+                        <Typography sx={{ fontSize: 13, fontWeight: 600 }}>{token.symbol}</Typography>
+                      </Stack>
+                    )}
+                    {valid ? null : (
                       <InputBase
                         value={manualValue > 0 ? manualValue : ''}
                         onChange={(e) => handleManual(e.target.value)}
@@ -1158,15 +1337,17 @@ const ReviewStep = ({
                 <Box
                   key={owner.value}
                   sx={{
-                    py: 1.25,
+                    py: 1,
                     borderTop: idx === 0 ? 'none' : REVIEW_DIVIDER,
+                    fontSize: 12.5,
+                    fontWeight: 500,
                   }}
                 >
                   <EthHashInfo
                     address={owner.value}
                     chainId={chainId}
                     shortAddress
-                    avatarSize={28}
+                    avatarSize={22}
                     showCopyButton={false}
                     name={owner.name || undefined}
                   />
@@ -1186,16 +1367,51 @@ const ReviewStep = ({
 const SpendingLimitFlow = () => {
   const router = useRouter()
   const { configs: chains } = useChains()
+  const { allSafes, isLoading: safesLoading } = useSpaceSafes()
 
-  const safeParam = (router.query.safe as string) || ''
-  const { prefix: shortName, address } = useMemo(() => parsePrefixedAddress(safeParam), [safeParam])
-  const chainId = useMemo(() => chains.find((c) => c.shortName === shortName)?.chainId ?? '', [chains, shortName])
+  const safesList = useMemo<SafeRowItem[]>(() => {
+    const out: SafeRowItem[] = []
+    for (const item of allSafes ?? []) {
+      if (isMultiChainSafeItem(item)) {
+        const first = item.safes[0]
+        if (first) out.push({ chainId: first.chainId, address: first.address, name: item.name || first.name || '' })
+      } else {
+        out.push({ chainId: item.chainId, address: item.address, name: item.name || '' })
+      }
+    }
+    return out
+  }, [allSafes])
 
   const rawStep = router.query.step as string | undefined
-  const stepKey: StepKey = STEPS.some((s) => s.key === rawStep) ? (rawStep as StepKey) : 'wallet'
+  const stepKey: StepKey = STEPS.some((s) => s.key === rawStep) ? (rawStep as StepKey) : 'apply-to'
   const currentIndex = STEPS.findIndex((s) => s.key === stepKey)
 
+  const [selectedSafeKey, setSelectedSafeKey] = useState<string>('')
+  const selectedSafe = useMemo<SafeRowItem | null>(
+    () => safesList.find((s) => safeKey(s) === selectedSafeKey) ?? null,
+    [safesList, selectedSafeKey],
+  )
+  const chainId = selectedSafe?.chainId ?? ''
+  const address = selectedSafe?.address ?? ''
+
+  // Hydrate the selection from the URL ?safe=eth:0x… param the first time the
+  // Safe list resolves. This keeps the SelectSafeModal entry path working: it
+  // navigates here with the Safe already chosen and ?step=wallet.
+  const safeParam = (router.query.safe as string) || ''
+  useEffect(() => {
+    if (selectedSafeKey || !safeParam || safesList.length === 0) return
+    const { prefix, address: paramAddress } = parsePrefixedAddress(safeParam)
+    const lowerAddr = paramAddress.toLowerCase()
+    const match = safesList.find((s) => {
+      const chain = chains.find((c) => c.chainId === s.chainId)
+      return chain?.shortName === prefix && s.address.toLowerCase() === lowerAddr
+    })
+    if (match) setSelectedSafeKey(safeKey(match))
+  }, [safeParam, safesList, chains, selectedSafeKey])
+
   const [delegate, setDelegate] = useState('')
+  const [delegateNickname, setDelegateNickname] = useState('')
+  const [saveDelegateToAddressBook, setSaveDelegateToAddressBook] = useState(true)
   const [pickedTokens, setPickedTokens] = useState<TokenItem[]>([])
   const [customTokens, setCustomTokens] = useState<TokenItem[]>([])
   const [amount, setAmount] = useState(0)
@@ -1207,26 +1423,21 @@ const SpendingLimitFlow = () => {
   }
 
   // Reset wizard state and snap back to step 1 when the user switches Safes mid-flow.
-  const prevSafeParamRef = useRef<string | null>(null)
+  const prevSelectedSafeKeyRef = useRef<string | null>(null)
   useEffect(() => {
-    const prev = prevSafeParamRef.current
-    prevSafeParamRef.current = safeParam
-    if (!prev || prev === safeParam) return
+    const prev = prevSelectedSafeKeyRef.current
+    prevSelectedSafeKeyRef.current = selectedSafeKey
+    if (!prev || prev === selectedSafeKey) return
 
     setDelegate('')
+    setDelegateNickname('')
+    setSaveDelegateToAddressBook(true)
     setPickedTokens([])
     setCustomTokens([])
     setAmount(0)
     setPeriod('day')
     setTokenAmounts({})
-
-    if (router.query.step && router.query.step !== 'wallet') {
-      void router.replace({
-        pathname: AppRoutes.spaces.policies,
-        query: { ...router.query, step: 'wallet' },
-      })
-    }
-  }, [safeParam, router])
+  }, [selectedSafeKey])
 
   const hasLiveRate = (t: TokenItem) => {
     const rate = t.fiatConversion ? Number(t.fiatConversion) : NaN
@@ -1237,9 +1448,25 @@ const SpendingLimitFlow = () => {
   const isTokenPriceable = (t: TokenItem) => (hasLiveRate(t) ? amount > 0 : tokenAmountFor(t) > 0)
 
   const trimmedDelegate = delegate.trim()
-  const isDelegateValid = isAddress(trimmedDelegate)
+  const isHexDelegate = isAddress(trimmedDelegate)
+  // Skip the ENS RPC when the input is already a valid hex address.
+  const { address: ensResolvedDelegate, resolving: delegateResolving } = useNameResolver(
+    isHexDelegate ? undefined : trimmedDelegate,
+  )
+  const resolvedDelegate = isHexDelegate ? trimmedDelegate : ensResolvedDelegate
+  const isDelegateValid = !!resolvedDelegate
 
-  const { submit, isSubmitting, error: submitError } = useSubmitPolicy({ chainId, safeAddress: address })
+  // Pre-fill nickname when the resolved address is already in the user's address book.
+  const delegateContact = useAddressBookItem(resolvedDelegate ?? '', chainId)
+  const addressBookName = delegateContact?.name
+  useEffect(() => {
+    if (addressBookName && !delegateNickname) setDelegateNickname(addressBookName)
+  }, [addressBookName, delegateNickname])
+
+  const dispatch = useAppDispatch()
+  const { setTxFlow } = useContext(TxModalContext)
+
+  const { buildTxs, isPreparing, error: submitError } = useSubmitPolicy({ chainId, safeAddress: address })
 
   const goToStep = (key: StepKey) => {
     void router.replace({
@@ -1250,7 +1477,7 @@ const SpendingLimitFlow = () => {
 
   const goBack = () => {
     if (currentIndex <= 0) {
-      const { policy: _p, step: _s, ...rest } = router.query
+      const { policy: _p, step: _s, safe: _sf, ...rest } = router.query
       void router.replace({ pathname: AppRoutes.spaces.policies, query: rest })
       return
     }
@@ -1258,8 +1485,9 @@ const SpendingLimitFlow = () => {
   }
 
   const submitPolicy = async () => {
-    const txId = await submit({
-      delegate: trimmedDelegate,
+    if (!resolvedDelegate) return
+    const txs = await buildTxs({
+      delegate: resolvedDelegate,
       amountUsd: amount,
       period,
       tokens: pickedTokens.map((t) => ({
@@ -1269,10 +1497,48 @@ const SpendingLimitFlow = () => {
         manualAmount: hasLiveRate(t) ? undefined : tokenAmountFor(t),
       })),
     })
-    if (txId) {
-      const { policy: _p, step: _s, safe: _sf, ...rest } = router.query
-      void router.replace({ pathname: AppRoutes.spaces.policies, query: rest })
+    if (!txs) return
+
+    // Switch the URL's active Safe right before handing off — the tx-flow
+    // modal reads it via useSafeInfo. This is the ONLY time we touch the
+    // global active-safe state, which keeps nested-safe navigation in the
+    // Topbar/sidebar from breaking during the wizard.
+    const chain = chains.find((c) => c.chainId === chainId)
+    if (chain) {
+      await router.replace(
+        { pathname: router.pathname, query: { ...router.query, safe: `${chain.shortName}:${address}` } },
+        undefined,
+        { shallow: true },
+      )
     }
+
+    // Hand the prebuilt batch off to the standard tx-flow modal — it owns the
+    // review screen, Safe Shield co-pilot, simulation, and the sign/propose
+    // step. We only need to react to its success callback.
+    setTxFlow(
+      <PolicyBatchFlow
+        txs={txs}
+        subtitle="Spending limit"
+        onSubmit={(args) => {
+          if (!args?.txId) return
+          // Persist nickname to the address book if the user opted in and the
+          // address isn't already known. Tied to the modal's success path so a
+          // dismissal doesn't leave a phantom contact behind.
+          const trimmedNick = delegateNickname.trim()
+          if (saveDelegateToAddressBook && trimmedNick && !addressBookName && chainId) {
+            dispatch(
+              upsertAddressBookEntries({
+                chainIds: [chainId],
+                address: resolvedDelegate,
+                name: trimmedNick,
+              }),
+            )
+          }
+          const { policy: _p, step: _s, safe: _sf, ...rest } = router.query
+          void router.replace({ pathname: AppRoutes.spaces.policies, query: rest })
+        }}
+      />,
+    )
   }
 
   const goNext = () => {
@@ -1285,6 +1551,7 @@ const SpendingLimitFlow = () => {
   }
 
   const continueDisabled = (() => {
+    if (stepKey === 'apply-to') return !selectedSafe
     if (stepKey === 'wallet') return !isDelegateValid
     if (stepKey === 'tokens') return pickedTokens.length === 0
     if (stepKey === 'amount') return !pickedTokens.every(isTokenPriceable)
@@ -1294,31 +1561,41 @@ const SpendingLimitFlow = () => {
   const isReview = stepKey === 'review'
 
   return (
-    <Box sx={{ maxWidth: 1200 }}>
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', md: '200px minmax(0, 1fr) 340px' },
-          gap: { xs: 3, md: 4 },
-          alignItems: 'flex-start',
-        }}
-      >
-        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-          <VerticalWizard steps={STEPS} currentIndex={currentIndex} />
-        </Box>
-
-        <Paper elevation={0} sx={{ borderRadius: '24px', padding: { xs: 3, md: 4 } }}>
+    <WizardLayout
+      wizard={<VerticalWizard steps={STEPS} currentIndex={currentIndex} />}
+      form={
+        <>
           <FormHeader
             currentIndex={currentIndex}
             onBack={goBack}
             onNext={goNext}
             continueDisabled={continueDisabled}
             isReview={isReview}
-            isSubmitting={isSubmitting}
+            isSubmitting={isPreparing}
           />
 
+          {stepKey === 'apply-to' && (
+            <ApplyToStep
+              safes={safesList}
+              isLoading={safesLoading}
+              selectedKey={selectedSafeKey}
+              onSelect={(s) => setSelectedSafeKey(safeKey(s))}
+            />
+          )}
+
           {stepKey === 'wallet' && (
-            <WalletStep chainId={chainId} safeAddress={address} delegate={delegate} setDelegate={setDelegate} />
+            <WalletStep
+              address={delegate}
+              setAddress={setDelegate}
+              nickname={delegateNickname}
+              setNickname={setDelegateNickname}
+              resolvedAddress={resolvedDelegate}
+              resolving={delegateResolving}
+              isHexAddress={isHexDelegate}
+              addressBookName={addressBookName}
+              saveToAddressBook={saveDelegateToAddressBook}
+              setSaveToAddressBook={setSaveDelegateToAddressBook}
+            />
           )}
 
           {stepKey === 'tokens' && (
@@ -1348,7 +1625,7 @@ const SpendingLimitFlow = () => {
             <ReviewStep
               chainId={chainId}
               address={address}
-              delegate={trimmedDelegate}
+              delegate={resolvedDelegate ?? ''}
               tokens={pickedTokens}
               amount={amount}
               period={period}
@@ -1356,21 +1633,21 @@ const SpendingLimitFlow = () => {
               submitError={submitError}
             />
           )}
-        </Paper>
-
-        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-          <PolicySummary
-            chainId={chainId}
-            safeAddress={address}
-            delegate={trimmedDelegate}
-            pickedTokens={pickedTokens}
-            amount={amount}
-            period={period}
-            tokenAmounts={tokenAmounts}
-          />
-        </Box>
-      </Box>
-    </Box>
+        </>
+      }
+      summary={
+        <PolicySummary
+          chainId={chainId}
+          safeAddress={address}
+          delegate={resolvedDelegate ?? ''}
+          delegateNickname={delegateNickname}
+          pickedTokens={pickedTokens}
+          amount={amount}
+          period={period}
+          tokenAmounts={tokenAmounts}
+        />
+      }
+    />
   )
 }
 
