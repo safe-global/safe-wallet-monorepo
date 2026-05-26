@@ -155,7 +155,7 @@ const SurveyOnboarding = (): ReactElement | null => {
                 <div className="flex w-full items-start justify-between">
                   {/* Icon in green-tinted rounded box — dark-green glyph (Tailwind green-600 / #16a34a in
                       light, Safe brand green in dark since #16a34a reads too muted on dark surfaces). */}
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-[var(--color-static-text-brand)]/15">
+                  <div className="flex size-10 items-center justify-center rounded-md bg-[var(--color-static-text-brand)]/15">
                     {Icon && <Icon className="size-5 text-[var(--color-success-main)]" strokeWidth={1.75} />}
                   </div>
                   {/* Checkbox — empty square (border only) or filled black w/ white check when selected. */}
