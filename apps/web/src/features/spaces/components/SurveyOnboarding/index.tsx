@@ -149,30 +149,27 @@ const SurveyOnboarding = (): ReactElement | null => {
                 onClick={() => toggle(opt.key)}
                 className={cn(
                   'flex cursor-pointer flex-col items-start gap-3 rounded-2xl border bg-card p-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                  isPressed
-                    ? 'border-[var(--color-static-text-brand)] bg-[var(--color-static-text-brand)]/5'
-                    : 'border-border hover:border-ring hover:bg-muted',
+                  isPressed ? 'border-foreground' : 'border-border hover:border-ring hover:bg-muted',
                 )}
               >
                 <div className="flex w-full items-start justify-between">
-                  {/* Icon in green-tinted rounded box */}
+                  {/* Icon in green-tinted rounded box — dark-green glyph (Tailwind green-600 / #16a34a in
+                      light, Safe brand green in dark since #16a34a reads too muted on dark surfaces). */}
                   <div className="flex size-10 items-center justify-center rounded-lg bg-[var(--color-static-text-brand)]/15">
-                    {Icon && <Icon className="size-5 text-foreground" strokeWidth={1.75} />}
+                    {Icon && <Icon className="size-5 text-[var(--color-success-main)]" strokeWidth={1.75} />}
                   </div>
-                  {/* Checkbox — empty square (border only) or filled (foreground + check) */}
+                  {/* Checkbox — empty square (border only) or filled black w/ white check when selected. */}
                   <div
                     className={cn(
-                      'flex size-5 shrink-0 items-center justify-center rounded-md border-2 transition-colors',
-                      isPressed
-                        ? 'border-[var(--color-static-text-brand)] bg-[var(--color-static-text-brand)]'
-                        : 'border-muted-foreground/40',
+                      'flex size-5 shrink-0 items-center justify-center rounded-sm border-2 transition-colors',
+                      isPressed ? 'border-foreground bg-foreground' : 'border-muted-foreground/40',
                     )}
                   >
-                    {isPressed && <Check className="size-3 text-white" strokeWidth={3} />}
+                    {isPressed && <Check className="size-3 text-background" strokeWidth={3} />}
                   </div>
                 </div>
-                {/* Label */}
-                <span className="text-base font-semibold leading-snug text-foreground">{opt.label}</span>
+                {/* Label — paragraph-small-bold (14px/600) per the design system */}
+                <Typography variant="paragraph-small-bold">{opt.label}</Typography>
               </button>
             )
           })}
@@ -204,7 +201,7 @@ const SurveyOnboarding = (): ReactElement | null => {
         type="button"
         disabled={!spaceId || selected.size === 0 || isSubmitting}
         onClick={onFinish}
-        className="w-full h-12 rounded-lg text-[15px] xl:flex-1"
+        className="w-full h-12 rounded-lg text-base xl:flex-1"
       >
         {isSubmitting ? <Spinner /> : 'Create Space'}
       </Button>

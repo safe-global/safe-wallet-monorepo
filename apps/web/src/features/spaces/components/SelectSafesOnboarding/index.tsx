@@ -278,7 +278,7 @@ const SelectSafesOnboarding = (): ReactElement => {
         type="submit"
         form={FORM_ID}
         disabled={selectedSafesLength === 0 || isSubmitting}
-        className="w-full h-12 rounded-lg text-[15px] xl:flex-1"
+        className="w-full h-12 rounded-lg text-base xl:flex-1"
       >
         {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Next'}
       </Button>

@@ -242,8 +242,7 @@ const SafeAppMockup = ({ name, highlight, accounts, balanceSafes }: SafeAppMocku
                 style={{ transformOrigin: 'left center' }}
                 className={cn(
                   'flex flex-1 flex-col rounded-3xl bg-card overflow-hidden p-2',
-                  highlight === 'accounts' &&
-                    'ring-2 ring-[var(--color-static-text-brand)] shadow-[0_0_0_5px_rgba(18,255,128,0.25)]', // rgba: Safe brand green at 25% opacity — no opacity-modifier token available
+                  highlight === 'accounts' && 'ring-[5px] ring-[var(--color-static-text-brand)]/25',
                 )}
               >
                 {/* Widget header — aligned with row content (same px-4) */}
