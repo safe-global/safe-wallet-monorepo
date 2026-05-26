@@ -25,13 +25,13 @@ export const useUpdateSpace = (space: GetSpaceResponse | undefined) => {
       dispatch(
         showNotification({
           variant: 'success',
-          message: 'Updated space name',
+          message: 'Updated workspace name',
           groupKey: 'space-update-name',
         }),
       )
     } catch (e) {
       console.error(e)
-      setError('Error updating the space. Please try again.')
+      setError('Error updating the workspace. Please try again.')
     }
   }
 

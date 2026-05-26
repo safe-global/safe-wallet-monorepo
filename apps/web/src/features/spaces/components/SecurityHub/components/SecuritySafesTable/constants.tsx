@@ -29,15 +29,22 @@ export const MotionTbody = motion.create('tbody')
  * hover background, and inline typography overrides. Lives here so the main
  * file isn't dominated by inline style config.
  */
+/** Wraps the table to enable horizontal scroll on viewports narrower than the table's min width. */
+export const TABLE_WRAPPER_SX: SxProps<Theme> = {
+  width: '100%',
+  overflowX: 'auto',
+}
+
 export const TABLE_SX: SxProps<Theme> = {
   tableLayout: 'fixed',
   borderCollapse: 'separate',
   borderSpacing: '0 6px',
+  minWidth: 960,
   '& th': {
     border: 'none',
     borderBottom: 'none !important',
     py: 0.5,
-    px: 2.5,
+    px: { xs: 1.25, md: 2.5 },
     fontSize: '0.65rem',
     fontWeight: 700,
     textTransform: 'uppercase',
@@ -49,7 +56,7 @@ export const TABLE_SX: SxProps<Theme> = {
     border: 'none',
     height: 72,
     py: 0,
-    px: 2.5,
+    px: { xs: 1.25, md: 2.5 },
     backgroundColor: 'background.paper',
     transition: 'background-color 0.12s',
     verticalAlign: 'middle',
@@ -60,8 +67,29 @@ export const TABLE_SX: SxProps<Theme> = {
     backgroundColor: 'success.background',
   },
   '& th:first-of-type': { pl: 0 },
-  '& td:first-of-type': { borderTopLeftRadius: 12, borderBottomLeftRadius: 12, pl: 3 },
-  '& td:last-of-type': { borderTopRightRadius: 12, borderBottomRightRadius: 12, pr: 3, overflow: 'hidden' },
+  '& td:first-of-type': {
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+    pl: { xs: 1.5, md: 3 },
+  },
+  '& td:last-of-type': {
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
+    pr: { xs: 3, md: 5 },
+    overflow: 'hidden',
+  },
+  // Hide "Version" (5th col) on screens narrower than `md` — least essential security signal.
+  '& th:nth-of-type(5), & td:nth-of-type(5)': {
+    display: { xs: 'none', md: 'table-cell' },
+  },
+  // Hide "Last scanned" (8th col) on screens narrower than `lg` — useful but not critical.
+  '& th:nth-of-type(8), & td:nth-of-type(8)': {
+    display: { xs: 'none', lg: 'table-cell' },
+  },
+  // Hide "Balance" (3rd col) on screens narrower than `sm` so 13"-and-below has room.
+  '& th:nth-of-type(3), & td:nth-of-type(3)': {
+    display: { xs: 'none', sm: 'table-cell' },
+  },
 }
 
 /**
@@ -76,6 +104,6 @@ export const COLUMNS: { label: string; width: string }[] = [
   { label: 'Version', width: '8%' },
   { label: 'Status', width: '11%' },
   { label: 'Score', width: '10%' },
-  { label: 'Last scanned', width: '12%' },
-  { label: '', width: '8%' },
+  { label: 'Last scanned', width: '11%' },
+  { label: '', width: '9%' },
 ]
