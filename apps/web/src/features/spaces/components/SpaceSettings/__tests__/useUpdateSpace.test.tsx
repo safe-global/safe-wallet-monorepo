@@ -4,7 +4,8 @@ import { makeStore } from '@/store'
 import { useUpdateSpace } from '../useUpdateSpace'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-const mockUpdateSpace = jest.fn()
+const mockUnwrap = jest.fn()
+const mockUpdateSpace = jest.fn(() => ({ unwrap: mockUnwrap }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesUpdateV1Mutation: jest.fn(() => [mockUpdateSpace]),
@@ -21,7 +22,7 @@ const renderWithStore = () => {
 describe('useUpdateSpace', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUpdateSpace.mockReset()
+    mockUnwrap.mockReset()
   })
 
   it('returns handleUpdate and no initial error', () => {
@@ -31,7 +32,7 @@ describe('useUpdateSpace', () => {
   })
 
   it('calls the mutation with the space id and new name', async () => {
-    mockUpdateSpace.mockResolvedValue({})
+    mockUnwrap.mockResolvedValue({})
     const { result } = renderWithStore()
 
     await act(async () => {
@@ -42,7 +43,7 @@ describe('useUpdateSpace', () => {
   })
 
   it('dispatches a success notification after a successful update', async () => {
-    mockUpdateSpace.mockResolvedValue({})
+    mockUnwrap.mockResolvedValue({})
     const { result, store } = renderWithStore()
 
     await act(async () => {
@@ -58,7 +59,7 @@ describe('useUpdateSpace', () => {
   })
 
   it('sets an error message when the mutation rejects', async () => {
-    mockUpdateSpace.mockRejectedValue(new Error('network'))
+    mockUnwrap.mockRejectedValue(new Error('network'))
     const { result } = renderWithStore()
 
     await act(async () => {
@@ -69,7 +70,7 @@ describe('useUpdateSpace', () => {
   })
 
   it('clears a previous error before a new attempt', async () => {
-    mockUpdateSpace.mockRejectedValueOnce(new Error('first')).mockResolvedValueOnce({})
+    mockUnwrap.mockRejectedValueOnce(new Error('first')).mockResolvedValueOnce({})
     const { result } = renderWithStore()
 
     await act(async () => {
