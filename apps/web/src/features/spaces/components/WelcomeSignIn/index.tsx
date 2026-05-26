@@ -177,10 +177,10 @@ const WelcomeSignIn = (): ReactElement => {
               animate="visible"
             >
               {/* Safe Accounts pill — 16px from card edges */}
-              <div className="px-4 pt-4">
+              <div className="px-4 pt-4 pb-4">
                 <motion.div
                   variants={itemVariants}
-                  className="flex w-full items-center gap-2.5 rounded-full bg-[#12FF80]/[0.08] px-3 py-1.5"
+                  className="flex w-full items-center gap-2.5 rounded-full border border-border/50 bg-background px-2.5 py-1"
                 >
                   <div className="flex -space-x-2">
                     {DEMO_ADDRESSES.slice(0, 3).map((addr) => (
@@ -190,7 +190,7 @@ const WelcomeSignIn = (): ReactElement => {
                         style={{ backgroundImage: `url(${blo(addr)})` }}
                       />
                     ))}
-                    <span className="flex size-7 items-center justify-center rounded-full border-2 border-white bg-white text-[10px] font-bold text-foreground dark:border-[#1a1a1a] dark:bg-[#1a1a1a]">
+                    <span className="flex size-7 items-center justify-center rounded-full border-2 border-white bg-[#f0f0f0] text-[10px] font-bold text-foreground dark:border-[#1a1a1a] dark:bg-[#2a2a2a]">
                       +2
                     </span>
                   </div>

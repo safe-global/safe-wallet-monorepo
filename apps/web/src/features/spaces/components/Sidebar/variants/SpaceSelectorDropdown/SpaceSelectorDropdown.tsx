@@ -1,5 +1,5 @@
 import { useId, useMemo, useState, type ReactElement } from 'react'
-import { Check, ChevronsUpDown, Plus, CircleFadingPlus, LayoutGrid, Loader2 } from 'lucide-react'
+import { Check, ChevronsUpDown, Plus, CircleFadingPlus, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/router'
 import { SidebarMenuButton } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
