@@ -30,7 +30,7 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
 
   const trimmedName = name.trim()
   const isDirty = !!space && trimmedName !== space.name && trimmedName.length > 0
-  const canSave = isDirty && isAdmin && !isSaving
+  const canSave = isDirty && isAdmin && !isSaving && !isAwaitingCacheSync.current
   const canCancel = !!space && name !== space.name && isAdmin && !isSaving && !isAwaitingCacheSync.current
 
   const handleCancel = () => {
