@@ -10,7 +10,6 @@
 import { useMemo } from 'react'
 import {
   useNavigate,
-  useLocation,
   useRouter as useTanStackRouter,
   useRouterState,
   useParams as useTanStackParams,
@@ -48,8 +47,13 @@ export function usePathname(): string {
 }
 
 export function useSearchParams(): URLSearchParams {
-  const location = useLocation()
-  return useMemo(() => new URLSearchParams(location.searchStr ?? ''), [location.searchStr])
+  // Subscribe to the search string primitive instead of the whole location
+  // object. `useLocation()` returns a fresh object on every router state
+  // tick (~50 per nav), which would create a new URLSearchParams instance
+  // each time and cascade through every consumer's useEffect/useCallback
+  // deps. Selector subscriptions only wake up when the value changes.
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr })
+  return useMemo(() => new URLSearchParams(searchStr ?? ''), [searchStr])
 }
 
 export function useParams<T extends Record<string, string> = Record<string, string>>(): T {
