@@ -1,5 +1,6 @@
-import type { ReactElement } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactElement } from 'react'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
 import { useRouter } from 'next/router'
 import {
   ArrowLeftRight,
@@ -7,6 +8,7 @@ import {
   Check,
   ChevronLeft,
   FileCode,
+  HelpCircle,
   Send,
   Shield,
   Sparkles,
@@ -39,7 +41,8 @@ const TOTAL_STEPS = 4
 const SURVEY_SLUG = 'onboarding'
 
 // Backend-issued icon keys → lucide icons, picked to match the prototype's
-// Step 4 card design. Unknown keys fall back to no icon (the card still renders).
+// Step 4 card design. Unknown keys fall back to a generic placeholder so the
+// card never renders iconless.
 const ICON_MAP: Record<string, LucideIcon> = {
   terminal: FileCode, // Operate a protocol
   gift: Sparkles, // Distribute tokens
@@ -48,12 +51,14 @@ const ICON_MAP: Record<string, LucideIcon> = {
   swap: ArrowLeftRight, // Trade and provide liquidity
   bank: Shield, // Hold assets
 }
+const FALLBACK_ICON: LucideIcon = HelpCircle
 
-// RTK Query surfaces FetchBaseQueryError | SerializedError. The first shape carries
+// RTK Query surfaces FetchBaseQueryError | SerializedError. The first carries
 // the HTTP status; treat 404 as "no active survey" (admin turned it off via
 // surveys.is_active = false) rather than a real failure.
-const isNotFoundError = (err: unknown): boolean =>
-  typeof err === 'object' && err !== null && 'status' in err && (err as { status: unknown }).status === 404
+const isNotFoundError = (err: FetchBaseQueryError | SerializedError | undefined): boolean => {
+  return err != null && 'status' in err && err.status === 404
+}
 
 const SurveyOnboarding = (): ReactElement | null => {
   const router = useRouter()
@@ -109,12 +114,21 @@ const SurveyOnboarding = (): ReactElement | null => {
 
   const onFinish = async (): Promise<void> => {
     if (!spaceId || !page || selected.size === 0) return
-    await submit({
-      spaceId,
-      slug: SURVEY_SLUG,
-      submitSurveyResponseDto: { selections: { [page.id]: Array.from(selected) } },
-    }).unwrap()
-    router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
+    // Sort so the same set of options always produces the same array — keeps
+    // server-side aggregation (group-by selections) deterministic.
+    const selections = Array.from(selected).sort()
+    try {
+      await submit({
+        spaceId,
+        slug: SURVEY_SLUG,
+        submitSurveyResponseDto: { selections: { [page.id]: selections } },
+      }).unwrap()
+      router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
+    } catch {
+      // The mutation hook exposes submitError, which renders the destructive
+      // alert below. Swallow the rejection here so the click handler doesn't
+      // surface an unhandled-promise warning.
+    }
   }
 
   const main = (
@@ -122,7 +136,9 @@ const SurveyOnboarding = (): ReactElement | null => {
       <StepCounter currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
 
       <div className="flex flex-col gap-2">
-        <Typography variant="h2">{page?.title ?? 'How will you use Safe?'}</Typography>
+        <Typography variant="h2" id="survey-page-title">
+          {page?.title ?? 'How will you use Safe?'}
+        </Typography>
         <Typography variant="paragraph" color="muted">
           {page?.subtitle ?? "Select all that apply. We'll tailor your setup."}
         </Typography>
@@ -140,7 +156,7 @@ const SurveyOnboarding = (): ReactElement | null => {
         <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
           {page.options.map((opt: SurveyOption) => {
             const isPressed = selected.has(opt.key)
-            const Icon = opt.icon ? ICON_MAP[opt.icon] : undefined
+            const Icon = opt.icon ? (ICON_MAP[opt.icon] ?? FALLBACK_ICON) : undefined
             return (
               <button
                 key={opt.key}
