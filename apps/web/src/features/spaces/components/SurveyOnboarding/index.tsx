@@ -31,6 +31,7 @@ import {
   useSafeNameLookup,
 } from '@/features/spaces/components/OnboardingLayout'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { flattenSafeItems } from '@/hooks/safes'
 import { cn } from '@/utils/cn'
 
 const ONBOARDING_STEP = 4
@@ -69,6 +70,7 @@ const SurveyOnboarding = (): ReactElement | null => {
     () => deriveSidePanelAccountsFromSpace(spaceSafes, nameLookup),
     [spaceSafes, nameLookup],
   )
+  const balanceSafes = useMemo(() => flattenSafeItems(spaceSafes), [spaceSafes])
   const [submit, { isLoading: isSubmitting, error: submitError }] = useSurveysSubmitResponseV1Mutation()
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
@@ -213,7 +215,14 @@ const SurveyOnboarding = (): ReactElement | null => {
     <OnboardingLayout
       main={main}
       footer={footer}
-      sidePanel={<SpaceSidePanel name={space?.name ?? ''} highlight="accounts" accounts={sidePanelAccounts} />}
+      sidePanel={
+        <SpaceSidePanel
+          name={space?.name ?? ''}
+          highlight="accounts"
+          accounts={sidePanelAccounts}
+          balanceSafes={balanceSafes}
+        />
+      }
     />
   )
 }

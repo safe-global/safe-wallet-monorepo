@@ -15,6 +15,7 @@ import {
   useSafeNameLookup,
 } from '@/features/spaces/components/OnboardingLayout'
 import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
+import { flattenSafeItems } from '@/hooks/safes'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { AppRoutes } from '@/config/routes'
 import useExistingSpace from './hooks/useExistingSpace'
@@ -70,6 +71,10 @@ const CreateSpaceOnboarding = (): ReactElement => {
     () => (spaceId ? deriveSidePanelAccountsFromSpace(allSafes, nameLookup) : []),
     [spaceId, allSafes, nameLookup],
   )
+  // Flat per-chain SafeItem list for the bulk balance query inside the mockup —
+  // matches the real Spaces dashboard's pattern (multi-chain Safes contribute one
+  // entry per chain so the aggregated total sums correctly across networks).
+  const balanceSafes = useMemo(() => (spaceId ? flattenSafeItems(allSafes) : []), [spaceId, allSafes])
   const trimmedWatched = watchedName.trim()
   const trimmedExisting = existingSpace?.name?.trim() ?? ''
   const displayName = hasUserEdited ? watchedName : watchedName || existingSpace?.name || ''
@@ -155,7 +160,12 @@ const CreateSpaceOnboarding = (): ReactElement => {
       main={main}
       footer={footer}
       sidePanel={
-        <SpaceSidePanel name={displayName} highlight={isFilled ? 'switcher' : 'none'} accounts={sidePanelAccounts} />
+        <SpaceSidePanel
+          name={displayName}
+          highlight={isFilled ? 'switcher' : 'none'}
+          accounts={sidePanelAccounts}
+          balanceSafes={balanceSafes}
+        />
       }
     />
   )

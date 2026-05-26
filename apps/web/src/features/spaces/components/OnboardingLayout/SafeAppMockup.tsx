@@ -1,10 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { motion } from 'motion/react'
 import { ChevronDown, House, WalletCards, BookUser, UsersRound, Settings } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import Identicon from '@/components/common/Identicon'
-import useSafeCardData from '../SelectSafesOnboarding/hooks/useSafeCardData'
+import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
+import { useAppSelector } from '@/store'
+import { selectCurrency } from '@/store/settingsSlice'
+import useWallet from '@/hooks/wallets/useWallet'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import type { SafeItem } from '@/hooks/safes'
+import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Skeleton } from '@/components/ui/skeleton'
 import SafeLogo from '@/public/images/logo-no-text.svg'
 
@@ -20,6 +26,13 @@ export interface SafeAppMockupProps {
   name: string
   highlight: 'switcher' | 'accounts' | 'none'
   accounts?: SafeAppMockupAccount[]
+  /**
+   * Flat list of SafeItems (one entry per chain) used to query and aggregate the
+   * balance shown in the mockup's top-left "total value" position. Multi-chain
+   * Safes contribute one SafeItem per chain so the total sums correctly.
+   * Matches the real Spaces dashboard's AggregatedBalance pattern.
+   */
+  balanceSafes?: SafeItem[]
 }
 
 // ─── Space-selector-style avatar (rounded-md, brand green bg) ────────────────
@@ -31,49 +44,38 @@ const SpaceAvatar = ({ initial }: { initial: string }) => (
   </div>
 )
 
-// ─── Compact-currency formatter for the aggregated balance ────────────────────
+// ─── Currency formatters ──────────────────────────────────────────────────────
 
-const compactFiatFormatter = new Intl.NumberFormat('en-US', {
-  notation: 'compact',
-  compactDisplay: 'short',
-  maximumFractionDigits: 1,
+// Per-row formatter — full thousand-separated, two decimals max ($1,024 / $0.06).
+const rowFiatFormatter = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 2,
 })
-
-const formatTotalFiat = (n: number): string => '$' + compactFiatFormatter.format(n)
-
-const parseFiatNumber = (formatted: string | undefined): number | null => {
-  if (!formatted) return null
-  const cleaned = formatted.replace(/[^0-9.-]/g, '')
-  const num = parseFloat(cleaned)
-  return isNaN(num) ? null : num
-}
-
-// ─── Hidden probe component: fetches one safe's fiat value and reports up ─────
-
-interface BalanceProbeProps {
-  safe: SafeItem
-  address: string
-  onLoad: (address: string, value: number) => void
-}
+const formatRowFiat = (n: number): string => '$' + rowFiatFormatter.format(n)
 
 /**
- * Calls useSafeCardData for a single safe and bubbles its parsed numeric balance
- * up via callback. Renders nothing — purely used so SafeAppMockup can aggregate
- * fiat across all accounts without violating hooks-in-loop rules at the parent.
+ * Sums fiatTotal across all SafeOverview entries whose address matches `address`.
+ * Multi-chain Safes are flattened to N overviews (one per chain), so summing
+ * by address aggregates their balance.
  */
-const BalanceProbe = ({ safe, address, onLoad }: BalanceProbeProps) => {
-  const { fiatValue } = useSafeCardData(safe)
-  useEffect(() => {
-    const num = parseFiatNumber(fiatValue)
-    if (num !== null) onLoad(address, num)
-  }, [fiatValue, address, onLoad])
-  return null
+const sumOverviewsForAddress = (overviews: SafeOverview[] | undefined, address: string): number | null => {
+  if (!overviews) return null
+  let found = false
+  let total = 0
+  for (const o of overviews) {
+    if (sameAddress(o.address.value, address)) {
+      found = true
+      total += Number(o.fiatTotal) || 0
+    }
+  }
+  return found ? total : null
 }
 
-// ─── Per-row account component (Option B: per-row hook call) ──────────────────
+// ─── Per-row account component ───────────────────────────────────────────────
 
 interface AccountRowProps {
   account: SafeAppMockupAccount
+  /** Pre-computed fiat (in currency-major units) summed across all chains for this address. */
+  fiatValue: number | null
 }
 
 const shortenAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-4)}`
@@ -83,9 +85,8 @@ const shortenAddress = (address: string) => `${address.slice(0, 6)}...${address.
  * to get a live fiatValue; otherwise falls back to the pre-computed fiatValue string.
  * React hook rules are satisfied because the safe list is stable within a session.
  */
-const AccountRow = ({ account }: AccountRowProps) => {
-  const liveData = useSafeCardData(account._safeItem ?? ({ address: account.address, chainId: '' } as SafeItem))
-  const fiatValue = account._safeItem ? liveData.fiatValue : account.fiatValue
+const AccountRow = ({ account, fiatValue }: AccountRowProps) => {
+  const displayFiat = fiatValue !== null ? formatRowFiat(fiatValue) : undefined
   // If no name is available, fall back to the shortened address as the primary text
   // (matches the real Safe app behaviour — never show a single bare character).
   const primaryText = account.name?.trim() || shortenAddress(account.address)
@@ -107,7 +108,7 @@ const AccountRow = ({ account }: AccountRowProps) => {
 
       {/* Fiat value right-aligned — matches AccountItem.Balance */}
       <div className="shrink-0 text-sm leading-tight font-medium tabular-nums text-foreground">
-        {fiatValue !== undefined ? fiatValue : <Skeleton className="h-3 w-12" />}
+        {displayFiat !== undefined ? displayFiat : <Skeleton className="h-3 w-12" />}
       </div>
     </div>
   )
@@ -115,7 +116,7 @@ const AccountRow = ({ account }: AccountRowProps) => {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-const SafeAppMockup = ({ name, highlight, accounts }: SafeAppMockupProps) => {
+const SafeAppMockup = ({ name, highlight, accounts, balanceSafes }: SafeAppMockupProps) => {
   const trimmed = name.trim()
   const displayName = trimmed || 'Your Space'
   // Initial follows displayName so empty state shows 'Y' (from "Your Space"), not '?'
@@ -123,14 +124,22 @@ const SafeAppMockup = ({ name, highlight, accounts }: SafeAppMockupProps) => {
 
   const visibleAccounts = accounts?.slice(0, 4)
 
-  // Aggregate fiat across ALL accounts (not just visible). Each probe component
-  // calls useSafeCardData for its safe and reports the numeric value up here.
-  const [balances, setBalances] = useState<Record<string, number>>({})
-  const handleBalance = useCallback((address: string, value: number) => {
-    setBalances((prev) => (prev[address] === value ? prev : { ...prev, [address]: value }))
-  }, [])
-  const totalFiat = useMemo(() => Object.values(balances).reduce((a, b) => a + b, 0), [balances])
-  const probedAccounts = useMemo(() => (accounts ?? []).filter((a) => a._safeItem), [accounts])
+  // Bulk-query all selected Safes' overviews in one call — same pattern as the
+  // real Spaces dashboard's AggregatedBalance.tsx. Each multi-chain Safe contributes
+  // one SafeItem per chain, so summing across the response naturally aggregates.
+  const { address: walletAddress } = useWallet() ?? {}
+  const currency = useAppSelector(selectCurrency)
+  const safesForQuery = balanceSafes ?? []
+  const { data: safeOverviews } = useGetMultipleSafeOverviewsQuery({
+    safes: safesForQuery,
+    walletAddress,
+    currency,
+  })
+  const totalFiat = useMemo(
+    () => (safeOverviews ?? []).reduce((sum, o) => sum + Number(o.fiatTotal), 0),
+    [safeOverviews],
+  )
+  const formattedTotal = formatCurrencyPrecise(totalFiat, currency)
 
   // Nav items matching the real spacesMainNavigation + spacesSetupGroup
   const navItems = [
@@ -198,11 +207,6 @@ const SafeAppMockup = ({ name, highlight, accounts }: SafeAppMockupProps) => {
 
           {/* ── Content column ── */}
           <div className="flex flex-1 flex-col overflow-hidden bg-muted">
-            {/* Hidden balance probes — one per account, used to aggregate total fiat */}
-            {probedAccounts.map((a) => (
-              <BalanceProbe key={a.address} safe={a._safeItem!} address={a.address} onLoad={handleBalance} />
-            ))}
-
             {/* TOP BAR skeletons — title pill + round icon + pill, like the real app header.
                 Uses --color-background-skeleton (project's theme-aware skeleton token). */}
             <div className="flex items-center gap-3 px-6 pb-8 pt-4">
@@ -217,7 +221,7 @@ const SafeAppMockup = ({ name, highlight, accounts }: SafeAppMockupProps) => {
               <div>
                 <div className="mb-2 h-3 w-20 rounded-md bg-[var(--color-background-skeleton)]" />
                 <span className="text-4xl font-semibold leading-none tracking-tight text-foreground tabular-nums">
-                  {totalFiat > 0 ? formatTotalFiat(totalFiat) : <span className="text-muted-foreground">$0</span>}
+                  {totalFiat > 0 ? formattedTotal : <span className="text-muted-foreground">{formattedTotal}</span>}
                 </span>
               </div>
               {/* Filter chips */}
@@ -251,7 +255,13 @@ const SafeAppMockup = ({ name, highlight, accounts }: SafeAppMockupProps) => {
                 {/* Account rows — px-0 on wrapper, each row provides its own px-4 */}
                 <div className="flex flex-col">
                   {visibleAccounts && visibleAccounts.length > 0
-                    ? visibleAccounts.map((account) => <AccountRow key={account.address} account={account} />)
+                    ? visibleAccounts.map((account) => (
+                        <AccountRow
+                          key={account.address}
+                          account={account}
+                          fiatValue={sumOverviewsForAddress(safeOverviews, account.address)}
+                        />
+                      ))
                     : /* Empty state skeleton rows */
                       [88, 70, 80].map((w, i) => (
                         <div key={i} className="flex items-center gap-3 rounded-2xl px-4 py-3">

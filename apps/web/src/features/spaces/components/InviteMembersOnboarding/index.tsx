@@ -13,6 +13,7 @@ import {
   useSafeNameLookup,
 } from '@/features/spaces/components/OnboardingLayout'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { flattenSafeItems } from '@/hooks/safes'
 import MemberInviteRow from './components/MemberInviteRow'
 import useInviteNavigation from './hooks/useInviteNavigation'
 import useInviteForm from './hooks/useInviteForm'
@@ -34,6 +35,7 @@ const InviteMembersOnboarding = (): ReactElement => {
     () => deriveSidePanelAccountsFromSpace(spaceSafes, nameLookup),
     [spaceSafes, nameLookup],
   )
+  const balanceSafes = useMemo(() => flattenSafeItems(spaceSafes), [spaceSafes])
 
   const main = (
     <form id={FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-6">
@@ -122,7 +124,14 @@ const InviteMembersOnboarding = (): ReactElement => {
     <OnboardingLayout
       main={main}
       footer={footer}
-      sidePanel={<SpaceSidePanel name={space?.name ?? ''} highlight="accounts" accounts={sidePanelAccounts} />}
+      sidePanel={
+        <SpaceSidePanel
+          name={space?.name ?? ''}
+          highlight="accounts"
+          accounts={sidePanelAccounts}
+          balanceSafes={balanceSafes}
+        />
+      }
     />
   )
 }

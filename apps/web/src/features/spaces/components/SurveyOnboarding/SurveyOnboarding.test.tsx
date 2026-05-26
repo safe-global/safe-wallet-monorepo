@@ -81,6 +81,11 @@ jest.mock('@/features/spaces/components/OnboardingLayout', () => ({
   useSafeNameLookup: () => new Map<string, string>(),
 }))
 
+jest.mock('@/hooks/safes', () => ({
+  flattenSafeItems: () => [],
+  isMultiChainSafeItem: () => false,
+}))
+
 jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: [], isLoading: false, isError: false, error: undefined, refetch: jest.fn() }),
 }))

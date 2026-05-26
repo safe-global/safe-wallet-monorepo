@@ -14,7 +14,8 @@ import {
 } from '@/features/spaces/components/OnboardingLayout'
 import type { SafeAppMockupAccount } from '@/features/spaces/components/OnboardingLayout'
 import useWallet from '@/hooks/wallets/useWallet'
-import { isMultiChainSafeItem, type AllSafeItems, type SafeItem } from '@/hooks/safes'
+import { flattenSafeItems, isMultiChainSafeItem, type AllSafeItems, type SafeItem } from '@/hooks/safes'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import OnboardingSafesList from './components/OnboardingSafesList'
 import ConnectWalletPrompt from './components/ConnectWalletPrompt'
@@ -146,6 +147,42 @@ const SelectSafesOnboarding = (): ReactElement => {
     }))
   }, [selectedSafes, allSafes, spaceSafes, nameByAddress])
 
+  // Flat per-chain SafeItem list for the bulk balance query inside the mockup —
+  // mirrors the real Spaces dashboard's AggregatedBalance pattern. While the form
+  // is initialised, derive from the user's current selection (one entry per
+  // selected chain — multi-chain Safes contribute multiple entries). Before init,
+  // fall back to flattening the persisted Space safes.
+  const balanceSafes = useMemo<SafeItem[]>(() => {
+    const entries = Object.entries(selectedSafes ?? {})
+    if (entries.length === 0) return flattenSafeItems(spaceSafes)
+
+    const result: SafeItem[] = []
+    for (const [key, isSelected] of entries) {
+      if (!isSelected) continue
+      if (key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX)) continue
+      const colonIdx = key.indexOf(':')
+      if (colonIdx === -1) continue
+      const chainId = key.slice(0, colonIdx)
+      const address = key.slice(colonIdx + 1)
+      // Find the matching SafeItem in allSafes (handles both single + multi-chain shapes)
+      let found: SafeItem | undefined
+      for (const safe of allSafes) {
+        if (isMultiChainSafeItem(safe)) {
+          const sub = safe.safes.find((s) => s.chainId === chainId && sameAddress(s.address, address))
+          if (sub) {
+            found = sub
+            break
+          }
+        } else if (safe.chainId === chainId && sameAddress(safe.address, address)) {
+          found = safe
+          break
+        }
+      }
+      if (found) result.push(found)
+    }
+    return result
+  }, [selectedSafes, allSafes, spaceSafes])
+
   const main = (
     <FormProvider {...formMethods}>
       <form id={FORM_ID} onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col gap-6 h-full">
@@ -252,7 +289,14 @@ const SelectSafesOnboarding = (): ReactElement => {
     <OnboardingLayout
       main={main}
       footer={footer}
-      sidePanel={<SpaceSidePanel name={space?.name ?? ''} highlight="accounts" accounts={sidePanelAccounts} />}
+      sidePanel={
+        <SpaceSidePanel
+          name={space?.name ?? ''}
+          highlight="accounts"
+          accounts={sidePanelAccounts}
+          balanceSafes={balanceSafes}
+        />
+      }
     />
   )
 }

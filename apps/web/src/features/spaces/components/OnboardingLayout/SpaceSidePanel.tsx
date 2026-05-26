@@ -1,4 +1,5 @@
 import SafeAppMockup, { type SafeAppMockupProps, type SafeAppMockupAccount } from './SafeAppMockup'
+import type { SafeItem } from '@/hooks/safes'
 
 export type { SafeAppMockupAccount }
 
@@ -6,10 +7,11 @@ interface SpaceSidePanelProps {
   name: string
   highlight: SafeAppMockupProps['highlight']
   accounts?: SafeAppMockupAccount[]
+  balanceSafes?: SafeItem[]
 }
 
-const SpaceSidePanel = ({ name, highlight, accounts }: SpaceSidePanelProps) => (
-  <SafeAppMockup name={name} highlight={highlight} accounts={accounts} />
+const SpaceSidePanel = ({ name, highlight, accounts, balanceSafes }: SpaceSidePanelProps) => (
+  <SafeAppMockup name={name} highlight={highlight} accounts={accounts} balanceSafes={balanceSafes} />
 )
 
 export default SpaceSidePanel
