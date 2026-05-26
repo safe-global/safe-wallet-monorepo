@@ -56,7 +56,6 @@ export type ScannerId =
   | 'transaction_scanning'
   | 'fallback_handler'
   | 'factory_validation'
-  | 'signer_integrity'
 
 export type SecurityScanner = {
   id: ScannerId
