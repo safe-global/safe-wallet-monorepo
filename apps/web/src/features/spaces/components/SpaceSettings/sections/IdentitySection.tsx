@@ -45,6 +45,7 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
       isAwaitingCacheSync.current = true
       await updateSpace({ id: space.id, updateSpaceDto: { name: trimmedName } }).unwrap()
       setName(trimmedName)
+      isAwaitingCacheSync.current = false
       dispatch(
         showNotification({
           variant: 'success',

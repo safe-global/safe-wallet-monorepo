@@ -15,7 +15,7 @@ const AccountPage = () => {
   const { logout } = useLogout()
 
   const handleSignOut = () => {
-    trackEvent(SPACE_EVENTS.AUTH_LOGGED_OUT, { timestamp: new Date().toISOString() })
+    trackEvent(SPACE_EVENTS.AUTH_LOGGED_OUT)
     logout()
   }
 
