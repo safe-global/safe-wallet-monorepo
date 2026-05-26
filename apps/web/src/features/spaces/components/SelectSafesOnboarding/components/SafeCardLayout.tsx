@@ -45,7 +45,7 @@ export const SafeCardLayout = ({
     className={cn(
       'box-border flex w-full min-w-0 max-w-full cursor-pointer items-center gap-1.5 rounded-3xl border-2 py-4 pl-2 pr-3 text-left transition-colors disabled:opacity-60 sm:gap-2 sm:pr-6',
       checked
-        ? 'border-[#12FF80] bg-[#12FF80]/5 shadow-[0_0_0_3px_rgba(18,255,128,0.25)]'
+        ? 'border-[var(--color-secondary-light)] bg-[var(--color-secondary-background)]'
         : 'border-card bg-card hover:bg-muted/50',
     )}
   >

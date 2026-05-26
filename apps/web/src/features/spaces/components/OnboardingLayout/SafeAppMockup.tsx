@@ -172,7 +172,7 @@ const SafeAppMockup = ({ name, highlight, accounts }: SafeAppMockupProps) => {
               }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
               style={{ transformOrigin: 'left center' }}
-              className="flex items-center gap-3 rounded-xl bg-muted p-3 transition-colors hover:bg-accent-secondary"
+              className="flex items-center gap-3 rounded-xl bg-muted p-3 transition-colors hover:bg-[var(--color-secondary-background)]"
             >
               {/* Avatar: circular, brand green bg, letter initial */}
               <SpaceAvatar initial={initial} />
@@ -203,28 +203,29 @@ const SafeAppMockup = ({ name, highlight, accounts }: SafeAppMockupProps) => {
               <BalanceProbe key={a.address} safe={a._safeItem!} address={a.address} onLoad={handleBalance} />
             ))}
 
-            {/* TOP BAR skeletons — title pill + round icon + pill, like the real app header */}
+            {/* TOP BAR skeletons — title pill + round icon + pill, like the real app header.
+                Uses --color-background-skeleton (project's theme-aware skeleton token). */}
             <div className="flex items-center gap-3 px-6 pb-8 pt-4">
-              <div className="h-9 w-60 shrink-0 rounded-xl bg-muted" />
+              <div className="h-9 w-60 shrink-0 rounded-xl bg-[var(--color-background-skeleton)]" />
               <div className="flex-1" />
-              <div className="size-9 shrink-0 rounded-full bg-muted" />
-              <div className="h-9 w-32 shrink-0 rounded-full bg-muted" />
+              <div className="size-9 shrink-0 rounded-full bg-[var(--color-background-skeleton)]" />
+              <div className="h-9 w-32 shrink-0 rounded-full bg-[var(--color-background-skeleton)]" />
             </div>
 
             {/* BALANCE BLOCK — small label skeleton + big $ total + filter chip skeletons */}
             <div className="flex flex-col gap-4 px-6 pt-2">
               <div>
-                <div className="mb-2 h-3 w-20 rounded-md bg-muted" />
+                <div className="mb-2 h-3 w-20 rounded-md bg-[var(--color-background-skeleton)]" />
                 <span className="text-4xl font-semibold leading-none tracking-tight text-foreground tabular-nums">
                   {totalFiat > 0 ? formatTotalFiat(totalFiat) : <span className="text-muted-foreground">$0</span>}
                 </span>
               </div>
               {/* Filter chips */}
               <div className="flex gap-2">
-                <div className="h-9 w-20 shrink-0 rounded-xl bg-muted" />
-                <div className="h-9 w-[90px] shrink-0 rounded-xl bg-muted" />
-                <div className="h-9 w-[70px] shrink-0 rounded-xl bg-muted" />
-                <div className="h-9 w-32 shrink-0 rounded-xl bg-muted" />
+                <div className="h-9 w-20 shrink-0 rounded-xl bg-[var(--color-background-skeleton)]" />
+                <div className="h-9 w-[90px] shrink-0 rounded-xl bg-[var(--color-background-skeleton)]" />
+                <div className="h-9 w-[70px] shrink-0 rounded-xl bg-[var(--color-background-skeleton)]" />
+                <div className="h-9 w-32 shrink-0 rounded-xl bg-[var(--color-background-skeleton)]" />
               </div>
             </div>
 
