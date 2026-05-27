@@ -16,22 +16,22 @@ const headCells = [
   {
     id: 'name',
     label: 'Name',
-    width: '50%',
+    width: '40%',
   },
   {
     id: 'email',
     label: 'Email',
-    width: '21%',
+    width: '30%',
   },
   {
     id: 'role',
     label: 'Role',
-    width: '21%',
+    width: '15%',
   },
   {
     id: 'actions',
     label: '',
-    width: '8%',
+    width: '15%',
     sticky: true,
   },
 ]
