@@ -111,11 +111,11 @@ documentation for your OS.
 Maestro tests rely on environment variables that must be set before running tests. The
 `app-start.yml` utility provides sensible defaults when variables are unset, but Maestro Studio does **not** read defaults from YAML files, so you must pass them explicitly.
 
-| Variable           | Description                                                          | iOS (production)            | iOS (dev)                       | Android (production)    | Android (dev)               |
-| ------------------ | -------------------------------------------------------------------- | --------------------------- | ------------------------------- | ----------------------- | --------------------------- |
-| `APP_ID`           | Bundle / package identifier of the installed app                     | `global.safe.mobileapp.ios` | `global.safe.mobileapp.ios.dev` | `global.safe.mobileapp` | `global.safe.mobileapp.dev` |
-| `IS_DEV_MODE`      | Set to `"true"` to dismiss dev-only dialogs on start                 | `false` (default)           | `true`                          | `false` (default)       | `true`                      |
-| `SKIP_CLEAN_START` | Set to `"true"` to preserve app state between tests (used in suites) | `false` (default)           |
+| Variable           | Description                                                        | iOS (production)            | iOS (dev)                       | Android (production)    | Android (dev)               |
+| ------------------ | ------------------------------------------------------------------ | --------------------------- | ------------------------------- | ----------------------- | --------------------------- |
+| `APP_ID`           | Bundle / package identifier of the installed app                   | `global.safe.mobileapp.ios` | `global.safe.mobileapp.ios.dev` | `global.safe.mobileapp` | `global.safe.mobileapp.dev` |
+| `IS_DEV_MODE`      | Set to `true` to dismiss dev-only dialogs on start                 | `false` (default)           | `true`                          | `false` (default)       | `true`                      |
+| `SKIP_CLEAN_START` | Set to `true` to preserve app state between tests (used in suites) | `false` (default)           |
 
 > [!TIP]
 >
