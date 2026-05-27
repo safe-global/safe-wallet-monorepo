@@ -89,7 +89,6 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { captureException, initObservability } from '@/services/observability'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
-import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
 import { useOidcLoginCallback } from '@/features/oidc-auth'
@@ -137,7 +136,6 @@ const InitApp = (): ReactElement | null => {
   useInitWeb3()
   useBeamer()
   useVisitedSafes()
-  useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
   useOidcLoginCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
@@ -189,16 +187,6 @@ interface SafeWalletAppProps extends AppProps {
   emotionCache?: EmotionCache
 }
 
-const TermsGate = ({ children }: { children: ReactNode }) => {
-  const { shouldShowContent } = useSafeLabsTerms()
-
-  if (!shouldShowContent) {
-    return null
-  }
-
-  return <>{children}</>
-}
-
 const SafeWalletApp = ({
   Component,
   pageProps,
@@ -223,27 +211,25 @@ const SafeWalletApp = ({
 
             <LazyWeb3Init />
 
-            <TermsGate>
-              <PageLayout pathname={router.pathname}>
-                <Component {...pageProps} key={safeKey} />
-              </PageLayout>
+            <PageLayout pathname={router.pathname}>
+              <Component {...pageProps} key={safeKey} />
+            </PageLayout>
 
-              <CookieAndTermBanner />
+            <CookieAndTermBanner />
 
-              <TargetedOutreachPopupLoader />
+            <TargetedOutreachPopupLoader />
 
-              <Notifications />
+            <Notifications />
 
-              <RecoveryLoader />
+            <RecoveryLoader />
 
-              <CounterfactualHooksLoader />
+            <CounterfactualHooksLoader />
 
-              <SpendingLimitsLoaderWrapper />
+            <SpendingLimitsLoaderWrapper />
 
-              <Analytics />
+            <Analytics />
 
-              <PkModulePopup />
-            </TermsGate>
+            <PkModulePopup />
           </CaptchaProvider>
         </AppProviders>
       </CacheProvider>

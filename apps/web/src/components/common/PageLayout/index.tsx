@@ -36,7 +36,6 @@ const ONBOARDING_ROUTES = [
 const STATIC_PAGE_ROUTES = [AppRoutes.terms, AppRoutes.privacy, AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
 
 const NO_HEADER_ROUTES = [
-  AppRoutes.safeLabsTerms,
   AppRoutes.welcome.index,
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
@@ -53,7 +52,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const { txFlow, setFullWidth } = useContext(TxModalContext)
   const { BatchSidebar } = useLoadFeature(BatchingFeature)
   const { SelectSafeModal } = useLoadFeature(SpacesFeature)
-  const isSafeLabsTermsPage = pathname === AppRoutes.safeLabsTerms
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
   const isRequireLoginEnabled = useIsRequireLoginEnabled() === true
   // /welcome/spaces is the canonical login page when the require-login gate is
@@ -161,7 +159,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
         <BatchSidebar isOpen={isBatchOpen} onToggle={setBatchOpen} />
 
-        {!isSafeLabsTermsPage && <Footer />}
+        <Footer />
       </div>
 
       <SelectSafeModal />
