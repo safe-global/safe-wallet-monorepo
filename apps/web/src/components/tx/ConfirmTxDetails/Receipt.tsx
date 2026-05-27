@@ -13,11 +13,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { Operation } from '@safe-global/store/gateway/types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { skipToken } from '@reduxjs/toolkit/query'
-import { useGetGtfFeePreviewQuery } from '@/store/api/gateway'
-import { toSupportedFiatCode } from '@/store/api/gateway/gtfFeePreview'
-import { useAppSelector } from '@/store'
-import { selectCurrency } from '@/store/settingsSlice'
+import { useGtfFeePreview } from '@/features/gtf/hooks/useGtfFeePreview'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import {
   useDomainHash,
@@ -49,7 +45,6 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   const { safe, safeAddress } = useSafeInfo()
   const { safeTx, gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
   const { balances } = useBalances()
-  const currency = useAppSelector(selectCurrency)
   const safeTxHash = useSafeTxHash({ safeTxData })
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData })
@@ -72,23 +67,14 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   const gasTokenLogo = isNativeGasToken ? chain?.nativeCurrency.logoUri : heldToken?.tokenInfo.logoUri
   const gasTokenSymbol = isNativeGasToken ? chain?.nativeCurrency.symbol : heldToken?.tokenInfo.symbol
 
-  const previewArg =
-    shouldPreviewGtf && safeTx && gtfSelectedGasToken && chain?.chainId && safeAddress && safe.threshold > 0
-      ? {
-          chainId: chain.chainId,
-          safeAddress,
-          tx: {
-            to: safeTx.data.to,
-            value: safeTx.data.value,
-            data: safeTx.data.data,
-            operation: safeTx.data.operation,
-            gasToken: gtfSelectedGasToken,
-            numberSignatures: safe.threshold,
-            fiatCode: toSupportedFiatCode(currency),
-          },
-        }
-      : skipToken
-  const { data: previewData } = useGetGtfFeePreviewQuery(previewArg)
+  const { data: previewData } = useGtfFeePreview({
+    enabled: shouldPreviewGtf,
+    safeTx,
+    chainId: chain?.chainId,
+    safeAddress,
+    gasToken: gtfSelectedGasToken,
+    numberSignatures: safe.threshold,
+  })
   const displayRefundReceiver =
     shouldPreviewGtf && previewData?.txData.refundReceiver
       ? previewData.txData.refundReceiver

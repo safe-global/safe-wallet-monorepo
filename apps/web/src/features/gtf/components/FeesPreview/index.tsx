@@ -1,6 +1,6 @@
-import type { ReactElement, ReactNode } from 'react'
+import type { ReactElement } from 'react'
 import { useContext, useRef, useState } from 'react'
-import { Alert, Divider, MenuItem, Popover, Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Alert, Divider, MenuItem, Popover, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ArrowUpRightIcon from '@/public/images/common/arrow-up-right.svg'
@@ -12,73 +12,13 @@ import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { GtfPaymentMode } from '@/features/gtf/types'
-import type { FeesPreviewData, FeeRow as FeeRowType, TotalOutgoing } from '../../hooks/useFeesPreview'
+import type { FeesPreviewData, TotalOutgoing } from '../../hooks/useFeesPreview'
+import { FeeBreakdownRow } from '../shared/FeeBreakdownRow'
+import { EXECUTION_FEE_TOOLTIP, GAS_FEE_TOOLTIP } from '../shared/tooltips'
 import css from './styles.module.css'
 
-const EXECUTION_FEE_TOOLTIP =
-  'Covers third-party services required to securely execute this transaction. Based on the transaction amount. Currently free while the new model is introduced.'
-const GAS_FEE_TOOLTIP = 'Network cost required to process this transaction on the blockchain.'
 const SIGNER_FEE_TOOLTIP = 'Fees will be paid from the connected signer wallet when executing this transaction.'
 const HOW_FEES_WORK_URL = 'https://help.safe.global/en/articles/618701-safe-wallet-gas-fees-faq'
-
-const FeeRow = ({
-  label,
-  amount,
-  currency,
-  fiatAmount,
-  isFree,
-  note,
-  loading,
-  error,
-  tooltip,
-}: FeeRowType & { loading?: boolean; error?: boolean; tooltip?: ReactNode }): ReactElement => (
-  <div className={css.feeRow}>
-    <div className={css.feeLabel}>
-      <Typography variant="body2">{label}</Typography>
-      {tooltip && (
-        <Tooltip title={tooltip} placement="top" arrow>
-          <span className={css.tooltipIcon}>
-            <SvgIcon component={InfoIcon} inheritViewBox sx={{ fontSize: '16px' }} color="border" />
-          </span>
-        </Tooltip>
-      )}
-    </div>
-
-    <div className={css.feeValue}>
-      {loading ? (
-        <Skeleton variant="text" sx={{ minWidth: '7em' }} />
-      ) : error ? (
-        <Typography variant="body2" color="warning.main">
-          Cannot estimate
-        </Typography>
-      ) : note ? (
-        <Typography variant="body2" color="text.secondary">
-          {note}
-        </Typography>
-      ) : (
-        <>
-          <div className={css.feeAmount}>
-            {isFree && (
-              <Typography variant="body2" component="span" color="success.main" fontWeight={700}>
-                FREE
-              </Typography>
-            )}
-            {amount && (
-              <Typography variant="body2" component="span" className={isFree ? css.strikethrough : undefined}>
-                {amount} {currency}
-              </Typography>
-            )}
-          </div>
-          {fiatAmount && (
-            <Typography variant="caption" color="text.secondary">
-              {fiatAmount}
-            </Typography>
-          )}
-        </>
-      )}
-    </div>
-  </div>
-)
 
 const TotalOutgoingSection = ({ totalOutgoing }: { totalOutgoing: TotalOutgoing }): ReactElement => (
   <div className={css.totalOutgoing}>
@@ -420,8 +360,8 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
           </>
         )}
 
-        <FeeRow {...executionFee} loading={props.loading} tooltip={EXECUTION_FEE_TOOLTIP} />
-        <FeeRow {...gasFee} loading={props.loading} error={props.error} tooltip={GAS_FEE_TOOLTIP} />
+        <FeeBreakdownRow {...executionFee} loading={props.loading} tooltip={EXECUTION_FEE_TOOLTIP} />
+        <FeeBreakdownRow {...gasFee} loading={props.loading} error={props.error} tooltip={GAS_FEE_TOOLTIP} />
       </div>
 
       {/* Safe-pays only — surfaced when the Safe doesn't currently hold enough of the chosen

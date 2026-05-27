@@ -5,7 +5,8 @@ import { Box, CardActions, Divider, Tooltip } from '@mui/material'
 import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
-import { useCurrentChain } from '@/hooks/useChains'
+import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { getTxOptions } from '@/utils/transactions'
 import useIsValidExecution from '@/hooks/useIsValidExecution'
@@ -84,9 +85,10 @@ export const ExecuteForm = ({
   // a stale `gtfPaymentMode === 'safe'` from the user's persisted preference must NOT force the
   // relay path on a tx whose payload doesn't carry the GTF fee fields (would fail in handlePayment).
   const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
   const requiresRelay =
     (safeTx && isGtfSafePaid(safeTx.data)) ||
-    (!!safeTx && safeTx.signatures.size === 0 && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken)
+    (isGtfChain && !!safeTx && safeTx.signatures.size === 0 && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken)
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)

@@ -10,6 +10,12 @@ jest.mock('@/services/tx/tx-sender', () => ({
   createTx: jest.fn(),
 }))
 
+const mockTrackError = jest.fn()
+jest.mock('@/services/exceptions', () => ({
+  trackError: (...args: unknown[]) => mockTrackError(...args),
+  Errors: { _805: '805: Error proposing or confirming a transaction' },
+}))
+
 jest.mock('@/store/api/gateway', () => ({
   gatewayApi: {
     endpoints: {
@@ -121,6 +127,10 @@ describe('resolveFeeParams', () => {
     ).rejects.toThrow(/untrusted refundReceiver/)
 
     expect(mockCreateTx).not.toHaveBeenCalled()
+    expect(mockTrackError).toHaveBeenCalledWith(
+      expect.stringContaining('805'),
+      expect.stringContaining('Untrusted GTF refundReceiver'),
+    )
   })
 
   it('propagates errors from the preview dispatch', async () => {

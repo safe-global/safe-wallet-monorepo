@@ -6,21 +6,15 @@ import {
   AccordionSummary,
   accordionSummaryClasses,
   styled,
-  SvgIcon,
-  Tooltip,
   Typography,
 } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import InfoIcon from '@/public/images/notifications/info.svg'
 import type { HistoryFeesData } from '../../hooks/useHistoryFeesBreakdown'
-import type { FeeRow as FeeRowType } from '../../hooks/useFeesPreview'
+import { FeeBreakdownRow } from '../shared/FeeBreakdownRow'
+import { EXECUTION_FEE_TOOLTIP, GAS_FEE_TOOLTIP } from '../shared/tooltips'
 import css from './styles.module.css'
 import accordionCss from '@/styles/accordion.module.css'
-
-const EXECUTION_FEE_TOOLTIP =
-  'Covers third-party services required to securely execute this transaction. Based on the transaction amount. Currently free while the new model is introduced.'
-const GAS_FEE_TOOLTIP = 'Network cost required to process this transaction on the blockchain.'
 
 // Match ColorCodedTxAccordion ("Advanced details") so both accordions stack with matching
 // border + summary background per tx category. CSS vars are theme-aware — no light/dark branch.
@@ -46,48 +40,6 @@ const StyledAccordion = styled(Accordion, {
     backgroundColor: palette.bg,
   },
 }))
-
-const FeeBreakdownRow = ({
-  label,
-  amount,
-  currency,
-  fiatAmount,
-  isFree,
-  tooltip,
-}: FeeRowType & { tooltip?: string }): ReactElement => (
-  <div className={css.feeRow}>
-    <div className={css.feeLabel}>
-      <Typography variant="body2">{label}</Typography>
-      {tooltip && (
-        <Tooltip title={tooltip} placement="top" arrow>
-          <span className={css.tooltipIcon}>
-            <SvgIcon component={InfoIcon} inheritViewBox sx={{ fontSize: '16px' }} color="border" />
-          </span>
-        </Tooltip>
-      )}
-    </div>
-
-    <div className={css.feeValue}>
-      <div className={css.feeAmount}>
-        {isFree && (
-          <Typography variant="body2" component="span" color="success.main" fontWeight={700}>
-            FREE
-          </Typography>
-        )}
-        {amount && (
-          <Typography variant="body2" component={isFree ? 'del' : 'span'} color={isFree ? 'text.secondary' : undefined}>
-            {amount} {currency}
-          </Typography>
-        )}
-      </div>
-      {fiatAmount && (
-        <Typography variant="caption" color="text.secondary">
-          {fiatAmount}
-        </Typography>
-      )}
-    </div>
-  </div>
-)
 
 const HistoryFeesAccordion = ({
   data,
@@ -132,8 +84,8 @@ const HistoryFeesAccordion = ({
 
       <AccordionDetails sx={{ p: 0 }}>
         <div className={css.breakdownContainer}>
-          <FeeBreakdownRow {...data.executionFee} tooltip={EXECUTION_FEE_TOOLTIP} />
-          <FeeBreakdownRow {...data.gasFee} tooltip={GAS_FEE_TOOLTIP} />
+          <FeeBreakdownRow {...data.executionFee} tooltip={EXECUTION_FEE_TOOLTIP} strikeAs="del" />
+          <FeeBreakdownRow {...data.gasFee} tooltip={GAS_FEE_TOOLTIP} strikeAs="del" />
         </div>
       </AccordionDetails>
     </StyledAccordion>

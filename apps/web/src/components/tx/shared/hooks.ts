@@ -10,7 +10,6 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import { assertTx, assertOnboard, assertChainInfo, assertProvider } from '@/utils/helpers'
 import { useContext, useMemo } from 'react'
 import { type TransactionOptions, type SafeTransaction } from '@safe-global/types-kit'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet, { useSigner } from '@/hooks/wallets/useWallet'
@@ -31,6 +30,7 @@ import { useUpdateBatch } from '@/features/batching'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useLoadFeature } from '@/features/__core__'
 import { GTFFeature } from '@/features/gtf'
+import { mergeGtfFeeParams } from '@/features/gtf/services/mergeGtfFeeParams'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useAppDispatch } from '@/store'
 
@@ -68,23 +68,18 @@ export const useTxActions = (): TxActions => {
     const safeAddress = safe.address.value
     const { chainId } = safe
 
-    // Merge the CGW fee-preview fee fields into the SafeTx before the first signer signs.
-    // Confirmers inherit the locked fields from the signed payload — no merge needed.
-    const mergeGtfFeeParams = async (safeTx: SafeTransaction): Promise<SafeTransaction> => {
-      if (safeTx.signatures.size > 0) return safeTx
-      if (!chain || !hasFeature(chain, FEATURES.GTF)) return safeTx
-      if (gtfPaymentMode !== 'safe' || !gtfSelectedGasToken) return safeTx
-      if (!gtfFeature.$isReady || !gtfFeature.resolveFeeParams) return safeTx
-
-      return gtfFeature.resolveFeeParams({
+    const withGtfFeeParams = (safeTx: SafeTransaction) =>
+      mergeGtfFeeParams({
+        safeTx,
+        chain,
+        gtfPaymentMode,
+        gtfSelectedGasToken,
+        gtfFeature,
         chainId,
         safeAddress,
-        safeTx,
-        gasToken: gtfSelectedGasToken,
         numberSignatures: safe.threshold,
         dispatch,
       })
-    }
 
     const _propose = async (sender: string, safeTx: SafeTransaction, txId?: string, origin?: string) => {
       return dispatchTxProposal({
@@ -116,7 +111,7 @@ export const useTxActions = (): TxActions => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
 
-      safeTx = await mergeGtfFeeParams(safeTx)
+      safeTx = await withGtfFeeParams(safeTx)
 
       // Smart contracts cannot sign transactions off-chain
       if (await isSmartContractWallet(signer.chainId, signer.address)) {
@@ -130,7 +125,7 @@ export const useTxActions = (): TxActions => {
       assertProvider(signer?.provider)
       assertOnboard(onboard)
 
-      safeTx = await mergeGtfFeeParams(safeTx)
+      safeTx = await withGtfFeeParams(safeTx)
 
       // Smart contract wallets must sign via an on-chain tx
       if (signer.isSafe || (await isSmartContractWallet(signer.chainId, signer.address))) {

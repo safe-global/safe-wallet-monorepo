@@ -227,7 +227,8 @@ const TxFlowProvider = <T extends unknown>({
           ? 'safe'
           : 'signing_wallet'
       // Compute isMassPayout from data (recipients.length > 1)
-      const isMassPayout = (data as any)?.recipients?.length > 1
+      const recipients = (data as { recipients?: unknown[] } | undefined)?.recipients
+      const isMassPayout = Array.isArray(recipients) && recipients.length > 1
       // Track tx event
       trackTxEvents(
         details,

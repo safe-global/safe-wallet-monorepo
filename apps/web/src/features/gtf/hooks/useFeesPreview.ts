@@ -1,13 +1,8 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useMemo } from 'react'
 import { formatUnits } from 'ethers'
-import { skipToken } from '@reduxjs/toolkit/query'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { isEmptyHexData } from '@safe-global/utils/utils/hex'
-import { decodeMultiSendData } from '@safe-global/protocol-kit'
-import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useAppSelector } from '@/store'
@@ -17,14 +12,20 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useBalances from '@/hooks/useBalances'
 import useGasLimit from '@/hooks/useGasLimit'
 import useGasPrice from '@/hooks/useGasPrice'
-import { useGetGtfFeePreviewQuery } from '@/store/api/gateway'
-import { toSupportedFiatCode } from '@/store/api/gateway/gtfFeePreview'
+import { useGtfFeePreview } from './useGtfFeePreview'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
-import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCandidates'
 import { isGtfSafePaid } from '../utils/isGtfSafePaid'
+import {
+  computeTotalOutgoing,
+  getSendInGasToken,
+  type TotalOutgoing,
+  type TotalOutgoingLine,
+} from '../services/totalOutgoing'
+
+export type { TotalOutgoing, TotalOutgoingLine }
 
 export type FeeRow = {
   label: string
@@ -34,14 +35,6 @@ export type FeeRow = {
   isFree?: boolean
   /** When set, replaces the amount/currency/fiat slot with explanatory copy (e.g. "Calculated at execution"). */
   note?: string
-}
-
-export type TotalOutgoingLine = { amount: string; currency: string }
-export type TotalOutgoing = {
-  /** One line per outgoing token. Single-element for non-batched txs, multi-element for multiSend. */
-  primary: TotalOutgoingLine[]
-  fees?: TotalOutgoingLine
-  fiatTotal: string
 }
 
 export type FeesPreviewData = {
@@ -80,212 +73,7 @@ export type FeesPreviewData = {
   previewedSafeTx?: SafeTransaction
 }
 
-const ERC20_INTERFACE = ERC20__factory.createInterface()
-const TRANSFER_SELECTOR = ERC20_INTERFACE.getFunction('transfer').selector
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
-
-type TotalOutgoingInputs = {
-  safeTx: SafeTransaction
-  gasWei: bigint
-  relayCostFiat: number
-  relayCostFiatCode: string
-  nativeSymbol: string
-  nativeDecimals: number
-  gasTokenAddress: string
-  gasSymbol: string
-  gasDecimals: number
-  balances: Balances
-}
-
-const getOutflowInGasToken = (
-  { to, value, data }: { to: string; value: string; data: string },
-  gasTokenAddress: string,
-): bigint => {
-  if (!data || isEmptyHexData(data)) {
-    return sameAddress(gasTokenAddress, ZERO_ADDRESS) ? BigInt(value) : 0n
-  }
-  if (data.startsWith(TRANSFER_SELECTOR) && sameAddress(to, gasTokenAddress)) {
-    try {
-      return ERC20_INTERFACE.decodeFunctionData('transfer', data)[1] as bigint
-    } catch {
-      return 0n
-    }
-  }
-  // Native value attached to a contract call still leaves the Safe.
-  if (sameAddress(gasTokenAddress, ZERO_ADDRESS) && value !== '0') {
-    return BigInt(value)
-  }
-  return 0n
-}
-
-const getSendInGasToken = (safeTx: SafeTransaction, gasTokenAddress: string): bigint => {
-  const { to, value, data } = safeTx.data
-
-  if (data && isMultiSendCalldata(data)) {
-    try {
-      return decodeMultiSendData(data).reduce((sum, inner) => sum + getOutflowInGasToken(inner, gasTokenAddress), 0n)
-    } catch {
-      return 0n
-    }
-  }
-
-  return getOutflowInGasToken({ to, value, data }, gasTokenAddress)
-}
-
-const computeTotalOutgoing = ({
-  safeTx,
-  gasWei,
-  relayCostFiat,
-  relayCostFiatCode,
-  nativeSymbol,
-  nativeDecimals,
-  gasTokenAddress,
-  gasSymbol,
-  gasDecimals,
-  balances,
-}: TotalOutgoingInputs): TotalOutgoing | undefined => {
-  const { to, value, data } = safeTx.data
-  const isEmptyData = !data || data === '0x'
-  const gasIsNative = sameAddress(gasTokenAddress, ZERO_ADDRESS)
-
-  // Native transfer. Single currency when gas is paid in native; two when not.
-  if (value !== '0' && isEmptyData) {
-    const sendWei = BigInt(value)
-    const nativeToken = balances.items.find((b) => b.tokenInfo.type === 'NATIVE_TOKEN')
-    const sendFiat = nativeToken ? Number(formatUnits(sendWei, nativeDecimals)) * Number(nativeToken.fiatConversion) : 0
-
-    if (gasIsNative) {
-      return {
-        primary: [{ amount: formatVisualAmount(sendWei + gasWei, nativeDecimals), currency: nativeSymbol }],
-        fiatTotal: formatCurrencyMinimal(sendFiat + relayCostFiat, relayCostFiatCode),
-      }
-    }
-    return {
-      primary: [{ amount: formatVisualAmount(sendWei, nativeDecimals), currency: nativeSymbol }],
-      fees: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
-      fiatTotal: formatCurrencyMinimal(sendFiat + relayCostFiat, relayCostFiatCode),
-    }
-  }
-
-  // ERC-20 transfer.
-  if (data?.startsWith(TRANSFER_SELECTOR)) {
-    try {
-      const decoded = ERC20_INTERFACE.decodeFunctionData('transfer', data)
-      const transferValue = decoded[1] as bigint
-      const token = balances.items.find((b) => sameAddress(b.tokenInfo.address, to))
-      if (!token || token.tokenInfo.type !== 'ERC20') return undefined
-
-      const sendAmount = formatVisualAmount(transferValue, token.tokenInfo.decimals)
-      const sendFiat = Number(formatUnits(transferValue, token.tokenInfo.decimals)) * Number(token.fiatConversion)
-      const sendIsGasToken = sameAddress(token.tokenInfo.address, gasTokenAddress)
-
-      // Paying gas in the same token being sent — bundle amounts, single currency.
-      if (sendIsGasToken) {
-        return {
-          primary: [
-            {
-              amount: formatVisualAmount(transferValue + gasWei, token.tokenInfo.decimals),
-              currency: token.tokenInfo.symbol,
-            },
-          ],
-          fiatTotal: formatCurrencyMinimal(sendFiat + relayCostFiat, relayCostFiatCode),
-        }
-      }
-
-      return {
-        primary: [{ amount: sendAmount, currency: token.tokenInfo.symbol }],
-        fees: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
-        fiatTotal: formatCurrencyMinimal(sendFiat + relayCostFiat, relayCostFiatCode),
-      }
-    } catch {
-      return undefined
-    }
-  }
-
-  if (data && isMultiSendCalldata(data)) {
-    let inner
-    try {
-      inner = decodeMultiSendData(data)
-    } catch {
-      return undefined
-    }
-
-    type TokenTotal = { wei: bigint; symbol: string; decimals: number; fiatPerUnit: number; address: string }
-    const totals = new Map<string, TokenTotal>()
-
-    const accrue = (addr: string, wei: bigint) => {
-      if (wei === 0n) return
-      const key = addr.toLowerCase()
-      const existing = totals.get(key)
-      if (existing) {
-        existing.wei += wei
-        return
-      }
-      if (sameAddress(addr, ZERO_ADDRESS)) {
-        const native = balances.items.find((b) => b.tokenInfo.type === 'NATIVE_TOKEN')
-        totals.set(key, {
-          address: addr,
-          wei,
-          symbol: nativeSymbol,
-          decimals: nativeDecimals,
-          fiatPerUnit: native ? Number(native.fiatConversion) : 0,
-        })
-        return
-      }
-      const token = balances.items.find((b) => sameAddress(b.tokenInfo.address, addr))
-      if (!token || token.tokenInfo.type !== 'ERC20') return // unknown token — can't price/format
-      totals.set(key, {
-        address: addr,
-        wei,
-        symbol: token.tokenInfo.symbol,
-        decimals: token.tokenInfo.decimals,
-        fiatPerUnit: Number(token.fiatConversion),
-      })
-    }
-
-    for (const tx of inner) {
-      if (tx.value && tx.value !== '0') accrue(ZERO_ADDRESS, BigInt(tx.value))
-      if (tx.data && tx.data.startsWith(TRANSFER_SELECTOR)) {
-        try {
-          const amount = ERC20_INTERFACE.decodeFunctionData('transfer', tx.data)[1] as bigint
-          accrue(tx.to, amount)
-        } catch {
-          /* malformed inner transfer — skip */
-        }
-      }
-    }
-
-    if (totals.size === 0) return undefined
-
-    const sendsFiat = [...totals.values()].reduce(
-      (sum, t) => sum + Number(formatUnits(t.wei, t.decimals)) * t.fiatPerUnit,
-      0,
-    )
-
-    const gasKey = gasTokenAddress.toLowerCase()
-    const gasFolded = totals.has(gasKey)
-    if (gasFolded) totals.get(gasKey)!.wei += gasWei
-
-    return {
-      primary: [...totals.values()].map((t) => ({
-        amount: formatVisualAmount(t.wei, t.decimals),
-        currency: t.symbol,
-      })),
-      fees: gasFolded ? undefined : { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
-      fiatTotal: formatCurrencyMinimal(sendsFiat + relayCostFiat, relayCostFiatCode),
-    }
-  }
-
-  // No-op self-call: only outflow is gas. FeesPreview drops this row in Signer mode via its !isSafeWallet check.
-  if (isEmptyData) {
-    return {
-      primary: [{ amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol }],
-      fiatTotal: formatCurrencyMinimal(relayCostFiat, relayCostFiatCode),
-    }
-  }
-
-  return undefined
-}
 
 export const useFeesPreview = (): FeesPreviewData => {
   const { safeTx, gtfPaymentMode, gtfSelectedGasToken, setGtfSelectedGasToken } = useContext(SafeTxContext)
@@ -319,7 +107,7 @@ export const useFeesPreview = (): FeesPreviewData => {
 
   const { candidates, defaultAddress } = useGasTokenCandidates(isConfirmation ? undefined : txPayload)
 
-  const lockedCandidate = ((): GasTokenCandidate | undefined => {
+  const lockedCandidate = useMemo<GasTokenCandidate | undefined>(() => {
     if (!lockedGasToken) return undefined
     if (sameAddress(lockedGasToken, ZERO_ADDRESS)) {
       return {
@@ -341,7 +129,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       }
     }
     return { address: lockedGasToken, symbol: '', logoUri: '', decimals: nativeDecimals, fiatBalance: '0' }
-  })()
+  }, [lockedGasToken, balances.items, nativeSymbol, nativeDecimals, chain?.nativeCurrency.logoUri])
 
   // If the user's explicit choice drops out of candidates (e.g. balance dropped to 0), forget it.
   // Skip while the candidates list is empty — that's the transient remount window (Back/Forward
@@ -366,27 +154,14 @@ export const useFeesPreview = (): FeesPreviewData => {
   // Skip the query when the Safe holds no eligible gas token — without this the CGW endpoint
   // can still return a quote priced in native against ZERO_ADDRESS, surfacing "Pay from Safe"
   // with an empty token dropdown. The signer fallback below then takes over.
-  const preview = useGetGtfFeePreviewQuery(
-    !isConfirmation &&
-      !isSignerMode &&
-      !isLegacySigned &&
-      candidates.length > 0 &&
-      txPayload &&
-      chain?.chainId &&
-      safeAddress &&
-      safe.threshold > 0
-      ? {
-          chainId: chain.chainId,
-          safeAddress,
-          tx: {
-            ...txPayload,
-            gasToken: selectedAddress,
-            numberSignatures: safe.threshold,
-            fiatCode: toSupportedFiatCode(currency),
-          },
-        }
-      : skipToken,
-  )
+  const preview = useGtfFeePreview({
+    enabled: !isConfirmation && !isSignerMode && !isLegacySigned && candidates.length > 0,
+    safeTx,
+    chainId: chain?.chainId,
+    safeAddress,
+    gasToken: selectedAddress,
+    numberSignatures: safe.threshold,
+  })
 
   // Sync `gtfSelectedGasToken` with the latest preview state
   //  - preview unavailable (errored / no eligible token after settling): drop the persisted
@@ -420,6 +195,25 @@ export const useFeesPreview = (): FeesPreviewData => {
   // Fallback local estimation — drives the gas fee shown in the EOA fallback variant.
   const { gasLimit, gasLimitError, gasLimitLoading } = useGasLimit(safeTx)
   const [gasPrice, gasPriceError, gasPriceLoading] = useGasPrice()
+
+  // Memoize the merged signing payload so threat analysis (which receives this) doesn't
+  // re-run on unrelated re-renders. Identity changes only when the CGW-resolved fee fields
+  // or the underlying safeTx change.
+  const previewTxData = preview.data?.txData
+  const previewedSafeTx = useMemo<SafeTransaction | undefined>(() => {
+    if (!previewTxData || !safeTx) return undefined
+    return {
+      data: {
+        ...safeTx.data,
+        safeTxGas: previewTxData.safeTxGas,
+        baseGas: previewTxData.baseGas,
+        gasPrice: previewTxData.gasPrice,
+        gasToken: previewTxData.gasToken,
+        refundReceiver: previewTxData.refundReceiver,
+      },
+      signatures: safeTx.signatures,
+    } as SafeTransaction
+  }, [safeTx, previewTxData])
 
   const base = {
     executionFee: EXECUTION_FEE,
@@ -578,18 +372,6 @@ export const useFeesPreview = (): FeesPreviewData => {
       gasDecimals,
       balances,
     })
-
-    const previewedSafeTx = {
-      data: {
-        ...safeTx.data,
-        safeTxGas: txData.safeTxGas,
-        baseGas: txData.baseGas,
-        gasPrice: txData.gasPrice,
-        gasToken: txData.gasToken,
-        refundReceiver: txData.refundReceiver,
-      },
-      signatures: safeTx.signatures,
-    } as SafeTransaction
 
     return {
       ...base,
