@@ -6,7 +6,7 @@ export { useIsEarnFeatureEnabled, useIsEarnPromoEnabled } from './hooks'
 
 export { EarnButton } from './components'
 
-export { isEligibleEarnToken } from './services'
+export { isEligibleEarnToken, isEarnSupportedOnChain } from './services'
 
 export { EARN_TITLE } from './constants'
 

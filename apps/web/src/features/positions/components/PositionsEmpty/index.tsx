@@ -6,7 +6,8 @@ import { AppRoutes } from '@/config/routes'
 import Track from '@/components/common/Track'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { useIsEarnPromoEnabled } from '@/features/earn'
+import { isEarnSupportedOnChain, useIsEarnPromoEnabled } from '@/features/earn'
+import useChainId from '@/hooks/useChainId'
 
 type PositionsEmptyProps = {
   entryPoint?: string
@@ -14,7 +15,9 @@ type PositionsEmptyProps = {
 
 const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
   const router = useRouter()
+  const chainId = useChainId()
   const isEarnFeatureEnabled = useIsEarnPromoEnabled()
+  const showExploreEarn = isEarnFeatureEnabled && isEarnSupportedOnChain(chainId)
 
   return (
     <Paper elevation={0} sx={{ p: 3, textAlign: 'center' }}>
@@ -24,7 +27,7 @@ const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
         You have no active DeFi positions yet
       </Typography>
 
-      {isEarnFeatureEnabled && (
+      {showExploreEarn && (
         <Track
           {...POSITIONS_EVENTS.EMPTY_POSITIONS_EXPLORE_CLICKED}
           mixpanelParams={{

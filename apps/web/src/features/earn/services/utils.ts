@@ -8,3 +8,7 @@ export const vaultTypeToLabel = {
 export const isEligibleEarnToken = (chainId: string, tokenAddress: string) => {
   return EligibleEarnTokens[chainId]?.includes(tokenAddress)
 }
+
+export const isEarnSupportedOnChain = (chainId: string) => {
+  return Boolean(EligibleEarnTokens[chainId]?.length)
+}
