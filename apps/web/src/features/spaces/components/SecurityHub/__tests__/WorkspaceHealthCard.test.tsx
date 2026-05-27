@@ -104,4 +104,30 @@ describe('WorkspaceHealthCard', () => {
     rerender(<WorkspaceHealthCard {...baseProps} safes={[safe(SAFE_A)]} scanResults={{}} isScanning={false} />)
     expect(screen.queryByText('100')).not.toBeInTheDocument()
   })
+
+  it('shows an incomplete-scan note when the last scan was partial and not running', () => {
+    render(
+      <WorkspaceHealthCard
+        {...baseProps}
+        safes={[safe(SAFE_A)]}
+        scanResults={{ [scanKey(SAFE_A, '1')]: allClear }}
+        isScanning={false}
+        scanIncomplete
+      />,
+    )
+    expect(screen.getByText(/last scan didn't finish/i)).toBeInTheDocument()
+  })
+
+  it('hides the incomplete-scan note while a scan is running', () => {
+    render(
+      <WorkspaceHealthCard
+        {...baseProps}
+        safes={[safe(SAFE_A)]}
+        scanResults={{ [scanKey(SAFE_A, '1')]: allClear }}
+        isScanning={true}
+        scanIncomplete
+      />,
+    )
+    expect(screen.queryByText(/last scan didn't finish/i)).not.toBeInTheDocument()
+  })
 })

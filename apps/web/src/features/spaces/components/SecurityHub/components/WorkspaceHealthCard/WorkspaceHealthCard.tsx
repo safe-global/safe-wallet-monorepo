@@ -17,6 +17,7 @@ type WorkspaceHealthCardProps = {
   onFilterChange: (grade: SafeGrade) => void
   lastScannedAt: number | null
   onRescan: () => void
+  scanIncomplete?: boolean
 }
 
 type AggregateCounts = {
@@ -108,6 +109,7 @@ const WorkspaceHealthCard = ({
   onFilterChange,
   lastScannedAt,
   onRescan,
+  scanIncomplete = false,
 }: WorkspaceHealthCardProps): ReactElement => {
   const security = useLoadFeature(SecurityFeature)
 
@@ -228,6 +230,12 @@ const WorkspaceHealthCard = ({
                 </Typography>
               </Stack>
             </Stack>
+          )}
+
+          {scanIncomplete && !isScanning && (
+            <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 0.5 }}>
+              The last scan didn&apos;t finish. Showing your most recent complete score — re-scan to update it.
+            </Typography>
           )}
         </Box>
       </Stack>
