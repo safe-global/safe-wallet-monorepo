@@ -39,9 +39,11 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
               const isSameAddressSelected = selectedAddresses.has(contactItem.address) && !isSelected
               const disabled = alreadyAdded || isSameAddressSelected
 
+              const setSelected = (next: boolean) => field.onChange(next ? contactItem.name : false)
+
               const toggle = () => {
                 if (disabled) return
-                field.onChange(field.value ? false : contactItem.name)
+                setSelected(!isSelected)
               }
 
               const row = (
@@ -62,10 +64,11 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
                   )}
                 >
                   <Checkbox
+                    // alreadyAdded contacts show as ticked to indicate they're already in the space, even though the form value is undefined
                     checked={isSelected || alreadyAdded}
                     disabled={disabled}
                     onClick={(e) => e.stopPropagation()}
-                    onCheckedChange={(checked) => field.onChange(checked ? contactItem.name : false)}
+                    onCheckedChange={(checked) => setSelected(Boolean(checked))}
                   />
                   <div className="flex-1 flex items-center justify-between overflow-hidden">
                     <div className="overflow-auto">
@@ -88,7 +91,11 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
                       <TooltipTrigger render={<div />} className="block w-full">
                         {row}
                       </TooltipTrigger>
-                      <TooltipContent>You already added a contact with this address.</TooltipContent>
+                      <TooltipContent>
+                        {alreadyAdded
+                          ? 'You already added a contact with this address.'
+                          : 'You already selected a contact with this address.'}
+                      </TooltipContent>
                     </Tooltip>
                   ) : (
                     row

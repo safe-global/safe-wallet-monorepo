@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { act } from 'react'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ImportAddressBookDialog from '../ImportAddressBookDialog'
@@ -114,6 +114,7 @@ describe('ImportAddressBookDialog', () => {
   })
 
   it('disables the Import button and delays closing after a successful import', async () => {
+    jest.useFakeTimers()
     upsertionSpyFn.mockResolvedValue({ data: {} })
 
     mockedUseAllAddressBooks.mockReturnValue({
@@ -131,7 +132,10 @@ describe('ImportAddressBookDialog', () => {
     })
     expect(handleClose).not.toHaveBeenCalled()
 
-    await waitFor(() => expect(handleClose).toHaveBeenCalledTimes(1), { timeout: 1500 })
+    act(() => jest.advanceTimersByTime(500))
+    expect(handleClose).toHaveBeenCalledTimes(1)
+
+    jest.useRealTimers()
   })
 
   it('shows an inline error when the mutation returns an error', async () => {

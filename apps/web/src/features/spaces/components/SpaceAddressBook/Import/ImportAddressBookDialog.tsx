@@ -1,11 +1,12 @@
 import { FormProvider, useForm } from 'react-hook-form'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { debounce } from 'lodash'
 
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 
@@ -16,7 +17,8 @@ import { useContactSearch } from '../useContactSearch'
 import { createContactItems, flattenAddressBook } from '../utils'
 import useChains from '@/hooks/useChains'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { trackEvent } from '@/services/analytics'
@@ -33,12 +35,14 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   const [searchQuery, setSearchQuery] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const handleCloseRef = useRef(handleClose)
   const { configs } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const allAddressBooks = useAllAddressBooks()
+  const spaceContacts = useGetSpaceAddressBook()
   const allContactItems = useMemo(
     () =>
       flattenAddressBook(allAddressBooks).filter((contactItem) =>
@@ -47,12 +51,26 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
     [allAddressBooks, configs],
   )
 
+  const hasNoImportableContacts = useMemo(
+    () =>
+      allContactItems.length === 0 ||
+      allContactItems.every((contactItem) =>
+        spaceContacts.some((spaceContact) => sameAddress(spaceContact.address, contactItem.address)),
+      ),
+    [allContactItems, spaceContacts],
+  )
+
+  useEffect(() => {
+    handleCloseRef.current = handleClose
+  })
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
+
+  useEffect(() => () => handleSearch.cancel(), [handleSearch])
   const filteredEntries = useContactSearch(allContactItems, searchQuery)
 
   const formMethods = useForm<ImportContactsFormValues>({
-    mode: 'onChange',
     defaultValues: { contacts: {} },
   })
 
@@ -75,6 +93,13 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
       if (result.error) {
         setError('Something went wrong. Please try again.')
+        dispatch(
+          showNotification({
+            message: 'Failed to import contacts. Please try again.',
+            variant: 'error',
+            groupKey: 'import-contacts-error',
+          }),
+        )
         return
       }
 
@@ -91,6 +116,13 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
       setIsSuccess(true)
     } catch (e) {
       setError('Something went wrong. Please try again.')
+      dispatch(
+        showNotification({
+          message: 'Failed to import contacts. Please try again.',
+          variant: 'error',
+          groupKey: 'import-contacts-error',
+        }),
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -98,9 +130,9 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
   useEffect(() => {
     if (!isSuccess) return
-    const timer = setTimeout(handleClose, SUCCESS_CLOSE_DELAY_MS)
+    const timer = setTimeout(() => handleCloseRef.current(), SUCCESS_CLOSE_DELAY_MS)
     return () => clearTimeout(timer)
-  }, [isSuccess, handleClose])
+  }, [isSuccess])
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
@@ -139,9 +171,14 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
                   <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={selectedCount === 0 || isSubmitting || isSuccess}>
-                    {isSubmitting ? <Spinner className="size-4" /> : `Import contacts (${selectedCount})`}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger render={<div className="inline-flex" />}>
+                      <Button type="submit" disabled={selectedCount === 0 || isSubmitting || isSuccess}>
+                        {isSubmitting ? <Spinner className="size-4" /> : `Import contacts (${selectedCount})`}
+                      </Button>
+                    </TooltipTrigger>
+                    {hasNoImportableContacts && <TooltipContent>You have no new contacts to import.</TooltipContent>}
+                  </Tooltip>
                 </DialogFooter>
               </form>
             </FormProvider>
