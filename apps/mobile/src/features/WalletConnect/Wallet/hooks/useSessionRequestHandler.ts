@@ -43,7 +43,15 @@ export const useSessionRequestHandler = (walletKit: IWalletKit | null, deps: Ses
         )
         return
       }
-      await walletKit.respondSessionRequest({ topic: request.topic, response })
+      // Swallow stale-topic errors (typical after a Metro reload / long backgrounding —
+      // the relayer reconnects and processes backlogged messages that reference sessions
+      // WalletKit no longer knows about). Surfacing these to LogBox is noise; the dApp
+      // will retry the request.
+      try {
+        await walletKit.respondSessionRequest({ topic: request.topic, response })
+      } catch (e) {
+        console.log('[walletKit] respondSessionRequest failed', e)
+      }
       // Surface the spec-mandated toast on the no-signer auto-reject path.
       if ('error' in response && response.error?.code === NO_SIGNER_ERROR_CODE) {
         toast.show('No signer attached to this Safe', { native: false, duration: 2500 })

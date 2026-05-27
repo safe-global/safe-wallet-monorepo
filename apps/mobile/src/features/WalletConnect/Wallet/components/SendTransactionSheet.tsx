@@ -58,10 +58,16 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
 
   // Declared BEFORE the compose effect so the catch handler can reference it without TDZ smell.
   const respondWithReject = async () => {
-    await walletKit.respondSessionRequest({
-      topic: pending.topic,
-      response: formatJsonRpcError(pending.id, getSdkError('USER_REJECTED').message),
-    })
+    // Swallow stale-topic errors (typical after a Metro reload — the relayer may have
+    // dropped the topic locally; the dApp will eventually time out client-side).
+    try {
+      await walletKit.respondSessionRequest({
+        topic: pending.topic,
+        response: formatJsonRpcError(pending.id, getSdkError('USER_REJECTED').message),
+      })
+    } catch (e) {
+      console.log('[walletKit] respondSessionRequest (reject) failed', e)
+    }
     dispatch(removePending({ id: pending.id, kind: 'request' }))
     if (composedHash) {
       // Drop the draft so it doesn't linger in the queue UI.

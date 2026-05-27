@@ -75,10 +75,15 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       return
     }
     const onAuth = async ({ id }: { id: number }) => {
-      await walletKit.rejectSessionAuthenticate({
-        id,
-        reason: getSdkError('UNSUPPORTED_METHODS'),
-      })
+      // Swallow stale-auth errors (replays from a backlogged relay after Metro reload).
+      try {
+        await walletKit.rejectSessionAuthenticate({
+          id,
+          reason: getSdkError('UNSUPPORTED_METHODS'),
+        })
+      } catch (e) {
+        console.log('[walletKit] rejectSessionAuthenticate failed', e)
+      }
     }
     walletKit.on('session_authenticate', onAuth)
     return () => {
