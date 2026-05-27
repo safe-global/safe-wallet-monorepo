@@ -9,11 +9,20 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { Tooltip } from '@mui/material'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
+import { useIsGnosisPaySafe } from '@/features/gnosispay'
 
 type CheckWalletProps = {
   children: (ok: boolean) => ReactElement
   allowSpendingLimit?: boolean
   allowNonOwner?: boolean
+  /**
+   * Pass to let any visitor of a Gnosis Pay safe through (nav / preview gates).
+   * The actual write permission (must be the wallet enabled on the Delay modifier)
+   * is enforced inside the lazy-loaded GnosisPayExecutionForm via its
+   * `cannotPropose` check, not here — keeping `useIsGnosisPayOwner` (which pulls
+   * @gnosis.pm/zodiac) out of the main bundle.
+   */
+  allowGnosisPaySafe?: boolean
   noTooltip?: boolean
   checkNetwork?: boolean
   allowUndeployedSafe?: boolean
@@ -31,6 +40,7 @@ const CheckWallet = ({
   children,
   allowSpendingLimit,
   allowNonOwner,
+  allowGnosisPaySafe,
   noTooltip,
   checkNetwork = false,
   allowUndeployedSafe = false,
@@ -43,6 +53,9 @@ const CheckWallet = ({
   const isWrongChain = useIsWrongChain()
   const sdk = useSafeSDK()
   const isProposer = useIsWalletProposer()
+  // Only opt into the Gnosis Pay safe detector (per-module eth_getCode on
+  // chain 100) when the caller actually cares about the gnosis pay path.
+  const [isGnosisPaySafe] = useIsGnosisPaySafe({ enabled: !!allowGnosisPaySafe })
 
   const { safe, safeLoaded } = useSafeInfo()
 
@@ -67,6 +80,7 @@ const CheckWallet = ({
       !isSafeOwner &&
       !isProposer &&
       !isNestedSafeOwner &&
+      !(allowGnosisPaySafe && isGnosisPaySafe) &&
       (!isOnlySpendingLimit || !allowSpendingLimit)
     ) {
       return Message.NotSafeOwner
@@ -77,9 +91,11 @@ const CheckWallet = ({
     }
   }, [
     allowNonOwner,
+    allowGnosisPaySafe,
     allowProposer,
     allowSpendingLimit,
     allowUndeployedSafe,
+    isGnosisPaySafe,
     isProposer,
     isNestedSafeOwner,
     isOnlySpendingLimit,

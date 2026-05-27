@@ -31,6 +31,7 @@ export {
 } from '@/features/counterfactual/store'
 export * from '@/features/swap/store'
 export * from './swapOrderSlice'
+export * from './gnosisPayTxsSlice'
 export * from './api/gateway'
 export * from './api/gateway/safeOverviews'
 export * from './visitedSafesSlice'
