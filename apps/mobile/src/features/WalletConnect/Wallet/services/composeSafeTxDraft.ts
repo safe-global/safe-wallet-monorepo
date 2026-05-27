@@ -21,9 +21,20 @@ export type ComposeSafeTxDraftInput = {
   dispatch: AppDispatch
 }
 
+// dApps send numeric fields as hex per JSON-RPC convention (e.g. Uniswap: value = '0x16345785d8a0000').
+// Protocol-kit / ethers expect decimal strings here — failure mode is a misleading
+// "invalid base-10 numeric string" thrown deep in the sign path. BigInt() accepts both '0x...' and
+// decimal input, and .toString() always emits decimal, so this normalizes either form safely.
+const normalizeValue = (value: string | undefined): string => {
+  if (!value) {
+    return '0'
+  }
+  return BigInt(value).toString()
+}
+
 const toMetaTx = (call: DappCall): MetaTransactionData => ({
   to: call.to,
-  value: call.value ?? '0',
+  value: normalizeValue(call.value),
   data: call.data ?? '0x',
   operation: 0, // OperationType.Call — protocol-kit numeric enum
 })
