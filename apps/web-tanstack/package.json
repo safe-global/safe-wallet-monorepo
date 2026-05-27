@@ -38,13 +38,13 @@
     "@tanstack/router-devtools": "1.159.4",
     "@types/react": "~19.2.10",
     "@types/react-dom": "~19.2.0",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^6.0.2",
     "cross-env": "^7.0.3",
     "cypress": "^15.9.0",
     "eslint": "^9.29.0",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.2",
-    "vite": "^6.4.2",
-    "vite-plugin-svgr": "^4.5.0"
+    "vite": "^8.0.13",
+    "vite-plugin-svgr": "^5.2.0"
   }
 }

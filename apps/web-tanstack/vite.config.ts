@@ -194,6 +194,15 @@ export default defineConfig(({ mode }) => {
           svgo: false,
           titleProp: true,
         },
+        // Under Rolldown-powered Vite (v8) the plugin transpiles its SVG-as-JSX
+        // output via Vite's `transformWithOxc`. Without an explicit `jsx`
+        // option oxc parses but does not lower the JSX, so raw `<svg>` reaches
+        // the bundler and every .svg import fails with a parse error. Force the
+        // React 19 automatic runtime (same as @vitejs/plugin-react) so the JSX
+        // is lowered to `react/jsx-runtime` calls.
+        oxcOptions: {
+          jsx: { runtime: 'automatic' },
+        },
       }),
       // Scoped `require()` polyfill. Two reused apps/web files use sync
       // CommonJS require (chains.json, 'blo'). We can't use a global Vite
