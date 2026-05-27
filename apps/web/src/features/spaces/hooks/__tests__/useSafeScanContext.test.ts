@@ -257,4 +257,32 @@ describe('useSafeScanContext', () => {
     expect(result.current).not.toBeNull()
     expect(result.current?.balanceUsd).toBe(500)
   })
+
+  it('does not force a refetch by default (uses cached data)', () => {
+    renderHook(() => useSafeScanContext(defaultSelected, defaultEntry))
+    for (const query of [
+      useSafesGetSafeV1Query,
+      useChainsGetMasterCopiesV1Query,
+      useTransactionsGetCreationTransactionV1Query,
+    ]) {
+      expect(query).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ refetchOnMountOrArgChange: false }),
+      )
+    }
+  })
+
+  it('forces the scan data queries to refetch when forceRefetch is true', () => {
+    renderHook(() => useSafeScanContext(defaultSelected, defaultEntry, undefined, true))
+    for (const query of [
+      useSafesGetSafeV1Query,
+      useChainsGetMasterCopiesV1Query,
+      useTransactionsGetCreationTransactionV1Query,
+    ]) {
+      expect(query).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ refetchOnMountOrArgChange: true }),
+      )
+    }
+  })
 })

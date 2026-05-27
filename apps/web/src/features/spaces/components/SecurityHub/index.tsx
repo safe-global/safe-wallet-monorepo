@@ -18,7 +18,7 @@ const SecurityHub = (): ReactElement => {
   const security = useLoadFeature(SecurityFeature)
   const { isLoadingSpacesSafes, safes, deployedEntries, balanceMap, overviewMap } = useReconciledSpaceSafes(security)
   const { allScanResults, scanTimestamps, lastScannedAt, handleScanComplete } = useScanResultsState(security)
-  const { scanningKeys, isRunning, startScan } = useAutoScanOrchestrator({
+  const { scanningKeys, isRunning, scanIncomplete, startScan } = useAutoScanOrchestrator({
     security,
     deployedEntries,
     safes,
@@ -59,7 +59,8 @@ const SecurityHub = (): ReactElement => {
             activeFilter={gradeFilter}
             onFilterChange={(grade) => setGradeFilter((prev) => (prev === grade ? null : grade))}
             lastScannedAt={lastScannedAt}
-            onRescan={startScan}
+            onRescan={() => startScan({ isManual: true })}
+            scanIncomplete={scanIncomplete}
           />
           <SecuritySafesTable
             safes={safes}

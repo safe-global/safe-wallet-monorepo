@@ -22,6 +22,9 @@ const useSafeScanContext = (
   selected: SelectedSafe | null,
   entry: SpaceSafeEntry | undefined,
   overviewData?: OverviewData,
+  // When true (a user-triggered re-scan), bypass the cache and refetch the scan's
+  // data queries from the backend so the new scan reflects current state.
+  forceRefetch = false,
 ): ScanContext | null => {
   const chainId = selected?.chainId ?? ''
   const address = selected?.address ?? ''
@@ -32,7 +35,7 @@ const useSafeScanContext = (
   // Fetch SafeState for the selected chain — skip if not deployed
   const { currentData: safeInfo, isFetching: isSafeFetching } = useSafesGetSafeV1Query(
     { chainId, safeAddress: address },
-    { skip: !selected || !isDeployed },
+    { skip: !selected || !isDeployed, refetchOnMountOrArgChange: forceRefetch },
   )
 
   // Fetch master copies for deployer resolution
@@ -40,7 +43,10 @@ const useSafeScanContext = (
     currentData: masterCopies,
     isFetching: isMasterCopiesFetching,
     isError: isMasterCopiesError,
-  } = useChainsGetMasterCopiesV1Query({ chainId }, { skip: !selected || !isDeployed })
+  } = useChainsGetMasterCopiesV1Query(
+    { chainId },
+    { skip: !selected || !isDeployed, refetchOnMountOrArgChange: forceRefetch },
+  )
 
   // Fetch creation transaction for factory/deployment validation
   const {
@@ -49,7 +55,7 @@ const useSafeScanContext = (
     isError: isCreationError,
   } = useTransactionsGetCreationTransactionV1Query(
     { chainId, safeAddress: address },
-    { skip: !selected || !isDeployed },
+    { skip: !selected || !isDeployed, refetchOnMountOrArgChange: forceRefetch },
   )
 
   // For multichain: fetch overviews for all chains to compare signer setup
@@ -75,7 +81,7 @@ const useSafeScanContext = (
   // when useAutoScan advances from one Safe to the next, before RTK Query resolves the new args.
   const { currentData: safeOverviews, isFetching: isOverviewsFetching } = useGetMultipleSafeOverviewsQuery(
     { safes: multichainSafeItems, currency },
-    { skip: !isMultichain || multichainSafeItems.length === 0 },
+    { skip: !isMultichain || multichainSafeItems.length === 0, refetchOnMountOrArgChange: forceRefetch },
   )
 
   // Fetch overview for balance data (fiatTotal) on the selected chain.
@@ -83,7 +89,7 @@ const useSafeScanContext = (
   // to avoid redundant per-Safe API requests during auto-scan.
   const { currentData: safeOverview, isFetching: isOverviewFetching } = useGetSafeOverviewQuery(
     { chainId, safeAddress: address },
-    { skip: !selected || !isDeployed || !!overviewData },
+    { skip: !selected || !isDeployed || !!overviewData, refetchOnMountOrArgChange: forceRefetch },
   )
 
   const chain = useChain(chainId)
