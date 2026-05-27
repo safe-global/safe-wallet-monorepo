@@ -73,7 +73,9 @@ export const buildSafeSessionProperties = ({
 export const isProposalSupported = (proposal: ProposalTypes.Struct): boolean => {
   const required = proposal.requiredNamespaces
   for (const key of Object.keys(required)) {
-    if (!key.startsWith(SUPPORTED_NAMESPACE)) return false
+    if (!key.startsWith(SUPPORTED_NAMESPACE)) {
+      return false
+    }
   }
   return true
 }
