@@ -115,6 +115,7 @@ describe('ImportAddressBookDialog', () => {
 
   it('disables the Import button and delays closing after a successful import', async () => {
     jest.useFakeTimers()
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
     upsertionSpyFn.mockResolvedValue({ data: {} })
 
     mockedUseAllAddressBooks.mockReturnValue({
@@ -124,8 +125,8 @@ describe('ImportAddressBookDialog', () => {
 
     render(<ImportAddressBookDialog handleClose={handleClose} />)
 
-    await userEvent.click(screen.getByText(/Alice/i))
-    await userEvent.click(screen.getByText(/Import contacts \(1\)/i))
+    await user.click(screen.getByText(/Alice/i))
+    await user.click(screen.getByText(/Import contacts \(1\)/i))
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /Import contacts \(1\)/i })).toBeDisabled()
@@ -157,6 +158,9 @@ describe('ImportAddressBookDialog', () => {
   })
 
   it('filters the contact list based on the search input', async () => {
+    jest.useFakeTimers()
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
+
     mockedUseAllAddressBooks.mockReturnValue({
       '1': {
         '0x123': 'Alice',
@@ -169,11 +173,14 @@ describe('ImportAddressBookDialog', () => {
     expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.getByText('Bob')).toBeInTheDocument()
 
-    await userEvent.type(screen.getByPlaceholderText(/Search/i), 'Alice')
+    await user.type(screen.getByPlaceholderText(/Search/i), 'Alice')
+    act(() => jest.advanceTimersByTime(300))
 
     await waitFor(() => {
       expect(screen.queryByText('Bob')).not.toBeInTheDocument()
     })
     expect(screen.getByText('Alice')).toBeInTheDocument()
+
+    jest.useRealTimers()
   })
 })
