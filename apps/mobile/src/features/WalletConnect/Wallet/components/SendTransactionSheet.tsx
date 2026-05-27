@@ -9,6 +9,7 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { useSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { removePending, setOutstandingRequest, clearOutstandingRequest } from '../store/walletKitSlice'
 import { clearDraft } from '@/src/store/draftTxSlice'
 import { composeSafeTxDraft, type DappCall } from '../services/composeSafeTxDraft'
@@ -42,6 +43,11 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
   const { data: safe } = useSafesGetSafeV1Query(
     activeSafe ? { chainId: activeSafe.chainId, safeAddress: activeSafe.address } : skipToken,
   )
+  // The Safe protocol-kit SDK is initialized asynchronously by useInitSafeCoreSDK after the
+  // active Safe loads. When WalletKit seeds a pending request on cold start, the sheet may
+  // mount BEFORE the SDK is ready — composing then throws "Safe SDK is not initialized".
+  // Gate the compose effect on this and re-run when the SDK becomes available.
+  const safeSDK = useSafeSDK()
   const [composing, setComposing] = useState(false)
   const [composedHash, setComposedHash] = useState<string | null>(null)
   // Becomes true when the user taps Sign and we hand the draft off to review-and-confirm.
@@ -86,8 +92,11 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
   // Compose draft on mount. Track the in-flight hash locally so the cleanup can GC orphans
   // when the effect is cancelled (re-render / unmount) after composeSafeTxDraft already
   // dispatched setDraft but before composedHash state caught up.
+  //
+  // Gate on `safeSDK` so that when WalletKit seeds a pending request on cold start before
+  // useInitSafeCoreSDK has finished, the effect waits for the SDK and re-runs when ready.
   useEffect(() => {
-    if (!activeSafe || !calls || !safe) {
+    if (!activeSafe || !calls || !safe || !safeSDK) {
       return
     }
     let cancelled = false
@@ -125,7 +134,7 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
         dispatch(clearOutstandingRequest(inFlightHash))
       }
     }
-  }, [activeSafe?.address, activeSafe?.chainId, calls, dispatch, safe])
+  }, [activeSafe?.address, activeSafe?.chainId, calls, dispatch, safe, safeSDK])
 
   const onSign = async () => {
     if (!composedHash) {
@@ -186,11 +195,11 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
         ))}
       </YStack>
       <XStack gap="$3">
-        <Button flex={1} borderWidth={1} onPress={onReject} disabled={composing}>
+        <Button flex={1} height="$8" borderWidth={1} onPress={onReject} disabled={composing}>
           Reject
         </Button>
-        <Button flex={1} onPress={onSign} disabled={composing || !composedHash}>
-          {composing ? 'Preparing…' : 'Sign'}
+        <Button flex={1} height="$8" onPress={onSign} disabled={composing || !safeSDK || !composedHash}>
+          {composing || !safeSDK ? 'Preparing…' : 'Sign'}
         </Button>
       </XStack>
     </YStack>
