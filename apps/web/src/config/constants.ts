@@ -82,6 +82,13 @@ export const DATADOG_RUM_DEFAULT_PRIVACY_LEVEL = (process.env.NEXT_PUBLIC_DATADO
 
 // Wallets
 export const WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID || ''
+export const WC_METADATA_URL = process.env.NEXT_PUBLIC_WC_METADATA_URL || 'https://app.safe.global'
+export const WC_METADATA_ICONS = (
+  process.env.NEXT_PUBLIC_WC_METADATA_ICONS || `${WC_METADATA_URL}/images/logo-round.svg`
+)
+  .split(',')
+  .map((icon: string) => icon.trim())
+  .filter(Boolean)
 export const TREZOR_APP_URL = 'app.safe.global'
 export const TREZOR_EMAIL = 'support@safe.global'
 
