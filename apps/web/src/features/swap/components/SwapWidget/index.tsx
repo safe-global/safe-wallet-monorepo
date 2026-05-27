@@ -55,7 +55,7 @@ const SwapWidget = ({ sell }: Params) => {
   const nativeCowSwapFeeV2Enabled = useHasFeature(FEATURES.NATIVE_COW_SWAP_FEE_V2)
   const isEurcvBoostEnabled = useHasFeature(FEATURES.EURCV_BOOST)
   const useStagingCowServer = useHasFeature(FEATURES.NATIVE_SWAPS_USE_COW_STAGING_SERVER)
-  const cowSwapBaseUrl = useStagingCowServer ? 'https://staging.swap.cow.finance' : 'https://swap.cow.finance'
+  const cowSwapBaseUrl = useStagingCowServer ? 'https://staging.swap.cow.fi' : 'https://swap.cow.fi'
 
   const { data: isSafeAddressBlocked } = useGetIsSanctionedQuery(safeAddress || skipToken)
   const { data: isWalletAddressBlocked } = useGetIsSanctionedQuery(wallet?.address || skipToken)
@@ -73,7 +73,6 @@ const SwapWidget = ({ sell }: Params) => {
     width: '100%', // Width in pixels (or 100% to use all available space)
     height: '860px',
     chainId: cowChainId,
-    baseUrl: cowSwapBaseUrl,
     standaloneMode: false,
     disableToastMessages: true,
     disablePostedOrderConfirmationModal: true,

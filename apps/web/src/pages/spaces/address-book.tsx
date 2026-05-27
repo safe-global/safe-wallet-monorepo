@@ -15,7 +15,7 @@ export default function SpaceAddressBookPage() {
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Space address book`}</title>
+        <title>{`${BRAND_NAME} – Workspace address book`}</title>
       </Head>
 
       <main>

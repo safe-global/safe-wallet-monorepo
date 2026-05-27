@@ -14,7 +14,7 @@ const UnauthorizedState = () => {
           </Typography>
 
           <Typography color="text.secondary" mb={2}>
-            Sorry, you don’t have permissions to view this page, as your wallet is not a member of the space. Try to
+            Sorry, you don’t have permissions to view this page, as your wallet is not a member of the workspace. Try to
             sign in with a different wallet or go back to the overview.
           </Typography>
 

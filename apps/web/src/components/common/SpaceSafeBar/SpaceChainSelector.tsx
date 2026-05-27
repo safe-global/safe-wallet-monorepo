@@ -1,10 +1,10 @@
-import { useContext, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import ChainSelectorBlock from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
 import { CreateSafeOnNewChain } from '@/features/multichain'
-import { TxModalContext } from '@/components/tx-flow'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
+import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 
 function SpaceChainSelectorSkeleton() {
@@ -18,10 +18,14 @@ function SpaceChainSelectorSkeleton() {
 function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
   const { deployedChains, selectedChainId, deployedChainIds, safeAddress, safeName, handleChainChange } =
     useSpaceChainSelector()
-  const { txFlow } = useContext(TxModalContext)
-  const isDisabled = !!txFlow
+  const isDisabled = useIsSafeBarControlDisabled()
 
   const [addNetworkChainId, setAddNetworkChainId] = useState<string>()
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
 
   const handleAddNetwork = useCallback((chainId: string) => {
     setAddNetworkChainId(chainId)
@@ -39,6 +43,8 @@ function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
   const handleCloseDialog = useCallback(() => {
     setAddNetworkChainId(undefined)
   }, [])
+
+  if (!isHydrated) return <SpaceChainSelectorSkeleton />
 
   if (!deployedChains.length) {
     if (isLoading) return <SpaceChainSelectorSkeleton />

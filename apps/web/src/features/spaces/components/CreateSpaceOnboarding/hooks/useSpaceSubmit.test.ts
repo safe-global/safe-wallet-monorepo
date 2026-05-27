@@ -164,4 +164,36 @@ describe('useSpaceSubmit routing', () => {
       query: { spaceId: '42', safe: '5:0xcafe' },
     })
   })
+
+  it('forwards a sanitised ?next= to selectSafes after creating a space', async () => {
+    mockRouterQuery = { next: '/balances' }
+    mockCreateSpaceWithUser.mockResolvedValue({ data: { id: 7, name: 'My Space' } })
+
+    const result = setupHook()
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/welcome',
+      query: { spaceId: '7', next: '/balances' },
+    })
+  })
+
+  it('drops an unsafe (protocol-relative) ?next= after creating a space', async () => {
+    mockRouterQuery = { next: '//evil.com/x' }
+    mockCreateSpaceWithUser.mockResolvedValue({ data: { id: 7, name: 'My Space' } })
+
+    const result = setupHook()
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/welcome',
+      query: { spaceId: '7' },
+    })
+  })
 })

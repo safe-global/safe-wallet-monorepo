@@ -97,5 +97,3 @@ export function SpacesFeedbackPopup({
     </div>
   )
 }
-
-export default SpacesFeedbackPopup

@@ -25,5 +25,6 @@
   .dialog :global .MuiDialog-paper {
     min-width: 600px;
     margin: 0;
+    border-radius: 24px;
   }
 }

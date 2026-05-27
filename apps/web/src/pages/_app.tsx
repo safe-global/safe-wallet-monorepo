@@ -41,6 +41,7 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature } from '@/features/counterfactual'
+import useCounterfactualSafeSync from '@/features/counterfactual/hooks/useCounterfactualSafeSync'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -93,8 +94,10 @@ import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
 import { useOidcLoginCallback } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
+import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
@@ -105,7 +108,24 @@ if (typeof window !== 'undefined') {
 const reduxStore = makeStore()
 setStoreInstance(reduxStore)
 
-const InitApp = (): null => {
+// Safe-scoped notification + tracking hooks. Split out of InitApp so they can
+// be unmounted entirely while the require-login gate is keeping the user out
+// — otherwise they subscribe to tx/message events and surface pending-tx
+// toasts on the login page before the user has signed in.
+const SafeScopedSubscriptions = (): null => {
+  useTxNotifications()
+  useSafeMessageNotifications()
+  useSafeNotifications()
+  useTxPendingStatuses()
+  useSafeMessagePendingStatuses()
+  useTxTracking()
+  useSafeMsgTracking()
+  usePortfolioRefetchOnTxHistory()
+  useCounterfactualSafeSync()
+  return null
+}
+
+const InitApp = (): ReactElement | null => {
   useHydrateStore(reduxStore)
   useInitStaticChains()
   useAdjustUrl()
@@ -115,21 +135,15 @@ const InitApp = (): null => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useTxNotifications()
-  useSafeMessageNotifications()
-  useSafeNotifications()
-  useTxPendingStatuses()
-  useSafeMessagePendingStatuses()
-  useTxTracking()
-  useSafeMsgTracking()
   useBeamer()
   useVisitedSafes()
-  usePortfolioRefetchOnTxHistory()
   useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
   useOidcLoginCallback()
   useLogoutCallback()
+  useSessionExpiryGuard()
 
-  return null
+  const isGateBlocking = useIsAuthGateBlocking()
+  return isGateBlocking ? null : <SafeScopedSubscriptions />
 }
 
 // Client-side cache, shared for the whole session of the user in the browser.

@@ -68,7 +68,6 @@ export enum MixpanelEvent {
 
 export enum WorkspaceCreateEntryPoint {
   WELCOME = 'welcome',
-  EMPTY_STATE = 'empty_state',
   SIDEBAR = 'sidebar',
 }
 

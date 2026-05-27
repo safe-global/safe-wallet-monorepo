@@ -4,16 +4,18 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ChevronLeft, Search, Loader2, Wallet } from 'lucide-react'
+import { ChevronLeft, Search, Loader2 } from 'lucide-react'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
 import useWallet from '@/hooks/wallets/useWallet'
-import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import StepIndicator from './components/StepIndicator'
 import OnboardingSafesList from './components/OnboardingSafesList'
+import ConnectWalletPrompt from './components/ConnectWalletPrompt'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
+import { useSelectAll } from '@/features/spaces/hooks/useSelectAll'
+import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/constants'
 
 const ONBOARDING_STEP = 2
 const TOTAL_STEPS = 3
@@ -21,7 +23,6 @@ const TOTAL_STEPS = 3
 const SelectSafesOnboarding = (): ReactElement => {
   const isDarkMode = useDarkMode()
   const wallet = useWallet()
-  const connectWallet = useConnectWallet()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
   const { trustedSafes, ownedSafes, similarAddresses, handleSearch } = useOnboardingSafes()
   const allSafes = useMemo(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
@@ -30,6 +31,15 @@ const SelectSafesOnboarding = (): ReactElement => {
     redirectToNextStep,
     allSafes,
   )
+
+  const { control, setValue } = formMethods
+
+  const { trustedSelection, ownedSelection, handleSelectAll, isAtLimit } = useSelectAll({
+    visibleTrusted: trustedSafes,
+    visibleOwned: ownedSafes,
+    control,
+    setValue,
+  })
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
@@ -83,10 +93,27 @@ const SelectSafesOnboarding = (): ReactElement => {
                   className="relative min-h-0 min-w-0 w-full flex-1 overflow-hidden overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent"
                   data-testid="onboarding-safes-list-scroll-region"
                 >
+                  {isAtLimit && (
+                    <Typography variant="paragraph" color="muted" className="text-xs pb-1">
+                      Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
+                    </Typography>
+                  )}
                   <OnboardingSafesList
                     trustedSafes={trustedSafes}
                     ownedSafes={ownedSafes}
                     similarAddresses={similarAddresses}
+                    trustedSelectAll={{
+                      state: trustedSelection.state,
+                      count: trustedSelection.selectedCount,
+                      total: trustedSelection.total,
+                      onToggle: (check) => handleSelectAll('trusted', check),
+                    }}
+                    ownedSelectAll={{
+                      state: ownedSelection.state,
+                      count: ownedSelection.selectedCount,
+                      total: ownedSelection.total,
+                      onToggle: (check) => handleSelectAll('owned', check),
+                    }}
                   />
                 </div>
 
@@ -122,19 +149,7 @@ const SelectSafesOnboarding = (): ReactElement => {
               </>
             ) : (
               <div className="flex flex-col mt-8 items-center justify-center gap-4">
-                <Wallet className="size-12 text-muted-foreground" />
-                <Typography variant="paragraph" align="center" color="muted">
-                  Connect your wallet to see your safes
-                </Typography>
-                <Button
-                  data-testid="select-safes-connect-wallet-button"
-                  type="button"
-                  size="lg"
-                  onClick={connectWallet}
-                  className="w-full max-w-[300px]"
-                >
-                  Connect wallet
-                </Button>
+                <ConnectWalletPrompt testId="select-safes-connect-wallet-button" />
                 <Button
                   data-testid="select-safes-skip-button"
                   type="button"

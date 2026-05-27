@@ -14,6 +14,7 @@ import {
 import AddManually, { type AddManuallyFormValues } from './AddManually'
 import { getSafeId } from './SafesList'
 import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingSafesList'
+import ConnectWalletPrompt from '../SelectSafesOnboarding/components/ConnectWalletPrompt'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
 import {
@@ -45,10 +46,8 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
-
-export type AddAccountsFormValues = {
-  selectedSafes: Record<string, boolean>
-}
+import { useSelectAll } from '../../hooks/useSelectAll'
+import type { AddAccountsFormValues } from '../../hooks/useSelectAll.types'
 
 function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
   const flatSafeItems = flattenSafeItems(spaceSafes)
@@ -112,7 +111,8 @@ const AddAccounts = ({
   const isDarkMode = useDarkMode()
 
   // Get wallet and chain info
-  const { address: walletAddress = '' } = useWallet() || {}
+  const wallet = useWallet()
+  const walletAddress = wallet?.address ?? ''
   const { configs } = useChains()
   const allChainIds = useMemo(() => configs.map((c) => c.chainId), [configs])
 
@@ -196,13 +196,23 @@ const AddAccounts = ({
     },
   })
 
-  const { handleSubmit, watch, setValue, reset, formState } = formMethods
+  const { handleSubmit, watch, setValue, reset, formState, control } = formMethods
 
   const selectedSafes = watch(`selectedSafes`)
   const selectedSafesLength = getSelectedSafes(selectedSafes, spaceSafes).length
   const removedSafesCount = getRemovedSafes(selectedSafes, spaceSafes).length
   const isFormDirty = selectedSafesLength > 0 || removedSafesCount > 0
   const { isSubmitting } = formState
+
+  const visibleTrusted = debouncedSearchQuery ? filteredTrusted : trustedSafes
+  const visibleOwned = debouncedSearchQuery ? filteredOwned : ownedSafes
+
+  const { trustedSelection, ownedSelection, handleSelectAll, isAtLimit } = useSelectAll({
+    visibleTrusted,
+    visibleOwned,
+    control,
+    setValue,
+  })
 
   // Reset form when modal opens
   useEffect(() => {
@@ -330,13 +340,14 @@ const AddAccounts = ({
   }, [debouncedSearchQuery])
 
   const hasAvailableSafes = trustedSafes.length > 0 || ownedSafes.length > 0
+  const showConnectWalletPrompt = !wallet
 
   return (
     <>
       {externalOpen === undefined && (
         <Button
           size="lg"
-          className="font-bold px-4 py-0"
+          className="font-normal px-4 py-0"
           variant={buttonVariant}
           disabled={!isAdmin}
           onClick={() => {
@@ -350,7 +361,7 @@ const AddAccounts = ({
           data-testid="add-space-account-button"
         >
           <Plus
-            className={cn('size-4 mr-1', {
+            className={cn('size-4', {
               'text-green-500': buttonVariant === 'default',
             })}
           />
@@ -392,22 +403,49 @@ const AddAccounts = ({
                     </InputGroup>
                   </div>
 
-                  <div
-                    className="relative min-h-[30dvh] min-w-0 w-full max-h-[25rem] overflow-y-auto overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]"
-                    data-testid="add-accounts-safes-list-scroll-region"
-                  >
-                    {!hasAvailableSafes && !debouncedSearchQuery ? (
-                      <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                        No safes on your list
-                      </Typography>
-                    ) : (
-                      <OnboardingSafesList
-                        trustedSafes={debouncedSearchQuery ? filteredTrusted : trustedSafes}
-                        ownedSafes={debouncedSearchQuery ? filteredOwned : ownedSafes}
-                        similarAddresses={similarAddresses}
-                      />
-                    )}
-                  </div>
+                  {showConnectWalletPrompt ? (
+                    <ConnectWalletPrompt className="shrink-0 py-4" testId="add-accounts-connect-wallet-button" />
+                  ) : (
+                    <div
+                      className="relative min-h-[30dvh] min-w-0 w-full max-h-[25rem] overflow-y-auto overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]"
+                      data-testid="add-accounts-safes-list-scroll-region"
+                    >
+                      {!hasAvailableSafes && !debouncedSearchQuery ? (
+                        <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                          No safes on your list
+                        </Typography>
+                      ) : trustedSelection.total === 0 && ownedSelection.total === 0 && debouncedSearchQuery ? (
+                        <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                          No safes match your search
+                        </Typography>
+                      ) : (
+                        <>
+                          {isAtLimit && (
+                            <Typography variant="paragraph" color="muted" className="text-xs pb-1">
+                              Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
+                            </Typography>
+                          )}
+                          <OnboardingSafesList
+                            trustedSafes={visibleTrusted}
+                            ownedSafes={visibleOwned}
+                            similarAddresses={similarAddresses}
+                            trustedSelectAll={{
+                              state: trustedSelection.state,
+                              count: trustedSelection.selectedCount,
+                              total: trustedSelection.total,
+                              onToggle: (check) => handleSelectAll('trusted', check),
+                            }}
+                            ownedSelectAll={{
+                              state: ownedSelection.state,
+                              count: ownedSelection.selectedCount,
+                              total: ownedSelection.total,
+                              onToggle: (check) => handleSelectAll('owned', check),
+                            }}
+                          />
+                        </>
+                      )}
+                    </div>
+                  )}
 
                   {error && (
                     <Alert variant="destructive" className="shrink-0">

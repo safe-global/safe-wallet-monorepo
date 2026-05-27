@@ -5,6 +5,8 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated, selectIsOidcLoginPending } from '@/store/authSlice'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
+import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import { parseNextUrlForRouter } from '@/utils/nextUrl'
 
 type RtkError = FetchBaseQueryError | SerializedError
 
@@ -26,6 +28,7 @@ export const useSignInRedirect = ({ spacesAmount, inviteAmount, isSpacesLoading,
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isOidcLoginPending = useAppSelector(selectIsOidcLoginPending)
   const wasOidcLoginPending = useRef(false)
+  const isRequireLoginEnabled = useIsRequireLoginEnabled()
 
   // Treat OIDC sign-in completion (pending → done) the same as wallet sign-in
   useEffect(() => {
@@ -45,8 +48,22 @@ export const useSignInRedirect = ({ spacesAmount, inviteAmount, isSpacesLoading,
     if (hasSignedIn && (isNewUser || hasNotFoundSpaces(error))) {
       setRedirectLoading(true)
       router.push({ pathname: AppRoutes.welcome.createSpace, query: router.query })
+      return
     }
-  }, [hasSignedIn, isSpacesLoading, spacesAmount, inviteAmount, isUserSignedIn, error])
+
+    // When the "must log in" gate is on, an existing user who just signed in
+    // should land on the URL they originally tried to open. Without ?next= we
+    // let them stay on /welcome/spaces, which now renders their Spaces list.
+    // Wait for the gate flag to resolve so a fast sign-in + slow chains config
+    // doesn't permanently strand the user on /welcome/spaces.
+    if (isRequireLoginEnabled === true && hasSignedIn && isUserSignedIn && !isSpacesLoading && spacesAmount > 0) {
+      const next = parseNextUrlForRouter(router.query.next)
+      if (next) {
+        setRedirectLoading(true)
+        router.push(next)
+      }
+    }
+  }, [hasSignedIn, isSpacesLoading, spacesAmount, inviteAmount, isUserSignedIn, error, isRequireLoginEnabled])
 
   return { setHasSignedIn, redirectLoading }
 }
