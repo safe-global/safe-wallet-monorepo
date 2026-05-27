@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 import { act, renderHook, waitFor } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
-import { gatewayApi, useGetMultipleSafeOverviewsQuery } from '../api/gateway'
+import { gatewayApi, makeSafeOverviewTag, useGetMultipleSafeOverviewsQuery } from '../api/gateway'
 import { useAppDispatch } from '@/store'
 
 /**
@@ -54,9 +54,11 @@ describe('safeOverviews cache invalidation (integration)', () => {
     )
     expect(requestCount).toBe(1)
 
-    // A transaction invalidates the overview cache -> a fresh network request must follow
+    // A transaction invalidates this Safe's overview tag -> a fresh network request must follow
     act(() => {
-      result.current.dispatch(gatewayApi.util.invalidateTags(['SafeOverviews']))
+      result.current.dispatch(
+        gatewayApi.util.invalidateTags([{ type: 'SafeOverviews', id: makeSafeOverviewTag('1', safeAddress) }]),
+      )
     })
 
     await waitFor(

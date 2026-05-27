@@ -5,7 +5,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { selectCurrency } from '../../settingsSlice'
 import { type SafeItem } from '@/hooks/safes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { makeSafeTag } from '.'
+import { makeSafeTag, makeSafeOverviewTag } from '.'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
 
 type InitiateThunk = ReturnType<typeof additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate>
@@ -134,7 +134,10 @@ export const safeOverviewEndpoints = (
 ) => ({
   getSafeOverview: builder.query<SafeOverview | null, { safeAddress: string; walletAddress?: string; chainId: string }>(
     {
-      providesTags: ['SafeOverviews'],
+      providesTags: (result) =>
+        result
+          ? [{ type: 'SafeOverviews' as const, id: makeSafeOverviewTag(result.chainId, result.address.value) }]
+          : [{ type: 'SafeOverviews' as const }],
       async queryFn({ safeAddress, walletAddress, chainId }, { getState, dispatch }) {
         const currency = selectCurrency(getState() as never)
         const dispatchFn: DispatchFn = (action) => dispatch(action)
@@ -159,7 +162,13 @@ export const safeOverviewEndpoints = (
     },
   ),
   getMultipleSafeOverviews: builder.query<SafeOverview[], MultiOverviewQueryParams>({
-    providesTags: ['SafeOverviews'],
+    providesTags: (result) =>
+      result && result.length > 0
+        ? result.map((overview) => ({
+            type: 'SafeOverviews' as const,
+            id: makeSafeOverviewTag(overview.chainId, overview.address.value),
+          }))
+        : [{ type: 'SafeOverviews' as const }],
     async queryFn(params, { dispatch }) {
       const { safes, walletAddress, currency } = params
       const dispatchFn: DispatchFn = (action) => dispatch(action)

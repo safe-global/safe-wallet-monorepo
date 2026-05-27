@@ -32,29 +32,25 @@ const makeOverview = (address: string, fiatTotal: string): SafeOverview =>
     queued: 0,
   }) as unknown as SafeOverview
 
-const txDetail = { txId: '0x1', nonce: 1, chainId: '1', safeAddress: faker.finance.ethereumAddress() }
+const makeSafeItem = (address: string) => ({
+  address,
+  chainId: '1',
+  isReadOnly: false,
+  isPinned: false,
+  lastVisited: 0,
+  name: undefined,
+})
 
 describe('useInvalidateOverviewsOnTx', () => {
   beforeEach(() => {
     mockedInitiate.mockReset()
   })
 
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
-
-  it('refetches Safe overviews when a tx is executed', async () => {
-    const safe = {
-      address: faker.finance.ethereumAddress(),
-      chainId: '1',
-      isReadOnly: false,
-      isPinned: false,
-      lastVisited: 0,
-      name: undefined,
-    }
-    const request = { currency: 'usd', safes: [safe] }
-    const stale = makeOverview(safe.address, '100')
-    const fresh = makeOverview(safe.address, '200')
+  it('refetches the overviews of the Safe that executed the tx', async () => {
+    const safeAddress = faker.finance.ethereumAddress()
+    const request = { currency: 'usd', safes: [makeSafeItem(safeAddress)] }
+    const stale = makeOverview(safeAddress, '100')
+    const fresh = makeOverview(safeAddress, '200')
 
     mockQueryAction([stale])
 
@@ -68,16 +64,47 @@ describe('useInvalidateOverviewsOnTx', () => {
     })
     expect(mockedInitiate).toHaveBeenCalledTimes(1)
 
-    // A tx is executed -> overviews must be refetched and the fresh balance shown
+    // tx executed on this Safe -> its overviews must be refetched and the fresh balance shown
     mockQueryAction([fresh])
     act(() => {
-      txDispatch(TxEvent.SUCCESS, txDetail)
+      txDispatch(TxEvent.SUCCESS, { txId: '0x1', nonce: 1, chainId: '1', safeAddress })
     })
 
     await waitFor(() => {
       expect(mockedInitiate).toHaveBeenCalledTimes(2)
       expect(result.current.data).toEqual([fresh])
     })
+  })
+
+  it('does not refetch overviews of an unrelated Safe', async () => {
+    const safeAddress = faker.finance.ethereumAddress()
+    const request = { currency: 'usd', safes: [makeSafeItem(safeAddress)] }
+
+    mockQueryAction([makeOverview(safeAddress, '100')])
+
+    const { result } = renderHook(() => {
+      useInvalidateOverviewsOnTx()
+      return useGetMultipleSafeOverviewsQuery(request)
+    })
+
+    await waitFor(() => {
+      expect(result.current.data?.[0]?.fiatTotal).toBe('100')
+    })
+    expect(mockedInitiate).toHaveBeenCalledTimes(1)
+
+    // tx executed on a different Safe -> this query must not refetch
+    act(() => {
+      txDispatch(TxEvent.SUCCESS, {
+        txId: '0x2',
+        nonce: 1,
+        chainId: '1',
+        safeAddress: faker.finance.ethereumAddress(),
+      })
+    })
+
+    // wait past the 300ms batching window to be sure no fetch was scheduled
+    await new Promise((resolve) => setTimeout(resolve, 400))
+    expect(mockedInitiate).toHaveBeenCalledTimes(1)
   })
 
   it('subscribes to tx success and unsubscribes on unmount', () => {
@@ -91,5 +118,7 @@ describe('useInvalidateOverviewsOnTx', () => {
 
     unmount()
     expect(unsubscribe).toHaveBeenCalledTimes(1)
+
+    subscribeSpy.mockRestore()
   })
 })
