@@ -28,6 +28,7 @@ import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import type { ReactElement } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeStatus, Severity } from '@safe-global/utils/features/safe-shield/types'
 
 import * as useIsPinnedSafeHook from '@/hooks/useIsPinnedSafe'
 import * as useTrustSafeHook from '@/features/myAccounts/hooks/useTrustSafe'
@@ -832,7 +833,7 @@ describe('SignMessage', () => {
       })
     })
 
-    it('shows RiskConfirmation checkbox when threat is detected', async () => {
+    it('shows RiskConfirmation checkbox with untrusted Safe warning when signing a message', async () => {
       jest.spyOn(require('@/features/safe-shield/SafeShieldContext'), 'useSafeShield').mockReturnValue({
         needsRiskConfirmation: true,
         isRiskConfirmed: false,
@@ -843,7 +844,13 @@ describe('SignMessage', () => {
         recipient: undefined,
         contract: undefined,
         threat: undefined,
-        safeAnalysis: null,
+        safeAnalysis: {
+          severity: Severity.CRITICAL,
+          type: SafeStatus.UNTRUSTED,
+          title: 'Untrusted Safe',
+          description:
+            "You're creating a transaction from a Safe that isn't in your trusted list. Trust it if you recognize it.",
+        },
         addToTrustedList: jest.fn(),
       })
 
@@ -853,7 +860,9 @@ describe('SignMessage', () => {
 
       await waitFor(() => {
         expect(getByTestId('risk-confirmation-checkbox')).toBeInTheDocument()
-        expect(getByText('I understand the risks and would like to proceed with this message.')).toBeInTheDocument()
+        expect(
+          getByText('I understand this Safe is untrusted and would like to proceed with this message.'),
+        ).toBeInTheDocument()
       })
     })
   })
