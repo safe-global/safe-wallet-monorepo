@@ -6,8 +6,8 @@ import UpdateSpaceForm from '../UpdateSpaceForm'
 // Import the real type
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-// Mock the hooks
-const mockUpdateSpace = jest.fn()
+const mockUnwrap = jest.fn()
+const mockUpdateSpace = jest.fn(() => ({ unwrap: mockUnwrap }))
 const mockUseIsAdmin = jest.fn()
 
 jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
@@ -53,7 +53,7 @@ describe('UpdateSpaceForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUpdateSpace.mockReset()
+    mockUnwrap.mockReset()
     mockUseIsAdmin.mockReset()
   })
 
@@ -110,7 +110,7 @@ describe('UpdateSpaceForm', () => {
   })
 
   it('should call updateSpace mutation on submit', async () => {
-    mockUpdateSpace.mockResolvedValue({})
+    mockUnwrap.mockResolvedValue({})
     setupForm(mockSpace, true)
 
     changeSpaceName('New Space Name')
@@ -127,7 +127,7 @@ describe('UpdateSpaceForm', () => {
   })
 
   it('should show success notification on successful update', async () => {
-    mockUpdateSpace.mockResolvedValue({})
+    mockUnwrap.mockResolvedValue({})
     const { store } = setupForm(mockSpace, true)
 
     changeSpaceName('New Space Name')
@@ -147,7 +147,7 @@ describe('UpdateSpaceForm', () => {
   })
 
   it('should display error message when update fails', async () => {
-    mockUpdateSpace.mockRejectedValue(new Error('Network error'))
+    mockUnwrap.mockRejectedValue(new Error('Network error'))
     setupForm(mockSpace, true)
 
     changeSpaceName('New Space Name')
@@ -174,7 +174,7 @@ describe('UpdateSpaceForm', () => {
   })
 
   it('should clear error message when user retries after error', async () => {
-    mockUpdateSpace.mockRejectedValueOnce(new Error('Network error')).mockResolvedValueOnce({})
+    mockUnwrap.mockRejectedValueOnce(new Error('Network error')).mockResolvedValueOnce({})
     setupForm(mockSpace, true)
 
     // First attempt fails

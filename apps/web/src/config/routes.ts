@@ -56,6 +56,9 @@ export const AppRoutes = {
   },
   spaces: {
     settings: '/spaces/settings',
+    settingsGeneral: '/spaces/settings/general',
+    settingsAccount: '/spaces/settings/account',
+    settingsAbout: '/spaces/settings/about',
     safeAccounts: '/spaces/safe-accounts',
     members: '/spaces/members',
     index: '/spaces',
