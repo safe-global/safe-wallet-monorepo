@@ -39,6 +39,7 @@ import { ExecutingMonitor } from '@/src/components/ExecutingMonitor'
 import { useDatadogConsent } from '@/src/hooks/useDatadogConsent'
 import { DatadogWrapper } from '@/src/providers/DatadogWrapper'
 import { AppKitInitializer } from '@/src/features/WalletConnect/Signer/components/AppKitInitializer'
+import { WalletKitProvider } from '@/src/features/WalletConnect/Wallet/context/WalletKitProvider'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -153,16 +154,18 @@ function RootLayout() {
                     <AppKitInitializer>
                       <SafeThemeProvider>
                         <BottomSheetModalProvider>
-                          <SafeToastProvider>
-                            <NavigationGuardHOC>
-                              <HooksInitializer />
-                              <SigningMonitor />
-                              <ExecutingMonitor />
-                              <TestCtrls />
-                              <NavigationStack />
-                              <SafeStatusBar />
-                            </NavigationGuardHOC>
-                          </SafeToastProvider>
+                          <WalletKitProvider>
+                            <SafeToastProvider>
+                              <NavigationGuardHOC>
+                                <HooksInitializer />
+                                <SigningMonitor />
+                                <ExecutingMonitor />
+                                <TestCtrls />
+                                <NavigationStack />
+                                <SafeStatusBar />
+                              </NavigationGuardHOC>
+                            </SafeToastProvider>
+                          </WalletKitProvider>
                         </BottomSheetModalProvider>
                       </SafeThemeProvider>
                     </AppKitInitializer>
