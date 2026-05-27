@@ -5,12 +5,12 @@ import { selectCurrency } from '@/store/settingsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import type { SafeItem } from '@/hooks/safes'
-import MockupSidebar from './mockup/MockupSidebar'
-import MockupContent from './mockup/MockupContent'
-import { useIsXlViewport } from './mockup/useIsXlViewport'
-import type { SafeAppMockupProps } from './mockup/types'
+import MockupSidebar from './MockupSidebar'
+import MockupContent from './MockupContent'
+import { useIsXlViewport } from './useIsXlViewport'
+import type { SafeAppMockupProps } from './types'
 
-export type { SafeAppMockupAccount, SafeAppMockupProps } from './mockup/types'
+export type { SafeAppMockupAccount, SafeAppMockupProps } from './types'
 
 const EMPTY_SAFES: SafeItem[] = []
 

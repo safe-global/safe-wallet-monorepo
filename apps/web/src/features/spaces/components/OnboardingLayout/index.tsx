@@ -1,6 +1,4 @@
 export { default as OnboardingLayout } from './OnboardingLayout'
 export { default as StepCounter } from './StepCounter'
-export { default as SafeAppMockup } from './SafeAppMockup'
-export type { SafeAppMockupAccount, SafeAppMockupProps } from './mockup/types'
-export { deriveSidePanelAccountsFromSpace } from './deriveSidePanelAccountsFromSpace'
-export { useSafeNameLookup } from './useSafeNameLookup'
+export { SafeAppMockup, deriveSidePanelAccountsFromSpace, useSafeNameLookup } from './mockup'
+export type { SafeAppMockupAccount, SafeAppMockupProps } from './mockup'
