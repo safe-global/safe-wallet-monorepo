@@ -39,12 +39,18 @@ class SafeOverviewFetcher {
     currency: string
     dispatch: DispatchFn
   }) {
-    const queryThunk = additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate({
-      safes: safeIds,
-      currency,
-      walletAddress,
-      trusted: false,
-    })
+    // forceRefetch so a cache invalidation (e.g. after a tx) re-runs the wrapping
+    // query AND bypasses the inner cache, otherwise the inner entry — unsubscribed
+    // here — would return stale data and the displayed balance would not update.
+    const queryThunk = additionalSafesRtkApi.endpoints.safesGetOverviewForMany.initiate(
+      {
+        safes: safeIds,
+        currency,
+        walletAddress,
+        trusted: false,
+      },
+      { forceRefetch: true },
+    )
     const queryAction = dispatch(queryThunk)
 
     try {
@@ -123,9 +129,12 @@ type MultiOverviewQueryParams = {
   safes: SafeItem[]
 }
 
-export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions', 'gatewayApi'>) => ({
+export const safeOverviewEndpoints = (
+  builder: EndpointBuilder<any, 'Submissions' | 'SafeOverviews', 'gatewayApi'>,
+) => ({
   getSafeOverview: builder.query<SafeOverview | null, { safeAddress: string; walletAddress?: string; chainId: string }>(
     {
+      providesTags: ['SafeOverviews'],
       async queryFn({ safeAddress, walletAddress, chainId }, { getState, dispatch }) {
         const currency = selectCurrency(getState() as never)
         const dispatchFn: DispatchFn = (action) => dispatch(action)
@@ -150,6 +159,7 @@ export const safeOverviewEndpoints = (builder: EndpointBuilder<any, 'Submissions
     },
   ),
   getMultipleSafeOverviews: builder.query<SafeOverview[], MultiOverviewQueryParams>({
+    providesTags: ['SafeOverviews'],
     async queryFn(params, { dispatch }) {
       const { safes, walletAddress, currency } = params
       const dispatchFn: DispatchFn = (action) => dispatch(action)

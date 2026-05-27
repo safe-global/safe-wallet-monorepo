@@ -18,7 +18,7 @@ export function makeSafeTag(chainId: string, address: string): `${number}:0x${st
 export const gatewayApi = createApi({
   reducerPath: 'gatewayApi',
   baseQuery: fakeBaseQuery<Error>(),
-  tagTypes: ['Submissions'],
+  tagTypes: ['Submissions', 'SafeOverviews'],
   endpoints: (builder) => ({
     ...safeOverviewEndpoints(builder),
   }),
