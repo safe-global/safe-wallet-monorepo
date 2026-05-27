@@ -52,7 +52,7 @@ const TxAuditLogActions = ({
   <>
     <TxShareLinkWrapper id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
       <Tooltip title="Copy transaction link" placement="top">
-        <IconButton size="small" sx={{ color: 'inherit' }}>
+        <IconButton data-testid="share-tx-link-btn" size="small" sx={{ color: 'inherit' }}>
           <CopyIcon fontSize="small" />
         </IconButton>
       </Tooltip>
