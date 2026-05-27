@@ -9,6 +9,20 @@ import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { isProposalSupported } from '../services/namespaces'
 import { SUPPORTED_NAMESPACE } from '../services/constants'
 
+// Swallow stale-proposal errors from WalletKit (typical after a Metro reload / long
+// backgrounding — the relayer reconnects and replays backlogged messages that reference
+// proposals WalletKit no longer knows about). Surfacing these to LogBox is noise.
+const safeRejectSession = async (
+  walletKit: IWalletKit,
+  args: Parameters<IWalletKit['rejectSession']>[0],
+): Promise<void> => {
+  try {
+    await walletKit.rejectSession(args)
+  } catch (e) {
+    console.log('[walletKit] rejectSession failed', e)
+  }
+}
+
 /**
  * Subscribes to `session_proposal` events and auto-rejects (no UI) proposals that are
  * fundamentally incompatible:
@@ -33,12 +47,12 @@ export const useSessionProposalHandler = (walletKit: IWalletKit | null) => {
 
       // Auto-reject: no active Safe
       if (!activeSafe) {
-        await walletKit.rejectSession({ id: proposal.id, reason: getSdkError('USER_REJECTED') })
+        await safeRejectSession(walletKit, { id: proposal.id, reason: getSdkError('USER_REJECTED') })
         return
       }
       // Auto-reject: non-eip155 required namespace key
       if (!isProposalSupported(proposal.params)) {
-        await walletKit.rejectSession({
+        await safeRejectSession(walletKit, {
           id: proposal.id,
           reason: getSdkError('UNSUPPORTED_NAMESPACE_KEY'),
         })
@@ -50,7 +64,7 @@ export const useSessionProposalHandler = (walletKit: IWalletKit | null) => {
       const requiredChains = Object.values(proposal.params.requiredNamespaces).flatMap((ns) => ns.chains ?? [])
       const missing = requiredChains.find((c) => !supportedSet.has(c))
       if (missing) {
-        await walletKit.rejectSession({
+        await safeRejectSession(walletKit, {
           id: proposal.id,
           reason: getSdkError('UNSUPPORTED_CHAINS'),
         })
@@ -67,5 +81,5 @@ export const useSessionProposalHandler = (walletKit: IWalletKit | null) => {
 }
 
 export const rejectProposal = async (walletKit: IWalletKit, id: number): Promise<void> => {
-  await walletKit.rejectSession({ id, reason: getSdkError('USER_REJECTED') })
+  await safeRejectSession(walletKit, { id, reason: getSdkError('USER_REJECTED') })
 }
