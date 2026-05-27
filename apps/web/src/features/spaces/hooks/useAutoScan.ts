@@ -3,6 +3,7 @@ import type { ScanResult, SecurityScanner } from '@/features/security/types'
 import type { SecurityContract } from '@/features/security'
 import useSafeScanContext, { type OverviewData } from '@/features/spaces/hooks/useSafeScanContext'
 import type { SpaceSafeEntry, SelectedSafe } from '@/features/spaces/components/SecurityHub'
+import { scheduleWhileVisible } from '@/utils/visibility'
 
 // How long to wait for useSafeScanContext to resolve before bailing past a target.
 // Protects against "ghost-deployed" chains: a multichain Safe entry may be flagged
@@ -172,39 +173,25 @@ const useAutoScan = (
     if (!currentTarget || !isRunning || !services || scanContext) return
     const key = services.scanKey(currentTarget.address, currentTarget.chainId)
 
-    let timer: ReturnType<typeof setTimeout> | undefined
-
-    // Only count down while the tab is visible. A backgrounded tab throttles timers and
-    // defers React renders, so the bail can fire before the still-in-flight queries'
-    // resolution re-render clears it — falsely marking the scan incomplete on tab return.
-    // Re-arm from scratch each time the tab becomes visible again.
-    const arm = () => {
-      clearTimeout(timer)
-      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return
-      timer = setTimeout(() => {
-        console.warn(
-          `[SecurityHub] scan context did not resolve for ${currentTarget.address}:${currentTarget.chainId} within ${SCAN_CONTEXT_BAIL_MS}ms — skipping`,
-        )
-        completedRef.current.add(key)
-        // A bailed target contributes no results, so the run is partial — surface it
-        // and leave the committed score untouched (same rationale as the commit gate).
-        setScanIncomplete(true)
-        setScanningKeys((prev) => {
-          if (!prev.has(key)) return prev
-          const next = new Set(prev)
-          next.delete(key)
-          return next
-        })
-        setCurrentIndex((i) => i + 1)
-      }, SCAN_CONTEXT_BAIL_MS)
+    const bailPastTarget = () => {
+      console.warn(
+        `[SecurityHub] scan context did not resolve for ${currentTarget.address}:${currentTarget.chainId} within ${SCAN_CONTEXT_BAIL_MS}ms — skipping`,
+      )
+      completedRef.current.add(key)
+      // A bailed target contributes no results, so the run is partial — surface it
+      // and leave the committed score untouched (same rationale as the commit gate).
+      setScanIncomplete(true)
+      setScanningKeys((prev) => {
+        if (!prev.has(key)) return prev
+        const next = new Set(prev)
+        next.delete(key)
+        return next
+      })
+      setCurrentIndex((i) => i + 1)
     }
 
-    arm()
-    document.addEventListener('visibilitychange', arm)
-    return () => {
-      clearTimeout(timer)
-      document.removeEventListener('visibilitychange', arm)
-    }
+    // Only count down while the tab is visible — see scheduleWhileVisible.
+    return scheduleWhileVisible(SCAN_CONTEXT_BAIL_MS, bailPastTarget)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scanContext, currentTarget?.address, currentTarget?.chainId, isRunning, services])
 
