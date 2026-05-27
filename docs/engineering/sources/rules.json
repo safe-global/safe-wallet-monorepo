@@ -1,0 +1,824 @@
+[
+  {
+    "id": "FEAT-01",
+    "project": "web",
+    "area": "features",
+    "title": "Use feature public APIs across boundaries",
+    "rule": "Feature code must import another feature through its public API, not through deep internal component, hook, service, data, or generated paths.",
+    "check": "Did this change cross a feature boundary? If yes, are imports going through the target feature's public API?",
+    "exampleRefs": ["web/examples/feature-boundaries.md#feature-public-api"],
+    "reviewLearningIds": ["RL-20260225-001", "RL-20260318-006", "RL-20260326-001"]
+  },
+  {
+    "id": "FEAT-02",
+    "project": "web",
+    "area": "features",
+    "title": "Give new features the standard boundary",
+    "rule": "New web features need an explicit boundary: public barrel, feature contract or handle where applicable, public types, and hooks exported without lazy-loading hook calls.",
+    "check": "Did this add or expand a feature? If yes, does it have the expected public API boundary instead of making consumers import internals?",
+    "exampleRefs": ["web/examples/feature-boundaries.md#feature-public-api"],
+    "reviewLearningIds": ["RL-20260227-001", "RL-20260327-004"]
+  },
+  {
+    "id": "CODE-01",
+    "project": "web",
+    "area": "abstractions",
+    "title": "Extract shared UI only when behavior is actually shared",
+    "rule": "When two components share form, state, loading, and error flow, prefer one configurable component over near-duplicate implementations.",
+    "check": "Did this add a component that mirrors an existing workflow? If yes, can the existing component accept the small differences as props?",
+    "exampleRefs": [
+      "web/examples/feature-boundaries.md#shared-form-components",
+      "web/examples/feature-boundaries.md#code-01-fold-near-duplicate-sign-in-buttons-into-one-configurable-component",
+      "web/examples/feature-boundaries.md#code-01-extract-embedded-error-boundaries-from-unrelated-ui-components",
+      "examples/general/api-and-packages.md#code-01-compare-severities-through-a-named-helper"
+    ],
+    "reviewLearningIds": [
+      "RL-20260227-002",
+      "RL-20260318-011",
+      "RL-20260327-006",
+      "RL-20260331-006",
+      "RL-20260505-006",
+      "RL-20260505-011"
+    ]
+  },
+  {
+    "id": "CODE-02",
+    "project": "web",
+    "area": "abstractions",
+    "title": "Extract repeated styling into named structure",
+    "rule": "Repeated or long styling patterns should move into a small component, class helper, or CSS module when that makes call sites readable and consistent.",
+    "check": "Did this repeat a long class list, shadow, or layout pattern? If yes, should it be named once and reused?",
+    "exampleRefs": [
+      "web/examples/feature-boundaries.md#repeated-style-shape",
+      "web/examples/feature-boundaries.md#code-02-move-heavy-tailwind-class-strings-into-css-modules",
+      "web/examples/feature-boundaries.md#consolidate-per-element-tailwind-into-the-css-module-class"
+    ],
+    "reviewLearningIds": ["RL-20260316-001", "RL-20260318-003", "RL-20260413-003", "RL-20260424-001"]
+  },
+  {
+    "id": "WEB-01",
+    "project": "web",
+    "area": "auth",
+    "title": "Make auth/session effects hydration-aware",
+    "rule": "Effects that depend on persisted auth state must observe hydration or the relevant hydrated value instead of capturing initial empty state forever.",
+    "check": "Did this effect read persisted auth/session state? If yes, does it re-run after hydration or depend on the hydrated value?",
+    "exampleRefs": ["examples/general/gateway-hooks.md#hydration-aware-effects"],
+    "reviewLearningIds": ["RL-20260420-002", "RL-20260504-001", "RL-20260506-002", "RL-20260520-001"]
+  },
+  {
+    "id": "WEB-02",
+    "project": "web",
+    "area": "auth",
+    "title": "Keep deliberate logout distinct from session expiry",
+    "rule": "Logout flows must clear client auth state before navigation or otherwise suppress session-expired handling while logout is in flight.",
+    "check": "Did this change logout, auth hydration, or credentialed 403 handling? If yes, can a deliberate logout race show a session-expired toast?",
+    "exampleRefs": ["examples/general/gateway-hooks.md#logout-session-races"],
+    "reviewLearningIds": ["RL-20260506-004"]
+  },
+  {
+    "id": "WEB-03",
+    "project": "web",
+    "area": "auth",
+    "title": "Use fresh server probes for auth transitions",
+    "rule": "Auth reconciliation and login/logout callbacks must not rely on cached RTK Query data when the backend cookie state is the source of truth.",
+    "check": "Did this check current auth after a login/logout/callback transition? If yes, does it force a fresh backend probe and avoid a lingering subscription?",
+    "exampleRefs": [
+      "examples/general/gateway-hooks.md#fresh-auth-probes",
+      "examples/general/gateway-hooks.md#web-03-force-unauthenticated-on-transient-reconcile-errors"
+    ],
+    "reviewLearningIds": ["RL-20260324-001", "RL-20260407-005", "RL-20260413-001"]
+  },
+  {
+    "id": "API-01",
+    "project": "general",
+    "area": "api",
+    "title": "Search consumers when removing public exports",
+    "rule": "Removing or changing a public export, hook return field, endpoint, or compatibility API requires updating all tests and consumers in the same change.",
+    "check": "Did this remove or rename an exported API? If yes, were tests, namespace imports, dynamic access, generated consumers, and downstream apps searched?",
+    "exampleRefs": [
+      "examples/general/api-and-packages.md#api-01-drop-in-replacements-preserve-the-original-prop-surface"
+    ],
+    "reviewLearningIds": ["RL-20260410-002", "RL-20260428-003", "RL-20260506-003"]
+  },
+  {
+    "id": "API-02",
+    "project": "general",
+    "area": "api",
+    "title": "Make additive hook registration idempotent",
+    "rule": "Initializers that append global hooks must be idempotent or retain and call the deregister callback before re-registering.",
+    "check": "Did this replace a setter with an additive hook API or register a global hook? If yes, is repeated initialization safe?",
+    "exampleRefs": ["examples/general/gateway-hooks.md#idempotent-response-hooks"],
+    "reviewLearningIds": ["RL-20260506-005"]
+  },
+  {
+    "id": "API-03",
+    "project": "general",
+    "area": "api",
+    "title": "Do not hand-edit generated clients as durable source",
+    "rule": "Generated gateway files must come from schema/codegen. Temporary hand edits need an explicit generator path or they will be overwritten.",
+    "check": "Did this touch AUTO_GENERATED or schema-derived files? If yes, can codegen reproduce the change?",
+    "exampleRefs": [
+      "examples/general/api-and-packages.md#api-03-import-from-package-public-entrypoints-not-deep-dist-paths",
+      "examples/general/api-and-packages.md#treat-autogenerated-clients-as-derived-output"
+    ],
+    "reviewLearningIds": ["RL-20260219-001", "RL-20260219-004", "RL-20260415-008"]
+  },
+  {
+    "id": "RTK-01",
+    "project": "general",
+    "area": "state",
+    "title": "Handle RTK mutation results explicitly",
+    "rule": "RTK Query mutation triggers resolve with a result object; use `.unwrap()` or inspect `result.error` before updating success UI or local state.",
+    "check": "Did this call an RTK mutation? If yes, does success state happen only after confirmed success?",
+    "exampleRefs": [
+      "examples/general/data-integrity.md#rtk-mutation-results",
+      "examples/general/gateway-hooks.md#rtk-01-unwrap-mutations-before-mutating-state-on-success"
+    ],
+    "reviewLearningIds": ["RL-20260407-004", "RL-20260505-004"]
+  },
+  {
+    "id": "RTK-02",
+    "project": "general",
+    "area": "state",
+    "title": "Choose loading flags by UX meaning",
+    "rule": "`isLoading` represents the first load; `isFetching` also covers refetches. Use the flag that matches whether existing data should remain visible.",
+    "check": "Did this show a spinner from RTK Query state? If yes, should refetch hide existing content or only the initial load?",
+    "exampleRefs": [
+      "examples/general/data-integrity.md#loading-vs-fetching",
+      "examples/general/data-integrity.md#rtk-02-skip-queries-until-the-resource-id-is-resolved"
+    ],
+    "reviewLearningIds": ["RL-20260302-005", "RL-20260415-006", "RL-20260420-001"]
+  },
+  {
+    "id": "DATA-01",
+    "project": "general",
+    "area": "data",
+    "title": "Preserve chain scope in address-like merges",
+    "rule": "Address-book and Safe-like merge logic must compare entries at the relevant identity granularity, usually address plus chain ID.",
+    "check": "Did this merge contacts, Safes, or address-scoped records? If yes, are non-overlapping chain IDs preserved?",
+    "exampleRefs": [
+      "examples/general/data-integrity.md#per-chain-contact-merges",
+      "examples/general/data-integrity.md#compare-addresses-through-sameaddress"
+    ],
+    "reviewLearningIds": [
+      "RL-20260223-001",
+      "RL-20260313-010",
+      "RL-20260323-001",
+      "RL-20260415-003",
+      "RL-20260505-002",
+      "RL-20260505-005"
+    ]
+  },
+  {
+    "id": "DATA-02",
+    "project": "general",
+    "area": "data",
+    "title": "Empty-state checks must include every visible collection",
+    "rule": "UI empty-state predicates must include every collection that can render tabs, rows, actions, or badges.",
+    "check": "Did this add a new collection to a view? If yes, do empty states and tab visibility include it?",
+    "exampleRefs": [
+      "examples/general/data-integrity.md#data-02-empty-state-gating-across-multiple-collections",
+      "examples/general/data-integrity.md#data-02-hide-native-token-without-erasing-aggregator-balances"
+    ],
+    "reviewLearningIds": ["RL-20260320-001", "RL-20260415-002", "RL-20260505-003"]
+  },
+  {
+    "id": "DATA-03",
+    "project": "general",
+    "area": "data",
+    "title": "Preserve fallback data when adding new response shapes",
+    "rule": "When upstream responses gain a new shape, merge field-by-field and preserve legacy fallback mappings for omitted optional sections.",
+    "check": "Did this add support for a new response shape? If yes, do partial new payloads still preserve legacy data?",
+    "exampleRefs": [
+      "examples/general/data-integrity.md#fallback-preserving-maps",
+      "examples/general/data-integrity.md#data-03-drop-analysis-results-when-their-fetch-errored",
+      "examples/general/data-integrity.md#three-state-portfolio-fallback-known-empty-vs-unknown-vs-errored"
+    ],
+    "reviewLearningIds": ["RL-20260310-011", "RL-20260318-009", "RL-20260409-001"]
+  },
+  {
+    "id": "DATA-04",
+    "project": "general",
+    "area": "data",
+    "title": "Normalize through existing bounded helpers",
+    "rule": "Values with established length, version, or encoding limits must go through the existing helper rather than duplicating raw serialization.",
+    "check": "Did this create a tx origin, encoded note, Safe version, or similar bounded value? If yes, did it use the canonical helper?",
+    "exampleRefs": [
+      "examples/general/chain-contracts.md#normalize-versions-and-origin",
+      "examples/general/testing.md#match-real-gateway-response-shapes-when-intercepting"
+    ],
+    "reviewLearningIds": ["RL-20260220-003", "RL-20260331-002", "RL-20260402-002", "RL-20260416-001", "RL-20260423-001"]
+  },
+  {
+    "id": "CHAIN-01",
+    "project": "general",
+    "area": "chain",
+    "title": "Resolve contracts from actual deployment data",
+    "rule": "Contract and chain compatibility logic should derive from Safe version, master copy, chain ID, and safe-deployments data rather than broad chain flags or naive set differences.",
+    "check": "Did this choose a contract address or available chain? If yes, is it based on actual deployment/compatibility data and covered for both web and mobile callers?",
+    "exampleRefs": ["examples/general/chain-contracts.md#deployment-data-not-chain-flags"],
+    "reviewLearningIds": ["RL-20260423-001", "RL-20260423-002", "RL-20260428-001"]
+  },
+  {
+    "id": "CHAIN-02",
+    "project": "web",
+    "area": "chain",
+    "title": "Gate multichain UI with compatibility state",
+    "rule": "Multichain UI should show only compatible actions, with explicit unavailable/loading/empty states, instead of letting users click into silent failures.",
+    "check": "Did this expose add-network or multichain actions? If yes, are compatibility, loading, unavailable, and empty states explicit and tested?",
+    "exampleRefs": ["web/examples/feature-boundaries.md#multichain-compatibility-state"],
+    "reviewLearningIds": ["RL-20260402-001", "RL-20260428-001", "RL-20260428-002"]
+  },
+  {
+    "id": "STATE-01",
+    "project": "mobile",
+    "area": "state",
+    "title": "Do not erase session-scoped discoveries on repeat actions",
+    "rule": "When a screen promises discoveries for the lifetime of an open session, repeated scans should accumulate or deliberately preserve previous discoveries.",
+    "check": "Did this store scan/discovery results for an open sheet or screen? If yes, does a later empty result unintentionally erase earlier discoveries?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260430-001"]
+  },
+  {
+    "id": "MOB-01",
+    "project": "mobile",
+    "area": "permissions",
+    "title": "Open system settings only from explicit controls",
+    "rule": "Permission-denied flows must open system Settings only from a clearly labeled user-tapped control, not from wrapper taps or automatic denial handling.",
+    "check": "Did this permission flow call `Linking.openSettings` or an equivalent API? If yes, is that path reachable only from the explicit Settings button?",
+    "exampleRefs": ["mobile/examples/permissions.md#explicit-settings-navigation"],
+    "reviewLearningIds": ["RL-20260505-006", "RL-20260506-001"]
+  },
+  {
+    "id": "MOB-02",
+    "project": "mobile",
+    "area": "permissions",
+    "title": "Branch permission UX on the actual permission outcome",
+    "rule": "Permission-denied explainers must run only for actual denial/restriction outcomes, not for unrelated registration or network failures.",
+    "check": "Did this permission request have multiple failure modes? If yes, does the Settings explainer branch on a permission result rather than any caught error?",
+    "exampleRefs": ["mobile/examples/permissions.md#permission-denial-branches"],
+    "reviewLearningIds": ["RL-20260505-001"]
+  },
+  {
+    "id": "MOB-03",
+    "project": "mobile",
+    "area": "dependencies",
+    "title": "Use the React Native package entrypoint",
+    "rule": "Mobile overrides of third-party UI must import from the same React Native module tree as the provider to avoid duplicate contexts or theme state.",
+    "check": "Did this import from a package internals path? If yes, does it match the React Native entrypoint used by the provider?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260413-006"]
+  },
+  {
+    "id": "E2E-01",
+    "project": "web",
+    "area": "e2e",
+    "title": "Target E2E selectors unambiguously",
+    "rule": "Cypress helpers must target the intended control by stable accessible label, test ID, or scoped container when copy is shared by multiple buttons.",
+    "check": "Did this update an E2E selector? If yes, can another visible control with similar copy be clicked instead?",
+    "exampleRefs": [
+      "examples/general/testing.md#unambiguous-e2e-selectors",
+      "examples/general/testing.md#e2e-01-match-formatted-value-regex-to-actual-rendered-output"
+    ],
+    "reviewLearningIds": ["RL-20260225-002", "RL-20260331-004", "RL-20260409-002", "RL-20260409-003", "RL-20260413-002"]
+  },
+  {
+    "id": "TEST-01",
+    "project": "general",
+    "area": "testing",
+    "title": "Assertions must fail on the regression they claim to cover",
+    "rule": "Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears.",
+    "check": "Did this add or update a test assertion? If yes, would it fail if the bug reappeared or fixture data vanished?",
+    "exampleRefs": [
+      "examples/general/testing.md#negative-assertions",
+      "examples/general/testing.md#test-01-assert-the-specific-behavior-the-description-claims",
+      "examples/general/testing.md#test-01-mock-external-lookups-instead-of-relying-on-real-fixture-state",
+      "examples/general/testing.md#test-01-test-the-debounce-not-just-the-post-debounce-assertion",
+      "examples/general/testing.md#overwriting-localstorage-fixtures-must-include-implicit-app-seeded-entries"
+    ],
+    "reviewLearningIds": [
+      "RL-20260217-001",
+      "RL-20260218-004",
+      "RL-20260303-010",
+      "RL-20260318-002",
+      "RL-20260331-005",
+      "RL-20260408-001",
+      "RL-20260408-002",
+      "RL-20260409-002",
+      "RL-20260423-002",
+      "RL-20260506-006"
+    ]
+  },
+  {
+    "id": "TEST-02",
+    "project": "general",
+    "area": "testing",
+    "title": "New branch logic needs branch-specific tests",
+    "rule": "New skip, hydration, merge-priority, permission, compatibility, and conditional-rendering branches need focused tests that exercise the new branch, not only the happy path.",
+    "check": "Did this add branching behavior? If yes, is the new branch covered by a test that would fail if the branch were removed?",
+    "exampleRefs": ["examples/general/testing.md#branch-specific-tests"],
+    "reviewLearningIds": [
+      "RL-20260318-001",
+      "RL-20260324-001",
+      "RL-20260327-004",
+      "RL-20260407-001",
+      "RL-20260417-001",
+      "RL-20260420-002",
+      "RL-20260428-002",
+      "RL-20260429-001",
+      "RL-20260430-001",
+      "RL-20260430-002",
+      "RL-20260504-001",
+      "RL-20260505-002",
+      "RL-20260505-006",
+      "RL-20260506-002"
+    ]
+  },
+  {
+    "id": "TEST-03",
+    "project": "general",
+    "area": "testing",
+    "title": "Test the pure transformation separately from orchestration",
+    "rule": "When a hook/component only forwards data into a pure conversion helper, test the conversion helper output directly and keep orchestration tests focused on forwarding behavior.",
+    "check": "Did this add conversion logic plus a caller? If yes, are transformation tests separate from orchestration tests?",
+    "exampleRefs": [
+      "examples/general/testing.md#conversion-vs-orchestration",
+      "examples/general/api-and-packages.md#test-03-delegate-hooks-to-the-shared-util-instead-of-redeclaring-the-mapping"
+    ],
+    "reviewLearningIds": ["RL-20260317-003", "RL-20260318-005", "RL-20260413-007"]
+  },
+  {
+    "id": "TEST-04",
+    "project": "general",
+    "area": "testing",
+    "title": "Moved behavior needs replacement coverage",
+    "rule": "When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts.",
+    "check": "Did this move or remove a return field, prop, or branch? If yes, did equivalent tests move to the new owner?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260428-002", "RL-20260428-003"]
+  },
+  {
+    "id": "TX-01",
+    "project": "web",
+    "area": "transactions",
+    "title": "Preserve immutable transaction identity",
+    "rule": "Existing queued or rejection transactions must not allow edits that change the transaction hash while the user thinks they are confirming the original transaction.",
+    "check": "Did this make transaction fields editable? If yes, are existing queue/rejection flows still locked where identity must be preserved?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260410-001"]
+  },
+  {
+    "id": "TX-02",
+    "project": "web",
+    "area": "transactions",
+    "title": "Submit option state must stay switchable and recoverable",
+    "rule": "Tx-flow submit options must not auto-register or set global state in a way that hides alternatives, and submit errors must reset loading state instead of throwing out of the flow.",
+    "check": "Did this add or auto-select a tx-flow submit option? If yes, can the user switch away and can failures reset loading state?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260417-002"]
+  },
+  {
+    "id": "UX-01",
+    "project": "web",
+    "area": "ui",
+    "title": "Constrained text must truncate or wrap intentionally",
+    "rule": "Long user-provided identifiers such as email addresses and names must fit constrained UI the same way wallet addresses do.",
+    "check": "Did this add user-provided text to a constrained sidebar, card, badge, or menu? If yes, is overflow handled intentionally?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260217-005", "RL-20260219-002", "RL-20260506-001"]
+  },
+  {
+    "id": "UX-02",
+    "project": "web",
+    "area": "ui",
+    "title": "Local rows need local actions",
+    "rule": "Rows that come from local/private data must not show server-backed actions unless they have been promoted or mapped to a server entity.",
+    "check": "Did this merge local/private/server rows into one table? If yes, are row actions valid for that row source?",
+    "exampleRefs": ["web/examples/feature-boundaries.md#ux-02-hide-server-backed-actions-on-local-only-rows"],
+    "reviewLearningIds": ["RL-20260415-005"]
+  },
+  {
+    "id": "OBS-01",
+    "project": "web",
+    "area": "observability",
+    "title": "Promote telemetry only when user impact justifies it",
+    "rule": "Observability changes should distinguish warning-level noise from user-impacting errors and avoid flooding SLOs with expected retries, browser noise, or duplicate signals.",
+    "check": "Did this change logging/RUM/error classification? If yes, is the level justified by user impact and duplication risk?",
+    "exampleRefs": ["examples/general/api-and-packages.md#obs-01-use-the-shared-analytics-param-key"],
+    "reviewLearningIds": ["RL-20260319-001", "RL-20260417-003"]
+  },
+  {
+    "id": "CACHE-01",
+    "project": "general",
+    "area": "cache",
+    "title": "Cache stable negative lookups deliberately",
+    "rule": "Repeated negative lookups that are expected and stable should be cached with clear TTL/invalidation; transient failures must not be cached as permanent absence.",
+    "check": "Did this resolver repeatedly query for absent data? If yes, is absence cached deliberately without making transient failures permanent?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260420-003"]
+  },
+  {
+    "id": "CI-01",
+    "project": "general",
+    "area": "ci",
+    "title": "Scope CI concurrency and generated labels to the real target",
+    "rule": "CI concurrency groups and generated deployment labels must include the branch/ref and any static suffixes that affect the real limit.",
+    "check": "Did this add or edit workflow concurrency, preview URLs, or DNS labels? If yes, is the real full label/ref scoped correctly?",
+    "exampleRefs": ["examples/general/api-and-packages.md#ci-01-same-repo-guard-for-pullrequesttarget-workflows"],
+    "reviewLearningIds": ["RL-20260302-002", "RL-20260318-008", "RL-20260326-003", "RL-20260407-002", "RL-20260422-001"]
+  },
+  {
+    "id": "SEC-01",
+    "project": "web",
+    "area": "security",
+    "title": "Use own-property checks for user-controlled map keys",
+    "rule": "User-controlled strings used as map keys must not index inherited object properties; use `Object.hasOwn`, a null-prototype object, or `Map`.",
+    "check": "Did this map a query string, server string, or external value through an object? If yes, are inherited keys impossible?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260423-003"]
+  },
+  {
+    "id": "DOC-01",
+    "project": "general",
+    "area": "docs",
+    "title": "Preserve guidance when splitting docs",
+    "rule": "When splitting or moving agent/developer docs, every removed section must be moved, intentionally superseded, or called out for review.",
+    "check": "Did this split, delete, or move docs? If yes, can every removed section be accounted for in the new structure?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260303-008", "RL-20260318-012", "RL-20260408-003", "RL-20260430-003"]
+  },
+  {
+    "id": "DOC-02",
+    "project": "general",
+    "area": "docs",
+    "title": "Operational docs must name real branches and fallback paths",
+    "rule": "Release and operational docs should describe actual branch names, generated branch patterns, and fallback actions rather than placeholders that look literal.",
+    "check": "Did this edit release/runbook instructions? If yes, would a release manager know the real source branch and fallback command?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260415-001"]
+  },
+  {
+    "id": "PROD-01",
+    "project": "general",
+    "area": "product",
+    "title": "Product behavior changes need explicit confirmation",
+    "rule": "Changes to visible balances, disabled actions, labels, or available flows should cite product/design intent when the behavior is not mechanically implied by the code change.",
+    "check": "Did this alter visible product behavior? If yes, is the product/design decision explicit?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260420-004"]
+  },
+  {
+    "id": "WEB-04",
+    "project": "web",
+    "area": "navigation",
+    "title": "Build Safe-scoped navigation from loaded Safe state",
+    "rule": "Safe-scoped CTAs and route builders must use the loaded Safe source of truth and block unavailable flows for undeployed Safes instead of trusting optional query params. Space-scoped navigation must preserve the URL `spaceId` as the source of truth; helper hooks should not silently fall back to the first available Space when the URL is absent.",
+    "check": "Did this add a Safe- or Space-scoped link, CTA, or router push? If yes, does it use loaded state, preserve the active `spaceId`, and gate undeployed-Safe blocked routes?",
+    "exampleRefs": [
+      "web/examples/feature-boundaries.md#web-04-reusable-onboarding-components-must-not-hard-code-back-navigation",
+      "web/examples/feature-boundaries.md#prefix-match-pathname-against-route-not-the-reverse"
+    ],
+    "reviewLearningIds": ["RL-20260217-002", "RL-20260402-001", "RL-20260410-003", "RL-20260429-002", "RL-20260520-001"]
+  },
+  {
+    "id": "MOB-04",
+    "project": "mobile",
+    "area": "navigation",
+    "title": "Keep Expo router layouts structural",
+    "rule": "Expo Router layout files should define shell/navigation structure; business cleanup, disconnect, validation, and navigation side effects belong in focused containers, hooks, or screen logic.",
+    "check": "Did this add logic to an Expo Router `_layout.tsx` file? If yes, is it only structural shell code?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260217-004", "RL-20260331-001"]
+  },
+  {
+    "id": "WEB-05",
+    "project": "web",
+    "area": "auth",
+    "title": "Sanitize auth redirects and outcomes",
+    "rule": "Auth redirect URLs must remove transient error/query state and validate externally supplied return targets before sending users through OIDC or callback flows.",
+    "check": "Did this add or change an auth redirect or callback? If yes, is the return URL sanitized and validated?",
+    "exampleRefs": [
+      "examples/general/gateway-hooks.md#web-05-trigger-redirect-endpoints-via-top-level-navigation",
+      "web/examples/feature-boundaries.md#branch-the-action-do-not-duplicate-the-match",
+      "web/examples/feature-boundaries.md#validate-safe-app-urls-before-postmessage-origin-checks"
+    ],
+    "reviewLearningIds": ["RL-20260220-001", "RL-20260312-004", "RL-20260325-001", "RL-20260407-003"]
+  },
+  {
+    "id": "FEAT-03",
+    "project": "web",
+    "area": "features",
+    "title": "Do not self-import feature barrels",
+    "rule": "Code inside a web feature must not import the feature barrel or lazy feature handle when a direct hook, constant, or feature flag check avoids a circular dependency.",
+    "check": "Did this code inside `features/<name>` import from that feature barrel? If yes, can it import the direct module or shared hook instead?",
+    "exampleRefs": [
+      "web/examples/feature-boundaries.md#feature-public-api",
+      "web/examples/feature-boundaries.md#place-feature-subfolders-next-to-their-consumers",
+      "web/examples/feature-boundaries.md#use-relative-imports-inside-a-feature-export-only-the-public-surface",
+      "web/examples/feature-boundaries.md#sibling-files-inside-a-feature-use-relative-imports"
+    ],
+    "reviewLearningIds": ["RL-20260220-002", "RL-20260309-001", "RL-20260309-005", "RL-20260326-001"]
+  },
+  {
+    "id": "UI-01",
+    "project": "general",
+    "area": "ui",
+    "title": "Use theme tokens and hosted assets",
+    "rule": "UI colors and reusable assets should use theme variables/tokens and hosted files instead of hardcoded hex values or embedded base64 data.",
+    "check": "Did this add colors, icons, or image assets? If yes, are they theme-backed or hosted rather than hardcoded/embedded?",
+    "exampleRefs": ["web/examples/feature-boundaries.md#theme-a-static-logo-via-css-mask-not-bundled-svg"],
+    "reviewLearningIds": ["RL-20260219-003", "RL-20260312-003", "RL-20260317-001", "RL-20260327-003", "RL-20260327-005"]
+  },
+  {
+    "id": "CI-02",
+    "project": "general",
+    "area": "ci",
+    "title": "Release workflows must compute against the pre-change state",
+    "rule": "Release workflows must read previous tags, changelog ranges, and duplicate namespaces before creating the new tag or artifact that changes those queries.",
+    "check": "Did this workflow create a tag, release, changelog, or artifact? If yes, are previous-state queries computed before the new state is created?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260326-002", "RL-20260326-003", "RL-20260327-001"]
+  },
+  {
+    "id": "MOB-05",
+    "project": "mobile",
+    "area": "providers",
+    "title": "Configure mobile providers from app state and supported config",
+    "rule": "Mobile wallet/provider integrations should sit low enough in the provider tree to read store/config state, use supported network/config sources, and avoid bundle-heavy embedded assets.",
+    "check": "Did this add or move a mobile provider or wallet integration? If yes, can it read store/config state and avoid hardcoded networks or embedded assets?",
+    "exampleRefs": ["mobile/examples/permissions.md#dont-fake-configurability-you-cant-ship-without-a-release"],
+    "reviewLearningIds": ["RL-20260311-012", "RL-20260327-002", "RL-20260327-003"]
+  },
+  {
+    "id": "CONFIG-01",
+    "project": "web",
+    "area": "config",
+    "title": "Match env-var default values to consumer parsers",
+    "rule": "Default values for env-var-driven config must satisfy the same parser or strict check the runtime applies to non-default values. For origin allowlists, omit trailing slashes since browser-supplied origins are slashless.",
+    "check": "Did this introduce or change an env-var default? If yes, run the default through the consuming check; would the strict path accept it without normalization?",
+    "exampleRefs": ["web/examples/config-and-env.md#config-01-match-env-var-defaults-to-consumer-parsers"],
+    "reviewLearningIds": ["RL-20260326-005"]
+  },
+  {
+    "id": "UX-03",
+    "project": "web",
+    "area": "ui",
+    "title": "Shell rewrites must port over user-relied UX features",
+    "rule": "When replacing a shared shell component (topbar, sidebar, layout, navigation chrome), do an explicit feature delta against the previous version. Carry forward icons, indicators, shortcuts, and entry points users have come to rely on; if you intentionally drop one, document the decision before merge.",
+    "check": "Did this replace shared shell/chrome? If yes, can you list every feature/icon/control that disappeared, and is each removal a deliberate UX call?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260302-003", "RL-20260318-010", "RL-20260410-004"]
+  },
+  {
+    "id": "PKG-01",
+    "project": "general",
+    "area": "packages",
+    "title": "Do not duplicate shared package files in app source",
+    "rule": "When a shared package (`packages/**`) owns a config, type, ABI, or generated file, app code must import from the package's public entrypoint rather than maintaining a parallel app-local copy. Duplication drifts silently and breaks both apps as the source of truth changes.",
+    "check": "Did this add or move a config/types/generated file under `apps/**`? If yes, does an equivalent file already exist in `packages/**`, and should the app import from there instead?",
+    "exampleRefs": ["examples/general/api-and-packages.md#pkg-01-do-not-duplicate-shared-package-config-in-app-source"],
+    "reviewLearningIds": ["RL-20260415-007"]
+  },
+  {
+    "id": "UI-02",
+    "area": "ui",
+    "title": "Pick z-index from a documented layer scale",
+    "rule": "When introducing or adjusting a z-index, place it on a documented scale of existing app layers (drawers, popovers, dialogs, notifications) rather than inventing an isolated value, and justify the choice in a comment if it must sit between two known layers.",
+    "check": "Does this z-index reference an existing documented layer or scale, or is it an arbitrary value?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260317-002"],
+    "project": "web"
+  },
+  {
+    "id": "REVIEW-01",
+    "area": "review",
+    "title": "Don't bundle unrelated refactors with infra/test PRs",
+    "rule": "A PR whose stated purpose is CI, tooling, or test-infrastructure should not also contain unrelated production refactors; reviewers should ask the author to split such changes into separate PRs.",
+    "check": "Does this PR contain production-code changes outside its stated scope (test infra, CI, scaffolding)? If yes, split it.",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260318-004"],
+    "project": "general"
+  },
+  {
+    "id": "STATE-02",
+    "area": "state",
+    "title": "Reset context state when its precondition flips",
+    "rule": "When an effect writes derived values into a context based on a boolean precondition, the false branch must explicitly reset those values; do not rely on the next true branch to overwrite them.",
+    "check": "Does this conditional context write also clear the values when the condition becomes false, so downstream consumers never see stale data?",
+    "exampleRefs": ["examples/general/data-integrity.md#state-02-reset-context-state-when-its-precondition-flips"],
+    "reviewLearningIds": ["RL-20260318-007"],
+    "project": "general"
+  },
+  {
+    "id": "TEST-05",
+    "area": "testing",
+    "title": "Pick the right test fixture surface: builders for unit tests, MSW fixtures for integration",
+    "rule": "Use Builder.new<T>().with({...}) data for unit tests so the field under test is isolated and randomized data exposes hidden assumptions. Reach for MSW fixtures only when the test mocks the network layer and needs a realistic CGW response.",
+    "check": "Unit tests under `*.test.ts(x)` must not import from `config/test/msw/fixtures/`.",
+    "exampleRefs": ["examples/general/testing.md#builders-vs-msw-fixtures"],
+    "reviewLearningIds": ["RL-20260313-002"],
+    "project": "web"
+  },
+  {
+    "id": "CODE-03",
+    "area": "abstractions",
+    "title": "Cap positional parameters; close over shared hook state",
+    "rule": "Helper functions called from inside a hook should not take more than 4 positional parameters. When all extra args come from the same hook scope, prefer a local closure (`const buildItem = (chainId, address) => _buildSafeItem(chainId, address, ...deps)`) or a single `deps` object so call sites stay readable.",
+    "check": "Static check: helpers invoked inside `useMemo`/`useCallback` with \u22655 positional args are flagged for review.",
+    "exampleRefs": ["examples/general/api-and-packages.md#close-over-hook-deps-instead-of-threading-6-args"],
+    "reviewLearningIds": ["RL-20260311-005"],
+    "project": "general"
+  },
+  {
+    "id": "CODE-04",
+    "area": "abstractions",
+    "title": "Compute once per render before the JSX, not inside it",
+    "rule": "Pure derivations from props or state \u2014 especially ones reused across multiple JSX nodes \u2014 should be assigned to a local `const` (or `useMemo` if expensive) above the `return`, not inlined into JSX attributes.",
+    "check": "Lint review: flag identical pure-function calls appearing in multiple JSX `style`/attribute expressions within the same return.",
+    "exampleRefs": ["web/examples/feature-boundaries.md#hoist-derived-values-out-of-jsx"],
+    "reviewLearningIds": ["RL-20260310-006"],
+    "project": "general"
+  },
+  {
+    "id": "PERF-01",
+    "area": "performance",
+    "title": "Hoist regex literals and stable JSX out of inner loops",
+    "rule": "When iterating across many items, define regex literals and any structurally-identical JSX wrappers outside the loop. Anything that does not depend on the loop variable should be allocated once.",
+    "check": "Code review: regex literals (`/.../`) appearing inside a `for`/`while`/`map`/`forEach` body and not depending on the iteration variable should be lifted.",
+    "exampleRefs": ["examples/general/api-and-packages.md#hoist-regex-literals-out-of-loops"],
+    "reviewLearningIds": ["RL-20260312-007"],
+    "project": "general"
+  },
+  {
+    "id": "CODE-05",
+    "area": "abstractions",
+    "title": "Use named membership checks instead of long `!==` chains",
+    "rule": "Three or more `value !== 'literal'` checks on the same variable should be rewritten as `!DISALLOWED.includes(value)` against a named const, and the resulting boolean assigned to a named variable before use in JSX.",
+    "check": "Review: \u22653 `!== 'string-literal'` operands joined by `&&` on the same identifier should be rejected in favor of a named constant.",
+    "exampleRefs": ["mobile/examples/permissions.md#name-the-warning-condition-do-not-chain"],
+    "reviewLearningIds": ["RL-20260312-008"],
+    "project": "general"
+  },
+  {
+    "id": "FEAT-04",
+    "area": "features",
+    "title": "Coordinate edits to shared UI primitives with in-flight design-system PRs",
+    "rule": "Before editing files under `apps/web/src/components/ui/*`, check for open PRs that rewrite those files. If one exists, hold the edit, base it on top of the design-system branch, or apply the change in that branch directly.",
+    "check": "PR review checklist: any change to `apps/web/src/components/ui/*` must call out coordination with the design-system rewrite or note that no such PR is open.",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260310-009"],
+    "project": "web"
+  },
+  {
+    "id": "OBS-02",
+    "area": "observability",
+    "title": "Telemetry user-context effects must handle the empty branch",
+    "rule": "Any effect that writes user/account context to a telemetry SDK must also clear or overwrite that context when the underlying entity becomes absent. The effect's dependency array must include the absence case, and the effect body must branch on it.",
+    "check": "Review: `useEffect` calls that read `activeSafe?.address` to call `addUserExtraInfo`/`setUser`/`identify` should also call the corresponding reset API in the falsy branch.",
+    "exampleRefs": ["mobile/examples/permissions.md#clear-telemetry-context-when-the-entity-becomes-null"],
+    "reviewLearningIds": ["RL-20260311-013"],
+    "project": "general"
+  },
+  {
+    "id": "TX-03",
+    "area": "transactions",
+    "title": "Gate submit on token data readiness",
+    "rule": "Block transaction submission until token decimals (or other parameters that affect the on-chain amount) are fully loaded. Never let the UI fall back to a default that silently corrupts the value.",
+    "check": "Did this submit path depend on token metadata? If yes, is submission disabled until that metadata is confirmed loaded?",
+    "exampleRefs": [
+      "examples/general/transactions.md#gate-submit-on-token-data-readiness-never-fall-back-to-default-decimals"
+    ],
+    "reviewLearningIds": ["RL-20260303-002"],
+    "project": "web"
+  },
+  {
+    "id": "TX-04",
+    "area": "transactions",
+    "title": "Guard transaction submission with a synchronous ref",
+    "rule": "Use a synchronous ref (not a state flag) to prevent double-submission in transaction send flows. State updates are async and can race when the user double-clicks or presses Enter while a request is in flight.",
+    "check": "Does this submit handler rely only on a state flag? If yes, switch to a useRef guard set/checked synchronously.",
+    "exampleRefs": ["examples/general/transactions.md#synchronous-ref-guard-against-double-submit"],
+    "reviewLearningIds": ["RL-20260303-003"],
+    "project": "web"
+  },
+  {
+    "id": "NUM-01",
+    "area": "numerics",
+    "title": "Avoid scientific notation when serializing decimal amounts",
+    "rule": "When converting fiat or float values into bigint/decimal-string representations, format intermediate math without scientific notation. JS toString() emits '1e-7' for very small numbers, which downstream BigInt parsers reject.",
+    "check": "Does this code convert a Number to a decimal string for on-chain use? If yes, is it formatted with toFixed/Decimal.js rather than implicit toString?",
+    "exampleRefs": ["examples/general/data-integrity.md#avoid-scientific-notation-in-derived-decimal-strings"],
+    "reviewLearningIds": ["RL-20260303-004"],
+    "project": "general"
+  },
+  {
+    "id": "STATE-03",
+    "area": "state",
+    "title": "Retry handlers must reset error state",
+    "rule": "When a user-initiated retry button calls an async operation, reset prior error state synchronously before re-issuing the call so the new attempt starts from a clean slate.",
+    "check": "Does this retry handler clear the previous error before retrying? If not, stale error UI persists through the new attempt.",
+    "exampleRefs": ["examples/general/data-integrity.md#reset-error-state-in-retry-handlers"],
+    "reviewLearningIds": ["RL-20260306-006"],
+    "project": "general"
+  },
+  {
+    "id": "DATA-05",
+    "area": "data",
+    "title": "Compare addresses with the shared sameAddress helper",
+    "rule": "Use the repo's `sameAddress(a, b)` helper for any address equality check. Direct string comparison silently fails on case/checksum differences; the helper normalizes both sides.",
+    "check": "Did this introduce a `===` or `!==` between two address values? If yes, switch to `sameAddress`.",
+    "exampleRefs": ["examples/general/data-integrity.md#compare-addresses-with-sameaddress-not-tolowercase"],
+    "reviewLearningIds": ["RL-20260309-007"],
+    "project": "general"
+  },
+  {
+    "id": "MOB-07",
+    "area": "navigation",
+    "title": "Mount navigators before running navigation effects",
+    "rule": "Effects that call router.replace/push/back must wait until the navigator has mounted; calling navigation before mount silently no-ops in Expo Router.",
+    "check": "Does this effect navigate during initial render? If yes, is it gated on a mount-ready condition?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260303-009"],
+    "project": "mobile"
+  },
+  {
+    "id": "TX-05",
+    "area": "transactions",
+    "title": "Centralize transaction-derived analyses in SafeShield",
+    "rule": "Decoded transaction data, simulation results, and risk analyses should run through the SafeShield context rather than being re-derived in individual components. Centralizing avoids divergent results across review surfaces.",
+    "check": "Does this component re-derive transaction data that SafeShield already exposes? If yes, consume the context instead.",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260307-011"],
+    "project": "web"
+  },
+  {
+    "id": "RTK-03",
+    "area": "state",
+    "title": "Match RTK Query cache-key strings to the serialized form",
+    "rule": "Persisted RTK Query cache keys must be derived from the same serialization the runtime uses. Mismatched keys silently miss cache hits and refetch on every page load.",
+    "check": "Does this code persist or restore an RTK cache key? If yes, does it use the same `serializeQueryArgs`/default key serializer the runtime uses?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260302-001"],
+    "project": "general"
+  },
+  {
+    "id": "WEB-06",
+    "area": "state",
+    "title": "Derive reactive parent state from the store, not from child refs",
+    "rule": "When a parent needs to react to changes inside a child component, drive that reactivity through Redux/store state rather than imperative refs. Refs don't trigger re-renders, so parent UI ends up stale.",
+    "check": "Does the parent compute layout/visibility from a child ref? If yes, lift the relevant value into the store and read it from a selector.",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260302-004"],
+    "project": "web"
+  },
+  {
+    "id": "MOB-06",
+    "area": "theme",
+    "title": "Forward auto theme to native APIs as null",
+    "rule": "When the user picks 'Auto' for theme/appearance, forward that to the native API as `null` so the OS controls the appearance. Forwarding the literal string 'auto' bypasses the OS hook.",
+    "check": "Does this expose a theme setting to native code? If yes, is the auto/system value translated to `null` before crossing the bridge?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260226-001"],
+    "project": "mobile"
+  },
+  {
+    "id": "E2E-02",
+    "area": "e2e",
+    "title": "Pass timeout to the Cypress retryable command, not the assertion",
+    "rule": "Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` \u2014 passing timeout into `should()` or `expect()` does nothing.",
+    "check": "Did this E2E test increase a timeout to handle async UI? Is the timeout on the retryable command rather than the trailing assertion?",
+    "exampleRefs": ["examples/general/testing.md#cypress-retry-timeout-belongs-on-the-preceding-command"],
+    "reviewLearningIds": ["RL-20260218-001"],
+    "project": "web"
+  },
+  {
+    "id": "DATA-06",
+    "area": "data",
+    "title": "Keep cache-key normalization consistent across all consumers",
+    "rule": "When multiple consumers (selector, hook, persistence layer) build cache keys from the same identifier, they must all normalize identically (e.g. `getAddress`, `toLowerCase`, EIP-55 checksum). Divergent normalization fragments the cache.",
+    "check": "Did this code add a new consumer that builds a cache key from an address/identifier? Does it normalize the same way as every existing consumer?",
+    "exampleRefs": ["examples/general/data-integrity.md#normalize-rtk-query-cache-keys-at-one-place"],
+    "reviewLearningIds": ["RL-20260218-002"],
+    "project": "general"
+  },
+  {
+    "id": "CHAIN-03",
+    "area": "chain",
+    "title": "Pass canonical Safe versions through chain-aware deployment helpers",
+    "rule": "When resolving Safe contract metadata for a transaction, route the lookup through a chain-aware helper that respects canonical-fallback ordering. Hard-coding latest-version indices skips chains pinned to older releases.",
+    "check": "Does this code resolve a Safe contract address/version? If yes, is it going through the canonical-version helper rather than picking from a flat list?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260218-003"],
+    "project": "general"
+  },
+  {
+    "id": "CI-03",
+    "area": "ci",
+    "title": "Codegen drift checks must catch untracked outputs and run against PR HEAD",
+    "rule": "Drift checks for generated code must (1) include `--include-untracked` so newly generated files trigger the failure and (2) run against the actual PR HEAD, not the merge base.",
+    "check": "Did this change a codegen workflow? If yes, does the drift check call `git status --porcelain --include-untracked` and run after the codegen step on the PR commit?",
+    "exampleRefs": [],
+    "reviewLearningIds": ["RL-20260217-003"],
+    "project": "general"
+  }
+]

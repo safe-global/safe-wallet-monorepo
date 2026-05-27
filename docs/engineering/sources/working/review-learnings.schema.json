@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "title",
+      "sourceWindowId",
+      "prNumbers",
+      "prState",
+      "reviewCommentIds",
+      "reviewIds",
+      "issueCommentIds",
+      "learning",
+      "ruleIds"
+    ],
+    "properties": {
+      "id": { "type": "string", "pattern": "^RL-[0-9]{8}-[0-9]{3}$" },
+      "title": { "type": "string", "minLength": 1 },
+      "sourceWindowId": { "type": "string", "pattern": "^(CLOSED-[0-9]{8}-[0-9]{8}|HIST-[0-9]{8})$" },
+      "prNumbers": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+      "prState": { "type": "string", "minLength": 1 },
+      "reviewCommentIds": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+      "reviewIds": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+      "issueCommentIds": { "type": "array", "items": { "type": "integer", "minimum": 1 } },
+      "learning": { "type": "string", "minLength": 1 },
+      "ruleIds": {
+        "type": "array",
+        "minItems": 1,
+        "items": { "type": "string", "pattern": "^[A-Z][A-Z0-9]{1,9}-[0-9]{2}$" }
+      }
+    },
+    "allOf": [
+      {
+        "$comment": "CLOSED-* learnings are derived from fetched closed-PR windows and must be traceable to their GitHub source: at least one PR number AND at least one of the three source-ID arrays must be populated. HIST-* manual entries are unconstrained because they may not link to any PR.",
+        "if": {
+          "properties": {
+            "sourceWindowId": { "pattern": "^CLOSED-" }
+          }
+        },
+        "then": {
+          "properties": {
+            "prNumbers": { "minItems": 1 }
+          },
+          "anyOf": [
+            { "properties": { "reviewCommentIds": { "minItems": 1 } } },
+            { "properties": { "reviewIds": { "minItems": 1 } } },
+            { "properties": { "issueCommentIds": { "minItems": 1 } } }
+          ]
+        }
+      }
+    ]
+  }
+}

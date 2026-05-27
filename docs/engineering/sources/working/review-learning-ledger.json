@@ -1,0 +1,20 @@
+{
+  "dateField": "closedAt",
+  "state": "closed",
+  "coveredClosedAtRange": {
+    "start": "2026-02-17T00:00:00Z",
+    "end": "2026-05-21T00:00:00Z"
+  },
+  "overlapHours": 2,
+  "lastRun": {
+    "mode": "compound",
+    "repo": "safe-global/safe-wallet-monorepo",
+    "sourceWindowId": "CLOSED-20260506-20260521",
+    "since": "2026-05-06T22:00:00Z",
+    "until": "2026-05-21T00:00:00Z",
+    "prs": 38,
+    "comments": 222,
+    "learnings": 1,
+    "fetchedAt": "2026-05-21T09:36:31Z"
+  }
+}
