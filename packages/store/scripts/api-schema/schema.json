@@ -3341,7 +3341,7 @@
     },
     "/v1/chains/{chainId}/relay": {
       "post": {
-        "description": "Relays a Safe transaction using the relay service, which pays for gas fees. The transaction must meet certain criteria and the Safe must have remaining relay quota.",
+        "description": "Relays a Safe transaction or Safe creation transaction using the relay service, which pays for gas fees. Supports execTransaction (Safe tx) and createProxyWithNonce (Safe creation) calldata. On relay-fee chains, safeTxHash is required and must match the hash derived on-chain from the submitted calldata.",
         "operationId": "relayRelayV1",
         "parameters": [
           {
@@ -3357,7 +3357,7 @@
         ],
         "requestBody": {
           "required": true,
-          "description": "Transaction data to relay including Safe address, transaction details, and signatures",
+          "description": "Transaction data to relay. safeTxHash is required on relay-fee chains and must correspond to the to + data fields.",
           "content": {
             "application/json": {
               "schema": {
@@ -3368,7 +3368,7 @@
         },
         "responses": {
           "200": {
-            "description": "Transaction relayed successfully with transaction hash",
+            "description": "Transaction relayed successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -3378,7 +3378,13 @@
             }
           },
           "400": {
-            "description": "Invalid transaction data, unofficial contracts, or unsupported operation"
+            "description": "Request body failed schema validation"
+          },
+          "403": {
+            "description": "Relay denied: safeTxHash missing, fee service rejected, or unofficial proxy factory"
+          },
+          "422": {
+            "description": "safeTxHash does not match the transaction data, or unrecognised transaction type"
           },
           "429": {
             "description": "Relay limit reached for this Safe"
@@ -3438,7 +3444,7 @@
     },
     "/v1/chains/{chainId}/relay/{safeAddress}": {
       "get": {
-        "description": "Retrieves the number of remaining relay transactions available for a specific Safe on the given chain.",
+        "description": "Retrieves the number of remaining relay transactions available for a specific Safe on the given chain. On relay-fee chains, safeTxHash is forwarded to the fee service to determine per-transaction eligibility (returns remaining=1 when eligible, 0 when not). On daily-limit and no-fee-campaign chains, a count-based quota is returned.",
         "operationId": "relayGetRelaysRemainingV1",
         "parameters": [
           {
@@ -3464,7 +3470,7 @@
             "name": "safeTxHash",
             "required": false,
             "in": "query",
-            "description": "Safe transaction hash (0x prefixed hex string). Required for chains enabled for relay-fee relayer",
+            "description": "Safe transaction hash (0x prefixed hex string). Required on relay-fee chains to check per-transaction eligibility with the fee service. Optional on daily-limit and no-fee-campaign chains.",
             "schema": {
               "type": "string"
             }
