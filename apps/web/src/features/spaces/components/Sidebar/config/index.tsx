@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   PanelRight,
   EllipsisVertical,
+  Scale,
   Shield,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
@@ -42,6 +43,11 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
     icon: BookUser,
     label: 'Address book',
     href: AppRoutes.spaces.addressBook,
+  },
+  {
+    icon: Scale,
+    label: 'Policies',
+    href: AppRoutes.spaces.policies,
   },
 ]
 

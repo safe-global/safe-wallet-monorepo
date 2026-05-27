@@ -6,6 +6,7 @@ export enum ESafeAction {
   Receive = 'receive',
   Swap = 'swap',
   BuildTransaction = 'buildTransaction',
+  SpendingLimit = 'spendingLimit',
 }
 
 interface SafeActionsModalState {
