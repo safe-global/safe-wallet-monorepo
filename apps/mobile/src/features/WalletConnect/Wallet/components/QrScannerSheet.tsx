@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import { Text, YStack, Button, View } from 'tamagui'
+import { BottomSheetModal, BottomSheetTextInput } from '@gorhom/bottom-sheet'
+import { Text, XStack, YStack, Button, View } from 'tamagui'
 import type { Code } from 'react-native-vision-camera'
 import { QrCamera } from '@/src/components/Camera/QrCamera'
 import { useCameraPermissionFlow } from '@/src/components/Camera/useCameraPermissionFlow'
@@ -17,6 +17,9 @@ export const QrScannerSheet: React.FC<Props> = ({ open, onClose }) => {
   const [connecting, setConnecting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isCameraActive, setIsCameraActive] = useState(true)
+  // TODO(wallet-poc): remove the debug paste-URI input before merging the full feature.
+  //   Kept for now so the iOS simulator (no camera) can exercise pairing by pasting a wc: URI.
+  const [debugUri, setDebugUri] = useState('')
   const { permission, requestPermission, openSettings } = useCameraPermissionFlow()
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Set true when the timeout fires; further state writes for this pair attempt are no-ops.
@@ -85,6 +88,15 @@ export const QrScannerSheet: React.FC<Props> = ({ open, onClose }) => {
     setIsCameraActive(true)
   }
 
+  const onPasteAndPair = () => {
+    const trimmed = debugUri.trim()
+    if (!trimmed || !isWcUri(trimmed)) {
+      setError('Not a wc: URI')
+      return
+    }
+    void startPair(trimmed)
+  }
+
   return (
     <BottomSheetModal ref={ref} snapPoints={['90%']} enableDynamicSizing={false} onDismiss={onClose}>
       <YStack flex={1} padding="$4" gap="$3">
@@ -109,6 +121,34 @@ export const QrScannerSheet: React.FC<Props> = ({ open, onClose }) => {
             <Button onPress={onRetry}>Try again</Button>
           </YStack>
         )}
+        {/* TODO(wallet-poc): debug-only paste input for the iOS simulator (no camera). Remove before merging the full feature. */}
+        <YStack gap="$2" padding="$3" backgroundColor="$backgroundSecondary" borderRadius="$3">
+          <Text fontSize="$2" color="$colorSecondary">
+            Debug: paste WC URI
+          </Text>
+          <XStack gap="$2" alignItems="center">
+            <View flex={1}>
+              <BottomSheetTextInput
+                value={debugUri}
+                onChangeText={setDebugUri}
+                placeholder="wc:..."
+                autoCapitalize="none"
+                autoCorrect={false}
+                editable={!connecting}
+                style={{
+                  paddingHorizontal: 8,
+                  paddingVertical: 8,
+                  borderRadius: 4,
+                  backgroundColor: '#00000022',
+                  color: '#FFFFFF',
+                }}
+              />
+            </View>
+            <Button onPress={onPasteAndPair} disabled={!debugUri || connecting}>
+              Pair
+            </Button>
+          </XStack>
+        </YStack>
       </YStack>
     </BottomSheetModal>
   )
