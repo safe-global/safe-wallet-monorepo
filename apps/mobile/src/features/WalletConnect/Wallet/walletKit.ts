@@ -18,8 +18,12 @@ let walletKit: IWalletKit | null = null
 let initPromise: Promise<IWalletKit> | null = null
 
 export const getWalletKit = (): Promise<IWalletKit> => {
-  if (walletKit) return Promise.resolve(walletKit)
-  if (initPromise) return initPromise
+  if (walletKit) {
+    return Promise.resolve(walletKit)
+  }
+  if (initPromise) {
+    return initPromise
+  }
 
   initPromise = (async () => {
     const core = new Core({
