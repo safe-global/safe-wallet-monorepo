@@ -1,476 +1,393 @@
 # Spaces → Policies
 
-Workspace-level policies page that lets users **create** (Spending Limit, Account Recovery) and **audit** policies applied to every Safe in a Space.
+Workspace-level policies page that lets users **create**, **review**, and **manage** policies that govern every Safe in a Space.
 
-> Branch: `policies` · Lives at `apps/web/src/features/spaces/components/Policies/` · Route: `/spaces/policies`
-
----
-
-## 1. What this ships
-
-A new page at `/spaces/policies` with three sections:
-
-1. **Header** — Page title and one-line description.
-2. **Add a policy** — A 3-tile grid (Spending Limit, Operator Role · _coming soon_, Account Recovery). Clicking a non-soon tile opens its wizard.
-3. **Active policies** — A live-scanning list of every policy already applied across the Safes in the current Space. Each entry is a compact tappable row that expands to show its full configuration.
-
-Two wizards are reachable from the **Add a policy** tiles:
-
-- **Spending Limit wizard** — 4 steps, replaces the old single-card flow on this branch with a 3-column shell.
-- **Account Recovery wizard** — 5 steps, brand new on this branch.
-
-Both wizards share a common 3-column shell:
-
-| Column | Width        | Role                                                                               |
-| ------ | ------------ | ---------------------------------------------------------------------------------- |
-| Left   | 200 px       | Vertical step indicator with dark filled circle for current/done steps             |
-| Center | flex (min-0) | The active step's form, with **Back** / **Continue** at the top                    |
-| Right  | 340 px       | Sticky **Policy summary** card — fills progressively as the user answers each step |
+> Branch: `feat/policies` · Lives at `apps/web/src/features/spaces/components/Policies/` · Route: `/spaces/policies`
 
 ---
 
-## 2. Where to look (URL map)
+## 1. Scope of this PR
 
-| Route                                                            | What renders                        |
-| ---------------------------------------------------------------- | ----------------------------------- |
-| `/spaces/policies`                                               | Tile grid + Active policies section |
-| `/spaces/policies?policy=spendingLimit&safe=eth:0x…&step=wallet` | Spending Limit wizard, step 1       |
-| `/spaces/policies?policy=spendingLimit&safe=eth:0x…&step=tokens` | Spending Limit wizard, step 2       |
-| `/spaces/policies?policy=spendingLimit&safe=eth:0x…&step=amount` | Spending Limit wizard, step 3       |
-| `/spaces/policies?policy=spendingLimit&safe=eth:0x…&step=review` | Spending Limit wizard, step 4       |
-| `/spaces/policies?policy=accountRecovery&step=apply-to`          | Recovery wizard, step 1             |
-| `/spaces/policies?policy=accountRecovery&step=recoverer`         | Recovery wizard, step 2             |
-| `/spaces/policies?policy=accountRecovery&step=cooldown`          | Recovery wizard, step 3             |
-| `/spaces/policies?policy=accountRecovery&step=expiry`            | Recovery wizard, step 4             |
-| `/spaces/policies?policy=accountRecovery&step=review`            | Recovery wizard, step 5             |
+What's in:
 
-URL params are **the source of truth** for which step the wizard is on. Refreshing keeps the user on the same step. The `safe` query param can be used to inject Safe context into the page — required for the per-limit delete flow.
+- **UI** for two policy wizards (Spending Limit, Account Recovery) and the **Active Policies** read view.
+- **Batch transaction assembly**: each wizard's Review CTA builds a multi-send `MetaTransactionData[]` and hands it off to the standard Safe **tx-flow modal** (Safe Shield co-pilot, simulation, signer select, sign/propose). The wizard does **not** sign or submit directly.
+- **Reuse of existing Safe services**: spending-limit reads come through the same `loadSpendingLimits` service the Safe Settings page uses; Delay Modifier reads come through `getRecoveryDelayModifiers`.
+
+What's _not_ in this PR (called out where relevant below):
+
+- A dedicated **token-price feed**. Per-token USD conversion in the Spending Limit wizard relies on `useBalancesGetBalancesV1Query` — only tokens the Safe currently holds get a live `fiatConversion`. Tokens with no balance fall through to manual amounts (see §3 step 3).
+- Server-side persistence of policies. Everything is on-chain state, fetched fresh on each load (+ optional manual refresh).
+- Editing existing policies. The drawer surfaces details and a per-token Remove; there's no "edit limit" flow yet — users remove + recreate.
+- Operator Role policy type. Still a "Coming soon" tile.
 
 ---
 
-## 3. Spending Limit wizard — step by step
+## 2. URL map
 
-Entry: clicking the **Spending Limit** tile dispatches `openSafeActionsModal` → user picks a Safe from the modal → URL gains `?policy=spendingLimit&safe=…` → wizard renders.
+| Route                                                    | What renders                     |
+| -------------------------------------------------------- | -------------------------------- |
+| `/spaces/policies`                                       | Tile grid + Active Policies list |
+| `/spaces/policies?policy=spendingLimit&step=apply-to`    | Spending Limit wizard, step 1    |
+| `/spaces/policies?policy=spendingLimit&step=wallet`      | Spending Limit wizard, step 2    |
+| `/spaces/policies?policy=spendingLimit&step=tokens`      | Spending Limit wizard, step 3    |
+| `/spaces/policies?policy=spendingLimit&step=amount`      | Spending Limit wizard, step 4    |
+| `/spaces/policies?policy=spendingLimit&step=review`      | Spending Limit wizard, step 5    |
+| `/spaces/policies?policy=accountRecovery&step=apply-to`  | Account Recovery wizard, step 1  |
+| `/spaces/policies?policy=accountRecovery&step=recoverer` | Account Recovery wizard, step 2  |
+| `/spaces/policies?policy=accountRecovery&step=cooldown`  | Account Recovery wizard, step 3  |
+| `/spaces/policies?policy=accountRecovery&step=expiry`    | Account Recovery wizard, step 4  |
+| `/spaces/policies?policy=accountRecovery&step=review`    | Account Recovery wizard, step 5  |
 
-### Step 1 — **Spender** (`?step=wallet`)
-
-- Title: "Who gets this limit?"
-- Lists the Safe's signers (owners) as selectable rows.
-- One must be picked before **Continue** activates.
-- **Back** label reads **Policies** on this first step — clicking strips `?policy=` + `?step=` from the URL and returns to the tile grid.
-
-### Step 2 — **Tokens** (`?step=tokens`)
-
-- Title: "Which tokens?"
-- Searchable, sorted list of tokens the Safe holds (priority order: held balances → top of a static Uniswap list → custom contract-paste).
-- Quick-pick pills: **Stablecoins**, **Native**, **Clear**.
-- Custom token entry: paste a contract address; appears as a dashed "Add custom token" row.
-- **Continue** activates once ≥1 token is selected.
-
-### Step 3 — **Amount** (`?step=amount`)
-
-- Title: "How much, how often?"
-- Single-column layout: big `$` USD input + a compact `Day` / `Week` / `Month` segmented control on the same row, then an **Equivalent** card listing per-token conversions.
-- Default amount is **`0`** (not 5000 — see commit `15163442a`).
-- For unpriced tokens, the user enters a per-token amount instead of relying on the USD conversion.
-- **Continue** activates once every picked token has a usable amount (priced → `amount > 0`; unpriced → manual entry > 0).
-
-### Step 4 — **Review** (`?step=review`)
-
-- Title: "Ready to sign?"
-- Single-column detail card: Safe, Spender (renamed from "Wallet"), Limits per period, Enforced by, Signatures required, owner list.
-- Submits via `useSubmitPolicy` (a real on-chain submission building a multisig tx using the AllowanceModule).
-
-### Right-column Policy summary (all steps)
-
-Rows fill progressively. The label "Per {period}" updates to reflect the chosen period. The "Resets" row stays at `—` until the user actually types a value (default-state guard, commit `pre-15163`).
-
-| Row          | Becomes visible when…          | Source                                                      |
-| ------------ | ------------------------------ | ----------------------------------------------------------- |
-| From         | Always                         | Safe URL prefix + address                                   |
-| Spender      | A signer is selected on step 1 | `delegate` state                                            |
-| Per {period} | A token is picked on step 2    | Computed per-token amount, formatted with `safeFormatUnits` |
-| Resets       | Amount entered on step 3       | `PERIOD_LABELS[period]`                                     |
+URL params are the source of truth for which step the wizard is on. The `?safe=eth:0x…` param is written **once** when the user taps Review — that's the only point where the global active-safe state is touched. The wizard itself maintains its own internal `selectedSafeKey` so picking a Safe in the Apply-to step doesn't churn the rest of the app (Topbar, sidebar, nested-safe nav stay untouched).
 
 ---
 
-## 4. Account Recovery wizard — step by step
+## 3. Spending Limit wizard
 
-Entry: clicking the **Account Recovery** tile pushes `?policy=accountRecovery` into the URL.
+A 5-step wizard ending in a tx-flow modal hand-off.
 
-### Step 1 — **Apply to** (`?step=apply-to`)
+```mermaid
+flowchart LR
+  A[Apply to] --> B[Spender] --> C[Tokens] --> D[Amount] --> E[Review] --> M((tx-flow modal))
+  M -->|Sign &amp; propose| Safe[Safe AllowanceModule]
+```
 
-- Title: "Which Safe does this apply to?"
-- Lists every Safe in the user's Space (`useSpaceSafes` → flattened across single + multi-chain entries).
-- Each row uses the same primitives as the Accounts page (`SafeIdenticon` + `ShortAddressWithTooltip` + `CopyAddressButton`).
-- `SelectionCheck` indicates the picked Safe.
+### Step 1 — Apply to (`?step=apply-to`)
 
-### Step 2 — **Recoverer** (`?step=recoverer`)
+- Lists every Safe in the user's Space via `useSpaceSafes` (flattened across single + multi-chain entries).
+- Each row shows the Safe identicon, name, short address, **chain logo**, and a selection checkbox.
+- Component is shared with the Recovery wizard (`ApplyToStep` in `wizardCommon.tsx`).
+- Continue activates once one Safe is selected.
 
-- Title: "Who can recover this Safe?"
-- Two fields:
-  - **Recoverer address** — accepts 0x hex or ENS. ENS is debounced + resolved via `useNameResolver` (same hook the production `AddressInput` uses). Renders three states:
-    - `Resolving…` pill with spinner while ENS is in flight
-    - `✓ Valid` pill + monospace "Resolves to `0xd8dA…6045`" sub-line on success
-    - Red "Enter a valid address or ENS." after resolution finishes with no match
-  - **Nickname** — optional, free text, shown later in the Policies overview.
-- A tip card reminds: "Pick an address you can always access" (hardware wallet, trusted law firm, another Safe).
-- **Continue** activates once the resolved address is valid.
+### Step 2 — Spender (`?step=wallet`)
 
-### Step 3 — **Cooldown** (`?step=cooldown`)
+- **Any address can be the spender** — not restricted to Safe signers. A bot, an external wallet, or a teammate's EOA all work; the AllowanceModule has no signer constraint.
+- Two fields, both backed by the shared `WizardField`:
+  - **Spender address** — accepts `0x…` hex or `name.eth`. ENS resolution via `useNameResolver` with `Resolving…` / `✓ Valid` / red error states.
+  - **Name** — optional, free text. Auto-fills from the user's address book if the resolved address is already known (via `useAddressBookItem`). When the user types a name for an unknown address, a "Save to address book" checkbox appears and (if checked) persists the entry on successful tx submission via `upsertAddressBookEntries`.
+- Help card explains that withdrawals up to the limit need no further Safe approvals.
 
-- Title: "How long is the review window?"
-- Vertical radio-list of 6 options: 24h, 7d, 14d, 28d (**Recommended**), 60d, **Custom**.
-- The `Custom` row swaps its description for an inline numeric input + "day(s)" suffix when selected.
-- **Continue** activates once a preset is picked, or when the Custom value is `> 0`.
+### Step 3 — Tokens (`?step=tokens`)
 
-### Step 4 — **Expiry** (`?step=expiry`)
+- Searchable list of tokens the Safe holds (sorted by held-balance > top of a chain-scoped fallback list), plus quick-pick pills (Stablecoins, Native, Clear) and a custom contract-paste row.
+- Token selection drives the equivalent-amount calculation in step 4.
 
-- Title: "When does this expire?"
-- Vertical radio-list of 4 options: **Never** (**Recommended**), 6 months, 1 year, **Custom date**.
-- The `Custom date` row swaps its description for a native `<input type="date">`, locked to "tomorrow or later" via `min=`.
-- **Continue** activates once a preset is picked, or when the Custom date is a valid future date.
+### Step 4 — Amount (`?step=amount`)
 
-### Step 5 — **Review** (`?step=review`)
+- A pill toggle at the top picks between **Recurring** and **One transaction**.
+- Recurring → Day / Week / Month chooser appears; the underlying `period` is `'day' | 'week' | 'month'` and maps to `resetTimeMin` of `1440 / 10080 / 43200`.
+- One transaction → period is `'once'` and maps to `resetTimeMin = 0` (the AllowanceModule's "single-use" allowance).
+- A big `$` USD input drives the per-token equivalents shown below.
 
-- Title: "Ready to sign?"
-- Green gradient hero with a one-sentence summary built from the data:
-  > **{recoverer name or short addr}** can recover **{Safe name}**. They can propose a signer rotation, which executes after a **{cooldown}** review window. This option **{never expires / expires after 1 year / expires on Apr 17, 2027}**.
-- Below: 2×2 detail grid (Safe, Recoverer, Review window, Expires) + an "Enforced by Safe Delay Modifier" footer.
+> **Token-price limitation.** The USD → token conversion uses each token's `fiatConversion` from `useBalancesGetBalancesV1Query` — the CGW endpoint that returns balances **and** their USD rate. If the Safe doesn't hold a particular token, no `fiatConversion` is returned and the wizard surfaces a per-token manual amount input instead. We **do not** call a price oracle directly. Coverage gaps in CGW's fiat conversion fall through to manual entry, which is functional but suboptimal UX.
 
-> ⚠️ **The Recovery wizard's `Sign & create` is currently a stub.** It waits 600 ms then returns to the policies grid. Deploying a Delay Modifier and enabling it on the Safe is **not implemented in this PR.**
+### Step 5 — Review (`?step=review`)
+
+- "Ready to sign?" hero summary + detail card listing Safe, Spender (with address-book name + cloud icon), Limits per period (or "One-time"), Enforced by, Signatures required, and the owner list.
+- The CTA reads **Review**. Clicking it:
+  1. Calls `useSubmitPolicy.buildTxs(...)` to assemble the multi-send batch (`enableModule` if not yet installed → `addDelegate` → `setAllowance` per token).
+  2. Writes `?safe=eth:0x…` into the URL (shallow replace) so the modal targets the right Safe.
+  3. Opens `<PolicyBatchFlow>` inside the standard tx-flow modal — the modal owns review, Safe Shield, simulation, and sign/propose.
+- On the modal's success callback, the wizard saves any unsaved address-book entry, strips the wizard query params, and returns to the policies grid.
+
+### Batch builder (`SpendingLimitFlow/buildBatch.ts`)
+
+Pure function — easy to unit-test (8 tests in `__tests__/buildBatch.test.ts`).
+
+- For deployed Safes that **don't** yet have the AllowanceModule enabled, the `enableModule(address)` call is encoded **directly** via `ethers.Interface` against the Safe address. The global Safe SDK singleton (`getSafeSDK()`) is no longer used, so the batch builds correctly for **any** Safe in the workspace without first switching the app's active-safe context.
+- For counterfactual (undeployed) Safes, the existing `createEnableModuleTx(chain, safeAddress, safeVersion, …)` helper is used because version-specific master copies matter.
+- `addDelegate` and `setAllowance` helpers come from `@/features/spending-limits/services/spendingLimitParams` unchanged.
 
 ---
 
-## 5. Active Policies — live data flow
+## 4. Account Recovery wizard
 
-This is the production read-path. It scans **every Safe in the current Space in parallel** and renders a row per `(Safe × policy type)` pair that has real on-chain state.
+A 5-step wizard that, at Review, builds the real Delay Modifier setup batch (deploy via the Zodiac factory + enable on the Safe + configure the recoverer + cooldown + expiry) and hands off to the tx-flow modal.
+
+```mermaid
+flowchart LR
+  A[Apply to] --> B[Recoverer] --> C[Cooldown] --> D[Expiry] --> E[Review] --> M((tx-flow modal))
+  M -->|Sign &amp; propose| Safe[Zodiac Delay Modifier]
+```
+
+### Step 1 — Apply to (`?step=apply-to`)
+
+Same shared `ApplyToStep` as Spending Limit.
+
+### Step 2 — Recoverer (`?step=recoverer`)
+
+- Same `WizardField` pair as the Spender step: address/ENS input + Name field + optional "Save to address book" toggle.
+- Help card emphasises picking an address the user can always access (hardware wallet, trusted firm, another Safe they control).
+
+### Step 3 — Cooldown (`?step=cooldown`)
+
+- Vertical option list: 24h / 7d / 14d / 28d (**Recommended**) / 60d / Custom.
+- Custom row swaps its description for an inline numeric input + "day(s)" suffix.
+- Custom days are converted to seconds at Review time via `customCooldownDays * DAY_IN_SECONDS`.
+
+### Step 4 — Expiry (`?step=expiry`)
+
+- Vertical option list: Never (**Recommended**) / 6 months / 1 year / Custom date.
+- The on-chain Delay Modifier `txExpiration` is a duration in seconds, not an absolute date. Custom dates are converted at Review time to `max(0, customDate - now)` seconds — a best-effort mapping of "this proposal expires by X date" to the contract's lifetime semantics.
+
+### Step 5 — Review (`?step=review`)
+
+- Gradient hero with a one-sentence summary interpolated from the data.
+- Detail grid: Safe, Recoverer, Review window, Expires, Enforced by Safe Delay Modifier.
+- Clicking **Review** mirrors Spending Limit:
+  1. Maps `cooldown` / `expiry` to seconds (see `COOLDOWN_SECONDS` / `EXPIRY_SECONDS` constants).
+  2. Creates a fresh per-chain `JsonRpcProvider` via `createWeb3ReadOnly(chain)` — does **not** rely on the global `web3ReadOnly` store so the build call works even though the wizard hasn't touched the app's active-safe state.
+  3. Calls `getRecoveryUpsertTransactions(...)` from `@/features/recovery/services/setup` — the same service the existing standalone `UpsertRecovery` flow uses. Returns `MetaTransactionData[]`.
+  4. Writes `?safe=eth:0x…` into the URL.
+  5. Opens `<PolicyBatchFlow subtitle="Account recovery">` in the tx-flow modal.
+- Address-book save runs on the modal's success callback, same pattern as Spending Limit.
+
+> **Note.** The setup tx is a multi-step batch (`createProxy` for the Delay Modifier, `enableModule` on the Safe, `enableModule(recoverer)` on the Delay Modifier, `setTxCooldown` / `setTxExpiration`). All assembled in `getRecoveryUpsertTransactions` — we don't reimplement that here.
+
+---
+
+## 5. Tx-flow handoff (`PolicyBatch`)
+
+`apps/web/src/components/tx-flow/flows/PolicyBatch/index.tsx`
+
+A thin wrapper around the standard `TxFlow` that accepts a prebuilt `MetaTransactionData[]` via `initialData` and uses a small `PolicyBatchReview` component to hydrate `SafeTxContext` from the batch on mount:
+
+```ts
+useEffect(() => {
+  if (!data?.txs?.length) return
+  createMultiSendCallOnlyTx(data.txs).then(setSafeTx).catch(setSafeTxError)
+}, [data, setSafeTx, setSafeTxError])
+```
+
+Once `setSafeTx` lands, the modal's standard ReviewTransactionV2 component renders with **all the regular features available** — Safe Shield (verified contract, threat scan, simulation), balance changes, fee preview, signer select, sign/propose. Nothing wizard-specific past this point.
+
+The wrapper accepts a `subtitle` (e.g. "Spending limit") and an optional `icon`, plus an `onSubmit` callback that fires when the modal flow completes with a `txId`.
+
+---
+
+## 6. Active Policies
+
+The page below the Add-a-policy tiles. Scans every Safe in the Space in parallel, renders one row per `(Safe × spender)` for spending limits and one row per `(Safe × recoverer)` for recovery.
+
+### Header
+
+```
+ACTIVE POLICIES  3            5 safes scanned  ⟳
+```
+
+- **Left**: title + count (or `Scanning N safes…` with a pulsing dot while in-flight).
+- **Right**: scanned-safes label + circular refresh button. Refresh works by bumping a `refreshNonce` integer that's part of the React key for each `<SafePolicies>` child → the child remounts → its `useAsync` hooks re-run.
+
+### Row layout
+
+Each row, top → bottom:
+
+1. **Policy tag** — small uppercase green caps: `SPENDING LIMIT` or `ACCOUNT RECOVERY`.
+2. **Spender / Recoverer** — identicon + address-book name (if known) + short address.
+3. **Applied-to Safe** — `Safe: [identicon] Name eth:0x…  [chain logo]`.
+4. **Detail line** — spending limit summary (`Limit: 100 USDC daily · 0.05 ETH weekly`) or recovery summary (`Cooldown: 28 days · never expires`).
+
+Right-anchored: a pulsing **Active** pill + a subtle chevron that nudges right on hover. The whole row is `role="button"` with Enter/Space keyboard support and focus-visible outline.
+
+Click → opens the **Policy Detail drawer** (see §7).
+
+### Data flow
 
 ```mermaid
 flowchart TD
   A[useSpaceSafes] --> B[flatSafes - SafeRef array]
-  B -->|for each Safe| C[SafeSpendingLimitItem]
-  B -->|for each Safe| D[SafeRecoveryItem]
-  B -->|for each Safe| E[SafeScanRow - footer]
-
-  C --> F[useSafeSpendingLimits]
-  F --> F1[useSafesGetSafeV1Query - modules]
-  F --> F2[useBalancesGetBalancesV1Query - token info]
-  F --> F3[createWeb3ReadOnly per chain]
-  F --> F4["findInstalledAllowanceAddress(modules)"]
-  F4 --> F5[AllowanceModule.connect]
-  F5 --> F6[contract.getDelegates]
-  F6 --> F7[getTokensForDelegates - multicall]
-
-  D --> G[useSafeRecovery]
-  G --> G1[useSafesGetSafeV1Query - modules]
-  G --> G2[createWeb3ReadOnly per chain]
-  G --> G3[getRecoveryDelayModifiers - zodiac probe]
-  G3 --> G4[multicall: txCooldown / Expiration / Modules]
+  B -->|for each Safe| C[useSafeSpendingLimits]
+  B -->|for each Safe| D[useSafeRecovery]
+  C --> C1[useSafesGetSafeV1Query - modules]
+  C --> C2[useBalancesGetBalancesV1Query - token info]
+  C --> C3[createWeb3ReadOnly per chain]
+  C --> C4[findInstalledAllowanceAddress]
+  C --> C5[loadSpendingLimits - shared service]
+  D --> D1[useSafesGetSafeV1Query - modules]
+  D --> D2[createWeb3ReadOnly per chain]
+  D --> D3[getRecoveryDelayModifiers - bytecode probe]
+  D3 --> D4[multicall: getModulesPaginated, txCooldown, txExpiration]
 ```
 
 ### `useSafeSpendingLimits(chainId, safeAddress)`
 
-Returns `{ limits, loading, error, hasAllowanceModule }`.
+Returns `{ limits, delegates, hasAllowanceModule, moduleAddress, loading, error }`.
 
-Internals:
-
-1. **Chain config** via `useChains` → match by chainId.
-2. **Per-chain JSON-RPC provider** via `createWeb3ReadOnly(chain)`. Not `useWeb3ReadOnly()` — that's the globally-selected chain's provider, which is wrong when iterating Safes on different chains.
-3. **Safe info** via `useSafesGetSafeV1Query` for the modules array.
-4. **Balances** via `useBalancesGetBalancesV1Query` for token metadata (decimals, symbol, logoUri). Not used to gate the loader — Safes can hold spending limits for tokens they no longer hold any balance of.
-5. **Address resolution** — `findInstalledAllowanceAddress(modules)` walks the Safe's own modules array and checks each against the **full set** of known AllowanceModule addresses (v0.1.0 + v0.1.1 across all chains in the deployment JSON). Returns the **exact address from the Safe** so the address is guaranteed to have bytecode.
-6. **`contract.getDelegates(safeAddress, 0, 100)`** → list of delegate addresses (spenders).
-7. **`getTokensForDelegates(contract, provider, safeAddress, delegates, tokenInfo)`** → batched multicall fetching every (delegate, token) tuple and its allowance state.
-8. Filters out "zero allowance + one-time" stubs (mirrors upstream).
+- Per-chain `JsonRpcProvider` via `createWeb3ReadOnly(chain)` (not the global one — that'd be wrong for cross-chain scans).
+- `findInstalledAllowanceAddress(modules)` matches each of the Safe's modules against every known AllowanceModule deployment address (v0.1.0 + v0.1.1, across every chain in the deployment JSON). Avoids the v0.1.1-on-mainnet gap in `deployment.networkAddresses["1"]`.
+- **Loader reuse**: the actual limit enumeration goes through `loadSpendingLimits` from `@/features/spending-limits/services/spendingLimitLoader` — the **same service** the Safe Settings page uses. Single source of truth.
+- Errors are caught and logged via the standard `logError(Errors._609, …)` channel; the listing degrades to `limits: []` rather than crashing.
 
 ### `useSafeRecovery(chainId, safeAddress)`
 
-Returns `{ recovery: SafeRecoveryConfig[], loading, error }`.
+Returns `{ recovery: SafeRecoveryConfig[], loading }`.
 
-Internals:
+- Same per-chain provider setup.
+- Probes each module's bytecode via `getRecoveryDelayModifiers` to confirm it's an official Zodiac Delay.
+- For each detected Delay Modifier, multicalls `getModulesPaginated(SENTINEL, 100)` + `txCooldown` + `txExpiration`. If any sub-call reverts, the modifier is skipped (partial config is worse than dropping the row). Errors are caught and logged via `logError(Errors._812, …)`.
 
-1. Same per-chain provider setup as above.
-2. **`getRecoveryDelayModifiers(chainId, modules, provider)`** — probes each module's bytecode through any proxy chain to confirm it's an official Zodiac Delay.
-3. For each detected Delay Modifier:
-   - Multicalls `getModulesPaginated(SENTINEL_ADDRESS, 100)` → recoverers list.
-   - Multicalls `txCooldown` → seconds.
-   - Multicalls `txExpiration` → seconds (0 = never).
+### Robustness fix in `spendingLimitLoader.ts`
 
-### Why a row appears even when limits are empty
+The shared loader was patched to **skip failed multicall sub-calls** instead of blindly decoding empty `0x` returnData (which crashes ethers with `invalid bytes32 – not 32 bytes long`). Both consumers (Settings page, Active Policies list) benefit.
 
-If `hasAllowanceModule` resolves true but `limits.length === 0` (or the loader errors), the row still renders. Three visible states:
+```ts
+const decoded = results
+  .map((result, index): DecodedAllowance | null => {
+    if (!result.success || !result.returnData || result.returnData === '0x') return null
+    try {
+      const tokenAllowance = contract.interface.decodeFunctionResult('getTokenAllowance', result.returnData)[0]
+      return { index, tokenAllowance }
+    } catch {
+      return null
+    }
+  })
+  .filter((entry): entry is DecodedAllowance => entry !== null)
+```
 
-1. **Working** — `Spending Limit · 2 spenders, 4 tokens` (+ expand shows real beneficiary blocks)
-2. **Module enabled, no spenders** — `Spending Limit · module enabled · no spenders` (+ expand shows a quiet explainer)
-3. **Failed to load** — `Spending Limit · failed to load` (+ expand shows a red box with the actual error message)
+### Fallback rendering
 
-This makes silent failures visible.
+The row + count are kept in sync three ways:
 
-### Scan completion tracking
+1. **Full data path** — spender + tokens enumerated. Row's detail line shows `Limit: …`.
+2. **Delegate known, tokens unknown** — happens when `getDelegates` returns a delegate but `getTokens` for that delegate reverts (e.g., setup tx not yet executed). One row per delegate with `No active token limits — setup may be pending execution.`
+3. **Module installed, no delegates at all** — fallback row keyed by the Safe itself. `Module installed · spender details unavailable`.
 
-Each child component reports back to the parent via `onAppliedChange(key, isApplied)`. The parent maintains a `Map<string, boolean>` and computes:
-
-- `expectedScans = flatSafes.length * 2` (one for spending limits, one for recovery)
-- `completedScans = scanStatuses.size`
-- `stillScanning = spacesLoading || completedScans < expectedScans`
-
-To avoid a "premature completion" race on the first render (before `useAsync`'s `useEffect` flips `loading` to true), both hooks track an internal `asyncAttempted` flag set inside the async callback's `finally`. The hook's returned `loading` stays `true` until either:
-
-- The Safe has zero modules (deterministically nothing to find), **or**
-- The async callback has actually fired and finished.
-
-### Scanned-safes diagnostic footer
-
-Below the active-policies list, a fold-out **Scanned N safes in this space** section lists every Safe with:
-
-- Identicon + name + short address
-- Module count (`0 modules` / `2 modules`)
-- An `ALLOWANCE` badge when `findInstalledAllowanceAddress` matches one of the Safe's modules
-- An `OTHER MODULE` badge when the Safe has modules beyond the AllowanceModule (e.g., a Delay Modifier)
-
-The footer **auto-expands** when 0 policies are found, so the user can immediately see what was checked and reason about why nothing showed up.
+Clicking any tier opens the drawer; tier-2 and tier-3 surfaces show graceful "not yet readable" copy.
 
 ---
 
-## 6. File structure
+## 7. Policy Detail drawer
+
+`PolicyDetailDrawer.tsx`
+
+Right-anchored 480px MUI Drawer styled to match the wizard's Policy Summary card. Section labels in small uppercase grey + value on the right + thin dividers.
+
+**Spending Limit drawer**:
+
+- **From** — Safe identicon, name, prefixed address, chain logo
+- **Spender** — identicon, name (from address book), short address (or "Details unavailable" in the tier-3 fallback)
+- **Per {cadence}** — one inline token row per limit: token logo + symbol + amount (right-aligned), thin spent/limit progress bar, `X spent · resets Tomorrow` line, trash button. Bar turns amber at 50%, red at 90%.
+- **Resets** — cadence label
+- **Footer** — `Enforced by Safe Allowance Module` chip + outlined "Manage on Safe" button
+
+**Recovery drawer**:
+
+- **From** + **Recoverer** rows (same pattern)
+- **Cooldown** — clock icon + duration
+- **Expires** — calendar icon + "Never" / duration
+- **Module** — monospace address of the Delay Modifier
+- **Footer** — `Enforced by Safe Delay Modifier` chip + outlined "Manage on Safe" button
+
+The per-token trash button opens the canonical `RemoveSpendingLimitFlow` — same as the Safe Settings page — after shallow-replacing the URL with the right `?safe=` so the underlying `useSafeInfo` lands correctly.
+
+---
+
+## 8. Shared primitives (`wizardCommon.tsx`)
+
+| Export             | Role                                                                        |
+| ------------------ | --------------------------------------------------------------------------- |
+| `WizardLayout`     | The three-column shell (stepper / form / summary) used by both wizards      |
+| `VerticalWizard`   | Numbered step indicator with connector lines                                |
+| `FormHeader`       | Back + Review/Continue header inside the form card                          |
+| `WizardField`      | Icon + input row with consistent rest/hover/focus/valid/error states        |
+| `ApplyToStep`      | Safe-picker step — used by both wizards                                     |
+| `OptionCard`       | Radio-list row (Cooldown, Expiry); supports inline `description: ReactNode` |
+| `PolicySummaryRow` | One row in the right-column summary; pending state fades to 0.45 opacity    |
+| `SelectionCheck`   | Squarish checkmark for row-pickers                                          |
+| `safeKey`          | Canonical `chainId:address` key helper                                      |
+| `SafeRowItem`      | Type for a row in the Apply-to step                                         |
+
+---
+
+## 9. File structure
 
 ```
 apps/web/src/features/spaces/components/Policies/
-├── index.tsx                     ← SpacePolicies entry; renders tiles or routes to a wizard
-├── Page.tsx                      ← page-level wrapper
-├── AppliedPolicies.tsx           ← Active policies section + scan footer
-├── wizardCommon.tsx              ← shared primitives (VerticalWizard, FormHeader, OptionCard, …)
-├── useSafeSpendingLimits.ts      ← per-Safe spending-limit loader + findInstalledAllowanceAddress
-├── useSafeRecovery.ts            ← per-Safe recovery loader
+├── index.tsx                          ← entry; tile grid + routes to wizards
+├── Page.tsx                           ← page-level wrapper
+├── AppliedPolicies.tsx                ← Active Policies list + refresh
+├── PolicyDetailDrawer.tsx             ← side-panel detail view
+├── wizardCommon.tsx                   ← shared layout + primitives
+├── useSafeSpendingLimits.ts           ← per-Safe spending-limit reader
+├── useSafeRecovery.ts                 ← per-Safe recovery reader
 ├── SpendingLimitFlow/
-│   ├── index.tsx                 ← 4-step wizard
-│   ├── buildBatch.ts             ← AllowanceModule tx builder
-│   ├── tokenList.ts              ← chain-scoped fallback token list
-│   └── useSubmitPolicy.ts        ← submission hook (real, multisig)
+│   ├── index.tsx                      ← 5-step wizard
+│   ├── buildBatch.ts                  ← multi-send batch builder
+│   ├── tokenList.ts                   ← chain-scoped fallback token list
+│   ├── useSubmitPolicy.ts             ← buildTxs hook (no signing)
+│   └── __tests__/
+│       └── buildBatch.test.ts
 ├── RecoveryFlow/
-│   └── index.tsx                 ← 5-step wizard (submit is stubbed)
+│   └── index.tsx                      ← 5-step wizard
 └── __tests__/
     └── index.test.tsx
 ```
 
-Plus the page route:
+Plus:
 
-```
-apps/web/src/pages/spaces/policies.tsx
-```
-
-And a sidebar nav entry in:
-
-```
-apps/web/src/features/spaces/components/Sidebar/config/index.tsx
-```
+- `apps/web/src/components/tx-flow/flows/PolicyBatch/index.tsx` — prebuilt-batch tx-flow
+- `apps/web/src/pages/spaces/policies.tsx` — Next.js route
+- `apps/web/src/features/spending-limits/services/spendingLimitLoader.ts` — shared loader (robustness patch)
 
 ---
 
-## 7. Shared primitives (`wizardCommon.tsx`)
+## 10. Known limitations
 
-| Component           | Role                                                                                                                    |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `VerticalWizard`    | Numbered step indicator with connector lines. Filled (dark) for current + completed.                                    |
-| `FormHeader`        | Back + Continue/Sign at the top of each form card. On step 1, Back reads "Policies" and exits the wizard.               |
-| `PolicySummaryRow`  | A single row in the right-column summary. Dim 0.45 opacity when `pending`.                                              |
-| `SelectionCheck`    | The squarish checkmark used in row-pickers (signers, Safes).                                                            |
-| `selectedRowStyles` | sx tokens applied to a Paper row to indicate selection.                                                                 |
-| `OptionCard`        | Radio-list row used by Cooldown + Expiry; supports a `description: ReactNode` slot so callers can inject inline inputs. |
+### Token prices
 
----
+Per-token USD conversion in the Spending Limit wizard is sourced from `useBalancesGetBalancesV1Query` — CGW only returns `fiatConversion` for tokens the Safe holds. The wizard degrades gracefully (falls through to per-token manual entry) but a user setting a spending limit for a token the Safe doesn't yet hold has to enter the token amount themselves.
 
-## 8. Submission flows
+A dedicated price feed (CoinGecko, an internal pricing service, or pulling rates from the Cowswap quote endpoint) is the natural follow-up.
 
-### Spending Limit
+### Custom delay seconds
 
-`useSubmitPolicy` builds a Safe transaction that, for each (token, amount, delegate, period) tuple, calls either:
-
-- `enableModule(allowanceModule)` if the AllowanceModule isn't already enabled, **and**
-- `setAllowance(delegate, token, amountInBase, resetTimeMin, resetBaseMin)` on the module.
-
-These are batched as a single Safe multi-send and routed through the normal queue → sign → execute flow.
-
-### Recovery (stub)
-
-`RecoveryFlow.submitPolicy` is intentionally a stub:
-
-```ts
-await new Promise((r) => setTimeout(r, 600))
-const { policy: _p, step: _s, ...rest } = router.query
-void router.replace({ pathname: AppRoutes.spaces.policies, query: rest })
-```
-
-A real implementation would:
-
-1. Deploy a new Zodiac Delay Modifier with the chosen `txCooldown` + `txExpiration`.
-2. Build a Safe transaction calling `enableModule(delayModifier)` on the Safe.
-3. Add the recoverer address as a module on the Delay Modifier (`enableModule(recoverer)` on the Delay).
-4. Route through the multisig queue → sign → execute flow.
-
-This is **not** in scope for this PR.
-
----
-
-## 9. Delete spending limit (canonical flow)
-
-Each limit row inside an expanded Spending Limit policy has a trash icon. Clicking it:
-
-1. Stops propagation (so the row doesn't collapse).
-2. Calls `router.replace({ pathname, query: { ...router.query, safe: `${shortName}:${safeAddress}` } }, undefined, { shallow: true })`. This injects the target Safe into the URL so `useLoadSafeInfo` populates `safeInfoSlice` — `RemoveSpendingLimitFlow` reads `useSafeInfo()` internally.
-3. `setTxFlow(<RemoveSpendingLimitFlow spendingLimit={limit} />)` opens the canonical modal flow.
-
-The user signs and executes the removal in the standard Safe tx flow.
-
----
-
-## 10. The "invalid bytes32" bug (fixed)
-
-For QA awareness — this came up while building the Active policies view and is **fixed** by this PR.
-
-**Symptom:** Spending Limit row showed `Spending Limit · failed to load` with the error `invalid bytes32 – not 32 bytes long`.
-
-**Root cause:** The user's Safe had AllowanceModule **v0.1.1** at `0xAA46724893dedD72658219405185Fb0Fc91e091C` on mainnet. The shared `getSpendingLimitContract` does `deployment.networkAddresses["1"]` with **no fallback**, but the v0.1.1 deployment JSON has no `"1"` entry — so the lookup returned `undefined`, ethers built a contract pointing at no address, the RPC call returned empty bytes, and ABI decoding failed.
-
-**Fix:** `findInstalledAllowanceAddress(modules)` finds the address **from the Safe's own modules array** by matching against every known AllowanceModule address (across both versions and every registered chain). The returned address is guaranteed to have bytecode on the chain we're calling.
-
-The badge in the scan footer uses the same helper, so the detection logic and the loader logic can never disagree.
-
----
-
-## 11. QA test cases
-
-### Tiles + navigation
-
-- [ ] Visiting `/spaces/policies` with no `?policy=` param shows the tile grid and (if any) Active policies section.
-- [ ] Clicking **Spending Limit** opens the Safe-picker modal first.
-- [ ] Clicking **Account Recovery** navigates to `?policy=accountRecovery&step=apply-to`.
-- [ ] **Operator Role** tile is dimmed with a green pulsing "Coming soon" pill and ignores clicks.
-- [ ] Refreshing the page while on any wizard step keeps the user on the same step.
-
-### Spending Limit wizard
-
-- [ ] Step 1 lists every signer of the Safe; only one can be selected at a time.
-- [ ] Back on step 1 reads "Policies" and exits the wizard.
-- [ ] Step 2 quick-pick pills (Stablecoins / Native / Clear) work.
-- [ ] Step 2 custom-address paste appends a row labelled "Custom".
-- [ ] Step 3 default amount is `0` (right-column "Per {period}" row stays at "—").
-- [ ] Step 3 period segmented control changes the right-column "Per {period}" label.
-- [ ] Step 3 unpriced tokens render their own input; Continue stays disabled until every picked token has a usable amount.
-- [ ] Step 4 detail card matches the right-column summary.
-- [ ] Submitting on step 4 routes to the standard Safe queue (do not actually submit unless intentional).
-
-### Recovery wizard
-
-- [ ] Step 1 lists every Safe in the Space (use `useSpaceSafes`); multi-chain Safes appear once per chain.
-- [ ] Step 2 typing `vitalik.eth` shows `Resolving…` then `✓ Valid` and a "Resolves to 0xd8dA…6045" sub-line.
-- [ ] Step 2 typing garbage shows the red error **only after** resolution settles (no flicker mid-typing).
-- [ ] Step 3 Custom row reveals a number input; entering `42` updates the right-column summary to "42 days".
-- [ ] Step 4 Custom date row reveals a native date picker; the `min` attribute prevents picking today or earlier.
-- [ ] Step 5 gradient hero interpolates the resolved recoverer name (or short addr), Safe name, cooldown label, and expiry verb correctly.
-- [ ] Clicking **Sign & create** on step 5 waits ~600 ms then returns to the policies grid (stub).
-
-### Active policies
-
-- [ ] A Safe with an AllowanceModule installed shows a row labelled `Spending Limit · N spenders, M tokens`.
-- [ ] Tapping the row expands it; each spender block shows identicon + (address-book name if any) + per-token rows with `spent / amount` and reset time.
-- [ ] An installed AllowanceModule with no delegates shows `Spending Limit · module enabled · no spenders` and an explainer in the expanded view.
-- [ ] An installed AllowanceModule that errors at runtime shows `Spending Limit · failed to load` and the error inside a red box on expand.
-- [ ] A Safe with a Zodiac Delay Modifier shows `Account Recovery · N recoverers, X days review`; expanding reveals the cooldown / expiry tiles + recoverer list.
-- [ ] **Active policies** header reads `Scanning N safes…` with a pulsing dot while any per-Safe scan is in flight; flips to a count once everything settles.
-- [ ] When zero policies are found, a dashed empty-state card appears: "No policies applied to the N safes in this space yet."
-- [ ] The **Scanned N safes in this space** footer:
-  - Lists every Safe with module count + `ALLOWANCE` and/or `OTHER MODULE` badges.
-  - Auto-expands when no active policies were found.
-
-### Delete limit
-
-- [ ] Clicking the trash icon on a limit row injects `?safe=eth:0x…` into the URL **without** leaving the policies page.
-- [ ] The canonical `RemoveSpendingLimitFlow` modal opens with the right spending limit pre-filled.
-- [ ] Cancelling the modal leaves the row intact.
-
-### Address book integration
-
-- [ ] When the Spender or Recoverer address has an entry in the user's address book (space or local), the row shows the **name** above the short address.
-- [ ] When there's no entry, only the short address shows — no awkward blank line.
-
-### Visual
-
-- [ ] Active-policy rows use the **blocky `SafeIdenticon`** (not letter avatars) — same as the Accounts page.
-- [ ] No copy buttons inside expanded views (intentional — addresses still have hover-tooltip via `ShortAddressWithTooltip`).
-- [ ] The Active section reads "ACTIVE POLICIES" (uppercase) with the count next to it.
-- [ ] The Add a policy section is **below** the Active section.
-
----
-
-## 12. Edge cases & limitations
+The Recovery wizard's Custom expiry date is mapped to a duration via `customDate - now`. The on-chain Delay Modifier `txExpiration` is a duration in seconds (how long a queued recovery proposal stays executable), not an absolute deadline. The wizard's UI (pick a date) doesn't perfectly map onto this semantic; we approximate with "remaining time until that date". For most users the simpler "Never / 6m / 1y" presets are the right call.
 
 ### Multi-chain Safes
 
-`flattenSafes` expands a `MultiChainSafeItem` into one `SafeRef` per chain. This means a Safe with the same address on 3 chains is scanned 3 times — once per chain — and could surface as 3 separate rows if it has policies on each.
+`flattenSafes` expands a multi-chain Safe entry into one row per chain. A Safe with the same address on 3 chains is scanned (and may appear) 3 times in the Apply-to list. Each chain is treated as an independent target.
 
 ### Custom AllowanceModule deployments
 
-`findInstalledAllowanceAddress` only matches against the SDK's `safe-modules-deployments` package. A Safe with a self-deployed, non-canonical AllowanceModule **will not be detected**. The row won't render and the badge in the scan footer won't appear.
+`findInstalledAllowanceAddress` only matches against the addresses in `@safe-global/safe-modules-deployments`. A Safe with a self-deployed, non-canonical AllowanceModule won't be detected.
 
-### Recovery: legitimate non-recovery Delay Modifiers
+### URL safe-context for the per-token delete
 
-`getRecoveryDelayModifiers` filters out Delay Modifiers whose enabled modules include any other Zodiac contract — heuristic for "this is a Roles / Scope setup, not recovery". A Delay Modifier with mixed-use modules might be misclassified.
+The drawer's Trash button writes `?safe=eth:0x…` via `window.history.replaceState` before opening `RemoveSpendingLimitFlow`. On slow networks the modal may render briefly before `safeInfoSlice` finishes loading — not breaking, just a faint flash.
 
-### Stub submission
+### No bulk remove
 
-The Recovery wizard's submission is a no-op stub. Do not click "Sign & create" expecting a real recovery setup. (Wired up in a future PR.)
-
-### URL safe-context for delete
-
-The trash button does `router.replace(..., { shallow: true })`. On slow networks, the `RemoveSpendingLimitFlow` modal might open a moment before `safeInfoSlice` finishes loading — the modal will show a loading state until it settles. Not breaking, just a subtle flash.
-
-### Custom days/date thread-through
-
-The Cooldown's custom days and Expiry's custom date are stored in component state and surfaced in the summary, but **are not yet threaded into a real submission payload**. Since the submit is stubbed anyway, this is internally consistent — but worth flagging for when the real submission lands.
-
-### Operator Role tile
-
-Visually present, dimmed with "Coming soon" pulse. No click handler — completely inert.
+The drawer's only destructive action is per-token Remove. There's no "remove all limits for this spender" or "remove the AllowanceModule" affordance — those flows live on the Safe Settings page (linked via the "Manage on Safe" button).
 
 ---
 
-## 13. Accessibility
+## 11. Follow-ups
 
-- All collapsible rows have `role="button"` and `aria-expanded`.
-- The trash icon button has `aria-label="Remove spending limit"`.
-- The custom date input has `aria-label="Custom expiry date"`; the custom days input has `aria-label="Custom number of days"`.
-- The wizard's vertical step indicator does not currently expose step state to AT — known gap; consider an `aria-current="step"` follow-up.
+1. **Token price feed** — wire a dedicated rate source so the Spending Limit wizard always has fiat conversion (see §10).
+2. **Operator Role policy type** — currently inert "Coming soon" tile.
+3. **Edit-in-place** for spending limits — change amount or reset window without remove + recreate.
+4. **Storybook stories** for the wizard steps + drawer in all states (full data, fallback, error).
+5. **Cypress E2E** for the end-to-end flow (build batch → Safe Shield modal → sign mock).
+6. **`aria-current="step"`** on the active wizard step in `VerticalWizard`.
+7. **Mobile breakpoints** — both wizards collapse to single-column on `xs`, untested under realistic mobile viewports.
 
 ---
 
-## 14. Backend touchpoints
+## 12. Backend touchpoints
 
 | Source                                                                        | What we read                                           |
 | ----------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `useSpaceSafesGetV1Query` (CGW)                                               | Space's Safe list                                      |
-| `useSafesGetSafeV1Query` (CGW)                                                | Per-Safe modules, owners, threshold                    |
-| `useBalancesGetBalancesV1Query` (CGW)                                         | Token metadata for displaying limit amounts            |
+| `useSpaceSafes` (CGW)                                                         | Space's Safe list                                      |
+| `useSafesGetSafeV1Query` (CGW)                                                | Per-Safe modules, owners, threshold, version           |
+| `useBalancesGetBalancesV1Query` (CGW)                                         | Token metadata + `fiatConversion` for held tokens      |
 | `createWeb3ReadOnly(chain)` (Infura)                                          | Per-chain JSON-RPC provider                            |
 | `AllowanceModule.getDelegates`, `.getTokens`, `.getTokenAllowance` (on-chain) | Spending limit state                                   |
 | `Delay.getModulesPaginated`, `.txCooldown`, `.txExpiration` (on-chain)        | Recovery configuration                                 |
-| Zodiac `ContractVersions` + `_getZodiacContract` bytecode probe (on-chain)    | Distinguish official Delay Modifier from other modules |
+| Zodiac bytecode probe (on-chain)                                              | Distinguish official Delay Modifier from other modules |
 | `useAllAddressBooks` (local store + CGW space contacts)                       | Spender / Recoverer names                              |
 | `useNameResolver` (web3 read-only + ENS)                                      | ENS → 0x resolution                                    |
 
 ---
 
-## 15. Known follow-ups
-
-1. **Wire Recovery submission** — deploy Delay Modifier + enable it on the Safe.
-2. **Persist custom cooldown seconds and expiry timestamps** in the submission payload.
-3. **Operator Role wizard** when product is ready.
-4. **Refactor `getSpendingLimitContract`** upstream to use the CREATE2 fallback that `findInstalledAllowanceAddress` already provides — would let the existing settings page benefit from the same robustness.
-5. **`aria-current="step"`** on the active wizard step.
-6. **Mobile breakpoints** — wizards collapse to single-column on `xs`, untested under realistic mobile viewports.
-7. **Storybook** — wizard steps have no stories yet.
-
----
-
-_Last updated: 2026-05-17_
+_Last updated: 2026-05-27_
