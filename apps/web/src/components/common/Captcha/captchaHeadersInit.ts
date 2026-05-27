@@ -22,7 +22,12 @@ export function isCaptchaActivated(): boolean {
 }
 
 // Only these endpoint patterns require a captcha token
-const CAPTCHA_PROTECTED_ROUTES = [/\/v2\/owners\/[^/]+\/safes/, /\/v3\/owners\/[^/]+\/safes/]
+const CAPTCHA_PROTECTED_ROUTES = [
+  /\/v2\/owners\/[^/]+\/safes/,
+  /\/v3\/owners\/[^/]+\/safes/,
+  /\/v1\/chains\/[^/]+\/safes\/[^/]+\/positions\/[^/]+/,
+  /\/v1\/portfolio\/[^/]+/,
+]
 
 export function isProtectedEndpoint(url: string): boolean {
   return CAPTCHA_PROTECTED_ROUTES.some((pattern) => pattern.test(url))
