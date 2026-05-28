@@ -9,12 +9,12 @@ export const spacesBannerID = 'spacesBanner'
 export const SpacesBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   return (
     <PromoBanner
-      title="New! Improved Spaces."
+      title="New! Improved workspaces."
       description="All your Safe Accounts, finally organized. Streamlined for teams and solo users alike"
       ctaLabel="Try now"
       href={AppRoutes.welcome.spaces}
       imageSrc={SpacesIllustration}
-      imageAlt="Spaces illustration"
+      imageAlt="Workspaces illustration"
       endIcon={<ChevronRightIcon fontSize="small" />}
       ctaVariant="text"
       trackingEvents={{ ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.safe_dashboard_banner }}

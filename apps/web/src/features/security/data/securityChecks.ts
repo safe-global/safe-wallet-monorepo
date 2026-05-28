@@ -20,22 +20,6 @@ export const CHECK_DEFS: Record<string, CheckDef> = {
     ctaLabel: 'Review setup',
     category: 'account',
   },
-  // signer_activity: {
-  //   id: 'signer_activity',
-  //   title: 'Signer activity',
-  //   shortDescription: 'How recently each signer has been active on-chain.',
-  //   fixRoute: AppRoutes.settings.setup,
-  //   ctaLabel: 'Review signers',
-  //   category: 'account',
-  // },
-  signer_integrity: {
-    id: 'signer_integrity',
-    title: 'Signer screening',
-    shortDescription: 'Whether any signers have exposure to sanctioned or flagged sources.',
-    fixRoute: AppRoutes.settings.setup,
-    ctaLabel: 'Review signers',
-    category: 'account',
-  },
   contract_version: {
     id: 'contract_version',
     title: 'Contract version',

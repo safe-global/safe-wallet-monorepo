@@ -20,6 +20,8 @@ on:
         required: false
         type: string
 
+permissions: {}
+
 jobs:
   start-release:
     runs-on: ubuntu-latest

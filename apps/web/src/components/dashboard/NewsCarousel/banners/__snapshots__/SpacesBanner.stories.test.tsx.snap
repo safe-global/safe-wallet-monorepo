@@ -12,7 +12,7 @@ exports[`./SpacesBanner.stories Default 1`] = `
       class="MuiStack-root bannerStack mui-style-pl8gqh-MuiStack-root"
     >
       <img
-        alt="Spaces illustration"
+        alt="Workspaces illustration"
         class="bannerImage"
         data-nimg="1"
         decoding="async"
@@ -29,7 +29,7 @@ exports[`./SpacesBanner.stories Default 1`] = `
         <h4
           class="MuiTypography-root MuiTypography-h4 bannerText bannerTitle mui-style-1x3wnrt-MuiTypography-root"
         >
-          New! Improved Spaces.
+          New! Improved workspaces.
         </h4>
         <p
           class="MuiTypography-root MuiTypography-body2 bannerText bannerDescription mui-style-17vdyq3-MuiTypography-root"

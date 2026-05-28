@@ -150,7 +150,7 @@ const SpaceAddressBook = () => {
               setActiveTab(val)
             }}
           >
-            <TabsList variant="line">
+            <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
               <TabsTrigger value="workspace" className="cursor-pointer">
                 Workspace contacts ({addressBookItems.length})
               </TabsTrigger>

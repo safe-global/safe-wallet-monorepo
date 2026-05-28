@@ -15,7 +15,7 @@ jest.mock('expo-router', () => ({
   useLocalSearchParams: () => ({ address: mockExpectedAddress }),
 }))
 
-jest.mock('@/src/features/WalletConnect/context/WalletConnectContext', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/context/WalletConnectContext', () => ({
   useWalletConnectContext: () => ({ reconnect: mockReconnect }),
 }))
 

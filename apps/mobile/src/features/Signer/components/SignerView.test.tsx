@@ -9,11 +9,11 @@ import type { FormValues } from '@/src/features/Signer/types'
 
 const mockUseWalletConnectStatus = jest.fn()
 
-jest.mock('@/src/features/WalletConnect/hooks/useWalletConnectStatus', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/hooks/useWalletConnectStatus', () => ({
   useWalletConnectStatus: (...args: unknown[]) => mockUseWalletConnectStatus(...args),
 }))
 
-jest.mock('@/src/features/WalletConnect/components/WalletConnectBadge', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/components/WalletConnectBadge', () => ({
   WalletConnectBadge: () => null,
 }))
 
