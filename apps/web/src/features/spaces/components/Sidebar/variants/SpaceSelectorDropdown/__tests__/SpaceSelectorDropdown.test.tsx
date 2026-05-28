@@ -408,6 +408,83 @@ describe('SpaceSelectorDropdown', () => {
       expect(button).not.toBeDisabled()
       expect(screen.queryByText('Only admins can add Safes to this workspace')).not.toBeInTheDocument()
     })
+
+    it('does not call addToSpace when a non-admin space item is clicked', async () => {
+      const mockAddToSpace = jest.fn().mockResolvedValue(true)
+      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
+        useAddSafeToSpace: jest.Mock
+      }
+      useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
+
+      const spaces = [{ id: 1, name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const memberBtn = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'MemberSpace')
+      await act(async () => {
+        fireEvent.click(memberBtn!)
+      })
+
+      expect(mockAddToSpace).not.toHaveBeenCalled()
+    })
+
+    it('calls addToSpace when an admin space item is clicked', async () => {
+      const mockAddToSpace = jest.fn().mockResolvedValue(true)
+      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
+        useAddSafeToSpace: jest.Mock
+      }
+      useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
+
+      const spaces = [{ id: 1, name: 'AdminSpace', safeCount: 0, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const adminBtn = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'AdminSpace')
+      await act(async () => {
+        fireEvent.click(adminBtn!)
+      })
+
+      expect(mockAddToSpace).toHaveBeenCalledWith(1)
+    })
+
+    it('in a mixed list, only admin items trigger addToSpace', async () => {
+      const mockAddToSpace = jest.fn().mockResolvedValue(true)
+      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
+        useAddSafeToSpace: jest.Mock
+      }
+      useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
+
+      const spaces = [
+        { id: 1, name: 'AdminSpace', safeCount: 0, members: adminMembersForCurrentUser },
+        { id: 2, name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser },
+      ]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const memberBtn = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'MemberSpace')
+      const adminBtn = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'AdminSpace')
+
+      await act(async () => {
+        fireEvent.click(memberBtn!)
+      })
+      await act(async () => {
+        fireEvent.click(adminBtn!)
+      })
+
+      expect(mockAddToSpace).toHaveBeenCalledTimes(1)
+      expect(mockAddToSpace).toHaveBeenCalledWith(1)
+    })
   })
 
   describe('onSpaceAdded callback propagation', () => {
