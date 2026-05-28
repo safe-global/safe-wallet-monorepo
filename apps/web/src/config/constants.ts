@@ -155,3 +155,6 @@ export const STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID = parseInt(
 )
 // Deployment specifics
 export const IS_BEHIND_IAP = process.env.NEXT_PUBLIC_IS_BEHIND_IAP === 'true'
+
+// Space onboarding survey
+export const IS_SURVEY_ONBOARDING_ENABLED = process.env.NEXT_PUBLIC_IS_SURVEY_ONBOARDING_ENABLED === 'true'
