@@ -56,7 +56,7 @@ export type SpaceSurveyResponse = {
 
 export type SurveyStateDto = {
   survey: SurveyDto
-  spaceResponse: SpaceSurveyResponse | null
+  surveyResponse: SpaceSurveyResponse | null
 }
 
 export type SurveyResponseResultDto = {

@@ -38,7 +38,7 @@ const surveyFixture: SurveyStateDto = {
       ],
     },
   },
-  spaceResponse: null,
+  surveyResponse: null,
 }
 
 jest.mock('next/router', () => ({
