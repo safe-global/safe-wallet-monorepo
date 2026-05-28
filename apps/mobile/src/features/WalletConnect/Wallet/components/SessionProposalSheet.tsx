@@ -84,7 +84,7 @@ export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending }) =>
     <YStack gap="$4" padding="$4">
       <XStack gap="$3" alignItems="center">
         {meta.icons?.[0] ? (
-          <Image source={{ uri: meta.icons[0] }} width={48} height={48} borderRadius="$2" />
+          <Image src={meta.icons[0]} width={48} height={48} borderRadius="$2" />
         ) : (
           <YStack width={48} height={48} borderRadius="$2" backgroundColor="$backgroundSecondary" />
         )}
