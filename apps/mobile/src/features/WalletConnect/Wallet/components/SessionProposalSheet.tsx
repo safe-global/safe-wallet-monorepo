@@ -97,10 +97,10 @@ export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending }) =>
       </XStack>
       <ConnectionPermissionsPanel variant={variant} />
       <XStack gap="$3">
-        <Button flex={1} borderWidth={1} onPress={onReject} disabled={busy}>
+        <Button flex={1} height="$8" borderWidth={1} onPress={onReject} disabled={busy}>
           Reject
         </Button>
-        <Button flex={1} onPress={onConnect} disabled={busy}>
+        <Button flex={1} height="$8" onPress={onConnect} disabled={busy}>
           {busy ? 'Connecting…' : 'Connect'}
         </Button>
       </XStack>
