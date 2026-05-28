@@ -118,7 +118,9 @@ export const QrScannerSheet: React.FC<Props> = ({ open, onClose }) => {
         {error && (
           <YStack gap="$3" padding="$4" backgroundColor="$backgroundSecondary" borderRadius="$3">
             <Text color="$error">{error}</Text>
-            <Button onPress={onRetry}>Try again</Button>
+            <Button height="$8" onPress={onRetry}>
+              Try again
+            </Button>
           </YStack>
         )}
         {/* TODO(wallet-poc): debug-only paste input for the iOS simulator (no camera). Remove before merging the full feature. */}
@@ -144,7 +146,7 @@ export const QrScannerSheet: React.FC<Props> = ({ open, onClose }) => {
                 }}
               />
             </View>
-            <Button onPress={onPasteAndPair} disabled={!debugUri || connecting}>
+            <Button onPress={onPasteAndPair} height="$8" minWidth="100" disabled={!debugUri || connecting}>
               Pair
             </Button>
           </XStack>
