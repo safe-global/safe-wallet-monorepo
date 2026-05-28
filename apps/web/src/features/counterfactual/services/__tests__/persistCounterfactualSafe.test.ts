@@ -73,6 +73,7 @@ const baseArgs = {
   props,
   name: 'MySafe',
   payMethod: PayMethod.PayLater,
+  isAdminOfActiveSpace: true,
 }
 
 describe('persistCounterfactualSafe', () => {
@@ -253,6 +254,23 @@ describe('persistCounterfactualSafe', () => {
     })
 
     expect(userInitiate).not.toHaveBeenCalled()
+    expect(spaceInitiate).not.toHaveBeenCalled()
+    expect(replayImpl).toHaveBeenCalled()
+    expect(result.ok).toBe(true)
+  })
+
+  it('skips the space POST when the user is not admin of the active space', async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: '42',
+      isUserAuthenticated: true,
+      isAdminOfActiveSpace: false,
+      dispatch,
+    })
+
+    expect(userInitiate).toHaveBeenCalledTimes(1)
     expect(spaceInitiate).not.toHaveBeenCalled()
     expect(replayImpl).toHaveBeenCalled()
     expect(result.ok).toBe(true)

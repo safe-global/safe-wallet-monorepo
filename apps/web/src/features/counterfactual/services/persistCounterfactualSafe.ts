@@ -19,6 +19,10 @@ type PersistArgs = {
   /** Whether the user is signed into the CGW session. Non-authed users can
    *  still create counterfactual safes but nothing is written to the backend. */
   isUserAuthenticated: boolean
+  /** Whether the user is an active admin of the active space. When false the
+   *  safe is not auto-attached to the space (the backend would reject the call
+   *  with 403). The safe is still persisted at the user level. */
+  isAdminOfActiveSpace: boolean
   dispatch: AppDispatch
 }
 
@@ -43,6 +47,7 @@ export const persistCounterfactualSafe = async ({
   payMethod,
   spaceId,
   isUserAuthenticated,
+  isAdminOfActiveSpace,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
   // 1. Save to backend (blocking). Unauth users fall back to local-only —
@@ -61,8 +66,11 @@ export const persistCounterfactualSafe = async ({
 
     // Guard against persisted/legacy lastUsedSpace values that don't parse to
     // a finite number — Number('abc') is NaN and would silently hit the API.
+    // Also skip when the user is not admin of the active space: the backend
+    // gates this endpoint on admin role and would 403. The safe is still
+    // persisted at the user level above.
     const numericSpaceId = parseSpaceId(spaceId)
-    if (numericSpaceId !== null) {
+    if (numericSpaceId !== null && isAdminOfActiveSpace) {
       const spaceResult = await dispatch(
         spacesApi.endpoints.spaceSafesCreateV1.initiate({
           spaceId: numericSpaceId,
