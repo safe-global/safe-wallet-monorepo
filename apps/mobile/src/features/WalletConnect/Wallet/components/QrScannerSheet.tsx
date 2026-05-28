@@ -95,6 +95,7 @@ export const QrScannerSheet: React.FC<Props> = ({ open, onClose }) => {
       return
     }
     void startPair(trimmed)
+    setDebugUri('')
   }
 
   return (
