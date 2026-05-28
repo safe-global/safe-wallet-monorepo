@@ -1,6 +1,8 @@
 /**
  * Utilities for detecting and handling specific transaction errors
  */
+import { BaseError } from 'viem'
+import { RpcRetryExhaustedError } from '@/utils/providers/RetryingRpcProvider'
 
 /**
  * Guard error codes
@@ -60,4 +62,28 @@ export const getGuardErrorName = (errorCode: string): string => {
  */
 export const isGuardError = (error: Error): boolean => {
   return extractGuardErrorCode(error) !== undefined
+}
+
+const RATE_LIMIT_MESSAGE_RE = /rate.?limit|too many requests|throttle/i
+
+/**
+ * Detects if an error originated from a transient RPC rate-limit (HTTP 429
+ * or JSON-RPC -32005/-32603) after our `RetryingRpcProvider` exhausted its
+ * built-in retries, OR a viem-wrapped contract error whose cause chain
+ * carries the same signals.
+ */
+export const isRateLimitError = (error: unknown): boolean => {
+  if (error instanceof RpcRetryExhaustedError) return true
+
+  if (error instanceof BaseError) {
+    const match = error.walk((e) => {
+      const code = (e as { code?: unknown } | null)?.code
+      const status = (e as { status?: unknown } | null)?.status
+      return code === -32005 || code === -32603 || status === 429
+    })
+    if (match) return true
+  }
+
+  const message = (error as { message?: unknown } | null)?.message
+  return typeof message === 'string' && RATE_LIMIT_MESSAGE_RE.test(message)
 }
