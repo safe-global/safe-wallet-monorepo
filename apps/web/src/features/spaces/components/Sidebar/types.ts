@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
+import type { SpaceMemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 export interface SidebarItemConfig {
   icon: LucideIcon
@@ -29,6 +30,7 @@ export interface SpaceItem {
   id: number
   name: string
   safeCount: number
+  members?: SpaceMemberDto[]
 }
 
 export interface SpaceSelectorProps {

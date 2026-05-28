@@ -10,13 +10,21 @@ import { AddToSpacePopupModal } from '../../../AddToSpacePopupModal/AddToSpacePo
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
+import { isUserActiveAdmin } from '@/features/spaces/utils'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 
 export interface SafeSidebarWorkspaceHeaderProps {
   workspaceHeader: SafeWorkspaceHeaderProps
 }
 
-export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorkspaceHeaderProps): ReactElement => {
+export const SafeSidebarWorkspaceHeader = ({
+  workspaceHeader,
+}: SafeSidebarWorkspaceHeaderProps): ReactElement | null => {
   const spaceId = useCurrentSpaceId()
+  const isSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isSignedIn })
 
   const handleAddSafeClick = () => {
     trackEvent(
@@ -30,8 +38,14 @@ export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorks
       return <BackToSpaceButton {...workspaceHeader} />
 
     case 'addToWorkspace': {
-      const hasSpaces = (workspaceHeader.spaces?.length ?? 0) > 0
+      const spaces = workspaceHeader.spaces ?? []
+      const hasSpaces = spaces.length > 0
       if (hasSpaces) {
+        const isAdminOfAnySpace = spaces.some((space) =>
+          space.members ? isUserActiveAdmin(space.members, currentUser?.id) : false,
+        )
+        if (!isAdminOfAnySpace) return null
+
         return (
           <SpaceSelectorDropdown
             triggerVariant="addToWorkspace"
