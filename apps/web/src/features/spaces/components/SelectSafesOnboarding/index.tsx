@@ -35,7 +35,7 @@ const FORM_ID = 'select-safes-form'
 const SelectSafesOnboarding = (): ReactElement => {
   const wallet = useWallet()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
-  const { trustedSafes, ownedSafes, similarAddresses, handleSearch } = useOnboardingSafes()
+  const { trustedSafes, ownedSafes, similarAddresses, handleSearch, hasNoSafes } = useOnboardingSafes()
   const allSafes = useMemo<AllSafeItems>(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
   const { formMethods, onSubmit, selectedSafesLength, error, isSubmitting } = useOnboardingSubmit(
     spaceId,
@@ -88,53 +88,59 @@ const SelectSafesOnboarding = (): ReactElement => {
         </div>
 
         {wallet ? (
-          <>
-            <InputGroup className="bg-card px-2 shrink-0">
-              <InputGroupAddon>
-                <Search className="size-4" />
-              </InputGroupAddon>
-              <InputGroupInput
-                placeholder="Search for safes"
-                aria-label="Search Safe list"
-                autoComplete="off"
-                onChange={(e) => handleSearch(e.target.value)}
-              />
-            </InputGroup>
+          hasNoSafes ? (
+            <Alert className="shrink-0">
+              <AlertDescription>You don&apos;t have any safes yet</AlertDescription>
+            </Alert>
+          ) : (
+            <>
+              <InputGroup className="bg-card px-2 shrink-0">
+                <InputGroupAddon>
+                  <Search className="size-4" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  placeholder="Search for safes"
+                  aria-label="Search Safe list"
+                  autoComplete="off"
+                  onChange={(e) => handleSearch(e.target.value)}
+                />
+              </InputGroup>
 
-            <div
-              className="relative min-h-0 min-w-0 flex-1 overflow-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-muted after:to-transparent"
-              data-testid="onboarding-safes-list-scroll-region"
-            >
-              {isAtLimit && (
-                <Typography variant="paragraph" color="muted" className="text-xs pb-1">
-                  Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
-                </Typography>
+              <div
+                className="relative min-h-0 min-w-0 flex-1 overflow-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-muted after:to-transparent"
+                data-testid="onboarding-safes-list-scroll-region"
+              >
+                {isAtLimit && (
+                  <Typography variant="paragraph" color="muted" className="text-xs pb-1">
+                    Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
+                  </Typography>
+                )}
+                <OnboardingSafesList
+                  trustedSafes={trustedSafes}
+                  ownedSafes={ownedSafes}
+                  similarAddresses={similarAddresses}
+                  trustedSelectAll={{
+                    state: trustedSelection.state,
+                    count: trustedSelection.selectedCount,
+                    total: trustedSelection.total,
+                    onToggle: (check) => handleSelectAll('trusted', check),
+                  }}
+                  ownedSelectAll={{
+                    state: ownedSelection.state,
+                    count: ownedSelection.selectedCount,
+                    total: ownedSelection.total,
+                    onToggle: (check) => handleSelectAll('owned', check),
+                  }}
+                />
+              </div>
+
+              {error && (
+                <Alert variant="destructive" className="shrink-0">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
-              <OnboardingSafesList
-                trustedSafes={trustedSafes}
-                ownedSafes={ownedSafes}
-                similarAddresses={similarAddresses}
-                trustedSelectAll={{
-                  state: trustedSelection.state,
-                  count: trustedSelection.selectedCount,
-                  total: trustedSelection.total,
-                  onToggle: (check) => handleSelectAll('trusted', check),
-                }}
-                ownedSelectAll={{
-                  state: ownedSelection.state,
-                  count: ownedSelection.selectedCount,
-                  total: ownedSelection.total,
-                  onToggle: (check) => handleSelectAll('owned', check),
-                }}
-              />
-            </div>
-
-            {error && (
-              <Alert variant="destructive" className="shrink-0">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-          </>
+            </>
+          )
         ) : (
           <div className="flex flex-col items-center justify-center gap-4">
             <ConnectWalletPrompt testId="select-safes-connect-wallet-button" />
@@ -153,7 +159,7 @@ const SelectSafesOnboarding = (): ReactElement => {
     </FormProvider>
   )
 
-  const footer = wallet ? (
+  const footer = (
     <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
       <Button
         type="button"
@@ -165,17 +171,19 @@ const SelectSafesOnboarding = (): ReactElement => {
         <ChevronLeft className="size-4 mr-1" />
         Back
       </Button>
-      <Button
-        data-testid="select-safes-continue-button"
-        type="submit"
-        form={FORM_ID}
-        disabled={selectedSafesLength === 0 || isSubmitting}
-        className="w-full h-12 rounded-lg text-base xl:flex-1"
-      >
-        {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Next'}
-      </Button>
+      {wallet && (
+        <Button
+          data-testid="select-safes-continue-button"
+          type="submit"
+          form={FORM_ID}
+          disabled={selectedSafesLength === 0 || isSubmitting}
+          className="w-full h-12 rounded-lg text-base xl:flex-1"
+        >
+          {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Next'}
+        </Button>
+      )}
     </div>
-  ) : undefined
+  )
 
   return (
     <OnboardingLayout
