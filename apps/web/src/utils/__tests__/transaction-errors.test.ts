@@ -82,28 +82,23 @@ describe('transaction-errors', () => {
       expect(isRateLimitError(new RpcRetryExhaustedError(new Error('underlying')))).toBe(true)
     })
 
-    it('returns true for viem BaseError whose cause chain carries code -32005', () => {
-      const inner = Object.assign(new BaseError('inner'), { code: -32005 })
+    it.each([
+      { label: 'code -32005', extra: { code: -32005 } },
+      { label: 'code -32603', extra: { code: -32603 } },
+      { label: 'status 429', extra: { status: 429 } },
+    ])('returns true for viem BaseError whose cause chain carries $label', ({ extra }) => {
+      const inner = Object.assign(new BaseError('inner'), extra)
       const outer = new BaseError('outer', { cause: inner })
       expect(isRateLimitError(outer)).toBe(true)
     })
 
-    it('returns true for viem BaseError whose cause chain carries code -32603', () => {
-      const inner = Object.assign(new BaseError('inner'), { code: -32603 })
-      const outer = new BaseError('outer', { cause: inner })
-      expect(isRateLimitError(outer)).toBe(true)
-    })
-
-    it('returns true for viem BaseError whose cause chain carries status 429', () => {
-      const inner = Object.assign(new BaseError('inner'), { status: 429 })
-      const outer = new BaseError('outer', { cause: inner })
-      expect(isRateLimitError(outer)).toBe(true)
-    })
-
-    it('returns true for plain error matching the message regex', () => {
-      expect(isRateLimitError(new Error('Request is being rate limited'))).toBe(true)
-      expect(isRateLimitError(new Error('too many requests'))).toBe(true)
-      expect(isRateLimitError(new Error('throttle exceeded'))).toBe(true)
+    it('returns false for contract reverts whose message mentions "rate limit"', () => {
+      // Guard against the previous regex-fallback false positive: a contract
+      // revert string containing "rate limit" must NOT be classified as a
+      // network-layer rate limit, or users would be told to "try again" on a
+      // transaction that is guaranteed to fail on-chain.
+      expect(isRateLimitError(new Error('execution reverted: rate limit exceeded'))).toBe(false)
+      expect(isRateLimitError(new Error('transfer throttled'))).toBe(false)
     })
 
     it('returns false for unrelated errors', () => {

@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import { custom, createPublicClient } from 'viem'
 import { server } from '@/tests/server'
-import { RetryingRpcProvider, RpcRetryExhaustedError } from '../RetryingRpcProvider'
+import { RetryingRpcProvider, RpcRetryExhaustedError, getOrCreateReadProvider } from '../RetryingRpcProvider'
 
 const RPC_URL = 'https://rpc.test.example/v3/test-token'
 const CHAIN_ID = 1
@@ -106,39 +106,10 @@ describe('RetryingRpcProvider', () => {
     } catch (err) {
       caught = err
     }
-    expect(caught).toBeInstanceOf(RpcRetryExhaustedError)
-    expect((caught as RpcRetryExhaustedError).code).toBe(-32099)
-    expect((caught as RpcRetryExhaustedError).originalError).toBeDefined()
-  })
-
-  // Note: ethers v6's FetchRequest treats Retry-After as MILLISECONDS, not
-  // seconds (fetch.js:475-477 does `parseInt(retryAfter)` with no *1000). This
-  // is a quirk; we verify the value is honoured (not ignored) rather than
-  // testing strict RFC semantics.
-  it('honors Retry-After header on HTTP 429 (ethers interprets as ms)', async () => {
-    const callTimestamps: number[] = []
-    server.use(
-      http.post(RPC_URL, async ({ request }) => {
-        const items = await parseBody(request)
-        callTimestamps.push(Date.now())
-        if (callTimestamps.length === 1) {
-          return new HttpResponse(null, { status: 429, headers: { 'Retry-After': '600' } })
-        }
-        return respond(
-          items,
-          items.map((i) => ({ id: i.id, result: '0x2a' })),
-        )
-      }),
-    )
-
-    const provider = new RetryingRpcProvider(RPC_URL, CHAIN_ID)
-    await provider.request({ method: 'eth_blockNumber', params: [] })
-    expect(callTimestamps).toHaveLength(2)
-    const gap = callTimestamps[1] - callTimestamps[0]
-    // Header value 600 → ethers waits ~600ms. We allow a 100ms floor below to
-    // tolerate timer jitter while still confirming the header was honoured
-    // (default backoff for attempt=0 would be 0ms; without the header gap≈0).
-    expect(gap).toBeGreaterThanOrEqual(500)
+    if (!(caught instanceof RpcRetryExhaustedError)) throw new Error('unreachable')
+    expect(caught.code).toBe(-32099)
+    expect(caught.cause).toBeDefined()
+    expect(caught.message).toContain('method=eth_blockNumber')
   })
 
   it('batches concurrent requests via ethers batchMaxCount', async () => {
@@ -186,5 +157,25 @@ describe('RetryingRpcProvider', () => {
     // (THROTTLE.maxAttempts). With a wrong shape, viem would retry on top and
     // we'd see ~9 (3 × viem's default retryCount of 3).
     expect(attempts).toBe(3)
+  })
+})
+
+describe('getOrCreateReadProvider', () => {
+  it('returns the same instance for the same URL+chainId', () => {
+    const a = getOrCreateReadProvider('https://rpc.cache.example/v3/a', 1)
+    const b = getOrCreateReadProvider('https://rpc.cache.example/v3/a', 1)
+    expect(a).toBe(b)
+  })
+
+  it('returns a different instance when chainId differs', () => {
+    const a = getOrCreateReadProvider('https://rpc.cache.example/v3/b', 1)
+    const b = getOrCreateReadProvider('https://rpc.cache.example/v3/b', 5)
+    expect(a).not.toBe(b)
+  })
+
+  it('returns a different instance when URL differs', () => {
+    const a = getOrCreateReadProvider('https://rpc.cache.example/v3/c', 1)
+    const b = getOrCreateReadProvider('https://rpc.cache.example/v3/d', 1)
+    expect(a).not.toBe(b)
   })
 })

@@ -64,13 +64,17 @@ export const isGuardError = (error: Error): boolean => {
   return extractGuardErrorCode(error) !== undefined
 }
 
-const RATE_LIMIT_MESSAGE_RE = /rate.?limit|too many requests|throttle/i
-
 /**
  * Detects if an error originated from a transient RPC rate-limit (HTTP 429
  * or JSON-RPC -32005/-32603) after our `RetryingRpcProvider` exhausted its
  * built-in retries, OR a viem-wrapped contract error whose cause chain
  * carries the same signals.
+ *
+ * Intentionally only matches structured shapes (our typed `RpcRetryExhaustedError`
+ * and viem `BaseError` cause chains carrying the expected `code`/`status`).
+ * A message-text regex would false-positive on contract reverts like
+ * `require(..., "rate limit exceeded")`, leading users to retry transactions
+ * that are guaranteed to fail on-chain.
  */
 export const isRateLimitError = (error: unknown): boolean => {
   if (error instanceof RpcRetryExhaustedError) return true
@@ -84,6 +88,5 @@ export const isRateLimitError = (error: unknown): boolean => {
     if (match) return true
   }
 
-  const message = (error as { message?: unknown } | null)?.message
-  return typeof message === 'string' && RATE_LIMIT_MESSAGE_RE.test(message)
+  return false
 }

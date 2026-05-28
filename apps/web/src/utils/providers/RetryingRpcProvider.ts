@@ -8,49 +8,64 @@ const RETRYABLE_RPC_CODES = new Set([-32005, -32603])
 /**
  * Thrown when ethers' built-in throttle retry mechanism has exhausted its
  * attempts. Extends viem's BaseError with a numeric `code` outside viem's
- * retry set (`{-1, -32005, -32603}`) so that viem's `shouldRetry` returns
+ * retry set ({-1, -32005, -32603}) so that viem's `shouldRetry` returns
  * false and the outer `withRetry` wrapping our `custom()` transport does
  * NOT re-invoke this provider — preventing geometric N×M retries.
  *
  * See node_modules/viem/utils/buildRequest.ts:185 (BaseError rethrow path)
- * and :212-239 (shouldRetry).
+ * and :212-239 (shouldRetry). The chosen literal `-32099` sits in the
+ * JSON-RPC reserved server-error range (-32000 to -32099) and is unused by
+ * viem's error switch.
+ *
+ * Original error is preserved on the standard ES2022 `cause` (set by viem
+ * `BaseError`'s constructor) — both for `Error.cause` consumers and for
+ * `BaseError.walk` traversal in `isRateLimitError`.
  */
 export class RpcRetryExhaustedError extends BaseError {
   readonly code = -32099
-  readonly originalError: unknown
 
-  constructor(originalError: unknown) {
-    super('RPC retry exhausted after throttle', {
+  constructor(originalError: unknown, context?: { method?: string }) {
+    const method = context?.method ? ` (method=${context.method})` : ''
+    super(`RPC retry exhausted after throttle${method}`, {
       cause: originalError instanceof Error ? originalError : undefined,
       name: 'RpcRetryExhaustedError',
     })
-    this.originalError = originalError
   }
 }
 
 const detectRpcThrottle = (response: FetchResponse): { code: number; message: string } | null => {
+  // Note: cannot short-circuit on HTTP 2xx — JSON-RPC errors (including
+  // -32005 / -32603) commonly come back with HTTP 200 OK and the error in
+  // the body. HTTP-level 429 is handled by ethers BEFORE processFunc runs,
+  // so we only see it here when the body is what carries the throttle.
   let body: unknown
   try {
     const text = new TextDecoder().decode(response.body ?? new Uint8Array())
+    if (!text) return null
     body = JSON.parse(text)
   } catch {
     return null
   }
-  const errors = Array.isArray(body)
-    ? body.map((entry) => (entry as { error?: { code?: number; message?: string } } | null)?.error).filter(Boolean)
-    : [(body as { error?: { code?: number; message?: string } } | null)?.error].filter(Boolean)
-  const hit = (errors as Array<{ code?: number; message?: string }>).find(
-    (err) => typeof err.code === 'number' && RETRYABLE_RPC_CODES.has(err.code),
-  )
-  return hit && typeof hit.code === 'number' ? { code: hit.code, message: hit.message ?? 'rate limited' } : null
+
+  const entries: Array<{ error?: { code?: number; message?: string } }> = Array.isArray(body)
+    ? (body as Array<{ error?: { code?: number; message?: string } }>)
+    : [body as { error?: { code?: number; message?: string } }]
+
+  for (const entry of entries) {
+    const code = entry?.error?.code
+    if (typeof code === 'number' && RETRYABLE_RPC_CODES.has(code)) {
+      return { code, message: entry.error?.message ?? 'rate limited' }
+    }
+  }
+  return null
 }
 
 const isThrottleExhausted = (err: unknown): boolean => {
   if (err == null || typeof err !== 'object') return false
   const e = err as { code?: unknown; message?: unknown; shortMessage?: unknown }
   if (e.code !== 'SERVER_ERROR') return false
-  const messages = [e.message, e.shortMessage].filter((s): s is string => typeof s === 'string')
-  return messages.some((m) => m.includes('exceeded maximum retry limit'))
+  const candidates = [e.message, e.shortMessage]
+  return candidates.some((m) => typeof m === 'string' && m.includes('exceeded maximum retry limit'))
 }
 
 /**
@@ -59,21 +74,20 @@ const isThrottleExhausted = (err: unknown): boolean => {
  * machinery, then surfaces a typed `RpcRetryExhaustedError` if retries are
  * exhausted.
  *
- * Passed to `Safe.init({ provider })` instead of a URL string so that
- * protocol-kit routes through viem's `custom()` (pass-through) transport
- * over this wrapper, gaining retry/backoff without giving viem a chance
- * to retry on top of us.
+ * Construct via `getOrCreateReadProvider(url)` to share one instance per URL
+ * — that way ethers' concurrent-call batching (`batchMaxCount`) coalesces
+ * reads across `Safe.init` and `getSafeProvider` callers instead of fanning
+ * out one HTTP POST per call site. Tests construct directly to bypass the
+ * cache.
  */
 export class RetryingRpcProvider {
   readonly #provider: JsonRpcProvider
 
   /**
-   * @param url   JSON-RPC endpoint URL
+   * @param url      JSON-RPC endpoint URL
    * @param chainId  Optional chain id. When provided, ethers skips its initial
-   *                 `eth_chainId` probe — which is desirable both for latency
-   *                 and to avoid the probe being batched together with the
-   *                 first user RPC call (the JsonRpcApiProvider's batch
-   *                 scheduler queues both into one POST otherwise).
+   *                 `eth_chainId` probe (which can otherwise be batched into
+   *                 the first user RPC call and complicates throttle scenarios).
    */
   constructor(url: string, chainId?: number) {
     const req = new FetchRequest(url)
@@ -83,7 +97,7 @@ export class RetryingRpcProvider {
       if (throttleHit) {
         // Hand control to ethers' built-in throttle path (fetch.js:481-498)
         // by throwing an error with { throttle: true, stall }. stall=0 lets
-        // ethers compute its own backoff (slotInterval * trunc(random() * 2^attempt)).
+        // ethers compute its own backoff: slotInterval * trunc(random() * 2^attempt).
         response.throwThrottleError(`RPC ${throttleHit.code}: ${throttleHit.message}`, 0)
       }
       return response
@@ -106,8 +120,27 @@ export class RetryingRpcProvider {
     try {
       return await this.#provider.send(method, (Array.isArray(params) ? params : [params]) as unknown[])
     } catch (err) {
-      if (isThrottleExhausted(err)) throw new RpcRetryExhaustedError(err)
+      if (isThrottleExhausted(err)) throw new RpcRetryExhaustedError(err, { method })
       throw err
     }
   }
+}
+
+// Module-level cache so callers that share an RPC URL share the underlying
+// `JsonRpcProvider` (and thus its batch scheduler). Without this,
+// `getSafeProvider()` was creating a fresh wrapper on each call from
+// `safeContracts.ts` (multiple call sites), defeating concurrent-call
+// batching and triggering an extra `eth_chainId` probe per instance.
+const providerCache = new Map<string, RetryingRpcProvider>()
+
+export const getOrCreateReadProvider = (url: string, chainId?: number): RetryingRpcProvider => {
+  // Cache key includes chainId so a misconfigured URL→chain reassignment
+  // (rare, but possible in env overrides) doesn't reuse a stale wrapper.
+  const key = `${chainId ?? 'auto'}:${url}`
+  let provider = providerCache.get(key)
+  if (!provider) {
+    provider = new RetryingRpcProvider(url, chainId)
+    providerCache.set(key, provider)
+  }
+  return provider
 }
