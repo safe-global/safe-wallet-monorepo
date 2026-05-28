@@ -154,8 +154,8 @@ function RootLayout() {
                     <AppKitInitializer>
                       <SafeThemeProvider>
                         <BottomSheetModalProvider>
-                          <WalletKitProvider>
-                            <SafeToastProvider>
+                          <SafeToastProvider>
+                            <WalletKitProvider>
                               <NavigationGuardHOC>
                                 <HooksInitializer />
                                 <SigningMonitor />
@@ -164,8 +164,8 @@ function RootLayout() {
                                 <NavigationStack />
                                 <SafeStatusBar />
                               </NavigationGuardHOC>
-                            </SafeToastProvider>
-                          </WalletKitProvider>
+                            </WalletKitProvider>
+                          </SafeToastProvider>
                         </BottomSheetModalProvider>
                       </SafeThemeProvider>
                     </AppKitInitializer>
