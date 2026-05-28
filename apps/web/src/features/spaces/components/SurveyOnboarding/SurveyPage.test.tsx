@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import SurveyPage from './survey'
+import SurveyPage from '@/pages/welcome/survey'
 
 const mockReplace = jest.fn()
 
