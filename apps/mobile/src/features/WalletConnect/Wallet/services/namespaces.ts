@@ -49,6 +49,11 @@ export const buildSafeApprovedNamespaces = ({
  * ProposalTypes.SessionProperties is `Record<string, string>` — values MUST be strings,
  * so the capability map is JSON-stringified.
  */
+type PerChainCapability = {
+  atomic: { status: 'supported' }
+  atomicBatch: { supported: true }
+}
+
 export const buildSafeSessionProperties = ({
   safeAddress,
   supportedChains,
@@ -57,12 +62,19 @@ export const buildSafeSessionProperties = ({
   supportedChains: SupportedChain[]
 }): ProposalTypes.SessionProperties => {
   const checksummed = getAddress(safeAddress)
-  const capabilities: Record<string, Record<string, { atomicBatch: { supported: true } }>> = {
+  // Advertise atomic-batch support under both shapes:
+  //   - EIP-5792 current spec: `atomic.status: 'supported'` — what real-world dApps
+  //     (CowSwap, etc.) check for.
+  //   - Older draft: `atomicBatch.supported: true` (kept for dApps still on the old shape)
+  const capabilities: Record<string, Record<string, PerChainCapability>> = {
     [checksummed]: {},
   }
   for (const c of supportedChains) {
     const chainIdHex = '0x' + Number(c.chainId).toString(16)
-    capabilities[checksummed][chainIdHex] = { atomicBatch: { supported: true } }
+    capabilities[checksummed][chainIdHex] = {
+      atomic: { status: 'supported' },
+      atomicBatch: { supported: true },
+    }
   }
   return {
     atomic: JSON.stringify({ status: 'supported' }),

@@ -80,7 +80,11 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     if (!activeChain) {
       return formatJsonRpcResult(id, {})
     }
-    const cap = { atomicBatch: { supported: true } }
+    // Advertise atomic-batch support under both shapes:
+    //   - EIP-5792 current spec: `atomic.status: 'supported'` — what real-world dApps
+    //     (CowSwap, etc.) check for.
+    //   - Older draft: `atomicBatch.supported: true` (kept for dApps still on the old shape)
+    const cap = { atomic: { status: 'supported' }, atomicBatch: { supported: true } }
     const hexChain = '0x' + Number(activeChain.chainId).toString(16)
     return formatJsonRpcResult(id, { [hexChain]: cap })
   }
