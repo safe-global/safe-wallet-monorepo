@@ -3,6 +3,7 @@ import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FeeParams } from '@/src/hooks/useFeeParams/useFeeParams'
 import { Signer } from '@/src/store/signersSlice'
+import { BIOMETRY_ROTATION_DESCRIPTION, BiometryInvalidationError } from '@/src/services/key-storage'
 
 /**
  * Execution path types for the confirm flow
@@ -93,11 +94,16 @@ export const determineExecutionPath = (
 }
 
 /**
- * Extracts error message from unknown error
+ * Extracts a user-facing message from an unknown error, mapping biometry
+ * invalidation to the shared re-import copy and falling back to `fallback`
+ * for non-Error throwables.
  */
-export const getErrorMessage = (error: unknown): string => {
+export const getErrorMessage = (error: unknown, fallback = 'Failed to execute transaction'): string => {
+  if (error instanceof BiometryInvalidationError) {
+    return BIOMETRY_ROTATION_DESCRIPTION
+  }
   if (error instanceof Error) {
     return error.message
   }
-  return 'Failed to execute transaction'
+  return fallback
 }
