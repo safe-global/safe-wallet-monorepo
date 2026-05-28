@@ -3,7 +3,13 @@ import { BaseError } from 'viem'
 
 const THROTTLE = { maxAttempts: 3, slotInterval: 300 } as const
 const BATCH_MAX_COUNT = 3
-const RETRYABLE_RPC_CODES = new Set([-32005, -32603])
+// Only -32005 (LimitExceeded) — the JSON-RPC code Infura documents and the
+// Linear issue (WA-2424) names as the actual throttle signal. -32603
+// (InternalError) is intentionally NOT included: while viem retries it by
+// default, classifying it as throttle would misclassify legitimate eth_call
+// simulation failures as "Network is busy" and prompt users to retry
+// guaranteed-failing transactions. Add codes back here only with evidence.
+const RETRYABLE_RPC_CODES = new Set([-32005])
 
 /**
  * Thrown when ethers' built-in throttle retry mechanism has exhausted its

@@ -78,6 +78,24 @@ describe('RetryingRpcProvider', () => {
     expect(attempts).toBe(2)
   })
 
+  it('does not retry on -32603 (internal error — could be legitimate eth_call failure)', async () => {
+    let attempts = 0
+    server.use(
+      http.post(RPC_URL, async ({ request }) => {
+        const items = await parseBody(request)
+        attempts += 1
+        return respond(
+          items,
+          items.map((i) => ({ id: i.id, error: { code: -32603, message: 'internal error' } })),
+        )
+      }),
+    )
+
+    const provider = new RetryingRpcProvider(RPC_URL, CHAIN_ID)
+    await expect(provider.request({ method: 'eth_blockNumber', params: [] })).rejects.toThrow(/internal/i)
+    expect(attempts).toBe(1)
+  })
+
   it('does not retry on non-throttle RPC errors (e.g. -32600)', async () => {
     let attempts = 0
     server.use(

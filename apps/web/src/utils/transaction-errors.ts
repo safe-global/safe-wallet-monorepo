@@ -83,7 +83,10 @@ export const isRateLimitError = (error: unknown): boolean => {
     const match = error.walk((e) => {
       const code = (e as { code?: unknown } | null)?.code
       const status = (e as { status?: unknown } | null)?.status
-      return code === -32005 || code === -32603 || status === 429
+      // Match only the documented throttle signals: JSON-RPC -32005
+      // (LimitExceeded) and HTTP 429. -32603 (Internal) is intentionally NOT
+      // matched — see RetryingRpcProvider for rationale.
+      return code === -32005 || status === 429
     })
     if (match) return true
   }

@@ -84,12 +84,20 @@ describe('transaction-errors', () => {
 
     it.each([
       { label: 'code -32005', extra: { code: -32005 } },
-      { label: 'code -32603', extra: { code: -32603 } },
       { label: 'status 429', extra: { status: 429 } },
     ])('returns true for viem BaseError whose cause chain carries $label', ({ extra }) => {
       const inner = Object.assign(new BaseError('inner'), extra)
       const outer = new BaseError('outer', { cause: inner })
       expect(isRateLimitError(outer)).toBe(true)
+    })
+
+    it('returns false for viem BaseError carrying code -32603 (internal error, not throttle)', () => {
+      // -32603 is intentionally NOT matched. A real eth_call simulation failure
+      // can surface as -32603 and must not be silently translated to "Network
+      // is busy" — that would prompt users to retry guaranteed-failing txs.
+      const inner = Object.assign(new BaseError('inner'), { code: -32603 })
+      const outer = new BaseError('outer', { cause: inner })
+      expect(isRateLimitError(outer)).toBe(false)
     })
 
     it('returns false for contract reverts whose message mentions "rate limit"', () => {
