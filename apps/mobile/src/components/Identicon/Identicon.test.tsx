@@ -89,9 +89,15 @@ describe('Identicon', () => {
     expect(getByTestId('identicon-image-placeholder')).toBeTruthy()
   })
 
-  it('does not call bloSvg for invalid addresses', () => {
+  it('does not call bloSvg for partial / invalid addresses', () => {
     mockedBloSvg.mockClear()
     render(<Identicon address={'0x123' as `0x${string}`} />)
     expect(mockedBloSvg).not.toHaveBeenCalled()
+  })
+
+  it('still renders a blockie for longer hex values (e.g. tx hashes)', () => {
+    const txHash = ('0x' + 'a'.repeat(64)) as `0x${string}`
+    const { getByTestId } = render(<Identicon address={txHash} />)
+    expect(getByTestId('identicon-image')).toBeTruthy()
   })
 })

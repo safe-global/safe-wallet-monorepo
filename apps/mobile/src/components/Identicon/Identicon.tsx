@@ -1,9 +1,13 @@
 import { memo, useMemo } from 'react'
 import { bloSvg } from 'blo'
-import { isAddress } from 'ethers'
 import { View } from 'tamagui'
 import { SvgXml } from 'react-native-svg'
 import { type Address } from '@/src/types/address'
+
+// Accept full Ethereum addresses (40 hex) and longer hex values (e.g. 64-char
+// transaction hashes used by AdvancedDetails). Rejects partial / non-hex input
+// so RecipientInput typing doesn't generate a blockie per keystroke.
+const HEX_INPUT_RE = /^0x[0-9a-fA-F]{40,}$/
 
 type Props = {
   address: Address
@@ -38,7 +42,7 @@ function getIdenticonSvg(address: Address): string {
 }
 
 export const Identicon = memo(function Identicon({ address, rounded = true, size = DEFAULT_SIZE }: Props) {
-  const valid = isAddress(address)
+  const valid = HEX_INPUT_RE.test(address)
   const blockieSvg = useMemo(() => (valid ? getIdenticonSvg(address) : null), [valid, address])
 
   if (!blockieSvg) {
