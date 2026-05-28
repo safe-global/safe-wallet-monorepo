@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../web/src/*"],
+      "@/public/*": ["../web/public/*"],
+      "@safe-global/theme/*": ["../../packages/theme/src/*"],
+      "@safe-global/store/*": ["../../packages/store/src/*"],
+      "@safe-global/utils/*": ["../../packages/utils/src/*"],
+      "@safe-global/test/*": ["../../config/test/*"],
+      "next/router": ["./src/compat/next-router.tsx"],
+      "next/link": ["./src/compat/next-link.tsx"],
+      "next/head": ["./src/compat/next-head.tsx"],
+      "next/dynamic": ["./src/compat/next-dynamic.tsx"],
+      "next/image": ["./src/compat/next-image.tsx"],
+      "next/app": ["./src/compat/next-app.ts"],
+      "next/navigation": ["./src/compat/next-navigation.tsx"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "vite.config.ts",
+    "../web/src/definitions.d.ts",
+    "../web/src/components/theme/mui.d.ts"
+  ],
+  "exclude": ["node_modules", "dist", "cypress"]
+}

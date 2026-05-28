@@ -1,0 +1,43 @@
+name: Web TanStack Checks
+
+on:
+  pull_request:
+    paths:
+      - apps/web-tanstack/**
+      - apps/web/**
+      - packages/**
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - apps/web-tanstack/**
+      - apps/web/**
+      - packages/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+      - uses: ./.github/actions/yarn
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          turbo-team: ${{ vars.TURBO_TEAM }}
+      - run: yarn workspace @safe-global/web-tanstack build
+
+  verify-changed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/yarn
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          turbo-team: ${{ vars.TURBO_TEAM }}
+      - run: node scripts/verify.mjs --changed --workspace=web-tanstack
