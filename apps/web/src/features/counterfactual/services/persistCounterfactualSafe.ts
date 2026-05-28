@@ -6,6 +6,7 @@ import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/s
 import { toBackendDto } from './counterfactualSafeMapper'
 import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
+import { showNotification } from '@/store/notificationsSlice'
 import { parseSpaceId } from '@/utils/spaces'
 
 type PersistArgs = {
@@ -70,6 +71,15 @@ export const persistCounterfactualSafe = async ({
     // gates this endpoint on admin role and would 403. The safe is still
     // persisted at the user level above.
     const numericSpaceId = parseSpaceId(spaceId)
+    if (numericSpaceId !== null && !isAdminOfActiveSpace) {
+      dispatch(
+        showNotification({
+          variant: 'info',
+          groupKey: 'cf-safe-space-skipped',
+          message: 'Safe added to your accounts — ask an admin to add it to the workspace',
+        }),
+      )
+    }
     if (numericSpaceId !== null && isAdminOfActiveSpace) {
       const spaceResult = await dispatch(
         spacesApi.endpoints.spaceSafesCreateV1.initiate({

@@ -8,6 +8,14 @@ const userDeleteInitiate = jest.fn()
 const spaceInitiate = jest.fn()
 const replayImpl = jest.fn()
 const enqueueImpl = jest.fn()
+const showNotificationImpl = jest.fn()
+
+jest.mock('@/store/notificationsSlice', () => ({
+  showNotification: (payload: unknown) => {
+    showNotificationImpl(payload)
+    return { type: 'showNotification', payload }
+  },
+}))
 
 jest.mock('../../store/pendingCfDeletesSlice', () => ({
   enqueuePendingCfDelete: (payload: unknown) => {
@@ -83,6 +91,7 @@ describe('persistCounterfactualSafe', () => {
     spaceInitiate.mockClear()
     replayImpl.mockClear()
     enqueueImpl.mockClear()
+    showNotificationImpl.mockClear()
   })
 
   it('POSTs to user endpoint then calls replayCounterfactualSafeDeployment on success (no space)', async () => {
@@ -259,7 +268,7 @@ describe('persistCounterfactualSafe', () => {
     expect(result.ok).toBe(true)
   })
 
-  it('skips the space POST when the user is not admin of the active space', async () => {
+  it('skips the space POST and shows an info toast when the user is not admin of the active space', async () => {
     const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
 
     const result = await persistCounterfactualSafe({
@@ -273,6 +282,22 @@ describe('persistCounterfactualSafe', () => {
     expect(userInitiate).toHaveBeenCalledTimes(1)
     expect(spaceInitiate).not.toHaveBeenCalled()
     expect(replayImpl).toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledWith(
+      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-skipped' }),
+    )
     expect(result.ok).toBe(true)
+  })
+
+  it('does not show the skip toast when the user is admin and the space POST succeeds', async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: '42',
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    expect(showNotificationImpl).not.toHaveBeenCalled()
   })
 })
