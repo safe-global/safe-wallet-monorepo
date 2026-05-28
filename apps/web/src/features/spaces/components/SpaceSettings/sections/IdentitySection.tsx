@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { type GetSpaceResponse, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import InitialsAvatar from '../../InitialsAvatar'
 import { useIsAdmin } from '@/features/spaces'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
@@ -8,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Typography } from '@/components/ui/typography'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 
 const MAX_NAME_LENGTH = 60
 

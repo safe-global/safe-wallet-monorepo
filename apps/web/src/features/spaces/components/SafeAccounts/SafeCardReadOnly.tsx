@@ -204,9 +204,9 @@ const SafeCardReadOnly = ({
           {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
         </div>
 
-          <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
-            {spaces?.SpaceSafeContextMenu && !hideContextMenu && <spaces.SpaceSafeContextMenu safeItem={safe} />}
-          </div>
+        <div className="flex shrink-0 items-center gap-2 pl-2" onClick={(e) => e.stopPropagation()}>
+          {spaces?.SpaceSafeContextMenu && !hideContextMenu && <spaces.SpaceSafeContextMenu safeItem={safe} />}
+        </div>
       </div>
     </Tooltip>
   )
