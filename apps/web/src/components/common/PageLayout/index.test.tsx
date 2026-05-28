@@ -91,6 +91,15 @@ jest.mock('@/hooks/useIsRequireLoginEnabled', () => ({
   useIsRequireLoginEnabled: jest.fn(() => false),
 }))
 
+const mockUseAppSelector = jest.fn<unknown, [unknown]>(() => false)
+jest.mock('@/store', () => ({
+  useAppSelector: (selector: unknown) => mockUseAppSelector(selector),
+}))
+
+jest.mock('@/store/authSlice', () => ({
+  isAuthenticated: jest.fn(() => 'isAuthenticated'),
+}))
+
 const mockUseIsAuthGateBlocking = jest.fn(() => false)
 jest.mock('@/hooks/useIsAuthGateBlocking', () => ({
   useIsAuthGateBlocking: () => mockUseIsAuthGateBlocking(),
@@ -114,6 +123,7 @@ describe('PageLayout', () => {
   beforeEach(() => {
     mockUseSafeAddressFromUrl.mockReturnValue('')
     mockUseIsAuthGateBlocking.mockReturnValue(false)
+    mockUseAppSelector.mockReturnValue(false)
   })
 
   const renderLayout = (pathname: string) =>
@@ -171,10 +181,18 @@ describe('PageLayout', () => {
       expect(screen.getByTestId('topbar')).toBeInTheDocument()
     })
 
-    it('hides Topbar on /welcome/spaces when the gate is ON', () => {
+    it('hides Topbar on /welcome/spaces when the gate is ON and the user is signed out', () => {
       useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(true)
+      mockUseAppSelector.mockReturnValue(false)
       renderLayout(AppRoutes.welcome.spaces)
       expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+    })
+
+    it('still shows Topbar on /welcome/spaces when the gate is ON and the user is signed in', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(true)
+      mockUseAppSelector.mockReturnValue(true)
+      renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
     })
 
     it('still shows Topbar while the flag is loading (undefined)', () => {

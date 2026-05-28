@@ -36,6 +36,10 @@ jest.mock('@/hooks/useClassicView', () => ({
   useIsClassicViewFeatureEnabled: jest.fn(() => false),
 }))
 
+jest.mock('@/hooks/useDarkMode', () => ({
+  useDarkMode: jest.fn(() => false),
+}))
+
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({ AccountsNavigation: () => <nav data-testid="accounts-nav" /> }),
   createFeatureHandle: () => ({}),

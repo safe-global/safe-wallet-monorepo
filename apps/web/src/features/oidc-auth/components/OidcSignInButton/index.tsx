@@ -1,12 +1,13 @@
 import type { ReactNode } from 'react'
-import Button from '@mui/material/Button'
+import { Button } from '@/components/ui/button'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useOidcLogin } from '../../hooks/useOidcLogin'
 import type { OidcConnection } from '../../constants'
-import css from './styles.module.css'
+
+export type OidcSignInButtonVariant = 'primary' | 'secondary'
 
 interface OidcSignInButtonProps {
   connection: OidcConnection
@@ -14,9 +15,17 @@ interface OidcSignInButtonProps {
   icon: ReactNode
   analyticsEvent: AnalyticsEvent
   testId: string
+  variant?: OidcSignInButtonVariant
 }
 
-const OidcSignInButton = ({ connection, label, icon, analyticsEvent, testId }: OidcSignInButtonProps) => {
+const OidcSignInButton = ({
+  connection,
+  label,
+  icon,
+  analyticsEvent,
+  testId,
+  variant = 'secondary',
+}: OidcSignInButtonProps) => {
   const { loginWithRedirect } = useOidcLogin()
   const isOidcAuthEnabled = useHasFeature(FEATURES.OIDC_AUTH)
 
@@ -29,13 +38,12 @@ const OidcSignInButton = ({ connection, label, icon, analyticsEvent, testId }: O
 
   return (
     <Button
-      className={css.signInButton}
-      fullWidth
-      disableElevation
-      startIcon={icon}
+      variant={variant === 'primary' ? 'default' : 'secondary'}
       onClick={handleClick}
       data-testid={testId}
+      className="h-12 w-full gap-3 rounded-xl px-4 text-[15px] font-semibold"
     >
+      {icon}
       {label}
     </Button>
   )
