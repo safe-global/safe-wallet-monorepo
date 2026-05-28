@@ -7,7 +7,6 @@ import {
   isRateLimitError,
   GUARD_ERROR_CODES,
 } from '../transaction-errors'
-import { RpcRetryExhaustedError } from '@/utils/providers/RetryingRpcProvider'
 
 describe('transaction-errors', () => {
   describe('isGuardError', () => {
@@ -78,10 +77,6 @@ describe('transaction-errors', () => {
   })
 
   describe('isRateLimitError', () => {
-    it('returns true for RpcRetryExhaustedError', () => {
-      expect(isRateLimitError(new RpcRetryExhaustedError(new Error('underlying')))).toBe(true)
-    })
-
     it.each([
       { label: 'code -32005', extra: { code: -32005 } },
       { label: 'status 429', extra: { status: 429 } },

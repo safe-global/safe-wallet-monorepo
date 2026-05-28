@@ -30,6 +30,7 @@ import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { isRateLimitError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
 
 export const ExecuteForm = ({
   safeTx,
@@ -222,8 +223,14 @@ export const ExecuteForm = ({
         ) : (
           (executionValidationError || gasLimitError) && (
             <ErrorMessage error={executionValidationError || gasLimitError} context="estimation">
-              This transaction will most likely fail.
-              {` To save gas costs, ${isCreation ? 'avoid creating' : 'reject'} this transaction.`}
+              {isRateLimitError(executionValidationError || gasLimitError) ? (
+                RATE_LIMIT_USER_MESSAGE
+              ) : (
+                <>
+                  This transaction will most likely fail.
+                  {` To save gas costs, ${isCreation ? 'avoid creating' : 'reject'} this transaction.`}
+                </>
+              )}
             </ErrorMessage>
           )
         )}

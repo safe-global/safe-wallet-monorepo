@@ -20,7 +20,6 @@ import {
   resolveChainAgnosticContractAddresses,
 } from '@safe-global/utils/services/contracts/deployments'
 import { logError, Errors } from '@/services/exceptions'
-import { getOrCreateReadProvider } from '@/utils/providers/RetryingRpcProvider'
 
 export const initSafeSDK = async ({
   provider,
@@ -146,12 +145,10 @@ export const initSafeSDK = async ({
     }
   }
 
-  const retryingProvider = getOrCreateReadProvider(provider._getConnection().url, Number(chainId))
-
   if (undeployedSafe) {
     if (isPredictedSafeProps(undeployedSafe.props) || isReplayedSafeProps(undeployedSafe.props)) {
       return Safe.init({
-        provider: retryingProvider,
+        provider: provider._getConnection().url,
         isL1SafeSingleton,
         ...(contractNetworks ? { contractNetworks } : {}),
         predictedSafe: undeployedSafe.props,
@@ -161,7 +158,7 @@ export const initSafeSDK = async ({
   }
 
   return Safe.init({
-    provider: retryingProvider,
+    provider: provider._getConnection().url,
     safeAddress: address,
     isL1SafeSingleton,
     ...(contractNetworks ? { contractNetworks } : {}),

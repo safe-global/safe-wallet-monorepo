@@ -15,7 +15,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import { getTxLink } from '@/utils/tx-link'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import { getGuardErrorInfo, isRateLimitError } from '@/utils/transaction-errors'
+import { getGuardErrorInfo, isRateLimitError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -76,7 +76,7 @@ const useTxNotifications = (): void => {
           // The raw error from viem looks like a contract revert ("Request is
           // being rate limited"); we replace the message but keep the original
           // in detailedMessage for debugging.
-          message = 'Network is busy. Please try again in a moment.'
+          message = RATE_LIMIT_USER_MESSAGE
         }
 
         const txId = 'txId' in detail ? detail.txId : undefined

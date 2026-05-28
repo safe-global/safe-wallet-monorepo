@@ -18,7 +18,6 @@ import { connectWallet, getConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { type OnboardAPI } from '@web3-onboard/core'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { UncheckedJsonRpcSigner } from '@/utils/providers/UncheckedJsonRpcSigner'
-import { getOrCreateReadProvider } from '@/utils/providers/RetryingRpcProvider'
 import get from 'lodash/get'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 
@@ -38,13 +37,7 @@ export const getSafeProvider = () => {
     throw new Error('Provider not found.')
   }
 
-  // Read chainId from the existing ethers provider (created with explicit chainId
-  // in createWeb3ReadOnly) so the retrying wrapper can skip its own probe. This
-  // keeps getSafeProvider synchronous while still benefitting from staticNetwork.
-  const chainId = provider._network?.chainId
-  return new SafeProvider({
-    provider: getOrCreateReadProvider(provider._getConnection().url, chainId ? Number(chainId) : undefined),
-  })
+  return new SafeProvider({ provider: provider._getConnection().url })
 }
 
 async function switchOrAddChain(walletProvider: ConnectedWallet['provider'], chainId: string): Promise<void> {
