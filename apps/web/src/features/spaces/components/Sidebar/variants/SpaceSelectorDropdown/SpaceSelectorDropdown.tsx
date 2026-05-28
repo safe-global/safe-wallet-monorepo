@@ -101,16 +101,20 @@ export const SpaceSelectorDropdown = ({
   const isAtSafeLimit = (space: SpaceItem) => isAddToWorkspace && space.safeCount >= SAFE_ACCOUNTS_LIMIT
   const isAdminOfSpace = (space: SpaceItem) => isUserActiveAdmin(space.members ?? [], currentUser?.id)
 
-  const renderMenuItemWithTooltip = (menuItem: ReactElement, space: SpaceItem) => {
+  const renderMenuItemWithTooltip = (
+    menuItem: ReactElement,
+    space: SpaceItem,
+    { isAdmin, atSafeLimit }: { isAdmin: boolean; atSafeLimit: boolean },
+  ) => {
     if (!isAddToWorkspace) return menuItem
-    if (!isAdminOfSpace(space)) {
+    if (!isAdmin) {
       return (
         <AdminOnlyWorkspaceTooltip key={space.id} members={space.members}>
           {menuItem}
         </AdminOnlyWorkspaceTooltip>
       )
     }
-    if (isAtSafeLimit(space)) {
+    if (atSafeLimit) {
       return (
         <Tooltip key={space.id}>
           <TooltipTrigger render={<span className="block w-full" />}>{menuItem}</TooltipTrigger>
@@ -122,7 +126,9 @@ export const SpaceSelectorDropdown = ({
   }
 
   const renderSpaceMenuItem = (space: SpaceItem) => {
-    const isDisabled = loadingSpaceId !== null || (isAddToWorkspace && (!isAdminOfSpace(space) || isAtSafeLimit(space)))
+    const isAdmin = isAdminOfSpace(space)
+    const atSafeLimit = isAtSafeLimit(space)
+    const isDisabled = loadingSpaceId !== null || (isAddToWorkspace && (!isAdmin || atSafeLimit))
     const spaceColor = spaceColors[space.id]
 
     const menuItem = (
@@ -146,7 +152,7 @@ export const SpaceSelectorDropdown = ({
       </DropdownMenuItem>
     )
 
-    return renderMenuItemWithTooltip(menuItem, space)
+    return renderMenuItemWithTooltip(menuItem, space, { isAdmin, atSafeLimit })
   }
 
   const handleOpenChange = (open: boolean) => {

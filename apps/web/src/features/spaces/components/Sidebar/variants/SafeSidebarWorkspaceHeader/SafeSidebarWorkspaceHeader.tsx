@@ -41,9 +41,7 @@ export const SafeSidebarWorkspaceHeader = ({
       const spaces = workspaceHeader.spaces ?? []
       const hasSpaces = spaces.length > 0
       if (hasSpaces) {
-        const isAdminOfAnySpace = spaces.some((space) =>
-          space.members ? isUserActiveAdmin(space.members, currentUser?.id) : false,
-        )
+        const isAdminOfAnySpace = spaces.some((space) => isUserActiveAdmin(space.members ?? [], currentUser?.id))
         if (!isAdminOfAnySpace) return null
 
         return (

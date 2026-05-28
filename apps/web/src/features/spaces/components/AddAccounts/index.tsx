@@ -227,7 +227,7 @@ const AddAccounts = ({
 
   const onSubmit = handleSubmit(async (data) => {
     if (!isAdmin) {
-      setError('Only admins can add or remove Safe Accounts in this workspace')
+      setError('Only admins can add or remove Safe accounts in this workspace')
       return
     }
 
