@@ -40,10 +40,17 @@ export const getEvidence = (
   return null
 }
 
-/** Format a fiat total into a compact dollar string ($1.2K / $3.4M). */
+/**
+ * Format a fiat total into a compact dollar string ($1.2K / $3.4M).
+ * A zero balance renders as `$0` (not a dash) so users can distinguish
+ * "known empty" from "unknown / not loaded".
+ */
 export const formatBalance = (fiatTotal?: string | null): string => {
-  const value = Number(fiatTotal)
-  if (!fiatTotal || !Number.isFinite(value) || value === 0) return DASH
+  if (fiatTotal === undefined || fiatTotal === null) return DASH
+  const trimmedFiatTotal = fiatTotal.trim()
+  if (trimmedFiatTotal === '') return DASH
+  const value = Number(trimmedFiatTotal)
+  if (!Number.isFinite(value)) return DASH
   if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
   if (value >= 1_000) return `$${(value / 1_000).toFixed(1)}K`
   return `$${value.toFixed(0)}`

@@ -5,6 +5,7 @@ import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import SecuritySafesTable from './components/SecuritySafesTable/SecuritySafesTable'
 import SecurityReportDrawer from './components/SecurityReportDrawer/SecurityReportDrawer'
+import SecurityEmptyState from './components/SecurityEmptyState/SecurityEmptyState'
 import WorkspaceHealthCard from './components/WorkspaceHealthCard/WorkspaceHealthCard'
 import useReconciledSpaceSafes from './hooks/useReconciledSpaceSafes'
 import useScanResultsState from './hooks/useScanResultsState'
@@ -17,7 +18,7 @@ const SecurityHub = (): ReactElement => {
   const security = useLoadFeature(SecurityFeature)
   const { isLoadingSpacesSafes, safes, deployedEntries, balanceMap, overviewMap } = useReconciledSpaceSafes(security)
   const { allScanResults, scanTimestamps, lastScannedAt, handleScanComplete } = useScanResultsState(security)
-  const { scanningKeys, isRunning, startScan } = useAutoScanOrchestrator({
+  const { scanningKeys, isRunning, scanIncomplete, startScan } = useAutoScanOrchestrator({
     security,
     deployedEntries,
     safes,
@@ -48,9 +49,7 @@ const SecurityHub = (): ReactElement => {
           Loading accounts...
         </Typography>
       ) : safes.length === 0 ? (
-        <Typography variant="body2" color="text.secondary">
-          No Safe accounts in this space yet.
-        </Typography>
+        <SecurityEmptyState />
       ) : (
         <>
           <WorkspaceHealthCard
@@ -60,7 +59,8 @@ const SecurityHub = (): ReactElement => {
             activeFilter={gradeFilter}
             onFilterChange={(grade) => setGradeFilter((prev) => (prev === grade ? null : grade))}
             lastScannedAt={lastScannedAt}
-            onRescan={startScan}
+            onRescan={() => startScan({ isManual: true })}
+            scanIncomplete={scanIncomplete}
           />
           <SecuritySafesTable
             safes={safes}

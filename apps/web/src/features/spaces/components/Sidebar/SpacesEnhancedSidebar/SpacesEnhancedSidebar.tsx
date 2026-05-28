@@ -24,6 +24,8 @@ interface SpacesEnhancedSidebarProps {
   onDrawerClose?: () => void
   /** Called when the sidebar expands or collapses (icon mode). */
   onOpenChange?: (open: boolean) => void
+  /** When true, render the desktop sidebar contained inside a parent drawer instead of fixed to the viewport. */
+  isContainedInDrawer?: boolean
 }
 
 /** Reports sidebar open/collapsed state to parent without interfering with internal state. */
@@ -39,6 +41,7 @@ export const SpacesEnhancedSidebar = ({
   isDrawerOpen,
   onDrawerClose,
   onOpenChange,
+  isContainedInDrawer = false,
 }: SpacesEnhancedSidebarProps = {}): ReactElement => {
   const isHydrated = useSidebarHydrated()
   const isDarkMode = useDarkMode()
@@ -46,18 +49,23 @@ export const SpacesEnhancedSidebar = ({
 
   return (
     <SidebarProvider
+      open={isContainedInDrawer ? true : undefined}
       openMobile={isDrawerOpen}
       onOpenMobileChange={(open) => !open && onDrawerClose?.()}
       style={{ '--sidebar-width': spacesSidebarWidth } as CSSProperties}
-      className={cn('shadcn-scope', isDarkMode && 'dark')}
+      className={cn('shadcn-scope', isDarkMode && 'dark', isContainedInDrawer && 'h-dvh')}
     >
       <SidebarStateReporter onOpenChange={onOpenChange} />
-      {isHydrated ? <HydratedSidebar /> : <SidebarSkeleton />}
+      {isHydrated ? (
+        <HydratedSidebar contained={isContainedInDrawer} />
+      ) : (
+        <SidebarSkeleton contained={isContainedInDrawer} />
+      )}
     </SidebarProvider>
   )
 }
 
-const HydratedSidebar = (): ReactElement => {
+const HydratedSidebar = ({ contained = false }: { contained?: boolean }): ReactElement => {
   const router = useRouter()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const resolvedSpaceId = useCurrentSpaceId()
@@ -93,6 +101,7 @@ const HydratedSidebar = (): ReactElement => {
 
   return (
     <EnhancedSidebar
+      contained={contained}
       type={sidebarType}
       selectedSpace={effectiveSelectedSpace}
       spaces={nonDeclinedSpaces}

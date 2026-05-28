@@ -1,0 +1,44 @@
+import { render, screen } from '@/tests/test-utils'
+import { SafeCardLayout } from '../SafeCardLayout'
+import { safeItemBuilder } from '@/tests/builders/safeItem'
+import { chainBuilder } from '@/tests/builders/chains'
+
+const mockChains = [chainBuilder().with({ chainId: '1', shortName: 'eth' }).build()]
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({ configs: mockChains }),
+  useChain: (chainId: string) => mockChains.find((chain) => chain.chainId === chainId),
+}))
+
+const baseProps = {
+  checked: false,
+  onToggle: jest.fn(),
+  name: 'My Safe',
+  address: '0x0000000000000000000000000000000000000001',
+  safes: [safeItemBuilder().with({ chainId: '1', address: '0x0000000000000000000000000000000000000001' }).build()],
+  fiatValue: undefined,
+  threshold: 1,
+  ownersCount: 1,
+}
+
+describe('SafeCardLayout', () => {
+  it('renders FiatBalance when the safe is deployed', () => {
+    render(<SafeCardLayout {...baseProps} fiatValue="123.45" isUndeployed={false} isActivating={false} />)
+
+    expect(screen.queryByText(/Not activated/i)).toBeNull()
+    expect(screen.queryByText(/Activating account/i)).toBeNull()
+  })
+
+  it('renders the Not activated chip when the safe is undeployed', () => {
+    render(<SafeCardLayout {...baseProps} fiatValue={undefined} isUndeployed isActivating={false} />)
+
+    expect(screen.getByText(/Not activated/i)).toBeInTheDocument()
+  })
+
+  it('renders the Activating account chip when activation is in flight', () => {
+    render(<SafeCardLayout {...baseProps} fiatValue={undefined} isUndeployed isActivating />)
+
+    expect(screen.getByText(/Activating account/i)).toBeInTheDocument()
+  })
+})

@@ -15,7 +15,7 @@ export default function SpaceMembersPage() {
   return (
     <>
       <Head>
-        <title>{`${BRAND_NAME} – Space members`}</title>
+        <title>{`${BRAND_NAME} – Workspace members`}</title>
       </Head>
 
       <main>

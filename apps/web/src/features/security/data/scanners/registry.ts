@@ -9,7 +9,6 @@ import { recoveryScanner } from './recovery'
 import { transactionScanningScanner } from './transactionScanning'
 import { fallbackHandlerScanner } from './fallbackHandler'
 import { factoryValidationScanner } from './factoryValidation'
-import { signerIntegrityScanner } from './signerIntegrity'
 
 export const SCANNERS: SecurityScanner[] = [
   accountSetupScanner,
@@ -22,5 +21,4 @@ export const SCANNERS: SecurityScanner[] = [
   transactionScanningScanner,
   fallbackHandlerScanner,
   factoryValidationScanner,
-  signerIntegrityScanner,
 ]

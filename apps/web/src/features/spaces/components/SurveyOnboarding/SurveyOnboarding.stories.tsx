@@ -63,7 +63,7 @@ const onboardingSurveyState: SurveyStateDto = {
       ],
     },
   },
-  spaceResponse: null,
+  surveyResponse: null,
 }
 
 const baseSetup = createMockStory({

@@ -13,7 +13,6 @@ export enum MixpanelEvent {
   CSV_TX_EXPORT_CLICKED = 'Export CSV Clicked',
   CSV_TX_EXPORT_SUBMITTED = 'CSV Exported',
   NATIVE_SWAP_VIEWED = 'Native Swap Viewed',
-  SAFE_LABS_TERMS_ACCEPTED = 'Safe Labs Terms Accepted',
   SIDEBAR_CLICKED = 'Sidebar Clicked',
   GUARDIAN_BANNER_VIEWED = 'Guardian Banner Viewed',
   GUARDIAN_FORM_VIEWED = 'Guardian Form Viewed',

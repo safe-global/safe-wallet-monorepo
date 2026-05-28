@@ -43,7 +43,7 @@ export const recoveryScanner: SecurityScanner = {
       const score = 100
       return {
         status: 'not_applicable',
-        severity: getSeverityFromScore(score),
+        severity: getSeverityFromScore(score, { excluded: true }),
         score,
         evidence: [{ label: 'Status', value: 'Not available on this network' }],
         remediation: '',

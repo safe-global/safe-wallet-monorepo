@@ -44,7 +44,7 @@ const SpaceContextMenuNew = ({ space }: { space: GetSpaceResponse }) => {
           }
         >
           <MoreVertical className="size-4 text-border" />
-          <span className="sr-only">Space actions</span>
+          <span className="sr-only">Workspace actions</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)} onSelect={(e) => e.stopPropagation()}>

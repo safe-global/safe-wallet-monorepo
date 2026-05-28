@@ -8,6 +8,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
+import { sanitizeNextUrl } from '@/utils/nextUrl'
 import type { UseFormHandleSubmit } from 'react-hook-form'
 
 const useSpaceSubmit = (
@@ -30,7 +31,11 @@ const useSpaceSubmit = (
       throw new Error(getRtkQueryErrorMessage(response.error))
     }
 
-    router.push({ pathname: AppRoutes.welcome.selectSafes, query: { spaceId, ...(safe ? { safe } : {}) } })
+    const next = sanitizeNextUrl(router.query.next)
+    router.push({
+      pathname: AppRoutes.welcome.selectSafes,
+      query: { spaceId, ...(safe ? { safe } : {}), ...(next ? { next } : {}) },
+    })
   }
 
   const createSpace = async (name: string) => {
@@ -42,9 +47,10 @@ const useSpaceSubmit = (
 
       dispatch(setLastUsedSpace(newSpaceId))
 
+      const next = sanitizeNextUrl(router.query.next)
       router.push({
         pathname: AppRoutes.welcome.selectSafes,
-        query: { spaceId: newSpaceId, ...(safe ? { safe } : {}) },
+        query: { spaceId: newSpaceId, ...(safe ? { safe } : {}), ...(next ? { next } : {}) },
       })
     }
 
@@ -68,7 +74,7 @@ const useSpaceSubmit = (
       const errorMessage =
         error instanceof Error
           ? error.message
-          : `Failed ${isEditMode ? 'updating' : 'creating'} the space. Please try again.`
+          : `Failed ${isEditMode ? 'updating' : 'creating'} the workspace. Please try again.`
       setError(errorMessage)
       setIsSubmitting(false)
     }
