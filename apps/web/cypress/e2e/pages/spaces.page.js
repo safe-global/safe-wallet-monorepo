@@ -186,12 +186,16 @@ export function signOutViaSidebarProfile() {
   cy.get(continueWithWalletBtn, { timeout: 30000 }).should('be.visible')
 }
 
-export function verifyOnSpacesWelcomePage() {
-  cy.url({ timeout: 30000 }).should('include', '/welcome/spaces').and('not.include', onboardingCreateSpacePath)
-}
-
-export function verifySpaceCardVisible(name) {
-  cy.get(spaceCard, { timeout: 30000 }).contains(name).should('be.visible')
+export function verifyOnSingleSpaceDashboard(spaceName) {
+  // After re-login the single-space short-circuit pushes us straight to the
+  // space dashboard. Assert the URL is the space dashboard (not the
+  // workspace list, not the create-space onboarding) AND that the space's
+  // own selector now shows the expected name.
+  cy.url({ timeout: 60000 })
+    .should('include', constants.spaceDashboardUrl)
+    .and('include', 'spaceId=')
+    .and('not.include', onboardingCreateSpacePath)
+  cy.get(spaceSelectorBtn, { timeout: 30000 }).should('be.visible').and('contain.text', spaceName)
 }
 
 export function waitForSpacesWelcomeReady() {

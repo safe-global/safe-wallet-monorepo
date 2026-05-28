@@ -15,13 +15,23 @@ interface UseSignInRedirectProps {
   inviteAmount: number
   isSpacesLoading: boolean
   error: RtkError | undefined
+  // When the signed-in user has exactly one active space, jump straight to it
+  // after sign-in instead of leaving them on the workspace list. Pass null when
+  // there are zero or multiple active spaces.
+  singleSpaceId?: string | null
 }
 
 const hasNotFoundSpaces = (error?: RtkError) => {
   return error && 'status' in error && error.status === 404
 }
 
-export const useSignInRedirect = ({ spacesAmount, inviteAmount, isSpacesLoading, error }: UseSignInRedirectProps) => {
+export const useSignInRedirect = ({
+  spacesAmount,
+  inviteAmount,
+  isSpacesLoading,
+  error,
+  singleSpaceId,
+}: UseSignInRedirectProps) => {
   const [hasSignedIn, setHasSignedIn] = useState(false)
   const router = useRouter()
   const [redirectLoading, setRedirectLoading] = useState(false)
@@ -51,19 +61,39 @@ export const useSignInRedirect = ({ spacesAmount, inviteAmount, isSpacesLoading,
       return
     }
 
-    // When the "must log in" gate is on, an existing user who just signed in
-    // should land on the URL they originally tried to open. Without ?next= we
-    // let them stay on /welcome/spaces, which now renders their Spaces list.
-    // Wait for the gate flag to resolve so a fast sign-in + slow chains config
-    // doesn't permanently strand the user on /welcome/spaces.
-    if (isRequireLoginEnabled === true && hasSignedIn && isUserSignedIn && !isSpacesLoading && spacesAmount > 0) {
-      const next = parseNextUrlForRouter(router.query.next)
-      if (next) {
+    if (hasSignedIn && isUserSignedIn && !isSpacesLoading && spacesAmount > 0) {
+      // Priority 1: an explicit ?next= round-trip target wins (the user
+      // originally tried to open that URL and was bounced to login). Only the
+      // require-login gate populates this — wait for the flag to resolve so a
+      // fast sign-in + slow chains config doesn't permanently strand the user.
+      if (isRequireLoginEnabled === true) {
+        const next = parseNextUrlForRouter(router.query.next)
+        if (next) {
+          setRedirectLoading(true)
+          router.push(next)
+          return
+        }
+      }
+
+      // Priority 2: if the user has exactly one space, jump straight to it.
+      // Falling back to the workspace list (i.e. leaving the user on
+      // /welcome/spaces) is intentional only when there are multiple to choose
+      // between.
+      if (singleSpaceId) {
         setRedirectLoading(true)
-        router.push(next)
+        router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: singleSpaceId } })
       }
     }
-  }, [hasSignedIn, isSpacesLoading, spacesAmount, inviteAmount, isUserSignedIn, error, isRequireLoginEnabled])
+  }, [
+    hasSignedIn,
+    isSpacesLoading,
+    spacesAmount,
+    inviteAmount,
+    isUserSignedIn,
+    error,
+    isRequireLoginEnabled,
+    singleSpaceId,
+  ])
 
   return { setHasSignedIn, redirectLoading }
 }

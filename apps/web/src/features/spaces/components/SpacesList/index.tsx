@@ -128,6 +128,8 @@ const SpacesList = () => {
   const inviteAmount = pendingInvites?.length
   const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
 
+  const singleSpaceId = activeSpaces.length === 1 ? String(activeSpaces[0].id) : null
+
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,
     inviteAmount: inviteAmount || 0,
@@ -141,6 +143,7 @@ const SpacesList = () => {
     // resolves, this clause becomes false and the normal redirect logic runs.
     isSpacesLoading: isFetching || isUninitialized || (spaces === undefined && !error),
     error: error || undefined,
+    singleSpaceId,
   })
 
   const afterSignIn = useCallback(() => {
