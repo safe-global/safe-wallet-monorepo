@@ -23,6 +23,11 @@ import type { SpaceItem } from '../../types'
 import { truncateSpaceName } from '../../utils'
 import { useAddSafeToSpace } from '../../hooks/useAddSafeToSpace'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
+import { isUserActiveAdmin } from '@/features/spaces/utils'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { AdminOnlyWorkspaceTooltip } from '@/features/spaces/components/AdminOnlyWorkspaceTooltip'
 
 const MENU_ITEM_CLASS = 'gap-3 min-h-9 px-2 py-2'
 
@@ -51,6 +56,8 @@ export const SpaceSelectorDropdown = ({
 
   const { addToSpace, loadingSpaceId } = useAddSafeToSpace({ spaces, onSpaceAdded })
   const spaceId = selectedSpace?.id?.toString()
+  const isSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isSignedIn })
 
   const spaceColors = useMemo(
     () => Object.fromEntries(spaces.map((s) => [s.id, getDeterministicColor(s.name)])),
@@ -89,20 +96,33 @@ export const SpaceSelectorDropdown = ({
     router.push(AppRoutes.welcome.spaces)
   }
 
+  const isAddToWorkspace = triggerVariant === 'addToWorkspace'
+
+  const isAtSafeLimit = (space: SpaceItem) => isAddToWorkspace && space.safeCount >= SAFE_ACCOUNTS_LIMIT
+  const isAdminOfSpace = (space: SpaceItem) => isUserActiveAdmin(space.members ?? [], currentUser?.id)
+
   const renderMenuItemWithTooltip = (menuItem: ReactElement, space: SpaceItem) => {
-    const isAtLimit = triggerVariant === 'addToWorkspace' && space.safeCount >= SAFE_ACCOUNTS_LIMIT
-    if (!isAtLimit) return menuItem
-    return (
-      <Tooltip key={space.id}>
-        <TooltipTrigger render={<span className="block w-full" />}>{menuItem}</TooltipTrigger>
-        <TooltipContent side="right">{`You can have up to ${SAFE_ACCOUNTS_LIMIT} Safes per workspace`}</TooltipContent>
-      </Tooltip>
-    )
+    if (!isAddToWorkspace) return menuItem
+    if (!isAdminOfSpace(space)) {
+      return (
+        <AdminOnlyWorkspaceTooltip key={space.id} members={space.members}>
+          {menuItem}
+        </AdminOnlyWorkspaceTooltip>
+      )
+    }
+    if (isAtSafeLimit(space)) {
+      return (
+        <Tooltip key={space.id}>
+          <TooltipTrigger render={<span className="block w-full" />}>{menuItem}</TooltipTrigger>
+          <TooltipContent side="right">{`You can have up to ${SAFE_ACCOUNTS_LIMIT} Safes per workspace`}</TooltipContent>
+        </Tooltip>
+      )
+    }
+    return menuItem
   }
 
   const renderSpaceMenuItem = (space: SpaceItem) => {
-    const isAtLimit = triggerVariant === 'addToWorkspace' && space.safeCount >= SAFE_ACCOUNTS_LIMIT
-    const isDisabled = loadingSpaceId !== null || isAtLimit
+    const isDisabled = loadingSpaceId !== null || (isAddToWorkspace && (!isAdminOfSpace(space) || isAtSafeLimit(space)))
     const spaceColor = spaceColors[space.id]
 
     const menuItem = (

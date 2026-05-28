@@ -12,6 +12,27 @@ jest.mock('../../../hooks/useAddSafeToSpace', () => ({
   useAddSafeToSpace: jest.fn(() => ({ addToSpace: jest.fn().mockResolvedValue(true), loadingSpaceId: null })),
 }))
 
+jest.mock('@/store', () => ({
+  useAppSelector: (selector: unknown) => (typeof selector === 'function' ? selector({}) : selector),
+}))
+
+jest.mock('@/store/authSlice', () => ({
+  isAuthenticated: () => true,
+}))
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
+  useUsersGetWithWalletsV1Query: () => ({ currentData: { id: 7 } }),
+}))
+
+const CURRENT_USER_ID = 7
+
+const adminMembersForCurrentUser = [
+  { role: 'ADMIN' as const, status: 'ACTIVE' as const, name: '', invitedBy: '', user: { id: CURRENT_USER_ID } },
+]
+const memberMembersForCurrentUser = [
+  { role: 'MEMBER' as const, status: 'ACTIVE' as const, name: '', invitedBy: '', user: { id: CURRENT_USER_ID } },
+]
+
 const mockPush = jest.fn()
 let mockRouterQuery: Record<string, string> = { spaceId: '1' }
 jest.mock('next/router', () => ({
@@ -276,8 +297,8 @@ describe('SpaceSelectorDropdown', () => {
 
     it('disables a space that has reached the safe limit', () => {
       const spaces = [
-        { id: 1, name: 'Full Space', safeCount: LIMIT },
-        { id: 2, name: 'Empty Space', safeCount: 0 },
+        { id: 1, name: 'Full Space', safeCount: LIMIT, members: adminMembersForCurrentUser },
+        { id: 2, name: 'Empty Space', safeCount: 0, members: adminMembersForCurrentUser },
       ]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
@@ -295,7 +316,7 @@ describe('SpaceSelectorDropdown', () => {
     })
 
     it('shows a tooltip with the limit message for a space at the limit', () => {
-      const spaces = [{ id: 1, name: 'Full Space', safeCount: LIMIT }]
+      const spaces = [{ id: 1, name: 'Full Space', safeCount: LIMIT, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -325,12 +346,67 @@ describe('SpaceSelectorDropdown', () => {
     })
 
     it('shows the full tooltip text including the limit number', () => {
-      const spaces = [{ id: 1, name: 'Full Space', safeCount: LIMIT }]
+      const spaces = [{ id: 1, name: 'Full Space', safeCount: LIMIT, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
 
       expect(screen.getByText(`You can have up to ${LIMIT} Safes per workspace`)).toBeInTheDocument()
+    })
+  })
+
+  describe('admin role gating (addToWorkspace variant)', () => {
+    it('disables a space where the user is not an active admin', () => {
+      const spaces = [
+        { id: 1, name: 'AdminSpace', safeCount: 0, members: adminMembersForCurrentUser },
+        { id: 2, name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser },
+      ]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const adminBtn = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'AdminSpace')
+      const memberBtn = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'MemberSpace')
+
+      expect(adminBtn).not.toBeDisabled()
+      expect(memberBtn).toBeDisabled()
+    })
+
+    it('shows the admin tooltip for non-admin spaces', () => {
+      const spaces = [{ id: 1, name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      expect(screen.getByText('Only admins can add Safes to this workspace')).toBeInTheDocument()
+    })
+
+    it('prefers the admin tooltip over the limit tooltip when both apply', () => {
+      const LIMIT = 40
+      const spaces = [{ id: 1, name: 'FullMember', safeCount: LIMIT, members: memberMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      expect(screen.getByText('Only admins can add Safes to this workspace')).toBeInTheDocument()
+      expect(screen.queryByText(/You can have up to /)).not.toBeInTheDocument()
+    })
+
+    it('does not gate by role in the default variant', () => {
+      const spaces = [{ id: 1, name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="default" selectedSpace={spaces[0]} spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Open workspace selector' }))
+
+      const button = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'MemberSpace')
+      expect(button).not.toBeDisabled()
+      expect(screen.queryByText('Only admins can add Safes to this workspace')).not.toBeInTheDocument()
     })
   })
 
@@ -354,7 +430,7 @@ describe('SpaceSelectorDropdown', () => {
       }
       useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
 
-      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -427,7 +503,7 @@ describe('SpaceSelectorDropdown', () => {
       }
       useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
 
-      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -518,9 +594,9 @@ describe('SpaceSelectorDropdown', () => {
     it('disables spaces when multiple are at the safe limit', () => {
       const LIMIT = 40
       const spaces = [
-        { id: 1, name: 'Full1', safeCount: LIMIT },
-        { id: 2, name: 'Full2', safeCount: LIMIT },
-        { id: 3, name: 'Available', safeCount: LIMIT - 1 },
+        { id: 1, name: 'Full1', safeCount: LIMIT, members: adminMembersForCurrentUser },
+        { id: 2, name: 'Full2', safeCount: LIMIT, members: adminMembersForCurrentUser },
+        { id: 3, name: 'Available', safeCount: LIMIT - 1, members: adminMembersForCurrentUser },
       ]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
@@ -539,7 +615,7 @@ describe('SpaceSelectorDropdown', () => {
 
     it('handles space with safeCount exactly one below the limit', () => {
       const LIMIT = 40
-      const spaces = [{ id: 1, name: 'AlmostFull', safeCount: LIMIT - 1 }]
+      const spaces = [{ id: 1, name: 'AlmostFull', safeCount: LIMIT - 1, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -599,7 +675,7 @@ describe('SpaceSelectorDropdown', () => {
       }
       useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
 
-      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
