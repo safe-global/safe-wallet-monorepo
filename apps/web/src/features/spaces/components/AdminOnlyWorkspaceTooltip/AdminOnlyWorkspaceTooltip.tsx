@@ -11,8 +11,11 @@ export const ADMIN_ONLY_WORKSPACE_TOOLTIP_MESSAGE = 'Only admins can add Safes t
 type Side = 'top' | 'right' | 'bottom' | 'left'
 
 interface AdminOnlyWorkspaceTooltipProps {
-  members: SpaceMemberDto[] | undefined
   children: ReactElement
+  /** Members of the workspace. Used to derive admin status against the current user. Ignored when `isAdmin` is provided. */
+  members?: SpaceMemberDto[]
+  /** Explicit admin flag. Takes precedence over `members` when provided. */
+  isAdmin?: boolean
   side?: Side
   /** Optional override for the tooltip message. */
   message?: ReactNode
@@ -24,14 +27,17 @@ interface AdminOnlyWorkspaceTooltipProps {
  * `children` unchanged.
  */
 export const AdminOnlyWorkspaceTooltip = ({
-  members,
   children,
+  members,
+  isAdmin,
   side = 'right',
   message = ADMIN_ONLY_WORKSPACE_TOOLTIP_MESSAGE,
 }: AdminOnlyWorkspaceTooltipProps): ReactElement => {
   const isSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isSignedIn })
-  const userIsAdmin = isUserActiveAdmin(members ?? [], currentUser?.id)
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, {
+    skip: !isSignedIn || isAdmin !== undefined,
+  })
+  const userIsAdmin = isAdmin ?? isUserActiveAdmin(members ?? [], currentUser?.id)
 
   if (userIsAdmin) return children
 
