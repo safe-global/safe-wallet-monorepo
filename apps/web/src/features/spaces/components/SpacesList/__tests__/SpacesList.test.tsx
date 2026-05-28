@@ -121,6 +121,29 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(screen.queryByTestId('sign-in-options')).not.toBeInTheDocument()
   })
 
+  // Regression: on re-login after logout the spaces RTK Query cache entry
+  // already exists (the post-logout page load fired a request with stale
+  // persisted auth that errored, then invalidateTags marked it stale). When
+  // skip flips to false on re-login, both isFetching and isUninitialized are
+  // briefly false while currentData is still undefined — the previous fix
+  // relied solely on `isFetching || isUninitialized`, which missed this case
+  // and bounced existing users into /welcome/create-space. SpacesList must
+  // pass isSpacesLoading=true whenever currentData and error are both absent.
+  it('passes isSpacesLoading=true to useSignInRedirect when spaces data and error are both undefined', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: undefined,
+      isFetching: false,
+      isUninitialized: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ isSpacesLoading: true }))
+  })
+
   it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {
     mockUseAppSelector.mockReturnValue(true)
     const tenSpaces = Array.from({ length: 10 }, (_, i) => ({ id: i + 1, name: `Space ${i + 1}` }))
