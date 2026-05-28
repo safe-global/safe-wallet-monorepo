@@ -52,6 +52,30 @@ describe('Spaces basic flow tests', () => {
     space.addAccountManually(staticSafes.SEP_STATIC_SAFE_35.substring(4), constants.networks.sepolia)
   })
 
+  it('Verify that re-signing in after sign-out lands on the spaces list, not on /welcome/create-space', () => {
+    const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
+
+    wallet.connectSigner(admin)
+    space.clickOnSignInBtn()
+    space.ensureReadyToCreateSpace()
+    cy.wait(3000)
+    space.createSpaceViaOnboardingWithSkip(spaceName)
+
+    space.signOutViaSidebarProfile()
+    wallet.connectSigner(admin)
+    space.clickOnSignInBtn()
+
+    // Wait for the spaces list to stabilize before asserting URL — if the
+    // re-login redirect bug fires we end up on /welcome/create-space and the
+    // space card never appears.
+    space.verifySpaceCardVisible(spaceName)
+    space.verifyOnSpacesWelcomePage()
+
+    space.clickOnSpaceSelector(spaceName)
+    space.goToSpaceSettings()
+    space.deleteSpace(spaceName)
+  })
+
   it('Verify a new member can be invited and accept the invite', () => {
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
     const memberName = 'Member ' + Math.random().toString(36).substring(2, 12)
