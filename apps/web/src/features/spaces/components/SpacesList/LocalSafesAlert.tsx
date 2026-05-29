@@ -11,16 +11,9 @@ const LocalSafesAlert = () => {
   return (
     <div
       data-testid="local-safes-alert"
-      className="mb-5 flex items-center gap-3 rounded-xl border p-3 text-left"
-      style={{
-        backgroundColor: 'color-mix(in srgb, var(--color-static-text-brand) 8%, transparent)',
-        borderColor: 'color-mix(in srgb, var(--color-static-text-brand) 35%, transparent)',
-      }}
+      className="mb-5 flex items-center gap-3 rounded-md border p-3 text-left bg-[color-mix(in_srgb,var(--color-static-text-brand)_8%,transparent)] border-[color-mix(in_srgb,var(--color-static-text-brand)_35%,transparent)]"
     >
-      <div
-        className="flex size-9 shrink-0 items-center justify-center rounded-lg text-[#0a0a0a]"
-        style={{ backgroundColor: 'var(--color-static-text-brand)' }}
-      >
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-xs text-[#0a0a0a] bg-[var(--color-static-text-brand)]">
         <WalletMinimal size={18} />
       </div>
 

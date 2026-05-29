@@ -65,8 +65,10 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+      {/* TODO(WA-2435): min-h-screen overlaps the Topbar in classic-view mode (require-login OFF).
+          Deferred while we keep PageLayout's dev-branch hideHeader logic untouched. */}
       <div className={cn('relative flex min-h-screen items-center justify-center bg-background p-6', css.authShell)}>
-        <div className="relative w-full max-w-[440px] rounded-2xl bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
+        <div className="relative w-full max-w-[440px] rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
           <div className="mb-6 flex size-10 items-center justify-center text-foreground">
             <SafeMarkIcon className="size-10" />
           </div>
@@ -169,11 +171,13 @@ const SpacesList = () => {
     setHasSignedIn(true)
   }, [setHasSignedIn])
 
-  // Signed-out users with no pending invites get the full-bleed sign-in screen
-  // (no surrounding chrome). When require-login is on, PageLayout has already
-  // hidden the header; when it's off (classic mode) the topbar still shows
-  // above, which is acceptable since classic mode is the legacy entry point.
-  if (!isUserSignedIn && (redirectLoading || pendingInvites.length === 0)) {
+  // Signed-out users get the full-bleed sign-in screen (no surrounding chrome).
+  // The users + spaces queries are skipped while signed out, so pendingInvites
+  // is always []; we don't need to gate the early return on it. When
+  // require-login is on, PageLayout has already hidden the header; when it's
+  // off (classic mode) the topbar still shows above — acceptable since classic
+  // mode is the legacy entry point.
+  if (!isUserSignedIn) {
     return <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
   }
 

@@ -7,15 +7,13 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useOidcLogin } from '../../hooks/useOidcLogin'
 import type { OidcConnection } from '../../constants'
 
-export type OidcSignInButtonVariant = 'primary' | 'secondary'
-
 interface OidcSignInButtonProps {
   connection: OidcConnection
   label: string
   icon: ReactNode
   analyticsEvent: AnalyticsEvent
   testId: string
-  variant?: OidcSignInButtonVariant
+  variant?: 'primary' | 'secondary'
 }
 
 const OidcSignInButton = ({
