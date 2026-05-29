@@ -24,7 +24,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   useUsersGetWithWalletsV1Query: () => ({ currentData: { id: 7 } }),
 }))
 
-const mockUseSpaceSafesGetV1Query = jest.fn(() => ({ currentData: undefined as unknown }))
+const mockUseSpaceSafesGetV1Query = jest.fn((..._args: unknown[]) => ({
+  currentData: undefined as { safes: Record<string, string[]> } | undefined,
+}))
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpaceSafesGetV1Query: (...args: unknown[]) => mockUseSpaceSafesGetV1Query(...args),
 }))
@@ -507,8 +509,8 @@ describe('SpaceSelectorDropdown', () => {
     const SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
 
     const setMembership = (membership: Record<number, Record<string, string[]>>) => {
-      mockUseSpaceSafesGetV1Query.mockImplementation((arg: unknown) => {
-        const { spaceId } = arg as { spaceId: number }
+      mockUseSpaceSafesGetV1Query.mockImplementation((...args: unknown[]) => {
+        const { spaceId } = args[0] as { spaceId: number }
         const safes = membership[spaceId]
         return { currentData: safes ? { safes } : undefined }
       })
