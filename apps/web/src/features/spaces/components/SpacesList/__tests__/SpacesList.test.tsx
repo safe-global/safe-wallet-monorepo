@@ -101,13 +101,36 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    // The signed-out card with Sign in heading + SignInOptions must render…
-    expect(screen.getByRole('heading', { name: /sign in/i })).toBeInTheDocument()
+    // The signed-out card with the new "Sign in to your workspace" heading +
+    // SignInOptions must render…
+    expect(screen.getByRole('heading', { name: /sign in to your workspace/i })).toBeInTheDocument()
     expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
 
     // …and the Create space CTA / no-spaces empty state must NOT.
     expect(screen.queryByText(/^create space$/i)).not.toBeInTheDocument()
     expect(screen.queryByText(/no spaces found/i)).not.toBeInTheDocument()
+  })
+
+  // The signed-out screen is meant to take over the viewport when the
+  // require-login gate is on. The signed-out branch in SpacesList is an
+  // early return, so the regular layout chrome (AccountsNavigation) must
+  // not render alongside the SignInOptions card.
+  it('does not render the AccountsNavigation chrome when the user is signed out', () => {
+    mockUseAppSelector.mockReturnValue(false)
+
+    render(<SpacesList />)
+
+    expect(screen.queryByTestId('accounts-nav')).not.toBeInTheDocument()
+  })
+
+  it('renders the AccountsNavigation chrome when the user is signed in (and require-login is OFF)', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByTestId('accounts-nav')).toBeInTheDocument()
   })
 
   it('renders the No-spaces empty state with Create space CTA when the user is authenticated and has no spaces', () => {

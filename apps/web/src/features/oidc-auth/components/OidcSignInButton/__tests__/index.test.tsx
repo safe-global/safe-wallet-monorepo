@@ -23,7 +23,7 @@ jest.mock('@/hooks/useChains', () => ({
 const testEvent = { action: 'Test action', category: 'test' }
 const TestIcon = () => <span data-testid="test-icon" />
 
-const renderButton = () =>
+const renderButton = (variant?: 'primary' | 'secondary') =>
   render(
     <OidcSignInButton
       connection={OidcConnection.EMAIL}
@@ -31,6 +31,7 @@ const renderButton = () =>
       icon={<TestIcon />}
       analyticsEvent={testEvent}
       testId="test-btn"
+      variant={variant}
     />,
   )
 
@@ -70,5 +71,20 @@ describe('OidcSignInButton', () => {
     fireEvent.click(screen.getByTestId('test-btn'))
 
     expect(mockLoginWithRedirect).toHaveBeenCalledWith(OidcConnection.EMAIL)
+  })
+
+  // The primary variant pins to a theme-agnostic dark surface in light mode
+  // (and a light surface in dark mode) so the Google "G" doesn't collide
+  // with shadcn's bg-primary token flipping to Safe-green in dark mode.
+  it('applies the primary-variant override class when variant="primary"', () => {
+    renderButton('primary')
+
+    expect(screen.getByTestId('test-btn').className).toContain('bg-[#171717]')
+  })
+
+  it('does not apply the primary-variant override class when variant defaults to secondary', () => {
+    renderButton()
+
+    expect(screen.getByTestId('test-btn').className).not.toContain('bg-[#171717]')
   })
 })
