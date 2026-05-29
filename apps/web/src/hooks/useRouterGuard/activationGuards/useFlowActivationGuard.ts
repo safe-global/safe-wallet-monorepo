@@ -34,7 +34,6 @@ const ALWAYS_PUBLIC_ROUTES = [
   AppRoutes.cookie,
   AppRoutes.imprint,
   AppRoutes.licenses,
-  AppRoutes.safeLabsTerms,
   AppRoutes.hypernative.oauthCallback,
 ]
 

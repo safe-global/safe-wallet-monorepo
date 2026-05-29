@@ -59,7 +59,7 @@ const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps):
           // but it steals all the events from the rest of the page
           position: 'relative',
           '& .MuiPaper-root': {
-            zIndex: 1250,
+            zIndex: 1150,
             ...(isTabletDrawer && {
               height: '100dvh',
               maxHeight: '100dvh',

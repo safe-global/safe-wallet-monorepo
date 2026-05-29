@@ -4,7 +4,6 @@ export const AppRoutes = {
   wc: '/wc',
   userSettings: '/user-settings',
   terms: '/terms',
-  safeLabsTerms: '/safe-labs-terms',
   swap: '/swap',
   stake: '/stake',
   privacy: '/privacy',

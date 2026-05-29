@@ -3,6 +3,7 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectChainById } from '@/src/store/chains'
 import { RootState } from '@/src/store'
+import { BiometryInvalidationError } from '@/src/services/key-storage'
 import { getPrivateKey } from '@/src/hooks/useSign/useSign'
 import { signTx } from '@/src/services/tx/tx-sender/sign'
 import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -163,12 +164,13 @@ export function useTransactionSigning({ txId, signerAddress }: UseTransactionSig
 
       setStatus(SigningStatus.SUCCESS)
     } catch (error) {
-      logger.error('Error signing transaction:', error)
       setStatus(SigningStatus.ERROR)
 
-      dispatch(setSigningError({ txId, error: asError(error).message }))
+      if (!(error instanceof BiometryInvalidationError)) {
+        logger.error('Error signing transaction:', error)
+      }
 
-      // Re-throw error so it can be handled imperatively by the caller
+      dispatch(setSigningError({ txId, error: asError(error).message }))
       throw error
     }
   }, [
