@@ -30,6 +30,7 @@ export interface SpaceItem {
   id: number
   name: string
   safeCount: number
+  // Optional only for fixtures; always present from the API.
   members?: SpaceMemberDto[]
 }
 
