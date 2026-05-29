@@ -212,8 +212,20 @@ export const useFlowActivationGuard: UseGuard = () => {
     let isPartOfSpaceUrl = true
 
     if (isSiweAuthenticated) {
-      const { data: spaces } = await fetchSpaces(undefined)
-      hasSpaces = !!spaces && spaces.length > 0
+      const { data: spaces, error } = await fetchSpaces(undefined)
+      // Trust the response only when it's definitive: a successful fetch
+      // (possibly empty) or a 404 confirming the user has no spaces. On any
+      // other error (401/403 from cleared cookies, network failure, 5xx),
+      // assume the user has spaces so we don't bounce them into create-space.
+      // The auth listener / reconcileAuth flow will clean up the stale auth
+      // state and re-trigger the guard with a correct isSiweAuthenticated.
+      const isNotFound = !!error && (error as { status?: unknown }).status === 404
+      const transientError = !!error && !isNotFound
+      if (transientError) {
+        hasSpaces = true
+      } else {
+        hasSpaces = !!spaces && spaces.length > 0
+      }
 
       if (query.spaceId) {
         isPartOfSpaceUrl = hasSpaces && !!spaces && spaces.some((s) => String(s.id) === query.spaceId)

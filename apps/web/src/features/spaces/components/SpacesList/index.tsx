@@ -155,16 +155,22 @@ const SpacesList = () => {
   const inviteAmount = pendingInvites?.length
   const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
 
+  const singleSpaceId = activeSpaces.length === 1 ? String(activeSpaces[0].id) : null
+
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,
     inviteAmount: inviteAmount || 0,
-    // Treat the "skip→unskip" transition as still loading. On the render where
-    // skip flips to false RTK Query returns isFetching=false but hasn't yet
-    // dispatched the fetch (that happens in a useEffect), so isFetching alone
-    // would lead useSignInRedirect to read spacesAmount=0 and bounce existing
-    // users into the create-space flow on re-login.
-    isSpacesLoading: isFetching || isUninitialized,
+    // Treat any state without a definitive answer as still loading. The
+    // skip→unskip transition (re-login after logout) returns isFetching=false
+    // and isUninitialized=false on the render where skip flips — RTK Query
+    // dispatches the refetch in a useEffect, so the loading flags lag one
+    // render behind. Without the `spaces === undefined && !error` clause an
+    // existing user gets bounced into /welcome/create-space because the hook
+    // reads spacesAmount=0 with isSpacesLoading=false. Once spaces or error
+    // resolves, this clause becomes false and the normal redirect logic runs.
+    isSpacesLoading: isFetching || isUninitialized || (spaces === undefined && !error),
     error: error || undefined,
+    singleSpaceId,
   })
 
   const afterSignIn = useCallback(() => {
