@@ -34,10 +34,6 @@ jest.mock('../SpaceAddressBookTable', () => {
   const SpaceAddressBookTable = () => <div data-testid="table" />
   return SpaceAddressBookTable
 })
-jest.mock('../EmptyAddressBook', () => {
-  const EmptyAddressBook = () => <div data-testid="empty" />
-  return EmptyAddressBook
-})
 jest.mock('../AddContact', () => {
   const AddContact = () => <button>Add contact</button>
   return AddContact

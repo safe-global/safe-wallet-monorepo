@@ -44,8 +44,8 @@ jobs:
           git_user_signingkey: true
           git_tag_gpgsign: true
           git_config_global: true
-          git_committer_name: 'github-actions[bot]'
-          git_committer_email: 'github-actions[bot]@users.noreply.github.com'
+          git_committer_name: 'GH Signer Bot'
+          git_committer_email: 'gh-signer-bot@safe.global'
 
       - name: Verify PR commits are in main
         if: github.event.pull_request.merged != true
@@ -110,6 +110,18 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_BOT_TOKEN }}
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_config_global: true
+          git_committer_name: 'GH Signer Bot'
+          git_committer_email: 'gh-signer-bot@safe.global'
 
       - name: Create GitHub release (draft)
         if: needs.tag.outputs.version
@@ -196,8 +208,8 @@ jobs:
           REPO: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "GH Signer Bot"
+          git config user.email "gh-signer-bot@safe.global"
 
           # Fetch latest changes
           git fetch origin main dev
@@ -207,7 +219,7 @@ jobs:
           git checkout -B "$BRANCH_NAME" origin/dev
 
           # Attempt to merge main into the branch
-          if git merge origin/main -m "chore: back-merge main to dev after release ${VERSION}"; then
+          if git merge -S origin/main -m "chore: back-merge main to dev after release ${VERSION}"; then
             git push origin "$BRANCH_NAME"
 
             # Create PR body file to avoid shell interpolation issues

@@ -3,6 +3,7 @@ import WifiOffIcon from '@mui/icons-material/WifiOff'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
+import SafeLogo from '@/components/common/SafeLogo'
 
 const Offline: NextPage = () => {
   return (
@@ -12,6 +13,9 @@ const Offline: NextPage = () => {
       </Head>
 
       <main>
+        <div className="fixed top-0 left-0 z-[1300] flex items-center px-6" style={{ height: 'var(--header-height)' }}>
+          <SafeLogo />
+        </div>
         <Box display="flex" justifyContent="center">
           <Paper sx={{ p: 4, mb: 2, maxWidth: 900 }}>
             <Box display="flex" justifyContent="center" mb={2} fontSize={100}>

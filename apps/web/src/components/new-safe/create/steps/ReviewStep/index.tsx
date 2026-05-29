@@ -5,6 +5,7 @@ import {
   SafeCreationEvent,
   replayCounterfactualSafeDeployment,
   activateReplayedSafe,
+  persistCounterfactualSafe,
 } from '@/features/counterfactual/services'
 import { PayNowPayLater } from '@/features/counterfactual/components'
 import { CF_TX_GROUP_KEY } from '@/features/counterfactual'
@@ -63,6 +64,7 @@ import NetworkWarning from '../../NetworkWarning'
 import { useAllSafes } from '@/hooks/safes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
+import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
 import { AppRoutes } from '@/config/routes'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
@@ -187,6 +189,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const [isCreating, setIsCreating] = useState<boolean>(false)
   const [submitError, setSubmitError] = useState<string>()
   const isCounterfactualEnabled = useHasFeature(FEATURES.COUNTERFACTUAL)
+  const isUserAuthenticated = useAppSelector(isAuthenticated)
+  const spaceId = useAppSelector(lastUsedSpace)
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
   const { showGasFeeEstimation, showInsufficientFundsWarning, showFeeInConfirmationText } = chain
     ? getNativeTokenDisplay(chain)
@@ -241,6 +245,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   const customRPCs = useAppSelector(selectRpc)
 
+  // Derive effective pay method synchronously to avoid one-render gap
+  const effectivePayMethod = !isUserAuthenticated && payMethod === PayMethod.PayLater ? PayMethod.PayNow : payMethod
+
   const handleBack = () => {
     onBack(data)
   }
@@ -287,15 +294,17 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       gtmSetChainId(chain.chainId)
 
-      if (isCounterfactualEnabled && payMethod === PayMethod.PayLater) {
+      if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
+        if (successfulChains.length === 0) return
+
         await router?.push({
           pathname: AppRoutes.home,
-          query: { safe: `${data.networks[0].shortName}:${safeAddress}` },
+          query: { safe: `${successfulChains[0].chain.shortName}:${safeAddress}` },
         })
         safeCreationDispatch(SafeCreationEvent.AWAITING_EXECUTION, {
           groupKey: CF_TX_GROUP_KEY,
           safeAddress,
-          networks: data.networks,
+          networks: successfulChains.map((r) => r.chain),
         })
       }
     } catch (err) {
@@ -317,16 +326,33 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       [MixpanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
       [MixpanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
       [MixpanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
-      [MixpanelEventParams.DEPLOYMENT_TYPE]: getDeploymentType(isCounterfactualEnabled, payMethod),
-      [MixpanelEventParams.PAYMENT_METHOD]: getPaymentMethodLabel(isCounterfactualEnabled, payMethod, willRelay),
+      [MixpanelEventParams.DEPLOYMENT_TYPE]: getDeploymentType(isCounterfactualEnabled, effectivePayMethod),
+      [MixpanelEventParams.PAYMENT_METHOD]: getPaymentMethodLabel(
+        isCounterfactualEnabled,
+        effectivePayMethod,
+        willRelay,
+      ),
     })
 
     try {
-      if (isCounterfactualEnabled && payMethod === PayMethod.PayLater) {
+      if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
         gtmSetSafeAddress(safeAddress)
 
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
-        replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, payMethod)
+
+        // Single code path for backend persist + Redux add — shared with the
+        // "Add another network" flow to keep the write path consistent.
+        const result = await persistCounterfactualSafe({
+          chainId: chain.chainId,
+          safeAddress,
+          props,
+          name: data.name,
+          payMethod: effectivePayMethod,
+          spaceId,
+          isUserAuthenticated,
+          dispatch,
+        })
+        if (!result.ok) throw result.error
 
         return { chain, safeAddress, success: true }
       }
@@ -340,7 +366,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       const onSubmitCallback = async (taskId?: string, txHash?: string) => {
         // Create a counterfactual Safe
-        replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, payMethod)
+        replayCounterfactualSafeDeployment(chain.chainId, safeAddress, props, data.name, dispatch, effectivePayMethod)
 
         if (taskId) {
           safeCreationDispatch(SafeCreationEvent.RELAYING, { groupKey: CF_TX_GROUP_KEY, taskId, safeAddress })
@@ -395,7 +421,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   const showNetworkWarning = shouldShowNetworkWarning(
     isWrongChain,
-    payMethod,
+    effectivePayMethod,
     willRelay,
     isMultiChainDeployment,
     isCounterfactualEnabled,
@@ -416,11 +442,12 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
               totalFee={totalFee}
               isMultiChain={isMultiChainDeployment}
               canRelay={canRelay}
-              payMethod={payMethod}
+              payMethod={effectivePayMethod}
               setPayMethod={setPayMethod}
+              isUserAuthenticated={isUserAuthenticated}
             />
 
-            {canRelay && payMethod === PayMethod.PayNow && (
+            {canRelay && effectivePayMethod === PayMethod.PayNow && (
               <>
                 <Grid
                   container
@@ -448,7 +475,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
               </Box>
             )}
 
-            {payMethod === PayMethod.PayNow && (
+            {effectivePayMethod === PayMethod.PayNow && (
               <Grid item>
                 <Typography
                   component="div"

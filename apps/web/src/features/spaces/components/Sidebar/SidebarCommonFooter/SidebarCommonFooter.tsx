@@ -111,7 +111,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
             <TooltipContent side="top">What&apos;s new</TooltipContent>
           </Tooltip>
           <div className={css.footerHelpStatus}>
-            <SidebarIndexingStatus />
+            <SidebarIndexingStatus isSafeSidebar={isSafeSidebar} />
           </div>
         </SidebarMenuItem>
       </SidebarMenu>

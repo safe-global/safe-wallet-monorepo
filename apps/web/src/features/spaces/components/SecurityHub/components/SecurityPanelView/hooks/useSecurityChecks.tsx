@@ -86,6 +86,27 @@ export const useSecurityChecks = (
       })
     }
 
+    const multichainResult = results['multichain_setup']
+    if (multichainResult && multichainResult.status !== 'not_applicable') {
+      const ok = isPassingStatus(multichainResult.status)
+      const title = ok ? 'Signers are consistent across networks' : 'Signers differ across networks'
+      items.push({
+        key: 'multichain',
+        severity: multichainResult.severity,
+        isPassing: ok,
+        node: (
+          <Row
+            leadIcon={iconFor(multichainResult)}
+            title={title}
+            expandedContent={buildExpanded(
+              multichainResult,
+              buildCta('multichain_setup', multichainResult, safeQueryParam),
+            )}
+          />
+        ),
+      })
+    }
+
     const recoveryResult = results['recovery']
     if (recoveryResult) {
       const ok = isPassingStatus(recoveryResult.status)
@@ -130,7 +151,12 @@ export const useSecurityChecks = (
     const factoryResult = results['factory_validation']
     if (factoryResult) {
       const ok = isPassingStatus(factoryResult.status)
-      const title = ok ? 'Deployed via official Safe factory' : 'Deployed from an unrecognized source'
+      const title =
+        factoryResult.status === 'clear'
+          ? 'Deployed via official Safe factory'
+          : factoryResult.status === 'inconclusive'
+            ? 'Deployment origin not yet verified'
+            : 'Deployed from an unrecognized source'
       items.push({
         key: 'factory',
         severity: factoryResult.severity,

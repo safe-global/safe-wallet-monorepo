@@ -59,7 +59,7 @@ const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
 const safeLevelNavigation = '[data-testid="safe-level-navigation"]'
 const spaceSafesNavigationBlock = '[data-testid="space-safes-navigation-block"]'
 const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"]'
-const backToSpaceBtn = '[aria-label="Back to space"]'
+const backToSpaceBtn = '[aria-label="Back to workspace"]'
 const safeLevelNavigationBackToSpaceBtn = `${safeLevelNavigation} ${backToSpaceBtn}`
 
 // -- Space sidebar items --
@@ -96,7 +96,6 @@ const confirmAcceptInviteBtn = '[data-testid="confirm-accept-invite-button"]'
 // -- Onboarding --
 const orgSpaceInput = '[data-testid="space-name-input"]'
 const createSpaceOnboardingContinueBtn = '[data-testid="create-space-onboarding-continue-button"]'
-const selectSafesSkipBtn = '[data-testid="select-safes-skip-button"]'
 const inviteMembersSkipBtn = '[data-testid="invite-members-skip-button"]'
 const onboardingCreateSpacePath = '/welcome/create-space'
 const onboardingSelectSafesPath = '/welcome/select-safes'
@@ -111,7 +110,7 @@ export const importAddressBookLabel = 'Import address book'
 export const dashboardAddMemberBtn = '[data-testid="add-member-button"]'
 export const inviteMemberLabel = 'Add member'
 export const learnMoreBtn = '[data-testid="spaces-learn-more-button"]'
-export const exploreSpacesLabel = 'Introducing spaces'
+export const exploreSpacesLabel = 'Introducing workspaces'
 
 // ===========================================
 // Labels & regex patterns
@@ -520,7 +519,14 @@ function submitSpaceName(name) {
 
 function skipSelectSafesStep() {
   cy.url({ timeout: 30000 }).should('include', onboardingSelectSafesPath).and('include', 'spaceId=')
-  cy.get(selectSafesSkipBtn).should('be.visible').click()
+  // In the wallet-connected branch, there is no Skip button (the Next button is gated by Safe selection).
+  // Navigate directly to the next onboarding step, preserving spaceId.
+  cy.url().then((url) => {
+    const match = url.match(/spaceId=(\d+)/)
+    if (!match) throw new Error('spaceId not found in URL')
+    const spaceId = match[1]
+    cy.visit(`${onboardingInviteMembersPath}?spaceId=${spaceId}`)
+  })
 }
 
 function skipInviteMembersStep() {
