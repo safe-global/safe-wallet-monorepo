@@ -41,7 +41,7 @@ const OidcSignInButton = ({
       variant={variant === 'primary' ? 'default' : 'secondary'}
       onClick={handleClick}
       data-testid={testId}
-      className="h-12 w-full gap-3 rounded-xl px-4 text-[15px] font-semibold"
+      className="h-12 w-full gap-3 rounded-md px-4 text-[15px] font-semibold"
     >
       {icon}
       {label}
