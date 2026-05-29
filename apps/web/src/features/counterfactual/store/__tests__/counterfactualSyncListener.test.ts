@@ -122,6 +122,37 @@ describe('counterfactualSyncListener', () => {
     consoleSpy.mockRestore()
   })
 
+  it('does NOT enqueue a retry when the DELETE returns 404 (already gone)', async () => {
+    const state = authedState({ '1': { '0x123': { isCreator: true } } })
+
+    initiateMock.mockImplementationOnce(makeInitiateMock(() => Promise.reject({ status: 404, data: {} })))
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { listenerApi } = runListener(state, removeUndeployedSafe({ chainId: '1', address: '0x123' }))
+    await Promise.resolve()
+    await Promise.resolve()
+    await Promise.resolve()
+
+    // 404 = already deleted, our intended end state. No error noise, no retry queued.
+    expect(consoleSpy).not.toHaveBeenCalled()
+    expect(listenerApi.dispatch).not.toHaveBeenCalledWith(enqueuePendingCfDelete({ chainId: '1', address: '0x123' }))
+    consoleSpy.mockRestore()
+  })
+
+  it('does NOT call the DELETE API when the pre-action state has no entry for the safe', async () => {
+    // Reproduces the dup-dispatch case: useLoadSafeInfo + INDEXED event both fire
+    // removeUndeployedSafe in the same tick; the second one finds nothing in
+    // originalState and must short-circuit, otherwise it 404s and pollutes the queue.
+    const state = authedState({})
+
+    const { listenerApi } = runListener(state, removeUndeployedSafe({ chainId: '1', address: '0x123' }))
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(initiateMock).not.toHaveBeenCalled()
+    expect(listenerApi.dispatch).not.toHaveBeenCalled()
+  })
+
   it('queues a pending delete (instead of calling the API) when user is not authenticated', () => {
     const state = {
       auth: { sessionExpiresAt: null },

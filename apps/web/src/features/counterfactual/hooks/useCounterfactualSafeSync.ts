@@ -16,6 +16,9 @@ import { parseSpaceId } from '@/utils/spaces'
 
 const SYNC_RETRY_DELAY_MS = 2000
 
+const is404 = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && 'status' in error && (error as { status?: unknown }).status === 404
+
 /**
  * Syncs counterfactual safes from the backend into Redux on app load.
  * Backend is the source of truth. Fetches from both the user endpoint
@@ -68,6 +71,12 @@ const useCounterfactualSafeSync = () => {
               ).unwrap()
               dispatch(removePendingCfDelete({ chainId, address }))
             } catch (e) {
+              // 404 means the record is already gone server-side — our intended end
+              // state. Drop the queue entry so we stop retrying it on every page load.
+              if (is404(e)) {
+                dispatch(removePendingCfDelete({ chainId, address }))
+                return
+              }
               console.error('[CF Sync] Failed to flush pending CF delete', e)
             }
           }),

@@ -7,6 +7,7 @@ const deleteInitiate = jest.fn()
 let userResponse: unknown = { safes: {} }
 let spaceResponse: unknown = { safes: {} }
 let deleteShouldFail = false
+let deleteRejection: unknown = null
 let pendingDeletesState: { chainId: string; address: string }[] = []
 let userFailureCount = 0
 
@@ -35,7 +36,11 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes', () =
         initiate: (arg: unknown) => {
           deleteInitiate(arg)
           return {
-            unwrap: () => (deleteShouldFail ? Promise.reject(new Error('boom')) : Promise.resolve({ ok: true })),
+            unwrap: () => {
+              if (deleteRejection !== null) return Promise.reject(deleteRejection)
+              if (deleteShouldFail) return Promise.reject(new Error('boom'))
+              return Promise.resolve({ ok: true })
+            },
           }
         },
       },
@@ -114,6 +119,7 @@ describe('useCounterfactualSafeSync', () => {
     userResponse = { safes: {} }
     spaceResponse = { safes: {} }
     deleteShouldFail = false
+    deleteRejection = null
     pendingDeletesState = []
     userFailureCount = 0
     ;(useAppSelector as jest.Mock).mockReset()
@@ -234,6 +240,33 @@ describe('useCounterfactualSafeSync', () => {
         typeof d === 'object' && d !== null && (d as { type?: string }).type === 'removePendingCfDelete',
     )
     expect(removeActions).toHaveLength(0)
+    consoleSpy.mockRestore()
+  })
+
+  it('drops queued entries on 404 so the queue does not retry forever against an already-deleted resource', async () => {
+    // Reproduces the bug: after activating a CF safe, ghost entries pile up in
+    // pendingCfDeletes and every page load fires N DELETEs that all 404. Each 404
+    // means the resource is already gone — drop the entry instead of retrying.
+    pendingDeletesState = [
+      { chainId: '1', address: '0xabc' },
+      { chainId: '1', address: '0xdef' },
+    ]
+    deleteRejection = { status: 404, data: { message: 'not found' } }
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+    mockSelectors(true, true, null)
+
+    renderHook(() => useCounterfactualSafeSync())
+    await flush()
+
+    expect(deleteInitiate).toHaveBeenCalledTimes(2)
+    // Each 404 must remove the corresponding queue entry.
+    const removeActions = dispatched.filter(
+      (d): d is { type: string; payload: { chainId: string; address: string } } =>
+        typeof d === 'object' && d !== null && (d as { type?: string }).type === 'removePendingCfDelete',
+    )
+    expect(removeActions).toHaveLength(2)
+    // 404 is the intended end state — no error noise.
+    expect(consoleSpy).not.toHaveBeenCalled()
     consoleSpy.mockRestore()
   })
 
