@@ -124,6 +124,7 @@ export const SpaceSelectorDropdown = ({
         loadingSpaceId={loadingSpaceId}
         chainId={chainId}
         safeAddress={safeAddress}
+        isOpen={isOpen}
         onSelect={() => void handleSelectSpace(space.id)}
       />
     )
@@ -256,6 +257,7 @@ interface SpaceMenuRowProps {
   loadingSpaceId: number | null
   chainId: string
   safeAddress: string
+  isOpen: boolean
   onSelect: () => void
 }
 
@@ -269,9 +271,13 @@ const SpaceMenuRow = ({
   loadingSpaceId,
   chainId,
   safeAddress,
+  isOpen,
   onSelect,
 }: SpaceMenuRowProps): ReactElement => {
-  const shouldCheckMembership = isAddToWorkspace && Boolean(safeAddress) && Boolean(chainId)
+  // Only check membership while the dropdown is open AND we have a safe/chain
+  // to check against. RTK Query caches the result via keepUnusedDataFor, so
+  // reopening within the cache window is free.
+  const shouldCheckMembership = isOpen && isAddToWorkspace && Boolean(safeAddress) && Boolean(chainId)
   const { currentData: spaceSafes } = useSpaceSafesGetV1Query({ spaceId: space.id }, { skip: !shouldCheckMembership })
 
   const isAlreadyAdded = useMemo(() => {

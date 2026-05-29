@@ -603,6 +603,20 @@ describe('SpaceSelectorDropdown', () => {
       const btn = screen.getAllByRole('button').find((b) => b.querySelector('span')?.textContent === 'Space')
       expect(btn).not.toBeDisabled()
     })
+
+    it('skips the membership query while the dropdown is closed and fires it once opened', () => {
+      mockSafeAddressFromUrl = SAFE_ADDRESS
+      setMembership({ 1: { '1': [SAFE_ADDRESS] } })
+
+      const spaces = [{ id: 1, name: 'Space', safeCount: 1, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      expect(mockUseSpaceSafesGetV1Query).not.toHaveBeenCalled()
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: 1 }, { skip: false })
+    })
   })
 
   describe('onSpaceAdded callback propagation', () => {
