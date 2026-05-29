@@ -15,7 +15,7 @@ import { isWalletRejection } from '@/utils/wallets'
 import { getTxLink } from '@/utils/tx-link'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import { getGuardErrorInfo } from '@/utils/transaction-errors'
+import { getGuardErrorInfo, isRateLimitError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -71,6 +71,12 @@ const useTxNotifications = (): void => {
         // Override message for Guard errors
         if (guardErrorName) {
           message = `Guard reverted the transaction (${guardErrorName}).`
+        } else if (isError && isRateLimitError(detail.error)) {
+          // Translate transient RPC rate-limit failures into friendly copy.
+          // The raw error from viem looks like a contract revert ("Request is
+          // being rate limited"); we replace the message but keep the original
+          // in detailedMessage for debugging.
+          message = RATE_LIMIT_USER_MESSAGE
         }
 
         const txId = 'txId' in detail ? detail.txId : undefined

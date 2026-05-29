@@ -1,6 +1,7 @@
 /**
  * Utilities for detecting and handling specific transaction errors
  */
+import { BaseError } from 'viem'
 
 /**
  * Guard error codes
@@ -60,4 +61,43 @@ export const getGuardErrorName = (errorCode: string): string => {
  */
 export const isGuardError = (error: Error): boolean => {
   return extractGuardErrorCode(error) !== undefined
+}
+
+/**
+ * User-facing message shown wherever a transient RPC rate-limit surfaces
+ * (transaction notification toast, inline submit-error in ComboSubmit, etc.).
+ * Kept as a single constant so the same condition reads consistently
+ * regardless of which catch handler reached the UI first.
+ */
+export const RATE_LIMIT_USER_MESSAGE = 'Network is busy. Please try again in a moment.'
+
+/**
+ * Detects if an error originated from a transient RPC rate-limit: a viem
+ * error whose cause chain carries the documented throttle signals
+ * (JSON-RPC -32005 / HTTP 429). viem's `http()` transport already retries
+ * these with backoff; this guard only decides whether to show the friendly
+ * message once retries are exhausted and the error reaches the UI.
+ *
+ * Intentionally only matches structured shapes (viem `BaseError` cause
+ * chains carrying the expected `code`/`status`). A message-text regex would
+ * false-positive on contract reverts like `require(..., "rate limit
+ * exceeded")`, leading users to retry transactions guaranteed to fail
+ * on-chain.
+ */
+export const isRateLimitError = (error: unknown): boolean => {
+  if (error instanceof BaseError) {
+    const match = error.walk((e) => {
+      const code = (e as { code?: unknown } | null)?.code
+      const status = (e as { status?: unknown } | null)?.status
+      // Match only the documented throttle signals: JSON-RPC -32005
+      // (LimitExceeded) and HTTP 429. -32603 (Internal) is intentionally NOT
+      // matched — a real eth_call simulation failure can surface as -32603,
+      // and translating it to "Network is busy" would prompt users to retry
+      // guaranteed-failing transactions.
+      return code === -32005 || status === 429
+    })
+    if (match) return true
+  }
+
+  return false
 }

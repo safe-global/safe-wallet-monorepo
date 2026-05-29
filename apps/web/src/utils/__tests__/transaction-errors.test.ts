@@ -1,8 +1,10 @@
+import { BaseError } from 'viem'
 import {
   isGuardError,
   extractGuardErrorCode,
   getGuardErrorInfo,
   getGuardErrorName,
+  isRateLimitError,
   GUARD_ERROR_CODES,
 } from '../transaction-errors'
 
@@ -71,6 +73,48 @@ describe('transaction-errors', () => {
 
     it('should return "Unknown" for unrecognized codes', () => {
       expect(getGuardErrorName('0x12345678')).toBe('Unknown')
+    })
+  })
+
+  describe('isRateLimitError', () => {
+    it.each([
+      { label: 'code -32005', extra: { code: -32005 } },
+      { label: 'status 429', extra: { status: 429 } },
+    ])('returns true for viem BaseError whose cause chain carries $label', ({ extra }) => {
+      const inner = Object.assign(new BaseError('inner'), extra)
+      const outer = new BaseError('outer', { cause: inner })
+      expect(isRateLimitError(outer)).toBe(true)
+    })
+
+    it('returns false for viem BaseError carrying code -32603 (internal error, not throttle)', () => {
+      // -32603 is intentionally NOT matched. A real eth_call simulation failure
+      // can surface as -32603 and must not be silently translated to "Network
+      // is busy" — that would prompt users to retry guaranteed-failing txs.
+      const inner = Object.assign(new BaseError('inner'), { code: -32603 })
+      const outer = new BaseError('outer', { cause: inner })
+      expect(isRateLimitError(outer)).toBe(false)
+    })
+
+    it('returns false for contract reverts whose message mentions "rate limit"', () => {
+      // Guard against the previous regex-fallback false positive: a contract
+      // revert string containing "rate limit" must NOT be classified as a
+      // network-layer rate limit, or users would be told to "try again" on a
+      // transaction that is guaranteed to fail on-chain.
+      expect(isRateLimitError(new Error('execution reverted: rate limit exceeded'))).toBe(false)
+      expect(isRateLimitError(new Error('transfer throttled'))).toBe(false)
+    })
+
+    it('returns false for unrelated errors', () => {
+      expect(isRateLimitError(new Error('contract reverted: insufficient balance'))).toBe(false)
+      expect(isRateLimitError(new Error('user rejected'))).toBe(false)
+      expect(isRateLimitError(null)).toBe(false)
+      expect(isRateLimitError(undefined)).toBe(false)
+    })
+
+    it('returns false for viem BaseError with an unrelated cause code', () => {
+      const inner = Object.assign(new BaseError('inner'), { code: -32602 })
+      const outer = new BaseError('outer', { cause: inner })
+      expect(isRateLimitError(outer)).toBe(false)
     })
   })
 })
