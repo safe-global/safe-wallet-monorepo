@@ -376,6 +376,8 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
         <FeeBreakdownRow {...gasFee} loading={props.loading} error={props.error} tooltip={GAS_FEE_TOOLTIP} />
       </div>
 
+      {displayedOutgoing && <TotalOutgoingSection totalOutgoing={displayedOutgoing} />}
+
       {/* Safe-pays only — surfaced when the Safe doesn't currently hold enough of the chosen
           gas token to cover the on-chain fee. We don't block signing in case another signer or
           a top-up brings the balance up before execution; the simulation/execution will revert
@@ -386,8 +388,6 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
           transaction will fail.
         </Alert>
       )}
-
-      {displayedOutgoing && <TotalOutgoingSection totalOutgoing={displayedOutgoing} />}
     </div>
   )
 }
