@@ -29,7 +29,7 @@ const ClassicViewLink = () => {
         type="button"
         onClick={onClick}
         data-testid="classic-view-link"
-        className="inline-flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline underline-offset-2"
+        className="inline-flex items-center gap-1.5 rounded-sm text-[13px] font-medium text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline focus-visible:text-foreground focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         Use the old UI
         <ArrowRight size={13} />
