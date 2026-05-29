@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState, type ReactElement } from 'react'
 import classnames from 'classnames'
-import { AnimatePresence, motion } from 'motion/react'
 import Topbar from '@/components/common/Header/Topbar'
 import SafeLogo from '@/components/common/SafeLogo'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
@@ -140,22 +139,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           <SafeLoadingError>
             {!hideHeader && parentSafe && <Breadcrumbs />}
 
-            {isOnboardingRoute ? (
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={pathname}
-                  className={css.onboardingMotion}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2, ease: 'easeInOut' }}
-                >
-                  {children}
-                </motion.div>
-              </AnimatePresence>
-            ) : (
-              children
-            )}
+            {isOnboardingRoute ? <div className={css.onboardingMotion}>{children}</div> : children}
           </SafeLoadingError>
         </div>
 

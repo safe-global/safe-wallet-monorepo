@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   OnboardingLayout,
   StepCounter,
@@ -137,7 +137,14 @@ const CreateSpaceOnboarding = (): ReactElement => {
         disabled={!isValid || isSubmitting || isCheckingAccess || isSpaceLoading}
         className="w-full h-12 rounded-lg text-base xl:flex-1"
       >
-        {isSubmitting ? <Spinner /> : 'Next'}
+        {isSubmitting ? (
+          <Spinner />
+        ) : (
+          <>
+            Next
+            <ChevronRight className="size-4 ml-1" />
+          </>
+        )}
       </Button>
     </div>
   )

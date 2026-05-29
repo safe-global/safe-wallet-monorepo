@@ -1,5 +1,5 @@
 import { useMemo, type ReactElement } from 'react'
-import { ChevronLeft, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
@@ -105,7 +105,14 @@ const InviteMembersOnboarding = (): ReactElement => {
           disabled={!formState.isValid || isSubmitting}
           className="w-full h-12 rounded-lg text-base xl:flex-1"
         >
-          {isSubmitting ? <Spinner /> : 'Next'}
+          {isSubmitting ? (
+            <Spinner />
+          ) : (
+            <>
+              Next
+              <ChevronRight className="size-4 ml-1" />
+            </>
+          )}
         </Button>
       </div>
       <button
@@ -113,7 +120,7 @@ const InviteMembersOnboarding = (): ReactElement => {
         type="button"
         onClick={redirectToNextStep}
         disabled={isSubmitting}
-        className="text-sm text-muted-foreground underline-offset-4 hover:underline disabled:opacity-50"
+        className="cursor-pointer text-sm text-muted-foreground underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
       >
         Skip, invite later
       </button>

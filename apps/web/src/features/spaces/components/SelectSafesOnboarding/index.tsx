@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { ChevronLeft, Search, Loader2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search, Loader2 } from 'lucide-react'
 import {
   OnboardingLayout,
   StepCounter,
@@ -160,27 +160,47 @@ const SelectSafesOnboarding = (): ReactElement => {
   )
 
   const footer = (
-    <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={handleBack}
-        disabled={isSubmitting}
-        className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
-      >
-        <ChevronLeft className="size-4 mr-1" />
-        Back
-      </Button>
-      {wallet && (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
         <Button
-          data-testid="select-safes-continue-button"
-          type="submit"
-          form={FORM_ID}
-          disabled={selectedSafesLength === 0 || isSubmitting}
-          className="w-full h-12 rounded-lg text-base xl:flex-1"
+          type="button"
+          variant="ghost"
+          onClick={handleBack}
+          disabled={isSubmitting}
+          className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
         >
-          {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Next'}
+          <ChevronLeft className="size-4 mr-1" />
+          Back
         </Button>
+        {wallet && (
+          <Button
+            data-testid="select-safes-continue-button"
+            type="submit"
+            form={FORM_ID}
+            disabled={selectedSafesLength === 0 || isSubmitting}
+            className="w-full h-12 rounded-lg text-base xl:flex-1"
+          >
+            {isSubmitting ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <>
+                Next
+                <ChevronRight className="size-4 ml-1" />
+              </>
+            )}
+          </Button>
+        )}
+      </div>
+      {wallet && (
+        <button
+          data-testid="select-safes-skip-link"
+          type="button"
+          onClick={handleSkip}
+          disabled={isSubmitting}
+          className="cursor-pointer text-sm text-muted-foreground underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Skip, add Safes later
+        </button>
       )}
     </div>
   )

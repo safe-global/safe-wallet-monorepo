@@ -46,7 +46,7 @@ const MockupContent = ({ accounts, safeOverviews, totalFormatted, totalFiat, hig
           style={{ transformOrigin: 'left center' }}
           className={cn(
             'flex flex-1 flex-col rounded-3xl bg-card overflow-hidden p-2',
-            highlight === 'accounts' && 'ring-[5px] ring-[var(--color-static-text-brand)]/25',
+            highlight === 'accounts' && 'ring-[5px] ring-[var(--color-success-main)]/25',
           )}
         >
           <div className="flex items-center justify-between px-4 pb-2 pt-4">
