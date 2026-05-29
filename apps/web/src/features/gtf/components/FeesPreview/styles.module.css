@@ -90,14 +90,6 @@
   cursor: default;
 }
 
-.gasTokenMenuItem {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 40px;
-  padding: 0 4px;
-}
-
 .selectorPopoverPaper:global(.MuiPaper-root) {
   margin-top: 4px;
   border-radius: 16px;
@@ -133,6 +125,21 @@
 .selectorMenuItem:global(.Mui-selected),
 .selectorMenuItem:global(.Mui-selected:hover) {
   background-color: var(--color-background-skeleton);
+}
+
+.gasTokenMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  padding: 2px 4px;
+}
+
+.gasTokenMenuItemText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
 }
 
 .selectorCaret {

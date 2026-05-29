@@ -181,7 +181,7 @@ const GasTokenSelector = ({
               className={`${css.selectorMenuItem} ${css.gasTokenMenuItem}`}
             >
               <TokenIcon logoUri={token.logoUri} tokenSymbol={token.symbol} size={24} />
-              <div>
+              <div className={css.gasTokenMenuItemText}>
                 <Typography variant="body2" fontWeight={700}>
                   {token.symbol}
                 </Typography>
