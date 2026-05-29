@@ -4,6 +4,7 @@ import { getStoreInstance } from '@/store'
 import { isAuthenticated, selectIsStoreHydrated, lastUsedSpace, setCfSafeSynced } from '@/store/authSlice'
 import { addUndeployedSafe, selectUndeployedSafes } from '../store/undeployedSafesSlice'
 import { removePendingCfDelete, selectPendingCfDeletes } from '../store/pendingCfDeletesSlice'
+import { Errors, logError } from '@/services/exceptions'
 import { fromBackendDto } from '../services/counterfactualSafeMapper'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import {
@@ -77,7 +78,7 @@ const useCounterfactualSafeSync = () => {
                 dispatch(removePendingCfDelete({ chainId, address }))
                 return
               }
-              console.error('[CF Sync] Failed to flush pending CF delete', e)
+              logError(Errors._650, e)
             }
           }),
         )
@@ -159,12 +160,12 @@ const useCounterfactualSafeSync = () => {
       try {
         await fetchAndMerge()
       } catch (firstError) {
-        console.error('[CF Sync] Initial sync failed, retrying once', firstError)
+        logError(Errors._650, firstError)
         await new Promise((resolve) => setTimeout(resolve, SYNC_RETRY_DELAY_MS))
         try {
           await fetchAndMerge()
         } catch (retryError) {
-          console.error('[CF Sync] Retry also failed, giving up until next auth/space change', retryError)
+          logError(Errors._650, retryError)
         }
       }
       // Settle regardless of outcome — leaving consumers waiting forever is worse

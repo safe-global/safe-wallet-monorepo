@@ -1,5 +1,6 @@
 import type { listenerMiddlewareInstance, RootState } from '@/store/index'
 import { isAuthenticated } from '@/store/authSlice'
+import { Errors, logError } from '@/services/exceptions'
 import { removeUndeployedSafe } from './undeployedSafesSlice'
 import { enqueuePendingCfDelete } from './pendingCfDeletesSlice'
 import { cgwApi as counterfactualSafesApi } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
@@ -54,7 +55,7 @@ export const counterfactualSyncListener = (listenerMiddleware: typeof listenerMi
         // 404 means the record is already gone server-side — that's our intended
         // end state, no retry needed.
         if (is404(e)) return
-        console.error('[CF Sync] Failed to delete CF safe from backend', e)
+        logError(Errors._650, e)
         // Network/5xx during the live DELETE leaves backend stuck on the now-deployed
         // safe. Queue it so the next sync flushes the retry — otherwise the next GET
         // would return it and the merge would re-add a "Not activated" chip.

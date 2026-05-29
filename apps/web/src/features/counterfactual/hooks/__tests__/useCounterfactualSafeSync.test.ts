@@ -48,6 +48,13 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes', () =
   },
 }))
 
+jest.mock('@/services/exceptions', () => ({
+  Errors: { _650: '650' },
+  logError: jest.fn(),
+}))
+
+const logErrorMock = jest.requireMock('@/services/exceptions').logError as jest.Mock
+
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   cgwApi: {
     endpoints: {
@@ -122,6 +129,7 @@ describe('useCounterfactualSafeSync', () => {
     deleteRejection = null
     pendingDeletesState = []
     userFailureCount = 0
+    logErrorMock.mockClear()
     ;(useAppSelector as jest.Mock).mockReset()
   })
 
@@ -228,7 +236,6 @@ describe('useCounterfactualSafeSync', () => {
   it('keeps queued entries when the DELETE fails so they can retry on next sign-in', async () => {
     pendingDeletesState = [{ chainId: '1', address: '0xabc' }]
     deleteShouldFail = true
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
     mockSelectors(true, true, null)
 
     renderHook(() => useCounterfactualSafeSync())
@@ -240,7 +247,7 @@ describe('useCounterfactualSafeSync', () => {
         typeof d === 'object' && d !== null && (d as { type?: string }).type === 'removePendingCfDelete',
     )
     expect(removeActions).toHaveLength(0)
-    consoleSpy.mockRestore()
+    expect(logErrorMock).toHaveBeenCalledWith('650', expect.any(Error))
   })
 
   it('drops queued entries on 404 so the queue does not retry forever against an already-deleted resource', async () => {
@@ -252,7 +259,6 @@ describe('useCounterfactualSafeSync', () => {
       { chainId: '1', address: '0xdef' },
     ]
     deleteRejection = { status: 404, data: { message: 'not found' } }
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
     mockSelectors(true, true, null)
 
     renderHook(() => useCounterfactualSafeSync())
@@ -266,8 +272,7 @@ describe('useCounterfactualSafeSync', () => {
     )
     expect(removeActions).toHaveLength(2)
     // 404 is the intended end state — no error noise.
-    expect(consoleSpy).not.toHaveBeenCalled()
-    consoleSpy.mockRestore()
+    expect(logErrorMock).not.toHaveBeenCalled()
   })
 
   it('does not re-add a safe whose pending DELETE was just flushed', async () => {
@@ -397,7 +402,6 @@ describe('useCounterfactualSafeSync', () => {
     // Without the retry, a single network blip stuck users who land on a
     // space-mate's CF safe URL on "Safe couldn't be loaded".
     jest.useFakeTimers()
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
     userFailureCount = 1
     userResponse = {
@@ -443,12 +447,10 @@ describe('useCounterfactualSafeSync', () => {
     expect(addActions.find((a) => a.payload.address === '0xRetry')).toBeDefined()
 
     jest.useRealTimers()
-    consoleSpy.mockRestore()
   })
 
   it('settles cfSafeSynced=true even when both attempts fail so consumers do not wait forever', async () => {
     jest.useFakeTimers()
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
     userFailureCount = 2
     mockSelectors(true, true, null)
@@ -469,6 +471,5 @@ describe('useCounterfactualSafeSync', () => {
     expect(syncedActions.some((a) => a.payload === true)).toBe(true)
 
     jest.useRealTimers()
-    consoleSpy.mockRestore()
   })
 })
