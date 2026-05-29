@@ -1,4 +1,4 @@
-import AddAccounts from '../AddAccounts'
+import AddAccountsChooser from '../AddAccountsChooser'
 import EmptySafeAccounts from './EmptySafeAccounts'
 import { Stack } from '@mui/material'
 import { Typography } from '@/components/ui/typography'
@@ -18,7 +18,7 @@ import {
 } from '@/hooks/safes'
 import useWallet from '@/hooks/wallets/useWallet'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
-import { useSpaceSafes, useIsAdmin, useIsInvited } from '@/features/spaces'
+import { useSpaceSafes, useIsInvited } from '@/features/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { TriangleAlert, RotateCw } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
@@ -37,7 +37,6 @@ const _groupAndSort = (
 
 const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
-  const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
 
   // Use same organization logic as onboarding
@@ -80,13 +79,11 @@ const SpaceSafeAccounts = () => {
         <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
           Safe Accounts
         </Typography>
-        {isAdmin && (
-          <Stack direction="row" justifyContent="flex-start">
-            <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
-              <AddAccounts buttonVariant="default" />
-            </Track>
-          </Stack>
-        )}
+        <Stack direction="row" justifyContent="flex-start">
+          <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
+            <AddAccountsChooser buttonVariant="default" />
+          </Track>
+        </Stack>
       </div>
 
       {isSpaceSafesError ? (
