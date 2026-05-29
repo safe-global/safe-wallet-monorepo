@@ -36,7 +36,7 @@ const AddActionsAction = () => {
 const EmptyStateAddAction = () => {
   return (
     <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
-      <AddAccountsChooser buttonVariant="default" buttonLabel="Add account" />
+      <AddAccountsChooser buttonVariant="default" buttonLabel="Manage accounts" />
     </Track>
   )
 }

@@ -113,7 +113,7 @@ const OwnedSafesModal = ({ open, onClose }: OwnedSafesModalProps) => {
         className="flex max-h-[90vh] w-full max-w-[560px] flex-col gap-0 p-0 dark:border dark:border-border"
       >
         <DialogHeader className="shrink-0 border-b border-border/50 px-4 pb-3 pt-4">
-          <DialogTitle className="font-bold">Owned Safe Accounts</DialogTitle>
+          <DialogTitle className="font-bold">Owned Safe accounts</DialogTitle>
         </DialogHeader>
 
         {isWalletConnected && (

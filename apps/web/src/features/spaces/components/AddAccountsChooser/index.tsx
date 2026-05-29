@@ -36,18 +36,21 @@ const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip 
       aria-disabled={disabled || undefined}
       title={disabled ? disabledTooltip : undefined}
       className={cn(
-        'group flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-foreground transition-colors',
-        disabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-muted/60 cursor-pointer',
+        'group flex w-full items-center gap-2 rounded-md p-2 text-left text-sm text-sidebar-foreground transition-colors',
+        '[&_svg]:[stroke-width:2] [&_svg]:transition-colors',
+        disabled
+          ? 'cursor-not-allowed opacity-50'
+          : 'cursor-pointer hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:[&_svg]:text-green-500',
       )}
     >
-      <span className="shrink-0 text-muted-foreground transition-colors [&_svg]:transition-colors [&_svg]:group-hover:text-accent-success">
-        {icon}
-      </span>
+      <span className="shrink-0">{icon}</span>
       <span className="flex-1 min-w-0">
-        <span className="block text-sm font-semibold transition-colors group-hover:text-accent-success">{title}</span>
-        <span className="block text-xs text-muted-foreground mt-0.5">{subtitle}</span>
+        <span className="block font-semibold">{title}</span>
+        <span className="block text-xs text-muted-foreground mt-0.5 group-hover:text-sidebar-accent-foreground/70">
+          {subtitle}
+        </span>
       </span>
-      <ChevronRight className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-accent-success" />
+      <ChevronRight className="size-3.5 shrink-0" />
     </button>
   )
 
@@ -109,9 +112,17 @@ const AddAccountsChooser = ({
       <Dialog open={chooserOpen} onOpenChange={setChooserOpen}>
         <DialogContent showCloseButton className="max-w-[440px] p-4 dark:border dark:border-border">
           <DialogHeader className="p-0 pb-2">
-            <DialogTitle className="font-bold">Add a Safe Account</DialogTitle>
+            <DialogTitle className="font-bold">Manage Safe accounts</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-1">
+            <ChooserRow
+              icon={<Plus className="size-4" />}
+              title="Add Safe accounts to this workspace"
+              subtitle="Add Safe accounts that are linked to your wallet to this workspace"
+              onClick={handleAdd}
+              disabled={!isAdmin}
+              disabledTooltip="You need to be an Admin to add accounts"
+            />
             <ChooserRow
               icon={<Search className="size-4" />}
               title="See owned Safe accounts"
@@ -122,17 +133,9 @@ const AddAccountsChooser = ({
               }}
             />
             <ChooserRow
-              icon={<Plus className="size-4" />}
-              title="Add Safe accounts to the Workspace"
-              subtitle="Add Safe accounts that are linked to your wallet to this workspace"
-              onClick={handleAdd}
-              disabled={!isAdmin}
-              disabledTooltip="You need to be an Admin to add accounts"
-            />
-            <ChooserRow
               icon={<CirclePlus className="size-4" />}
               title="Create new Safe"
-              subtitle="Deploy a new Safe Account"
+              subtitle="Create a new Safe account"
               onClick={handleCreate}
             />
           </div>

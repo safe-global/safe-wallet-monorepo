@@ -42,19 +42,19 @@ describe('AddAccountsChooser', () => {
   })
 
   it('respects a custom buttonLabel', () => {
-    render(<AddAccountsChooser buttonLabel="Add account" />)
+    render(<AddAccountsChooser buttonLabel="Manage accounts" />)
 
-    expect(screen.getByTestId('add-space-account-button')).toHaveTextContent('Add account')
+    expect(screen.getByTestId('add-space-account-button')).toHaveTextContent('Manage accounts')
   })
 
   it('opens the chooser dialog when the trigger button is clicked', () => {
     render(<AddAccountsChooser />)
 
-    expect(screen.queryByText('Add a Safe Account')).not.toBeInTheDocument()
+    expect(screen.queryByText('Manage Safe accounts')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByTestId('add-space-account-button'))
 
-    expect(screen.getByText('Add a Safe Account')).toBeInTheDocument()
+    expect(screen.getByText('Manage Safe accounts')).toBeInTheDocument()
   })
 
   it('shows three chooser rows', () => {
@@ -63,7 +63,7 @@ describe('AddAccountsChooser', () => {
     fireEvent.click(screen.getByTestId('add-space-account-button'))
 
     expect(screen.getByText('See owned Safe accounts')).toBeInTheDocument()
-    expect(screen.getByText('Add Safe accounts to the Workspace')).toBeInTheDocument()
+    expect(screen.getByText('Add Safe accounts to this workspace')).toBeInTheDocument()
     expect(screen.getByText('Create new Safe')).toBeInTheDocument()
   })
 
@@ -76,11 +76,11 @@ describe('AddAccountsChooser', () => {
     expect(screen.getByTestId('owned-safes-modal')).toBeInTheDocument()
   })
 
-  it('opens AddAccounts picker when admin clicks "Add Safe accounts to the Workspace"', () => {
+  it('opens AddAccounts picker when admin clicks "Add Safe accounts to this workspace"', () => {
     render(<AddAccountsChooser />)
 
     fireEvent.click(screen.getByTestId('add-space-account-button'))
-    fireEvent.click(screen.getByText('Add Safe accounts to the Workspace'))
+    fireEvent.click(screen.getByText('Add Safe accounts to this workspace'))
 
     expect(screen.getByTestId('add-accounts-picker')).toBeInTheDocument()
   })
@@ -89,7 +89,7 @@ describe('AddAccountsChooser', () => {
     render(<AddAccountsChooser />)
 
     fireEvent.click(screen.getByTestId('add-space-account-button'))
-    fireEvent.click(screen.getByText('Add Safe accounts to the Workspace'))
+    fireEvent.click(screen.getByText('Add Safe accounts to this workspace'))
 
     expect(mockTrackEvent).toHaveBeenCalledWith(
       expect.objectContaining({ action: expect.any(String) }),
@@ -103,7 +103,7 @@ describe('AddAccountsChooser', () => {
 
     fireEvent.click(screen.getByTestId('add-space-account-button'))
 
-    const row = screen.getByRole('button', { name: /Add Safe accounts to the Workspace/i })
+    const row = screen.getByRole('button', { name: /Add Safe accounts to this workspace/i })
     expect(row).toHaveAttribute('aria-disabled', 'true')
 
     fireEvent.click(row)
@@ -116,7 +116,7 @@ describe('AddAccountsChooser', () => {
 
     fireEvent.click(screen.getByTestId('add-space-account-button'))
 
-    expect(screen.getByRole('button', { name: /Add Safe accounts to the Workspace/i })).toHaveAttribute(
+    expect(screen.getByRole('button', { name: /Add Safe accounts to this workspace/i })).toHaveAttribute(
       'title',
       'You need to be an Admin to add accounts',
     )
@@ -156,7 +156,7 @@ describe('AddAccountsChooser', () => {
     render(<AddAccountsChooser />)
 
     fireEvent.click(screen.getByTestId('add-space-account-button'))
-    fireEvent.click(screen.getByRole('button', { name: /Add Safe accounts to the Workspace/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Add Safe accounts to this workspace/i }))
 
     expect(mockTrackEvent).not.toHaveBeenCalled()
   })
