@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import type { KeyboardEvent, ReactElement } from 'react'
 import { useContext, useRef, useState } from 'react'
 import { Alert, Divider, MenuItem, Popover, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
@@ -18,6 +18,14 @@ import { EXECUTION_FEE_TOOLTIP, GAS_FEE_TOOLTIP } from '../shared/tooltips'
 import css from './styles.module.css'
 
 const SIGNER_FEE_TOOLTIP = 'Fees will be paid from the connected signer wallet when executing this transaction.'
+
+// Enable not regular selectors to open the dropdowns for accessibility and keyboard users.
+const onActivateKey = (open: () => void) => (e: KeyboardEvent) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault()
+    open()
+  }
+}
 const HOW_FEES_WORK_URL = 'https://help.safe.global/en/articles/618701-safe-wallet-gas-fees-faq'
 
 const TotalOutgoingSection = ({ totalOutgoing }: { totalOutgoing: TotalOutgoing }): ReactElement => (
@@ -72,7 +80,9 @@ const PaymentSourceSelector = ({
         ref={anchorRef}
         className={css.paymentSourceSelector}
         onClick={() => setOpen(true)}
+        onKeyDown={onActivateKey(() => setOpen(true))}
         role="button"
+        tabIndex={0}
         data-testid="payment-source-selector"
       >
         <Typography variant="body2" fontWeight={700} letterSpacing="0.1px">
@@ -144,7 +154,9 @@ const GasTokenSelector = ({
         ref={anchorRef}
         className={`${css.gasTokenSelector} ${locked ? css.gasTokenSelectorLocked : ''}`}
         onClick={locked ? undefined : () => setOpen(true)}
+        onKeyDown={locked ? undefined : onActivateKey(() => setOpen(true))}
         role={locked ? undefined : 'button'}
+        tabIndex={locked ? undefined : 0}
         data-testid="gas-token-selector"
       >
         <TokenIcon logoUri={selected?.logoUri} tokenSymbol={selected?.symbol} size={24} />

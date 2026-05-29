@@ -1,7 +1,7 @@
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
-import { computeTotalOutgoing, getSendInGasToken, TRANSFER_SELECTOR, ERC20_INTERFACE } from '../totalOutgoing'
+import { computeTotalOutgoing, getSendInGasToken, ERC20_INTERFACE } from '../totalOutgoing'
 import { createSafeTx } from '@/tests/builders/safeTx'
 
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
@@ -92,9 +92,4 @@ describe('computeTotalOutgoing', () => {
 
     expect(result?.primary).toEqual([{ amount: '1', currency: 'USDC' }])
   })
-})
-
-// Smoke-test that the selector constant we export matches the ERC20 transfer ABI.
-test('TRANSFER_SELECTOR matches ERC20 transfer', () => {
-  expect(TRANSFER_SELECTOR).toBe(ERC20_INTERFACE.getFunction('transfer').selector)
 })

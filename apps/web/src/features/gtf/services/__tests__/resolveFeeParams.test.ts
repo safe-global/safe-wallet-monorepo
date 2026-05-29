@@ -13,7 +13,7 @@ jest.mock('@/services/tx/tx-sender', () => ({
 const mockTrackError = jest.fn()
 jest.mock('@/services/exceptions', () => ({
   trackError: (...args: unknown[]) => mockTrackError(...args),
-  Errors: { _805: '805: Error proposing or confirming a transaction' },
+  Errors: { _821: '821: Untrusted gas-fee refundReceiver returned by CGW' },
 }))
 
 jest.mock('@/store/api/gateway', () => ({
@@ -128,7 +128,7 @@ describe('resolveFeeParams', () => {
 
     expect(mockCreateTx).not.toHaveBeenCalled()
     expect(mockTrackError).toHaveBeenCalledWith(
-      expect.stringContaining('805'),
+      expect.stringContaining('821'),
       expect.stringContaining('Untrusted GTF refundReceiver'),
     )
   })

@@ -47,7 +47,7 @@ export const resolveFeeParams = async ({
   if (!GELATO_FEE_COLLECTORS.some((addr) => sameAddress(addr, refundReceiver))) {
     // Surface to Sentry so a Gelato collector rotation is observable instead of failing
     // silently for users who can't recover from the thrown error below.
-    trackError(Errors._805, `Untrusted GTF refundReceiver ${refundReceiver} returned by CGW on chain ${chainId}`)
+    trackError(Errors._821, `Untrusted GTF refundReceiver ${refundReceiver} returned by CGW on chain ${chainId}`)
     throw new Error(`Refusing to sign: untrusted refundReceiver ${refundReceiver} returned by CGW.`)
   }
 

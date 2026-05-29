@@ -1,8 +1,11 @@
+import type { fakeBaseQuery } from '@reduxjs/toolkit/query/react'
 import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
 import type { OperationType } from '@safe-global/types-kit'
 
 import { GATEWAY_URL } from '@/config/gateway'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+
+type GatewayEndpointBuilder = EndpointBuilder<ReturnType<typeof fakeBaseQuery<Error>>, 'Submissions', 'gatewayApi'>
 
 // prettier-ignore
 const SUPPORTED_FIAT_CODES = new Set(
@@ -68,7 +71,7 @@ const isFeePreviewResponse = (value: unknown): value is FeePreviewResponse =>
   'relayCost' in value &&
   'pricingContextSnapshot' in value
 
-export const gtfFeePreviewEndpoints = (builder: EndpointBuilder<any, 'Submissions', 'gatewayApi'>) => ({
+export const gtfFeePreviewEndpoints = (builder: GatewayEndpointBuilder) => ({
   getGtfFeePreview: builder.query<FeePreviewResponse, FeePreviewArg>({
     async queryFn({ chainId, safeAddress, tx }) {
       try {

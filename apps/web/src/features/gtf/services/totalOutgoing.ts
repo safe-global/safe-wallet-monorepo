@@ -12,7 +12,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 
 export const ERC20_INTERFACE = ERC20__factory.createInterface()
-export const TRANSFER_SELECTOR = ERC20_INTERFACE.getFunction('transfer').selector
+const TRANSFER_SELECTOR = ERC20_INTERFACE.getFunction('transfer').selector
 
 export type TotalOutgoingLine = { amount: string; currency: string }
 export type TotalOutgoing = {

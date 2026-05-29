@@ -3,7 +3,8 @@ import { Fragment, useContext, useMemo, type ReactElement } from 'react'
 import { Box, Divider, Stack, Tooltip, Typography } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import TokenIcon from '@/components/common/TokenIcon'
-import { useCurrentChain } from '@/hooks/useChains'
+import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import useBalances from '@/hooks/useBalances'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -44,6 +45,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   const chain = useCurrentChain()
   const { safe, safeAddress } = useSafeInfo()
   const { safeTx, gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
   const { balances } = useBalances()
   const safeTxHash = useSafeTxHash({ safeTxData })
   const domainHash = useDomainHash()
@@ -58,7 +60,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   }, [txDetails?.detailedExecutionInfo])
 
   const shouldPreviewGtf =
-    (!safeTx || safeTx.signatures.size === 0) && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken
+    isGtfChain && (!safeTx || safeTx.signatures.size === 0) && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken
   const displayGasToken = shouldPreviewGtf ? gtfSelectedGasToken : safeTxData.gasToken
   const isNativeGasToken = displayGasToken === ZERO_ADDRESS
   const heldToken = isNativeGasToken
