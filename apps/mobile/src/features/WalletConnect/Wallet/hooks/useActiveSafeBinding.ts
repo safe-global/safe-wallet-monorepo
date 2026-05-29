@@ -20,7 +20,16 @@ export const useActiveSafeBinding = (walletKit: IWalletKit | null) => {
     const chainCaip2 = eip155Caip2(activeSafe.chainId)
     const account = `${chainCaip2}:${checksummed}`
 
+    // Redux's view of sessions can lag the SDK's after a delete / relay-driven prune.
+    // Calling updateSession on a topic the SDK no longer knows throws "session topic
+    // doesn't exist" — benign, but the SDK logs it via console.error before our catch
+    // can swallow it. Filtering against the live snapshot avoids the noisy call.
+    const live = walletKit.getActiveSessions()
+
     sessions.forEach(async (session) => {
+      if (!live[session.topic]) {
+        return
+      }
       try {
         const eip155 = session.namespaces[SUPPORTED_NAMESPACE]
         if (!eip155) {
