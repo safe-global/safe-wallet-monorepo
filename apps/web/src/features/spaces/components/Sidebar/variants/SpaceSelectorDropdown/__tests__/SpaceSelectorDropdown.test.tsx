@@ -24,6 +24,11 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   useUsersGetWithWalletsV1Query: () => ({ currentData: { id: 7 } }),
 }))
 
+const mockUseSpaceSafesGetV1Query = jest.fn(() => ({ currentData: undefined as unknown }))
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  useSpaceSafesGetV1Query: (...args: unknown[]) => mockUseSpaceSafesGetV1Query(...args),
+}))
+
 const CURRENT_USER_ID = 7
 
 const adminMembersForCurrentUser = [
@@ -43,11 +48,19 @@ jest.mock('next/router', () => ({
   }),
 }))
 
+let mockSafeAddressFromUrl = ''
+let mockChainId = '1'
 jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeQueryParam: () => {
     const safe = mockRouterQuery.safe
     return typeof safe === 'string' ? safe : ''
   },
+  useSafeAddressFromUrl: () => mockSafeAddressFromUrl,
+}))
+
+jest.mock('@/hooks/useChainId', () => ({
+  __esModule: true,
+  default: () => mockChainId,
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -174,6 +187,9 @@ describe('SpaceSelectorDropdown', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockRouterQuery = { spaceId: '1' }
+    mockSafeAddressFromUrl = ''
+    mockChainId = '1'
+    mockUseSpaceSafesGetV1Query.mockImplementation(() => ({ currentData: undefined }))
   })
 
   it('adds an accessible label to the trigger', () => {
@@ -484,6 +500,106 @@ describe('SpaceSelectorDropdown', () => {
 
       expect(mockAddToSpace).toHaveBeenCalledTimes(1)
       expect(mockAddToSpace).toHaveBeenCalledWith(1)
+    })
+  })
+
+  describe('already-in-workspace gating (addToWorkspace variant)', () => {
+    const SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
+
+    const setMembership = (membership: Record<number, Record<string, string[]>>) => {
+      mockUseSpaceSafesGetV1Query.mockImplementation((arg: unknown) => {
+        const { spaceId } = arg as { spaceId: number }
+        const safes = membership[spaceId]
+        return { currentData: safes ? { safes } : undefined }
+      })
+    }
+
+    it('disables a space that already contains the current Safe', () => {
+      mockSafeAddressFromUrl = SAFE_ADDRESS
+      setMembership({ 1: { '1': [SAFE_ADDRESS] }, 2: { '1': [] } })
+
+      const spaces = [
+        { id: 1, name: 'AlreadyIn', safeCount: 1, members: adminMembersForCurrentUser },
+        { id: 2, name: 'NotIn', safeCount: 0, members: adminMembersForCurrentUser },
+      ]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const alreadyInBtn = screen
+        .getAllByRole('button')
+        .find((btn) => btn.querySelector('span')?.textContent === 'AlreadyIn')
+      const notInBtn = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'NotIn')
+
+      expect(alreadyInBtn).toBeDisabled()
+      expect(notInBtn).not.toBeDisabled()
+    })
+
+    it('shows the "already in workspace" tooltip for matching spaces', () => {
+      mockSafeAddressFromUrl = SAFE_ADDRESS
+      setMembership({ 1: { '1': [SAFE_ADDRESS] } })
+
+      const spaces = [{ id: 1, name: 'AlreadyIn', safeCount: 1, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      expect(screen.getByText('Safe is already in this workspace')).toBeInTheDocument()
+    })
+
+    it('matches membership by current chainId only', () => {
+      mockSafeAddressFromUrl = SAFE_ADDRESS
+      mockChainId = '1'
+      setMembership({ 1: { '137': [SAFE_ADDRESS] } })
+
+      const spaces = [{ id: 1, name: 'OtherChain', safeCount: 1, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const btn = screen.getAllByRole('button').find((b) => b.querySelector('span')?.textContent === 'OtherChain')
+      expect(btn).not.toBeDisabled()
+      expect(screen.queryByText('Safe is already in this workspace')).not.toBeInTheDocument()
+    })
+
+    it('prefers the "already in workspace" tooltip over the admin tooltip', () => {
+      mockSafeAddressFromUrl = SAFE_ADDRESS
+      setMembership({ 1: { '1': [SAFE_ADDRESS] } })
+
+      const spaces = [{ id: 1, name: 'MemberAlreadyIn', safeCount: 1, members: memberMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      expect(screen.getByText('Safe is already in this workspace')).toBeInTheDocument()
+      expect(screen.queryByText('Only admins can add Safes to this workspace')).not.toBeInTheDocument()
+    })
+
+    it('does not disable already-added spaces in the default variant', () => {
+      mockSafeAddressFromUrl = SAFE_ADDRESS
+      setMembership({ 1: { '1': [SAFE_ADDRESS] } })
+
+      const spaces = [{ id: 1, name: 'AlreadyIn', safeCount: 1, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="default" selectedSpace={spaces[0]} spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Open workspace selector' }))
+
+      const btn = screen.getAllByRole('button').find((b) => b.querySelector('span')?.textContent === 'AlreadyIn')
+      expect(btn).not.toBeDisabled()
+      expect(screen.queryByText('Safe is already in this workspace')).not.toBeInTheDocument()
+    })
+
+    it('does not disable any space when no Safe is in the URL', () => {
+      mockSafeAddressFromUrl = ''
+      setMembership({ 1: { '1': [SAFE_ADDRESS] } })
+
+      const spaces = [{ id: 1, name: 'Space', safeCount: 1, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const btn = screen.getAllByRole('button').find((b) => b.querySelector('span')?.textContent === 'Space')
+      expect(btn).not.toBeDisabled()
     })
   })
 
