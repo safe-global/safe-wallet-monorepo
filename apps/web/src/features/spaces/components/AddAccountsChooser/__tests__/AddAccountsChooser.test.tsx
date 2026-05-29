@@ -130,4 +130,34 @@ describe('AddAccountsChooser', () => {
 
     expect(mockPush).toHaveBeenCalledWith('/new-safe/create')
   })
+
+  it('lets non-admin members open OwnedSafesModal from "See owned Safe accounts"', () => {
+    mockIsAdmin = false
+    render(<AddAccountsChooser />)
+
+    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    fireEvent.click(screen.getByText('See owned Safe accounts'))
+
+    expect(screen.getByTestId('owned-safes-modal')).toBeInTheDocument()
+  })
+
+  it('lets non-admin members navigate to /new-safe/create from "Create new Safe"', () => {
+    mockIsAdmin = false
+    render(<AddAccountsChooser />)
+
+    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    fireEvent.click(screen.getByText('Create new Safe'))
+
+    expect(mockPush).toHaveBeenCalledWith('/new-safe/create')
+  })
+
+  it('does not fire WORKSPACE_SAFE_LINK_STARTED when a non-admin clicks the disabled row', () => {
+    mockIsAdmin = false
+    render(<AddAccountsChooser />)
+
+    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    fireEvent.click(screen.getByRole('button', { name: /Add Safe accounts to the Workspace/i }))
+
+    expect(mockTrackEvent).not.toHaveBeenCalled()
+  })
 })
