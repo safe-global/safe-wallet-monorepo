@@ -3,7 +3,6 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useInviteForm from './useInviteForm'
 
-const mockDispatch = jest.fn()
 const mockInviteMembers = jest.fn()
 const mockOnSuccess = jest.fn()
 
@@ -16,14 +15,6 @@ jest.mock('@/services/analytics/events/spaces', () => ({
     WORKSPACE_MEMBER_INVITE_SENT: { action: 'Workspace member invite sent', category: 'spaces' },
   },
   SPACE_LABELS: {},
-}))
-
-jest.mock('@/store', () => ({
-  useAppDispatch: () => mockDispatch,
-}))
-
-jest.mock('@/store/notificationsSlice', () => ({
-  showNotification: (payload: unknown) => ({ type: 'notifications/show', payload }),
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({

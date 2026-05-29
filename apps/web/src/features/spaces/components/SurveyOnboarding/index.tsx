@@ -1,17 +1,16 @@
-import type { ReactElement } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { useRouter } from 'next/router'
 import {
   ArrowLeftRight,
-  Banknote,
+  BarChart3,
   ChevronLeft,
-  Gift,
+  FileCode,
   HelpCircle,
-  Landmark,
-  Sprout,
-  Terminal,
+  Send,
+  Shield,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react'
 import {
@@ -19,31 +18,36 @@ import {
   useSurveysSubmitResponseV1Mutation,
   type SurveyOption,
 } from '@safe-global/store/gateway/surveys'
+import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/ui/typography'
-import StepIndicator from '@/features/spaces/components/StepIndicator'
-import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
+import {
+  OnboardingLayout,
+  StepCounter,
+  SafeAppMockup,
+  deriveSidePanelAccountsFromSpace,
+  useSafeNameLookup,
+} from '@/features/spaces/components/OnboardingLayout'
+import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { flattenSafeItems } from '@/hooks/safes'
+import SurveyOptionCard from './SurveyOptionCard'
 
 const ONBOARDING_STEP = 4
 const TOTAL_STEPS = 4
 const SURVEY_SLUG = 'onboarding'
 
-// Backend-issued icon keys → frontend icon components. Unknown keys (e.g. the
-// backend adds a new option before this map is updated) fall back to a generic
+// Backend-issued icon keys → lucide icons. Unknown keys fall back to a
 // placeholder so the card never renders iconless.
 const ICON_MAP: Record<string, LucideIcon> = {
-  terminal: Terminal,
-  gift: Gift,
-  cash: Banknote,
-  sprout: Sprout,
+  terminal: FileCode,
+  gift: Sparkles,
+  cash: Send,
+  sprout: BarChart3,
   swap: ArrowLeftRight,
-  bank: Landmark,
+  bank: Shield,
 }
 const FALLBACK_ICON: LucideIcon = HelpCircle
 
@@ -55,7 +59,6 @@ const isNotFoundError = (err: FetchBaseQueryError | SerializedError | undefined)
 }
 
 const SurveyOnboarding = (): ReactElement | null => {
-  const isDarkMode = useDarkMode()
   const router = useRouter()
   const spaceId = router.query.spaceId as string | undefined
 
@@ -63,6 +66,14 @@ const SurveyOnboarding = (): ReactElement | null => {
     { spaceId: spaceId ?? '', slug: SURVEY_SLUG },
     { skip: !spaceId },
   )
+  const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
+  const { allSafes: spaceSafes } = useSpaceSafes()
+  const nameLookup = useSafeNameLookup()
+  const sidePanelAccounts = useMemo(
+    () => deriveSidePanelAccountsFromSpace(spaceSafes, nameLookup),
+    [spaceSafes, nameLookup],
+  )
+  const balanceSafes = useMemo(() => flattenSafeItems(spaceSafes), [spaceSafes])
   const [submit, { isLoading: isSubmitting, error: submitError }] = useSurveysSubmitResponseV1Mutation()
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
@@ -72,18 +83,11 @@ const SurveyOnboarding = (): ReactElement | null => {
     }
   }, [router, spaceId])
 
-  // Treat a 404 from the state endpoint as "no active survey" (admin turned it
-  // off via surveys.is_active = false) and exit silently to the Space dashboard.
-  // Real errors (5xx, network) still surface in the alert below.
   useEffect(() => {
     if (isNotFoundError(error) && spaceId) {
       router.replace({ pathname: AppRoutes.spaces.index, query: { spaceId } })
     }
   }, [error, router, spaceId])
-
-  // Note: don't early-return null on missing spaceId — the outer motion.div in
-  // PageLayout only fades in if its child renders something. The redirect effect
-  // above handles the missing-spaceId case while we render a static shell.
 
   const toggle = (key: string): void => {
     setSelected((prev) => {
@@ -98,9 +102,6 @@ const SurveyOnboarding = (): ReactElement | null => {
     router.push({ pathname: AppRoutes.welcome.inviteMembers, query: { spaceId } })
   }
 
-  // For now the survey only has one page; this is the page we render and submit.
-  // When multi-page lands, replace this with a current-page selector + per-page
-  // selections state.
   const page = data?.survey.surveyContent.pages[0]
 
   const onFinish = async (): Promise<void> => {
@@ -116,119 +117,90 @@ const SurveyOnboarding = (): ReactElement | null => {
       }).unwrap()
       router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
     } catch {
-      // The mutation hook exposes submitError, which renders the destructive
-      // alert below. Swallow the rejection here so the click handler doesn't
-      // surface an unhandled-promise warning.
+      // submitError feeds the alert below; swallow here to avoid unhandled-promise.
     }
   }
 
-  return (
-    <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-      <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
-        <div className="flex w-full max-w-[1100px] flex-col items-center gap-8">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={goBack}
-            aria-label="Go back"
-            className="self-start rounded-md border border-card shadow-sm"
-          >
-            <ChevronLeft className="size-5" />
-          </Button>
+  const main = (
+    <div className="flex flex-col gap-6">
+      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
 
-          <StepIndicator currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
-
-          <div className="flex flex-col items-center gap-2">
-            <Typography variant="h2" align="center" id="survey-page-title">
-              {page?.title ?? 'How will you use Safe?'}
-            </Typography>
-            {page?.subtitle && (
-              <Typography variant="paragraph" align="center" color="muted">
-                {page.subtitle}
-              </Typography>
-            )}
-          </div>
-
-          {isLoading && <Spinner />}
-
-          {error && !isNotFoundError(error) && (
-            <Alert variant="destructive">
-              <AlertDescription>Failed to load survey. Please refresh.</AlertDescription>
-            </Alert>
-          )}
-
-          {page?.options && (
-            <div
-              role="group"
-              aria-labelledby="survey-page-title"
-              className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-            >
-              {page.options.map((opt: SurveyOption) => {
-                const Icon = opt.icon ? (ICON_MAP[opt.icon] ?? FALLBACK_ICON) : undefined
-                const isChecked = selected.has(opt.key)
-                return (
-                  <Card
-                    key={opt.key}
-                    role="checkbox"
-                    aria-checked={isChecked}
-                    tabIndex={0}
-                    onClick={() => toggle(opt.key)}
-                    onKeyDown={(e) => {
-                      if (e.key === ' ' || e.key === 'Enter') {
-                        e.preventDefault()
-                        toggle(opt.key)
-                      }
-                    }}
-                    className="cursor-pointer outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  >
-                    <div className="flex items-start justify-between gap-3 p-4">
-                      {Icon && (
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10">
-                          <Icon className="size-5 text-primary" />
-                        </div>
-                      )}
-                      <div className="flex-1">
-                        <Typography variant="paragraph-medium">{opt.label}</Typography>
-                        {opt.description && (
-                          <Typography variant="paragraph-small" color="muted">
-                            {opt.description}
-                          </Typography>
-                        )}
-                      </div>
-                      {/*
-                        Visual-only indicator. The Card itself owns the click /
-                        keyboard interaction and exposes role="checkbox" +
-                        aria-checked, so the inner Checkbox is hidden from a11y
-                        and ignores pointer events to avoid double-toggling.
-                      */}
-                      <Checkbox checked={isChecked} aria-hidden="true" tabIndex={-1} className="pointer-events-none" />
-                    </div>
-                  </Card>
-                )
-              })}
-            </div>
-          )}
-
-          {submitError && (
-            <Alert variant="destructive">
-              <AlertDescription>Failed to submit. Please try again.</AlertDescription>
-            </Alert>
-          )}
-
-          <Button
-            data-testid="survey-finish-button"
-            type="button"
-            size="lg"
-            disabled={!spaceId || selected.size === 0 || isSubmitting}
-            onClick={onFinish}
-            className="w-full max-w-[400px]"
-          >
-            {isSubmitting ? <Spinner /> : 'Finish'}
-          </Button>
-        </div>
+      <div className="flex flex-col gap-2">
+        <Typography variant="h2" id="survey-page-title">
+          {page?.title ?? 'How will you use Safe?'}
+        </Typography>
+        <Typography variant="paragraph" color="muted">
+          {page?.subtitle ?? "Select all that apply. We'll tailor your setup."}
+        </Typography>
       </div>
+
+      {isLoading && <Spinner />}
+
+      {error && !isNotFoundError(error) && (
+        <Alert variant="destructive">
+          <AlertDescription>Failed to load survey. Please refresh.</AlertDescription>
+        </Alert>
+      )}
+
+      {page?.options && (
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+          {page.options.map((opt: SurveyOption) => (
+            <SurveyOptionCard
+              key={opt.key}
+              option={opt}
+              Icon={opt.icon ? (ICON_MAP[opt.icon] ?? FALLBACK_ICON) : undefined}
+              isPressed={selected.has(opt.key)}
+              onToggle={toggle}
+            />
+          ))}
+        </div>
+      )}
+
+      {submitError && (
+        <Alert variant="destructive">
+          <AlertDescription>Failed to submit. Please try again.</AlertDescription>
+        </Alert>
+      )}
     </div>
+  )
+
+  const footer = (
+    <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={goBack}
+        disabled={isSubmitting}
+        className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
+      >
+        <ChevronLeft className="size-4 mr-1" />
+        Back
+      </Button>
+      <Button
+        data-testid="survey-finish-button"
+        type="button"
+        disabled={!spaceId || selected.size === 0 || isSubmitting}
+        onClick={onFinish}
+        className="w-full h-12 rounded-lg text-base xl:flex-1"
+      >
+        {isSubmitting ? <Spinner /> : 'Create Space'}
+      </Button>
+    </div>
+  )
+
+  return (
+    <OnboardingLayout
+      main={main}
+      footer={footer}
+      sidePanel={
+        <SafeAppMockup
+          name={space?.name ?? ''}
+          highlight="accounts"
+          accounts={sidePanelAccounts}
+          balanceSafes={balanceSafes}
+        />
+      }
+    />
   )
 }
 

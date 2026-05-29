@@ -14,7 +14,6 @@ jest.mock('@/hooks/useChains', () => ({
 
 const mockAddSafesToSpace = jest.fn().mockResolvedValue({ data: {} })
 const mockRemoveSafesFromSpace = jest.fn().mockResolvedValue({ data: {} })
-const mockDispatch = jest.fn()
 const mockTrackEvent = jest.fn()
 
 let mockSpaceSafes: Array<SafeItem | MultiChainSafeItem> = []
@@ -31,17 +30,9 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   },
 }))
 
-jest.mock('@/store', () => ({
-  useAppDispatch: () => mockDispatch,
-}))
-
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpaceSafesCreateV1Mutation: () => [mockAddSafesToSpace],
   useSpaceSafesDeleteV1Mutation: () => [mockRemoveSafesFromSpace],
-}))
-
-jest.mock('@/store/notificationsSlice', () => ({
-  showNotification: jest.fn((payload) => ({ type: 'showNotification', payload })),
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -292,17 +283,6 @@ describe('useOnboardingSubmit', () => {
       action: 'add_accounts',
       category: 'spaces',
     })
-  })
-
-  it('should dispatch success notification on successful submit', async () => {
-    const { result } = renderHook(() => useOnboardingSubmit('1', onSuccess))
-
-    await act(async () => {
-      await result.current.onSubmit()
-    })
-
-    expect(mockDispatch).toHaveBeenCalled()
-    expect(onSuccess).toHaveBeenCalled()
   })
 
   it('should preselect safe from URL when space has no existing safes', async () => {
