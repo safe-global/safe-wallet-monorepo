@@ -1,5 +1,5 @@
 import React, { act } from 'react'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ImportAddressBookDialog from '../ImportAddressBookDialog'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
@@ -182,5 +182,34 @@ describe('ImportAddressBookDialog', () => {
     expect(screen.getByText('Alice')).toBeInTheDocument()
 
     jest.useRealTimers()
+  })
+
+  it('renders both the local contacts and upload file tabs', () => {
+    mockedUseAllAddressBooks.mockReturnValue({ '1': { '0x123': 'Alice' } })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    expect(screen.getByRole('tab', { name: /local contacts/i })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /upload file/i })).toBeInTheDocument()
+  })
+
+  it('parses an uploaded CSV file and upserts the entries into the space', async () => {
+    mockedUseAllAddressBooks.mockReturnValue({})
+    upsertionSpyFn.mockResolvedValue({ data: {} })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    // Empty local address book defaults to the upload tab
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    const csv = 'address,name,chainId\n0xAecDFD3A19f777F0c03e6bf99AAfB59937d6467b,Alice,1'
+    fireEvent.change(input, { target: { files: [new File([csv], 'book.csv', { type: 'text/csv' })] } })
+
+    const importButton = await screen.findByRole('button', { name: /Import \(1\)/i })
+    await waitFor(() => expect(importButton).not.toBeDisabled())
+    await userEvent.click(importButton)
+
+    expect(upsertionSpyFn).toHaveBeenCalledTimes(1)
+    const items = upsertionSpyFn.mock.calls[0][0]['upsertAddressBookItemsDto']['items']
+    expect(items).toEqual([{ address: '0xAecDFD3A19f777F0c03e6bf99AAfB59937d6467b', name: 'Alice', chainIds: ['1'] }])
   })
 })
