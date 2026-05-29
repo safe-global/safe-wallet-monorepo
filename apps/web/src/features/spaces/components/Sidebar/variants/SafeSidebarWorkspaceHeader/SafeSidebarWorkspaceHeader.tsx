@@ -15,7 +15,9 @@ export interface SafeSidebarWorkspaceHeaderProps {
   workspaceHeader: SafeWorkspaceHeaderProps
 }
 
-export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorkspaceHeaderProps): ReactElement => {
+export const SafeSidebarWorkspaceHeader = ({
+  workspaceHeader,
+}: SafeSidebarWorkspaceHeaderProps): ReactElement | null => {
   const spaceId = useCurrentSpaceId()
 
   const handleAddSafeClick = () => {
@@ -30,7 +32,8 @@ export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorks
       return <BackToSpaceButton {...workspaceHeader} />
 
     case 'addToWorkspace': {
-      const hasSpaces = (workspaceHeader.spaces?.length ?? 0) > 0
+      const spaces = workspaceHeader.spaces ?? []
+      const hasSpaces = spaces.length > 0
       if (hasSpaces) {
         return (
           <SpaceSelectorDropdown
