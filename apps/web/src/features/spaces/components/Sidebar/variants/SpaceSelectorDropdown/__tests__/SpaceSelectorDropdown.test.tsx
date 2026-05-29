@@ -12,12 +12,13 @@ jest.mock('../../../hooks/useAddSafeToSpace', () => ({
   useAddSafeToSpace: jest.fn(() => ({ addToSpace: jest.fn().mockResolvedValue(true), loadingSpaceId: null })),
 }))
 
+let mockIsAuthenticated = true
 jest.mock('@/store', () => ({
   useAppSelector: (selector: unknown) => (typeof selector === 'function' ? selector({}) : selector),
 }))
 
 jest.mock('@/store/authSlice', () => ({
-  isAuthenticated: () => true,
+  isAuthenticated: () => mockIsAuthenticated,
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
@@ -191,6 +192,7 @@ describe('SpaceSelectorDropdown', () => {
     mockRouterQuery = { spaceId: '1' }
     mockSafeAddressFromUrl = ''
     mockChainId = '1'
+    mockIsAuthenticated = true
     mockUseSpaceSafesGetV1Query.mockImplementation(() => ({ currentData: undefined }))
   })
 
@@ -616,6 +618,33 @@ describe('SpaceSelectorDropdown', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
 
       expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: 1 }, { skip: false })
+    })
+
+    it('skips the membership query when the user is signed out', () => {
+      mockIsAuthenticated = false
+      mockSafeAddressFromUrl = SAFE_ADDRESS
+      setMembership({ 1: { '1': [SAFE_ADDRESS] } })
+
+      const spaces = [{ id: 1, name: 'Space', safeCount: 1, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: 1 }, { skip: true })
+    })
+
+    it('matches membership when the stored address differs in case from the URL address', () => {
+      mockSafeAddressFromUrl = SAFE_ADDRESS
+      setMembership({ 1: { '1': [SAFE_ADDRESS.toLowerCase()] } })
+
+      const spaces = [{ id: 1, name: 'AlreadyIn', safeCount: 1, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
+
+      const btn = screen.getAllByRole('button').find((b) => b.querySelector('span')?.textContent === 'AlreadyIn')
+      expect(btn).toBeDisabled()
+      expect(screen.getByText('Safe is already in this workspace')).toBeInTheDocument()
     })
   })
 

@@ -30,6 +30,7 @@ import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AdminOnlyWorkspaceTooltip } from '@/features/spaces/components/AdminOnlyWorkspaceTooltip'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this workspace'
 
@@ -125,6 +126,7 @@ export const SpaceSelectorDropdown = ({
         chainId={chainId}
         safeAddress={safeAddress}
         isOpen={isOpen}
+        isSignedIn={isSignedIn}
         onSelect={() => void handleSelectSpace(space.id)}
       />
     )
@@ -258,6 +260,7 @@ interface SpaceMenuRowProps {
   chainId: string
   safeAddress: string
   isOpen: boolean
+  isSignedIn: boolean
   onSelect: () => void
 }
 
@@ -272,17 +275,18 @@ const SpaceMenuRow = ({
   chainId,
   safeAddress,
   isOpen,
+  isSignedIn,
   onSelect,
 }: SpaceMenuRowProps): ReactElement => {
-  // Only check membership while the dropdown is open AND we have a safe/chain
-  // to check against. RTK Query caches the result via keepUnusedDataFor, so
-  // reopening within the cache window is free.
-  const shouldCheckMembership = isOpen && isAddToWorkspace && Boolean(safeAddress) && Boolean(chainId)
+  // Only check membership while the dropdown is open AND the user is signed in
+  // AND we have a safe/chain to check against. RTK Query caches the result via
+  // keepUnusedDataFor, so reopening within the cache window is free.
+  const shouldCheckMembership = isOpen && isAddToWorkspace && isSignedIn && Boolean(safeAddress) && Boolean(chainId)
   const { currentData: spaceSafes } = useSpaceSafesGetV1Query({ spaceId: space.id }, { skip: !shouldCheckMembership })
 
   const isAlreadyAdded = useMemo(() => {
     if (!shouldCheckMembership || !spaceSafes) return false
-    return spaceSafes.safes[chainId]?.includes(safeAddress) ?? false
+    return spaceSafes.safes[chainId]?.some((addr) => sameAddress(addr, safeAddress)) ?? false
   }, [shouldCheckMembership, spaceSafes, chainId, safeAddress])
 
   const isDisabled = loadingSpaceId !== null || (isAddToWorkspace && (!isAdmin || atSafeLimit || isAlreadyAdded))
