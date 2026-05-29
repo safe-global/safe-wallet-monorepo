@@ -19,10 +19,17 @@
   flex-wrap: wrap;
 }
 
-/* Soft brand-tinted radial glow behind the sign-in card. Layered on top of the
-   theme-aware bg-background so it works in both light and dark mode. */
+/* Soft brand-tinted radial glow behind the sign-in card. */
 .authShell {
   background-image:
-    radial-gradient(circle at 20% 20%, rgba(18, 255, 128, 0.06) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(18, 255, 128, 0.04) 0%, transparent 50%);
+    radial-gradient(
+      circle at 20% 20%,
+      color-mix(in srgb, var(--color-static-text-brand) 6%, transparent) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      color-mix(in srgb, var(--color-static-text-brand) 4%, transparent) 0%,
+      transparent 50%
+    );
 }

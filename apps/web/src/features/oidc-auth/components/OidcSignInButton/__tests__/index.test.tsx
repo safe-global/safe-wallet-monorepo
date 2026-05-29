@@ -73,18 +73,18 @@ describe('OidcSignInButton', () => {
     expect(mockLoginWithRedirect).toHaveBeenCalledWith(OidcConnection.EMAIL)
   })
 
-  // The primary variant pins to a theme-agnostic dark surface in light mode
-  // (and a light surface in dark mode) so the Google "G" doesn't collide
-  // with shadcn's bg-primary token flipping to Safe-green in dark mode.
-  it('applies the primary-variant override class when variant="primary"', () => {
+  // The primary variant maps to the sidebar-primary token pair, which does not
+  // flip to Safe-green in dark mode like shadcn's --primary does — keeping the
+  // Google "G" legible against the button surface.
+  it('applies the sidebar-primary token classes when variant="primary"', () => {
     renderButton('primary')
 
-    expect(screen.getByTestId('test-btn').className).toContain('bg-[#171717]')
+    expect(screen.getByTestId('test-btn').className).toContain('bg-sidebar-primary')
   })
 
-  it('does not apply the primary-variant override class when variant defaults to secondary', () => {
+  it('does not apply the sidebar-primary token classes when variant defaults to secondary', () => {
     renderButton()
 
-    expect(screen.getByTestId('test-btn').className).not.toContain('bg-[#171717]')
+    expect(screen.getByTestId('test-btn').className).not.toContain('bg-sidebar-primary')
   })
 })

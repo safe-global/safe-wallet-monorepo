@@ -34,17 +34,12 @@ const OidcSignInButton = ({
 
   if (!isOidcAuthEnabled) return null
 
-  // The primary variant overrides shadcn's `bg-primary` token, which flips to
-  // Safe-green in dark mode. The colored Google "G" has its own green path
-  // (#34A853) that becomes near-invisible on a green surface. We pin the
-  // light-mode bg to the design's literal `--primary: #171717`, and in dark
-  // mode flip to a light surface so the button still pops against the dark
-  // card (`--card: #171717` in dark mode) without competing with the brand
-  // green elsewhere on the screen.
+  // Avoid `bg-primary` here: it flips to Safe-green in dark mode and would
+  // clash with the Google "G" logo's own green path. `--sidebar-primary` is
+  // the project's neutral primary pair that flips dark ↔ light without the
+  // brand-green override.
   const primaryOverride =
-    variant === 'primary'
-      ? 'bg-[#171717] text-white hover:bg-[#2a2a2a] dark:bg-[#fafafa] dark:text-[#0a0a0a] dark:hover:bg-[#e5e5e5]'
-      : ''
+    variant === 'primary' ? 'bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90' : ''
 
   return (
     <Button

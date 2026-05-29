@@ -171,12 +171,8 @@ const SpacesList = () => {
     setHasSignedIn(true)
   }, [setHasSignedIn])
 
-  // Signed-out users get the full-bleed sign-in screen (no surrounding chrome).
-  // The users + spaces queries are skipped while signed out, so pendingInvites
-  // is always []; we don't need to gate the early return on it. When
-  // require-login is on, PageLayout has already hidden the header; when it's
-  // off (classic mode) the topbar still shows above — acceptable since classic
-  // mode is the legacy entry point.
+  // The spaces query is skipped while signed out, so pendingInvites is always
+  // [] — no need to gate the early return on it.
   if (!isUserSignedIn) {
     return <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
   }
