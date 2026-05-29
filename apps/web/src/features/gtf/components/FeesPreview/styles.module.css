@@ -160,6 +160,12 @@
   transform: rotate(180deg);
 }
 
+.tooltipIcon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
 .signerFeeNotice {
   display: flex;
   flex-direction: column;
