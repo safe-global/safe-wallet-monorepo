@@ -31,6 +31,7 @@ const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
+  AppRoutes.welcome.survey,
 ]
 
 const STATIC_PAGE_ROUTES = [AppRoutes.terms, AppRoutes.privacy, AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
@@ -40,6 +41,7 @@ const NO_HEADER_ROUTES = [
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
+  AppRoutes.welcome.survey,
   AppRoutes.spaces.createSpace,
   ...STATIC_PAGE_ROUTES,
 ]

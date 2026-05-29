@@ -39,10 +39,6 @@ jest.mock('@/store/authSlice', () => ({
   setLastUsedSpace: (id: string) => ({ type: 'auth/setLastUsedSpace', payload: id }),
 }))
 
-jest.mock('@/store/notificationsSlice', () => ({
-  showNotification: (payload: unknown) => ({ type: 'notifications/show', payload }),
-}))
-
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesCreateV1Mutation: () => [mockCreateSpaceWithUser],
   useSpacesUpdateV1Mutation: () => [mockUpdateSpace],

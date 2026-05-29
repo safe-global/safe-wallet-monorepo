@@ -27,7 +27,7 @@ const useInviteNavigation = () => {
       router.push(nextUrl)
       return
     }
-    router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
+    router.push({ pathname: AppRoutes.welcome.survey, query: { spaceId } })
   }, [router, spaceId, nextUrl])
 
   return {
