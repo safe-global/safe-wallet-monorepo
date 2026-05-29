@@ -478,6 +478,8 @@ export const dispatchTxRelay = async (
 ) => {
   const store = getStoreInstance()
   const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe)
+  const safeSDK = getAndValidateSafeSDK()
+  const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 
   let transactionToRelay = safeTx
   const data = readOnlySafeContract.encode('execTransaction', [
@@ -501,6 +503,7 @@ export const dispatchTxRelay = async (
         data,
         gasLimit: gasLimit?.toString(),
         version: safe.version ?? getLatestSafeVersion(chain),
+        safeTxHash,
       },
     })
 

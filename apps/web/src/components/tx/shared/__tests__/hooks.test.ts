@@ -1,5 +1,5 @@
 import { extendedSafeInfoBuilder, safeInfoBuilder } from '@/tests/builders/safe'
-import { renderHook, waitFor } from '@/tests/test-utils'
+import { render, renderHook, waitFor } from '@/tests/test-utils'
 import { zeroPadValue } from 'ethers'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
@@ -10,6 +10,7 @@ import * as pending from '@/hooks/usePendingTxs'
 import * as txSender from '@/services/tx/tx-sender/dispatch'
 import * as onboardHooks from '@/hooks/wallets/useOnboard'
 import { type OnboardAPI } from '@web3-onboard/core'
+import { createElement } from 'react'
 import {
   useAlreadySigned,
   useImmediatelyExecutable,
@@ -25,6 +26,9 @@ import * as useChains from '@/hooks/useChains'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { type SignerWallet } from '@/components/common/WalletProvider'
 import { type NestedWallet } from '@/utils/nested-safe-wallet'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import * as loadFeature from '@/features/__core__/useLoadFeature'
+import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 
 const chainInfo = chainBuilder().with({ chainId: '1' }).build()
 
@@ -729,6 +733,135 @@ describe('SignOrExecute hooks', () => {
       await waitFor(() => {
         expect(result.current).toEqual(2)
       })
+    })
+  })
+
+  describe('useTxActions — GTF fee-params merge', () => {
+    const GAS_TOKEN = '0xa0b86991000000000000000000000000000000aa'
+    const SAFE_ADDRESS = zeroPadValue('0x0000', 20)
+
+    const captureActions = (overrides: Partial<SafeTxContextParams> = {}) => {
+      const ref: { current?: ReturnType<typeof useTxActions> } = {}
+      const contextValue: SafeTxContextParams = {
+        setSafeTx: jest.fn(),
+        setSafeMessage: jest.fn(),
+        setSafeMessageHash: jest.fn(),
+        setSafeTxError: jest.fn(),
+        setNonce: jest.fn(),
+        setNonceNeeded: jest.fn(),
+        setSafeTxGas: jest.fn(),
+        setTxOrigin: jest.fn(),
+        isReadOnly: false,
+        gtfPaymentMode: 'safe',
+        setGtfPaymentMode: jest.fn(),
+        gtfSelectedGasToken: GAS_TOKEN,
+        setGtfSelectedGasToken: jest.fn(),
+        ...overrides,
+      }
+      const Harness = () => {
+        ref.current = useTxActions()
+        return null
+      }
+      render(createElement(SafeTxContext.Provider, { value: contextValue }, createElement(Harness)))
+      return ref
+    }
+
+    const setupGtfChain = () => {
+      const gtfChain = chainBuilder()
+        .with({ chainId: '1', features: [FEATURES.GTF] })
+        .build()
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(gtfChain)
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version: '1.3.0',
+          address: { value: SAFE_ADDRESS },
+          nonce: 100,
+          threshold: 2,
+          owners: [{ value: zeroPadValue('0x0123', 20) }, { value: zeroPadValue('0x0456', 20) }],
+          chainId: '1',
+        },
+        safeAddress: SAFE_ADDRESS,
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+    }
+
+    const mockFeatureResolve = (resolveFeeParams: jest.Mock) => {
+      jest.spyOn(loadFeature, 'useLoadFeature').mockReturnValue({
+        $isReady: true,
+        $isDisabled: false,
+        $error: undefined,
+        resolveFeeParams,
+      } as unknown as ReturnType<typeof loadFeature.useLoadFeature>)
+    }
+
+    it('invokes resolveFeeParams on first-signer sign when GTF + Safe-pays guards pass', async () => {
+      setupGtfChain()
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
+
+      const mergedTx = createSafeTx()
+      const resolveFeeParams = jest.fn().mockResolvedValue(mergedTx)
+      mockFeatureResolve(resolveFeeParams)
+
+      const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(mergedTx)
+      jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+
+      const ref = captureActions()
+      await ref.current!.signTx(createSafeTx())
+
+      expect(resolveFeeParams).toHaveBeenCalledWith(
+        expect.objectContaining({ gasToken: GAS_TOKEN, numberSignatures: 2 }),
+      )
+      expect(signSpy).toHaveBeenCalledWith(mergedTx, expect.anything(), undefined)
+    })
+
+    it('skips the merge for confirmers (safeTx already has a signature)', async () => {
+      setupGtfChain()
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
+
+      const resolveFeeParams = jest.fn()
+      mockFeatureResolve(resolveFeeParams)
+
+      jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation((tx) => Promise.resolve(tx))
+      jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+
+      const signedTx = createSafeTx()
+      signedTx.addSignature({
+        signer: zeroPadValue('0x0123', 20),
+        data: '0x01',
+        staticPart: () => '0x01',
+        dynamicPart: () => '',
+        isContractSignature: false,
+      })
+
+      const ref = captureActions()
+      await ref.current!.signTx(signedTx)
+
+      expect(resolveFeeParams).not.toHaveBeenCalled()
+    })
+
+    it('skips the merge in signer-pays mode', async () => {
+      setupGtfChain()
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
+
+      const resolveFeeParams = jest.fn()
+      mockFeatureResolve(resolveFeeParams)
+
+      jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation((tx) => Promise.resolve(tx))
+      jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+
+      const ref = captureActions({ gtfPaymentMode: 'signer', gtfSelectedGasToken: undefined })
+      await ref.current!.signTx(createSafeTx())
+
+      expect(resolveFeeParams).not.toHaveBeenCalled()
     })
   })
 })

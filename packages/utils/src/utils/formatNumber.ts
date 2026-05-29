@@ -85,8 +85,28 @@ export const formatCurrency = (number: string | number, currency: string, maxLen
   return result.replace(/^(\D+)/, '$1 ')
 }
 
+// Crypto codes need more decimals than the 2-digit fiat default — a 0.0001 ETH
+// fee is meaningful and shouldn't collapse to "< 0.01".
+const CRYPTO_CURRENCIES = new Set(['BTC', 'ETH'])
+const getPrecision = (currency: string) => (CRYPTO_CURRENCIES.has(currency.toUpperCase()) ? 6 : 2)
+
+/**
+ * Currency formatter for small fees: forces fixed precision and shows
+ * "< {currency}{min}" when the value rounds to zero (e.g. "< $0.01", "< Ξ0.000001").
+ */
+export const formatCurrencyMinimal = (number: string | number, currency: string): string => {
+  const float = Number(number)
+  const precision = getPrecision(currency)
+  const min = Math.pow(10, -precision)
+  if (float > 0 && float < min / 2) {
+    return `< ${formatCurrencyPrecise(min, currency)}`
+  }
+  return formatCurrencyPrecise(number, currency)
+}
+
 export const formatCurrencyPrecise = (number: string | number, currency: string): string => {
-  const result = getCurrencyFormatter(currency, false, 2, 2).format(Number(number))
+  const precision = getPrecision(currency)
+  const result = getCurrencyFormatter(currency, false, precision, precision).format(Number(number))
   return result.replace(/^(\D+)/, '$1 ')
 }
 

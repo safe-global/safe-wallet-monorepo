@@ -51,6 +51,7 @@ export function trackTxEvents(
   origin?: string,
   isMassPayout: boolean = false,
   threshold?: number,
+  gasPaymentSource?: 'safe' | 'signing_wallet',
 ) {
   const isNestedConfirmation = !!details && isNestedConfirmationTxInfo(details.txInfo)
 
@@ -67,6 +68,9 @@ export function trackTxEvents(
     }
     if (threshold !== undefined) {
       properties[MixpanelEventParams.THRESHOLD] = threshold
+    }
+    if (gasPaymentSource !== undefined) {
+      properties[MixpanelEventParams.GAS_PAYMENT_SOURCE] = gasPaymentSource
     }
     return properties
   }
