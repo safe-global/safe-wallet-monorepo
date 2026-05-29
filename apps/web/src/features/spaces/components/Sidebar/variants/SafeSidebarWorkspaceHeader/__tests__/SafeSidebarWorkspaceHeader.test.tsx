@@ -37,19 +37,6 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '42',
 }))
 
-jest.mock('@/store', () => ({
-  useAppSelector: (selector: unknown) => (typeof selector === 'function' ? selector({}) : selector),
-}))
-
-jest.mock('@/store/authSlice', () => ({
-  isAuthenticated: () => true,
-}))
-
-const mockUseUsersGetWithWalletsV1Query = jest.fn()
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
-  useUsersGetWithWalletsV1Query: (...args: unknown[]) => mockUseUsersGetWithWalletsV1Query(...args),
-}))
-
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarMenuButton: ({
     children,
@@ -154,7 +141,6 @@ const memberMembers = [
 describe('SafeSidebarWorkspaceHeader', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: CURRENT_USER_ID } })
   })
 
   describe('variant backToSpace', () => {
@@ -309,20 +295,19 @@ describe('SafeSidebarWorkspaceHeader', () => {
       expect(spaceSelectorDropdownMock).toHaveBeenCalled()
     })
 
-    it('hides the trigger when the user is admin of zero spaces', () => {
+    it('renders SpaceSelectorDropdown even when the user is admin of zero spaces — rows handle the disabled state and tooltip', () => {
       const spaces = [
         { id: 1, name: 'A', safeCount: 1, members: memberMembers },
         { id: 2, name: 'B', safeCount: 0, members: memberMembers },
       ]
 
-      const { container } = render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces })} />)
+      render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces })} />)
 
-      expect(container).toBeEmptyDOMElement()
-      expect(spaceSelectorDropdownMock).not.toHaveBeenCalled()
+      expect(spaceSelectorDropdownMock).toHaveBeenCalled()
       expect(screen.queryByTestId('dialog-root')).not.toBeInTheDocument()
     })
 
-    it('renders the trigger when the user is admin of at least one space', () => {
+    it('renders SpaceSelectorDropdown when the user is admin of at least one space', () => {
       const spaces = [
         { id: 1, name: 'A', safeCount: 1, members: memberMembers },
         { id: 2, name: 'B', safeCount: 0, members: adminMembers },
@@ -330,7 +315,7 @@ describe('SafeSidebarWorkspaceHeader', () => {
 
       render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces })} />)
 
-      expect(screen.getByTestId('add-safe-to-workspace-button')).toBeInTheDocument()
+      expect(spaceSelectorDropdownMock).toHaveBeenCalled()
     })
 
     it('renders Add Safe to space trigger and popup inside Dialog when not in a Space', () => {
