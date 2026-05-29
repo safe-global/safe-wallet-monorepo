@@ -76,17 +76,35 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
   }
 
   // Capabilities (EIP-5792) — response is keyed by hex chain id, not CAIP-2.
+  // EIP-5792 request shape: wallet_getCapabilities(address, chainIds?).
+  // dApps (CowSwap, etc.) compare response keys against the chain THEY are operating on;
+  // keying off our app's `activeChain` instead of what the dApp asked about would miss
+  // whenever the two differ (a swap on Polygon while the active Safe is on Mainnet).
   if (method === 'wallet_getCapabilities') {
-    if (!activeChain) {
+    const [, requestedChainIds] = rpcParams as [string, string[] | undefined]
+    // The session_request envelope's params.chainId is the chain the dApp is currently
+    // bound to (a CAIP-2 like 'eip155:1'). Use that as the fallback when the dApp omits
+    // chainIds. Sessions are only approved for chains the Safe is deployed on, so
+    // anything in the envelope is safe to advertise atomic support for.
+    const envelopeChainHex = chainId.startsWith(NS) ? '0x' + Number(chainId.slice(NS.length)).toString(16) : null
+    const chainsToReport: string[] =
+      requestedChainIds && requestedChainIds.length > 0
+        ? requestedChainIds.map((c) => c.toLowerCase())
+        : envelopeChainHex
+          ? [envelopeChainHex]
+          : []
+    if (chainsToReport.length === 0) {
       return formatJsonRpcResult(id, {})
     }
     // Advertise atomic-batch support under both shapes:
-    //   - EIP-5792 current spec: `atomic.status: 'supported'` — what real-world dApps
-    //     (CowSwap, etc.) check for.
+    //   - EIP-5792 current spec: `atomic.status: 'supported'` — what real-world dApps check for.
     //   - Older draft: `atomicBatch.supported: true` (kept for dApps still on the old shape)
     const cap = { atomic: { status: 'supported' }, atomicBatch: { supported: true } }
-    const hexChain = '0x' + Number(activeChain.chainId).toString(16)
-    return formatJsonRpcResult(id, { [hexChain]: cap })
+    const result: Record<string, typeof cap> = {}
+    for (const c of chainsToReport) {
+      result[c] = cap
+    }
+    return formatJsonRpcResult(id, result)
   }
 
   // Calls status / show.
