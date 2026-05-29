@@ -24,7 +24,13 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes', () =
   },
 }))
 
+jest.mock('@/services/exceptions', () => ({
+  Errors: { _650: '650' },
+  logError: jest.fn(),
+}))
+
 const initiateMock = counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate as jest.Mock
+const logErrorMock = jest.requireMock('@/services/exceptions').logError as jest.Mock
 
 describe('counterfactualSyncListener', () => {
   const listenerMiddlewareInstance = createListenerMiddleware<RootState>()
@@ -108,18 +114,45 @@ describe('counterfactualSyncListener', () => {
 
     const error = new Error('boom')
     initiateMock.mockImplementationOnce(makeInitiateMock(() => Promise.reject(error)))
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
     const { listenerApi } = runListener(state, removeUndeployedSafe({ chainId: '1', address: '0x123' }))
     await Promise.resolve()
     await Promise.resolve()
     await Promise.resolve()
 
-    expect(consoleSpy).toHaveBeenCalled()
+    expect(logErrorMock).toHaveBeenCalledWith('650', error)
     // Failure must enqueue a pending delete so the next sync retries — otherwise
     // the next GET would resurrect the activated safe as "Not activated".
     expect(listenerApi.dispatch).toHaveBeenCalledWith(enqueuePendingCfDelete({ chainId: '1', address: '0x123' }))
-    consoleSpy.mockRestore()
+  })
+
+  it('does NOT enqueue a retry when the DELETE returns 404 (already gone)', async () => {
+    const state = authedState({ '1': { '0x123': { isCreator: true } } })
+
+    initiateMock.mockImplementationOnce(makeInitiateMock(() => Promise.reject({ status: 404, data: {} })))
+
+    const { listenerApi } = runListener(state, removeUndeployedSafe({ chainId: '1', address: '0x123' }))
+    await Promise.resolve()
+    await Promise.resolve()
+    await Promise.resolve()
+
+    // 404 = already deleted, our intended end state. No error noise, no retry queued.
+    expect(logErrorMock).not.toHaveBeenCalled()
+    expect(listenerApi.dispatch).not.toHaveBeenCalledWith(enqueuePendingCfDelete({ chainId: '1', address: '0x123' }))
+  })
+
+  it('does NOT call the DELETE API when the pre-action state has no entry for the safe', async () => {
+    // Reproduces the dup-dispatch case: useLoadSafeInfo + INDEXED event both fire
+    // removeUndeployedSafe in the same tick; the second one finds nothing in
+    // originalState and must short-circuit, otherwise it 404s and pollutes the queue.
+    const state = authedState({})
+
+    const { listenerApi } = runListener(state, removeUndeployedSafe({ chainId: '1', address: '0x123' }))
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(initiateMock).not.toHaveBeenCalled()
+    expect(listenerApi.dispatch).not.toHaveBeenCalled()
   })
 
   it('queues a pending delete (instead of calling the API) when user is not authenticated', () => {

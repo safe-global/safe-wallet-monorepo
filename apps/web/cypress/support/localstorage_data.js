@@ -975,6 +975,15 @@ export const safeLabsTerms = {
   acceptedTerms: 'true',
 }
 
+export const pendingCfDeletes = {
+  // Two ghost entries pointing at already-deleted CGW records. Used to reproduce
+  // the "[CF Sync] Failed to flush pending CF delete" 404 spam regression.
+  twoGhostEntries: [
+    { chainId: '11155111', address: '0x111111111111111111111111111111111111aaaa' },
+    { chainId: '11155111', address: '0x222222222222222222222222222222222222bbbb' },
+  ],
+}
+
 export const undeployedSafe = {
   safe1: {
     11155111: {
