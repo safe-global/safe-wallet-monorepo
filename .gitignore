@@ -122,3 +122,5 @@ todos/*
 
 .codemod
 .serena
+# Claude Code worktrees
+.claude/worktrees/
