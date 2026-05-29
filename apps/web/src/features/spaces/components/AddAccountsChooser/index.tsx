@@ -36,16 +36,18 @@ const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip 
       aria-disabled={disabled || undefined}
       title={disabled ? disabledTooltip : undefined}
       className={cn(
-        'flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors',
-        disabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-muted/60',
+        'group flex w-full items-center gap-3 rounded-md px-3 py-3 text-left text-foreground transition-colors',
+        disabled ? 'cursor-not-allowed opacity-50' : 'hover:bg-muted/60 cursor-pointer',
       )}
     >
-      <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted">{icon}</span>
-      <span className="flex-1 min-w-0">
-        <span className="block text-sm font-semibold text-foreground">{title}</span>
-        <span className="block text-xs text-muted-foreground">{subtitle}</span>
+      <span className="shrink-0 text-muted-foreground transition-colors [&_svg]:transition-colors [&_svg]:group-hover:text-accent-success">
+        {icon}
       </span>
-      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+      <span className="flex-1 min-w-0">
+        <span className="block text-sm font-semibold transition-colors group-hover:text-accent-success">{title}</span>
+        <span className="block text-xs text-muted-foreground mt-0.5">{subtitle}</span>
+      </span>
+      <ChevronRight className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-accent-success" />
     </button>
   )
 
@@ -105,9 +107,9 @@ const AddAccountsChooser = ({
       </Button>
 
       <Dialog open={chooserOpen} onOpenChange={setChooserOpen}>
-        <DialogContent showCloseButton className="max-w-[440px] p-4">
+        <DialogContent showCloseButton className="max-w-[440px] p-4 dark:border dark:border-border">
           <DialogHeader className="p-0 pb-2">
-            <DialogTitle>Add a Safe Account</DialogTitle>
+            <DialogTitle className="font-bold">Add a Safe Account</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-1">
             <ChooserRow

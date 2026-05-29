@@ -106,9 +106,12 @@ const OwnedSafesModal = ({ open, onClose }: OwnedSafesModalProps) => {
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent showCloseButton className="flex max-h-[90vh] w-full max-w-[560px] flex-col gap-0 p-0">
+      <DialogContent
+        showCloseButton
+        className="flex max-h-[90vh] w-full max-w-[560px] flex-col gap-0 p-0 dark:border dark:border-border"
+      >
         <DialogHeader className="shrink-0 border-b border-border/50 px-4 pb-3 pt-4">
-          <DialogTitle>Owned Safe Accounts</DialogTitle>
+          <DialogTitle className="font-bold">Owned Safe Accounts</DialogTitle>
         </DialogHeader>
 
         {isWalletConnected && (
