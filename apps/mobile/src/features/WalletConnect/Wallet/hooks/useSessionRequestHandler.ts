@@ -6,11 +6,14 @@ import { useToastController } from '@tamagui/toast'
 import type { RootState, AppDispatch } from '@/src/store'
 import { pushPending, removePending } from '../store/walletKitSlice'
 import { routeSessionRequest, isDeferredResponse, type RouteContext } from '../services/methodRouter'
+import { REJECTED_SIGNING_METHODS } from '../services/constants'
 
 export type SessionRequestHandlerDeps = Omit<RouteContext, 'request' | 'dispatch' | 'getState'>
 
 // Spec: "auto-reject with formatJsonRpcError(id, { code: 4100, ... }) + generic toast".
 const NO_SIGNER_ERROR_CODE = 4100
+
+const REJECTED_SIGNING_METHODS_SET: ReadonlySet<string> = new Set(REJECTED_SIGNING_METHODS)
 
 export const useSessionRequestHandler = (walletKit: IWalletKit | null, deps: SessionRequestHandlerDeps) => {
   const dispatch = useAppDispatch()
@@ -55,6 +58,12 @@ export const useSessionRequestHandler = (walletKit: IWalletKit | null, deps: Ses
       // Surface the spec-mandated toast on the no-signer auto-reject path.
       if ('error' in response && response.error?.code === NO_SIGNER_ERROR_CODE) {
         toast.show('No signer attached to this Safe', { native: false, duration: 2500 })
+      }
+      // Explain rejections of message-signing methods (eth_signTypedData_v4, personal_sign, …) —
+      // dApps like CowSwap fire these in parallel with their tx request, and without a toast
+      // the user just sees a red "unknown RPC error" in the dApp with no context.
+      if (REJECTED_SIGNING_METHODS_SET.has(request.params.request.method)) {
+        toast.show('Message signing is not yet supported on mobile', { native: false, duration: 2500 })
       }
       // Ensure no stray pending entry for this id.
       dispatch(removePending({ id: request.id, kind: 'request' }))
