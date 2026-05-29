@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Search, CircleFadingPlus, Plus } from 'lucide-react'
+import { Search, CircleFadingPlus, Plus, Wallet } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Button } from '@/components/ui/button'
@@ -23,7 +23,8 @@ import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSim
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
-import ConnectWalletPrompt from '@/features/spaces/components/SelectSafesOnboarding/components/ConnectWalletPrompt'
+import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
+import { Typography } from '@/components/ui/typography'
 import SafeItemCard from '@/components/common/SpaceSafeBar/AccountsModal/SafeItemCard'
 import MultiSafeItemCard from '@/components/common/SpaceSafeBar/AccountsModal/MultiSafeItemCard'
 import { SafeListSkeleton } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
@@ -35,6 +36,7 @@ interface OwnedSafesModalProps {
 
 const OwnedSafesModal = ({ open, onClose }: OwnedSafesModalProps) => {
   const [search, setSearch] = useState('')
+  const connectWallet = useConnectWallet()
 
   const wallet = useWallet()
   const walletAddress = wallet?.address ?? ''
@@ -136,7 +138,24 @@ const OwnedSafesModal = ({ open, onClose }: OwnedSafesModalProps) => {
           data-testid="owned-safes-list"
         >
           {!isWalletConnected ? (
-            <ConnectWalletPrompt className="py-8" testId="owned-safes-connect-wallet-button" />
+            <div className="flex flex-col items-center justify-center gap-4 py-8">
+              <Wallet className="size-12 text-muted-foreground" />
+              <Typography variant="paragraph" align="center" color="muted">
+                Connect your wallet to access all your Safes
+              </Typography>
+              <Button
+                data-testid="owned-safes-connect-wallet-button"
+                type="button"
+                size="lg"
+                className="w-full max-w-[300px]"
+                onClick={() => {
+                  onClose()
+                  connectWallet()
+                }}
+              >
+                Connect wallet
+              </Button>
+            </div>
           ) : ownedError && allItems.length === 0 ? (
             <p className="px-2 py-6 text-center text-sm text-destructive">Failed to load owned safes.</p>
           ) : ownedLoading && allItems.length === 0 ? (
@@ -166,44 +185,46 @@ const OwnedSafesModal = ({ open, onClose }: OwnedSafesModalProps) => {
           )}
         </div>
 
-        <DialogFooter className="shrink-0 flex-row gap-2 border-t border-border/50 px-4 py-3">
-          <Button
-            render={
-              <Link
-                href={AppRoutes.newSafe.load}
-                onClick={() => {
-                  trackEvent({ ...OVERVIEW_EVENTS.ADD_TO_WATCHLIST, label: OVERVIEW_LABELS.top_bar })
-                  onClose()
-                }}
-              />
-            }
-            variant="secondary"
-            size="lg"
-            className="flex-1"
-            data-testid="owned-safes-add-existing"
-          >
-            <CircleFadingPlus className="size-4" />
-            Add existing
-          </Button>
-          <Button
-            render={
-              <Link
-                href={AppRoutes.newSafe.create}
-                onClick={() => {
-                  trackEvent({ ...OVERVIEW_EVENTS.CREATE_NEW_SAFE, label: OVERVIEW_LABELS.top_bar })
-                  onClose()
-                }}
-              />
-            }
-            variant="default"
-            size="lg"
-            className="flex-1"
-            data-testid="owned-safes-create-new"
-          >
-            <Plus className="size-4 text-green-500" />
-            Create new
-          </Button>
-        </DialogFooter>
+        {isWalletConnected && (
+          <DialogFooter className="shrink-0 flex-row gap-2 border-t border-border/50 px-4 py-3">
+            <Button
+              render={
+                <Link
+                  href={AppRoutes.newSafe.load}
+                  onClick={() => {
+                    trackEvent({ ...OVERVIEW_EVENTS.ADD_TO_WATCHLIST, label: OVERVIEW_LABELS.top_bar })
+                    onClose()
+                  }}
+                />
+              }
+              variant="secondary"
+              size="lg"
+              className="flex-1"
+              data-testid="owned-safes-add-existing"
+            >
+              <CircleFadingPlus className="size-4" />
+              Add existing
+            </Button>
+            <Button
+              render={
+                <Link
+                  href={AppRoutes.newSafe.create}
+                  onClick={() => {
+                    trackEvent({ ...OVERVIEW_EVENTS.CREATE_NEW_SAFE, label: OVERVIEW_LABELS.top_bar })
+                    onClose()
+                  }}
+                />
+              }
+              variant="default"
+              size="lg"
+              className="flex-1"
+              data-testid="owned-safes-create-new"
+            >
+              <Plus className="size-4 text-green-500" />
+              Create new
+            </Button>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   )
