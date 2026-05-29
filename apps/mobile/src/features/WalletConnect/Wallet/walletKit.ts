@@ -17,7 +17,9 @@ LogBox.ignoreLogs([
   'No matching key. session:',
   'No matching key. history:',
   'No matching key. proposal id:',
-  'session topic does not exist',
+  // The bundled SDK uses the contracted form ("doesn't"); older versions emit
+  // "does not". Match either via regex so we don't have to chase phrasing changes.
+  /(session|pairing) topic (doesn't|does not) exist/,
 ])
 
 // Dual-package hazard: @walletconnect/core resolves to a newer semver in the mobile
