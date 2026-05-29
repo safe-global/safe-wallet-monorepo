@@ -25,8 +25,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   useUsersGetWithWalletsV1Query: () => ({ currentData: { id: 7 } }),
 }))
 
-const mockUseSpaceSafesGetV1Query = jest.fn(() => ({
-  currentData: undefined as { safes: Record<string, string[]> } | undefined,
+type SpaceSafesQueryResult = { currentData: { safes: Record<string, string[]> } | undefined }
+const mockUseSpaceSafesGetV1Query: jest.Mock<SpaceSafesQueryResult, unknown[]> = jest.fn(() => ({
+  currentData: undefined,
 }))
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpaceSafesGetV1Query: (...args: unknown[]) => mockUseSpaceSafesGetV1Query(...args),
