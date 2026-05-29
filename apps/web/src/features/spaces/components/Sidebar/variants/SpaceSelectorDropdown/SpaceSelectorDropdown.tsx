@@ -323,7 +323,7 @@ const SpaceMenuRow = ({
   }
 
   if (!isAdmin) {
-    return <AdminOnlyWorkspaceTooltip isAdmin={isAdmin}>{menuItem}</AdminOnlyWorkspaceTooltip>
+    return <AdminOnlyWorkspaceTooltip isAdmin={false}>{menuItem}</AdminOnlyWorkspaceTooltip>
   }
 
   if (atSafeLimit) {
