@@ -25,7 +25,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   useUsersGetWithWalletsV1Query: () => ({ currentData: { id: 7 } }),
 }))
 
-const mockUseSpaceSafesGetV1Query = jest.fn((..._args: unknown[]) => ({
+const mockUseSpaceSafesGetV1Query = jest.fn(() => ({
   currentData: undefined as { safes: Record<string, string[]> } | undefined,
 }))
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
