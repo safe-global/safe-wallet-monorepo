@@ -140,11 +140,12 @@ export const ExecuteForm = ({
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
 
-  // Safe-pays runs via Gelato, not the wallet — this hook simulates the wrong path.
-  // The wallet-as-executor simulation reverts with GS026 on owner-set drift (dev/staging)
-  // and can't see Gelato's gas budget either, so it offers no actionable signal here.
+  // Safe-pays runs via Gelato (not the wallet), so the simulated `from` doesn't match the
+  // real msg.sender on execTransaction. We still run the check, the inner-call revert that
+  // catches issues like spam-token transfers fails regardless of who calls execTransaction,
+  // and missing that signal silently in Safe-pays is worse than the simulated-from drift.
   const { executionValidationError } = useIsValidExecution(
-    requiresRelay ? undefined : safeTx,
+    safeTx,
     advancedParams.gasLimit ? advancedParams.gasLimit : undefined,
   )
 
