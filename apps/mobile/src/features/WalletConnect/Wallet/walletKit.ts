@@ -45,6 +45,14 @@ export const getWalletKit = (): Promise<IWalletKit> => {
     const core = new Core({
       projectId: REOWN_PROJECT_ID,
       storage: createMmkvStorage(WALLET_MMKV_ID),
+      // The Reown Signer (AppKit) creates its own Core for connecting external wallets.
+      // @walletconnect/core dedupes Cores via `globalThis[_walletConnectCore_<prefix>]`,
+      // so two Cores with the same (default '') prefix share one slot and clobber each
+      // other — sessions registered on one Core surface as "No matching key" on the
+      // other, and dApps (CowSwap) end up talking to a half-broken instance. Mirroring
+      // apps/web/.../WalletConnectWallet.ts: namespace this Core under `wc_dapp_` so
+      // it lives in its own global slot independent of AppKit's.
+      customStoragePrefix: 'wc_dapp_',
     }) as unknown as WalletKitCore
     const instance = await WalletKit.init({
       core,
