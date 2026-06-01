@@ -6,6 +6,7 @@ import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/s
 import { toBackendDto } from './counterfactualSafeMapper'
 import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
+import { showNotification } from '@/store/notificationsSlice'
 import { parseSpaceId } from '@/utils/spaces'
 
 type PersistArgs = {
@@ -19,6 +20,10 @@ type PersistArgs = {
   /** Whether the user is signed into the CGW session. Non-authed users can
    *  still create counterfactual safes but nothing is written to the backend. */
   isUserAuthenticated: boolean
+  /** Whether the user is an active admin of the active space. When false the
+   *  safe is not auto-attached to the space (the backend would reject the call
+   *  with 403). The safe is still persisted at the user level. */
+  isAdminOfActiveSpace: boolean
   dispatch: AppDispatch
 }
 
@@ -43,6 +48,7 @@ export const persistCounterfactualSafe = async ({
   payMethod,
   spaceId,
   isUserAuthenticated,
+  isAdminOfActiveSpace,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
   // 1. Save to backend (blocking). Unauth users fall back to local-only —
@@ -63,28 +69,40 @@ export const persistCounterfactualSafe = async ({
     // a finite number — Number('abc') is NaN and would silently hit the API.
     const numericSpaceId = parseSpaceId(spaceId)
     if (numericSpaceId !== null) {
-      const spaceResult = await dispatch(
-        spacesApi.endpoints.spaceSafesCreateV1.initiate({
-          spaceId: numericSpaceId,
-          createSpaceSafesDto: { safes: [{ chainId, address: safeAddress }] },
-        }),
-      )
-      if ('error' in spaceResult) {
-        // Roll back the user-level entry so the backend doesn't end up with
-        // a safe that the user "created" but failed to associate with their
-        // active space.
-        const rollbackResult = await dispatch(
-          counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
-            deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
+      if (!isAdminOfActiveSpace) {
+        // Backend gates this endpoint on admin role and would 403. Inform the
+        // user — the safe is still persisted at the user level above.
+        dispatch(
+          showNotification({
+            variant: 'info',
+            groupKey: 'cf-safe-space-skipped',
+            message: 'Safe added to your accounts — ask an admin to add it to the workspace',
           }),
         )
-        if ('error' in rollbackResult) {
-          // Rollback also failed — orphan now exists server-side. Queue the
-          // cleanup so the next sign-in's sync flushes it, otherwise the GET
-          // would re-surface the orphan locally as "Not activated".
-          dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
+      } else {
+        const spaceResult = await dispatch(
+          spacesApi.endpoints.spaceSafesCreateV1.initiate({
+            spaceId: numericSpaceId,
+            createSpaceSafesDto: { safes: [{ chainId, address: safeAddress }] },
+          }),
+        )
+        if ('error' in spaceResult) {
+          // Roll back the user-level entry so the backend doesn't end up with
+          // a safe that the user "created" but failed to associate with their
+          // active space.
+          const rollbackResult = await dispatch(
+            counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
+              deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
+            }),
+          )
+          if ('error' in rollbackResult) {
+            // Rollback also failed — orphan now exists server-side. Queue the
+            // cleanup so the next sign-in's sync flushes it, otherwise the GET
+            // would re-surface the orphan locally as "Not activated".
+            dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
+          }
+          return { ok: false, error: new Error('Failed to add Safe Account to space') }
         }
-        return { ok: false, error: new Error('Failed to add Safe Account to space') }
       }
     }
   }
