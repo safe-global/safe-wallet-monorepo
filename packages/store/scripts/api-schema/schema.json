@@ -9179,9 +9179,15 @@
           "safes"
         ]
       },
-      "InviteUserDto": {
+      "WalletInviteUserDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "wallet"
+            ]
+          },
           "address": {
             "type": "string"
           },
@@ -9199,7 +9205,42 @@
           }
         },
         "required": [
+          "type",
           "address",
+          "name",
+          "role"
+        ]
+      },
+      "EmailInviteUserDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "email"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 255
+          },
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 30
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "MEMBER"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "email",
           "name",
           "role"
         ]
@@ -9210,7 +9251,14 @@
           "users": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/InviteUserDto"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/WalletInviteUserDto"
+                },
+                {
+                  "$ref": "#/components/schemas/EmailInviteUserDto"
+                }
+              ]
             }
           }
         },

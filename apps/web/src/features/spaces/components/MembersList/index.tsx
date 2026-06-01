@@ -6,22 +6,24 @@ import EnhancedTable from '@/components/common/EnhancedTable'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberDialog'
+import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useIsAdmin, isAdmin as checkIsAdmin, isActiveAdmin, MemberStatus, useAdminCount } from '@/features/spaces'
 import EditMemberDialog from './EditMemberDialog'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 
+type MembersListCell = {
+  content: ReactNode
+  rawValue: string | number | null
+  sticky?: boolean
+}
+
 const headCells = [
   {
     id: 'name',
     label: 'Name',
-    width: '40%',
-  },
-  {
-    id: 'email',
-    label: 'Email',
-    width: '30%',
+    width: '70%',
   },
   {
     id: 'role',
@@ -34,6 +36,20 @@ const headCells = [
     width: '15%',
     sticky: true,
   },
+]
+
+const headCellsWithEmail = [
+  {
+    id: 'name',
+    label: 'Name',
+    width: '40%',
+  },
+  {
+    id: 'email',
+    label: 'Email',
+    width: '30%',
+  },
+  ...headCells.slice(1),
 ]
 
 const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean }) => {
@@ -93,7 +109,7 @@ export const RemoveMemberButton = ({
   )
 }
 
-const MembersList = ({ members }: { members: MemberDto[] }) => {
+const MembersList = ({ members, showEmail = false }: { members: MemberDto[]; showEmail?: boolean }) => {
   const isAdmin = useIsAdmin()
   const adminCount = useAdminCount(members)
 
@@ -102,58 +118,68 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     const isInvite = member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED
     const isDeclined = member.status === MemberStatus.DECLINED
     const isDisabled = isAdmin && isLastAdmin && !isInvite
-    const memberEmail = member.user.email
-
-    return {
-      cells: {
-        name: {
-          rawValue: member.name,
-          content: (
-            <Stack direction="row" alignItems="center" justifyContent="left" gap={1}>
-              <MemberName member={member} />
-              {isDeclined && (
-                <Chip
-                  label="Declined"
-                  size="small"
-                  sx={{ backgroundColor: 'error.light', color: 'static.main', borderRadius: 0.5 }}
-                />
-              )}
-            </Stack>
-          ),
-        },
-        email: {
-          rawValue: memberEmail,
-          content: memberEmail ? <Typography variant="body2">{memberEmail}</Typography> : null,
-        },
-        role: {
-          rawValue: member.role,
-          content: (
+    const nameCell = {
+      rawValue: member.name,
+      content: (
+        <Stack direction="row" alignItems="center" justifyContent="left" gap={1}>
+          <MemberName member={member} />
+          {isDeclined && (
             <Chip
+              label="Declined"
               size="small"
-              label={checkIsAdmin(member) ? 'Admin' : 'Member'}
-              sx={{ backgroundColor: 'background.lightgrey', borderRadius: 0.5 }}
+              sx={{ backgroundColor: 'error.light', color: 'static.main', borderRadius: 0.5 }}
             />
-          ),
-        },
-        actions: {
-          rawValue: '',
-          sticky: true,
-          content: isAdmin ? (
-            <div className={tableCss.actions}>
-              {!isInvite && <EditButton member={member} disabled={isDisabled} />}
-              <RemoveMemberButton member={member} disabled={isDisabled} isInvite={isInvite} />
-            </div>
-          ) : null,
-        },
-      },
+          )}
+        </Stack>
+      ),
     }
+
+    const roleCell = {
+      rawValue: member.role,
+      content: (
+        <Chip
+          size="small"
+          label={checkIsAdmin(member) ? 'Admin' : 'Member'}
+          sx={{ backgroundColor: 'background.lightgrey', borderRadius: 0.5 }}
+        />
+      ),
+    }
+
+    const actionsCell = {
+      rawValue: '',
+      sticky: true,
+      content: isAdmin ? (
+        <div className={tableCss.actions}>
+          {!isInvite && <EditButton member={member} disabled={isDisabled} />}
+          <RemoveMemberButton member={member} disabled={isDisabled} isInvite={isInvite} />
+        </div>
+      ) : null,
+    }
+
+    const cells: Record<string, MembersListCell> = showEmail
+      ? {
+          name: nameCell,
+          email: {
+            rawValue: member.user.email,
+            content: member.user.email ? <Typography variant="body2">{member.user.email}</Typography> : null,
+          },
+          role: roleCell,
+          actions: actionsCell,
+        }
+      : {
+          name: nameCell,
+          role: roleCell,
+          actions: actionsCell,
+        }
+
+    return { cells }
   })
 
   if (!rows.length) {
     return null
   }
 
-  return <EnhancedTable rows={rows} headCells={headCells} />
+  return <EnhancedTable rows={rows} headCells={showEmail ? headCellsWithEmail : headCells} />
 }
 
 export default MembersList
