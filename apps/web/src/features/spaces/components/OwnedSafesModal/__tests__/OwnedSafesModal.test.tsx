@@ -116,7 +116,7 @@ describe('OwnedSafesModal', () => {
     expect(screen.queryByTestId('owned-safes-create-new')).not.toBeInTheDocument()
   })
 
-  it('closes the modal and triggers connectWallet when the connect button is clicked', () => {
+  it('triggers connectWallet without closing the modal when the connect button is clicked', () => {
     mockWalletAddress = null
     const onClose = jest.fn()
 
@@ -124,8 +124,24 @@ describe('OwnedSafesModal', () => {
 
     fireEvent.click(screen.getByTestId('owned-safes-connect-wallet-button'))
 
-    expect(onClose).toHaveBeenCalledTimes(1)
     expect(mockConnectWallet).toHaveBeenCalledTimes(1)
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('swaps from the connect-wallet prompt to the owned-safes list once a wallet connects', () => {
+    mockWalletAddress = null
+    mockAllOwned = { '1': ['0xSafe1'] }
+
+    const { rerender } = render(<OwnedSafesModal open onClose={noop} />)
+
+    expect(screen.getByTestId('owned-safes-connect-wallet-button')).toBeInTheDocument()
+    expect(screen.queryByTestId('safe-item-card')).not.toBeInTheDocument()
+
+    mockWalletAddress = '0xWallet'
+    rerender(<OwnedSafesModal open onClose={noop} />)
+
+    expect(screen.queryByTestId('owned-safes-connect-wallet-button')).not.toBeInTheDocument()
+    expect(screen.getByTestId('safe-item-card')).toBeInTheDocument()
   })
 
   it('renders the footer buttons when a wallet is connected', () => {

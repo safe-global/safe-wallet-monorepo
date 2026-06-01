@@ -135,10 +135,7 @@ const OwnedSafesModal = ({ open, onClose }: OwnedSafesModalProps) => {
                 type="button"
                 size="lg"
                 className="w-full max-w-[300px]"
-                onClick={() => {
-                  onClose()
-                  connectWallet()
-                }}
+                onClick={() => connectWallet()}
               >
                 Connect wallet
               </Button>
