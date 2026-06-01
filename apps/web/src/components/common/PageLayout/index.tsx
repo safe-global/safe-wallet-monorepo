@@ -22,6 +22,7 @@ import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
+import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import { isAlwaysPublic } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import ClassicViewToast from '@/components/common/ClassicViewToast'
 import ClassicViewWarningBorder from '@/components/common/ClassicViewWarningBorder'
@@ -55,12 +56,12 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const { SelectSafeModal } = useLoadFeature(SpacesFeature)
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
   const isRequireLoginEnabled = useIsRequireLoginEnabled() === true
-  // /welcome/spaces is the canonical login page when the require-login gate is
-  // on (and the Topbar's URL-derived hooks then add SSR hydration noise on top
-  // of being pointless). When the gate is off the page is the legacy Spaces
-  // list and keeps its Topbar.
+  const isSignedIn = useIsSignedIn()
+  // /welcome/spaces renders the sign-in form when signed out, the legacy
+  // workspaces list when signed in. Only the list needs the Topbar.
   const hideHeader =
-    NO_HEADER_ROUTES.includes(pathname) || (isRequireLoginEnabled && pathname === AppRoutes.welcome.spaces)
+    NO_HEADER_ROUTES.includes(pathname) ||
+    (pathname === AppRoutes.welcome.spaces && (isRequireLoginEnabled || !isSignedIn))
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
   const urlSafeAddress = useSafeAddressFromUrl()
