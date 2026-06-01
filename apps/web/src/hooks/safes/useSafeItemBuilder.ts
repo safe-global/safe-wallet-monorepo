@@ -15,7 +15,7 @@ export interface UseSafeItemBuilderResult {
   buildSafeItem: SafeItemBuilder
   walletAddress: string
   isWalletConnected: boolean
-  allOwned: ReturnType<typeof useAllOwnedSafes>[0]
+  allOwned: AllOwnedSafes
   ownedError: ReturnType<typeof useAllOwnedSafes>[1]
   ownedLoading: ReturnType<typeof useAllOwnedSafes>[2]
 }
