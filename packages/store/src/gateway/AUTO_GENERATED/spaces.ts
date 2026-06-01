@@ -465,7 +465,8 @@ export type UserDto = {
 export type SpaceMemberDto = {
   role: 'ADMIN' | 'MEMBER'
   name: string
-  invitedBy: string
+  invitedBy: number | null
+  invitedByName?: string
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   user: UserDto
 }
@@ -504,7 +505,7 @@ export type Invitation = {
   spaceId: number
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
-  invitedBy?: string | null
+  invitedBy: number | null
 }
 export type InviteUserDto = {
   address: string
@@ -528,7 +529,7 @@ export type MemberDto = {
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   name: string
   alias?: string | null
-  invitedBy?: string | null
+  invitedBy: number | null
   createdAt: string
   updatedAt: string
   user: MemberUser
