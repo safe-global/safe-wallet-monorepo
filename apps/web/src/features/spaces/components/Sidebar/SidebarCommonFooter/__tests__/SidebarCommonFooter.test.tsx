@@ -67,10 +67,12 @@ jest.mock('@/components/ui/tooltip', () => ({
   TooltipTrigger: ({
     children,
     render,
+    className,
   }: {
     children: ReactNode
-    render: React.ReactElement<{ children?: ReactNode }>
-  }) => React.cloneElement(render, {}, children),
+    render?: React.ReactElement<{ children?: ReactNode }>
+    className?: string
+  }) => (render ? React.cloneElement(render, {}, children) : <div className={className}>{children}</div>),
   TooltipContent: ({ children }: { children: ReactNode }) => <div role="tooltip">{children}</div>,
 }))
 
@@ -185,6 +187,11 @@ describe('SidebarCommonFooter', () => {
   it('renders the indexing status next to Help', () => {
     render(<SidebarCommonFooter />)
     expect(screen.getByTestId('indexing-status')).toBeInTheDocument()
+  })
+
+  it('renders the Help center tooltip', () => {
+    render(<SidebarCommonFooter />)
+    expect(screen.getByRole('tooltip', { name: /Help center/i })).toBeInTheDocument()
   })
 
   it('opens help menu when Help button is clicked', () => {

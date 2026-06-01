@@ -2,6 +2,14 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
 
+jest.mock('@/components/ui/tooltip', () => ({
+  Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({ children, className }: { children: ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  ),
+  TooltipContent: () => null,
+}))
+
 const mockSetIsCollapsed = jest.fn()
 let mockIsCollapsed: boolean | undefined = undefined
 let mockSidebarState: 'expanded' | 'collapsed' = 'expanded'
@@ -197,6 +205,18 @@ describe('ApiCtaSidebar', () => {
       expect(link).toHaveAttribute('href', 'https://developer.safe.global/login')
       expect(link).toHaveAttribute('target', '_blank')
       expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+    })
+  })
+
+  describe('tooltip', () => {
+    it('wraps the icon and label together in a tooltip trigger on the collapsed button', () => {
+      mockIsCollapsed = true
+      render(<ApiCtaSidebar />)
+
+      const trigger = document.querySelector('.flex.items-center.gap-3')
+      expect(trigger).toBeInTheDocument()
+      expect(trigger).toHaveTextContent('API')
+      expect(trigger?.querySelector('img[alt="API"]')).toBeInTheDocument()
     })
   })
 })

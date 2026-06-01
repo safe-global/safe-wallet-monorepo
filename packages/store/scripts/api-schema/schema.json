@@ -427,14 +427,33 @@
             }
           },
           {
-            "name": "fiatCode",
+            "name": "sync",
             "required": false,
             "in": "query",
-            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
+            "description": "If true, waits for position data to be aggregated before responding (up to 30s)",
             "schema": {
-              "default": "USD",
-              "example": "USD",
-              "type": "string"
+              "example": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "excludeDust",
+            "required": false,
+            "in": "query",
+            "description": "If true, filters out dust positions (balance < $0.001 USD)",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "If true, only returns trusted tokens",
+            "schema": {
+              "example": true,
+              "type": "boolean"
             }
           },
           {
@@ -448,36 +467,13 @@
             }
           },
           {
-            "name": "trusted",
+            "name": "fiatCode",
             "required": false,
             "in": "query",
-            "description": "If true, only returns trusted tokens",
+            "description": "Fiat currency code for balance conversion (e.g., USD, EUR)",
             "schema": {
-              "default": true,
-              "example": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "excludeDust",
-            "required": false,
-            "in": "query",
-            "description": "If true, filters out dust positions (balance < $0.001 USD)",
-            "schema": {
-              "default": true,
-              "example": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "sync",
-            "required": false,
-            "in": "query",
-            "description": "If true, waits for position data to be aggregated before responding (up to 30s)",
-            "schema": {
-              "default": false,
-              "example": false,
-              "type": "boolean"
+              "example": "USD",
+              "type": "string"
             }
           }
         ],
@@ -2074,7 +2070,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "User is not a member of this space or wallet authentication required"
+            "description": "User is not a member of this space"
           }
         },
         "summary": "Upsert private address book entries",
@@ -2113,7 +2109,7 @@
             "description": "Private address book entry deleted successfully"
           },
           "403": {
-            "description": "User is not a member or wallet authentication required"
+            "description": "User is not a member of this space"
           },
           "404": {
             "description": "Entry not found"
@@ -2202,7 +2198,7 @@
             }
           },
           "403": {
-            "description": "User is not a member or wallet authentication required"
+            "description": "User is not a member of this space"
           },
           "404": {
             "description": "Private contact not found"
@@ -2247,7 +2243,7 @@
             "description": "Only pending requests can be approved"
           },
           "403": {
-            "description": "User is not an admin or wallet authentication required"
+            "description": "User is not an admin of this space"
           },
           "404": {
             "description": "Request not found"
@@ -2292,7 +2288,7 @@
             "description": "Only pending requests can be rejected"
           },
           "403": {
-            "description": "User is not an admin or wallet authentication required"
+            "description": "User is not an admin of this space"
           },
           "404": {
             "description": "Request not found"
@@ -3206,6 +3202,121 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/surveys/{slug}/state": {
+      "get": {
+        "description": "Returns the active survey definition and this space's response (if any) in a single round trip. Only active admins of the space can read survey state.",
+        "operationId": "surveysGetStateV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "onboarding",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveyStateDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "User is not an active admin of this space"
+          },
+          "404": {
+            "description": "No active survey for this slug"
+          }
+        },
+        "summary": "Get survey state for a space",
+        "tags": [
+          "surveys"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/surveys/{slug}/responses": {
+      "post": {
+        "description": "Submits or updates the space's response to the active survey for the given slug. Only active admins of the space can submit. Idempotent: repeat submissions overwrite the previous response.",
+        "operationId": "surveysSubmitResponseV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "onboarding",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitSurveyResponseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveyResponseResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Empty selections or unknown option keys"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "User is not an active admin of this space"
+          },
+          "404": {
+            "description": "No active survey for this slug"
+          }
+        },
+        "summary": "Submit a survey response for a space",
+        "tags": [
+          "surveys"
+        ]
+      }
+    },
     "/v1/chains/{chainId}/owners/{ownerAddress}/safes": {
       "get": {
         "description": "Retrieves a list of Safe addresses that are owned by the specified address on a specific chain.",
@@ -3345,7 +3456,7 @@
     },
     "/v1/chains/{chainId}/relay": {
       "post": {
-        "description": "Relays a Safe transaction using the relay service, which pays for gas fees. The transaction must meet certain criteria and the Safe must have remaining relay quota.",
+        "description": "Relays a Safe transaction or Safe creation transaction using the relay service, which pays for gas fees. Supports execTransaction (Safe tx) and createProxyWithNonce (Safe creation) calldata. On relay-fee chains, safeTxHash is required and must match the hash derived on-chain from the submitted calldata.",
         "operationId": "relayRelayV1",
         "parameters": [
           {
@@ -3361,7 +3472,7 @@
         ],
         "requestBody": {
           "required": true,
-          "description": "Transaction data to relay including Safe address, transaction details, and signatures",
+          "description": "Transaction data to relay. safeTxHash is required on relay-fee chains and must correspond to the to + data fields.",
           "content": {
             "application/json": {
               "schema": {
@@ -3372,7 +3483,7 @@
         },
         "responses": {
           "200": {
-            "description": "Transaction relayed successfully with transaction hash",
+            "description": "Transaction relayed successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -3382,7 +3493,13 @@
             }
           },
           "400": {
-            "description": "Invalid transaction data, unofficial contracts, or unsupported operation"
+            "description": "Request body failed schema validation"
+          },
+          "403": {
+            "description": "Relay denied: safeTxHash missing, fee service rejected, or unofficial proxy factory"
+          },
+          "422": {
+            "description": "safeTxHash does not match the transaction data, or unrecognised transaction type"
           },
           "429": {
             "description": "Relay limit reached for this Safe"
@@ -3442,7 +3559,7 @@
     },
     "/v1/chains/{chainId}/relay/{safeAddress}": {
       "get": {
-        "description": "Retrieves the number of remaining relay transactions available for a specific Safe on the given chain.",
+        "description": "Retrieves the number of remaining relay transactions available for a specific Safe on the given chain. On relay-fee chains, safeTxHash is forwarded to the fee service to determine per-transaction eligibility (returns remaining=1 when eligible, 0 when not). On daily-limit and no-fee-campaign chains, a count-based quota is returned.",
         "operationId": "relayGetRelaysRemainingV1",
         "parameters": [
           {
@@ -3468,7 +3585,7 @@
             "name": "safeTxHash",
             "required": false,
             "in": "query",
-            "description": "Safe transaction hash (0x prefixed hex string). Required for chains enabled for relay-fee relayer",
+            "description": "Safe transaction hash (0x prefixed hex string). Required on relay-fee chains to check per-transaction eligibility with the fee service. Optional on daily-limit and no-fee-campaign chains.",
             "schema": {
               "type": "string"
             }
@@ -5357,28 +5474,10 @@
             }
           },
           {
-            "name": "safe",
+            "name": "cursor",
             "required": false,
             "in": "query",
-            "description": "Filter by Safe address",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegate",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegate address",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegator",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegator address",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -5393,10 +5492,28 @@
             }
           },
           {
-            "name": "cursor",
+            "name": "delegator",
             "required": false,
             "in": "query",
-            "description": "Pagination cursor for retrieving the next set of results",
+            "description": "Filter by delegator address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate address",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safe",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Safe address",
             "schema": {
               "type": "string"
             }
@@ -5587,28 +5704,10 @@
             }
           },
           {
-            "name": "safe",
+            "name": "cursor",
             "required": false,
             "in": "query",
-            "description": "Filter by Safe address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegate",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegate address (0x prefixed hex string)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "delegator",
-            "required": false,
-            "in": "query",
-            "description": "Filter by delegator address (0x prefixed hex string)",
+            "description": "Pagination cursor for retrieving the next set of results",
             "schema": {
               "type": "string"
             }
@@ -5623,10 +5722,28 @@
             }
           },
           {
-            "name": "cursor",
+            "name": "delegator",
             "required": false,
             "in": "query",
-            "description": "Pagination cursor for retrieving the next set of results",
+            "description": "Filter by delegator address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safe",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Safe address (0x prefixed hex string)",
             "schema": {
               "type": "string"
             }
@@ -6123,6 +6240,10 @@
           "signerAddress": {
             "type": "string",
             "description": "Wallet signer address. Present only for SIWE-authenticated users."
+          },
+          "email": {
+            "type": "string",
+            "description": "Verified email address. Present only for OIDC-authenticated users when stored."
           }
         },
         "required": [
@@ -8044,6 +8165,11 @@
             "description": "Number of signatures required for execution",
             "example": 2,
             "minimum": 1
+          },
+          "fiatCode": {
+            "type": "string",
+            "description": "Fiat currency code for relay cost conversion (e.g. EUR, GBP). Defaults to USD.",
+            "example": "EUR"
           }
         },
         "required": [
@@ -8110,6 +8236,25 @@
           "numberSignatures"
         ]
       },
+      "FeePreviewRelayCost": {
+        "type": "object",
+        "properties": {
+          "fiatCode": {
+            "type": "string",
+            "description": "Fiat currency code",
+            "example": "USD"
+          },
+          "fiatValue": {
+            "type": "string",
+            "description": "Relay cost as a string",
+            "example": "0.0025"
+          }
+        },
+        "required": [
+          "fiatCode",
+          "fiatValue"
+        ]
+      },
       "PriceSource": {
         "type": "string",
         "enum": [
@@ -8138,9 +8283,9 @@
             "description": "Price snapshot Unix timestamp",
             "example": 1700000000
           },
-          "gasVolatilityBuffer": {
+          "gasPriceVolatilityBuffer": {
             "type": "number",
-            "description": "Gas volatility buffer multiplier",
+            "description": "Gas price volatility buffer multiplier",
             "example": 1.3
           }
         },
@@ -8148,7 +8293,7 @@
           "phase",
           "priceSource",
           "priceTimestamp",
-          "gasVolatilityBuffer"
+          "gasPriceVolatilityBuffer"
         ]
       },
       "FeePreviewResponse": {
@@ -8157,10 +8302,8 @@
           "txData": {
             "$ref": "#/components/schemas/FeePreviewTxData"
           },
-          "relayCostUsd": {
-            "type": "number",
-            "description": "Relay cost in USD",
-            "example": 38.22
+          "relayCost": {
+            "$ref": "#/components/schemas/FeePreviewRelayCost"
           },
           "pricingContextSnapshot": {
             "$ref": "#/components/schemas/FeePreviewPricingContext"
@@ -8168,7 +8311,7 @@
         },
         "required": [
           "txData",
-          "relayCostUsd",
+          "relayCost",
           "pricingContextSnapshot"
         ]
       },
@@ -8596,10 +8739,20 @@
             }
           },
           "createdBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Email or wallet address of the creator, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "createdByUserId": {
+            "type": "number",
+            "description": "User ID of the creator"
           },
           "lastUpdatedBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Email or wallet address of the last editor, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "lastUpdatedByUserId": {
+            "type": "number",
+            "description": "User ID of the last editor"
           },
           "createdAt": {
             "format": "date-time",
@@ -8615,7 +8768,9 @@
           "address",
           "chainIds",
           "createdBy",
+          "createdByUserId",
           "lastUpdatedBy",
+          "lastUpdatedByUserId",
           "createdAt",
           "updatedAt"
         ]
@@ -8690,7 +8845,12 @@
             }
           },
           "createdBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Email or wallet address of the creator, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "createdByUserId": {
+            "type": "number",
+            "description": "User ID of the creator"
           },
           "createdAt": {
             "type": "object"
@@ -8704,6 +8864,7 @@
           "address",
           "chainIds",
           "createdBy",
+          "createdByUserId",
           "createdAt",
           "updatedAt"
         ]
@@ -8745,7 +8906,22 @@
             }
           },
           "requestedBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Email or wallet address of the requester, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "requestedByUserId": {
+            "type": "number",
+            "description": "User ID of the requester"
+          },
+          "reviewedBy": {
+            "type": "string",
+            "nullable": true,
+            "description": "Email or wallet address of the reviewing admin, \"Unknown user\", \"Deleted user\", or null when still PENDING"
+          },
+          "reviewedByUserId": {
+            "type": "number",
+            "nullable": true,
+            "description": "User ID of the reviewing admin, null when still PENDING"
           },
           "status": {
             "type": "string",
@@ -8770,6 +8946,9 @@
           "address",
           "chainIds",
           "requestedBy",
+          "requestedByUserId",
+          "reviewedBy",
+          "reviewedByUserId",
           "status",
           "createdAt",
           "updatedAt"
@@ -9100,11 +9279,16 @@
               "PENDING",
               "ACTIVE"
             ]
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
           "id",
-          "status"
+          "status",
+          "email"
         ]
       },
       "MemberDto": {
@@ -9416,6 +9600,234 @@
           "safes"
         ]
       },
+      "SurveyOptionDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label"
+        ]
+      },
+      "SurveyPageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "multiSelect": {
+            "type": "boolean"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SurveyOptionDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "subtitle",
+          "multiSelect",
+          "options"
+        ]
+      },
+      "SurveyContentDto": {
+        "type": "object",
+        "properties": {
+          "pages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SurveyPageDto"
+            }
+          }
+        },
+        "required": [
+          "pages"
+        ]
+      },
+      "SurveyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "surveyContent": {
+            "$ref": "#/components/schemas/SurveyContentDto"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "version",
+          "title",
+          "subtitle",
+          "surveyContent"
+        ]
+      },
+      "SpaceSurveyResponseDto": {
+        "type": "object",
+        "properties": {
+          "surveyVersion": {
+            "type": "number"
+          },
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Map from page id → selected option keys"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "answeredByUserId": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "surveyVersion",
+          "selections",
+          "submittedAt",
+          "updatedAt",
+          "answeredByUserId"
+        ]
+      },
+      "SurveyStateDto": {
+        "type": "object",
+        "properties": {
+          "survey": {
+            "$ref": "#/components/schemas/SurveyDto"
+          },
+          "surveyResponse": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpaceSurveyResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "survey",
+          "surveyResponse"
+        ]
+      },
+      "SubmitSurveyResponseDto": {
+        "type": "object",
+        "properties": {
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Map from page id → selected option keys",
+            "example": {
+              "use_cases": [
+                "run_payments",
+                "hold_assets"
+              ]
+            }
+          }
+        },
+        "required": [
+          "selections"
+        ]
+      },
+      "SurveyResponseResultDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "spaceId": {
+            "type": "number"
+          },
+          "surveySlug": {
+            "type": "string"
+          },
+          "surveyVersion": {
+            "type": "number"
+          },
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "answeredByUserId": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "spaceId",
+          "surveySlug",
+          "surveyVersion",
+          "selections",
+          "submittedAt",
+          "updatedAt",
+          "answeredByUserId"
+        ]
+      },
       "SafeList": {
         "type": "object",
         "properties": {
@@ -9606,6 +10018,7 @@
           },
           "provider": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SafeAppProvider"
@@ -9687,6 +10100,7 @@
           },
           "fallbackHandler": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddressInfo"
@@ -9695,6 +10109,7 @@
           },
           "guard": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddressInfo"
@@ -10936,6 +11351,7 @@
           },
           "implementation": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddressInfo"
@@ -11594,6 +12010,7 @@
           },
           "fees": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/BridgeFee"
@@ -11608,6 +12025,7 @@
           },
           "toToken": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/TokenInfo"
@@ -11781,6 +12199,7 @@
           },
           "fees": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/BridgeFee"
@@ -12566,6 +12985,7 @@
           },
           "dataDecoded": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/DataDecoded"
@@ -12667,6 +13087,12 @@
           "gasToken": {
             "type": "string"
           },
+          "fee": {
+            "type": "string"
+          },
+          "payment": {
+            "type": "string"
+          },
           "refundReceiver": {
             "$ref": "#/components/schemas/AddressInfo"
           },
@@ -12675,6 +13101,7 @@
           },
           "executor": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddressInfo"
@@ -12703,6 +13130,7 @@
             }
           },
           "gasTokenInfo": {
+            "type": "object",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/NativeToken"
@@ -12721,6 +13149,7 @@
           },
           "proposer": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddressInfo"
@@ -12729,6 +13158,7 @@
           },
           "proposedByDelegate": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddressInfo"
@@ -12744,6 +13174,8 @@
           "baseGas",
           "gasPrice",
           "gasToken",
+          "fee",
+          "payment",
           "refundReceiver",
           "safeTxHash",
           "signers",
@@ -12869,6 +13301,7 @@
           },
           "txData": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/TransactionData"
@@ -12876,6 +13309,7 @@
             ]
           },
           "detailedExecutionInfo": {
+            "type": "object",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/MultisigExecutionDetails"
@@ -12892,6 +13326,7 @@
           },
           "safeAppInfo": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SafeAppInfo"
@@ -12994,6 +13429,9 @@
           "fee": {
             "type": "object"
           },
+          "payment": {
+            "type": "object"
+          },
           "origin": {
             "type": "object"
           },
@@ -13036,6 +13474,7 @@
           "ethGasPrice",
           "gasUsed",
           "fee",
+          "payment",
           "origin",
           "confirmationsRequired",
           "confirmations",
@@ -13198,6 +13637,7 @@
             ]
           },
           "executionInfo": {
+            "type": "object",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/MultisigExecutionInfo"
@@ -13210,6 +13650,7 @@
           },
           "safeAppInfo": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SafeAppInfo"
@@ -13754,6 +14195,7 @@
           },
           "dataDecoded": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/DataDecoded"

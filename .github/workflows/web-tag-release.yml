@@ -30,22 +30,22 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
         with:
           ref: main
           fetch-depth: 0
           token: ${{ secrets.RELEASE_BOT_TOKEN }}
 
       - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v7
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
           git_user_signingkey: true
           git_tag_gpgsign: true
           git_config_global: true
-          git_committer_name: 'github-actions[bot]'
-          git_committer_email: 'github-actions[bot]@users.noreply.github.com'
+          git_committer_name: 'GH Signer Bot'
+          git_committer_email: 'gh-signer-bot@safe.global'
 
       - name: Verify PR commits are in main
         if: github.event.pull_request.merged != true
@@ -106,14 +106,26 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_BOT_TOKEN }}
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_config_global: true
+          git_committer_name: 'GH Signer Bot'
+          git_committer_email: 'gh-signer-bot@safe.global'
 
       - name: Create GitHub release (draft)
         if: needs.tag.outputs.version
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         id: create_release
         with:
           draft: true
@@ -144,7 +156,7 @@ jobs:
         working-directory: apps/web
 
       - name: Generate artifact attestation
-        uses: actions/attest@v4
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
           subject-path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 
@@ -153,19 +165,19 @@ jobs:
         working-directory: apps/web
 
       - name: Upload archive as release asset
-        uses: shogo82148/actions-upload-release-asset@v1
+        uses: shogo82148/actions-upload-release-asset@ee2ae851dc5d938b90075b3ef12c540abfd1ee72 # v1.10.1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 
       - name: Upload checksum as release asset
-        uses: shogo82148/actions-upload-release-asset@v1
+        uses: shogo82148/actions-upload-release-asset@ee2ae851dc5d938b90075b3ef12c540abfd1ee72 # v1.10.1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -196,8 +208,8 @@ jobs:
           REPO: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "GH Signer Bot"
+          git config user.email "gh-signer-bot@safe.global"
 
           # Fetch latest changes
           git fetch origin main dev
@@ -207,7 +219,7 @@ jobs:
           git checkout -B "$BRANCH_NAME" origin/dev
 
           # Attempt to merge main into the branch
-          if git merge origin/main -m "chore: back-merge main to dev after release ${VERSION}"; then
+          if git merge -S origin/main -m "chore: back-merge main to dev after release ${VERSION}"; then
             git push origin "$BRANCH_NAME"
 
             # Create PR body file to avoid shell interpolation issues

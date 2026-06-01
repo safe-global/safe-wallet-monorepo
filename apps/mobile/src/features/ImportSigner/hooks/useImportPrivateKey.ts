@@ -59,7 +59,6 @@ export const useImportPrivateKey = () => {
       }
 
       try {
-        // Store the private key
         await storePrivateKey(wallet.address, trimmedInput)
 
         // Create a delegate for this owner

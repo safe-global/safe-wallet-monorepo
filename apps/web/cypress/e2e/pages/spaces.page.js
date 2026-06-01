@@ -20,7 +20,7 @@ const spaceSaveBtn = '[data-testid="space-save-button"]'
 const spaceDeleteBtn = '[data-testid="space-delete-button"]'
 const spaceConfirmDeleteBtn = '[data-testid="space-confirm-delete-button"]'
 const spaceCard = '[data-testid="space-card"]'
-const spaceVertMenuIcon = '[data-testid="MoreVertIcon"]'
+const spaceCardContextMenuBtn = '[data-testid="space-card-context-menu-button"]'
 const contectMenuRemoveBtn = '[data-testid="remove-button"]'
 
 // -- Dashboard widgets --
@@ -59,7 +59,7 @@ const safeSelectorThreshold = '[data-testid="safe-selector-threshold"]'
 const safeLevelNavigation = '[data-testid="safe-level-navigation"]'
 const spaceSafesNavigationBlock = '[data-testid="space-safes-navigation-block"]'
 const spaceChainNavigationButton = '[data-testid="space-chain-navigation-button"]'
-const backToSpaceBtn = '[aria-label="Back to space"]'
+const backToSpaceBtn = '[aria-label="Back to workspace"]'
 const safeLevelNavigationBackToSpaceBtn = `${safeLevelNavigation} ${backToSpaceBtn}`
 
 // -- Space sidebar items --
@@ -93,10 +93,15 @@ const acceptInviteBtn = '[data-testid="accept-invite-button"]'
 const inviteNameInput = '[data-testid="invite-name-input"]'
 const confirmAcceptInviteBtn = '[data-testid="confirm-accept-invite-button"]'
 
+// -- Sidebar profile (sign-out) --
+const sidebarProfileTrigger = '[data-testid="sidebar-profile-trigger"]'
+const sidebarProfilePopover = '[data-testid="sidebar-profile-popover"]'
+const sidebarProfileSignOutBtn = '[data-testid="sidebar-profile-sign-out"]'
+const continueWithWalletBtn = '[data-testid="continue-with-wallet-btn"]'
+
 // -- Onboarding --
 const orgSpaceInput = '[data-testid="space-name-input"]'
 const createSpaceOnboardingContinueBtn = '[data-testid="create-space-onboarding-continue-button"]'
-const selectSafesSkipBtn = '[data-testid="select-safes-skip-button"]'
 const inviteMembersSkipBtn = '[data-testid="invite-members-skip-button"]'
 const onboardingCreateSpacePath = '/welcome/create-space'
 const onboardingSelectSafesPath = '/welcome/select-safes'
@@ -111,7 +116,7 @@ export const importAddressBookLabel = 'Import address book'
 export const dashboardAddMemberBtn = '[data-testid="add-member-button"]'
 export const inviteMemberLabel = 'Add member'
 export const learnMoreBtn = '[data-testid="spaces-learn-more-button"]'
-export const exploreSpacesLabel = 'Introducing spaces'
+export const exploreSpacesLabel = 'Introducing workspaces'
 
 // ===========================================
 // Labels & regex patterns
@@ -166,7 +171,30 @@ const spaceDashboardWidgetSelectorByTitle = {
 // ===========================================
 
 export function clickOnSignInBtn() {
-  cy.get('[data-testid="continue-with-wallet-btn"]').click()
+  cy.get(continueWithWalletBtn).click()
+}
+
+export function signOutViaSidebarProfile() {
+  cy.get(sidebarProfileTrigger, { timeout: 30000 }).should('be.visible').click()
+  cy.get(sidebarProfilePopover).should('be.visible')
+  cy.get(sidebarProfileSignOutBtn).should('be.visible').click()
+  // useLogout submits a form to the gateway which 303-redirects back to
+  // /welcome/spaces — wait for the round-trip to land and the signed-out
+  // sign-in button to render before letting the next step run.
+  cy.url({ timeout: 60000 }).should('include', constants.spacesUrl)
+  cy.get(continueWithWalletBtn, { timeout: 30000 }).should('be.visible')
+}
+
+export function verifyOnSingleSpaceDashboard(spaceName) {
+  // After re-login the single-space short-circuit pushes us straight to the
+  // space dashboard. Assert the URL is the space dashboard (not the
+  // workspace list, not the create-space onboarding) AND that the space's
+  // own selector now shows the expected name.
+  cy.url({ timeout: 60000 })
+    .should('include', constants.spaceDashboardUrl)
+    .and('include', 'spaceId=')
+    .and('not.include', onboardingCreateSpacePath)
+  cy.get(spaceSelectorBtn, { timeout: 30000 }).should('be.visible').and('contain.text', spaceName)
 }
 
 export function waitForSpacesWelcomeReady() {
@@ -425,28 +453,27 @@ export function deleteSpace(name) {
   cy.contains(spaceCard, name).should('not.exist')
 }
 
-function deleteAllSpaces() {
-  cy.get('body').then(($body) => {
-    if ($body.find(spaceCard).length > 0) {
-      cy.get(spaceCard)
-        .first()
-        .within(() => {
-          cy.get(spaceVertMenuIcon).click({ force: true })
-        })
-      cy.get(contectMenuRemoveBtn).click({ force: true })
-      cy.get(spaceConfirmDeleteBtn).click()
-      cy.wait(1000)
-      deleteAllSpaces()
-    }
-  })
-}
+const MAX_SPACES = 10
 
 export function ensureReadyToCreateSpace() {
-  cy.get('body').then(($body) => {
-    if ($body.find(spaceCard).length > 0) {
-      deleteAllSpaces()
-    }
-  })
+  // Wait for the page to settle: either the spaces list or the create button must be visible
+  cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
+
+  // Use the live jQuery collection so the count reflects what's actually in the DOM now
+  cy.get('body')
+    .find(spaceCard)
+    .then(($cards) => {
+      if ($cards.length >= MAX_SPACES) {
+        // At the limit — delete one space to free a slot
+        cy.wrap($cards.first()).within(() => {
+          cy.get(spaceCardContextMenuBtn).click({ force: true })
+        })
+        cy.get(contectMenuRemoveBtn).click({ force: true })
+        cy.get(spaceConfirmDeleteBtn).click()
+        cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
+      }
+    })
+
   // Wait for either the create button or the create-space form to settle after deletion/redirect
   cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 }
@@ -521,7 +548,14 @@ function submitSpaceName(name) {
 
 function skipSelectSafesStep() {
   cy.url({ timeout: 30000 }).should('include', onboardingSelectSafesPath).and('include', 'spaceId=')
-  cy.get(selectSafesSkipBtn).should('be.visible').click()
+  // In the wallet-connected branch, there is no Skip button (the Next button is gated by Safe selection).
+  // Navigate directly to the next onboarding step, preserving spaceId.
+  cy.url().then((url) => {
+    const match = url.match(/spaceId=(\d+)/)
+    if (!match) throw new Error('spaceId not found in URL')
+    const spaceId = match[1]
+    cy.visit(`${onboardingInviteMembersPath}?spaceId=${spaceId}`)
+  })
 }
 
 function skipInviteMembersStep() {

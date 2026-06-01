@@ -34,6 +34,72 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['spaces'],
       }),
+      userAddressBookGetPrivateItemsV1: build.query<
+        UserAddressBookGetPrivateItemsV1ApiResponse,
+        UserAddressBookGetPrivateItemsV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/address-book/private` }),
+        providesTags: ['spaces'],
+      }),
+      userAddressBookUpsertPrivateItemsV1: build.mutation<
+        UserAddressBookUpsertPrivateItemsV1ApiResponse,
+        UserAddressBookUpsertPrivateItemsV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/private`,
+          method: 'PUT',
+          body: queryArg.upsertAddressBookItemsDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      userAddressBookDeletePrivateItemV1: build.mutation<
+        UserAddressBookDeletePrivateItemV1ApiResponse,
+        UserAddressBookDeletePrivateItemV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/private/${queryArg.address}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBookRequestsGetPendingRequestsV1: build.query<
+        AddressBookRequestsGetPendingRequestsV1ApiResponse,
+        AddressBookRequestsGetPendingRequestsV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/address-book/requests` }),
+        providesTags: ['spaces'],
+      }),
+      addressBookRequestsCreateRequestV1: build.mutation<
+        AddressBookRequestsCreateRequestV1ApiResponse,
+        AddressBookRequestsCreateRequestV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/requests`,
+          method: 'POST',
+          body: queryArg.createAddressBookRequestDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBookRequestsApproveRequestV1: build.mutation<
+        AddressBookRequestsApproveRequestV1ApiResponse,
+        AddressBookRequestsApproveRequestV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/requests/${queryArg.requestId}/approve`,
+          method: 'PUT',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBookRequestsRejectRequestV1: build.mutation<
+        AddressBookRequestsRejectRequestV1ApiResponse,
+        AddressBookRequestsRejectRequestV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/requests/${queryArg.requestId}/reject`,
+          method: 'PUT',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       spacesCreateV1: build.mutation<SpacesCreateV1ApiResponse, SpacesCreateV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces`, method: 'POST', body: queryArg.createSpaceDto }),
         invalidatesTags: ['spaces'],
@@ -130,6 +196,13 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}`, method: 'DELETE' }),
         invalidatesTags: ['spaces'],
       }),
+      spaceCounterfactualSafesGetV1: build.query<
+        SpaceCounterfactualSafesGetV1ApiResponse,
+        SpaceCounterfactualSafesGetV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/counterfactual-safes` }),
+        providesTags: ['spaces'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -154,6 +227,55 @@ export type AddressBooksDeleteByAddressV1ApiArg = {
   spaceId: number
   /** Address to remove from the address book (0x prefixed hex string) */
   address: string
+}
+export type UserAddressBookGetPrivateItemsV1ApiResponse =
+  /** status 200 Private address book items retrieved successfully */ UserAddressBookDto
+export type UserAddressBookGetPrivateItemsV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+}
+export type UserAddressBookUpsertPrivateItemsV1ApiResponse =
+  /** status 200 Private address book updated successfully */ UserAddressBookDto
+export type UserAddressBookUpsertPrivateItemsV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  /** Address book items to create or update */
+  upsertAddressBookItemsDto: UpsertAddressBookItemsDto
+}
+export type UserAddressBookDeletePrivateItemV1ApiResponse = unknown
+export type UserAddressBookDeletePrivateItemV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  /** Address to remove (0x prefixed) */
+  address: string
+}
+export type AddressBookRequestsGetPendingRequestsV1ApiResponse =
+  /** status 200 Pending requests retrieved successfully */ AddressBookRequestsDto
+export type AddressBookRequestsGetPendingRequestsV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+}
+export type AddressBookRequestsCreateRequestV1ApiResponse =
+  /** status 201 Request created successfully */ AddressBookRequestItemDto
+export type AddressBookRequestsCreateRequestV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  /** Address of the private contact to request adding */
+  createAddressBookRequestDto: CreateAddressBookRequestDto
+}
+export type AddressBookRequestsApproveRequestV1ApiResponse = unknown
+export type AddressBookRequestsApproveRequestV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  /** Request ID to approve */
+  requestId: number
+}
+export type AddressBookRequestsRejectRequestV1ApiResponse = unknown
+export type AddressBookRequestsRejectRequestV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+  /** Request ID to reject */
+  requestId: number
 }
 export type SpacesCreateV1ApiResponse = /** status 200 Space created successfully */ CreateSpaceResponse
 export type SpacesCreateV1ApiArg = {
@@ -257,12 +379,24 @@ export type MembersRemoveUserV1ApiArg = {
   /** User ID of the member to remove */
   userId: number
 }
+export type SpaceCounterfactualSafesGetV1ApiResponse =
+  /** status 200 Counterfactual Safes retrieved successfully */ GetCounterfactualSafesResponse
+export type SpaceCounterfactualSafesGetV1ApiArg = {
+  /** Space ID */
+  spaceId: number
+}
 export type SpaceAddressBookItemDto = {
   name: string
   address: string
   chainIds: string[]
+  /** Email or wallet address of the creator, "Unknown user" if the user has no display identity, or "Deleted user" */
   createdBy: string
+  /** User ID of the creator */
+  createdByUserId: number
+  /** Email or wallet address of the last editor, "Unknown user" if the user has no display identity, or "Deleted user" */
   lastUpdatedBy: string
+  /** User ID of the last editor */
+  lastUpdatedByUserId: number
   createdAt: string
   updatedAt: string
 }
@@ -277,6 +411,46 @@ export type AddressBookItem = {
 }
 export type UpsertAddressBookItemsDto = {
   items: AddressBookItem[]
+}
+export type UserAddressBookItemDto = {
+  name: string
+  address: string
+  chainIds: string[]
+  /** Email or wallet address of the creator, "Unknown user" if the user has no display identity, or "Deleted user" */
+  createdBy: string
+  /** User ID of the creator */
+  createdByUserId: number
+  createdAt: object
+  updatedAt: object
+}
+export type UserAddressBookDto = {
+  spaceId: string
+  data: UserAddressBookItemDto[]
+}
+export type AddressBookRequestItemDto = {
+  id: number
+  name: string
+  address: string
+  chainIds: string[]
+  /** Email or wallet address of the requester, "Unknown user" if the user has no display identity, or "Deleted user" */
+  requestedBy: string
+  /** User ID of the requester */
+  requestedByUserId: number
+  /** Email or wallet address of the reviewing admin, "Unknown user", "Deleted user", or null when still PENDING */
+  reviewedBy: string | null
+  /** User ID of the reviewing admin, null when still PENDING */
+  reviewedByUserId: number | null
+  status: 'PENDING' | 'APPROVED' | 'REJECTED'
+  createdAt: string
+  updatedAt: string
+}
+export type AddressBookRequestsDto = {
+  spaceId: string
+  data: AddressBookRequestItemDto[]
+}
+export type CreateAddressBookRequestDto = {
+  /** Address of the private contact to request adding to space */
+  address: string
 }
 export type CreateSpaceResponse = {
   name: string
@@ -346,6 +520,7 @@ export type AcceptInviteDto = {
 export type MemberUser = {
   id: number
   status: 'PENDING' | 'ACTIVE'
+  email: string | null
 }
 export type MemberDto = {
   id: number
@@ -368,11 +543,40 @@ export type UpdateMemberAliasDto = {
   /** The new alias for the member */
   alias: string
 }
+export type GetCounterfactualSafeItem = {
+  address: string
+  factoryAddress: string
+  masterCopy: string
+  saltNonce: string
+  safeVersion: string
+  threshold: number
+  owners: string[]
+  fallbackHandler: string | null
+  to: string | null
+  data: string
+  paymentToken: string | null
+  payment: string | null
+  paymentReceiver: string | null
+}
+export type GetCounterfactualSafesResponse = {
+  safes: {
+    [key: string]: GetCounterfactualSafeItem[]
+  }
+}
 export const {
   useAddressBooksGetAddressBookItemsV1Query,
   useLazyAddressBooksGetAddressBookItemsV1Query,
   useAddressBooksUpsertAddressBookItemsV1Mutation,
   useAddressBooksDeleteByAddressV1Mutation,
+  useUserAddressBookGetPrivateItemsV1Query,
+  useLazyUserAddressBookGetPrivateItemsV1Query,
+  useUserAddressBookUpsertPrivateItemsV1Mutation,
+  useUserAddressBookDeletePrivateItemV1Mutation,
+  useAddressBookRequestsGetPendingRequestsV1Query,
+  useLazyAddressBookRequestsGetPendingRequestsV1Query,
+  useAddressBookRequestsCreateRequestV1Mutation,
+  useAddressBookRequestsApproveRequestV1Mutation,
+  useAddressBookRequestsRejectRequestV1Mutation,
   useSpacesCreateV1Mutation,
   useSpacesGetV1Query,
   useLazySpacesGetV1Query,
@@ -396,4 +600,6 @@ export const {
   useMembersUpdateRoleV1Mutation,
   useMembersUpdateAliasV1Mutation,
   useMembersRemoveUserV1Mutation,
+  useSpaceCounterfactualSafesGetV1Query,
+  useLazySpaceCounterfactualSafesGetV1Query,
 } = injectedRtkApi

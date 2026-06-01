@@ -1,10 +1,11 @@
 import type { LucideIcon } from 'lucide-react'
+import type { SpaceMemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 export interface SidebarItemConfig {
   icon: LucideIcon
   label: string
   href: string
-  badge?: number
+  badge?: number | string
   isActive?: boolean
   activeMemberOnly?: boolean
 }
@@ -29,6 +30,8 @@ export interface SpaceItem {
   id: number
   name: string
   safeCount: number
+  // Optional only for fixtures; always present from the API.
+  members?: SpaceMemberDto[]
 }
 
 export interface SpaceSelectorProps {

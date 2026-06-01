@@ -45,7 +45,7 @@
   cursor: pointer;
 }
 
-/* "Add Safe to workspace" (opens space selector) */
+/* "Add Safe to space" (opens space selector) */
 .addSafeToWorkspaceTrigger {
   display: flex;
   align-items: center;
@@ -291,7 +291,6 @@
 .footerHelpRow {
   display: flex;
   align-items: center;
-  gap: 8px;
   overflow: visible;
 }
 

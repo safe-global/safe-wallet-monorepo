@@ -5,6 +5,7 @@ import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import Identicon from '@/components/common/Identicon'
 import { Badge } from '@/components/ui/badge'
 import { TriangleAlert } from 'lucide-react'
+import { cn } from '@/utils/cn'
 import FiatBalance from './FiatBalance'
 import ThresholdBadge from './ThresholdBadge'
 
@@ -20,6 +21,8 @@ interface SafeCardLayoutProps {
   threshold: number
   ownersCount: number
   isSimilar?: boolean
+  isUndeployed?: boolean
+  isActivating?: boolean
 }
 
 export const SafeCardLayout = ({
@@ -34,6 +37,8 @@ export const SafeCardLayout = ({
   threshold,
   ownersCount,
   isSimilar,
+  isUndeployed = false,
+  isActivating = false,
 }: SafeCardLayoutProps) => (
   <button
     ref={ref}
@@ -41,7 +46,12 @@ export const SafeCardLayout = ({
     role="checkbox"
     aria-checked={checked}
     onClick={onToggle}
-    className="box-border flex w-full min-w-0 max-w-full cursor-pointer items-center gap-1.5 rounded-3xl border-2 border-card bg-card py-4 pl-2 pr-3 text-left transition-colors hover:bg-muted/50 disabled:opacity-60 sm:gap-2 sm:pr-6"
+    className={cn(
+      'box-border flex w-full min-w-0 max-w-full cursor-pointer items-center gap-1.5 rounded-3xl border-2 py-4 pl-2 pr-3 text-left transition-colors disabled:opacity-60 sm:gap-2 sm:pr-6',
+      checked
+        ? 'border-[var(--color-secondary-light)] bg-[var(--color-secondary-background)]'
+        : 'border-card bg-card hover:bg-muted/50',
+    )}
   >
     <div className="flex shrink-0 items-center px-2">
       <Checkbox
@@ -86,7 +96,11 @@ export const SafeCardLayout = ({
     </div>
 
     <div className="flex min-w-0 shrink-0 flex-col items-end gap-2 pl-1 sm:min-w-16 sm:pl-0">
-      <FiatBalance value={fiatValue} />
+      {isUndeployed ? (
+        <AccountItem.StatusChip undeployedSafe isActivating={isActivating} />
+      ) : (
+        <FiatBalance value={fiatValue} />
+      )}
       {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
     </div>
   </button>

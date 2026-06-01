@@ -1,5 +1,16 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
+import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import SpaceNestedSafesButton from './SpaceNestedSafesButton'
+
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(),
+}))
+jest.mock('@/hooks/safe-apps/useSafeAppUrl', () => ({
+  useSafeAppUrl: jest.fn(),
+}))
 
 const mockStartFiltering = jest.fn()
 
@@ -67,6 +78,8 @@ describe('SpaceNestedSafesButton', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
+    jest.mocked(useRouter).mockReturnValue({ pathname: '/', query: {} } as unknown as ReturnType<typeof useRouter>)
+    jest.mocked(useSafeAppUrl).mockReturnValue(undefined)
     mockUseSafeInfo.mockReturnValue({
       safe: { chainId: '1', address: { value: '0xSafe1' }, deployed: true },
     })
@@ -189,5 +202,104 @@ describe('SpaceNestedSafesButton', () => {
     const track = screen.getByTestId('track')
     expect(track).toHaveAttribute('data-action', 'Open nested Safe list')
     expect(track).toHaveAttribute('data-label', 'space_safe_bar')
+  })
+
+  describe('disabled while a tx flow is active', () => {
+    const renderWithTxFlow = (txFlow: TxModalContextType['txFlow']) => {
+      const value: TxModalContextType = {
+        txFlow,
+        setTxFlow: jest.fn(),
+        setFullWidth: jest.fn(),
+      }
+      return render(
+        <TxModalContext.Provider value={value}>
+          <SpaceNestedSafesButton />
+        </TxModalContext.Provider>,
+      )
+    }
+
+    it('disables the button when a tx flow is open', () => {
+      renderWithTxFlow(<div data-testid="active-tx-flow" />)
+
+      const button = screen.getByTestId('nested-safes-button')
+      expect(button).toBeDisabled()
+    })
+
+    it('applies the disabled styling to the button when a tx flow is open', () => {
+      renderWithTxFlow(<div data-testid="active-tx-flow" />)
+
+      const button = screen.getByTestId('nested-safes-button')
+      expect(button.className).toMatch(/cursor-not-allowed/)
+      expect(button.className).toMatch(/opacity-50/)
+      expect(button.className).not.toMatch(/cursor-pointer/)
+    })
+
+    it('shows the explanatory tooltip text when a tx flow is open', () => {
+      renderWithTxFlow(<div data-testid="active-tx-flow" />)
+
+      expect(screen.getByText('Nested Safes are not allowed in this screen')).toBeInTheDocument()
+      expect(screen.queryByText('Nested Safes')).not.toBeInTheDocument()
+    })
+
+    it('does not open the popover or call startFiltering when clicked while disabled', () => {
+      renderWithTxFlow(<div data-testid="active-tx-flow" />)
+
+      fireEvent.click(screen.getByTestId('nested-safes-button'))
+
+      expect(mockStartFiltering).not.toHaveBeenCalled()
+      expect(screen.getByTestId('nested-safes-popover')).toHaveAttribute('data-open', 'false')
+    })
+
+    it('renders the original tooltip and remains enabled when no tx flow is active', () => {
+      renderWithTxFlow(undefined)
+
+      const button = screen.getByTestId('nested-safes-button')
+      expect(button).not.toBeDisabled()
+      expect(button.className).not.toMatch(/cursor-not-allowed/)
+      expect(button.className).not.toMatch(/opacity-50/)
+      expect(screen.getByText('Nested Safes')).toBeInTheDocument()
+      expect(screen.queryByText('Nested Safes are not allowed in this screen')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('disabled while inside an opened Safe App', () => {
+    it('disables the button on /apps/open with an appUrl', () => {
+      jest.mocked(useRouter).mockReturnValue({
+        pathname: AppRoutes.apps.open,
+        query: { appUrl: 'https://example-safe-app.test' },
+      } as unknown as ReturnType<typeof useRouter>)
+      jest.mocked(useSafeAppUrl).mockReturnValue('https://example-safe-app.test')
+
+      render(<SpaceNestedSafesButton />)
+
+      const button = screen.getByTestId('nested-safes-button')
+      expect(button).toBeDisabled()
+      expect(screen.getByText('Nested Safes are not allowed in this screen')).toBeInTheDocument()
+    })
+
+    it('does not disable the button on /apps/open without an appUrl', () => {
+      jest
+        .mocked(useRouter)
+        .mockReturnValue({ pathname: AppRoutes.apps.open, query: {} } as unknown as ReturnType<typeof useRouter>)
+
+      render(<SpaceNestedSafesButton />)
+
+      const button = screen.getByTestId('nested-safes-button')
+      expect(button).not.toBeDisabled()
+      expect(screen.getByText('Nested Safes')).toBeInTheDocument()
+    })
+
+    it('does not disable the button on /apps/custom', () => {
+      jest.mocked(useRouter).mockReturnValue({
+        pathname: AppRoutes.apps.custom,
+        query: { safe: 'eth:0xSafe1' },
+      } as unknown as ReturnType<typeof useRouter>)
+
+      render(<SpaceNestedSafesButton />)
+
+      const button = screen.getByTestId('nested-safes-button')
+      expect(button).not.toBeDisabled()
+      expect(screen.getByText('Nested Safes')).toBeInTheDocument()
+    })
   })
 })

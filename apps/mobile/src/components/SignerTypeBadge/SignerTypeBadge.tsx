@@ -2,7 +2,7 @@ import React from 'react'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
 import { LedgerSignerBadge } from '@/src/features/Ledger/components/LedgerSignerBadge'
-import { WalletConnectBadge } from '@/src/features/WalletConnect/components/WalletConnectBadge'
+import { WalletConnectBadge } from '@/src/features/WalletConnect/Signer/components/WalletConnectBadge'
 
 interface SignerBadgeProps {
   address: `0x${string}`

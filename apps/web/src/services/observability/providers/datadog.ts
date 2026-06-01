@@ -66,15 +66,33 @@ const isKnownNoise = (message: string | undefined): boolean => {
   return KNOWN_NOISE_PATTERNS.some((pattern) => message.includes(pattern))
 }
 
+const NON_USER_IMPACTING_SOURCES = new Set(['console', 'report'])
+
 /**
- * Drop RUM error events that are demonstrably not caused by our code so the
- * Error-Free Views SLO reflects real user-impacting failures. Non-error events
+ * Drop RUM error events that are demonstrably not caused by user-impacting
+ * failures so the Error-Free Views SLO reflects real breakage. Non-error events
  * (views, actions, resources) pass through untouched.
+ *
+ * Sources we drop:
+ * - `console`: the RUM SDK auto-instruments `console.error` via
+ *   `trackConsoleError` (no init flag exists to disable it). The codebase has
+ *   many `console.error` catch blocks for non-blocking failures (clipboard
+ *   denial, RPC retries, third-party widget init, observability self-recovery
+ *   in `composite.ts`, etc.) that are not user-impacting.
+ * - `report`: Browser Reporting API events (CSP violations, deprecation,
+ *   intervention, permissions-policy). Useful as a security/policy signal but
+ *   not indicative of user-blocking failure; CSP visibility belongs on a
+ *   `report-uri`/`report-to` endpoint, not the SLO.
+ *
+ * Genuine user failures continue to flow through `trackError` /
+ * `captureException` (source: `custom`), unhandled exceptions (`source`), and
+ * network failures (`network`).
  */
 export const filterRumEvent = (event: RumEvent, context: RumEventDomainContext): boolean => {
   if (event.type !== 'error') return true
 
   const errorEvent = event as RumErrorEvent
+  if (NON_USER_IMPACTING_SOURCES.has(errorEvent.error.source)) return false
   if (isKnownNoise(errorEvent.error.message)) return false
   if (originatesFromExtension(errorEvent.error.stack)) return false
 

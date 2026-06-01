@@ -6,6 +6,9 @@ import { signTx } from '@/src/services/tx/tx-sender/sign'
 import { useTransactionsAddConfirmationV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import logger from '@/src/utils/logger'
 import type { RootState } from '@/src/tests/test-utils'
+import { addSignaturesToTx, createTx } from '@/src/services/tx/tx-sender/create'
+import proposeNewTransaction from '@/src/services/tx/proposeNewTransaction'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 // Mock only external dependencies that can't be mocked through Redux state
 jest.mock('@/src/hooks/useSign/useSign')
@@ -13,15 +16,41 @@ jest.mock('@/src/services/tx/tx-sender/sign')
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
   useTransactionsAddConfirmationV1Mutation: jest.fn(),
   cgwApi: {
+    reducerPath: 'cgwApi',
     util: {
       invalidateTags: jest.fn(() => ({ type: 'cgwApi/invalidateTags' })),
+    },
+    endpoints: {
+      transactionsGetTransactionByIdV1: {
+        matchFulfilled: Object.assign(() => false, { type: 'cgwApi/test/get/matchFulfilled' }),
+      },
+      transactionsProposeTransactionV1: {
+        matchFulfilled: Object.assign(() => false, { type: 'cgwApi/test/propose/matchFulfilled' }),
+      },
     },
   },
 }))
 jest.mock('@/src/utils/logger')
 jest.mock('@/src/services/ledger/ledger-safe-signing.service')
-jest.mock('@/src/features/WalletConnect/context/WalletConnectContext', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/context/WalletConnectContext', () => ({
   useWalletConnectContext: jest.fn(() => ({ sign: jest.fn(), hasProvider: false })),
+}))
+jest.mock('@/src/hooks/useSafeInfo', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    safe: {
+      version: '1.4.1',
+      owners: [{ value: '0x456', name: null, logoUri: null }],
+    },
+  })),
+}))
+jest.mock('@/src/services/tx/tx-sender/create', () => ({
+  createTx: jest.fn(),
+  addSignaturesToTx: jest.fn(),
+}))
+jest.mock('@/src/services/tx/proposeNewTransaction', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 const mockGetPrivateKey = getPrivateKey as jest.MockedFunction<typeof getPrivateKey>
@@ -319,6 +348,170 @@ describe('useTransactionSigning', () => {
         type: 'ledger',
         derivationPath: "m/44'/60'/0'/0/0",
       })
+    })
+  })
+
+  describe('draft branch (un-proposed transactions)', () => {
+    const mockedCreateTx = createTx as jest.MockedFunction<typeof createTx>
+    const mockedAddSignaturesToTx = addSignaturesToTx as jest.MockedFunction<typeof addSignaturesToTx>
+    const mockedProposeNewTransaction = proposeNewTransaction as jest.MockedFunction<typeof proposeNewTransaction>
+
+    const draftSafeTxHash = '0xdraft-hash'
+
+    const buildDraftState = () => {
+      const baseState = createMockState()
+      return {
+        ...baseState,
+        draftTx: {
+          drafts: {
+            [draftSafeTxHash]: {
+              chainId: '1',
+              safeAddress: '0x123',
+              buildParams: { to: '0xRecipient', value: '0', data: '0x', nonce: 0 },
+              safeTxHash: draftSafeTxHash,
+              txDetails: { txId: draftSafeTxHash } as TransactionDetails,
+            },
+          },
+        },
+      }
+    }
+
+    beforeEach(() => {
+      mockedCreateTx.mockReset()
+      mockedAddSignaturesToTx.mockReset()
+      mockedProposeNewTransaction.mockReset()
+    })
+
+    it('proposes the transaction with the signature inline instead of adding a confirmation', async () => {
+      const fakeSafeTx = { data: { to: '0xRecipient' } } as unknown as Awaited<ReturnType<typeof createTx>>
+      mockedCreateTx.mockResolvedValue(fakeSafeTx)
+      mockedProposeNewTransaction.mockResolvedValue({ txId: 'multisig_real_tx_id' } as TransactionDetails)
+      mockGetPrivateKey.mockResolvedValue('private-key')
+      mockSignTx.mockResolvedValue(mockSignedTx)
+
+      const { result } = renderHook(
+        () => useTransactionSigning({ txId: draftSafeTxHash, signerAddress: '0x456' }),
+        buildDraftState(),
+      )
+
+      await act(async () => {
+        await result.current.executeSign()
+      })
+
+      await waitFor(() => {
+        expect(result.current.status).toBe('success')
+      })
+
+      expect(mockedCreateTx).toHaveBeenCalledTimes(1)
+      expect(mockSignTx).toHaveBeenCalledWith(expect.objectContaining({ prebuiltSafeTx: fakeSafeTx }))
+      expect(mockedAddSignaturesToTx).toHaveBeenCalledWith(fakeSafeTx, { '0x456': mockSignedTx.signature })
+      expect(mockedProposeNewTransaction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chainId: '1',
+          safeAddress: '0x123',
+          sender: '0x456',
+          signedTx: fakeSafeTx,
+          safeTxHash: mockSignedTx.safeTransactionHash,
+        }),
+      )
+      expect(mockAddConfirmation).not.toHaveBeenCalled()
+    })
+
+    // Cleanup of the draft after a successful propose is the slice's
+    // responsibility via the transactionsProposeTransactionV1.matchFulfilled
+    // extraReducer — see draftTxSlice.test.ts for that coverage. This file
+    // only verifies the hook's orchestration (above).
+
+    it('refuses to sign a draft when the active chain no longer matches', async () => {
+      const fakeSafeTx = { data: { to: '0xRecipient' } } as unknown as Awaited<ReturnType<typeof createTx>>
+      mockedCreateTx.mockResolvedValue(fakeSafeTx)
+      mockGetPrivateKey.mockResolvedValue('private-key')
+
+      // Draft is on chain '1', active safe is on chain '137'
+      const mismatchedState = {
+        ...buildDraftState(),
+        activeSafe: { chainId: '137', address: '0x123' as `0x${string}` },
+      }
+
+      const { result } = renderHook(
+        () => useTransactionSigning({ txId: draftSafeTxHash, signerAddress: '0x456' }),
+        mismatchedState,
+      )
+
+      await act(async () => {
+        try {
+          await result.current.executeSign()
+        } catch (err) {
+          expect((err as Error).message).toMatch(/chain/i)
+        }
+      })
+
+      await waitFor(() => {
+        expect(result.current.status).toBe('error')
+      })
+
+      expect(mockedProposeNewTransaction).not.toHaveBeenCalled()
+      expect(mockSignTx).not.toHaveBeenCalled()
+    })
+
+    it('refuses to sign a draft when the active Safe address no longer matches', async () => {
+      const fakeSafeTx = { data: { to: '0xRecipient' } } as unknown as Awaited<ReturnType<typeof createTx>>
+      mockedCreateTx.mockResolvedValue(fakeSafeTx)
+      mockGetPrivateKey.mockResolvedValue('private-key')
+
+      const mismatchedState = {
+        ...buildDraftState(),
+        activeSafe: { chainId: '1', address: '0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef' as `0x${string}` },
+      }
+
+      const { result } = renderHook(
+        () => useTransactionSigning({ txId: draftSafeTxHash, signerAddress: '0x456' }),
+        mismatchedState,
+      )
+
+      await act(async () => {
+        try {
+          await result.current.executeSign()
+        } catch (err) {
+          expect((err as Error).message).toMatch(/different Safe/i)
+        }
+      })
+
+      await waitFor(() => {
+        expect(result.current.status).toBe('error')
+      })
+
+      expect(mockedProposeNewTransaction).not.toHaveBeenCalled()
+    })
+
+    it('does not propose or clear the draft if signing fails', async () => {
+      const fakeSafeTx = { data: { to: '0xRecipient' } } as unknown as Awaited<ReturnType<typeof createTx>>
+      mockedCreateTx.mockResolvedValue(fakeSafeTx)
+      mockGetPrivateKey.mockResolvedValue('private-key')
+      mockSignTx.mockRejectedValue(new Error('user cancelled'))
+
+      const hookResult = renderHook(
+        () => useTransactionSigning({ txId: draftSafeTxHash, signerAddress: '0x456' }),
+        buildDraftState(),
+      )
+      const { result } = hookResult
+      const store = hookResult.store as { getState: () => RootState }
+
+      await act(async () => {
+        try {
+          await result.current.executeSign()
+        } catch {
+          // expected
+        }
+      })
+
+      await waitFor(() => {
+        expect(result.current.status).toBe('error')
+      })
+
+      expect(mockedProposeNewTransaction).not.toHaveBeenCalled()
+      expect(mockAddConfirmation).not.toHaveBeenCalled()
+      expect(store.getState().draftTx.drafts[draftSafeTxHash]).toBeDefined()
     })
   })
 
