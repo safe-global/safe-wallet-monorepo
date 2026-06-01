@@ -7,10 +7,90 @@
   column-gap: var(--space-1);
 }
 
+.roleIcon {
+  grid-area: icon;
+  display: flex;
+  align-items: center;
+}
+
+.roleDescription {
+  grid-area: description;
+  max-width: 300px;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.roleCheckIcon {
+  grid-area: checkIcon;
+  margin: 0 var(--space-1);
+}
+
+.roleCheckIconHidden {
+  composes: roleCheckIcon;
+  visibility: hidden;
+}
+
+.roleCheckSvg {
+  color: var(--color-text-primary);
+}
+
+.roleSelect {
+  min-width: 150px;
+  padding-block: 4px;
+  background-color: var(--color-background-main);
+}
+
 .menuItem:hover {
   background-color: var(--color-background-main) !important;
 }
 
 .menuItem:global(.Mui-selected) {
   background-color: var(--color-background-main);
+}
+
+.identifierField {
+  position: relative;
+}
+
+.identifierInput {
+  border-color: var(--color-border-light);
+  background-color: var(--color-background-paper);
+  color: var(--color-text-primary);
+}
+
+.identifierInput::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.identifierInput:focus-visible {
+  border-color: var(--color-border-main);
+}
+
+.identifierOptions {
+  position: fixed;
+  z-index: var(--z-overlay, 1500);
+  margin-top: 4px;
+  overflow: hidden;
+  border: 1px solid var(--color-border-light);
+  border-radius: 6px;
+  background-color: var(--color-background-paper);
+  color: var(--color-text-primary);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
+}
+
+.identifierOption {
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  appearance: none;
+  border: 0;
+  background-color: var(--color-background-paper);
+  color: var(--color-text-primary);
+  text-align: left;
+  outline: none;
+}
+
+.identifierOption:hover,
+.identifierOption:focus {
+  background-color: var(--color-background-secondary);
+  outline: none;
 }

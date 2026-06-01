@@ -466,6 +466,7 @@ export type SpaceMemberDto = {
   role: 'ADMIN' | 'MEMBER'
   name: string
   invitedBy: number | null
+  inviteExpiresAt: string | null
   invitedByName?: string
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   user: UserDto
@@ -507,13 +508,20 @@ export type Invitation = {
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   invitedBy: number | null
 }
-export type InviteUserDto = {
+export type WalletInviteUserDto = {
+  type: 'wallet'
   address: string
-  name: string
   role: 'ADMIN' | 'MEMBER'
+  name: string
+}
+export type EmailInviteUserDto = {
+  type: 'email'
+  email: string
+  role: 'ADMIN' | 'MEMBER'
+  name: string
 }
 export type InviteUsersDto = {
-  users: InviteUserDto[]
+  users: (WalletInviteUserDto | EmailInviteUserDto)[]
 }
 export type AcceptInviteDto = {
   name: string
@@ -530,6 +538,7 @@ export type MemberDto = {
   name: string
   alias?: string | null
   invitedBy: number | null
+  inviteExpiresAt?: string | null
   createdAt: string
   updatedAt: string
   user: MemberUser

@@ -22,7 +22,7 @@ const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {
             value={value}
             onChange={onChange}
             required
-            sx={{ minWidth: '150px', py: 0.5 }}
+            className={css.roleSelect}
             renderValue={(role) => <RoleMenuItem role={role as MemberRole} />}
           >
             <MenuItem value={MemberRole.ADMIN} className={css.menuItem}>

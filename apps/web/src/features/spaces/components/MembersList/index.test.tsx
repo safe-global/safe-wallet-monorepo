@@ -35,9 +35,53 @@ jest.mock('@/features/spaces', () => ({
 }))
 
 describe('MembersList', () => {
-  it('renders member email and leaves empty email cells blank', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('shows the email column for invitation rows when enabled', () => {
     render(
       <MembersList
+        showEmail
+        members={[
+          memberBuilder()
+            .with({
+              id: 2,
+              role: 'ADMIN',
+              status: 'DECLINED',
+              name: 'Bob',
+              user: memberUserBuilder().with({ id: 12, status: 'PENDING', email: 'bob@example.com' }).build(),
+            })
+            .build(),
+        ]}
+      />,
+    )
+
+    expect(screen.getByText('Email')).toBeInTheDocument()
+    expect(screen.getByText('bob@example.com')).toBeInTheDocument()
+  })
+
+  it('does not show the email column by default', () => {
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({
+              user: memberUserBuilder().with({ email: 'alice@example.com' }).build(),
+            })
+            .build(),
+        ]}
+      />,
+    )
+
+    expect(screen.queryByText('Email')).not.toBeInTheDocument()
+    expect(screen.queryByText('alice@example.com')).not.toBeInTheDocument()
+  })
+
+  it('leaves empty email cells blank when email column is enabled', () => {
+    render(
+      <MembersList
+        showEmail
         members={[
           memberBuilder()
             .with({
@@ -58,8 +102,6 @@ describe('MembersList', () => {
       />,
     )
 
-    expect(screen.getByText('Email')).toBeInTheDocument()
-
     const emailCells = screen.getAllByTestId('table-cell-email')
 
     expect(emailCells).toHaveLength(2)
@@ -67,11 +109,12 @@ describe('MembersList', () => {
     expect(within(emailCells[1]!).queryByText(/@/)).not.toBeInTheDocument()
   })
 
-  it('wires up noWrap and a hover tooltip for long member emails', async () => {
+  it('wires up noWrap and a hover tooltip for long invite emails', async () => {
     const longEmail = `${'a'.repeat(64)}@${'b'.repeat(186)}.com`
 
     const { user } = renderWithUserEvent(
       <MembersList
+        showEmail
         members={[
           memberBuilder()
             .with({
