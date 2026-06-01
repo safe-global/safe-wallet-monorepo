@@ -1,5 +1,6 @@
 import { Typography, Paper, Box, Stack } from '@mui/material'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import css from './styles.module.css'
 import { useCurrentSpaceId } from '@/features/spaces'
@@ -12,14 +13,15 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import DeclineButton from './DeclineButton'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import Inviter from './Inviter'
-import { useInviter } from './useInviter'
+import { getInvitedByName } from '@/features/spaces/utils'
 
 const PreviewInvite = () => {
   const isDarkMode = useDarkMode()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const spaceId = useCurrentSpaceId()
   const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
-  const invitedByName = useInviter(space)
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
+  const invitedByName = getInvitedByName(space, currentUser?.id)
 
   if (!space) return null
 

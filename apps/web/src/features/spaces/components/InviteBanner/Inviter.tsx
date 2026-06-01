@@ -2,6 +2,7 @@ import { Box, Stack, Typography, type TypographyProps } from '@mui/material'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EmailInfo from '@/components/common/EmailInfo'
+import css from './styles.module.css'
 
 type InviterProps = {
   invitedByName: string | undefined
@@ -15,7 +16,7 @@ const Inviter = ({ invitedByName, variant, avatarSize }: InviterProps) => {
   return (
     <Stack direction="row" alignItems="end" spacing={0.75}>
       <Typography variant={variant}>by</Typography>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'primary.main', fontWeight: 700 }}>
+      <Box className={css.inviterName}>
         {isAddress(invitedByName) ? (
           <EthHashInfo
             address={invitedByName}

@@ -12,16 +12,15 @@ import AcceptButton from './AcceptButton'
 import DeclineButton from './DeclineButton'
 import { trackEvent } from '@/services/analytics'
 import Inviter from './Inviter'
-import { useInviter } from './useInviter'
 
 type SpaceListInvite = {
   space: GetSpaceResponse
+  invitedByName: string | undefined
 }
 
-const SpaceListInvite = ({ space }: SpaceListInvite) => {
+const SpaceListInvite = ({ space, invitedByName }: SpaceListInvite) => {
   const { id, name, members, safeCount } = space
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
-  const invitedByName = useInviter(space)
 
   return (
     <Card sx={{ p: 2, mb: 2 }}>

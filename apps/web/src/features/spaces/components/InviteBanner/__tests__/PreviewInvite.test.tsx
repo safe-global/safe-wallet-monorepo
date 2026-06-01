@@ -1,11 +1,23 @@
 import { render, screen } from '@testing-library/react'
 import PreviewInvite from '../PreviewInvite'
-import { spaceBuilder } from '@/tests/builders/space'
+import { spaceBuilder, spaceMemberBuilder } from '@/tests/builders/space'
 import { faker } from '@faker-js/faker'
 
 const EMAIL = faker.internet.email()
+const CURRENT_USER_ID = 1
 
-const mockUseInviter = jest.fn()
+const buildSpaceWithInviter = (invitedByName?: string) =>
+  spaceBuilder()
+    .with({
+      members: [
+        spaceMemberBuilder()
+          .with({ user: { id: CURRENT_USER_ID }, invitedByName })
+          .build(),
+      ],
+    })
+    .build()
+
+const mockUseUsersGetWithWalletsV1Query = jest.fn()
 const mockUseSpacesGetOneV1Query = jest.fn()
 const mockUseCurrentSpaceId = jest.fn()
 
@@ -38,12 +50,12 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetOneV1Query: (...args: unknown[]) => mockUseSpacesGetOneV1Query(...args),
 }))
 
-jest.mock('@/features/spaces', () => ({
-  useCurrentSpaceId: () => mockUseCurrentSpaceId(),
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
+  useUsersGetWithWalletsV1Query: (...args: unknown[]) => mockUseUsersGetWithWalletsV1Query(...args),
 }))
 
-jest.mock('../useInviter', () => ({
-  useInviter: (...args: unknown[]) => mockUseInviter(...args),
+jest.mock('@/features/spaces', () => ({
+  useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
 
 jest.mock('../Inviter', () => ({
@@ -77,7 +89,7 @@ describe('PreviewInvite', () => {
     jest.clearAllMocks()
     mockUseCurrentSpaceId.mockReturnValue('42')
     mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: spaceBuilder().build() })
-    mockUseInviter.mockReturnValue(undefined)
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: CURRENT_USER_ID } })
   })
 
   it('renders nothing when there is no space loaded', () => {
@@ -94,12 +106,13 @@ describe('PreviewInvite', () => {
   })
 
   it('passes the resolved inviter name through to the Inviter component', () => {
-    mockUseInviter.mockReturnValue(EMAIL)
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: buildSpaceWithInviter(EMAIL) })
     render(<PreviewInvite />)
     expect(screen.getByTestId('inviter')).toHaveTextContent(EMAIL)
   })
 
-  it('renders no inviter element when useInviter returns nothing', () => {
+  it('renders no inviter element when the member has no inviter name', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: buildSpaceWithInviter(undefined) })
     render(<PreviewInvite />)
     expect(screen.queryByTestId('inviter')).not.toBeInTheDocument()
   })

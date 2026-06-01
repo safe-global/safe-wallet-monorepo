@@ -5,8 +5,6 @@ import { faker } from '@faker-js/faker'
 
 const EMAIL = faker.internet.email()
 
-const mockUseInviter = jest.fn()
-
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
@@ -18,10 +16,6 @@ jest.mock('@/services/analytics/events/spaces', () => ({
     DECLINE_INVITE: { action: 'decline invite', category: 'spaces' },
   },
   SPACE_LABELS: { space_list_page: 'space_list_page' },
-}))
-
-jest.mock('../useInviter', () => ({
-  useInviter: (...args: unknown[]) => mockUseInviter(...args),
 }))
 
 jest.mock('../Inviter', () => ({
@@ -61,23 +55,21 @@ jest.mock('../../SpaceCard', () => ({
 describe('SpaceListInvite', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseInviter.mockReturnValue(undefined)
   })
 
   it('renders the space name as the invitation target', () => {
     const space = spaceBuilder().with({ name: 'Test Space' }).build()
-    render(<SpaceListInvite space={space} />)
+    render(<SpaceListInvite space={space} invitedByName={undefined} />)
     expect(screen.getByText('Test Space')).toBeInTheDocument()
   })
 
-  it('passes the resolved inviter name through to the Inviter component', () => {
-    mockUseInviter.mockReturnValue(EMAIL)
-    render(<SpaceListInvite space={spaceBuilder().build()} />)
+  it('passes the inviter name through to the Inviter component', () => {
+    render(<SpaceListInvite space={spaceBuilder().build()} invitedByName={EMAIL} />)
     expect(screen.getByTestId('inviter')).toHaveTextContent(EMAIL)
   })
 
-  it('renders no inviter element when useInviter returns nothing', () => {
-    render(<SpaceListInvite space={spaceBuilder().build()} />)
+  it('renders no inviter element when invitedByName is undefined', () => {
+    render(<SpaceListInvite space={spaceBuilder().build()} invitedByName={undefined} />)
     expect(screen.queryByTestId('inviter')).not.toBeInTheDocument()
   })
 })
