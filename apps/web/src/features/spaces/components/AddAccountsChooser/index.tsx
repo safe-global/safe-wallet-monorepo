@@ -141,8 +141,8 @@ const AddAccountsChooser = ({
           </div>
         </DialogContent>
       </Dialog>
-      <OwnedSafesModal open={subModal === 'find'} onClose={() => setSubModal(null)} />
-      <AddAccounts externalOpen={subModal === 'add'} onExternalClose={() => setSubModal(null)} />
+      {subModal === 'find' && <OwnedSafesModal open onClose={() => setSubModal(null)} />}
+      {subModal === 'add' && <AddAccounts externalOpen onExternalClose={() => setSubModal(null)} />}
     </>
   )
 }

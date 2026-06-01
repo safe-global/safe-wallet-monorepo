@@ -17,15 +17,22 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ push: mockPush }),
 }))
 
+const mockAddAccountsMount = jest.fn()
 jest.mock('@/features/spaces/components/AddAccounts', () => ({
   __esModule: true,
-  default: ({ externalOpen }: { externalOpen?: boolean }) =>
-    externalOpen ? <div data-testid="add-accounts-picker" /> : null,
+  default: ({ externalOpen }: { externalOpen?: boolean }) => {
+    mockAddAccountsMount()
+    return externalOpen ? <div data-testid="add-accounts-picker" /> : null
+  },
 }))
 
+const mockOwnedSafesModalMount = jest.fn()
 jest.mock('@/features/spaces/components/OwnedSafesModal', () => ({
   __esModule: true,
-  default: ({ open }: { open: boolean }) => (open ? <div data-testid="owned-safes-modal" /> : null),
+  default: ({ open }: { open: boolean }) => {
+    mockOwnedSafesModalMount()
+    return open ? <div data-testid="owned-safes-modal" /> : null
+  },
 }))
 
 describe('AddAccountsChooser', () => {
@@ -33,6 +40,8 @@ describe('AddAccountsChooser', () => {
     mockIsAdmin = true
     mockTrackEvent.mockClear()
     mockPush.mockClear()
+    mockAddAccountsMount.mockClear()
+    mockOwnedSafesModalMount.mockClear()
   })
 
   it('renders the trigger button with the default label', () => {
@@ -159,5 +168,47 @@ describe('AddAccountsChooser', () => {
     fireEvent.click(screen.getByRole('button', { name: /Add Safe accounts to this workspace/i }))
 
     expect(mockTrackEvent).not.toHaveBeenCalled()
+  })
+
+  it('does not mount OwnedSafesModal or AddAccounts before the chooser is opened', () => {
+    render(<AddAccountsChooser />)
+
+    expect(mockOwnedSafesModalMount).not.toHaveBeenCalled()
+    expect(mockAddAccountsMount).not.toHaveBeenCalled()
+  })
+
+  it('does not mount OwnedSafesModal or AddAccounts when only the chooser is opened', () => {
+    render(<AddAccountsChooser />)
+    fireEvent.click(screen.getByTestId('add-space-account-button'))
+
+    expect(mockOwnedSafesModalMount).not.toHaveBeenCalled()
+    expect(mockAddAccountsMount).not.toHaveBeenCalled()
+  })
+
+  it('mounts only OwnedSafesModal when "See owned Safe accounts" is clicked', () => {
+    render(<AddAccountsChooser />)
+    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    fireEvent.click(screen.getByText('See owned Safe accounts'))
+
+    expect(mockOwnedSafesModalMount).toHaveBeenCalled()
+    expect(mockAddAccountsMount).not.toHaveBeenCalled()
+  })
+
+  it('mounts only AddAccounts when an admin picks "Add Safe accounts to this workspace"', () => {
+    render(<AddAccountsChooser />)
+    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    fireEvent.click(screen.getByText('Add Safe accounts to this workspace'))
+
+    expect(mockAddAccountsMount).toHaveBeenCalled()
+    expect(mockOwnedSafesModalMount).not.toHaveBeenCalled()
+  })
+
+  it('does not mount AddAccounts when a non-admin clicks the disabled row', () => {
+    mockIsAdmin = false
+    render(<AddAccountsChooser />)
+    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    fireEvent.click(screen.getByRole('button', { name: /Add Safe accounts to this workspace/i }))
+
+    expect(mockAddAccountsMount).not.toHaveBeenCalled()
   })
 })
