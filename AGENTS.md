@@ -6,14 +6,14 @@ This repository is the Safe{Wallet} monorepo, containing both web and mobile app
 
 This monorepo uses nested AGENTS.md files. Agents working in a subtree automatically load the nearest one. Start at root for cross-cutting rules, then drop into the relevant subtree:
 
-| Subtree                | File                                                           | Covers                                                     |
-| ---------------------- | -------------------------------------------------------------- | ---------------------------------------------------------- |
-| `apps/web/`            | [apps/web/AGENTS.md](apps/web/AGENTS.md)                       | Feature architecture, Storybook, web testing, web pitfalls |
-| `apps/web/cypress/`    | [apps/web/cypress/AGENTS.md](apps/web/cypress/AGENTS.md)       | Cypress E2E patterns (legacy — no new tests)               |
-| `apps/web/e2e/`        | [apps/web/e2e/docs/README.md](apps/web/e2e/docs/README.md)     | **Playwright E2E — all new tests go here**                 |
-| `apps/web/.storybook/` | [apps/web/.storybook/AGENTS.md](apps/web/.storybook/AGENTS.md) | Storybook fixtures and provider patterns                   |
-| `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 | Expo + Tamagui                                             |
-| `packages/`            | [packages/AGENTS.md](packages/AGENTS.md)                       | Shared packages, dual env vars                             |
+| Subtree                | File                                                                     | Covers                                                     |
+| ---------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| `apps/web/`            | [apps/web/AGENTS.md](apps/web/AGENTS.md)                                 | Feature architecture, Storybook, web testing, web pitfalls |
+| `apps/web/cypress/`    | [apps/web/cypress/AGENTS.md](apps/web/cypress/AGENTS.md)                 | Cypress E2E patterns (legacy — no new tests)               |
+| `apps/web/playwright/` | [apps/web/playwright/docs/README.md](apps/web/playwright/docs/README.md) | **Playwright E2E — all new tests go here**                 |
+| `apps/web/.storybook/` | [apps/web/.storybook/AGENTS.md](apps/web/.storybook/AGENTS.md)           | Storybook fixtures and provider patterns                   |
+| `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                           | Expo + Tamagui                                             |
+| `packages/`            | [packages/AGENTS.md](packages/AGENTS.md)                                 | Shared packages, dual env vars                             |
 
 When adding new guidance, place it in the most-specific subtree it applies to.
 
@@ -387,12 +387,12 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 ### Platform-specific testing
 
 - **Web — Cypress** (legacy, no new tests): see [apps/web/AGENTS.md](apps/web/AGENTS.md#web-testing).
-- **Web — Playwright** (all new E2E tests): see [apps/web/e2e/docs/README.md](apps/web/e2e/docs/README.md).
+- **Web — Playwright** (all new E2E tests): see [apps/web/playwright/docs/README.md](apps/web/playwright/docs/README.md).
 - **Mobile** (E2E guidelines, mobile test commands): see [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md#mobile-specific-testing).
 
 ### Playwright E2E Framework
 
-All new E2E tests must be written in Playwright (`apps/web/e2e/`). Cypress is legacy — no new Cypress tests.
+All new E2E tests must be written in Playwright (`apps/web/playwright/`). Cypress is legacy — no new Cypress tests.
 
 | Command              | Purpose                      |
 | -------------------- | ---------------------------- |
@@ -401,9 +401,9 @@ All new E2E tests must be written in Playwright (`apps/web/e2e/`). Cypress is le
 | `yarn pw:test:api`   | Run `@api` tests only        |
 | `yarn pw:ci`         | CI mode — smoke with retries |
 
-**Before writing any Playwright test, AI agents must follow the [12-step AI Test Output Format](apps/web/e2e/docs/AI_TEST_OUTPUT_FORMAT.md).** Code is step 11 of 12.
+**Before writing any Playwright test, AI agents must follow the [12-step AI Test Output Format](apps/web/playwright/docs/AI_TEST_OUTPUT_FORMAT.md).** Code is step 11 of 12.
 
-For Cypress → Playwright migration, follow the [Cypress Migration Guide](apps/web/e2e/docs/CYPRESS_MIGRATION_GUIDE.md).
+For Cypress → Playwright migration, follow the [Cypress Migration Guide](apps/web/playwright/docs/CYPRESS_MIGRATION_GUIDE.md).
 
 ### Developer-Owned Tests Rule
 
@@ -415,7 +415,7 @@ AI agents must always consider what developers should test before QA automation.
 
 If a feature lacks unit and component coverage, the correct response is to flag missing developer tests — not to write a Playwright test that compensates for them. Playwright tests are the top of the pyramid, not the foundation.
 
-See [Developer Testability Contract](apps/web/e2e/docs/developer-testability-contract.md) for the full QA-developer agreement.
+See [Developer Testability Contract](apps/web/playwright/docs/developer-testability-contract.md) for the full QA-developer agreement.
 
 ## Security & Safe Wallet Patterns
 

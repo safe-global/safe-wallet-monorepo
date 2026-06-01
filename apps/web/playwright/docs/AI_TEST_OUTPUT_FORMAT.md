@@ -53,11 +53,28 @@ AI must answer these 4 questions for every test:
 3. **How is the data cleaned?** — read-only (no cleanup), API reversal, or dedicated test Safe?
 4. **Can this test run in parallel?** — does it mutate shared state? If yes, it needs its own data.
 
+**Autonomous Safe selection — AI must do this without asking the human:**
+
+Before writing any test, AI must read `src/data/safes/static.ts` and select the right Safe automatically. The file contains a lookup table at the top with every Safe's properties (threshold, tokens, NFTs, pending txs, wallet ownership).
+
+Selection algorithm:
+
+1. What chain does the test need? → Filter by network prefix (SEP*, ETH*, GNO\_, etc.)
+2. What data does the test need? → Match against the lookup table columns
+3. Does the test mutate state? → If yes, DO NOT use a static Safe — flag as a test data gap
+4. Does the test need wallet connection? → Check "Test wallet" column (Owner vs NOT owner)
+5. Pick the SIMPLEST Safe that satisfies requirements — don't use a feature-rich Safe for a basic smoke test
+
+If no existing Safe matches: document exactly what's missing (e.g., "Need a Sepolia Safe with 2/3 threshold and ERC-721 tokens") and flag it as a test data gap. Do NOT hardcode a new address — a human must create and register it.
+
+AI must state which Safe it selected and why in the test output: "Selected `SEP_STATIC_SAFE_2` because test needs a Safe with ERC20 tokens and NFTs."
+
 Rules:
 
-- Use existing static test Safes from `src/data/constants.ts` for read-only tests
+- Use existing static test Safes from `src/data/safes/static.ts` for read-only tests
+- Import via `import { staticSafes } from '../data/safes'` — never from constants.ts
 - If new test data is needed, document what must be created and where
-- Never hardcode addresses that aren't in the shared constants file
+- Never hardcode addresses that aren't in the safes registry
 - Use unique identifiers for created data (e.g., include `testInfo.testId` or `Date.now()`)
 - Use API for data creation and cleanup when possible — never UI clicks
 - Avoid dependency on existing shared mutable data — create what you need, clean what you create
