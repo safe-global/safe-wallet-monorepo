@@ -135,10 +135,10 @@ const createAddHeader = (
 const CURRENT_USER_ID = 7
 
 const adminMembers = [
-  { role: 'ADMIN' as const, status: 'ACTIVE' as const, name: '', invitedBy: '', user: { id: CURRENT_USER_ID } },
+  { role: 'ADMIN' as const, status: 'ACTIVE' as const, name: '', invitedBy: null, user: { id: CURRENT_USER_ID } },
 ]
 const memberMembers = [
-  { role: 'MEMBER' as const, status: 'ACTIVE' as const, name: '', invitedBy: '', user: { id: CURRENT_USER_ID } },
+  { role: 'MEMBER' as const, status: 'ACTIVE' as const, name: '', invitedBy: null, user: { id: CURRENT_USER_ID } },
 ]
 
 describe('SafeSidebarWorkspaceHeader', () => {
