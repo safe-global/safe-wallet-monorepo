@@ -20,8 +20,27 @@ export type RouteContext = {
   hasSigner: boolean
   // Switch active chain handler (returns when state is committed):
   switchActiveChainByCaip2: (caip2: string) => Promise<{ ok: true } | { ok: false; reason: 'NOT_DEPLOYED' }>
-  // Local Safe-tx status lookup (chainId, txId/safeTxHash) → status string per EIP-5792
-  getCallsStatus: (chainId: string, id: string) => Promise<{ status: number; receipts?: unknown[] }>
+  // EIP-5792 GetCallsResult envelope (mirrors apps/web/.../safe-wallet-provider/index.ts).
+  // status codes: 100 PENDING | 200 CONFIRMED | 400 OFFCHAIN_FAILURE | 500 REVERTED.
+  // Throws 'Transaction not found' if the safeTxHash is unknown — caller wraps in JSON-RPC error.
+  getCallsStatus: (
+    chainId: string,
+    id: string,
+  ) => Promise<{
+    version: '2.0.0'
+    id: string
+    chainId: `0x${string}`
+    status: number
+    atomic: true
+    receipts?: Array<{
+      logs: unknown[]
+      status: `0x${string}`
+      blockHash: `0x${string}`
+      blockNumber: `0x${string}`
+      gasUsed: `0x${string}`
+      transactionHash: `0x${string}`
+    }>
+  }>
   navigateToCallsStatus: (chainId: string, id: string) => void
 }
 
@@ -110,8 +129,17 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
   // Calls status / show.
   if (method === 'wallet_getCallsStatus') {
     const [callsId] = rpcParams as [string]
-    const status = await ctx.getCallsStatus(chainId, callsId)
-    return formatJsonRpcResult(id, status)
+    try {
+      const result = await ctx.getCallsStatus(chainId, callsId)
+      return formatJsonRpcResult(id, result)
+    } catch (e) {
+      // Web maps an unknown safeTxHash to a JSON-RPC error rather than `{status: 100}`,
+      // because viem/wagmi treats "missing" and "pending" as distinct outcomes.
+      return formatJsonRpcError(id, {
+        code: -32603,
+        message: e instanceof Error ? e.message : 'Transaction not found',
+      })
+    }
   }
   if (method === 'wallet_showCallsStatus') {
     const [callsId] = rpcParams as [string]
@@ -141,6 +169,44 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     }
     if (!hasSigner) {
       return formatJsonRpcError(id, { code: 4100, message: 'No signer attached to this Safe' })
+    }
+    // wallet_sendCalls — validate the bundle envelope up front (mirrors apps/web/.../
+    // safe-wallet-provider/index.ts wallet_sendCalls). chainId / from mismatches and
+    // malformed calls fail synchronously rather than burning a sheet + compose pass.
+    if (method === 'wallet_sendCalls' && activeChain) {
+      const [bundle] = rpcParams as [
+        | {
+            chainId?: `0x${string}`
+            from?: `0x${string}`
+            calls?: Array<{ to?: string; value?: string; data?: string }>
+          }
+        | undefined,
+      ]
+      if (!bundle) {
+        return formatJsonRpcError(id, { code: -32602, message: 'Invalid call parameters.' })
+      }
+      const expectedChainHex = `0x${Number(activeChain.chainId).toString(16)}`
+      if (bundle.chainId !== expectedChainHex) {
+        return formatJsonRpcError(id, {
+          code: -32602,
+          message: `Safe is not on chain ${activeChain.chainId}`,
+        })
+      }
+      if (bundle.from !== activeSafe.address.value) {
+        return formatJsonRpcError(id, { code: -32602, message: 'Invalid from address' })
+      }
+      // Per-call shape (web's mapping rules):
+      //   - all-fields-empty → invalid
+      //   - no-to + only data → contract deployment (allowed; composeSafeTxDraft routes via CreateCall)
+      //   - no-to + (value or no-data) → invalid
+      for (const call of bundle.calls ?? []) {
+        if (!call.to) {
+          const isDeployment = !call.value && !!call.data
+          if (!isDeployment) {
+            return formatJsonRpcError(id, { code: -32602, message: 'Invalid call parameters.' })
+          }
+        }
+      }
     }
     // Sentinel: caller checks for this and DOES NOT call respondSessionRequest yet.
     return { id, jsonrpc: '2.0', result: '__DEFERRED__' } as unknown as RoutedResponse

@@ -8,6 +8,7 @@ import { getSdkError } from '@walletconnect/utils'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
+import { selectChainById } from '@/src/store/chains'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { removePending, setOutstandingRequest, clearOutstandingRequest } from '../store/walletKitSlice'
 import { clearDraft } from '@/src/store/draftTxSlice'
@@ -39,6 +40,7 @@ const extractCalls = (method: string, params: unknown): DappCall[] => {
 export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) => {
   const dispatch = useAppDispatch()
   const activeSafe = useAppSelector(selectActiveSafe)
+  const chain = useAppSelector((s) => (activeSafe ? (selectChainById(s, activeSafe.chainId) ?? null) : null))
   const { data: safe } = useSafesGetSafeV1Query(
     activeSafe ? { chainId: activeSafe.chainId, safeAddress: activeSafe.address } : skipToken,
   )
@@ -90,7 +92,7 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
   // The parent RequestSheetHost only mounts this sheet once the Safe protocol-kit SDK
   // is ready, so composeSafeTxDraft can rely on getSafeSDK() returning a real instance.
   useEffect(() => {
-    if (!activeSafe || !calls || !safe) {
+    if (!activeSafe || !calls || !safe || !chain) {
       return
     }
     let cancelled = false
@@ -101,6 +103,7 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
       chainId: activeSafe.chainId,
       safeAddress: activeSafe.address,
       safe,
+      chain,
       dispatch,
     })
       .then((hash) => {
@@ -128,7 +131,7 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
         dispatch(clearOutstandingRequest(inFlightHash))
       }
     }
-  }, [activeSafe?.address, activeSafe?.chainId, calls, dispatch, safe])
+  }, [activeSafe?.address, activeSafe?.chainId, calls, dispatch, safe, chain])
 
   const onSign = async () => {
     if (!composedHash) {
@@ -180,7 +183,7 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
       <YStack gap="$2">
         {calls.map((c, i) => (
           <YStack key={i} gap="$1" padding="$2" borderRadius="$2" backgroundColor="$backgroundSecondary">
-            <Text fontWeight="500">to: {c.to}</Text>
+            <Text fontWeight="500">to: {c.to ?? '(contract deployment)'}</Text>
             <Text color="$colorSecondary">value: {c.value ?? '0'}</Text>
             <Text color="$colorSecondary" numberOfLines={1}>
               data: {c.data ?? '0x'}
