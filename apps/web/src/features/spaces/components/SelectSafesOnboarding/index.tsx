@@ -83,7 +83,7 @@ const SelectSafesOnboarding = (): ReactElement => {
         <div className="flex flex-col gap-2 shrink-0">
           <Typography variant="h2">Select Safes</Typography>
           <Typography variant="paragraph" color="muted">
-            Choose which Safes to add to this Space. You can add more later.
+            Choose which Safes to add to this Workspace. You can add more later.
           </Typography>
         </div>
 

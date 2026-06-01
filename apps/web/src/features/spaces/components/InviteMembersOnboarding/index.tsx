@@ -44,7 +44,7 @@ const InviteMembersOnboarding = (): ReactElement => {
       <div className="flex flex-col gap-2">
         <Typography variant="h2">Invite your team</Typography>
         <Typography variant="paragraph" color="muted">
-          Add people to collaborate on this Space.
+          Add people to collaborate on this Workspace.
         </Typography>
       </div>
 

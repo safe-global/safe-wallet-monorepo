@@ -49,8 +49,8 @@ const CreateSpaceOnboarding = (): ReactElement => {
   const [hasUserEdited, setHasUserEdited] = useState(false)
   const nameReg = register('name', {
     required: true,
-    maxLength: { value: 30, message: 'Space name must be 30 characters or less' },
-    pattern: { value: /^[a-zA-Z0-9 ]+$/, message: 'Space name must not contain special characters' },
+    maxLength: { value: 30, message: 'Workspace name must be 30 characters or less' },
+    pattern: { value: /^[a-zA-Z0-9 ]+$/, message: 'Workspace name must not contain special characters' },
     validate: (value) => value?.trim() !== '',
   })
 
@@ -72,7 +72,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
       <StepCounter currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
 
       <div className="flex flex-col gap-2">
-        <Typography variant="h2">Create a Space</Typography>
+        <Typography variant="h2">Create a Workspace</Typography>
         <Typography variant="paragraph" color="muted">
           Your team&apos;s home for managing Safes, tracking activity, and collaborating.
         </Typography>
@@ -81,7 +81,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
       <form id={FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-6">
         <div className="relative">
           <label htmlFor="space-name" className="m-0 text-sm leading-5 font-medium">
-            Space name
+            Workspace name
           </label>
           <Input
             id="space-name"

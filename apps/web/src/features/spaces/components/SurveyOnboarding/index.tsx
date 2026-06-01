@@ -188,7 +188,7 @@ const SurveyOnboarding = (): ReactElement | null => {
           <Spinner />
         ) : (
           <>
-            Create Space
+            Create Workspace
             <ChevronRight className="size-4 ml-1" />
           </>
         )}
