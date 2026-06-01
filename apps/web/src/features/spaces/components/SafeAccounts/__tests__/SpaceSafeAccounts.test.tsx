@@ -5,7 +5,7 @@ jest.mock('../../AddAccountsChooser', () => ({
   __esModule: true,
   default: ({ buttonLabel, entryPoint }: { buttonLabel?: string; entryPoint?: string }) => (
     <button data-testid="add-accounts-chooser" data-entry-point={entryPoint}>
-      {buttonLabel ?? 'Add Accounts'}
+      {buttonLabel ?? 'Add accounts'}
     </button>
   ),
 }))

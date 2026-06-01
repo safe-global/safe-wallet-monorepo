@@ -47,7 +47,7 @@ describe('AddAccountsChooser', () => {
   it('renders the trigger button with the default label', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
-    expect(screen.getByTestId('add-space-account-button')).toHaveTextContent('Add Accounts')
+    expect(screen.getByTestId('add-space-account-button')).toHaveTextContent('Add accounts')
   })
 
   it('respects a custom buttonLabel', () => {

@@ -71,7 +71,7 @@ const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip 
 
 const AddAccountsChooser = ({
   buttonVariant = 'outline',
-  buttonLabel = 'Add Accounts',
+  buttonLabel = 'Add accounts',
   entryPoint,
 }: AddAccountsChooserProps) => {
   const [chooserOpen, setChooserOpen] = useState(false)
