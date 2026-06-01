@@ -109,4 +109,22 @@ describe('SpaceAddressBookTable', () => {
     expect(screen.getAllByTestId('eth-hash-info')).toHaveLength(1)
     expect(screen.getByTestId('email-info')).toHaveTextContent(createdBy)
   })
+
+  it('renders EthHashInfo in the "Added by" cell when createdBy is an address', () => {
+    const createdBy = faker.finance.ethereumAddress()
+    render(<SpaceAddressBookTable entries={[entryBuilder().with({ createdBy }).build()]} />)
+
+    // One EthHashInfo for the Address column, one for the "Added by" cell
+    expect(screen.getAllByTestId('eth-hash-info')).toHaveLength(2)
+    expect(screen.queryByTestId('email-info')).not.toBeInTheDocument()
+  })
+
+  it('renders EmailInfo in the "Added by" cell when createdBy is an email', () => {
+    const createdBy = faker.internet.email()
+    render(<SpaceAddressBookTable entries={[entryBuilder().with({ createdBy }).build()]} />)
+
+    // EthHashInfo only renders for the Address column; "Added by" uses EmailInfo
+    expect(screen.getAllByTestId('eth-hash-info')).toHaveLength(1)
+    expect(screen.getByTestId('email-info')).toHaveTextContent(createdBy)
+  })
 })
