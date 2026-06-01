@@ -131,16 +131,13 @@ describe('AddAccountsChooser', () => {
     expect(screen.queryByTestId('add-accounts-picker')).not.toBeInTheDocument()
   })
 
-  it('renders the admin-only tooltip text in the DOM for non-admins', () => {
+  it('does not set a native title attribute on the disabled row (Tooltip handles it)', () => {
     mockIsAdmin = false
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
     fireEvent.click(screen.getByTestId('add-space-account-button'))
 
-    expect(screen.getByRole('button', { name: /Add Safe accounts to this workspace/i })).toHaveAttribute(
-      'title',
-      'You need to be an Admin to add accounts',
-    )
+    expect(screen.getByRole('button', { name: /Add Safe accounts to this workspace/i })).not.toHaveAttribute('title')
   })
 
   it('navigates to /new-safe/create when "Create new Safe" is clicked', () => {

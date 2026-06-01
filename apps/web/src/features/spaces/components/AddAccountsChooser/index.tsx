@@ -37,7 +37,6 @@ const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip 
       type="button"
       onClick={disabled ? undefined : onClick}
       aria-disabled={disabled || undefined}
-      title={disabled ? disabledTooltip : undefined}
       className={cn(
         'group flex w-full items-center gap-2 rounded-md p-2 text-left text-sm text-sidebar-foreground transition-colors',
         '[&_svg]:[stroke-width:2] [&_svg]:transition-colors',
