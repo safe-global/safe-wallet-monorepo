@@ -32,14 +32,14 @@ export type RouteContext = {
     chainId: `0x${string}`
     status: number
     atomic: true
-    receipts?: Array<{
+    receipts?: {
       logs: unknown[]
       status: `0x${string}`
       blockHash: `0x${string}`
       blockNumber: `0x${string}`
       gasUsed: `0x${string}`
       transactionHash: `0x${string}`
-    }>
+    }[]
   }>
   navigateToCallsStatus: (chainId: string, id: string) => void
 }
@@ -178,7 +178,7 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
         | {
             chainId?: `0x${string}`
             from?: `0x${string}`
-            calls?: Array<{ to?: string; value?: string; data?: string }>
+            calls?: { to?: string; value?: string; data?: string }[]
           }
         | undefined,
       ]
