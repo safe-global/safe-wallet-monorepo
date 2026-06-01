@@ -7,6 +7,7 @@ import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { isDomain } from '@/services/ens'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
+import { cn } from '@/utils/cn'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -111,7 +112,7 @@ const MemberInviteRow = ({
               },
             })}
             placeholder="Wallet address or ENS name"
-            className="h-11 rounded-lg bg-card px-4"
+            className={cn('h-11 rounded-lg bg-card px-4', resolving && 'pr-10')}
             error={displayError}
             data-testid={`invite-address-input-${index}`}
           />
