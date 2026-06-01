@@ -33,7 +33,17 @@ interface OwnedSafesModalProps {
 
 const OwnedSafesModal = ({ open, onClose }: OwnedSafesModalProps) => {
   const [search, setSearch] = useState('')
+  const [isConnecting, setIsConnecting] = useState(false)
   const connectWallet = useConnectWallet()
+
+  const handleConnectWallet = async () => {
+    setIsConnecting(true)
+    try {
+      await connectWallet()
+    } finally {
+      setIsConnecting(false)
+    }
+  }
 
   const { buildSafeItem, walletAddress, isWalletConnected, allOwned, ownedError, ownedLoading } = useSafeItemBuilder()
   const allUndeployed = useAppSelector(selectUndeployedSafes)
@@ -92,11 +102,13 @@ const OwnedSafesModal = ({ open, onClose }: OwnedSafesModalProps) => {
   }, [search])
 
   if (!open) return null
+  if (isConnecting) return null
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent
         showCloseButton
+        data-owned-safes-modal
         className="flex max-h-[90vh] w-full max-w-[560px] flex-col gap-0 p-0 dark:border dark:border-border"
       >
         <DialogHeader className="shrink-0 border-b border-border/50 px-4 pb-3 pt-4">
@@ -135,7 +147,7 @@ const OwnedSafesModal = ({ open, onClose }: OwnedSafesModalProps) => {
                 type="button"
                 size="lg"
                 className="w-full max-w-[300px]"
-                onClick={() => connectWallet()}
+                onClick={handleConnectWallet}
               >
                 Connect wallet
               </Button>

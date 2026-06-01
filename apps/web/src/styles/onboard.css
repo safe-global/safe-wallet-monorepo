@@ -46,7 +46,8 @@
   --onboard-warning-600: var(--color-error-main);
   --onboard-warning-700: var(--color-error-dark);
 
-  --onboard-modal-z-index: 1500;
+  /* Connect modal */
+  --onboard-modal-z-index: 1301;
 
   --onboard-modal-backdrop: rgba(99, 102, 105, 0.75);
 
@@ -82,7 +83,12 @@
 
   --account-select-danger-500: var(--onboard-danger-500);
 
-  --onboard-account-select-modal-z-index: 1500;
+  --onboard-account-select-modal-z-index: 1301;
+}
+
+[data-owned-safes-modal],
+[data-slot='dialog-overlay']:has(+ [data-owned-safes-modal]) {
+  z-index: 1200;
 }
 
 #walletconnect-qrcode-modal {
