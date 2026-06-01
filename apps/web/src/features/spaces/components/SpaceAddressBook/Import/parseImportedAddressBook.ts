@@ -16,7 +16,7 @@ const UNSUPPORTED_FILE_ERROR = 'Unsupported file type. Please upload a CSV or JS
 const hasEntry = (row: string[]) => row.length === 3 && !!row[0] && !!row[1] && !!row[2]
 
 const filterToSupportedChains = (items: AddressBookItem[], supportedChainIds: string[]): ParsedAddressBook => {
-  const filtered = items.filter((item) => supportedChainIds.includes(item.chainIds[0]))
+  const filtered = items.filter((item) => item.chainIds.some((chainId) => supportedChainIds.includes(chainId)))
 
   if (filtered.length === 0) {
     return { items: [], error: NO_SUPPORTED_CHAINS_ERROR }

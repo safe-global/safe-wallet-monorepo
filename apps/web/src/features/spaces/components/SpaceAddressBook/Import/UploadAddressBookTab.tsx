@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import { useDropzone } from 'react-dropzone'
+import { useDropzone, type FileRejection } from 'react-dropzone'
 
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,16 @@ import { parseImportedAddressBook } from './parseImportedAddressBook'
 const ACCEPTED_FILE_TYPES = {
   'text/csv': ['.csv'],
   'application/json': ['.json'],
+}
+
+// Matches the local address book CSV import guard so large files aren't read/parsed on the main thread.
+const MAX_FILE_SIZE = 1_000_000
+
+const getRejectionError = (rejection?: FileRejection): string => {
+  const code = rejection?.errors[0]?.code
+  if (code === 'file-too-large') return 'File is too large. Please upload a file smaller than 1MB.'
+  if (code === 'too-many-files') return 'Please upload a single file.'
+  return 'Unsupported file type. Please upload a CSV or JSON file.'
 }
 
 type UploadAddressBookTabProps = {
@@ -37,20 +47,35 @@ const UploadAddressBookTab = ({
   const [error, setError] = useState<string>()
 
   const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
+    (acceptedFiles: File[], fileRejections: FileRejection[]) => {
+      // Reset any previously parsed items so a stale, importable selection can't survive a new drop.
+      setItems([])
+
+      if (fileRejections.length > 0) {
+        setFileName(undefined)
+        setError(getRejectionError(fileRejections[0]))
+        return
+      }
+
       const file = acceptedFiles[0]
       if (!file) return
+
+      setFileName(file.name)
+      setError(undefined)
 
       const reader = new FileReader()
       reader.onload = (event) => {
         const content = event.target?.result
-        if (typeof content !== 'string') return
+        if (typeof content !== 'string') {
+          setError('Could not read file')
+          return
+        }
 
         const result = parseImportedAddressBook(file.name, content, supportedChainIds)
-        setFileName(file.name)
         setItems(result.items)
         setError(result.error)
       }
+      reader.onerror = () => setError('Could not read file')
       reader.readAsText(file)
     },
     [supportedChainIds],
@@ -60,6 +85,7 @@ const UploadAddressBookTab = ({
     accept: ACCEPTED_FILE_TYPES,
     maxFiles: 1,
     multiple: false,
+    maxSize: MAX_FILE_SIZE,
     onDrop,
   })
 

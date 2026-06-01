@@ -8,9 +8,21 @@ jest.mock('../parseImportedAddressBook', () => ({
 
 const mockParse = parseImportedAddressBook as jest.Mock
 
-const uploadFile = (content = 'address,name,chainId') => {
+const uploadFile = (
+  content = 'address,name,chainId',
+  {
+    name = 'book.csv',
+    type = 'text/csv',
+    size,
+  }: Partial<{
+    name: string
+    type: string
+    size: number
+  }> = {},
+) => {
   const input = document.querySelector('input[type="file"]') as HTMLInputElement
-  const file = new File([content], 'book.csv', { type: 'text/csv' })
+  const file = new File([content], name, { type })
+  if (size !== undefined) Object.defineProperty(file, 'size', { value: size })
   fireEvent.change(input, { target: { files: [file] } })
 }
 
@@ -69,6 +81,39 @@ describe('UploadAddressBookTab', () => {
     uploadFile()
 
     await waitFor(() => expect(screen.getByText('Invalid or corrupt address book header')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: /import/i })).toBeDisabled()
+  })
+
+  it('rejects an oversized file with a size error and keeps import disabled', async () => {
+    render(<UploadAddressBookTab {...baseProps} />)
+    uploadFile('address,name,chainId', { size: 2_000_000 })
+
+    await waitFor(() => expect(screen.getByText(/smaller than 1MB/i)).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: /import/i })).toBeDisabled()
+    expect(mockParse).not.toHaveBeenCalled()
+  })
+
+  it('rejects an unsupported file type with an error', async () => {
+    render(<UploadAddressBookTab {...baseProps} />)
+    uploadFile('hello', { name: 'notes.txt', type: 'text/plain' })
+
+    await waitFor(() => expect(screen.getByText(/Unsupported file type/i)).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: /import/i })).toBeDisabled()
+  })
+
+  it('clears previously parsed items when a rejected file is dropped', async () => {
+    mockParse.mockReturnValue({ items: [{ address: '0x1', name: 'Alice', chainIds: ['1'] }] })
+
+    render(<UploadAddressBookTab {...baseProps} />)
+    uploadFile()
+
+    const importButton = await screen.findByRole('button', { name: /import/i })
+    await waitFor(() => expect(importButton).not.toBeDisabled())
+
+    // Dropping an oversized file must drop the stale, importable selection.
+    uploadFile('address,name,chainId', { size: 2_000_000 })
+
+    await waitFor(() => expect(screen.getByText(/smaller than 1MB/i)).toBeInTheDocument())
     expect(screen.getByRole('button', { name: /import/i })).toBeDisabled()
   })
 

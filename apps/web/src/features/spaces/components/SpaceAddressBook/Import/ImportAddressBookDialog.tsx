@@ -152,7 +152,9 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
         <Tabs defaultValue={defaultTab} className="gap-0">
           <TabsList className="mx-4 mt-4">
             <TabsTrigger value="local">Local contacts</TabsTrigger>
-            <TabsTrigger value="upload">Upload file</TabsTrigger>
+            <TabsTrigger value="upload" data-testid="upload-file-tab">
+              Upload file
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="local">

@@ -118,6 +118,13 @@ export const inviteMemberLabel = 'Add member'
 export const learnMoreBtn = '[data-testid="spaces-learn-more-button"]'
 export const exploreSpacesLabel = 'Introducing workspaces'
 
+// -- Address book import dialog --
+const openImportDialogBtn = '[data-testid="import-address-book-btn"]'
+const uploadFileTab = '[data-testid="upload-file-tab"]'
+const importFileInput = '[data-testid="ab-file-input"]'
+const importSubmitBtn = '[data-testid="import-btn"]'
+const importSuccessLabel = 'Imported contact(s)'
+
 // ===========================================
 // Labels & regex patterns
 // ===========================================
@@ -573,4 +580,50 @@ export function createSpaceViaOnboardingWithSkip(name) {
   skipSelectSafesStep()
   skipInviteMembersStep()
   verifySpaceDashboardLoaded()
+}
+
+// -- Address book import flow --
+
+export function visitSpaceAddressBook(spaceId) {
+  cy.visit(constants.spaceAddressBookUrl + String(spaceId))
+}
+
+export function openImportAddressBookDialog() {
+  cy.get(openImportDialogBtn, { timeout: 30000 }).should('be.visible').click()
+  cy.contains(importAddressBookLabel).should('be.visible')
+}
+
+export function switchToUploadFileTab() {
+  cy.get(uploadFileTab).should('be.visible').click()
+  cy.get(importFileInput).should('exist')
+}
+
+export function uploadAddressBookFile(fixturePath) {
+  cy.get(importFileInput).selectFile(`cypress/fixtures/${fixturePath}`, { force: true })
+}
+
+export function clickImportUploadedFile() {
+  cy.get(importSubmitBtn).should('be.enabled').click()
+}
+
+export function verifyUploadSummary(entryCount, chainCount) {
+  const entryWord = entryCount === 1 ? 'entry' : 'entries'
+  const chainWord = chainCount > 1 ? 'chains' : 'chain'
+  cy.contains(`Found ${entryCount} ${entryWord} on ${chainCount} ${chainWord}`).should('be.visible')
+}
+
+export function verifyImportSubmitDisabled() {
+  cy.get(importSubmitBtn).should('be.disabled')
+}
+
+export function verifyImportError(message) {
+  cy.contains(message).should('be.visible')
+}
+
+export function verifyImportRequestItemCount(alias, expectedCount) {
+  cy.wait(alias).its('request.body.items').should('have.length', expectedCount)
+}
+
+export function verifyImportSuccessNotification() {
+  cy.contains(importSuccessLabel).should('be.visible')
 }
