@@ -28,7 +28,7 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 const AddActionsAction = () => {
   return (
     <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
-      <AddAccountsChooser />
+      <AddAccountsChooser buttonLabel="Manage accounts" />
     </Track>
   )
 }
