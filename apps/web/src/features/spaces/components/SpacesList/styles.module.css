@@ -18,3 +18,18 @@
   gap: var(--space-2);
   flex-wrap: wrap;
 }
+
+/* Soft brand-tinted radial glow behind the sign-in card. */
+.authShell {
+  background-image:
+    radial-gradient(
+      circle at 20% 20%,
+      color-mix(in srgb, var(--color-static-text-brand) 6%, transparent) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      color-mix(in srgb, var(--color-static-text-brand) 4%, transparent) 0%,
+      transparent 50%
+    );
+}

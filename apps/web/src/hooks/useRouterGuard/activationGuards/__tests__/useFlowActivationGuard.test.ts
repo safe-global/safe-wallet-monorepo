@@ -400,6 +400,23 @@ describe('useFlowActivationGuard', () => {
         redirectTo: AppRoutes.welcome.createSpace,
       })
     })
+
+    // Regression: after a logout the persisted authSlice still says
+    // "signed in" until reconcileAuth resolves, so the guard runs with
+    // isSiweAuthenticated=true while the cookies have already been cleared.
+    // fetchSpaces then resolves with a 401/403 error and data=undefined —
+    // the old code treated that as "no spaces" and bounced the user into
+    // /welcome/create-space. The guard must instead treat transient/auth
+    // errors as "uncertain" and let the page render.
+    it('should NOT redirect to create-space when the spaces fetch errors with 403 (cookies cleared post-logout)', async () => {
+      setupMocks({ pathname: AppRoutes.spaces.index, isSpaceRoute: true })
+      mockFetchSpaces.mockResolvedValueOnce({ data: undefined, error: { status: 403, data: 'Forbidden' } })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult.success).not.toBe(false)
+    })
   })
 
   // -----------------------------------------------------------------------

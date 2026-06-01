@@ -19,6 +19,16 @@ jest.mock('@/store', () => ({
   useAppSelector: (...args: unknown[]) => mockUseAppSelector(...args),
 }))
 
+const mockUseUsersGetWithWalletsV1Query = jest.fn()
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
+  useUsersGetWithWalletsV1Query: (...args: unknown[]) => mockUseUsersGetWithWalletsV1Query(...args),
+}))
+
+const CURRENT_USER_ID = 7
+const adminMembersForCurrentUser = [
+  { role: 'ADMIN' as const, status: 'ACTIVE' as const, name: '', invitedBy: '', user: { id: CURRENT_USER_ID } },
+]
+
 jest.mock('next/router', () => ({
   useRouter: jest.fn(() => ({
     push: jest.fn(),
@@ -202,6 +212,7 @@ describe('SafeSidebarVariant', () => {
     mockUseIsCounterfactualSafe.mockReturnValue(false)
     mockUseSidebarHydrated.mockReturnValue(true)
     mockUseAppSelector.mockReturnValue(true)
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: CURRENT_USER_ID } })
   })
 
   it('renders all navigation sections', () => {
@@ -386,8 +397,8 @@ describe('SafeSidebarVariant', () => {
 
     it('passes spaces array to addToWorkspace variant', () => {
       const spaces = [
-        { id: 1, name: 'Team', safeCount: 5 },
-        { id: 2, name: 'Personal', safeCount: 2 },
+        { id: 1, name: 'Team', safeCount: 5, members: adminMembersForCurrentUser },
+        { id: 2, name: 'Personal', safeCount: 2, members: adminMembersForCurrentUser },
       ]
       render(
         <SafeSidebarVariant
@@ -450,6 +461,7 @@ describe('SafeSidebarVariant', () => {
         id: i + 1,
         name: `Space ${i + 1}`,
         safeCount: 0,
+        members: adminMembersForCurrentUser,
       }))
 
       render(

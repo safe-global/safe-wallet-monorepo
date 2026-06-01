@@ -85,6 +85,7 @@ import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
+import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureException, initObservability } from '@/services/observability'
 import useMixpanel from '@/services/analytics/useMixpanel'
@@ -120,6 +121,7 @@ const SafeScopedSubscriptions = (): null => {
   useTxTracking()
   useSafeMsgTracking()
   usePortfolioRefetchOnTxHistory()
+  useInvalidateOverviewsOnTx()
   useCounterfactualSafeSync()
   return null
 }

@@ -93,10 +93,15 @@ const acceptInviteBtn = '[data-testid="accept-invite-button"]'
 const inviteNameInput = '[data-testid="invite-name-input"]'
 const confirmAcceptInviteBtn = '[data-testid="confirm-accept-invite-button"]'
 
+// -- Sidebar profile (sign-out) --
+const sidebarProfileTrigger = '[data-testid="sidebar-profile-trigger"]'
+const sidebarProfilePopover = '[data-testid="sidebar-profile-popover"]'
+const sidebarProfileSignOutBtn = '[data-testid="sidebar-profile-sign-out"]'
+const continueWithWalletBtn = '[data-testid="continue-with-wallet-btn"]'
+
 // -- Onboarding --
 const orgSpaceInput = '[data-testid="space-name-input"]'
 const createSpaceOnboardingContinueBtn = '[data-testid="create-space-onboarding-continue-button"]'
-const selectSafesSkipBtn = '[data-testid="select-safes-skip-button"]'
 const inviteMembersSkipBtn = '[data-testid="invite-members-skip-button"]'
 const onboardingCreateSpacePath = '/welcome/create-space'
 const onboardingSelectSafesPath = '/welcome/select-safes'
@@ -166,7 +171,30 @@ const spaceDashboardWidgetSelectorByTitle = {
 // ===========================================
 
 export function clickOnSignInBtn() {
-  cy.get('[data-testid="continue-with-wallet-btn"]').click()
+  cy.get(continueWithWalletBtn).click()
+}
+
+export function signOutViaSidebarProfile() {
+  cy.get(sidebarProfileTrigger, { timeout: 30000 }).should('be.visible').click()
+  cy.get(sidebarProfilePopover).should('be.visible')
+  cy.get(sidebarProfileSignOutBtn).should('be.visible').click()
+  // useLogout submits a form to the gateway which 303-redirects back to
+  // /welcome/spaces — wait for the round-trip to land and the signed-out
+  // sign-in button to render before letting the next step run.
+  cy.url({ timeout: 60000 }).should('include', constants.spacesUrl)
+  cy.get(continueWithWalletBtn, { timeout: 30000 }).should('be.visible')
+}
+
+export function verifyOnSingleSpaceDashboard(spaceName) {
+  // After re-login the single-space short-circuit pushes us straight to the
+  // space dashboard. Assert the URL is the space dashboard (not the
+  // workspace list, not the create-space onboarding) AND that the space's
+  // own selector now shows the expected name.
+  cy.url({ timeout: 60000 })
+    .should('include', constants.spaceDashboardUrl)
+    .and('include', 'spaceId=')
+    .and('not.include', onboardingCreateSpacePath)
+  cy.get(spaceSelectorBtn, { timeout: 30000 }).should('be.visible').and('contain.text', spaceName)
 }
 
 export function waitForSpacesWelcomeReady() {
@@ -520,7 +548,14 @@ function submitSpaceName(name) {
 
 function skipSelectSafesStep() {
   cy.url({ timeout: 30000 }).should('include', onboardingSelectSafesPath).and('include', 'spaceId=')
-  cy.get(selectSafesSkipBtn).should('be.visible').click()
+  // In the wallet-connected branch, there is no Skip button (the Next button is gated by Safe selection).
+  // Navigate directly to the next onboarding step, preserving spaceId.
+  cy.url().then((url) => {
+    const match = url.match(/spaceId=(\d+)/)
+    if (!match) throw new Error('spaceId not found in URL')
+    const spaceId = match[1]
+    cy.visit(`${onboardingInviteMembersPath}?spaceId=${spaceId}`)
+  })
 }
 
 function skipInviteMembersStep() {

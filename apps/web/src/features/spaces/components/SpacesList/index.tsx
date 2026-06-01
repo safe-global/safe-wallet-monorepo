@@ -7,15 +7,19 @@ import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import { useIsClassicViewFeatureEnabled } from '@/hooks/useClassicView'
 import ClassicViewLink from '../ClassicViewLink'
 import SpacesIcon from '@/public/images/spaces/spaces.svg'
+import SafeMarkIcon from '@/public/images/logo-no-text.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { Box, Card, Grid2, Link, Typography } from '@mui/material'
 import { Button } from '@/components/ui/button'
+import { Typography as ShadcnTypography } from '@/components/ui/typography'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import SpaceListInvite from '../InviteBanner'
 import { useCallback, useState } from 'react'
 import css from './styles.module.css'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import { cn } from '@/utils/cn'
 import { MemberStatus } from '@/features/spaces'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
@@ -57,25 +61,48 @@ const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?
 
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
   const isClassicViewFeatureEnabled = useIsClassicViewFeatureEnabled() === true
+  const isDarkMode = useDarkMode()
 
   return (
-    <>
-      <Card sx={{ p: 5, textAlign: 'center' }}>
-        <Typography variant="h3" fontWeight={600} mb={3}>
-          Sign in
-        </Typography>
+    <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+      {/* TODO(WA-2435): min-h-screen overlaps the Topbar in classic-view mode (require-login OFF).
+          Deferred while we keep PageLayout's dev-branch hideHeader logic untouched. */}
+      <div className={cn('relative flex min-h-screen items-center justify-center bg-background p-6', css.authShell)}>
+        <div className="relative w-full max-w-[440px] rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
+          <div className="mb-6 flex size-10 items-center justify-center text-foreground">
+            <SafeMarkIcon className="size-10" />
+          </div>
 
-        <Typography color="text.secondary" mb={3}>
-          Sign in to view or create a workspace.
-        </Typography>
+          <ShadcnTypography variant="h3" className="mb-6">
+            Sign in to your workspace
+          </ShadcnTypography>
 
-        <LocalSafesAlert />
+          <LocalSafesAlert />
 
-        <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
-      </Card>
+          <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
 
-      {isClassicViewFeatureEnabled && <ClassicViewLink />}
-    </>
+          {isClassicViewFeatureEnabled && <ClassicViewLink />}
+
+          <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
+            By continuing, you agree to the{' '}
+            <NextLink
+              href={AppRoutes.terms}
+              className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
+            >
+              Terms
+            </NextLink>{' '}
+            and{' '}
+            <NextLink
+              href={AppRoutes.privacy}
+              className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
+            >
+              Privacy Policy
+            </NextLink>
+            .
+          </p>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -128,21 +155,33 @@ const SpacesList = () => {
   const inviteAmount = pendingInvites?.length
   const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
 
+  const singleSpaceId = activeSpaces.length === 1 ? String(activeSpaces[0].id) : null
+
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,
     inviteAmount: inviteAmount || 0,
-    // Treat the "skip→unskip" transition as still loading. On the render where
-    // skip flips to false RTK Query returns isFetching=false but hasn't yet
-    // dispatched the fetch (that happens in a useEffect), so isFetching alone
-    // would lead useSignInRedirect to read spacesAmount=0 and bounce existing
-    // users into the create-space flow on re-login.
-    isSpacesLoading: isFetching || isUninitialized,
+    // Treat any state without a definitive answer as still loading. The
+    // skip→unskip transition (re-login after logout) returns isFetching=false
+    // and isUninitialized=false on the render where skip flips — RTK Query
+    // dispatches the refetch in a useEffect, so the loading flags lag one
+    // render behind. Without the `spaces === undefined && !error` clause an
+    // existing user gets bounced into /welcome/create-space because the hook
+    // reads spacesAmount=0 with isSpacesLoading=false. Once spaces or error
+    // resolves, this clause becomes false and the normal redirect logic runs.
+    isSpacesLoading: isFetching || isUninitialized || (spaces === undefined && !error),
     error: error || undefined,
+    singleSpaceId,
   })
 
   const afterSignIn = useCallback(() => {
     setHasSignedIn(true)
   }, [setHasSignedIn])
+
+  // The spaces query is skipped while signed out, so pendingInvites is always
+  // [] — no need to gate the early return on it.
+  if (!isUserSignedIn) {
+    return <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+  }
 
   return (
     <Box className={css.container}>
@@ -166,22 +205,16 @@ const SpacesList = () => {
             <SpaceListInvite key={invitingSpace.id} space={invitingSpace} />
           ))}
 
-        {isUserSignedIn || (!redirectLoading && pendingInvites.length) ? (
-          <>
-            {activeSpaces.length > 0 ? (
-              <Grid2 container spacing={2} flexWrap="wrap" data-testid="org-list">
-                {activeSpaces.map((space) => (
-                  <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
-                    <SpaceCard space={space} currentUserId={currentUser?.id} />
-                  </Grid2>
-                ))}
+        {activeSpaces.length > 0 ? (
+          <Grid2 container spacing={2} flexWrap="wrap" data-testid="org-list">
+            {activeSpaces.map((space) => (
+              <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
+                <SpaceCard space={space} currentUserId={currentUser?.id} />
               </Grid2>
-            ) : (
-              <NoSpacesState isAtLimit={isAtSpacesLimit} />
-            )}
-          </>
+            ))}
+          </Grid2>
         ) : (
-          <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+          isUserSignedIn && <NoSpacesState isAtLimit={isAtSpacesLimit} />
         )}
       </Box>
     </Box>
