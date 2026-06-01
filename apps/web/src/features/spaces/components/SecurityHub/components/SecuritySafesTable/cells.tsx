@@ -1,18 +1,19 @@
-import { Box, Skeleton, Stack, Typography } from '@mui/material'
+import { Skeleton, Stack, Typography } from '@mui/material'
 import type { GradeSummary, ScanResult } from '@/features/security/types'
-import type { SecurityContract } from '@/features/security'
 import { DASH } from './constants'
 import { formatBalance, getEvidence } from './utils'
 
 type ScoreCellProps = {
   summary: GradeSummary | null
   isScanning?: boolean
-  getStrengthLevel: SecurityContract['getStrengthLevel']
-  getStrengthColor: SecurityContract['getStrengthColor']
 }
 
-/** Numeric score (0–100) + colored dot reflecting the strength level. */
-export const ScoreCell = ({ summary, isScanning, getStrengthLevel, getStrengthColor }: ScoreCellProps) => {
+/**
+ * Numeric score (0–100) as plain text. No colored dot here — the adjacent STATUS
+ * column already carries the severity color, and a score-band dot would contradict
+ * it (a Safe can score high yet be Critical due to a single severe finding).
+ */
+export const ScoreCell = ({ summary, isScanning }: ScoreCellProps) => {
   if (!summary) {
     if (isScanning) return <Skeleton variant="rounded" width={60} height={20} />
     return (
@@ -23,20 +24,9 @@ export const ScoreCell = ({ summary, isScanning, getStrengthLevel, getStrengthCo
   }
   const clearRatio = summary.applicableCount > 0 ? summary.passing / summary.applicableCount : 0
   const score = Math.round(clearRatio * 100)
-  const level = getStrengthLevel(clearRatio, summary.hasCriticalIssue)
-  const color = getStrengthColor(level)
 
   return (
-    <Stack direction="row" alignItems="center" spacing={0.75}>
-      <Box
-        sx={{
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          backgroundColor: color,
-          flexShrink: 0,
-        }}
-      />
+    <Stack direction="row" alignItems="baseline" spacing={0.75}>
       <Typography variant="body2" fontWeight={600}>
         {score}
       </Typography>

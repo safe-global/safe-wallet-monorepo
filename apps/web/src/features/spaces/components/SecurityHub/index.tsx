@@ -6,6 +6,7 @@ import { useLoadFeature } from '@/features/__core__'
 import SecuritySafesTable from './components/SecuritySafesTable/SecuritySafesTable'
 import SecurityReportDrawer from './components/SecurityReportDrawer/SecurityReportDrawer'
 import SecurityEmptyState from './components/SecurityEmptyState/SecurityEmptyState'
+import SecurityHubSkeleton from './components/SecurityHubSkeleton/SecurityHubSkeleton'
 import WorkspaceHealthCard from './components/WorkspaceHealthCard/WorkspaceHealthCard'
 import useReconciledSpaceSafes from './hooks/useReconciledSpaceSafes'
 import useScanResultsState from './hooks/useScanResultsState'
@@ -36,18 +37,11 @@ const SecurityHub = (): ReactElement => {
   return (
     <Box data-testid="security-hub">
       <Box mb={3}>
-        <Typography variant="h1" mb={0.5}>
-          Security
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Overview of security checks across your accounts.
-        </Typography>
+        <Typography variant="h1">Security</Typography>
       </Box>
 
       {isLoadingSpacesSafes ? (
-        <Typography variant="body2" color="text.secondary">
-          Loading accounts...
-        </Typography>
+        <SecurityHubSkeleton />
       ) : safes.length === 0 ? (
         <SecurityEmptyState />
       ) : (

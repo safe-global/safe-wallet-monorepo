@@ -37,54 +37,72 @@ export const TABLE_WRAPPER_SX: SxProps<Theme> = {
 
 export const TABLE_SX: SxProps<Theme> = {
   tableLayout: 'fixed',
-  borderCollapse: 'separate',
-  borderSpacing: '0 6px',
+  borderCollapse: 'collapse',
+  width: '100%',
   minWidth: 960,
+  // Header: muted, uppercase, hairline bottom divider — Linear-style.
   '& th': {
-    border: 'none',
-    borderBottom: 'none !important',
-    py: 0.5,
-    px: { xs: 1.25, md: 2.5 },
-    fontSize: '0.65rem',
-    fontWeight: 700,
+    borderTop: 0,
+    borderRight: 0,
+    borderLeft: 0,
+    borderBottom: '1px solid var(--color-border-light)',
+    py: 1.25,
+    px: { xs: 1.5, md: 2.5 },
+    fontSize: '0.6875rem',
+    fontWeight: 600,
     textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    color: 'text.primary',
-    opacity: 0.6,
+    letterSpacing: '0.6px',
+    color: 'text.secondary',
+    backgroundColor: 'transparent',
+    textAlign: 'left',
   },
-  '& td': {
-    border: 'none',
-    height: 72,
+  // Body cells: flat, hairline divider, tighter row height, no per-row card chrome.
+  '& tbody td': {
+    borderTop: 0,
+    borderRight: 0,
+    borderLeft: 0,
+    borderBottom: '1px solid var(--color-border-light)',
+    height: 60,
     py: 0,
-    px: { xs: 1.25, md: 2.5 },
-    backgroundColor: 'background.paper',
+    px: { xs: 1.5, md: 2.5 },
+    backgroundColor: 'transparent',
     transition: 'background-color 0.12s',
     verticalAlign: 'middle',
     '& .MuiTypography-body2': { fontWeight: 500, fontSize: '0.875rem' },
     '& .MuiTypography-caption': { fontSize: '0.75rem' },
   },
+  // Last row drops its divider so it sits flush against the card bottom.
+  '& tbody tr:last-of-type td': {
+    borderBottom: 0,
+  },
+  // Subtle row hover, full-row.
   '& tbody tr:hover td': {
-    backgroundColor: 'success.background',
+    backgroundColor: 'action.hover',
   },
-  '& th:first-of-type': { pl: 0 },
-  '& td:first-of-type': {
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-    pl: { xs: 1.5, md: 3 },
+  // Expanded multichain parent reads as "active/open" — slightly stronger than hover,
+  // persists while the group is expanded so the state is unmistakable.
+  '& tbody tr[data-expanded-parent="true"] td': {
+    backgroundColor: 'action.selected',
   },
-  '& td:last-of-type': {
-    borderTopRightRadius: 12,
-    borderBottomRightRadius: 12,
-    pr: { xs: 3, md: 5 },
-    overflow: 'hidden',
+  // Edge padding to align with the card's inner padding rhythm.
+  '& th:first-of-type, & tbody td:first-of-type': {
+    pl: { xs: 2, md: 3 },
+  },
+  '& th:last-of-type, & tbody td:last-of-type': {
+    pr: { xs: 2, md: 3 },
+  },
+  // Child rows under an expanded multichain parent: subtle left rail for hierarchy,
+  // muted divider (vs. a sibling divider), and a slight inset on the first cell so
+  // the connection to the parent reads as a tree branch, not another sibling row.
+  '& tbody tr[data-child-row="true"] td:first-of-type': {
+    boxShadow: 'inset 2px 0 0 0 var(--color-border-light)',
+  },
+  '& tbody tr[data-child-row="true"][data-last-child="true"] td': {
+    borderBottomStyle: 'solid', // keep divider — visually closes the group
   },
   // Hide "Version" (5th col) on screens narrower than `md` — least essential security signal.
   '& th:nth-of-type(5), & td:nth-of-type(5)': {
     display: { xs: 'none', md: 'table-cell' },
-  },
-  // Hide "Last scanned" (8th col) on screens narrower than `lg` — useful but not critical.
-  '& th:nth-of-type(8), & td:nth-of-type(8)': {
-    display: { xs: 'none', lg: 'table-cell' },
   },
   // Hide "Balance" (3rd col) on screens narrower than `sm` so 13"-and-below has room.
   '& th:nth-of-type(3), & td:nth-of-type(3)': {
@@ -97,13 +115,12 @@ export const TABLE_SX: SxProps<Theme> = {
  * `TABLE_SX` so the column layout config is colocated.
  */
 export const COLUMNS: { label: string; width: string }[] = [
-  { label: 'Account', width: '22%' },
-  { label: 'Network', width: '11%' },
-  { label: 'Balance', width: '9%' },
-  { label: 'Threshold', width: '9%' },
-  { label: 'Version', width: '8%' },
-  { label: 'Status', width: '11%' },
-  { label: 'Score', width: '10%' },
-  { label: 'Last scanned', width: '11%' },
-  { label: '', width: '9%' },
+  { label: 'Account', width: '26%' },
+  { label: 'Network', width: '12%' },
+  { label: 'Balance', width: '11%' },
+  { label: 'Threshold', width: '11%' },
+  { label: 'Version', width: '10%' },
+  { label: 'Status', width: '13%' },
+  { label: 'Score', width: '12%' },
+  { label: '', width: '5%' },
 ]

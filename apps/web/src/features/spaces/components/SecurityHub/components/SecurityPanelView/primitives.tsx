@@ -1,4 +1,4 @@
-import { type ReactElement, type ReactNode, useState } from 'react'
+import { Fragment, type ReactElement, type ReactNode, useState } from 'react'
 import { Box, Collapse, Stack, Typography } from '@mui/material'
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
@@ -55,18 +55,20 @@ export const Row = ({ leadIcon, title, trailing, expandedContent }: RowProps): R
   return (
     <Box
       sx={{
-        px: 2,
+        px: 1.5,
         cursor: expandable ? 'pointer' : 'default',
-        '&:hover': expandable ? { backgroundColor: 'action.hover' } : {},
+        transition: 'background-color 0.12s',
+        '&:hover': expandable ? { backgroundColor: 'var(--muted)' } : {},
+        ...(expanded && { backgroundColor: 'var(--muted)' }),
       }}
       onClick={expandable ? () => setExpanded((v) => !v) : undefined}
     >
-      <Stack direction="row" spacing={1.25} alignItems="center" sx={{ py: 1.25 }}>
+      <Stack direction="row" spacing={1.5} alignItems="center" sx={{ py: 1.25 }}>
         {leadIcon && <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>{leadIcon}</Box>}
         <Typography
           variant="body2"
-          fontWeight={600}
-          sx={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}
+          fontWeight={500}
+          sx={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '0.8125rem' }}
           noWrap
           title={title}
         >
@@ -77,20 +79,34 @@ export const Row = ({ leadIcon, title, trailing, expandedContent }: RowProps): R
           <KeyboardArrowDownRoundedIcon
             sx={{
               color: 'text.secondary',
-              fontSize: 18,
+              fontSize: 16,
               flexShrink: 0,
+              opacity: 0.7,
               transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s',
+              transition: 'transform 0.2s ease, opacity 0.12s',
             }}
           />
         )}
       </Stack>
       {expandable && (
         <Collapse in={expanded}>
-          {/* Align expanded body's left edge with the title (icon 18px + gap 1.25 = 3.5 spacing units). */}
-          <Box sx={{ pb: 1.5, pl: leadIcon ? 3.5 : 0 }} onClick={(e) => e.stopPropagation()}>
+          {/* Indent expanded body so it visually attaches to the row's title via a quiet left rail. */}
+          <Box
+            sx={{
+              ml: leadIcon ? 3.75 : 0,
+              pl: 2,
+              pb: 1.75,
+              pt: 0.5,
+              borderLeft: '1px solid var(--color-border-light)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
             {typeof expandedContent === 'string' ? (
-              <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5, display: 'block' }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ lineHeight: 1.55, display: 'block', fontSize: '0.75rem' }}
+              >
                 {expandedContent}
               </Typography>
             ) : (
@@ -173,40 +189,62 @@ export const EvidenceList = ({
   const hasEvidence = !!evidence && evidence.length > 0
   if (!intro && !hasEvidence && !cta) return null
   return (
-    <Stack spacing={0.75}>
+    <Stack spacing={1.25}>
       {intro && (
-        <Typography variant="caption" color="text.primary" sx={{ lineHeight: 1.5, display: 'block' }}>
+        <Typography
+          variant="caption"
+          color="text.primary"
+          sx={{ lineHeight: 1.55, display: 'block', fontSize: '0.75rem' }}
+        >
           {intro}
         </Typography>
       )}
       {hasEvidence && (
-        <Stack spacing={0.25}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(80px, max-content) 1fr',
+            columnGap: 2,
+            rowGap: 0.5,
+          }}
+        >
           {evidence!.map((item, idx) =>
             typeof item === 'string' ? (
               <Typography
                 key={idx}
                 variant="caption"
                 color="text.secondary"
-                sx={{ lineHeight: 1.5, display: 'block', wordBreak: 'break-word' }}
+                sx={{
+                  gridColumn: '1 / -1',
+                  lineHeight: 1.55,
+                  display: 'block',
+                  wordBreak: 'break-word',
+                  fontSize: '0.75rem',
+                }}
               >
                 {item}
               </Typography>
             ) : (
-              <Stack key={idx} direction="row" spacing={1} alignItems="baseline">
+              <Fragment key={idx}>
                 <Typography
                   variant="caption"
                   color="text.secondary"
-                  sx={{ minWidth: 96, flexShrink: 0, lineHeight: 1.5 }}
+                  sx={{ lineHeight: 1.55, fontSize: '0.75rem', textTransform: 'lowercase' }}
                 >
                   {item.label}
                 </Typography>
-                <Typography variant="caption" color="text.primary" sx={{ lineHeight: 1.5, wordBreak: 'break-word' }}>
+                <Typography
+                  variant="caption"
+                  color="text.primary"
+                  fontWeight={500}
+                  sx={{ lineHeight: 1.55, wordBreak: 'break-word', fontSize: '0.75rem' }}
+                >
                   {item.value}
                 </Typography>
-              </Stack>
+              </Fragment>
             ),
           )}
-        </Stack>
+        </Box>
       )}
       {cta && <CtaLink cta={cta} />}
     </Stack>

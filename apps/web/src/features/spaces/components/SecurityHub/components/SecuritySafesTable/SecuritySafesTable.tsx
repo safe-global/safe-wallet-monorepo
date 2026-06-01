@@ -1,6 +1,7 @@
 import { type ReactElement, useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { Box, Table, TableCell, TableHead, TableRow } from '@mui/material'
 import { AnimatePresence } from 'framer-motion'
+import { Card } from '@/components/ui/card'
 import type { ScanResult, SafeGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
@@ -95,55 +96,57 @@ const SecuritySafesTable = ({
   if (!security.$isReady) return <></>
 
   return (
-    <Box sx={TABLE_WRAPPER_SX}>
-      <Table sx={TABLE_SX}>
-        <TableHead>
-          <TableRow>
-            {COLUMNS.map((c, i) => (
-              <TableCell key={c.label || `col-${i}`} sx={{ width: c.width }}>
-                {c.label}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <AnimatePresence mode="wait">
-          <MotionTbody
-            key={gradeFilter ?? 'all'}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-          >
-            {filteredSafes.map((safe, safeIdx) => {
-              const isMultichain = safe.isMultichain && safe.chainEntries.length > 1
-              const sharedProps = {
-                safe,
-                safeIdx,
-                hasAnimated: hasAnimatedRef.current,
-                selectedSafe,
-                onViewReport,
-                scanResults,
-                scanTimestamps,
-                scanningKeys,
-                balanceMap,
-                security,
-                getSafeSecurityHref,
-              }
-              return isMultichain ? (
-                <MultichainSafeRow
-                  key={safe.address}
-                  {...sharedProps}
-                  isExpanded={expandedAddresses.has(safe.address)}
-                  onToggleExpand={toggleExpand}
-                />
-              ) : (
-                <SingleSafeRow key={security.scanKey(safe.address, safe.chainId)} {...sharedProps} />
-              )
-            })}
-          </MotionTbody>
-        </AnimatePresence>
-      </Table>
-    </Box>
+    <Card className="overflow-hidden border-border border bg-card">
+      <Box sx={TABLE_WRAPPER_SX}>
+        <Table sx={TABLE_SX}>
+          <TableHead>
+            <TableRow>
+              {COLUMNS.map((c, i) => (
+                <TableCell key={c.label || `col-${i}`} sx={{ width: c.width }}>
+                  {c.label}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <AnimatePresence mode="wait">
+            <MotionTbody
+              key={gradeFilter ?? 'all'}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              {filteredSafes.map((safe, safeIdx) => {
+                const isMultichain = safe.isMultichain && safe.chainEntries.length > 1
+                const sharedProps = {
+                  safe,
+                  safeIdx,
+                  hasAnimated: hasAnimatedRef.current,
+                  selectedSafe,
+                  onViewReport,
+                  scanResults,
+                  scanTimestamps,
+                  scanningKeys,
+                  balanceMap,
+                  security,
+                  getSafeSecurityHref,
+                }
+                return isMultichain ? (
+                  <MultichainSafeRow
+                    key={safe.address}
+                    {...sharedProps}
+                    isExpanded={expandedAddresses.has(safe.address)}
+                    onToggleExpand={toggleExpand}
+                  />
+                ) : (
+                  <SingleSafeRow key={security.scanKey(safe.address, safe.chainId)} {...sharedProps} />
+                )
+              })}
+            </MotionTbody>
+          </AnimatePresence>
+        </Table>
+      </Box>
+    </Card>
   )
 }
 

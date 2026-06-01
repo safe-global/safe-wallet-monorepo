@@ -115,7 +115,7 @@ describe('WorkspaceHealthCard', () => {
         scanIncomplete
       />,
     )
-    expect(screen.getByText(/last scan didn't finish/i)).toBeInTheDocument()
+    expect(screen.getByText(/scan didn't finish/i)).toBeInTheDocument()
   })
 
   it('hides the incomplete-scan note while a scan is running', () => {

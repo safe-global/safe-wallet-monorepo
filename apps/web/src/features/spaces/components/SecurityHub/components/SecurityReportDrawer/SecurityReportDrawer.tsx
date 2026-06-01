@@ -7,6 +7,8 @@ import type { ScanContext, ScanResult } from '@/features/security/types'
 import Identicon from '@/components/common/Identicon'
 import { useSecurityScan } from '@/features/security'
 import { useChain } from '@/hooks/useChains'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import SecurityPanelView from '../SecurityPanelView/SecurityPanelView'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
@@ -30,6 +32,7 @@ const SecurityReportDrawer = ({
 }: SecurityReportDrawerProps): ReactElement => {
   const { results, isComplete, lastScannedAt, rescan } = useSecurityScan(scanContext)
   const chain = useChain(selectedSafe?.chainId ?? '')
+  const isDarkMode = useDarkMode()
   const scanContextRef = useRef(scanContext)
   scanContextRef.current = scanContext
 
@@ -64,42 +67,44 @@ const SecurityReportDrawer = ({
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden',
+          outline: 'none',
+          '&:focus, &:focus-visible': { outline: 'none' },
         },
       }}
     >
-      <AnimatePresence mode="wait">
-        {selectedSafe && (
-          <MotionBox
-            key={`${selectedSafe.address}:${selectedSafe.chainId}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}
-          >
-            {/* Docked header */}
+      {/* Wrap drawer content in shadcn scope so the shadcn Card/tokens resolve —
+          the MUI Drawer portals outside the app-level ShadcnProvider. */}
+      <ShadcnProvider
+        dark={isDarkMode}
+        className="flex min-h-0 flex-1 flex-col overflow-hidden outline-none focus-visible:outline-none"
+      >
+        <AnimatePresence mode="wait">
+          {selectedSafe && (
             <MotionBox
+              key={`${selectedSafe.address}:${selectedSafe.chainId}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30, delay: 0.05 }}
-              sx={{
-                px: 3,
-                py: 2,
-                borderBottom: 1,
-                borderColor: 'border.light',
-                backgroundColor: 'background.paper',
-                flexShrink: 0,
-              }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              sx={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}
             >
-              <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1.5} spacing={1}>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}
-                >
-                  Security report
-                </Typography>
-                <Stack direction="row" spacing={0.5}>
+              {/* Docked header */}
+              <MotionBox
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30, delay: 0.05 }}
+                sx={{
+                  px: 4,
+                  pt: 2,
+                  pb: 3,
+                  borderBottom: 1,
+                  borderColor: 'border.light',
+                  backgroundColor: 'background.paper',
+                  flexShrink: 0,
+                }}
+              >
+                {/* Top row — minimal action bar, right-aligned (Linear-style: drawer is its own context). */}
+                <Stack direction="row" justifyContent="flex-end" spacing={0.25} mb={2.5}>
                   <Tooltip title="Re-scan this Safe">
                     <span>
                       <IconButton onClick={handleRescan} size="small" disabled={!isComplete} aria-label="Re-scan">
@@ -111,72 +116,77 @@ const SecurityReportDrawer = ({
                     <CloseRoundedIcon fontSize="small" />
                   </IconButton>
                 </Stack>
-              </Stack>
 
-              <Stack direction="row" alignItems="center" spacing={1.25} sx={{ minWidth: 0 }}>
-                <Identicon address={selectedSafe.address} size={24} />
-                <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Typography
-                    variant="caption"
-                    fontWeight={600}
-                    noWrap
-                    sx={{ display: 'block', lineHeight: 1.2 }}
-                    title={selectedEntry?.name || selectedSafe.address}
-                  >
-                    {selectedEntry?.name || shortenAddress(selectedSafe.address)}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    noWrap
-                    sx={{ display: 'block', lineHeight: 1.2 }}
-                  >
-                    {chain?.shortName ? `${chain.shortName}:` : ''}
-                    {shortenAddress(selectedSafe.address)}
-                  </Typography>
-                </Box>
-                {lastScannedAt && (
-                  <Box sx={{ flexShrink: 0, textAlign: 'right' }}>
+                {/* Identity row — Safe is the hero; chain:address + last scanned support it. */}
+                <Stack direction="row" alignItems="center" spacing={2} sx={{ minWidth: 0 }}>
+                  <Identicon address={selectedSafe.address} size={36} />
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Typography
+                      variant="body1"
+                      fontWeight={600}
+                      noWrap
+                      sx={{ lineHeight: 1.3 }}
+                      title={selectedEntry?.name || selectedSafe.address}
+                    >
+                      {selectedEntry?.name || shortenAddress(selectedSafe.address)}
+                    </Typography>
                     <Typography
                       variant="caption"
-                      fontWeight={600}
-                      sx={{ display: 'block', lineHeight: 1.2, whiteSpace: 'nowrap' }}
-                      title={new Date(lastScannedAt).toLocaleString()}
+                      color="text.secondary"
+                      noWrap
+                      sx={{ display: 'block', lineHeight: 1.4 }}
                     >
-                      {new Date(lastScannedAt).toLocaleString(undefined, {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.2 }}>
-                      Last scanned
+                      {chain?.shortName ? `${chain.shortName}:` : ''}
+                      {shortenAddress(selectedSafe.address)}
                     </Typography>
                   </Box>
-                )}
-              </Stack>
-            </MotionBox>
+                  {lastScannedAt && (
+                    <Box sx={{ flexShrink: 0, textAlign: 'right' }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: 'block', lineHeight: 1.4, whiteSpace: 'nowrap' }}
+                      >
+                        Last scanned
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        fontWeight={600}
+                        sx={{ display: 'block', lineHeight: 1.4, whiteSpace: 'nowrap' }}
+                        title={new Date(lastScannedAt).toLocaleString()}
+                      >
+                        {new Date(lastScannedAt).toLocaleString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                        })}
+                      </Typography>
+                    </Box>
+                  )}
+                </Stack>
+              </MotionBox>
 
-            {/* Scrollable content — animationKey replays entrance on rescan */}
-            <MotionBox
-              key={animationKey}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.15 }}
-              sx={{ flex: 1, overflowY: 'auto', px: 3, pt: 2, pb: 3 }}
-            >
-              <SecurityPanelView
-                key={`${selectedSafe.address}:${selectedSafe.chainId}`}
-                scanContext={scanContext}
-                results={results}
-                isComplete={isComplete}
-                safeQueryParam={chain?.shortName ? `${chain.shortName}:${selectedSafe.address}` : undefined}
-              />
+              {/* Scrollable content — animationKey replays entrance on rescan */}
+              <MotionBox
+                key={animationKey}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.15 }}
+                sx={{ flex: 1, overflowY: 'auto', px: 4, pt: 3, pb: 4 }}
+              >
+                <SecurityPanelView
+                  key={`${selectedSafe.address}:${selectedSafe.chainId}`}
+                  scanContext={scanContext}
+                  results={results}
+                  isComplete={isComplete}
+                  safeQueryParam={chain?.shortName ? `${chain.shortName}:${selectedSafe.address}` : undefined}
+                />
+              </MotionBox>
             </MotionBox>
-          </MotionBox>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      </ShadcnProvider>
     </Drawer>
   )
 }

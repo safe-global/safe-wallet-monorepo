@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { IconButton, Stack, TableCell, Tooltip, Typography } from '@mui/material'
+import { Box, IconButton, Stack, TableCell, Tooltip, Typography } from '@mui/material'
 import Link from 'next/link'
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
@@ -33,7 +33,6 @@ export type MultichainSafeRowProps = {
   selectedSafe: SelectedSafe | null
   onViewReport: (address: string, chainId: string) => void
   scanResults: Record<string, Record<string, ScanResult>>
-  scanTimestamps?: Record<string, number>
   scanningKeys?: Set<string>
   balanceMap: Record<string, string | undefined>
   security: RowSecurity
@@ -44,10 +43,11 @@ type ChildRowProps = {
   safe: SpaceSafeEntry
   chain: ChainEntry
   childIdx: number
+  isFirst: boolean
+  isLast: boolean
   selectedSafe: SelectedSafe | null
   onViewReport: (address: string, chainId: string) => void
   scanResults: Record<string, Record<string, ScanResult>>
-  scanTimestamps?: Record<string, number>
   scanningKeys?: Set<string>
   balanceMap: Record<string, string | undefined>
   security: RowSecurity
@@ -59,16 +59,17 @@ const MultichainChildRow = ({
   safe,
   chain,
   childIdx,
+  isFirst,
+  isLast,
   selectedSafe,
   onViewReport,
   scanResults,
-  scanTimestamps,
   scanningKeys,
   balanceMap,
   security,
   getSafeSecurityHref,
 }: ChildRowProps) => {
-  const { scanKey, computeSummary, formatTimestamp, getStrengthLevel, getStrengthColor, getSafeGrade } = security
+  const { scanKey, computeSummary, getSafeGrade } = security
   const key = scanKey(safe.address, chain.chainId)
   const results = scanResults[key]
   const summary = results ? computeSummary(results) : null
@@ -85,27 +86,37 @@ const MultichainChildRow = ({
       selected={isSelected}
       hover={chain.isDeployed}
       onClick={chain.isDeployed ? () => onViewReport(safe.address, chain.chainId) : undefined}
+      data-child-row="true"
+      data-first-child={isFirst ? 'true' : undefined}
+      data-last-child={isLast ? 'true' : undefined}
       sx={{
         backgroundColor: 'background.paper',
         cursor: chain.isDeployed ? 'pointer' : 'default',
       }}
     >
       <TableCell>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          component={childHref ? Link : 'span'}
-          {...(childHref ? { href: childHref } : {})}
-          onClick={(e: React.MouseEvent) => e.stopPropagation()}
-          sx={{
-            pl: 5.5,
-            textDecoration: 'none',
-            color: 'text.secondary',
-            '&:hover': childHref ? { textDecoration: 'underline' } : {},
-          }}
-        >
-          {safe.name || shortenAddress(safe.address)}
-        </Typography>
+        <Stack direction="row" alignItems="center" spacing={1.25} sx={{ pl: 4 }}>
+          <Box sx={{ opacity: 0.7, display: 'flex' }}>
+            <Identicon address={safe.address} size={24} />
+          </Box>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            noWrap
+            component={childHref ? Link : 'span'}
+            {...(childHref ? { href: childHref } : {})}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+            sx={{
+              textDecoration: 'none',
+              color: 'text.secondary',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              '&:hover': childHref ? { textDecoration: 'underline' } : {},
+            }}
+          >
+            {safe.name || shortenAddress(safe.address)}
+          </Typography>
+        </Stack>
       </TableCell>
       <TableCell>
         <ChainIndicator chainId={chain.chainId} onlyLogo />
@@ -120,39 +131,27 @@ const MultichainChildRow = ({
         <VersionCell results={results} isScanning={isScanning} />
       </TableCell>
       <TableCell>
-        <StatusCell grade={childGrade} isScanning={isScanning} />
+        {chain.isDeployed ? (
+          <StatusCell grade={childGrade} isScanning={isScanning} />
+        ) : (
+          <Tooltip title="Safe not yet deployed on this network">
+            <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+              Not deployed
+            </Typography>
+          </Tooltip>
+        )}
       </TableCell>
       <TableCell>
-        <ScoreCell
-          summary={summary}
-          isScanning={isScanning}
-          getStrengthLevel={getStrengthLevel}
-          getStrengthColor={getStrengthColor}
-        />
-      </TableCell>
-      <TableCell>
-        <Typography variant="caption" color="text.secondary">
-          {scanTimestamps?.[key] ? formatTimestamp(scanTimestamps[key]) : DASH}
-        </Typography>
+        <ScoreCell summary={summary} isScanning={isScanning} />
       </TableCell>
       <TableCell align="right">
-        {chain.isDeployed ? (
+        {chain.isDeployed && (
           <ChevronRightRoundedIcon
             sx={{
               color: isSelected ? 'primary.main' : 'text.secondary',
               verticalAlign: 'middle',
             }}
           />
-        ) : (
-          <Tooltip title="Safe not yet deployed on this network">
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ display: 'inline-block', whiteSpace: 'normal', lineHeight: 1.2, fontSize: '0.65rem' }}
-            >
-              Not deployed
-            </Typography>
-          </Tooltip>
         )}
       </TableCell>
     </MotionTableRow>
@@ -173,13 +172,12 @@ const MultichainSafeRow = ({
   selectedSafe,
   onViewReport,
   scanResults,
-  scanTimestamps,
   scanningKeys,
   balanceMap,
   security,
   getSafeSecurityHref,
 }: MultichainSafeRowProps) => {
-  const { scanKey, formatTimestamp, getStrengthLevel, getStrengthColor, getSafeGrade } = security
+  const { scanKey, getSafeGrade } = security
   const aggregateSummary = getAggregateSummary(safe, scanResults, security)
   const aggregateGrade = getAggregateSafeGrade(safe, scanResults, scanKey, getSafeGrade)
   const aggregateScanning = isAnyChainScanning(safe, scanningKeys, scanKey)
@@ -188,10 +186,6 @@ const MultichainSafeRow = ({
     (sum, c) => sum + (Number(balanceMap[scanKey(safe.address, c.chainId)]) || 0),
     0,
   )
-  const chainTimestamps = safe.chainEntries
-    .map((c) => scanTimestamps?.[scanKey(safe.address, c.chainId)])
-    .filter((t): t is number => !!t)
-  const oldestTimestamp = chainTimestamps.length > 0 ? Math.min(...chainTimestamps) : null
 
   return (
     <Fragment>
@@ -201,7 +195,8 @@ const MultichainSafeRow = ({
         animate="visible"
         transition={{ duration: 0.2, delay: hasAnimated ? 0 : safeIdx * 0.03 }}
         hover
-        sx={{ cursor: 'pointer', '& > *': { borderBottom: isExpanded ? 0 : undefined } }}
+        data-expanded-parent={isExpanded ? 'true' : undefined}
+        sx={{ cursor: 'pointer' }}
         onClick={() => onToggleExpand(safe.address)}
       >
         <TableCell>
@@ -274,17 +269,7 @@ const MultichainSafeRow = ({
           <StatusCell grade={aggregateGrade} isScanning={aggregateScanning} />
         </TableCell>
         <TableCell>
-          <ScoreCell
-            summary={aggregateSummary}
-            isScanning={aggregateScanning}
-            getStrengthLevel={getStrengthLevel}
-            getStrengthColor={getStrengthColor}
-          />
-        </TableCell>
-        <TableCell>
-          <Typography variant="caption" color="text.secondary">
-            {oldestTimestamp ? formatTimestamp(oldestTimestamp) : DASH}
-          </Typography>
+          <ScoreCell summary={aggregateSummary} isScanning={aggregateScanning} />
         </TableCell>
         <TableCell align="right" />
       </MotionTableRow>
@@ -296,10 +281,11 @@ const MultichainSafeRow = ({
             safe={safe}
             chain={chain}
             childIdx={childIdx}
+            isFirst={childIdx === 0}
+            isLast={childIdx === safe.chainEntries.length - 1}
             selectedSafe={selectedSafe}
             onViewReport={onViewReport}
             scanResults={scanResults}
-            scanTimestamps={scanTimestamps}
             scanningKeys={scanningKeys}
             balanceMap={balanceMap}
             security={security}

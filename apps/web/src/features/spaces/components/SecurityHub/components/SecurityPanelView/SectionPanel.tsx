@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Box, Divider, Paper, Typography } from '@mui/material'
+import { Box } from '@mui/material'
 import { motion } from 'framer-motion'
 import { ROW_STAGGER } from './constants'
 
@@ -14,8 +14,11 @@ export type SectionPanelProps = {
 }
 
 /**
- * Animated section container used by every panel section (signers + checks).
- * Renders nothing when there are no rows and no footer so empty sections collapse.
+ * Section container — quiet heading + flat list of rows separated by hairline dividers.
+ *
+ * Intentionally NOT a bordered card: the surrounding drawer already provides containment,
+ * and per-section borders made the panel feel boxy. The rows themselves carry the structure
+ * via hover + divider rhythm (Linear-style).
  */
 const SectionPanel = ({ title, rows, footer, baseDelay = 0 }: SectionPanelProps): ReactElement | null => {
   if (rows.length === 0 && !footer) return null
@@ -26,36 +29,30 @@ const SectionPanel = ({ title, rows, footer, baseDelay = 0 }: SectionPanelProps)
       transition={{ type: 'spring', stiffness: 400, damping: 30, delay: baseDelay }}
       sx={{ mb: 3 }}
     >
-      <Typography
-        variant="caption"
-        color="text.secondary"
+      <Box
+        component="h3"
         sx={{
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px',
-          fontWeight: 700,
-          display: 'block',
-          mb: 1,
+          m: 0,
+          mb: 1.5,
+          fontSize: '0.8125rem',
+          fontWeight: 600,
+          letterSpacing: '-0.005em',
+          color: 'text.primary',
         }}
       >
         {title}
-      </Typography>
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: '12px',
-          overflow: 'hidden',
-          border: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
+      </Box>
+      <Box>
         {rows.map((r, idx) => (
           <MotionBox
             key={r.key}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.15, delay: baseDelay + (idx + 1) * ROW_STAGGER }}
+            sx={{
+              borderTop: idx > 0 ? '1px solid var(--color-border-light)' : 0,
+            }}
           >
-            {idx > 0 && <Divider />}
             {r.node}
           </MotionBox>
         ))}
@@ -64,11 +61,14 @@ const SectionPanel = ({ title, rows, footer, baseDelay = 0 }: SectionPanelProps)
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.15, delay: baseDelay + (rows.length + 1) * ROW_STAGGER }}
+            sx={{
+              borderTop: rows.length > 0 ? '1px solid var(--color-border-light)' : 0,
+            }}
           >
             {footer}
           </MotionBox>
         )}
-      </Paper>
+      </Box>
     </MotionBox>
   )
 }

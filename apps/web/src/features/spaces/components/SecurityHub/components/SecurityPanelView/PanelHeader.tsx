@@ -1,7 +1,8 @@
 import type { ReactElement } from 'react'
-import { Box, CircularProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
+import { Skeleton } from '@mui/material'
+import { Card, CardContent } from '@/components/ui/card'
 import type { ScanResult } from '@/features/security/types'
-import { GRADE_BG_BY_STRENGTH, STRENGTH_DESCRIPTIONS } from './constants'
+import { getScoreBand } from '../../scoreBands'
 import { usePanelHeader } from './hooks/usePanelHeader'
 
 export type PanelHeaderProps = {
@@ -9,7 +10,17 @@ export type PanelHeaderProps = {
   isComplete: boolean
 }
 
-/** Score gauge + strength level chip + action line at the top of the panel. */
+/**
+ * Score panel at the top of the drawer.
+ *
+ * Visual model: a quiet shadcn `Card` containing
+ *   - the score number (hero) + grade pill (right, dot + label)
+ *   - a horizontal progress bar tinted by grade
+ *   - the "Security score" anchor + a short action line
+ *
+ * Replaces the previous tinted card + circular gauge. Reads as a status readout,
+ * not an alarm — the color carries enough signal without the saturated background.
+ */
 const PanelHeader = ({ results, isComplete }: PanelHeaderProps): ReactElement | null => {
   const state = usePanelHeader(results, isComplete)
 
@@ -18,44 +29,45 @@ const PanelHeader = ({ results, isComplete }: PanelHeaderProps): ReactElement | 
   }
   if (state.status === 'empty') return null
 
-  const { score, level, color, actionLine } = state
+  const { score, actionLine } = state
+  // The numeric score maps to a 5-tier band (label + ramp colors).
+  const band = getScoreBand(score)
 
   return (
-    <Paper sx={{ p: 2.5, borderRadius: '12px', mb: 3, backgroundColor: GRADE_BG_BY_STRENGTH[level] }} elevation={0}>
-      <Stack direction="row" spacing={2.5} alignItems="center">
-        <Box sx={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
-          <CircularProgress variant="determinate" value={100} size={80} thickness={4} sx={{ color: 'border.light' }} />
-          <CircularProgress
-            variant="determinate"
-            value={score}
-            size={80}
-            thickness={4}
-            sx={{
-              color,
-              position: 'absolute',
-              left: 0,
-              '& .MuiCircularProgress-circle': { strokeLinecap: 'round' },
-            }}
+    <Card className="mb-6">
+      <CardContent className="flex flex-col gap-4">
+        <div className="flex items-baseline justify-between gap-3">
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-4xl font-bold leading-none tabular-nums tracking-tight">{score}</span>
+            <span className="text-muted-foreground text-sm tabular-nums">/ 100</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="size-1.5 rounded-full" style={{ backgroundColor: band.color }} aria-hidden />
+            <span className="text-sm font-semibold" style={{ color: band.textColor }}>
+              {band.label}
+            </span>
+          </div>
+        </div>
+        <div
+          className="h-2 w-full overflow-hidden rounded-full"
+          style={{ backgroundColor: 'var(--color-border-light)' }}
+        >
+          <div
+            className="h-full rounded-full transition-[width] duration-300 ease-out"
+            style={{ width: `${score}%`, backgroundColor: band.color }}
+            role="progressbar"
+            aria-valuenow={score}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Security score"
           />
-          <Box sx={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Typography variant="h4" fontWeight={700} sx={{ lineHeight: 1 }}>
-              {score}
-            </Typography>
-          </Box>
-        </Box>
-        <Box sx={{ minWidth: 0 }}>
-          <Typography variant="h5" fontWeight={700} mb={0.5}>
-            {level}
-          </Typography>
-          <Typography variant="body2" color="text.primary" sx={{ lineHeight: 1.5, mb: 0.5 }}>
-            {STRENGTH_DESCRIPTIONS[level]}
-          </Typography>
-          <Typography variant="caption" color="text.secondary" fontWeight={600}>
-            {actionLine}
-          </Typography>
-        </Box>
-      </Stack>
-    </Paper>
+        </div>
+        <div>
+          <div className="text-sm font-medium">Security score</div>
+          <div className="text-muted-foreground mt-0.5 text-xs">{actionLine}</div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

@@ -7,7 +7,7 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import StatusCell from '../StatusCell/StatusCell'
 import { BalanceCell, ScoreCell, ThresholdCell, VersionCell } from './cells'
-import { DASH, MotionTableRow, ROW_VARIANTS } from './constants'
+import { MotionTableRow, ROW_VARIANTS } from './constants'
 import type { GetSafeSecurityHref, RowSecurity } from './utils'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
 
@@ -33,13 +33,12 @@ const SingleSafeRow = ({
   selectedSafe,
   onViewReport,
   scanResults,
-  scanTimestamps,
   scanningKeys,
   balanceMap,
   security,
   getSafeSecurityHref,
 }: SingleSafeRowProps) => {
-  const { scanKey, computeSummary, formatTimestamp, getStrengthLevel, getStrengthColor, getSafeGrade } = security
+  const { scanKey, computeSummary, getSafeGrade } = security
   const key = scanKey(safe.address, safe.chainId)
   const results = scanResults[key]
   const summary = results ? computeSummary(results) : null
@@ -104,17 +103,7 @@ const SingleSafeRow = ({
         <StatusCell grade={grade} isScanning={isScanning} />
       </TableCell>
       <TableCell>
-        <ScoreCell
-          summary={summary}
-          isScanning={isScanning}
-          getStrengthLevel={getStrengthLevel}
-          getStrengthColor={getStrengthColor}
-        />
-      </TableCell>
-      <TableCell>
-        <Typography variant="caption" color="text.secondary">
-          {scanTimestamps?.[key] ? formatTimestamp(scanTimestamps[key]) : DASH}
-        </Typography>
+        <ScoreCell summary={summary} isScanning={isScanning} />
       </TableCell>
       <TableCell align="right">
         {isDeployed ? (

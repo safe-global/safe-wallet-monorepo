@@ -1,8 +1,7 @@
 import { type ReactElement, useState } from 'react'
-import { Box, Collapse, Divider, Typography } from '@mui/material'
+import { Box, Collapse, Typography } from '@mui/material'
 import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
-import UnfoldLessRoundedIcon from '@mui/icons-material/UnfoldLessRounded'
-import UnfoldMoreRoundedIcon from '@mui/icons-material/UnfoldMoreRounded'
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import SectionPanel from './SectionPanel'
@@ -28,34 +27,37 @@ const SecurityChecksSection = ({
   const footer =
     passingRows.length > 0 ? (
       <>
-        {failingRows.length > 0 && <Divider />}
         <Box
           onClick={() => setPassingExpanded((v) => !v)}
           sx={{
-            px: 2,
+            px: 1.5,
             py: 1.25,
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
-            gap: 1.25,
-            '&:hover': { backgroundColor: 'action.hover' },
+            gap: 1.5,
+            transition: 'background-color 0.12s',
+            '&:hover': { backgroundColor: 'var(--muted)' },
+            ...(passingExpanded && { backgroundColor: 'var(--muted)' }),
           }}
         >
           <CheckCircleRoundedIcon sx={{ color: 'success.main', fontSize: 18 }} />
-          <Typography variant="body2" fontWeight={600} sx={{ flex: 1 }}>
+          <Typography variant="body2" fontWeight={500} sx={{ flex: 1, fontSize: '0.8125rem' }}>
             {`${passingRows.length} check${maybePlural(passingRows)} passing`}
           </Typography>
-          {/* UnfoldMore/Less signals a *group* expansion, distinct from the single-row chevron. */}
-          {passingExpanded ? (
-            <UnfoldLessRoundedIcon sx={{ color: 'text.secondary', fontSize: 18 }} />
-          ) : (
-            <UnfoldMoreRoundedIcon sx={{ color: 'text.secondary', fontSize: 18 }} />
-          )}
+          <KeyboardArrowDownRoundedIcon
+            sx={{
+              color: 'text.secondary',
+              fontSize: 16,
+              opacity: 0.7,
+              transform: passingExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+            }}
+          />
         </Box>
         <Collapse in={passingExpanded}>
           {passingRows.map((r) => (
-            <Box key={r.key}>
-              <Divider />
+            <Box key={r.key} sx={{ borderTop: '1px solid var(--color-border-light)' }}>
               {r.node}
             </Box>
           ))}

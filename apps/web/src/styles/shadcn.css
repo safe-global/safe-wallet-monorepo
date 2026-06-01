@@ -46,6 +46,20 @@
   --accent-success: #16a34a;
   --z-sidebar: 1300;
   --z-overlay: 1400;
+
+  /* Security score ramp (5 tiers). Red/orange/green reuse design-system tokens;
+     yellow + lime are introduced here (no equivalent exists in the palette).
+     `*-text` variants are darkened for accessible labels on light surfaces. */
+  --score-critical: var(--color-error-main); /* #ff5f72 */
+  --score-at-risk: var(--color-warning1-contrast-text); /* #ff8c00 */
+  --score-review: #eab308; /* introduced — yellow */
+  --score-good: #65a30d; /* introduced — lime */
+  --score-healthy: var(--color-success-main); /* #00b460 */
+  --score-critical-text: var(--color-error-dark); /* #ac2c3b */
+  --score-at-risk-text: #c2410c;
+  --score-review-text: #a16207;
+  --score-good-text: #4d7c0f;
+  --score-healthy-text: var(--color-success-dark); /* #028d4c */
 }
 
 .dark.shadcn-scope,
@@ -85,6 +99,19 @@
   --accent-secondary: #c4fddd;
   --accent-secondary-foreground: #121312;
   --accent-success: #16a34a;
+
+  /* Security score ramp — dark mode. Solids stay vivid; text variants lighten
+     for contrast against dark surfaces. */
+  --score-critical: var(--color-error-main); /* #ff5f72 */
+  --score-at-risk: var(--color-warning1-contrast-text); /* #ff8c00 */
+  --score-review: #facc15; /* introduced — yellow (dark) */
+  --score-good: #a3e635; /* introduced — lime (dark) */
+  --score-healthy: var(--color-success-main); /* #00b460 */
+  --score-critical-text: #ff8a99;
+  --score-at-risk-text: #ffb266;
+  --score-review-text: #fde047;
+  --score-good-text: #bef264;
+  --score-healthy-text: #34d399;
 }
 
 @theme inline {

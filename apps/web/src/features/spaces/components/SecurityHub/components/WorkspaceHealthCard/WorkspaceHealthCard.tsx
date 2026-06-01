@@ -1,13 +1,56 @@
 import { type ReactElement, useMemo } from 'react'
-import { Box, Chip, CircularProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
-import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
-import type { ScanResult, SafeGrade, StrengthLevel } from '@/features/security/types'
+import { CircularProgress } from '@mui/material'
+import { RefreshCw } from 'lucide-react'
+import type { ScanResult, SafeGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
-import SafeGradeChip, { SAFE_GRADE_LABEL } from '../SafeGradeChip/SafeGradeChip'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { cn } from '@/utils/cn'
+import { HealthSummarySkeleton } from '../SecurityHubSkeleton/SecurityHubSkeleton'
+import { getScoreBand, GRADE_RAMP } from '../../scoreBands'
 import type { SpaceSafeEntry } from '../../types'
 
 const FILTER_GRADES: SafeGrade[] = ['critical', 'at_risk', 'needs_attention', 'passing']
+
+/**
+ * Per-grade verbal language + soft tint for the filter chips. Accent colors come
+ * from the shared score ramp (`GRADE_RAMP`); the tint is the soft chip background;
+ * the description is surfaced on hover so the chips stay scannable without losing
+ * the "why".
+ */
+const GRADE_META: Record<SafeGrade, { label: string; description: string; tintVar: string }> = {
+  critical: {
+    label: 'Critical',
+    description: 'Severe issues that put funds or control directly at risk. Fix these first.',
+    tintVar: 'var(--color-error-background)',
+  },
+  at_risk: {
+    label: 'At risk',
+    description: 'Security gaps that weaken protection over time. Address these soon.',
+    tintVar: 'var(--color-warning-background)',
+  },
+  needs_attention: {
+    label: 'Needs review',
+    description: "Settings worth a closer look to confirm they're intentional and safe.",
+    tintVar: 'var(--color-warning1-main)',
+  },
+  passing: {
+    label: 'Healthy',
+    description: 'Passing every security check. No action needed.',
+    tintVar: 'var(--color-success-background)',
+  },
+}
+
+// Text color when a chip is active (solid fill). White reads on red/orange/green;
+// yellow needs a dark label for contrast.
+const CHIP_ACTIVE_TEXT: Record<SafeGrade, string> = {
+  critical: '#ffffff',
+  at_risk: '#ffffff',
+  needs_attention: '#3f2d00',
+  passing: '#ffffff',
+}
 
 type WorkspaceHealthCardProps = {
   safes: SpaceSafeEntry[]
@@ -30,13 +73,9 @@ type AggregateCounts = {
 }
 
 type Aggregate = AggregateCounts & {
-  level: StrengthLevel
-  color: string
   scorePct: number
 }
 
-// Pure reducer — no feature-service calls. The strength level/color are derived
-// inside the component where useLoadFeature gives access to the scoring utils.
 const computeCounts = (scanResults: Record<string, Record<string, ScanResult>>): AggregateCounts | null => {
   let passing = 0
   let applicableCount = 0
@@ -66,40 +105,158 @@ const computeCounts = (scanResults: Record<string, Record<string, ScanResult>>):
   return { passing, applicableCount, criticalCount, needsAttentionCount, atRiskCount, hasCriticalIssue }
 }
 
-const ScoreGauge = ({ scorePct, color }: { scorePct: number; color: string }) => (
-  <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-    <CircularProgress variant="determinate" value={100} size={120} thickness={4} sx={{ color: 'border.light' }} />
+/**
+ * Radial score gauge — a ring filled to the score, tinted by band. The unfilled
+ * arc creates a "complete the circle to 100" pull that a flat bar can't. The
+ * number lives inside the ring.
+ */
+const ScoreGauge = ({ score, color, size = 116 }: { score: number; color: string; size?: number }) => (
+  <div className="relative inline-flex shrink-0" style={{ width: size, height: size }}>
     <CircularProgress
       variant="determinate"
-      value={scorePct}
-      size={120}
+      value={100}
+      size={size}
       thickness={4}
-      sx={{
-        color,
-        position: 'absolute',
-        left: 0,
-        '& .MuiCircularProgress-circle': { strokeLinecap: 'round' },
-      }}
+      sx={{ color: 'var(--color-border-light)' }}
     />
-    <Box
-      sx={{
-        position: 'absolute',
-        inset: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-      }}
-    >
-      <Typography variant="h3" fontWeight={700} sx={{ lineHeight: 1 }}>
-        {scorePct}
-      </Typography>
-      <Typography variant="caption" color="text.secondary">
-        / 100
-      </Typography>
-    </Box>
-  </Box>
+    <CircularProgress
+      variant="determinate"
+      value={score}
+      size={size}
+      thickness={4}
+      sx={{ color, position: 'absolute', left: 0, '& .MuiCircularProgress-circle': { strokeLinecap: 'round' } }}
+    />
+    <div className="absolute inset-0 flex flex-col items-center justify-center">
+      <span className="text-3xl font-bold leading-none tabular-nums tracking-tight">{score}</span>
+      <span className="text-muted-foreground text-xs tabular-nums">/ 100</span>
+    </div>
+  </div>
 )
+
+/**
+ * Score panel — radial gauge (the hero), grade verdict, compact filter chips and
+ * a re-scan affordance. The gauge carries the "complete to 100" feel; the chips
+ * carry the breakdown + filtering.
+ */
+const ScoreCard = ({
+  scorePct,
+  gradeCounts,
+  activeFilter,
+  onFilterChange,
+  isScanning,
+  lastScannedAt,
+  lastScannedLabel,
+  onRescan,
+  scanIncomplete,
+}: {
+  scorePct: number
+  gradeCounts: Record<SafeGrade, number>
+  activeFilter: SafeGrade | null
+  onFilterChange: (grade: SafeGrade) => void
+  isScanning: boolean
+  lastScannedAt: number | null
+  lastScannedLabel: string
+  onRescan: () => void
+  scanIncomplete: boolean
+}) => {
+  // The numeric score maps to a 5-tier band (label + color).
+  const band = getScoreBand(scorePct)
+  // formatTimestamp capitalises "Just now"; lower the leading char so it reads
+  // naturally inside the sentence ("Last scanned just now").
+  const readableTime = lastScannedLabel ? lastScannedLabel.charAt(0).toLowerCase() + lastScannedLabel.slice(1) : ''
+  return (
+    <Card>
+      <CardContent>
+        <div className="flex items-center gap-6">
+          {/* Radial gauge — a single value to "complete to 100", tinted by band. */}
+          <ScoreGauge score={scorePct} color={band.color} />
+          {/* Verdict + filter chips + re-scan, stacked beside the gauge. */}
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="size-2 rounded-full" style={{ backgroundColor: band.color }} aria-hidden />
+              <span className="text-base font-semibold" style={{ color: band.textColor }}>
+                {band.label}
+              </span>
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              {FILTER_GRADES.filter((grade) => gradeCounts[grade] > 0).map((grade) => (
+                <FilterChip
+                  key={grade}
+                  grade={grade}
+                  count={gradeCounts[grade]}
+                  active={activeFilter === grade}
+                  onClick={() => onFilterChange(grade)}
+                />
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button variant="outline" size="sm" onClick={onRescan} disabled={isScanning}>
+                <RefreshCw className={isScanning ? 'animate-spin' : ''} />
+                {isScanning ? 'Scanning…' : 'Re-scan'}
+              </Button>
+              <span className="text-muted-foreground text-xs tabular-nums">
+                {lastScannedAt ? `Last scanned ${readableTime}` : 'Not scanned yet'}
+                {scanIncomplete && !isScanning && (
+                  <span className="ml-2" style={{ color: 'var(--color-warning-main)' }}>
+                    · Scan didn&apos;t finish — re-scan to update.
+                  </span>
+                )}
+              </span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+/**
+ * Compact filter chip — count + label, ramp-colored. Soft tint by default,
+ * solid fill when it's the active filter. The grade's meaning surfaces on hover
+ * (tooltip) so the chips stay scannable + quick to act on without losing the
+ * "why". Clicking toggles the table filter for that grade.
+ */
+const FilterChip = ({
+  grade,
+  count,
+  active,
+  onClick,
+}: {
+  grade: SafeGrade
+  count: number
+  active: boolean
+  onClick: () => void
+}) => {
+  const meta = GRADE_META[grade]
+  const { color, textColor } = GRADE_RAMP[grade]
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            onClick={onClick}
+            aria-pressed={active}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm transition-colors',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[var(--chip-color)]',
+            )}
+            style={{
+              ...({ '--chip-color': color } as React.CSSProperties),
+              backgroundColor: active ? color : meta.tintVar,
+              color: active ? CHIP_ACTIVE_TEXT[grade] : textColor,
+            }}
+          >
+            {!active && <span className="size-1.5 rounded-full" style={{ backgroundColor: color }} aria-hidden />}
+            <span className="font-semibold tabular-nums">{count}</span>
+            <span>{meta.label}</span>
+          </button>
+        }
+      />
+      <TooltipContent>{meta.description}</TooltipContent>
+    </Tooltip>
+  )
+}
 
 const WorkspaceHealthCard = ({
   safes,
@@ -117,15 +274,11 @@ const WorkspaceHealthCard = ({
     const counts = computeCounts(scanResults)
     if (!counts || !security.$isReady) return null
     const clearRatio = counts.applicableCount > 0 ? counts.passing / counts.applicableCount : 0
-    const level = security.getStrengthLevel(clearRatio, counts.hasCriticalIssue)
-    const color = security.getStrengthColor(level)
-    return { ...counts, level, color, scorePct: Math.round(clearRatio * 100) }
-  }, [scanResults, security.$isReady, security.getStrengthLevel, security.getStrengthColor])
+    return { ...counts, scorePct: Math.round(clearRatio * 100) }
+  }, [scanResults, security.$isReady])
 
-  // Per-Safe grade counts for the filter chips.
-  // Iterate over `safes` (not scanResults) so multichain safes are counted once per
-  // distinct grade — not once per chain entry. This keeps chip counts consistent with
-  // the table's filter semantics ("show safes where ANY chain matches this grade").
+  // Per-Safe grade counts. Iterate over `safes` (not scanResults) so multichain
+  // safes are counted once per distinct grade — not once per chain entry.
   const gradeCounts = useMemo(() => {
     const counts: Record<SafeGrade, number> = { critical: 0, at_risk: 0, needs_attention: 0, passing: 0 }
     if (!security.$isReady) return counts
@@ -142,104 +295,27 @@ const WorkspaceHealthCard = ({
     return counts
   }, [safes, scanResults, security.$isReady, security.scanKey, security.getSafeGrade])
 
-  // Show skeleton only when we have no data at all. Once any Safe has completed, render the
-  // aggregate incrementally — it updates as more results arrive. The re-scan row below
-  // surfaces the in-progress state via its "Scanning..." label.
   if (!aggregate) {
-    return (
-      <Paper sx={{ p: 3, borderRadius: '12px', mb: 3 }}>
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'flex-start', md: 'center' }}>
-          <Skeleton variant="circular" width={120} height={120} />
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Skeleton variant="rounded" width={180} height={24} sx={{ mb: 1 }} />
-            <Skeleton variant="rounded" width={320} height={16} sx={{ mb: 0.5 }} />
-            <Skeleton variant="rounded" width={260} height={16} sx={{ mb: 2 }} />
-            <Stack direction="row" spacing={1}>
-              <Skeleton variant="rounded" width={80} height={20} sx={{ borderRadius: '10px' }} />
-              <Skeleton variant="rounded" width={100} height={20} sx={{ borderRadius: '10px' }} />
-            </Stack>
-          </Box>
-        </Stack>
-      </Paper>
-    )
+    return <HealthSummarySkeleton />
   }
 
-  const { color, level, scorePct } = aggregate
+  const { scorePct } = aggregate
+  const lastScannedLabel = lastScannedAt && security.$isReady ? security.formatTimestamp(lastScannedAt) : ''
 
   return (
-    <Paper sx={{ p: 3, borderRadius: '12px', mb: 3 }}>
-      <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'flex-start', md: 'center' }}>
-        <ScoreGauge scorePct={scorePct} color={color} />
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Stack direction="row" alignItems="center" spacing={1.5} mb={0.5} flexWrap="wrap">
-            <Typography variant="h5" fontWeight={700}>
-              Security score
-            </Typography>
-            <Chip
-              label={level}
-              size="small"
-              sx={{
-                backgroundColor: color,
-                color: 'background.paper',
-                fontWeight: 700,
-                letterSpacing: '0.5px',
-                height: 18,
-                fontSize: '0.65rem',
-                '& .MuiChip-label': { px: 0.75 },
-              }}
-            />
-          </Stack>
-          <Typography variant="body2" color="text.secondary" mb={2}>
-            Combined score from all security checks across your accounts.
-          </Typography>
-          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            {FILTER_GRADES.filter((grade) => gradeCounts[grade] > 0).map((grade) => (
-              <SafeGradeChip
-                key={grade}
-                grade={grade}
-                active={activeFilter === grade}
-                label={`${gradeCounts[grade]} ${SAFE_GRADE_LABEL[grade]}`}
-                onClick={() => onFilterChange(grade)}
-                sx={{ '& .MuiChip-root:active, & .MuiTouchRipple-root': { display: 'none' } }}
-              />
-            ))}
-          </Stack>
-
-          {lastScannedAt && (
-            <Stack direction="row" alignItems="center" spacing={0.5} mt={2}>
-              <Typography variant="caption" color="text.secondary">
-                Last scanned {security.$isReady ? security.formatTimestamp(lastScannedAt) : ''}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                ·
-              </Typography>
-              <Stack
-                direction="row"
-                spacing={0.5}
-                alignItems="center"
-                onClick={isScanning ? undefined : onRescan}
-                sx={{
-                  cursor: isScanning ? 'default' : 'pointer',
-                  color: isScanning ? 'text.disabled' : 'primary.main',
-                  '&:hover': isScanning ? {} : { color: 'primary.dark' },
-                }}
-              >
-                <RefreshRoundedIcon sx={{ fontSize: 14 }} />
-                <Typography variant="caption" fontWeight={700} sx={{ color: 'inherit' }}>
-                  {isScanning ? 'Scanning...' : 'Re-scan'}
-                </Typography>
-              </Stack>
-            </Stack>
-          )}
-
-          {scanIncomplete && !isScanning && (
-            <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 0.5 }}>
-              The last scan didn&apos;t finish. Showing your most recent complete score — re-scan to update it.
-            </Typography>
-          )}
-        </Box>
-      </Stack>
-    </Paper>
+    <div className="mb-6">
+      <ScoreCard
+        scorePct={scorePct}
+        gradeCounts={gradeCounts}
+        activeFilter={activeFilter}
+        onFilterChange={onFilterChange}
+        isScanning={isScanning}
+        lastScannedAt={lastScannedAt}
+        lastScannedLabel={lastScannedLabel}
+        onRescan={onRescan}
+        scanIncomplete={scanIncomplete}
+      />
+    </div>
   )
 }
 

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { createMockContext } from '@/features/security/testing'
 import type { ScanResult } from '@/features/security/types'
 import SecurityPanelView from '../components/SecurityPanelView/SecurityPanelView'
@@ -95,9 +95,10 @@ describe('SecurityPanelView', () => {
   })
 
   describe('header', () => {
-    it('renders strength level and "all checks passing" copy when everything clears', () => {
+    it('renders the score band and "all checks passing" copy when everything clears', () => {
       renderPanel()
-      expect(screen.getByText('Strong')).toBeInTheDocument()
+      // All checks clear → score 100 → "Healthy" band.
+      expect(screen.getByText('Healthy')).toBeInTheDocument()
       expect(screen.getByText('All checks passing.')).toBeInTheDocument()
     })
 
@@ -284,9 +285,9 @@ describe('SecurityPanelView', () => {
       })
       const row = screen.getByText('Single signer controls this Safe')
       fireEvent.click(row)
-      const paper = row.closest('.MuiPaper-root')!
-      expect(within(paper as HTMLElement).getByText('Raise the threshold.')).toBeInTheDocument()
-      expect(within(paper as HTMLElement).getByText('1 of 3')).toBeInTheDocument()
+      // The expanded body reveals remediation + evidence (both unique in the panel).
+      expect(screen.getByText('Raise the threshold.')).toBeInTheDocument()
+      expect(screen.getByText('1 of 3')).toBeInTheDocument()
     })
   })
 })
