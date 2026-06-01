@@ -1,14 +1,18 @@
 import { type Operation, cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { MetaTransactionData } from '@safe-global/types-kit'
+import { Interface } from 'ethers'
 import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { setDraft, type DraftTx } from '@/src/store/draftTxSlice'
 import { synthesizeDraftTxDetails } from '@/src/features/ConfirmTx/utils/synthesizeDraftTxDetails'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { getCreateCallContractDeployment } from '@safe-global/utils/services/contracts/deployments'
 import type { AppDispatch } from '@/src/store'
 
+// dApp call shape per EIP-5792 / WC. Contract deployments omit `to` and provide `data` only.
 export type DappCall = {
-  to: string
+  to?: string
   value?: string // hex or decimal string
   data?: string
 }
@@ -18,6 +22,7 @@ export type ComposeSafeTxDraftInput = {
   chainId: string
   safeAddress: string
   safe: SafeState
+  chain: Chain
   dispatch: AppDispatch
 }
 
@@ -32,12 +37,40 @@ const normalizeValue = (value: string | undefined): string => {
   return BigInt(value).toString()
 }
 
-const toMetaTx = (call: DappCall): MetaTransactionData => ({
-  to: call.to,
-  value: normalizeValue(call.value),
-  data: call.data ?? '0x',
-  operation: 0, // OperationType.Call — protocol-kit numeric enum
-})
+// Contract deployment routed through CreateCall (no-to + only-data); mirrors web's
+// WalletSDK.getCreateCallTransaction in apps/web/.../useSafeWalletProvider.tsx.
+const buildCreateCallTx = (chain: Chain, safeVersion: SafeState['version'], data: string): MetaTransactionData => {
+  const deployment = getCreateCallContractDeployment(chain, safeVersion)
+  if (!deployment) {
+    throw new Error('No CreateCall deployment found for chain and safe version')
+  }
+  const addressOrAddresses = deployment.networkAddresses[chain.chainId]
+  const createCallAddress = Array.isArray(addressOrAddresses) ? addressOrAddresses[0] : addressOrAddresses
+  if (!createCallAddress) {
+    throw new Error('No CreateCall address for this chain')
+  }
+  const iface = new Interface(deployment.abi)
+  return {
+    to: createCallAddress,
+    value: '0',
+    data: iface.encodeFunctionData('performCreate', ['0', data]),
+    operation: 0,
+  }
+}
+
+const toMetaTx = (call: DappCall, chain: Chain, safeVersion: SafeState['version']): MetaTransactionData => {
+  if (!call.to) {
+    // The router has already ruled out empty / no-to-with-value; this branch is
+    // strictly the contract-deployment case (data-only).
+    return buildCreateCallTx(chain, safeVersion, call.data ?? '0x')
+  }
+  return {
+    to: call.to,
+    value: normalizeValue(call.value),
+    data: call.data ?? '0x',
+    operation: 0,
+  }
+}
 
 async function getVerifiedSafeSDK(chainId: string) {
   const safeSDK = getSafeSDK()
@@ -67,6 +100,7 @@ export const composeSafeTxDraft = async ({
   chainId,
   safeAddress,
   safe,
+  chain,
   dispatch,
 }: ComposeSafeTxDraftInput): Promise<string> => {
   if (calls.length === 0) {
@@ -74,7 +108,7 @@ export const composeSafeTxDraft = async ({
   }
 
   const safeSDK = await getVerifiedSafeSDK(chainId)
-  const metaTxs: MetaTransactionData[] = calls.map(toMetaTx)
+  const metaTxs: MetaTransactionData[] = calls.map((c) => toMetaTx(c, chain, safe.version))
   const safeTx = await safeSDK.createTransaction({ transactions: metaTxs })
   const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 

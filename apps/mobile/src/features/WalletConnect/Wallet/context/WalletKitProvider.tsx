@@ -26,6 +26,9 @@ import { selectChainById } from '@/src/store/chains'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { proxyReadOnlyCall } from '../services/readRpcProxy'
+import { SUPPORTED_NAMESPACE } from '../services/constants'
+import type { TransactionReceipt } from 'ethers'
 
 // Only seed pending requests that the UI can act on. Read-only methods that survived
 // across restart would just hang in the slice with no sheet to render them.
@@ -101,11 +104,15 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const unsubscribe = startAppListening({
       matcher: cgwApi.endpoints.transactionsProposeTransactionV1.matchFulfilled,
       effect: async (action, api) => {
-        // The arg shape: { chainId, safeAddress, transactionV1Dto: { safeTxHash, ... } }.
+        // The arg shape: { chainId, safeAddress, proposeTransactionDto: { safeTxHash, ... } }.
+        // The DTO key is `proposeTransactionDto` per the generated endpoint
+        // (packages/store/src/gateway/AUTO_GENERATED/transactions.ts); a previous typo
+        // (`transactionV1Dto`) silently swallowed every propose, so dApps never received
+        // the wallet_sendCalls / eth_sendTransaction response.
         const arg = action.meta.arg.originalArgs as {
-          transactionV1Dto?: { safeTxHash?: string }
+          proposeTransactionDto?: { safeTxHash?: string }
         }
-        const safeTxHash = arg.transactionV1Dto?.safeTxHash
+        const safeTxHash = arg.proposeTransactionDto?.safeTxHash
         if (!safeTxHash) {
           return
         }
@@ -189,20 +196,85 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const getCallsStatus: SessionRequestHandlerDeps['getCallsStatus'] = useCallback(
     async (chainId, id) => {
-      // EIP-5792 status mapping for a Safe tx hash:
-      //   100 = PENDING (not yet executed on-chain or awaiting confirmations)
-      //   200 = CONFIRMED (executed and mined)
-      //   400 = REVERTED / CANCELLED
+      // chainId arrives as CAIP-2 (e.g. 'eip155:11155111'); CGW + envelope want numeric/hex.
+      const numericChainId = chainId.startsWith(`${SUPPORTED_NAMESPACE}:`)
+        ? chainId.slice(SUPPORTED_NAMESPACE.length + 1)
+        : chainId
+      const chainIdHex = `0x${Number(numericChainId).toString(16)}` as `0x${string}`
+
+      // Mirror apps/web/.../safe-wallet-provider/index.ts wallet_getCallsStatus: throw if
+      // the tx isn't known (the JSON-RPC error layer in methodRouter converts to {code, message}).
+      let tx
       try {
-        const tx = await dispatch(cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate({ chainId, id })).unwrap()
-        const status =
-          tx.txStatus === 'SUCCESS' ? 200 : tx.txStatus === 'FAILED' || tx.txStatus === 'CANCELLED' ? 400 : 100
-        return { status }
+        tx = await dispatch(
+          cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate({ chainId: numericChainId, id }),
+        ).unwrap()
       } catch {
-        return { status: 100 }
+        throw new Error('Transaction not found')
+      }
+
+      // BundleTxStatuses (verbatim from web):
+      //   AWAITING_CONFIRMATIONS / AWAITING_EXECUTION → 100 PENDING
+      //   SUCCESS                                     → 200 CONFIRMED
+      //   CANCELLED                                   → 400 OFFCHAIN_FAILURE
+      //   FAILED                                      → 500 REVERTED
+      const status =
+        tx.txStatus === 'SUCCESS' ? 200 : tx.txStatus === 'CANCELLED' ? 400 : tx.txStatus === 'FAILED' ? 500 : 100
+
+      const envelope = {
+        version: '2.0.0' as const,
+        id,
+        chainId: chainIdHex,
+        status,
+        atomic: true as const,
+      }
+
+      // No on-chain tx hash yet → no receipts (still a valid 100/400 response).
+      if (!tx.txHash) {
+        return envelope
+      }
+
+      const chain = selectChainById(store.getState(), numericChainId)
+      if (!chain) {
+        return envelope
+      }
+
+      let receipt: TransactionReceipt | null = null
+      try {
+        receipt = (await proxyReadOnlyCall(chain, 'eth_getTransactionReceipt', [
+          tx.txHash,
+        ])) as TransactionReceipt | null
+      } catch {
+        return envelope
+      }
+      if (!receipt) {
+        return envelope
+      }
+
+      // Web replicates the same receipt for each underlying call in the bundle.
+      let callsCount = 1
+      const valueDecoded = tx.txData?.dataDecoded?.parameters?.[0]?.valueDecoded
+      if (Array.isArray(valueDecoded) && valueDecoded.length > 0) {
+        callsCount = valueDecoded.length
+      }
+
+      const blockNumber = Number(receipt.blockNumber)
+      const gasUsed = Number(receipt.gasUsed)
+      const onChainStatusHex = (tx.txStatus === 'SUCCESS' ? '0x1' : '0x0') as `0x${string}`
+
+      return {
+        ...envelope,
+        receipts: Array.from({ length: callsCount }, () => ({
+          logs: receipt.logs as unknown[],
+          status: onChainStatusHex,
+          blockHash: receipt.blockHash as `0x${string}`,
+          blockNumber: `0x${blockNumber.toString(16)}` as `0x${string}`,
+          gasUsed: `0x${gasUsed.toString(16)}` as `0x${string}`,
+          transactionHash: tx.txHash as `0x${string}`,
+        })),
       }
     },
-    [dispatch],
+    [dispatch, store],
   )
 
   const navigateToCallsStatus: SessionRequestHandlerDeps['navigateToCallsStatus'] = useCallback((chainId, id) => {
