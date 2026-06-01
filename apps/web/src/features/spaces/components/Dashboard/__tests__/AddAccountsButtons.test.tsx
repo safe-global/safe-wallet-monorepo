@@ -74,8 +74,10 @@ jest.mock('@/components/common/Track', () => {
 
 jest.mock('@/features/spaces/components/AddAccountsChooser', () => ({
   __esModule: true,
-  default: ({ buttonLabel }: { buttonLabel?: string }) => (
-    <button data-testid="add-accounts-chooser">{buttonLabel ?? 'Add Accounts'}</button>
+  default: ({ buttonLabel, entryPoint }: { buttonLabel?: string; entryPoint?: string }) => (
+    <button data-testid="add-accounts-chooser" data-entry-point={entryPoint}>
+      {buttonLabel ?? 'Add Accounts'}
+    </button>
   ),
 }))
 
@@ -139,5 +141,21 @@ describe('SpaceDashboard – AddAccountsChooser button labels', () => {
 
     const emptyStateSlot = screen.getByTestId('empty-state-action-slot')
     expect(emptyStateSlot).toHaveTextContent('Manage accounts')
+  })
+
+  it('passes entryPoint="dashboard" to the populated action slot', () => {
+    restoreDefaultMocks([{ address: '0xaaaa', chainId: '1' }])
+
+    render(<SpaceDashboard />)
+
+    expect(screen.getByTestId('action-slot').querySelector('[data-entry-point="dashboard"]')).not.toBeNull()
+  })
+
+  it('passes entryPoint="dashboard" to the empty state action slot', () => {
+    restoreDefaultMocks([])
+
+    render(<SpaceDashboard />)
+
+    expect(screen.getByTestId('empty-state-action-slot').querySelector('[data-entry-point="dashboard"]')).not.toBeNull()
   })
 })

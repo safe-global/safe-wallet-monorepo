@@ -28,7 +28,7 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 const AddActionsAction = () => {
   return (
     <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
-      <AddAccountsChooser buttonLabel="Manage accounts" />
+      <AddAccountsChooser buttonLabel="Manage accounts" entryPoint="dashboard" />
     </Track>
   )
 }
@@ -36,7 +36,7 @@ const AddActionsAction = () => {
 const EmptyStateAddAction = () => {
   return (
     <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
-      <AddAccountsChooser buttonVariant="default" buttonLabel="Manage accounts" />
+      <AddAccountsChooser buttonVariant="default" buttonLabel="Manage accounts" entryPoint="dashboard" />
     </Track>
   )
 }

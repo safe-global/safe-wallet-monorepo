@@ -26,7 +26,7 @@ const AddAccountsCard = () => {
           </Typography>
 
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
-            <AddAccountsChooser buttonLabel="Manage accounts" />
+            <AddAccountsChooser buttonLabel="Manage accounts" entryPoint="dashboard" />
           </Track>
         </Box>
 

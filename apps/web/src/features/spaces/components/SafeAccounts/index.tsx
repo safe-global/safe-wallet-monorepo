@@ -81,7 +81,7 @@ const SpaceSafeAccounts = () => {
         </Typography>
         <Stack direction="row" justifyContent="flex-start">
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
-            <AddAccountsChooser buttonVariant="default" />
+            <AddAccountsChooser buttonVariant="default" buttonLabel="Manage accounts" entryPoint="safe_accounts" />
           </Track>
         </Stack>
       </div>

@@ -12,9 +12,12 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
+type EntryPoint = 'dashboard' | 'safe_accounts'
+
 interface AddAccountsChooserProps {
   buttonVariant?: 'outline' | 'default'
   buttonLabel?: string
+  entryPoint: EntryPoint
 }
 
 type SubModal = 'find' | 'add' | null
@@ -69,7 +72,8 @@ const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip 
 const AddAccountsChooser = ({
   buttonVariant = 'outline',
   buttonLabel = 'Add Accounts',
-}: AddAccountsChooserProps = {}) => {
+  entryPoint,
+}: AddAccountsChooserProps) => {
   const [chooserOpen, setChooserOpen] = useState(false)
   const [subModal, setSubModal] = useState<SubModal>(null)
   const isAdmin = useIsAdmin()
@@ -86,7 +90,7 @@ const AddAccountsChooser = ({
     if (!isAdmin) return
     trackEvent(
       { ...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED, label: spaceId },
-      { workspace_id: spaceId, entry_point: 'dashboard' },
+      { workspace_id: spaceId, entry_point: entryPoint },
     )
     setChooserOpen(false)
     setSubModal('add')

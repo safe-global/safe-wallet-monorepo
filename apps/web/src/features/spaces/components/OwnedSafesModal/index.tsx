@@ -192,7 +192,7 @@ const OwnedSafesModal = ({ open, onClose }: OwnedSafesModalProps) => {
                 <Link
                   href={AppRoutes.newSafe.load}
                   onClick={() => {
-                    trackEvent({ ...OVERVIEW_EVENTS.ADD_TO_WATCHLIST, label: OVERVIEW_LABELS.top_bar })
+                    trackEvent({ ...OVERVIEW_EVENTS.ADD_TO_WATCHLIST, label: OVERVIEW_LABELS.owned_safes_modal })
                     onClose()
                   }}
                 />
@@ -210,7 +210,7 @@ const OwnedSafesModal = ({ open, onClose }: OwnedSafesModalProps) => {
                 <Link
                   href={AppRoutes.newSafe.create}
                   onClick={() => {
-                    trackEvent({ ...OVERVIEW_EVENTS.CREATE_NEW_SAFE, label: OVERVIEW_LABELS.top_bar })
+                    trackEvent({ ...OVERVIEW_EVENTS.CREATE_NEW_SAFE, label: OVERVIEW_LABELS.owned_safes_modal })
                     onClose()
                   }}
                 />

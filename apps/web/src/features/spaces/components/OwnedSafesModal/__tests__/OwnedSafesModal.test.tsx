@@ -13,6 +13,11 @@ jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => ({
   default: () => mockConnectWallet,
 }))
 
+const mockTrackEvent = jest.fn()
+jest.mock('@/services/analytics', () => ({
+  trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
+}))
+
 let mockChains: Array<{ chainId: string }> = [{ chainId: '1' }, { chainId: '137' }]
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
@@ -73,6 +78,7 @@ describe('OwnedSafesModal', () => {
     mockOwnedError = undefined
     mockOwnedLoading = false
     mockConnectWallet.mockClear()
+    mockTrackEvent.mockClear()
   })
 
   afterEach(() => {
@@ -189,5 +195,21 @@ describe('OwnedSafesModal', () => {
     render(<OwnedSafesModal open onClose={noop} />)
 
     expect(screen.getByText('Failed to load owned safes.')).toBeInTheDocument()
+  })
+
+  it('tracks ADD_TO_WATCHLIST with the owned_safes_modal label when "Add existing" is clicked', () => {
+    render(<OwnedSafesModal open onClose={noop} />)
+
+    fireEvent.click(screen.getByTestId('owned-safes-add-existing'))
+
+    expect(mockTrackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'owned_safes_modal' }))
+  })
+
+  it('tracks CREATE_NEW_SAFE with the owned_safes_modal label when "Create new" is clicked', () => {
+    render(<OwnedSafesModal open onClose={noop} />)
+
+    fireEvent.click(screen.getByTestId('owned-safes-create-new'))
+
+    expect(mockTrackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'owned_safes_modal' }))
   })
 })

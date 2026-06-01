@@ -13,8 +13,10 @@ jest.mock('@/components/common/Track', () => {
 
 jest.mock('../../AddAccountsChooser', () => ({
   __esModule: true,
-  default: ({ buttonLabel }: { buttonLabel?: string }) => (
-    <button data-testid="add-accounts-chooser">{buttonLabel}</button>
+  default: ({ buttonLabel, entryPoint }: { buttonLabel?: string; entryPoint?: string }) => (
+    <button data-testid="add-accounts-chooser" data-entry-point={entryPoint}>
+      {buttonLabel}
+    </button>
   ),
 }))
 
@@ -23,5 +25,11 @@ describe('AddAccountsCard', () => {
     render(<AddAccountsCard />)
 
     expect(screen.getByTestId('add-accounts-chooser')).toHaveTextContent('Manage accounts')
+  })
+
+  it('passes "dashboard" as the entryPoint to AddAccountsChooser', () => {
+    render(<AddAccountsCard />)
+
+    expect(screen.getByTestId('add-accounts-chooser')).toHaveAttribute('data-entry-point', 'dashboard')
   })
 })
