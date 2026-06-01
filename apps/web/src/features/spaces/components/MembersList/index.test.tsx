@@ -1,7 +1,32 @@
-import { render, screen, within } from '@/tests/test-utils'
+import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { memberBuilder, memberUserBuilder } from '@/tests/builders/member'
+import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import MembersList from './index'
+
+const MEMBER_CREATED_AT = '2026-04-24T00:00:00.000Z'
+
+const memberDto = ({
+  user,
+  ...overrides
+}: Omit<Partial<MemberDto>, 'user'> & {
+  user?: Partial<MemberDto['user']>
+}): MemberDto => ({
+  id: 1,
+  role: 'MEMBER',
+  status: 'ACTIVE',
+  name: 'Alice',
+  alias: null,
+  invitedBy: null,
+  createdAt: MEMBER_CREATED_AT,
+  updatedAt: MEMBER_CREATED_AT,
+  user: {
+    id: 11,
+    status: 'ACTIVE',
+    email: null,
+    ...user,
+  },
+  ...overrides,
+})
 
 jest.mock('./MemberName', () => ({
   __esModule: true,
@@ -35,35 +60,48 @@ jest.mock('@/features/spaces', () => ({
 }))
 
 describe('MembersList', () => {
-  it('renders member email and leaves empty email cells blank', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('shows the email column for invitation rows when enabled', () => {
     render(
       <MembersList
+        showEmail
         members={[
-          memberBuilder()
-            .with({
-              name: 'Alice',
-              user: memberUserBuilder().with({ email: 'alice@example.com' }).build(),
-            })
-            .build(),
-          memberBuilder()
-            .with({
-              id: 2,
-              role: 'ADMIN',
-              status: 'INVITED',
-              name: 'Bob',
-              user: memberUserBuilder().with({ id: 12, status: 'PENDING' }).build(),
-            })
-            .build(),
+          memberDto({
+            id: 2,
+            role: 'ADMIN',
+            status: 'DECLINED',
+            name: 'Bob',
+            user: {
+              id: 12,
+              status: 'PENDING',
+              email: 'bob@example.com',
+            },
+          }),
         ]}
       />,
     )
 
     expect(screen.getByText('Email')).toBeInTheDocument()
+    expect(screen.getByText('bob@example.com')).toBeInTheDocument()
+  })
 
-    const emailCells = screen.getAllByTestId('table-cell-email')
+  it('does not show the email column by default', () => {
+    render(
+      <MembersList
+        members={[
+          memberDto({
+            user: {
+              email: 'alice@example.com',
+            },
+          }),
+        ]}
+      />,
+    )
 
-    expect(emailCells).toHaveLength(2)
-    expect(within(emailCells[0]!).getByText('alice@example.com')).toBeInTheDocument()
-    expect(within(emailCells[1]!).queryByText(/@/)).not.toBeInTheDocument()
+    expect(screen.queryByText('Email')).not.toBeInTheDocument()
+    expect(screen.queryByText('alice@example.com')).not.toBeInTheDocument()
   })
 })

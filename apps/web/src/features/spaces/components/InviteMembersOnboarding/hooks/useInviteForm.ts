@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { isAddress } from 'ethers'
-import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { type InviteUsersDto, useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
@@ -9,6 +9,13 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 interface MemberInvite {
   address: string
+  role: MemberRole
+}
+
+type WalletInviteUserPayload = {
+  type: 'wallet'
+  address: string
+  name: string
   role: MemberRole
 }
 
@@ -53,15 +60,17 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     setIsSubmitting(true)
 
     try {
-      const usersToInvite = validMembers.map((member) => ({
+      const usersToInvite: WalletInviteUserPayload[] = validMembers.map((member) => ({
+        type: 'wallet',
         address: member.address,
         name: member.address,
         role: member.role,
       }))
+      const inviteUsersDto = { users: usersToInvite } as unknown as InviteUsersDto
 
       const result = await inviteMembers({
         spaceId: Number(spaceId),
-        inviteUsersDto: { users: usersToInvite },
+        inviteUsersDto,
       })
 
       if (result.error) {
