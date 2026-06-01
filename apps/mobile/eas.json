@@ -6,7 +6,6 @@
   "build": {
     "base": {
       "node": "24.14.0",
-      "corepack": true,
       "android": {
         "image": "sdk-55"
       },
