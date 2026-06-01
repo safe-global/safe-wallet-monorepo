@@ -29,7 +29,14 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
 jest.mock('@/hooks/safes', () => ({
   useAllOwnedSafes: () => [{}, undefined, false],
   getComparator: () => () => 0,
-  _buildSafeItem: jest.fn(),
+  useSafeItemBuilder: () => ({
+    buildSafeItem: jest.fn(),
+    walletAddress: '',
+    isWalletConnected: false,
+    allOwned: {},
+    ownedError: undefined,
+    ownedLoading: false,
+  }),
   _getMultiChainAccounts: () => [],
   _getSingleChainAccounts: () => [],
 }))

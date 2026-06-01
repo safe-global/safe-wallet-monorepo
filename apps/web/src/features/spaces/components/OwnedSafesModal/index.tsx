@@ -6,19 +6,16 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Button } from '@/components/ui/button'
 import { AppRoutes } from '@/config/routes'
 import {
-  _buildSafeItem,
   _getMultiChainAccounts,
   _getSingleChainAccounts,
-  useAllOwnedSafes,
+  useSafeItemBuilder,
   type AllSafeItems,
   type SafeItem,
   isMultiChainSafeItem,
 } from '@/hooks/safes'
 import useChains from '@/hooks/useChains'
-import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
-import { selectAllAddedSafes } from '@/store/addedSafesSlice'
-import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
+import { selectUndeployedSafes } from '@/store/slices'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { trackEvent } from '@/services/analytics'
@@ -38,24 +35,14 @@ const OwnedSafesModal = ({ open, onClose }: OwnedSafesModalProps) => {
   const [search, setSearch] = useState('')
   const connectWallet = useConnectWallet()
 
-  const wallet = useWallet()
-  const walletAddress = wallet?.address ?? ''
-  const isWalletConnected = walletAddress !== ''
+  const { buildSafeItem, walletAddress, isWalletConnected, allOwned, ownedError, ownedLoading } = useSafeItemBuilder()
+  const allUndeployed = useAppSelector(selectUndeployedSafes)
 
   const { configs } = useChains()
   const allChainIds = useMemo(() => configs.map((c) => c.chainId), [configs])
 
-  const [allOwned = {}, ownedError, ownedLoading] = useAllOwnedSafes(walletAddress)
-  const allAdded = useAppSelector(selectAllAddedSafes)
-  const allUndeployed = useAppSelector(selectUndeployedSafes)
-  const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
-  const allSafeNames = useAppSelector(selectAllAddressBooks)
-
   const ownedItems = useMemo<SafeItem[]>(() => {
     if (!isWalletConnected) return []
-
-    const buildItem = (chainId: string, address: string) =>
-      _buildSafeItem(chainId, address, walletAddress, allAdded, allOwned, allUndeployed, allVisitedSafes, allSafeNames)
 
     return allChainIds.flatMap((chainId) => {
       const deployedOwned = allOwned[chainId] ?? []
@@ -68,9 +55,9 @@ const OwnedSafesModal = ({ open, onClose }: OwnedSafesModalProps) => {
         .map(([address]) => address)
 
       const merged = Array.from(new Set([...deployedOwned, ...undeployedOwned]))
-      return merged.map((address) => buildItem(chainId, address))
+      return merged.map((address) => buildSafeItem(chainId, address))
     })
-  }, [isWalletConnected, walletAddress, allChainIds, allOwned, allUndeployed, allAdded, allVisitedSafes, allSafeNames])
+  }, [isWalletConnected, walletAddress, allChainIds, allOwned, allUndeployed, buildSafeItem])
 
   const allItems = useMemo<AllSafeItems>(() => {
     const multi = _getMultiChainAccounts(ownedItems)

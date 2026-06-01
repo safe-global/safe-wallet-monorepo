@@ -32,13 +32,20 @@ jest.mock('@/hooks/safes', () => {
   return {
     ...actual,
     useAllOwnedSafes: () => [mockAllOwned, mockOwnedError, mockOwnedLoading] as const,
-    _buildSafeItem: (chainId: string, address: string) => ({
-      chainId,
-      address,
-      name: '',
-      isReadOnly: false,
-      isPinned: false,
-      lastVisited: 0,
+    useSafeItemBuilder: () => ({
+      buildSafeItem: (chainId: string, address: string) => ({
+        chainId,
+        address,
+        name: '',
+        isReadOnly: false,
+        isPinned: false,
+        lastVisited: 0,
+      }),
+      walletAddress: mockWalletAddress ?? '',
+      isWalletConnected: !!mockWalletAddress,
+      allOwned: mockAllOwned,
+      ownedError: mockOwnedError,
+      ownedLoading: mockOwnedLoading,
     }),
     _getMultiChainAccounts: () => [],
     _getSingleChainAccounts: (items: unknown[]) => items,

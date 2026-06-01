@@ -5,18 +5,14 @@ import { Typography } from '@/components/ui/typography'
 import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import { selectAllAddedSafes } from '@/store/addedSafesSlice'
-import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
 import {
   type AllSafeItems,
   type SafeItem,
-  _buildSafeItem,
   _getMultiChainAccounts,
   _getSingleChainAccounts,
   getComparator,
-  useAllOwnedSafes,
+  useSafeItemBuilder,
 } from '@/hooks/safes'
-import useWallet from '@/hooks/wallets/useWallet'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useSpaceSafes, useIsInvited } from '@/features/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
@@ -42,22 +38,14 @@ const SpaceSafeAccounts = () => {
   // Use same organization logic as onboarding
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)
-  const { address: walletAddress = '' } = useWallet() || {}
-  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
-  const allAdded = useAppSelector(selectAllAddedSafes)
-  const allUndeployed = useAppSelector(selectUndeployedSafes)
-  const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
-  const allSafeNames = useAppSelector(selectAllAddressBooks)
+  const { buildSafeItem } = useSafeItemBuilder()
 
   const spaceSafeItems = useMemo(() => {
-    const buildItem = (chainId: string, address: string) =>
-      _buildSafeItem(chainId, address, walletAddress, allAdded, allOwned, allUndeployed, allVisitedSafes, allSafeNames)
-
     // Only include safes that are part of the current space
     const spaceSafes = allSafes?.flatMap((item) => ('safes' in item ? item.safes : [item])) || []
 
-    return spaceSafes.map((safe) => buildItem(safe.chainId, safe.address))
-  }, [allAdded, allOwned, allUndeployed, walletAddress, allVisitedSafes, allSafeNames, allSafes])
+    return spaceSafes.map((safe) => buildSafeItem(safe.chainId, safe.address))
+  }, [buildSafeItem, allSafes])
 
   const similarAddresses = useMemo<Set<string>>(
     () => getFlaggedSimilarAddressSet(spaceSafeItems.map((s) => s.address)),
