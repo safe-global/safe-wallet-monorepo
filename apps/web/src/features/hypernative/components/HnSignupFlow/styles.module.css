@@ -130,6 +130,10 @@
   border-radius: 4px;
 }
 
+[data-theme='light'] .logo {
+  filter: brightness(1) invert(1);
+}
+
 [data-theme='dark'] .logo {
   filter: brightness(0) invert(1);
 }
