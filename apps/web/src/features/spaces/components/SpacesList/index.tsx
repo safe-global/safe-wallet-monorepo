@@ -65,8 +65,6 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-      {/* TODO(WA-2435): min-h-screen overlaps the Topbar in classic-view mode (require-login OFF).
-          Deferred while we keep PageLayout's dev-branch hideHeader logic untouched. */}
       <div className={cn('relative flex min-h-screen items-center justify-center bg-background p-6', css.authShell)}>
         <div className="relative w-full max-w-[440px] rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
           <div className="mb-6 flex size-10 items-center justify-center text-foreground">

@@ -9,7 +9,13 @@ const isSystemDarkMode = (): boolean => {
 
 export const useDarkMode = (): boolean => {
   const settings = useAppSelector(selectSettings)
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false)
+  // The effect below persists the resolved theme to <html data-theme>. Read it
+  // synchronously on first render so a remount (e.g. Next.js route change)
+  // doesn't flash light-mode for a frame before the effect runs.
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    if (typeof document === 'undefined') return false
+    return document.documentElement.dataset.theme === 'dark'
+  })
 
   useEffect(() => {
     const isDark = settings.theme.darkMode ?? isSystemDarkMode()
