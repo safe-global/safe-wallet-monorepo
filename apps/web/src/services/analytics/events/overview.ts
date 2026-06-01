@@ -272,4 +272,5 @@ export enum OVERVIEW_LABELS {
   settings = 'settings',
   space_list_page = 'space_list_page',
   space_page = 'space_page',
+  owned_safes_modal = 'owned_safes_modal',
 }
