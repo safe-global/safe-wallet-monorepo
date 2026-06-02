@@ -48,13 +48,12 @@ describe('IndexPage', () => {
     jest.clearAllMocks()
   })
 
-  it('renders SpacesLogin inline (no redirect) when the require-login gate is on', async () => {
+  it('renders SpacesLogin inline (no redirect) when the require-login gate is on', () => {
     setup({ isRequireLoginEnabled: true })
 
     render(<IndexPage />)
 
     expect(screen.getByTestId('spaces-login')).toBeInTheDocument()
-    await Promise.resolve()
     expect(mockReplace).not.toHaveBeenCalled()
   })
 

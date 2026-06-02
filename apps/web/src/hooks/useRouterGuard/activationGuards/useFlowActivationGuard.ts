@@ -69,9 +69,9 @@ const guardRules: GuardRule[] = [
   // "Must log in to Spaces" gate — only when the feature is enabled
   // ---------------------------------------------------------------------
 
-  // While on the login page, follow ?next= onward once the user is signed in.
-  // If no ?next= is present we allow the page to render — `/welcome/spaces`
-  // is the canonical Spaces list for signed-in users.
+  // While on a login page (`/` or `/welcome/spaces`), follow ?next= onward
+  // once the user is signed in. If no ?next= is present we allow the page to
+  // render — both paths show the Spaces list for signed-in users.
   {
     match: ({ isRequireLoginEnabled, isLoginPath, isSiweAuthenticated, hasSpaces, query }) =>
       isRequireLoginEnabled === true &&
