@@ -55,6 +55,13 @@ node .claude/skills/code-conventions/scripts/validate-convention-docs.js
 
 Then run `git diff --check`.
 
+`rules.generated.md` is formatted through the repo's Prettier inside
+`renderRulesMarkdown`, so it's byte-identical to what a pre-commit
+`prettier`/`lint-staged` hook produces and won't be rewritten (and then flagged
+stale) after a commit. Generator and validator share that formatting path, so
+they agree. If a commit hook still reformats the generated file, that's a
+generator bug — fix the emitted Markdown, don't hand-edit the output.
+
 ## Final Response
 
 Tell the user:

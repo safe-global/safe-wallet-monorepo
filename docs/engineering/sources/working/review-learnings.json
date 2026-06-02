@@ -1815,5 +1815,151 @@
     "issueCommentIds": [],
     "learning": "A Spaces URL-sync hook could run before redux-persist hydration, treat a still-rehydrating signed-in user as signed out, and redirect a deep link into the welcome flow. Separately, Safe-switch route builders dropped `spaceId`, while `useCurrentSpaceId` silently fell back to the first owned Space; the combination moved users into the wrong workspace after switching Safes. Effects that redirect from persisted auth state must wait for hydration, and Space-scoped navigation should preserve the URL `spaceId` instead of inventing a fallback active Space.",
     "ruleIds": ["WEB-01", "WEB-04"]
+  },
+  {
+    "id": "RL-20260521-001",
+    "title": "Classic-view opt-in bypassed the require-login gate even after sign-in",
+    "sourceWindowId": "CLOSED-20260520-20260602",
+    "prNumbers": [7889],
+    "prState": "merged",
+    "reviewCommentIds": [3279498206, 3279592744],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A session opt-in (`isClassicViewOptedIn`) short-circuited `useIsRequireLoginEnabled` unconditionally, so a user who opted into classic view and then signed in within the same tab kept bypassing the gate and its onboarding redirects. An opt-in or escape-hatch that overrides an auth gate must be scoped to signed-out sessions: re-check `isAuthenticated` (or clear the opt-in on sign-in) so authenticating re-enables the gate.",
+    "ruleIds": ["WEB-07"]
+  },
+  {
+    "id": "RL-20260522-001",
+    "title": "Coercing a still-loading feature flag to false fired routing before it resolved",
+    "sourceWindowId": "CLOSED-20260520-20260602",
+    "prNumbers": [7884, 7889],
+    "prState": "merged",
+    "reviewCommentIds": [
+      3273411105, 3273589003, 3281073690, 3281073764, 3281073811, 3273593343, 3287551033, 3287552112, 3287553221
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`useIsRequireLoginEnabled()` returns `boolean | undefined` (undefined while chains config loads), but call sites coerced it with `?? false`. That treated the gate as OFF on first mount, firing legacy redirects that dropped the `?next=` round-trip, flashing the legacy welcome screen, and skipping post-sign-in forwarding when SIWE resolved before the flag. Handle the tri-state explicitly: an `undefined` (still-resolving) flag must mean \"wait / allow until known\", never a hard `false`. Gate redirects, `return null` loaders, and no-header lists on `=== true` / `=== false`, not on a coerced boolean.",
+    "ruleIds": ["WEB-07"]
+  },
+  {
+    "id": "RL-20260522-002",
+    "title": "Fire-and-forget async handlers leaked unhandled promise rejections",
+    "sourceWindowId": "CLOSED-20260520-20260602",
+    "prNumbers": [7819, 7886],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [],
+    "issueCommentIds": [4389362713, 4389664162, 4516730519, 4518290587],
+    "learning": "An un-awaited `disconnect()` and an `onClick={onFinish}` whose `await submit().unwrap()` could reject both surfaced as unhandled promise rejections (console/Sentry noise), even though a visible error alert already existed. Any fire-and-forget async call (event-handler `onClick`, cleanup, bail-out branch) must either be awaited inside a `try/catch` or wrapped in an awaited IIFE that logs/handles rejection, so the user-facing error state is the only path and no rejection escapes.",
+    "ruleIds": ["CODE-06"]
+  },
+  {
+    "id": "RL-20260522-003",
+    "title": "Number(spaceId) silently produced NaN and hit the API with it",
+    "sourceWindowId": "CLOSED-20260520-20260602",
+    "prNumbers": [7875],
+    "prState": "merged",
+    "reviewCommentIds": [3266648839, 3266649338, 3266807266, 3266807289],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`spaceId` is `string | null` from auth state; `Number(spaceId)` yields `NaN` for empty/whitespace/non-numeric values and that `NaN` was passed straight into space-scoped API calls. Parse external string-to-number conversions through a guarded helper (`parseSpaceId` returning `null` for non-finite results) and skip the call when parsing fails, rather than trusting raw `Number()` coercion at the call site.",
+    "ruleIds": ["NUM-02"]
+  },
+  {
+    "id": "RL-20260522-004",
+    "title": "FE DTO marked backend-optional fields required; null coercion scattered",
+    "sourceWindowId": "CLOSED-20260520-20260602",
+    "prNumbers": [7875],
+    "prState": "merged",
+    "reviewCommentIds": [3266544634, 3266561658, 3266807291, 3266807297],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A hand-written `BackendCfSafeDto` typed `fallbackHandler`/`to`/`paymentReceiver` as required strings while the backend schema marks them optional/nullable, so a null from the API would violate the FE type and downstream address code. Align the DTO optionality with the backend schema (`?: string | null`) and centralize the `null → ZERO_ADDRESS` normalization in the mapper (`fromBackendDto`) instead of coercing per call site.",
+    "ruleIds": ["DATA-03"]
+  },
+  {
+    "id": "RL-20260526-001",
+    "title": "permissions:{} workflows missing per-job contents:read break checkout",
+    "sourceWindowId": "CLOSED-20260520-20260602",
+    "prNumbers": [7918],
+    "prState": "merged",
+    "reviewCommentIds": [3302841130, 3302841160, 3302841184],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Setting workflow-level `permissions: {}` (least privilege) removes the inherited `contents: read` scope, but every job that runs `actions/checkout` still needs it. Jobs that don't re-declare `contents: read` fail checkout with an insufficient-token-scope error. When tightening a workflow to `permissions: {}`, add an explicit minimal `permissions:` block (including `contents: read`) to each job that checks out the repo.",
+    "ruleIds": ["CI-04"]
+  },
+  {
+    "id": "RL-20260526-002",
+    "title": "Number() of a balance string collapsed unknown and whitespace into $0",
+    "sourceWindowId": "CLOSED-20260520-20260602",
+    "prNumbers": [7897],
+    "prState": "merged",
+    "reviewCommentIds": [3279865393, 3279977406],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`formatBalance` ran `Number(fiatTotal)` directly, but `Number('   ') === 0`, so whitespace-only / effectively-empty gateway strings rendered as a known `$0` instead of the unknown-value dash. Guard numeric coercion of external strings: reject `null`/`undefined`, `trim()` and treat `'' → unknown`, then `Number.isFinite` the parsed value — keep the \"known zero vs unknown/unloaded\" distinction explicit rather than letting coercion erase it.",
+    "ruleIds": ["NUM-02", "DATA-03"]
+  },
+  {
+    "id": "RL-20260526-003",
+    "title": "threshold <= 1 let an invalid zero threshold pass as ready-to-execute",
+    "sourceWindowId": "CLOSED-20260520-20260602",
+    "prNumbers": [7856],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [],
+    "issueCommentIds": [4508323508, 4508392988],
+    "learning": "`threshold <= 1 ? 'AWAITING_EXECUTION' : 'AWAITING_CONFIRMATIONS'` silently mapped an invalid `threshold === 0` to the ready-to-execute state. When a value has a known valid floor, use the exact comparison (`=== 1`) so malformed inputs surface instead of being absorbed by an over-broad bound.",
+    "ruleIds": ["NUM-02"]
+  },
+  {
+    "id": "RL-20260527-001",
+    "title": "Dirty/can-save derived from RTK cache re-enabled during post-mutation refetch",
+    "sourceWindowId": "CLOSED-20260520-20260602",
+    "prNumbers": [7916],
+    "prState": "merged",
+    "reviewCommentIds": [3302786704, 3303397301],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`isDirty`/`canSave` was computed against the RTK Query cache (`trimmedName !== space.name`). After a successful save the cache still holds the old value until the refetch settles, so Save re-enabled in that window and allowed a duplicate submission. Derived \"dirty\"/\"can-submit\" state must not be recomputed from server cache during the post-mutation refetch window: track a local saved-baseline or gate on an `awaitingCacheSync` flag until the cache reflects the write.",
+    "ruleIds": ["RTK-01"]
+  },
+  {
+    "id": "RL-20260528-001",
+    "title": "Destructive key cleanup ran on cancelled/transient auth, not just true loss",
+    "sourceWindowId": "CLOSED-20260520-20260602",
+    "prNumbers": [7901],
+    "prState": "merged",
+    "reviewCommentIds": [3280044544, 3280044547],
+    "reviewIds": [],
+    "issueCommentIds": [4507128189],
+    "learning": "`cleanupSinglePrivateKey` treated any falsy `getPrivateKey()` as a successful cleanup and force-removed the signer key without auth, but `getPrivateKey` returns `undefined` for cancelled biometric prompts and transient lockouts too — so a user who cancelled silently lost their signer. A separate path pre-deleted the stored key before re-import, risking data loss if the store then failed. Gate irreversible/destructive operations on the specific confirmed cause (e.g. a caught `BiometryInvalidationError`), preserve the prior error path for ambiguous/transient failures, and never delete existing data before its replacement is durably stored.",
+    "ruleIds": ["SEC-02"]
+  },
+  {
+    "id": "RL-20260601-001",
+    "title": "Bare RTK Query tag invalidated every safe/space on any mutation",
+    "sourceWindowId": "CLOSED-20260520-20260602",
+    "prNumbers": [7960, 7935],
+    "prState": "merged",
+    "reviewCommentIds": [3310522458, 3310633274, 3311237763],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`providesTags: ['SafeOverviews']` / a global `invalidateTags(['SafeOverviews'])` on every `TxEvent.SUCCESS` invalidated every overview query across all chains and safes, causing refetch storms. Scope cache tags per entity id (`[{ type: 'SafeOverviews', id: makeSafeOverviewTag(chainId, address) }]`) and invalidate only the affected id, so a mutation on one safe/space doesn't refetch all of them. The same applies to coarse `providesTags/invalidatesTags: ['surveys']`-style tags.",
+    "ruleIds": ["RTK-04"]
+  },
+  {
+    "id": "RL-20260601-002",
+    "title": "Analytics events hardcoded/reused a label across multiple entry points",
+    "sourceWindowId": "CLOSED-20260520-20260602",
+    "prNumbers": [7958, 7899],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [],
+    "issueCommentIds": [4590505538, 4591784464, 4543012677],
+    "learning": "A shared `AddAccountsChooser` hardcoded `entry_point: 'dashboard'` while also being rendered from the Safe Accounts page, and a Security-tab CTA reused `SPACE_LABELS.space_dashboard_card` — both collapsed distinct funnels into one bucket and mis-attributed analytics. When a shared component or CTA fires an analytics event from more than one surface, pass the entry-point/label in as a prop and add a dedicated label per surface; never hardcode one surface's value or reuse another page's label.",
+    "ruleIds": ["OBS-01"]
   }
 ]

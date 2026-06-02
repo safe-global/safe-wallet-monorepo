@@ -310,3 +310,37 @@ for (let i = 0; i < parts.length; i++) {
 ### Why
 
 Allocating the regex once and collapsing the two near-identical JSX branches removes per-iteration allocations on a hot rendering path that previously caused recursion-style stack growth.
+
+## CI-04 — Grant per-job contents read under empty workflow permissions
+
+Source: PR #7918 (RL-20260526-001)
+
+### Avoid
+
+```yaml
+permissions: {} # least privilege at workflow level
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4 # fails: no contents:read inherited
+```
+
+### Prefer
+
+```yaml
+permissions: {}
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # restore the minimal scope checkout needs
+    steps:
+      - uses: actions/checkout@v4
+```
+
+### Why
+
+A top-level `permissions: {}` removes the inherited `contents: read` scope, so every job that runs `actions/checkout` fails with an insufficient-token-scope error until it re-declares the minimal permission. Add an explicit `permissions:` block (including `contents: read`) to each checkout job rather than widening the workflow-level scope back up.

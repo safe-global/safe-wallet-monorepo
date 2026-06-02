@@ -128,13 +128,13 @@
     "project": "general",
     "area": "state",
     "title": "Handle RTK mutation results explicitly",
-    "rule": "RTK Query mutation triggers resolve with a result object; use `.unwrap()` or inspect `result.error` before updating success UI or local state.",
-    "check": "Did this call an RTK mutation? If yes, does success state happen only after confirmed success?",
+    "rule": "RTK Query mutation triggers resolve with a result object; use `.unwrap()` or inspect `result.error` before updating success UI or local state. After a successful mutation, do not recompute derived `dirty`/`can-submit` state from the server cache until its refetch settles — the cache still holds the pre-mutation value in that window, which can re-enable a duplicate submit. Track a local saved-baseline or an `awaitingCacheSync` flag instead.",
+    "check": "Did this call an RTK mutation? If yes, does success state happen only after confirmed success, and is derived dirty/can-submit state protected from re-enabling during the post-mutation refetch window?",
     "exampleRefs": [
       "examples/general/data-integrity.md#rtk-mutation-results",
       "examples/general/gateway-hooks.md#rtk-01-unwrap-mutations-before-mutating-state-on-success"
     ],
-    "reviewLearningIds": ["RL-20260407-004", "RL-20260505-004"]
+    "reviewLearningIds": ["RL-20260407-004", "RL-20260505-004", "RL-20260527-001"]
   },
   {
     "id": "RTK-02",
@@ -194,7 +194,7 @@
       "examples/general/data-integrity.md#data-03-drop-analysis-results-when-their-fetch-errored",
       "examples/general/data-integrity.md#three-state-portfolio-fallback-known-empty-vs-unknown-vs-errored"
     ],
-    "reviewLearningIds": ["RL-20260310-011", "RL-20260318-009", "RL-20260409-001"]
+    "reviewLearningIds": ["RL-20260310-011", "RL-20260318-009", "RL-20260409-001", "RL-20260522-004", "RL-20260526-002"]
   },
   {
     "id": "DATA-04",
@@ -402,10 +402,10 @@
     "project": "web",
     "area": "observability",
     "title": "Promote telemetry only when user impact justifies it",
-    "rule": "Observability changes should distinguish warning-level noise from user-impacting errors and avoid flooding SLOs with expected retries, browser noise, or duplicate signals.",
-    "check": "Did this change logging/RUM/error classification? If yes, is the level justified by user impact and duplication risk?",
+    "rule": "Observability changes should distinguish warning-level noise from user-impacting errors and avoid flooding SLOs with expected retries, browser noise, or duplicate signals. When a shared component or CTA fires an analytics event from more than one surface, pass the entry-point/label in as a prop and add a dedicated label per surface; never hardcode one surface's value or reuse another page's label, which collapses distinct funnels and mis-attributes events.",
+    "check": "Did this change logging/RUM/error classification, or fire an analytics event from a shared/reused component? If yes, is the level justified by user impact and duplication risk, and is the event attributed to the actual entry point rather than a hardcoded/reused label?",
     "exampleRefs": ["examples/general/api-and-packages.md#obs-01-use-the-shared-analytics-param-key"],
-    "reviewLearningIds": ["RL-20260319-001", "RL-20260417-003"]
+    "reviewLearningIds": ["RL-20260319-001", "RL-20260417-003", "RL-20260601-002"]
   },
   {
     "id": "CACHE-01",
@@ -819,6 +819,68 @@
     "check": "Did this change a codegen workflow? If yes, does the drift check call `git status --porcelain --include-untracked` and run after the codegen step on the PR commit?",
     "exampleRefs": [],
     "reviewLearningIds": ["RL-20260217-003"],
+    "project": "general"
+  },
+  {
+    "id": "WEB-07",
+    "area": "auth",
+    "title": "Handle the loading tri-state of feature-flag hooks",
+    "rule": "Feature-flag/gate hooks that return `boolean | undefined` (undefined while config loads) must not be coerced with `?? false`. Treat `undefined` as \"still resolving\" — wait, render a loader, or allow until known — and branch routing/gating/no-header decisions on `=== true` / `=== false`. A gate opt-in or escape hatch must also re-check `isAuthenticated` so it can't bypass the gate after sign-in.",
+    "check": "Did this read a flag/gate hook that can be `undefined` while loading? If yes, is the undefined state handled explicitly instead of coerced to false, and would a premature decision lose `next`/flash the wrong UI/bypass the gate?",
+    "exampleRefs": ["examples/general/gateway-hooks.md#web-07-handle-the-loading-tri-state-of-feature-flags"],
+    "reviewLearningIds": ["RL-20260521-001", "RL-20260522-001"],
+    "project": "web"
+  },
+  {
+    "id": "CODE-06",
+    "area": "abstractions",
+    "title": "Await or catch fire-and-forget async calls",
+    "rule": "Any async call that is not awaited in a normal control-flow path — an `onClick={asyncFn}` handler, a cleanup/bail-out `disconnect()`, a background effect — must either be awaited inside a `try/catch` or wrapped in an awaited IIFE that handles rejection. A rejecting `.unwrap()` or promise must not escape as an unhandled rejection, even when a user-facing error state already renders.",
+    "check": "Did this add an async call without awaiting it in a try/catch (event handler, cleanup, IIFE)? If yes, is its rejection path handled so nothing surfaces as an unhandled promise rejection?",
+    "exampleRefs": ["examples/general/gateway-hooks.md#code-06-await-or-catch-fire-and-forget-async"],
+    "reviewLearningIds": ["RL-20260522-002"],
+    "project": "general"
+  },
+  {
+    "id": "NUM-02",
+    "area": "numerics",
+    "title": "Validate numeric coercion of external string inputs",
+    "rule": "`Number(x)` on an external/string value silently yields `0` for `''`/whitespace and `NaN` for non-numeric input. Parse such values through a guarded helper (reject null/undefined, trim, treat empty as unknown, `Number.isFinite` the result) before using them as API args, aggregates, or status decisions, and keep \"known zero\" distinct from \"unknown/unloaded\". When a value has a known valid floor, use the exact comparison (`=== 1`) rather than an over-broad bound (`<= 1`) so malformed inputs surface.",
+    "check": "Did this coerce an external string to a number (id, balance, threshold)? If yes, is empty/whitespace/non-finite handled explicitly instead of trusting raw `Number()`, and do bounds use exact comparisons where the floor is known?",
+    "exampleRefs": ["examples/general/data-integrity.md#num-02-guard-numeric-coercion-of-external-strings"],
+    "reviewLearningIds": ["RL-20260522-003", "RL-20260526-002", "RL-20260526-003"],
+    "project": "general"
+  },
+  {
+    "id": "RTK-04",
+    "area": "state",
+    "title": "Scope RTK Query cache tags per entity id",
+    "rule": "`providesTags`/`invalidatesTags` must carry an `id` (`[{ type: 'X', id: makeTag(chainId, address) }]`) when the data is per-safe, per-space, or otherwise per-entity. A bare `['X']` tag invalidates every query of that type across all entities, so one mutation triggers a refetch storm. Invalidate only the affected id.",
+    "check": "Did this add or change RTK Query `providesTags`/`invalidatesTags`, or invalidate on an event? If yes, is the tag scoped to the affected entity id rather than a bare type that hits every safe/space?",
+    "exampleRefs": ["examples/general/gateway-hooks.md#rtk-04-scope-cache-tags-per-id"],
+    "reviewLearningIds": ["RL-20260601-001"],
+    "project": "general"
+  },
+  {
+    "id": "SEC-02",
+    "area": "security",
+    "title": "Gate destructive operations on a confirmed cause",
+    "rule": "Irreversible operations (deleting a key, wiping a signer, removing persisted data) must run only on the specific confirmed condition that warrants them — not on any falsy/ambiguous result or any caught error. A function that returns `undefined` for cancelled/transient failures as well as true loss must distinguish them and preserve the prior error path for the ambiguous case. Never delete existing data before its replacement is durably stored.",
+    "check": "Did this add a destructive/irreversible action? If yes, does it fire only on the specific confirmed cause (not a generic falsy/error result), and is existing data preserved until its replacement is committed?",
+    "exampleRefs": ["examples/general/data-integrity.md#sec-02-gate-destructive-operations-on-a-confirmed-cause"],
+    "reviewLearningIds": ["RL-20260528-001"],
+    "project": "general"
+  },
+  {
+    "id": "CI-04",
+    "area": "ci",
+    "title": "Grant per-job contents:read under empty workflow permissions",
+    "rule": "When a workflow sets `permissions: {}` for least privilege, every job that runs `actions/checkout` must re-declare a minimal `permissions:` block including `contents: read`, since the empty top-level block removes the inherited scope and checkout otherwise fails with an insufficient-token-scope error.",
+    "check": "Did this set workflow-level `permissions: {}` or tighten token scopes? If yes, does every job that checks out the repo still declare `contents: read`?",
+    "exampleRefs": [
+      "examples/general/api-and-packages.md#ci-04-grant-per-job-contents-read-under-empty-workflow-permissions"
+    ],
+    "reviewLearningIds": ["RL-20260526-001"],
     "project": "general"
   }
 ]

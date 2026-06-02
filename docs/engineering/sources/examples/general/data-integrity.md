@@ -500,3 +500,77 @@ function projectRemove(currentOwners: string[], change: { ownerAddress: string }
 ### Why
 
 `sameAddress` already handles checksum-vs-lowercase, undefined inputs, and the 0x prefix. Inline `.toLowerCase()` reimplements it inconsistently and is easy to forget on one branch (e.g. swapOwner vs removeOwner).
+
+## NUM-02 — Guard numeric coercion of external strings
+
+Source: PR #7875, #7897, #7856 (RL-20260522-003, RL-20260526-002, RL-20260526-003)
+
+### Avoid
+
+```ts
+const id = Number(rawId) // '' / '  ' → 0, 'abc' → NaN
+dispatch(endpoint.initiate({ id })) // calls the API with NaN
+
+const value = Number(fiatTotal) // Number('   ') === 0 → renders a known $0 for unknown input
+const status = threshold <= 1 ? 'READY' : 'PENDING' // invalid threshold 0 silently becomes READY
+```
+
+### Prefer
+
+```ts
+const parseId = (raw: string | null): number | null => {
+  const n = Number(raw?.trim())
+  return raw && raw.trim() !== '' && Number.isFinite(n) ? n : null
+}
+const id = parseId(rawId)
+if (id === null) return // skip rather than call with NaN
+
+if (fiatTotal == null || fiatTotal.trim() === '') return UNKNOWN // distinct from known 0
+const value = Number(fiatTotal.trim())
+const status = threshold === 1 ? 'READY' : 'PENDING' // exact floor — invalid 0 surfaces
+```
+
+### Why
+
+`Number()` of an external string yields `0` for empty/whitespace and `NaN` for non-numeric input; both then flow silently into API args, aggregates, or status decisions. Parse through a guarded helper that rejects non-finite results, keep "known zero" distinct from "unknown/unloaded", and use exact comparisons (`=== 1`) where a valid floor exists so malformed values surface instead of being absorbed.
+
+## SEC-02 — Gate destructive operations on a confirmed cause
+
+Source: PR #7901 (RL-20260528-001)
+
+### Avoid
+
+```ts
+const key = await keyStorage.getPrivateKey(addr) // returns undefined on cancel/lockout too
+if (!key) {
+  await keyStorage.removePrivateKey(addr, { requireAuthentication: false }) // wipes signer on a cancelled prompt
+  dispatch(removeSigner(addr))
+  return ok()
+}
+
+await keyStorage.removePrivateKey(addr) // pre-delete before the re-import is stored → data loss if store fails
+await storePrivateKey(addr, input)
+```
+
+### Prefer
+
+```ts
+let invalidated = false
+let key: string | undefined
+try {
+  key = await keyStorage.getPrivateKey(addr)
+} catch (e) {
+  if (e instanceof BiometryInvalidationError) invalidated = true
+  else throw e
+}
+if (!key) {
+  if (!invalidated) return error(STORAGE_ERROR) // cancel/transient → preserve prior path
+  await keyStorage.removePrivateKey(addr, { requireAuthentication: false }) // only on confirmed invalidation
+  dispatch(removeSigner(addr))
+  return ok()
+}
+```
+
+### Why
+
+A function that returns `undefined`/falsy for cancelled prompts and transient lockouts as well as true key loss must not treat every falsy result as license to perform an irreversible action — a user who cancels would silently lose their signer. Gate destructive operations on the specific confirmed cause, keep the prior error path for ambiguous failures, and never delete existing data before its replacement is durably stored.

@@ -456,13 +456,13 @@ function validateGeneratedChecklistIgnore(root) {
   return []
 }
 
-function validateRulesMarkdown(rules, rulesMdPath, engineeringRoot) {
-  const expected = renderRulesMarkdown(rules, engineeringRoot)
+async function validateRulesMarkdown(rules, rulesMdPath, engineeringRoot) {
+  const expected = await renderRulesMarkdown(rules, engineeringRoot)
   const actual = readRequired(rulesMdPath)
   return actual === expected ? [] : ['rules.generated.md is stale; regenerate it from rules.json']
 }
 
-function main() {
+async function main() {
   const { root } = parseArgs(process.argv)
   const resolvedRoot = path.resolve(root)
   const docsDir = path.join(resolvedRoot, 'docs', 'engineering')
@@ -504,7 +504,7 @@ function main() {
   errors.push(...validateRulesJson(rules))
   errors.push(...validateReviewLearningsJson(reviewLearnings))
   errors.push(...validateMappings(rules, reviewLearnings))
-  errors.push(...validateRulesMarkdown(rules, rulesMdPath, sourcesDir))
+  errors.push(...(await validateRulesMarkdown(rules, rulesMdPath, sourcesDir)))
   errors.push(...validateLegacySourceIds(sourcesDir))
   errors.push(...validateObsoleteFiles(sourcesDir))
   errors.push(...validateGeneratedChecklistIgnore(resolvedRoot))
@@ -520,9 +520,7 @@ function main() {
   console.log('Convention docs OK')
 }
 
-try {
-  main()
-} catch (error) {
+main().catch((error) => {
   console.error(error.message)
   process.exit(1)
-}
+})

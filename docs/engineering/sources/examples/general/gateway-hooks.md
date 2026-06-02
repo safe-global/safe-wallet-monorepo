@@ -242,3 +242,100 @@ Awaiting an RTK Query mutation does not throw on HTTP/API failures unless
 the backend rejected the request, desynchronising client state from server
 state and skipping the `catch` branch that would surface or recover from the
 failure.
+
+## WEB-07 — Handle the loading tri-state of feature flags
+
+Source: PR #7884, #7889 (RL-20260522-001, RL-20260521-001)
+
+### Avoid
+
+```ts
+const isGateEnabled = useIsResourceGateEnabled() ?? false // undefined while config loads → treated as OFF
+
+// fires on first mount before the flag resolves: drops ?next=, flashes wrong UI
+if (isGateEnabled) router.replace(loginPath)
+// an opt-in escape hatch that ignores auth state keeps bypassing the gate after sign-in
+if (isOptedOut) return false
+```
+
+### Prefer
+
+```ts
+const gate = useIsResourceGateEnabled() // boolean | undefined
+
+if (gate === undefined) return null // still resolving — wait / allow until known
+if (isOptedOut && !isAuthenticated) return false // opt-out scoped to signed-out only
+if (gate === true && !isAuthenticated) router.replace(withNext(loginPath))
+```
+
+### Why
+
+A flag hook that is `undefined` while its source loads must not be coerced to a hard `false`. Coercion makes routing, `return null` loaders, and gating decisions fire before the value is known — losing the destination URL, flashing the pre-gate screen, or letting a stale opt-in bypass the gate after sign-in. Branch on `=== true`/`=== false` and treat `undefined` as "wait".
+
+## CODE-06 — Await or catch fire-and-forget async
+
+Source: PR #7819, #7886 (RL-20260522-002)
+
+### Avoid
+
+```ts
+const onFinish = async () => {
+  await submit(payload).unwrap() // rejects → unhandled promise rejection
+  router.push(next)
+}
+;<Button onClick={onFinish} /> // fire-and-forget
+
+cleanup() // un-awaited; rejection escapes
+```
+
+### Prefer
+
+```ts
+const onFinish = async () => {
+  try {
+    await submit(payload).unwrap()
+    router.push(next)
+  } catch {
+    // error state already drives the visible alert
+  }
+}
+
+void (async () => {
+  try {
+    await cleanup()
+  } catch (e) {
+    Logger.warn('cleanup failed', e)
+  }
+})()
+```
+
+### Why
+
+An `onClick={asyncFn}` handler and an un-awaited cleanup call both let a rejected promise escape as an unhandled rejection (console + Sentry noise), even when a user-facing error alert already renders. Await inside `try/catch`, or wrap in an awaited IIFE that logs the rejection, so the handled error state is the only surfaced path.
+
+## RTK-04 — Scope cache tags per id
+
+Source: PR #7960, #7935 (RL-20260601-001)
+
+### Avoid
+
+```ts
+// every overview query across all chains/safes is invalidated on any tx success
+getSafeOverview: build.query({ providesTags: ['SafeOverviews'] })
+dispatch(api.util.invalidateTags(['SafeOverviews']))
+```
+
+### Prefer
+
+```ts
+getSafeOverview: build.query({
+  providesTags: (_r, _e, { chainId, address }) => [
+    { type: 'SafeOverviews', id: makeSafeOverviewTag(chainId, address) },
+  ],
+})
+dispatch(api.util.invalidateTags([{ type: 'SafeOverviews', id: makeSafeOverviewTag(chainId, address) }]))
+```
+
+### Why
+
+A bare `['SafeOverviews']` tag matches every query of that type, so one mutation refetches all of them — a refetch storm that scales with the number of mounted safes/spaces. Carry an `id` derived from the entity (chain + address, or `spaceId:slug`) so invalidation hits only the affected query.

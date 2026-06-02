@@ -196,7 +196,25 @@ function renderQuickIndex(rules) {
   return lines.join('\n')
 }
 
-export function renderRulesMarkdown(rules, engineeringRoot) {
+// Format through the repo's Prettier so the output matches a pre-commit
+// `prettier --write` and the validator won't flag it stale. Falls back to raw
+// Markdown when Prettier is unavailable; the validator shares this path.
+async function formatMarkdown(markdown, filePath) {
+  let prettier
+  try {
+    prettier = await import('prettier')
+  } catch {
+    return markdown
+  }
+  try {
+    const config = (await prettier.resolveConfig(filePath)) || {}
+    return await prettier.format(markdown, { ...config, parser: 'markdown', filepath: filePath })
+  } catch {
+    return markdown
+  }
+}
+
+export async function renderRulesMarkdown(rules, engineeringRoot) {
   if (!engineeringRoot) {
     throw new Error('renderRulesMarkdown requires engineeringRoot to resolve exampleRefs')
   }
@@ -244,10 +262,11 @@ export function renderRulesMarkdown(rules, engineeringRoot) {
     lines.push('')
   }
 
-  return `${lines.join('\n').replace(/\n+$/u, '')}\n`
+  const raw = `${lines.join('\n').replace(/\n+$/u, '')}\n`
+  return formatMarkdown(raw, path.join(engineeringRoot, 'rules.generated.md'))
 }
 
-function main() {
+async function main() {
   const { root, out } = parseArgs(process.argv)
   const resolvedRoot = path.resolve(root)
   const sourcesRoot = path.join(resolvedRoot, 'docs', 'engineering', 'sources')
@@ -257,7 +276,7 @@ function main() {
     throw new Error(`Missing required file: ${rulesPath}`)
   }
 
-  const markdown = renderRulesMarkdown(readJson(rulesPath), sourcesRoot)
+  const markdown = await renderRulesMarkdown(readJson(rulesPath), sourcesRoot)
   const outPath = path.resolve(resolvedRoot, out)
   fs.mkdirSync(path.dirname(outPath), { recursive: true })
   fs.writeFileSync(outPath, markdown)
@@ -265,10 +284,8 @@ function main() {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  try {
-    main()
-  } catch (error) {
+  main().catch((error) => {
     console.error(error.message)
     process.exit(1)
-  }
+  })
 }
