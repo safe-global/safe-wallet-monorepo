@@ -5,6 +5,7 @@ import { useStore } from 'react-redux'
 import { useToastController } from '@tamagui/toast'
 import type { RootState, AppDispatch } from '@/src/store'
 import { pushPending, removePending, isDeferredTxMethod } from '../store/walletKitSlice'
+import { logWalletKitError } from '../utils/errors'
 import { routeSessionRequest, isDeferredResponse, type RouteContext } from '../services/methodRouter'
 import { REJECTED_SIGNING_METHODS } from '../services/constants'
 
@@ -60,7 +61,7 @@ export const useSessionRequestHandler = (walletKit: IWalletKit | null, deps: Ses
       try {
         await walletKit.respondSessionRequest({ topic: request.topic, response })
       } catch (e) {
-        console.log('[walletKit] respondSessionRequest failed', e)
+        logWalletKitError('respondSessionRequest failed', e)
       }
       // Surface the spec-mandated toast on the no-signer auto-reject path.
       if ('error' in response && response.error?.code === NO_SIGNER_ERROR_CODE) {

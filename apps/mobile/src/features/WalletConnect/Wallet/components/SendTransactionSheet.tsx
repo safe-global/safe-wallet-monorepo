@@ -14,6 +14,7 @@ import { removePending, setOutstandingRequest, clearOutstandingRequest } from '.
 import { clearDraft } from '@/src/store/draftTxSlice'
 import { composeSafeTxDraft, type DappCall } from '../services/composeSafeTxDraft'
 import type { PendingSessionRequest } from '../store/walletKitSlice'
+import { logWalletKitError } from '../utils/errors'
 
 type Props = {
   walletKit: IWalletKit
@@ -56,7 +57,7 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
         response: formatJsonRpcError(pending.id, getSdkError('USER_REJECTED').message),
       })
     } catch (e) {
-      console.log('[walletKit] respondSessionRequest (reject) failed', e)
+      logWalletKitError('respondSessionRequest (reject) failed', e)
     }
     dispatch(removePending({ id: pending.id, kind: 'request' }))
     if (composedHash) {

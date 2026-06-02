@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import type { RootState } from '@/src/store'
 import { useSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { removePending, selectCurrentRequest } from '../store/walletKitSlice'
+import { logWalletKitError } from '../utils/errors'
 import { SessionProposalSheet } from './SessionProposalSheet'
 import { SendTransactionSheet } from './SendTransactionSheet'
 
@@ -56,7 +57,7 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
           reason: getSdkError('USER_REJECTED'),
         })
       } catch (e) {
-        console.log('[walletKit] rejectSession on sheet dismiss failed', e)
+        logWalletKitError('rejectSession on sheet dismiss failed', e)
       }
       dispatch(removePending({ id: currentAtDismiss.id, kind: 'proposal' }))
       return
@@ -68,7 +69,7 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
         response: formatJsonRpcError(currentAtDismiss.id, getSdkError('USER_REJECTED').message),
       })
     } catch (e) {
-      console.log('[walletKit] respondSessionRequest on sheet dismiss failed', e)
+      logWalletKitError('respondSessionRequest on sheet dismiss failed', e)
     }
     dispatch(removePending({ id: currentAtDismiss.id, kind: 'request' }))
     // Draft / outstandingRequest cleanup happens automatically in SendTransactionSheet's

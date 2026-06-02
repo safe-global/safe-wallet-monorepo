@@ -29,6 +29,7 @@ import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { proxyReadOnlyCall } from '../services/readRpcProxy'
 import { SUPPORTED_NAMESPACE } from '../services/constants'
+import { logWalletKitError } from '../utils/errors'
 import type { TransactionReceipt } from 'ethers'
 
 export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -127,7 +128,7 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             response: formatJsonRpcResult(outstanding.id, result),
           })
         } catch (e) {
-          console.log('[walletKit] respondSessionRequest after propose failed', e)
+          logWalletKitError('respondSessionRequest after propose failed', e)
         }
         api.dispatch(clearOutstandingRequest(safeTxHash))
       },
