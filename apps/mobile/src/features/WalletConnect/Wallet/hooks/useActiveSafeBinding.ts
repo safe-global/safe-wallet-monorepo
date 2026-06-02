@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
 import type { IWalletKit } from '@reown/walletkit'
+import type { SessionTypes } from '@walletconnect/types'
 import { getAddress } from 'ethers'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSessions } from '../store/walletKitSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { SUPPORTED_NAMESPACE } from '../services/constants'
+import { logWalletKitError } from '../utils/errors'
 
 const eip155Caip2 = (chainId: string) => `${SUPPORTED_NAMESPACE}:${chainId}`
 
@@ -26,7 +28,7 @@ export const useActiveSafeBinding = (walletKit: IWalletKit | null) => {
     // can swallow it. Filtering against the live snapshot avoids the noisy call.
     const live = walletKit.getActiveSessions()
 
-    sessions.forEach(async (session) => {
+    const updateOne = async (session: SessionTypes.Struct) => {
       if (!live[session.topic]) {
         return
       }
@@ -58,8 +60,13 @@ export const useActiveSafeBinding = (walletKit: IWalletKit | null) => {
           chainId: chainCaip2,
         })
       } catch (e) {
-        console.log('[walletKit] active-safe binding failed for', session.topic, e)
+        logWalletKitError(`active-safe binding failed for ${session.topic}`, e)
       }
-    })
+    }
+
+    // Each session's body catches its own errors, so Promise.all never rejects — the
+    // explicit `void` documents the fire-and-forget intent (avoids the no-floating-promises
+    // / no-misused-promises smell of `forEach(async ...)`).
+    void Promise.all(sessions.map(updateOne))
   }, [walletKit, activeSafe?.address, activeSafe?.chainId, sessions])
 }
