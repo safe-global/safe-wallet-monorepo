@@ -26,7 +26,7 @@ const EmptyCardItem = ({ iconNode, title, description, label, onClick }: EmptyCa
     <Card className={cn(css.emptyCardState, 'group')} onClick={onClick}>
       {typeof iconNode === 'string' ? (
         <div>
-          <img className="max-w-[54px] rounded-md" src={iconNode} />
+          <img className="w-[54px] rounded-md" src={iconNode} />
         </div>
       ) : (
         <div className="flex size-14 items-center justify-center rounded-md bg-green-100">{iconNode}</div>
@@ -86,7 +86,7 @@ const SecurityEmptyState = (): ReactElement => {
         label: 'enterprise',
         title: 'Hypernative Guardian',
         description: 'Block risky transactions automatically.',
-        icon: '/images/hypernative.png',
+        icon: '/images/hypernative/hypernative-icon.svg',
         onClick: handleHypernativeClick,
       },
     ],
