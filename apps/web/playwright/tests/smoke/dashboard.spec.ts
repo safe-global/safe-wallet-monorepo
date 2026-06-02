@@ -13,7 +13,7 @@ test.describe('Dashboard', { tag: '@smoke' }, () => {
 
   test.beforeEach(async ({ safePage }) => {
     homePage = new HomePage(safePage)
-    await homePage.goto(staticSafes.SEP_STATIC_SAFE_1)
+    await homePage.goto(staticSafes.SEP_STATIC_SAFE_2)
   })
 
   test('should load the dashboard and show Safe header info', async ({ safePage }) => {

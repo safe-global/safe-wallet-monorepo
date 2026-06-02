@@ -9,7 +9,7 @@ import { staticSafes } from '../../src/data/safes'
 import { ROUTES } from '../../src/data/constants'
 import { safeGoto } from '../../src/utils/navigation'
 
-const safeAddress = staticSafes.SEP_STATIC_SAFE_1.split(':')[1]
+const safeAddress = staticSafes.SEP_STATIC_SAFE_2.split(':')[1]
 
 test.describe('Balances page', { tag: '@smoke' }, () => {
   test('should display token balances matching API data', async ({ safePage, safeApiClient }) => {
@@ -20,7 +20,7 @@ test.describe('Balances page', { tag: '@smoke' }, () => {
     expect(balances.items.length).toBeGreaterThan(0)
 
     // 2. UI: navigate to balances page (retries on 429)
-    await safeGoto(safePage, `${ROUTES.balances}?safe=${staticSafes.SEP_STATIC_SAFE_1}`)
+    await safeGoto(safePage, `${ROUTES.balances}?safe=${staticSafes.SEP_STATIC_SAFE_2}`)
 
     // 3. Verify: UI shows the first token symbol from API
     const firstToken = balances.items[0]

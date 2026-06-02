@@ -9,7 +9,7 @@ import { staticSafes } from '../../src/data/safes'
 import { CHAIN_IDS } from '../../src/data/constants'
 
 // Extract the raw address from prefixed format "sep:0xABC..." → "0xABC..."
-const safeAddress = staticSafes.SEP_STATIC_SAFE_1.split(':')[1]
+const safeAddress = staticSafes.SEP_STATIC_SAFE_5.split(':')[1]
 
 test.describe('Safe Info API', { tag: '@api' }, () => {
   test('should return Safe info with valid structure', async ({ safeApiClient }) => {
