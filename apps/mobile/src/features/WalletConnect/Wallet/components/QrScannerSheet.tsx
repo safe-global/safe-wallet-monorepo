@@ -17,8 +17,8 @@ export const QrScannerSheet: React.FC<Props> = ({ open, onClose }) => {
   const [connecting, setConnecting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isCameraActive, setIsCameraActive] = useState(true)
-  // TODO(wallet-poc): remove the debug paste-URI input before merging the full feature.
-  //   Kept for now so the iOS simulator (no camera) can exercise pairing by pasting a wc: URI.
+  // Dev-only paste input — lets the iOS simulator (which has no camera) exercise pairing.
+  // Compiled out of release builds via `__DEV__`; never reaches users.
   const [debugUri, setDebugUri] = useState('')
   const { permission, requestPermission, openSettings } = useCameraPermissionFlow()
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -124,34 +124,36 @@ export const QrScannerSheet: React.FC<Props> = ({ open, onClose }) => {
             </Button>
           </YStack>
         )}
-        {/* TODO(wallet-poc): debug-only paste input for the iOS simulator (no camera). Remove before merging the full feature. */}
-        <YStack gap="$2" padding="$3" backgroundColor="$backgroundSecondary" borderRadius="$3">
-          <Text fontSize="$2" color="$colorSecondary">
-            Debug: paste WC URI
-          </Text>
-          <XStack gap="$2" alignItems="center">
-            <View flex={1}>
-              <BottomSheetTextInput
-                value={debugUri}
-                onChangeText={setDebugUri}
-                placeholder="wc:..."
-                autoCapitalize="none"
-                autoCorrect={false}
-                editable={!connecting}
-                style={{
-                  paddingHorizontal: 8,
-                  paddingVertical: 8,
-                  borderRadius: 4,
-                  backgroundColor: '#00000022',
-                  color: '#FFFFFF',
-                }}
-              />
-            </View>
-            <Button onPress={onPasteAndPair} height="$8" minWidth="100" disabled={!debugUri || connecting}>
-              Pair
-            </Button>
-          </XStack>
-        </YStack>
+        {/* Dev-only paste input for the iOS simulator (no camera). Stripped from release builds. */}
+        {__DEV__ && (
+          <YStack gap="$2" padding="$3" backgroundColor="$backgroundSecondary" borderRadius="$3">
+            <Text fontSize="$2" color="$colorSecondary">
+              Debug: paste WC URI
+            </Text>
+            <XStack gap="$2" alignItems="center">
+              <View flex={1}>
+                <BottomSheetTextInput
+                  value={debugUri}
+                  onChangeText={setDebugUri}
+                  placeholder="wc:..."
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={!connecting}
+                  style={{
+                    paddingHorizontal: 8,
+                    paddingVertical: 8,
+                    borderRadius: 4,
+                    backgroundColor: '#00000022',
+                    color: '#FFFFFF',
+                  }}
+                />
+              </View>
+              <Button onPress={onPasteAndPair} height="$8" minWidth="100" disabled={!debugUri || connecting}>
+                Pair
+              </Button>
+            </XStack>
+          </YStack>
+        )}
       </YStack>
     </BottomSheetModal>
   )
