@@ -16,8 +16,12 @@ export const BENIGN_WALLETKIT_PATTERNS: (string | RegExp)[] = [
 ]
 
 const messageOf = (e: unknown): string => {
-  if (e instanceof Error) return e.message
-  if (typeof e === 'string') return e
+  if (e instanceof Error) {
+    return e.message
+  }
+  if (typeof e === 'string') {
+    return e
+  }
   return String(e)
 }
 
