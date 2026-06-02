@@ -109,8 +109,6 @@ export type WebhookEvent =
   | ConfirmationRequestEvent
   | SafeCreatedEvent
 
-// Restored for the web-tanstack Vite service worker (see #7568). The single
-// bundled Vite worker is the long-term home for FCM background push.
 export const isWebhookEvent = (data: MessagePayload['data']): data is WebhookEvent => {
   return Object.values(WebhookType).some((type) => type === data?.type)
 }
