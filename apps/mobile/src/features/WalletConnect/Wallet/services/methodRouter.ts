@@ -170,10 +170,17 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     if (!hasSigner) {
       return formatJsonRpcError(id, { code: 4100, message: 'No signer attached to this Safe' })
     }
+    // Both tx methods need the active chain config (downstream compose uses it to look up
+    // CreateCall deployments and to verify the SDK is bound to the same chain). Fail
+    // synchronously so the dApp sees a structured error instead of an opaque compose
+    // failure later.
+    if (!activeChain) {
+      return formatJsonRpcError(id, { code: -32603, message: 'No active chain' })
+    }
     // wallet_sendCalls — validate the bundle envelope up front (mirrors apps/web/.../
     // safe-wallet-provider/index.ts wallet_sendCalls). chainId / from mismatches and
     // malformed calls fail synchronously rather than burning a sheet + compose pass.
-    if (method === 'wallet_sendCalls' && activeChain) {
+    if (method === 'wallet_sendCalls') {
       const [bundle] = rpcParams as [
         | {
             chainId?: `0x${string}`
