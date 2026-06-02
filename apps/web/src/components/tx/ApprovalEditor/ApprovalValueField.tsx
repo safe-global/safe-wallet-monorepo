@@ -1,11 +1,13 @@
 import NumberField from '@/components/common/NumberField'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
-import { Autocomplete, type MenuItemProps, MenuItem } from '@mui/material'
+import { Autocomplete, Box, type MenuItemProps, MenuItem, SvgIcon, Tooltip } from '@mui/material'
 import { useController, useFormContext } from 'react-hook-form'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
 import css from './styles.module.css'
 import { PSEUDO_APPROVAL_VALUES } from './utils/approvals'
 import { approvalMethodDescription } from './ApprovalItem'
+import InfoIcon from '@/public/images/notifications/info.svg'
+import { TokenType } from '@safe-global/store/gateway/types'
 
 const ApprovalOption = ({ menuItemProps, value }: { menuItemProps: MenuItemProps; value: string }) => {
   return (
@@ -38,7 +40,27 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
 
   const helperText = fieldState.error?.message ?? (fieldState.isDirty ? 'Save to apply changes' : '')
 
-  const label = `${approvalMethodDescription[tx.method](tx.tokenInfo?.symbol ?? '')}`
+  const symbol = tx.tokenInfo?.symbol ?? ''
+  const labelText = approvalMethodDescription[tx.method](symbol)
+  const showAmountTooltip = tx.tokenInfo?.type === TokenType.ERC20
+  const label = showAmountTooltip ? (
+    <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+      {labelText}
+      <Tooltip title="Enter a decimal amount (e.g. 1.5), not a raw wei value." arrow placement="top">
+        <span>
+          <SvgIcon
+            component={InfoIcon}
+            inheritViewBox
+            color="border"
+            fontSize="small"
+            sx={{ verticalAlign: 'middle' }}
+          />
+        </span>
+      </Tooltip>
+    </Box>
+  ) : (
+    labelText
+  )
   const options = selectValues
 
   return (
