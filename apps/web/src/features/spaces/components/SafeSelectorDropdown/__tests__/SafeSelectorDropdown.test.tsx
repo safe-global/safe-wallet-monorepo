@@ -221,10 +221,9 @@ describe('SafeSelectorDropdown', () => {
         />,
       )
 
-      // The dropdown trigger renders (so the user can pick another safe)
       expect(screen.getByTestId('mock-select-root')).toBeInTheDocument()
       expect(screen.getByTestId('safe-selector-trigger-content')).toBeInTheDocument()
-      // The old "not available" error is gone — main content surfaces the load failure instead
+      // Old "not available" error is gone — main content surfaces the load failure instead.
       expect(screen.queryByText('This Safe is not available on the selected network')).not.toBeInTheDocument()
     })
 
@@ -239,7 +238,6 @@ describe('SafeSelectorDropdown', () => {
         />,
       )
 
-      // forceOpenable should be set so the user can still switch to the one available safe
       const selectRoot = screen.getByTestId('mock-select-root')
       expect(selectRoot.getAttribute('data-mock-disabled')).toBe('false')
     })

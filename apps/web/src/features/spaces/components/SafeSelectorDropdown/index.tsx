@@ -11,10 +11,7 @@ import { getSafeSelectorClassVariants } from './utils/classVariants'
 import type { SafeItemData, SafeSelectorDropdownProps } from './types'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
-// Builds a minimal trigger item from `${chainId}:${address}` so the dropdown stays usable
-// when the current safe isn't in `items` (e.g. safe-info load failure, navigated to a safe
-// outside the current space). Balance/threshold/owners stay in their loading state — we
-// don't know them. Returns null if the id isn't parseable.
+// Keeps the dropdown trigger renderable when the current safe isn't in `items`.
 function buildFallbackSafeItem(selectedItemId: string | undefined): SafeItemData | null {
   if (!selectedItemId) return null
   const colonIndex = selectedItemId.indexOf(':')
@@ -58,8 +55,7 @@ function SafeSelectorDropdown({
   footer,
 }: SafeSelectorDropdownProps) {
   const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
-  // When items are loaded but none match `selectedItemId`, we'll render a fallback trigger;
-  // force the dropdown openable so the user can switch even if items has just one entry.
+  // Force-openable so `isSingleSafe` can't hide the chevron when only one other safe exists.
   const willUseFallbackTrigger =
     items.length > 0 && Boolean(selectedItemId) && !items.some((item) => item.id === selectedItemId)
   const isDisabled = useIsSafeBarControlDisabled()
@@ -84,9 +80,6 @@ function SafeSelectorDropdown({
   const safeSelectValue = selectedItemId ?? selectedItem?.id
   const safeItemSelect = onItemSelect ?? (() => {})
 
-  // When items are loaded but no entry matches `selectedItemId` (current safe failed to
-  // load, or navigated outside the current space), keep the dropdown usable by rendering
-  // a degraded trigger built from the URL's `${chainId}:${address}`.
   const fallbackSelectedItem = useMemo(
     () => (selectedItem ? null : buildFallbackSafeItem(selectedItemId)),
     [selectedItem, selectedItemId],
@@ -98,8 +91,6 @@ function SafeSelectorDropdown({
     return <SafeSelectorDropdownSkeleton />
   }
 
-  // Items haven't arrived yet — surface the load error / skeleton instead of an empty
-  // dropdown that can't switch anywhere.
   if (items.length === 0) {
     if (isError) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
     return <SafeSelectorDropdownSkeleton />
