@@ -466,6 +466,7 @@ export type SpaceMemberDto = {
   role: 'ADMIN' | 'MEMBER'
   name: string
   invitedBy: number | null
+  inviteExpiresAt: string | null
   invitedByName?: string
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   user: UserDto
@@ -530,6 +531,7 @@ export type MemberDto = {
   name: string
   alias?: string | null
   invitedBy: number | null
+  inviteExpiresAt?: string | null
   createdAt: string
   updatedAt: string
   user: MemberUser
