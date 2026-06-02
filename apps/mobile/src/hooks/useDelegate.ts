@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { useSign } from './useSign/useSign'
 import { selectAllChains } from '@/src/store/chains'
 import { addDelegate } from '@/src/store/delegatesSlice'
-import { delegatesApi } from '@safe-global/store/gateway/delegates'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import Logger from '@/src/utils/logger'
 import { getDelegateTypedData, hashDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { getDelegateKeyId } from '@/src/utils/delegate'
@@ -33,7 +33,7 @@ export const useDelegate = (): UseDelegateProps => {
   const allChains = useAppSelector(selectAllChains)
 
   // Access API endpoints
-  const [registerDelegate] = delegatesApi.useDelegatesPostDelegateV3Mutation()
+  const [registerDelegate] = cgwApi.useDelegatesPostDelegateV3Mutation()
 
   const createDelegate = useCallback(
     async (ownerPrivateKey: string, safe: string | null = null) => {

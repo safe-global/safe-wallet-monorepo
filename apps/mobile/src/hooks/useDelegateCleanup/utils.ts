@@ -3,7 +3,7 @@ import { type Address } from '@/src/types/address'
 import { Wallet } from 'ethers'
 import { getDelegateTypedData, hashDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { type DelegatesDeleteDelegateV3ApiArg } from '@safe-global/store/gateway/delegates'
+import { type DelegatesDeleteDelegateV3ApiArg } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { keyStorageService } from '@/src/services/key-storage'
 import { getDelegateKeyId } from '@/src/utils/delegate'
 import { withGeneralRetry } from '@/src/utils/retry'
@@ -138,7 +138,7 @@ export const removeDelegatesFromBackend = async (
               await deleteDelegate({
                 chainId: chain.chainId,
                 delegateAddress,
-                deleteDelegateV2Dto: {
+                deleteDelegateV3Dto: {
                   delegator: ownerAddress,
                   signature,
                 },
