@@ -14,7 +14,6 @@ export type NotificationTracking = {
   }
 }
 
-// Restored for the web-tanstack Vite service worker (see #7568).
 export const getNotificationTrackingKey = (chainId: string, type: WebhookType): NotificationTrackingKey => {
   return `${chainId}:${type}`
 }
@@ -44,7 +43,6 @@ export const DEFAULT_WEBHOOK_TRACKING: NotificationTracking[NotificationTracking
   opened: 0,
 }
 
-// Restored for the web-tanstack Vite service worker (see #7568).
 export const cacheServiceWorkerPushNotificationTrackingEvent = (
   property: keyof NotificationTracking[NotificationTrackingKey],
   data: MessagePayload['data'],

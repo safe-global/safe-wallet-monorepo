@@ -2,24 +2,10 @@ import { readFileSync, existsSync, readdirSync, rmSync } from 'node:fs'
 import path from 'node:path'
 import type { Plugin } from 'vite'
 
-/**
- * Two build-time concerns for the single Vite service worker, kept together
- * because they both bracket the vite-plugin-pwa lifecycle:
- *
- * 1. Emit `offline.html` into the bundle. `publicDir` points at the legacy
- *    `apps/web/public`, and Vite supports only one public dir, so the offline
- *    shell is emitted from source instead of copied. Emitting in
- *    `generateBundle` guarantees it is on disk before vite-plugin-pwa computes
- *    its precache manifest in `closeBundle`.
- *
- * 2. Remove stale service-worker artifacts that `publicDir` copies verbatim
- *    from `apps/web/public` (R-PUBLICDIR): the tracked 0-byte
- *    `firebase-messaging-sw.js` stub and any leftover `workbox-*.js` from a
- *    local `apps/web` build. In injectManifest mode the Workbox runtime is
- *    bundled into `sw.js`, so a separate `workbox-*.js` is always stale. This
- *    runs in `closeBundle`; the plugin must be ordered AFTER `VitePWA` so the
- *    generated `sw.js` already exists.
- */
+// `publicDir` points at the legacy apps/web/public and Vite allows only one, so
+// the offline shell is emitted from source rather than copied, and stale service
+// workers that apps/web/public carries (the 0-byte firebase-messaging-sw.js stub,
+// leftover workbox-*.js from a local apps/web build) are deleted from the output.
 export function swAssets(offlineHtmlPath: string): Plugin {
   let outDir = 'dist'
 
@@ -47,14 +33,10 @@ export function swAssets(offlineHtmlPath: string): Plugin {
         }
       }
 
-      // The single worker is `sw.js`; the FCM logic is merged into it. The
-      // legacy `firebase-messaging-sw.js` must never ship (it would shadow our
-      // worker / trigger the dual-SW reload loop).
       remove('firebase-messaging-sw.js')
       remove('firebase-messaging-sw.js.map')
 
-      // injectManifest bundles Workbox into `sw.js`; any `workbox-*.js` in the
-      // output is a stale copy from `apps/web/public`.
+      // injectManifest bundles Workbox into sw.js, so any workbox-*.js is stale.
       if (existsSync(outDir)) {
         for (const entry of readdirSync(outDir)) {
           if (/^workbox-.*\.js(\.map)?$/.test(entry)) {

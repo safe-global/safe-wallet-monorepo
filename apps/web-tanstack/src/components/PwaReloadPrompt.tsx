@@ -4,14 +4,9 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 
-/**
- * Surfaces a non-blocking "new version available" toast when the service
- * worker has a waiting update (Decision 2 / D2-a). A wallet must never reload
- * mid-transaction, so the user controls the reload.
- *
- * `useRegisterSW` performs the single SW registration — `injectRegister` is
- * `false` in the VitePWA config so there is no competing auto-injected script.
- */
+// A wallet must never reload mid-transaction, so an SW update only surfaces a
+// toast and the user triggers the reload. useRegisterSW is the single SW
+// registration (injectRegister is false in the VitePWA config).
 const PwaReloadPrompt = (): null => {
   const dispatch = useAppDispatch()
   const {
@@ -29,8 +24,7 @@ const PwaReloadPrompt = (): null => {
         message: 'A new version of Safe is available.',
         variant: 'info',
         groupKey: 'pwa-update',
-        // Persist until the user acts — a wallet update prompt must not vanish
-        // on the default 5s auto-hide.
+        // Must not vanish on the default 5s auto-hide — the user has to act on it.
         autoHideDuration: null,
         link: {
           onClick: () => updateServiceWorker(true),

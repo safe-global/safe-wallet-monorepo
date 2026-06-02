@@ -61,7 +61,6 @@ export const _parseServiceWorkerWebhookPushNotification = async (
   }
 }
 
-// Restored for the web-tanstack Vite service worker (see #7568).
 export const shouldShowServiceWorkerPushNotification = async (payload: MessagePayload): Promise<boolean> => {
   if (!isWebhookEvent(payload.data)) {
     return true
@@ -84,7 +83,6 @@ export const shouldShowServiceWorkerPushNotification = async (payload: MessagePa
   return preferencesStore.preferences[type]
 }
 
-// Restored for the web-tanstack Vite service worker (see #7568).
 export const parseServiceWorkerPushNotification = async (
   payload: MessagePayload,
 ): Promise<({ title?: string; link?: string } & NotificationOptions) | undefined> => {

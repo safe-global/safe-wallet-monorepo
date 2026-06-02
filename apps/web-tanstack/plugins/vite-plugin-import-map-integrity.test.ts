@@ -8,7 +8,6 @@ const { sri, injectIntegrity } = __test__
 test('sri produces a sha384 base64 hash with the expected prefix', () => {
   const hash = sri('hello')
   assert.match(hash, /^sha384-[A-Za-z0-9+/]+={0,2}$/)
-  // Deterministic for known input.
   assert.equal(sri('hello'), sri('hello'))
   assert.notEqual(sri('hello'), sri('world'))
 })
@@ -30,7 +29,6 @@ test('import map contains only JS entries and precedes module loads', () => {
   assert.deepEqual(map.integrity, { '/assets/a.js': 'sha384-JS' })
   assert.ok(map.integrity['/assets/a.css'] === undefined, 'css excluded from import map')
 
-  // Import map must come before the first module script.
   assert.ok(out.indexOf('type="importmap"') < out.indexOf('type="module"'))
 })
 

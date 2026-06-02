@@ -1,12 +1,6 @@
-// Single Vite-built service worker for apps/web-tanstack.
-//
-// Phase 6A: Workbox precaching + runtime CacheFirst + offline fallback.
-// Phase 6B: Firebase Cloud Messaging background push (restores regression
-//           #7568 — the legacy worker was deleted as mis-flagged dead code).
-//
-// This is a SINGLE worker on purpose: registering a second
-// `firebase-messaging-sw.js` triggers the documented vite-plugin-pwa #777
-// reload loop and scope conflicts.
+// One worker handles both Workbox precaching/offline and Firebase Cloud
+// Messaging on purpose: a separate firebase-messaging-sw.js would race this
+// worker (vite-plugin-pwa #777) and fight over scope.
 //
 // Be careful what you import here — every import inflates the worker bundle.
 
@@ -29,7 +23,7 @@ import {
 import { cacheServiceWorkerPushNotificationTrackingEvent } from '@/services/push-notifications/tracking'
 
 declare const self: ServiceWorkerGlobalScope & {
-  // Injected by vite-plugin-pwa (injectManifest mode) at build time.
+  // Injected by vite-plugin-pwa at build time.
   __WB_MANIFEST: Array<{ url: string; revision: string | null } | string>
 }
 // Inlined by vite.config.ts `define`.
@@ -38,35 +32,28 @@ declare const __APP_VERSION__: string
 const OFFLINE_URL = 'offline.html'
 const SAFE_LOGO_ICON = '/images/safe-logo-green.png'
 
-// ---------------------------------------------------------------------------
-// Phase 6A — precaching, routing, offline fallback
-// ---------------------------------------------------------------------------
-
-// Precache the app shell. `self.__WB_MANIFEST` is the required injection point
-// for injectManifest mode.
+// self.__WB_MANIFEST is the injection point vite-plugin-pwa requires.
 precacheAndRoute(self.__WB_MANIFEST)
 cleanupOutdatedCaches()
 
-// SPA navigation fallback: serve the precached `index.html` shell for app
-// routes. The denylist keeps worker/asset URLs from being answered with HTML.
+// Serve the precached index.html shell for SPA routes; the denylist keeps
+// worker/asset URLs from being answered with HTML.
 const navigationRoute = new NavigationRoute(createHandlerBoundToURL('index.html'), {
   denylist: [
     /^\/sw\.js$/,
     /^\/workbox-/,
     /^\/firebase-messaging-sw\.js$/,
     /^\/manifest/,
-    // Anything that looks like a file (has an extension) is an asset, not a route.
+    // any path with a file extension is an asset, not a route
     /\/[^/?]+\.[^/]+$/,
   ],
 })
 registerRoute(navigationRoute)
 
-// CacheFirst for static assets — parity with legacy next-pwa runtimeCaching
-// (1 year / 1000 entries). Cache name is versioned so a new release starts a
-// fresh cache and `cleanupOutdatedCaches()` reclaims the old ones.
 registerRoute(
   ({ request }) => ['image', 'font', 'style', 'script'].includes(request.destination),
   new CacheFirst({
+    // Versioned so a new release starts a fresh cache; cleanupOutdatedCaches reclaims the old ones.
     cacheName: `static-${__APP_VERSION__}`,
     plugins: [
       new CacheableResponsePlugin({ statuses: [0, 200] }),
@@ -79,8 +66,6 @@ registerRoute(
   }),
 )
 
-// Cold offline navigation → precached, JS-free offline shell. Replicates the
-// legacy next-pwa `fallbacks.document` behaviour.
 setCatchHandler(async ({ request }) => {
   if (request.destination === 'document') {
     const offline = await matchPrecache(OFFLINE_URL)
@@ -91,22 +76,16 @@ setCatchHandler(async ({ request }) => {
   return Response.error()
 })
 
-// Let the page activate a waiting worker (D2-a: user-controlled reload prompt).
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting()
   }
 })
 
-// ---------------------------------------------------------------------------
-// Phase 6B — Firebase Cloud Messaging background push (restores #7568)
-// ---------------------------------------------------------------------------
-
 type NotificationData = MessagePayload['data'] & { link: string }
 
-// Registered synchronously (before any async FCM init) so it is attached the
-// moment the worker evaluates — Firebase also attaches a `notificationclick`
-// handler internally, and ours must run first.
+// Registered synchronously so it attaches before Firebase's own
+// notificationclick handler — ours must run first.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
   const data = event.notification.data as NotificationData | undefined
@@ -155,5 +134,5 @@ void isSupported()
     })
   })
   .catch(() => {
-    // FCM unsupported in this browser — precaching and offline still work.
+    // FCM unsupported here — precaching/offline still work.
   })

@@ -229,10 +229,8 @@ export default defineConfig(({ mode }) => {
           return null
         },
       },
-      // Phase 6A/6B — single Vite service worker (Workbox precache + offline
-      // fallback + Firebase Cloud Messaging) via injectManifest. The worker is
-      // bundled by Vite, so the `define` block above (process.env, __APP_VERSION__)
-      // and the `@/` resolve aliases apply to it.
+      // The worker is bundled by Vite, so the `define` block above (process.env,
+      // __APP_VERSION__) and the `@/` resolve aliases apply to it.
       VitePWA({
         strategies: 'injectManifest',
         srcDir: 'src/service-worker',
@@ -246,8 +244,7 @@ export default defineConfig(({ mode }) => {
         manifest: false,
         injectManifest: {
           globPatterns: ['**/*.{js,css,html,svg,png,ico,webp,woff2}'],
-          // Never precache the stale publicDir artifacts (R-PUBLICDIR), the
-          // generated worker itself, or sourcemaps.
+          // Exclude the stale publicDir service workers, the generated worker, and sourcemaps.
           globIgnores: ['firebase-messaging-sw.js', 'workbox-*.js', 'sw.js', '**/*.map'],
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         },
@@ -257,11 +254,8 @@ export default defineConfig(({ mode }) => {
           navigateFallback: 'index.html',
         },
       }),
-      // Emit the JS-free offline shell into the bundle and strip stale SW
-      // artifacts copied from apps/web/public. Ordered AFTER VitePWA so its
-      // cleanup (closeBundle) runs after sw.js is generated.
+      // Ordered after VitePWA so its cleanup runs once sw.js is generated.
       swAssets(path.resolve(__dirname, 'src/service-worker/offline.html')),
-      // Phase 6C — Subresource Integrity via native import-map integrity.
       importMapIntegrity(),
     ],
   }
