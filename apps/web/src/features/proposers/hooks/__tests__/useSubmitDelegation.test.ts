@@ -2,7 +2,7 @@ import { renderHook, act, waitFor } from '@/tests/test-utils'
 import { useSubmitDelegation } from '../useSubmitDelegation'
 import * as useChainIdModule from '@/hooks/useChainId'
 import * as useSafeAddressModule from '@/hooks/useSafeAddress'
-import * as delegatesExtendedQueries from '@safe-global/store/gateway/delegates'
+import * as delegatesQueries from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import * as utilsModule from '@/features/proposers/utils/utils'
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
@@ -49,21 +49,21 @@ describe('useSubmitDelegation', () => {
     mockDeleteDelegateV3 = jest.fn().mockReturnValue({ unwrap: jest.fn().mockResolvedValue({}) })
 
     jest
-      .spyOn(delegatesExtendedQueries, 'useDelegatesPostDelegateV3Mutation')
+      .spyOn(delegatesQueries, 'useDelegatesPostDelegateV3Mutation')
       .mockReturnValue([mockAddDelegateV3, { isLoading: false, reset: jest.fn() }] as unknown as ReturnType<
-        typeof delegatesExtendedQueries.useDelegatesPostDelegateV3Mutation
+        typeof delegatesQueries.useDelegatesPostDelegateV3Mutation
       >)
 
     jest
-      .spyOn(delegatesExtendedQueries, 'useDelegatesUpdateDelegateV3Mutation')
+      .spyOn(delegatesQueries, 'useDelegatesUpdateDelegateV3Mutation')
       .mockReturnValue([mockUpdateDelegateV3, { isLoading: false, reset: jest.fn() }] as unknown as ReturnType<
-        typeof delegatesExtendedQueries.useDelegatesUpdateDelegateV3Mutation
+        typeof delegatesQueries.useDelegatesUpdateDelegateV3Mutation
       >)
 
     jest
-      .spyOn(delegatesExtendedQueries, 'useDelegatesDeleteDelegateV3Mutation')
+      .spyOn(delegatesQueries, 'useDelegatesDeleteDelegateV3Mutation')
       .mockReturnValue([mockDeleteDelegateV3, { isLoading: false, reset: jest.fn() }] as unknown as ReturnType<
-        typeof delegatesExtendedQueries.useDelegatesDeleteDelegateV3Mutation
+        typeof delegatesQueries.useDelegatesDeleteDelegateV3Mutation
       >)
   })
 
@@ -109,7 +109,7 @@ describe('useSubmitDelegation', () => {
     expect(utilsModule.encodeEIP1271Signature).toHaveBeenCalledWith(parentSafeAddress, preparedSignature)
     expect(mockUpdateDelegateV3).toHaveBeenCalledWith({
       chainId,
-      createDelegateDto: {
+      updateDelegateV3Dto: {
         safe: safeAddress,
         delegate: delegateAddress,
         delegator: parentSafeAddress,
@@ -133,7 +133,7 @@ describe('useSubmitDelegation', () => {
     expect(mockDeleteDelegateV3).toHaveBeenCalledWith({
       chainId,
       delegateAddress,
-      deleteDelegateV2Dto: {
+      deleteDelegateV3Dto: {
         delegator: parentSafeAddress,
         safe: safeAddress,
         signature: encodedSignature,
