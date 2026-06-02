@@ -68,8 +68,8 @@ jest.mock('@/src/hooks/useNotificationCleanup', () => ({
   }),
 }))
 
-jest.mock('@safe-global/store/gateway/delegates', () => ({
-  delegatesApi: {
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
+  cgwApi: {
     useDelegatesDeleteDelegateV3Mutation: () => [jest.fn(), { isLoading: false }],
   },
 }))
