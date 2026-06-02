@@ -2,12 +2,25 @@ import { useEffect } from 'react'
 import { getSdkError } from '@walletconnect/utils'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { useStore } from 'react-redux'
+import { useToastController } from '@tamagui/toast'
+import { getEip155ChainId } from '@safe-global/utils/features/walletconnect/utils'
 import { useAppDispatch } from '@/src/store/hooks'
 import type { RootState } from '@/src/store'
 import { pushPending } from '../store/walletKitSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
+import { selectChainById } from '@/src/store/chains'
 import { isProposalSupported } from '../services/namespaces'
 import { SUPPORTED_NAMESPACE } from '../services/constants'
+
+// All eip155 chains the dApp can operate on — the union of its required and optional
+// namespaces. buildApprovedNamespaces intersects this with the Safe's chains, so a chain
+// the dApp never lists (whether required or optional) can never end up in the session.
+const getDappSupportedChains = (proposal: WalletKitTypes.SessionProposal): Set<string> => {
+  const { requiredNamespaces, optionalNamespaces } = proposal.params
+  return new Set(
+    [...Object.values(requiredNamespaces), ...Object.values(optionalNamespaces ?? {})].flatMap((ns) => ns.chains ?? []),
+  )
+}
 
 // Swallow stale-proposal errors from WalletKit (typical after a Metro reload / long
 // backgrounding — the relayer reconnects and replays backlogged messages that reference
@@ -29,6 +42,8 @@ const safeRejectSession = async (
  *  - No active Safe selected
  *  - Required namespace key is not `eip155`
  *  - Required chains include chains the active Safe is not deployed on
+ *  - The dApp does not support the active Safe's chain (with a toast, since the user
+ *    can fix it by switching the active Safe to a network the dApp supports)
  *
  * Compatible proposals are pushed to the slice so RequestSheetHost renders
  * SessionProposalSheet.
@@ -36,6 +51,7 @@ const safeRejectSession = async (
 export const useSessionProposalHandler = (walletKit: IWalletKit | null) => {
   const dispatch = useAppDispatch()
   const store = useStore<RootState>()
+  const toast = useToastController()
 
   useEffect(() => {
     if (!walletKit) {
@@ -70,6 +86,21 @@ export const useSessionProposalHandler = (walletKit: IWalletKit | null) => {
         })
         return
       }
+      // Auto-reject: the dApp doesn't support the active Safe's chain. buildApprovedNamespaces
+      // would otherwise silently drop that chain and approve a session the active Safe can't
+      // use at all (e.g. active Safe on Sepolia, dApp only on mainnet). Toast so the user knows
+      // to switch the active Safe to a network the dApp supports.
+      const activeChainCaip2 = getEip155ChainId(activeSafe.chainId)
+      if (!getDappSupportedChains(proposal).has(activeChainCaip2)) {
+        await safeRejectSession(walletKit, {
+          id: proposal.id,
+          reason: getSdkError('UNSUPPORTED_CHAINS'),
+        })
+        const dappName = proposal.params.proposer.metadata.name || 'This dApp'
+        const networkName = selectChainById(state, activeSafe.chainId)?.chainName ?? `chain ${activeSafe.chainId}`
+        toast.show(`${dappName} doesn't support ${networkName}`, { native: false, duration: 3000 })
+        return
+      }
 
       dispatch(pushPending({ kind: 'proposal', id: proposal.id, proposal }))
     }
@@ -77,7 +108,7 @@ export const useSessionProposalHandler = (walletKit: IWalletKit | null) => {
     return () => {
       walletKit.off('session_proposal', onProposal)
     }
-  }, [walletKit, dispatch, store])
+  }, [walletKit, dispatch, store, toast])
 }
 
 export const rejectProposal = async (walletKit: IWalletKit, id: number): Promise<void> => {
