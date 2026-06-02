@@ -19,9 +19,9 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { isEthSignWallet } from '@/utils/wallets'
 import {
   useDelegatesDeleteDelegateV1Mutation,
+  useDelegatesDeleteDelegateV3Mutation,
   type Delegate,
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
-import { useDelegatesDeleteDelegateV3Mutation } from '@safe-global/store/gateway/delegates'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import React, { useState } from 'react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
@@ -121,7 +121,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
         await deleteDelegateV3({
           chainId,
           delegateAddress: proposer.delegate,
-          deleteDelegateV2Dto: {
+          deleteDelegateV3Dto: {
             delegator: parentSafeAddress,
             safe: safeAddress,
             signature,
@@ -146,7 +146,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
           await deleteDelegateV3({
             chainId,
             delegateAddress: proposer.delegate,
-            deleteDelegateV2Dto: {
+            deleteDelegateV3Dto: {
               delegator: proposer.delegator,
               safe: safeAddress,
               signature,

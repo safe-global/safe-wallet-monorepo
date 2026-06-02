@@ -5,8 +5,8 @@ import {
   useDelegatesGetDelegatesV3Query,
   useLazyDelegatesGetDelegatesV3Query,
   type DelegatesGetDelegatesV3ApiArg,
-} from '@safe-global/store/gateway/delegates'
-import type { DelegatePage } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
+  type DelegatePage,
+} from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 
 const hasDelegate = ({ results }: DelegatePage, address: string | undefined) =>
   results.some((proposer) => proposer.delegate === address)
