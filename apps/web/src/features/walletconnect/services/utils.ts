@@ -1,18 +1,14 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ProposalTypes, SessionTypes } from '@walletconnect/types'
 import { EIP155, BlockedBridges, WarnedBridges, WarnedBridgeNames } from '../constants'
+import { getEip155ChainId } from '@safe-global/utils/features/walletconnect/utils'
 
-export const isPairingUri = (uri: string): boolean => {
-  return uri.startsWith('wc:')
-}
-
-export const getEip155ChainId = (chainId: string): string => {
-  return `${EIP155}:${chainId}`
-}
-
-export const stripEip155Prefix = (eip155Address: string): string => {
-  return eip155Address.split(':').pop() ?? ''
-}
+export {
+  isPairingUri,
+  getEip155ChainId,
+  stripEip155Prefix,
+  splitError,
+} from '@safe-global/utils/features/walletconnect/utils'
 
 export const getSupportedEip155ChainIds = (
   requiredNamespaces: ProposalTypes.RequiredNamespaces,
@@ -57,8 +53,4 @@ export const isWarnedBridge = (origin: string, name: string) => {
 
 export const getPeerName = (peer: SessionTypes.Struct['peer'] | ProposalTypes.Struct['proposer']): string => {
   return peer.metadata?.name || peer.metadata?.url || ''
-}
-
-export const splitError = (message: string): string[] => {
-  return message.split(/: (.+)/).slice(0, 2)
 }
