@@ -29,8 +29,8 @@ type Props = { safeTxHash: string }
  * If the txId on this screen isn't a WC request (e.g. native Send flow), the
  * outstanding lookup misses and the handler is a no-op — safe to mount unconditionally.
  *
- * Gated by NATIVE_WALLETCONNECT: when the feature is off, no listener is registered
- * at all (the WalletKit provider isn't mounted either).
+ * Gated by NATIVE_WALLETCONNECT: when the feature is off the listener is skipped, and
+ * WalletKitProvider is also absent from the tree (WalletKitGate renders children raw).
  */
 export const WcRejectOnBack: React.FC<Props> = ({ safeTxHash }) => {
   const navigation = useNavigation()
