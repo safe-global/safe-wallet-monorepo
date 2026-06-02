@@ -20,7 +20,6 @@ export const useActiveSafeBinding = (walletKit: IWalletKit | null) => {
     }
     const checksummed = getAddress(activeSafe.address)
     const chainCaip2 = eip155Caip2(activeSafe.chainId)
-    const account = `${chainCaip2}:${checksummed}`
 
     // Redux's view of sessions can lag the SDK's after a delete / relay-driven prune.
     // Calling updateSession on a topic the SDK no longer knows throws "session topic
@@ -32,14 +31,26 @@ export const useActiveSafeBinding = (walletKit: IWalletKit | null) => {
       if (!live[session.topic]) {
         return
       }
-      try {
-        const eip155 = session.namespaces[SUPPORTED_NAMESPACE]
-        if (!eip155) {
-          return
-        }
 
+      const eip155 = session.namespaces[SUPPORTED_NAMESPACE]
+      if (!eip155) {
+        return
+      }
+
+      // The active Safe can move to a chain this session never approved (the user switched
+      // networks after connecting). WalletConnect can't represent that — emitSessionEvent
+      // rejects a chainId outside the session namespaces — so skip update + emit entirely
+      // and leave the dApp on its last supported chain. It resyncs when the user returns to
+      // a Safe on a chain it supports. (Connecting on an unsupported chain is already blocked
+      // up front in useSessionProposalHandler.)
+      const sessionChains = eip155.chains ?? []
+      if (!sessionChains.includes(chainCaip2)) {
+        return
+      }
+
+      try {
         // 1) Update namespace accounts to the current active Safe address.
-        const nextAccounts = eip155.chains?.map((c) => `${c}:${checksummed}`) ?? [account]
+        const nextAccounts = sessionChains.map((c) => `${c}:${checksummed}`)
         await walletKit.updateSession({
           topic: session.topic,
           namespaces: {
