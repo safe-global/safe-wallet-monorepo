@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react'
-import { Alert } from 'react-native'
-import { Image, Text, YStack, XStack, Button } from 'tamagui'
+import { Image, Text, YStack, XStack } from 'tamagui'
+import { useToastController } from '@tamagui/toast'
 import type { WalletKitTypes, IWalletKit } from '@reown/walletkit'
+import { SafeButton } from '@/src/components/SafeButton'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { addSession, removePending } from '../store/walletKitSlice'
@@ -18,6 +19,7 @@ type Props = {
 
 export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending }) => {
   const dispatch = useAppDispatch()
+  const toast = useToastController()
   const activeSafe = useAppSelector(selectActiveSafe)
   // Chains the Safe is deployed on, in the SupportedChain[] shape buildSafeApprovedNamespaces expects.
   const supportedChains = useAppSelector((s) =>
@@ -61,7 +63,7 @@ export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending }) =>
       dispatch(addSession(session))
       close()
     } catch (e) {
-      Alert.alert('Failed to connect', e instanceof Error ? e.message : 'Unknown error')
+      toast.show(e instanceof Error ? e.message : 'Failed to connect', { native: false, duration: 3000 })
       // Always reject on failure so the dApp doesn't hang waiting for a response.
       try {
         await rejectProposal(walletKit, pending.id)
@@ -98,12 +100,19 @@ export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending }) =>
       </XStack>
       <ConnectionPermissionsPanel variant={variant} />
       <XStack gap="$3">
-        <Button flex={1} height="$8" borderWidth={1} onPress={onReject} disabled={busy}>
+        <SafeButton flex={1} outlined onPress={onReject} disabled={busy} testID="wc-proposal-reject">
           Reject
-        </Button>
-        <Button flex={1} height="$8" onPress={onConnect} disabled={busy}>
-          {busy ? 'Connecting…' : 'Connect'}
-        </Button>
+        </SafeButton>
+        <SafeButton
+          flex={1}
+          primary
+          onPress={onConnect}
+          loading={busy}
+          loadingText="Connecting…"
+          testID="wc-proposal-connect"
+        >
+          Connect
+        </SafeButton>
       </XStack>
     </YStack>
   )
