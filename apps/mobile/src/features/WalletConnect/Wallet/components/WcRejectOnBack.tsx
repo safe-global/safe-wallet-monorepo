@@ -8,6 +8,7 @@ import type { RootState } from '@/src/store'
 import { selectDraftByHash } from '@/src/store/draftTxSlice'
 import { getWalletKit } from '../walletKit'
 import { clearOutstandingRequest, selectOutstandingRequestByHash } from '../store/walletKitSlice'
+import { logWalletKitError } from '../utils/errors'
 
 type Props = { safeTxHash: string }
 
@@ -52,7 +53,7 @@ export const WcRejectOnBack: React.FC<Props> = ({ safeTxHash }) => {
             response: formatJsonRpcError(outstanding.id, getSdkError('USER_REJECTED').message),
           })
         } catch (e) {
-          console.log('[walletKit] reject-on-back failed', e)
+          logWalletKitError('reject-on-back failed', e)
         }
         dispatch(clearOutstandingRequest(safeTxHash))
       })()

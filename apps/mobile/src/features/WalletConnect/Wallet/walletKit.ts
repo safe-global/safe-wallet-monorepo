@@ -4,6 +4,7 @@ import { WalletKit, type IWalletKit } from '@reown/walletkit'
 import { createMmkvStorage } from '../shared/mmkvStorageAdapter'
 import { REOWN_PROJECT_ID } from '../shared/projectId'
 import { SAFE_WALLET_METADATA } from '../shared/metadata'
+import { BENIGN_WALLETKIT_PATTERNS } from './utils/errors'
 
 const WALLET_MMKV_ID = 'walletkit'
 
@@ -12,15 +13,10 @@ const WALLET_MMKV_ID = 'walletkit'
 // instance no longer knows about. These are benign — the dApp retries cleanly — but
 // they pollute LogBox during development. Suppress the on-device toast layer here.
 // (LogBox is a no-op in production. The JS DevTools console will still show them.)
-LogBox.ignoreLogs([
-  'emitting session_update',
-  'No matching key. session:',
-  'No matching key. history:',
-  'No matching key. proposal id:',
-  // The bundled SDK uses the contracted form ("doesn't"); older versions emit
-  // "does not". Match either via regex so we don't have to chase phrasing changes.
-  /(session|pairing) topic (doesn't|does not) exist/,
-])
+//
+// Single source of truth for what counts as "benign" is utils/errors.ts; the same list
+// drives `isBenignWalletKitError` so log-level classification stays consistent.
+LogBox.ignoreLogs(BENIGN_WALLETKIT_PATTERNS)
 
 // Dual-package hazard: @walletconnect/core resolves to a newer semver in the mobile
 // workspace than the version bundled inside @reown/walletkit's own node_modules.
