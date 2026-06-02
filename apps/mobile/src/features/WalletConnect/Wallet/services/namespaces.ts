@@ -1,6 +1,8 @@
 import { buildApprovedNamespaces } from '@walletconnect/utils'
 import type { SessionTypes, ProposalTypes } from '@walletconnect/types'
 import { getAddress } from 'ethers'
+import { getEip155ChainId, chainIdToHex } from '@safe-global/utils/features/walletconnect/utils'
+import { buildAtomicCapabilities, type AtomicCapability } from '@safe-global/utils/features/walletconnect/eip5792'
 import { WALLET_SUPPORTED_METHODS, EVENTS_TO_EMIT, SUPPORTED_NAMESPACE } from './constants'
 
 export type SupportedChain = {
@@ -25,7 +27,7 @@ export const buildSafeApprovedNamespaces = ({
   supportedChains,
 }: BuildNamespacesInput): SessionTypes.Namespaces => {
   const checksummed = getAddress(safeAddress)
-  const caip2Chains = supportedChains.map((c) => `${SUPPORTED_NAMESPACE}:${c.chainId}`)
+  const caip2Chains = supportedChains.map((c) => getEip155ChainId(c.chainId))
   const accounts = caip2Chains.map((c) => `${c}:${checksummed}`)
 
   return buildApprovedNamespaces({
@@ -49,11 +51,6 @@ export const buildSafeApprovedNamespaces = ({
  * ProposalTypes.SessionProperties is `Record<string, string>` — values MUST be strings,
  * so the capability map is JSON-stringified.
  */
-type PerChainCapability = {
-  atomic: { status: 'supported' }
-  atomicBatch: { supported: true }
-}
-
 export const buildSafeSessionProperties = ({
   safeAddress,
   supportedChains,
@@ -62,19 +59,8 @@ export const buildSafeSessionProperties = ({
   supportedChains: SupportedChain[]
 }): ProposalTypes.SessionProperties => {
   const checksummed = getAddress(safeAddress)
-  // Advertise atomic-batch support under both shapes:
-  //   - EIP-5792 current spec: `atomic.status: 'supported'` — what real-world dApps
-  //     (CowSwap, etc.) check for.
-  //   - Older draft: `atomicBatch.supported: true` (kept for dApps still on the old shape)
-  const capabilities: Record<string, Record<string, PerChainCapability>> = {
-    [checksummed]: {},
-  }
-  for (const c of supportedChains) {
-    const chainIdHex = '0x' + Number(c.chainId).toString(16)
-    capabilities[checksummed][chainIdHex] = {
-      atomic: { status: 'supported' },
-      atomicBatch: { supported: true },
-    }
+  const capabilities: Record<string, Record<string, AtomicCapability>> = {
+    [checksummed]: buildAtomicCapabilities(supportedChains.map((c) => chainIdToHex(c.chainId))),
   }
   return {
     atomic: JSON.stringify({ status: 'supported' }),

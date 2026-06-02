@@ -1,3 +1,5 @@
+import { EIP155 } from '@safe-global/utils/features/walletconnect/constants'
+
 // EIP-1193 / WC namespace methods this wallet supports.
 export const WALLET_SUPPORTED_METHODS = [
   'eth_accounts',
@@ -45,4 +47,4 @@ export const REJECTED_SIGNING_METHODS = [
 export const EVENTS_TO_EMIT = ['chainChanged', 'accountsChanged'] as const
 
 // WalletConnect namespaces this wallet supports.
-export const SUPPORTED_NAMESPACE = 'eip155' as const
+export const SUPPORTED_NAMESPACE = EIP155

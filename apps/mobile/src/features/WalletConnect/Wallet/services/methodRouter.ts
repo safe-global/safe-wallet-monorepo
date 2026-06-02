@@ -4,6 +4,7 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import type { AppDispatch, RootState } from '@/src/store'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { buildAtomicCapabilities } from '@safe-global/utils/features/walletconnect/eip5792'
 import { proxyReadOnlyCall, isReadOnlyMethod } from './readRpcProxy'
 import { REJECTED_SIGNING_METHODS, SUPPORTED_NAMESPACE } from './constants'
 
@@ -115,15 +116,7 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     if (chainsToReport.length === 0) {
       return formatJsonRpcResult(id, {})
     }
-    // Advertise atomic-batch support under both shapes:
-    //   - EIP-5792 current spec: `atomic.status: 'supported'` — what real-world dApps check for.
-    //   - Older draft: `atomicBatch.supported: true` (kept for dApps still on the old shape)
-    const cap = { atomic: { status: 'supported' }, atomicBatch: { supported: true } }
-    const result: Record<string, typeof cap> = {}
-    for (const c of chainsToReport) {
-      result[c] = cap
-    }
-    return formatJsonRpcResult(id, result)
+    return formatJsonRpcResult(id, buildAtomicCapabilities(chainsToReport))
   }
 
   // Calls status / show.
