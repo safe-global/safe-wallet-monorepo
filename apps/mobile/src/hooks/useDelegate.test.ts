@@ -73,8 +73,8 @@ jest.mock('@/src/store/chains', () => ({
 }))
 
 // Import the real addDelegate, no need to mock it
-jest.mock('@safe-global/store/gateway/delegates', () => ({
-  delegatesApi: {
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
+  cgwApi: {
     useDelegatesPostDelegateV3Mutation: () => [mockRegisterDelegate],
   },
 }))
