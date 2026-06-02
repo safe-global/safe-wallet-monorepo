@@ -29,6 +29,9 @@ const PwaReloadPrompt = (): null => {
         message: 'A new version of Safe is available.',
         variant: 'info',
         groupKey: 'pwa-update',
+        // Persist until the user acts — a wallet update prompt must not vanish
+        // on the default 5s auto-hide.
+        autoHideDuration: null,
         link: {
           onClick: () => updateServiceWorker(true),
           title: 'Reload',
