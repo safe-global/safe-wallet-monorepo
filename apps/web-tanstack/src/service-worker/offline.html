@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
+    <title>Safe – Offline</title>
+    <!--
+      Kept deliberately JS-free and self-contained so it renders even when the
+      main bundle is uncached. Precached by the service worker and served on a
+      failed cold navigation (Workbox setCatchHandler → matchPrecache).
+    -->
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 24px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        text-align: center;
+        background: #f4f4f4;
+        color: #121312;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #121312;
+          color: #ffffff;
+        }
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin: 0;
+      }
+      p {
+        max-width: 32rem;
+        margin: 0;
+        opacity: 0.8;
+        line-height: 1.5;
+      }
+      img {
+        width: 64px;
+        height: 64px;
+      }
+    </style>
+  </head>
+  <body>
+    <img src="/images/safe-logo-green.png" alt="Safe" />
+    <h1>You're offline</h1>
+    <p>
+      Safe needs an internet connection to load your accounts and transactions. Check your connection and try again.
+    </p>
+  </body>
+</html>

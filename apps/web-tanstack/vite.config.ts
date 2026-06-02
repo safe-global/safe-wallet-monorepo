@@ -1,4 +1,5 @@
 import { defineConfig, loadEnv } from 'vite'
+import { VitePWA } from 'vite-plugin-pwa'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import svgr from 'vite-plugin-svgr'
@@ -10,6 +11,8 @@ import remarkGfm from 'remark-gfm'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
+import { swAssets } from './plugins/vite-plugin-sw-assets'
+import { importMapIntegrity } from './plugins/vite-plugin-import-map-integrity'
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 const webRoot = path.resolve(__dirname, '../web')
@@ -226,6 +229,40 @@ export default defineConfig(({ mode }) => {
           return null
         },
       },
+      // Phase 6A/6B — single Vite service worker (Workbox precache + offline
+      // fallback + Firebase Cloud Messaging) via injectManifest. The worker is
+      // bundled by Vite, so the `define` block above (process.env, __APP_VERSION__)
+      // and the `@/` resolve aliases apply to it.
+      VitePWA({
+        strategies: 'injectManifest',
+        srcDir: 'src/service-worker',
+        filename: 'sw.ts',
+        registerType: 'prompt',
+        // PwaReloadPrompt's useRegisterSW performs the single registration; no
+        // competing auto-injected script.
+        injectRegister: false,
+        // Reuse the existing safe.webmanifest (linked via MetaTags); don't let
+        // the plugin generate/inject its own manifest.
+        manifest: false,
+        injectManifest: {
+          globPatterns: ['**/*.{js,css,html,svg,png,ico,webp,woff2}'],
+          // Never precache the stale publicDir artifacts (R-PUBLICDIR), the
+          // generated worker itself, or sourcemaps.
+          globIgnores: ['firebase-messaging-sw.js', 'workbox-*.js', 'sw.js', '**/*.map'],
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        },
+        devOptions: {
+          enabled: true,
+          type: 'module',
+          navigateFallback: 'index.html',
+        },
+      }),
+      // Emit the JS-free offline shell into the bundle and strip stale SW
+      // artifacts copied from apps/web/public. Ordered AFTER VitePWA so its
+      // cleanup (closeBundle) runs after sw.js is generated.
+      swAssets(path.resolve(__dirname, 'src/service-worker/offline.html')),
+      // Phase 6C — Subresource Integrity via native import-map integrity.
+      importMapIntegrity(),
     ],
   }
 })
