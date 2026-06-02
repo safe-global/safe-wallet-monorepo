@@ -123,6 +123,7 @@ todos/*
 /docs/plans/
 /docs/todos/
 /docs/brainstorms/
+/docs/migration/
 
 .codemod
 .serena
