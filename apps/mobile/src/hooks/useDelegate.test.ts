@@ -13,12 +13,17 @@ const mockUseAppSelector = jest.fn()
 const mockStorePrivateKey = jest.fn()
 const mockRegisterDelegate = jest.fn()
 
-// Mock ethers Wallet
+// Mock ethers Wallet. Signing now goes through `signingKey.sign()` on the raw
+// EIP-712 digest, and `hashDelegateTypedData` (real impl) calls these ethers
+// helpers — stub them so the digest computation doesn't blow up under the mock.
 jest.mock('ethers', () => {
   return {
     Wallet: class {
       address = OWNER_ADDRESS
       privateKey = TEST_PRIVATE_KEY
+      signingKey = {
+        sign: () => ({ serialized: 'mockedSignature' }),
+      }
 
       static createRandom() {
         return {
@@ -26,12 +31,12 @@ jest.mock('ethers', () => {
           privateKey: '0xDelegatePrivateKey123',
         }
       }
-
-      signTypedData() {
-        return 'mockedSignature'
-      }
     },
     verifyMessage: () => 'mockedVerification',
+    ZeroAddress: '0x0000000000000000000000000000000000000000',
+    TypedDataEncoder: { hashStruct: () => `0x${'00'.repeat(32)}` },
+    concat: () => '0x',
+    keccak256: () => `0x${'00'.repeat(32)}`,
   }
 })
 
@@ -67,9 +72,9 @@ jest.mock('@/src/store/chains', () => ({
 }))
 
 // Import the real addDelegate, no need to mock it
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
-  cgwApi: {
-    useDelegatesPostDelegateV2Mutation: () => [mockRegisterDelegate],
+jest.mock('@safe-global/store/gateway/delegates', () => ({
+  delegatesApi: {
+    useDelegatesPostDelegateV3Mutation: () => [mockRegisterDelegate],
   },
 }))
 
