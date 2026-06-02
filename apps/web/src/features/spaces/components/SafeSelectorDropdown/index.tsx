@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/utils/cn'
@@ -8,8 +8,28 @@ import InlineRetryError from '@/components/common/InlineRetryError'
 import { useSafeSelectorState } from './hooks/useSafeSelectorState'
 import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
 import { getSafeSelectorClassVariants } from './utils/classVariants'
-import type { SafeSelectorDropdownProps } from './types'
+import type { SafeItemData, SafeSelectorDropdownProps } from './types'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+
+// Builds a minimal trigger item from `${chainId}:${address}` so the dropdown stays usable
+// when the current safe isn't in `items` (e.g. safe-info load failure, navigated to a safe
+// outside the current space). Balance/threshold/owners stay in their loading state — we
+// don't know them. Returns null if the id isn't parseable.
+function buildFallbackSafeItem(selectedItemId: string | undefined): SafeItemData | null {
+  if (!selectedItemId) return null
+  const colonIndex = selectedItemId.indexOf(':')
+  if (colonIndex <= 0) return null
+  return {
+    id: selectedItemId,
+    name: '',
+    address: selectedItemId.slice(colonIndex + 1),
+    threshold: 0,
+    owners: 0,
+    balance: '',
+    isLoading: true,
+    chains: [{ chainId: selectedItemId.slice(0, colonIndex), chainName: '', chainLogoUri: null, shortName: '' }],
+  }
+}
 
 function SafeSelectorDropdownSkeleton() {
   return (
@@ -38,6 +58,10 @@ function SafeSelectorDropdown({
   footer,
 }: SafeSelectorDropdownProps) {
   const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
+  // When items are loaded but none match `selectedItemId`, we'll render a fallback trigger;
+  // force the dropdown openable so the user can switch even if items has just one entry.
+  const willUseFallbackTrigger =
+    items.length > 0 && Boolean(selectedItemId) && !items.some((item) => item.id === selectedItemId)
   const isDisabled = useIsSafeBarControlDisabled()
   const {
     dropdownOpen,
@@ -47,7 +71,12 @@ function SafeSelectorDropdown({
     handleOpenChange,
     handleSafeChange,
     closeDropdown,
-  } = useSafeSelectorState({ items, selectedItemId, onItemSelect, forceOpenable: hasDropdownContent })
+  } = useSafeSelectorState({
+    items,
+    selectedItemId,
+    onItemSelect,
+    forceOpenable: hasDropdownContent || willUseFallbackTrigger,
+  })
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
@@ -55,12 +84,24 @@ function SafeSelectorDropdown({
   const safeSelectValue = selectedItemId ?? selectedItem?.id
   const safeItemSelect = onItemSelect ?? (() => {})
 
-  if (!selectedItem || !mounted) {
+  // When items are loaded but no entry matches `selectedItemId` (current safe failed to
+  // load, or navigated outside the current space), keep the dropdown usable by rendering
+  // a degraded trigger built from the URL's `${chainId}:${address}`.
+  const fallbackSelectedItem = useMemo(
+    () => (selectedItem ? null : buildFallbackSafeItem(selectedItemId)),
+    [selectedItem, selectedItemId],
+  )
+  const triggerItem = selectedItem ?? fallbackSelectedItem
+
+  if (!mounted || !triggerItem) {
     if (isError && mounted) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
-    // Mismatch (loaded, but no item for selectedItemId). No retry: refetch can't fix it.
-    if (mounted && !isLoading && items.length > 0) {
-      return <InlineRetryError message="This Safe is not available on the selected network" />
-    }
+    return <SafeSelectorDropdownSkeleton />
+  }
+
+  // Items haven't arrived yet — surface the load error / skeleton instead of an empty
+  // dropdown that can't switch anywhere.
+  if (items.length === 0) {
+    if (isError) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
     return <SafeSelectorDropdownSkeleton />
   }
 
@@ -83,7 +124,7 @@ function SafeSelectorDropdown({
         data-testid="open-safes-icon"
       >
         <SelectValue>
-          <SafeSelectorTriggerContent selectedItem={selectedItem} selectedChainId={selectedChainId} />
+          <SafeSelectorTriggerContent selectedItem={triggerItem} selectedChainId={selectedChainId} />
         </SelectValue>
       </SelectTrigger>
 
