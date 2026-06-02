@@ -56,12 +56,12 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const { SelectSafeModal } = useLoadFeature(SpacesFeature)
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
   const isRequireLoginEnabled = useIsRequireLoginEnabled() === true
-  // /welcome/spaces is the canonical login page when the require-login gate is
-  // on (and the Topbar's URL-derived hooks then add SSR hydration noise on top
-  // of being pointless). When the gate is off the page is the legacy Spaces
-  // list and keeps its Topbar.
-  const hideHeader =
-    NO_HEADER_ROUTES.includes(pathname) || (isRequireLoginEnabled && pathname === AppRoutes.welcome.spaces)
+  // The login page (`/welcome/spaces` or `/`) is the canonical login surface
+  // when the require-login gate is on (and the Topbar's URL-derived hooks then
+  // add SSR hydration noise on top of being pointless). When the gate is off
+  // the page is the legacy Spaces list and keeps its Topbar.
+  const isLoginPath = pathname === AppRoutes.welcome.spaces || pathname === AppRoutes.index
+  const hideHeader = NO_HEADER_ROUTES.includes(pathname) || (isRequireLoginEnabled && isLoginPath)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
   const urlSafeAddress = useSafeAddressFromUrl()
@@ -86,11 +86,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   // The login page, onboarding flow and always-public pages stay rendered.
   const isGateBlocking = useIsAuthGateBlocking()
   const isGateBlockedRoute =
-    isGateBlocking &&
-    !isAlwaysPublic(pathname) &&
-    pathname !== AppRoutes.welcome.spaces &&
-    !isOnboardingRoute &&
-    !isStaticPage
+    isGateBlocking && !isAlwaysPublic(pathname) && !isLoginPath && !isOnboardingRoute && !isStaticPage
   if (isGateBlockedRoute) {
     return <></>
   }
