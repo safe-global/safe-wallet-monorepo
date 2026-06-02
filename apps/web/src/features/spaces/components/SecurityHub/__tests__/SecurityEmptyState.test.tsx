@@ -1,5 +1,12 @@
 import { render, screen } from '@/tests/test-utils'
+import { fireEvent } from '@testing-library/react'
 import SecurityEmptyState from '../components/SecurityEmptyState/SecurityEmptyState'
+
+jest.mock('@/features/hypernative/components/HnSignupFlow', () => ({
+  __esModule: true,
+  HnSignupFlow: ({ open }: { open: boolean }) =>
+    open ? <div data-testid="mock-hn-signup-flow">Hypernative signup</div> : null,
+}))
 
 jest.mock('@/features/spaces/components/AddAccounts', () => {
   const MockAddAccounts = ({ buttonLabel }: { buttonLabel?: string }) => (
@@ -37,5 +44,15 @@ describe('SecurityEmptyState', () => {
     render(<SecurityEmptyState />)
 
     expect(screen.getByTestId('security-empty-state')).toBeInTheDocument()
+  })
+
+  it('opens the Hypernative signup flow when the Hypernative card is clicked', () => {
+    render(<SecurityEmptyState />)
+
+    expect(screen.queryByTestId('mock-hn-signup-flow')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('Hypernative Guardian'))
+
+    expect(screen.getByTestId('mock-hn-signup-flow')).toBeInTheDocument()
   })
 })
