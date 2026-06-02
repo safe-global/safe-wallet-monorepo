@@ -4,9 +4,9 @@ import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { useSign } from './useSign/useSign'
 import { selectAllChains } from '@/src/store/chains'
 import { addDelegate } from '@/src/store/delegatesSlice'
-import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
+import { delegatesApi } from '@safe-global/store/gateway/delegates'
 import Logger from '@/src/utils/logger'
-import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
+import { getDelegateTypedData, hashDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { getDelegateKeyId } from '@/src/utils/delegate'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
@@ -33,7 +33,7 @@ export const useDelegate = (): UseDelegateProps => {
   const allChains = useAppSelector(selectAllChains)
 
   // Access API endpoints
-  const [registerDelegate] = cgwApi.useDelegatesPostDelegateV2Mutation()
+  const [registerDelegate] = delegatesApi.useDelegatesPostDelegateV3Mutation()
 
   const createDelegate = useCallback(
     async (ownerPrivateKey: string, safe: string | null = null) => {
@@ -75,11 +75,10 @@ export const useDelegate = (): UseDelegateProps => {
               await new Promise((resolve) => setTimeout(resolve, 300 * index))
             }
 
-            // Generate typed data for this chain
-            const typedData = getDelegateTypedData(chain.chainId, delegateWallet.address)
+            const typedData = getDelegateTypedData(chain.chainId, delegateWallet.address, safe)
 
-            // Sign the message with the owner's wallet
-            const signature = await ownerWallet.signTypedData(typedData.domain, typedData.types, typedData.message)
+            // Sign the raw EIP-712 digest — ethers rejects the non-standard `safe` domain key
+            const signature = ownerWallet.signingKey.sign(hashDelegateTypedData(typedData)).serialized
 
             // Register delegate on the backend
             await registerDelegate({
