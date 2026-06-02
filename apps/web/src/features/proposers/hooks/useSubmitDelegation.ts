@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react'
 import {
-  useDelegatesPostDelegateV2Mutation,
-  useDelegatesDeleteDelegateV2Mutation,
-} from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
+  useDelegatesPostDelegateV3Mutation,
+  useDelegatesDeleteDelegateV3Mutation,
+} from '@safe-global/store/gateway/delegates'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { encodeEIP1271Signature } from '@/features/proposers/utils/utils'
 import { isTotpValid } from '@/features/proposers/utils/totp'
@@ -18,8 +18,8 @@ import type { PendingDelegation } from '@/features/proposers/types'
 export const useSubmitDelegation = () => {
   const chainId = useChainId()
   const safeAddress = useSafeAddress()
-  const [addDelegateV2] = useDelegatesPostDelegateV2Mutation()
-  const [deleteDelegateV2] = useDelegatesDeleteDelegateV2Mutation()
+  const [addDelegateV3] = useDelegatesPostDelegateV3Mutation()
+  const [deleteDelegateV3] = useDelegatesDeleteDelegateV3Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<Error>()
 
@@ -43,7 +43,7 @@ export const useSubmitDelegation = () => {
         )
 
         if (delegation.action === 'add') {
-          await addDelegateV2({
+          await addDelegateV3({
             chainId,
             createDelegateDto: {
               safe: safeAddress,
@@ -54,7 +54,7 @@ export const useSubmitDelegation = () => {
             },
           }).unwrap()
         } else if (delegation.action === 'remove') {
-          await deleteDelegateV2({
+          await deleteDelegateV3({
             chainId,
             delegateAddress: delegation.delegateAddress,
             deleteDelegateV2Dto: {
@@ -72,7 +72,7 @@ export const useSubmitDelegation = () => {
         setIsSubmitting(false)
       }
     },
-    [chainId, safeAddress, addDelegateV2, deleteDelegateV2],
+    [chainId, safeAddress, addDelegateV3, deleteDelegateV3],
   )
 
   return { submitDelegation, isSubmitting, submitError }
