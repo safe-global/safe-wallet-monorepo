@@ -6036,6 +6036,213 @@
         ]
       }
     },
+    "/v3/chains/{chainId}/delegates": {
+      "get": {
+        "description": "Retrieves a paginated list of delegates for a specific chain with optional filtering by Safe, delegate, delegator, or label.",
+        "operationId": "delegatesGetDelegatesV3",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where delegates are registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "label",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate label or name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegator",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegator address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safe",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Safe address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of delegates retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelegatePage"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get delegates",
+        "tags": [
+          "delegates"
+        ]
+      },
+      "post": {
+        "description": "Creates a new delegate relationship between a Safe and a delegate address. Requires proper authorization signature.",
+        "operationId": "delegatesPostDelegateV3",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the delegate will be registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Delegate creation data including Safe address, delegate address, label, and authorization signature",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDelegateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Delegate created successfully"
+          },
+          "400": {
+            "description": "Invalid delegate data, signature, or unauthorized creation attempt"
+          }
+        },
+        "summary": "Create delegate",
+        "tags": [
+          "delegates"
+        ]
+      },
+      "patch": {
+        "description": "Updates an existing delegate relationship (e.g. the delegate label). Requires proper authorization signature.",
+        "operationId": "delegatesUpdateDelegateV3",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the delegate is registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Delegate update data including Safe address, delegate address, delegator, label, and authorization signature",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDelegateV3Dto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Delegate updated successfully"
+          },
+          "400": {
+            "description": "Invalid delegate data, signature, or unauthorized update attempt"
+          }
+        },
+        "summary": "Update delegate",
+        "tags": [
+          "delegates"
+        ]
+      }
+    },
+    "/v3/chains/{chainId}/delegates/{delegateAddress}": {
+      "delete": {
+        "description": "Removes a delegate relationship for a specific delegate address. Requires proper authorization signature.",
+        "operationId": "delegatesDeleteDelegateV3",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the delegate is registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegateAddress",
+            "required": true,
+            "in": "path",
+            "description": "Delegate address to remove (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Signature and data proving authorization to delete the delegate",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteDelegateV3Dto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Delegate deleted successfully"
+          },
+          "400": {
+            "description": "Invalid signature or unauthorized deletion attempt"
+          }
+        },
+        "summary": "Delete delegate",
+        "tags": [
+          "delegates"
+        ]
+      }
+    },
     "/v1/register/notifications": {
       "post": {
         "deprecated": true,
@@ -14866,6 +15073,52 @@
         },
         "required": [
           "signature"
+        ]
+      },
+      "DeleteDelegateV3Dto": {
+        "type": "object",
+        "properties": {
+          "delegator": {
+            "type": "string",
+            "nullable": true
+          },
+          "safe": {
+            "type": "string",
+            "nullable": true
+          },
+          "signature": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "signature"
+        ]
+      },
+      "UpdateDelegateV3Dto": {
+        "type": "object",
+        "properties": {
+          "safe": {
+            "type": "string",
+            "nullable": true
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "delegator": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "delegate",
+          "delegator",
+          "signature",
+          "label"
         ]
       },
       "SafeRegistration": {
