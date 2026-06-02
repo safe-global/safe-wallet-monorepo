@@ -32,6 +32,7 @@ interface SafeItemCardProps {
   isSimilar?: boolean
   onClose: () => void
   openSafeTrackingLabel?: OVERVIEW_LABELS
+  hidePinControls?: boolean
 }
 
 const SafeItemCard = ({
@@ -39,6 +40,7 @@ const SafeItemCard = ({
   isSimilar,
   onClose,
   openSafeTrackingLabel = OVERVIEW_LABELS.top_bar,
+  hidePinControls = false,
 }: SafeItemCardProps) => {
   const dispatch = useAppDispatch()
   const currency = useAppSelector(selectCurrency)
@@ -107,7 +109,7 @@ const SafeItemCard = ({
           {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
         </div>
         <div className="flex items-center gap-1 min-w-0">
-          <ShortAddressWithTooltip address={safeItem.address} />
+          <ShortAddressWithTooltip address={safeItem.address} isSimilar={isSimilar} />
           <CopyAddressButton address={safeItem.address} />
         </div>
         {isSimilar && <SimilarityBadge />}
@@ -147,21 +149,25 @@ const SafeItemCard = ({
         <div className={mainContentClasses}>{mainContent}</div>
       )}
 
-      {/* Pin/Unpin toggle */}
-      <button
-        type="button"
-        onClick={handleTogglePin}
-        className="shrink-0 rounded p-1 hover:bg-muted"
-        aria-label={safeItem.isPinned ? 'Unpin safe' : 'Pin safe'}
-        data-testid="bookmark-icon"
-      >
-        <Bookmark
-          className={`size-4 ${safeItem.isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
-        />
-      </button>
+      {!hidePinControls && (
+        <>
+          {/* Pin/Unpin toggle */}
+          <button
+            type="button"
+            onClick={handleTogglePin}
+            className="shrink-0 rounded p-1 hover:bg-muted"
+            aria-label={safeItem.isPinned ? 'Unpin safe' : 'Pin safe'}
+            data-testid="bookmark-icon"
+          >
+            <Bookmark
+              className={`size-4 ${safeItem.isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
+            />
+          </button>
 
-      {/* Context menu */}
-      <PinnedSafeContextMenu address={safeItem.address} chainId={safeItem.chainId} name={displayName} />
+          {/* Context menu */}
+          <PinnedSafeContextMenu address={safeItem.address} chainId={safeItem.chainId} name={displayName} />
+        </>
+      )}
     </div>
   )
 }

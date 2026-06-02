@@ -103,4 +103,23 @@ describe('MultiSafeItemCard', () => {
     expect(screen.getByTestId('sub-item-1')).toBeInTheDocument()
     expect(screen.getByTestId('sub-item-100')).toBeInTheDocument()
   })
+
+  it('renders the pin/unpin button by default', () => {
+    render(<MultiSafeItemCard item={buildMultiItem()} onClose={noopClose} />)
+
+    expect(screen.getByRole('button', { name: /pin safe/i })).toBeInTheDocument()
+  })
+
+  it('hides the pin/unpin button when hidePinControls is set (space-safe context)', () => {
+    render(<MultiSafeItemCard item={buildMultiItem()} onClose={noopClose} hidePinControls />)
+
+    expect(screen.queryByRole('button', { name: /pin safe/i })).not.toBeInTheDocument()
+  })
+
+  it('renders the full address with bolded first/last 4 hex chars when flagged as similar', () => {
+    const { container } = render(<MultiSafeItemCard item={buildMultiItem()} isSimilar onClose={noopClose} />)
+
+    const bolded = Array.from(container.querySelectorAll('b')).map((el) => el.textContent)
+    expect(bolded).toEqual(expect.arrayContaining(['1111', '1111']))
+  })
 })
