@@ -15,7 +15,6 @@ import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
-import { getDeterministicColor } from '@/features/spaces'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT, SPACE_SELECTOR_NAME_MAX_LENGTH, SPACES_LIMIT } from '../../constants'
 import css from '../../styles.module.css'
@@ -31,6 +30,7 @@ import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_G
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AdminOnlyWorkspaceTooltip } from '@/features/spaces/components/AdminOnlyWorkspaceTooltip'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { getDeterministicColor } from '@/utils/colors'
 
 export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this workspace'
 

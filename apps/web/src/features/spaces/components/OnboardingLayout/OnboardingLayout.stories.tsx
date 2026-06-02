@@ -23,7 +23,7 @@ export const Step1WithSwitcherHighlight: Story = {
     main: (
       <>
         <StepCounter currentStep={1} totalSteps={4} />
-        <Typography variant="h2">Create a Space</Typography>
+        <Typography variant="h2">Create a Workspace</Typography>
       </>
     ),
     footer: (
@@ -71,7 +71,7 @@ export const Step4Done: Story = {
         <Button variant="outline" size="lg">
           Back
         </Button>
-        <Button size="lg">Create Space</Button>
+        <Button size="lg">Create Workspace</Button>
       </div>
     ),
     sidePanel: <SafeAppMockup name="Treasury Ops" highlight="accounts" />,

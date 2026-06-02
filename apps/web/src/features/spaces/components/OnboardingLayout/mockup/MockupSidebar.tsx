@@ -23,12 +23,17 @@ const MockupSidebar = ({ displayName, initial, highlight }: MockupSidebarProps) 
 
     <motion.div
       animate={{
-        // Brand-green hex is inlined: Tailwind has no opacity-modifier syntax for raw rgb() box-shadow.
+        // Hex inlined for the DS success-green token (--color-success-main, #00b460). Two reasons we
+        // can't use var() here: (1) motion interpolates box-shadow in JS frame-by-frame and can't
+        // resolve CSS vars at animation time, so it'd snap instead of fading; (2) the rgba() alpha
+        // form needs raw rgb channels, and Tailwind's /opacity modifier only works in utility classes,
+        // not inline strings. Safe to hardcode because --color-success-main is #00b460 in both
+        // light and dark mode (see vars.css).
         scale: highlight === 'switcher' ? 1.18 : 1,
         boxShadow:
           highlight === 'switcher'
-            ? '0 0 0 1px #12FF80, 0 0 5px 5px rgba(18, 255, 128, 0.3)'
-            : '0 0 0 0 rgba(18, 255, 128, 0)',
+            ? '0 0 0 1px #00b460, 0 0 5px 5px rgba(0, 180, 96, 0.3)'
+            : '0 0 0 0 rgba(0, 180, 96, 0)',
       }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
       style={{ transformOrigin: 'left center' }}
@@ -37,7 +42,7 @@ const MockupSidebar = ({ displayName, initial, highlight }: MockupSidebarProps) 
       <SpaceAvatar initial={initial} />
       <div className="min-w-0 flex-1 flex flex-col gap-0.5">
         <div className="truncate text-sm font-semibold leading-tight text-foreground">{displayName}</div>
-        <div className="text-xs leading-none text-muted-foreground">Space</div>
+        <div className="text-xs leading-none text-muted-foreground">Workspace</div>
       </div>
       <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
     </motion.div>

@@ -18,7 +18,7 @@ import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { MyAccountsFeature, useSpaceAccountsData } from '@/features/myAccounts'
 import { useLoadFeature } from '@/features/__core__'
-import AddAccounts from '@/features/spaces/components/AddAccounts'
+import AddAccountsChooser from '@/features/spaces/components/AddAccountsChooser'
 import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
@@ -28,7 +28,7 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 const AddActionsAction = () => {
   return (
     <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
-      <AddAccounts />
+      <AddAccountsChooser buttonLabel="Manage accounts" entryPoint="dashboard" />
     </Track>
   )
 }
@@ -36,7 +36,7 @@ const AddActionsAction = () => {
 const EmptyStateAddAction = () => {
   return (
     <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
-      <AddAccounts buttonVariant="default" buttonLabel="Add account" />
+      <AddAccountsChooser buttonVariant="default" buttonLabel="Manage accounts" entryPoint="dashboard" />
     </Track>
   )
 }

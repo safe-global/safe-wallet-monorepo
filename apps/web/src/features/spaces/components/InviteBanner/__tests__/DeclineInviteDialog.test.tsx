@@ -1,16 +1,13 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import DeclineInviteDialog from './DeclineInviteDialog'
-import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import DeclineInviteDialog from '../DeclineInviteDialog'
+import { spaceBuilder } from '@/tests/builders/space'
 
 const mockDispatch = jest.fn()
 const mockDeclineInvite = jest.fn()
 
-const mockSpace = {
-  id: 42,
-  name: 'Test Space',
-} as unknown as GetSpaceResponse
+const mockSpace = spaceBuilder().build()
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
