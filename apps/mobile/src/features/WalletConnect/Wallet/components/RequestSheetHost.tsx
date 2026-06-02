@@ -78,10 +78,9 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
   return (
     <BottomSheetModal ref={ref} snapPoints={['70%']} enableDynamicSizing={false} onDismiss={onSheetDismiss}>
       {walletKit && current?.kind === 'proposal' && <SessionProposalSheet walletKit={walletKit} pending={current} />}
-      {walletKit &&
-        current?.kind === 'request' &&
-        ['eth_sendTransaction', 'wallet_sendCalls'].includes(current.method) &&
-        safeSDK && <SendTransactionSheet walletKit={walletKit} pending={current} />}
+      {walletKit && current?.kind === 'request' && safeSDK && (
+        <SendTransactionSheet walletKit={walletKit} pending={current} />
+      )}
     </BottomSheetModal>
   )
 }

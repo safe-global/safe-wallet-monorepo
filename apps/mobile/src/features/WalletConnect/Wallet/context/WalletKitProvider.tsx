@@ -19,6 +19,7 @@ import {
   pushPending,
   clearOutstandingRequest,
   selectOutstandingRequestByHash,
+  isDeferredTxMethod,
 } from '../store/walletKitSlice'
 import { RequestSheetHost } from '../components/RequestSheetHost'
 import { selectActiveSafe, switchActiveChain } from '@/src/store/activeSafeSlice'
@@ -29,10 +30,6 @@ import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { proxyReadOnlyCall } from '../services/readRpcProxy'
 import { SUPPORTED_NAMESPACE } from '../services/constants'
 import type { TransactionReceipt } from 'ethers'
-
-// Only seed pending requests that the UI can act on. Read-only methods that survived
-// across restart would just hang in the slice with no sheet to render them.
-const DEFERRED_METHODS = new Set(['eth_sendTransaction', 'wallet_sendCalls'])
 
 export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useAppDispatch()
@@ -49,9 +46,12 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
         setWalletKit(wk)
         dispatch(setSessions(wk.getActiveSessions()))
-        const pendings = wk.getPendingSessionRequests()
-        ;(pendings as WalletKitTypes.SessionRequest[]).forEach((r) => {
-          if (!DEFERRED_METHODS.has(r.params.request.method)) {
+        // Only seed requests the UI can act on. Read-only methods that survived a
+        // restart would hang in the slice with no sheet to render them.
+        const pendings = wk.getPendingSessionRequests() as WalletKitTypes.SessionRequest[]
+        pendings.forEach((r) => {
+          const method = r.params.request.method
+          if (!isDeferredTxMethod(method)) {
             return
           }
           dispatch(
@@ -60,7 +60,7 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               id: r.id,
               topic: r.topic,
               chainId: r.params.chainId,
-              method: r.params.request.method,
+              method,
               params: r.params.request.params,
             }),
           )

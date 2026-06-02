@@ -3,6 +3,14 @@ import type { SessionTypes } from '@walletconnect/types'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { RootState } from '@/src/store'
 
+// The only session_request methods that need UI / a deferred response. Other methods
+// are answered synchronously by methodRouter and never reach the slice.
+export const DEFERRED_TX_METHODS = ['eth_sendTransaction', 'wallet_sendCalls'] as const
+export type DeferredTxMethod = (typeof DEFERRED_TX_METHODS)[number]
+
+export const isDeferredTxMethod = (method: string): method is DeferredTxMethod =>
+  (DEFERRED_TX_METHODS as readonly string[]).includes(method)
+
 export type PendingSessionProposal = {
   kind: 'proposal'
   id: number
@@ -14,7 +22,7 @@ export type PendingSessionRequest = {
   id: number
   topic: string
   chainId: string // CAIP-2, e.g. 'eip155:1'
-  method: string
+  method: DeferredTxMethod
   params: unknown
 }
 
@@ -26,7 +34,7 @@ export type PendingItem = PendingSessionProposal | PendingSessionRequest
 export type OutstandingTxRequest = {
   topic: string
   id: number
-  method: 'eth_sendTransaction' | 'wallet_sendCalls'
+  method: DeferredTxMethod
 }
 
 type State = {

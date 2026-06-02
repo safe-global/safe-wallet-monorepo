@@ -13,28 +13,22 @@ import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import { removePending, setOutstandingRequest, clearOutstandingRequest } from '../store/walletKitSlice'
 import { clearDraft } from '@/src/store/draftTxSlice'
 import { composeSafeTxDraft, type DappCall } from '../services/composeSafeTxDraft'
+import type { PendingSessionRequest } from '../store/walletKitSlice'
 
 type Props = {
   walletKit: IWalletKit
-  pending: {
-    id: number
-    topic: string
-    chainId: string
-    method: 'eth_sendTransaction' | 'wallet_sendCalls' | string
-    params: unknown
-  }
+  pending: PendingSessionRequest
 }
 
-const extractCalls = (method: string, params: unknown): DappCall[] => {
+// pending.method is the narrowed DeferredTxMethod, so this is total — no throw needed.
+const extractCalls = (method: PendingSessionRequest['method'], params: unknown): DappCall[] => {
   if (method === 'eth_sendTransaction') {
     const [tx] = params as [DappCall]
     return [tx]
   }
-  if (method === 'wallet_sendCalls') {
-    const [batch] = params as [{ calls: DappCall[] }]
-    return batch.calls
-  }
-  throw new Error(`Unsupported method in SendTransactionSheet: ${method}`)
+  // wallet_sendCalls
+  const [batch] = params as [{ calls: DappCall[] }]
+  return batch.calls
 }
 
 export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) => {
@@ -50,13 +44,7 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
   // The unmount cleanup uses this to decide whether to GC the draft.
   const handedOffRef = useRef(false)
 
-  const calls = useMemo(() => {
-    try {
-      return extractCalls(pending.method, pending.params)
-    } catch {
-      return null
-    }
-  }, [pending.method, pending.params])
+  const calls = useMemo(() => extractCalls(pending.method, pending.params), [pending.method, pending.params])
 
   // Declared BEFORE the compose effect so the catch handler can reference it without TDZ smell.
   const respondWithReject = async () => {
@@ -92,7 +80,7 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
   // The parent RequestSheetHost only mounts this sheet once the Safe protocol-kit SDK
   // is ready, so composeSafeTxDraft can rely on getSafeSDK() returning a real instance.
   useEffect(() => {
-    if (!activeSafe || !calls || !safe || !chain) {
+    if (!activeSafe || !safe || !chain) {
       return
     }
     let cancelled = false
@@ -139,16 +127,14 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
     }
     // Hand off to review-and-confirm. The dApp response is sent later by the propose-success
     // listener in WalletKitProvider, NOT here — the user hasn't actually signed yet.
-    if (pending.method === 'eth_sendTransaction' || pending.method === 'wallet_sendCalls') {
-      dispatch(
-        setOutstandingRequest({
-          safeTxHash: composedHash,
-          topic: pending.topic,
-          id: pending.id,
-          method: pending.method,
-        }),
-      )
-    }
+    dispatch(
+      setOutstandingRequest({
+        safeTxHash: composedHash,
+        topic: pending.topic,
+        id: pending.id,
+        method: pending.method,
+      }),
+    )
     handedOffRef.current = true // tell the cleanup effect to leave the draft alone
     dispatch(removePending({ id: pending.id, kind: 'request' }))
     router.push({ pathname: '/review-and-confirm', params: { txId: composedHash } })
@@ -164,15 +150,6 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
       }
     }
   }, [composedHash, dispatch])
-
-  if (!calls) {
-    return (
-      <YStack gap="$3" padding="$4">
-        <Text>Invalid dApp request</Text>
-        <Button onPress={onReject}>Close</Button>
-      </YStack>
-    )
-  }
 
   return (
     <YStack gap="$3" padding="$4">

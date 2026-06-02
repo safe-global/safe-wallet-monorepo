@@ -4,7 +4,7 @@ import { useAppDispatch } from '@/src/store/hooks'
 import { useStore } from 'react-redux'
 import { useToastController } from '@tamagui/toast'
 import type { RootState, AppDispatch } from '@/src/store'
-import { pushPending, removePending } from '../store/walletKitSlice'
+import { pushPending, removePending, isDeferredTxMethod } from '../store/walletKitSlice'
 import { routeSessionRequest, isDeferredResponse, type RouteContext } from '../services/methodRouter'
 import { REJECTED_SIGNING_METHODS } from '../services/constants'
 
@@ -34,13 +34,20 @@ export const useSessionRequestHandler = (walletKit: IWalletKit | null, deps: Ses
       const response = await routeSessionRequest(ctx)
       if (isDeferredResponse(response)) {
         // UI sheet will respond later. Push to pending so the host can render it.
+        // methodRouter only emits __DEFERRED__ for eth_sendTransaction / wallet_sendCalls,
+        // so this narrow type-guard is true by construction — it just propagates that
+        // invariant to the slice's tightened method type.
+        const method = request.params.request.method
+        if (!isDeferredTxMethod(method)) {
+          return
+        }
         dispatch(
           pushPending({
             kind: 'request',
             id: request.id,
             topic: request.topic,
             chainId: request.params.chainId,
-            method: request.params.request.method,
+            method,
             params: request.params.request.params,
           }),
         )
