@@ -26,7 +26,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
 
 const CURRENT_USER_ID = 7
 const adminMembersForCurrentUser = [
-  { role: 'ADMIN' as const, status: 'ACTIVE' as const, name: '', invitedBy: '', user: { id: CURRENT_USER_ID } },
+  { role: 'ADMIN' as const, status: 'ACTIVE' as const, name: '', invitedBy: null, user: { id: CURRENT_USER_ID } },
 ]
 
 jest.mock('next/router', () => ({
@@ -63,8 +63,11 @@ jest.mock('@safe-global/utils/utils/chains', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  getDeterministicColor: (name: string) => `color-${name}`,
   useCurrentSpaceId: () => '42',
+}))
+
+jest.mock('@/utils/colors', () => ({
+  getDeterministicColor: (name: string) => `color-${name}`,
 }))
 
 jest.mock('../../NavItem', () => ({

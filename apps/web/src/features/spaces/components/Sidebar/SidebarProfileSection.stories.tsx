@@ -47,7 +47,7 @@ type Story = StoryObj<typeof meta>
 
 export const Member: Story = {
   args: {
-    memberName: 'Alice',
+    profileName: 'Alice',
     displayName: 'Alice',
     role: 'member',
     onSignOut: () => {},
@@ -56,7 +56,7 @@ export const Member: Story = {
 
 export const Admin: Story = {
   args: {
-    memberName: 'Bob',
+    profileName: 'Bob',
     displayName: '0x3e7c...C0a7',
     role: 'admin',
     onSignOut: () => {},
@@ -65,7 +65,7 @@ export const Admin: Story = {
 
 export const LongName: Story = {
   args: {
-    memberName: 'Alexander Maximilian von Rothschild III',
+    profileName: 'Alexander Maximilian von Rothschild III',
     displayName: 'Alexander Maximilian von Rothschild III',
     role: 'member',
     onSignOut: () => {},
@@ -74,9 +74,27 @@ export const LongName: Story = {
 
 export const WalletUser: Story = {
   args: {
-    memberName: 'Alice',
+    profileName: 'Alice',
     displayName: '0x1234...7890',
     role: 'admin',
+    onSignOut: () => {},
+  },
+}
+
+export const EmailUser: Story = {
+  args: {
+    profileName: 'alice@example.com',
+    displayName: 'alice@example.com',
+    role: 'member',
+    onSignOut: () => {},
+  },
+}
+
+export const LongEmail: Story = {
+  args: {
+    profileName: 'alice.long.email.address@example-enterprise-customer.com',
+    displayName: 'alice.long.email.address@example-enterprise-customer.com',
+    role: 'member',
     onSignOut: () => {},
   },
 }
