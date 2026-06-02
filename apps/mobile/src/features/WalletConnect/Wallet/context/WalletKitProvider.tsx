@@ -67,7 +67,7 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           )
         })
       })
-      .catch((e) => console.log('[walletKit] init failed', e))
+      .catch((e) => logWalletKitError('init failed', e))
     return () => {
       mounted = false
     }
@@ -86,7 +86,7 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           reason: getSdkError('UNSUPPORTED_METHODS'),
         })
       } catch (e) {
-        console.log('[walletKit] rejectSessionAuthenticate failed', e)
+        logWalletKitError('rejectSessionAuthenticate failed', e)
       }
     }
     walletKit.on('session_authenticate', onAuth)
@@ -150,7 +150,7 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       try {
         await walletKit.pair({ uri: url })
       } catch (e) {
-        console.log('[walletKit] deep-link pair failed', e)
+        logWalletKitError('deep-link pair failed', e)
       }
     }
     const sub = Linking.addEventListener('url', ({ url }) => {

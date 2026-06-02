@@ -11,6 +11,7 @@ import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectChainById } from '@/src/store/chains'
 import { isProposalSupported } from '../services/namespaces'
 import { SUPPORTED_NAMESPACE } from '../services/constants'
+import { logWalletKitError } from '../utils/errors'
 
 // All eip155 chains the dApp can operate on — the union of its required and optional
 // namespaces. buildApprovedNamespaces intersects this with the Safe's chains, so a chain
@@ -32,7 +33,7 @@ const safeRejectSession = async (
   try {
     await walletKit.rejectSession(args)
   } catch (e) {
-    console.log('[walletKit] rejectSession failed', e)
+    logWalletKitError('rejectSession failed', e)
   }
 }
 

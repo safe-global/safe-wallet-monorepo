@@ -9,6 +9,7 @@ import { buildSafeApprovedNamespaces, buildSafeSessionProperties } from '../serv
 import { verifyStatusToVariant } from '../utils/verifyStatus'
 import { ConnectionPermissionsPanel } from './ConnectionPermissionsPanel'
 import { rejectProposal } from '../hooks/useSessionProposalHandler'
+import { logWalletKitError } from '../utils/errors'
 
 type Props = {
   walletKit: IWalletKit
@@ -65,7 +66,7 @@ export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending }) =>
       try {
         await rejectProposal(walletKit, pending.id)
       } catch (rejectErr) {
-        console.log('[walletKit] rejectProposal after approve failure also failed', rejectErr)
+        logWalletKitError('rejectProposal after approve failure also failed', rejectErr)
       }
       close()
     } finally {
