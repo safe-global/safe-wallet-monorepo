@@ -270,6 +270,23 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                                 </div>
                               </div>
                             </div>
+                            <div
+                              class="MuiBox-root mui-style-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root mui-style-1f9z19n"
+                              >
+                                <div
+                                  class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
+                                  >
+                                    Threat analysis found no issues
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -5210,6 +5227,241 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
 </div>
 `;
 
+exports[`./SafeShield.stories OverflowFindings 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-1xanyxa-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="MuiBox-root mui-style-1hjq20a"
+    >
+      <div
+        class="MuiStack-root mui-style-hwnj0i-MuiStack-root"
+        data-testid="safe-shield-widget"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiCard-root mui-style-3l1p1j-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: none;"
+        >
+          <div
+            class="MuiBox-root mui-style-2w7gpf"
+          >
+            <div
+              class="MuiStack-root mui-style-la659o-MuiStack-root"
+              data-testid="safe-shield-status"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-overline mui-style-1v2h5v4-MuiTypography-root"
+              >
+                Issues found
+              </span>
+            </div>
+          </div>
+          <div
+            class="MuiBox-root mui-style-1hpqev5"
+          >
+            <div
+              class="MuiBox-root mui-style-1l5zt4q"
+            >
+              <div
+                class="MuiBox-root mui-style-xhak29"
+              >
+                <div
+                  class="MuiBox-root mui-style-7yf5bk"
+                  data-testid="threat-analysis-group-card"
+                >
+                  <div
+                    class="MuiStack-root mui-style-es2900-MuiStack-root"
+                  >
+                    <div
+                      class="MuiStack-root mui-style-1rlitzi-MuiStack-root"
+                    >
+                      <mock-icon
+                        aria-hidden=""
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1nx0ljk-MuiSvgIcon-root"
+                        focusable="false"
+                      />
+                      <p
+                        class="MuiTypography-root MuiTypography-body2 mui-style-1ew0eu5-MuiTypography-root"
+                      >
+                        Moderate threat 1
+                      </p>
+                    </div>
+                    <button
+                      class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall mui-style-59os6z-MuiButtonBase-root-MuiIconButton-root"
+                      tabindex="0"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-118obxm-MuiSvgIcon-root"
+                        data-testid="KeyboardArrowDownIcon"
+                        focusable="false"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div
+                    class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-hidden mui-style-cwrbtg-MuiCollapse-root"
+                    style="min-height: 0px;"
+                  >
+                    <div
+                      class="MuiCollapse-wrapper MuiCollapse-vertical mui-style-1x6hinx-MuiCollapse-wrapper"
+                    >
+                      <div
+                        class="MuiCollapse-wrapperInner MuiCollapse-vertical mui-style-1i4ywhz-MuiCollapse-wrapperInner"
+                      >
+                        <div
+                          class="MuiBox-root mui-style-v1dotw"
+                        >
+                          <div
+                            class="MuiStack-root mui-style-hwnj0i-MuiStack-root"
+                          >
+                            <div
+                              class="MuiBox-root mui-style-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root mui-style-jgusbz"
+                              >
+                                <div
+                                  class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
+                                  >
+                                    First moderate threat.
+                                  </p>
+                                  <div
+                                    class="MuiBox-root mui-style-1821gv5"
+                                  >
+                                    <div
+                                      class="MuiBox-root mui-style-1ygviyr"
+                                    >
+                                      <div
+                                        class="MuiBox-root mui-style-jnhdwv"
+                                      >
+                                        <p
+                                          class="MuiTypography-root MuiTypography-body2 mui-style-1lbkc8c-MuiTypography-root"
+                                        >
+                                          Bulleted list from validation.features, grouped by Malicious first, then Warnings.
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="MuiBox-root mui-style-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root mui-style-1f9z19n"
+                              >
+                                <div
+                                  class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
+                                  >
+                                    Second moderate threat.
+                                  </p>
+                                  <div
+                                    class="MuiBox-root mui-style-1821gv5"
+                                  >
+                                    <div
+                                      class="MuiBox-root mui-style-1ygviyr"
+                                    >
+                                      <div
+                                        class="MuiBox-root mui-style-jnhdwv"
+                                      >
+                                        <p
+                                          class="MuiTypography-root MuiTypography-body2 mui-style-1lbkc8c-MuiTypography-root"
+                                        >
+                                          Bulleted list from validation.features, grouped by Malicious first, then Warnings.
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              class="MuiBox-root mui-style-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root mui-style-1f9z19n"
+                              >
+                                <div
+                                  class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
+                                  >
+                                    Third moderate threat.
+                                  </p>
+                                  <div
+                                    class="MuiBox-root mui-style-1821gv5"
+                                  >
+                                    <div
+                                      class="MuiBox-root mui-style-1ygviyr"
+                                    >
+                                      <div
+                                        class="MuiBox-root mui-style-jnhdwv"
+                                      >
+                                        <p
+                                          class="MuiTypography-root MuiTypography-body2 mui-style-1lbkc8c-MuiTypography-root"
+                                        >
+                                          Bulleted list from validation.features, grouped by Malicious first, then Warnings.
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="MuiStack-root mui-style-10778a5-MuiStack-root"
+        >
+          <a
+            class="MuiTypography-root MuiTypography-inherit MuiLink-root MuiLink-underlineAlways mui-style-r9pq5a-MuiTypography-root-MuiLink-root"
+            href="https://help.safe.global/articles/6434169802-understanding-safe-shield-copilot"
+            rel="noreferrer noopener"
+            target="_blank"
+          >
+            <span
+              class="MuiBox-root mui-style-u9xrjn"
+            >
+              <mock-icon
+                aria-hidden=""
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-6s60fs-MuiSvgIcon-root"
+                focusable="false"
+              />
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`./SafeShield.stories OwnershipChange 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
@@ -6230,6 +6482,23 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                                 </div>
                               </div>
                             </div>
+                            <div
+                              class="MuiBox-root mui-style-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root mui-style-1f9z19n"
+                              >
+                                <div
+                                  class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
+                                  >
+                                    Threat analysis found no issues
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -6482,6 +6751,23 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                           <div
                             class="MuiStack-root mui-style-hwnj0i-MuiStack-root"
                           >
+                            <div
+                              class="MuiBox-root mui-style-6io5aq"
+                            >
+                              <div
+                                class="MuiBox-root mui-style-1f9z19n"
+                              >
+                                <div
+                                  class="MuiStack-root mui-style-1ucnu3w-MuiStack-root"
+                                >
+                                  <p
+                                    class="MuiTypography-root MuiTypography-body2 mui-style-15dk1ju-MuiTypography-root"
+                                  >
+                                    Threat analysis found no issues
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
                             <div
                               class="MuiBox-root mui-style-6io5aq"
                             >

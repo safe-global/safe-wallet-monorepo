@@ -2,17 +2,21 @@ import type * as ReactHookForm from 'react-hook-form'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import AcceptInviteDialog from './AcceptInviteDialog'
-import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import AcceptInviteDialog from '../AcceptInviteDialog'
+import { spaceBuilder, spaceMemberBuilder } from '@/tests/builders/space'
 
 const mockDispatch = jest.fn()
 const mockAcceptInvite = jest.fn()
 
-const mockSpace = {
-  id: 42,
-  name: 'Test Space',
-  members: [{ user: { id: 1 }, name: 'Test User' }],
-} as unknown as GetSpaceResponse
+const mockSpace = spaceBuilder()
+  .with({
+    members: [
+      spaceMemberBuilder()
+        .with({ user: { id: 1 }, name: 'Test User' })
+        .build(),
+    ],
+  })
+  .build()
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),

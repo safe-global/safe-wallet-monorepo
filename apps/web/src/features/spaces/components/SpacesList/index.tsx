@@ -25,7 +25,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import SpaceInfoModal from '../SpaceInfoModal'
-import { filterSpacesByStatus } from '@/features/spaces/utils'
+import { filterSpacesByStatus, getInvitedByName } from '@/features/spaces/utils'
 import { AppRoutes } from '@/config/routes'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
@@ -65,8 +65,6 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-      {/* TODO(WA-2435): min-h-screen overlaps the Topbar in classic-view mode (require-login OFF).
-          Deferred while we keep PageLayout's dev-branch hideHeader logic untouched. */}
       <div className={cn('relative flex min-h-screen items-center justify-center bg-background p-6', css.authShell)}>
         <div className="relative w-full max-w-[440px] rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
           <div className="mb-6 flex size-10 items-center justify-center text-foreground">
@@ -202,7 +200,11 @@ const SpacesList = () => {
         {isUserSignedIn &&
           pendingInvites.length > 0 &&
           pendingInvites.map((invitingSpace: GetSpaceResponse) => (
-            <SpaceListInvite key={invitingSpace.id} space={invitingSpace} />
+            <SpaceListInvite
+              key={invitingSpace.id}
+              space={invitingSpace}
+              invitedByName={getInvitedByName(invitingSpace, currentUser?.id)}
+            />
           ))}
 
         {activeSpaces.length > 0 ? (

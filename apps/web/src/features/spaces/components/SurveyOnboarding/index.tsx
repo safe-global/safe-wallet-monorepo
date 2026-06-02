@@ -6,6 +6,7 @@ import {
   ArrowLeftRight,
   BarChart3,
   ChevronLeft,
+  ChevronRight,
   FileCode,
   HelpCircle,
   Send,
@@ -143,7 +144,7 @@ const SurveyOnboarding = (): ReactElement | null => {
       )}
 
       {page?.options && (
-        <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+        <div className="grid auto-rows-fr grid-cols-2 gap-3 xl:grid-cols-3">
           {page.options.map((opt: SurveyOption) => (
             <SurveyOptionCard
               key={opt.key}
@@ -183,7 +184,14 @@ const SurveyOnboarding = (): ReactElement | null => {
         onClick={onFinish}
         className="w-full h-12 rounded-lg text-base xl:flex-1"
       >
-        {isSubmitting ? <Spinner /> : 'Create Space'}
+        {isSubmitting ? (
+          <Spinner />
+        ) : (
+          <>
+            Create Workspace
+            <ChevronRight className="size-4 ml-1" />
+          </>
+        )}
       </Button>
     </div>
   )

@@ -16,14 +16,12 @@ const SurveyOptionCard = ({ option, Icon, isPressed, onToggle }: SurveyOptionCar
     aria-pressed={isPressed}
     onClick={() => onToggle(option.key)}
     className={cn(
-      'flex cursor-pointer flex-col items-start gap-3 rounded-2xl border bg-card p-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+      'flex h-full cursor-pointer flex-col items-start gap-3 rounded-2xl border bg-card p-4 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
       isPressed ? 'border-foreground' : 'border-border hover:border-ring hover:bg-muted',
     )}
   >
     <div className="flex w-full items-start justify-between">
-      {/* color-success-main reads with enough contrast on the tinted bg in both
-          light and dark mode; raw green-600 looks muted on dark surfaces. */}
-      <div className="flex size-10 items-center justify-center rounded-md bg-[var(--color-static-text-brand)]/15">
+      <div className="flex size-10 items-center justify-center rounded-md bg-[var(--color-success-main)]/15">
         {Icon && <Icon className="size-5 text-[var(--color-success-main)]" strokeWidth={1.75} />}
       </div>
       <div

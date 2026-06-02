@@ -1,10 +1,11 @@
 import type { SecurityScanner } from './types'
 import { getSeverityFromScore } from './constants'
+import { hasRecoverySetup } from './recoveryDetection'
 
 export const accountSetupScanner: SecurityScanner = {
   id: 'account_setup',
   scan: async (ctx) => {
-    const { owners, threshold } = ctx
+    const { owners, threshold, modules, chainId, chainSupportsRecovery } = ctx
     const ownerCount = owners.length
     const now = new Date().toISOString()
 
@@ -32,15 +33,48 @@ export const accountSetupScanner: SecurityScanner = {
     // Simple majority = strictly more than half. For even N this is N/2 + 1, not N/2.
     const simpleMajority = Math.floor(ownerCount / 2) + 1
 
-    // Single signer = no multisig protection
-    if (ownerCount === 1) {
-      const score = 10
+    // n/n Safe (threshold === owner count, incl. 1/1): losing any single signer permanently
+    // locks the Safe. Acceptable only when account recovery mitigates that lockout risk.
+    if (threshold === ownerCount) {
+      // Recovery isn't available on this chain — the lockout risk can't be mitigated, so this
+      // is the most severe case.
+      if (!chainSupportsRecovery) {
+        const score = 10
+        return {
+          status: 'issue',
+          severity: getSeverityFromScore(score),
+          score,
+          evidence: [...baseEvidence, 'Losing any signer would permanently lock this Safe'],
+          remediation: 'Add another signer and lower the threshold so losing one key cannot lock this Safe.',
+          lastChecked: now,
+        }
+      }
+
+      // Recovery configured → the lockout risk is mitigated.
+      if (hasRecoverySetup(chainId, modules)) {
+        const score = 100
+        return {
+          status: 'clear',
+          severity: getSeverityFromScore(score),
+          score,
+          evidence: baseEvidence,
+          remediation: '',
+          lastChecked: now,
+        }
+      }
+
+      // Recovery is available but not configured — fixable, so flag as a (non-critical) risk.
+      const score = 40
+      const remediation =
+        ownerCount === 1
+          ? 'Set up account recovery, or add signers, so this Safe cannot be permanently locked if a signer loses access.'
+          : 'Set up account recovery so this Safe can be recovered if a signer loses access.'
       return {
         status: 'issue',
         severity: getSeverityFromScore(score),
         score,
-        evidence: baseEvidence,
-        remediation: 'Add additional signers and increase the threshold for better security.',
+        evidence: [...baseEvidence, 'Losing any signer would permanently lock this Safe'],
+        remediation,
         lastChecked: now,
       }
     }

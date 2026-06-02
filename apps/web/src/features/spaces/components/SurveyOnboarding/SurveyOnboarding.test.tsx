@@ -114,7 +114,7 @@ describe('SurveyOnboarding', () => {
     expect(screen.getByRole('button', { name: 'Hold assets' })).toBeInTheDocument()
   })
 
-  it('keeps the Create Space button disabled until at least one chip is selected', () => {
+  it('keeps the Create Workspace button disabled until at least one chip is selected', () => {
     render(<SurveyOnboarding />)
 
     const finish = screen.getByTestId('survey-finish-button')
