@@ -245,7 +245,6 @@ export const useFlowActivationGuard: UseGuard = () => {
         isPublicRoute: !isOnboardingRoute && !isSpaceRoute && !isSpacesPath,
         isOnboardingRoute,
         isSpacesPath,
-        isWelcomeSpacesPath,
         isLoginPath,
         isStoreHydrated,
         isWalletReady,
