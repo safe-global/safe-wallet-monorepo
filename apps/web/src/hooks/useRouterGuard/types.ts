@@ -20,6 +20,7 @@ export interface GuardContext {
   isOnboardingRoute: boolean
   isSpacesPath: boolean
   isWelcomeSpacesPath: boolean
+  isLoginPath: boolean
   isStoreHydrated: boolean
   isWalletReady: boolean
   isSiweAuthenticated: boolean
