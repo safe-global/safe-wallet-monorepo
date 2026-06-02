@@ -47,6 +47,10 @@ export type RouteContext = {
 
 const NS = SUPPORTED_NAMESPACE + ':'
 
+// EIP-1193 4100 "Unauthorized" — returned when the active Safe has no signer attached.
+// useSessionRequestHandler keys its "No signer attached" toast off this code.
+export const NO_SIGNER_ERROR_CODE = 4100
+
 const crossNamespaceError = (id: number) => formatJsonRpcError(id, getSdkError('UNAUTHORIZED_METHOD').message)
 
 const unsupportedError = (id: number) => formatJsonRpcError(id, getSdkError('UNSUPPORTED_METHODS').message)
@@ -161,7 +165,7 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
       return formatJsonRpcError(id, { code: -32603, message: 'No active Safe' })
     }
     if (!hasSigner) {
-      return formatJsonRpcError(id, { code: 4100, message: 'No signer attached to this Safe' })
+      return formatJsonRpcError(id, { code: NO_SIGNER_ERROR_CODE, message: 'No signer attached to this Safe' })
     }
     // Both tx methods need the active chain config (downstream compose uses it to look up
     // CreateCall deployments and to verify the SDK is bound to the same chain). Fail
@@ -169,6 +173,13 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     // failure later.
     if (!activeChain) {
       return formatJsonRpcError(id, { code: -32603, message: 'No active chain' })
+    }
+    // The dApp's session can be bound to a chain the active Safe is no longer on (the user
+    // switched networks after connecting). We can only sign on the active chain, so reject
+    // here rather than composing on the wrong chain; useSessionRequestHandler surfaces a toast
+    // telling the user which network to switch back to. `chainId` is the dApp's session chain.
+    if (chainId !== `${SUPPORTED_NAMESPACE}:${activeChain.chainId}`) {
+      return formatJsonRpcError(id, getSdkError('UNSUPPORTED_CHAINS'))
     }
     // wallet_sendCalls — validate the bundle envelope up front (mirrors apps/web/.../
     // safe-wallet-provider/index.ts wallet_sendCalls). chainId / from mismatches and

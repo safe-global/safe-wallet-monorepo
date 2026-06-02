@@ -3,16 +3,23 @@ import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { useAppDispatch } from '@/src/store/hooks'
 import { useStore } from 'react-redux'
 import { useToastController } from '@tamagui/toast'
+import { stripEip155Prefix } from '@safe-global/utils/features/walletconnect/utils'
 import type { RootState, AppDispatch } from '@/src/store'
 import { pushPending, removePending, isDeferredTxMethod } from '../store/walletKitSlice'
+import { selectChainById } from '@/src/store/chains'
 import { logWalletKitError } from '../utils/errors'
-import { routeSessionRequest, isDeferredResponse, type RouteContext } from '../services/methodRouter'
+import {
+  routeSessionRequest,
+  isDeferredResponse,
+  NO_SIGNER_ERROR_CODE,
+  type RouteContext,
+} from '../services/methodRouter'
 import { REJECTED_SIGNING_METHODS } from '../services/constants'
+import { getSdkError } from '@walletconnect/utils'
 
 export type SessionRequestHandlerDeps = Omit<RouteContext, 'request' | 'dispatch' | 'getState'>
 
-// Spec: "auto-reject with formatJsonRpcError(id, { code: 4100, ... }) + generic toast".
-const NO_SIGNER_ERROR_CODE = 4100
+const WRONG_ACTIVE_CHAIN_CODE = getSdkError('UNSUPPORTED_CHAINS').code
 
 const REJECTED_SIGNING_METHODS_SET: ReadonlySet<string> = new Set(REJECTED_SIGNING_METHODS)
 
@@ -72,6 +79,16 @@ export const useSessionRequestHandler = (walletKit: IWalletKit | null, deps: Ses
       // the user just sees a red "unknown RPC error" in the dApp with no context.
       if (REJECTED_SIGNING_METHODS_SET.has(request.params.request.method)) {
         toast.show('Message signing is not yet supported on mobile', { native: false, duration: 2500 })
+      }
+      // Explain tx requests we auto-reject because the active Safe was switched to a chain the
+      // dApp's session doesn't cover (methodRouter returns WRONG_ACTIVE_CHAIN_CODE rather than
+      // deferring). The dApp just sees a rejection; the toast tells the user which network to
+      // switch back to.
+      if ('error' in response && response.error?.code === WRONG_ACTIVE_CHAIN_CODE) {
+        const requestChainId = stripEip155Prefix(request.params.chainId)
+        const network = selectChainById(store.getState(), requestChainId)?.chainName ?? `chain ${requestChainId}`
+        const dappName = walletKit.getActiveSessions()[request.topic]?.peer.metadata.name || 'this dApp'
+        toast.show(`Switch your active Safe to ${network} to use ${dappName}`, { native: false, duration: 3000 })
       }
       // Ensure no stray pending entry for this id.
       dispatch(removePending({ id: request.id, kind: 'request' }))
