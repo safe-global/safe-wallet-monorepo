@@ -138,6 +138,7 @@ describe('signProposerTypedDataForSafe', () => {
   const mockChainId = '11155111'
   const mockProposerAddress = getAddress(faker.finance.ethereumAddress())
   const mockParentSafeAddress = getAddress(faker.finance.ethereumAddress())
+  const mockSafeAddress = getAddress(faker.finance.ethereumAddress())
   const mockSignature = '0x' + 'ab'.repeat(65)
   const mockDelegateHash = '0x' + 'dd'.repeat(32)
   const mockSigner = {} as JsonRpcSigner
@@ -147,19 +148,21 @@ describe('signProposerTypedDataForSafe', () => {
   })
 
   it('should hash the delegate typed data and sign the SafeMessage-wrapped hash', async () => {
-    jest.spyOn(web3Utils, 'hashTypedData').mockReturnValue(mockDelegateHash)
+    jest.spyOn(delegateUtils, 'hashDelegateTypedData').mockReturnValue(mockDelegateHash)
     jest.spyOn(web3Utils, 'signTypedData').mockResolvedValue(mockSignature)
 
     const result = await signProposerTypedDataForSafe(
       mockChainId,
       mockProposerAddress,
       mockParentSafeAddress,
+      mockSafeAddress,
+      'add',
       mockSigner,
     )
 
     // Should hash the delegate typed data first
-    expect(web3Utils.hashTypedData).toHaveBeenCalledWith(
-      delegateUtils.getDelegateTypedData(mockChainId, mockProposerAddress),
+    expect(delegateUtils.hashDelegateTypedData).toHaveBeenCalledWith(
+      delegateUtils.getDelegateTypedData(mockChainId, mockProposerAddress, mockSafeAddress, 'add'),
     )
 
     // Should sign the SafeMessage typed data (not the raw delegate typed data)
@@ -185,10 +188,17 @@ describe('signProposerTypedDataForSafe', () => {
 
   it('should use the correct parent Safe address in the domain', async () => {
     const specificParentSafe = getAddress(faker.finance.ethereumAddress())
-    jest.spyOn(web3Utils, 'hashTypedData').mockReturnValue(mockDelegateHash)
+    jest.spyOn(delegateUtils, 'hashDelegateTypedData').mockReturnValue(mockDelegateHash)
     jest.spyOn(web3Utils, 'signTypedData').mockResolvedValue(mockSignature)
 
-    await signProposerTypedDataForSafe(mockChainId, mockProposerAddress, specificParentSafe, mockSigner)
+    await signProposerTypedDataForSafe(
+      mockChainId,
+      mockProposerAddress,
+      specificParentSafe,
+      mockSafeAddress,
+      'add',
+      mockSigner,
+    )
 
     expect(web3Utils.signTypedData).toHaveBeenCalledWith(
       mockSigner,
@@ -201,10 +211,17 @@ describe('signProposerTypedDataForSafe', () => {
   })
 
   it('should use the correct chainId in the domain', async () => {
-    jest.spyOn(web3Utils, 'hashTypedData').mockReturnValue(mockDelegateHash)
+    jest.spyOn(delegateUtils, 'hashDelegateTypedData').mockReturnValue(mockDelegateHash)
     jest.spyOn(web3Utils, 'signTypedData').mockResolvedValue(mockSignature)
 
-    await signProposerTypedDataForSafe('1', mockProposerAddress, mockParentSafeAddress, mockSigner)
+    await signProposerTypedDataForSafe(
+      '1',
+      mockProposerAddress,
+      mockParentSafeAddress,
+      mockSafeAddress,
+      'add',
+      mockSigner,
+    )
 
     expect(web3Utils.signTypedData).toHaveBeenCalledWith(
       mockSigner,
