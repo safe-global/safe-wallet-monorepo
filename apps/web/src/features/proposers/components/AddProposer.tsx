@@ -40,9 +40,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Typography } from '@/components/ui/typography'
 import {
   useDelegatesPostDelegateV1Mutation,
+  useDelegatesPostDelegateV3Mutation,
   type CreateDelegateDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
-import { useDelegatesPostDelegateV3Mutation } from '@safe-global/store/gateway/delegates'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm, type Validate } from 'react-hook-form'

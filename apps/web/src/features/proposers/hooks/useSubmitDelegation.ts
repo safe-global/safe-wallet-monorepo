@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import {
   useDelegatesPostDelegateV3Mutation,
   useDelegatesDeleteDelegateV3Mutation,
-} from '@safe-global/store/gateway/delegates'
+} from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { encodeEIP1271Signature } from '@/features/proposers/utils/utils'
 import { isTotpValid } from '@/features/proposers/utils/totp'
@@ -57,7 +57,7 @@ export const useSubmitDelegation = () => {
           await deleteDelegateV3({
             chainId,
             delegateAddress: delegation.delegateAddress,
-            deleteDelegateV2Dto: {
+            deleteDelegateV3Dto: {
               delegator: delegation.parentSafeAddress,
               safe: safeAddress,
               signature: eip1271Signature,
