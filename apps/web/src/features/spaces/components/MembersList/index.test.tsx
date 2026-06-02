@@ -1,4 +1,4 @@
-import { render, screen, within } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import type { ReactNode } from 'react'
 import { memberBuilder, memberUserBuilder } from '@/tests/builders/member'
 import MembersList from './index'
@@ -65,5 +65,28 @@ describe('MembersList', () => {
     expect(emailCells).toHaveLength(2)
     expect(within(emailCells[0]!).getByText('alice@example.com')).toBeInTheDocument()
     expect(within(emailCells[1]!).queryByText(/@/)).not.toBeInTheDocument()
+  })
+
+  it('wires up noWrap and a hover tooltip for long member emails', async () => {
+    const longEmail = `${'a'.repeat(64)}@${'b'.repeat(186)}.com`
+
+    const { user } = renderWithUserEvent(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({
+              name: 'Alice',
+              user: memberUserBuilder().with({ email: longEmail }).build(),
+            })
+            .build(),
+        ]}
+      />,
+    )
+
+    const emailNode = screen.getByText(longEmail)
+    expect(emailNode).toHaveClass('MuiTypography-noWrap')
+
+    await user.hover(emailNode)
+    expect(await screen.findByRole('tooltip', { name: longEmail })).toBeInTheDocument()
   })
 })

@@ -123,7 +123,13 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
         },
         email: {
           rawValue: memberEmail,
-          content: memberEmail ? <Typography variant="body2">{memberEmail}</Typography> : null,
+          content: memberEmail ? (
+            <Tooltip title={memberEmail} placement="top">
+              <Typography variant="body2" noWrap>
+                {memberEmail}
+              </Typography>
+            </Tooltip>
+          ) : null,
         },
         role: {
           rawValue: member.role,
@@ -153,7 +159,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     return null
   }
 
-  return <EnhancedTable rows={rows} headCells={headCells} />
+  return <EnhancedTable rows={rows} headCells={headCells} fixedLayout />
 }
 
 export default MembersList
