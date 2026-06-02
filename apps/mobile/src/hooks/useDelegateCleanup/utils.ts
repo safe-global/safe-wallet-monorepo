@@ -1,9 +1,9 @@
 import Logger from '@/src/utils/logger'
 import { type Address } from '@/src/types/address'
 import { Wallet } from 'ethers'
-import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
+import { getDelegateTypedData, hashDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { type DelegatesDeleteDelegateV2ApiArg } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
+import { type DelegatesDeleteDelegateV3ApiArg } from '@safe-global/store/gateway/delegates'
 import { keyStorageService } from '@/src/services/key-storage'
 import { getDelegateKeyId } from '@/src/utils/delegate'
 import { withGeneralRetry } from '@/src/utils/retry'
@@ -106,7 +106,7 @@ export const removeDelegatesFromBackend = async (
   delegateAddresses: Address[],
   ownerWallet: Wallet,
   allChains: Chain[],
-  deleteDelegate: (params: DelegatesDeleteDelegateV2ApiArg) => Promise<unknown>,
+  deleteDelegate: (params: DelegatesDeleteDelegateV3ApiArg) => Promise<unknown>,
 ): Promise<DelegateRemovalResult> => {
   if (!delegateAddresses || delegateAddresses.length === 0) {
     return { success: true }
@@ -130,9 +130,10 @@ export const removeDelegatesFromBackend = async (
             }
 
             const result = await withGeneralRetry(async () => {
-              const typedData = getDelegateTypedData(chain.chainId, delegateAddress)
+              const typedData = getDelegateTypedData(chain.chainId, delegateAddress, null, 'delete')
 
-              const signature = await ownerWallet.signTypedData(typedData.domain, typedData.types, typedData.message)
+              // Sign the raw EIP-712 digest — ethers rejects the non-standard `safe` domain key
+              const signature = ownerWallet.signingKey.sign(hashDelegateTypedData(typedData)).serialized
 
               await deleteDelegate({
                 chainId: chain.chainId,

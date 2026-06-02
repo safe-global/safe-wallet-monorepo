@@ -1,6 +1,6 @@
 import { Address } from '@/src/types/address'
 import { AppDispatch } from '@/src/store'
-import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
+import { delegatesApi } from '@safe-global/store/gateway/delegates'
 import { useNotificationCleanup } from '@/src/hooks/useNotificationCleanup'
 import {
   cleanupDelegateNotifications,
@@ -55,7 +55,7 @@ export interface DelegateCleanupConfig {
   allChains: Chain[]
   allDelegates: Record<Address, Record<string, DelegateInfo>>
   cleanupNotificationsForDelegate: ReturnType<typeof useNotificationCleanup>['cleanupNotificationsForDelegate']
-  deleteDelegate: ReturnType<typeof cgwApi.useDelegatesDeleteDelegateV2Mutation>[0]
+  deleteDelegate: ReturnType<typeof delegatesApi.useDelegatesDeleteDelegateV3Mutation>[0]
   dispatch: AppDispatch
   onProgress?: (progress: DelegateCleanupProgress) => void
 }
