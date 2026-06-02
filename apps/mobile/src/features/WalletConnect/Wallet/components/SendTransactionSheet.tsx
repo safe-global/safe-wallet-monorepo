@@ -1,8 +1,9 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react'
 import { Alert } from 'react-native'
 import { router } from 'expo-router'
-import { Text, YStack, XStack, Button } from 'tamagui'
+import { Text, YStack, XStack } from 'tamagui'
 import type { IWalletKit } from '@reown/walletkit'
+import { SafeButton } from '@/src/components/SafeButton'
 import { formatJsonRpcError } from '@walletconnect/jsonrpc-utils'
 import { getSdkError } from '@walletconnect/utils'
 import { skipToken } from '@reduxjs/toolkit/query'
@@ -170,12 +171,20 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
         ))}
       </YStack>
       <XStack gap="$3">
-        <Button flex={1} height="$8" borderWidth={1} onPress={onReject} disabled={composing}>
+        <SafeButton flex={1} outlined onPress={onReject} disabled={composing} testID="wc-tx-reject">
           Reject
-        </Button>
-        <Button flex={1} height="$8" onPress={onSign} disabled={composing || !composedHash}>
-          {composing ? 'Preparing…' : 'Sign'}
-        </Button>
+        </SafeButton>
+        <SafeButton
+          flex={1}
+          primary
+          onPress={onSign}
+          loading={composing}
+          loadingText="Preparing…"
+          disabled={!composedHash}
+          testID="wc-tx-sign"
+        >
+          Sign
+        </SafeButton>
       </XStack>
     </YStack>
   )
