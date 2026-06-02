@@ -2,7 +2,7 @@ import { useCallback, useState, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectAllChains } from '@/src/store/chains'
 import { selectDelegates } from '@/src/store/delegatesSlice'
-import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
+import { delegatesApi } from '@safe-global/store/gateway/delegates'
 import { useNotificationCleanup } from '@/src/hooks/useNotificationCleanup'
 import { type Address } from '@/src/types/address'
 import {
@@ -57,7 +57,7 @@ export const useDelegateCleanup = (): UseDelegateCleanupProps => {
 
   const { cleanupNotificationsForDelegate } = useNotificationCleanup()
 
-  const [deleteDelegate] = cgwApi.useDelegatesDeleteDelegateV2Mutation()
+  const [deleteDelegate] = delegatesApi.useDelegatesDeleteDelegateV3Mutation()
 
   const cleanupService = useMemo(() => {
     return new DelegateCleanupService({
