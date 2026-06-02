@@ -41,13 +41,11 @@ import {
 } from '@mui/material'
 import {
   useDelegatesPostDelegateV1Mutation,
+  useDelegatesPostDelegateV3Mutation,
+  useDelegatesUpdateDelegateV3Mutation,
   type CreateDelegateDto,
   type Delegate,
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
-import {
-  useDelegatesPostDelegateV3Mutation,
-  useDelegatesUpdateDelegateV3Mutation,
-} from '@safe-global/store/gateway/delegates'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm, type Validate } from 'react-hook-form'
@@ -188,7 +186,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
       }
 
       if (isEditing) {
-        await updateDelegateV3({ chainId, createDelegateDto }).unwrap()
+        await updateDelegateV3({ chainId, updateDelegateV3Dto: createDelegateDto }).unwrap()
       } else if (shouldEthSign && !parentSafeAddress) {
         await addDelegateV1({ chainId, createDelegateDto }).unwrap()
       } else {

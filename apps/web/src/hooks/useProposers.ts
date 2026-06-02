@@ -3,7 +3,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import {
   useDelegatesGetDelegatesV3Query,
   type DelegatesGetDelegatesV3ApiArg,
-} from '@safe-global/store/gateway/delegates'
+} from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 
 const useProposers = () => {
   const {
