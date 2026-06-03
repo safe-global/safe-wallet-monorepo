@@ -24,6 +24,7 @@ const mockSpace: GetSpaceResponse = {
     {
       name: 'Admin User',
       invitedBy: null,
+      inviteExpiresAt: null,
       user: { id: 1 },
       role: MemberRole.ADMIN,
       status: MemberStatus.ACTIVE,
@@ -31,6 +32,7 @@ const mockSpace: GetSpaceResponse = {
     {
       name: 'Member One',
       invitedBy: 1,
+      inviteExpiresAt: null,
       user: { id: 2 },
       role: MemberRole.MEMBER,
       status: MemberStatus.ACTIVE,
@@ -38,6 +40,7 @@ const mockSpace: GetSpaceResponse = {
     {
       name: 'Member Two',
       invitedBy: 1,
+      inviteExpiresAt: null,
       user: { id: 3 },
       role: MemberRole.MEMBER,
       status: MemberStatus.ACTIVE,
