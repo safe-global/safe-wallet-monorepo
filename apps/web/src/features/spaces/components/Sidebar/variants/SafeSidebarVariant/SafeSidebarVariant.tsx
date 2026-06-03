@@ -10,6 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import css from '../../styles.module.css'
@@ -39,6 +40,7 @@ export const SafeSidebarVariant = ({
   isLoading = false,
 }: SafeSidebarVariantProps): ReactElement => {
   const router = useRouter()
+  const { state, isMobile } = useSidebar()
   const { safe } = useSafeInfo()
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const isHydrated = useSidebarHydrated()
@@ -95,25 +97,27 @@ export const SafeSidebarVariant = ({
                   <NavItem key={item?.href ?? `skeleton-main-${index}`} item={item} isLoading={isLoading} />
                 ))}
                 <SidebarMenuItem>
-                  <SidebarMenuButton
-                    size="lg"
-                    isActive={isSettingsActive}
-                    disabled={isLoading}
-                    className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
-                    render={!isLoading ? <Link href={settingsHref} /> : undefined}
-                    data-testid="sidebar-settings-item"
-                  >
-                    <Tooltip>
-                      <TooltipTrigger render={<span />} className="flex min-w-0 cursor-pointer items-center gap-3">
-                        <span className="relative">
-                          <Settings className="text-muted-foreground" />
+                  <Tooltip>
+                    <TooltipTrigger render={<span className="block w-full" />}>
+                      <SidebarMenuButton
+                        size="lg"
+                        isActive={isSettingsActive}
+                        disabled={isLoading}
+                        className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
+                        render={!isLoading ? <Link href={settingsHref} /> : undefined}
+                        data-testid="sidebar-settings-item"
+                      >
+                        <span className={`relative ${isSettingsActive ? css.activeIcon : ''}`}>
+                          <Settings />
                           {isOutdated && <span className={css.outdatedDot} aria-hidden />}
                         </span>
                         <span className="truncate group-data-[collapsible=icon]:hidden">Settings</span>
-                      </TooltipTrigger>
-                      <TooltipContent side="right">Settings</TooltipContent>
-                    </Tooltip>
-                  </SidebarMenuButton>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" hidden={state !== 'collapsed' || isMobile}>
+                      Settings
+                    </TooltipContent>
+                  </Tooltip>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>

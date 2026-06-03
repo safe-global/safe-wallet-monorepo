@@ -86,7 +86,14 @@ jest.mock('../../NavItem', () => ({
   ),
 }))
 
+// Controls the mocked sidebar collapse state per test.
+const mockSidebarState: { state: 'expanded' | 'collapsed'; isMobile: boolean } = {
+  state: 'expanded',
+  isMobile: false,
+}
+
 jest.mock('@/components/ui/sidebar', () => ({
+  useSidebar: () => mockSidebarState,
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -126,7 +133,8 @@ jest.mock('@/components/ui/sidebar', () => ({
 jest.mock('@/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children }: { children: ReactNode }) => <span>{children}</span>,
-  TooltipContent: () => null,
+  TooltipContent: ({ children, hidden }: { children: ReactNode; hidden?: boolean }) =>
+    hidden ? null : <div role="tooltip">{children}</div>,
 }))
 
 jest.mock('@/components/ui/avatar', () => ({
@@ -223,6 +231,8 @@ describe('SafeSidebarVariant', () => {
     mockUseSidebarHydrated.mockReturnValue(true)
     mockUseAppSelector.mockReturnValue(true)
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: CURRENT_USER_ID } })
+    mockSidebarState.state = 'expanded'
+    mockSidebarState.isMobile = false
   })
 
   it('renders all navigation sections', () => {
@@ -581,6 +591,61 @@ describe('SafeSidebarVariant', () => {
 
       const settingsButton = screen.getByTestId('sidebar-settings-item')
       expect(settingsButton).toHaveAttribute('data-active', 'true')
+    })
+
+    it('applies the active icon colour to Settings when active', () => {
+      const mockRouter = jest.requireMock('next/router').useRouter as jest.Mock
+      mockRouter.mockReturnValue({ push: jest.fn(), query: { safe: '0x123' }, pathname: AppRoutes.settings.setup })
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      const settingsButton = screen.getByTestId('sidebar-settings-item')
+      expect(settingsButton.querySelector('.activeIcon')).toBeInTheDocument()
+    })
+
+    it('does not apply the active icon colour to Settings when inactive', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      const settingsButton = screen.getByTestId('sidebar-settings-item')
+      expect(settingsButton.querySelector('.activeIcon')).not.toBeInTheDocument()
+    })
+
+    it('hides the Settings tooltip when the sidebar is expanded', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
+    })
+
+    it('shows the Settings tooltip when the sidebar is collapsed to icons', () => {
+      mockSidebarState.state = 'collapsed'
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByRole('tooltip')).toHaveTextContent('Settings')
     })
 
     it('marks Settings as active when on settings sub-tab page', () => {
