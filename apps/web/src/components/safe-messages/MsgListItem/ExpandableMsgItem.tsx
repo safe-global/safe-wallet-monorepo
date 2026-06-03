@@ -11,13 +11,7 @@ import txListItemCss from '@/components/transactions/TxListItem/styles.module.cs
 
 const ExpandableMsgItem = ({ msg, expanded = false }: { msg: MessageItem; expanded?: boolean }): ReactElement => {
   return (
-    <Accordion
-      defaultExpanded={expanded}
-      disableGutters
-      elevation={0}
-      className={txListItemCss.accordion}
-      sx={{ border: 'none', '&:before': { display: 'none' } }}
-    >
+    <Accordion defaultExpanded={expanded} disableGutters elevation={0} className={txListItemCss.listItem}>
       <AccordionSummary
         data-testid="message-item"
         expandIcon={<ExpandMoreIcon />}
