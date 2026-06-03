@@ -506,7 +506,7 @@ exports[`./index.stories CustomRecipient 1`] = `
           <div
             class="MuiAlert-icon mui-style-vab54s-MuiAlert-icon"
           >
-            mock-icon
+            <mock-icon />
           </div>
           <div
             class="MuiAlert-message mui-style-zioonp-MuiAlert-message"
