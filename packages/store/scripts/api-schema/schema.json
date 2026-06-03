@@ -9185,70 +9185,29 @@
           "safes"
         ]
       },
-      "WalletInviteUserDto": {
+      "InviteUserDto": {
         "type": "object",
         "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "wallet"
-            ]
-          },
           "address": {
             "type": "string"
           },
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 30
+          },
           "role": {
             "type": "string",
             "enum": [
               "ADMIN",
               "MEMBER"
             ]
-          },
-          "name": {
-            "type": "string",
-            "minLength": 3,
-            "maxLength": 30
           }
         },
         "required": [
-          "type",
           "address",
-          "role",
-          "name"
-        ]
-      },
-      "EmailInviteUserDto": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "email"
-            ]
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "maxLength": 255
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "ADMIN",
-              "MEMBER"
-            ]
-          },
-          "name": {
-            "type": "string",
-            "minLength": 3,
-            "maxLength": 30
-          }
-        },
-        "required": [
-          "type",
-          "email",
-          "role",
-          "name"
+          "name",
+          "role"
         ]
       },
       "InviteUsersDto": {
@@ -9257,14 +9216,7 @@
           "users": {
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/WalletInviteUserDto"
-                },
-                {
-                  "$ref": "#/components/schemas/EmailInviteUserDto"
-                }
-              ]
+              "$ref": "#/components/schemas/InviteUserDto"
             }
           }
         },

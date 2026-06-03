@@ -54,7 +54,6 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
 
     try {
       const usersToInvite = validMembers.map((member) => ({
-        type: 'wallet' as const,
         address: member.address,
         name: member.address,
         role: member.role,

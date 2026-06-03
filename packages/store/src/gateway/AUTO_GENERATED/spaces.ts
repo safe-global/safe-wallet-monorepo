@@ -508,20 +508,13 @@ export type Invitation = {
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   invitedBy: number | null
 }
-export type WalletInviteUserDto = {
-  type: 'wallet'
+export type InviteUserDto = {
   address: string
-  role: 'ADMIN' | 'MEMBER'
   name: string
-}
-export type EmailInviteUserDto = {
-  type: 'email'
-  email: string
   role: 'ADMIN' | 'MEMBER'
-  name: string
 }
 export type InviteUsersDto = {
-  users: (WalletInviteUserDto | EmailInviteUserDto)[]
+  users: InviteUserDto[]
 }
 export type AcceptInviteDto = {
   name: string
