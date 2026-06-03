@@ -1,8 +1,11 @@
 import React, { useMemo, useState } from 'react'
-import { Image, Text, YStack, XStack } from 'tamagui'
+import { Text, YStack, XStack } from 'tamagui'
 import { useToastController } from '@tamagui/toast'
 import type { WalletKitTypes, IWalletKit } from '@reown/walletkit'
 import { SafeButton } from '@/src/components/SafeButton'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { DappIcon } from './DappIcon'
+import { VerifyStatusIcon } from './VerifyStatusIcon'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { addSession, removePending } from '../store/walletKitSlice'
@@ -26,17 +29,22 @@ export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending }) =>
     activeSafe ? Object.keys(s.safes[activeSafe.address] ?? {}).map((chainId) => ({ chainId })) : [],
   )
   const [busy, setBusy] = useState(false)
+  const [showPermissions, setShowPermissions] = useState(false)
 
   const { proposer } = pending.proposal.params
   const verifyContext = pending.proposal.verifyContext
   const variant = useMemo(() => verifyStatusToVariant(verifyContext?.verified), [verifyContext])
 
+  const meta = proposer.metadata
+  // dApp domain without the scheme/trailing slash, e.g. 'https://uniswap.org/' -> 'uniswap.org'.
+  const domain = useMemo(() => meta.url?.replace(/^https?:\/\//, '').replace(/\/+$/, '') || meta.url || '', [meta.url])
+
   const close = () => dispatch(removePending({ id: pending.id, kind: 'proposal' }))
 
   const onConnect = async () => {
-    // Defensive fallback only — the handler in Task 3.1 has already auto-rejected proposals
-    // that are missing an active Safe or have unsupported namespaces. Reaching this branch
-    // means the active Safe was cleared between handler-time and Connect-tap.
+    // Defensive fallback only — the handler has already auto-rejected proposals missing an
+    // active Safe or with unsupported namespaces. Reaching this branch means the active Safe
+    // was cleared between handler-time and Connect-tap.
     if (!activeSafe) {
       await rejectProposal(walletKit, pending.id)
       close()
@@ -76,44 +84,50 @@ export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending }) =>
     }
   }
 
-  const onReject = async () => {
-    await rejectProposal(walletKit, pending.id)
-    close()
+  // The info symbol on the domain pill opens the permissions detail; "Got it" returns here.
+  if (showPermissions) {
+    return <ConnectionPermissionsPanel variant={variant} onDismiss={() => setShowPermissions(false)} />
   }
 
-  const meta = proposer.metadata
-
   return (
-    <YStack gap="$4" padding="$4">
-      <XStack gap="$3" alignItems="center">
-        {meta.icons?.[0] ? (
-          <Image src={meta.icons[0]} width={48} height={48} borderRadius="$2" />
-        ) : (
-          <YStack width={48} height={48} borderRadius="$2" backgroundColor="$backgroundSecondary" />
-        )}
-        <YStack flex={1}>
-          <Text fontWeight="600">{meta.name}</Text>
-          <Text color="$colorSecondary" numberOfLines={1}>
-            {meta.url}
-          </Text>
+    <YStack gap="$5" padding="$4">
+      <Text fontSize={18} fontWeight="600" textAlign="center">
+        Connection request
+      </Text>
+
+      <YStack gap="$3" alignItems="center">
+        <YStack width={64} height={64}>
+          <DappIcon url={meta.icons?.[0]} size={64} />
+          {/* Verify badge overlapping the icon's bottom-right corner. The $background ring
+              separates the badge from the dApp icon, matching the design. */}
+          <YStack position="absolute" bottom={-4} right={-4} borderRadius={100} backgroundColor="$background">
+            <VerifyStatusIcon variant={variant} size={22} onPress={() => setShowPermissions(true)} />
+          </YStack>
         </YStack>
-      </XStack>
-      <ConnectionPermissionsPanel variant={variant} />
-      <XStack gap="$3">
-        <SafeButton flex={1} outlined onPress={onReject} disabled={busy} testID="wc-proposal-reject">
-          Reject
-        </SafeButton>
-        <SafeButton
-          flex={1}
-          primary
-          onPress={onConnect}
-          loading={busy}
-          loadingText="Connecting…"
-          testID="wc-proposal-connect"
+
+        <Text fontSize={17} fontWeight="600" textAlign="center">
+          {meta.name}
+        </Text>
+
+        <XStack
+          gap="$1"
+          alignItems="center"
+          paddingVertical="$1"
+          paddingHorizontal="$2"
+          borderRadius="$2"
+          backgroundColor="$backgroundSecondary"
+          pressStyle={{ opacity: 0.6 }}
+          onPress={() => setShowPermissions(true)}
+          testID="wc-proposal-domain"
         >
-          Connect
-        </SafeButton>
-      </XStack>
+          <Text color="$colorSecondary">{domain}</Text>
+          <SafeFontIcon name="info" size={14} color="$colorSecondary" />
+        </XStack>
+      </YStack>
+
+      <SafeButton primary onPress={onConnect} loading={busy} loadingText="Connecting…" testID="wc-proposal-connect">
+        Connect
+      </SafeButton>
     </YStack>
   )
 }

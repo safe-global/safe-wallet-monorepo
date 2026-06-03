@@ -1,41 +1,76 @@
 import React from 'react'
 import { Text, YStack, XStack } from 'tamagui'
+import { SafeButton } from '@/src/components/SafeButton'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import type { IconName } from '@/src/types/iconTypes'
 import type { VerifyVariant } from '../utils/verifyStatus'
+import { VerifyStatusIcon } from './VerifyStatusIcon'
 
 type Props = {
   variant: VerifyVariant
+  onDismiss: () => void
 }
 
-const COPY: Record<VerifyVariant, { title: string; tone: 'positive' | 'neutral' | 'critical' }> = {
-  verified: { title: 'Verified dApp', tone: 'positive' },
-  unverified: { title: 'Unverified dApp — proceed with caution', tone: 'neutral' },
-  malicious: { title: 'This domain has been flagged as malicious', tone: 'critical' },
-}
+type PermissionRow = { allowed: boolean; text: string }
 
-const PERMISSIONS = [
-  'See your Safe address and balance',
-  'Request approval for transactions',
-  'Read on-chain data on your behalf',
+const CAN: PermissionRow[] = [
+  { allowed: true, text: 'View your balance and activity' },
+  { allowed: true, text: 'Request transactions approval' },
 ]
 
-export const ConnectionPermissionsPanel: React.FC<Props> = ({ variant }) => {
-  const { title, tone } = COPY[variant]
+const CANNOT: PermissionRow[] = [{ allowed: false, text: 'Move funds without permission' }]
+
+const Row: React.FC<PermissionRow> = ({ allowed, text }) => {
+  const icon: IconName = allowed ? 'check' : 'close'
   return (
-    <YStack gap="$3" padding="$4" borderRadius="$3" backgroundColor="$backgroundSecondary">
-      <Text
-        fontWeight="600"
-        color={tone === 'critical' ? '$error' : tone === 'positive' ? '$success' : '$colorSecondary'}
-      >
-        {title}
+    <XStack gap="$2" alignItems="center">
+      <SafeFontIcon name={icon} size={18} color={allowed ? '$success' : '$error'} />
+      <Text flex={1}>{text}</Text>
+    </XStack>
+  )
+}
+
+export const ConnectionPermissionsPanel: React.FC<Props> = ({ variant, onDismiss }) => {
+  const isVerified = variant === 'verified'
+
+  return (
+    <YStack gap="$4" padding="$4">
+      <Text fontSize={18} fontWeight="600" textAlign="center">
+        Connection request
       </Text>
+
+      <XStack
+        gap="$3"
+        padding="$3"
+        borderRadius="$3"
+        alignItems="center"
+        backgroundColor={isVerified ? '$successBackground' : '$errorBackground'}
+      >
+        <VerifyStatusIcon variant={variant} size={20} />
+        <Text flex={1} fontWeight="600">
+          {isVerified ? 'This domain has been verified.' : 'This domain could not be verified.'}
+        </Text>
+      </XStack>
+
       <YStack gap="$2">
-        {PERMISSIONS.map((p) => (
-          <XStack key={p} gap="$2">
-            <Text>•</Text>
-            <Text>{p}</Text>
-          </XStack>
+        <Text color="$colorSecondary">This website will be able to:</Text>
+        {CAN.map((row) => (
+          <Row key={row.text} {...row} />
         ))}
       </YStack>
+
+      <YStack gap="$2">
+        <Text color="$colorSecondary">This website won&apos;t be able to:</Text>
+        {CANNOT.map((row) => (
+          <Row key={row.text} {...row} />
+        ))}
+      </YStack>
+
+      {!isVerified && <Text fontWeight="600">Only continue if you trust the source.</Text>}
+
+      <SafeButton primary onPress={onDismiss} testID="wc-proposal-permissions-dismiss">
+        Got it
+      </SafeButton>
     </YStack>
   )
 }
