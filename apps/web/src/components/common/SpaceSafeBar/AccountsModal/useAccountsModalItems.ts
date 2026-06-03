@@ -91,9 +91,9 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
   }, [open, ownedSafesError, refetchOwnedSafes, dispatch])
 
   const filteredAllSafes = useMemo(() => {
-    if (!allSafes || !spaceExclusionKey) return allSafes
-    return allSafes.filter((s) => !spaceExclusionKey.has(`${s.chainId}:${s.address.toLowerCase()}`))
-  }, [allSafes, spaceExclusionKey])
+    if (!allSafes || !isQualifiedSafe) return allSafes
+    return allSafes.filter((s) => !spaceExclusionKey?.has(`${s.chainId}:${s.address.toLowerCase()}`))
+  }, [allSafes, isQualifiedSafe, spaceExclusionKey])
 
   const { allSingleSafes, allMultiChainSafes } = useAllSafesGrouped(filteredAllSafes ?? EMPTY_SAFES)
 
