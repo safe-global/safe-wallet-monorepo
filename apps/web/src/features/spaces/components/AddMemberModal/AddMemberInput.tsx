@@ -3,8 +3,10 @@ import { IconButton, InputAdornment, Skeleton, SvgIcon, TextField, Typography } 
 import Autocomplete from '@mui/material/Autocomplete'
 import classnames from 'classnames'
 import type { UseFormRegisterReturn } from 'react-hook-form'
+import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { isAddress } from 'viem'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
+import { useAddressBookSearch } from '@/features/spaces'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
@@ -53,18 +55,17 @@ const AddMemberInput = ({
     }
   }, [inviteeIdentifier, onSelectAddress, resolvedAddress])
 
-  const options = useMemo<InviteeIdentifierOption[]>(() => {
-    const query = inviteeIdentifier.toLowerCase()
+  const contacts = useMemo<InviteeIdentifierOption[]>(
+    () => Object.entries(addressBook).map(([address, name]) => ({ address, name })),
+    [addressBook],
+  )
 
-    if (!query || isAddress(query)) {
-      return []
-    }
-
-    return Object.entries(addressBook)
-      .filter(([address, name]) => address.toLowerCase().includes(query) || name.toLowerCase().includes(query))
-      .slice(0, MAX_VISIBLE_OPTIONS)
-      .map(([address, name]) => ({ address, name }))
-  }, [addressBook, inviteeIdentifier])
+  const searchQuery = isAddress(inviteeIdentifier) ? '' : inviteeIdentifier
+  const matches = useAddressBookSearch(contacts as SpaceAddressBookItemDto[], searchQuery)
+  const options = useMemo(
+    () => (isAddress(inviteeIdentifier) ? [] : matches.slice(0, MAX_VISIBLE_OPTIONS)),
+    [inviteeIdentifier, matches],
+  )
 
   const showIdenticon = Boolean(value && !error && isAddress(value))
 
@@ -96,6 +97,7 @@ const AddMemberInput = ({
     <Autocomplete<InviteeIdentifierOption, false, true, true>
       freeSolo
       disableClearable
+      openOnFocus
       open={isOpen && options.length > 0}
       onOpen={() => setIsOpen(true)}
       onClose={() => setIsOpen(false)}

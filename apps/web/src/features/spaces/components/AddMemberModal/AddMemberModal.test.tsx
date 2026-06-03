@@ -25,6 +25,13 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '42',
   MemberRole: { MEMBER: 'MEMBER', ADMIN: 'ADMIN' },
+  useAddressBookSearch: (contacts: { name: string; address: string }[], query: string) =>
+    query
+      ? contacts.filter(
+          ({ name, address }) =>
+            name.toLowerCase().includes(query.toLowerCase()) || address.toLowerCase().includes(query.toLowerCase()),
+        )
+      : contacts,
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/auth', () => ({
