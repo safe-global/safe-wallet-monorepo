@@ -162,7 +162,7 @@ describe('PageLayout', () => {
     )
   })
 
-  describe('/welcome/spaces topbar gating', () => {
+  describe('login page topbar gating (/welcome/spaces and /)', () => {
     const useIsRequireLoginEnabledModule = jest.requireMock('@/hooks/useIsRequireLoginEnabled') as {
       useIsRequireLoginEnabled: jest.Mock
     }
@@ -198,6 +198,24 @@ describe('PageLayout', () => {
       renderLayout(AppRoutes.welcome.spaces)
       expect(screen.getByTestId('topbar')).toBeInTheDocument()
     })
+
+    it('renders Topbar on / when the gate is OFF', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      renderLayout(AppRoutes.index)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
+
+    it('hides Topbar on / when the gate is ON', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(true)
+      renderLayout(AppRoutes.index)
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+    })
+
+    it('still shows Topbar on / while the flag is loading (undefined)', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
+      renderLayout(AppRoutes.index)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
   })
 
   describe('auth gate blocking', () => {
@@ -214,6 +232,11 @@ describe('PageLayout', () => {
 
     it('still renders the login page itself so the user can sign in', () => {
       renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.getByTestId('page-content')).toBeInTheDocument()
+    })
+
+    it('still renders / (the index login page) so the user can sign in', () => {
+      renderLayout(AppRoutes.index)
       expect(screen.getByTestId('page-content')).toBeInTheDocument()
     })
 

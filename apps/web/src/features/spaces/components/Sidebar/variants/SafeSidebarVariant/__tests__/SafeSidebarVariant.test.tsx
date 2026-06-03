@@ -26,7 +26,14 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
 
 const CURRENT_USER_ID = 7
 const adminMembersForCurrentUser = [
-  { role: 'ADMIN' as const, status: 'ACTIVE' as const, name: '', invitedBy: null, user: { id: CURRENT_USER_ID } },
+  {
+    role: 'ADMIN' as const,
+    status: 'ACTIVE' as const,
+    name: '',
+    invitedBy: null,
+    inviteExpiresAt: null,
+    user: { id: CURRENT_USER_ID },
+  },
 ]
 
 jest.mock('next/router', () => ({

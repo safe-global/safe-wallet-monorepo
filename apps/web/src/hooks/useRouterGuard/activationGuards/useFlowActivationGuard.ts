@@ -69,13 +69,13 @@ const guardRules: GuardRule[] = [
   // "Must log in to Spaces" gate — only when the feature is enabled
   // ---------------------------------------------------------------------
 
-  // While on the login page, follow ?next= onward once the user is signed in.
-  // If no ?next= is present we allow the page to render — `/welcome/spaces`
-  // is the canonical Spaces list for signed-in users.
+  // While on a login page (`/` or `/welcome/spaces`), follow ?next= onward
+  // once the user is signed in. If no ?next= is present we allow the page to
+  // render — both paths show the Spaces list for signed-in users.
   {
-    match: ({ isRequireLoginEnabled, isWelcomeSpacesPath, isSiweAuthenticated, hasSpaces, query }) =>
+    match: ({ isRequireLoginEnabled, isLoginPath, isSiweAuthenticated, hasSpaces, query }) =>
       isRequireLoginEnabled === true &&
-      isWelcomeSpacesPath &&
+      isLoginPath &&
       isSiweAuthenticated &&
       hasSpaces &&
       sanitizeNextUrl(query.next) !== null,
@@ -113,10 +113,10 @@ const guardRules: GuardRule[] = [
   // /welcome/create-space should round-trip through /welcome/spaces and only
   // hit onboarding once authenticated.
   {
-    match: ({ isRequireLoginEnabled, isSiweAuthenticated, isWelcomeSpacesPath, pathname }) => {
+    match: ({ isRequireLoginEnabled, isSiweAuthenticated, isLoginPath, pathname }) => {
       if (isRequireLoginEnabled !== true) return false
       if (isSiweAuthenticated) return false
-      if (isWelcomeSpacesPath) return false
+      if (isLoginPath) return false
       return !isAlwaysPublic(pathname)
     },
     action: ({ query, currentUrl }) => {
@@ -235,6 +235,7 @@ export const useFlowActivationGuard: UseGuard = () => {
     const isSpacesPath = pathname.startsWith('/spaces')
     const isOnboardingRoute = ONBOARDING_ROUTES.some((route) => pathname.startsWith(route))
     const isWelcomeSpacesPath = pathname === AppRoutes.welcome.spaces
+    const isLoginPath = isWelcomeSpacesPath || pathname === AppRoutes.index
     const currentUrl = buildCurrentNextUrl(pathname, query)
 
     return evaluateGuard(
@@ -244,7 +245,7 @@ export const useFlowActivationGuard: UseGuard = () => {
         isPublicRoute: !isOnboardingRoute && !isSpaceRoute && !isSpacesPath,
         isOnboardingRoute,
         isSpacesPath,
-        isWelcomeSpacesPath,
+        isLoginPath,
         isStoreHydrated,
         isWalletReady,
         isSiweAuthenticated,
