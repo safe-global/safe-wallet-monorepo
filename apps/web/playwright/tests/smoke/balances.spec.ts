@@ -5,11 +5,11 @@
  * This is the recommended approach for data-display pages.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
-import { staticSafes } from '../../src/data/safes'
+import { staticSafes, parseSafeAddress } from '../../src/data/safes'
 import { ROUTES } from '../../src/data/constants'
 import { safeGoto } from '../../src/utils/navigation'
 
-const safeAddress = staticSafes.SEP_STATIC_SAFE_2.split(':')[1]
+const safeAddress = parseSafeAddress(staticSafes.SEP_STATIC_SAFE_2)
 
 test.describe('Balances page', { tag: '@smoke' }, () => {
   test('should display token balances matching API data', async ({ safePage, safeApiClient }) => {

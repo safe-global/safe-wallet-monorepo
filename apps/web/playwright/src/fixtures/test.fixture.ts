@@ -62,7 +62,11 @@ async function seedLocalStorage(page: Page): Promise<void> {
 // CI debuggability — collect failure evidence
 // ---------------------------------------------------------------------------
 
-/** Collects console errors during the test */
+/**
+ * Collects console errors during the test.
+ * Note: listeners are scoped to the safePage fixture lifetime (one test).
+ * If page reuse across tests is introduced, add page.off() in teardown.
+ */
 function collectConsoleErrors(page: Page): string[] {
   const errors: string[] = []
   page.on('console', (msg) => {
@@ -76,7 +80,7 @@ function collectConsoleErrors(page: Page): string[] {
   return errors
 }
 
-/** Collects console warnings during the test */
+/** Collects console warnings during the test. Same scoping note as above. */
 function collectConsoleWarnings(page: Page): string[] {
   const warnings: string[] = []
   page.on('console', (msg) => {
