@@ -5,6 +5,7 @@ import {
   ContractStatus,
   type GroupedAnalysisResults,
   type Severity,
+  type StatusGroup,
 } from '@safe-global/utils/features/safe-shield/types'
 import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
@@ -24,6 +25,7 @@ export interface AnalysisGroupCardProps {
   'data-testid'?: string
   requestId?: string
   footer?: ReactNode
+  expandedGroups?: StatusGroup[]
 }
 
 export const AnalysisGroupCard = ({
@@ -35,11 +37,12 @@ export const AnalysisGroupCard = ({
   'data-testid': dataTestId,
   requestId,
   footer,
+  expandedGroups,
 }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
 
-  const visibleResults = useMemo(() => mapVisibleAnalysisResults(data), [data])
+  const visibleResults = useMemo(() => mapVisibleAnalysisResults(data, expandedGroups), [data, expandedGroups])
   const primaryResult = useMemo(() => getPrimaryAnalysisResult(data), [data])
   const primarySeverity = primaryResult?.severity
   const isHighlighted = !highlightedSeverity || primarySeverity === highlightedSeverity
