@@ -66,8 +66,11 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       console.log('[walletKit] session_request (stub)', r.id)
     }
     const onDelete = ({ topic }: { topic: string }) => dispatch(removeSession(topic))
-    const onExpire = () => refreshSessions()
-    const onUpdate = () => refreshSessions()
+    // proposal_expire / session_request_expire are the lifecycle-expiry events @reown/walletkit
+    // actually surfaces (its event map has no `session_expire` / `session_update`). Re-seed from
+    // the SDK so the slice's session mirror can't drift after a prune/expiry.
+    const onProposalExpire = () => refreshSessions()
+    const onRequestExpire = () => refreshSessions()
     const onAuthenticate = async ({ id }: { id: number }) => {
       try {
         await walletKit.rejectSessionAuthenticate({ id, reason: getSdkError('UNSUPPORTED_METHODS') })
@@ -79,16 +82,16 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     walletKit.on('session_proposal', onProposal)
     walletKit.on('session_request', onRequest)
     walletKit.on('session_delete', onDelete)
-    walletKit.on('session_expire', onExpire)
-    walletKit.on('session_update', onUpdate)
+    walletKit.on('proposal_expire', onProposalExpire)
+    walletKit.on('session_request_expire', onRequestExpire)
     walletKit.on('session_authenticate', onAuthenticate)
 
     return () => {
       walletKit.off('session_proposal', onProposal)
       walletKit.off('session_request', onRequest)
       walletKit.off('session_delete', onDelete)
-      walletKit.off('session_expire', onExpire)
-      walletKit.off('session_update', onUpdate)
+      walletKit.off('proposal_expire', onProposalExpire)
+      walletKit.off('session_request_expire', onRequestExpire)
       walletKit.off('session_authenticate', onAuthenticate)
     }
   }, [walletKit, dispatch])

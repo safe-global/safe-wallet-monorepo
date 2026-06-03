@@ -6,7 +6,7 @@ import { walletKitSliceName } from '../../store/walletKitSlice'
 import type { SessionTypes } from '@walletconnect/types'
 import type { IWalletKit } from '@reown/walletkit'
 
-const safeAddress = getAddress(faker.finance.ethereumAddress())
+const safeAddress = getAddress(faker.finance.ethereumAddress()) as `0x${string}`
 const checksummed = getAddress(safeAddress)
 
 const makeSession = (topic: string, chains: string[]): SessionTypes.Struct =>

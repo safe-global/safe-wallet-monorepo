@@ -16,7 +16,7 @@ jest.mock('@walletconnect/core', () => ({
 jest.mock('@walletconnect/utils', () => ({ getSdkError: jest.fn() }))
 
 // Spy on the MMKV factory the storage adapter uses.
-const mockCreateMMKV = jest.fn(() => ({
+const mockCreateMMKV = jest.fn((_opts: { id: string }) => ({
   getAllKeys: () => [],
   getString: () => undefined,
   set: jest.fn(),

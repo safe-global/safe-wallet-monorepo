@@ -23,7 +23,7 @@ jest.mock('expo-linking', () => ({
 jest.mock('../../components/RequestSheetHost', () => ({ RequestSheetHost: () => null }))
 jest.mock('../../hooks/useActiveSafeBinding', () => ({ useActiveSafeBinding: jest.fn() }))
 
-const listeners: Record<string, (arg: unknown) => void> = {}
+let listeners: Record<string, (arg: unknown) => void> = {}
 const session = { topic: 'seeded-topic' }
 const mockWalletKit = {
   getActiveSessions: jest.fn(() => ({ 'seeded-topic': session })),
@@ -54,7 +54,7 @@ const renderProvider = () => {
 describe('WalletKitProvider', () => {
   beforeEach(() => {
     mockUrlHandler = undefined
-    Object.keys(listeners).forEach((k) => delete listeners[k])
+    listeners = {}
     jest.clearAllMocks()
     mockGetInitialURL.mockResolvedValue(null)
   })
@@ -80,8 +80,8 @@ describe('WalletKitProvider', () => {
         'session_proposal',
         'session_request',
         'session_delete',
-        'session_expire',
-        'session_update',
+        'proposal_expire',
+        'session_request_expire',
         'session_authenticate',
       ]),
     )

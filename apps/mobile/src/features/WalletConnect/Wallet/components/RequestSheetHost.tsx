@@ -40,6 +40,7 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
       {/* Request-type sheets added in WA-2318 / WA-2321 / WA-2322. */}
+      {null}
     </BottomSheetModal>
   )
 }
