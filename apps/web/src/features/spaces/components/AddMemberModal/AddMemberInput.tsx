@@ -1,5 +1,6 @@
 import { type ChangeEvent, type FocusEvent, type ReactElement, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useTheme } from '@mui/material/styles'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 import { isAddress } from 'viem'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
@@ -35,6 +36,7 @@ const AddMemberInput = ({
   onSelectAddress,
   value,
 }: AddMemberInputProps): ReactElement => {
+  const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement | null>(null)
   const identifier = value.trim()
@@ -109,7 +111,8 @@ const AddMemberInput = ({
                 left: inputRect.left,
                 top: inputRect.bottom,
                 width: inputRect.width,
-                zIndex: 'var(--z-overlay, 1500)',
+                // Portaled into document.body, so it must clear the MUI Dialog (modal layer).
+                zIndex: theme.zIndex.tooltip,
               }}
             >
               {options.map((option) => (

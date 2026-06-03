@@ -1,4 +1,5 @@
-import { isAddress, isAddressEqual } from 'viem'
+import { isAddress } from 'viem'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { MemberRole } from '../../hooks/useSpaceMembers'
 import type { EmailInviteUserDto, WalletInviteUserDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
@@ -69,12 +70,7 @@ export const getIdentifierValidationError = ({
     return "You can't invite yourself."
   }
 
-  if (
-    isWalletAddress &&
-    walletAddresses?.some((walletAddress) =>
-      isAddressEqual(walletAddress as `0x${string}`, normalizedIdentifier as `0x${string}`),
-    )
-  ) {
+  if (isWalletAddress && walletAddresses?.some((walletAddress) => sameAddress(walletAddress, normalizedIdentifier))) {
     return "You can't invite yourself."
   }
 

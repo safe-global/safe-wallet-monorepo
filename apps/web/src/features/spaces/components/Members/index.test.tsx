@@ -1,25 +1,11 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { memberBuilder } from '@/tests/builders/member'
 
 const mockUseIsAdmin = jest.fn()
 const mockUseIsInvited = jest.fn()
 const mockUseSpaceMembersByStatus = jest.fn()
 const mockUseMembersSearch = jest.fn()
-
-const MEMBER_CREATED_AT = '2026-04-24T00:00:00.000Z'
-
-const memberDto = (overrides: Partial<MemberDto>): MemberDto => ({
-  id: 1,
-  role: 'MEMBER',
-  status: 'ACTIVE',
-  name: 'Alice',
-  alias: null,
-  invitedBy: null,
-  createdAt: MEMBER_CREATED_AT,
-  updatedAt: MEMBER_CREATED_AT,
-  user: { id: 11, status: 'ACTIVE', email: null },
-  ...overrides,
-})
 
 jest.mock('@/features/spaces', () => ({
   useIsAdmin: () => mockUseIsAdmin(),
@@ -69,8 +55,8 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 import SpaceMembers from './index'
 
 describe('SpaceMembers pending invitations visibility', () => {
-  const activeMember = memberDto({ id: 1, name: 'Active Alice', status: 'ACTIVE' })
-  const invitedMember = memberDto({ id: 2, name: 'Pending Bob', status: 'INVITED' })
+  const activeMember = memberBuilder().with({ id: 1, name: 'Active Alice', status: 'ACTIVE' }).build()
+  const invitedMember = memberBuilder().with({ id: 2, name: 'Pending Bob', status: 'INVITED' }).build()
 
   beforeEach(() => {
     jest.clearAllMocks()
