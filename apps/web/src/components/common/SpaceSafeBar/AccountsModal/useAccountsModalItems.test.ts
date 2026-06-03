@@ -84,6 +84,26 @@ describe('useAccountsModalItems', () => {
     expect(result.current.otherItems).toHaveLength(0)
   })
 
+  it('reports isLoading=true in workspace context while space safes are still loading', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+    mockUseAllSafes.mockReturnValue([safeItem('1', ADDR_A)])
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [], isLoading: true })
+
+    const { result } = renderHook(() => useAccountsModalItems({ search: '', open: true }))
+
+    expect(result.current.isLoading).toBe(true)
+  })
+
+  it('does not gate on space-safes loading outside workspace context', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(false)
+    mockUseAllSafes.mockReturnValue([safeItem('1', ADDR_A)])
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [], isLoading: true })
+
+    const { result } = renderHook(() => useAccountsModalItems({ search: '', open: true }))
+
+    expect(result.current.isLoading).toBe(false)
+  })
+
   it('filters out safes already in the current space by exact (chainId, address) match', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
     mockUseAllSafes.mockReturnValue([safeItem('1', ADDR_A), safeItem('100', ADDR_A), safeItem('1', ADDR_B)])

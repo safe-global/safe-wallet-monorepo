@@ -67,7 +67,7 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
   )
 
   const isQualifiedSafe = useIsQualifiedSafe()
-  const { allSafes: spaceSafes } = useSpaceSafes()
+  const { allSafes: spaceSafes, isLoading: spaceSafesLoading } = useSpaceSafes()
   const spaceExclusionKey = useMemo<Set<string> | null>(() => {
     if (!isQualifiedSafe) return null
     return new Set(flattenSafeItems(spaceSafes).map((s) => `${s.chainId}:${s.address.toLowerCase()}`))
@@ -133,7 +133,10 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
     trustedItems,
     otherItems,
     similarAddresses,
-    isLoading: !allSafes,
+    // In workspace context the exclusion set depends on space safes — show the skeleton
+    // until both arrive, otherwise the user briefly sees safes that ARE in the workspace
+    // before the filter kicks in (contradicting the "Safes not in this workspace" title).
+    isLoading: !allSafes || (isQualifiedSafe && Boolean(spaceSafesLoading)),
     isOwnedSafesError: Boolean(ownedSafesError),
     refetchOwnedSafes,
     isQualifiedSafe,
