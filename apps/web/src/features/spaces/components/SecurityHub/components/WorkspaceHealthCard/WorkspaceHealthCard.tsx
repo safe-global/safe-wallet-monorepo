@@ -1,5 +1,6 @@
 import { type ReactElement, useMemo } from 'react'
 import { RefreshCw } from 'lucide-react'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
@@ -112,6 +113,18 @@ const WorkspaceHealthCard = ({
     return counts
   }, [safes, scanResults, security.$isReady, security.scanKey, security.getSafeGrade])
 
+  // Distinct accounts needing attention — a Safe counts once if ANY of its chain entries
+  // resolves to a non-`passing` grade (matching the chip/table filter semantics).
+  const needsAttentionCount = useMemo(() => {
+    if (!security.$isReady) return 0
+    return safes.filter((safe) =>
+      safe.chainEntries.some((chain) => {
+        const results = scanResults[security.scanKey(safe.address, chain.chainId)]
+        return results ? security.getSafeGrade(results) !== 'passing' : false
+      }),
+    ).length
+  }, [safes, scanResults, security.$isReady, security.scanKey, security.getSafeGrade])
+
   // Show skeleton only when we have no data at all. Once any Safe has completed, render the
   // aggregate incrementally — it updates as more results arrive. The re-scan row below
   // surfaces the in-progress state via its "Scanning..." label.
@@ -143,7 +156,11 @@ const WorkspaceHealthCard = ({
           <Typography variant="h4">{level}</Typography>
 
           <Typography variant="paragraph-small" color="muted">
-            3 of {safes.length} accounts need attention
+            {needsAttentionCount === 0
+              ? 'All accounts are healthy'
+              : `${needsAttentionCount} of ${safes.length} account${maybePlural(safes.length)} need${
+                  needsAttentionCount === 1 ? 's' : ''
+                } attention`}
           </Typography>
 
           <div className="flex flex-wrap gap-2">

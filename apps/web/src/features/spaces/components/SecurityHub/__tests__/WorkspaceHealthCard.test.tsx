@@ -105,6 +105,37 @@ describe('WorkspaceHealthCard', () => {
     expect(screen.queryByText('100')).not.toBeInTheDocument()
   })
 
+  it('counts how many accounts need attention (a Safe counts once even across chains)', () => {
+    const withIssue = { ...allClear, contract_version: mkResult('issue', 'High') }
+    render(
+      <WorkspaceHealthCard
+        {...baseProps}
+        safes={[safe(SAFE_A), safe(SAFE_B)]}
+        scanResults={{
+          [scanKey(SAFE_A, '1')]: allClear,
+          [scanKey(SAFE_B, '1')]: withIssue,
+        }}
+        isScanning={false}
+      />,
+    )
+    expect(screen.getByText('1 of 2 accounts needs attention')).toBeInTheDocument()
+  })
+
+  it('shows the all-healthy message when every account passes', () => {
+    render(
+      <WorkspaceHealthCard
+        {...baseProps}
+        safes={[safe(SAFE_A), safe(SAFE_B)]}
+        scanResults={{
+          [scanKey(SAFE_A, '1')]: allClear,
+          [scanKey(SAFE_B, '1')]: allClear,
+        }}
+        isScanning={false}
+      />,
+    )
+    expect(screen.getByText('All accounts are healthy')).toBeInTheDocument()
+  })
+
   it('shows an incomplete-scan note when the last scan was partial and not running', () => {
     render(
       <WorkspaceHealthCard

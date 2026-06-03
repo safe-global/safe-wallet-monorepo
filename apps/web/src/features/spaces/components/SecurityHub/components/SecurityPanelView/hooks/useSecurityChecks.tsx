@@ -59,7 +59,7 @@ export const useSecurityChecks = (
     const showModuleSummary = activeModules.length > 2 && !modulesExpanded
 
     const items: SectionRow[] = []
-    const iconFor = (r: ScanResult) => <StatusIcon status={r.status} />
+    const iconFor = (r: ScanResult) => <StatusIcon status={r.status} severity={r.severity} />
 
     const accountSetupResult = results['account_setup']
     if (accountSetupResult) {
@@ -291,7 +291,7 @@ export const useSecurityChecks = (
             isPassing: trusted,
             node: (
               <Row
-                leadIcon={<StatusIcon status={status} />}
+                leadIcon={<StatusIcon status={status} severity={severity} />}
                 title={title}
                 expandedContent={
                   <EvidenceList intro={intro} evidence={perModuleEvidence} cta={trusted ? null : modulesCta} />

@@ -243,7 +243,7 @@ describe('SecuritySafesTable', () => {
         { multichain_setup: { status: 'partial', severity: 'Medium' } as ScanResult },
       )
       renderTable({ safes: [multiSafe], scanResults: warnResults })
-      expect(screen.getByTestId('WarningAmberRoundedIcon')).toBeInTheDocument()
+      expect(screen.getByLabelText('Signer setup differs across networks')).toBeInTheDocument()
     })
   })
 

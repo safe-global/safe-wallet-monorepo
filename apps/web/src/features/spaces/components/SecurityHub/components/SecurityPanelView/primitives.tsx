@@ -1,15 +1,11 @@
 import { type ReactElement, type ReactNode, useState } from 'react'
 import { Box, Collapse, Stack, Typography } from '@mui/material'
-import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
-import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded'
-import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded'
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
-import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutlineRounded'
-import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
 import Link from 'next/link'
 import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SEVERITY_RANK, type SecurityContract } from '@/features/security'
+import { resolveStatusTone, SeverityIcon } from '../SeverityIcon/SeverityIcon'
 
 export type SectionRow = { key: string; severity: SecurityGrade; isPassing: boolean; node: ReactNode }
 
@@ -27,16 +23,17 @@ export const isPassingStatus = (s: ScanResult['status']) =>
 export const sortBySeverity = <T extends { severity: SecurityGrade }>(items: T[]): T[] =>
   [...items].sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity])
 
-/** Leading icon reflecting a check's status. Sized & colored to match the accordion summary icon. */
-export const StatusIcon = ({ status }: { status: ScanResult['status'] }): ReactElement => {
-  const sx = { fontSize: 18, flexShrink: 0 } as const
-  if (status === 'clear') return <CheckCircleOutlineRoundedIcon sx={{ ...sx, color: 'success.main' }} />
-  if (status === 'not_applicable') return <RemoveCircleOutlineRoundedIcon sx={{ ...sx, color: 'text.secondary' }} />
-  if (status === 'inconclusive') return <HelpOutlineRoundedIcon sx={{ ...sx, color: 'text.disabled' }} />
-  if (status === 'partial') return <WarningAmberRoundedIcon sx={{ ...sx, color: 'warning.main' }} />
-  // issue
-  return <ErrorOutlineRoundedIcon sx={{ ...sx, color: 'error.main' }} />
-}
+/**
+ * Leading icon reflecting a check's status. Sized & colored to match the accordion summary icon.
+ * A Critical-severity issue escalates to the "dangerous" glyph (see `resolveStatusTone`).
+ */
+export const StatusIcon = ({
+  status,
+  severity,
+}: {
+  status: ScanResult['status']
+  severity?: SecurityGrade
+}): ReactElement => <SeverityIcon tone={resolveStatusTone(status, severity)} />
 
 type RowProps = {
   /** Leading status icon (same visual weight as accordion summary icon) */
