@@ -2,6 +2,12 @@
   border-color: transparent;
 }
 
+.standalone.listItem,
+.standalone.listItem:not(:last-of-type),
+.standalone.listItem:last-of-type {
+  border-radius: var(--space-3) !important;
+}
+
 .closed:hover,
 .batched {
   background-color: var(--color-secondary-background);

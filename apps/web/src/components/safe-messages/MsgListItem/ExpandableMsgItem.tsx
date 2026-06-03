@@ -15,8 +15,8 @@ const ExpandableMsgItem = ({ msg, expanded = false }: { msg: MessageItem; expand
       defaultExpanded={expanded}
       disableGutters
       elevation={0}
-      className={txListItemCss.accordion}
-      sx={{ border: 'none', '&:before': { display: 'none' } }}
+      className={`${txListItemCss.listItem} ${txListItemCss.standalone}`}
+      sx={{ '&:before': { display: 'none' } }}
     >
       <AccordionSummary
         data-testid="message-item"

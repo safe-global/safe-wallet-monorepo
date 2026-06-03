@@ -28,6 +28,7 @@ const ExpandableTransactionItem = ({
   const hoverContext = useContext(BatchExecuteHoverContext)
 
   const isBatched = hoverContext.activeHover.includes(item.transaction.id)
+  const isStandalone = !isBulkGroup && !isConflictGroup
 
   return (
     <Accordion
@@ -38,7 +39,7 @@ const ExpandableTransactionItem = ({
       }}
       elevation={0}
       defaultExpanded={!!txDetails}
-      className={classNames(css.listItem, { [css.batched]: isBatched })}
+      className={classNames(css.listItem, { [css.batched]: isBatched, [css.standalone]: isStandalone })}
       data-testid={testId}
       onChange={(_, expanded) => {
         if (expanded) {
