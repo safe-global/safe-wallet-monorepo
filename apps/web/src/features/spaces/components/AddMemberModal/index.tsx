@@ -30,7 +30,12 @@ import { isAuthenticated } from '@/store/authSlice'
 import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { isAddress } from 'viem'
-import { type MemberField, buildInviteUserPayload, getInviteeIdentifierValidationError } from './utils'
+import {
+  type MemberField,
+  buildInviteUserPayload,
+  getInviteeIdentifierValidationError,
+  normalizeInviteeIdentifier,
+} from './utils'
 import AddMemberInput from './AddMemberInput'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
@@ -120,7 +125,9 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
 
-    if (!data.inviteeIdentifier.trim()) {
+    const inviteeIdentifier = normalizeInviteeIdentifier(data.inviteeIdentifier)
+
+    if (!inviteeIdentifier) {
       return
     }
 
@@ -152,7 +159,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
         dispatch(
           showNotification({
-            message: `Invited ${data.name || data.inviteeIdentifier.trim()} to space`,
+            message: `Invited ${data.name || inviteeIdentifier} to space`,
             variant: 'success',
             groupKey: 'invite-member-success',
           }),
