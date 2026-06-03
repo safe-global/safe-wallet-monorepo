@@ -70,8 +70,7 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
   const { allSafes: spaceSafes } = useSpaceSafes()
   const spaceExclusionKey = useMemo<Set<string> | null>(() => {
     if (!isQualifiedSafe) return null
-    const flat = flattenSafeItems(spaceSafes)
-    return new Set(flat.map((s) => `${s.chainId}:${s.address.toLowerCase()}`))
+    return new Set(flattenSafeItems(spaceSafes).map((s) => `${s.chainId}:${s.address.toLowerCase()}`))
   }, [isQualifiedSafe, spaceSafes])
 
   useEffect(() => {
@@ -137,5 +136,6 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
     isLoading: !allSafes,
     isOwnedSafesError: Boolean(ownedSafesError),
     refetchOwnedSafes,
+    isQualifiedSafe,
   }
 }

@@ -109,6 +109,15 @@ describe('useAccountsModalItems', () => {
     expect(result.current.otherItems).toHaveLength(1)
   })
 
+  it('exposes isQualifiedSafe so callers do not need to call useIsQualifiedSafe themselves', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+    mockUseAllSafes.mockReturnValue([safeItem('1', ADDR_A)])
+
+    const { result } = renderHook(() => useAccountsModalItems({ search: '', open: true }))
+
+    expect(result.current.isQualifiedSafe).toBe(true)
+  })
+
   it('applies search by name and address substring', () => {
     mockUseAllSafes.mockReturnValue([
       safeItem('1', ADDR_A, { name: 'Treasury Safe' }),

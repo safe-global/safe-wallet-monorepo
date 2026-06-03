@@ -64,7 +64,7 @@ function DropdownWorkspaceHeader() {
   return (
     <div className="flex items-center gap-1 px-4 pt-3 pb-2">
       <span className="text-sm font-semibold text-secondary-foreground" data-testid="workspace-header">
-        Safes in this Workspace
+        Safes in this workspace
       </span>
     </div>
   )
@@ -173,7 +173,7 @@ function SpaceSafeBar() {
       ? (close: () => void) => <ConnectWalletFooter onConnect={connectWallet} onClose={close} />
       : (close: () => void) => (
           <DropdownFooter
-            label={isQualifiedSafe ? 'Safes not in this Workspace' : 'All Accounts'}
+            label={isQualifiedSafe ? 'Safes not in this workspace' : 'All Accounts'}
             onOpen={() => {
               close()
               handleOpenAccountsModal()

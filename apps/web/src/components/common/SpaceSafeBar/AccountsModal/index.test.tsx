@@ -1,12 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
-import { useIsQualifiedSafe } from '@/features/spaces'
 import type { SafeItem } from '@/hooks/safes'
 import { useAccountsModalItems } from './useAccountsModalItems'
 import AccountsModal from './index'
-
-jest.mock('@/features/spaces', () => ({
-  useIsQualifiedSafe: jest.fn(),
-}))
 
 jest.mock('./useAccountsModalItems', () => ({
   useAccountsModalItems: jest.fn(),
@@ -48,7 +43,6 @@ jest.mock('./MultiSafeItemCard', () => {
   return { __esModule: true, default: MockMultiSafeItemCard }
 })
 
-const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 const mockUseAccountsModalItems = useAccountsModalItems as jest.Mock
 
 const safeItem = (chainId: string, address: string, overrides: Partial<SafeItem> = {}): SafeItem => ({
@@ -63,38 +57,42 @@ const safeItem = (chainId: string, address: string, overrides: Partial<SafeItem>
 
 const ADDR_A = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
+const buildHookReturn = (overrides: Partial<ReturnType<typeof useAccountsModalItems>> = {}) => ({
+  trustedItems: [],
+  otherItems: [safeItem('1', ADDR_A)],
+  similarAddresses: new Set<string>(),
+  isLoading: false,
+  isOwnedSafesError: false,
+  refetchOwnedSafes: jest.fn(),
+  isQualifiedSafe: false,
+  ...overrides,
+})
+
 describe('AccountsModal', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    mockUseAccountsModalItems.mockReturnValue({
-      trustedItems: [],
-      otherItems: [safeItem('1', ADDR_A)],
-      similarAddresses: new Set<string>(),
-      isLoading: false,
-      isOwnedSafesError: false,
-      refetchOwnedSafes: jest.fn(),
-    })
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn())
   })
 
   it('shows the "All Accounts" dialog title when not in a qualified space', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ isQualifiedSafe: false }))
 
     render(<AccountsModal open onClose={jest.fn()} />)
 
     expect(screen.getByText('All Accounts')).toBeInTheDocument()
   })
 
-  it('shows the "Safes not in this Workspace" dialog title when in a qualified space', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
+  it('shows the "Safes not in this workspace" dialog title when in a qualified space', () => {
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ isQualifiedSafe: true }))
 
     render(<AccountsModal open onClose={jest.fn()} />)
 
-    expect(screen.getByText('Safes not in this Workspace')).toBeInTheDocument()
+    expect(screen.getByText('Safes not in this workspace')).toBeInTheDocument()
     expect(screen.queryByText('All Accounts')).not.toBeInTheDocument()
   })
 
   it('passes hidePinControls=false to cards when not in a qualified space', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ isQualifiedSafe: false }))
 
     render(<AccountsModal open onClose={jest.fn()} />)
 
@@ -102,7 +100,7 @@ describe('AccountsModal', () => {
   })
 
   it('passes hidePinControls=true to cards when in a qualified space', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ isQualifiedSafe: true }))
 
     render(<AccountsModal open onClose={jest.fn()} />)
 
@@ -110,15 +108,7 @@ describe('AccountsModal', () => {
   })
 
   it('renders the empty state when no items match', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
-    mockUseAccountsModalItems.mockReturnValue({
-      trustedItems: [],
-      otherItems: [],
-      similarAddresses: new Set<string>(),
-      isLoading: false,
-      isOwnedSafesError: false,
-      refetchOwnedSafes: jest.fn(),
-    })
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ trustedItems: [], otherItems: [] }))
 
     render(<AccountsModal open onClose={jest.fn()} />)
 
@@ -126,15 +116,7 @@ describe('AccountsModal', () => {
   })
 
   it('renders the loading skeleton while isLoading is true', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
-    mockUseAccountsModalItems.mockReturnValue({
-      trustedItems: [],
-      otherItems: [],
-      similarAddresses: new Set<string>(),
-      isLoading: true,
-      isOwnedSafesError: false,
-      refetchOwnedSafes: jest.fn(),
-    })
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ trustedItems: [], otherItems: [], isLoading: true }))
 
     render(<AccountsModal open onClose={jest.fn()} />)
 

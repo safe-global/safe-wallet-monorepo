@@ -6,7 +6,6 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Button } from '@/components/ui/button'
 import { AppRoutes } from '@/config/routes'
 import { isMultiChainSafeItem } from '@/hooks/safes'
-import { useIsQualifiedSafe } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import InlineRetryError from '@/components/common/InlineRetryError'
@@ -22,9 +21,15 @@ interface AccountsModalProps {
 
 const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
   const [search, setSearch] = useState('')
-  const isQualifiedSafe = useIsQualifiedSafe()
-  const { trustedItems, otherItems, similarAddresses, isLoading, isOwnedSafesError, refetchOwnedSafes } =
-    useAccountsModalItems({ search, open })
+  const {
+    trustedItems,
+    otherItems,
+    similarAddresses,
+    isLoading,
+    isOwnedSafesError,
+    refetchOwnedSafes,
+    isQualifiedSafe,
+  } = useAccountsModalItems({ search, open })
 
   if (!open) return null
 
@@ -34,7 +39,7 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
     <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent showCloseButton className="flex max-h-[90vh] w-full max-w-[560px] flex-col gap-0 p-0">
         <DialogHeader className="shrink-0 border-b border-border/50 px-4 pb-3 pt-4">
-          <DialogTitle>{isQualifiedSafe ? 'Safes not in this Workspace' : 'All Accounts'}</DialogTitle>
+          <DialogTitle>{isQualifiedSafe ? 'Safes not in this workspace' : 'All Accounts'}</DialogTitle>
         </DialogHeader>
 
         <div className="shrink-0 px-4 py-3">

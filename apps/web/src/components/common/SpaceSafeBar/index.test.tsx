@@ -219,7 +219,7 @@ describe('SpaceSafeBar', () => {
     expect(getByTestId('all-accounts-btn').textContent).toContain('All Accounts')
   })
 
-  it('labels the dropdown footer "Safes not in this Workspace" on the Spaces level', () => {
+  it('labels the dropdown footer "Safes not in this workspace" on the Spaces level', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
     mockUseSpaceBackLink.mockReturnValue({
       space: { id: 1, name: 'Test Space' },
@@ -227,10 +227,10 @@ describe('SpaceSafeBar', () => {
     })
 
     const { getByTestId } = render(<SpaceSafeBar />)
-    expect(getByTestId('all-accounts-btn').textContent).toContain('Safes not in this Workspace')
+    expect(getByTestId('all-accounts-btn').textContent).toContain('Safes not in this workspace')
   })
 
-  it('renders the "Safes in this Workspace" dropdown header on the Spaces level', () => {
+  it('renders the "Safes in this workspace" dropdown header on the Spaces level', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
     mockUseSpaceBackLink.mockReturnValue({
       space: { id: 1, name: 'Test Space' },
@@ -238,7 +238,7 @@ describe('SpaceSafeBar', () => {
     })
 
     const { getByTestId } = render(<SpaceSafeBar />)
-    expect(getByTestId('workspace-header').textContent).toBe('Safes in this Workspace')
+    expect(getByTestId('workspace-header').textContent).toBe('Safes in this workspace')
   })
 
   it('does not render the workspace header off the Spaces level', () => {
