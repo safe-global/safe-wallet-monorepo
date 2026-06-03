@@ -6,6 +6,7 @@ import {
   type AllSafeItems,
   type MultiChainSafeItem,
   type SafeItem,
+  type SafeItems,
 } from '@/hooks/safes'
 import { useIsQualifiedSafe, useSpaceSafes } from '@/features/spaces'
 import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
@@ -15,6 +16,9 @@ import { showNotification } from '@/store/notificationsSlice'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
+
+// Stable empty-array reference so `useAllSafesGrouped` memo doesn't re-run on each render while loading.
+const EMPTY_SAFES: SafeItems = []
 
 /**
  * Assembles the list shown in <AccountsModal />: the user's accounts
@@ -91,7 +95,7 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
     return allSafes.filter((s) => !spaceExclusionKey.has(`${s.chainId}:${s.address.toLowerCase()}`))
   }, [allSafes, spaceExclusionKey])
 
-  const { allSingleSafes, allMultiChainSafes } = useAllSafesGrouped(filteredAllSafes ?? [])
+  const { allSingleSafes, allMultiChainSafes } = useAllSafesGrouped(filteredAllSafes ?? EMPTY_SAFES)
 
   const allItems = useMemo<AllSafeItems>(() => {
     const multi = allMultiChainSafes ?? []
@@ -114,7 +118,9 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
   const trustedItems = useMemo<AllSafeItems>(() => filteredItems.filter((item) => item.isPinned), [filteredItems])
   const otherItems = useMemo<AllSafeItems>(() => filteredItems.filter((item) => !item.isPinned), [filteredItems])
 
-  // Fire SEARCH analytics once per non-empty query (debounced).
+  // Fire SEARCH analytics once per from-empty search session — re-arms when
+  // the user clears the input. Intentional: avoids spamming the endpoint on
+  // every keystroke while still capturing that the user searched.
   const searchTracked = useRef(false)
   useEffect(() => {
     if (!search.trim()) {

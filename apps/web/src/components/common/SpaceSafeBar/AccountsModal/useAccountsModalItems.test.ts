@@ -1,7 +1,9 @@
 import { renderHook } from '@testing-library/react'
 import { useIsQualifiedSafe, useSpaceSafes } from '@/features/spaces'
-import { useAllSafes } from '@/hooks/safes'
+import { useAllSafes, isMultiChainSafeItem } from '@/hooks/safes'
 import type { SafeItem } from '@/hooks/safes'
+import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
+import { useAppDispatch } from '@/store'
 import { useAccountsModalItems } from './useAccountsModalItems'
 
 jest.mock('@/features/spaces', () => ({
@@ -28,17 +30,19 @@ jest.mock('@/hooks/safes', () => {
 jest.mock('@/hooks/wallets/useWallet', () => () => ({ address: '' }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/owners', () => ({
-  useOwnersGetAllSafesByOwnerV2Query: () => ({ error: undefined, refetch: jest.fn() }),
+  useOwnersGetAllSafesByOwnerV2Query: jest.fn(() => ({ error: undefined, refetch: jest.fn() })),
 }))
 
 jest.mock('@/store', () => ({
-  useAppDispatch: () => jest.fn(),
+  useAppDispatch: jest.fn(),
   useAppSelector: () => ({}),
 }))
 
 const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 const mockUseSpaceSafes = useSpaceSafes as jest.Mock
 const mockUseAllSafes = useAllSafes as jest.Mock
+const mockUseOwnersQuery = useOwnersGetAllSafesByOwnerV2Query as unknown as jest.Mock
+const mockUseAppDispatch = useAppDispatch as unknown as jest.Mock
 
 const safeItem = (chainId: string, address: string, overrides: Partial<SafeItem> = {}): SafeItem => ({
   chainId,
@@ -58,6 +62,8 @@ describe('useAccountsModalItems', () => {
     jest.resetAllMocks()
     mockUseSpaceSafes.mockReturnValue({ allSafes: [] })
     mockUseIsQualifiedSafe.mockReturnValue(false)
+    mockUseOwnersQuery.mockReturnValue({ error: undefined, refetch: jest.fn() })
+    mockUseAppDispatch.mockReturnValue(jest.fn())
   })
 
   it('splits items into trusted (pinned) and other (non-pinned)', () => {
@@ -136,6 +142,47 @@ describe('useAccountsModalItems', () => {
     const { result } = renderHook(() => useAccountsModalItems({ search: '', open: true }))
 
     expect(result.current.isQualifiedSafe).toBe(true)
+  })
+
+  it('degrades a multi-chain safe to single-chain when one of its chains is in the workspace', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+    // ADDR_A is on chains 1 + 100 → would normally group as multi-chain.
+    mockUseAllSafes.mockReturnValue([safeItem('1', ADDR_A), safeItem('100', ADDR_A)])
+    // Workspace contains ADDR_A on chain 1 → chain 1 is excluded, only chain 100 remains.
+    mockUseSpaceSafes.mockReturnValue({
+      allSafes: [safeItem('1', ADDR_A)],
+    })
+
+    const { result } = renderHook(() => useAccountsModalItems({ search: '', open: true }))
+
+    expect(result.current.otherItems).toHaveLength(1)
+    const survivor = result.current.otherItems[0]
+    // After filtering, only one chain instance remains → must be a single-chain SafeItem, not multi.
+    expect(isMultiChainSafeItem(survivor)).toBe(false)
+    expect((survivor as SafeItem).chainId).toBe('100')
+    expect(survivor.address).toBe(ADDR_A)
+  })
+
+  it('does not dispatch the owned-safes error notification while the modal is closed', () => {
+    const dispatch = jest.fn()
+    mockUseAppDispatch.mockReturnValue(dispatch)
+    mockUseOwnersQuery.mockReturnValue({ error: { status: 500 }, refetch: jest.fn() })
+    mockUseAllSafes.mockReturnValue([safeItem('1', ADDR_A)])
+
+    renderHook(() => useAccountsModalItems({ search: '', open: false }))
+
+    expect(dispatch).not.toHaveBeenCalled()
+  })
+
+  it('dispatches the owned-safes error notification when the modal is open and the query errors', () => {
+    const dispatch = jest.fn()
+    mockUseAppDispatch.mockReturnValue(dispatch)
+    mockUseOwnersQuery.mockReturnValue({ error: { status: 500 }, refetch: jest.fn() })
+    mockUseAllSafes.mockReturnValue([safeItem('1', ADDR_A)])
+
+    renderHook(() => useAccountsModalItems({ search: '', open: true }))
+
+    expect(dispatch).toHaveBeenCalledTimes(1)
   })
 
   it('applies search by name and address substring', () => {

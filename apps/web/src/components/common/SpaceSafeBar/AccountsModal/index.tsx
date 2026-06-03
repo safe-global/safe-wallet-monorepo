@@ -13,10 +13,52 @@ import { SafeListSkeleton } from './shared'
 import SafeItemCard from './SafeItemCard'
 import MultiSafeItemCard from './MultiSafeItemCard'
 import { useAccountsModalItems } from './useAccountsModalItems'
+import type { AllSafeItems } from '@/hooks/safes'
 
 interface AccountsModalProps {
   open: boolean
   onClose: () => void
+}
+
+interface SectionOptions {
+  similarAddresses: Set<string>
+  onClose: () => void
+  hidePinControls: boolean
+  headerPaddingTopClass: string
+  headerTestId?: string
+}
+
+const renderSection = (title: string, items: AllSafeItems, opts: SectionOptions) => {
+  if (items.length === 0) return null
+  return (
+    <>
+      <div
+        className={`flex items-center gap-1.5 px-2 pb-1 ${opts.headerPaddingTopClass}`}
+        data-testid={opts.headerTestId}
+      >
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</span>
+      </div>
+      {items.map((item) =>
+        isMultiChainSafeItem(item) ? (
+          <MultiSafeItemCard
+            key={item.address}
+            item={item}
+            isSimilar={opts.similarAddresses.has(item.address.toLowerCase())}
+            onClose={opts.onClose}
+            hidePinControls={opts.hidePinControls}
+          />
+        ) : (
+          <SafeItemCard
+            key={`${item.chainId}:${item.address}`}
+            safeItem={item}
+            isSimilar={opts.similarAddresses.has(item.address.toLowerCase())}
+            onClose={opts.onClose}
+            hidePinControls={opts.hidePinControls}
+          />
+        ),
+      )}
+    </>
+  )
 }
 
 const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
@@ -74,63 +116,19 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
             </p>
           ) : (
             <>
-              {trustedItems.length > 0 && (
-                <>
-                  <div className="flex items-center gap-1.5 px-2 pb-1 pt-1" data-testid="pinned-accounts">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Trusted Safes
-                    </span>
-                  </div>
-                  {trustedItems.map((item) =>
-                    isMultiChainSafeItem(item) ? (
-                      <MultiSafeItemCard
-                        key={item.address}
-                        item={item}
-                        isSimilar={similarAddresses.has(item.address.toLowerCase())}
-                        onClose={onClose}
-                        hidePinControls={isQualifiedSafe}
-                      />
-                    ) : (
-                      <SafeItemCard
-                        key={`${item.chainId}:${item.address}`}
-                        safeItem={item}
-                        isSimilar={similarAddresses.has(item.address.toLowerCase())}
-                        onClose={onClose}
-                        hidePinControls={isQualifiedSafe}
-                      />
-                    ),
-                  )}
-                </>
-              )}
-
-              {otherItems.length > 0 && (
-                <>
-                  <div className="flex items-center gap-1.5 px-2 pb-1 pt-2">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Other Safes
-                    </span>
-                  </div>
-                  {otherItems.map((item) =>
-                    isMultiChainSafeItem(item) ? (
-                      <MultiSafeItemCard
-                        key={item.address}
-                        item={item}
-                        isSimilar={similarAddresses.has(item.address.toLowerCase())}
-                        onClose={onClose}
-                        hidePinControls={isQualifiedSafe}
-                      />
-                    ) : (
-                      <SafeItemCard
-                        key={`${item.chainId}:${item.address}`}
-                        safeItem={item}
-                        isSimilar={similarAddresses.has(item.address.toLowerCase())}
-                        onClose={onClose}
-                        hidePinControls={isQualifiedSafe}
-                      />
-                    ),
-                  )}
-                </>
-              )}
+              {renderSection('Trusted Safes', trustedItems, {
+                similarAddresses,
+                onClose,
+                hidePinControls: isQualifiedSafe,
+                headerPaddingTopClass: 'pt-1',
+                headerTestId: 'pinned-accounts',
+              })}
+              {renderSection('Other Safes', otherItems, {
+                similarAddresses,
+                onClose,
+                hidePinControls: isQualifiedSafe,
+                headerPaddingTopClass: 'pt-2',
+              })}
             </>
           )}
         </div>
