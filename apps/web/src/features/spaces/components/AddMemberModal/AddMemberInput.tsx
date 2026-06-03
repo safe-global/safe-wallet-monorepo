@@ -42,10 +42,10 @@ const AddMemberInput = ({
 }: AddMemberInputProps): ReactElement => {
   const [isOpen, setIsOpen] = useState(false)
   const inviteeIdentifier = value.trim()
-  const shouldResolveName = Boolean(
+  const shouldResolveEns = Boolean(
     inviteeIdentifier && !isEmailAddress(inviteeIdentifier) && !isAddress(inviteeIdentifier),
   )
-  const { address: resolvedAddress } = useNameResolver(shouldResolveName ? inviteeIdentifier : '')
+  const { address: resolvedAddress } = useNameResolver(shouldResolveEns ? inviteeIdentifier : '')
 
   useEffect(() => {
     if (resolvedAddress) {
