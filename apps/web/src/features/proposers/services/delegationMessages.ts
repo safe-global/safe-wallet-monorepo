@@ -3,7 +3,7 @@ import type { CreateMessageDto } from '@safe-global/store/gateway/AUTO_GENERATED
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { parseDelegationOrigin } from '@/features/proposers/utils/delegationParsing'
-import { normalizeDelegateTypedData, type getDelegateTypedData } from '@safe-global/utils/services/delegates'
+import { getDelegateTypedData, normalizeDelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { AppDispatch } from '@/store'
 
 /**
