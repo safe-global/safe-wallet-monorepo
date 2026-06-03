@@ -4,6 +4,8 @@ import HnSignupLayout from './HnSignupLayout'
 import css from './styles.module.css'
 import Track from '@/components/common/Track'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { useTheme } from '@mui/material/styles'
+import HypernativeLogo from '../HypernativeLogo'
 
 export type HnSignupIntroProps = {
   onGetStarted: () => void
@@ -11,6 +13,8 @@ export type HnSignupIntroProps = {
 }
 
 const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
+  const theme = useTheme()
+
   const features = [
     {
       title: 'Automatic blocking',
@@ -37,7 +41,7 @@ const HnSignupIntro = ({ onGetStarted, onClose }: HnSignupIntroProps) => {
             <Typography variant="body2" className={css.poweredByText}>
               powered by
             </Typography>
-            <img src="/images/hypernative/hypernative-logo.svg" alt="Hypernative" className={css.logo} />
+            <HypernativeLogo fill={theme.palette.primary.light} sx={{ width: 66 }} />
           </div>
           <Typography variant="body2" className={css.subtitle}>
             Enterprise-level protection for teams and organizations.
