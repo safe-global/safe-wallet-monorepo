@@ -57,11 +57,16 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
   const isRequireLoginEnabled = useIsRequireLoginEnabled() === true
   const isSignedIn = useIsSignedIn()
-  // /welcome/spaces renders the sign-in form when signed out, the legacy
-  // workspaces list when signed in. Only the list needs the Topbar.
+  // The login page (`/welcome/spaces` or `/`) is the canonical login surface
+  // when the require-login gate is on (and the Topbar's URL-derived hooks then
+  // add SSR hydration noise on top of being pointless). With the gate off,
+  // /welcome/spaces still renders the sign-in form when signed out and the
+  // legacy workspaces list when signed in — only the list needs the Topbar.
+  const isLoginPath = pathname === AppRoutes.welcome.spaces || pathname === AppRoutes.index
   const hideHeader =
     NO_HEADER_ROUTES.includes(pathname) ||
-    (pathname === AppRoutes.welcome.spaces && (isRequireLoginEnabled || !isSignedIn))
+    (isRequireLoginEnabled && isLoginPath) ||
+    (pathname === AppRoutes.welcome.spaces && !isSignedIn)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
   const urlSafeAddress = useSafeAddressFromUrl()
@@ -86,11 +91,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   // The login page, onboarding flow and always-public pages stay rendered.
   const isGateBlocking = useIsAuthGateBlocking()
   const isGateBlockedRoute =
-    isGateBlocking &&
-    !isAlwaysPublic(pathname) &&
-    pathname !== AppRoutes.welcome.spaces &&
-    !isOnboardingRoute &&
-    !isStaticPage
+    isGateBlocking && !isAlwaysPublic(pathname) && !isLoginPath && !isOnboardingRoute && !isStaticPage
   if (isGateBlockedRoute) {
     return <></>
   }
