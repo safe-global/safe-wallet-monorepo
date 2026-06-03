@@ -44,6 +44,7 @@
     "cross-env": "^7.0.3",
     "cypress": "^15.9.0",
     "eslint": "^9.29.0",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.2",
     "vite": "^8.0.13",

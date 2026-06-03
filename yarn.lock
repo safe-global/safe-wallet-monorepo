@@ -14079,6 +14079,7 @@ __metadata:
     cypress: "npm:^15.9.0"
     eslint: "npm:^9.29.0"
     firebase: "npm:11.1.0"
+    prettier: "npm:^3.6.2"
     react: "npm:19.2.0"
     react-dom: "npm:19.2.0"
     react-helmet-async: "npm:^3.0.0"
