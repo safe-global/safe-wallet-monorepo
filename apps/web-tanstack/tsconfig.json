@@ -19,10 +19,17 @@
     "paths": {
       "@/*": ["../web/src/*"],
       "@/public/*": ["../web/public/*"],
+      "@/storybook/*": ["../web/.storybook/*"],
+      "src/*": ["../web/src/*"],
       "@safe-global/theme/*": ["../../packages/theme/src/*"],
       "@safe-global/store/*": ["../../packages/store/src/*"],
       "@safe-global/utils/*": ["../../packages/utils/src/*"],
       "@safe-global/test/*": ["../../config/test/*"],
+      "@safe-global/safe-apps-sdk/dist/types/types/permissions": [
+        "../../node_modules/@safe-global/safe-apps-sdk/dist/types/types/permissions"
+      ],
+      "@gnosis.pm/zodiac/dist/cjs/types/Delay": ["../../node_modules/@gnosis.pm/zodiac/dist/cjs/types/Delay"],
+      "next/dist/client/resolve-href": ["./src/compat/next-resolve-href.ts"],
       "next/router": ["./src/compat/next-router.tsx"],
       "next/link": ["./src/compat/next-link.tsx"],
       "next/head": ["./src/compat/next-head.tsx"],

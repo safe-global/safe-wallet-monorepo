@@ -1,29 +1,35 @@
 /**
- * Compatibility shim for `next/router`.
- *
- * Decided in docs/migration/state/decisions.md (2026-05-22): cross-workspace
- * Next.js imports inside reused apps/web/src/** code are routed to these
- * shims via Vite aliases so we don't have to rewrite 175 call-sites up front.
- *
- * This delegates to TanStack Router primitives. Phase 3 migrators are expected
- * to gradually replace `useRouter()` with native TanStack hooks; until then
- * this gives a working router-shaped object.
+ * Compatibility shim for `next/router`, delegating to TanStack Router. Reused
+ * apps/web/src code imports `next/router`; a Vite alias routes those imports
+ * here so they keep working against a router-shaped object.
  */
 import { useMemo } from 'react'
+import type { UrlObject } from 'url'
 import { useNavigate, useRouter as useTanStackRouter, useRouterState } from '@tanstack/react-router'
 
-type Url = string | { pathname?: string; query?: Record<string, string | string[] | undefined>; hash?: string }
+// Mirror next's own `Url` type (string | node's UrlObject) so reused web code
+// that passes a full UrlObject (host, hostname, numeric query values, ...) or
+// next's imported `Url` type type-checks unchanged.
+type Url = string | UrlObject
+
+// next router push/replace/prefetch accept (url, as?, options?).
+type TransitionOptions = { shallow?: boolean; locale?: string | false; scroll?: boolean }
 
 function toHref(url: Url): string {
   if (typeof url === 'string') return url
   const pathname = url.pathname ?? '/'
-  const params = new URLSearchParams()
-  for (const [k, v] of Object.entries(url.query ?? {})) {
-    if (v == null) continue
-    if (Array.isArray(v)) v.forEach((vv) => params.append(k, String(vv)))
-    else params.append(k, String(v))
+  let qs = ''
+  if (typeof url.query === 'string') {
+    qs = url.query
+  } else if (url.query) {
+    const params = new URLSearchParams()
+    for (const [k, v] of Object.entries(url.query)) {
+      if (v == null) continue
+      if (Array.isArray(v)) v.forEach((vv) => params.append(k, String(vv)))
+      else params.append(k, String(v))
+    }
+    qs = params.toString()
   }
-  const qs = params.toString()
   const hash = url.hash ? `#${url.hash.replace(/^#/, '')}` : ''
   return `${pathname}${qs ? `?${qs}` : ''}${hash}`
 }
@@ -51,12 +57,12 @@ export interface NextRouterLike {
   isFallback: boolean
   isPreview: boolean
   query: Record<string, string | string[]>
-  push: (url: Url) => Promise<boolean>
-  replace: (url: Url) => Promise<boolean>
+  push: (url: Url, as?: Url, options?: TransitionOptions) => Promise<boolean>
+  replace: (url: Url, as?: Url, options?: TransitionOptions) => Promise<boolean>
   back: () => void
   forward: () => void
   reload: () => void
-  prefetch: (url: Url) => Promise<void>
+  prefetch: (url: Url, as?: Url, options?: TransitionOptions) => Promise<void>
   beforePopState: (cb: () => boolean) => void
   events: {
     on: (event: string, handler: (...args: unknown[]) => void) => void
@@ -128,11 +134,17 @@ export function withRouter<P extends object>(
   }
 }
 
+// next's default export is the imperatively-usable singleton router. Reused
+// web code reads `router.pathname` off it outside React, so back it with the
+// live location.
 const router = {
   useRouter,
   withRouter,
-  push: async (_url: Url) => true,
-  replace: async (_url: Url) => true,
+  get pathname() {
+    return typeof window !== 'undefined' ? window.location.pathname : '/'
+  },
+  push: async (_url: Url, _as?: Url, _options?: TransitionOptions) => true,
+  replace: async (_url: Url, _as?: Url, _options?: TransitionOptions) => true,
   events: noopEvents,
 }
 

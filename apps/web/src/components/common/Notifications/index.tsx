@@ -72,6 +72,7 @@ const Toast = ({
   onClose,
   id,
   icon = false,
+  autoHideDuration: autoHideDurationOverride,
 }: {
   variant: AlertColor
   onClose: () => void
@@ -89,7 +90,12 @@ const Toast = ({
     onClose()
   }
 
-  const autoHideDuration = variant === 'info' || variant === 'success' ? 5000 : undefined
+  const autoHideDuration =
+    autoHideDurationOverride !== undefined
+      ? (autoHideDurationOverride ?? undefined)
+      : variant === 'info' || variant === 'success'
+        ? 5000
+        : undefined
 
   return (
     <Snackbar open onClose={handleClose} sx={toastStyle} autoHideDuration={autoHideDuration}>

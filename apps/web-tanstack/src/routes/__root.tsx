@@ -19,6 +19,7 @@ import { makeStore, setStoreInstance, useHydrateStore, useInitStaticChains } fro
 import createEmotionCache from '@/utils/createEmotionCache'
 import MetaTags from '@/components/common/MetaTags'
 import PageLayout from '@/components/common/PageLayout'
+import PwaReloadPrompt from '../components/PwaReloadPrompt'
 import Notifications from '@/components/common/Notifications'
 import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
 import { CaptchaProvider } from '@/components/common/Captcha'
@@ -161,6 +162,7 @@ function RootShell() {
             <CssBaseline />
             <CaptchaProvider>
               <InitApp />
+              <PwaReloadPrompt />
               <Suspense fallback={null}>
                 <LazyWeb3Init />
               </Suspense>
