@@ -30,7 +30,7 @@ const config: ExpoConfig = {
   },
   orientation: 'portrait',
   icon: './assets/images/icon.png',
-  scheme: 'myapp',
+  scheme: ['myapp', 'wc'],
   userInterfaceStyle: 'automatic',
   ios: {
     config: {
