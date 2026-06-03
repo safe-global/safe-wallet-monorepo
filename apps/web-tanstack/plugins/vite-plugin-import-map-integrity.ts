@@ -8,17 +8,17 @@ import type { Plugin } from 'vite'
 const sri = (content: string | Uint8Array): string => `sha384-${createHash('sha384').update(content).digest('base64')}`
 
 const injectIntegrity = (html: string, integrity: Record<string, string>): string => {
-  let out = html.replace(/<(?:script|link)\b[^>]*>/g, (tag) => {
-    const ref = tag.match(/\b(?:src|href)="([^"]+)"/)
+  let out = html.replace(/<(?:script|link)\b[^>]*>/gi, (tag) => {
+    const ref = tag.match(/\b(?:src|href)="([^"]+)"/i)
     const hash = ref && integrity[ref[1]]
     if (!hash) {
       return tag
     }
     let next = tag
-    if (!/\bintegrity=/.test(next)) {
+    if (!/\bintegrity=/i.test(next)) {
       next = next.replace(/\s*\/?>$/, (end) => ` integrity="${hash}"${end}`)
     }
-    if (!/\bcrossorigin/.test(next)) {
+    if (!/\bcrossorigin/i.test(next)) {
       next = next.replace(/\s*\/?>$/, (end) => ` crossorigin="anonymous"${end}`)
     }
     return next

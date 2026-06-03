@@ -40,6 +40,14 @@ test('injectIntegrity does not duplicate an existing crossorigin attribute', () 
   assert.ok(out.includes('integrity="sha384-AAA"'))
 })
 
+test('injectIntegrity matches upper-case tags and attributes', () => {
+  const html = '<head></head><body><SCRIPT TYPE="module" SRC="/assets/a.js"></SCRIPT></body>'
+  const out = injectIntegrity(html, { '/assets/a.js': 'sha384-AAA' })
+
+  assert.ok(out.includes('integrity="sha384-AAA"'), 'upper-case script gets integrity')
+  assert.ok(out.includes('crossorigin="anonymous"'), 'upper-case script gets crossorigin')
+})
+
 test('injectIntegrity leaves untracked references untouched', () => {
   const html = '<head></head><script src="https://cdn.example.com/x.js"></script>'
   const out = injectIntegrity(html, { '/assets/a.js': 'sha384-AAA' })
