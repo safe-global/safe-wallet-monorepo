@@ -9206,8 +9206,7 @@
           },
           "name": {
             "type": "string",
-            "minLength": 3,
-            "maxLength": 30
+            "maxLength": 255
           }
         },
         "required": [
@@ -9240,8 +9239,7 @@
           },
           "name": {
             "type": "string",
-            "minLength": 3,
-            "maxLength": 30
+            "maxLength": 255
           }
         },
         "required": [
@@ -9318,8 +9316,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "minLength": 3,
-            "maxLength": 30
+            "maxLength": 255
           }
         },
         "required": [
