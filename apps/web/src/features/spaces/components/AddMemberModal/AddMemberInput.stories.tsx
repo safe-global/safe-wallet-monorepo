@@ -5,7 +5,7 @@ import { createMockStory } from '@/stories/mocks'
 import AddMemberInput from './AddMemberInput'
 
 type FormValues = {
-  identifier: string
+  inviteeIdentifier: string
 }
 
 const addressBook = {
@@ -28,7 +28,7 @@ const defaultSetup = createMockStory({
 
 const AddMemberInputStory = ({ error }: { error?: string }) => {
   const { register, setValue, watch } = useForm<FormValues>({
-    defaultValues: { identifier: '' },
+    defaultValues: { inviteeIdentifier: '' },
   })
 
   return (
@@ -36,9 +36,9 @@ const AddMemberInputStory = ({ error }: { error?: string }) => {
       <AddMemberInput
         addressBook={addressBook}
         error={error}
-        inputProps={register('identifier')}
-        onSelectAddress={(address) => setValue('identifier', address)}
-        value={watch('identifier')}
+        inputProps={register('inviteeIdentifier')}
+        onSelectAddress={(address) => setValue('inviteeIdentifier', address)}
+        value={watch('inviteeIdentifier')}
       />
     </Box>
   )

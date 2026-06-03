@@ -30,7 +30,7 @@ import { isAuthenticated } from '@/store/authSlice'
 import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { isAddress } from 'viem'
-import { type MemberField, buildInviteUserPayload, getIdentifierValidationError } from './utils'
+import { type MemberField, buildInviteUserPayload, getInviteeIdentifierValidationError } from './utils'
 import AddMemberInput from './AddMemberInput'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
@@ -86,19 +86,19 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
     mode: 'onChange',
     defaultValues: {
       name: '',
-      identifier: '',
+      inviteeIdentifier: '',
       role: MemberRole.MEMBER,
     },
   })
 
   const { handleSubmit, formState, register, watch, setValue } = methods
 
-  const identifierValue = watch('identifier')
-  const identifierInputProps = register('identifier', {
+  const inviteeIdentifierValue = watch('inviteeIdentifier')
+  const inviteeIdentifierInputProps = register('inviteeIdentifier', {
     validate: (value) => {
       return (
-        getIdentifierValidationError({
-          identifier: value,
+        getInviteeIdentifierValidationError({
+          inviteeIdentifier: value,
           sessionEmail,
           walletAddresses: currentUser?.wallets?.map((wallet) => wallet.address),
         }) ?? true
@@ -107,20 +107,20 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   })
 
   useEffect(() => {
-    if (!isAddress(identifierValue)) {
+    if (!isAddress(inviteeIdentifierValue)) {
       return
     }
 
-    const addressBookName = addressBook[identifierValue]
+    const addressBookName = addressBook[inviteeIdentifierValue]
     if (addressBookName) {
       setValue('name', addressBookName, { shouldValidate: true })
     }
-  }, [addressBook, identifierValue, setValue])
+  }, [addressBook, inviteeIdentifierValue, setValue])
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
 
-    if (!data.identifier.trim()) {
+    if (!data.inviteeIdentifier.trim()) {
       return
     }
 
@@ -152,7 +152,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
         dispatch(
           showNotification({
-            message: `Invited ${data.name || data.identifier.trim()} to space`,
+            message: `Invited ${data.name || data.inviteeIdentifier.trim()} to space`,
             variant: 'success',
             groupKey: 'invite-member-success',
           }),
@@ -183,13 +183,13 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
               <AddMemberInput
                 addressBook={addressBook}
-                error={formState.errors.identifier?.message}
-                inputProps={identifierInputProps}
+                error={formState.errors.inviteeIdentifier?.message}
+                inputProps={inviteeIdentifierInputProps}
                 onSelectAddress={(address, name) => {
-                  setValue('identifier', address, { shouldDirty: true, shouldValidate: true })
+                  setValue('inviteeIdentifier', address, { shouldDirty: true, shouldValidate: true })
                   setValue('name', name, { shouldValidate: true })
                 }}
-                value={identifierValue}
+                value={inviteeIdentifierValue}
               />
             </Stack>
 
@@ -208,7 +208,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
               data-testid="add-member-modal-button"
               type="submit"
               variant="contained"
-              disabled={!identifierValue.trim() || !formState.isValid || isSubmitting}
+              disabled={!inviteeIdentifierValue.trim() || !formState.isValid || isSubmitting}
               disableElevation
             >
               {isSubmitting ? <CircularProgress size={20} /> : 'Add member'}

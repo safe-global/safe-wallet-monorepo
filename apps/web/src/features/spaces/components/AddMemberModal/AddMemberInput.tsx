@@ -10,7 +10,7 @@ import Identicon from '@/components/common/Identicon'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
 import inputCss from '@/styles/inputs.module.css'
-import { EMAIL_IDENTIFIER_MAX_LENGTH, isEmailIdentifier } from './utils'
+import { EMAIL_MAX_LENGTH, isEmailAddress } from './utils'
 import css from './styles.module.css'
 
 type AddressBook = Record<string, string>
@@ -18,21 +18,21 @@ type AddressBook = Record<string, string>
 type AddMemberInputProps = {
   addressBook: AddressBook
   error?: string
-  inputProps: UseFormRegisterReturn<'identifier'>
+  inputProps: UseFormRegisterReturn<'inviteeIdentifier'>
   onSelectAddress: (address: string, name: string) => void
   value: string
 }
 
-type IdentifierOption = { address: string; name: string }
+type InviteeIdentifierOption = { address: string; name: string }
 
 const MAX_VISIBLE_OPTIONS = 5
 
 /**
- * Invite-specific identifier input.
+ * Invite-specific input for choosing who to invite.
  *
  * Unlike AddressBookInput/AddressInput, this accepts either an email or a wallet
- * identifier. Address-book names and ENS names are resolved to addresses before
- * submit; emails are kept as email identifiers.
+ * inviteeIdentifier. Address-book names and ENS names are resolved to addresses before
+ * submit; emails are kept as-is.
  */
 const AddMemberInput = ({
   addressBook,
@@ -42,18 +42,20 @@ const AddMemberInput = ({
   value,
 }: AddMemberInputProps): ReactElement => {
   const [isOpen, setIsOpen] = useState(false)
-  const identifier = value.trim()
-  const shouldResolveName = Boolean(identifier && !isEmailIdentifier(identifier) && !isAddress(identifier))
-  const { address: resolvedAddress } = useNameResolver(shouldResolveName ? identifier : '')
+  const inviteeIdentifier = value.trim()
+  const shouldResolveName = Boolean(
+    inviteeIdentifier && !isEmailAddress(inviteeIdentifier) && !isAddress(inviteeIdentifier),
+  )
+  const { address: resolvedAddress } = useNameResolver(shouldResolveName ? inviteeIdentifier : '')
 
   useEffect(() => {
     if (resolvedAddress) {
-      onSelectAddress(resolvedAddress, identifier)
+      onSelectAddress(resolvedAddress, inviteeIdentifier)
     }
-  }, [identifier, onSelectAddress, resolvedAddress])
+  }, [inviteeIdentifier, onSelectAddress, resolvedAddress])
 
-  const options = useMemo<IdentifierOption[]>(() => {
-    const query = identifier.toLowerCase()
+  const options = useMemo<InviteeIdentifierOption[]>(() => {
+    const query = inviteeIdentifier.toLowerCase()
 
     if (!query || isAddress(query)) {
       return []
@@ -63,17 +65,17 @@ const AddMemberInput = ({
       .filter(([address, name]) => address.toLowerCase().includes(query) || name.toLowerCase().includes(query))
       .slice(0, MAX_VISIBLE_OPTIONS)
       .map(([address, name]) => ({ address, name }))
-  }, [addressBook, identifier])
+  }, [addressBook, inviteeIdentifier])
 
   const showIdenticon = Boolean(value && !error && isAddress(value))
-  const showInitials = Boolean(value && !error && !showIdenticon && isEmailIdentifier(identifier))
+  const showInitials = Boolean(value && !error && !showIdenticon && isEmailAddress(inviteeIdentifier))
 
   const renderAvatar = () => {
     if (showIdenticon) {
       return <Identicon address={value} size={32} />
     }
     if (showInitials) {
-      return <InitialsAvatar name={identifier} size="medium" rounded />
+      return <InitialsAvatar name={inviteeIdentifier} size="medium" rounded />
     }
     return <Skeleton variant="circular" width={32} height={32} animation={false} />
   }
@@ -99,7 +101,7 @@ const AddMemberInput = ({
     ) : null
 
   return (
-    <Autocomplete<IdentifierOption, false, true, true>
+    <Autocomplete<InviteeIdentifierOption, false, true, true>
       freeSolo
       disableClearable
       open={isOpen && options.length > 0}
@@ -145,8 +147,8 @@ const AddMemberInput = ({
           spellCheck={false}
           inputProps={{
             ...params.inputProps,
-            'data-testid': 'member-identifier-input',
-            maxLength: EMAIL_IDENTIFIER_MAX_LENGTH,
+            'data-testid': 'member-invitee-identifier-input',
+            maxLength: EMAIL_MAX_LENGTH,
           }}
           InputProps={{
             ...params.InputProps,

@@ -100,7 +100,7 @@ describe('AddMemberModal tracking', () => {
 
     render(<AddMemberModal onClose={jest.fn()} />)
 
-    fireEvent.change(screen.getByTestId('member-identifier-input'), {
+    fireEvent.change(screen.getByTestId('member-invitee-identifier-input'), {
       target: { value: '0x1234567890123456789012345678901234567890' },
     })
 
@@ -124,7 +124,7 @@ describe('AddMemberModal tracking', () => {
 
     render(<AddMemberModal onClose={jest.fn()} />)
 
-    fireEvent.change(screen.getByTestId('member-identifier-input'), {
+    fireEvent.change(screen.getByTestId('member-invitee-identifier-input'), {
       target: { value: 'invitee@example.com' },
     })
 
@@ -142,30 +142,32 @@ describe('AddMemberModal tracking', () => {
     })
   })
 
-  it('limits the identifier input to the CGW email max length', () => {
+  it('limits the invitee identifier input to the CGW email max length', () => {
     render(<AddMemberModal onClose={jest.fn()} />)
 
-    expect(screen.getByTestId('member-identifier-input')).toHaveAttribute('maxLength', '255')
+    expect(screen.getByTestId('member-invitee-identifier-input')).toHaveAttribute('maxLength', '255')
   })
 
   it('shows an initials avatar for a valid email', async () => {
     render(<AddMemberModal onClose={jest.fn()} />)
 
-    fireEvent.change(screen.getByTestId('member-identifier-input'), {
+    fireEvent.change(screen.getByTestId('member-invitee-identifier-input'), {
       target: { value: 'invitee@example.com' },
     })
 
     await waitFor(() => expect(screen.getByText('i')).toBeInTheDocument())
   })
 
-  it('shows an error for an invalid identifier', async () => {
+  it('shows an error for an invalid invitee identifier', async () => {
     render(<AddMemberModal onClose={jest.fn()} />)
 
-    fireEvent.change(screen.getByTestId('member-identifier-input'), {
+    fireEvent.change(screen.getByTestId('member-invitee-identifier-input'), {
       target: { value: 'not-a-wallet-or-email' },
     })
 
-    await waitFor(() => expect(screen.getByTestId('member-identifier-input')).toHaveAttribute('aria-invalid', 'true'))
+    await waitFor(() =>
+      expect(screen.getByTestId('member-invitee-identifier-input')).toHaveAttribute('aria-invalid', 'true'),
+    )
     expect(screen.getByTestId('add-member-modal-button')).toBeDisabled()
   })
 
@@ -176,11 +178,13 @@ describe('AddMemberModal tracking', () => {
 
     render(<AddMemberModal onClose={jest.fn()} />)
 
-    fireEvent.change(screen.getByTestId('member-identifier-input'), {
+    fireEvent.change(screen.getByTestId('member-invitee-identifier-input'), {
       target: { value: 'ALICE@example.com' },
     })
 
-    await waitFor(() => expect(screen.getByTestId('member-identifier-input')).toHaveAttribute('aria-invalid', 'true'))
+    await waitFor(() =>
+      expect(screen.getByTestId('member-invitee-identifier-input')).toHaveAttribute('aria-invalid', 'true'),
+    )
     expect(screen.getByTestId('add-member-modal-button')).toBeDisabled()
   })
 
@@ -194,11 +198,13 @@ describe('AddMemberModal tracking', () => {
 
     render(<AddMemberModal onClose={jest.fn()} />)
 
-    fireEvent.change(screen.getByTestId('member-identifier-input'), {
+    fireEvent.change(screen.getByTestId('member-invitee-identifier-input'), {
       target: { value: '0x1234567890123456789012345678901234567890' },
     })
 
-    await waitFor(() => expect(screen.getByTestId('member-identifier-input')).toHaveAttribute('aria-invalid', 'true'))
+    await waitFor(() =>
+      expect(screen.getByTestId('member-invitee-identifier-input')).toHaveAttribute('aria-invalid', 'true'),
+    )
     expect(screen.getByTestId('add-member-modal-button')).toBeDisabled()
   })
 
@@ -213,12 +219,12 @@ describe('AddMemberModal tracking', () => {
 
     render(<AddMemberModal onClose={jest.fn()} />)
 
-    fireEvent.change(screen.getByTestId('member-identifier-input'), {
+    fireEvent.change(screen.getByTestId('member-invitee-identifier-input'), {
       target: { value: 'Ali' },
     })
     fireEvent.click(await screen.findByRole('option', { name }))
 
-    expect(screen.getByTestId('member-identifier-input')).toHaveValue(address)
+    expect(screen.getByTestId('member-invitee-identifier-input')).toHaveValue(address)
 
     const submitButton = screen.getByTestId('add-member-modal-button')
     await waitFor(() => expect(submitButton).not.toBeDisabled())

@@ -6,27 +6,27 @@ import type { EmailInviteUserDto, WalletInviteUserDto } from '@safe-global/store
 export type MemberField = {
   name: string
   // Can be an address book name, wallet address, or email.
-  identifier: string
+  inviteeIdentifier: string
   role: MemberRole
 }
 
-export type InviteIdentifierPayload = EmailInviteUserDto | WalletInviteUserDto
+export type InvitePayload = EmailInviteUserDto | WalletInviteUserDto
 
-export const EMAIL_IDENTIFIER_MAX_LENGTH = 255
+export const EMAIL_MAX_LENGTH = 255
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-export const isEmailIdentifier = (value: string): boolean => EMAIL_REGEX.test(value)
+export const isEmailAddress = (value: string): boolean => EMAIL_REGEX.test(value)
 
-export const normalizeIdentifier = (value: string): string => value.trim()
+export const normalizeInviteeIdentifier = (value: string): string => value.trim()
 
-export const buildInviteUserPayload = (data: MemberField): InviteIdentifierPayload => {
-  const identifier = normalizeIdentifier(data.identifier)
+export const buildInviteUserPayload = (data: MemberField): InvitePayload => {
+  const inviteeIdentifier = normalizeInviteeIdentifier(data.inviteeIdentifier)
 
-  if (isEmailIdentifier(identifier)) {
+  if (isEmailAddress(inviteeIdentifier)) {
     return {
       type: 'email',
-      email: identifier.toLowerCase(),
+      email: inviteeIdentifier.toLowerCase(),
       role: data.role,
       name: data.name,
     }
@@ -34,43 +34,43 @@ export const buildInviteUserPayload = (data: MemberField): InviteIdentifierPaylo
 
   return {
     type: 'wallet',
-    address: identifier,
+    address: inviteeIdentifier,
     role: data.role,
     name: data.name,
   }
 }
 
-export const getIdentifierValidationError = ({
-  identifier,
+export const getInviteeIdentifierValidationError = ({
+  inviteeIdentifier,
   sessionEmail,
   walletAddresses,
 }: {
-  identifier: string
+  inviteeIdentifier: string
   sessionEmail?: string
   walletAddresses?: string[]
 }): string | undefined => {
-  const normalizedIdentifier = normalizeIdentifier(identifier)
+  const normalized = normalizeInviteeIdentifier(inviteeIdentifier)
 
-  if (!normalizedIdentifier) {
+  if (!normalized) {
     return undefined
   }
 
-  const isEmail = isEmailIdentifier(normalizedIdentifier)
-  const isWalletAddress = isAddress(normalizedIdentifier)
+  const isEmailIdentifier = isEmailAddress(normalized)
+  const isWalletIdentifier = isAddress(normalized)
 
-  if (isEmail && normalizedIdentifier.length > EMAIL_IDENTIFIER_MAX_LENGTH) {
-    return `Email must be ${EMAIL_IDENTIFIER_MAX_LENGTH} characters or less.`
+  if (isEmailIdentifier && normalized.length > EMAIL_MAX_LENGTH) {
+    return `Email must be ${EMAIL_MAX_LENGTH} characters or less.`
   }
 
-  if (!isEmail && !isWalletAddress) {
+  if (!isEmailIdentifier && !isWalletIdentifier) {
     return 'Enter a valid email, wallet address, or ENS.'
   }
 
-  if (isEmail && sessionEmail && normalizedIdentifier.toLowerCase() === sessionEmail.toLowerCase()) {
+  if (isEmailIdentifier && sessionEmail && normalized.toLowerCase() === sessionEmail.toLowerCase()) {
     return "You can't invite yourself."
   }
 
-  if (isWalletAddress && walletAddresses?.some((walletAddress) => sameAddress(walletAddress, normalizedIdentifier))) {
+  if (isWalletIdentifier && walletAddresses?.some((walletAddress) => sameAddress(walletAddress, normalized))) {
     return "You can't invite yourself."
   }
 
