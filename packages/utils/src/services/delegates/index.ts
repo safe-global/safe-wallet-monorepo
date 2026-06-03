@@ -18,7 +18,7 @@ const DELEGATE_MESSAGE_TYPES = {
 /**
  * Generates typed data for delegate registration according to EIP-712.
  * The domain includes a non-standard `safe` field, so signing must bypass
- * ethers' built-in validators — use `signDelegateTypedData` and `hashDelegateTypedData`.
+ * ethers' built-in validators — use `hashDelegateTypedData` (and send the normalized payload via `normalizeDelegateTypedData`).
  */
 export type DelegateAction = 'add' | 'delete' | 'edit'
 
