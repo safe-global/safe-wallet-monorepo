@@ -10,6 +10,8 @@
     "src/components/common/Mui/index.tsx",
     "src/services/contracts/ContractErrorCodes.ts",
     "src/service-workers/firebase-messaging/webhook-types.ts",
+    "src/service-workers/firebase-messaging/notifications.ts",
+    "src/services/push-notifications/tracking.ts",
     "src/features/counterfactual/contract.ts",
     "src/features/ledger/types.ts",
     "src/features/multichain/types.ts",

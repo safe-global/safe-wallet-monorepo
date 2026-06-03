@@ -1,4 +1,5 @@
 import { defineConfig, loadEnv } from 'vite'
+import { VitePWA } from 'vite-plugin-pwa'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import svgr from 'vite-plugin-svgr'
@@ -10,6 +11,8 @@ import remarkGfm from 'remark-gfm'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
+import { swAssets } from './plugins/vite-plugin-sw-assets'
+import { importMapIntegrity } from './plugins/vite-plugin-import-map-integrity'
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 const webRoot = path.resolve(__dirname, '../web')
@@ -38,6 +41,9 @@ export default defineConfig(({ mode }) => {
   // like dev, gather every NEXT_PUBLIC_* / VITE_* value at build time and
   // inline them as a literal `process.env` object via `define`.
   const loadedEnv = loadEnv(mode, process.cwd(), ['VITE_', 'NEXT_PUBLIC_', 'EXPO_PUBLIC_'])
+  // `NODE_ENV` is typed as a narrow union, but the host shell can set it to
+  // 'cypress' (see comment below). Read it as a plain string so that check holds.
+  const hostNodeEnv = process.env.NODE_ENV as string
   const processEnv = {
     ...loadedEnv,
     // Build-time constants that override / supplement what loadEnv saw.
@@ -49,8 +55,8 @@ export default defineConfig(({ mode }) => {
     // `IS_TEST_E2E` in apps/web/src/config/constants.ts (and the require-login
     // gate it gates) without needing a separate NEXT_PUBLIC_IS_TEST_E2E flag.
     NODE_ENV:
-      process.env.NODE_ENV === 'cypress' || process.env.NODE_ENV === 'test'
-        ? process.env.NODE_ENV
+      hostNodeEnv === 'cypress' || hostNodeEnv === 'test'
+        ? hostNodeEnv
         : mode === 'production'
           ? 'production'
           : 'development',
@@ -119,6 +125,10 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: [
         // Next.js compatibility shims (decisions.md: cross-workspace next/* shimming)
+        {
+          find: 'next/dist/client/resolve-href',
+          replacement: path.resolve(__dirname, 'src/compat/next-resolve-href.ts'),
+        },
         { find: 'next/router', replacement: path.resolve(__dirname, 'src/compat/next-router.tsx') },
         { find: 'next/link', replacement: path.resolve(__dirname, 'src/compat/next-link.tsx') },
         { find: 'next/head', replacement: path.resolve(__dirname, 'src/compat/next-head.tsx') },
@@ -226,6 +236,34 @@ export default defineConfig(({ mode }) => {
           return null
         },
       },
+      // The worker is bundled by Vite, so the `define` block above (process.env,
+      // __APP_VERSION__) and the `@/` resolve aliases apply to it.
+      VitePWA({
+        strategies: 'injectManifest',
+        srcDir: 'src/service-worker',
+        filename: 'sw.ts',
+        registerType: 'prompt',
+        // PwaReloadPrompt's useRegisterSW performs the single registration; no
+        // competing auto-injected script.
+        injectRegister: false,
+        // Reuse the existing safe.webmanifest (linked via MetaTags); don't let
+        // the plugin generate/inject its own manifest.
+        manifest: false,
+        injectManifest: {
+          globPatterns: ['**/*.{js,css,html,svg,png,ico,webp,woff2}'],
+          // Exclude the stale publicDir service workers, the generated worker, and sourcemaps.
+          globIgnores: ['firebase-messaging-sw.js', 'workbox-*.js', 'sw.js', '**/*.map'],
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        },
+        devOptions: {
+          enabled: true,
+          type: 'module',
+          navigateFallback: 'index.html',
+        },
+      }),
+      // Ordered after VitePWA so its cleanup runs once sw.js is generated.
+      swAssets(path.resolve(__dirname, 'src/service-worker/offline.html')),
+      importMapIntegrity(),
     ],
   }
 })
