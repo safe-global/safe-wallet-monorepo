@@ -38,6 +38,8 @@ const alertVariants = cva(
           'text-destructive bg-card *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current',
         warning:
           'bg-yellow-50 text-yellow-800 border-transparent *:data-[slot=alert-description]:text-yellow-800 *:[svg]:text-current',
+        success:
+          'bg-[var(--color-success-background)] text-[var(--color-success-dark)] border-[var(--color-success-light)] *:data-[slot=alert-description]:text-[var(--color-success-dark)] *:[svg]:text-current',
       },
     },
     defaultVariants: {
