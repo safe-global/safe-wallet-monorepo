@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Stack, Typography } from '@mui/material'
+import { Stack, Typography, useTheme } from '@mui/material'
 import { AnalysisGroupCard, type AnalysisGroupCardProps } from '@/features/safe-shield/components/AnalysisGroupCard'
 import HypernativeLogo from '../HypernativeLogo'
 
@@ -7,20 +7,17 @@ type HnAnalysisGroupCardProps = Omit<AnalysisGroupCardProps, 'footer'> & {
   overflowRow?: ReactNode
 }
 
-const ByHypernativeFooter = () => (
-  <Stack direction="row" alignItems="center" alignSelf="flex-end" gap={0.5}>
-    <Typography variant="caption" color="text.secondary">
-      by
-    </Typography>
-    <HypernativeLogo
-      sx={{
-        width: 78,
-        height: 15,
-        '& > rect': { fill: (theme) => theme.palette.text.secondary },
-      }}
-    />
-  </Stack>
-)
+const ByHypernativeFooter = () => {
+  const theme = useTheme()
+  return (
+    <Stack direction="row" alignItems="center" alignSelf="flex-end" gap={0.5}>
+      <Typography variant="caption" color="text.secondary">
+        by
+      </Typography>
+      <HypernativeLogo fill={theme.palette.text.secondary} sx={{ width: 70, height: 17 }} />
+    </Stack>
+  )
+}
 
 /**
  * Hypernative-branded variant of AnalysisGroupCard.
