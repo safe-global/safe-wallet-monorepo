@@ -5,7 +5,7 @@ exports[`./SafeGradeChip.stories ActiveFilter 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="border has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-2 rounded-full border-transparent px-3 py-1 text-sm font-medium [&>svg]:size-[18px]! cursor-pointer transition-opacity hover:opacity-80 ring-2 ring-inset bg-[var(--color-error-background)] text-[var(--color-error-dark)] ring-[var(--color-error-dark)]"
+    class="border py-0.5 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-2 rounded-full border-transparent px-3 text-xs font-medium [&>svg]:size-[18px]! cursor-pointer transition-opacity hover:opacity-80 ring-1 ring-inset bg-[var(--color-error-background)] text-[var(--color-error-dark)] ring-[var(--color-error-dark)]"
     data-slot="badge"
     data-variant="default"
     role="button"
@@ -28,27 +28,27 @@ exports[`./SafeGradeChip.stories ActiveFilter 1`] = `
       />
       <rect
         class="fill-[var(--color-border-light)]"
-        height="10"
+        height="8"
         rx="1.5"
         width="3"
         x="8"
-        y="12"
+        y="14"
       />
       <rect
         class="fill-[var(--color-border-light)]"
-        height="15"
+        height="12"
         rx="1.5"
         width="3"
         x="14"
-        y="7"
+        y="10"
       />
       <rect
         class="fill-[var(--color-border-light)]"
-        height="20"
+        height="16"
         rx="1.5"
         width="3"
         x="20"
-        y="2"
+        y="6"
       />
     </svg>
     1 critical
@@ -61,7 +61,7 @@ exports[`./SafeGradeChip.stories AtRisk 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-2 rounded-full border-transparent bg-[var(--color-border-background)] px-3 py-1 text-sm font-medium text-[var(--color-primary-light)] [&>svg]:size-[18px]!"
+    class="border py-0.5 transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-2 rounded-full border-transparent bg-muted px-3 text-xs font-medium text-muted-foreground [&>svg]:size-[18px]!"
     data-slot="badge"
     data-variant="default"
   >
@@ -82,27 +82,27 @@ exports[`./SafeGradeChip.stories AtRisk 1`] = `
       />
       <rect
         class="fill-[var(--color-error-main)]"
-        height="10"
+        height="8"
         rx="1.5"
         width="3"
         x="8"
-        y="12"
+        y="14"
       />
       <rect
         class="fill-[var(--color-border-light)]"
-        height="15"
+        height="12"
         rx="1.5"
         width="3"
         x="14"
-        y="7"
+        y="10"
       />
       <rect
         class="fill-[var(--color-border-light)]"
-        height="20"
+        height="16"
         rx="1.5"
         width="3"
         x="20"
-        y="2"
+        y="6"
       />
     </svg>
     3 at risk
@@ -115,7 +115,7 @@ exports[`./SafeGradeChip.stories Critical 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-2 rounded-full border-transparent bg-[var(--color-border-background)] px-3 py-1 text-sm font-medium text-[var(--color-primary-light)] [&>svg]:size-[18px]!"
+    class="border py-0.5 transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-2 rounded-full border-transparent bg-muted px-3 text-xs font-medium text-muted-foreground [&>svg]:size-[18px]!"
     data-slot="badge"
     data-variant="default"
   >
@@ -136,27 +136,27 @@ exports[`./SafeGradeChip.stories Critical 1`] = `
       />
       <rect
         class="fill-[var(--color-border-light)]"
-        height="10"
+        height="8"
         rx="1.5"
         width="3"
         x="8"
-        y="12"
+        y="14"
       />
       <rect
         class="fill-[var(--color-border-light)]"
-        height="15"
+        height="12"
         rx="1.5"
         width="3"
         x="14"
-        y="7"
+        y="10"
       />
       <rect
         class="fill-[var(--color-border-light)]"
-        height="20"
+        height="16"
         rx="1.5"
         width="3"
         x="20"
-        y="2"
+        y="6"
       />
     </svg>
     1 critical
@@ -169,7 +169,7 @@ exports[`./SafeGradeChip.stories NeedsAttention 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-2 rounded-full border-transparent bg-[var(--color-border-background)] px-3 py-1 text-sm font-medium text-[var(--color-primary-light)] [&>svg]:size-[18px]!"
+    class="border py-0.5 transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-2 rounded-full border-transparent bg-muted px-3 text-xs font-medium text-muted-foreground [&>svg]:size-[18px]!"
     data-slot="badge"
     data-variant="default"
   >
@@ -190,27 +190,27 @@ exports[`./SafeGradeChip.stories NeedsAttention 1`] = `
       />
       <rect
         class="fill-[var(--color-warning-main)]"
-        height="10"
+        height="8"
         rx="1.5"
         width="3"
         x="8"
-        y="12"
+        y="14"
       />
       <rect
         class="fill-[var(--color-warning-main)]"
-        height="15"
+        height="12"
         rx="1.5"
         width="3"
         x="14"
-        y="7"
+        y="10"
       />
       <rect
         class="fill-[var(--color-border-light)]"
-        height="20"
+        height="16"
         rx="1.5"
         width="3"
         x="20"
-        y="2"
+        y="6"
       />
     </svg>
     2 needs review
@@ -223,7 +223,7 @@ exports[`./SafeGradeChip.stories Passing 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-2 rounded-full border-transparent bg-[var(--color-border-background)] px-3 py-1 text-sm font-medium text-[var(--color-primary-light)] [&>svg]:size-[18px]!"
+    class="border py-0.5 transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-2 rounded-full border-transparent bg-muted px-3 text-xs font-medium text-muted-foreground [&>svg]:size-[18px]!"
     data-slot="badge"
     data-variant="default"
   >
@@ -244,27 +244,27 @@ exports[`./SafeGradeChip.stories Passing 1`] = `
       />
       <rect
         class="fill-[var(--color-success-main)]"
-        height="10"
+        height="8"
         rx="1.5"
         width="3"
         x="8"
-        y="12"
+        y="14"
       />
       <rect
         class="fill-[var(--color-success-main)]"
-        height="15"
+        height="12"
         rx="1.5"
         width="3"
         x="14"
-        y="7"
+        y="10"
       />
       <rect
         class="fill-[var(--color-success-main)]"
-        height="20"
+        height="16"
         rx="1.5"
         width="3"
         x="20"
-        y="2"
+        y="6"
       />
     </svg>
     12 healthy
