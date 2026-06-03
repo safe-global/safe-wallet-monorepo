@@ -1,78 +1,68 @@
-import PlusIcon from '@/public/images/common/plus.svg'
-import { Button, Stack, Typography } from '@mui/material'
+import { Button as ShadcnButton } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import AddMemberModal from 'src/features/spaces/components/AddMemberModal'
 import { useState } from 'react'
 import MembersList from '../MembersList'
-import { useMembersSearch, useIsInvited, useSpaceMembersByStatus, useIsAdmin } from '@/features/spaces'
+import { useIsInvited, useSpaceMembersByStatus, useIsAdmin } from '@/features/spaces'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import SearchInput from '../SearchInput'
 
 const SpaceMembers = () => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const { activeMembers, invitedMembers } = useSpaceMembersByStatus()
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
 
-  const filteredMembers = useMembersSearch(activeMembers, searchQuery)
-  const filteredInvites = useMembersSearch(invitedMembers, searchQuery)
-
   return (
     <>
       {isInvited && <PreviewInvite />}
-      <Typography variant="h1" mb={3}>
-        Members
-      </Typography>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="flex-start"
-        mb={3}
-        flexWrap="nowrap"
-        gap={2}
-        flexDirection={{ xs: 'column-reverse', sm: 'row' }}
-      >
-        <SearchInput onSearch={setSearchQuery} />
+      <div className="mb-6 flex flex-col gap-6">
+        <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
+          Members
+        </Typography>
         {isAdmin && (
           <Track {...SPACE_EVENTS.ADD_MEMBER_MODAL} label={SPACE_LABELS.members_page}>
-            <Button
+            <ShadcnButton
               data-testid="add-member-button"
-              variant="contained"
-              startIcon={<PlusIcon />}
+              size="lg"
+              className="px-4 py-0"
               onClick={() => setOpenAddMembersModal(true)}
-              sx={{ whiteSpace: 'nowrap' }}
             >
+              <Plus className="size-4 mr-1 text-green-500" />
               Add member
-            </Button>
+            </ShadcnButton>
           </Track>
         )}
-      </Stack>
-      <>
-        {searchQuery && !filteredMembers.length && (!isAdmin || !filteredInvites.length) && (
-          <Typography variant="h5" fontWeight="normal" mb={2} color="primary.light">
-            Found 0 results
-          </Typography>
-        )}
-        {isAdmin && filteredInvites.length > 0 && (
-          <>
-            <Typography variant="h5" fontWeight={700} mb={2}>
-              Pending invitations ({filteredInvites.length})
-            </Typography>
-            <MembersList members={filteredInvites} showEmail />
-          </>
-        )}
-        {filteredMembers.length > 0 && (
-          <>
-            <Typography variant="h5" fontWeight={700} mb={2} mt={1}>
-              All members ({filteredMembers.length})
-            </Typography>
-            <MembersList members={filteredMembers} />
-          </>
-        )}
-      </>
+      </div>
+
+      <Tabs defaultValue="members">
+        <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
+          <TabsTrigger value="members" className="cursor-pointer">
+            Members ({activeMembers.length})
+          </TabsTrigger>
+          <TabsTrigger value="pending" className="cursor-pointer">
+            Pending ({invitedMembers.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="members">
+          <MembersList members={activeMembers} />
+        </TabsContent>
+
+        <TabsContent value="pending">
+          {invitedMembers.length === 0 ? (
+            <div className="bg-card rounded-lg border p-4">
+              <p className="text-muted-foreground text-sm">No pending members.</p>
+            </div>
+          ) : (
+            <MembersList members={invitedMembers} />
+          )}
+        </TabsContent>
+      </Tabs>
 
       {openAddMembersModal && <AddMemberModal onClose={() => setOpenAddMembersModal(false)} />}
     </>
