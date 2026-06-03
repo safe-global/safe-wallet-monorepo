@@ -155,7 +155,7 @@ export function ShortAddressWithTooltip({
           />
         }
       >
-        {isSimilar ? (
+        {isSimilar && address.startsWith('0x') && address.length >= 10 ? (
           <>
             0x
             <b className="text-foreground">{address.slice(2, 6)}</b>
