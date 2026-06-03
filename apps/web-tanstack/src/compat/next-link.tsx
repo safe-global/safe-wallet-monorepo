@@ -10,11 +10,12 @@
  */
 import { forwardRef, cloneElement, isValidElement } from 'react'
 import type { AnchorHTMLAttributes, MouseEvent, ReactElement, ReactNode } from 'react'
+import type { UrlObject } from 'url'
 import { useNavigate } from '@tanstack/react-router'
 
 export type LinkProps = {
-  href: string | { pathname?: string; query?: Record<string, string | string[] | undefined>; hash?: string }
-  as?: string
+  href: string | UrlObject
+  as?: string | UrlObject
   replace?: boolean
   scroll?: boolean
   shallow?: boolean
@@ -28,13 +29,18 @@ export type LinkProps = {
 function hrefToString(href: LinkProps['href']): string {
   if (typeof href === 'string') return href
   const pathname = href.pathname ?? '/'
-  const params = new URLSearchParams()
-  for (const [k, v] of Object.entries(href.query ?? {})) {
-    if (v == null) continue
-    if (Array.isArray(v)) v.forEach((vv) => params.append(k, String(vv)))
-    else params.append(k, String(v))
+  let qs = ''
+  if (typeof href.query === 'string') {
+    qs = href.query
+  } else if (href.query) {
+    const params = new URLSearchParams()
+    for (const [k, v] of Object.entries(href.query)) {
+      if (v == null) continue
+      if (Array.isArray(v)) v.forEach((vv) => params.append(k, String(vv)))
+      else params.append(k, String(v))
+    }
+    qs = params.toString()
   }
-  const qs = params.toString()
   const hash = href.hash ? `#${href.hash.replace(/^#/, '')}` : ''
   return `${pathname}${qs ? `?${qs}` : ''}${hash}`
 }

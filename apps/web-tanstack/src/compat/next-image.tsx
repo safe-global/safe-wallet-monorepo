@@ -5,7 +5,15 @@
  */
 import type { ImgHTMLAttributes } from 'react'
 
-export type ImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'placeholder'> & {
+// next/image re-exports this for callers that type their own image props.
+export type StaticImageData = {
+  src: string
+  height: number
+  width: number
+  blurDataURL?: string
+}
+
+export type ImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, 'placeholder' | 'src' | 'width' | 'height'> & {
   src: string | { src: string; width?: number; height?: number }
   width?: number | string
   height?: number | string

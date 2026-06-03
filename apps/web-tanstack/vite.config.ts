@@ -41,6 +41,9 @@ export default defineConfig(({ mode }) => {
   // like dev, gather every NEXT_PUBLIC_* / VITE_* value at build time and
   // inline them as a literal `process.env` object via `define`.
   const loadedEnv = loadEnv(mode, process.cwd(), ['VITE_', 'NEXT_PUBLIC_', 'EXPO_PUBLIC_'])
+  // `NODE_ENV` is typed as a narrow union, but the host shell can set it to
+  // 'cypress' (see comment below). Read it as a plain string so that check holds.
+  const hostNodeEnv = process.env.NODE_ENV as string
   const processEnv = {
     ...loadedEnv,
     // Build-time constants that override / supplement what loadEnv saw.
@@ -52,8 +55,8 @@ export default defineConfig(({ mode }) => {
     // `IS_TEST_E2E` in apps/web/src/config/constants.ts (and the require-login
     // gate it gates) without needing a separate NEXT_PUBLIC_IS_TEST_E2E flag.
     NODE_ENV:
-      process.env.NODE_ENV === 'cypress' || process.env.NODE_ENV === 'test'
-        ? process.env.NODE_ENV
+      hostNodeEnv === 'cypress' || hostNodeEnv === 'test'
+        ? hostNodeEnv
         : mode === 'production'
           ? 'production'
           : 'development',
@@ -122,6 +125,10 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: [
         // Next.js compatibility shims (decisions.md: cross-workspace next/* shimming)
+        {
+          find: 'next/dist/client/resolve-href',
+          replacement: path.resolve(__dirname, 'src/compat/next-resolve-href.ts'),
+        },
         { find: 'next/router', replacement: path.resolve(__dirname, 'src/compat/next-router.tsx') },
         { find: 'next/link', replacement: path.resolve(__dirname, 'src/compat/next-link.tsx') },
         { find: 'next/head', replacement: path.resolve(__dirname, 'src/compat/next-head.tsx') },
