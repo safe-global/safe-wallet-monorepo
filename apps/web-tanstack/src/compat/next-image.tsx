@@ -1,7 +1,6 @@
 /**
- * Compatibility shim for `next/image`.
- * Decision: 9 call-sites total. Plain <img> with the same src/width/height/alt
- * surface, since apps/web already sets `images.unoptimized: true`.
+ * Compatibility shim for `next/image`: a plain <img> with the same
+ * src/width/height/alt surface, since apps/web sets `images.unoptimized: true`.
  */
 import type { ImgHTMLAttributes } from 'react'
 

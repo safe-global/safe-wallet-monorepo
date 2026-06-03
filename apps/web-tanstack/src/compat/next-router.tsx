@@ -1,13 +1,7 @@
 /**
- * Compatibility shim for `next/router`.
- *
- * Decided in docs/migration/state/decisions.md (2026-05-22): cross-workspace
- * Next.js imports inside reused apps/web/src/** code are routed to these
- * shims via Vite aliases so we don't have to rewrite 175 call-sites up front.
- *
- * This delegates to TanStack Router primitives. Phase 3 migrators are expected
- * to gradually replace `useRouter()` with native TanStack hooks; until then
- * this gives a working router-shaped object.
+ * Compatibility shim for `next/router`, delegating to TanStack Router. Reused
+ * apps/web/src code imports `next/router`; a Vite alias routes those imports
+ * here so they keep working against a router-shaped object.
  */
 import { useMemo } from 'react'
 import type { UrlObject } from 'url'

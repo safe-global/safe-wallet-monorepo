@@ -1,12 +1,10 @@
 /**
- * Compatibility shim for `next/link`.
- * See decisions.md (2026-05-22) — temporary cutover scaffolding.
- *
- * Wraps `<a>` with TanStack Router's history-aware navigation. The `passHref`,
- * `legacyBehavior`, `prefetch`, `scroll`, and `shallow` props are accepted
- * and ignored — apps/web/src/pages/403.tsx and a handful of others rely on
- * `passHref legacyBehavior`, which is preserved here by always forwarding
- * `href` to the child anchor (or the cloned child when `legacyBehavior` is set).
+ * Compatibility shim for `next/link`, wrapping `<a>` with TanStack Router's
+ * history-aware navigation. The `passHref`, `legacyBehavior`, `prefetch`,
+ * `scroll`, and `shallow` props are accepted and ignored — apps/web/src/pages/
+ * 403.tsx and a handful of others rely on `passHref legacyBehavior`, which is
+ * preserved here by always forwarding `href` to the child anchor (or the cloned
+ * child when `legacyBehavior` is set).
  */
 import { forwardRef, cloneElement, isValidElement } from 'react'
 import type { AnchorHTMLAttributes, MouseEvent, ReactElement, ReactNode } from 'react'
