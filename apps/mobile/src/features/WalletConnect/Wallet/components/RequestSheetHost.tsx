@@ -2,11 +2,13 @@ import React, { useCallback, useEffect, useRef } from 'react'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import type { IWalletKit } from '@reown/walletkit'
 import { useStore } from 'react-redux'
+import { getVariable, useTheme } from 'tamagui'
 import { formatJsonRpcError } from '@walletconnect/jsonrpc-utils'
 import { getSdkError } from '@walletconnect/utils'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import type { RootState } from '@/src/store'
 import { useSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
+import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
 import { removePending, selectCurrentRequest } from '../store/walletKitSlice'
 import { logWalletKitError } from '../utils/errors'
 import { SessionProposalSheet } from './SessionProposalSheet'
@@ -16,14 +18,12 @@ type Props = { walletKit: IWalletKit | null }
 
 export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
   const current = useAppSelector(selectCurrentRequest)
-  // Proposals don't need the Safe SDK and present immediately. Tx requests wait for SDK
-  // readiness (useInitSafeCoreSDK populates it asynchronously after the active Safe
-  // loads) — otherwise composeSafeTxDraft would throw "Safe SDK is not initialized" on
-  // cold start when WalletKit seeds a backlogged pending request before the SDK warms up.
   const safeSDK = useSafeSDK()
   const dispatch = useAppDispatch()
   const store = useStore<RootState>()
+  const theme = useTheme()
   const ref = useRef<BottomSheetModal>(null)
+  const renderBackdrop = useCallback(() => <BackdropComponent shouldNavigateBack={false} />, [])
 
   useEffect(() => {
     if (!current) {
@@ -72,12 +72,18 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
       logWalletKitError('respondSessionRequest on sheet dismiss failed', e)
     }
     dispatch(removePending({ id: currentAtDismiss.id, kind: 'request' }))
-    // Draft / outstandingRequest cleanup happens automatically in SendTransactionSheet's
-    // unmount effects (handedOffRef stays false on dismiss-without-Sign).
   }, [walletKit, store, dispatch])
 
   return (
-    <BottomSheetModal ref={ref} snapPoints={['70%']} enableDynamicSizing={false} onDismiss={onSheetDismiss}>
+    <BottomSheetModal
+      ref={ref}
+      snapPoints={['50%']}
+      enableDynamicSizing={false}
+      onDismiss={onSheetDismiss}
+      backgroundComponent={BackgroundComponent}
+      backdropComponent={renderBackdrop}
+      handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
+    >
       {walletKit && current?.kind === 'proposal' && <SessionProposalSheet walletKit={walletKit} pending={current} />}
       {walletKit && current?.kind === 'request' && safeSDK && (
         <SendTransactionSheet walletKit={walletKit} pending={current} />
