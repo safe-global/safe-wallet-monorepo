@@ -165,6 +165,36 @@ describe('NavItem', () => {
     expect(screen.getByText('You need to activate your Safe first.')).toBeInTheDocument()
   })
 
+  it('applies the active icon style when active', () => {
+    const { container } = render(<NavItem item={{ ...baseItem, isActive: true }} />)
+
+    expect(container.querySelector('.activeIcon')).toBeInTheDocument()
+  })
+
+  it('does not apply the active icon style when inactive', () => {
+    const { container } = render(<NavItem item={baseItem} />)
+
+    expect(container.querySelector('.activeIcon')).not.toBeInTheDocument()
+  })
+
+  it('renders an indicator dot on the icon when item.indicator is set', () => {
+    const { container } = render(<NavItem item={{ ...baseItem, indicator: true }} />)
+
+    expect(container.querySelector('.outdatedDot')).toBeInTheDocument()
+  })
+
+  it('does not render an indicator dot by default', () => {
+    const { container } = render(<NavItem item={baseItem} />)
+
+    expect(container.querySelector('.outdatedDot')).not.toBeInTheDocument()
+  })
+
+  it('uses item.testId as the data-testid when provided', () => {
+    render(<NavItem item={{ ...baseItem, testId: 'sidebar-settings-item' }} />)
+
+    expect(screen.getByTestId('sidebar-settings-item')).toBeInTheDocument()
+  })
+
   it('uses per-label test id when isSpacesVariant', () => {
     render(<NavItem item={baseItem} isSpacesVariant />)
 

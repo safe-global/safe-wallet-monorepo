@@ -65,7 +65,7 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
     )
   }
 
-  const dataTestId = isSpacesVariant ? getSidebarItemTestId(item.label) : 'sidebar-list-item'
+  const dataTestId = item.testId ?? (isSpacesVariant ? getSidebarItemTestId(item.label) : 'sidebar-list-item')
 
   const handleClick = () => {
     if (item.disabled) return
@@ -87,7 +87,14 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
       onClick={handleClick}
     >
       <div className={item.isActive ? css.activeIcon : undefined}>
-        <item.icon />
+        {item.indicator ? (
+          <span className="relative">
+            <item.icon />
+            <span className={css.outdatedDot} aria-hidden />
+          </span>
+        ) : (
+          <item.icon />
+        )}
       </div>
       <span className="truncate group-data-[collapsible=icon]:hidden">{item.label}</span>
     </SidebarMenuButton>
