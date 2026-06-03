@@ -29,11 +29,10 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
       - run: yarn workspace @safe-global/web-tanstack build
-      # Phase 6C — assert every emitted JS/CSS chunk matches its recorded
-      # sha384 integrity (re-hash after build; fails on tamper or gaps).
+      # Assert every emitted JS/CSS chunk matches its recorded sha384 integrity
+      # (re-hash after build; fails on tamper or gaps).
       - run: yarn workspace @safe-global/web-tanstack assert:sri
-      # Phase 6A — the build must ship our generated worker, not the stale
-      # publicDir copies (R-PUBLICDIR).
+      # The build must ship our generated worker, not the stale publicDir copies.
       - name: Assert service worker output
         working-directory: apps/web-tanstack
         run: |

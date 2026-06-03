@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Phase 6C SRI assertion (mirrors the legacy intent of integrity-hashes.cjs).
+// SRI assertion (mirrors the legacy intent of integrity-hashes.cjs).
 //
 // After `vite build`, re-hash every emitted JS/CSS asset and assert it matches
 // the integrity recorded in `dist/sri-manifest.json` AND the `<script
