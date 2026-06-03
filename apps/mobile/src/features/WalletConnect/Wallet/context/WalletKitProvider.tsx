@@ -101,6 +101,7 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (!walletKit) {
       return
     }
+    let cancelled = false
     const handleUrl = async (url: string) => {
       if (!url.startsWith('wc:')) {
         return
@@ -114,12 +115,14 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const sub = Linking.addEventListener('url', ({ url }) => {
       void handleUrl(url)
     })
+    // Guard against resolving after unmount (symmetry with the init effect).
     Linking.getInitialURL().then((url) => {
-      if (url) {
+      if (url && !cancelled) {
         void handleUrl(url)
       }
     })
     return () => {
+      cancelled = true
       sub.remove()
     }
   }, [walletKit])
