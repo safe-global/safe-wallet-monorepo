@@ -77,7 +77,7 @@ const SelectSafesOnboarding = (): ReactElement => {
 
   const main = (
     <FormProvider {...formMethods}>
-      <form id={FORM_ID} onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col gap-6 h-full">
+      <form id={FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-6">
         <StepCounter currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
 
         <div className="flex flex-col gap-2 shrink-0">
@@ -106,10 +106,7 @@ const SelectSafesOnboarding = (): ReactElement => {
                 />
               </InputGroup>
 
-              <div
-                className="relative min-h-0 min-w-0 flex-1 overflow-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-muted after:to-transparent"
-                data-testid="onboarding-safes-list-scroll-region"
-              >
+              <div className="relative min-w-0" data-testid="onboarding-safes-list-scroll-region">
                 {isAtLimit && (
                   <Typography variant="paragraph" color="muted" className="text-xs pb-1">
                     Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached

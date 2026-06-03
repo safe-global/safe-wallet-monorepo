@@ -378,10 +378,10 @@ const AddAccounts = ({
 
       <ModalDialog open={isOpen} fullScreen hideChainIndicator>
         <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-          <div className="flex h-dvh max-h-dvh w-full min-w-0 max-w-full flex-col overflow-hidden overflow-x-hidden bg-secondary p-4">
-            <div className="mx-auto flex justify-center min-h-0 w-full min-w-0 max-w-full flex-1 flex-col gap-6 sm:max-w-[520px]">
+          <div className="flex h-dvh max-h-dvh w-full min-w-0 max-w-full flex-col overflow-y-auto overflow-x-hidden bg-secondary p-4">
+            <div className="mx-auto flex w-full min-w-0 max-w-full flex-col gap-6 sm:max-w-[520px]">
               <FormProvider {...formMethods}>
-                <form onSubmit={onSubmit} className="flex flex-col min-h-0 w-full gap-6">
+                <form onSubmit={onSubmit} className="flex flex-col w-full gap-6">
                   <div className="flex shrink-0 flex-col gap-4">
                     <div className="flex items-center justify-between">
                       <Button type="button" variant="ghost" size="icon" onClick={handleClose} className="rounded-md">
@@ -427,10 +427,7 @@ const AddAccounts = ({
                     </Alert>
                   )}
 
-                  <div
-                    className="relative min-h-[30dvh] min-w-0 w-full max-h-[25rem] overflow-y-auto overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]"
-                    data-testid="add-accounts-safes-list-scroll-region"
-                  >
+                  <div className="relative min-w-0 w-full" data-testid="add-accounts-safes-list-scroll-region">
                     {!hasAvailableSafes && !debouncedSearchQuery ? (
                       <Typography variant="paragraph" align="center" color="muted" className="py-8">
                         {wallet
