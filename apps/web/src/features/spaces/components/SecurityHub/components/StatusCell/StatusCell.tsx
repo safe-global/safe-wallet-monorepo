@@ -18,7 +18,7 @@ const StatusCell = ({ grade, isScanning }: StatusCellProps) => {
       </Typography>
     )
   }
-  return <SafeGradeChip grade={grade} sx={{ height: 22 }} />
+  return <SafeGradeChip grade={grade} />
 }
 
 export default StatusCell

@@ -1,11 +1,16 @@
 import { type ReactElement, useMemo } from 'react'
-import { Box, Chip, CircularProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
-import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
+import { RefreshCw } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 import type { ScanResult, SafeGrade, StrengthLevel } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import SafeGradeChip, { SAFE_GRADE_LABEL } from '../SafeGradeChip/SafeGradeChip'
 import type { SpaceSafeEntry } from '../../types'
+import { ScoreGauge } from './WorkspaceGauge'
+import { Button } from '@/components/ui/button'
 
 const FILTER_GRADES: SafeGrade[] = ['critical', 'at_risk', 'needs_attention', 'passing']
 
@@ -66,41 +71,6 @@ const computeCounts = (scanResults: Record<string, Record<string, ScanResult>>):
   return { passing, applicableCount, criticalCount, needsAttentionCount, atRiskCount, hasCriticalIssue }
 }
 
-const ScoreGauge = ({ scorePct, color }: { scorePct: number; color: string }) => (
-  <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-    <CircularProgress variant="determinate" value={100} size={120} thickness={4} sx={{ color: 'border.light' }} />
-    <CircularProgress
-      variant="determinate"
-      value={scorePct}
-      size={120}
-      thickness={4}
-      sx={{
-        color,
-        position: 'absolute',
-        left: 0,
-        '& .MuiCircularProgress-circle': { strokeLinecap: 'round' },
-      }}
-    />
-    <Box
-      sx={{
-        position: 'absolute',
-        inset: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-      }}
-    >
-      <Typography variant="h3" fontWeight={700} sx={{ lineHeight: 1 }}>
-        {scorePct}
-      </Typography>
-      <Typography variant="caption" color="text.secondary">
-        / 100
-      </Typography>
-    </Box>
-  </Box>
-)
-
 const WorkspaceHealthCard = ({
   safes,
   scanResults,
@@ -147,52 +117,36 @@ const WorkspaceHealthCard = ({
   // surfaces the in-progress state via its "Scanning..." label.
   if (!aggregate) {
     return (
-      <Paper sx={{ p: 3, borderRadius: '12px', mb: 3 }}>
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'flex-start', md: 'center' }}>
-          <Skeleton variant="circular" width={120} height={120} />
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Skeleton variant="rounded" width={180} height={24} sx={{ mb: 1 }} />
-            <Skeleton variant="rounded" width={320} height={16} sx={{ mb: 0.5 }} />
-            <Skeleton variant="rounded" width={260} height={16} sx={{ mb: 2 }} />
-            <Stack direction="row" spacing={1}>
-              <Skeleton variant="rounded" width={80} height={20} sx={{ borderRadius: '10px' }} />
-              <Skeleton variant="rounded" width={100} height={20} sx={{ borderRadius: '10px' }} />
-            </Stack>
-          </Box>
-        </Stack>
-      </Paper>
+      <Card className="mb-6 flex-col items-start gap-6 p-6 md:flex-row md:items-center">
+        <Skeleton className="size-[100px] shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1">
+          <Skeleton className="mb-2 h-6 w-[180px] rounded" />
+          <Skeleton className="mb-1 h-4 w-[320px] rounded" />
+          <Skeleton className="mb-4 h-4 w-[260px] rounded" />
+          <div className="flex gap-2">
+            <Skeleton className="h-5 w-20 rounded-[10px]" />
+            <Skeleton className="h-5 w-[100px] rounded-[10px]" />
+          </div>
+        </div>
+      </Card>
     )
   }
 
   const { color, level, scorePct } = aggregate
 
   return (
-    <Paper sx={{ p: 3, borderRadius: '12px', mb: 3 }}>
-      <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} alignItems={{ xs: 'flex-start', md: 'center' }}>
-        <ScoreGauge scorePct={scorePct} color={color} />
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Stack direction="row" alignItems="center" spacing={1.5} mb={0.5} flexWrap="wrap">
-            <Typography variant="h5" fontWeight={700}>
-              Security score
-            </Typography>
-            <Chip
-              label={level}
-              size="small"
-              sx={{
-                backgroundColor: color,
-                color: 'background.paper',
-                fontWeight: 700,
-                letterSpacing: '0.5px',
-                height: 18,
-                fontSize: '0.65rem',
-                '& .MuiChip-label': { px: 0.75 },
-              }}
-            />
-          </Stack>
-          <Typography variant="body2" color="text.secondary" mb={2}>
-            Combined score from all security checks across your accounts.
+    <Card className="mb-6 flex-col items-start gap-6 py-5 px-6 md:flex-row md:items-center">
+      <ScoreGauge scorePct={scorePct} color={color} />
+
+      <div className="flex min-w-0 flex-1 justify-between">
+        <div className="flex -mt-2 flex-col gap-2">
+          <Typography variant="h4">{level}</Typography>
+
+          <Typography variant="paragraph-small" color="muted">
+            3 of {safes.length} accounts need attention
           </Typography>
-          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+
+          <div className="flex flex-wrap gap-2">
             {FILTER_GRADES.filter((grade) => gradeCounts[grade] > 0).map((grade) => (
               <SafeGradeChip
                 key={grade}
@@ -200,46 +154,49 @@ const WorkspaceHealthCard = ({
                 active={activeFilter === grade}
                 label={`${gradeCounts[grade]} ${SAFE_GRADE_LABEL[grade]}`}
                 onClick={() => onFilterChange(grade)}
-                sx={{ '& .MuiChip-root:active, & .MuiTouchRipple-root': { display: 'none' } }}
               />
             ))}
-          </Stack>
+          </div>
+        </div>
 
+        <div>
           {lastScannedAt && (
-            <Stack direction="row" alignItems="center" spacing={0.5} mt={2}>
-              <Typography variant="caption" color="text.secondary">
+            <div className="mt-2 flex flex-col gap-1">
+              <Button size="lg" disabled={isScanning} onClick={isScanning ? undefined : onRescan}>
+                <RefreshCw className={cn('size-4 text-green-500', isScanning && 'animate-spin')} />
+
+                {isScanning ? 'Scanning...' : 'Re-scan'}
+              </Button>
+
+              <Typography variant="paragraph-mini" color="muted">
                 Last scanned {security.$isReady ? security.formatTimestamp(lastScannedAt) : ''}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
-                ·
-              </Typography>
-              <Stack
-                direction="row"
-                spacing={0.5}
-                alignItems="center"
+
+              {/* <button
+                type="button"
                 onClick={isScanning ? undefined : onRescan}
-                sx={{
-                  cursor: isScanning ? 'default' : 'pointer',
-                  color: isScanning ? 'text.disabled' : 'primary.main',
-                  '&:hover': isScanning ? {} : { color: 'primary.dark' },
-                }}
+                disabled={isScanning}
+                className={cn(
+                  'flex items-center gap-1',
+                  isScanning ? 'cursor-default text-muted-foreground' : 'cursor-pointer text-primary hover:opacity-80',
+                )}
               >
-                <RefreshRoundedIcon sx={{ fontSize: 14 }} />
-                <Typography variant="caption" fontWeight={700} sx={{ color: 'inherit' }}>
-                  {isScanning ? 'Scanning...' : 'Re-scan'}
+                <RefreshCw className="size-3.5" />
+                <Typography variant="paragraph-mini-bold" className="text-inherit">
+
                 </Typography>
-              </Stack>
-            </Stack>
+              </button> */}
+            </div>
           )}
 
           {scanIncomplete && !isScanning && (
-            <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 0.5 }}>
+            <Typography variant="paragraph-mini" className="mt-0.5 block text-[var(--color-warning-main)]">
               The last scan didn&apos;t finish. Showing your most recent complete score — re-scan to update it.
             </Typography>
           )}
-        </Box>
-      </Stack>
-    </Paper>
+        </div>
+      </div>
+    </Card>
   )
 }
 
