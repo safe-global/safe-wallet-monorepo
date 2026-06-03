@@ -41,7 +41,6 @@ import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
-import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 import { useOidcLoginCallback } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
@@ -108,17 +107,10 @@ const InitApp = (): null => {
   useBeamer()
   useVisitedSafes()
   usePortfolioRefetchOnTxHistory()
-  useSafeLabsTerms()
   useOidcLoginCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
   return null
-}
-
-const TermsGate = ({ children }: { children: React.ReactNode }) => {
-  const { shouldShowContent } = useSafeLabsTerms()
-  if (!shouldShowContent) return null
-  return <>{children}</>
 }
 
 // Memoized subtree — bails out of re-render when pathname and outlet are
@@ -166,9 +158,7 @@ function RootShell() {
               <Suspense fallback={null}>
                 <LazyWeb3Init />
               </Suspense>
-              <TermsGate>
-                <MemoizedTree pathname={location.pathname} outlet={outlet} />
-              </TermsGate>
+              <MemoizedTree pathname={location.pathname} outlet={outlet} />
             </CaptchaProvider>
           </AppProviders>
         </CacheProvider>

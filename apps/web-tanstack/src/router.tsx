@@ -27,7 +27,6 @@ import { Route as CookieRoute } from './routes/cookie'
 import { Route as LicensesRoute } from './routes/licenses'
 import { Route as PrivacyRoute } from './routes/privacy'
 import { Route as TermsRoute } from './routes/terms'
-import { Route as SafeLabsTermsRoute } from './routes/safe-labs-terms'
 
 // Group B — /settings/*
 import { Route as SettingsAppearanceRoute } from './routes/settings/appearance'
@@ -48,6 +47,9 @@ import { Route as SpacesMembersRoute } from './routes/spaces/members'
 import { Route as SpacesSafeAccountsRoute } from './routes/spaces/safe-accounts'
 import { Route as SpacesSecurityRoute } from './routes/spaces/security'
 import { Route as SpacesSettingsRoute } from './routes/spaces/settings'
+import { Route as SpacesSettingsAboutRoute } from './routes/spaces/settings/about'
+import { Route as SpacesSettingsAccountRoute } from './routes/spaces/settings/account'
+import { Route as SpacesSettingsGeneralRoute } from './routes/spaces/settings/general'
 
 // Group D — /apps/*, /new-safe/*, /balances/*, /welcome/*
 import { Route as AppsIndexRoute } from './routes/apps'
@@ -61,6 +63,7 @@ import { Route as BalancesNftsRoute } from './routes/balances/nfts'
 import { Route as BalancesPositionsRoute } from './routes/balances/positions'
 import { Route as WelcomeSelectSafesRoute } from './routes/welcome/select-safes'
 import { Route as WelcomeSpacesRoute } from './routes/welcome/spaces'
+import { Route as WelcomeSurveyRoute } from './routes/welcome/survey'
 
 // Group E — top-level Safe-scoped misc
 import { Route as AddOwnerRoute } from './routes/addOwner'
@@ -100,7 +103,6 @@ const routeTree = RootRoute.addChildren([
   LicensesRoute,
   PrivacyRoute,
   TermsRoute,
-  SafeLabsTermsRoute,
   // Group B
   SettingsAppearanceRoute,
   SettingsCookiesRoute,
@@ -119,6 +121,9 @@ const routeTree = RootRoute.addChildren([
   SpacesSafeAccountsRoute,
   SpacesSecurityRoute,
   SpacesSettingsRoute,
+  SpacesSettingsGeneralRoute,
+  SpacesSettingsAboutRoute,
+  SpacesSettingsAccountRoute,
   // Group D
   AppsIndexRoute,
   AppsBookmarkedRoute,
@@ -131,6 +136,7 @@ const routeTree = RootRoute.addChildren([
   BalancesPositionsRoute,
   WelcomeSelectSafesRoute,
   WelcomeSpacesRoute,
+  WelcomeSurveyRoute,
   // Group E
   AddOwnerRoute,
   AddressBookRoute,
