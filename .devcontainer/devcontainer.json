@@ -1,0 +1,20 @@
+{
+  "name": "Safe Wallet Monorepo Dev Container",
+  "dockerComposeFile": ["./docker-compose.yml"],
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/safe-wallet-monorepo",
+  "remoteUser": "node",
+  "forwardPorts": [3000],
+  "postCreateCommand": ".devcontainer/post-create.sh",
+  "postAttachCommand": ".devcontainer/post-attach.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": ["biomejs.biome", "Anthropic.claude-code", "openai.chatgpt"],
+      "settings": {
+        "editor.defaultFormatter": "biomejs.biome",
+        "editor.formatOnSave": true,
+        "claudeCode.initialPermissionMode": "auto"
+      }
+    }
+  }
+}
