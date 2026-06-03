@@ -148,6 +148,16 @@ describe('AddMemberModal tracking', () => {
     expect(screen.getByTestId('member-identifier-input')).toHaveAttribute('maxLength', '255')
   })
 
+  it('shows an initials avatar for a valid email', async () => {
+    render(<AddMemberModal onClose={jest.fn()} />)
+
+    fireEvent.change(screen.getByTestId('member-identifier-input'), {
+      target: { value: 'invitee@example.com' },
+    })
+
+    await waitFor(() => expect(screen.getByText('i')).toBeInTheDocument())
+  })
+
   it('shows an error for an invalid identifier', async () => {
     render(<AddMemberModal onClose={jest.fn()} />)
 
@@ -155,7 +165,7 @@ describe('AddMemberModal tracking', () => {
       target: { value: 'not-a-wallet-or-email' },
     })
 
-    expect(await screen.findByTestId('member-identifier-error')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByTestId('member-identifier-input')).toHaveAttribute('aria-invalid', 'true'))
     expect(screen.getByTestId('add-member-modal-button')).toBeDisabled()
   })
 
@@ -170,7 +180,7 @@ describe('AddMemberModal tracking', () => {
       target: { value: 'ALICE@example.com' },
     })
 
-    expect(await screen.findByTestId('member-identifier-error')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByTestId('member-identifier-input')).toHaveAttribute('aria-invalid', 'true'))
     expect(screen.getByTestId('add-member-modal-button')).toBeDisabled()
   })
 
@@ -188,7 +198,7 @@ describe('AddMemberModal tracking', () => {
       target: { value: '0x1234567890123456789012345678901234567890' },
     })
 
-    expect(await screen.findByTestId('member-identifier-error')).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByTestId('member-identifier-input')).toHaveAttribute('aria-invalid', 'true'))
     expect(screen.getByTestId('add-member-modal-button')).toBeDisabled()
   })
 
@@ -206,7 +216,7 @@ describe('AddMemberModal tracking', () => {
     fireEvent.change(screen.getByTestId('member-identifier-input'), {
       target: { value: 'Ali' },
     })
-    fireEvent.click(await screen.findByRole('button', { name }))
+    fireEvent.click(await screen.findByRole('option', { name }))
 
     expect(screen.getByTestId('member-identifier-input')).toHaveValue(address)
 

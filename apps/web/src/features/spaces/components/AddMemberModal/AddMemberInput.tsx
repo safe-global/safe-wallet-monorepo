@@ -1,12 +1,15 @@
-import { type ChangeEvent, type FocusEvent, type ReactElement, useEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
-import { useTheme } from '@mui/material/styles'
+import { type ReactElement, useEffect, useMemo, useState } from 'react'
+import { IconButton, InputAdornment, Skeleton, SvgIcon, TextField, Typography } from '@mui/material'
+import Autocomplete from '@mui/material/Autocomplete'
+import classnames from 'classnames'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 import { isAddress } from 'viem'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { Field, FieldError, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import Identicon from '@/components/common/Identicon'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
+import CaretDownIcon from '@/public/images/common/caret-down.svg'
+import inputCss from '@/styles/inputs.module.css'
 import { EMAIL_IDENTIFIER_MAX_LENGTH, isEmailIdentifier } from './utils'
 import css from './styles.module.css'
 
@@ -19,6 +22,8 @@ type AddMemberInputProps = {
   onSelectAddress: (address: string, name: string) => void
   value: string
 }
+
+type IdentifierOption = { address: string; name: string }
 
 const MAX_VISIBLE_OPTIONS = 5
 
@@ -36,9 +41,7 @@ const AddMemberInput = ({
   onSelectAddress,
   value,
 }: AddMemberInputProps): ReactElement => {
-  const theme = useTheme()
   const [isOpen, setIsOpen] = useState(false)
-  const inputRef = useRef<HTMLInputElement | null>(null)
   const identifier = value.trim()
   const shouldResolveName = Boolean(identifier && !isEmailIdentifier(identifier) && !isAddress(identifier))
   const { address: resolvedAddress } = useNameResolver(shouldResolveName ? identifier : '')
@@ -49,7 +52,7 @@ const AddMemberInput = ({
     }
   }, [identifier, onSelectAddress, resolvedAddress])
 
-  const options = useMemo(() => {
+  const options = useMemo<IdentifierOption[]>(() => {
     const query = identifier.toLowerCase()
 
     if (!query || isAddress(query)) {
@@ -57,81 +60,103 @@ const AddMemberInput = ({
     }
 
     return Object.entries(addressBook)
-      .filter(([address, name]) => {
-        return address.toLowerCase().includes(query) || name.toLowerCase().includes(query)
-      })
+      .filter(([address, name]) => address.toLowerCase().includes(query) || name.toLowerCase().includes(query))
       .slice(0, MAX_VISIBLE_OPTIONS)
       .map(([address, name]) => ({ address, name }))
   }, [addressBook, identifier])
 
-  const showOptions = isOpen && options.length > 0
-  const inputRect = inputRef.current?.getBoundingClientRect()
+  const showIdenticon = Boolean(value && !error && isAddress(value))
+  const showInitials = Boolean(value && !error && !showIdenticon && isEmailIdentifier(identifier))
 
-  const onChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setIsOpen(true)
-    inputProps.onChange(event)
+  const renderAvatar = () => {
+    if (showIdenticon) {
+      return <Identicon address={value} size={32} />
+    }
+    if (showInitials) {
+      return <InitialsAvatar name={identifier} size="medium" rounded />
+    }
+    return <Skeleton variant="circular" width={32} height={32} animation={false} />
   }
 
-  const onFocus = () => {
-    setIsOpen(true)
-  }
+  const startAdornment = (
+    <InputAdornment position="start" sx={{ ml: 0, mr: 1 }}>
+      {renderAvatar()}
+    </InputAdornment>
+  )
 
-  const onBlur = (event: FocusEvent<HTMLInputElement>) => {
-    inputProps.onBlur(event)
-    setIsOpen(false)
-  }
-
-  const onOptionSelect = (address: string, name: string) => {
-    onSelectAddress(address, name)
-    setIsOpen(false)
-  }
+  const endAdornment =
+    options.length > 0 ? (
+      <InputAdornment position="end">
+        <IconButton
+          className={classnames(css.openButton, { [css.rotated]: isOpen })}
+          color="primary"
+          onClick={() => setIsOpen((open) => !open)}
+          tabIndex={-1}
+        >
+          <SvgIcon component={CaretDownIcon} inheritViewBox fontSize="small" />
+        </IconButton>
+      </InputAdornment>
+    ) : null
 
   return (
-    <Field className={css.identifierField}>
-      <FieldLabel htmlFor="member-identifier-input">Enter email or wallet address</FieldLabel>
-      <Input
-        id="member-identifier-input"
-        data-testid="member-identifier-input"
-        className={css.identifierInput}
-        maxLength={EMAIL_IDENTIFIER_MAX_LENGTH}
-        {...inputProps}
-        ref={(element) => {
-          inputRef.current = element
-          inputProps.ref(element)
-        }}
-        onBlur={onBlur}
-        onChange={onChange}
-        onFocus={onFocus}
-      />
-      {showOptions && inputRect
-        ? createPortal(
-            <div
-              className={css.identifierOptions}
-              style={{
-                left: inputRect.left,
-                top: inputRect.bottom,
-                width: inputRect.width,
-                // Portaled into document.body, so it must clear the MUI Dialog (modal layer).
-                zIndex: theme.zIndex.tooltip,
-              }}
-            >
-              {options.map((option) => (
-                <button
-                  className={css.identifierOption}
-                  key={option.address}
-                  onClick={() => onOptionSelect(option.address, option.name)}
-                  onMouseDown={(event) => event.preventDefault()}
-                  type="button"
-                >
-                  <EthHashInfo address={option.address} name={option.name} shortAddress={false} copyAddress={false} />
-                </button>
-              ))}
-            </div>,
-            document.body,
-          )
-        : null}
-      <FieldError data-testid="member-identifier-error">{error}</FieldError>
-    </Field>
+    <Autocomplete<IdentifierOption, false, true, true>
+      freeSolo
+      disableClearable
+      open={isOpen && options.length > 0}
+      onOpen={() => setIsOpen(true)}
+      onClose={() => setIsOpen(false)}
+      className={inputCss.input}
+      options={options}
+      // Address book entries are already filtered against the current input value.
+      filterOptions={(opts) => opts}
+      getOptionLabel={(option) => (typeof option === 'string' ? option : option.address)}
+      inputValue={value}
+      onInputChange={(_, newValue, reason) => {
+        if (reason === 'input') {
+          inputProps.onChange({ target: { name: inputProps.name, value: newValue } } as never)
+        }
+      }}
+      onChange={(_, option) => {
+        if (option && typeof option !== 'string') {
+          onSelectAddress(option.address, option.name)
+          setIsOpen(false)
+        }
+      }}
+      componentsProps={{ paper: { elevation: 2 } }}
+      renderOption={(props, option) => {
+        const { key, ...rest } = props
+        return (
+          <Typography component="li" variant="body2" {...rest} key={key}>
+            <EthHashInfo address={option.address} name={option.name} shortAddress={false} copyAddress={false} />
+          </Typography>
+        )
+      }}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          name={inputProps.name}
+          inputRef={inputProps.ref}
+          onBlur={inputProps.onBlur}
+          label={error || 'Address or email'}
+          required={!error}
+          error={!!error}
+          fullWidth
+          autoComplete="off"
+          spellCheck={false}
+          inputProps={{
+            ...params.inputProps,
+            'data-testid': 'member-identifier-input',
+            maxLength: EMAIL_IDENTIFIER_MAX_LENGTH,
+          }}
+          InputProps={{
+            ...params.InputProps,
+            startAdornment,
+            endAdornment,
+          }}
+          InputLabelProps={{ shrink: true }}
+        />
+      )}
+    />
   )
 }
 

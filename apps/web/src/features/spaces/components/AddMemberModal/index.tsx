@@ -113,7 +113,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
     const addressBookName = addressBook[identifierValue]
     if (addressBookName) {
-      setValue('name', addressBookName)
+      setValue('name', addressBookName, { shouldValidate: true })
     }
   }, [addressBook, identifierValue, setValue])
 
@@ -187,7 +187,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
                 inputProps={identifierInputProps}
                 onSelectAddress={(address, name) => {
                   setValue('identifier', address, { shouldDirty: true, shouldValidate: true })
-                  setValue('name', name)
+                  setValue('name', name, { shouldValidate: true })
                 }}
                 value={identifierValue}
               />
