@@ -7,7 +7,6 @@ import { isAddress } from 'viem'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
-import InitialsAvatar from '@/components/common/InitialsAvatar'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
 import inputCss from '@/styles/inputs.module.css'
 import { EMAIL_MAX_LENGTH, isEmailAddress } from './utils'
@@ -68,21 +67,14 @@ const AddMemberInput = ({
   }, [addressBook, inviteeIdentifier])
 
   const showIdenticon = Boolean(value && !error && isAddress(value))
-  const showInitials = Boolean(value && !error && !showIdenticon && isEmailAddress(inviteeIdentifier))
-
-  const renderAvatar = () => {
-    if (showIdenticon) {
-      return <Identicon address={value} size={32} />
-    }
-    if (showInitials) {
-      return <InitialsAvatar name={inviteeIdentifier} size="medium" rounded />
-    }
-    return <Skeleton variant="circular" width={32} height={32} animation={false} />
-  }
 
   const startAdornment = (
     <InputAdornment position="start" sx={{ ml: 0, mr: 1 }}>
-      {renderAvatar()}
+      {showIdenticon ? (
+        <Identicon address={value} size={32} />
+      ) : (
+        <Skeleton variant="circular" width={32} height={32} animation={false} />
+      )}
     </InputAdornment>
   )
 

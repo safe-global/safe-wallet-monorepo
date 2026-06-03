@@ -148,16 +148,6 @@ describe('AddMemberModal tracking', () => {
     expect(screen.getByTestId('member-invitee-identifier-input')).toHaveAttribute('maxLength', '255')
   })
 
-  it('shows an initials avatar for a valid email', async () => {
-    render(<AddMemberModal onClose={jest.fn()} />)
-
-    fireEvent.change(screen.getByTestId('member-invitee-identifier-input'), {
-      target: { value: 'invitee@example.com' },
-    })
-
-    await waitFor(() => expect(screen.getByText('i')).toBeInTheDocument())
-  })
-
   it('shows an error for an invalid invitee identifier', async () => {
     render(<AddMemberModal onClose={jest.fn()} />)
 
