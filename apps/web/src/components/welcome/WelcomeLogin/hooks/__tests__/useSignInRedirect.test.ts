@@ -298,7 +298,7 @@ describe('useSignInRedirect', () => {
   })
 
   // -----------------------------------------------------------------------
-  // Require-login gate (REQUIRE_LOGIN_DISABLED off → gate ON)
+  // Require-login gate (REQUIRE_LOGIN on → gate ON)
   // -----------------------------------------------------------------------
 
   describe('require-login gate enabled', () => {

@@ -1,6 +1,7 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
+import { Typography } from '@mui/material'
 import { useCallback, useEffect, useMemo } from 'react'
 import debounce from 'lodash/debounce'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
@@ -45,58 +46,64 @@ const SafeApps: NextPage = () => {
     }
   }, [router])
 
-  if (!isSafeAppsEnabled) return <></>
-
   return (
     <>
       <Head>
         <title>{`${BRAND_NAME} – Safe Apps`}</title>
       </Head>
 
-      <SafeAppsHeader />
+      {isSafeAppsEnabled === undefined ? null : !isSafeAppsEnabled ? (
+        <Typography textAlign="center" my={3}>
+          Safe Apps are not available on this network.
+        </Typography>
+      ) : (
+        <>
+          <SafeAppsHeader />
 
-      <main>
-        {/* Safe Apps Filters */}
-        <SafeAppsFilters
-          onChangeQuery={onChangeQuery}
-          onChangeFilterCategory={setSelectedCategories}
-          onChangeOptimizedWithBatch={setOptimizedWithBatchFilter}
-          selectedCategories={selectedCategories}
-          safeAppsList={remoteSafeApps}
-        />
+          <main>
+            {/* Safe Apps Filters */}
+            <SafeAppsFilters
+              onChangeQuery={onChangeQuery}
+              onChangeFilterCategory={setSelectedCategories}
+              onChangeOptimizedWithBatch={setOptimizedWithBatchFilter}
+              selectedCategories={selectedCategories}
+              safeAppsList={remoteSafeApps}
+            />
 
-        {/* Pinned apps */}
-        {!isFiltered && pinnedSafeApps.length > 0 && (
-          <SafeAppList
-            title="My pinned apps"
-            safeAppsList={pinnedSafeApps}
-            bookmarkedSafeAppsId={pinnedSafeAppIds}
-            eventLabel={SAFE_APPS_LABELS.apps_pinned}
-          />
-        )}
+            {/* Pinned apps */}
+            {!isFiltered && pinnedSafeApps.length > 0 && (
+              <SafeAppList
+                title="My pinned apps"
+                safeAppsList={pinnedSafeApps}
+                bookmarkedSafeAppsId={pinnedSafeAppIds}
+                eventLabel={SAFE_APPS_LABELS.apps_pinned}
+              />
+            )}
 
-        {/* Featured apps */}
-        {!isFiltered && featuredSafeApps.length > 0 && (
-          <SafeAppList
-            title="Featured apps"
-            safeAppsList={featuredSafeApps}
-            bookmarkedSafeAppsId={pinnedSafeAppIds}
-            eventLabel={SAFE_APPS_LABELS.apps_featured}
-          />
-        )}
+            {/* Featured apps */}
+            {!isFiltered && featuredSafeApps.length > 0 && (
+              <SafeAppList
+                title="Featured apps"
+                safeAppsList={featuredSafeApps}
+                bookmarkedSafeAppsId={pinnedSafeAppIds}
+                eventLabel={SAFE_APPS_LABELS.apps_featured}
+              />
+            )}
 
-        {/* All apps */}
-        <SafeAppList
-          title="All apps"
-          isFiltered={isFiltered}
-          safeAppsList={isFiltered ? filteredApps : nonPinnedApps}
-          safeAppsListLoading={remoteSafeAppsLoading}
-          bookmarkedSafeAppsId={pinnedSafeAppIds}
-          eventLabel={SAFE_APPS_LABELS.apps_all}
-          query={query}
-          showNativeSwapsCard
-        />
-      </main>
+            {/* All apps */}
+            <SafeAppList
+              title="All apps"
+              isFiltered={isFiltered}
+              safeAppsList={isFiltered ? filteredApps : nonPinnedApps}
+              safeAppsListLoading={remoteSafeAppsLoading}
+              bookmarkedSafeAppsId={pinnedSafeAppIds}
+              eventLabel={SAFE_APPS_LABELS.apps_all}
+              query={query}
+              showNativeSwapsCard
+            />
+          </main>
+        </>
+      )}
     </>
   )
 }

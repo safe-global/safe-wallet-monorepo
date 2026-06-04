@@ -55,20 +55,20 @@ describe('useIsRequireLoginEnabled', () => {
     disableClassicView()
   })
 
-  it('returns true when the default chain does NOT have REQUIRE_LOGIN_DISABLED (gate ON)', () => {
+  it('returns false when the default chain does NOT have REQUIRE_LOGIN (gate OFF)', () => {
     setMockChain(mockChain([]))
 
     const { result } = renderHook(() => useIsRequireLoginEnabled())
 
-    expect(result.current).toBe(true)
+    expect(result.current).toBe(false)
   })
 
-  it('returns false when the default chain has REQUIRE_LOGIN_DISABLED (gate OFF)', () => {
-    setMockChain(mockChain([FEATURES.REQUIRE_LOGIN_DISABLED]))
+  it('returns true when the default chain has REQUIRE_LOGIN (gate ON)', () => {
+    setMockChain(mockChain([FEATURES.REQUIRE_LOGIN]))
 
     const { result } = renderHook(() => useIsRequireLoginEnabled())
 
-    expect(result.current).toBe(false)
+    expect(result.current).toBe(true)
   })
 
   it('returns undefined while the chains config has not loaded', () => {
@@ -90,7 +90,7 @@ describe('useIsRequireLoginEnabled', () => {
 
   it('forces the gate OFF under Cypress (IS_TEST_E2E)', () => {
     // Even if the chain config would normally produce gate ON, Cypress runs bypass it.
-    setMockChain(mockChain([]))
+    setMockChain(mockChain([FEATURES.REQUIRE_LOGIN]))
     mockIsTestE2E.mockReturnValue(true)
 
     const { result } = renderHook(() => useIsRequireLoginEnabled())
@@ -101,7 +101,7 @@ describe('useIsRequireLoginEnabled', () => {
   })
 
   it('returns false when the user has opted into classic view this session', () => {
-    setMockChain(mockChain([]))
+    setMockChain(mockChain([FEATURES.REQUIRE_LOGIN]))
     enableClassicView()
 
     const { result } = renderHook(() => useIsRequireLoginEnabled())
@@ -125,7 +125,7 @@ describe('useIsRequireLoginEnabled', () => {
     // Otherwise the "signed in but no Spaces → onboarding" redirect would
     // never trigger for an opted-in user who later signs in within the same
     // tab — the override is signed-out-only.
-    setMockChain(mockChain([]))
+    setMockChain(mockChain([FEATURES.REQUIRE_LOGIN]))
     enableClassicView()
     mockIsSignedIn = true
 
@@ -141,7 +141,7 @@ describe('useIsRequireLoginEnabled', () => {
     // fire a redirect to /welcome/spaces before the real opt-in propagated.
     // We instead return undefined until the first effect tick, which the
     // guard treats as "still loading".
-    setMockChain(mockChain([]))
+    setMockChain(mockChain([FEATURES.REQUIRE_LOGIN]))
     enableClassicView()
 
     const captures: Array<boolean | undefined> = []
