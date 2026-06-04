@@ -1,5 +1,6 @@
 import React from 'react'
 import { ActivityIndicator } from 'react-native'
+import type { CameraPermissionStatus } from 'react-native-vision-camera'
 import { Text, YStack } from 'tamagui'
 import { QrCamera } from '@/src/components/Camera'
 import { SafeButton } from '@/src/components/SafeButton'
@@ -8,7 +9,7 @@ import { WalletConnectDebugPasteInput } from './WalletConnectDebugPasteInput'
 
 const GRANTED_FOOTER = 'Scan an Ethereum wallet address or connect to a desktop app'
 
-const headingForPermission = (permission: string): string => {
+const headingForPermission = (permission: CameraPermissionStatus): string => {
   switch (permission) {
     case 'denied':
       return 'Camera access is off'
@@ -21,7 +22,7 @@ const headingForPermission = (permission: string): string => {
   }
 }
 
-const bodyForPermission = (permission: string): string => {
+const bodyForPermission = (permission: CameraPermissionStatus): string => {
   switch (permission) {
     case 'denied':
       return 'Enable camera access to scan a WalletConnect QR code. You can change this in Settings.'
@@ -96,7 +97,7 @@ export function WalletConnectScanContainer() {
       onActivateCamera={onActivateCamera}
       onRequestPermission={requestPermission}
       onPressSettings={openSettings}
-      heading={granted ? '' : headingForPermission(permission)}
+      heading={granted ? null : headingForPermission(permission)}
       lensTone={status === 'error' ? 'error' : 'neutral'}
       dimLens={status !== 'scanning'}
       centerOverlay={centerOverlay}

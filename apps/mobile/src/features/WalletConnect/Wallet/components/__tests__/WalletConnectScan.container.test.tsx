@@ -1,5 +1,6 @@
 import React from 'react'
 import { fireEvent, render } from '@/src/tests/test-utils'
+import type { CameraPermissionStatus } from 'react-native-vision-camera'
 import { WalletConnectScanContainer } from '../WalletConnectScan.container'
 import type { ScanStatus } from '../../hooks/useWalletConnectScan'
 
@@ -7,7 +8,7 @@ const baseHook: {
   status: ScanStatus
   errorMessage: string
   isCameraActive: boolean
-  permission: 'granted' | 'denied' | 'restricted' | 'not-determined'
+  permission: CameraPermissionStatus
   requestPermission: jest.Mock
   openSettings: jest.Mock
   onScan: jest.Mock
@@ -18,7 +19,7 @@ const baseHook: {
   status: 'scanning',
   errorMessage: '',
   isCameraActive: true,
-  permission: 'granted' as const,
+  permission: 'granted' as CameraPermissionStatus,
   requestPermission: jest.fn(),
   openSettings: jest.fn(),
   onScan: jest.fn(),
