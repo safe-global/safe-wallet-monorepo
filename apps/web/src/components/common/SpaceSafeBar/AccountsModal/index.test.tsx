@@ -82,12 +82,12 @@ describe('AccountsModal', () => {
     expect(screen.getByText('All Accounts')).toBeInTheDocument()
   })
 
-  it('shows the "Safes not in this workspace" dialog title when in a qualified space', () => {
+  it('shows the "Explore other Safes" dialog title when in a qualified space', () => {
     mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ isQualifiedSafe: true }))
 
     render(<AccountsModal open onClose={jest.fn()} />)
 
-    expect(screen.getByText('Safes not in this workspace')).toBeInTheDocument()
+    expect(screen.getByText('Explore other Safes')).toBeInTheDocument()
     expect(screen.queryByText('All Accounts')).not.toBeInTheDocument()
   })
 

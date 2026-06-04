@@ -173,7 +173,7 @@ function SpaceSafeBar() {
       ? (close: () => void) => <ConnectWalletFooter onConnect={connectWallet} onClose={close} />
       : (close: () => void) => (
           <DropdownFooter
-            label={isQualifiedSafe ? 'Safes not in this workspace' : 'All Accounts'}
+            label={isQualifiedSafe ? 'Explore other Safes' : 'All Accounts'}
             onOpen={() => {
               close()
               handleOpenAccountsModal()
