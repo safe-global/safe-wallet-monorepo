@@ -130,13 +130,19 @@ const buildMergedResult = (opts: {
     return { data: undefined, error: new Error(String(txService.error)), loading: false, ...shared }
   }
 
+  // Query is skipped/uninitialized (not yet "loading"): keep loading to avoid a flash of the empty box.
   if (!txService.balances) {
     return { data: undefined, error: undefined, loading: true, ...shared }
   }
 
   // Portfolio only adds positions/fiatTotal; if it's missing, fall back to tx-service alone.
   if (!portfolio.balances) {
-    return { data: createPortfolioBalances(txService.balances), error: undefined, loading: false, ...shared }
+    return {
+      data: { ...createPortfolioBalances(txService.balances), isAllTokensMode: true },
+      error: undefined,
+      loading: false,
+      ...shared,
+    }
   }
 
   const mergedBalances: PortfolioBalances = {

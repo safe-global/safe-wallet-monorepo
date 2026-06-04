@@ -346,6 +346,8 @@ describe('useTotalBalances', () => {
       // Portfolio-derived data falls back safely
       expect(result.current.data?.positions).toBeUndefined()
       expect(result.current.data?.positionsFiatTotal).toBe('0')
+      // Still flagged as all-tokens mode so the UI keeps signalling the selected mode
+      expect(result.current.data?.isAllTokensMode).toBe(true)
     })
 
     it('should keep loading when portfolio errors but tx service has no data yet', () => {
