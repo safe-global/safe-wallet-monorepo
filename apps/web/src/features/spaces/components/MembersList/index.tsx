@@ -125,7 +125,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
           rawValue: memberEmail,
           content: memberEmail ? (
             <Tooltip title={memberEmail} placement="top">
-              <Typography variant="body2" noWrap>
+              <Typography variant="body2" noWrap sx={{ display: 'inline-block', maxWidth: '100%' }}>
                 {memberEmail}
               </Typography>
             </Tooltip>

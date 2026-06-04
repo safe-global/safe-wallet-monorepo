@@ -65,6 +65,19 @@ describe('useInviteForm tracking', () => {
     fireEvent.click(screen.getByTestId('submit'))
 
     await waitFor(() => {
+      expect(mockInviteMembers).toHaveBeenCalledWith({
+        spaceId: 42,
+        inviteUsersDto: {
+          users: [
+            {
+              type: 'wallet',
+              address: '0x1234567890123456789012345678901234567890',
+              name: '0x1234567890123456789012345678901234567890',
+              role: 'MEMBER',
+            },
+          ],
+        },
+      })
       expect(trackEvent).toHaveBeenCalledTimes(1)
       expect(trackEvent).toHaveBeenCalledWith(
         { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: '11111111-1111-1111-1111-111111111111' },
