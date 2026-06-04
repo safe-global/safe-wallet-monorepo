@@ -14,6 +14,7 @@ import {
   sortBySeverity,
   type SectionRow,
 } from '../primitives'
+import { resolveStatusTone } from '../../SeverityIcon/SeverityIcon'
 
 export type FailingRow = { key: string; node: ReactNode; grade: SafeGrade }
 
@@ -70,6 +71,9 @@ export const useSecurityChecks = (
 
     const items: SectionRow[] = []
     const iconFor = (r: ScanResult) => <StatusIcon status={r.status} severity={r.severity} />
+    const toneFor = (r: ScanResult) => resolveStatusTone(r.status, r.severity)
+    // Surface the remediation as the row subtitle for failing checks (passing rows need no action).
+    const subtitleFor = (r: ScanResult) => (!isPassingStatus(r.status) && r.remediation ? r.remediation : undefined)
 
     const accountSetupResult = results['account_setup']
     if (accountSetupResult) {
@@ -86,6 +90,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(accountSetupResult)}
+            accentTone={toneFor(accountSetupResult)}
+            subtitle={subtitleFor(accountSetupResult)}
             title={title}
             expandedContent={buildExpanded(
               accountSetupResult,
@@ -107,6 +113,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(multichainResult)}
+            accentTone={toneFor(multichainResult)}
+            subtitle={subtitleFor(multichainResult)}
             title={title}
             expandedContent={buildExpanded(
               multichainResult,
@@ -133,6 +141,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(recoveryResult)}
+            accentTone={toneFor(recoveryResult)}
+            subtitle={subtitleFor(recoveryResult)}
             title={title}
             expandedContent={buildExpanded(recoveryResult, buildCta('recovery', recoveryResult, safeQueryParam))}
           />
@@ -151,6 +161,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(versionResult)}
+            accentTone={toneFor(versionResult)}
+            subtitle={subtitleFor(versionResult)}
             title={title}
             expandedContent={buildExpanded(versionResult, buildCta('contract_version', versionResult, safeQueryParam))}
           />
@@ -174,6 +186,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(factoryResult)}
+            accentTone={toneFor(factoryResult)}
+            subtitle={subtitleFor(factoryResult)}
             title={title}
             expandedContent={buildExpanded(
               factoryResult,
@@ -201,6 +215,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(guardResult)}
+            accentTone={toneFor(guardResult)}
+            subtitle={subtitleFor(guardResult)}
             title={title}
             expandedContent={buildExpanded(guardResult, buildCta('guard', guardResult, safeQueryParam))}
           />
@@ -228,6 +244,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(fallbackResult)}
+            accentTone={toneFor(fallbackResult)}
+            subtitle={subtitleFor(fallbackResult)}
             title={title}
             expandedContent={buildExpanded(
               fallbackResult,
@@ -248,6 +266,8 @@ export const useSecurityChecks = (
           node: (
             <Row
               leadIcon={iconFor(modulesResult)}
+              accentTone={toneFor(modulesResult)}
+              subtitle={subtitleFor(modulesResult)}
               title="No modules installed"
               expandedContent={buildExpanded(modulesResult, buildCta('modules', modulesResult, safeQueryParam))}
             />
@@ -262,6 +282,7 @@ export const useSecurityChecks = (
           node: (
             <Row
               leadIcon={iconFor(modulesResult)}
+              accentTone={toneFor(modulesResult)}
               title={`Modules & Extensions · ${activeModules.length} installed`}
               trailing={
                 <Button
@@ -302,6 +323,7 @@ export const useSecurityChecks = (
             node: (
               <Row
                 leadIcon={<StatusIcon status={status} severity={severity} />}
+                accentTone={resolveStatusTone(status, severity)}
                 title={title}
                 expandedContent={
                   <EvidenceList intro={intro} evidence={perModuleEvidence} cta={trusted ? null : modulesCta} />
@@ -324,6 +346,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(scanningResult)}
+            accentTone={toneFor(scanningResult)}
+            subtitle={subtitleFor(scanningResult)}
             title={title}
             expandedContent={buildExpanded(
               scanningResult,
@@ -350,6 +374,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(pendingResult)}
+            accentTone={toneFor(pendingResult)}
+            subtitle={subtitleFor(pendingResult)}
             title={title}
             expandedContent={buildExpanded(pendingResult, buildCta('pending_tx', pendingResult, safeQueryParam))}
           />

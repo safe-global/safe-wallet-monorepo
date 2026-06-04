@@ -76,8 +76,8 @@ const renderPanel = (overrides: Partial<React.ComponentProps<typeof SecurityPane
   return render(<SecurityPanelView {...defaults} {...overrides} />)
 }
 
-/** Find the "N checks passing" accordion summary (distinct from the header's "All checks passing."). */
-const getChecksAccordion = () => screen.getByText(/^\d+ checks? passing$/)
+/** Find the collapsible "Healthy · N" passing-group chip (distinct from the header's "All checks passing."). */
+const getChecksAccordion = () => screen.getByText(/^Healthy · \d+$/)
 
 // ─── tests ────────────────────────────────────────────────────────────────────
 
@@ -284,9 +284,9 @@ describe('SecurityPanelView', () => {
       })
       const row = screen.getByText('Single signer controls this Safe')
       fireEvent.click(row)
-      const paper = row.closest('.MuiPaper-root')!
-      expect(within(paper as HTMLElement).getByText('Raise the threshold.')).toBeInTheDocument()
-      expect(within(paper as HTMLElement).getByText('1 of 3')).toBeInTheDocument()
+      const panel = row.closest('.rounded-lg')!
+      expect(within(panel as HTMLElement).getByText('Raise the threshold.')).toBeInTheDocument()
+      expect(within(panel as HTMLElement).getByText('1 of 3')).toBeInTheDocument()
     })
   })
 })
