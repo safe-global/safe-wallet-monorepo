@@ -77,10 +77,12 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
     gasToken: gtfSelectedGasToken,
     numberSignatures: safe.threshold,
   })
-  const displayRefundReceiver =
-    shouldPreviewGtf && previewData?.txData.refundReceiver
-      ? previewData.txData.refundReceiver
-      : safeTxData.refundReceiver
+
+  const previewTxData = shouldPreviewGtf ? previewData?.txData : undefined
+  const displayRefundReceiver = previewTxData?.refundReceiver ?? safeTxData.refundReceiver
+  const displaySafeTxGas = previewTxData?.safeTxGas ?? safeTxData.safeTxGas
+  const displayBaseGas = previewTxData?.baseGas ?? safeTxData.baseGas
+  const displayGasPrice = previewTxData?.gasPrice ?? safeTxData.gasPrice
 
   return (
     <PaperViewToggle activeView={0} leftAlign={grid}>
@@ -134,15 +136,15 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
                 </TxDetailsRow>
 
                 <TxDetailsRow label="SafeTxGas" grid={grid}>
-                  {safeTxData.safeTxGas}
+                  {displaySafeTxGas}
                 </TxDetailsRow>
 
                 <TxDetailsRow label="BaseGas" grid={grid}>
-                  {safeTxData.baseGas}
+                  {displayBaseGas}
                 </TxDetailsRow>
 
                 <TxDetailsRow label="GasPrice" grid={grid}>
-                  {safeTxData.gasPrice}
+                  {displayGasPrice}
                 </TxDetailsRow>
 
                 <TxDetailsRow label="GasToken" grid={grid}>
