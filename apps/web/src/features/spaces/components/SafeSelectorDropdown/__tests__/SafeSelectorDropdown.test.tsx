@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
+import useChains from '@/hooks/useChains'
 import SafeSelectorDropdown from '../index'
 import type { SafeItemData } from '../types'
 
@@ -13,6 +14,10 @@ jest.mock('next/router', () => ({
 }))
 jest.mock('@/hooks/safe-apps/useSafeAppUrl', () => ({
   useSafeAppUrl: jest.fn(),
+}))
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 jest.mock('@/components/ui/tooltip', () => ({
@@ -37,7 +42,9 @@ jest.mock('@/components/ui/tooltip', () => ({
 
 jest.mock('../components/SafeSelectorTriggerContent', () => ({
   __esModule: true,
-  default: () => <span data-testid="safe-selector-trigger-content" />,
+  default: ({ selectedItem }: { selectedItem: { chains: Array<{ shortName: string }> } }) => (
+    <span data-testid="safe-selector-trigger-content" data-shortname={selectedItem.chains[0]?.shortName ?? ''} />
+  ),
 }))
 
 jest.mock('../components/SafeDropdownContainer', () => ({
@@ -150,6 +157,12 @@ describe('SafeSelectorDropdown', () => {
       .mocked(useRouter)
       .mockReturnValue({ push: jest.fn(), pathname: '/', query: {} } as unknown as ReturnType<typeof useRouter>)
     jest.mocked(useSafeAppUrl).mockReturnValue(undefined)
+    jest.mocked(useChains).mockReturnValue({
+      configs: [
+        { chainId: '1', shortName: 'eth', chainName: 'Ethereum', chainLogoUri: null },
+        { chainId: '137', shortName: 'matic', chainName: 'Polygon', chainLogoUri: null },
+      ] as ReturnType<typeof useChains>['configs'],
+    })
   })
 
   describe('onValueChange filtering by reason', () => {
@@ -240,6 +253,21 @@ describe('SafeSelectorDropdown', () => {
 
       const selectRoot = screen.getByTestId('mock-select-root')
       expect(selectRoot.getAttribute('data-mock-disabled')).toBe('false')
+    })
+
+    it('looks up the chain shortName from chain configs for the fallback trigger', () => {
+      const itemA = createItem()
+      render(
+        <SafeSelectorDropdown
+          items={[itemA]}
+          selectedItemId="137:0xe7255eE8D8A47ee01864241e7475C5c7A9792401"
+          onItemSelect={jest.fn()}
+        />,
+      )
+
+      // Fallback chain entry must pick up shortName (`matic`) from chain configs,
+      // so the trigger renders `matic:0x...` instead of bare `0x...`.
+      expect(screen.getByTestId('safe-selector-trigger-content').getAttribute('data-shortname')).toBe('matic')
     })
 
     it('forwards the user pick even from the fallback trigger', async () => {

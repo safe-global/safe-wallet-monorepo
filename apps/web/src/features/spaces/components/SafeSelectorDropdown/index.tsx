@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/utils/cn'
@@ -7,24 +9,33 @@ import SafeDropdownContainer from './components/SafeDropdownContainer'
 import InlineRetryError from '@/components/common/InlineRetryError'
 import { useSafeSelectorState } from './hooks/useSafeSelectorState'
 import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
+import useChains from '@/hooks/useChains'
 import { getSafeSelectorClassVariants } from './utils/classVariants'
 import type { SafeItemData, SafeSelectorDropdownProps } from './types'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 // Keeps the dropdown trigger renderable when the current safe isn't in `items`.
-function buildFallbackSafeItem(selectedItemId: string | undefined): SafeItemData | null {
+function buildFallbackSafeItem(selectedItemId: string | undefined, chainConfigs: Chain[]): SafeItemData | null {
   if (!selectedItemId) return null
-  const colonIndex = selectedItemId.indexOf(':')
-  if (colonIndex <= 0) return null
+  const { prefix: chainId, address } = parsePrefixedAddress(selectedItemId)
+  if (!chainId || !address) return null
+  const chain = chainConfigs.find((c) => c.chainId === chainId)
   return {
     id: selectedItemId,
     name: '',
-    address: selectedItemId.slice(colonIndex + 1),
+    address,
     threshold: 0,
     owners: 0,
     balance: '',
     isLoading: true,
-    chains: [{ chainId: selectedItemId.slice(0, colonIndex), chainName: '', chainLogoUri: null, shortName: '' }],
+    chains: [
+      {
+        chainId,
+        chainName: chain?.chainName ?? '',
+        chainLogoUri: chain?.chainLogoUri ?? null,
+        shortName: chain?.shortName ?? '',
+      },
+    ],
   }
 }
 
@@ -80,9 +91,10 @@ function SafeSelectorDropdown({
   const safeSelectValue = selectedItemId ?? selectedItem?.id
   const safeItemSelect = onItemSelect ?? (() => {})
 
+  const { configs: chainConfigs } = useChains()
   const fallbackSelectedItem = useMemo(
-    () => (selectedItem ? null : buildFallbackSafeItem(selectedItemId)),
-    [selectedItem, selectedItemId],
+    () => (selectedItem ? null : buildFallbackSafeItem(selectedItemId, chainConfigs)),
+    [selectedItem, selectedItemId, chainConfigs],
   )
   const triggerItem = selectedItem ?? fallbackSelectedItem
 
