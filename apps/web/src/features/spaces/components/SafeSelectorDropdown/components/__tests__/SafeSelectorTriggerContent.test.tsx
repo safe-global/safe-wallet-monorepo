@@ -67,4 +67,50 @@ describe('SafeSelectorTriggerContent', () => {
     // When no name is resolved, getSafeDisplayInfo falls back to prefixed address
     expect(getByText(/0xabc/)).toBeInTheDocument()
   })
+
+  it('shows the not-activated warning icon instead of the balance when the selected chain is undeployed', () => {
+    const item = createItem({
+      chains: [
+        { chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth', isUndeployed: true },
+        { chainId: '137', chainName: 'Polygon', chainLogoUri: null, shortName: 'matic' },
+      ],
+    })
+
+    const { getByTestId, queryByTestId } = render(
+      <SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />,
+    )
+
+    expect(getByTestId('safe-selector-not-activated-icon')).toHaveAttribute('aria-label', 'Not activated')
+    expect(queryByTestId('safe-balance-block')).not.toBeInTheDocument()
+  })
+
+  it('shows the activating label when the selected chain is being activated', () => {
+    const item = createItem({
+      chains: [
+        {
+          chainId: '1',
+          chainName: 'Ethereum',
+          chainLogoUri: null,
+          shortName: 'eth',
+          isUndeployed: true,
+          isActivating: true,
+        },
+      ],
+    })
+
+    const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />)
+
+    expect(getByTestId('safe-selector-not-activated-icon')).toHaveAttribute('aria-label', 'Activating')
+  })
+
+  it('shows the balance when the selected chain is deployed', () => {
+    const item = createItem()
+
+    const { getByTestId, queryByTestId } = render(
+      <SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" />,
+    )
+
+    expect(getByTestId('safe-balance-block')).toBeInTheDocument()
+    expect(queryByTestId('safe-selector-not-activated-icon')).not.toBeInTheDocument()
+  })
 })

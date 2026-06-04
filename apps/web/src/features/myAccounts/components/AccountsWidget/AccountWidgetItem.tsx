@@ -8,6 +8,7 @@ import { AccountItem } from '../AccountItem'
 import type { Account } from './types'
 import Identicon from '@/components/common/Identicon'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { NotActivatedBadge } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 
 interface AccountWidgetItemProps {
   account: Account
@@ -49,12 +50,16 @@ const AccountWidgetItem = ({
       }
       actionNode={
         <div className="flex flex-col items-end gap-2">
-          <AccountItem.Balance
-            className="w-full"
-            data-testid="single-account-balance"
-            fiatTotal={account.fiatTotal}
-            isLoading={!account.fiatTotal && loading}
-          />
+          {account.isUndeployed ? (
+            <NotActivatedBadge isActivating={!!account.isActivating} />
+          ) : (
+            <AccountItem.Balance
+              className="w-full"
+              data-testid="single-account-balance"
+              fiatTotal={account.fiatTotal}
+              isLoading={!account.fiatTotal && loading}
+            />
+          )}
           {!account.subAccounts && (
             <Badge variant="secondary" data-testid="single-account-threshold">
               <UserRound className="size-3" />

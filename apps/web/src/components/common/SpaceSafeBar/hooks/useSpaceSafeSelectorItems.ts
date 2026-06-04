@@ -111,8 +111,10 @@ function buildSingleChainItem(
   overviewsLoading: boolean,
   safe: { threshold: number; owners?: { value: string }[] },
   chainConfigs: Chain[],
+  undeployedSafes: UndeployedSafesState,
 ): SafeItemData {
   const overview = overviews?.find((o) => sameAddress(o.address.value, item.address) && o.chainId === item.chainId)
+  const undeployed = undeployedSafes[item.chainId]?.[item.address]
 
   return {
     id: `${item.chainId}:${item.address}`,
@@ -121,7 +123,12 @@ function buildSingleChainItem(
     ...resolveThresholdAndOwners(isCurrentSafe, safe, overview),
     balance: overview?.fiatTotal ?? '0',
     isLoading: overviewsLoading && !overview,
-    chains: mapChainIds(chainConfigs, [item.chainId]),
+    chains: mapChainIds(chainConfigs, [item.chainId]).map((chain) => ({
+      ...chain,
+      isReadOnly: item.isReadOnly ?? false,
+      isUndeployed: Boolean(undeployed),
+      isActivating: Boolean(undeployed && undeployed.status.status !== PendingSafeStatus.AWAITING_EXECUTION),
+    })),
   }
 }
 
@@ -164,7 +171,7 @@ export function useSpaceSafeSelectorItems() {
         )
       }
 
-      return buildSingleChainItem(item, isCurrentSafe, overviews, overviewsLoading, safe, chainConfigs)
+      return buildSingleChainItem(item, isCurrentSafe, overviews, overviewsLoading, safe, chainConfigs, undeployedSafes)
     })
   }, [allSafes, effectiveSafeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs, undeployedSafes])
 

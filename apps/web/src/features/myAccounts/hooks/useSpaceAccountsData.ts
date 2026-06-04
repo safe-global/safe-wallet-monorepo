@@ -22,6 +22,7 @@ import type { Account, SubAccount } from '../components/AccountsWidget/types'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
+import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 
 const getLocalName = (address: string, safes: SafeItem[], localAddressBooks: AddressBookState): string => {
   for (const safe of safes) {
@@ -41,6 +42,21 @@ const getCfOwners = (address: string, chainId: string, undeployedSafes: Undeploy
   if (!cfSafe) return undefined
   const { threshold, owners } = cfSafe.props.safeAccountConfig
   return `${threshold}/${owners.length}`
+}
+
+// An account is "not activated" only when none of its chains are deployed yet.
+const getActivationStatus = (
+  safes: SafeItem[],
+  undeployedSafes: UndeployedSafesState,
+): { isUndeployed: boolean; isActivating: boolean } => {
+  const isUndeployed = safes.length > 0 && safes.every((s) => Boolean(undeployedSafes[s.chainId]?.[s.address]))
+  const isActivating =
+    isUndeployed &&
+    safes.some((s) => {
+      const undeployed = undeployedSafes[s.chainId]?.[s.address]
+      return Boolean(undeployed && undeployed.status.status !== PendingSafeStatus.AWAITING_EXECUTION)
+    })
+  return { isUndeployed, isActivating }
 }
 
 const formatMultichainAccount = (
@@ -86,6 +102,7 @@ const formatMultichainAccount = (
     fiatTotal: safeOverviews.length > 0 ? totalFiat.toString() : undefined,
     owners,
     subAccounts,
+    ...getActivationStatus(safe.safes, undeployedSafes),
   }
 }
 
@@ -112,6 +129,7 @@ const formatSingleSafe = (
     safes: [safe],
     fiatTotal: overview?.fiatTotal,
     owners,
+    ...getActivationStatus([safe], undeployedSafes),
   }
 }
 

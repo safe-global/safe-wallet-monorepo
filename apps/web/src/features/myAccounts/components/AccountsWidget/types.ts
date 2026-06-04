@@ -15,4 +15,8 @@ export interface Account {
   owners: string
   highlighted?: boolean
   subAccounts?: SubAccount[]
+  /** True when the safe is counterfactual and not yet deployed on any of its chains. */
+  isUndeployed?: boolean
+  /** True while a counterfactual safe is being activated. */
+  isActivating?: boolean
 }

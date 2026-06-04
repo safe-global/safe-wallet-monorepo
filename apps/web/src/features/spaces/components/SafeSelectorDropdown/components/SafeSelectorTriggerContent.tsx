@@ -1,6 +1,6 @@
 import { useState, useCallback, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react'
 import { blo } from 'blo'
-import { Copy, Check } from 'lucide-react'
+import { Copy, Check, AlertCircle } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
@@ -20,6 +20,8 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
   const [copied, setCopied] = useState(false)
   const selectedChain = selectedItem.chains.find((c) => c.chainId === selectedChainId) ?? selectedItem.chains[0]
   const chainShortName = selectedChain?.shortName ?? ''
+  const isUndeployed = Boolean(selectedChain?.isUndeployed)
+  const isActivating = Boolean(selectedChain?.isActivating)
 
   const resolvedName = useSafeDisplayName(selectedItem.address, selectedChainId)
   const { addressWithPrefix, displayName, showAddressLine } = getSafeDisplayInfo(
@@ -94,13 +96,34 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
           </div>
         )}
       </div>
-      <SafeBalanceBlock
-        isLoading={selectedItem.isLoading ?? false}
-        balance={selectedItem.balance}
-        threshold={selectedItem.threshold}
-        owners={selectedItem.owners}
-        showBalanceDisplay
-      />
+      {isUndeployed ? (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span
+                tabIndex={0}
+                className="flex shrink-0 items-center"
+                data-testid="safe-selector-not-activated-icon"
+                aria-label={isActivating ? 'Activating' : 'Not activated'}
+              />
+            }
+          >
+            <AlertCircle
+              className="size-4"
+              style={{ color: isActivating ? 'var(--color-info-dark)' : 'var(--color-warning-main)' }}
+            />
+          </TooltipTrigger>
+          <TooltipContent>{isActivating ? 'Activating' : 'Not activated'}</TooltipContent>
+        </Tooltip>
+      ) : (
+        <SafeBalanceBlock
+          isLoading={selectedItem.isLoading ?? false}
+          balance={selectedItem.balance}
+          threshold={selectedItem.threshold}
+          owners={selectedItem.owners}
+          showBalanceDisplay
+        />
+      )}
     </div>
   )
 }
