@@ -106,9 +106,9 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(screen.getByRole('heading', { name: /sign in to your workspace/i })).toBeInTheDocument()
     expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
 
-    // …and the Create space CTA / no-spaces empty state must NOT.
-    expect(screen.queryByText(/^create space$/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/no spaces found/i)).not.toBeInTheDocument()
+    // …and the Create workspace CTA / no-workspaces empty state must NOT.
+    expect(screen.queryByText(/^create workspace$/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/no workspaces found/i)).not.toBeInTheDocument()
   })
 
   // The signed-out screen is meant to take over the viewport when the
