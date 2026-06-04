@@ -1,5 +1,6 @@
 import React from 'react'
 import { Pressable } from 'react-native'
+import { Circle } from 'tamagui'
 import { router } from 'expo-router'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useAppSelector } from '@/src/store/hooks'
@@ -19,9 +20,11 @@ export const HeaderQrButton: React.FC = () => {
     <Pressable
       onPress={() => router.push('/wallet-connect-scan')}
       accessibilityLabel="Scan WalletConnect QR"
-      style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}
+      testID="navbar-qr-button"
     >
-      <SafeFontIcon name="qr-code" />
+      <Circle size={40} backgroundColor="$backgroundSkeleton">
+        <SafeFontIcon name="scan" size={24} color="$color" />
+      </Circle>
     </Pressable>
   )
 }
