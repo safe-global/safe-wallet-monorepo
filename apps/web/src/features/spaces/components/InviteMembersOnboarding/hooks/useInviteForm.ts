@@ -37,7 +37,9 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
   const onSubmit = handleSubmit(async (data) => {
     if (!spaceId) return
 
-    const validMembers = data.members.filter((m) => m.identifier.trim() !== '')
+    const validMembers = data.members
+      .map((m) => ({ ...m, identifier: m.identifier.trim() }))
+      .filter((m) => m.identifier !== '')
 
     const hasUnresolvedNames = validMembers.some((m) => !isEmailAddress(m.identifier) && !isAddress(m.identifier))
     if (hasUnresolvedNames) {

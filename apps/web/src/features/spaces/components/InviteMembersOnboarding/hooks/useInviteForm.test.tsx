@@ -111,6 +111,35 @@ describe('useInviteForm tracking', () => {
     })
   })
 
+  it('submits identifiers with surrounding whitespace instead of blocking on "unresolved" names', async () => {
+    mockInviteMembers.mockResolvedValue({
+      data: [{ userId: 3, spaceId: 42, name: 'Dave', role: 'MEMBER', status: 'INVITED' }],
+    })
+
+    render(<TestComponent spaceId="42" />)
+
+    fireEvent.change(screen.getByTestId('address-0'), {
+      target: { value: '  Dave@Example.com  ' },
+    })
+    fireEvent.click(screen.getByTestId('submit'))
+
+    await waitFor(() => {
+      expect(mockInviteMembers).toHaveBeenCalledWith({
+        spaceId: 42,
+        inviteUsersDto: {
+          users: [
+            {
+              type: 'email',
+              email: 'dave@example.com',
+              name: 'Dave@Example.com',
+              role: 'MEMBER',
+            },
+          ],
+        },
+      })
+    })
+  })
+
   it('builds a mixed payload of wallet and email invites in order', async () => {
     mockInviteMembers.mockResolvedValue({
       data: [
