@@ -165,20 +165,20 @@ describe('SelectSafesOnboarding — wallet connection state', () => {
     expect(screen.queryByTestId('select-safes-connect-wallet-button')).not.toBeInTheDocument()
   })
 
-  it('renders the ConnectWalletPrompt when no wallet is connected', () => {
+  it('still renders the list, Continue, and an inline connect hint when no wallet is connected', () => {
     mockWalletValue = null
     render(<SelectSafesOnboarding />)
 
+    // No-wallet users can still pick their locally stored Safes; the wallet CTA is just an inline hint.
+    expect(screen.getByTestId('onboarding-safes-list')).toBeInTheDocument()
+    expect(screen.getByTestId('select-safes-continue-button')).toBeInTheDocument()
     expect(screen.getByTestId('select-safes-connect-wallet-button')).toBeInTheDocument()
-    expect(screen.getByText('Connect your wallet to access all your Safes')).toBeInTheDocument()
-    expect(screen.queryByTestId('onboarding-safes-list')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('select-safes-continue-button')).not.toBeInTheDocument()
   })
 
-  it('still shows the Skip button when no wallet is connected', () => {
+  it('shows the skip link when no wallet is connected', () => {
     mockWalletValue = null
     render(<SelectSafesOnboarding />)
 
-    expect(screen.getByTestId('select-safes-skip-button')).toBeInTheDocument()
+    expect(screen.getByTestId('select-safes-skip-link')).toBeInTheDocument()
   })
 })

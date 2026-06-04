@@ -112,9 +112,15 @@ describe('AddAccounts — wallet connection state', () => {
 
   it('still renders the safes list (does not replace it) when no wallet is connected', () => {
     mockWalletValue = null
-    render(<AddAccounts externalOpen onExternalClose={() => {}} />)
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, {
+      initialReduxState: {
+        addedSafes: { '1': { '0x0000000000000000000000000000000000001234': { owners: [], threshold: 1 } } },
+      },
+    })
 
-    expect(screen.getByTestId('add-accounts-safes-list-scroll-region')).toBeInTheDocument()
+    // List region is present AND the list actually renders — not replaced by a connect prompt.
+    expect(screen.getByTestId('add-accounts-safes-list-region')).toBeInTheDocument()
+    expect(screen.getByTestId('onboarding-safes-list')).toBeInTheDocument()
   })
 
   it('keeps the manual add affordance available without a connected wallet', () => {

@@ -14,6 +14,7 @@ import {
 import AddManually, { type AddManuallyFormValues } from './AddManually'
 import { getSafeId } from './SafesList'
 import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingSafesList'
+import ConnectWalletHint from '../ConnectWalletHint'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
 import { AdminOnlyWorkspaceTooltip } from '@/features/spaces/components/AdminOnlyWorkspaceTooltip'
@@ -30,12 +31,12 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
-import { Search, Plus, X, Loader2, Wallet } from 'lucide-react'
+import { Search, Plus, X, Loader2 } from 'lucide-react'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { Alert, AlertAction, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import Track from '@/components/common/Track'
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
@@ -43,7 +44,6 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
-import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { cn } from '@/utils/cn'
 import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
@@ -113,7 +113,6 @@ const AddAccounts = ({
 
   // Get wallet and chain info
   const wallet = useWallet()
-  const connectWallet = useConnectWallet()
   const walletAddress = wallet?.address ?? ''
   const { configs } = useChains()
   const allChainIds = useMemo(() => configs.map((c) => c.chainId), [configs])
@@ -347,6 +346,9 @@ const AddAccounts = ({
   }, [debouncedSearchQuery])
 
   const hasAvailableSafes = trustedSafes.length > 0 || ownedSafes.length > 0
+  const isListEmpty = !hasAvailableSafes && !debouncedSearchQuery
+  const hasNoSearchMatch = trustedSelection.total === 0 && ownedSelection.total === 0 && Boolean(debouncedSearchQuery)
+  const emptyStateMessage = wallet ? 'No safes on your list' : 'No saved Safe accounts yet — add one by address below.'
 
   return (
     <>
@@ -410,31 +412,14 @@ const AddAccounts = ({
                     </InputGroup>
                   </div>
 
-                  {!wallet && (
-                    <Alert variant="success" className="shrink-0 items-center rounded-md py-4">
-                      <Wallet className="!translate-y-0" />
-                      <AlertDescription>Connect a wallet to discover accounts you own or sign for</AlertDescription>
-                      <AlertAction className="top-1/2 -translate-y-1/2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={connectWallet}
-                          data-testid="add-accounts-connect-wallet-button"
-                        >
-                          Connect
-                        </Button>
-                      </AlertAction>
-                    </Alert>
-                  )}
+                  {!wallet && <ConnectWalletHint testId="add-accounts-connect-wallet-button" />}
 
-                  <div className="relative min-w-0 w-full" data-testid="add-accounts-safes-list-scroll-region">
-                    {!hasAvailableSafes && !debouncedSearchQuery ? (
+                  <div className="relative min-w-0 w-full" data-testid="add-accounts-safes-list-region">
+                    {isListEmpty ? (
                       <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                        {wallet
-                          ? 'No safes on your list'
-                          : 'No saved Safe accounts yet. Connect your wallet or add an account by address below.'}
+                        {emptyStateMessage}
                       </Typography>
-                    ) : trustedSelection.total === 0 && ownedSelection.total === 0 && debouncedSearchQuery ? (
+                    ) : hasNoSearchMatch ? (
                       <Typography variant="paragraph" align="center" color="muted" className="py-8">
                         No safes match your search
                       </Typography>
