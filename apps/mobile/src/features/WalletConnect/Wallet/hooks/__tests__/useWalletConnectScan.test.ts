@@ -67,6 +67,8 @@ describe('useWalletConnectScan', () => {
   })
 
   it('surfaces the pair() error message on failure', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
     mockPair.mockRejectedValueOnce(new Error('pairing rejected'))
     const { result } = renderHook(() => useWalletConnectScan())
 
@@ -77,6 +79,7 @@ describe('useWalletConnectScan', () => {
     await waitFor(() => expect(result.current.status).toBe('error'))
     expect(result.current.errorMessage).toBe('pairing rejected')
     expect(mockBack).not.toHaveBeenCalled()
+    errorSpy.mockRestore()
   })
 
   it('goes to error on the 10s timeout and ignores a late pair() resolve', async () => {

@@ -25,12 +25,12 @@ export const useWalletConnectScan = () => {
   const cancelledRef = useRef(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const clearTimer = () => {
+  const clearTimer = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current)
       timerRef.current = null
     }
-  }
+  }, [])
 
   const toError = useCallback((message: string) => {
     setErrorMessage(message)
@@ -40,14 +40,14 @@ export const useWalletConnectScan = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (permission === 'granted' && status === 'scanning') {
+      if (permission === 'granted') {
         setIsCameraActive(true)
       }
       return () => {
         setIsCameraActive(false)
         clearTimer()
       }
-    }, [permission, status]),
+    }, [permission, clearTimer]),
   )
 
   const startPair = useCallback(
@@ -85,7 +85,7 @@ export const useWalletConnectScan = () => {
         toError(e instanceof Error ? e.message : 'Failed to pair')
       }
     },
-    [router, toError],
+    [router, toError, clearTimer],
   )
 
   const onScan = useCallback(
@@ -113,6 +113,13 @@ export const useWalletConnectScan = () => {
 
   const onActivateCamera = useCallback(() => setIsCameraActive(true), [])
 
+  const onPasteUri = useCallback(
+    (uri: string) => {
+      void startPair(uri)
+    },
+    [startPair],
+  )
+
   return {
     status,
     errorMessage,
@@ -123,6 +130,6 @@ export const useWalletConnectScan = () => {
     onScan,
     onTryAgain,
     onActivateCamera,
-    startPair,
+    onPasteUri,
   }
 }
