@@ -24,7 +24,7 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - Alert: `variant` ('default' | 'destructive')
+ * - Alert: `variant` ('default' | 'destructive' | 'warning' | 'success')
  * - AlertAction: for action buttons (positioned top-right)
  */
 
