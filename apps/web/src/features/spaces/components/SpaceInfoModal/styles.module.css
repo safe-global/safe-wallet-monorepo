@@ -1,0 +1,112 @@
+/* Ambient drifting glows on the dark preview panel */
+.glowPrimary,
+.glowSecondary {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 9999px;
+  will-change: transform, opacity;
+}
+
+.glowPrimary {
+  top: -180px;
+  right: -160px;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(18, 255, 128, 0.2) 0%, rgba(18, 255, 128, 0.03) 50%, transparent 75%);
+  filter: blur(32px);
+  animation: glowDrift 28s ease-in-out infinite;
+}
+
+.glowSecondary {
+  bottom: -200px;
+  left: -160px;
+  width: 440px;
+  height: 440px;
+  background: radial-gradient(circle, rgba(18, 255, 128, 0.1) 0%, transparent 65%);
+  filter: blur(40px);
+  animation: glowDrift2 36s ease-in-out infinite;
+}
+
+@keyframes glowDrift {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.85;
+  }
+  33% {
+    transform: translate(-28px, 38px) scale(1.08);
+    opacity: 1;
+  }
+  66% {
+    transform: translate(18px, -22px) scale(0.97);
+    opacity: 0.78;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.85;
+  }
+}
+
+@keyframes glowDrift2 {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(44px, -30px) scale(1.1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+}
+
+/* One-time shine sweep across each preview card as it lands */
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 30%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0) 70%,
+    transparent 100%
+  );
+  pointer-events: none;
+  animation: shineSweep 1400ms cubic-bezier(0.32, 0.72, 0, 1) var(--shine-delay, 0ms) forwards;
+}
+
+@keyframes shineSweep {
+  0% {
+    left: -60%;
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    left: 160%;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glowPrimary,
+  .glowSecondary {
+    animation: none;
+  }
+  .shine::after {
+    animation: none;
+    display: none;
+  }
+}
