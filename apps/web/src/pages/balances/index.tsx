@@ -71,6 +71,7 @@ const Balances: NextPage = () => {
               fiatTotal={tokensFiatTotal}
               title="Total assets value"
               tooltipTitle={showAllTokens ? 'Total Balance may be different when you show all tokens.' : undefined}
+              tooltipColor="warning"
             />
 
             <Stack direction="column" alignItems="flex-end" gap={0.5}>
