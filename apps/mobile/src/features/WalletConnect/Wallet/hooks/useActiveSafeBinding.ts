@@ -5,13 +5,11 @@ import { getAddress } from 'ethers'
 import { EIP155 } from '@safe-global/utils/features/walletconnect/constants'
 import { getEip155ChainId } from '@safe-global/utils/features/walletconnect/utils'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectSessions } from '../store/walletKitSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { logWalletKitError } from '../utils/errors'
 
 export const useActiveSafeBinding = (walletKit: IWalletKit | null) => {
   const activeSafe = useAppSelector(selectActiveSafe)
-  const sessions = useAppSelector(selectSessions)
 
   useEffect(() => {
     if (!walletKit || !activeSafe) {
@@ -20,16 +18,15 @@ export const useActiveSafeBinding = (walletKit: IWalletKit | null) => {
     const checksummed = getAddress(activeSafe.address)
     const chainCaip2 = getEip155ChainId(activeSafe.chainId)
 
-    // Redux's view of sessions can lag the SDK's after a delete / relay-driven prune.
-    // Calling updateSession on a topic the SDK no longer knows throws "session topic
-    // doesn't exist". Filter against the live snapshot to avoid the noisy call.
+    // Source sessions from the SDK's live snapshot, not the redux mirror. A new session is
+    // already bound to the active Safe at approval time, so this effect only needs to re-bind
+    // when the active Safe itself changes (address / chain) — see the deps. Depending on the
+    // sessions array instead would re-emit updateSession + accountsChanged/chainChanged to
+    // every connected dApp on any single-session add/remove (redundant O(n) churn). Reading
+    // the live snapshot also avoids updateSession throwing on a topic the SDK already pruned.
     const live = walletKit.getActiveSessions()
 
     const updateOne = async (session: SessionTypes.Struct) => {
-      if (!live[session.topic]) {
-        return
-      }
-
       const eip155 = session.namespaces[EIP155]
       if (!eip155) {
         return
@@ -70,6 +67,6 @@ export const useActiveSafeBinding = (walletKit: IWalletKit | null) => {
 
     // Each body catches its own errors, so Promise.all never rejects — the explicit void
     // documents the fire-and-forget intent.
-    void Promise.all(sessions.map(updateOne))
-  }, [walletKit, activeSafe?.address, activeSafe?.chainId, sessions])
+    void Promise.all(Object.values(live).map(updateOne))
+  }, [walletKit, activeSafe?.address, activeSafe?.chainId])
 }
