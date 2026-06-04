@@ -38,6 +38,7 @@ enum ErrorCodes {
   _616 = '616: Failed to retrieve recommended nonce',
   _619 = '619: Error fetching data from master-copies',
   _620 = '620: Error loading chains',
+  _621 = '621: Error checking modules for known vulnerabilities',
   _630 = '630: Error fetching remaining daily relays',
   _631 = '631: Transaction failed to be relayed',
   _632 = '632: Error fetching relay task status',
