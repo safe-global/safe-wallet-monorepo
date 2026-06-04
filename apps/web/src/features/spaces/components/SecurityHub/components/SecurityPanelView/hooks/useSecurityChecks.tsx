@@ -1,6 +1,6 @@
 import { type ReactNode, useMemo, useState } from 'react'
 import { Button } from '@mui/material'
-import type { EvidenceItem, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
+import type { EvidenceItem, SafeGrade, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -15,10 +15,20 @@ import {
   type SectionRow,
 } from '../primitives'
 
+export type FailingRow = { key: string; node: ReactNode; grade: SafeGrade }
+
 export type UseSecurityChecksResult = {
   isReady: boolean
-  failingRows: { key: string; node: ReactNode }[]
+  failingRows: FailingRow[]
   passingRows: { key: string; node: ReactNode }[]
+}
+
+/** Maps a per-check severity to the SafeGrade used by the issue chips. */
+const SEVERITY_TO_SAFE_GRADE: Record<SecurityGrade, SafeGrade> = {
+  Critical: 'critical',
+  High: 'at_risk',
+  Medium: 'needs_attention',
+  Low: 'needs_attention',
 }
 
 /**
@@ -48,7 +58,7 @@ export const useSecurityChecks = (
   const { failingRows, passingRows } = useMemo(() => {
     if (!buildCta || !isKnownModuleByName || !zeroAddress) {
       return {
-        failingRows: [] as { key: string; node: ReactNode }[],
+        failingRows: [] as FailingRow[],
         passingRows: [] as { key: string; node: ReactNode }[],
       }
     }
@@ -348,7 +358,11 @@ export const useSecurityChecks = (
     }
 
     return {
-      failingRows: sortBySeverity(items.filter((i) => !i.isPassing)).map(({ key, node }) => ({ key, node })),
+      failingRows: sortBySeverity(items.filter((i) => !i.isPassing)).map(({ key, node, severity }) => ({
+        key,
+        node,
+        grade: SEVERITY_TO_SAFE_GRADE[severity],
+      })),
       passingRows: items.filter((i) => i.isPassing).map(({ key, node }) => ({ key, node })),
     }
   }, [buildCta, isKnownModuleByName, zeroAddress, scanContext, results, safeQueryParam, modulesExpanded])

@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./SecurityDrawerDetails.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="flex items-center justify-center py-16"
+  >
+    <span
+      class="m-0 text-sm leading-5 font-normal text-muted-foreground"
+      data-slot="typography"
+      data-variant="paragraph-small"
+    >
+      MOCK HERE
+    </span>
+  </div>
+</div>
+`;

@@ -4,8 +4,9 @@ import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
 import UnfoldLessRoundedIcon from '@mui/icons-material/UnfoldLessRounded'
 import UnfoldMoreRoundedIcon from '@mui/icons-material/UnfoldMoreRounded'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import type { ScanContext, ScanResult } from '@/features/security/types'
+import type { SafeGrade, ScanContext, ScanResult } from '@/features/security/types'
 import SectionPanel from './SectionPanel'
+import SafeGradeChip from '../SafeGradeChip/SafeGradeChip'
 import { useSecurityChecks } from './hooks/useSecurityChecks'
 
 export type SecurityChecksSectionProps = {
@@ -24,6 +25,12 @@ const SecurityChecksSection = ({
 
   // Feature not yet loaded — render nothing; the panel skeleton covers this state.
   if (!isReady) return null
+
+  // One chip per distinct grade present across all checks (failing + passing), ordered by severity.
+  const gradeOrder: SafeGrade[] = ['critical', 'at_risk', 'needs_attention', 'passing']
+  const presentGrades = new Set<SafeGrade>(failingRows.map((row) => row.grade))
+  if (passingRows.length > 0) presentGrades.add('passing')
+  const chipGrades = gradeOrder.filter((grade) => presentGrades.has(grade))
 
   const footer =
     passingRows.length > 0 ? (
@@ -63,7 +70,18 @@ const SecurityChecksSection = ({
       </>
     ) : undefined
 
-  return <SectionPanel title="Security checks" rows={failingRows} footer={footer} baseDelay={0.08} />
+  return (
+    <div>
+      {chipGrades.length > 0 && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {chipGrades.map((grade) => (
+            <SafeGradeChip key={grade} grade={grade} />
+          ))}
+        </div>
+      )}
+      <SectionPanel rows={failingRows} footer={footer} baseDelay={0.08} />
+    </div>
+  )
 }
 
 export default SecurityChecksSection
