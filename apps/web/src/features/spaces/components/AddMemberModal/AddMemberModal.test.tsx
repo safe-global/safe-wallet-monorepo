@@ -149,7 +149,7 @@ describe('AddMemberModal tracking', () => {
     })
   })
 
-  it('limits the invitee identifier input to the CGW email max length', () => {
+  it('limits the invitee identifier input to the allowed email max length', () => {
     render(<AddMemberModal onClose={jest.fn()} />)
 
     expect(screen.getByTestId('member-invitee-identifier-input')).toHaveAttribute('maxLength', '255')

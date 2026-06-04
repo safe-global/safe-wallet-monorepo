@@ -82,7 +82,7 @@ describe('AddMemberModal utils', () => {
     ).toBeUndefined()
   })
 
-  it('returns an error for emails longer than the CGW limit', () => {
+  it('returns an error for emails longer than the allowed limit', () => {
     const tooLongEmail = `${'a'.repeat(EMAIL_MAX_LENGTH - '@example.com'.length + 1)}@example.com`
 
     expect(getInviteeIdentifierValidationError({ inviteeIdentifier: tooLongEmail })).toBe(

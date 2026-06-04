@@ -14,6 +14,9 @@ export type InvitePayload = EmailInviteUserDto | WalletInviteUserDto
 
 export const EMAIL_MAX_LENGTH = 255
 
+const SELF_INVITE_ERROR = "You can't invite yourself."
+const INVALID_IDENTIFIER_ERROR = 'Enter a valid email, wallet address, or ENS.'
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export const isEmailAddress = (value: string): boolean => EMAIL_REGEX.test(value)
@@ -55,24 +58,22 @@ export const getInviteeIdentifierValidationError = ({
     return undefined
   }
 
-  const isEmailIdentifier = isEmailAddress(normalized)
-  const isWalletIdentifier = isAddress(normalized)
-
-  if (isEmailIdentifier && normalized.length > EMAIL_MAX_LENGTH) {
-    return `Email must be ${EMAIL_MAX_LENGTH} characters or less.`
+  if (isEmailAddress(normalized)) {
+    if (normalized.length > EMAIL_MAX_LENGTH) {
+      return `Email must be ${EMAIL_MAX_LENGTH} characters or less.`
+    }
+    if (sessionEmail && normalized.toLowerCase() === sessionEmail.toLowerCase()) {
+      return SELF_INVITE_ERROR
+    }
+    return undefined
   }
 
-  if (!isEmailIdentifier && !isWalletIdentifier) {
-    return 'Enter a valid email, wallet address, or ENS.'
+  if (isAddress(normalized)) {
+    if (walletAddresses?.some((walletAddress) => sameAddress(walletAddress, normalized))) {
+      return SELF_INVITE_ERROR
+    }
+    return undefined
   }
 
-  if (isEmailIdentifier && sessionEmail && normalized.toLowerCase() === sessionEmail.toLowerCase()) {
-    return "You can't invite yourself."
-  }
-
-  if (isWalletIdentifier && walletAddresses?.some((walletAddress) => sameAddress(walletAddress, normalized))) {
-    return "You can't invite yourself."
-  }
-
-  return undefined
+  return INVALID_IDENTIFIER_ERROR
 }
