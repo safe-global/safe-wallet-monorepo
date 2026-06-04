@@ -102,10 +102,12 @@ export const AllVariants: Story = {
           <div style={{ width: '400px' }}>
             <Alert variant="success" className="items-center rounded-md py-4">
               <Wallet className="!translate-y-0" />
-              <AlertDescription>Connect a wallet to discover accounts you own or sign for</AlertDescription>
-              <AlertAction className="top-1/2 -translate-y-1/2">
-                <Button size="sm">Connect</Button>
-              </AlertAction>
+              <AlertDescription className="flex w-full items-center gap-3">
+                <span className="min-w-0 flex-1">Connect a wallet to discover accounts you own or sign for</span>
+                <Button size="sm" className="shrink-0">
+                  Connect
+                </Button>
+              </AlertDescription>
             </Alert>
           </div>
         </div>
