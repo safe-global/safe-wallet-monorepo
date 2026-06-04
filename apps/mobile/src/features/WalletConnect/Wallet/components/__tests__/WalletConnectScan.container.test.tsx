@@ -4,6 +4,9 @@ import type { CameraPermissionStatus } from 'react-native-vision-camera'
 import { WalletConnectScanContainer } from '../WalletConnectScan.container'
 import type { ScanStatus } from '../../hooks/useWalletConnectScan'
 
+const mockPush = jest.fn()
+jest.mock('expo-router', () => ({ router: { push: (p: string) => mockPush(p) } }))
+
 const baseHook: {
   status: ScanStatus
   errorMessage: string
@@ -14,7 +17,6 @@ const baseHook: {
   onScan: jest.Mock
   onTryAgain: jest.Mock
   onActivateCamera: jest.Mock
-  onPasteUri: jest.Mock
 } = {
   status: 'scanning',
   errorMessage: '',
@@ -25,7 +27,6 @@ const baseHook: {
   onScan: jest.fn(),
   onTryAgain: jest.fn(),
   onActivateCamera: jest.fn(),
-  onPasteUri: jest.fn(),
 }
 
 const mockUseScan = jest.fn(() => baseHook)
@@ -33,11 +34,16 @@ jest.mock('../../hooks/useWalletConnectScan', () => ({
   useWalletConnectScan: () => mockUseScan(),
 }))
 
-// QrCamera renders its centerOverlay so we can assert per-status content.
+// QrCamera renders its centerOverlay and footer so we can assert per-status content and dev buttons.
 jest.mock('@/src/components/Camera', () => {
   const React = require('react')
   return {
-    QrCamera: ({ centerOverlay }: { centerOverlay?: React.ReactNode }) => <>{centerOverlay}</>,
+    QrCamera: ({ centerOverlay, footer }: { centerOverlay?: React.ReactNode; footer?: React.ReactNode }) => (
+      <>
+        {centerOverlay}
+        {footer}
+      </>
+    ),
   }
 })
 
@@ -72,5 +78,11 @@ describe('WalletConnectScanContainer', () => {
 
     fireEvent.press(getByText('Try again'))
     expect(onTryAgain).toHaveBeenCalledTimes(1)
+  })
+
+  it('navigates to the manual entry route when "Enter manually" is pressed', () => {
+    const { getByTestId } = render(<WalletConnectScanContainer />)
+    fireEvent.press(getByTestId('wc-enter-manually'))
+    expect(mockPush).toHaveBeenCalledWith('/wallet-connect-manual')
   })
 })

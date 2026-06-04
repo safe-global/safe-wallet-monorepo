@@ -118,13 +118,6 @@ export const useWalletConnectScan = () => {
 
   const onActivateCamera = useCallback(() => setIsCameraActive(true), [])
 
-  const onPasteUri = useCallback(
-    (uri: string) => {
-      void startPair(uri)
-    },
-    [startPair],
-  )
-
   return {
     status,
     errorMessage,
@@ -135,6 +128,5 @@ export const useWalletConnectScan = () => {
     onScan,
     onTryAgain,
     onActivateCamera,
-    onPasteUri,
   }
 }

@@ -1,11 +1,12 @@
 import React from 'react'
 import { ActivityIndicator } from 'react-native'
 import type { CameraPermissionStatus } from 'react-native-vision-camera'
-import { Text, YStack } from 'tamagui'
+import { Text, View, YStack } from 'tamagui'
+import { router } from 'expo-router'
 import { QrCamera } from '@/src/components/Camera'
 import { SafeButton } from '@/src/components/SafeButton'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { useWalletConnectScan } from '../hooks/useWalletConnectScan'
-import { WalletConnectDebugPasteInput } from './WalletConnectDebugPasteInput'
 
 const GRANTED_FOOTER = 'Scan an Ethereum wallet address or connect to a desktop app'
 
@@ -70,7 +71,6 @@ export function WalletConnectScanContainer() {
     onScan,
     onTryAgain,
     onActivateCamera,
-    onPasteUri,
   } = useWalletConnectScan()
 
   const granted = permission === 'granted'
@@ -106,7 +106,19 @@ export function WalletConnectScanContainer() {
           <Text textAlign="center" color="$color">
             {granted ? GRANTED_FOOTER : bodyForPermission(permission)}
           </Text>
-          <WalletConnectDebugPasteInput onPair={onPasteUri} />
+          {__DEV__ && (
+            <View alignItems="center" marginTop="$5">
+              <SafeButton
+                secondary
+                size="$sm"
+                icon={<SafeFontIcon name="copy" size={18} />}
+                onPress={() => router.push('/wallet-connect-manual')}
+                testID="wc-enter-manually"
+              >
+                Enter manually
+              </SafeButton>
+            </View>
+          )}
         </YStack>
       }
     />
