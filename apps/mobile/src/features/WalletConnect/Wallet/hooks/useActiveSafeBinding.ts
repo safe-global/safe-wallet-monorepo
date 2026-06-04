@@ -2,13 +2,12 @@ import { useEffect } from 'react'
 import type { IWalletKit } from '@reown/walletkit'
 import type { SessionTypes } from '@walletconnect/types'
 import { getAddress } from 'ethers'
+import { EIP155 } from '@safe-global/utils/features/walletconnect/constants'
+import { getEip155ChainId } from '@safe-global/utils/features/walletconnect/utils'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectSessions } from '../store/walletKitSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
-import { SUPPORTED_NAMESPACE } from '../services/constants'
 import { logWalletKitError } from '../utils/errors'
-
-const eip155Caip2 = (chainId: string) => `${SUPPORTED_NAMESPACE}:${chainId}`
 
 export const useActiveSafeBinding = (walletKit: IWalletKit | null) => {
   const activeSafe = useAppSelector(selectActiveSafe)
@@ -19,7 +18,7 @@ export const useActiveSafeBinding = (walletKit: IWalletKit | null) => {
       return
     }
     const checksummed = getAddress(activeSafe.address)
-    const chainCaip2 = eip155Caip2(activeSafe.chainId)
+    const chainCaip2 = getEip155ChainId(activeSafe.chainId)
 
     // Redux's view of sessions can lag the SDK's after a delete / relay-driven prune.
     // Calling updateSession on a topic the SDK no longer knows throws "session topic
@@ -31,7 +30,7 @@ export const useActiveSafeBinding = (walletKit: IWalletKit | null) => {
         return
       }
 
-      const eip155 = session.namespaces[SUPPORTED_NAMESPACE]
+      const eip155 = session.namespaces[EIP155]
       if (!eip155) {
         return
       }
@@ -50,7 +49,7 @@ export const useActiveSafeBinding = (walletKit: IWalletKit | null) => {
           topic: session.topic,
           namespaces: {
             ...session.namespaces,
-            [SUPPORTED_NAMESPACE]: { ...eip155, accounts: nextAccounts },
+            [EIP155]: { ...eip155, accounts: nextAccounts },
           },
         })
 

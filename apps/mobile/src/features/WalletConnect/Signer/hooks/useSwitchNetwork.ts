@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { useAppKit, useAccount } from '@reown/appkit-react-native'
+import { getEip155ChainId } from '@safe-global/utils/features/walletconnect/utils'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { useAppSelector } from '@/src/store/hooks'
 import Logger from '@/src/utils/logger'
@@ -29,14 +30,14 @@ export function useSwitchNetwork() {
       return
     }
     if (String(walletChainId) !== activeSafe.chainId) {
-      await appKitSwitchNetwork(`eip155:${parseInt(activeSafe.chainId, 10)}`).catch(() => {
+      await appKitSwitchNetwork(getEip155ChainId(String(parseInt(activeSafe.chainId, 10)))).catch(() => {
         Logger.warn('Failed to switch wallet network, continuing with validation')
       })
     }
   }, [walletChainId, activeSafe, appKitSwitchNetwork])
 
   const switchNetwork = useCallback(
-    (chainId: string) => appKitSwitchNetwork(`eip155:${parseInt(chainId, 10)}`),
+    (chainId: string) => appKitSwitchNetwork(getEip155ChainId(String(parseInt(chainId, 10)))),
     [appKitSwitchNetwork],
   )
 
