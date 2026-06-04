@@ -34,7 +34,6 @@ const AddMemberInputStory = ({ error }: { error?: string }) => {
   return (
     <Box sx={{ width: 360, minHeight: '50vh', pt: '22vh' }}>
       <AddMemberInput
-        addressBook={addressBook}
         error={error}
         inputProps={register('inviteeIdentifier')}
         onSelectAddress={(address) => setValue('inviteeIdentifier', address)}

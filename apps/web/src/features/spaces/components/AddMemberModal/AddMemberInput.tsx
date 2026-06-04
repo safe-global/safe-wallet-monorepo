@@ -3,9 +3,9 @@ import { IconButton, InputAdornment, Skeleton, SvgIcon, TextField, Typography } 
 import Autocomplete from '@mui/material/Autocomplete'
 import classnames from 'classnames'
 import type { UseFormRegisterReturn } from 'react-hook-form'
-import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { isAddress } from 'viem'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
+import useAddressBook from '@/hooks/useAddressBook'
 import { useAddressBookSearch } from '@/features/spaces'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
@@ -14,10 +14,7 @@ import inputCss from '@/styles/inputs.module.css'
 import { EMAIL_MAX_LENGTH, isEmailAddress } from './utils'
 import css from './styles.module.css'
 
-type AddressBook = Record<string, string>
-
 type AddMemberInputProps = {
-  addressBook: AddressBook
   error?: string
   inputProps: UseFormRegisterReturn<'inviteeIdentifier'>
   onSelectAddress: (address: string, name: string) => void
@@ -35,13 +32,8 @@ const MAX_VISIBLE_OPTIONS = 5
  * inviteeIdentifier. Address-book names and ENS names are resolved to addresses before
  * submit; emails are kept as-is.
  */
-const AddMemberInput = ({
-  addressBook,
-  error,
-  inputProps,
-  onSelectAddress,
-  value,
-}: AddMemberInputProps): ReactElement => {
+const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMemberInputProps): ReactElement => {
+  const addressBook = useAddressBook()
   const [isOpen, setIsOpen] = useState(false)
   const inviteeIdentifier = value.trim()
   const shouldResolveEns = Boolean(
@@ -61,7 +53,7 @@ const AddMemberInput = ({
   )
 
   const searchQuery = isAddress(inviteeIdentifier) ? '' : inviteeIdentifier
-  const matches = useAddressBookSearch(contacts as SpaceAddressBookItemDto[], searchQuery)
+  const matches = useAddressBookSearch(contacts, searchQuery)
   const options = useMemo(
     () => (isAddress(inviteeIdentifier) ? [] : matches.slice(0, MAX_VISIBLE_OPTIONS)),
     [inviteeIdentifier, matches],

@@ -189,7 +189,6 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
               <MemberInfoForm />
 
               <AddMemberInput
-                addressBook={addressBook}
                 error={formState.errors.inviteeIdentifier?.message}
                 inputProps={inviteeIdentifierInputProps}
                 onSelectAddress={(address, name) => {
