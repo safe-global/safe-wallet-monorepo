@@ -4,11 +4,13 @@ import Autocomplete from '@mui/material/Autocomplete'
 import classnames from 'classnames'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 import { isAddress } from 'viem'
+import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
 import useAddressBook from '@/hooks/useAddressBook'
 import { useAddressBookSearch } from '@/features/spaces'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
 import inputCss from '@/styles/inputs.module.css'
 import { EMAIL_MAX_LENGTH, isEmailAddress } from './utils'
@@ -24,6 +26,9 @@ type AddMemberInputProps = {
 type InviteeIdentifierOption = { address: string; name: string }
 
 const MAX_VISIBLE_OPTIONS = 5
+
+// Debounce the email avatar so its color doesn't flicker on every keystroke.
+const AVATAR_DEBOUNCE_MS = 500
 
 /**
  * Invite-specific input for choosing who to invite.
@@ -60,13 +65,24 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
 
   const showIdenticon = Boolean(value && !error && isAddress(value))
 
+  // The initials avatar colors itself from the full email, which would change
+  // on every keystroke. Debounce it so the color doesn't flicker while typing.
+  const debouncedIdentifier = useDebounce(inviteeIdentifier, AVATAR_DEBOUNCE_MS)
+  const showInitials = Boolean(debouncedIdentifier && !error && !showIdenticon && isEmailAddress(debouncedIdentifier))
+
+  const renderAvatar = () => {
+    if (showIdenticon) {
+      return <Identicon address={value} size={32} />
+    }
+    if (showInitials) {
+      return <InitialsAvatar name={debouncedIdentifier} size="medium" rounded />
+    }
+    return <Skeleton variant="circular" width={32} height={32} animation={false} />
+  }
+
   const startAdornment = (
     <InputAdornment position="start" sx={{ ml: 0, mr: 1 }}>
-      {showIdenticon ? (
-        <Identicon address={value} size={32} />
-      ) : (
-        <Skeleton variant="circular" width={32} height={32} animation={false} />
-      )}
+      {renderAvatar()}
     </InputAdornment>
   )
 
