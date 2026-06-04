@@ -26,7 +26,8 @@
 }
 
 .roleCheckIconHidden {
-  composes: roleCheckIcon;
+  grid-area: checkIcon;
+  margin: 0 var(--space-1);
   visibility: hidden;
 }
 
