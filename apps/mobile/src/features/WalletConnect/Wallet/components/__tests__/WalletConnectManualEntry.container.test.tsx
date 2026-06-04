@@ -1,5 +1,5 @@
 import React from 'react'
-import { fireEvent, render, waitFor } from '@/src/tests/test-utils'
+import { act, fireEvent, render, waitFor } from '@/src/tests/test-utils'
 import { WalletConnectManualEntryContainer } from '../WalletConnectManualEntry.container'
 
 const VALID_URI = 'wc:7f6e9a3c@2?relay-protocol=irn&symKey=abc'
@@ -32,5 +32,23 @@ describe('WalletConnectManualEntryContainer', () => {
     await waitFor(() => expect(getByText('pair boom')).toBeTruthy())
     expect(mockDismiss).not.toHaveBeenCalled()
     errorSpy.mockRestore()
+  })
+
+  it('shows a timeout error and does not navigate when pairing does not resolve in time', async () => {
+    jest.useFakeTimers()
+    mockPair.mockImplementationOnce(() => new Promise<void>(() => undefined)) // never resolves
+    const { getByPlaceholderText, getByTestId, getByText } = render(<WalletConnectManualEntryContainer />)
+    fireEvent.changeText(getByPlaceholderText('wc:…'), VALID_URI)
+    await act(async () => {
+      fireEvent.press(getByTestId('wc-manual-pair'))
+    })
+
+    act(() => {
+      jest.advanceTimersByTime(10_000)
+    })
+
+    expect(getByText('Connection timed out. Try again.')).toBeTruthy()
+    expect(mockDismiss).not.toHaveBeenCalled()
+    jest.useRealTimers()
   })
 })
