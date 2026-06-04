@@ -111,9 +111,14 @@ const SafeItemCard = ({
           <CopyAddressButton address={safeItem.address} />
         </div>
         {isSimilar && <SimilarityBadge />}
-        {undeployedSafe && <NotActivatedBadge isActivating={isActivating} />}
         {!undeployedSafe && safeItem.isReadOnly && !isSimilar && <ReadOnlyBadge />}
       </div>
+
+      {undeployedSafe && (
+        <div className="shrink-0">
+          <NotActivatedBadge isActivating={isActivating} />
+        </div>
+      )}
 
       {/* Chain logo */}
       <div className="mx-auto shrink-0">
