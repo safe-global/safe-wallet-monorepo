@@ -26,18 +26,40 @@ export type GetSafeSecurityHref = (
   chainId: string,
 ) => { pathname: string; query: { safe: string } } | undefined
 
-/** Extract a specific evidence label's value from a ScanResult. */
-export const getEvidence = (
-  results: Record<string, ScanResult> | undefined,
-  scannerId: string,
-  label: string,
-): string | null => {
-  const evidence = results?.[scannerId]?.evidence
-  if (!evidence) return null
-  for (const item of evidence) {
-    if (typeof item !== 'string' && item.label === label) return item.value
+/** Tally of non-passing checks for the Checks column. */
+export type CheckCounts = { failed: number; warnings: number }
+
+/**
+ * Count failed (`issue`) and warning (`partial`) checks in a single Safe's scan
+ * results. Mirrors the status→severity mapping used by WorkspaceHealthCard so the
+ * column stays consistent with the header badges.
+ */
+export const countChecks = (results: Record<string, ScanResult> | undefined): CheckCounts => {
+  let failed = 0
+  let warnings = 0
+  if (results) {
+    for (const result of Object.values(results)) {
+      if (result.status === 'issue') failed++
+      else if (result.status === 'partial') warnings++
+    }
   }
-  return null
+  return { failed, warnings }
+}
+
+/** Sum the failed/warning checks across all of a multichain Safe's chain entries. */
+export const getAggregateCheckCounts = (
+  safe: SpaceSafeEntry,
+  scanResults: Record<string, Record<string, ScanResult>>,
+  scanKey: SecurityContract['scanKey'],
+): CheckCounts => {
+  let failed = 0
+  let warnings = 0
+  for (const chain of safe.chainEntries) {
+    const counts = countChecks(scanResults[scanKey(safe.address, chain.chainId)])
+    failed += counts.failed
+    warnings += counts.warnings
+  }
+  return { failed, warnings }
 }
 
 /**

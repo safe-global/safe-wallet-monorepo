@@ -2,7 +2,7 @@ import { Box, Skeleton, Stack, Typography } from '@mui/material'
 import type { GradeSummary, ScanResult } from '@/features/security/types'
 import type { SecurityContract } from '@/features/security'
 import { DASH } from './constants'
-import { formatBalance, getEvidence } from './utils'
+import { countChecks, formatBalance, type CheckCounts } from './utils'
 
 type ScoreCellProps = {
   summary: GradeSummary | null
@@ -47,28 +47,35 @@ export const ScoreCell = ({ summary, isScanning, getStrengthLevel, getStrengthCo
   )
 }
 
-type ResultsCellProps = { results?: Record<string, ScanResult>; isScanning?: boolean }
-
-/** Threshold from `account_setup` scanner evidence (e.g. "2 of 3"). */
-export const ThresholdCell = ({ results, isScanning }: ResultsCellProps) => {
-  if (!results && isScanning) return <Skeleton variant="rounded" width={50} height={20} />
-  const threshold = getEvidence(results, 'account_setup', 'Threshold')
+/** Presentational failed/warning tally (e.g. "1 failed  2 warnings"); dash when all clear. */
+export const ChecksCount = ({ failed, warnings }: CheckCounts) => {
+  if (!failed && !warnings) {
+    return (
+      <Typography variant="body2" color="text.secondary">
+        {DASH}
+      </Typography>
+    )
+  }
   return (
-    <Typography variant="body2" color="text.primary">
-      {threshold ?? DASH}
-    </Typography>
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0 }}>
+      {failed > 0 && (
+        <Typography variant="body2" color="text.secondary" noWrap>
+          {failed} failed
+        </Typography>
+      )}
+      {warnings > 0 && (
+        <Typography variant="body2" color="text.secondary" noWrap>
+          {warnings} warning{warnings === 1 ? '' : 's'}
+        </Typography>
+      )}
+    </Stack>
   )
 }
 
-/** Contract version from `contract_version` scanner evidence (e.g. "1.4.1"). */
-export const VersionCell = ({ results, isScanning }: ResultsCellProps) => {
-  if (!results && isScanning) return <Skeleton variant="rounded" width={50} height={20} />
-  const version = getEvidence(results, 'contract_version', 'Current version')
-  return (
-    <Typography variant="body2" color="text.primary">
-      {version ?? DASH}
-    </Typography>
-  )
+/** Failed/warning tally for a single Safe's scan results. */
+export const ChecksCell = ({ results, isScanning }: { results?: Record<string, ScanResult>; isScanning?: boolean }) => {
+  if (!results && isScanning) return <Skeleton variant="rounded" width={70} height={20} />
+  return <ChecksCount {...countChecks(results)} />
 }
 
 /** Compact fiat balance ($1.2K / $3.4M / dash when zero or missing). */

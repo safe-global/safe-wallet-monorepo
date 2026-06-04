@@ -1,14 +1,14 @@
 import { type ReactElement, useState, useCallback, useEffect, useMemo, useRef } from 'react'
-import { Box, Table, TableCell, TableHead, TableRow } from '@mui/material'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import type { ScanResult, SafeGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
+import { cn } from '@/utils/cn'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
-import { COLUMNS, MotionTbody, TABLE_SX, TABLE_WRAPPER_SX } from './constants'
+import { COLUMNS, GRID_COLS } from './constants'
 import SingleSafeRow from './SingleSafeRow'
 import MultichainSafeRow from './MultichainSafeRow'
 import type { GetSafeSecurityHref } from './utils'
@@ -95,20 +95,30 @@ const SecuritySafesTable = ({
   if (!security.$isReady) return <></>
 
   return (
-    <Box sx={TABLE_WRAPPER_SX}>
-      <Table sx={TABLE_SX}>
-        <TableHead>
-          <TableRow>
-            {COLUMNS.map((c, i) => (
-              <TableCell key={c.label || `col-${i}`} sx={{ width: c.width }}>
-                {c.label}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
+    <div className="w-full overflow-x-auto">
+      <div className="min-w-[960px]">
+        <div
+          className={cn(
+            'grid w-full items-center gap-2 border-2 border-transparent pb-1 pl-3 pr-3 sm:pl-6 sm:pr-6',
+            GRID_COLS,
+          )}
+        >
+          {COLUMNS.map((c, i) => (
+            <div
+              key={c.label || `col-${i}`}
+              className={cn('text-[0.65rem] font-bold uppercase tracking-[0.5px] text-foreground/60', c.hideClass, {
+                'justify-end': c.align === 'right',
+              })}
+            >
+              {c.label}
+            </div>
+          ))}
+        </div>
+
         <AnimatePresence mode="wait">
-          <MotionTbody
+          <motion.div
             key={gradeFilter ?? 'all'}
+            className="flex flex-col gap-1.5"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -140,10 +150,10 @@ const SecuritySafesTable = ({
                 <SingleSafeRow key={security.scanKey(safe.address, safe.chainId)} {...sharedProps} />
               )
             })}
-          </MotionTbody>
+          </motion.div>
         </AnimatePresence>
-      </Table>
-    </Box>
+      </div>
+    </div>
   )
 }
 
