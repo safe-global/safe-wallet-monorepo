@@ -10,6 +10,7 @@ import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import InlineRetryError from '@/components/common/InlineRetryError'
 import { SafeListSkeleton } from './shared'
+import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 import SafeItemCard from './SafeItemCard'
 import MultiSafeItemCard from './MultiSafeItemCard'
 import { useAccountsModalItems } from './useAccountsModalItems'
@@ -116,6 +117,11 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
             </p>
           ) : (
             <>
+              {similarAddresses.size > 0 && (
+                <div className="px-2 pb-2 pt-1">
+                  <SimilarAddressAlert />
+                </div>
+              )}
               {renderSection('Trusted Safes', trustedItems, {
                 similarAddresses,
                 onClose,

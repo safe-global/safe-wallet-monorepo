@@ -123,4 +123,24 @@ describe('AccountsModal', () => {
     expect(screen.queryByTestId('empty-pinned-list')).not.toBeInTheDocument()
     expect(screen.queryByTestId('safe-item-card-mock')).not.toBeInTheDocument()
   })
+
+  it('renders the similar-address warning banner when at least one similar address is detected', () => {
+    mockUseAccountsModalItems.mockReturnValue(
+      buildHookReturn({
+        similarAddresses: new Set([ADDR_A.toLowerCase()]),
+      }),
+    )
+
+    render(<AccountsModal open onClose={jest.fn()} />)
+
+    expect(screen.getByTestId('similar-address-alert')).toBeInTheDocument()
+  })
+
+  it('hides the similar-address warning banner when no similar addresses are detected', () => {
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ similarAddresses: new Set<string>() }))
+
+    render(<AccountsModal open onClose={jest.fn()} />)
+
+    expect(screen.queryByTestId('similar-address-alert')).not.toBeInTheDocument()
+  })
 })
