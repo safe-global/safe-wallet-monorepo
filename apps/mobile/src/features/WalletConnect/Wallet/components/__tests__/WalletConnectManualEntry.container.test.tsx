@@ -3,10 +3,10 @@ import { fireEvent, render, waitFor } from '@/src/tests/test-utils'
 import { WalletConnectManualEntryContainer } from '../WalletConnectManualEntry.container'
 
 const VALID_URI = 'wc:7f6e9a3c@2?relay-protocol=irn&symKey=abc'
-const mockBack = jest.fn()
+const mockDismiss = jest.fn()
 const mockPair = jest.fn()
 
-jest.mock('expo-router', () => ({ useRouter: () => ({ back: mockBack }) }))
+jest.mock('expo-router', () => ({ useRouter: () => ({ dismiss: mockDismiss }) }))
 jest.mock('../../walletKit', () => ({ getWalletKit: () => Promise.resolve({ pair: mockPair }) }))
 
 describe('WalletConnectManualEntryContainer', () => {
@@ -15,12 +15,12 @@ describe('WalletConnectManualEntryContainer', () => {
     mockPair.mockResolvedValue(undefined)
   })
 
-  it('pairs the entered URI and pops both the manual entry and the scanner on success', async () => {
+  it('pairs the entered URI and dismisses both the manual entry and the scanner on success', async () => {
     const { getByPlaceholderText, getByTestId } = render(<WalletConnectManualEntryContainer />)
     fireEvent.changeText(getByPlaceholderText('wc:…'), VALID_URI)
     fireEvent.press(getByTestId('wc-manual-pair'))
     await waitFor(() => expect(mockPair).toHaveBeenCalledWith({ uri: VALID_URI }))
-    await waitFor(() => expect(mockBack).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(mockDismiss).toHaveBeenCalledWith(2))
   })
 
   it('shows the pairing error and does not navigate on failure', async () => {
@@ -30,7 +30,7 @@ describe('WalletConnectManualEntryContainer', () => {
     fireEvent.changeText(getByPlaceholderText('wc:…'), VALID_URI)
     fireEvent.press(getByTestId('wc-manual-pair'))
     await waitFor(() => expect(getByText('pair boom')).toBeTruthy())
-    expect(mockBack).not.toHaveBeenCalled()
+    expect(mockDismiss).not.toHaveBeenCalled()
     errorSpy.mockRestore()
   })
 })

@@ -15,10 +15,10 @@ export function WalletConnectManualEntryContainer() {
     try {
       const wk = await getWalletKit()
       await wk.pair({ uri })
-      // Pop twice: first the manual-entry screen, then the QR scanner it was pushed from,
-      // so the proposal (surfaced by the global RequestSheetHost) shows over the screen below.
-      router.back()
-      router.back()
+      // Dismiss both screens this was reached through — the manual-entry screen and the QR
+      // scanner it was pushed from — so the proposal (surfaced by the global RequestSheetHost)
+      // shows over the screen below.
+      router.dismiss(2)
     } catch (e) {
       logWalletKitError('manual pair failed', e)
       setPairError(e instanceof Error ? e.message : 'Failed to pair')
