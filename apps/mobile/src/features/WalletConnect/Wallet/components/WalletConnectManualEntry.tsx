@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
-import { KeyboardAvoidingView } from 'react-native'
+import { KeyboardAvoidingView, Pressable } from 'react-native'
 import { Text, View, YStack, getTokenValue } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import Clipboard from '@react-native-clipboard/clipboard'
 import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
 import { SafeInput } from '@/src/components/SafeInput/SafeInput'
 import { SafeButton } from '@/src/components/SafeButton'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { LargeHeaderTitle } from '@/src/components/Title/LargeHeaderTitle'
 
 type Props = {
@@ -27,14 +29,27 @@ export const WalletConnectManualEntry: React.FC<Props> = ({ onPair, isPairing = 
     }
   }
 
-  const onPairPress = () => {
-    const trimmed = uri.trim()
+  const clearInput = () => {
+    setUri('')
+    setFormatError(undefined)
+  }
+
+  const attemptPair = (value: string) => {
+    const trimmed = value.trim()
     if (!isPairingUri(trimmed)) {
       setFormatError(INVALID_MESSAGE)
       return
     }
     setFormatError(undefined)
     onPair(trimmed)
+  }
+
+  const onPairPress = () => attemptPair(uri)
+
+  const onPasteThis = async () => {
+    const text = await Clipboard.getString()
+    setUri(text)
+    attemptPair(text)
   }
 
   return (
@@ -47,13 +62,28 @@ export const WalletConnectManualEntry: React.FC<Props> = ({ onPair, isPairing = 
           onChangeText={onChangeText}
           multiline
           autoFocus
+          textAlignVertical="top"
+          alignSelf="stretch"
+          style={{ paddingTop: getTokenValue('$2') }}
           placeholder="wc:…"
           error={formatError ?? pairError}
+          right={
+            uri ? (
+              <YStack>
+                <Pressable onPress={clearInput} hitSlop={12} testID="wc-manual-clear">
+                  <SafeFontIcon name="close" size={16} color="$colorSecondary" />
+                </Pressable>
+              </YStack>
+            ) : undefined
+          }
         />
         <YStack flex={1} />
-        <View paddingBottom={bottom || getTokenValue('$4')}>
+        <View paddingBottom={bottom || getTokenValue('$4')} gap="$3">
           <SafeButton primary onPress={onPairPress} disabled={!uri.trim() || isPairing} testID="wc-manual-pair">
             {isPairing ? 'Connecting…' : 'Pair'}
+          </SafeButton>
+          <SafeButton secondary onPress={onPasteThis} testID="wc-manual-paste">
+            Paste
           </SafeButton>
         </View>
       </YStack>
