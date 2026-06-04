@@ -50,6 +50,7 @@ describe('useWalletConnectScan', () => {
     })
 
     expect(result.current.status).toBe('connecting')
+    expect(result.current.isCameraActive).toBe(false)
     await waitFor(() => expect(mockPair).toHaveBeenCalledWith({ uri: VALID_URI }))
     await waitFor(() => expect(mockBack).toHaveBeenCalledTimes(1))
   })
@@ -63,6 +64,7 @@ describe('useWalletConnectScan', () => {
 
     expect(result.current.status).toBe('error')
     expect(result.current.errorMessage).toBe('Unrecognised QR code')
+    expect(result.current.isCameraActive).toBe(false)
     expect(mockPair).not.toHaveBeenCalled()
   })
 

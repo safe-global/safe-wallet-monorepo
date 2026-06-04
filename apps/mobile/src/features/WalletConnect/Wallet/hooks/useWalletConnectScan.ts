@@ -19,6 +19,11 @@ export const useWalletConnectScan = () => {
   const [errorMessage, setErrorMessage] = useState('')
   const [isCameraActive, setIsCameraActive] = useState(false)
 
+  // Mirror `status` in a ref so the focus effect can read the latest value WITHOUT
+  // listing `status` in its deps (which would re-run the effect and clear the live timer).
+  const statusRef = useRef(status)
+  statusRef.current = status
+
   // Guards a second pair attempt while one is in flight (rapid re-scans).
   const pairingRef = useRef(false)
   // Set true when the timeout fires; later writes for that attempt become no-ops.
@@ -40,7 +45,7 @@ export const useWalletConnectScan = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (permission === 'granted') {
+      if (permission === 'granted' && statusRef.current === 'scanning') {
         setIsCameraActive(true)
       }
       return () => {
