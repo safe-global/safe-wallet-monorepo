@@ -1,6 +1,6 @@
 import { isMultiChainSafeItem, type AllSafeItems } from '@/hooks/safes'
 import SafeCard from '../SelectSafesOnboarding/components/SafeCard'
-import SimilarAddressAlert from '../SelectSafesOnboarding/components/SimilarAddressAlert'
+import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useMemo } from 'react'
 

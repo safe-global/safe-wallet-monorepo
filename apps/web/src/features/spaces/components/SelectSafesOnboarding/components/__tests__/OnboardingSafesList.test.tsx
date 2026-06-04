@@ -13,7 +13,7 @@ jest.mock('../SafeCard', () => ({
   ),
 }))
 
-jest.mock('../SimilarAddressAlert', () => ({
+jest.mock('@/components/common/SimilarAddressAlert', () => ({
   __esModule: true,
   default: () => <div data-testid="similar-address-alert">Similar addresses detected</div>,
 }))

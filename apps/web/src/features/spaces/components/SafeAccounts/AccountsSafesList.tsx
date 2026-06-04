@@ -1,7 +1,7 @@
 import { type AllSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
 import SafeCardReadOnly from './SafeCardReadOnly'
 import SafeCardsErrorBoundary from './SafeCardsErrorBoundary'
-import SimilarAddressAlert from '../SelectSafesOnboarding/components/SimilarAddressAlert'
+import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 
 interface SafeListProps {
   safes: AllSafeItems
