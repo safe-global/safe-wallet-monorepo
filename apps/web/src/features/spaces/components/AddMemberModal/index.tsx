@@ -193,7 +193,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
                 error={formState.errors.inviteeIdentifier?.message}
                 inputProps={inviteeIdentifierInputProps}
                 onSelectAddress={(address, name) => {
-                  setValue('inviteeIdentifier', address, { shouldDirty: true, shouldValidate: true })
+                  setValue('inviteeIdentifier', address, { shouldValidate: true })
                   setValue('name', name, { shouldValidate: true })
                 }}
                 value={inviteeIdentifierValue}
