@@ -100,6 +100,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
   const inviteeIdentifierValue = watch('inviteeIdentifier')
   const inviteeIdentifierInputProps = register('inviteeIdentifier', {
+    required: true,
     validate: (value) => {
       return (
         getInviteeIdentifierValidationError({
@@ -126,10 +127,6 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
     setError(undefined)
 
     const inviteeIdentifier = normalizeInviteeIdentifier(data.inviteeIdentifier)
-
-    if (!inviteeIdentifier) {
-      return
-    }
 
     if (!spaceId) {
       setError('Something went wrong. Please try again.')
@@ -214,7 +211,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
               data-testid="add-member-modal-button"
               type="submit"
               variant="contained"
-              disabled={!inviteeIdentifierValue.trim() || !formState.isValid || isSubmitting}
+              disabled={!formState.isValid || isSubmitting}
               disableElevation
             >
               {isSubmitting ? <CircularProgress size={20} /> : 'Add member'}
