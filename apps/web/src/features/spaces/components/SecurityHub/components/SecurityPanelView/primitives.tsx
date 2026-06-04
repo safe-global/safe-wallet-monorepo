@@ -95,7 +95,7 @@ export const Row = ({ leadIcon, title, subtitle, accentTone, trailing, expandedC
             >
               {/* Align expanded body's left edge with the title (icon 18px + gap 2.5 → pl-7). */}
               <div
-                className={cn('flex flex-col gap-1.5 py-3 px-5 rounded-md bg-muted')}
+                className={cn('flex flex-col gap-1.5 py-3 px-5 rounded-md bg-muted my-2')}
                 onClick={(e) => e.stopPropagation()}
               >
                 {subtitle && (

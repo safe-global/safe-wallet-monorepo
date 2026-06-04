@@ -42,7 +42,7 @@ const SecurityDrawerContent = ({
       </TabsContent>
 
       <TabsContent value="details">
-        <SecurityDrawerDetails />
+        <SecurityDrawerDetails scanContext={scanContext} lastScannedAt={lastScannedAt} />
       </TabsContent>
     </div>
   </Tabs>
