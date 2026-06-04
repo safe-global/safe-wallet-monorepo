@@ -69,7 +69,7 @@ const InviteMembersOnboarding = (): ReactElement => {
 
       <button
         type="button"
-        onClick={() => append({ address: '', role: MemberRole.MEMBER })}
+        onClick={() => append({ identifier: '', role: MemberRole.MEMBER })}
         className="flex cursor-pointer items-center justify-center gap-2"
         data-testid="add-another-member"
       >
