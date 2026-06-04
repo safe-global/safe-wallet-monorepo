@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import type { SurveyStateDto } from '@safe-global/store/gateway/surveys'
+import type { SurveyStateDto } from '@safe-global/store/gateway/AUTO_GENERATED/surveys'
 import SurveyOnboarding from '.'
 
 const mockReplace = jest.fn()
@@ -50,7 +50,7 @@ jest.mock('next/router', () => ({
   }),
 }))
 
-jest.mock('@safe-global/store/gateway/surveys', () => ({
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/surveys', () => ({
   useSurveysGetStateV1Query: () => queryResult,
   useSurveysSubmitResponseV1Mutation: () => [mockSubmit, mutationState],
 }))
@@ -158,7 +158,7 @@ describe('SurveyOnboarding', () => {
 
     await waitFor(() => {
       expect(mockSubmit).toHaveBeenCalledWith({
-        spaceId: '42',
+        spaceId: 42,
         slug: 'onboarding',
         submitSurveyResponseDto: {
           // Selections are sorted alphabetically before submit so the same set

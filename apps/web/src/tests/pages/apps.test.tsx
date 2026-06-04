@@ -434,6 +434,30 @@ describe('AppsPage', () => {
     })
   })
 
+  describe('feature gate', () => {
+    it('renders nothing while the chains config is still loading (feature === undefined)', () => {
+      jest.spyOn(chainHooks, 'useHasFeature').mockImplementation(() => undefined)
+
+      render(<AppsPage />, {
+        routerProps: { pathname: '/apps', query: { safe: 'matic:0x0000000000000000000000000000000000000000' } },
+      })
+
+      expect(screen.queryByText('Safe Apps are not available on this network.')).not.toBeInTheDocument()
+      expect(screen.queryByPlaceholderText('Search by name or category')).not.toBeInTheDocument()
+    })
+
+    it('shows the not-available message when Safe Apps are disabled (feature === false)', () => {
+      jest.spyOn(chainHooks, 'useHasFeature').mockImplementation(() => false)
+
+      render(<AppsPage />, {
+        routerProps: { pathname: '/apps', query: { safe: 'matic:0x0000000000000000000000000000000000000000' } },
+      })
+
+      expect(screen.getByText('Safe Apps are not available on this network.')).toBeInTheDocument()
+      expect(screen.queryByPlaceholderText('Search by name or category')).not.toBeInTheDocument()
+    })
+  })
+
   describe('Safe Apps Filters', () => {
     describe('search by Safe App name and description', () => {
       it('search by Safe App name', async () => {

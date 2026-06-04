@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse, delay } from 'msw'
 import { mswLoader } from 'msw-storybook-addon'
 import { createMockStory } from '@/stories/mocks'
-import type { SurveyStateDto } from '@safe-global/store/gateway/surveys'
+import type { SurveyStateDto } from '@safe-global/store/gateway/AUTO_GENERATED/surveys'
 import SurveyOnboarding from '.'
 
 const SURVEY_STATE_URL = /\/v1\/spaces\/\d+\/surveys\/[\w-]+\/state$/
