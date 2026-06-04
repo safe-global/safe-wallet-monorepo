@@ -23,7 +23,7 @@ const SpaceListInvite = ({ space, invitedByName }: SpaceListInvite) => {
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
 
   return (
-    <Card sx={{ p: 2, mb: 2 }}>
+    <Card sx={{ p: 2, mb: 2 }} data-testid="space-invite-banner">
       <Stack direction="row" alignItems="center" flexWrap="wrap" rowGap={0.5} columnGap={0.5} mb={2}>
         <Typography variant="h4" fontWeight={700} color="primary.light">
           You were invited to join

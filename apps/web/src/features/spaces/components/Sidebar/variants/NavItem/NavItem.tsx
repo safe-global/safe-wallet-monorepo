@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import Link from 'next/link'
-import { SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
+import { SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
 import type { ResolvedSidebarItem } from '../../types'
@@ -55,6 +55,8 @@ interface NavItemProps {
 }
 
 export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: NavItemProps): ReactElement => {
+  const { state, isMobile } = useSidebar()
+
   if (isLoading || !item) {
     return (
       <SidebarMenuItem>
@@ -63,7 +65,7 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
     )
   }
 
-  const dataTestId = isSpacesVariant ? getSidebarItemTestId(item.label) : 'sidebar-list-item'
+  const dataTestId = item.testId ?? (isSpacesVariant ? getSidebarItemTestId(item.label) : 'sidebar-list-item')
 
   const handleClick = () => {
     if (item.disabled) return
@@ -84,24 +86,32 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
       data-testid={dataTestId}
       onClick={handleClick}
     >
-      <Tooltip>
-        <TooltipTrigger render={<div />} className="flex min-w-0 cursor-pointer items-center gap-3">
-          <div className={item.isActive ? css.activeIcon : undefined}>
+      <div className={item.isActive ? css.activeIcon : undefined}>
+        {item.indicator ? (
+          <span className="relative">
             <item.icon />
-          </div>
-          <span className="truncate group-data-[collapsible=icon]:hidden">{item.label}</span>
-        </TooltipTrigger>
-        <TooltipContent side="right">{item.label}</TooltipContent>
-      </Tooltip>
+            <span className={css.outdatedDot} aria-hidden />
+          </span>
+        ) : (
+          <item.icon />
+        )}
+      </div>
+      <span className="truncate group-data-[collapsible=icon]:hidden">{item.label}</span>
     </SidebarMenuButton>
   )
 
-  const interactive = isSpacesVariant ? (
-    menuButton
-  ) : (
+  // Disabled Safe nav items always explain why they're inactive; for every other item the
+  // label tooltip is redundant while the sidebar is expanded, so it only shows when collapsed.
+  const showsDisabledReason = item.disabled && !isSpacesVariant
+  const tooltipContent = showsDisabledReason ? 'You need to activate your Safe first.' : item.label
+  const isTooltipHidden = showsDisabledReason ? false : state !== 'collapsed' || isMobile
+
+  const interactive = (
     <Tooltip>
       <TooltipTrigger render={<span className="block w-full" />}>{menuButton}</TooltipTrigger>
-      {item.disabled && <TooltipContent side="right">You need to activate your Safe first.</TooltipContent>}
+      <TooltipContent side="right" hidden={isTooltipHidden}>
+        {tooltipContent}
+      </TooltipContent>
     </Tooltip>
   )
 

@@ -9,16 +9,13 @@ import {
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
 } from '@/components/ui/sidebar'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import css from '../../styles.module.css'
-import type { SafeSidebarVariantProps } from '../../types'
+import type { ResolvedSidebarItem, SafeSidebarVariantProps } from '../../types'
 import { AppRoutes } from '@/config/routes'
 import { NavItem } from '../NavItem'
 import { SidebarActionButton } from '../../NewTransactionButton'
 import { SafeSidebarWorkspaceHeader } from '../SafeSidebarWorkspaceHeader'
-import Link from 'next/link'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
@@ -54,6 +51,19 @@ export const SafeSidebarVariant = ({
     query: safeAddress ? { safe: safeAddress } : {},
   }
   const isSettingsActive = router.pathname.startsWith(AppRoutes.settings.index)
+
+  // Settings lives in the main nav group but isn't config-driven: its outdated indicator and
+  // active state depend on the current Safe. Render it through NavItem so styling stays in sync.
+  const settingsItem: ResolvedSidebarItem = {
+    icon: Settings,
+    label: 'Settings',
+    href: AppRoutes.settings.setup,
+    link: settingsHref,
+    isActive: isSettingsActive,
+    disabled: false,
+    indicator: isOutdated,
+    testId: 'sidebar-settings-item',
+  }
 
   const shouldRenderWorkspaceHeaderGroup =
     workspaceHeader.variant === 'backToSpace' || (isUserSignedIn && !(isHydrated && isCounterfactualSafe))
@@ -94,27 +104,7 @@ export const SafeSidebarVariant = ({
                 {displayMainNavItems.map((item, index) => (
                   <NavItem key={item?.href ?? `skeleton-main-${index}`} item={item} isLoading={isLoading} />
                 ))}
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    size="lg"
-                    isActive={isSettingsActive}
-                    disabled={isLoading}
-                    className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
-                    render={!isLoading ? <Link href={settingsHref} /> : undefined}
-                    data-testid="sidebar-settings-item"
-                  >
-                    <Tooltip>
-                      <TooltipTrigger render={<span />} className="flex min-w-0 cursor-pointer items-center gap-3">
-                        <span className="relative">
-                          <Settings className="text-muted-foreground" />
-                          {isOutdated && <span className={css.outdatedDot} aria-hidden />}
-                        </span>
-                        <span className="truncate group-data-[collapsible=icon]:hidden">Settings</span>
-                      </TooltipTrigger>
-                      <TooltipContent side="right">Settings</TooltipContent>
-                    </Tooltip>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <NavItem item={settingsItem} isLoading={isLoading} />
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

@@ -42,9 +42,8 @@ export const disableClassicView = (): void => {
 /**
  * Whether the "classic view" escape hatch is exposed by the backend.
  *
- * The chains config flag is CLASSIC_VIEW_DISABLED (inverted, default OFF =
- * classic view available). When the flag is explicitly set the escape hatch
- * is hidden entirely.
+ * The chains config flag is CLASSIC_VIEW (default OFF = escape hatch hidden).
+ * When the flag is explicitly set the classic view escape hatch is exposed.
  *
  * Returns `undefined` while the chains config is still loading so callers can
  * avoid flashing UI before the answer is known.
@@ -52,7 +51,7 @@ export const disableClassicView = (): void => {
 export const useIsClassicViewFeatureEnabled = (): boolean | undefined => {
   const chain = useChain(String(DEFAULT_CHAIN_ID))
   if (!chain) return undefined
-  return !hasFeature(chain, FEATURES.CLASSIC_VIEW_DISABLED)
+  return hasFeature(chain, FEATURES.CLASSIC_VIEW)
 }
 
 /**
