@@ -1,8 +1,7 @@
 import { useMemo } from 'react'
 import Fuse from 'fuse.js'
-import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-const useAddressBookSearch = (contacts: SpaceAddressBookItemDto[], query: string): SpaceAddressBookItemDto[] => {
+const useAddressBookSearch = <T extends { name: string; address: string }>(contacts: T[], query: string): T[] => {
   const fuse = useMemo(
     () =>
       new Fuse(contacts, {

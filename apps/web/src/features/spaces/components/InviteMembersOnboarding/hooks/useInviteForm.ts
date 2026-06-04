@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { isAddress } from 'ethers'
-import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  type WalletInviteUserDto,
+  useMembersInviteUserV1Mutation,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
@@ -53,8 +56,8 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     setIsSubmitting(true)
 
     try {
-      const usersToInvite = validMembers.map((member) => ({
-        type: 'wallet' as const,
+      const usersToInvite: WalletInviteUserDto[] = validMembers.map((member) => ({
+        type: 'wallet',
         address: member.address,
         name: member.address,
         role: member.role,
