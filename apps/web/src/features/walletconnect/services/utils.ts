@@ -1,6 +1,7 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ProposalTypes, SessionTypes } from '@walletconnect/types'
 import { EIP155, BlockedBridges, WarnedBridges, WarnedBridgeNames } from '../constants'
+import { getEip155ChainId } from '@safe-global/utils/features/walletconnect/utils'
 
 export { isPairingUri, getEip155ChainId } from '@safe-global/utils/features/walletconnect/utils'
 
