@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import * as Linking from 'expo-linking'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { getSdkError } from '@walletconnect/utils'
+import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
 import { useAppDispatch } from '@/src/store/hooks'
 import { getWalletKit } from '../walletKit'
 import { useActiveSafeBinding } from '../hooks/useActiveSafeBinding'
@@ -103,7 +104,7 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
     let cancelled = false
     const handleUrl = async (url: string) => {
-      if (!url.startsWith('wc:')) {
+      if (!isPairingUri(url)) {
         return
       }
       try {
