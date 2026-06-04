@@ -21,20 +21,17 @@ describe('[SMOKE] Safe selector tests', { defaultCommandTimeout: 60000, ...const
       ls.addedSafes.sidebarTrustedSafe3TwoChains,
     )
     main.addToAppLocalStorage(constants.localStorageKeys.SAFE_v2__undeployedSafes, ls.undeployedSafe.safes2)
-
-    // Chains are fetched at runtime (no build-time seed), so the added multichain
-    // safe only enters the selector list once the chains config has loaded. Wait
-    // for that request after reload before opening, otherwise the dropdown opens
-    // with a stale current-safe-only list and never shows the multichain group.
-    cy.intercept('GET', constants.chainsEndpoint).as('chainsConfig')
     cy.reload()
-    cy.wait('@chainsConfig')
+
+    // Chains are fetched at runtime now (no build-time seed) and the selector
+    // snapshots its safe list when opened, so it must only be opened once chain
+    // configs are fully loaded. Waiting for the current safe's balance to render
+    // ('Sepolia Ether' comes from the chain config) gates on that before opening,
+    // otherwise the multichain group renders with fewer than two chain logos.
+    cy.contains('Sepolia Ether', { timeout: 60000 }).should('be.visible')
 
     safeSelector.openSelector()
     safeSelector.verifyDropdownContainsSafe(multichainSafeShortAddress)
     safeSelector.verifyMultichainSafeChainLogos(multichainSafeShortAddress, 2)
-
-    // Wait for main content to fully load before the snapshot is captured
-    cy.contains('Sepolia Ether', { timeout: 30000 }).should('be.visible')
   })
 })
