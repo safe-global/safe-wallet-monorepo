@@ -348,7 +348,7 @@ exports[`./SecurityDrawerDetails.stories Default 1`] = `
         class="bg-card py-4 rounded-xl"
       >
         <span
-          class="m-0 text-xs leading-4 font-normal text-muted-foreground mb-1 block"
+          class="m-0 text-xs leading-4 font-normal text-muted-foreground mb-1 block px-4"
           data-slot="typography"
           data-variant="paragraph-mini"
         >
@@ -365,7 +365,7 @@ exports[`./SecurityDrawerDetails.stories Default 1`] = `
           class="flex flex-col"
         >
           <div
-            class="flex items-center justify-between py-2.5"
+            class="flex items-center px-4 justify-between py-2.5"
           >
             <span
               class="m-0 text-xs leading-4 font-normal text-muted-foreground"
@@ -390,7 +390,7 @@ exports[`./SecurityDrawerDetails.stories Default 1`] = `
             role="separator"
           />
           <div
-            class="flex items-center justify-between py-2.5"
+            class="flex items-center px-4 justify-between py-2.5"
           >
             <span
               class="m-0 text-xs leading-4 font-normal text-muted-foreground"
@@ -415,7 +415,7 @@ exports[`./SecurityDrawerDetails.stories Default 1`] = `
             role="separator"
           />
           <div
-            class="flex items-center justify-between py-2.5"
+            class="flex items-center px-4 justify-between py-2.5"
           >
             <span
               class="m-0 text-xs leading-4 font-normal text-muted-foreground"
@@ -440,7 +440,7 @@ exports[`./SecurityDrawerDetails.stories Default 1`] = `
             role="separator"
           />
           <div
-            class="flex items-center justify-between py-2.5"
+            class="flex items-center px-4 justify-between py-2.5"
           >
             <span
               class="m-0 text-xs leading-4 font-normal text-muted-foreground"
