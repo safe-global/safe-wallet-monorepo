@@ -95,7 +95,7 @@ const SecuritySafesTable = ({
   if (!security.$isReady) return <></>
 
   return (
-    <div className="w-full overflow-x-auto">
+    <div className="mb-10 w-full overflow-x-auto">
       <div className="min-w-[960px]">
         <div
           className={cn(
@@ -106,7 +106,7 @@ const SecuritySafesTable = ({
           {COLUMNS.map((c, i) => (
             <div
               key={c.label || `col-${i}`}
-              className={cn('text-[0.65rem] font-bold uppercase tracking-[0.5px] text-foreground/60', c.hideClass, {
+              className={cn('text-[0.65rem] font-bold uppercase tracking-[0.5px] text-zinc-400', c.hideClass, {
                 'justify-end': c.align === 'right',
               })}
             >

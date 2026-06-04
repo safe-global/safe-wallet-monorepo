@@ -148,7 +148,7 @@ const WorkspaceHealthCard = ({
   const { color, level, scorePct } = aggregate
 
   return (
-    <Card className="mb-6 flex-col items-start gap-6 py-5 px-6 md:flex-row md:items-center">
+    <Card className="mb-10 flex-col items-start gap-6 py-5 px-6 md:flex-row md:items-center">
       <ScoreGauge scorePct={scorePct} color={color} />
 
       <div className="flex min-w-0 flex-1 justify-between">

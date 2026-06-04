@@ -43,7 +43,7 @@ const SafeGradeChip = ({ grade, active = false, label, onClick, className }: Saf
     role={onClick ? 'button' : undefined}
     tabIndex={onClick ? 0 : undefined}
     className={cn(
-      'h-auto gap-2 rounded-full border-transparent bg-muted px-3 text-xs font-medium text-muted-foreground [&>svg]:size-[18px]!',
+      'h-auto  rounded-full border-transparent bg-muted px-3 text-xs font-medium text-muted-foreground [&>svg]:size-[18px]!',
       onClick && 'cursor-pointer transition-opacity hover:opacity-80',
       active && cn('ring-1 ring-inset', GRADE_ACTIVE_STYLES[grade]),
       className,

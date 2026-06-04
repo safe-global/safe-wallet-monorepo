@@ -68,7 +68,7 @@ const MultichainChildRow = ({
   security,
   getSafeSecurityHref,
 }: ChildRowProps) => {
-  const { scanKey, computeSummary, getStrengthLevel, getStrengthColor, getSafeGrade } = security
+  const { scanKey, computeSummary, getSafeGrade } = security
   const key = scanKey(safe.address, chain.chainId)
   const results = scanResults[key]
   const summary = results ? computeSummary(results) : null
@@ -111,13 +111,8 @@ const MultichainChildRow = ({
       <div className={cn(CELL_BASE, HIDE_BALANCE)}>
         <BalanceCell value={balanceMap[key]} isScanning={isScanning} />
       </div>
-      <div className={CELL_BASE}>
-        <ScoreCell
-          summary={summary}
-          isScanning={isScanning}
-          getStrengthLevel={getStrengthLevel}
-          getStrengthColor={getStrengthColor}
-        />
+      <div className={cn(CELL_BASE, 'justify-start')}>
+        <ScoreCell summary={summary} isScanning={isScanning} />
       </div>
       <div className={CELL_BASE}>
         <ChecksCell results={results} isScanning={isScanning} />
@@ -164,7 +159,7 @@ const MultichainSafeRow = ({
   security,
   getSafeSecurityHref,
 }: MultichainSafeRowProps) => {
-  const { scanKey, getStrengthLevel, getStrengthColor, getSafeGrade } = security
+  const { scanKey, getSafeGrade } = security
   const aggregateSummary = getAggregateSummary(safe, scanResults, security)
   const aggregateGrade = getAggregateSafeGrade(safe, scanResults, scanKey, getSafeGrade)
   const aggregateChecks = getAggregateCheckCounts(safe, scanResults, scanKey)
@@ -238,15 +233,10 @@ const MultichainSafeRow = ({
           </div>
         </div>
         <div className={cn(CELL_BASE, HIDE_BALANCE)}>
-          <span className="text-sm text-foreground">{formatBalance(String(totalBalance))}</span>
+          <span className="text-sm font-bold text-foreground">{formatBalance(String(totalBalance))}</span>
         </div>
-        <div className={CELL_BASE}>
-          <ScoreCell
-            summary={aggregateSummary}
-            isScanning={aggregateScanning}
-            getStrengthLevel={getStrengthLevel}
-            getStrengthColor={getStrengthColor}
-          />
+        <div className={cn(CELL_BASE, 'justify-start')}>
+          <ScoreCell summary={aggregateSummary} isScanning={aggregateScanning} />
         </div>
         <div className={CELL_BASE}>
           {aggregateScanning && aggregateSummary === null ? (

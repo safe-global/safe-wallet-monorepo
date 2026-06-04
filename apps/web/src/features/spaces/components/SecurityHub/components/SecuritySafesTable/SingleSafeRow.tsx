@@ -40,7 +40,7 @@ const SingleSafeRow = ({
   security,
   getSafeSecurityHref,
 }: SingleSafeRowProps) => {
-  const { scanKey, computeSummary, getStrengthLevel, getStrengthColor, getSafeGrade } = security
+  const { scanKey, computeSummary, getSafeGrade } = security
   const key = scanKey(safe.address, safe.chainId)
   const results = scanResults[key]
   const summary = results ? computeSummary(results) : null
@@ -101,13 +101,8 @@ const SingleSafeRow = ({
       <div className={cn(CELL_BASE, HIDE_BALANCE)}>
         <BalanceCell value={balanceMap[key]} isScanning={isScanning} />
       </div>
-      <div className={CELL_BASE}>
-        <ScoreCell
-          summary={summary}
-          isScanning={isScanning}
-          getStrengthLevel={getStrengthLevel}
-          getStrengthColor={getStrengthColor}
-        />
+      <div className={cn(CELL_BASE, 'justify-start')}>
+        <ScoreCell summary={summary} isScanning={isScanning} />
       </div>
       <div className={CELL_BASE}>
         <ChecksCell results={results} isScanning={isScanning} />
