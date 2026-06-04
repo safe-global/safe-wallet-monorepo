@@ -58,10 +58,11 @@ jest.mock('@/hooks/safes', () => {
 })
 
 let mockIsAdmin = true
+let mockSpaceSafes: Array<{ chainId: string; address: string }> = []
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => mockIsAdmin,
-  useSpaceSafes: () => ({ allSafes: [] }),
+  useSpaceSafes: () => ({ allSafes: mockSpaceSafes }),
 }))
 
 const mockAddSafesToSpace = jest.fn()
@@ -84,6 +85,7 @@ describe('AddAccounts — wallet connection state', () => {
     mockWalletValue = { address: '0xWallet' }
     mockAllOwned = {}
     mockIsAdmin = true
+    mockSpaceSafes = []
   })
 
   it('does not render the connect-wallet hint when a wallet is connected', () => {
@@ -135,6 +137,21 @@ describe('AddAccounts — wallet connection state', () => {
     })
 
     expect(screen.getByTestId('onboarding-safes-list')).toHaveAttribute('data-trusted-count', '1')
+  })
+
+  it('excludes safes already in the current space, even without a connected wallet', () => {
+    mockWalletValue = null
+    const address = '0x0000000000000000000000000000000000001234'
+    // The same safe is both locally stored and already part of the current space.
+    mockSpaceSafes = [{ chainId: '1', address }]
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, {
+      initialReduxState: {
+        addedSafes: { '1': { [address]: { owners: [], threshold: 1 } } },
+      },
+    })
+
+    // Its only saved safe is in the space → filtered out → list is empty (contrast with the test above).
+    expect(screen.queryByTestId('onboarding-safes-list')).not.toBeInTheDocument()
   })
 })
 
