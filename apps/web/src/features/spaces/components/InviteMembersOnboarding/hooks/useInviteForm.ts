@@ -1,17 +1,16 @@
 import { useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { isAddress } from 'ethers'
-import {
-  type WalletInviteUserDto,
-  useMembersInviteUserV1Mutation,
-} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { type InviteUsersDto, useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { buildInviteUserPayload, isEmailAddress } from '../../AddMemberModal/utils'
 
 interface MemberInvite {
-  address: string
+  // Can be a wallet address, ENS name, or email.
+  identifier: string
   role: MemberRole
 }
 
@@ -28,7 +27,7 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
   const methods = useForm<InviteMembersFormValues>({
     mode: 'onChange',
     defaultValues: {
-      members: [{ address: '', role: MemberRole.MEMBER }],
+      members: [{ identifier: '', role: MemberRole.MEMBER }],
     },
   })
 
@@ -38,9 +37,11 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
   const onSubmit = handleSubmit(async (data) => {
     if (!spaceId) return
 
-    const validMembers = data.members.filter((m) => m.address.trim() !== '')
+    const validMembers = data.members
+      .map((m) => ({ ...m, identifier: m.identifier.trim() }))
+      .filter((m) => m.identifier !== '')
 
-    const hasUnresolvedNames = validMembers.some((m) => !isAddress(m.address))
+    const hasUnresolvedNames = validMembers.some((m) => !isEmailAddress(m.identifier) && !isAddress(m.identifier))
     if (hasUnresolvedNames) {
       setError('Please wait for all ENS names to resolve')
       return
@@ -56,12 +57,9 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     setIsSubmitting(true)
 
     try {
-      const usersToInvite: WalletInviteUserDto[] = validMembers.map((member) => ({
-        type: 'wallet',
-        address: member.address,
-        name: member.address,
-        role: member.role,
-      }))
+      const usersToInvite: InviteUsersDto['users'] = validMembers.map((member) =>
+        buildInviteUserPayload({ name: member.identifier, inviteeIdentifier: member.identifier, role: member.role }),
+      )
 
       const result = await inviteMembers({
         spaceId,
