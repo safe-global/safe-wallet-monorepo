@@ -13165,6 +13165,7 @@ __metadata:
     "@types/react-native-get-random-values": "npm:^1"
     "@types/semver": "npm:^7.7.0"
     "@walletconnect/core": "npm:^2.21.0"
+    "@walletconnect/jsonrpc-utils": "npm:^1.0.8"
     "@walletconnect/react-native-compat": "npm:^2.23.8"
     "@walletconnect/utils": "npm:^2.21.0"
     babel-loader: "npm:^10.0.0"

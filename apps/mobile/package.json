@@ -85,6 +85,7 @@
     "@tamagui/font-dm-sans": "2.0.0-rc.26",
     "@tamagui/toast": "2.0.0-rc.26",
     "@walletconnect/core": "^2.21.0",
+    "@walletconnect/jsonrpc-utils": "^1.0.8",
     "@walletconnect/react-native-compat": "^2.23.8",
     "@walletconnect/utils": "^2.21.0",
     "babel-plugin-react-native-web": "^0.19.13",
