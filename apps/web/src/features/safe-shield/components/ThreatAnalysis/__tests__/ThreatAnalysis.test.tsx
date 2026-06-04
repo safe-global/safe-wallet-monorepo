@@ -5,16 +5,17 @@ import { Severity, ThreatStatus, CommonSharedStatus } from '@safe-global/utils/f
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { HypernativeAuthStatus } from '@/features/hypernative'
 
-// Mock AnalysisGroupCard
+// Mock AnalysisGroupCard — forward expandedGroups to a data attribute for assertions
 jest.mock('../../AnalysisGroupCard', () => ({
   AnalysisGroupCard: jest.fn(
-    ({ children, delay, highlightedSeverity, analyticsEvent, requestId, 'data-testid': testId }) => (
+    ({ children, delay, highlightedSeverity, analyticsEvent, requestId, expandedGroups, 'data-testid': testId }) => (
       <div
         data-testid={testId}
         data-delay={delay}
         data-severity={highlightedSeverity}
         data-analytics={analyticsEvent}
         data-request-id={requestId}
+        data-expanded-groups={expandedGroups ? JSON.stringify(expandedGroups) : undefined}
       >
         AnalysisGroupCard
         {children}
@@ -41,26 +42,52 @@ jest.mock('@/services/analytics', () => ({
 }))
 
 // Mock useLoadFeature to provide HnAnalysisGroupCard
+// Forward expandedGroups + overflowRow to data attributes / children for assertions
 jest.mock('@/features/__core__', () => ({
   createFeatureHandle: jest.fn((name) => ({ name, __type: 'FeatureHandle' })),
   useLoadFeature: jest.fn(() => ({
     $isReady: true,
     $isDisabled: false,
     HnAnalysisGroupCard: jest.fn(
-      ({ children, delay, highlightedSeverity, analyticsEvent, requestId, 'data-testid': testId }) => (
+      ({
+        children,
+        delay,
+        highlightedSeverity,
+        analyticsEvent,
+        requestId,
+        expandedGroups,
+        overflowRow,
+        'data-testid': testId,
+      }) => (
         <div
           data-testid={testId}
           data-delay={delay}
           data-severity={highlightedSeverity}
           data-analytics={analyticsEvent}
           data-request-id={requestId}
+          data-expanded-groups={expandedGroups ? JSON.stringify(expandedGroups) : undefined}
         >
           HnAnalysisGroupCard
+          {overflowRow}
           {children}
         </div>
       ),
     ),
   })),
+}))
+
+// Mock useSafeShieldAssessmentUrl
+jest.mock('@/features/hypernative/hooks/useSafeShieldAssessmentUrl', () => ({
+  useSafeShieldAssessmentUrl: jest.fn(() => 'https://hn.example/report'),
+}))
+
+// Mock HnViewMoreOnHypernativeRow so we can assert its presence and props
+jest.mock('@/features/hypernative/components/HnViewMoreOnHypernativeRow', () => ({
+  HnViewMoreOnHypernativeRow: jest.fn(({ overflowCount, assessmentUrl }) => (
+    <div data-testid="overflow-row" data-overflow-count={overflowCount} data-assessment-url={assessmentUrl ?? ''}>
+      +{overflowCount}
+    </div>
+  )),
 }))
 
 describe('ThreatAnalysis', () => {
@@ -395,6 +422,91 @@ describe('ThreatAnalysis', () => {
       const { container } = render(<ThreatAnalysis threat={threat} />)
 
       expect(container.firstChild).toBeNull()
+    })
+  })
+
+  describe('top-3 cap and overflow row', () => {
+    const createThreats = (count: number): ThreatAnalysisResult[] =>
+      Array.from({ length: count }, (_, i) => createThreatResult({ title: `Threat ${i + 1}`, severity: Severity.WARN }))
+
+    describe('HN path (hypernativeAuth + hn.$isReady)', () => {
+      it('renders HnAnalysisGroupCard with expandedGroups=[THREAT] and overflow row when 5 threats', () => {
+        const threat: AsyncResult<ThreatAnalysisResults> = [{ THREAT: createThreats(5) }, undefined, false]
+        const hypernativeAuth = createAuthenticatedAuth()
+
+        render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
+
+        const card = screen.getByTestId('threat-analysis-group-card')
+        expect(card).toBeInTheDocument()
+        expect(screen.getByText('HnAnalysisGroupCard')).toBeInTheDocument()
+
+        // expandedGroups should include THREAT
+        const expandedGroups = JSON.parse(card.getAttribute('data-expanded-groups') ?? '[]') as string[]
+        expect(expandedGroups).toContain('THREAT')
+
+        // overflow row should be present with +2 (5 - 3 = 2)
+        const overflowRow = screen.getByTestId('overflow-row')
+        expect(overflowRow).toBeInTheDocument()
+        expect(overflowRow).toHaveAttribute('data-overflow-count', '2')
+        expect(overflowRow).toHaveAttribute('data-assessment-url', 'https://hn.example/report')
+      })
+
+      it('renders HnAnalysisGroupCard with expandedGroups=[THREAT] and NO overflow row when 2 threats', () => {
+        const threat: AsyncResult<ThreatAnalysisResults> = [{ THREAT: createThreats(2) }, undefined, false]
+        const hypernativeAuth = createAuthenticatedAuth()
+
+        render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
+
+        expect(screen.getByText('HnAnalysisGroupCard')).toBeInTheDocument()
+
+        const card = screen.getByTestId('threat-analysis-group-card')
+        const expandedGroups = JSON.parse(card.getAttribute('data-expanded-groups') ?? '[]') as string[]
+        expect(expandedGroups).toContain('THREAT')
+
+        // no overflow row — overflow is 0
+        expect(screen.queryByTestId('overflow-row')).not.toBeInTheDocument()
+      })
+
+      it('renders HnViewMoreOnHypernativeRow with assessmentUrl=null when URL is null and 5 threats', () => {
+        // Override the mock to return null for this test
+        const { useSafeShieldAssessmentUrl } = jest.requireMock(
+          '@/features/hypernative/hooks/useSafeShieldAssessmentUrl',
+        ) as { useSafeShieldAssessmentUrl: jest.Mock }
+        useSafeShieldAssessmentUrl.mockReturnValueOnce(null)
+
+        const threat: AsyncResult<ThreatAnalysisResults> = [{ THREAT: createThreats(5) }, undefined, false]
+        const hypernativeAuth = createAuthenticatedAuth()
+
+        render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
+
+        expect(screen.getByText('HnAnalysisGroupCard')).toBeInTheDocument()
+
+        // The overflow row IS created (overflow > 0) — but with assessmentUrl=null
+        // HnViewMoreOnHypernativeRow itself returns null when URL is null (tested in Task 7).
+        // Here we verify it's rendered with the correct props.
+        const overflowRow = screen.getByTestId('overflow-row')
+        expect(overflowRow).toHaveAttribute('data-overflow-count', '2')
+        expect(overflowRow).toHaveAttribute('data-assessment-url', '')
+      })
+    })
+
+    describe('Blockaid path (no hypernativeAuth)', () => {
+      it('renders AnalysisGroupCard (not Hn variant) with expandedGroups=[THREAT] and NO overflow row when 5 threats', () => {
+        const threat: AsyncResult<ThreatAnalysisResults> = [{ THREAT: createThreats(5) }, undefined, false]
+
+        render(<ThreatAnalysis threat={threat} />)
+
+        // Blockaid path → plain AnalysisGroupCard, never Hn variant
+        expect(screen.getByText('AnalysisGroupCard')).toBeInTheDocument()
+        expect(screen.queryByText('HnAnalysisGroupCard')).not.toBeInTheDocument()
+
+        const card = screen.getByTestId('threat-analysis-group-card')
+        const expandedGroups = JSON.parse(card.getAttribute('data-expanded-groups') ?? '[]') as string[]
+        expect(expandedGroups).toContain('THREAT')
+
+        // Blockaid path silently truncates — no overflow row
+        expect(screen.queryByTestId('overflow-row')).not.toBeInTheDocument()
+      })
     })
   })
 })

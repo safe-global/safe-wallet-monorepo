@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import type { CSSProperties, ReactNode } from 'react'
-import { getDeterministicColor } from '@/features/spaces'
+import { getDeterministicColor } from '@/utils/colors'
 import { SafeSidebarWorkspaceHeader } from '../SafeSidebarWorkspaceHeader'
 import type { SafeWorkspaceHeaderBackToSpace, SafeWorkspaceHeaderAddToWorkspace } from '../../../types'
 import { AppRoutes } from '@/config/routes'
@@ -33,8 +33,11 @@ jest.mock('next/router', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  getDeterministicColor: (name: string) => `color-${name}`,
   useCurrentSpaceId: () => '42',
+}))
+
+jest.mock('@/utils/colors', () => ({
+  getDeterministicColor: (name: string) => `color-${name}`,
 }))
 
 jest.mock('@/components/ui/sidebar', () => ({
@@ -132,10 +135,24 @@ const createAddHeader = (
 const CURRENT_USER_ID = 7
 
 const adminMembers = [
-  { role: 'ADMIN' as const, status: 'ACTIVE' as const, name: '', invitedBy: '', user: { id: CURRENT_USER_ID } },
+  {
+    role: 'ADMIN' as const,
+    status: 'ACTIVE' as const,
+    name: '',
+    invitedBy: null,
+    inviteExpiresAt: null,
+    user: { id: CURRENT_USER_ID },
+  },
 ]
 const memberMembers = [
-  { role: 'MEMBER' as const, status: 'ACTIVE' as const, name: '', invitedBy: '', user: { id: CURRENT_USER_ID } },
+  {
+    role: 'MEMBER' as const,
+    status: 'ACTIVE' as const,
+    name: '',
+    invitedBy: null,
+    inviteExpiresAt: null,
+    user: { id: CURRENT_USER_ID },
+  },
 ]
 
 describe('SafeSidebarWorkspaceHeader', () => {

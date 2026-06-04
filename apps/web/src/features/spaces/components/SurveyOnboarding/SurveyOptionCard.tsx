@@ -1,10 +1,10 @@
 import { Check, type LucideIcon } from 'lucide-react'
-import type { SurveyOption } from '@safe-global/store/gateway/surveys'
+import type { SurveyOptionDto } from '@safe-global/store/gateway/AUTO_GENERATED/surveys'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 
 interface SurveyOptionCardProps {
-  option: SurveyOption
+  option: SurveyOptionDto
   Icon: LucideIcon | undefined
   isPressed: boolean
   onToggle: (key: string) => void

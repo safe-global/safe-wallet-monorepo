@@ -98,7 +98,7 @@ const Dashboard = (): ReactElement => {
               {!showHnBanner && <AddFundsToGetStarted />}
             </Stack>
           ) : (
-            <Stack minWidth="100%">
+            <Stack minWidth="100%" className={css.hideIfEmpty}>
               <NewsCarousel banners={banners} />
             </Stack>
           )}

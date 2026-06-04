@@ -26,7 +26,14 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
 
 const CURRENT_USER_ID = 7
 const adminMembersForCurrentUser = [
-  { role: 'ADMIN' as const, status: 'ACTIVE' as const, name: '', invitedBy: '', user: { id: CURRENT_USER_ID } },
+  {
+    role: 'ADMIN' as const,
+    status: 'ACTIVE' as const,
+    name: '',
+    invitedBy: null,
+    inviteExpiresAt: null,
+    user: { id: CURRENT_USER_ID },
+  },
 ]
 
 jest.mock('next/router', () => ({
@@ -63,17 +70,22 @@ jest.mock('@safe-global/utils/utils/chains', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  getDeterministicColor: (name: string) => `color-${name}`,
   useCurrentSpaceId: () => '42',
 }))
 
+jest.mock('@/utils/colors', () => ({
+  getDeterministicColor: (name: string) => `color-${name}`,
+}))
+
 jest.mock('../../NavItem', () => ({
-  NavItem: ({ item }: { item: ResolvedSidebarItem }) => (
-    <div data-testid={`sidebar-item-${item.label.toLowerCase()}`}>
-      {item.label}
-      {!!item.badge && <span aria-label={`${item.badge} ${item.label} notifications`}>{item.badge}</span>}
-    </div>
-  ),
+  NavItem: ({ item }: { item: ResolvedSidebarItem | null }) =>
+    item ? (
+      <div data-testid={item.testId ?? `sidebar-item-${item.label.toLowerCase()}`} data-active={item.isActive}>
+        {item.label}
+        {!!item.badge && <span aria-label={`${item.badge} ${item.label} notifications`}>{item.badge}</span>}
+        {item.indicator && <span aria-hidden />}
+      </div>
+    ) : null,
 }))
 
 jest.mock('@/components/ui/sidebar', () => ({

@@ -25,7 +25,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import SpaceInfoModal from '../SpaceInfoModal'
-import { filterSpacesByStatus } from '@/features/spaces/utils'
+import { filterSpacesByStatus, getInvitedByName } from '@/features/spaces/utils'
 import { AppRoutes } from '@/config/routes'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
@@ -200,7 +200,11 @@ const SpacesList = () => {
         {isUserSignedIn &&
           pendingInvites.length > 0 &&
           pendingInvites.map((invitingSpace: GetSpaceResponse) => (
-            <SpaceListInvite key={invitingSpace.id} space={invitingSpace} />
+            <SpaceListInvite
+              key={invitingSpace.id}
+              space={invitingSpace}
+              invitedByName={getInvitedByName(invitingSpace, currentUser?.id)}
+            />
           ))}
 
         {activeSpaces.length > 0 ? (

@@ -172,6 +172,24 @@ export class ThreatAnalysisResultBuilder<
       .title('Custom check failed')
       .type(ThreatStatus.HYPERNATIVE_GUARD)
       .severity(Severity.WARN)
+      .issues({
+        [Severity.WARN]: [
+          {
+            description: 'Custom check failed. Review before processing.',
+          },
+        ],
+        [Severity.CRITICAL]: [
+          {
+            description: 'Critical issue.',
+            address: '0x1234567890123456789012345678901234567890',
+          },
+        ],
+        [Severity.INFO]: [
+          {
+            description: 'Informational issue. Just a test.',
+          },
+        ],
+      })
       .description('Custom check failed. Review before processing.')
   }
 }

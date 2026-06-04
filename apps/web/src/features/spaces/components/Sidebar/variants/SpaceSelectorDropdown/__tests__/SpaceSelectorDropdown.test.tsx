@@ -3,7 +3,7 @@ import type * as ReactModule from 'react'
 import type { ReactElement, ReactNode, CSSProperties } from 'react'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
-import { getDeterministicColor } from '@/features/spaces'
+import { getDeterministicColor } from '@/utils/colors'
 import { SPACE_SELECTOR_NAME_MAX_LENGTH, SPACES_LIMIT } from '../../../constants'
 import { truncateSpaceName } from '../../../utils'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
@@ -36,10 +36,24 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 const CURRENT_USER_ID = 7
 
 const adminMembersForCurrentUser = [
-  { role: 'ADMIN' as const, status: 'ACTIVE' as const, name: '', invitedBy: '', user: { id: CURRENT_USER_ID } },
+  {
+    role: 'ADMIN' as const,
+    status: 'ACTIVE' as const,
+    name: '',
+    invitedBy: null,
+    inviteExpiresAt: null,
+    user: { id: CURRENT_USER_ID },
+  },
 ]
 const memberMembersForCurrentUser = [
-  { role: 'MEMBER' as const, status: 'ACTIVE' as const, name: '', invitedBy: '', user: { id: CURRENT_USER_ID } },
+  {
+    role: 'MEMBER' as const,
+    status: 'ACTIVE' as const,
+    name: '',
+    invitedBy: null,
+    inviteExpiresAt: null,
+    user: { id: CURRENT_USER_ID },
+  },
 ]
 
 const mockPush = jest.fn()

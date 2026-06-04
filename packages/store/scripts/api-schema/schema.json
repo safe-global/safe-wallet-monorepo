@@ -9035,6 +9035,15 @@
             "type": "string"
           },
           "invitedBy": {
+            "type": "number",
+            "nullable": true
+          },
+          "inviteExpiresAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "invitedByName": {
             "type": "string"
           },
           "status": {
@@ -9053,6 +9062,7 @@
           "role",
           "name",
           "invitedBy",
+          "inviteExpiresAt",
           "status",
           "user"
         ]
@@ -9175,16 +9185,17 @@
           "safes"
         ]
       },
-      "InviteUserDto": {
+      "WalletInviteUserDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "wallet"
+            ]
+          },
           "address": {
             "type": "string"
-          },
-          "name": {
-            "type": "string",
-            "minLength": 3,
-            "maxLength": 30
           },
           "role": {
             "type": "string",
@@ -9192,12 +9203,50 @@
               "ADMIN",
               "MEMBER"
             ]
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
           }
         },
         "required": [
+          "type",
           "address",
-          "name",
-          "role"
+          "role",
+          "name"
+        ]
+      },
+      "EmailInviteUserDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "email"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 255
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "MEMBER"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "type",
+          "email",
+          "role",
+          "name"
         ]
       },
       "InviteUsersDto": {
@@ -9206,7 +9255,14 @@
           "users": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/InviteUserDto"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/WalletInviteUserDto"
+                },
+                {
+                  "$ref": "#/components/schemas/EmailInviteUserDto"
+                }
+              ]
             }
           }
         },
@@ -9242,7 +9298,7 @@
             ]
           },
           "invitedBy": {
-            "type": "string",
+            "type": "number",
             "nullable": true
           }
         },
@@ -9251,7 +9307,8 @@
           "name",
           "spaceId",
           "role",
-          "status"
+          "status",
+          "invitedBy"
         ]
       },
       "AcceptInviteDto": {
@@ -9259,8 +9316,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "minLength": 3,
-            "maxLength": 30
+            "maxLength": 255
           }
         },
         "required": [
@@ -9320,6 +9376,11 @@
             "nullable": true
           },
           "invitedBy": {
+            "type": "number",
+            "nullable": true
+          },
+          "inviteExpiresAt": {
+            "format": "date-time",
             "type": "string",
             "nullable": true
           },
@@ -9340,6 +9401,7 @@
           "role",
           "status",
           "name",
+          "invitedBy",
           "createdAt",
           "updatedAt",
           "user"
