@@ -52,8 +52,7 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
     [addressBook],
   )
 
-  const searchQuery = isAddress(inviteeIdentifier) ? '' : inviteeIdentifier
-  const matches = useAddressBookSearch(contacts, searchQuery)
+  const matches = useAddressBookSearch(contacts, inviteeIdentifier)
   const options = useMemo(
     () => (isAddress(inviteeIdentifier) ? [] : matches.slice(0, MAX_VISIBLE_OPTIONS)),
     [inviteeIdentifier, matches],
@@ -95,7 +94,7 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
       onClose={() => setIsOpen(false)}
       className={inputCss.input}
       options={options}
-      // Address book entries are already filtered against the current input value.
+      // Options are already searched/sliced via useAddressBookSearch.
       filterOptions={(opts) => opts}
       getOptionLabel={(option) => (typeof option === 'string' ? option : option.address)}
       inputValue={value}
