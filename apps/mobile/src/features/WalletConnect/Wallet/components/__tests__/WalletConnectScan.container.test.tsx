@@ -53,9 +53,10 @@ describe('WalletConnectScanContainer', () => {
     mockUseScan.mockReturnValue(baseHook)
   })
 
-  it('shows the scan prompt in the scanning state', () => {
-    const { getByText } = render(<WalletConnectScanContainer />)
-    expect(getByText('Scan a QR code')).toBeTruthy()
+  it('shows no center overlay in the scanning state', () => {
+    const { queryByText } = render(<WalletConnectScanContainer />)
+    expect(queryByText('Scan a QR code')).toBeNull()
+    expect(queryByText('Connecting…')).toBeNull()
   })
 
   it('shows the connecting indicator while connecting', () => {

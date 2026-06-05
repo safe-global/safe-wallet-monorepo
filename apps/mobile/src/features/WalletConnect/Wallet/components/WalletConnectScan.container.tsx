@@ -74,12 +74,6 @@ function CenterOverlay({
       return <ConnectingOverlay />
     case 'error':
       return <ErrorOverlay message={errorMessage} onTryAgain={onTryAgain} />
-    default:
-      return (
-        <Text color="$color" fontWeight="600">
-          Scan a QR code
-        </Text>
-      )
   }
 }
 
