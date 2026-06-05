@@ -124,7 +124,7 @@ const AddAccountsChooser = ({
             <ChooserRow
               icon={<Plus className="size-4" />}
               title="Add Safe accounts to this workspace"
-              subtitle="Add Safe accounts that are linked to your wallet to this workspace"
+              subtitle="Add your owned and trusted Safes to this workspace"
               onClick={handleAdd}
               disabled={!isAdmin}
               disabledTooltip="You need to be an Admin to add accounts"
@@ -133,7 +133,7 @@ const AddAccountsChooser = ({
             <ChooserRow
               icon={<Search className="size-4" />}
               title="See all Safe accounts"
-              subtitle="Your trusted, owned and counterfactual Safes"
+              subtitle="Your trusted and owned Safes"
               onClick={() => {
                 setChooserOpen(false)
                 setSubModal('find')
