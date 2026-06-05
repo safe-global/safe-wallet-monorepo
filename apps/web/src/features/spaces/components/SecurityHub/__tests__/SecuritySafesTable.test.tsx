@@ -249,6 +249,21 @@ describe('SecuritySafesTable', () => {
     })
   })
 
+  it('renders skeleton rows instead of safe rows while overviews load', () => {
+    renderTable({ isLoading: true, safes: [singleSafe, multiSafe] })
+    // The skeleton stands in for the rows — no real safe row or name is painted yet,
+    // so optimistic deployment flags/balances never flip on screen.
+    expect(screen.getByTestId('security-safes-table-skeleton')).toBeInTheDocument()
+    expect(screen.queryByText('My Vault')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('security-safe-row')).not.toBeInTheDocument()
+  })
+
+  it('renders real rows once overviews have loaded', () => {
+    renderTable({ isLoading: false })
+    expect(screen.queryByTestId('security-safes-table-skeleton')).not.toBeInTheDocument()
+    expect(screen.getByText('My Vault')).toBeInTheDocument()
+  })
+
   it('highlights the selected safe row', () => {
     const selected: SelectedSafe = { address: singleSafe.address, chainId: '1' }
     renderTable({ selectedSafe: selected })

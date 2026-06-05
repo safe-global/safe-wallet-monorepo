@@ -174,6 +174,56 @@ describe('useReconciledSpaceSafes', () => {
     expect(result.current.isLoadingSpacesSafes).toBe(true)
   })
 
+  it('reports isLoadingOverviews while the batch query has no response yet', () => {
+    useSpaceSafesMock.mockReturnValue({
+      allSafes: [{ chainId: MAINNET, address: SAFE_A, name: 'A' }],
+      isLoading: false,
+    })
+    useGetMultipleSafeOverviewsQueryMock.mockReturnValue({ data: undefined })
+
+    const { result } = renderHook(() => useReconciledSpaceSafes(mkSecurity()))
+
+    expect(result.current.isLoadingOverviews).toBe(true)
+  })
+
+  it('clears isLoadingOverviews once the batch response arrives', () => {
+    useSpaceSafesMock.mockReturnValue({
+      allSafes: [{ chainId: MAINNET, address: SAFE_A, name: 'A' }],
+      isLoading: false,
+    })
+    useGetMultipleSafeOverviewsQueryMock.mockReturnValue({ data: [mkOverview(SAFE_A, MAINNET)] })
+
+    const { result } = renderHook(() => useReconciledSpaceSafes(mkSecurity()))
+
+    expect(result.current.isLoadingOverviews).toBe(false)
+  })
+
+  it('does not gate on overviews when there are no deployed Safes to fetch', () => {
+    setSelectors({ undeployed: { [MAINNET]: { [SAFE_A]: { props: {} } } } })
+    useSpaceSafesMock.mockReturnValue({
+      allSafes: [{ chainId: MAINNET, address: SAFE_A, name: 'A' }],
+      isLoading: false,
+    })
+    useGetMultipleSafeOverviewsQueryMock.mockReturnValue({ data: undefined })
+
+    const { result } = renderHook(() => useReconciledSpaceSafes(mkSecurity()))
+
+    // Query is skipped (nothing deployed) — no skeleton, render the undeployed rows.
+    expect(result.current.isLoadingOverviews).toBe(false)
+  })
+
+  it('stops gating on overviews when the batch query errors', () => {
+    useSpaceSafesMock.mockReturnValue({
+      allSafes: [{ chainId: MAINNET, address: SAFE_A, name: 'A' }],
+      isLoading: false,
+    })
+    useGetMultipleSafeOverviewsQueryMock.mockReturnValue({ data: undefined, isError: true })
+
+    const { result } = renderHook(() => useReconciledSpaceSafes(mkSecurity()))
+
+    expect(result.current.isLoadingOverviews).toBe(false)
+  })
+
   it('ignores overview entries with missing address or chainId', () => {
     useSpaceSafesMock.mockReturnValue({
       allSafes: [

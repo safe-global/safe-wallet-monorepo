@@ -12,6 +12,13 @@ type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>
 
 export type ReconciledSpaceSafes = {
   isLoadingSpacesSafes: boolean
+  /**
+   * True while the batch overview query is still in flight (and there are deployed
+   * Safes to fetch). Until it resolves, deployment flags are unreconciled and
+   * balances are absent — consumers gate the table on this to avoid painting
+   * optimistic rows that then flip once CGW responds.
+   */
+  isLoadingOverviews: boolean
   safes: SpaceSafeEntry[]
   deployedEntries: SelectedSafe[]
   balanceMap: BalanceMap
@@ -32,10 +39,14 @@ const useReconciledSpaceSafes = (security: SecurityHandle): ReconciledSpaceSafes
   const rawSafes = useMemo(() => flattenSafes(allSafes, undeployedSafes), [allSafes, undeployedSafes])
   const safeItems = useMemo(() => toSafeItems(rawSafes), [rawSafes])
 
-  const { data: overviews } = useGetMultipleSafeOverviewsQuery(
+  const { data: overviews, isError: isOverviewsError } = useGetMultipleSafeOverviewsQuery(
     { safes: safeItems, currency },
     { skip: safeItems.length === 0 },
   )
+
+  // Loading while we have deployed Safes queued but no response yet. An error stops
+  // the gate (fall back to optimistic rows rather than an indefinite skeleton).
+  const isLoadingOverviews = safeItems.length > 0 && !overviews && !isOverviewsError
 
   const { confirmedDeployedKeys, balanceMap, overviewMap } = useMemo(() => {
     if (!security.$isReady || !overviews) {
@@ -75,7 +86,7 @@ const useReconciledSpaceSafes = (security: SecurityHandle): ReconciledSpaceSafes
 
   const deployedEntries = useMemo(() => getDeployedEntries(safes), [safes])
 
-  return { isLoadingSpacesSafes, safes, deployedEntries, balanceMap, overviewMap }
+  return { isLoadingSpacesSafes, isLoadingOverviews, safes, deployedEntries, balanceMap, overviewMap }
 }
 
 export default useReconciledSpaceSafes

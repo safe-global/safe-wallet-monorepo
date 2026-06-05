@@ -7,8 +7,9 @@ import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import { cn } from '@/utils/cn'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
-import { COLUMNS, GRID_COLS } from './constants'
+import { CARD_ROW_CLASS, CELL_BASE, COLUMNS, GRID_COLS, HIDE_BALANCE } from './constants'
 import SingleSafeRow from './SingleSafeRow'
 import MultichainSafeRow from './MultichainSafeRow'
 import type { GetSafeSecurityHref } from './utils'
@@ -22,6 +23,9 @@ type SecuritySafesTableProps = {
   scanningKeys?: Set<string>
   gradeFilter?: SafeGrade | null
   balanceMap: Record<string, string | undefined>
+  /** Render skeleton rows while the batch overview query resolves, so deployment
+   *  flags and balances are correct on first paint instead of flipping. */
+  isLoading?: boolean
 }
 
 const SecuritySafesTable = ({
@@ -33,6 +37,7 @@ const SecuritySafesTable = ({
   scanningKeys,
   gradeFilter,
   balanceMap,
+  isLoading = false,
 }: SecuritySafesTableProps): ReactElement => {
   const security = useLoadFeature(SecurityFeature)
   const { data: chainsData } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
@@ -115,43 +120,86 @@ const SecuritySafesTable = ({
           ))}
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={gradeFilter ?? 'all'}
-            className="flex flex-col gap-1.5"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-          >
-            {filteredSafes.map((safe, safeIdx) => {
-              const isMultichain = safe.isMultichain && safe.chainEntries.length > 1
-              const sharedProps = {
-                safe,
-                safeIdx,
-                hasAnimated: hasAnimatedRef.current,
-                selectedSafe,
-                onViewReport,
-                scanResults,
-                scanTimestamps,
-                scanningKeys,
-                balanceMap,
-                security,
-                getSafeSecurityHref,
-              }
-              return isMultichain ? (
-                <MultichainSafeRow
-                  key={safe.address}
-                  {...sharedProps}
-                  isExpanded={expandedAddresses.has(safe.address)}
-                  onToggleExpand={toggleExpand}
-                />
-              ) : (
-                <SingleSafeRow key={security.scanKey(safe.address, safe.chainId)} {...sharedProps} />
-              )
-            })}
-          </motion.div>
-        </AnimatePresence>
+        {isLoading ? (
+          <div className="flex flex-col gap-1.5" data-testid="security-safes-table-skeleton">
+            {Array.from({ length: Math.min(Math.max(safes.length, 1), 6) }).map((_, i) => (
+              <div key={i} className={cn(CARD_ROW_CLASS, GRID_COLS, 'border-transparent')}>
+                {/* Account: identicon + name/address — mirrors SingleSafeRow's first cell */}
+                <div className={CELL_BASE}>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Skeleton className="size-8 shrink-0 rounded-full" />
+                    <div className="flex min-w-0 flex-col gap-1.5">
+                      <Skeleton className="h-3.5 w-32 max-w-full rounded" />
+                      <Skeleton className="h-2.5 w-24 max-w-full rounded" />
+                    </div>
+                  </div>
+                </div>
+                {/* Network */}
+                <div className={CELL_BASE}>
+                  <Skeleton className="size-[18px] rounded-full" />
+                </div>
+                {/* Balance (collapses below sm, same as the data cell) */}
+                <div className={cn(CELL_BASE, HIDE_BALANCE)}>
+                  <Skeleton className="h-4 w-14 rounded" />
+                </div>
+                {/* Score */}
+                <div className={CELL_BASE}>
+                  <Skeleton className="h-4 w-9 rounded" />
+                </div>
+                {/* Checks */}
+                <div className={CELL_BASE}>
+                  <Skeleton className="h-4 w-16 rounded" />
+                </div>
+                {/* Status */}
+                <div className={CELL_BASE}>
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                </div>
+                {/* Chevron */}
+                <div className={cn(CELL_BASE, 'justify-end')}>
+                  <Skeleton className="size-5 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={gradeFilter ?? 'all'}
+              className="flex flex-col gap-1.5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              {filteredSafes.map((safe, safeIdx) => {
+                const isMultichain = safe.isMultichain && safe.chainEntries.length > 1
+                const sharedProps = {
+                  safe,
+                  safeIdx,
+                  hasAnimated: hasAnimatedRef.current,
+                  selectedSafe,
+                  onViewReport,
+                  scanResults,
+                  scanTimestamps,
+                  scanningKeys,
+                  balanceMap,
+                  security,
+                  getSafeSecurityHref,
+                }
+                return isMultichain ? (
+                  <MultichainSafeRow
+                    key={safe.address}
+                    {...sharedProps}
+                    isExpanded={expandedAddresses.has(safe.address)}
+                    onToggleExpand={toggleExpand}
+                  />
+                ) : (
+                  <SingleSafeRow key={security.scanKey(safe.address, safe.chainId)} {...sharedProps} />
+                )
+              })}
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
     </div>
   )
