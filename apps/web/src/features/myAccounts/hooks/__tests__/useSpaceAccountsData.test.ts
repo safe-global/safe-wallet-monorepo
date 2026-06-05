@@ -209,4 +209,76 @@ describe('useSpaceAccountsData', () => {
       expect(result.current.accounts[0].owners).toBe('2/4')
     })
   })
+
+  describe('activation status', () => {
+    const cfState = (address: string, chainId: string, status = 'AWAITING_EXECUTION') => ({
+      undeployedSafes: {
+        [chainId]: {
+          [address]: {
+            props: {
+              safeAccountConfig: { threshold: 1, owners: ['0xOwnerA'] },
+              factoryAddress: '0xFactory',
+              masterCopy: '0xMasterCopy',
+              saltNonce: '0',
+              safeVersion: '1.3.0',
+            },
+            status: { status, type: 'counterfactual' },
+          },
+        },
+      },
+    })
+
+    it('marks a single undeployed safe as not activated', () => {
+      const address = '0xCfSingle'
+      const safes: AllSafeItems = [makeSafeItem({ chainId: '1', address })]
+
+      const { result } = renderHook(() => useSpaceAccountsData(safes), {
+        initialReduxState: cfState(address, '1') as unknown as Partial<RootState>,
+      })
+
+      expect(result.current.accounts[0].isUndeployed).toBe(true)
+      expect(result.current.accounts[0].isActivating).toBe(false)
+    })
+
+    it('marks an undeployed safe with a non-awaiting status as activating', () => {
+      const address = '0xCfActivating'
+      const safes: AllSafeItems = [makeSafeItem({ chainId: '1', address })]
+
+      const { result } = renderHook(() => useSpaceAccountsData(safes), {
+        initialReduxState: cfState(address, '1', 'PROCESSING') as unknown as Partial<RootState>,
+      })
+
+      expect(result.current.accounts[0].isUndeployed).toBe(true)
+      expect(result.current.accounts[0].isActivating).toBe(true)
+    })
+
+    it('does not mark a deployed safe as undeployed', () => {
+      const safes: AllSafeItems = [makeSafeItem({ chainId: '1', address: '0xDeployedOnly' })]
+
+      const { result } = renderHook(() => useSpaceAccountsData(safes))
+
+      expect(result.current.accounts[0].isUndeployed).toBe(false)
+      expect(result.current.accounts[0].isActivating).toBe(false)
+    })
+
+    it('marks a multichain account undeployed only when every chain is undeployed', () => {
+      const address = '0xMultiPartial'
+      const safes: AllSafeItems = [
+        {
+          address,
+          safes: [makeSafeItem({ chainId: '1', address }), makeSafeItem({ chainId: '137', address })],
+          isPinned: false,
+          lastVisited: 0,
+          name: undefined,
+        },
+      ]
+
+      const { result } = renderHook(() => useSpaceAccountsData(safes), {
+        // Only chain '1' is undeployed; '137' is deployed.
+        initialReduxState: cfState(address, '1') as unknown as Partial<RootState>,
+      })
+
+      expect(result.current.accounts[0].isUndeployed).toBe(false)
+    })
+  })
 })
