@@ -59,7 +59,7 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
     setError(undefined)
 
     try {
-      await deleteSpace({ id: space.id }).unwrap()
+      await deleteSpace({ id: space.uuid }).unwrap()
       onClose()
 
       trackEvent({ ...SPACE_EVENTS.DELETE_SPACE })

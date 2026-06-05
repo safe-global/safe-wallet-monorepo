@@ -1,12 +1,12 @@
 /**
- * The space id stored in auth state is `string | null` (from Redux persistence).
- * Convert to a numeric id for API calls, returning `null` for missing or
- * non-numeric values so callers can skip space-scoped requests rather than
- * silently hit the API with NaN.
+ * Normalize the persisted `lastUsedSpace` value (string | null) for use as
+ * a Space identifier. Returns null for missing/whitespace-only inputs so
+ * callers can skip space-scoped requests rather than passing an empty id.
+ * The identifier is a UUID; legacy numeric strings are still accepted by
+ * the backend's LegacySpaceIdPipe during the deprecation window, so we
+ * pass any non-empty string through unchanged.
  */
-export const parseSpaceId = (spaceId: string | null): number | null => {
-  // Number('') === 0 and Number('  ') === 0 in JS; treat both as missing.
+export const parseSpaceId = (spaceId: string | null): string | null => {
   if (spaceId === null || spaceId.trim() === '') return null
-  const parsed = Number(spaceId)
-  return Number.isFinite(parsed) ? parsed : null
+  return spaceId
 }

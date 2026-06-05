@@ -12,7 +12,7 @@ const useExistingSpace = (setValue: UseFormSetValue<{ name: string }>) => {
     data: existingSpace,
     isLoading: isLoadingSpace,
     isFetching: isFetchingSpace,
-  } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
+  } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
 
   useEffect(() => {
     if (existingSpace?.name) {

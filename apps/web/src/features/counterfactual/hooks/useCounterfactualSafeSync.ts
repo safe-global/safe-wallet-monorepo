@@ -87,11 +87,11 @@ const useCounterfactualSafeSync = () => {
       // Fetch CF safes from user endpoint and space endpoint
       const userQuery = dispatch(counterfactualSafesApi.endpoints.counterfactualSafesGetV1.initiate(undefined))
       // Guard against persisted/legacy lastUsedSpace values that aren't a clean
-      // integer — Number('abc') is NaN and would silently hit the API with NaN.
-      const numericSpaceId = parseSpaceId(spaceId)
+      // UUID or non-empty string — pass through unchanged, null means skip.
+      const resolvedSpaceId = parseSpaceId(spaceId)
       const spaceQuery =
-        numericSpaceId !== null
-          ? dispatch(spacesApi.endpoints.spaceCounterfactualSafesGetV1.initiate({ spaceId: numericSpaceId }))
+        resolvedSpaceId !== null
+          ? dispatch(spacesApi.endpoints.spaceCounterfactualSafesGetV1.initiate({ spaceId: resolvedSpaceId }))
           : null
 
       try {

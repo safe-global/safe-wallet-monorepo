@@ -65,10 +65,10 @@ export const persistCounterfactualSafe = async ({
       return { ok: false, error: toPersistError(userResult.error) }
     }
 
-    // Guard against persisted/legacy lastUsedSpace values that don't parse to
-    // a finite number — Number('abc') is NaN and would silently hit the API.
-    const numericSpaceId = parseSpaceId(spaceId)
-    if (numericSpaceId !== null) {
+    // Guard against persisted/legacy lastUsedSpace values that are empty or
+    // whitespace-only — pass any non-empty string through unchanged.
+    const resolvedSpaceId = parseSpaceId(spaceId)
+    if (resolvedSpaceId !== null) {
       if (!isAdminOfActiveSpace) {
         // Backend gates this endpoint on admin role and would 403. Inform the
         // user — the safe is still persisted at the user level above.
@@ -82,7 +82,7 @@ export const persistCounterfactualSafe = async ({
       } else {
         const spaceResult = await dispatch(
           spacesApi.endpoints.spaceSafesCreateV1.initiate({
-            spaceId: numericSpaceId,
+            spaceId: resolvedSpaceId,
             createSpaceSafesDto: { safes: [{ chainId, address: safeAddress }] },
           }),
         )
