@@ -108,6 +108,25 @@ const nextConfig = {
       }
     : {}),
   webpack(config, { dev }) {
+    // rspack's incremental build (default `experiments.incremental = {}` in
+    // 1.5) drifts the chunk graph across on-demand dev recompiles, producing
+    // "__webpack_modules__[moduleId] is not a function" 500s after ~13 route
+    // compiles (rspack #11247). Fully disabling incremental fixes it but makes
+    // recompiles ~9s. Instead keep the fast per-MODULE passes incremental and
+    // rebuild only the CHUNK-level passes (the ones that emit the drifted
+    // output) from scratch. Dev + rspack only.
+    if (dev && process.env.USE_RSPACK === '1') {
+      // EXPERIMENT 6: keep incremental fully on (fast) and disable only the
+      // single chunk pass most implicated in the stale module registry —
+      // buildChunkGraph. If the drifted __webpack_require__ ids come from an
+      // incrementally-rebuilt chunk graph, rebuilding just that pass should fix
+      // the crash while leaving the fast per-module passes intact.
+      config.experiments = {
+        ...config.experiments,
+        incremental: { buildChunkGraph: false },
+      }
+    }
+
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: { and: [/\.(js|ts|md)x?$/] },
