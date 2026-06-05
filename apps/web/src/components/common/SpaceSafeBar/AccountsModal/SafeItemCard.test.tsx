@@ -4,7 +4,7 @@ import SafeItemCard from './SafeItemCard'
 
 const defaultSafeItemData = {
   name: undefined,
-  safeOverview: { fiatTotal: 0 },
+  safeOverview: { fiatTotal: 0 } as { fiatTotal: number } | undefined,
   threshold: 1,
   owners: [{ value: '0x0000000000000000000000000000000000000001' }],
   elementRef: { current: null },
