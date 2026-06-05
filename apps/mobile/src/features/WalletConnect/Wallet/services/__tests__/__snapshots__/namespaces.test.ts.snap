@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildSafeApprovedNamespaces produces eip155 namespaces with checksummed accounts (snapshot) 1`] = `
+{
+  "eip155": {
+    "accounts": [
+      "eip155:1:0x1111111111111111111111111111111111111111",
+      "eip155:137:0x1111111111111111111111111111111111111111",
+    ],
+    "chains": [
+      "eip155:1",
+      "eip155:137",
+    ],
+    "events": [
+      "chainChanged",
+      "accountsChanged",
+    ],
+    "methods": [
+      "eth_sendTransaction",
+      "eth_accounts",
+    ],
+  },
+}
+`;
