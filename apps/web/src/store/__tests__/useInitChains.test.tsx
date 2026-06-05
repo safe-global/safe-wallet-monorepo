@@ -1,19 +1,25 @@
 import { renderHook, waitFor } from '@/tests/test-utils'
-import { makeStore, useInitStaticChains } from '@/store'
+import { makeStore, useInitChains } from '@/store'
+import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import { Provider } from 'react-redux'
 import type { ReactNode } from 'react'
 
-describe('useInitStaticChains', () => {
-  it('should dispatch actions for a background chains refetch', async () => {
+describe('useInitChains', () => {
+  it('does not seed chain data into the RTK Query cache', () => {
+    const store = makeStore(undefined, { skipBroadcast: true })
+
+    // With build-time prefetch removed, the cgw query cache must start empty.
+    expect(store.getState()[cgwClient.reducerPath].queries).toEqual({})
+  })
+
+  it('dispatches a chains fetch on mount', async () => {
     const store = makeStore(undefined, { skipBroadcast: true })
     const dispatchSpy = jest.spyOn(store, 'dispatch')
 
     const wrapper = ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>
 
-    renderHook(() => useInitStaticChains(), { wrapper })
+    renderHook(() => useInitChains(), { wrapper })
 
-    // The hook dispatches initiate({ forceRefetch: true }) to trigger a
-    // background network fetch for fresh chain data.
     await waitFor(() => {
       expect(dispatchSpy).toHaveBeenCalled()
     })
@@ -21,19 +27,17 @@ describe('useInitStaticChains', () => {
     dispatchSpy.mockRestore()
   })
 
-  it('should clean up subscription on unmount', async () => {
+  it('cleans up the subscription on unmount', async () => {
     const store = makeStore(undefined, { skipBroadcast: true })
 
     const wrapper = ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>
 
-    const { unmount } = renderHook(() => useInitStaticChains(), { wrapper })
+    const { unmount } = renderHook(() => useInitChains(), { wrapper })
 
-    // Give the effect time to run
     await waitFor(() => {
       expect(store.dispatch).toBeDefined()
     })
 
-    // Cleanup should not throw (unsubscribe is called if available)
     expect(() => unmount()).not.toThrow()
   })
 })

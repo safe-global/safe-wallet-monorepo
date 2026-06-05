@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
+import useChains from '@/hooks/useChains'
 import SafeSelectorDropdown from '../index'
 import type { SafeItemData } from '../types'
 
@@ -13,6 +14,10 @@ jest.mock('next/router', () => ({
 }))
 jest.mock('@/hooks/safe-apps/useSafeAppUrl', () => ({
   useSafeAppUrl: jest.fn(),
+}))
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 jest.mock('@/components/ui/tooltip', () => ({
@@ -37,7 +42,9 @@ jest.mock('@/components/ui/tooltip', () => ({
 
 jest.mock('../components/SafeSelectorTriggerContent', () => ({
   __esModule: true,
-  default: () => <span data-testid="safe-selector-trigger-content" />,
+  default: ({ selectedItem }: { selectedItem: { chains: Array<{ shortName: string }> } }) => (
+    <span data-testid="safe-selector-trigger-content" data-shortname={selectedItem.chains[0]?.shortName ?? ''} />
+  ),
 }))
 
 jest.mock('../components/SafeDropdownContainer', () => ({
@@ -150,6 +157,12 @@ describe('SafeSelectorDropdown', () => {
       .mocked(useRouter)
       .mockReturnValue({ push: jest.fn(), pathname: '/', query: {} } as unknown as ReturnType<typeof useRouter>)
     jest.mocked(useSafeAppUrl).mockReturnValue(undefined)
+    jest.mocked(useChains).mockReturnValue({
+      configs: [
+        { chainId: '1', shortName: 'eth', chainName: 'Ethereum', chainLogoUri: null },
+        { chainId: '137', shortName: 'matic', chainName: 'Polygon', chainLogoUri: null },
+      ] as ReturnType<typeof useChains>['configs'],
+    })
   })
 
   describe('onValueChange filtering by reason', () => {
@@ -210,42 +223,94 @@ describe('SafeSelectorDropdown', () => {
      * useSpaceChainSelector, or the controlled value plumbing), this test catches the
      * second router.push. The two unit tests above only cover each branch in isolation.
      */
-    it('renders an error message when items are loaded but selectedItemId has no match', () => {
+    it('renders a fallback trigger when items are loaded but selectedItemId has no match', () => {
       const itemA = createItem()
-      render(<SafeSelectorDropdown items={[itemA]} selectedItemId="999:0xnotfound" isLoading={false} />)
-
-      expect(screen.getByText('This Safe is not available on the selected network')).toBeInTheDocument()
-    })
-
-    it('keeps showing the skeleton while items are still loading and there is no match yet', () => {
-      const itemA = createItem()
-      render(<SafeSelectorDropdown items={[itemA]} selectedItemId="999:0xnotfound" isLoading={true} />)
-
-      expect(screen.queryByText('This Safe is not available on the selected network')).not.toBeInTheDocument()
-    })
-
-    it('shows the load error (not the no-match error) when isError is true', () => {
-      const itemA = createItem()
-      const onRetry = jest.fn()
       render(
         <SafeSelectorDropdown
           items={[itemA]}
           selectedItemId="999:0xnotfound"
           isLoading={false}
-          isError={true}
-          onRetry={onRetry}
+          onItemSelect={jest.fn()}
         />,
       )
 
-      expect(screen.getByText('Failed to load Safe data')).toBeInTheDocument()
+      expect(screen.getByTestId('mock-select-root')).toBeInTheDocument()
+      expect(screen.getByTestId('safe-selector-trigger-content')).toBeInTheDocument()
+      // Old "not available" error is gone — main content surfaces the load failure instead.
       expect(screen.queryByText('This Safe is not available on the selected network')).not.toBeInTheDocument()
     })
 
-    it('shows the skeleton (not the no-match error) when items are empty', () => {
-      const { container } = render(<SafeSelectorDropdown items={[]} selectedItemId="1:0xa" isLoading={false} />)
+    it('keeps the fallback trigger openable even when items has a single entry', () => {
+      const itemA = createItem()
+      render(
+        <SafeSelectorDropdown
+          items={[itemA]}
+          selectedItemId="999:0xnotfound"
+          isLoading={false}
+          onItemSelect={jest.fn()}
+        />,
+      )
 
-      expect(screen.queryByText('This Safe is not available on the selected network')).not.toBeInTheDocument()
-      // Skeleton renders a placeholder block; trigger content is not rendered yet
+      const selectRoot = screen.getByTestId('mock-select-root')
+      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('false')
+    })
+
+    it('looks up the chain shortName from chain configs for the fallback trigger', () => {
+      const itemA = createItem()
+      render(
+        <SafeSelectorDropdown
+          items={[itemA]}
+          selectedItemId="137:0xe7255eE8D8A47ee01864241e7475C5c7A9792401"
+          onItemSelect={jest.fn()}
+        />,
+      )
+
+      // Fallback chain entry must pick up shortName (`matic`) from chain configs,
+      // so the trigger renders `matic:0x...` instead of bare `0x...`.
+      expect(screen.getByTestId('safe-selector-trigger-content').getAttribute('data-shortname')).toBe('matic')
+    })
+
+    it('forwards the user pick even from the fallback trigger', async () => {
+      const user = userEvent.setup()
+      const onItemSelect = jest.fn()
+      const itemA = createItem()
+      const itemB = createItem({
+        id: '2:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        name: 'Safe B',
+        address: '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        chains: [{ chainId: '2', chainName: 'Another', chainLogoUri: null, shortName: 'oeth' }],
+      })
+
+      render(
+        <SafeSelectorDropdown items={[itemA, itemB]} selectedItemId="999:0xnotfound" onItemSelect={onItemSelect} />,
+      )
+
+      await user.click(screen.getByTestId('simulate-user-pick-new'))
+
+      expect(onItemSelect).toHaveBeenCalledTimes(1)
+      expect(onItemSelect).toHaveBeenCalledWith(itemB.id)
+    })
+
+    it('shows the skeleton while items are still loading and selectedItemId is empty', () => {
+      const itemA = createItem()
+      render(<SafeSelectorDropdown items={[itemA]} selectedItemId="" isLoading={true} />)
+
+      // Empty selectedItemId can't build a fallback item → skeleton
+      expect(screen.queryByTestId('safe-selector-trigger-content')).not.toBeInTheDocument()
+    })
+
+    it('shows the load error when items are empty and isError is true', () => {
+      const onRetry = jest.fn()
+      render(
+        <SafeSelectorDropdown items={[]} selectedItemId="1:0xa" isLoading={false} isError={true} onRetry={onRetry} />,
+      )
+
+      expect(screen.getByText('Failed to load Safe data')).toBeInTheDocument()
+    })
+
+    it('shows the skeleton when items are empty and not yet loaded', () => {
+      const { container } = render(<SafeSelectorDropdown items={[]} selectedItemId="" isLoading={false} />)
+
       expect(screen.queryByTestId('safe-selector-trigger-content')).not.toBeInTheDocument()
       expect(container.firstChild).toBeTruthy()
     })
