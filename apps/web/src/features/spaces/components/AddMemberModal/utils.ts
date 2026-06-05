@@ -15,7 +15,7 @@ export type InvitePayload = EmailInviteUserDto | WalletInviteUserDto
 export const EMAIL_MAX_LENGTH = 255
 
 const SELF_INVITE_ERROR = "You can't invite yourself."
-const INVALID_IDENTIFIER_ERROR = 'Enter a valid email, wallet address, or ENS.'
+export const INVALID_IDENTIFIER_ERROR = 'Enter a valid email, wallet address, or ENS.'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 

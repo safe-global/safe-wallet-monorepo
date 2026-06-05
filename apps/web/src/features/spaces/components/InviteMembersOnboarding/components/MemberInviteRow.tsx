@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Controller } from 'react-hook-form'
 import type { InviteMembersFormValues } from '../hooks/useInviteForm'
-import { EMAIL_MAX_LENGTH, isEmailAddress } from '../../AddMemberModal/utils'
+import { EMAIL_MAX_LENGTH, INVALID_IDENTIFIER_ERROR, isEmailAddress } from '../../AddMemberModal/utils'
 
 const ROLE_LABELS: Record<MemberRole, string> = {
   [MemberRole.ADMIN]: 'Admin',
@@ -22,11 +22,17 @@ const ROLE_LABELS: Record<MemberRole, string> = {
 
 const ADDRESS_RE = /^0x[0-9a-f]{40}$/i
 const ERROR_DEBOUNCE_MS = 500
+const INVALID_ADDRESS_ERROR = 'Invalid address'
 
 type AutoChecksumCallback = (checksummed: string) => void
 
 function validateEthereumAddress(value: string, onAutoChecksum: AutoChecksumCallback): string | undefined {
-  if (!ADDRESS_RE.test(value)) return 'Invalid address'
+  // A "0x" prefix signals an address attempt — show the address-specific error rather than the generic one
+  const looksLikeAddress = value.toLowerCase().startsWith('0x')
+
+  if (!ADDRESS_RE.test(value)) {
+    return looksLikeAddress ? INVALID_ADDRESS_ERROR : INVALID_IDENTIFIER_ERROR
+  }
 
   const hex = value.slice(2)
   const hasNoChecksumIntent = hex === hex.toLowerCase() || hex === hex.toUpperCase()
@@ -37,7 +43,7 @@ function validateEthereumAddress(value: string, onAutoChecksum: AutoChecksumCall
     return undefined
   }
 
-  if (!isChecksummedAddress(value)) return 'Invalid address checksum'
+  if (!isChecksummedAddress(value)) return INVALID_ADDRESS_ERROR
 
   return undefined
 }
