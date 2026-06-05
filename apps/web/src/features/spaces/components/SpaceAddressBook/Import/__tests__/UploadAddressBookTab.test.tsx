@@ -84,6 +84,18 @@ describe('UploadAddressBookTab', () => {
     expect(screen.getByRole('button', { name: /import/i })).toBeDisabled()
   })
 
+  it('shows a friendly error and keeps import disabled when parsing throws', async () => {
+    mockParse.mockImplementation(() => {
+      throw new Error('boom')
+    })
+
+    render(<UploadAddressBookTab {...baseProps} />)
+    uploadFile()
+
+    await waitFor(() => expect(screen.getByText('Could not read file')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: /import/i })).toBeDisabled()
+  })
+
   it('rejects an oversized file with a size error and keeps import disabled', async () => {
     render(<UploadAddressBookTab {...baseProps} />)
     uploadFile('address,name,chainId', { size: 2_000_000 })

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { DialogFooter } from '@/components/ui/dialog'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/utils/cn'
+import { AB_FILE_SIZE_LIMIT } from '@/components/address-book/ImportDialog/validation'
 import type { AddressBookItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 import { parseImportedAddressBook } from './parseImportedAddressBook'
@@ -14,9 +15,6 @@ const ACCEPTED_FILE_TYPES = {
   'text/csv': ['.csv'],
   'application/json': ['.json'],
 }
-
-// Matches the local address book CSV import guard so large files aren't read/parsed on the main thread.
-const MAX_FILE_SIZE = 1_000_000
 
 const getRejectionError = (rejection?: FileRejection): string => {
   const code = rejection?.errors[0]?.code
@@ -71,9 +69,15 @@ const UploadAddressBookTab = ({
           return
         }
 
-        const result = parseImportedAddressBook(file.name, content, supportedChainIds)
-        setItems(result.items)
-        setError(result.error)
+        try {
+          const result = parseImportedAddressBook(file.name, content, supportedChainIds)
+          setItems(result.items)
+          setError(result.error)
+        } catch {
+          // Malformed input can make the parser throw; surface a friendly error instead of failing silently.
+          setItems([])
+          setError('Could not read file')
+        }
       }
       reader.onerror = () => setError('Could not read file')
       reader.readAsText(file)
@@ -85,7 +89,7 @@ const UploadAddressBookTab = ({
     accept: ACCEPTED_FILE_TYPES,
     maxFiles: 1,
     multiple: false,
-    maxSize: MAX_FILE_SIZE,
+    maxSize: AB_FILE_SIZE_LIMIT,
     onDrop,
   })
 

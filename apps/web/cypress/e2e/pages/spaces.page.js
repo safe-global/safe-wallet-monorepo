@@ -633,6 +633,7 @@ export function switchToUploadFileTab() {
 }
 
 export function uploadAddressBookFile(fixturePath) {
+  // force: true because react-dropzone hides the native file input (display: none), which Cypress treats as non-interactable.
   cy.get(importFileInput).selectFile(`cypress/fixtures/${fixturePath}`, { force: true })
 }
 

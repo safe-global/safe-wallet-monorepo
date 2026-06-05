@@ -86,18 +86,42 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   const supportedChainIds = useMemo(() => configs.map((chain) => chain.chainId), [configs])
   const defaultTab = allContactItems.length > 0 ? 'local' : 'upload'
 
-  const runImport = async (items: AddressBookItem[]) => {
-    setError(undefined)
+  const runImport = useCallback(
+    async (items: AddressBookItem[]) => {
+      setError(undefined)
 
-    try {
-      setIsSubmitting(true)
+      try {
+        setIsSubmitting(true)
 
-      const result = await upsertAddressBook({
-        spaceId: Number(spaceId),
-        upsertAddressBookItemsDto: { items },
-      })
+        const result = await upsertAddressBook({
+          spaceId: Number(spaceId),
+          upsertAddressBookItemsDto: { items },
+        })
 
-      if (result.error) {
+        if (result.error) {
+          setError('Something went wrong. Please try again.')
+          dispatch(
+            showNotification({
+              message: 'Failed to import contacts. Please try again.',
+              variant: 'error',
+              groupKey: 'import-contacts-error',
+            }),
+          )
+          return
+        }
+
+        dispatch(
+          showNotification({
+            message: `Imported contact(s)`,
+            variant: 'success',
+            groupKey: 'import-contacts-success',
+          }),
+        )
+
+        trackEvent(SPACE_EVENTS.IMPORT_ADDRESS_BOOK_SUBMIT)
+
+        setIsSuccess(true)
+      } catch (e) {
         setError('Something went wrong. Please try again.')
         dispatch(
           showNotification({
@@ -106,33 +130,12 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
             groupKey: 'import-contacts-error',
           }),
         )
-        return
+      } finally {
+        setIsSubmitting(false)
       }
-
-      dispatch(
-        showNotification({
-          message: `Imported contact(s)`,
-          variant: 'success',
-          groupKey: 'import-contacts-success',
-        }),
-      )
-
-      trackEvent(SPACE_EVENTS.IMPORT_ADDRESS_BOOK_SUBMIT)
-
-      setIsSuccess(true)
-    } catch (e) {
-      setError('Something went wrong. Please try again.')
-      dispatch(
-        showNotification({
-          message: 'Failed to import contacts. Please try again.',
-          variant: 'error',
-          groupKey: 'import-contacts-error',
-        }),
-      )
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+    },
+    [upsertAddressBook, spaceId, dispatch],
+  )
 
   const onSubmit = handleSubmit((data) => runImport(createContactItems(data)))
 
@@ -149,7 +152,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
           <DialogTitle className="font-bold text-xl">Import address book</DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue={defaultTab} className="gap-0">
+        <Tabs defaultValue={defaultTab} onValueChange={() => setError(undefined)} className="gap-0">
           <TabsList className="mx-4 mt-4">
             <TabsTrigger value="local">Local contacts</TabsTrigger>
             <TabsTrigger value="upload" data-testid="upload-file-tab">

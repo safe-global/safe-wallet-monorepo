@@ -157,6 +157,29 @@ describe('ImportAddressBookDialog', () => {
     expect(screen.getByRole('button', { name: /Import contacts \(1\)/i })).not.toBeDisabled()
   })
 
+  it('clears the import error when switching tabs', async () => {
+    upsertionSpyFn.mockResolvedValue({ error: { status: 500 } })
+
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x123': 'Alice' },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    await userEvent.click(screen.getByText(/Alice/i))
+    await userEvent.click(screen.getByText(/Import contacts \(1\)/i))
+
+    await waitFor(() => {
+      expect(screen.getByText(/Something went wrong\. Please try again\./i)).toBeInTheDocument()
+    })
+
+    await userEvent.click(screen.getByRole('tab', { name: /upload file/i }))
+
+    await waitFor(() => {
+      expect(screen.queryByText(/Something went wrong\. Please try again\./i)).not.toBeInTheDocument()
+    })
+  })
+
   it('filters the contact list based on the search input', async () => {
     jest.useFakeTimers()
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })

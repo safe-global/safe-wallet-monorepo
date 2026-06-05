@@ -7,7 +7,8 @@ const SPACE_ID = '1'
 const csvFixture = 'spaces/import_address_book.csv'
 const jsonFixture = 'spaces/import_address_book.json'
 const unsupportedFixture = 'spaces/import_address_book_unsupported.txt'
-const unsupportedFileError = 'Unsupported file type. Please upload a CSV or JSON file.'
+// Partial match keeps the assertion decoupled from the exact wording of the source copy.
+const unsupportedFileError = 'Unsupported file type'
 
 // Mocks the auth + spaces endpoints so the address book page renders for an admin
 // without a real backend sign-in. Mirrors the setup used by the visual spaces test.
@@ -43,12 +44,11 @@ describe('Spaces address book file import tests', () => {
     setupSpacesAuth()
     cy.intercept('PUT', constants.spacesAddressBookEndpoint, { statusCode: 200, body: {} }).as('importAddressBook')
     space.visitSpaceAddressBook(SPACE_ID)
+    space.openImportAddressBookDialog()
+    space.switchToUploadFileTab()
   })
 
   it('Verify that a CSV file can be uploaded and imported into the space address book', () => {
-    space.openImportAddressBookDialog()
-    space.switchToUploadFileTab()
-
     space.uploadAddressBookFile(csvFixture)
 
     space.verifyUploadSummary(2, 1)
@@ -60,9 +60,6 @@ describe('Spaces address book file import tests', () => {
   })
 
   it('Verify that a JSON file exported from the app can be uploaded and imported', () => {
-    space.openImportAddressBookDialog()
-    space.switchToUploadFileTab()
-
     space.uploadAddressBookFile(jsonFixture)
 
     space.verifyUploadSummary(1, 1)
@@ -74,9 +71,6 @@ describe('Spaces address book file import tests', () => {
   })
 
   it('Verify that uploading an unsupported file type shows an error and keeps import disabled', () => {
-    space.openImportAddressBookDialog()
-    space.switchToUploadFileTab()
-
     space.uploadAddressBookFile(unsupportedFixture)
 
     space.verifyImportError(unsupportedFileError)
