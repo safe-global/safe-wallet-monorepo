@@ -57,6 +57,7 @@ const rootReducer = combineReducers({
   [slices.swapParamsSlice.name]: slices.swapParamsSlice.reducer,
   [slices.visitedSafesSlice.name]: slices.visitedSafesSlice.reducer,
   [slices.orderByPreferenceSlice.name]: slices.orderByPreferenceSlice.reducer,
+  [slices.safeOrderSlice.name]: slices.safeOrderSlice.reducer,
   [slices.hnStateSlice.name]: slices.hnStateSlice.reducer,
   [slices.hnQueueAssessmentsSlice.name]: slices.hnQueueAssessmentsSlice.reducer,
   [slices.calendlySlice.name]: slices.calendlySlice.reducer,
@@ -86,6 +87,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.swapOrderSlice.name,
   slices.visitedSafesSlice.name,
   slices.orderByPreferenceSlice.name,
+  slices.safeOrderSlice.name,
   slices.authSlice.name,
   slices.hnStateSlice.name,
 ]

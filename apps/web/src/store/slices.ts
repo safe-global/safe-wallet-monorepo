@@ -35,6 +35,7 @@ export * from './api/gateway'
 export * from './api/gateway/safeOverviews'
 export * from './visitedSafesSlice'
 export * from './orderByPreferenceSlice'
+export * from './safeOrderSlice'
 export * from './authSlice'
 export * from '@/features/hypernative/store'
 export {

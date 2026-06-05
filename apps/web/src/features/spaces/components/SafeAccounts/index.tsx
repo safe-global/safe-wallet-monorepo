@@ -2,14 +2,17 @@ import AddAccountsChooser from '../AddAccountsChooser'
 import EmptySafeAccounts from './EmptySafeAccounts'
 import { Stack } from '@mui/material'
 import { Typography } from '@/components/ui/typography'
-import { useMemo } from 'react'
-import { useAppSelector } from '@/store'
+import { useCallback, useMemo } from 'react'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { selectSpaceSafeOrder, setSpaceSafeOrder } from '@/store/safeOrderSlice'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import {
   type AllSafeItems,
   type SafeItem,
   _getMultiChainAccounts,
   _getSingleChainAccounts,
+  applyCustomOrder,
   getComparator,
   useSafeItemBuilder,
 } from '@/hooks/safes'
@@ -20,7 +23,7 @@ import { TriangleAlert, RotateCw } from 'lucide-react'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import AccountsSafesList from './AccountsSafesList'
+import SortableAccountsList from './SortableAccountsList'
 
 const _groupAndSort = (
   items: SafeItem[],
@@ -34,10 +37,13 @@ const _groupAndSort = (
 const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
   const isInvited = useIsInvited()
+  const dispatch = useAppDispatch()
+  const spaceId = useCurrentSpaceId()
 
   // Use same organization logic as onboarding
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)
+  const customOrder = useAppSelector((state) => selectSpaceSafeOrder(state, spaceId))
   const { buildSafeItem } = useSafeItemBuilder()
 
   const spaceSafeItems = useMemo(() => {
@@ -52,10 +58,19 @@ const SpaceSafeAccounts = () => {
     [spaceSafeItems],
   )
 
-  // Group and sort
-  const displaySafes = useMemo<AllSafeItems>(
-    () => _groupAndSort(spaceSafeItems, sortComparator),
-    [spaceSafeItems, sortComparator],
+  // Group and sort. A saved manual order (per user, per space) takes precedence over the
+  // default comparator; new/unknown accounts fall back to the comparator and are appended.
+  const displaySafes = useMemo<AllSafeItems>(() => {
+    const grouped = _groupAndSort(spaceSafeItems, sortComparator)
+    return customOrder?.length ? applyCustomOrder(grouped, customOrder) : grouped
+  }, [spaceSafeItems, sortComparator, customOrder])
+
+  const handleReorder = useCallback(
+    (orderedKeys: string[]) => {
+      if (!spaceId) return
+      dispatch(setSpaceSafeOrder({ spaceId, order: orderedKeys }))
+    },
+    [dispatch, spaceId],
   )
 
   const hasResults = displaySafes.length > 0
@@ -95,7 +110,7 @@ const SpaceSafeAccounts = () => {
       ) : !hasResults && allSafes && allSafes.length === 0 ? (
         <EmptySafeAccounts />
       ) : (
-        <AccountsSafesList safes={displaySafes} similarAddresses={similarAddresses} />
+        <SortableAccountsList safes={displaySafes} similarAddresses={similarAddresses} onReorder={handleReorder} />
       )}
     </>
   )

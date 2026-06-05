@@ -24,6 +24,7 @@ export { useGetHref } from './useGetHref'
 
 // Comparators/utilities
 export { getComparator, nameComparator, lastVisitedComparator } from './comparators'
+export { getSafeItemKey, applyCustomOrder } from './safeOrder'
 
 // Types
 export type { SafeItem, SafeItems } from './useAllSafes'

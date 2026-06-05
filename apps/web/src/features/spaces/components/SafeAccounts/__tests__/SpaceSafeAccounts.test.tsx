@@ -39,10 +39,21 @@ jest.mock('@/hooks/safes', () => ({
   }),
   _getMultiChainAccounts: () => [],
   _getSingleChainAccounts: () => [],
+  applyCustomOrder: (items: unknown) => items,
 }))
 
 jest.mock('@/store', () => ({
   useAppSelector: () => ({}),
+  useAppDispatch: () => jest.fn(),
+}))
+
+jest.mock('@/store/safeOrderSlice', () => ({
+  selectSpaceSafeOrder: jest.fn(),
+  setSpaceSafeOrder: jest.fn(),
+}))
+
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+  useCurrentSpaceId: () => null,
 }))
 
 jest.mock('@/store/orderByPreferenceSlice', () => ({ selectOrderByPreference: jest.fn() }))
@@ -53,7 +64,7 @@ jest.mock('@/store/slices', () => ({
   selectUndeployedSafes: jest.fn(),
 }))
 
-jest.mock('../AccountsSafesList', () => ({
+jest.mock('../SortableAccountsList', () => ({
   __esModule: true,
   default: () => null,
 }))
