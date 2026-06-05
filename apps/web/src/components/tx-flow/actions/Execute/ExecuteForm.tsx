@@ -1,19 +1,10 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useState, useEffect } from 'react'
-import {
-  Box,
-  Button,
-  CardActions,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Tooltip,
-} from '@mui/material'
+import { Box, Button, CardActions, DialogActions, DialogContent, Divider, Tooltip } from '@mui/material'
 import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import ModalDialog from '@/components/common/ModalDialog'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -315,34 +306,33 @@ export const ExecuteForm = ({
           </ErrorMessage>
         )}
 
-        <Dialog
+        <ModalDialog
           open={relaySimError?.code === 'INDETERMINATE_SIMULATION'}
           onClose={() => setRelaySimError(undefined)}
+          dialogTitle="Confirm execution"
+          chainId={currentChain?.chainId}
           data-testid="relay-indeterminate-dialog"
         >
-          <DialogTitle sx={{ fontWeight: 700 }}>Couldn&apos;t verify this transaction</DialogTitle>
-
-          <DialogContent>
-            We couldn&apos;t verify this transaction with a pre-execution simulation (the simulation service is
-            temporarily unavailable). You can run the simulation yourself from the Safe Shield panel before deciding or
-            Execute Anyway.
+          <DialogContent sx={{ mt: 1 }}>
+            We couldn&apos;t review this transaction. If you execute and it fails, you&apos;ll still pay the network
+            fee. You can run the simulation yourself from the Safe Shield panel before deciding.
           </DialogContent>
 
-          <DialogActions sx={{ p: 3, justifyContent: 'space-between' }}>
-            <Button size="small" variant="text" onClick={() => setRelaySimError(undefined)}>
-              Go back
+          <DialogActions>
+            <Button data-testid="relay-go-back-btn" onClick={() => setRelaySimError(undefined)}>
+              Back
             </Button>
             <Button
               data-testid="relay-accept-unverified-btn"
               variant="contained"
-              size="small"
+              disableElevation
               disabled={isSubmitLoading}
               onClick={() => submitTx(true)}
             >
               Execute anyway
             </Button>
           </DialogActions>
-        </Dialog>
+        </ModalDialog>
 
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 

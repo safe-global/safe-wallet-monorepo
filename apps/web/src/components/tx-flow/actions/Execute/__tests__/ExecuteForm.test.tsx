@@ -290,7 +290,7 @@ describe('ExecuteForm', () => {
     fireEvent.click(getByText('Execute'))
 
     await waitFor(() => {
-      expect(getByText(/pre-execution simulation/i)).toBeInTheDocument()
+      expect(getByText(/couldn't review this transaction/i)).toBeInTheDocument()
     })
 
     // First attempt didn't opt into the unverified relay.
