@@ -6,7 +6,7 @@ import { router } from 'expo-router'
 import { QrCamera } from '@/src/components/Camera'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { useWalletConnectScan } from '../hooks/useWalletConnectScan'
+import { useWalletConnectScan, type ScanStatus } from '../hooks/useWalletConnectScan'
 
 const GRANTED_FOOTER = 'Scan an Ethereum wallet address or connect to a desktop app'
 
@@ -60,6 +60,29 @@ function ErrorOverlay({ message, onTryAgain }: { message: string; onTryAgain: ()
   )
 }
 
+function CenterOverlay({
+  status,
+  errorMessage,
+  onTryAgain,
+}: {
+  status: ScanStatus
+  errorMessage: string
+  onTryAgain: () => void
+}) {
+  switch (status) {
+    case 'connecting':
+      return <ConnectingOverlay />
+    case 'error':
+      return <ErrorOverlay message={errorMessage} onTryAgain={onTryAgain} />
+    default:
+      return (
+        <Text color="$color" fontWeight="600">
+          Scan a QR code
+        </Text>
+      )
+  }
+}
+
 export function WalletConnectScanContainer() {
   const {
     status,
@@ -78,15 +101,7 @@ export function WalletConnectScanContainer() {
   // Overlay only owns the lens once permission is granted; otherwise QrCamera shows its
   // own permission CTA + heading.
   const centerOverlay = granted ? (
-    status === 'connecting' ? (
-      <ConnectingOverlay />
-    ) : status === 'error' ? (
-      <ErrorOverlay message={errorMessage} onTryAgain={onTryAgain} />
-    ) : (
-      <Text color="$color" fontWeight="600">
-        Scan a QR code
-      </Text>
-    )
+    <CenterOverlay status={status} errorMessage={errorMessage} onTryAgain={onTryAgain} />
   ) : undefined
 
   return (
