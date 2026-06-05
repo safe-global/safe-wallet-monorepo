@@ -16,12 +16,14 @@ export { initialBalancesState, createPortfolioBalances } from '@safe-global/util
 
 export const useTokenListSetting = (): boolean | undefined => {
   const chain = useCurrentChain()
+  const hasPortfolioFeature = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT)
   const settings = useAppSelector(selectSettings)
 
   return useMemo(() => {
+    if (hasPortfolioFeature === false) return false
     if (settings.tokenList === TOKEN_LISTS.ALL) return false
     return chain ? hasFeature(chain, FEATURES.DEFAULT_TOKENLIST) : undefined
-  }, [chain, settings.tokenList])
+  }, [chain, hasPortfolioFeature, settings.tokenList])
 }
 
 /**

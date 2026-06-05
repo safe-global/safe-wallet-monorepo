@@ -86,6 +86,11 @@
   --onboard-account-select-modal-z-index: 1301;
 }
 
+[data-owned-safes-modal],
+[data-slot='dialog-overlay']:has(+ [data-owned-safes-modal]) {
+  z-index: 1200;
+}
+
 #walletconnect-qrcode-modal {
   padding: 20px !important;
 }
@@ -103,6 +108,7 @@
 #kv_sdk_container + .ReactModalPortal > div {
   z-index: 1301 !important;
 }
+
 #kv_sdk_container + .ReactModalPortal .ReactModal__Content {
   padding: 0 !important;
 }

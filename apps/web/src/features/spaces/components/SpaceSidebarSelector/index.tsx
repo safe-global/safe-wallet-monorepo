@@ -4,7 +4,7 @@ import { useState } from 'react'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CheckIcon from '@mui/icons-material/Check'
 import SpaceCard from '../SpaceCard'
-import InitialsAvatar from '../InitialsAvatar'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 
 import css from './styles.module.css'
 import { useRouter } from 'next/router'

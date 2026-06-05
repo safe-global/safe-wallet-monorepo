@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import AddAccounts from '../index'
 
 jest.mock('../../Sidebar/constants', () => ({
@@ -57,15 +57,19 @@ jest.mock('@/hooks/safes', () => {
   }
 })
 
+let mockIsAdmin = true
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
-  useIsAdmin: () => true,
+  useIsAdmin: () => mockIsAdmin,
   useSpaceSafes: () => ({ allSafes: [] }),
 }))
 
+const mockAddSafesToSpace = jest.fn()
+const mockRemoveSafesFromSpace = jest.fn()
+
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
-  useSpaceSafesCreateV1Mutation: () => [jest.fn(), {}],
-  useSpaceSafesDeleteV1Mutation: () => [jest.fn(), {}],
+  useSpaceSafesCreateV1Mutation: () => [mockAddSafesToSpace, {}],
+  useSpaceSafesDeleteV1Mutation: () => [mockRemoveSafesFromSpace, {}],
 }))
 
 const mockConnectWallet = jest.fn()
@@ -79,6 +83,7 @@ describe('AddAccounts — wallet connection state', () => {
     jest.clearAllMocks()
     mockWalletValue = { address: '0xWallet' }
     mockAllOwned = {}
+    mockIsAdmin = true
   })
 
   it('does not render ConnectWalletPrompt when a wallet is connected', () => {
@@ -110,5 +115,55 @@ describe('AddAccounts — wallet connection state', () => {
     render(<AddAccounts externalOpen onExternalClose={() => {}} />)
 
     expect(screen.queryByText('No safes on your list')).not.toBeInTheDocument()
+  })
+})
+
+describe('AddAccounts — admin guard on submit', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockWalletValue = { address: '0xWallet' }
+    mockAllOwned = {}
+    mockIsAdmin = true
+  })
+
+  it('blocks submission and shows an error when the user is not an admin', async () => {
+    mockIsAdmin = false
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />)
+
+    const form = screen.getByTestId('add-accounts-button').closest('form')
+    expect(form).not.toBeNull()
+    fireEvent.submit(form!)
+
+    expect(await screen.findByText('Only admins can add or remove Safe accounts in this workspace')).toBeInTheDocument()
+    expect(mockAddSafesToSpace).not.toHaveBeenCalled()
+    expect(mockRemoveSafesFromSpace).not.toHaveBeenCalled()
+  })
+
+  it('disables the trigger button when the user is not an admin', () => {
+    mockIsAdmin = false
+    render(<AddAccounts />)
+
+    expect(screen.getByTestId('add-space-account-button')).toBeDisabled()
+  })
+
+  it('enables the trigger button when the user is an admin', () => {
+    mockIsAdmin = true
+    render(<AddAccounts />)
+
+    expect(screen.getByTestId('add-space-account-button')).not.toBeDisabled()
+  })
+
+  it('does not show the admin error and does not call mutations when an admin submits an empty form', async () => {
+    mockIsAdmin = true
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />)
+
+    const form = screen.getByTestId('add-accounts-button').closest('form')
+    expect(form).not.toBeNull()
+    fireEvent.submit(form!)
+
+    // Admin path: no admin-block error; nothing to add/remove → no mutations either
+    expect(screen.queryByText('Only admins can add or remove Safe accounts in this workspace')).not.toBeInTheDocument()
+    expect(mockAddSafesToSpace).not.toHaveBeenCalled()
+    expect(mockRemoveSafesFromSpace).not.toHaveBeenCalled()
   })
 })

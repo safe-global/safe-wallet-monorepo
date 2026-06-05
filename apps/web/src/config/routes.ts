@@ -4,7 +4,6 @@ export const AppRoutes = {
   wc: '/wc',
   userSettings: '/user-settings',
   terms: '/terms',
-  safeLabsTerms: '/safe-labs-terms',
   swap: '/swap',
   stake: '/stake',
   privacy: '/privacy',
@@ -84,6 +83,7 @@ export const AppRoutes = {
     createSpace: '/welcome/create-space',
     selectSafes: '/welcome/select-safes',
     inviteMembers: '/welcome/invite-members',
+    survey: '/welcome/survey',
   },
 }
 

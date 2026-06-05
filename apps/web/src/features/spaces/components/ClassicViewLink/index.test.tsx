@@ -14,6 +14,14 @@ describe('ClassicViewLink', () => {
     disableClassicView()
   })
 
+  it('renders the "Use the old UI" copy with a trailing arrow icon', () => {
+    render(<ClassicViewLink />, { routerProps: { query: {} } })
+
+    const link = screen.getByTestId('classic-view-link')
+    expect(link).toHaveTextContent('Use the old UI')
+    expect(link.querySelector('svg')).toBeInTheDocument()
+  })
+
   it('enables classic view and redirects to /welcome/accounts when no ?next= is present', () => {
     const replace = jest.fn()
     render(<ClassicViewLink />, { routerProps: { replace, query: {} } })

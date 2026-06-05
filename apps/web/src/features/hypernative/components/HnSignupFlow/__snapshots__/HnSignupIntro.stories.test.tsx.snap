@@ -29,11 +29,16 @@ exports[`./HnSignupIntro.stories Default 1`] = `
             >
               powered by
             </p>
-            <img
-              alt="Hypernative"
-              class="logo"
-              src="/images/hypernative/hypernative-logo.svg"
-            />
+            <div
+              style="display: inline-flex;"
+            >
+              <mock-icon
+                aria-hidden=""
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1m5ygj6-MuiSvgIcon-root"
+                fill="#636669"
+                focusable="false"
+              />
+            </div>
           </div>
           <p
             class="MuiTypography-root MuiTypography-body2 subtitle mui-style-17vdyq3-MuiTypography-root"

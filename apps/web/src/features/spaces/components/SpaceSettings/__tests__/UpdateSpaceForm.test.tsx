@@ -3,8 +3,8 @@ import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
 import UpdateSpaceForm from '../UpdateSpaceForm'
 
-// Import the real type
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { spaceBuilder } from '@/tests/builders/space'
 
 const mockUnwrap = jest.fn()
 const mockUpdateSpace = jest.fn(() => ({ unwrap: mockUnwrap }))
@@ -28,12 +28,7 @@ const renderWithStore = (ui: React.ReactElement) => {
 }
 
 describe('UpdateSpaceForm', () => {
-  const mockSpace: GetSpaceResponse = {
-    id: 123,
-    name: 'Test Space',
-    members: [],
-    safeCount: 0,
-  }
+  const mockSpace = spaceBuilder().with({ id: 123, name: 'Test Space', members: [] }).build()
 
   // Helper functions to reduce code duplication
   const setupForm = (space: GetSpaceResponse | undefined, isAdmin: boolean) => {

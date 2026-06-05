@@ -400,6 +400,23 @@ describe('useFlowActivationGuard', () => {
         redirectTo: AppRoutes.welcome.createSpace,
       })
     })
+
+    // Regression: after a logout the persisted authSlice still says
+    // "signed in" until reconcileAuth resolves, so the guard runs with
+    // isSiweAuthenticated=true while the cookies have already been cleared.
+    // fetchSpaces then resolves with a 401/403 error and data=undefined —
+    // the old code treated that as "no spaces" and bounced the user into
+    // /welcome/create-space. The guard must instead treat transient/auth
+    // errors as "uncertain" and let the page render.
+    it('should NOT redirect to create-space when the spaces fetch errors with 403 (cookies cleared post-logout)', async () => {
+      setupMocks({ pathname: AppRoutes.spaces.index, isSpaceRoute: true })
+      mockFetchSpaces.mockResolvedValueOnce({ data: undefined, error: { status: 403, data: 'Forbidden' } })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult.success).not.toBe(false)
+    })
   })
 
   // -----------------------------------------------------------------------
@@ -548,7 +565,7 @@ describe('useFlowActivationGuard', () => {
   })
 
   // -----------------------------------------------------------------------
-  // Require-login gate (REQUIRE_LOGIN_DISABLED feature flag is OFF)
+  // Require-login gate (REQUIRE_LOGIN feature flag is ON)
   // -----------------------------------------------------------------------
 
   describe('require-login gate enabled', () => {
@@ -763,7 +780,7 @@ describe('useFlowActivationGuard', () => {
       expect(guardResult).toEqual({ success: true })
     })
 
-    it('does not add next= when the unauthenticated user is on `/` (bare index is pointless as next)', async () => {
+    it('does NOT redirect an unauthenticated user on `/` (index is the canonical login page, rendered inline)', async () => {
       setupMocks({
         pathname: '/',
         isAuthenticated: false,
@@ -773,7 +790,50 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.spaces })
+      expect(guardResult).toEqual({ success: true })
+    })
+
+    it('forwards an authenticated user with spaces from `/` to ?next=', async () => {
+      setupMocks({
+        pathname: AppRoutes.index,
+        query: { next: '/balances' },
+        isAuthenticated: true,
+        spaces: defaultSpaces,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: '/balances' })
+    })
+
+    it('lets an authenticated user with spaces stay on `/` when there is no next=', async () => {
+      setupMocks({
+        pathname: AppRoutes.index,
+        isAuthenticated: true,
+        spaces: defaultSpaces,
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
+    })
+
+    it('still redirects a signed-in user with no spaces from `/` to onboarding (no next= for the bare index)', async () => {
+      setupMocks({
+        pathname: AppRoutes.index,
+        isAuthenticated: true,
+        spaces: [],
+        isRequireLoginEnabled: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.createSpace })
     })
 
     it('ignores a protocol-relative next= value (treated as no next, so stays on login page)', async () => {

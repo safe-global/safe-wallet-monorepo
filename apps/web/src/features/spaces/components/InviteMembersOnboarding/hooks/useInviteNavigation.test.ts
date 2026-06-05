@@ -17,7 +17,11 @@ jest.mock('next/router', () => ({
 
 jest.mock('@/config/routes', () => ({
   AppRoutes: {
-    welcome: { createSpace: '/welcome/create-space', selectSafes: '/welcome/select-safes' },
+    welcome: {
+      createSpace: '/welcome/create-space',
+      selectSafes: '/welcome/select-safes',
+      survey: '/welcome/survey',
+    },
     spaces: { index: '/spaces' },
   },
 }))
@@ -29,12 +33,12 @@ describe('useInviteNavigation', () => {
     mockIsReady = true
   })
 
-  it('redirects to /spaces with spaceId when there is no next param', () => {
+  it('redirects to the survey step with spaceId when there is no next param', () => {
     const { result } = renderHook(() => useInviteNavigation())
 
     act(() => result.current.redirectToNextStep())
 
-    expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: '7' } })
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/welcome/survey', query: { spaceId: '7' } })
   })
 
   it('redirects to the sanitised next URL when present', () => {
@@ -46,13 +50,13 @@ describe('useInviteNavigation', () => {
     expect(mockPush).toHaveBeenCalledWith({ pathname: '/balances', query: { token: 'eth' } })
   })
 
-  it('rejects an unsafe next URL and falls back to /spaces', () => {
+  it('rejects an unsafe next URL and falls back to the survey step', () => {
     mockRouterQuery = { spaceId: '7', next: '//evil.com/x' }
     const { result } = renderHook(() => useInviteNavigation())
 
     act(() => result.current.redirectToNextStep())
 
-    expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: '7' } })
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/welcome/survey', query: { spaceId: '7' } })
   })
 
   it('preserves next when going back to select-safes', () => {

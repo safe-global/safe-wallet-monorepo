@@ -141,5 +141,9 @@ export function useThreatAnalysisHypernative({
     return [undefined, new Error('authToken is required'), false]
   }
 
-  return isMessageAnalysis ? messageAnalysisResult : [threatAnalysisResult, fetchError, isLoading]
+  if (isMessageAnalysis) {
+    return messageAnalysisResult
+  }
+
+  return [threatAnalysisResult, fetchError, isLoading]
 }

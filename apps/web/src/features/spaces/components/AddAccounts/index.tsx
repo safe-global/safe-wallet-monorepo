@@ -17,6 +17,7 @@ import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingS
 import ConnectWalletPrompt from '../SelectSafesOnboarding/components/ConnectWalletPrompt'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
+import { AdminOnlyWorkspaceTooltip } from '@/features/spaces/components/AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,
@@ -225,6 +226,11 @@ const AddAccounts = ({
   }, [isOpen, defaultSelectedSafes, reset])
 
   const onSubmit = handleSubmit(async (data) => {
+    if (!isAdmin) {
+      setError('Only admins can add or remove Safe accounts in this workspace')
+      return
+    }
+
     const safesToAdd = getSelectedSafes(data.selectedSafes, spaceSafes).map(([key]) => {
       const [chainId, address] = key.split(':')
       return { chainId, address }
@@ -345,28 +351,29 @@ const AddAccounts = ({
   return (
     <>
       {externalOpen === undefined && (
-        <Button
-          size="lg"
-          className="font-normal px-4 py-0"
-          variant={buttonVariant}
-          disabled={!isAdmin}
-          onClick={() => {
-            trackEvent(
-              { ...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED, label: spaceId },
-              { workspace_id: spaceId, entry_point: 'dashboard' },
-            )
-            setOpen(true)
-          }}
-          title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
-          data-testid="add-space-account-button"
-        >
-          <Plus
-            className={cn('size-4', {
-              'text-green-500': buttonVariant === 'default',
-            })}
-          />
-          {buttonLabel}
-        </Button>
+        <AdminOnlyWorkspaceTooltip isAdmin={isAdmin} side="bottom">
+          <Button
+            size="lg"
+            className="font-normal px-4 py-0"
+            variant={buttonVariant}
+            disabled={!isAdmin}
+            onClick={() => {
+              trackEvent(
+                { ...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED, label: spaceId },
+                { workspace_id: spaceId, entry_point: 'dashboard' },
+              )
+              setOpen(true)
+            }}
+            data-testid="add-space-account-button"
+          >
+            <Plus
+              className={cn('size-4', {
+                'text-green-500': buttonVariant === 'default',
+              })}
+            />
+            {buttonLabel}
+          </Button>
+        </AdminOnlyWorkspaceTooltip>
       )}
 
       <ModalDialog open={isOpen} fullScreen hideChainIndicator>

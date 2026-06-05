@@ -1,6 +1,7 @@
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { Typography } from '@/components/ui/typography'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import AddMemberModal from 'src/features/spaces/components/AddMemberModal'
 import { useState } from 'react'
 import MembersList from '../MembersList'
@@ -28,7 +29,7 @@ const SpaceMembers = () => {
             <ShadcnButton
               data-testid="add-member-button"
               size="lg"
-              className="font-bold px-4 py-0"
+              className="px-4 py-0"
               onClick={() => setOpenAddMembersModal(true)}
             >
               <Plus className="size-4 mr-1 text-green-500" />
@@ -37,24 +38,31 @@ const SpaceMembers = () => {
           </Track>
         )}
       </div>
-      <>
-        {invitedMembers.length > 0 && (
-          <>
-            <Typography variant="paragraph-bold" className="font-bold mb-4">
-              Pending invitations ({invitedMembers.length})
-            </Typography>
+
+      <Tabs defaultValue="members">
+        <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
+          <TabsTrigger value="members" className="cursor-pointer" data-testid="members-tab">
+            Members ({activeMembers.length})
+          </TabsTrigger>
+          <TabsTrigger value="pending" className="cursor-pointer" data-testid="pending-members-tab">
+            Pending ({invitedMembers.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="members">
+          <MembersList members={activeMembers} />
+        </TabsContent>
+
+        <TabsContent value="pending">
+          {invitedMembers.length === 0 ? (
+            <div className="bg-card rounded-lg border p-4">
+              <p className="text-muted-foreground text-sm">No pending members.</p>
+            </div>
+          ) : (
             <MembersList members={invitedMembers} />
-          </>
-        )}
-        {activeMembers.length > 0 && (
-          <>
-            <Typography variant="paragraph-bold" className="font-bold mt-2 mb-4">
-              All members ({activeMembers.length})
-            </Typography>
-            <MembersList members={activeMembers} />
-          </>
-        )}
-      </>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {openAddMembersModal && <AddMemberModal onClose={() => setOpenAddMembersModal(false)} />}
     </>

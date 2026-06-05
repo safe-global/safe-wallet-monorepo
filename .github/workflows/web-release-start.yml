@@ -44,8 +44,8 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
           git_config_global: true
-          git_committer_name: 'github-actions[bot]'
-          git_committer_email: 'github-actions[bot]@users.noreply.github.com'
+          git_committer_name: 'GH Signer Bot'
+          git_committer_email: 'gh-signer-bot@safe.global'
 
       - name: Determine base branch
         id: base
@@ -162,6 +162,8 @@ jobs:
 
       - name: Commit version bump
         run: |
+          git config user.name "GH Signer Bot"
+          git config user.email "gh-signer-bot@safe.global"
           git add apps/web/package.json
           git commit -S -m "${{ steps.version.outputs.version }}"
           git push origin release

@@ -82,6 +82,18 @@ describe('useCurrentMemberProfile', () => {
     expect(result.current.signerAddress).toBeUndefined()
   })
 
+  it('returns email when present on the session', () => {
+    const email = faker.internet.email().toLowerCase()
+    mockUseAuthGetMeV1Query.mockReturnValue({
+      data: { id: 'u1', authMethod: 'oidc', email },
+      isLoading: false,
+    })
+
+    const { result } = renderHook(() => useCurrentMemberProfile())
+
+    expect(result.current.email).toBe(email)
+  })
+
   it('returns undefined signerAddress when session is not loaded', () => {
     const { result } = renderHook(() => useCurrentMemberProfile())
 

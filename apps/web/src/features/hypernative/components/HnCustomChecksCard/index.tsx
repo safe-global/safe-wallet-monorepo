@@ -1,10 +1,15 @@
 import { useMemo, type ReactElement } from 'react'
-import type { ThreatAnalysisResults, Severity } from '@safe-global/utils/features/safe-shield/types'
+import { StatusGroup, type ThreatAnalysisResults, type Severity } from '@safe-global/utils/features/safe-shield/types'
+import { sliceTopBySeverity } from '@safe-global/utils/features/safe-shield/utils'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import { AnalysisGroupCardDisabled } from '@/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
 import { HnAnalysisGroupCard } from '../HnAnalysisGroupCard'
+import { HnViewMoreOnHypernativeRow } from '@/features/hypernative/components/HnViewMoreOnHypernativeRow'
+import { useSafeShieldAssessmentUrl } from '@/features/hypernative/hooks/useSafeShieldAssessmentUrl'
 import type { HypernativeAuthStatus } from '../../hooks/useHypernativeOAuth'
+
+const VISIBLE_CAP = 3
 
 export interface HnCustomChecksCardProps {
   threat: AsyncResult<ThreatAnalysisResults>
@@ -14,8 +19,9 @@ export interface HnCustomChecksCardProps {
 }
 
 /**
- * Displays an analysis group card for the Hypernative custom checks.
- * Shows the "by Hypernative" branding in the footer.
+ * Displays the Hypernative custom checks card. Shows the top 3 custom check
+ * results by severity. When more findings exist, renders an overflow row that
+ * deep-links to the full report on Hypernative.
  */
 export const HnCustomChecksCard = ({
   threat: [threatResults],
@@ -23,10 +29,18 @@ export const HnCustomChecksCard = ({
   highlightedSeverity,
   hypernativeAuth,
 }: HnCustomChecksCardProps): ReactElement | null => {
+  const assessmentUrl = useSafeShieldAssessmentUrl()
   const requiresHypernativeLogin =
     hypernativeAuth !== undefined && (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired)
 
-  const customChecksData = useMemo(() => ({ ['0x']: { CUSTOM_CHECKS: threatResults?.CUSTOM_CHECKS } }), [threatResults])
+  const { customChecksData, overflow } = useMemo(() => {
+    const all = threatResults?.CUSTOM_CHECKS ?? []
+    const { visible, overflow } = sliceTopBySeverity(all, VISIBLE_CAP)
+    return {
+      customChecksData: { '0x': { CUSTOM_CHECKS: visible } },
+      overflow,
+    }
+  }, [threatResults])
 
   if (requiresHypernativeLogin) {
     return (
@@ -40,6 +54,9 @@ export const HnCustomChecksCard = ({
     return null
   }
 
+  const overflowRow =
+    overflow > 0 ? <HnViewMoreOnHypernativeRow overflowCount={overflow} assessmentUrl={assessmentUrl} /> : undefined
+
   return (
     <HnAnalysisGroupCard
       data-testid="custom-checks-analysis-group-card"
@@ -47,6 +64,8 @@ export const HnCustomChecksCard = ({
       delay={delay}
       highlightedSeverity={highlightedSeverity}
       analyticsEvent={SAFE_SHIELD_EVENTS.CUSTOM_CHECKS_ANALYZED}
+      expandedGroups={[StatusGroup.CUSTOM_CHECKS]}
+      overflowRow={overflowRow}
     />
   )
 }

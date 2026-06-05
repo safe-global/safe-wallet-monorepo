@@ -4,7 +4,6 @@ import { debounce } from 'lodash'
 
 import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
@@ -136,54 +135,47 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <DialogContent
-        showCloseButton={false}
-        className="fixed inset-0 top-0 left-0 w-screen h-screen max-w-none translate-x-0 translate-y-0 rounded-none bg-[var(--color-border-background)] overflow-y-auto flex items-center justify-center"
-      >
-        <div className="w-full max-w-[600px] px-4">
-          <DialogHeader className="p-0 mb-6">
-            <DialogTitle className="text-3xl font-bold">Import address book</DialogTitle>
-          </DialogHeader>
+      <DialogContent className="p-0">
+        <DialogHeader className="border-b">
+          <DialogTitle className="font-bold text-xl">Import address book</DialogTitle>
+        </DialogHeader>
 
-          <Card className="border-0 p-0">
-            <FormProvider {...formMethods}>
-              <form onSubmit={onSubmit}>
-                <div className="relative px-4 pt-4 mb-2">
-                  <SearchIcon className="absolute left-6 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-                  <Input
-                    id="search-by-name"
-                    placeholder="Search"
-                    aria-label="Search contact list by name or address"
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
+        <FormProvider {...formMethods}>
+          <form onSubmit={onSubmit}>
+            <div className="relative px-4 pt-4 mb-2">
+              <SearchIcon className="absolute left-6 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+              <Input
+                id="search-by-name"
+                placeholder="Search"
+                aria-label="Search contact list by name or address"
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
 
-                <ContactsList contactItems={searchQuery ? filteredEntries : allContactItems} />
+            <ContactsList contactItems={searchQuery ? filteredEntries : allContactItems} />
 
-                {error && (
-                  <Alert variant="destructive" className="mt-2 mx-4">
-                    {error}
-                  </Alert>
-                )}
+            {error && (
+              <Alert variant="destructive" className="mt-2 mx-4">
+                {error}
+              </Alert>
+            )}
 
-                <DialogFooter className="flex-row justify-end gap-2 p-4">
-                  <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
-                    Cancel
+            <DialogFooter className="flex-row justify-end gap-2 p-4 border-t">
+              <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Tooltip>
+                <TooltipTrigger render={<div className="inline-flex" />}>
+                  <Button type="submit" disabled={selectedCount === 0 || isSubmitting || isSuccess}>
+                    {isSubmitting ? <Spinner className="size-4" /> : `Import contacts (${selectedCount})`}
                   </Button>
-                  <Tooltip>
-                    <TooltipTrigger render={<div className="inline-flex" />}>
-                      <Button type="submit" disabled={selectedCount === 0 || isSubmitting || isSuccess}>
-                        {isSubmitting ? <Spinner className="size-4" /> : `Import contacts (${selectedCount})`}
-                      </Button>
-                    </TooltipTrigger>
-                    {hasNoImportableContacts && <TooltipContent>You have no new contacts to import.</TooltipContent>}
-                  </Tooltip>
-                </DialogFooter>
-              </form>
-            </FormProvider>
-          </Card>
-        </div>
+                </TooltipTrigger>
+                {hasNoImportableContacts && <TooltipContent>You have no new contacts to import.</TooltipContent>}
+              </Tooltip>
+            </DialogFooter>
+          </form>
+        </FormProvider>
       </DialogContent>
     </Dialog>
   )

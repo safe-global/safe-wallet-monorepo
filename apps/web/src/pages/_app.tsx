@@ -16,7 +16,7 @@ import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
 import '@/styles/shadcn.css'
 import { BRAND_NAME } from '@/config/constants'
-import { makeStore, setStoreInstance, useHydrateStore, useInitStaticChains } from '@/store'
+import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
@@ -85,11 +85,11 @@ import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
+import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureException, initObservability } from '@/services/observability'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
-import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
 import { useOidcLoginCallback } from '@/features/oidc-auth'
@@ -121,13 +121,14 @@ const SafeScopedSubscriptions = (): null => {
   useTxTracking()
   useSafeMsgTracking()
   usePortfolioRefetchOnTxHistory()
+  useInvalidateOverviewsOnTx()
   useCounterfactualSafeSync()
   return null
 }
 
 const InitApp = (): ReactElement | null => {
   useHydrateStore(reduxStore)
-  useInitStaticChains()
+  useInitChains()
   useAdjustUrl()
   useGtm()
   useMixpanel()
@@ -137,7 +138,6 @@ const InitApp = (): ReactElement | null => {
   useInitWeb3()
   useBeamer()
   useVisitedSafes()
-  useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
   useOidcLoginCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
@@ -189,16 +189,6 @@ interface SafeWalletAppProps extends AppProps {
   emotionCache?: EmotionCache
 }
 
-const TermsGate = ({ children }: { children: ReactNode }) => {
-  const { shouldShowContent } = useSafeLabsTerms()
-
-  if (!shouldShowContent) {
-    return null
-  }
-
-  return <>{children}</>
-}
-
 const SafeWalletApp = ({
   Component,
   pageProps,
@@ -223,27 +213,25 @@ const SafeWalletApp = ({
 
             <LazyWeb3Init />
 
-            <TermsGate>
-              <PageLayout pathname={router.pathname}>
-                <Component {...pageProps} key={safeKey} />
-              </PageLayout>
+            <PageLayout pathname={router.pathname}>
+              <Component {...pageProps} key={safeKey} />
+            </PageLayout>
 
-              <CookieAndTermBanner />
+            <CookieAndTermBanner />
 
-              <TargetedOutreachPopupLoader />
+            <TargetedOutreachPopupLoader />
 
-              <Notifications />
+            <Notifications />
 
-              <RecoveryLoader />
+            <RecoveryLoader />
 
-              <CounterfactualHooksLoader />
+            <CounterfactualHooksLoader />
 
-              <SpendingLimitsLoaderWrapper />
+            <SpendingLimitsLoaderWrapper />
 
-              <Analytics />
+            <Analytics />
 
-              <PkModulePopup />
-            </TermsGate>
+            <PkModulePopup />
           </CaptchaProvider>
         </AppProviders>
       </CacheProvider>

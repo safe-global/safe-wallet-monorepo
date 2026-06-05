@@ -1,6 +1,6 @@
 import BackLink from '@/components/common/BackLink'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { getDeterministicColor } from '@/features/spaces'
+import { getDeterministicColor } from '@/utils/colors'
 
 type SpaceBackLinkProps = {
   space: { id: number; name: string }

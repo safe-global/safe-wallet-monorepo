@@ -91,6 +91,3 @@ export {
 
 // Public types (compile-time only, no runtime cost)
 export { mapSpaceContactsToAddressBookState } from './utils'
-
-// Utilities
-export { getDeterministicColor } from './components/InitialsAvatar'

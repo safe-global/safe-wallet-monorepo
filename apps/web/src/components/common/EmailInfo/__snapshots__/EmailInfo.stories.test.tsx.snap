@@ -1,0 +1,178 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./EmailInfo.stories AllSizes 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiStack-root mui-style-1x33toh-MuiStack-root"
+  >
+    <div
+      class="container"
+    >
+      <div
+        class="initialsAvatar MuiBox-root mui-style-efynn7"
+      >
+        a
+      </div>
+      <span
+        class="email MuiBox-root mui-style-0"
+      >
+        alice@example.com
+      </span>
+    </div>
+    <div
+      class="container"
+    >
+      <div
+        class="initialsAvatar MuiBox-root mui-style-1b9h2ff"
+      >
+        a
+      </div>
+      <span
+        class="email MuiBox-root mui-style-0"
+      >
+        alice@example.com
+      </span>
+    </div>
+    <div
+      class="container"
+    >
+      <div
+        class="initialsAvatar MuiBox-root mui-style-9xpjgb"
+      >
+        a
+      </div>
+      <span
+        class="email MuiBox-root mui-style-0"
+      >
+        alice@example.com
+      </span>
+    </div>
+    <div
+      class="container"
+    >
+      <div
+        class="initialsAvatar MuiBox-root mui-style-543i2x"
+      >
+        a
+      </div>
+      <span
+        class="email MuiBox-root mui-style-0"
+      >
+        alice@example.com
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="container"
+  >
+    <div
+      class="initialsAvatar MuiBox-root mui-style-9xpjgb"
+    >
+      a
+    </div>
+    <span
+      class="email MuiBox-root mui-style-0"
+    >
+      alice@example.com
+    </span>
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories EmptyEmail 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiBox-root mui-style-p20wo7"
+  />
+</div>
+`;
+
+exports[`./EmailInfo.stories LongEmailTruncated 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiBox-root mui-style-p20wo7"
+  >
+    <div
+      class="container"
+    >
+      <div
+        class="initialsAvatar MuiBox-root mui-style-i9xiy1"
+      >
+        a
+      </div>
+      <span
+        class="email MuiBox-root mui-style-0"
+      >
+        a-very-long-address-that-will-not-fit@some-very-long-domain.example.com
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories SquareAvatar 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="container"
+  >
+    <div
+      class="initialsAvatar MuiBox-root mui-style-x5ifb2"
+    >
+      b
+    </div>
+    <span
+      class="email MuiBox-root mui-style-0"
+    >
+      bob@example.com
+    </span>
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories WhitespaceOnly 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiBox-root mui-style-p20wo7"
+  />
+</div>
+`;
+
+exports[`./EmailInfo.stories WithTooltip 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="container"
+  >
+    <div
+      class="initialsAvatar MuiBox-root mui-style-9xpjgb"
+    >
+      a
+    </div>
+    <span
+      aria-label="alice@example.com"
+      class="email MuiBox-root mui-style-0"
+      data-mui-internal-clone-element="true"
+    >
+      alice@example.com
+    </span>
+  </div>
+</div>
+`;

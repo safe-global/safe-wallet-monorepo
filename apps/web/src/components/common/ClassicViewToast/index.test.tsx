@@ -52,7 +52,7 @@ const signedInState: Partial<RootState> = {
 
 describe('ClassicViewToast', () => {
   beforeEach(() => {
-    setMockChain(mockChain([]))
+    setMockChain(mockChain([FEATURES.CLASSIC_VIEW]))
     sessionStorage.clear()
     localStorage.clear()
     mockShowNotification.mockClear()
@@ -96,8 +96,8 @@ describe('ClassicViewToast', () => {
     expect(mockShowNotification).not.toHaveBeenCalled()
   })
 
-  it('does not dispatch a notification when the CLASSIC_VIEW_DISABLED chain flag is set, even if the session is opted in', () => {
-    setMockChain(mockChain([FEATURES.CLASSIC_VIEW_DISABLED]))
+  it('does not dispatch a notification when the CLASSIC_VIEW chain flag is absent, even if the session is opted in', () => {
+    setMockChain(mockChain([]))
     act(() => {
       enableClassicView()
     })

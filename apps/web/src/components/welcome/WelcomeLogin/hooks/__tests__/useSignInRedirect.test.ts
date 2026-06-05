@@ -298,7 +298,7 @@ describe('useSignInRedirect', () => {
   })
 
   // -----------------------------------------------------------------------
-  // Require-login gate (REQUIRE_LOGIN_DISABLED off → gate ON)
+  // Require-login gate (REQUIRE_LOGIN on → gate ON)
   // -----------------------------------------------------------------------
 
   describe('require-login gate enabled', () => {
@@ -364,6 +364,80 @@ describe('useSignInRedirect', () => {
       })
 
       expect(mockPush).toHaveBeenCalledWith({ pathname: '/balances', query: {} })
+    })
+
+    it('?next= wins over the single-space short-circuit when the gate is on', async () => {
+      setupMocks({ routerQuery: { next: '/balances' } })
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({ ...defaultProps, spacesAmount: 1, singleSpaceId: 'space-42' }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/balances', query: {} })
+    })
+  })
+
+  // -----------------------------------------------------------------------
+  // Single-space short-circuit
+  // -----------------------------------------------------------------------
+
+  describe('when the user has exactly one space', () => {
+    it('redirects to that space after sign-in instead of the workspace list', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({ ...defaultProps, spacesAmount: 1, singleSpaceId: 'space-42' }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: 'space-42' } })
+      expect(result.current.redirectLoading).toBe(true)
+    })
+
+    it('does not redirect when there are multiple spaces (no singleSpaceId)', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() => useSignInRedirect({ ...defaultProps, spacesAmount: 3, singleSpaceId: null }))
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+
+    it('does not short-circuit before the user has signed in', async () => {
+      setupMocks()
+
+      renderHook(() => useSignInRedirect({ ...defaultProps, spacesAmount: 1, singleSpaceId: 'space-42' }))
+
+      expect(mockPush).not.toHaveBeenCalled()
+    })
+
+    it('does not short-circuit while spaces are still loading', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({
+          ...defaultProps,
+          spacesAmount: 1,
+          isSpacesLoading: true,
+          singleSpaceId: 'space-42',
+        }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).not.toHaveBeenCalled()
     })
   })
 })

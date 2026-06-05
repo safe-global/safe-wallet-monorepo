@@ -96,6 +96,11 @@ jest.mock('@/hooks/useIsAuthGateBlocking', () => ({
   useIsAuthGateBlocking: () => mockUseIsAuthGateBlocking(),
 }))
 
+const mockUseIsSignedIn = jest.fn(() => false)
+jest.mock('@/hooks/useIsSignedIn', () => ({
+  useIsSignedIn: () => mockUseIsSignedIn(),
+}))
+
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(() => ({
     BatchSidebar: () => null,
@@ -114,6 +119,7 @@ describe('PageLayout', () => {
   beforeEach(() => {
     mockUseSafeAddressFromUrl.mockReturnValue('')
     mockUseIsAuthGateBlocking.mockReturnValue(false)
+    mockUseIsSignedIn.mockReturnValue(false)
   })
 
   const renderLayout = (pathname: string) =>
@@ -156,7 +162,7 @@ describe('PageLayout', () => {
     )
   })
 
-  describe('/welcome/spaces topbar gating', () => {
+  describe('login page topbar gating (/welcome/spaces and /)', () => {
     const useIsRequireLoginEnabledModule = jest.requireMock('@/hooks/useIsRequireLoginEnabled') as {
       useIsRequireLoginEnabled: jest.Mock
     }
@@ -165,21 +171,49 @@ describe('PageLayout', () => {
       useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
     })
 
-    it('renders Topbar on /welcome/spaces when the gate is OFF', () => {
+    it('renders Topbar on /welcome/spaces when the gate is OFF and the user is signed in', () => {
       useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      mockUseIsSignedIn.mockReturnValue(true)
       renderLayout(AppRoutes.welcome.spaces)
       expect(screen.getByTestId('topbar')).toBeInTheDocument()
     })
 
-    it('hides Topbar on /welcome/spaces when the gate is ON', () => {
-      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(true)
+    it('hides Topbar on /welcome/spaces when the user is signed out (sign-in form rendered)', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      mockUseIsSignedIn.mockReturnValue(false)
       renderLayout(AppRoutes.welcome.spaces)
       expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
     })
 
-    it('still shows Topbar while the flag is loading (undefined)', () => {
-      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
+    it('hides Topbar on /welcome/spaces when the gate is ON', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(true)
+      mockUseIsSignedIn.mockReturnValue(true)
       renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+    })
+
+    it('still shows Topbar while the flag is loading (undefined) and the user is signed in', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
+      mockUseIsSignedIn.mockReturnValue(true)
+      renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
+
+    it('renders Topbar on / when the gate is OFF', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      renderLayout(AppRoutes.index)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
+
+    it('hides Topbar on / when the gate is ON', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(true)
+      renderLayout(AppRoutes.index)
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+    })
+
+    it('still shows Topbar on / while the flag is loading (undefined)', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
+      renderLayout(AppRoutes.index)
       expect(screen.getByTestId('topbar')).toBeInTheDocument()
     })
   })
@@ -198,6 +232,11 @@ describe('PageLayout', () => {
 
     it('still renders the login page itself so the user can sign in', () => {
       renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.getByTestId('page-content')).toBeInTheDocument()
+    })
+
+    it('still renders / (the index login page) so the user can sign in', () => {
+      renderLayout(AppRoutes.index)
       expect(screen.getByTestId('page-content')).toBeInTheDocument()
     })
 

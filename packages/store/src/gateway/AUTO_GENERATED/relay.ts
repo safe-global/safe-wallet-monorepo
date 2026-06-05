@@ -27,11 +27,11 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type RelayRelayV1ApiResponse = /** status 200 Transaction relayed successfully with transaction hash */ Relay
+export type RelayRelayV1ApiResponse = /** status 200 Transaction relayed successfully */ Relay
 export type RelayRelayV1ApiArg = {
   /** Chain ID where the Safe transaction will be executed */
   chainId: string
-  /** Transaction data to relay including Safe address, transaction details, and signatures */
+  /** Transaction data to relay. safeTxHash is required on relay-fee chains and must correspond to the to + data fields. */
   relayDto: RelayDto
 }
 export type RelayGetTaskStatusV1ApiResponse = /** status 200 Task status retrieved successfully */ RelayTaskStatus
@@ -48,7 +48,7 @@ export type RelayGetRelaysRemainingV1ApiArg = {
   chainId: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
-  /** Safe transaction hash (0x prefixed hex string). Required for chains enabled for relay-fee relayer */
+  /** Safe transaction hash (0x prefixed hex string). Required on relay-fee chains to check per-transaction eligibility with the fee service. Optional on daily-limit and no-fee-campaign chains. */
   safeTxHash?: string
 }
 export type Relay = {

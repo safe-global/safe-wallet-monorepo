@@ -2,7 +2,9 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import SpacesList from '../index'
+import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 
+const mockUseIsRequireLoginEnabled = useIsRequireLoginEnabled as jest.Mock
 const mockUseAppSelector = jest.fn()
 const mockUseSpacesGetV1Query = jest.fn()
 const mockUseUsersGetWithWalletsV1Query = jest.fn()
@@ -34,6 +36,10 @@ jest.mock('@/hooks/useIsRequireLoginEnabled', () => ({
 
 jest.mock('@/hooks/useClassicView', () => ({
   useIsClassicViewFeatureEnabled: jest.fn(() => false),
+}))
+
+jest.mock('@/hooks/useDarkMode', () => ({
+  useDarkMode: jest.fn(() => false),
 }))
 
 jest.mock('@/features/__core__', () => ({
@@ -86,24 +92,67 @@ jest.mock('@/services/analytics', () => ({
 describe('SpacesList — auth/expiry state rendering', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    // clearAllMocks wipes call history but not implementations, so reset the
+    // gate to its default (OFF) each test; gate-ON cases opt in explicitly.
+    mockUseIsRequireLoginEnabled.mockReturnValue(false)
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: undefined, isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
     mockUseSignInRedirect.mockReturnValue({ setHasSignedIn: jest.fn(), redirectLoading: false })
   })
 
   it('renders the Sign in card (not Create space) when the user is unauthenticated — i.e. after a session expiry redirect', () => {
+    // Session-expiry redirect lands on the gate-ON login page.
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
     // After sessionExpired() runs, setUnauthenticated clears sessionExpiresAt → isAuthenticated returns false.
     mockUseAppSelector.mockReturnValue(false)
 
     render(<SpacesList />)
 
-    // The signed-out card with Sign in heading + SignInOptions must render…
-    expect(screen.getByRole('heading', { name: /sign in/i })).toBeInTheDocument()
+    // The signed-out card with the new "Sign in to your workspace" heading +
+    // SignInOptions must render…
+    expect(screen.getByRole('heading', { name: /sign in to your workspace/i })).toBeInTheDocument()
     expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
 
-    // …and the Create space CTA / no-spaces empty state must NOT.
-    expect(screen.queryByText(/^create space$/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/no spaces found/i)).not.toBeInTheDocument()
+    // …and the Create workspace CTA / no-workspaces empty state must NOT.
+    expect(screen.queryByText(/^create workspace$/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/no workspaces found/i)).not.toBeInTheDocument()
+  })
+
+  // When the require-login gate is OFF, classic view is available and
+  // /welcome/spaces keeps its Topbar + tabbed layout. The Accounts/Workspaces
+  // tabs must therefore render regardless of auth state, with the sign-in card
+  // offered below the tabs.
+  it('renders the AccountsNavigation chrome when signed out and require-login is OFF', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(false)
+    mockUseAppSelector.mockReturnValue(false)
+
+    render(<SpacesList />)
+
+    expect(screen.getByTestId('accounts-nav')).toBeInTheDocument()
+    expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
+  })
+
+  // When the gate is ON, /welcome/spaces is the canonical full-screen login
+  // page: it takes over the viewport (no Topbar) via an early return, so the
+  // tabbed layout chrome (AccountsNavigation) must NOT render.
+  it('does not render the AccountsNavigation chrome when signed out and require-login is ON', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
+    mockUseAppSelector.mockReturnValue(false)
+
+    render(<SpacesList />)
+
+    expect(screen.queryByTestId('accounts-nav')).not.toBeInTheDocument()
+    expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
+  })
+
+  it('renders the AccountsNavigation chrome when the user is signed in (and require-login is OFF)', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByTestId('accounts-nav')).toBeInTheDocument()
   })
 
   it('renders the No-spaces empty state with Create space CTA when the user is authenticated and has no spaces', () => {
@@ -119,6 +168,29 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     // Sign in card must NOT render in this branch.
     expect(screen.queryByTestId('sign-in-options')).not.toBeInTheDocument()
+  })
+
+  // Regression: on re-login after logout the spaces RTK Query cache entry
+  // already exists (the post-logout page load fired a request with stale
+  // persisted auth that errored, then invalidateTags marked it stale). When
+  // skip flips to false on re-login, both isFetching and isUninitialized are
+  // briefly false while currentData is still undefined — the previous fix
+  // relied solely on `isFetching || isUninitialized`, which missed this case
+  // and bounced existing users into /welcome/create-space. SpacesList must
+  // pass isSpacesLoading=true whenever currentData and error are both absent.
+  it('passes isSpacesLoading=true to useSignInRedirect when spaces data and error are both undefined', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: undefined,
+      isFetching: false,
+      isUninitialized: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ isSpacesLoading: true }))
   })
 
   it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {

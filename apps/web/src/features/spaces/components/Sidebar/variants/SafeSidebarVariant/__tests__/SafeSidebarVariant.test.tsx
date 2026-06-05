@@ -19,6 +19,23 @@ jest.mock('@/store', () => ({
   useAppSelector: (...args: unknown[]) => mockUseAppSelector(...args),
 }))
 
+const mockUseUsersGetWithWalletsV1Query = jest.fn()
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
+  useUsersGetWithWalletsV1Query: (...args: unknown[]) => mockUseUsersGetWithWalletsV1Query(...args),
+}))
+
+const CURRENT_USER_ID = 7
+const adminMembersForCurrentUser = [
+  {
+    role: 'ADMIN' as const,
+    status: 'ACTIVE' as const,
+    name: '',
+    invitedBy: null,
+    inviteExpiresAt: null,
+    user: { id: CURRENT_USER_ID },
+  },
+]
+
 jest.mock('next/router', () => ({
   useRouter: jest.fn(() => ({
     push: jest.fn(),
@@ -53,17 +70,22 @@ jest.mock('@safe-global/utils/utils/chains', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  getDeterministicColor: (name: string) => `color-${name}`,
   useCurrentSpaceId: () => '42',
 }))
 
+jest.mock('@/utils/colors', () => ({
+  getDeterministicColor: (name: string) => `color-${name}`,
+}))
+
 jest.mock('../../NavItem', () => ({
-  NavItem: ({ item }: { item: ResolvedSidebarItem }) => (
-    <div data-testid={`sidebar-item-${item.label.toLowerCase()}`}>
-      {item.label}
-      {!!item.badge && <span aria-label={`${item.badge} ${item.label} notifications`}>{item.badge}</span>}
-    </div>
-  ),
+  NavItem: ({ item }: { item: ResolvedSidebarItem | null }) =>
+    item ? (
+      <div data-testid={item.testId ?? `sidebar-item-${item.label.toLowerCase()}`} data-active={item.isActive}>
+        {item.label}
+        {!!item.badge && <span aria-label={`${item.badge} ${item.label} notifications`}>{item.badge}</span>}
+        {item.indicator && <span aria-hidden />}
+      </div>
+    ) : null,
 }))
 
 jest.mock('@/components/ui/sidebar', () => ({
@@ -202,6 +224,7 @@ describe('SafeSidebarVariant', () => {
     mockUseIsCounterfactualSafe.mockReturnValue(false)
     mockUseSidebarHydrated.mockReturnValue(true)
     mockUseAppSelector.mockReturnValue(true)
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: CURRENT_USER_ID } })
   })
 
   it('renders all navigation sections', () => {
@@ -386,8 +409,8 @@ describe('SafeSidebarVariant', () => {
 
     it('passes spaces array to addToWorkspace variant', () => {
       const spaces = [
-        { id: 1, name: 'Team', safeCount: 5 },
-        { id: 2, name: 'Personal', safeCount: 2 },
+        { id: 1, name: 'Team', safeCount: 5, members: adminMembersForCurrentUser },
+        { id: 2, name: 'Personal', safeCount: 2, members: adminMembersForCurrentUser },
       ]
       render(
         <SafeSidebarVariant
@@ -450,6 +473,7 @@ describe('SafeSidebarVariant', () => {
         id: i + 1,
         name: `Space ${i + 1}`,
         safeCount: 0,
+        members: adminMembersForCurrentUser,
       }))
 
       render(

@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, Stack, SvgIcon, Tooltip } from '@mui/material'
+import { Box, Chip, IconButton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
 import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
@@ -16,7 +16,12 @@ const headCells = [
   {
     id: 'name',
     label: 'Name',
-    width: '70%',
+    width: '40%',
+  },
+  {
+    id: 'email',
+    label: 'Email',
+    width: '30%',
   },
   {
     id: 'role',
@@ -97,6 +102,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     const isInvite = member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED
     const isDeclined = member.status === MemberStatus.DECLINED
     const isDisabled = isAdmin && isLastAdmin && !isInvite
+    const memberEmail = member.user.email
 
     return {
       cells: {
@@ -114,6 +120,10 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
               )}
             </Stack>
           ),
+        },
+        email: {
+          rawValue: memberEmail,
+          content: memberEmail ? <Typography variant="body2">{memberEmail}</Typography> : null,
         },
         role: {
           rawValue: member.role,

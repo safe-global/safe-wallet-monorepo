@@ -76,6 +76,9 @@ const config: ConfigFile = {
     '../src/gateway/AUTO_GENERATED/counterfactual-safes.ts': {
       filterEndpoints: [/^counterfactualSafes/],
     },
+    '../src/gateway/AUTO_GENERATED/surveys.ts': {
+      filterEndpoints: [/^surveys/],
+    },
     '../src/gateway/AUTO_GENERATED/positions.ts': {
       filterEndpoints: [/^positions/],
     },

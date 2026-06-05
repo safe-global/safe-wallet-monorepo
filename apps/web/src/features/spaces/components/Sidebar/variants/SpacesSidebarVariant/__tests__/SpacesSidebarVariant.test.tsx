@@ -13,6 +13,7 @@ jest.mock('@/components/ui/tooltip', () => ({
 }))
 
 jest.mock('@/components/ui/sidebar', () => ({
+  useSidebar: () => ({ state: 'expanded', isMobile: false }),
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,

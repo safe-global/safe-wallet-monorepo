@@ -7,7 +7,7 @@ import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED
 import classNames from 'classnames'
 import { isUserActiveAdmin } from '@/features/spaces/utils'
 import { MemberStatus } from '@/features/spaces'
-import InitialsAvatar from '../InitialsAvatar'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 import SpaceContextMenu from './SpaceContextMenu'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { trackEvent } from '@/services/analytics'

@@ -23,21 +23,24 @@ const mockSpace: GetSpaceResponse = {
   members: [
     {
       name: 'Admin User',
-      invitedBy: 'system',
+      invitedBy: null,
+      inviteExpiresAt: null,
       user: { id: 1 },
       role: MemberRole.ADMIN,
       status: MemberStatus.ACTIVE,
     },
     {
       name: 'Member One',
-      invitedBy: 'admin@example.com',
+      invitedBy: 1,
+      inviteExpiresAt: null,
       user: { id: 2 },
       role: MemberRole.MEMBER,
       status: MemberStatus.ACTIVE,
     },
     {
       name: 'Member Two',
-      invitedBy: 'admin@example.com',
+      invitedBy: 1,
+      inviteExpiresAt: null,
       user: { id: 3 },
       role: MemberRole.MEMBER,
       status: MemberStatus.ACTIVE,
