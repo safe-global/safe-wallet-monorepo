@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
-import useInviteForm from './useInviteForm'
+import useInviteForm, { toInviteName } from './useInviteForm'
 
 const mockInviteMembers = jest.fn()
 const mockOnSuccess = jest.fn()
@@ -42,6 +42,31 @@ const TestComponent = ({ spaceId }: { spaceId: string | undefined }) => {
     </form>
   )
 }
+
+describe('toInviteName', () => {
+  it('keeps wallet addresses and ENS names as-is', () => {
+    expect(toInviteName('0x1234567890123456789012345678901234567890')).toBe(
+      '0x1234567890123456789012345678901234567890',
+    )
+    expect(toInviteName('alice.eth')).toBe('alice.eth')
+  })
+
+  it('derives the name from the email local part', () => {
+    expect(toInviteName('john.doe@example.com')).toBe('john.doe')
+  })
+
+  it('strips characters the backend name validation rejects', () => {
+    expect(toInviteName('john+safe@example.com')).toBe('johnsafe')
+  })
+
+  it('strips leading non-alphanumeric characters', () => {
+    expect(toInviteName('_test@example.com')).toBe('test')
+  })
+
+  it('falls back to a default when nothing valid remains', () => {
+    expect(toInviteName('+++@example.com')).toBe('Member')
+  })
+})
 
 describe('useInviteForm tracking', () => {
   beforeEach(() => {
@@ -90,9 +115,9 @@ describe('useInviteForm tracking', () => {
     })
   })
 
-  it('builds an email invite payload with a lowercased email', async () => {
+  it('builds an email invite payload with a lowercased email and a name derived from the local part', async () => {
     mockInviteMembers.mockResolvedValue({
-      data: [{ userId: 9, spaceId: 42, name: 'Bob@Example.com', role: 'MEMBER', status: 'INVITED' }],
+      data: [{ userId: 9, spaceId: 42, name: 'Bob', role: 'MEMBER', status: 'INVITED' }],
     })
 
     render(<TestComponent spaceId="42" />)
@@ -110,7 +135,7 @@ describe('useInviteForm tracking', () => {
             {
               type: 'email',
               email: 'bob@example.com',
-              name: 'Bob@Example.com',
+              name: 'Bob',
               role: 'MEMBER',
             },
           ],
@@ -139,7 +164,7 @@ describe('useInviteForm tracking', () => {
             {
               type: 'email',
               email: 'dave@example.com',
-              name: 'Dave@Example.com',
+              name: 'Dave',
               role: 'MEMBER',
             },
           ],
@@ -182,7 +207,7 @@ describe('useInviteForm tracking', () => {
             {
               type: 'email',
               email: 'carol@example.com',
-              name: 'Carol@Example.com',
+              name: 'Carol',
               role: 'MEMBER',
             },
           ],
