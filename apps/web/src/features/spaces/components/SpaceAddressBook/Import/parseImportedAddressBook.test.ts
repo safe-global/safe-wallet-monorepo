@@ -56,6 +56,26 @@ describe('parseImportedAddressBook', () => {
     })
   })
 
+  it('trims whitespace around names from CSV imports', () => {
+    const csv = `address,name,chainId\n${ADDR_1},  Alice  ,1`
+
+    const { items, error } = parseImportedAddressBook('book.csv', csv, SUPPORTED)
+
+    expect(error).toBeUndefined()
+    expect(items).toEqual([{ address: ADDR_1, name: 'Alice', chainIds: ['1'] }])
+  })
+
+  it('trims whitespace around names from JSON imports', () => {
+    const json = JSON.stringify({
+      version: '2.0',
+      data: { addressBook: { '1': { [ADDR_1]: '  Alice  ' } } },
+    })
+
+    const { items } = parseImportedAddressBook('export.json', json, SUPPORTED)
+
+    expect(items).toEqual([{ address: ADDR_1, name: 'Alice', chainIds: ['1'] }])
+  })
+
   describe('JSON', () => {
     it('parses the global data-export shape into address book items', () => {
       const json = JSON.stringify({
