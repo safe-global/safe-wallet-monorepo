@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import type { RootState } from '@/src/store'
 import { removePending, selectCurrentRequest } from '../store/walletKitSlice'
 import { logWalletKitError } from '../utils/errors'
+import { SessionProposalSheet } from './SessionProposalSheet'
 
 type Props = { walletKit: IWalletKit | null }
 
@@ -84,8 +85,8 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
       backdropComponent={renderBackdrop}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
-      {/* Request-type sheets added in WA-2318 / WA-2321 / WA-2322. */}
-      {null}
+      {walletKit && current?.kind === 'proposal' && <SessionProposalSheet walletKit={walletKit} pending={current} />}
+      {/* Transaction request sheet (current?.kind === 'request') added in WA-2321 / WA-2322. */}
     </BottomSheetModal>
   )
 }

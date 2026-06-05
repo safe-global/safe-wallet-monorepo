@@ -6,7 +6,9 @@ import { renderWithStore, createTestStore } from '@/src/tests/test-utils'
 import { RequestSheetHost } from '../RequestSheetHost'
 import { pushPending, selectPending, walletKitSliceName } from '../../store/walletKitSlice'
 import type { RootState } from '@/src/store'
-import type { IWalletKit } from '@reown/walletkit'
+import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
+
+jest.mock('@tamagui/toast', () => ({ useToastController: () => ({ show: jest.fn() }) }))
 
 const mockPresent = jest.fn()
 const mockDismiss = jest.fn()
@@ -96,10 +98,19 @@ describe('RequestSheetHost', () => {
   })
 
   it('rejects the proposal with USER_REJECTED when the sheet is dismissed', async () => {
+    const fakeProposal = {
+      id: 2,
+      params: {
+        proposer: { metadata: { name: 'dApp', url: 'https://dapp.test', icons: [] } },
+        requiredNamespaces: { eip155: { chains: ['eip155:1'], methods: [], events: [] } },
+        optionalNamespaces: {},
+      },
+      verifyContext: { verified: { validation: 'VALID' } },
+    } as unknown as WalletKitTypes.SessionProposal
     const store = createTestStore({
       [walletKitSliceName]: {
         sessions: {},
-        pending: [{ kind: 'proposal', id: 2, proposal: {} }],
+        pending: [{ kind: 'proposal', id: 2, proposal: fakeProposal }],
         outstandingRequests: {},
       },
     } as never)
