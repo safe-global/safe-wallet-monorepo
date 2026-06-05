@@ -83,20 +83,22 @@ const SignedOutState = ({
           !inline && css.authShell,
         )}
       >
-        <div className="relative w-full max-w-[440px] rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
-          <div className="mb-6 flex size-10 items-center justify-center text-foreground">
-            <SafeMarkIcon className="size-10" />
+        <div className="flex w-full max-w-[440px] flex-col items-center">
+          <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
+            <div className="mx-auto mb-6 flex size-10 items-center justify-center text-foreground">
+              <SafeMarkIcon className="size-10" />
+            </div>
+
+            <ShadcnTypography variant="h3" className="mb-6 text-center">
+              Sign in to your workspace
+            </ShadcnTypography>
+
+            <LocalSafesAlert />
+
+            <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+
+            {isClassicViewFeatureEnabled && <ClassicViewLink />}
           </div>
-
-          <ShadcnTypography variant="h3" className="mb-6">
-            Sign in to your workspace
-          </ShadcnTypography>
-
-          <LocalSafesAlert />
-
-          <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
-
-          {isClassicViewFeatureEnabled && <ClassicViewLink />}
 
           <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
             By continuing, you agree to the{' '}
@@ -205,7 +207,7 @@ const SpacesList = () => {
 
   return (
     <Box className={css.container}>
-      <Box className={css.mySpaces}>
+      <Box className={cn(css.mySpaces, { [css.headerSpacer]: !isUserSignedIn })}>
         <Box className={css.spacesHeader}>
           {!isRequireLoginEnabled && <AccountsNavigation />}
 
