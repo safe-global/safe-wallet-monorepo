@@ -79,6 +79,10 @@ export const SPACE_EVENTS = {
     action: 'Workspace member invite sent',
     category: SPACE_CATEGORY,
   },
+  WORKSPACE_MEMBER_INVITE_RENEWED: {
+    action: 'Workspace member invite renewed',
+    category: SPACE_CATEGORY,
+  },
   ADD_ACCOUNTS_MODAL: {
     action: 'Open add accounts modal',
     category: SPACE_CATEGORY,

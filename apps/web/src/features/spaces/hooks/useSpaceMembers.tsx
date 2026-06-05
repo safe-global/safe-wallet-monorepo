@@ -24,6 +24,11 @@ export const isAdmin = (member: MemberDto) => member.role === MemberRole.ADMIN
 
 export const isActiveAdmin = (member: MemberDto) => isAdmin(member) && member.status === MemberStatus.ACTIVE
 
+export const isInviteExpired = (member: MemberDto): boolean =>
+  member.status === MemberStatus.INVITED &&
+  member.inviteExpiresAt != null &&
+  new Date(member.inviteExpiresAt).getTime() <= Date.now()
+
 const useAllMembers = (spaceId?: number) => {
   const currentSpaceId = useCurrentSpaceId()
   const actualSpaceId = spaceId ?? currentSpaceId
