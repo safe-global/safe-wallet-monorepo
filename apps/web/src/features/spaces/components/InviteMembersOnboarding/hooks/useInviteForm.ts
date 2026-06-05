@@ -18,6 +18,24 @@ export interface InviteMembersFormValues {
   members: MemberInvite[]
 }
 
+/**
+ * The onboarding flow has no dedicated name field, so a display name is derived from the
+ * identifier. Wallet/ENS invites keep using the address as the name (as before); email
+ * invites use the email's local part, sanitized to the alphanumeric-ish characters the
+ * backend's name validation accepts (the raw email's "@" would be rejected).
+ */
+export const toInviteName = (identifier: string): string => {
+  if (!isEmailAddress(identifier)) return identifier
+
+  const localPart = identifier.slice(0, identifier.indexOf('@'))
+  const sanitized = localPart
+    .replace(/[^a-zA-Z0-9 ._-]/g, '')
+    .replace(/^[^a-zA-Z0-9]+/, '')
+    .trim()
+
+  return sanitized || 'Member'
+}
+
 const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
   const [inviteMembers] = useMembersInviteUserV1Mutation()
 
@@ -58,7 +76,11 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
 
     try {
       const usersToInvite: InviteUsersDto['users'] = validMembers.map((member) =>
-        buildInviteUserPayload({ name: member.identifier, inviteeIdentifier: member.identifier, role: member.role }),
+        buildInviteUserPayload({
+          name: toInviteName(member.identifier),
+          inviteeIdentifier: member.identifier,
+          role: member.role,
+        }),
       )
 
       const result = await inviteMembers({
