@@ -1,11 +1,10 @@
 import { type ReactElement, useMemo } from 'react'
 import { RefreshCw } from 'lucide-react'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
-import type { ScanResult, SafeGrade, StrengthLevel } from '@/features/security/types'
+import type { ScanResult, SafeGrade, ScoreBandDef } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import SafeGradeChip, { SAFE_GRADE_LABEL } from '../SafeGradeChip/SafeGradeChip'
@@ -36,12 +35,11 @@ type AggregateCounts = {
 }
 
 type Aggregate = AggregateCounts & {
-  level: StrengthLevel
-  color: string
+  band: ScoreBandDef
   scorePct: number
 }
 
-// Pure reducer — no feature-service calls. The strength level/color are derived
+// Pure reducer — no feature-service calls. The score band (label/colour) is derived
 // inside the component where useLoadFeature gives access to the scoring utils.
 const computeCounts = (scanResults: Record<string, Record<string, ScanResult>>): AggregateCounts | null => {
   let passing = 0
@@ -88,10 +86,10 @@ const WorkspaceHealthCard = ({
     const counts = computeCounts(scanResults)
     if (!counts || !security.$isReady) return null
     const clearRatio = counts.applicableCount > 0 ? counts.passing / counts.applicableCount : 0
-    const level = security.getStrengthLevel(clearRatio, counts.hasCriticalIssue)
-    const color = security.getStrengthColor(level)
-    return { ...counts, level, color, scorePct: Math.round(clearRatio * 100) }
-  }, [scanResults, security.$isReady, security.getStrengthLevel, security.getStrengthColor])
+    const scorePct = Math.round(clearRatio * 100)
+    const band = security.getScoreBand(scorePct, counts.hasCriticalIssue)
+    return { ...counts, band, scorePct }
+  }, [scanResults, security.$isReady, security.getScoreBand])
 
   // Per-Safe grade counts for the filter chips.
   // Iterate over `safes` (not scanResults) so multichain safes are counted once per
@@ -111,18 +109,6 @@ const WorkspaceHealthCard = ({
       for (const grade of gradesFound) counts[grade]++
     }
     return counts
-  }, [safes, scanResults, security.$isReady, security.scanKey, security.getSafeGrade])
-
-  // Distinct accounts needing attention — a Safe counts once if ANY of its chain entries
-  // resolves to a non-`passing` grade (matching the chip/table filter semantics).
-  const needsAttentionCount = useMemo(() => {
-    if (!security.$isReady) return 0
-    return safes.filter((safe) =>
-      safe.chainEntries.some((chain) => {
-        const results = scanResults[security.scanKey(safe.address, chain.chainId)]
-        return results ? security.getSafeGrade(results) !== 'passing' : false
-      }),
-    ).length
   }, [safes, scanResults, security.$isReady, security.scanKey, security.getSafeGrade])
 
   // Show skeleton only when we have no data at all. Once any Safe has completed, render the
@@ -145,23 +131,17 @@ const WorkspaceHealthCard = ({
     )
   }
 
-  const { color, level, scorePct } = aggregate
+  const { band, scorePct } = aggregate
 
   return (
     <Card className="mb-10 flex-col items-start gap-6 py-5 px-6 md:flex-row md:items-center">
-      <ScoreGauge scorePct={scorePct} color={color} />
+      <div className="-mb-4">
+        <ScoreGauge scorePct={scorePct} color={band.color} />
+      </div>
 
       <div className="flex min-w-0 flex-1 justify-between">
-        <div className="flex -mt-2 flex-col gap-2">
-          <Typography variant="h4">{level}</Typography>
-
-          <Typography variant="paragraph-small" color="muted">
-            {needsAttentionCount === 0
-              ? 'All accounts are healthy'
-              : `${needsAttentionCount} of ${safes.length} account${maybePlural(safes.length)} need${
-                  needsAttentionCount === 1 ? 's' : ''
-                } attention`}
-          </Typography>
+        <div className="flex flex-col gap-2">
+          <Typography variant="h4">{band.label}</Typography>
 
           <div className="flex flex-wrap gap-2">
             {FILTER_GRADES.filter((grade) => gradeCounts[grade] > 0).map((grade) => (
@@ -188,21 +168,6 @@ const WorkspaceHealthCard = ({
               <Typography variant="paragraph-mini" color="muted">
                 Last scanned {security.$isReady ? security.formatTimestamp(lastScannedAt) : ''}
               </Typography>
-
-              {/* <button
-                type="button"
-                onClick={isScanning ? undefined : onRescan}
-                disabled={isScanning}
-                className={cn(
-                  'flex items-center gap-1',
-                  isScanning ? 'cursor-default text-muted-foreground' : 'cursor-pointer text-primary hover:opacity-80',
-                )}
-              >
-                <RefreshCw className="size-3.5" />
-                <Typography variant="paragraph-mini-bold" className="text-inherit">
-
-                </Typography>
-              </button> */}
             </div>
           )}
 

@@ -10,15 +10,16 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { cn } from '@/utils/cn'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Skeleton } from '@/components/ui/skeleton'
 import StatusCell from '../StatusCell/StatusCell'
-import { BalanceCell, ChecksCell, ChecksCount, ScoreCell } from './cells'
+import { BalanceCell, ScoreCell } from './cells'
 import { CARD_ROW_CLASS, CELL_BASE, GRID_COLS, HIDE_BALANCE, ROW_VARIANTS } from './constants'
 import {
+  countChecks,
   formatBalance,
   getAggregateCheckCounts,
   getAggregateSafeGrade,
   getAggregateSummary,
+  getStatusCount,
   hasMultichainWarning,
   isAnyChainScanning,
   type GetSafeSecurityHref,
@@ -73,6 +74,7 @@ const MultichainChildRow = ({
   const results = scanResults[key]
   const summary = results ? computeSummary(results) : null
   const childGrade = results ? getSafeGrade(results) : null
+  const childStatusCount = getStatusCount(childGrade, countChecks(results))
   const isSelected = sameAddress(selectedSafe?.address, safe.address) && selectedSafe?.chainId === chain.chainId
   const isScanning = scanningKeys?.has(key)
   const childHref = getSafeSecurityHref(safe.address, chain.chainId)
@@ -89,10 +91,11 @@ const MultichainChildRow = ({
       className={cn(CARD_ROW_CLASS, GRID_COLS, {
         'cursor-pointer hover:bg-muted/100': chain.isDeployed,
         'cursor-default': !chain.isDeployed,
-        'border-primary': isSelected,
+        'bg-muted/100 border-card': isSelected,
       })}
     >
-      <div className={cn(CELL_BASE, 'pl-7 sm:pl-12')}>
+      <div className={cn(CELL_BASE, 'gap-2 pl-7 ')}>
+        <Identicon address={safe.address} size={24} />
         {childHref ? (
           <Link
             href={childHref}
@@ -115,10 +118,7 @@ const MultichainChildRow = ({
         <ScoreCell summary={summary} isScanning={isScanning} />
       </div>
       <div className={CELL_BASE}>
-        <ChecksCell results={results} isScanning={isScanning} />
-      </div>
-      <div className={CELL_BASE}>
-        <StatusCell grade={childGrade} isScanning={isScanning} />
+        <StatusCell grade={childGrade} count={childStatusCount} isScanning={isScanning} />
       </div>
       <div className={cn(CELL_BASE, 'justify-end')}>
         {chain.isDeployed ? (
@@ -180,7 +180,9 @@ const MultichainSafeRow = ({
         animate="visible"
         transition={{ duration: 0.2, delay: hasAnimated ? 0 : safeIdx * 0.03 }}
         onClick={() => onToggleExpand(safe.address)}
-        className={cn(CARD_ROW_CLASS, GRID_COLS, 'cursor-pointer hover:bg-muted/100')}
+        className={cn(CARD_ROW_CLASS, GRID_COLS, 'cursor-pointer hover:bg-muted/100', {
+          'bg-muted/100 border-card': isExpanded,
+        })}
       >
         <div className={CELL_BASE}>
           <div className="flex min-w-0 items-center gap-4">
@@ -239,14 +241,11 @@ const MultichainSafeRow = ({
           <ScoreCell summary={aggregateSummary} isScanning={aggregateScanning} />
         </div>
         <div className={CELL_BASE}>
-          {aggregateScanning && aggregateSummary === null ? (
-            <Skeleton className="h-5 w-[70px]" />
-          ) : (
-            <ChecksCount {...aggregateChecks} />
-          )}
-        </div>
-        <div className={CELL_BASE}>
-          <StatusCell grade={aggregateGrade} isScanning={aggregateScanning} />
+          <StatusCell
+            grade={aggregateGrade}
+            count={getStatusCount(aggregateGrade, aggregateChecks)}
+            isScanning={aggregateScanning}
+          />
         </div>
         <div className={cn(CELL_BASE, 'justify-end')} />
       </motion.div>

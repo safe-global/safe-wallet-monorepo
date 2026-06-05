@@ -6,6 +6,10 @@ jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => useCurrentSpaceIdMock(),
 }))
 
+// The header's Safe Shield logo picks a light/dark variant via useDarkMode (Redux-backed).
+// These tests render SecurityHub without a store and only assert remount behaviour.
+jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
+
 // Stub the per-space body with a mount counter so we can assert it is remounted
 // (fresh state) when the active space changes, rather than re-rendered in place.
 const mountSpy = jest.fn()

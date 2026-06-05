@@ -17,8 +17,7 @@ const SEVERITY_BY_RANK = (Object.entries(SEVERITY_RANK) as Array<[SecurityGrade,
 export type SecurityUtils = Pick<SecurityContract, 'scanKey' | 'computeSummary' | 'severityRank'>
 
 /** Superset used by row components: SecurityUtils + the formatters/grade helpers they render. */
-export type RowSecurity = SecurityUtils &
-  Pick<SecurityContract, 'formatTimestamp' | 'getStrengthLevel' | 'getStrengthColor' | 'getSafeGrade'>
+export type RowSecurity = SecurityUtils & Pick<SecurityContract, 'formatTimestamp' | 'getSafeGrade'>
 
 /** Builder returning a Safe's home URL for a given (address, chainId), or undefined if the chain has no short name. */
 export type GetSafeSecurityHref = (
@@ -60,6 +59,23 @@ export const getAggregateCheckCounts = (
     warnings += counts.warnings
   }
   return { failed, warnings }
+}
+
+/**
+ * Number of checks driving a Safe's grade — shown beside the grade in the Status column.
+ * `at_risk`/`critical` count failing checks, `needs_attention` counts warnings, and
+ * `passing` has no count (the chip just reads "Healthy").
+ */
+export const getStatusCount = (grade: SafeGrade | null, counts: CheckCounts): number | undefined => {
+  switch (grade) {
+    case 'critical':
+    case 'at_risk':
+      return counts.failed
+    case 'needs_attention':
+      return counts.warnings
+    default:
+      return undefined
+  }
 }
 
 /**

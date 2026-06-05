@@ -7,14 +7,13 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import {
   EvidenceList,
   Row,
-  StatusIcon,
   buildExpanded,
   isPassingStatus,
   makeBuildCta,
   sortBySeverity,
   type SectionRow,
 } from '../primitives'
-import { resolveStatusTone } from '../../SeverityIcon/SeverityIcon'
+import { resolveStatusTone, SeverityIcon, type SeverityTone } from '../../SeverityIcon/SeverityIcon'
 
 export type FailingRow = { key: string; node: ReactNode; grade: SafeGrade }
 
@@ -30,6 +29,24 @@ const SEVERITY_TO_SAFE_GRADE: Record<SecurityGrade, SafeGrade> = {
   High: 'at_risk',
   Medium: 'needs_attention',
   Low: 'needs_attention',
+}
+
+/** Accent-bar + icon colour per grade, matching the SafeGrade chip's dot. */
+const GRADE_ROW_COLOR: Record<SafeGrade, string> = {
+  critical: 'error.main',
+  at_risk: 'warning.main',
+  needs_attention: 'score.review',
+  passing: 'success.main',
+}
+
+/**
+ * Tone for a check row's accent bar + leading icon. Failing rows take their grade group's
+ * colour (so the bar/icon match the section chip); passing / N-A / inconclusive rows keep
+ * their neutral status tone. The glyph shape always comes from the status tone.
+ */
+const rowTone = (status: ScanResult['status'], severity: SecurityGrade): SeverityTone => {
+  const base = resolveStatusTone(status, severity)
+  return isPassingStatus(status) ? base : { ...base, color: GRADE_ROW_COLOR[SEVERITY_TO_SAFE_GRADE[severity]] }
 }
 
 /**
@@ -70,8 +87,8 @@ export const useSecurityChecks = (
     const showModuleSummary = activeModules.length > 2 && !modulesExpanded
 
     const items: SectionRow[] = []
-    const iconFor = (r: ScanResult) => <StatusIcon status={r.status} severity={r.severity} />
-    const toneFor = (r: ScanResult) => resolveStatusTone(r.status, r.severity)
+    const iconFor = (r: ScanResult) => <SeverityIcon tone={rowTone(r.status, r.severity)} />
+    const toneFor = (r: ScanResult) => rowTone(r.status, r.severity)
     // Surface the remediation as the row subtitle for failing checks (passing rows need no action).
     const subtitleFor = (r: ScanResult) => (!isPassingStatus(r.status) && r.remediation ? r.remediation : undefined)
 
@@ -322,8 +339,8 @@ export const useSecurityChecks = (
             isPassing: trusted,
             node: (
               <Row
-                leadIcon={<StatusIcon status={status} severity={severity} />}
-                accentTone={resolveStatusTone(status, severity)}
+                leadIcon={<SeverityIcon tone={rowTone(status, severity)} />}
+                accentTone={rowTone(status, severity)}
                 title={title}
                 expandedContent={
                   <EvidenceList intro={intro} evidence={perModuleEvidence} cta={trusted ? null : modulesCta} />

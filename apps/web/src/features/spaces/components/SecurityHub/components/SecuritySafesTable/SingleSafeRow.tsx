@@ -8,9 +8,9 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { cn } from '@/utils/cn'
 import StatusCell from '../StatusCell/StatusCell'
-import { BalanceCell, ChecksCell, ScoreCell } from './cells'
+import { BalanceCell, ScoreCell } from './cells'
 import { CARD_ROW_CLASS, CELL_BASE, GRID_COLS, HIDE_BALANCE, ROW_VARIANTS } from './constants'
-import type { GetSafeSecurityHref, RowSecurity } from './utils'
+import { countChecks, getStatusCount, type GetSafeSecurityHref, type RowSecurity } from './utils'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
 
 export type SingleSafeRowProps = {
@@ -45,6 +45,7 @@ const SingleSafeRow = ({
   const results = scanResults[key]
   const summary = results ? computeSummary(results) : null
   const grade = results ? getSafeGrade(results) : null
+  const statusCount = getStatusCount(grade, countChecks(results))
   const isSelected = selectedSafe?.address === safe.address && selectedSafe?.chainId === safe.chainId
   const isScanning = scanningKeys?.has(key)
   const safeHref = getSafeSecurityHref(safe.address, safe.chainId)
@@ -105,10 +106,7 @@ const SingleSafeRow = ({
         <ScoreCell summary={summary} isScanning={isScanning} />
       </div>
       <div className={CELL_BASE}>
-        <ChecksCell results={results} isScanning={isScanning} />
-      </div>
-      <div className={CELL_BASE}>
-        <StatusCell grade={grade} isScanning={isScanning} />
+        <StatusCell grade={grade} count={statusCount} isScanning={isScanning} />
       </div>
       <div className={cn(CELL_BASE, 'justify-end')}>
         {isDeployed ? (

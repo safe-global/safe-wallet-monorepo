@@ -197,15 +197,15 @@ describe('SecuritySafesTable', () => {
     expect(container.querySelectorAll('.MuiSkeleton-root').length).toBe(0)
   })
 
-  it('renders the checks column with failed and warning counts', () => {
+  it('shows the failing-check count beside the grade in the status column', () => {
     const scanResults = buildScanResults([{ address: singleSafe.address, chainId: singleSafe.chainId }], {
       account_setup: mkResult('issue'),
       recovery: mkResult('partial'),
       guard: mkResult('partial'),
     })
     renderTable({ scanResults })
-    expect(screen.getByText('1 failed')).toBeInTheDocument()
-    expect(screen.getByText('2 warnings')).toBeInTheDocument()
+    // An issue grades the Safe "at risk"; the status chip reports the failing count.
+    expect(screen.getByText('1 at risk')).toBeInTheDocument()
   })
 
   describe('multichain safes', () => {

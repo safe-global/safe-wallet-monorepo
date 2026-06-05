@@ -52,11 +52,11 @@ const SecurityDrawerChecks = ({
     <div className="flex flex-col gap-6">
       {header.status === 'ready' && (
         <Card className="h-[88px] flex-row items-center gap-3 px-4 py-0 dark:bg-secondary">
-          <ScoreGauge scorePct={header.score} color={header.color} size="small" />
+          <ScoreGauge scorePct={header.score} color={header.band.color} size="small" />
 
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex flex-wrap items-center gap-2">
-              <SafeGradeChip grade={grade} active />
+              <SafeGradeChip grade={grade} />
               <Typography variant="paragraph-mini" color="muted">
                 Scanned {security.formatTimestamp(lastScannedAt ?? undefined)}
               </Typography>

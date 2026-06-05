@@ -5,25 +5,16 @@ exports[`./SafeGradeChip.stories ActiveFilter 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="gap-1 border py-0.5 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto rounded-full border-transparent px-3 text-xs font-medium [&>svg]:size-[18px]! cursor-pointer transition-opacity hover:opacity-80 ring-1 ring-inset bg-[var(--color-error-background)] text-[var(--color-error-dark)] ring-[var(--color-error-dark)]"
+    class="border has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-1.5 rounded-full border-transparent px-2.5 py-1 text-xs font-medium bg-[var(--color-error-background)] text-[var(--color-error-dark)] cursor-pointer transition-opacity hover:opacity-80 ring-1 ring-inset ring-current"
     data-slot="badge"
     data-variant="default"
     role="button"
     tabindex="0"
   >
-    <svg
+    <span
       aria-hidden="true"
-      aria-label="Critical"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-ia47z7-MuiSvgIcon-root"
-      data-testid="DangerousRoundedIcon"
-      focusable="false"
-      role="img"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M14.9 3H9.1c-.53 0-1.04.21-1.42.59l-4.1 4.1C3.21 8.06 3 8.57 3 9.1v5.8c0 .53.21 1.04.59 1.41l4.1 4.1c.37.38.88.59 1.41.59h5.8c.53 0 1.04-.21 1.41-.59l4.1-4.1c.38-.37.59-.88.59-1.41V9.1c0-.53-.21-1.04-.59-1.41l-4.1-4.1c-.37-.38-.88-.59-1.41-.59m.64 12.54c-.39.39-1.02.39-1.41 0L12 13.41l-2.12 2.12c-.39.39-1.02.39-1.41 0a.996.996 0 0 1 0-1.41L10.59 12 8.46 9.88a.996.996 0 0 1 0-1.41c.39-.39 1.02-.39 1.41 0L12 10.59l2.12-2.12c.39-.39 1.02-.39 1.41 0s.39 1.02 0 1.41L13.41 12l2.12 2.12c.4.39.4 1.03.01 1.42"
-      />
-    </svg>
+      class="size-2 shrink-0 rounded-full bg-[var(--color-error-main)]"
+    />
     1 critical
   </span>
 </div>
@@ -34,23 +25,14 @@ exports[`./SafeGradeChip.stories AtRisk 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="gap-1 border py-0.5 transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto rounded-full border-transparent bg-muted px-3 text-xs font-medium text-muted-foreground [&>svg]:size-[18px]!"
+    class="border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-1.5 rounded-full border-transparent px-2.5 py-1 text-xs font-medium bg-[var(--color-warning-background)] text-[var(--color-warning-main)]"
     data-slot="badge"
     data-variant="default"
   >
-    <svg
+    <span
       aria-hidden="true"
-      aria-label="At risk"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-bby4eh-MuiSvgIcon-root"
-      data-testid="ErrorOutlineRoundedIcon"
-      focusable="false"
-      role="img"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M12 7c.55 0 1 .45 1 1v4c0 .55-.45 1-1 1s-1-.45-1-1V8c0-.55.45-1 1-1m-.01-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2M12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8m1-3h-2v-2h2z"
-      />
-    </svg>
+      class="size-2 shrink-0 rounded-full bg-[var(--color-warning-main)]"
+    />
     3 at risk
   </span>
 </div>
@@ -61,23 +43,14 @@ exports[`./SafeGradeChip.stories Critical 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="gap-1 border py-0.5 transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto rounded-full border-transparent bg-muted px-3 text-xs font-medium text-muted-foreground [&>svg]:size-[18px]!"
+    class="border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-1.5 rounded-full border-transparent px-2.5 py-1 text-xs font-medium bg-[var(--color-error-background)] text-[var(--color-error-dark)]"
     data-slot="badge"
     data-variant="default"
   >
-    <svg
+    <span
       aria-hidden="true"
-      aria-label="Critical"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-ia47z7-MuiSvgIcon-root"
-      data-testid="DangerousRoundedIcon"
-      focusable="false"
-      role="img"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M14.9 3H9.1c-.53 0-1.04.21-1.42.59l-4.1 4.1C3.21 8.06 3 8.57 3 9.1v5.8c0 .53.21 1.04.59 1.41l4.1 4.1c.37.38.88.59 1.41.59h5.8c.53 0 1.04-.21 1.41-.59l4.1-4.1c.38-.37.59-.88.59-1.41V9.1c0-.53-.21-1.04-.59-1.41l-4.1-4.1c-.37-.38-.88-.59-1.41-.59m.64 12.54c-.39.39-1.02.39-1.41 0L12 13.41l-2.12 2.12c-.39.39-1.02.39-1.41 0a.996.996 0 0 1 0-1.41L10.59 12 8.46 9.88a.996.996 0 0 1 0-1.41c.39-.39 1.02-.39 1.41 0L12 10.59l2.12-2.12c.39-.39 1.02-.39 1.41 0s.39 1.02 0 1.41L13.41 12l2.12 2.12c.4.39.4 1.03.01 1.42"
-      />
-    </svg>
+      class="size-2 shrink-0 rounded-full bg-[var(--color-error-main)]"
+    />
     1 critical
   </span>
 </div>
@@ -88,23 +61,14 @@ exports[`./SafeGradeChip.stories NeedsAttention 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="gap-1 border py-0.5 transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto rounded-full border-transparent bg-muted px-3 text-xs font-medium text-muted-foreground [&>svg]:size-[18px]!"
+    class="border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-1.5 rounded-full border-transparent px-2.5 py-1 text-xs font-medium bg-[var(--color-score-review)]/10 text-[var(--color-score-review-text)]"
     data-slot="badge"
     data-variant="default"
   >
-    <svg
+    <span
       aria-hidden="true"
-      aria-label="Needs review"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1h48zqc-MuiSvgIcon-root"
-      data-testid="WarningAmberRoundedIcon"
-      focusable="false"
-      role="img"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M12 5.99 19.53 19H4.47zM2.74 18c-.77 1.33.19 3 1.73 3h15.06c1.54 0 2.5-1.67 1.73-3L13.73 4.99c-.77-1.33-2.69-1.33-3.46 0zM11 11v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1m0 5h2v2h-2z"
-      />
-    </svg>
+      class="size-2 shrink-0 rounded-full bg-[var(--color-score-review)]"
+    />
     2 needs review
   </span>
 </div>
@@ -115,23 +79,14 @@ exports[`./SafeGradeChip.stories Passing 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <span
-    class="gap-1 border py-0.5 transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto rounded-full border-transparent bg-muted px-3 text-xs font-medium text-muted-foreground [&>svg]:size-[18px]!"
+    class="border transition-all has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&>svg]:size-3! inline-flex items-center justify-center w-fit whitespace-nowrap shrink-0 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive overflow-hidden group/badge [a]:hover:bg-primary/80 h-auto gap-1.5 rounded-full border-transparent px-2.5 py-1 text-xs font-medium bg-[var(--color-success-background)] text-[var(--color-success-main)]"
     data-slot="badge"
     data-variant="default"
   >
-    <svg
+    <span
       aria-hidden="true"
-      aria-label="Healthy"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-189vbe6-MuiSvgIcon-root"
-      data-testid="CheckCircleOutlineRoundedIcon"
-      focusable="false"
-      role="img"
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8m3.88-11.71L10 14.17l-1.88-1.88a.996.996 0 0 0-1.41 0c-.39.39-.39 1.02 0 1.41l2.59 2.59c.39.39 1.02.39 1.41 0L17.3 9.7c.39-.39.39-1.02 0-1.41s-1.03-.39-1.42 0"
-      />
-    </svg>
+      class="size-2 shrink-0 rounded-full bg-[var(--color-success-main)]"
+    />
     12 healthy
   </span>
 </div>

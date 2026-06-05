@@ -23,7 +23,7 @@ exports[`./SeverityIcon.stories AllGrades 1`] = `
     <svg
       aria-hidden="true"
       aria-label="At risk"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-bby4eh-MuiSvgIcon-root"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1h48zqc-MuiSvgIcon-root"
       data-testid="ErrorOutlineRoundedIcon"
       focusable="false"
       role="img"
@@ -36,7 +36,7 @@ exports[`./SeverityIcon.stories AllGrades 1`] = `
     <svg
       aria-hidden="true"
       aria-label="Needs review"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-1h48zqc-MuiSvgIcon-root"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-s6c3uv-MuiSvgIcon-root"
       data-testid="WarningAmberRoundedIcon"
       focusable="false"
       role="img"

@@ -95,9 +95,9 @@ describe('SecurityPanelView', () => {
   })
 
   describe('header', () => {
-    it('renders strength level and "all checks passing" copy when everything clears', () => {
+    it('renders the score band and "all checks passing" copy when everything clears', () => {
       renderPanel()
-      expect(screen.getByText('Strong')).toBeInTheDocument()
+      expect(screen.getByText('Healthy')).toBeInTheDocument()
       expect(screen.getByText('All checks passing.')).toBeInTheDocument()
     })
 

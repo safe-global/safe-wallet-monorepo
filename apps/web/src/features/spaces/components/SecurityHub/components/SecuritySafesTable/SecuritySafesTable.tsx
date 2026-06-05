@@ -146,10 +146,6 @@ const SecuritySafesTable = ({
                 <div className={CELL_BASE}>
                   <Skeleton className="h-4 w-9 rounded" />
                 </div>
-                {/* Checks */}
-                <div className={CELL_BASE}>
-                  <Skeleton className="h-4 w-16 rounded" />
-                </div>
                 {/* Status */}
                 <div className={CELL_BASE}>
                   <Skeleton className="h-5 w-20 rounded-full" />

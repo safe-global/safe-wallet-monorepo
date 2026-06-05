@@ -44,8 +44,8 @@ export const resolveStatusTone = (status: ScanResult['status'], severity?: Secur
  */
 export const GRADE_TONE: Record<SafeGrade, SeverityTone> = {
   passing: { Icon: CheckCircleOutlineRoundedIcon, color: 'success.main' },
-  needs_attention: { Icon: WarningAmberRoundedIcon, color: 'warning.main' },
-  at_risk: { Icon: ErrorOutlineRoundedIcon, color: 'error.main' },
+  needs_attention: { Icon: WarningAmberRoundedIcon, color: 'score.reviewText' },
+  at_risk: { Icon: ErrorOutlineRoundedIcon, color: 'warning.main' },
   critical: CRITICAL_TONE,
 }
 
