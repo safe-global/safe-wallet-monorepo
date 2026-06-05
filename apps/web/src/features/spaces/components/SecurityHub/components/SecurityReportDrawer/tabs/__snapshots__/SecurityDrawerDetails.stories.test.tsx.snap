@@ -1,0 +1,476 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`./SecurityDrawerDetails.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  >
+    <div
+      class="flex flex-col gap-6"
+    >
+      <section
+        class="bg-card p-4 rounded-xl"
+      >
+        <span
+          class="m-0 text-xs leading-4 font-normal text-muted-foreground mb-1 block"
+          data-slot="typography"
+          data-variant="paragraph-mini"
+        >
+          Signers · 4/6
+        </span>
+        <div
+          class="flex flex-col"
+        >
+          <div
+            class="flex items-center gap-3 py-2.5"
+          >
+            <div
+              class="icon"
+              style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMTkyIDY1JSAzNiUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzMDYgNjAlIDUxJSkiIGQ9Ik0wLDBoMXYxaC0xek03LDBoMXYxaC0xek0xLDBoMXYxaC0xek02LDBoMXYxaC0xek0yLDBoMXYxaC0xek01LDBoMXYxaC0xek0zLDBoMXYxaC0xek00LDBoMXYxaC0xek0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0wLDNoMXYxaC0xek03LDNoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0zLDNoMXYxaC0xek00LDNoMXYxaC0xek0wLDRoMXYxaC0xek03LDRoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0wLDVoMXYxaC0xek03LDVoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0wLDdoMXYxaC0xek03LDdoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgyNyA1NyUgNTklKSIgZD0iTTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTAsNmgxdjFoLTF6TTcsNmgxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 24px; height: 24px;"
+            />
+            <span
+              class="m-0 text-xs leading-4 font-normal min-w-0 flex-1 truncate"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+              title="0x7a2b0000000000000000000000000000000009f0"
+            >
+              0x7a2b...09f0
+            </span>
+            <span
+              aria-label="Copy to clipboard"
+              class=""
+              data-mui-internal-clone-element="true"
+              style="cursor: pointer;"
+            >
+              <span
+                aria-label="Copy address"
+                class="flex cursor-pointer items-center text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-copy h-3 w-3"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="14"
+                    rx="2"
+                    ry="2"
+                    width="14"
+                    x="8"
+                    y="8"
+                  />
+                  <path
+                    d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+                  />
+                </svg>
+              </span>
+            </span>
+          </div>
+          <div
+            class="flex items-center gap-3 py-2.5"
+          >
+            <div
+              class="icon"
+              style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMTM1IDgyJSA2OSUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgyMzUgNDglIDM4JSkiIGQ9Ik0wLDBoMXYxaC0xek03LDBoMXYxaC0xek0yLDBoMXYxaC0xek01LDBoMXYxaC0xek0zLDBoMXYxaC0xek00LDBoMXYxaC0xek0wLDFoMXYxaC0xek03LDFoMXYxaC0xek0xLDFoMXYxaC0xek02LDFoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0wLDVoMXYxaC0xek03LDVoMXYxaC0xek0yLDVoMXYxaC0xek01LDVoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0xLDZoMXYxaC0xek02LDZoMXYxaC0xek0wLDdoMXYxaC0xek03LDdoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgyMjMgOTUlIDUwJSkiIGQ9Ik0wLDNoMXYxaC0xek03LDNoMXYxaC0xek0wLDRoMXYxaC0xek03LDRoMXYxaC0xeiIvPjwvc3ZnPg==); width: 24px; height: 24px;"
+            />
+            <span
+              class="m-0 text-xs leading-4 font-normal min-w-0 flex-1 truncate"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+              title="0x3c1d00000000000000000000000000000000ab42"
+            >
+              0x3c1d...ab42
+            </span>
+            <span
+              aria-label="Copy to clipboard"
+              class=""
+              data-mui-internal-clone-element="true"
+              style="cursor: pointer;"
+            >
+              <span
+                aria-label="Copy address"
+                class="flex cursor-pointer items-center text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-copy h-3 w-3"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="14"
+                    rx="2"
+                    ry="2"
+                    width="14"
+                    x="8"
+                    y="8"
+                  />
+                  <path
+                    d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+                  />
+                </svg>
+              </span>
+            </span>
+          </div>
+          <div
+            class="flex items-center gap-3 py-2.5"
+          >
+            <div
+              class="icon"
+              style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woNzIgNDIlIDYwJSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDMyNyA2NCUgNTQlKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTMsMGgxdjFoLTF6TTQsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTIsM2gxdjFoLTF6TTUsM2gxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTEsN2gxdjFoLTF6TTYsN2gxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDE1IDQ3JSA1NSUpIiBkPSJNMywxaDF2MWgtMXpNNCwxaDF2MWgtMXpNMywzaDF2MWgtMXpNNCwzaDF2MWgtMXpNMyw0aDF2MWgtMXpNNCw0aDF2MWgtMXpNMyw3aDF2MWgtMXpNNCw3aDF2MWgtMXoiLz48L3N2Zz4=); width: 24px; height: 24px;"
+            />
+            <span
+              class="m-0 text-xs leading-4 font-normal min-w-0 flex-1 truncate"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+              title="0xb0b00000000000000000000000000000000c0c0c"
+            >
+              0xb0b0...0c0c
+            </span>
+            <span
+              aria-label="Copy to clipboard"
+              class=""
+              data-mui-internal-clone-element="true"
+              style="cursor: pointer;"
+            >
+              <span
+                aria-label="Copy address"
+                class="flex cursor-pointer items-center text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-copy h-3 w-3"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="14"
+                    rx="2"
+                    ry="2"
+                    width="14"
+                    x="8"
+                    y="8"
+                  />
+                  <path
+                    d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+                  />
+                </svg>
+              </span>
+            </span>
+          </div>
+          <div
+            class="flex items-center gap-3 py-2.5"
+          >
+            <div
+              class="icon"
+              style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMTc1IDgwJSAzOSUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCg1IDQwJSAyNCUpIiBkPSJNMCwwaDF2MWgtMXpNNywwaDF2MWgtMXpNMCwxaDF2MWgtMXpNNywxaDF2MWgtMXpNMSwyaDF2MWgtMXpNNiwyaDF2MWgtMXpNMywyaDF2MWgtMXpNNCwyaDF2MWgtMXpNMCwzaDF2MWgtMXpNNywzaDF2MWgtMXpNMSwzaDF2MWgtMXpNNiwzaDF2MWgtMXpNMSw0aDF2MWgtMXpNNiw0aDF2MWgtMXpNMiw1aDF2MWgtMXpNNSw1aDF2MWgtMXpNMyw1aDF2MWgtMXpNNCw1aDF2MWgtMXpNMCw3aDF2MWgtMXpNNyw3aDF2MWgtMXpNMiw3aDF2MWgtMXpNNSw3aDF2MWgtMXoiLz48cGF0aCBmaWxsPSJoc2woNjAgNzglIDUzJSkiIGQ9Ik0xLDBoMXYxaC0xek02LDBoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0yLDJoMXYxaC0xek01LDJoMXYxaC0xek0wLDZoMXYxaC0xek03LDZoMXYxaC0xek0xLDZoMXYxaC0xek02LDZoMXYxaC0xeiIvPjwvc3ZnPg==); width: 24px; height: 24px;"
+            />
+            <span
+              class="m-0 text-xs leading-4 font-normal min-w-0 flex-1 truncate"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+              title="0x4444444444444444444444444444444444444444"
+            >
+              0x4444...4444
+            </span>
+            <span
+              aria-label="Copy to clipboard"
+              class=""
+              data-mui-internal-clone-element="true"
+              style="cursor: pointer;"
+            >
+              <span
+                aria-label="Copy address"
+                class="flex cursor-pointer items-center text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-copy h-3 w-3"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="14"
+                    rx="2"
+                    ry="2"
+                    width="14"
+                    x="8"
+                    y="8"
+                  />
+                  <path
+                    d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+                  />
+                </svg>
+              </span>
+            </span>
+          </div>
+          <div
+            class="flex items-center gap-3 py-2.5"
+          >
+            <div
+              class="icon"
+              style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjEgNjUlIDU2JSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDYxIDk0JSA4NSUpIiBkPSJNMSwwaDF2MWgtMXpNNiwwaDF2MWgtMXpNMCwxaDF2MWgtMXpNNywxaDF2MWgtMXpNMSwxaDF2MWgtMXpNNiwxaDF2MWgtMXpNMywxaDF2MWgtMXpNNCwxaDF2MWgtMXpNMCwyaDF2MWgtMXpNNywyaDF2MWgtMXpNMiwyaDF2MWgtMXpNNSwyaDF2MWgtMXpNMiwzaDF2MWgtMXpNNSwzaDF2MWgtMXpNMywzaDF2MWgtMXpNNCwzaDF2MWgtMXpNMSw0aDF2MWgtMXpNNiw0aDF2MWgtMXpNMiw0aDF2MWgtMXpNNSw0aDF2MWgtMXpNMCw1aDF2MWgtMXpNNyw1aDF2MWgtMXpNMyw1aDF2MWgtMXpNNCw1aDF2MWgtMXpNMSw3aDF2MWgtMXpNNiw3aDF2MWgtMXpNMiw3aDF2MWgtMXpNNSw3aDF2MWgtMXpNMyw3aDF2MWgtMXpNNCw3aDF2MWgtMXoiLz48cGF0aCBmaWxsPSJoc2woMzI1IDUzJSA1MyUpIiBkPSJNMiwwaDF2MWgtMXpNNSwwaDF2MWgtMXpNMywwaDF2MWgtMXpNNCwwaDF2MWgtMXpNMiwxaDF2MWgtMXpNNSwxaDF2MWgtMXpNMyw0aDF2MWgtMXpNNCw0aDF2MWgtMXpNMSw2aDF2MWgtMXpNNiw2aDF2MWgtMXpNMiw2aDF2MWgtMXpNNSw2aDF2MWgtMXoiLz48L3N2Zz4=); width: 24px; height: 24px;"
+            />
+            <span
+              class="m-0 text-xs leading-4 font-normal min-w-0 flex-1 truncate"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+              title="0x5555555555555555555555555555555555555555"
+            >
+              0x5555...5555
+            </span>
+            <span
+              aria-label="Copy to clipboard"
+              class=""
+              data-mui-internal-clone-element="true"
+              style="cursor: pointer;"
+            >
+              <span
+                aria-label="Copy address"
+                class="flex cursor-pointer items-center text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-copy h-3 w-3"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="14"
+                    rx="2"
+                    ry="2"
+                    width="14"
+                    x="8"
+                    y="8"
+                  />
+                  <path
+                    d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+                  />
+                </svg>
+              </span>
+            </span>
+          </div>
+          <div
+            class="flex items-center gap-3 py-2.5"
+          >
+            <div
+              class="icon"
+              style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMTA0IDQ5JSA0MCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgyNjAgNTQlIDQyJSkiIGQ9Ik0zLDBoMXYxaC0xek00LDBoMXYxaC0xek0wLDFoMXYxaC0xek03LDFoMXYxaC0xek0yLDJoMXYxaC0xek01LDJoMXYxaC0xek0zLDJoMXYxaC0xek00LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0wLDRoMXYxaC0xek03LDRoMXYxaC0xek0yLDRoMXYxaC0xek01LDRoMXYxaC0xek0wLDVoMXYxaC0xek03LDVoMXYxaC0xek0xLDZoMXYxaC0xek02LDZoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0wLDdoMXYxaC0xek03LDdoMXYxaC0xek0xLDdoMXYxaC0xek02LDdoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCgyNTkgNzYlIDc3JSkiIGQ9Ik0yLDBoMXYxaC0xek01LDBoMXYxaC0xek0yLDdoMXYxaC0xek01LDdoMXYxaC0xeiIvPjwvc3ZnPg==); width: 24px; height: 24px;"
+            />
+            <span
+              class="m-0 text-xs leading-4 font-normal min-w-0 flex-1 truncate"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+              title="0x6666666666666666666666666666666666666666"
+            >
+              0x6666...6666
+            </span>
+            <span
+              aria-label="Copy to clipboard"
+              class=""
+              data-mui-internal-clone-element="true"
+              style="cursor: pointer;"
+            >
+              <span
+                aria-label="Copy address"
+                class="flex cursor-pointer items-center text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-copy h-3 w-3"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    height="14"
+                    rx="2"
+                    ry="2"
+                    width="14"
+                    x="8"
+                    y="8"
+                  />
+                  <path
+                    d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+                  />
+                </svg>
+              </span>
+            </span>
+          </div>
+        </div>
+      </section>
+      <section
+        class="bg-card py-4 rounded-xl"
+      >
+        <span
+          class="m-0 text-xs leading-4 font-normal text-muted-foreground mb-1 block px-4"
+          data-slot="typography"
+          data-variant="paragraph-mini"
+        >
+          About
+        </span>
+        <div
+          aria-orientation="horizontal"
+          class="shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch bg-muted"
+          data-orientation="horizontal"
+          data-slot="separator"
+          role="separator"
+        />
+        <div
+          class="flex flex-col"
+        >
+          <div
+            class="flex items-center px-4 justify-between py-2.5"
+          >
+            <span
+              class="m-0 text-xs leading-4 font-normal text-muted-foreground"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+            >
+              Contract version
+            </span>
+            <span
+              class="m-0 text-xs leading-4 font-normal"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+            >
+              v1.4.1
+            </span>
+          </div>
+          <div
+            aria-orientation="horizontal"
+            class="shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch bg-muted"
+            data-orientation="horizontal"
+            data-slot="separator"
+            role="separator"
+          />
+          <div
+            class="flex items-center px-4 justify-between py-2.5"
+          >
+            <span
+              class="m-0 text-xs leading-4 font-normal text-muted-foreground"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+            >
+              Networks
+            </span>
+            <span
+              class="m-0 text-xs leading-4 font-normal"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+            >
+              Ethereum
+            </span>
+          </div>
+          <div
+            aria-orientation="horizontal"
+            class="shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch bg-muted"
+            data-orientation="horizontal"
+            data-slot="separator"
+            role="separator"
+          />
+          <div
+            class="flex items-center px-4 justify-between py-2.5"
+          >
+            <span
+              class="m-0 text-xs leading-4 font-normal text-muted-foreground"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+            >
+              Balance
+            </span>
+            <span
+              class="m-0 text-xs leading-4 font-normal"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+            >
+              $ 612,900.00
+            </span>
+          </div>
+          <div
+            aria-orientation="horizontal"
+            class="shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch bg-muted"
+            data-orientation="horizontal"
+            data-slot="separator"
+            role="separator"
+          />
+          <div
+            class="flex items-center px-4 justify-between py-2.5"
+          >
+            <span
+              class="m-0 text-xs leading-4 font-normal text-muted-foreground"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+            >
+              Last scanned
+            </span>
+            <span
+              class="m-0 text-xs leading-4 font-normal"
+              data-slot="typography"
+              data-variant="paragraph-mini"
+            >
+              —
+            </span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./SecurityDrawerDetails.stories Loading 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
+    style="--Paper-shadow: none;"
+  />
+</div>
+`;

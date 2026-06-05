@@ -1,7 +1,6 @@
 import type { ReactElement } from 'react'
 import { Box, CircularProgress, Paper, Skeleton, Stack, Typography } from '@mui/material'
 import type { ScanResult } from '@/features/security/types'
-import { GRADE_BG_BY_STRENGTH, STRENGTH_DESCRIPTIONS } from './constants'
 import { usePanelHeader } from './hooks/usePanelHeader'
 
 export type PanelHeaderProps = {
@@ -18,10 +17,10 @@ const PanelHeader = ({ results, isComplete }: PanelHeaderProps): ReactElement | 
   }
   if (state.status === 'empty') return null
 
-  const { score, level, color, actionLine } = state
+  const { score, band, actionLine } = state
 
   return (
-    <Paper sx={{ p: 2.5, borderRadius: '12px', mb: 3, backgroundColor: GRADE_BG_BY_STRENGTH[level] }} elevation={0}>
+    <Paper sx={{ p: 2.5, borderRadius: '12px', mb: 3, backgroundColor: band.background }} elevation={0}>
       <Stack direction="row" spacing={2.5} alignItems="center">
         <Box sx={{ position: 'relative', display: 'inline-flex', flexShrink: 0 }}>
           <CircularProgress variant="determinate" value={100} size={80} thickness={4} sx={{ color: 'border.light' }} />
@@ -31,7 +30,7 @@ const PanelHeader = ({ results, isComplete }: PanelHeaderProps): ReactElement | 
             size={80}
             thickness={4}
             sx={{
-              color,
+              color: band.color,
               position: 'absolute',
               left: 0,
               '& .MuiCircularProgress-circle': { strokeLinecap: 'round' },
@@ -45,10 +44,10 @@ const PanelHeader = ({ results, isComplete }: PanelHeaderProps): ReactElement | 
         </Box>
         <Box sx={{ minWidth: 0 }}>
           <Typography variant="h5" fontWeight={700} mb={0.5}>
-            {level}
+            {band.label}
           </Typography>
           <Typography variant="body2" color="text.primary" sx={{ lineHeight: 1.5, mb: 0.5 }}>
-            {STRENGTH_DESCRIPTIONS[level]}
+            {band.description}
           </Typography>
           <Typography variant="caption" color="text.secondary" fontWeight={600}>
             {actionLine}
