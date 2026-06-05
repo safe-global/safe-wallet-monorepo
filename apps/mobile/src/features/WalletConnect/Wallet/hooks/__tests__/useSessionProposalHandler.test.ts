@@ -4,7 +4,7 @@ import { getSdkError } from '@walletconnect/utils'
 import type { WalletKitTypes, IWalletKit } from '@reown/walletkit'
 import { renderHookWithStore, createTestStore, waitFor } from '@/src/tests/test-utils'
 import { useSessionProposalHandler } from '../useSessionProposalHandler'
-import { selectPending, walletKitSliceName } from '../../store/walletKitSlice'
+import { selectPending } from '../../store/walletKitSlice'
 import type { RootState } from '@/src/store'
 
 const mockToastShow = jest.fn()
@@ -17,7 +17,9 @@ const makeWalletKit = () => {
   let listener: ((p: WalletKitTypes.SessionProposal) => void) | undefined
   const wk = {
     on: jest.fn((event: string, cb: (p: WalletKitTypes.SessionProposal) => void) => {
-      if (event === 'session_proposal') listener = cb
+      if (event === 'session_proposal') {
+        listener = cb
+      }
     }),
     off: jest.fn(),
     rejectSession: jest.fn().mockResolvedValue(undefined),
