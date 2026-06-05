@@ -565,7 +565,7 @@ describe('useFlowActivationGuard', () => {
   })
 
   // -----------------------------------------------------------------------
-  // Require-login gate (REQUIRE_LOGIN_DISABLED feature flag is OFF)
+  // Require-login gate (REQUIRE_LOGIN feature flag is ON)
   // -----------------------------------------------------------------------
 
   describe('require-login gate enabled', () => {

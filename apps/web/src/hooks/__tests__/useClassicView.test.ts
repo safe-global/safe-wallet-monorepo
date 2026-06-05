@@ -46,20 +46,20 @@ describe('useClassicView', () => {
   })
 
   describe('useIsClassicViewFeatureEnabled', () => {
-    it('returns true when CLASSIC_VIEW_DISABLED is absent (default = available)', () => {
+    it('returns false when CLASSIC_VIEW is absent (default = hidden)', () => {
       setMockChain(mockChain([]))
 
       const { result } = renderHook(() => useIsClassicViewFeatureEnabled())
 
-      expect(result.current).toBe(true)
+      expect(result.current).toBe(false)
     })
 
-    it('returns false when CLASSIC_VIEW_DISABLED is set on the default chain', () => {
-      setMockChain(mockChain([FEATURES.CLASSIC_VIEW_DISABLED]))
+    it('returns true when CLASSIC_VIEW is set on the default chain', () => {
+      setMockChain(mockChain([FEATURES.CLASSIC_VIEW]))
 
       const { result } = renderHook(() => useIsClassicViewFeatureEnabled())
 
-      expect(result.current).toBe(false)
+      expect(result.current).toBe(true)
     })
 
     it('returns undefined while chains config has not loaded', () => {
@@ -104,7 +104,7 @@ describe('useClassicView', () => {
 
   describe('useIsClassicViewActive', () => {
     it('is true only when the feature is exposed AND the user has opted in', () => {
-      setMockChain(mockChain([]))
+      setMockChain(mockChain([FEATURES.CLASSIC_VIEW]))
 
       const { result } = renderHook(() => useIsClassicViewActive())
       expect(result.current).toBe(false)
@@ -116,7 +116,7 @@ describe('useClassicView', () => {
     })
 
     it('stays false when the feature is disabled by the flag, even if opted in', () => {
-      setMockChain(mockChain([FEATURES.CLASSIC_VIEW_DISABLED]))
+      setMockChain(mockChain([]))
 
       const { result } = renderHook(() => useIsClassicViewActive())
 

@@ -13,6 +13,7 @@ interface SurveyOptionCardProps {
 const SurveyOptionCard = ({ option, Icon, isPressed, onToggle }: SurveyOptionCardProps) => (
   <button
     type="button"
+    data-testid="survey-option-card"
     aria-pressed={isPressed}
     onClick={() => onToggle(option.key)}
     className={cn(
