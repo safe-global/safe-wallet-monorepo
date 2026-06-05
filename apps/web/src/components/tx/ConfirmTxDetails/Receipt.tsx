@@ -47,9 +47,6 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   const { safeTx, gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
   const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
   const { balances } = useBalances()
-  const safeTxHash = useSafeTxHash({ safeTxData })
-  const domainHash = useDomainHash()
-  const messageHash = useMessageHash({ safeTxData })
   const operation = Number(safeTxData.operation) as Operation
 
   const ToWrapper = grid ? Box : Fragment
@@ -83,6 +80,24 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   const displaySafeTxGas = previewTxData?.safeTxGas ?? safeTxData.safeTxGas
   const displayBaseGas = previewTxData?.baseGas ?? safeTxData.baseGas
   const displayGasPrice = previewTxData?.gasPrice ?? safeTxData.gasPrice
+
+  // The payload actually signed in Safe-pays carries the merged GTF fee fields. Build it once so the
+  // Data/JSON/Hashes tabs all reflect what the wallet will sign and not the bare pre-merge safeTx.
+  const displaySafeTxData = useMemo(
+    () => ({
+      ...safeTxData,
+      safeTxGas: displaySafeTxGas,
+      baseGas: displayBaseGas,
+      gasPrice: displayGasPrice,
+      gasToken: displayGasToken,
+      refundReceiver: displayRefundReceiver,
+    }),
+    [safeTxData, displaySafeTxGas, displayBaseGas, displayGasPrice, displayGasToken, displayRefundReceiver],
+  )
+
+  const safeTxHash = useSafeTxHash({ safeTxData: displaySafeTxData })
+  const domainHash = useDomainHash()
+  const messageHash = useMessageHash({ safeTxData: displaySafeTxData })
 
   return (
     <PaperViewToggle activeView={0} leftAlign={grid}>
@@ -253,7 +268,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
           title: 'JSON',
           content: (
             <ScrollWrapper>
-              <JsonView data={safeTxData} />
+              <JsonView data={displaySafeTxData} />
             </ScrollWrapper>
           ),
         },
