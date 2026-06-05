@@ -23,7 +23,7 @@
  */
 import { test, expect } from '@playwright/test'
 import { spawn, type ChildProcess } from 'node:child_process'
-import { rmSync } from 'node:fs'
+import { rmSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -62,6 +62,18 @@ const TRIGGER_ROUTES = [`/transactions/history?safe=${SAFE}`, '/new-safe/create'
 
 const CRASH_SIGNATURE = '__webpack_modules__[moduleId] is not a function'
 
+// How many full warmup→edit→trigger cycles to run. Each cycle includes a real
+// source edit (HMR rebuild) — the actual real-world trigger for the crash.
+const CYCLES = Number(process.env.STRESS_CYCLES || 3)
+// FAST mode: few routes, many edit cycles — maximises HMR churn (the real
+// trigger) while minimising slow cold compiles, for quick config iteration.
+const FAST = process.env.STRESS_FAST === '1'
+
+// A shared component imported by (nearly) every route — editing it forces a
+// broad HMR recompile, the strongest churn we can induce. Touched + reverted
+// in-test; never left dirty.
+const HMR_TARGET = path.join(WEB_DIR, 'src/components/common/PageLayout/index.tsx')
+
 let server: ChildProcess
 let serverOutput = ''
 let serverExited = false
@@ -71,9 +83,18 @@ test.describe('dev server module-id stability', { tag: '@regression' }, () => {
   test.beforeAll(async () => {
     rmSync(path.join(WEB_DIR, '.next'), { recursive: true, force: true })
 
-    server = spawn('npx', ['next', 'dev', '-p', String(PORT)], {
+    // BUNDLER selects the dev bundler:
+    //   rspack (default) — USE_RSPACK=1, the engine with the moduleId crash
+    //   turbopack        — `next dev --turbopack` (different engine)
+    //   webpack          — USE_RSPACK=0, no flag = Next's original webpack bundler
+    const bundler = process.env.BUNDLER || 'rspack'
+    const args = ['next', 'dev', '-p', String(PORT)]
+    if (bundler === 'turbopack') args.push('--turbopack')
+    server = spawn('npx', args, {
       cwd: WEB_DIR,
-      env: { ...process.env, USE_RSPACK: '1', NO_POLL: '1' },
+      // Polling ON (no NO_POLL) so the in-test source edits actually trigger
+      // HMR rebuilds — the strongest chunk-graph churn and the real-world repro.
+      env: { ...process.env, USE_RSPACK: bundler === 'rspack' ? '1' : '0' },
       stdio: ['ignore', 'pipe', 'pipe'],
     })
     server.stdout?.on('data', (d: Buffer) => {
@@ -133,21 +154,41 @@ test.describe('dev server module-id stability', { tag: '@regression' }, () => {
       }
     }
 
-    for (const route of WARMUP_ROUTES) {
-      await visit(route, 'warmup')
-      // Give on-demand entries time to settle; the real-world repro involves
-      // idle-eviction (~25s) and recompile cycles, not just cold compiles.
-      await page.waitForTimeout(2_000)
+    // Edit a shared source file to force an HMR rebuild, then restore it.
+    // This is the real-world churn that triggers chunk-graph drift far more
+    // aggressively than cold on-demand compiles alone.
+    const original = readFileSync(HMR_TARGET, 'utf-8')
+    let editN = 0
+    const editAndRestore = async () => {
+      writeFileSync(HMR_TARGET, `${original}\n// stress-edit ${++editN}\n`)
+      await page.waitForTimeout(2_500) // let the HMR rebuild land
+      writeFileSync(HMR_TARGET, original)
+      await page.waitForTimeout(2_500)
+      expect(serverExited, `dev server exited after HMR edit #${editN}`).toBe(false)
+      expect(serverOutput, `module-id crash after HMR edit #${editN}`).not.toContain(CRASH_SIGNATURE)
     }
 
-    // Second pass: revisit early routes after they may have been evicted —
-    // eviction + recompile is where ids get reassigned under the old graph.
-    for (const route of WARMUP_ROUTES.slice(0, 8)) {
-      await visit(route, 'revisit')
-    }
+    // FAST: only the heavy tx-flow routes that crash, but many edit cycles.
+    const warmup = FAST ? WARMUP_ROUTES.slice(0, 5) : WARMUP_ROUTES
+    const triggers = FAST ? TRIGGER_ROUTES : [...TRIGGER_ROUTES, ...WARMUP_ROUTES.slice(0, 6)]
+    const cycles = FAST ? Math.max(CYCLES, 5) : CYCLES
 
-    for (const route of TRIGGER_ROUTES) {
-      await visit(route, 'trigger')
+    try {
+      for (let cycle = 1; cycle <= cycles; cycle++) {
+        for (const route of warmup) {
+          await visit(route, `c${cycle}-warmup`)
+        }
+        // HMR churn mid-cycle (the strongest trigger), then hammer the heavy
+        // tx-flow / network-selector routes that historically blew up.
+        await editAndRestore()
+        for (const route of triggers) {
+          await visit(route, `c${cycle}-trigger`)
+        }
+        await editAndRestore()
+      }
+    } finally {
+      // Never leave the working tree dirty, even on failure.
+      writeFileSync(HMR_TARGET, original)
     }
   })
 })
