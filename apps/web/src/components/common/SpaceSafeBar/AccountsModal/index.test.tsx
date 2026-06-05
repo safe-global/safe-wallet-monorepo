@@ -33,17 +33,14 @@ jest.mock('@/features/spaces/components/ConnectWalletHint', () => {
 jest.mock('./SafeItemCard', () => {
   const MockSafeItemCard = ({
     safeItem,
-    hidePinControls,
     openSafeTrackingLabel,
   }: {
     safeItem: { chainId: string; address: string }
-    hidePinControls?: boolean
     openSafeTrackingLabel?: string
   }) => (
     <div
       data-testid="safe-item-card-mock"
       data-key={`${safeItem.chainId}:${safeItem.address}`}
-      data-hide-pin={String(Boolean(hidePinControls))}
       data-open-label={openSafeTrackingLabel}
     />
   )
@@ -52,18 +49,8 @@ jest.mock('./SafeItemCard', () => {
 })
 
 jest.mock('./MultiSafeItemCard', () => {
-  const MockMultiSafeItemCard = ({
-    item,
-    hidePinControls,
-  }: {
-    item: { address: string }
-    hidePinControls?: boolean
-  }) => (
-    <div
-      data-testid="multi-safe-item-card-mock"
-      data-address={item.address}
-      data-hide-pin={String(Boolean(hidePinControls))}
-    />
+  const MockMultiSafeItemCard = ({ item }: { item: { address: string } }) => (
+    <div data-testid="multi-safe-item-card-mock" data-address={item.address} />
   )
   MockMultiSafeItemCard.displayName = 'MultiSafeItemCard'
   return { __esModule: true, default: MockMultiSafeItemCard }
@@ -123,22 +110,6 @@ describe('AccountsModal', () => {
 
     expect(screen.getByText('Explore other Safes')).toBeInTheDocument()
     expect(screen.queryByText('All Accounts')).not.toBeInTheDocument()
-  })
-
-  it('passes hidePinControls=false to cards when not in a qualified space', () => {
-    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ isQualifiedSafe: false }))
-
-    render(<AccountsModal open onClose={jest.fn()} />)
-
-    expect(screen.getByTestId('safe-item-card-mock').getAttribute('data-hide-pin')).toBe('false')
-  })
-
-  it('passes hidePinControls=true to cards when in a qualified space', () => {
-    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ isQualifiedSafe: true }))
-
-    render(<AccountsModal open onClose={jest.fn()} />)
-
-    expect(screen.getByTestId('safe-item-card-mock').getAttribute('data-hide-pin')).toBe('true')
   })
 
   it('renders the empty state when no items match', () => {

@@ -33,7 +33,6 @@ interface SafeItemCardProps {
   isSimilar?: boolean
   onClose: () => void
   openSafeTrackingLabel?: OVERVIEW_LABELS
-  hidePinControls?: boolean
 }
 
 const SafeItemCard = ({
@@ -41,7 +40,6 @@ const SafeItemCard = ({
   isSimilar,
   onClose,
   openSafeTrackingLabel = OVERVIEW_LABELS.top_bar,
-  hidePinControls = false,
 }: SafeItemCardProps) => {
   const dispatch = useAppDispatch()
   const currency = useAppSelector(selectCurrency)
@@ -155,32 +153,28 @@ const SafeItemCard = ({
         <div className={mainContentClasses}>{mainContent}</div>
       )}
 
-      {!hidePinControls && (
-        <>
-          {/* Pin/Unpin toggle */}
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <button
-                  type="button"
-                  onClick={handleTogglePin}
-                  className="shrink-0 cursor-pointer rounded p-1 hover:bg-muted"
-                  aria-label={safeItem.isPinned ? 'Unpin safe' : 'Pin safe'}
-                  data-testid="bookmark-icon"
-                />
-              }
-            >
-              <Bookmark
-                className={`size-4 ${safeItem.isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
-              />
-            </TooltipTrigger>
-            <TooltipContent>{safeItem.isPinned ? 'Remove from trusted Safes' : 'Add to trusted Safes'}</TooltipContent>
-          </Tooltip>
+      {/* Pin/Unpin toggle */}
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              onClick={handleTogglePin}
+              className="shrink-0 cursor-pointer rounded p-1 hover:bg-muted"
+              aria-label={safeItem.isPinned ? 'Unpin safe' : 'Pin safe'}
+              data-testid="bookmark-icon"
+            />
+          }
+        >
+          <Bookmark
+            className={`size-4 ${safeItem.isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
+          />
+        </TooltipTrigger>
+        <TooltipContent>{safeItem.isPinned ? 'Remove from trusted Safes' : 'Add to trusted Safes'}</TooltipContent>
+      </Tooltip>
 
-          {/* Context menu */}
-          <PinnedSafeContextMenu address={safeItem.address} chainId={safeItem.chainId} name={displayName} />
-        </>
-      )}
+      {/* Context menu */}
+      <PinnedSafeContextMenu address={safeItem.address} chainId={safeItem.chainId} name={displayName} />
     </div>
   )
 }

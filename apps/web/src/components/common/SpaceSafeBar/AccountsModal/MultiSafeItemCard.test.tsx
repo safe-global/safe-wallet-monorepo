@@ -110,12 +110,6 @@ describe('MultiSafeItemCard', () => {
     expect(screen.getByRole('button', { name: /pin safe/i })).toBeInTheDocument()
   })
 
-  it('hides the pin/unpin button when hidePinControls is set (space-safe context)', () => {
-    render(<MultiSafeItemCard item={buildMultiItem()} onClose={noopClose} hidePinControls />)
-
-    expect(screen.queryByRole('button', { name: /pin safe/i })).not.toBeInTheDocument()
-  })
-
   it('renders the full address with bolded first/last 4 hex chars when flagged as similar', () => {
     const { container } = render(<MultiSafeItemCard item={buildMultiItem()} isSimilar onClose={noopClose} />)
 

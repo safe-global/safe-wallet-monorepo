@@ -29,7 +29,6 @@ interface AccountsModalProps {
 interface SectionOptions {
   similarAddresses: Set<string>
   onClose: () => void
-  hidePinControls: boolean
   headerPaddingTopClass: string
   openSafeTrackingLabel: OVERVIEW_LABELS
   headerTestId?: string
@@ -52,7 +51,6 @@ const renderSection = (title: string, items: AllSafeItems, opts: SectionOptions)
             item={item}
             isSimilar={opts.similarAddresses.has(item.address.toLowerCase())}
             onClose={opts.onClose}
-            hidePinControls={opts.hidePinControls}
             openSafeTrackingLabel={opts.openSafeTrackingLabel}
           />
         ) : (
@@ -61,7 +59,6 @@ const renderSection = (title: string, items: AllSafeItems, opts: SectionOptions)
             safeItem={item}
             isSimilar={opts.similarAddresses.has(item.address.toLowerCase())}
             onClose={opts.onClose}
-            hidePinControls={opts.hidePinControls}
             openSafeTrackingLabel={opts.openSafeTrackingLabel}
           />
         ),
@@ -154,7 +151,6 @@ const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar 
               {renderSection('Trusted Safes', trustedItems, {
                 similarAddresses,
                 onClose,
-                hidePinControls: isQualifiedSafe,
                 headerPaddingTopClass: 'pt-1',
                 openSafeTrackingLabel: trackingLabel,
                 headerTestId: 'pinned-accounts',
@@ -162,7 +158,6 @@ const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar 
               {renderSection('Other Safes', otherItems, {
                 similarAddresses,
                 onClose,
-                hidePinControls: isQualifiedSafe,
                 headerPaddingTopClass: 'pt-2',
                 openSafeTrackingLabel: trackingLabel,
               })}
