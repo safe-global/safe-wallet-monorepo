@@ -35,12 +35,15 @@ jest.mock('../../hooks/useWalletConnectScan', () => ({
 }))
 
 // QrCamera renders its centerOverlay and footer so we can assert per-status content and dev buttons.
+// The overlay is wrapped in a marker only when actually provided, so tests can distinguish
+// "no overlay passed" (scanning — QrCamera keeps its own CTA) from "overlay renders nothing".
 jest.mock('@/src/components/Camera', () => {
   const React = require('react')
+  const { View } = require('react-native')
   return {
     QrCamera: ({ centerOverlay, footer }: { centerOverlay?: React.ReactNode; footer?: React.ReactNode }) => (
       <>
-        {centerOverlay}
+        {centerOverlay != null ? <View testID="wc-center-overlay">{centerOverlay}</View> : null}
         {footer}
       </>
     ),
@@ -53,10 +56,9 @@ describe('WalletConnectScanContainer', () => {
     mockUseScan.mockReturnValue(baseHook)
   })
 
-  it('shows no center overlay in the scanning state', () => {
-    const { queryByText } = render(<WalletConnectScanContainer />)
-    expect(queryByText('Scan a QR code')).toBeNull()
-    expect(queryByText('Connecting…')).toBeNull()
+  it('passes no center overlay in the scanning state so QrCamera keeps its own CTA', () => {
+    const { queryByTestId } = render(<WalletConnectScanContainer />)
+    expect(queryByTestId('wc-center-overlay')).toBeNull()
   })
 
   it('shows the connecting indicator while connecting', () => {

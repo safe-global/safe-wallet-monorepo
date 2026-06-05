@@ -74,6 +74,8 @@ function CenterOverlay({
       return <ConnectingOverlay />
     case 'error':
       return <ErrorOverlay message={errorMessage} onTryAgain={onTryAgain} />
+    default:
+      return null
   }
 }
 
@@ -92,11 +94,13 @@ export function WalletConnectScanContainer() {
 
   const granted = permission === 'granted'
 
-  // Overlay only owns the lens once permission is granted; otherwise QrCamera shows its
-  // own permission CTA + heading.
-  const centerOverlay = granted ? (
-    <CenterOverlay status={status} errorMessage={errorMessage} onTryAgain={onTryAgain} />
-  ) : undefined
+  // Overlay only owns the lens while connecting/erroring; in the scanning state we leave it
+  // undefined so QrCamera keeps its own tap-to-reactivate CTA. Otherwise QrCamera shows its
+  // permission CTA + heading.
+  const centerOverlay =
+    granted && status !== 'scanning' ? (
+      <CenterOverlay status={status} errorMessage={errorMessage} onTryAgain={onTryAgain} />
+    ) : undefined
 
   return (
     <QrCamera
