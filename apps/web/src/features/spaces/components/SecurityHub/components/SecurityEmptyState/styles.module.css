@@ -1,0 +1,5 @@
+@reference '../../../../../../styles/shadcn.css';
+
+.emptyCardState {
+  @apply rounded-lg relative w-full md:max-w-[336px] max-w-full transition-all md:min-h-[244px] min-h-[200px] p-6 bg-card flex justify-between cursor-pointer hover:-translate-y-1 hover:shadow-[0_18px_36px_-16px_rgba(0,0,0,0.12)];
+}

@@ -17,6 +17,8 @@ import {
 } from '@/features/multichain'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import { ActionRequiredPanel } from './ActionRequiredPanel'
+import { VulnerableModuleWarning } from './ActionRequiredPanel/VulnerableModuleWarning'
+import { useVulnerableSafe } from '@/features/security'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import NewsDisclaimers from '@/components/dashboard/NewsCarousel/NewsDisclaimers'
 import NewsCarousel, { type BannerItem } from '@/components/dashboard/NewsCarousel'
@@ -53,6 +55,7 @@ const Dashboard = (): ReactElement => {
   const { NonPinnedWarning } = useLoadFeature(MyAccountsFeature)
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const supportsRecovery = useIsRecoverySupported()
+  const isVulnerableSafe = useVulnerableSafe()
 
   const { balances, loaded: balancesLoaded } = useVisibleBalances()
   const items = useMemo(() => {
@@ -125,7 +128,8 @@ const Dashboard = (): ReactElement => {
         </div>
 
         <div className={css.rightCol}>
-          <ActionRequiredPanel>
+          <ActionRequiredPanel defaultExpanded={isVulnerableSafe}>
+            <VulnerableModuleWarning isVulnerable={isVulnerableSafe} />
             {supportsRecovery && <RecoveryHeader />}
             <InconsistentSignerSetupWarning />
             <OutdatedMastercopyWarning />
