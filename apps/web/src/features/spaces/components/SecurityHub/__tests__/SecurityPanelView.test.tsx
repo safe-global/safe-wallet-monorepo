@@ -258,10 +258,9 @@ describe('SecurityPanelView', () => {
           modules: [{ value: '0xbbbb000000000000000000000000000000000002', name: 'Mystery Module' }],
         }),
       })
-      // Unrecognized module → failing → visible at top. Title + evidence both render the name;
-      // assert at least one match exists and that it's a body2 title element.
-      const matches = screen.getAllByText('Mystery Module')
-      expect(matches.length).toBeGreaterThanOrEqual(1)
+      // Unrecognized module → failing → visible at top under its grade group, without expanding
+      // the passing accordion. The row title flags it; the module name lives in the expanded evidence.
+      expect(screen.getByText('Unrecognized module detected')).toBeInTheDocument()
     })
   })
 

@@ -159,8 +159,13 @@ const WorkspaceHealthCard = ({
         <div>
           {lastScannedAt && (
             <div className="mt-2 flex flex-col gap-1">
-              <Button size="lg" disabled={isScanning} className="self-end" onClick={isScanning ? undefined : onRescan}>
-                <RefreshCw className={cn('size-4 text-green-500', isScanning && 'animate-spin')} />
+              <Button
+                variant="outline"
+                disabled={isScanning}
+                className="self-end px-6 hover:bg-border"
+                onClick={isScanning ? undefined : onRescan}
+              >
+                <RefreshCw className={cn('size-5', isScanning && 'animate-spin')} strokeWidth={1.5} />
 
                 {isScanning ? 'Scanning...' : 'Re-scan'}
               </Button>

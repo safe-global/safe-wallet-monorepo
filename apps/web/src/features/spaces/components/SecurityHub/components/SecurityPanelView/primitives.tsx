@@ -2,8 +2,11 @@ import { type ReactElement, type ReactNode, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { isAddress } from 'ethers'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { cn } from '@/utils/cn'
 import { Typography } from '@/components/ui/typography'
+import CopyButton from '@/components/common/CopyButton'
 import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SEVERITY_RANK, type SecurityContract } from '@/features/security'
 import { resolveStatusTone, SeverityIcon, type SeverityTone } from '../SeverityIcon/SeverityIcon'
@@ -185,9 +188,18 @@ export const EvidenceList = ({
                 <Typography variant="paragraph-mini" color="muted" className="w-24 shrink-0 leading-normal">
                   {item.label}
                 </Typography>
-                <Typography variant="paragraph-mini" className="leading-normal break-words">
-                  {item.value}
-                </Typography>
+                {isAddress(item.value) ? (
+                  <span className="flex items-center gap-1">
+                    <Typography variant="paragraph-mini" className="leading-normal">
+                      {shortenAddress(item.value)}
+                    </Typography>
+                    <CopyButton text={item.value} className="!p-0.5 text-muted-foreground [&_svg]:!size-3" />
+                  </span>
+                ) : (
+                  <Typography variant="paragraph-mini" className="leading-normal break-words">
+                    {item.value}
+                  </Typography>
+                )}
               </div>
             ),
           )}

@@ -3,7 +3,6 @@ import { Button } from '@mui/material'
 import type { EvidenceItem, SafeGrade, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import {
   EvidenceList,
   Row,
@@ -325,7 +324,7 @@ export const useSecurityChecks = (
           const status: ScanResult['status'] = trusted ? 'clear' : 'issue'
           // Show the module's name as the title for both trusted and unrecognized modules — users
           // need to identify *which* module when it's flagged. The icon + intro convey the verdict.
-          const title = mod.name || shortenAddress(mod.value)
+          const title = 'Unrecognized module detected'
           const perModuleEvidence: EvidenceItem[] = [
             { label: 'Address', value: mod.value },
             ...(mod.name ? [{ label: 'Name', value: mod.name }] : []),
