@@ -3,19 +3,19 @@
 }
 
 /* Scroll buttons */
-.tabs :global .MuiTabs-scrollButtons.Mui-disabled {
+.tabs :global(.MuiTabs-scrollButtons.Mui-disabled) {
   opacity: 0.3;
 }
 
-.tabs :global .MuiTabScrollButton-root ~ .MuiTabs-scroller p {
+.tabs :global(.MuiTabScrollButton-root ~ .MuiTabs-scroller p) {
   padding-bottom: 0;
 }
 
-.tabs :global .MuiTabScrollButton-root:first-of-type {
+.tabs :global(.MuiTabScrollButton-root:first-of-type) {
   margin-left: calc(var(--space-2) * -1);
 }
 
-.tabs :global .MuiTabScrollButton-root:last-of-type {
+.tabs :global(.MuiTabScrollButton-root:last-of-type) {
   margin-right: calc(var(--space-2) * -1);
 }
 

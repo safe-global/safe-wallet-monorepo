@@ -27,7 +27,7 @@
   height: 42px;
 }
 
-[data-theme='dark'] .allocationBadge :global .MuiBadge-dot {
+[data-theme='dark'] .allocationBadge :global(.MuiBadge-dot) {
   background-color: var(--color-primary-main);
 }
 

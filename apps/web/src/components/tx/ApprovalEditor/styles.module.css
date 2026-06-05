@@ -12,8 +12,8 @@
   border: 1px var(--color-warning-main) solid !important;
 }
 
-.warningAccordion :global .Mui-expanded.MuiAccordionSummary-root,
-.warningAccordion :global .MuiAccordionSummary-root:hover {
+.warningAccordion :global(.Mui-expanded.MuiAccordionSummary-root),
+.warningAccordion :global(.MuiAccordionSummary-root:hover) {
   background-color: var(--color-warning-background);
 }
 
@@ -28,7 +28,7 @@
   width: 100%;
 }
 
-.alert :global .MuiAlert-message {
+.alert :global(.MuiAlert-message) {
   width: 100%;
 }
 

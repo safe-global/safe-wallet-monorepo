@@ -20,11 +20,11 @@
   border-bottom: 1px solid var(--color-border-light);
 }
 
-.header :global .MuiCardHeader-avatar {
+.header :global(.MuiCardHeader-avatar) {
   margin-right: var(--space-2);
 }
 
-.header :global .MuiCardHeader-action {
+.header :global(.MuiCardHeader-action) {
   align-self: center;
   margin: 0;
 }

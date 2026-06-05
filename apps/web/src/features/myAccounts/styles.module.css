@@ -79,7 +79,7 @@
   }
 }
 
-.safeList :global .MuiAccordionSummary-root {
+.safeList :global(.MuiAccordionSummary-root) {
   background: var(--color-background-paper) !important;
   padding-left: 0;
   min-height: 0;
@@ -87,7 +87,7 @@
   vertical-align: middle;
 }
 
-.search :global .MuiInputBase-root {
+.search :global(.MuiInputBase-root) {
   border: 1px solid transparent !important;
 }
 

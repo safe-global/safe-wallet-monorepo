@@ -1,4 +1,4 @@
-.msg :global .MuiInputBase-input {
+.msg :global(.MuiInputBase-input) {
   font-family: Menlo, 'Cascadia Code', monospace;
   font-size: 0.85rem;
   -webkit-text-fill-color: var(--color-text-primary);

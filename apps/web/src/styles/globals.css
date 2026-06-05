@@ -1,15 +1,9 @@
 @import url(./vars.css);
 @import url(./onboard.css);
-@import url(/fonts/fonts.css);
 /**
-* ^^^^^^^
-* Some IDEs show the fonts file above as not existing, but it is.
-* If you modify the path to it make sure that the file is also loaded on the
-* actual website.
-* Fun fact: if this comment block is above the @import url(/fonts/fonts.css);
-* nextjs's build will incorrectly place the @import in the middle of the file
-* and the fonts won't load. More info on @import:
-* https://developer.mozilla.org/en-US/docs/Web/CSS/@import#description
+* fonts.css is loaded via a <link> tag in _document.tsx — Turbopack (the
+* default bundler since Next 16) cannot resolve a server-relative
+* @import url(/fonts/fonts.css) from here.
 */
 
 html,

@@ -12,6 +12,6 @@
   border-color: var(--color-secondary-light) !important;
 }
 
-.expanded :global .MuiAccordionSummary-root {
+.expanded :global(.MuiAccordionSummary-root) {
   background-color: var(--color-secondary-background);
 }

@@ -1,12 +1,12 @@
-.container :global .MuiGrid-item {
+.container :global(.MuiGrid-item) {
   padding: var(--space-3) 0;
 }
 
-.container :global .MuiGrid-item:first-of-type {
+.container :global(.MuiGrid-item:first-of-type) {
   padding: 0 0 var(--space-3) 0;
 }
 
-.container :global .MuiGrid-item:last-of-type {
+.container :global(.MuiGrid-item:last-of-type) {
   padding: var(--space-3) 0 0 0;
 }
 

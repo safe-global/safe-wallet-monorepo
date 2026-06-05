@@ -7,7 +7,7 @@
   background-color: var(--color-background-main);
 }
 
-.badge :global .MuiBadge-badge {
+.badge :global(.MuiBadge-badge) {
   border: 2px solid var(--color-background-paper);
   border-radius: 50%;
   box-sizing: content-box;

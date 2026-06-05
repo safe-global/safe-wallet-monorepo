@@ -26,6 +26,6 @@
 }
 
 /* Remove default margins from warning components */
-.warningsContainer :global(> *) {
+.warningsContainer > :global(*) {
   margin: 0 !important;
 }

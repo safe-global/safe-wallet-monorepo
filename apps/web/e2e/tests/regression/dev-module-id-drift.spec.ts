@@ -87,7 +87,8 @@ test.describe('dev server module-id stability', { tag: '@regression' }, () => {
     //   rspack (default) — USE_RSPACK=1, the engine with the moduleId crash
     //   turbopack        — `next dev --turbopack` (different engine)
     //   webpack          — USE_RSPACK=0, no flag = Next's original webpack bundler
-    const bundler = process.env.BUNDLER || 'rspack'
+    // Turbopack is the default since Next 16 (and the bundler we now dev with).
+    const bundler = process.env.BUNDLER || 'turbopack'
     const args = ['next', 'dev', '-p', String(PORT)]
     if (bundler === 'turbopack') args.push('--turbopack')
     server = spawn('npx', args, {

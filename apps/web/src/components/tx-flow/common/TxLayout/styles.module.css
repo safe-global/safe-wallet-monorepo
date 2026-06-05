@@ -130,7 +130,7 @@
     margin-top: unset;
   }
 
-  .widget :global .MuiPaper-root {
+  .widget :global(.MuiPaper-root) {
     height: 100%;
   }
 

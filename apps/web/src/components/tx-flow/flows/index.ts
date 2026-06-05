@@ -1,31 +1,33 @@
-import dynamic from 'next/dynamic'
+// EXP14: static re-exports instead of next/dynamic — Next dev keeps stale lazy
+// SSR chunks after HMR edits (vercel/next.js#31015, #93293) causing
+// __webpack_modules__[moduleId] crashes. Documented workaround: static imports.
 
-export const AddOwnerFlow = dynamic(() => import('./AddOwner'))
-export const CancelRecoveryFlow = dynamic(() => import('./CancelRecovery'))
-export const ChangeThresholdFlow = dynamic(() => import('./ChangeThreshold'))
-export const ConfirmBatchFlow = dynamic(() => import('./ConfirmBatch'))
-export const ConfirmTxFlow = dynamic(() => import('./ConfirmTx'))
-export const CreateNestedSafeFlow = dynamic(() => import('./CreateNestedSafe'))
-export const ExecuteBatchFlow = dynamic(() => import('./ExecuteBatch'))
-export const ManageSignersFlow = dynamic(() => import('./ManagerSigners'))
-export const MigrateSafeL2Flow = dynamic(() => import('./MigrateSafeL2'))
-export const NestedTxSuccessScreenFlow = dynamic(() => import('./NestedTxSuccessScreen'))
-export const NewSpendingLimitFlow = dynamic(() => import('./NewSpendingLimit'))
-export const NewTxFlow = dynamic(() => import('./NewTx'))
-export const NftTransferFlow = dynamic(() => import('./NftTransfer'))
-export const RecoveryAttemptFlow = dynamic(() => import('./RecoveryAttempt'))
-export const RecoverAccountFlow = dynamic(() => import('./RecoverAccount'))
-export const RemoveGuardFlow = dynamic(() => import('./RemoveGuard'))
-export const RemoveModuleFlow = dynamic(() => import('./RemoveModule'))
-export const RemoveOwnerFlow = dynamic(() => import('./RemoveOwner'))
-export const RemoveRecoveryFlow = dynamic(() => import('./RemoveRecovery'))
-export const RemoveSpendingLimitFlow = dynamic(() => import('./RemoveSpendingLimit'))
-export const ReplaceOwnerFlow = dynamic(() => import('./ReplaceOwner'))
-export const ReplaceTxFlow = dynamic(() => import('./ReplaceTx'))
-export const SafeAppsTxFlow = dynamic(() => import('./SafeAppsTx'))
-export const SignMessageFlow = dynamic(() => import('./SignMessage'))
-export const SignMessageOnChainFlow = dynamic(() => import('./SignMessageOnChain'))
-export const SuccessScreenFlow = dynamic(() => import('./SuccessScreen'))
-export const TokenTransferFlow = dynamic(() => import('./TokenTransfer'))
-export const UpdateSafeFlow = dynamic(() => import('./UpdateSafe'))
-export const UpsertRecoveryFlow = dynamic(() => import('./UpsertRecovery'))
+export { default as AddOwnerFlow } from './AddOwner'
+export { default as CancelRecoveryFlow } from './CancelRecovery'
+export { default as ChangeThresholdFlow } from './ChangeThreshold'
+export { default as ConfirmBatchFlow } from './ConfirmBatch'
+export { default as ConfirmTxFlow } from './ConfirmTx'
+export { default as CreateNestedSafeFlow } from './CreateNestedSafe'
+export { default as ExecuteBatchFlow } from './ExecuteBatch'
+export { default as ManageSignersFlow } from './ManagerSigners'
+export { default as MigrateSafeL2Flow } from './MigrateSafeL2'
+export { default as NestedTxSuccessScreenFlow } from './NestedTxSuccessScreen'
+export { default as NewSpendingLimitFlow } from './NewSpendingLimit'
+export { default as NewTxFlow } from './NewTx'
+export { default as NftTransferFlow } from './NftTransfer'
+export { default as RecoveryAttemptFlow } from './RecoveryAttempt'
+export { default as RecoverAccountFlow } from './RecoverAccount'
+export { default as RemoveGuardFlow } from './RemoveGuard'
+export { default as RemoveModuleFlow } from './RemoveModule'
+export { default as RemoveOwnerFlow } from './RemoveOwner'
+export { default as RemoveRecoveryFlow } from './RemoveRecovery'
+export { default as RemoveSpendingLimitFlow } from './RemoveSpendingLimit'
+export { default as ReplaceOwnerFlow } from './ReplaceOwner'
+export { default as ReplaceTxFlow } from './ReplaceTx'
+export { default as SafeAppsTxFlow } from './SafeAppsTx'
+export { default as SignMessageFlow } from './SignMessage'
+export { default as SignMessageOnChainFlow } from './SignMessageOnChain'
+export { default as SuccessScreenFlow } from './SuccessScreen'
+export { default as TokenTransferFlow } from './TokenTransfer'
+export { default as UpdateSafeFlow } from './UpdateSafe'
+export { default as UpsertRecoveryFlow } from './UpsertRecovery'

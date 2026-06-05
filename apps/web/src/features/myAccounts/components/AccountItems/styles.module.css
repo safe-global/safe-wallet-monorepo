@@ -17,12 +17,12 @@
   background-color: none;
 }
 
-.listItem :global .MuiAccordion-root,
-.listItem :global .MuiAccordion-root:hover > .MuiAccordionSummary-root {
+.listItem :global(.MuiAccordion-root),
+.listItem :global(.MuiAccordion-root:hover > .MuiAccordionSummary-root) {
   background-color: transparent;
 }
 
-.listItem :global .MuiAccordion-root.Mui-expanded {
+.listItem :global(.MuiAccordion-root.Mui-expanded) {
   background-color: var(--color-background-paper);
 }
 
@@ -139,7 +139,7 @@
   text-overflow: ellipsis;
 }
 
-.safeAddress :global .ethHashInfo-name {
+.safeAddress :global(.ethHashInfo-name) {
   font-weight: bold;
 }
 

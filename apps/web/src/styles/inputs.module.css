@@ -1,14 +1,14 @@
 /* TODO: Apply these styles in the MUI theme once its part of this repository */
-.input :global .MuiFormHelperText-root {
+.input :global(.MuiFormHelperText-root) {
   position: absolute;
   bottom: -20px;
 }
 
-.input :global .MuiFormLabel-root:not(.MuiInputLabel-shrink) {
+.input :global(.MuiFormLabel-root:not(.MuiInputLabel-shrink)) {
   transform: translate(16px, 22px) scale(1);
 }
 
-.input :global .MuiInputBase-root {
+.input :global(.MuiInputBase-root) {
   background-color: var(--color-background-paper);
   border-radius: 6px;
   height: 66px;
@@ -19,16 +19,16 @@
   padding: 0;
 }
 
-.input :global .MuiInputBase-root fieldset {
+.input :global(.MuiInputBase-root fieldset) {
   border-width: 1px !important;
 }
 
-.input :global .MuiInputBase-root:not(.Mui-error) fieldset {
+.input :global(.MuiInputBase-root:not(.Mui-error) fieldset) {
   border-color: var(--color-border-light) !important;
 }
 
 @media (max-width: 899.95px) {
-  .input :global .MuiFormHelperText-root {
+  .input :global(.MuiFormHelperText-root) {
     position: relative;
     bottom: 0;
   }
