@@ -59,13 +59,30 @@ const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?
   )
 }
 
-const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
+const SignedOutState = ({
+  afterSignIn,
+  redirectLoading,
+  inline = false,
+}: {
+  afterSignIn: () => void
+  redirectLoading: boolean
+  inline?: boolean
+}) => {
   const isClassicViewFeatureEnabled = useIsClassicViewFeatureEnabled() === true
   const isDarkMode = useDarkMode()
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-      <div className={cn('relative flex min-h-screen items-center justify-center bg-background p-6', css.authShell)}>
+      {/* Full-screen login takeover when the require-login gate is ON. When the
+          gate is OFF (classic view) the page keeps its Topbar + Accounts/Workspaces
+          tabs, so the card renders inline instead of as a min-h-screen overlay. */}
+      <div
+        className={cn(
+          'relative flex items-center justify-center p-6',
+          inline ? 'py-10' : 'min-h-screen bg-background',
+          !inline && css.authShell,
+        )}
+      >
         <div className="relative w-full max-w-[440px] rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
           <div className="mb-6 flex size-10 items-center justify-center text-foreground">
             <SafeMarkIcon className="size-10" />
@@ -139,7 +156,8 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
-  const isRequireLoginEnabled = useIsRequireLoginEnabled() ?? false
+  const requireLogin = useIsRequireLoginEnabled()
+  const isRequireLoginEnabled = requireLogin ?? false
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
@@ -175,9 +193,13 @@ const SpacesList = () => {
     setHasSignedIn(true)
   }, [setHasSignedIn])
 
+  // When the require-login gate is ON (or still resolving), /welcome/spaces is
+  // the canonical full-screen login page: take over the viewport. When the gate
+  // is OFF, classic view is available — fall through to the tabbed layout below
+  // so the Accounts/Workspaces tabs stay reachable regardless of auth state.
   // The spaces query is skipped while signed out, so pendingInvites is always
   // [] — no need to gate the early return on it.
-  if (!isUserSignedIn) {
+  if (!isUserSignedIn && requireLogin !== false) {
     return <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
   }
 
@@ -207,7 +229,9 @@ const SpacesList = () => {
             />
           ))}
 
-        {activeSpaces.length > 0 ? (
+        {!isUserSignedIn ? (
+          <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} inline />
+        ) : activeSpaces.length > 0 ? (
           <Grid2 container spacing={2} flexWrap="wrap" data-testid="org-list">
             {activeSpaces.map((space) => (
               <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
@@ -216,7 +240,7 @@ const SpacesList = () => {
             ))}
           </Grid2>
         ) : (
-          isUserSignedIn && <NoSpacesState isAtLimit={isAtSpacesLimit} />
+          <NoSpacesState isAtLimit={isAtSpacesLimit} />
         )}
       </Box>
     </Box>

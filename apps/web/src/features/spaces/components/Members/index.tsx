@@ -41,10 +41,10 @@ const SpaceMembers = () => {
 
       <Tabs defaultValue="members">
         <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
-          <TabsTrigger value="members" className="cursor-pointer">
+          <TabsTrigger value="members" className="cursor-pointer" data-testid="members-tab">
             Members ({activeMembers.length})
           </TabsTrigger>
-          <TabsTrigger value="pending" className="cursor-pointer">
+          <TabsTrigger value="pending" className="cursor-pointer" data-testid="pending-members-tab">
             Pending ({invitedMembers.length})
           </TabsTrigger>
         </TabsList>

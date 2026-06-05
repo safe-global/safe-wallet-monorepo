@@ -17,8 +17,8 @@ import {
 import {
   useSurveysGetStateV1Query,
   useSurveysSubmitResponseV1Mutation,
-  type SurveyOption,
-} from '@safe-global/store/gateway/surveys'
+  type SurveyOptionDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/surveys'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
 import { Button } from '@/components/ui/button'
@@ -64,7 +64,7 @@ const SurveyOnboarding = (): ReactElement | null => {
   const spaceId = router.query.spaceId as string | undefined
 
   const { data, isLoading, error } = useSurveysGetStateV1Query(
-    { spaceId: spaceId ?? '', slug: SURVEY_SLUG },
+    { spaceId: Number(spaceId), slug: SURVEY_SLUG },
     { skip: !spaceId },
   )
   const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
@@ -112,7 +112,7 @@ const SurveyOnboarding = (): ReactElement | null => {
     const selections = Array.from(selected).sort()
     try {
       await submit({
-        spaceId,
+        spaceId: Number(spaceId),
         slug: SURVEY_SLUG,
         submitSurveyResponseDto: { selections: { [page.id]: selections } },
       }).unwrap()
@@ -145,7 +145,7 @@ const SurveyOnboarding = (): ReactElement | null => {
 
       {page?.options && (
         <div className="grid auto-rows-fr grid-cols-2 gap-3 xl:grid-cols-3">
-          {page.options.map((opt: SurveyOption) => (
+          {page.options.map((opt: SurveyOptionDto) => (
             <SurveyOptionCard
               key={opt.key}
               option={opt}

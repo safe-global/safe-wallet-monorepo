@@ -61,4 +61,33 @@ describe('SafeItemCard', () => {
     expect(screen.queryByText('High similarity')).not.toBeInTheDocument()
     expect(screen.getByText('Read-only')).toBeInTheDocument()
   })
+
+  it('renders the pin/unpin button by default', () => {
+    const safeItem = safeItemBuilder().build()
+
+    render(<SafeItemCard safeItem={safeItem} onClose={noopClose} />)
+
+    expect(screen.getByTestId('bookmark-icon')).toBeInTheDocument()
+  })
+
+  it('hides the pin/unpin button when hidePinControls is set (space-safe context)', () => {
+    const safeItem = safeItemBuilder().build()
+
+    render(<SafeItemCard safeItem={safeItem} onClose={noopClose} hidePinControls />)
+
+    expect(screen.queryByTestId('bookmark-icon')).not.toBeInTheDocument()
+  })
+
+  it('renders the full address with bolded first/last 4 hex chars when flagged as similar', () => {
+    const safeItem = safeItemBuilder()
+      .with({
+        address: '0x1234567890123456789012345678901234567890',
+      })
+      .build()
+
+    const { container } = render(<SafeItemCard safeItem={safeItem} isSimilar onClose={noopClose} />)
+
+    const bolded = Array.from(container.querySelectorAll('b')).map((el) => el.textContent)
+    expect(bolded).toEqual(expect.arrayContaining(['1234', '7890']))
+  })
 })

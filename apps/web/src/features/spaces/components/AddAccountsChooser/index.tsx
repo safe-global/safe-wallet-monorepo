@@ -29,12 +29,14 @@ interface ChooserRowProps {
   onClick: () => void
   disabled?: boolean
   disabledTooltip?: string
+  testId?: string
 }
 
-const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip }: ChooserRowProps) => {
+const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip, testId }: ChooserRowProps) => {
   const row = (
     <button
       type="button"
+      data-testid={testId}
       onClick={disabled ? undefined : onClick}
       aria-disabled={disabled || undefined}
       className={cn(
@@ -125,6 +127,7 @@ const AddAccountsChooser = ({
               onClick={handleAdd}
               disabled={!isAdmin}
               disabledTooltip="You need to be an Admin to add accounts"
+              testId="add-safe-accounts-to-workspace-button"
             />
             <ChooserRow
               icon={<Search className="size-4" />}
