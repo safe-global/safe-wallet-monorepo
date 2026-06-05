@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import AddContact from '../AddContact'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUpsertAddressBook = jest.fn()
 
@@ -21,7 +22,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  useCurrentSpaceId: () => '42',
+  useCurrentSpaceId: () => '11111111-1111-1111-1111-111111111111',
   useGetSpaceAddressBook: () => [{ id: 1 }, { id: 2 }],
 }))
 
@@ -70,10 +71,10 @@ describe('AddContact', () => {
     mockUpsertAddressBook.mockResolvedValue({})
     render(<AddContact />)
 
-    await lastProps!.submit({ name: 'Alice', address: '0xabc', chainIds: ['1'] }, '42')
+    await lastProps!.submit({ name: 'Alice', address: '0xabc', chainIds: ['1'] }, MOCK_SPACE_UUID)
 
     expect(mockUpsertAddressBook).toHaveBeenCalledWith({
-      spaceId: 42,
+      spaceId: MOCK_SPACE_UUID,
       upsertAddressBookItemsDto: { items: [{ name: 'Alice', address: '0xabc', chainIds: ['1'] }] },
     })
   })
@@ -91,7 +92,7 @@ describe('AddContact', () => {
 
     expect(trackEvent).toHaveBeenCalledWith(
       { ...SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED },
-      { workspace_id: '42', entry_count_after: 3 },
+      { workspace_id: MOCK_SPACE_UUID, entry_count_after: 3 },
     )
   })
 

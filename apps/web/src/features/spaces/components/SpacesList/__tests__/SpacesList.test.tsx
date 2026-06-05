@@ -220,7 +220,11 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
   it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {
     mockUseAppSelector.mockReturnValue(true)
-    const tenSpaces = Array.from({ length: 10 }, (_, i) => ({ id: i + 1, name: `Space ${i + 1}` }))
+    const tenSpaces = Array.from({ length: 10 }, (_, i) => ({
+      id: i + 1,
+      uuid: `00000000-0000-0000-0000-0000000000${String(i + 1).padStart(2, '0')}`,
+      name: `Space ${i + 1}`,
+    }))
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: tenSpaces, isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
 

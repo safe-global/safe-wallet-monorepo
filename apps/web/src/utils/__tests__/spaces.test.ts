@@ -5,19 +5,16 @@ describe('parseSpaceId', () => {
     expect(parseSpaceId(null)).toBe(null)
   })
 
-  it('parses a numeric string to a number', () => {
-    expect(parseSpaceId('42')).toBe(42)
-    expect(parseSpaceId('0')).toBe(0)
-  })
-
-  it('returns null for non-numeric strings', () => {
-    expect(parseSpaceId('abc')).toBe(null)
+  it('returns null for empty or whitespace-only strings', () => {
     expect(parseSpaceId('')).toBe(null)
-    expect(parseSpaceId('42abc')).toBe(null)
+    expect(parseSpaceId('   ')).toBe(null)
   })
 
-  it('returns null for special numeric values that JS coerces to non-finite', () => {
-    expect(parseSpaceId('Infinity')).toBe(null)
-    expect(parseSpaceId('NaN')).toBe(null)
+  it('passes a UUID string through unchanged', () => {
+    expect(parseSpaceId('11111111-1111-1111-1111-111111111111')).toBe('11111111-1111-1111-1111-111111111111')
+  })
+
+  it('passes a legacy numeric string through unchanged', () => {
+    expect(parseSpaceId('42')).toBe('42')
   })
 })

@@ -265,7 +265,10 @@ describe('SafeSidebarContent', () => {
       const onSpaceAdded = jest.fn()
       render(
         <GeoblockingContext.Provider value={false}>
-          <SafeSidebarContent spaces={[{ id: 1, name: 'My Space', safeCount: 0 }]} onSpaceAdded={onSpaceAdded} />
+          <SafeSidebarContent
+            spaces={[{ id: 1, uuid: 'uuid-1', name: 'My Space', safeCount: 0 }]}
+            onSpaceAdded={onSpaceAdded}
+          />
         </GeoblockingContext.Provider>,
       )
 

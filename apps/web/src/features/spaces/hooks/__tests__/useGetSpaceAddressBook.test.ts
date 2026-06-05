@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import useGetSpaceAddressBook from '../useGetSpaceAddressBook'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUseCurrentSpaceId = jest.fn()
 const mockUseAddressBooksGetAddressBookItemsV1Query = jest.fn()
@@ -31,14 +32,14 @@ describe('useGetSpaceAddressBook', () => {
 
   it('skips the query when the user is not authenticated', () => {
     mockIsAuthenticated = false
-    mockUseCurrentSpaceId.mockReturnValue('7')
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
 
     renderHook(() => useGetSpaceAddressBook())
 
     expect(mockUseAddressBooksGetAddressBookItemsV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
   })
 
-  it('skips the query when there is no current spaceId (Number(null) is 0 — must not hit /v1/spaces/0/...)', () => {
+  it('skips the query when there is no current spaceId', () => {
     mockUseCurrentSpaceId.mockReturnValue(null)
 
     renderHook(() => useGetSpaceAddressBook())
@@ -54,16 +55,19 @@ describe('useGetSpaceAddressBook', () => {
     expect(mockUseAddressBooksGetAddressBookItemsV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
   })
 
-  it('fires the query with the numeric spaceId when authenticated and spaceId is set', () => {
-    mockUseCurrentSpaceId.mockReturnValue('42')
+  it('fires the query with the spaceId when authenticated and spaceId is set', () => {
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
 
     renderHook(() => useGetSpaceAddressBook())
 
-    expect(mockUseAddressBooksGetAddressBookItemsV1Query).toHaveBeenCalledWith({ spaceId: 42 }, { skip: false })
+    expect(mockUseAddressBooksGetAddressBookItemsV1Query).toHaveBeenCalledWith(
+      { spaceId: MOCK_SPACE_UUID },
+      { skip: false },
+    )
   })
 
   it('returns the address book data when the query resolves', () => {
-    mockUseCurrentSpaceId.mockReturnValue('1')
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
     const data = [{ address: '0xabc', name: 'Alice', chainIds: ['1'] }]
     mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: { data } })
 
@@ -73,7 +77,7 @@ describe('useGetSpaceAddressBook', () => {
   })
 
   it('returns an empty array when the query has no data', () => {
-    mockUseCurrentSpaceId.mockReturnValue('1')
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
 
     const { result } = renderHook(() => useGetSpaceAddressBook())
 

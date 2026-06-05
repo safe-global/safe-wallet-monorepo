@@ -64,7 +64,9 @@ describe('SpaceCreationModal tracking', () => {
   })
 
   it('tracks WORKSPACE_CREATED with spaceId sent to both GA (label) and Mixpanel (additionalParameters) after successful creation', async () => {
-    mockCreateSpaceWithUser.mockResolvedValue({ data: { id: 99, name: 'My Space' } })
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 99, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
 
     render(<SpaceCreationModal onClose={jest.fn()} />)
 
@@ -78,8 +80,8 @@ describe('SpaceCreationModal tracking', () => {
 
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.WORKSPACE_CREATED, label: '99' },
-        { workspace_id: '99' },
+        { ...SPACE_EVENTS.WORKSPACE_CREATED, label: '11111111-1111-1111-1111-111111111111' },
+        { workspace_id: '11111111-1111-1111-1111-111111111111' },
       )
     })
   })

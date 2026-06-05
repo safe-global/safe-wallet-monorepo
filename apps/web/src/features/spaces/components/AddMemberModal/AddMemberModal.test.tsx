@@ -20,7 +20,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  useCurrentSpaceId: () => '42',
+  useCurrentSpaceId: () => '11111111-1111-1111-1111-111111111111',
   MemberRole: { MEMBER: 'MEMBER', ADMIN: 'ADMIN' },
 }))
 
@@ -74,7 +74,15 @@ describe('AddMemberModal tracking', () => {
 
   it('tracks WORKSPACE_MEMBER_INVITE_SENT with workspace_id, user_id and role on submit', async () => {
     mockInviteMembers.mockResolvedValue({
-      data: [{ userId: 1, spaceId: 42, name: 'Alice', role: 'MEMBER', status: 'INVITED' }],
+      data: [
+        {
+          userId: 1,
+          spaceId: '11111111-1111-1111-1111-111111111111',
+          name: 'Alice',
+          role: 'MEMBER',
+          status: 'INVITED',
+        },
+      ],
     })
 
     render(<AddMemberModal onClose={jest.fn()} />)
@@ -90,8 +98,8 @@ describe('AddMemberModal tracking', () => {
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledTimes(1)
       expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: '42' },
-        { workspace_id: '42', user_id: 1, role: 'member' },
+        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: '11111111-1111-1111-1111-111111111111' },
+        { workspace_id: '11111111-1111-1111-1111-111111111111', user_id: 1, role: 'member' },
       )
     })
   })
