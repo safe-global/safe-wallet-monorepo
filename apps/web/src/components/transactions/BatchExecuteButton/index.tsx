@@ -64,7 +64,11 @@ const BatchExecuteButton = () => {
     isBatchable && !!txsWithDetails && safePaidCount > 0 && safePaidCount === batchableTransactions.length
   const isMixed = isBatchable && safePaidCount > 0 && safePaidCount < batchableTransactions.length
 
-  const isDisabled = !isBatchable || hasPendingTx || !wallet || allSafePaid
+  // Until details load we can't tell all-Safe-paid / mixed apart — keep the button disabled so a
+  // fast click can't bypass the all-Safe-paid disable or the mixed-batch warning modal.
+  const detailsLoading = isBatchable && !!chainId && txsWithDetails === undefined
+
+  const isDisabled = !isBatchable || hasPendingTx || !wallet || allSafePaid || detailsLoading
 
   const tooltipTitle = allSafePaid ? ALL_SAFE_PAID_TOOLTIP : isDisabled ? NOT_BATCHABLE_TOOLTIP : BATCHABLE_TOOLTIP
 

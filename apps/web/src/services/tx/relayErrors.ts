@@ -22,6 +22,9 @@ export class RelaySimulationError extends Error {
 
 const SIMULATION_CODES: ReadonlyArray<RelaySimulationCode> = ['SIMULATION_FAILED', 'INDETERMINATE_SIMULATION']
 
+const isRelaySimulationCode = (code: unknown): code is RelaySimulationCode =>
+  SIMULATION_CODES.includes(code as RelaySimulationCode)
+
 /**
  * Extracts a `RelaySimulationError` from an RTK Query `FetchBaseQueryError` ({ status, data }) when
  * the response body is a `RelayErrorResponse`. Returns `undefined` for any other error shape so the
@@ -34,8 +37,8 @@ export const getRelaySimulationError = (thrown: unknown): RelaySimulationError |
   if (typeof data !== 'object' || data === null || !('code' in data)) return undefined
 
   const code = (data as { code?: unknown }).code
-  if (!SIMULATION_CODES.includes(code as RelaySimulationCode)) return undefined
+  if (!isRelaySimulationCode(code)) return undefined
 
   const message = 'message' in data ? String((data as { message?: unknown }).message) : ''
-  return new RelaySimulationError(code as RelaySimulationCode, message)
+  return new RelaySimulationError(code, message)
 }
