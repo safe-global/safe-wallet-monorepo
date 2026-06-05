@@ -5,10 +5,9 @@ import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
 import { useCameraPermissionFlow } from '@/src/components/Camera'
 import { getWalletKit } from '../walletKit'
 import { logWalletKitError } from '../utils/errors'
+import { PAIR_TIMEOUT_MESSAGE, PAIR_TIMEOUT_MS } from '../utils/constants'
 
-const TIMEOUT_MS = 10_000
 const UNRECOGNISED_MESSAGE = 'Unrecognised QR code'
-const TIMEOUT_MESSAGE = 'Connection timed out. Try again.'
 
 export type ScanStatus = 'scanning' | 'connecting' | 'error'
 
@@ -68,8 +67,8 @@ export const useWalletConnectScan = () => {
         cancelledRef.current = true
         timerRef.current = null
         pairingRef.current = false
-        toError(TIMEOUT_MESSAGE)
-      }, TIMEOUT_MS)
+        toError(PAIR_TIMEOUT_MESSAGE)
+      }, PAIR_TIMEOUT_MS)
       try {
         const wk = await getWalletKit()
         await wk.pair({ uri })

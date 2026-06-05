@@ -2,10 +2,8 @@ import React, { useState } from 'react'
 import { useRouter } from 'expo-router'
 import { getWalletKit } from '../walletKit'
 import { logWalletKitError } from '../utils/errors'
+import { PAIR_TIMEOUT_MESSAGE, PAIR_TIMEOUT_MS } from '../utils/constants'
 import { WalletConnectManualEntry } from './WalletConnectManualEntry'
-
-const TIMEOUT_MS = 10_000
-const TIMEOUT_MESSAGE = 'Connection timed out. Try again.'
 
 export function WalletConnectManualEntryContainer() {
   const router = useRouter()
@@ -20,9 +18,9 @@ export function WalletConnectManualEntryContainer() {
     let cancelled = false
     const timer = setTimeout(() => {
       cancelled = true
-      setPairError(TIMEOUT_MESSAGE)
+      setPairError(PAIR_TIMEOUT_MESSAGE)
       setIsPairing(false)
-    }, TIMEOUT_MS)
+    }, PAIR_TIMEOUT_MS)
     try {
       const wk = await getWalletKit()
       await wk.pair({ uri })
