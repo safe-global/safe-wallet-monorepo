@@ -68,10 +68,10 @@ describe('useWalletConnectScan', () => {
     expect(mockPair).not.toHaveBeenCalled()
   })
 
-  it('surfaces the pair() error message on failure', async () => {
+  it('shows a friendly error message on failure instead of the raw pair() error', async () => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-    mockPair.mockRejectedValueOnce(new Error('pairing rejected'))
+    mockPair.mockRejectedValueOnce(new Error("No matching key. session topic doesn't exist"))
     const { result } = renderHook(() => useWalletConnectScan())
 
     act(() => {
@@ -79,7 +79,7 @@ describe('useWalletConnectScan', () => {
     })
 
     await waitFor(() => expect(result.current.status).toBe('error'))
-    expect(result.current.errorMessage).toBe('pairing rejected')
+    expect(result.current.errorMessage).toBe('Failed to pair. Please try again.')
     expect(mockBack).not.toHaveBeenCalled()
     errorSpy.mockRestore()
   })

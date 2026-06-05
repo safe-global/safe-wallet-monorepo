@@ -25,6 +25,18 @@ export const isBenignWalletKitError = (e: unknown): boolean => {
   return BENIGN_WALLETKIT_PATTERNS.some((p) => (typeof p === 'string' ? message.includes(p) : p.test(message)))
 }
 
+// WalletKit/relay errors are technical (e.g. "No matching key. session topic doesn't exist")
+// and must not surface verbatim. Map the one common, actionable case (an expired URI) and fall
+// back to a single generic message for everything else.
+const PAIR_ERROR_FALLBACK = 'Failed to pair. Please try again.'
+
+export const getPairErrorMessage = (e: unknown): string => {
+  if (/expired/i.test(messageOf(e))) {
+    return 'This WalletConnect URI has expired. Generate a new QR code and try again.'
+  }
+  return PAIR_ERROR_FALLBACK
+}
+
 export const logWalletKitError = (context: string, e: unknown): void => {
   const label = `[walletKit] ${context}`
   if (isBenignWalletKitError(e)) {

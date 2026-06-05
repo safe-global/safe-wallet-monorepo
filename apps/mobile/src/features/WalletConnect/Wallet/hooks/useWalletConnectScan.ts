@@ -4,7 +4,7 @@ import type { Code } from 'react-native-vision-camera'
 import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
 import { useCameraPermissionFlow } from '@/src/components/Camera'
 import { getWalletKit } from '../walletKit'
-import { logWalletKitError } from '../utils/errors'
+import { getPairErrorMessage, logWalletKitError } from '../utils/errors'
 import { PAIR_TIMEOUT_MESSAGE, PAIR_TIMEOUT_MS } from '../utils/constants'
 
 const UNRECOGNISED_MESSAGE = 'Unrecognised QR code'
@@ -86,7 +86,7 @@ export const useWalletConnectScan = () => {
         clearTimer()
         pairingRef.current = false
         logWalletKitError('pair failed', e)
-        toError(e instanceof Error ? e.message : 'Failed to pair')
+        toError(getPairErrorMessage(e))
       }
     },
     [router, toError, clearTimer],

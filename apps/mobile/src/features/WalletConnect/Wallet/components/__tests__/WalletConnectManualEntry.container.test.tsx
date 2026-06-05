@@ -23,13 +23,13 @@ describe('WalletConnectManualEntryContainer', () => {
     await waitFor(() => expect(mockDismiss).toHaveBeenCalledWith(2))
   })
 
-  it('shows the pairing error and does not navigate on failure', async () => {
+  it('shows a friendly pairing error and does not navigate on failure', async () => {
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(jest.fn())
-    mockPair.mockRejectedValueOnce(new Error('pair boom'))
+    mockPair.mockRejectedValueOnce(new Error("No matching key. session topic doesn't exist"))
     const { getByPlaceholderText, getByTestId, getByText } = render(<WalletConnectManualEntryContainer />)
     fireEvent.changeText(getByPlaceholderText('wc:…'), VALID_URI)
     fireEvent.press(getByTestId('wc-manual-pair'))
-    await waitFor(() => expect(getByText('pair boom')).toBeTruthy())
+    await waitFor(() => expect(getByText('Failed to pair. Please try again.')).toBeTruthy())
     expect(mockDismiss).not.toHaveBeenCalled()
     errorSpy.mockRestore()
   })

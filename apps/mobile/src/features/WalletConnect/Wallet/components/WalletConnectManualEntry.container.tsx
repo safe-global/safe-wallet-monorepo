@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useRouter } from 'expo-router'
 import { getWalletKit } from '../walletKit'
-import { logWalletKitError } from '../utils/errors'
+import { getPairErrorMessage, logWalletKitError } from '../utils/errors'
 import { PAIR_TIMEOUT_MESSAGE, PAIR_TIMEOUT_MS } from '../utils/constants'
 import { WalletConnectManualEntry } from './WalletConnectManualEntry'
 
@@ -38,7 +38,7 @@ export function WalletConnectManualEntryContainer() {
       }
       clearTimeout(timer)
       logWalletKitError('manual pair failed', e)
-      setPairError(e instanceof Error ? e.message : 'Failed to pair')
+      setPairError(getPairErrorMessage(e))
       setIsPairing(false)
     }
   }
