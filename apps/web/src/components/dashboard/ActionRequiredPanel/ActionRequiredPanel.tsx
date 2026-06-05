@@ -1,4 +1,4 @@
-import { useState, useRef, type ReactElement, type ReactNode } from 'react'
+import { useState, useRef, useEffect, type ReactElement, type ReactNode } from 'react'
 import { Card, Stack, Typography, Collapse, IconButton } from '@mui/material'
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 
@@ -8,6 +8,12 @@ import css from './styles.module.css'
 
 export interface ActionRequiredPanelProps {
   children: ReactNode
+  /**
+   * Opens the panel once when this turns true (e.g. a critical item was detected).
+   * A manual user toggle always wins thereafter, so a late/again-true signal never
+   * re-opens a panel the user has collapsed.
+   */
+  defaultExpanded?: boolean
 }
 
 /**
@@ -29,12 +35,21 @@ export interface ActionRequiredPanelProps {
  * </ActionRequiredPanel>
  * ```
  */
-export const ActionRequiredPanel = ({ children }: ActionRequiredPanelProps): ReactElement => {
+export const ActionRequiredPanel = ({ children, defaultExpanded = false }: ActionRequiredPanelProps): ReactElement => {
   const [isExpanded, setIsExpanded] = useState(false)
+  const userToggledRef = useRef(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const warningCount = useWarningCount(containerRef)
 
+  // Open once when a critical item is detected, unless the user has already toggled the panel.
+  useEffect(() => {
+    if (defaultExpanded && !userToggledRef.current) {
+      setIsExpanded(true)
+    }
+  }, [defaultExpanded])
+
   const toggleExpanded = () => {
+    userToggledRef.current = true
     setIsExpanded((prev) => !prev)
   }
 

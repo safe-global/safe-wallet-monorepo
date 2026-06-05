@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { Button, Paper, Typography } from '@mui/material'
+import { Box, Button, Paper, Typography } from '@mui/material'
 import DefiIcon from '@/public/images/balances/defi.svg'
 import { AppRoutes } from '@/config/routes'
 import Track from '@/components/common/Track'
@@ -18,7 +18,9 @@ const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
 
   return (
     <Paper elevation={0} sx={{ p: 3, textAlign: 'center' }}>
-      <DefiIcon />
+      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+        <DefiIcon />
+      </Box>
 
       <Typography data-testid="no-tx-text" variant="body1" color="primary.light">
         You have no active DeFi positions yet
