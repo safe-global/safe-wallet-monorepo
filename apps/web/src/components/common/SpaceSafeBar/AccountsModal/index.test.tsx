@@ -1,5 +1,8 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import type { SafeItem } from '@/hooks/safes'
+import useWallet from '@/hooks/wallets/useWallet'
+import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
+import { OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import { useAccountsModalItems } from './useAccountsModalItems'
 import AccountsModal from './index'
 
@@ -7,18 +10,41 @@ jest.mock('./useAccountsModalItems', () => ({
   useAccountsModalItems: jest.fn(),
 }))
 
+jest.mock('@/hooks/wallets/useWallet', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+
+jest.mock('@/components/common/ConnectWallet/useConnectWallet', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+
+jest.mock('@/features/spaces/components/ConnectWalletHint', () => {
+  const MockConnectWalletHint = ({ onConnect }: { onConnect?: () => void }) => (
+    <button data-testid="connect-wallet-hint" onClick={onConnect}>
+      Connect
+    </button>
+  )
+  MockConnectWalletHint.displayName = 'ConnectWalletHint'
+  return { __esModule: true, default: MockConnectWalletHint }
+})
+
 jest.mock('./SafeItemCard', () => {
   const MockSafeItemCard = ({
     safeItem,
     hidePinControls,
+    openSafeTrackingLabel,
   }: {
     safeItem: { chainId: string; address: string }
     hidePinControls?: boolean
+    openSafeTrackingLabel?: string
   }) => (
     <div
       data-testid="safe-item-card-mock"
       data-key={`${safeItem.chainId}:${safeItem.address}`}
       data-hide-pin={String(Boolean(hidePinControls))}
+      data-open-label={openSafeTrackingLabel}
     />
   )
   MockSafeItemCard.displayName = 'SafeItemCard'
@@ -44,6 +70,12 @@ jest.mock('./MultiSafeItemCard', () => {
 })
 
 const mockUseAccountsModalItems = useAccountsModalItems as jest.Mock
+const mockUseWallet = useWallet as jest.Mock
+const mockUseConnectWallet = useConnectWallet as jest.Mock
+
+const connectedWallet = { address: '0x1234567890123456789012345678901234567890' } as unknown as ReturnType<
+  typeof useWallet
+>
 
 const safeItem = (chainId: string, address: string, overrides: Partial<SafeItem> = {}): SafeItem => ({
   chainId,
@@ -72,6 +104,8 @@ describe('AccountsModal', () => {
   beforeEach(() => {
     jest.resetAllMocks()
     mockUseAccountsModalItems.mockReturnValue(buildHookReturn())
+    mockUseWallet.mockReturnValue(connectedWallet)
+    mockUseConnectWallet.mockReturnValue(jest.fn().mockResolvedValue(undefined))
   })
 
   it('shows the "All Accounts" dialog title when not in a qualified space', () => {
@@ -142,5 +176,65 @@ describe('AccountsModal', () => {
     render(<AccountsModal open onClose={jest.fn()} />)
 
     expect(screen.queryByTestId('similar-address-alert')).not.toBeInTheDocument()
+  })
+
+  it('shows the connect-wallet hint and still lists local safes when no wallet is connected', () => {
+    mockUseWallet.mockReturnValue(null)
+
+    render(<AccountsModal open onClose={jest.fn()} />)
+
+    expect(screen.getByTestId('connect-wallet-hint')).toBeInTheDocument()
+    expect(screen.getByTestId('safe-item-card-mock')).toBeInTheDocument()
+  })
+
+  it('shows the connect-wallet hint even when the list is empty and no wallet is connected', () => {
+    mockUseWallet.mockReturnValue(null)
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ trustedItems: [], otherItems: [] }))
+
+    render(<AccountsModal open onClose={jest.fn()} />)
+
+    expect(screen.getByTestId('connect-wallet-hint')).toBeInTheDocument()
+    expect(screen.getByTestId('empty-pinned-list')).toBeInTheDocument()
+  })
+
+  it('hides the connect-wallet hint when a wallet is connected', () => {
+    mockUseWallet.mockReturnValue(connectedWallet)
+
+    render(<AccountsModal open onClose={jest.fn()} />)
+
+    expect(screen.queryByTestId('connect-wallet-hint')).not.toBeInTheDocument()
+  })
+
+  it('unmounts the dialog while connecting so the wallet-connect modal can come to the front', async () => {
+    mockUseWallet.mockReturnValue(null)
+    let resolveConnect: () => void = () => {}
+    const connect = jest.fn(() => new Promise<void>((resolve) => (resolveConnect = resolve)))
+    mockUseConnectWallet.mockReturnValue(connect)
+
+    render(<AccountsModal open onClose={jest.fn()} />)
+
+    expect(screen.getByText('All Accounts')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('connect-wallet-hint'))
+
+    // Dialog disappears while the connect modal is open
+    await waitFor(() => expect(screen.queryByText('All Accounts')).not.toBeInTheDocument())
+    expect(connect).toHaveBeenCalled()
+
+    // ...and comes back once connecting resolves
+    resolveConnect()
+    await waitFor(() => expect(screen.getByText('All Accounts')).toBeInTheDocument())
+  })
+
+  it('forwards the default top_bar tracking label to cards', () => {
+    render(<AccountsModal open onClose={jest.fn()} />)
+
+    expect(screen.getByTestId('safe-item-card-mock').getAttribute('data-open-label')).toBe('top_bar')
+  })
+
+  it('forwards a custom tracking label to cards', () => {
+    render(<AccountsModal open onClose={jest.fn()} trackingLabel={OVERVIEW_LABELS.owned_safes_modal} />)
+
+    expect(screen.getByTestId('safe-item-card-mock').getAttribute('data-open-label')).toBe('owned_safes_modal')
   })
 })

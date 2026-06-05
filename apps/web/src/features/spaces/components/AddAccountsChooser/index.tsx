@@ -5,11 +5,12 @@ import { ChevronRight, CirclePlus, Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/utils/cn'
-import OwnedSafesModal from '@/features/spaces/components/OwnedSafesModal'
+import AccountsModal from '@/components/common/SpaceSafeBar/AccountsModal'
 import AddAccounts from '@/features/spaces/components/AddAccounts'
 import { useCurrentSpaceId, useIsAdmin } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 type EntryPoint = 'dashboard' | 'safe_accounts'
@@ -40,7 +41,7 @@ const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip,
       onClick={disabled ? undefined : onClick}
       aria-disabled={disabled || undefined}
       className={cn(
-        'group flex w-full items-center gap-2 rounded-md p-2 text-left text-sm text-sidebar-foreground transition-colors',
+        'group flex w-full items-center gap-3 rounded-md p-3 text-left text-sm text-sidebar-foreground transition-colors',
         '[&_svg]:[stroke-width:2] [&_svg]:transition-colors',
         disabled
           ? 'cursor-not-allowed opacity-50'
@@ -50,7 +51,7 @@ const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip,
       <span className="shrink-0">{icon}</span>
       <span className="flex-1 min-w-0">
         <span className="block font-semibold">{title}</span>
-        <span className="block text-xs text-muted-foreground mt-0.5 group-hover:text-sidebar-accent-foreground/70">
+        <span className="block text-xs text-muted-foreground mt-1 group-hover:text-sidebar-accent-foreground/70">
           {subtitle}
         </span>
       </span>
@@ -115,11 +116,11 @@ const AddAccountsChooser = ({
       </Button>
 
       <Dialog open={chooserOpen} onOpenChange={setChooserOpen}>
-        <DialogContent showCloseButton className="max-w-[440px] p-4 dark:border dark:border-border">
-          <DialogHeader className="p-0 pb-2">
+        <DialogContent showCloseButton className="max-w-[440px] p-6 dark:border dark:border-border">
+          <DialogHeader className="p-0 pb-3">
             <DialogTitle className="font-bold">Manage Safe accounts</DialogTitle>
           </DialogHeader>
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2">
             <ChooserRow
               icon={<Plus className="size-4" />}
               title="Add Safe accounts to this workspace"
@@ -131,8 +132,8 @@ const AddAccountsChooser = ({
             />
             <ChooserRow
               icon={<Search className="size-4" />}
-              title="See owned Safe accounts"
-              subtitle="View all Safes linked to your wallet"
+              title="See all Safe accounts"
+              subtitle="Your trusted, owned and counterfactual Safes"
               onClick={() => {
                 setChooserOpen(false)
                 setSubModal('find')
@@ -147,7 +148,9 @@ const AddAccountsChooser = ({
           </div>
         </DialogContent>
       </Dialog>
-      {subModal === 'find' && <OwnedSafesModal open onClose={() => setSubModal(null)} />}
+      {subModal === 'find' && (
+        <AccountsModal open onClose={() => setSubModal(null)} trackingLabel={OVERVIEW_LABELS.owned_safes_modal} />
+      )}
       {subModal === 'add' && <AddAccounts externalOpen onExternalClose={() => setSubModal(null)} />}
     </>
   )
