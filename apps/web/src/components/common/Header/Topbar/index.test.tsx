@@ -85,18 +85,16 @@ jest.mock('@/components/settings/PushNotifications/hooks/useShowNotificationsRen
   useShowNotificationsRenewalMessage: jest.fn(),
 }))
 
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-  OVERVIEW_EVENTS: {
-    NOTIFICATION_CENTER: 'notification_center',
-    OPEN_ONBOARD: { action: 'Open wallet modal', category: 'overview' },
-  },
-  OVERVIEW_LABELS: { top_bar: 'top_bar' },
-  BATCH_EVENTS: { BATCH_SIDEBAR_OPEN: { action: 'Batch sidebar open', category: 'batching' } },
-}))
+jest.mock('@/services/analytics', () =>
+  (
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
+)
 
 jest.mock('@/services/analytics/events/spaces', () => ({
+  ...jest.requireActual('@/services/analytics/events/spaces'),
   SPACE_EVENTS: {
+    ...jest.requireActual<{ SPACE_EVENTS: object }>('@/services/analytics/events/spaces').SPACE_EVENTS,
     WALLET_SWITCHED: { action: 'wallet_switched', category: 'spaces' },
     WALLET_DISCONNECTED: { action: 'wallet_disconnected', category: 'spaces' },
   },

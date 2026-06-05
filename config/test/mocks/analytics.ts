@@ -37,7 +37,11 @@ export const EventType = {
  * Use this in jest.mock() calls to avoid hoisting issues.
  */
 export function createAnalyticsMock() {
+  // Spread all real event constants (MODALS_EVENTS, ASSETS_EVENTS, etc.) so
+  // modules that reference them at evaluation time don't blow up when mocked.
+  const actualEvents = jest.requireActual<object>('@/services/analytics/events')
   return {
+    ...actualEvents,
     trackEvent: jest.fn(),
     trackSafeAppEvent: jest.fn(),
     trackMixpanelEvent: jest.fn(),
