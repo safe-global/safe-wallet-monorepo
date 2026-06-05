@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useFocusEffect } from 'expo-router'
 import type { Code } from 'react-native-vision-camera'
 import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
@@ -28,6 +28,9 @@ export const useWalletConnectScan = () => {
   // Set true when the timeout fires; later writes for that attempt become no-ops.
   const cancelledRef = useRef(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Flipped on unmount so a pair() that resolves afterwards can't write state or navigate.
+  const mountedRef = useRef(true)
+  useEffect(() => () => void (mountedRef.current = false), [])
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -74,15 +77,15 @@ export const useWalletConnectScan = () => {
         // WalletKit.pair() can't be aborted, so on timeout we only stop reacting here — the relay
         // pairing may still complete and surface a proposal later via the global RequestSheetHost.
         await wk.pair({ uri })
-        if (cancelledRef.current) {
-          return // timed out first; the error overlay already shows
+        if (cancelledRef.current || !mountedRef.current) {
+          return // timed out first or unmounted; the error overlay already shows / nothing to do
         }
         clearTimer()
         pairingRef.current = false
         // Proposal surfaces via the global RequestSheetHost on the screen below.
         router.back()
       } catch (e) {
-        if (cancelledRef.current) {
+        if (cancelledRef.current || !mountedRef.current) {
           return
         }
         clearTimer()

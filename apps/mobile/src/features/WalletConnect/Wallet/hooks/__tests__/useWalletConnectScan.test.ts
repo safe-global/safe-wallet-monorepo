@@ -125,6 +125,25 @@ describe('useWalletConnectScan', () => {
     expect(result.current.isCameraActive).toBe(true)
   })
 
+  it('does not navigate when the hook unmounts before pair() resolves', async () => {
+    let resolvePair: () => void = () => undefined
+    mockPair.mockImplementationOnce(() => new Promise<void>((res) => (resolvePair = res)))
+
+    const { result, unmount } = renderHook(() => useWalletConnectScan())
+    act(() => {
+      result.current.onScan(codes(VALID_URI))
+    })
+    expect(result.current.status).toBe('connecting')
+
+    unmount()
+
+    await act(async () => {
+      resolvePair()
+      await Promise.resolve()
+    })
+    expect(mockBack).not.toHaveBeenCalled()
+  })
+
   it('ignores a second scan while a pair is in flight', async () => {
     let resolvePair: () => void = () => undefined
     mockPair.mockImplementationOnce(() => new Promise<void>((res) => (resolvePair = res)))
