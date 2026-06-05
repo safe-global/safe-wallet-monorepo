@@ -229,7 +229,7 @@ export function NotActivatedBadge({ isActivating }: { isActivating: boolean }) {
       data-testid="pending-activation-icon"
     >
       <AlertCircle className="size-3 shrink-0" />
-      {isActivating ? 'Activating account' : 'Not activated'}
+      {isActivating ? 'Activating' : 'Not activated'}
     </span>
   )
 }

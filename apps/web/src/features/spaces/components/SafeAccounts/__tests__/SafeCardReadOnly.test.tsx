@@ -110,8 +110,8 @@ describe('SafeCardReadOnly', () => {
 
     const chip = screen.getByTestId('pending-activation-chip')
 
-    const balanceColumn = document.querySelector('.flex.min-w-0.shrink-0.flex-col.items-end')
-    expect(balanceColumn?.contains(chip)).toBe(false)
+    const balanceColumn = screen.getByTestId('balance-column')
+    expect(balanceColumn.contains(chip)).toBe(false)
     expect(screen.queryByText(/\$/)).not.toBeInTheDocument()
   })
 })

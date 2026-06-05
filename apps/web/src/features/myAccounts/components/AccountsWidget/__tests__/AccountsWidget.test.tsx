@@ -200,7 +200,7 @@ describe('AccountsWidget', () => {
     const activatingAccount: Account[] = [{ ...mockAccounts[1], isUndeployed: true, isActivating: true }]
     render(<AccountsWidget accounts={activatingAccount} />)
 
-    expect(screen.getByText('Activating account')).toBeInTheDocument()
+    expect(screen.getByText('Activating')).toBeInTheDocument()
   })
 
   it('renders the Not activated badge for an undeployed multi-chain account', () => {
