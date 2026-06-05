@@ -71,6 +71,8 @@ export const useWalletConnectScan = () => {
       }, PAIR_TIMEOUT_MS)
       try {
         const wk = await getWalletKit()
+        // WalletKit.pair() can't be aborted, so on timeout we only stop reacting here — the relay
+        // pairing may still complete and surface a proposal later via the global RequestSheetHost.
         await wk.pair({ uri })
         if (cancelledRef.current) {
           return // timed out first; the error overlay already shows
