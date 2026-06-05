@@ -8,6 +8,7 @@ import { SafeInput } from '@/src/components/SafeInput/SafeInput'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { LargeHeaderTitle } from '@/src/components/Title/LargeHeaderTitle'
+import { logWalletKitError } from '../utils/errors'
 
 type Props = {
   onPair: (uri: string) => void
@@ -47,9 +48,16 @@ export const WalletConnectManualEntry: React.FC<Props> = ({ onPair, isPairing = 
   const onPairPress = () => attemptPair(uri)
 
   const onPasteThis = async () => {
-    const text = await Clipboard.getString()
-    setUri(text)
-    attemptPair(text)
+    try {
+      const text = await Clipboard.getString()
+      if (!text.trim()) {
+        return
+      }
+      setUri(text)
+      attemptPair(text)
+    } catch (e) {
+      logWalletKitError('clipboard read failed', e)
+    }
   }
 
   return (

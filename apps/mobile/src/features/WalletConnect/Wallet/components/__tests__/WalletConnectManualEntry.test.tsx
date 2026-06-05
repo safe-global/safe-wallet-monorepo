@@ -47,6 +47,31 @@ describe('WalletConnectManualEntry', () => {
     expect(getByPlaceholderText('wc:…').props.value).toBe(VALID_URI)
   })
 
+  it('does nothing when the clipboard is empty', async () => {
+    ;(Clipboard.getString as jest.Mock).mockResolvedValue('   ')
+    const onPair = jest.fn()
+    const { getByTestId, queryByText } = render(<WalletConnectManualEntry onPair={onPair} />)
+
+    fireEvent.press(getByTestId('wc-manual-paste'))
+
+    await waitFor(() => expect(Clipboard.getString).toHaveBeenCalled())
+    expect(onPair).not.toHaveBeenCalled()
+    expect(queryByText(/valid WalletConnect URI/i)).toBeNull()
+  })
+
+  it('does not crash when reading the clipboard throws', async () => {
+    ;(Clipboard.getString as jest.Mock).mockRejectedValue(new Error('clipboard unavailable'))
+    const logSpy = jest.spyOn(console, 'error').mockImplementation(jest.fn())
+    const onPair = jest.fn()
+    const { getByTestId } = render(<WalletConnectManualEntry onPair={onPair} />)
+
+    fireEvent.press(getByTestId('wc-manual-paste'))
+
+    await waitFor(() => expect(Clipboard.getString).toHaveBeenCalled())
+    expect(onPair).not.toHaveBeenCalled()
+    logSpy.mockRestore()
+  })
+
   it('clears the input via the clear button, which only shows when there is a value', () => {
     const { getByPlaceholderText, getByTestId, queryByTestId } = render(<WalletConnectManualEntry onPair={jest.fn()} />)
 
