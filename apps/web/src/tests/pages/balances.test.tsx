@@ -1,6 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import BalancesPage from '@/pages/balances'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import { TOKEN_LISTS } from '@/store/settingsSlice'
 
 jest.mock('@/hooks/useVisibleBalances', () => ({
   useVisibleBalances: jest.fn(),
@@ -18,7 +19,7 @@ jest.mock('@/components/balances/AssetsTable', () => ({
 
 jest.mock('@/components/balances/TotalAssetValue', () => ({
   __esModule: true,
-  default: () => <div data-testid="total-asset-value" />,
+  default: ({ tooltipTitle }: { tooltipTitle?: string }) => <div data-testid="total-asset-value">{tooltipTitle}</div>,
 }))
 
 jest.mock('@/components/balances/ManageTokensButton', () => ({
@@ -62,6 +63,18 @@ jest.mock('@/features/__core__', () => ({
   }),
 }))
 
+const DEFAULT_SETTINGS = {
+  currency: 'usd',
+  hiddenTokens: {},
+  tokenList: TOKEN_LISTS.TRUSTED,
+  shortName: { copy: true, qr: true },
+  theme: { darkMode: false },
+  env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
+  signing: { onChainSigning: false, blindSigning: false },
+  transactionExecution: true,
+  curatedNestedSafes: {},
+}
+
 describe('Balances page', () => {
   beforeEach(() => {
     jest.mocked(useVisibleBalances).mockReturnValue({
@@ -92,5 +105,30 @@ describe('Balances page', () => {
     expect(screen.getByTestId('currency-select')).toBeInTheDocument()
     expect(screen.getByText('There was an error loading your assets')).toBeInTheDocument()
     expect(screen.queryByTestId('assets-table')).not.toBeInTheDocument()
+  })
+
+  const tooltipText = 'Total Balance may be different when you show all tokens.'
+
+  const renderWithTokenList = (tokenList: TOKEN_LISTS | undefined) =>
+    render(<BalancesPage />, {
+      initialReduxState: { settings: { ...DEFAULT_SETTINGS, tokenList } } as never,
+    })
+
+  it('shows the total balance tooltip when all tokens are shown', () => {
+    renderWithTokenList(TOKEN_LISTS.ALL)
+
+    expect(screen.getByTestId('total-asset-value')).toHaveTextContent(tooltipText)
+  })
+
+  it('shows the total balance tooltip when the token list is unset', () => {
+    renderWithTokenList(undefined)
+
+    expect(screen.getByTestId('total-asset-value')).toHaveTextContent(tooltipText)
+  })
+
+  it('hides the total balance tooltip when only trusted tokens are shown', () => {
+    renderWithTokenList(TOKEN_LISTS.TRUSTED)
+
+    expect(screen.getByTestId('total-asset-value')).not.toHaveTextContent(tooltipText)
   })
 })
