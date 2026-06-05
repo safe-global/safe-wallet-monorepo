@@ -1,100 +1,88 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { Search, CircleFadingPlus, Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Button } from '@/components/ui/button'
 import { AppRoutes } from '@/config/routes'
-import { useAllSafes, useAllSafesGrouped, isMultiChainSafeItem, type AllSafeItems } from '@/hooks/safes'
-import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
-import useWallet from '@/hooks/wallets/useWallet'
-import { useAppDispatch } from '@/store'
-import { showNotification } from '@/store/notificationsSlice'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { isMultiChainSafeItem } from '@/hooks/safes'
 import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import InlineRetryError from '@/components/common/InlineRetryError'
 import { SafeListSkeleton } from './shared'
+import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 import SafeItemCard from './SafeItemCard'
 import MultiSafeItemCard from './MultiSafeItemCard'
+import { useAccountsModalItems } from './useAccountsModalItems'
+import type { AllSafeItems } from '@/hooks/safes'
 
 interface AccountsModalProps {
   open: boolean
   onClose: () => void
 }
 
+interface SectionOptions {
+  similarAddresses: Set<string>
+  onClose: () => void
+  hidePinControls: boolean
+  headerPaddingTopClass: string
+  headerTestId?: string
+}
+
+const renderSection = (title: string, items: AllSafeItems, opts: SectionOptions) => {
+  if (items.length === 0) return null
+  return (
+    <>
+      <div
+        className={`flex items-center gap-1.5 px-2 pb-1 ${opts.headerPaddingTopClass}`}
+        data-testid={opts.headerTestId}
+      >
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</span>
+      </div>
+      {items.map((item) =>
+        isMultiChainSafeItem(item) ? (
+          <MultiSafeItemCard
+            key={item.address}
+            item={item}
+            isSimilar={opts.similarAddresses.has(item.address.toLowerCase())}
+            onClose={opts.onClose}
+            hidePinControls={opts.hidePinControls}
+          />
+        ) : (
+          <SafeItemCard
+            key={`${item.chainId}:${item.address}`}
+            safeItem={item}
+            isSimilar={opts.similarAddresses.has(item.address.toLowerCase())}
+            onClose={opts.onClose}
+            hidePinControls={opts.hidePinControls}
+          />
+        ),
+      )}
+    </>
+  )
+}
+
 const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
   const [search, setSearch] = useState('')
-  const dispatch = useAppDispatch()
-  const allSafes = useAllSafes()
-  const { address: walletAddress = '' } = useWallet() || {}
-  const { error: ownedSafesError, refetch: refetchOwnedSafes } = useOwnersGetAllSafesByOwnerV2Query(
-    { ownerAddress: walletAddress },
-    { skip: walletAddress === '' },
-  )
-
-  useEffect(() => {
-    if (!open || !ownedSafesError) return
-    dispatch(
-      showNotification({
-        title: 'Failed to load owned safes',
-        message: 'Some of your accounts may be missing. Please try again.',
-        groupKey: 'owned-safes-fetch-error',
-        variant: 'error',
-        link: { onClick: () => void refetchOwnedSafes(), title: 'Retry' },
-      }),
-    )
-  }, [open, ownedSafesError, refetchOwnedSafes, dispatch])
-
-  // Group ALL safes into single/multi-chain
-  const { allSingleSafes, allMultiChainSafes } = useAllSafesGrouped(allSafes ?? [])
-
-  // Merge into ordered list (multi-chain first by lastVisited, then single)
-  const allItems = useMemo<AllSafeItems>(() => {
-    const multi = allMultiChainSafes ?? []
-    const single = allSingleSafes ?? []
-    return [...multi, ...single].sort((a, b) => (b.lastVisited ?? 0) - (a.lastVisited ?? 0))
-  }, [allMultiChainSafes, allSingleSafes])
-
-  const similarAddresses = useMemo(() => getFlaggedSimilarAddressSet(allItems.map((item) => item.address)), [allItems])
-
-  // Apply search filter
-  const filteredItems = useMemo(() => {
-    if (!search.trim()) return allItems
-    const query = search.toLowerCase()
-    return allItems.filter((item) => {
-      const name = item.name?.toLowerCase() ?? ''
-      const address = item.address.toLowerCase()
-      return name.includes(query) || address.includes(query)
-    })
-  }, [allItems, search])
-
-  // Split into trusted and other
-  const trustedItems = useMemo(() => filteredItems.filter((item) => item.isPinned), [filteredItems])
-  const otherItems = useMemo(() => filteredItems.filter((item) => !item.isPinned), [filteredItems])
-
-  // Track search with debounce
-  const searchTracked = useRef(false)
-  useEffect(() => {
-    if (!search.trim()) {
-      searchTracked.current = false
-      return
-    }
-    if (searchTracked.current) return
-    const timer = setTimeout(() => {
-      trackEvent(OVERVIEW_EVENTS.SEARCH)
-      searchTracked.current = true
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [search])
+  const {
+    trustedItems,
+    otherItems,
+    similarAddresses,
+    isLoading,
+    isOwnedSafesError,
+    refetchOwnedSafes,
+    isQualifiedSafe,
+  } = useAccountsModalItems({ search, open })
 
   if (!open) return null
+
+  const isEmpty = trustedItems.length === 0 && otherItems.length === 0
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent showCloseButton className="flex max-h-[90vh] w-full max-w-[560px] flex-col gap-0 p-0">
         <DialogHeader className="shrink-0 border-b border-border/50 px-4 pb-3 pt-4">
-          <DialogTitle>All Accounts</DialogTitle>
+          <DialogTitle>{isQualifiedSafe ? 'Explore other Safes' : 'All Accounts'}</DialogTitle>
         </DialogHeader>
 
         <div className="shrink-0 px-4 py-3">
@@ -116,72 +104,37 @@ const AccountsModal = ({ open, onClose }: AccountsModalProps) => {
           className="min-h-0 flex-1 overflow-y-auto px-3 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
           data-testid="accounts-list"
         >
-          {ownedSafesError && (
+          {isOwnedSafesError && (
             <div className="px-2 pb-2 pt-1">
               <InlineRetryError message="Failed to load owned safes" onRetry={refetchOwnedSafes} />
             </div>
           )}
-          {!allSafes ? (
+          {isLoading ? (
             <SafeListSkeleton />
-          ) : filteredItems.length === 0 ? (
+          ) : isEmpty ? (
             <p className="px-2 py-6 text-center text-sm text-muted-foreground" data-testid="empty-pinned-list">
               {search.trim() ? 'No safes match your search' : 'No safes yet'}
             </p>
           ) : (
             <>
-              {trustedItems.length > 0 && (
-                <>
-                  <div className="flex items-center gap-1.5 px-2 pb-1 pt-1" data-testid="pinned-accounts">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Trusted Safes
-                    </span>
-                  </div>
-                  {trustedItems.map((item) =>
-                    isMultiChainSafeItem(item) ? (
-                      <MultiSafeItemCard
-                        key={item.address}
-                        item={item}
-                        isSimilar={similarAddresses.has(item.address.toLowerCase())}
-                        onClose={onClose}
-                      />
-                    ) : (
-                      <SafeItemCard
-                        key={`${item.chainId}:${item.address}`}
-                        safeItem={item}
-                        isSimilar={similarAddresses.has(item.address.toLowerCase())}
-                        onClose={onClose}
-                      />
-                    ),
-                  )}
-                </>
+              {similarAddresses.size > 0 && (
+                <div className="px-2 pb-2 pt-1">
+                  <SimilarAddressAlert />
+                </div>
               )}
-
-              {otherItems.length > 0 && (
-                <>
-                  <div className="flex items-center gap-1.5 px-2 pb-1 pt-2">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Other Safes
-                    </span>
-                  </div>
-                  {otherItems.map((item) =>
-                    isMultiChainSafeItem(item) ? (
-                      <MultiSafeItemCard
-                        key={item.address}
-                        item={item}
-                        isSimilar={similarAddresses.has(item.address.toLowerCase())}
-                        onClose={onClose}
-                      />
-                    ) : (
-                      <SafeItemCard
-                        key={`${item.chainId}:${item.address}`}
-                        safeItem={item}
-                        isSimilar={similarAddresses.has(item.address.toLowerCase())}
-                        onClose={onClose}
-                      />
-                    ),
-                  )}
-                </>
-              )}
+              {renderSection('Trusted Safes', trustedItems, {
+                similarAddresses,
+                onClose,
+                hidePinControls: isQualifiedSafe,
+                headerPaddingTopClass: 'pt-1',
+                headerTestId: 'pinned-accounts',
+              })}
+              {renderSection('Other Safes', otherItems, {
+                similarAddresses,
+                onClose,
+                hidePinControls: isQualifiedSafe,
+                headerPaddingTopClass: 'pt-2',
+              })}
             </>
           )}
         </div>

@@ -27,7 +27,7 @@ describe('SafeCardLayout', () => {
     render(<SafeCardLayout {...baseProps} fiatValue="123.45" isUndeployed={false} isActivating={false} />)
 
     expect(screen.queryByText(/Not activated/i)).toBeNull()
-    expect(screen.queryByText(/Activating account/i)).toBeNull()
+    expect(screen.queryByText(/Activating/i)).toBeNull()
   })
 
   it('renders the Not activated chip when the safe is undeployed', () => {
@@ -36,9 +36,9 @@ describe('SafeCardLayout', () => {
     expect(screen.getByText(/Not activated/i)).toBeInTheDocument()
   })
 
-  it('renders the Activating account chip when activation is in flight', () => {
+  it('renders the Activating chip when activation is in flight', () => {
     render(<SafeCardLayout {...baseProps} fiatValue={undefined} isUndeployed isActivating />)
 
-    expect(screen.getByText(/Activating account/i)).toBeInTheDocument()
+    expect(screen.getByText(/Activating/i)).toBeInTheDocument()
   })
 })

@@ -131,8 +131,21 @@ const TooltipFullAddress = ({ address }: { address: string }) => {
   )
 }
 
-/** Shortened address; hover shows full address in a tooltip */
-export function ShortAddressWithTooltip({ address, className }: { address: string; className?: string }) {
+/**
+ * Shortened address; hover shows full address in a tooltip.
+ *
+ * When `isSimilar` is true, the two visible hex groups (first 4 and last 4) are
+ * bolded inline so users can compare against another address at a glance.
+ */
+export function ShortAddressWithTooltip({
+  address,
+  className,
+  isSimilar = false,
+}: {
+  address: string
+  className?: string
+  isSimilar?: boolean
+}) {
   return (
     <Tooltip>
       <TooltipTrigger
@@ -142,7 +155,16 @@ export function ShortAddressWithTooltip({ address, className }: { address: strin
           />
         }
       >
-        {shortenAddress(address)}
+        {isSimilar && address.startsWith('0x') && address.length >= 10 ? (
+          <>
+            0x
+            <b className="text-foreground">{address.slice(2, 6)}</b>
+            ...
+            <b className="text-foreground">{address.slice(-4)}</b>
+          </>
+        ) : (
+          shortenAddress(address)
+        )}
       </TooltipTrigger>
       <TooltipContent
         side="top"
@@ -229,7 +251,7 @@ export function NotActivatedBadge({ isActivating }: { isActivating: boolean }) {
       data-testid="pending-activation-icon"
     >
       <AlertCircle className="size-3 shrink-0" />
-      {isActivating ? 'Activating account' : 'Not activated'}
+      {isActivating ? 'Activating' : 'Not activated'}
     </span>
   )
 }
