@@ -34,6 +34,7 @@ import { createWeb3, getUserNonce } from '@/hooks/wallets/web3'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import chains from '@safe-global/utils/config/chains'
 import { createExistingTx } from './create'
+import { getRelaySimulationError } from '@/services/tx/relayErrors'
 
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
@@ -475,6 +476,7 @@ export const dispatchTxRelay = async (
   txId: string,
   chain: Chain,
   gasLimit?: string | number | bigint,
+  acceptUnverifiedSimulation?: boolean,
 ) => {
   const store = getStoreInstance()
   const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe)
@@ -504,6 +506,7 @@ export const dispatchTxRelay = async (
         gasLimit: gasLimit?.toString(),
         version: safe.version ?? getLatestSafeVersion(chain),
         safeTxHash,
+        acceptUnverifiedSimulation,
       },
     })
 
@@ -525,14 +528,17 @@ export const dispatchTxRelay = async (
     // Monitor relay tx
     waitForRelayedTx(taskId, [txId], safe.chainId, safe.address.value, safeTx.data.nonce)
   } catch (error) {
+    // CGW pre-relay simulation surfaces SIMULATION_FAILED / INDETERMINATE_SIMULATION as a typed
+    // error so the UI can block or offer an explicit retry; everything else stays as-is.
+    const finalError = getRelaySimulationError(error) ?? asError(error)
     txDispatch(TxEvent.FAILED, {
       txId,
-      error: asError(error),
+      error: finalError,
       nonce: safeTx.data.nonce,
       chainId: safe.chainId,
       safeAddress: safe.address.value,
     })
-    throw error
+    throw finalError
   }
 }
 

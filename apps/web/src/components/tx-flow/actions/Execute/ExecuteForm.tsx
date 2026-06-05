@@ -1,7 +1,17 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useState, useEffect } from 'react'
-import { Box, CardActions, Divider, Tooltip } from '@mui/material'
+import {
+  Box,
+  Button,
+  CardActions,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Tooltip,
+} from '@mui/material'
 import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
@@ -34,6 +44,7 @@ import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { isGtfSafePaid } from '@/features/gtf/utils/isGtfSafePaid'
+import { RelaySimulationError } from '@/services/tx/relayErrors'
 
 export const ExecuteForm = ({
   safeTx,
@@ -151,12 +162,20 @@ export const ExecuteForm = ({
     advancedParams.gasLimit ? advancedParams.gasLimit : undefined,
   )
 
-  // On modal submit
-  const handleSubmit = async (e: SyntheticEvent) => {
-    e.preventDefault()
+  // CGW pre-relay simulation outcome (SIMULATION_FAILED blocks; INDETERMINATE offers an override).
+  const [relaySimError, setRelaySimError] = useState<RelaySimulationError | undefined>(undefined)
 
+  // Clear a stale simulation verdict when the payload changes (e.g. user edits params / gas token).
+  useEffect(() => {
+    setRelaySimError(undefined)
+  }, [safeTx?.data])
+
+  // `acceptUnverifiedSimulation` is only set when the user explicitly retries past an
+  // INDETERMINATE_SIMULATION; CGW ignores it for SIMULATION_FAILED (fail-closed).
+  const submitTx = async (acceptUnverifiedSimulation = false) => {
     setIsSubmitLoading(true)
     setSubmitError(undefined)
+    setRelaySimError(undefined)
     setIsRejectedByUser(false)
 
     const txOptions = getTxOptions(advancedParams, currentChain)
@@ -165,11 +184,20 @@ export const ExecuteForm = ({
 
     let executedTxId: string
     try {
-      executedTxId = await executeTx(txOptions, safeTx, txId, origin, willRelay || willNoFeeCampaign)
+      executedTxId = await executeTx(
+        txOptions,
+        safeTx,
+        txId,
+        origin,
+        willRelay || willNoFeeCampaign,
+        acceptUnverifiedSimulation,
+      )
     } catch (_err) {
       const err = asError(_err)
       if (isWalletRejection(err)) {
         setIsRejectedByUser(true)
+      } else if (err instanceof RelaySimulationError) {
+        setRelaySimError(err)
       } else {
         trackError(Errors._804, err)
         setSubmitError(err)
@@ -182,6 +210,12 @@ export const ExecuteForm = ({
     // On success
     onSubmitSuccess?.({ txId: executedTxId, isExecuted: true })
     setTxFlow(<SuccessScreenFlow txId={executedTxId} />, undefined, false)
+  }
+
+  // On modal submit
+  const handleSubmit = (e: SyntheticEvent) => {
+    e.preventDefault()
+    submitTx()
   }
 
   const walletCanPay = useWalletCanPay({
@@ -206,6 +240,7 @@ export const ExecuteForm = ({
     cannotPropose ||
     relayUnavailableForGtf ||
     blockSafePaysFromNestedExecutor ||
+    relaySimError?.code === 'SIMULATION_FAILED' ||
     (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
@@ -271,6 +306,43 @@ export const ExecuteForm = ({
             </ErrorMessage>
           )
         )}
+
+        {/* CGW pre-relay simulation verdict */}
+        {relaySimError?.code === 'SIMULATION_FAILED' && (
+          <ErrorMessage>
+            This transaction is expected to fail on-chain, so it can&apos;t be relayed. Review the transaction or reject
+            it.
+          </ErrorMessage>
+        )}
+
+        <Dialog
+          open={relaySimError?.code === 'INDETERMINATE_SIMULATION'}
+          onClose={() => setRelaySimError(undefined)}
+          data-testid="relay-indeterminate-dialog"
+        >
+          <DialogTitle sx={{ fontWeight: 700 }}>Couldn&apos;t verify this transaction</DialogTitle>
+
+          <DialogContent>
+            We couldn&apos;t verify this transaction with a pre-execution simulation (the simulation service is
+            temporarily unavailable). You can run the simulation yourself from the Safe Shield panel before deciding or
+            Execute Anyway.
+          </DialogContent>
+
+          <DialogActions sx={{ p: 3, justifyContent: 'space-between' }}>
+            <Button size="small" variant="text" onClick={() => setRelaySimError(undefined)}>
+              Go back
+            </Button>
+            <Button
+              data-testid="relay-accept-unverified-btn"
+              variant="contained"
+              size="small"
+              disabled={isSubmitLoading}
+              onClick={() => submitTx(true)}
+            >
+              Execute anyway
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
 

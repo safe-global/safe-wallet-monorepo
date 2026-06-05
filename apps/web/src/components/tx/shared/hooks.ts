@@ -43,6 +43,7 @@ type TxActions = {
     txId?: string,
     origin?: string,
     isRelayed?: boolean,
+    acceptUnverifiedSimulation?: boolean,
   ) => Promise<string>
   signProposerTx: (safeTx?: SafeTransaction, origin?: string) => Promise<string>
   proposeTx: (safeTx: SafeTransaction, txId?: string, origin?: string) => Promise<TransactionDetails>
@@ -162,7 +163,14 @@ export const useTxActions = (): TxActions => {
       return tx.txId
     }
 
-    const executeTx: TxActions['executeTx'] = async (txOptions, safeTx, txId, origin, isRelayed) => {
+    const executeTx: TxActions['executeTx'] = async (
+      txOptions,
+      safeTx,
+      txId,
+      origin,
+      isRelayed,
+      acceptUnverifiedSimulation,
+    ) => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
       assertOnboard(onboard)
@@ -184,7 +192,7 @@ export const useTxActions = (): TxActions => {
 
       // Relay or execute the tx via connected wallet
       if (isRelayed) {
-        await dispatchTxRelay(safeTx, safe, txId, chain, txOptions.gasLimit)
+        await dispatchTxRelay(safeTx, safe, txId, chain, txOptions.gasLimit, acceptUnverifiedSimulation)
       } else {
         const isSmartAccount = await isSmartContractWallet(signer.chainId, signer.address)
         await dispatchTxExecution(
