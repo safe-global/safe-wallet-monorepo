@@ -19,12 +19,12 @@ const defaultChainShortName =
   (Object.entries(chains) as [string, string][]).find(([, id]) => id === String(DEFAULT_CHAIN_ID))?.[0] ?? 'sep'
 
 const SAFE_SIDEBAR_ROUTER_QUERY = {
-  spaceId: '1',
+  spaceId: 'uuid-1',
   chain: defaultChainShortName,
   safe: '0x1234567890123456789012345678901234567890',
 }
 
-const STORY_SELECTED_SPACE: SpaceItem = { id: 1, name: 'Company Space', safeCount: 0 }
+const STORY_SELECTED_SPACE: SpaceItem = { id: 1, uuid: 'uuid-1', name: 'Company Space', safeCount: 0 }
 
 const storyChain = (() => {
   const base = createChainData()
@@ -335,8 +335,8 @@ export const VariantAddToWorkspace: Story = {
         workspaceHeader={{
           variant: 'addToWorkspace',
           spaces: [
-            { id: 1, name: 'Company Space', safeCount: 2 },
-            { id: 2, name: 'Treasury', safeCount: 5 },
+            { id: 1, uuid: 'uuid-1', name: 'Company Space', safeCount: 2 },
+            { id: 2, uuid: 'uuid-2', name: 'Treasury', safeCount: 5 },
           ],
         }}
         mainNavItems={variantMainNavItems}
