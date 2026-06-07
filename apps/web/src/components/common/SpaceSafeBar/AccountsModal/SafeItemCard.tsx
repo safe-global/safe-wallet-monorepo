@@ -103,7 +103,7 @@ const SafeItemCard = ({
       </div>
 
       {/* Name + address + optional status badge */}
-      <div className="flex min-w-0 w-[160px] shrink-0 flex-col gap-0.5 overflow-hidden">
+      <div data-testid="name-column" className="flex min-w-0 w-[160px] shrink-0 flex-col gap-0.5 overflow-hidden">
         <div className="flex items-center gap-1 min-w-0">
           <span className="truncate text-sm font-semibold text-foreground">{displayName}</span>
           {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
@@ -113,9 +113,14 @@ const SafeItemCard = ({
           <CopyAddressButton address={safeItem.address} />
         </div>
         {isSimilar && <SimilarityBadge />}
-        {undeployedSafe && <NotActivatedBadge isActivating={isActivating} />}
         {!undeployedSafe && safeItem.isReadOnly && !isSimilar && <ReadOnlyBadge />}
       </div>
+
+      {undeployedSafe && (
+        <div className="shrink-0">
+          <NotActivatedBadge isActivating={isActivating} />
+        </div>
+      )}
 
       {/* Chain logo */}
       <div className="mx-auto shrink-0">

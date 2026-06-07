@@ -91,16 +91,13 @@ export const SafeCardLayout = ({
       </div>
     </div>
 
-    <div className="ml-auto flex shrink-0 items-center justify-end pl-1 sm:pl-2">
+    <div className="ml-auto flex shrink-0 items-center justify-end gap-1.5 pl-1 sm:gap-2 sm:pl-2">
+      {isUndeployed && <AccountItem.StatusChip undeployedSafe isActivating={isActivating} />}
       <AccountItem.ChainBadge safes={safes} className="justify-end" />
     </div>
 
     <div className="flex min-w-0 shrink-0 flex-col items-end gap-2 pl-1 sm:min-w-16 sm:pl-0">
-      {isUndeployed ? (
-        <AccountItem.StatusChip undeployedSafe isActivating={isActivating} />
-      ) : (
-        <FiatBalance value={fiatValue} />
-      )}
+      {!isUndeployed && <FiatBalance value={fiatValue} />}
       {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
     </div>
   </button>

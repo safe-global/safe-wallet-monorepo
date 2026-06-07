@@ -1,4 +1,4 @@
-import { AlertCircle, Eye } from 'lucide-react'
+import { Eye } from 'lucide-react'
 import FiatValue from '@/components/common/FiatValue'
 import { Badge } from '@/components/ui/badge'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
@@ -9,6 +9,7 @@ import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeInfoDisplay from './SafeInfoDisplay'
 import BalanceDisplay from './BalanceDisplay'
 import ChainLogo from './ChainLogo'
+import NotActivatedBadge from './NotActivatedBadge'
 import type { SafeItemData, SafeItemDataChain } from '../types'
 
 interface MultiChainSafeItemRowProps {
@@ -17,18 +18,7 @@ interface MultiChainSafeItemRowProps {
 
 function StatusBadge({ chain }: { chain: SafeItemDataChain }) {
   if (chain.isUndeployed) {
-    return (
-      <span
-        className="inline-flex w-fit items-center gap-1 rounded-full px-1.5 py-px text-[11px] leading-none"
-        style={{
-          backgroundColor: chain.isActivating ? 'var(--color-info-light)' : 'var(--color-warning-background)',
-          color: chain.isActivating ? 'var(--color-info-dark)' : 'var(--color-warning-main)',
-        }}
-      >
-        <AlertCircle className="size-3 shrink-0" />
-        {chain.isActivating ? 'Activating' : 'Not activated'}
-      </span>
-    )
+    return <NotActivatedBadge isActivating={chain.isActivating} />
   }
   if (chain.isReadOnly) {
     return (

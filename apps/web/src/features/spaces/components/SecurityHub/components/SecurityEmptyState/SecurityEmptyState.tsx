@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, type ReactElement } from 'react'
-import { ArrowUpRight, KeyRound, ShieldCheck } from 'lucide-react'
+import { ArrowUpRight, ShieldCheck } from 'lucide-react'
 import AddAccounts from '@/features/spaces/components/AddAccounts'
 import { HnSignupFlow } from '@/features/hypernative/components/HnSignupFlow'
 import Track from '@/components/common/Track'
@@ -75,13 +75,14 @@ const SecurityEmptyState = (): ReactElement => {
 
   const CARDS = useMemo(
     () => [
-      {
-        label: 'free',
-        title: 'Account recovery',
-        description: 'Never lose access to your Safe.',
-        icon: <KeyRound />,
-        onClick: handleAccountRecoveryClick,
-      },
+      // TODO: We're hidding it because of the incident
+      // {
+      //   label: 'free',
+      //   title: 'Account recovery',
+      //   description: 'Never lose access to your Safe.',
+      //   icon: <KeyRound />,
+      //   onClick: handleAccountRecoveryClick,
+      // },
       {
         label: 'enterprise',
         title: 'Hypernative Guardian',
