@@ -164,6 +164,13 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members/decline`, method: 'POST' }),
         invalidatesTags: ['spaces'],
       }),
+      membersRenewInviteV1: build.mutation<MembersRenewInviteV1ApiResponse, MembersRenewInviteV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}/invite/renew`,
+          method: 'POST',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       membersGetUsersV1: build.query<MembersGetUsersV1ApiResponse, MembersGetUsersV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members` }),
         providesTags: ['spaces'],
@@ -343,6 +350,13 @@ export type MembersDeclineInviteV1ApiResponse = unknown
 export type MembersDeclineInviteV1ApiArg = {
   /** Space ID to decline invitation for */
   spaceId: number
+}
+export type MembersRenewInviteV1ApiResponse = /** status 200 Invitation renewed successfully */ Invitation
+export type MembersRenewInviteV1ApiArg = {
+  /** Space ID containing the invitation */
+  spaceId: number
+  /** User ID of the invited member */
+  userId: number
 }
 export type MembersGetUsersV1ApiResponse = /** status 200 Space members retrieved successfully */ MembersDto
 export type MembersGetUsersV1ApiArg = {
@@ -602,6 +616,7 @@ export const {
   useMembersInviteUserV1Mutation,
   useMembersAcceptInviteV1Mutation,
   useMembersDeclineInviteV1Mutation,
+  useMembersRenewInviteV1Mutation,
   useMembersGetUsersV1Query,
   useLazyMembersGetUsersV1Query,
   useMembersSelfRemoveV1Mutation,

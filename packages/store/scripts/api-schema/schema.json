@@ -2813,6 +2813,59 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/members/{userId}/invite/renew": {
+      "post": {
+        "description": "Renews a pending invitation to a space, refreshing its expiry. Only space admins can renew, and only pending invitations can be renewed.Note: renewal for email invites also resends the invitation email.",
+        "operationId": "membersRenewInviteV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID containing the invitation",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "User ID of the invited member",
+            "schema": {
+              "example": 123,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invitation renewed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitation"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access forbidden - user is not an active admin of this space"
+          },
+          "404": {
+            "description": "User, space, or member not found"
+          },
+          "409": {
+            "description": "Invitation is not in a pending state"
+          }
+        },
+        "summary": "Renew space invitation",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/members": {
       "get": {
         "description": "Retrieves all members of a space including their roles, status, and membership information.",
@@ -8219,9 +8272,9 @@
         "type": "object",
         "properties": {
           "chainId": {
-            "type": "number",
+            "type": "string",
             "description": "Chain ID",
-            "example": 1
+            "example": "1"
           },
           "safeAddress": {
             "type": "string",
