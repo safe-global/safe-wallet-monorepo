@@ -48,7 +48,7 @@ describe('resolveFeeParams', () => {
       baseGas: '48564',
       gasPrice: '195000000000000',
       gasToken: '0xa0b86991000000000000000000000000000000aa',
-      refundReceiver: '0xc918e75504D1B0c741Eb4236B72Dae7A52401E95',
+      refundReceiver: '0xaEf22e5f09980fC1Ba6F2ec3EC34c1B9aeC885b5',
       numberSignatures: 3,
     },
     relayCost: { fiatCode: 'USD', fiatValue: '38.22' },
@@ -100,7 +100,7 @@ describe('resolveFeeParams', () => {
         baseGas: '48564',
         gasPrice: '195000000000000',
         gasToken: '0xa0b86991000000000000000000000000000000aa',
-        refundReceiver: '0xc918e75504D1B0c741Eb4236B72Dae7A52401E95',
+        refundReceiver: '0xaEf22e5f09980fC1Ba6F2ec3EC34c1B9aeC885b5',
       }),
       safeTx.data.nonce,
     )
