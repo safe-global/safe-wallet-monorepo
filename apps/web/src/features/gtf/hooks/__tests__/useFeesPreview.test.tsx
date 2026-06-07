@@ -97,7 +97,7 @@ const wethBalance = {
 const mockSuccessfulPreview = {
   data: {
     txData: {
-      chainId: 1,
+      chainId: '1',
       safeAddress: mockSafe.address.value,
       safeTxGas: '2409',
       baseGas: '68568',

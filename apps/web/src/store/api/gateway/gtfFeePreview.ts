@@ -36,7 +36,7 @@ export type FeePreviewTransactionDto = {
 }
 
 export type FeePreviewTxData = {
-  chainId: number
+  chainId: string
   safeAddress: string
   safeTxGas: string
   baseGas: string
