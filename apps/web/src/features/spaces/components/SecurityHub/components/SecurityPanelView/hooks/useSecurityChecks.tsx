@@ -14,7 +14,7 @@ import {
   type SectionRow,
 } from '../primitives'
 import { resolveStatusTone, SeverityIcon, type SeverityTone } from '../../SeverityIcon/SeverityIcon'
-import { ZODIAC_VULNERABILITY_CTA, getModuleRowContent } from '../utils'
+import { VULNERABLE_MODULE_INTRO, ZODIAC_VULNERABILITY_CTA, getModuleRowContent } from '../utils'
 
 export type FailingRow = { key: string; node: ReactNode; grade: SafeGrade }
 
@@ -344,12 +344,7 @@ export const useSecurityChecks = (
                 leadIcon={<SeverityIcon tone={rowTone('issue', severity)} />}
                 accentTone={rowTone('issue', severity)}
                 title="Vulnerable module detected"
-                expandedContent={
-                  <EvidenceList
-                    intro="This Safe is affected by a known Zodiac module vulnerability through a related account. Review your setup and remove the affected module."
-                    cta={ZODIAC_VULNERABILITY_CTA}
-                  />
-                }
+                expandedContent={<EvidenceList intro={VULNERABLE_MODULE_INTRO} cta={ZODIAC_VULNERABILITY_CTA} />}
               />
             ),
           })

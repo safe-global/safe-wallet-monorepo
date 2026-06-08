@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { Cta } from './primitives'
 
 /**
@@ -10,6 +11,15 @@ export const ZODIAC_VULNERABILITY_CTA: Cta = {
   href: 'https://app.zodiac.eco/public/fallback-handler',
 }
 
+/** Shared intro shown for any Zodiac-vulnerability finding (per-module rows and the nested warning). */
+export const VULNERABLE_MODULE_INTRO: ReactNode = (
+  <>
+    <span className="font-bold">This Safe is affected by a vulnerable third-party module.</span> A Zodiac Delay v1.1.0
+    or Roles v2.1.0 module associated with it has a known critical vulnerability. We advise you to take immediate
+    action.
+  </>
+)
+
 /**
  * Intro copy + CTA for a single module row, keyed on its verdict:
  * - vulnerable → remove action (or the external checker when no in-app handler),
@@ -21,11 +31,10 @@ export const getModuleRowContent = (
   verdict: { vulnerable: boolean; trusted: boolean },
   modulesCta: Cta | null,
   onRemoveModule?: (address: string) => void,
-): { intro: string; cta: Cta | null } => {
+): { intro: ReactNode; cta: Cta | null } => {
   if (verdict.vulnerable) {
     return {
-      intro:
-        'This module is affected by a known Zodiac security vulnerability. Remove it immediately to protect your funds.',
+      intro: VULNERABLE_MODULE_INTRO,
       cta: onRemoveModule
         ? { label: 'Remove unsupported module', onClick: () => onRemoveModule(module.value) }
         : ZODIAC_VULNERABILITY_CTA,

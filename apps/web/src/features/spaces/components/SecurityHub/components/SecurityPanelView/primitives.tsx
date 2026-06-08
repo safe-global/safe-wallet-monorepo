@@ -181,7 +181,7 @@ export const EvidenceList = ({
   evidence,
   cta,
 }: {
-  intro?: string
+  intro?: ReactNode
   evidence?: EvidenceItem[]
   cta?: Cta | null
 }): ReactElement | null => {
