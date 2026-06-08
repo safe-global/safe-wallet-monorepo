@@ -23,13 +23,13 @@ import {
 } from './shared'
 import { PinnedSafeSubItem } from './PinnedSafeItem'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 interface MultiSafeItemCardProps {
   item: MultiChainSafeItem
   isSimilar?: boolean
   onClose: () => void
   openSafeTrackingLabel?: OVERVIEW_LABELS
-  hidePinControls?: boolean
 }
 
 const MultiSafeItemCard = ({
@@ -37,7 +37,6 @@ const MultiSafeItemCard = ({
   isSimilar,
   onClose,
   openSafeTrackingLabel = OVERVIEW_LABELS.top_bar,
-  hidePinControls = false,
 }: MultiSafeItemCardProps) => {
   const [open, setOpen] = useState(false)
   const currency = useAppSelector(selectCurrency)
@@ -116,24 +115,27 @@ const MultiSafeItemCard = ({
             </div>
           </CollapsibleTrigger>
 
-          {!hidePinControls && (
-            <>
-              {/* Pin/Unpin toggle — outside trigger so it doesn't toggle the collapsible */}
-              <button
-                type="button"
-                onClick={handleTogglePin}
-                className="shrink-0 rounded p-1 hover:bg-muted"
-                aria-label={isPinned ? 'Unpin safe' : 'Pin safe'}
-              >
-                <Bookmark
-                  className={`size-4 ${isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
+          {/* Pin/Unpin toggle — outside trigger so it doesn't toggle the collapsible */}
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={handleTogglePin}
+                  className="shrink-0 cursor-pointer rounded p-1 hover:bg-muted"
+                  aria-label={isPinned ? 'Unpin safe' : 'Pin safe'}
                 />
-              </button>
+              }
+            >
+              <Bookmark
+                className={`size-4 ${isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
+              />
+            </TooltipTrigger>
+            <TooltipContent>{isPinned ? 'Remove from trusted Safes' : 'Add to trusted Safes'}</TooltipContent>
+          </Tooltip>
 
-              {/* Context menu — outside trigger for the same reason */}
-              <PinnedSafeContextMenu address={address} chainId={sortedSafes[0]?.chainId ?? ''} name={displayName} />
-            </>
-          )}
+          {/* Context menu — outside trigger for the same reason */}
+          <PinnedSafeContextMenu address={address} chainId={sortedSafes[0]?.chainId ?? ''} name={displayName} />
         </div>
 
         <CollapsibleContent>

@@ -124,6 +124,9 @@
   --color-accent-secondary: var(--accent-secondary);
   --color-accent-secondary-foreground: var(--accent-secondary-foreground);
   --color-accent-success: var(--accent-success);
+  --color-success-subtle: var(--color-success-background);
+  --color-success-muted: var(--color-success-light);
+  --color-success-strong: var(--color-success-dark);
   --radius-2xs: 0.25rem;
   --radius-xs: 0.5rem;
   --radius-sm: 0.5rem;

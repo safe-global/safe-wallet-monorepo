@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Alert, AlertTitle, AlertDescription, AlertAction } from '../alert'
-import { AlertCircle, X } from 'lucide-react'
+import { AlertCircle, Wallet, X } from 'lucide-react'
 import { Button } from '../button'
 
 /**
@@ -14,7 +14,7 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'destructive'],
+      options: ['default', 'destructive', 'warning', 'success'],
     },
   },
 } satisfies Meta<typeof Alert>
@@ -97,6 +97,17 @@ export const AllVariants: Story = {
                   <X />
                 </Button>
               </AlertAction>
+            </Alert>
+          </div>
+          <div style={{ width: '400px' }}>
+            <Alert variant="success" className="items-center rounded-md py-4">
+              <Wallet className="!translate-y-0" />
+              <AlertDescription className="flex w-full items-center gap-3">
+                <span className="min-w-0 flex-1">Connect a wallet to discover accounts you own or sign for</span>
+                <Button size="sm" className="shrink-0">
+                  Connect
+                </Button>
+              </AlertDescription>
             </Alert>
           </div>
         </div>

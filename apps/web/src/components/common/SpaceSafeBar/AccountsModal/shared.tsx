@@ -1,5 +1,5 @@
 /**
- * Shared shadcn-only primitives used by PinnedSafeItem and PinnedMultiSafeItem.
+ * Shared shadcn-only primitives used by the AccountsModal safe rows.
  * No MUI dependencies.
  */
 import { type MouseEvent, useState } from 'react'
