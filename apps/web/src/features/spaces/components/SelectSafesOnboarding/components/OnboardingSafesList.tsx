@@ -2,6 +2,7 @@ import { type AllSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
 import SafeCard from './SafeCard'
 import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 import SelectAllToggle, { type SelectAllState } from '@/features/spaces/components/SelectAllToggle/SelectAllToggle'
+import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/constants'
 
 interface SectionSelectAll {
   state: SelectAllState
@@ -37,6 +38,7 @@ const SectionRow = ({ label, selectAll, testId }: { label: string; selectAll?: S
         total={selectAll.total}
         onToggle={selectAll.onToggle}
         label="Select all"
+        labelTooltip={`You can select up to ${SAFE_ACCOUNTS_LIMIT} Safe accounts`}
         showCount
         countTooltip="Multi-chain safes count once per network"
         testId={testId}

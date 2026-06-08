@@ -10,6 +10,7 @@ interface SelectAllToggleProps {
   total: number
   onToggle: (check: boolean) => void
   label?: string
+  labelTooltip?: string
   showCount?: boolean
   countTooltip?: string
   className?: string
@@ -23,6 +24,7 @@ const SelectAllToggle = ({
   total,
   onToggle,
   label = 'Select all',
+  labelTooltip,
   showCount = false,
   countTooltip,
   className,
@@ -38,21 +40,32 @@ const SelectAllToggle = ({
 
   const showCountText = showCount && total > 0
 
+  const toggleButton = (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={indeterminate ? 'mixed' : checked}
+      aria-label={showCountText ? `${label} (${count}/${total})` : label}
+      onClick={handleChange}
+      disabled={disabled || total === 0}
+      data-testid={testId}
+      className="flex items-center gap-2 rounded-md px-2 py-1 text-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      <Checkbox checked={checked} indeterminate={indeterminate} tabIndex={-1} aria-hidden />
+      <span className="text-muted-foreground">{label}</span>
+    </button>
+  )
+
   return (
     <div className={cn('inline-flex items-center gap-1', className)}>
-      <button
-        type="button"
-        role="checkbox"
-        aria-checked={indeterminate ? 'mixed' : checked}
-        aria-label={showCountText ? `${label} (${count}/${total})` : label}
-        onClick={handleChange}
-        disabled={disabled || total === 0}
-        data-testid={testId}
-        className="flex items-center gap-2 rounded-md px-2 py-1 text-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        <Checkbox checked={checked} indeterminate={indeterminate} tabIndex={-1} aria-hidden />
-        <span className="text-muted-foreground">{label}</span>
-      </button>
+      {labelTooltip ? (
+        <Tooltip>
+          <TooltipTrigger render={toggleButton} />
+          <TooltipContent>{labelTooltip}</TooltipContent>
+        </Tooltip>
+      ) : (
+        toggleButton
+      )}
       {showCountText &&
         (countTooltip ? (
           <Tooltip>

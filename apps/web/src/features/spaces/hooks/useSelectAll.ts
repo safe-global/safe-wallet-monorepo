@@ -8,6 +8,13 @@ import type { AddAccountsFormValues } from './useSelectAll.types'
 
 type Scope = 'all' | 'trusted' | 'owned'
 
+// When the global cap is reached, a section with selections can't grow, so it
+// behaves as fully selected: show it checked and let the next click deselect.
+const applyCap = (selection: ReturnType<typeof getSelectionState>, isAtLimit: boolean) =>
+  selection.state === 'all' || (isAtLimit && selection.selectedCount > 0)
+    ? { ...selection, state: 'all' as const }
+    : selection
+
 interface Args {
   visibleTrusted: AllSafeItems
   visibleOwned: AllSafeItems
@@ -17,16 +24,20 @@ interface Args {
 
 export function useSelectAll({ visibleTrusted, visibleOwned, control, setValue }: Args) {
   const selectedSafes = useWatch({ control, name: 'selectedSafes' }) ?? {}
-  const trustedSelection = useMemo(
-    () => getSelectionState(visibleTrusted, selectedSafes),
-    [visibleTrusted, selectedSafes],
-  )
-  const ownedSelection = useMemo(() => getSelectionState(visibleOwned, selectedSafes), [visibleOwned, selectedSafes])
   const isAtLimit = useMemo(
     () =>
       Object.entries(selectedSafes).filter(([k, v]) => v && !k.startsWith(MULTICHAIN_SAFE_KEY_PREFIX)).length >=
       SAFE_ACCOUNTS_LIMIT,
     [selectedSafes],
+  )
+
+  const trustedSelection = useMemo(
+    () => applyCap(getSelectionState(visibleTrusted, selectedSafes), isAtLimit),
+    [visibleTrusted, selectedSafes, isAtLimit],
+  )
+  const ownedSelection = useMemo(
+    () => applyCap(getSelectionState(visibleOwned, selectedSafes), isAtLimit),
+    [visibleOwned, selectedSafes, isAtLimit],
   )
 
   const handleSelectAll = useCallback(
