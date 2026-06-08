@@ -4,7 +4,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import Identicon from '@/components/common/Identicon'
 import { Badge } from '@/components/ui/badge'
-import { TriangleAlert } from 'lucide-react'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { AlertCircle, TriangleAlert } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import FiatBalance from './FiatBalance'
 import ThresholdBadge from './ThresholdBadge'
@@ -92,7 +93,27 @@ export const SafeCardLayout = ({
     </div>
 
     <div className="ml-auto flex shrink-0 items-center justify-end gap-1.5 pl-1 sm:gap-2 sm:pl-2">
-      {isUndeployed && <AccountItem.StatusChip undeployedSafe isActivating={isActivating} />}
+      {isUndeployed && (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span
+                tabIndex={0}
+                className="flex shrink-0 items-center"
+                data-testid="onboarding-not-activated-icon"
+                aria-label={isActivating ? 'Activating' : 'Inactive'}
+                onClick={(e) => e.stopPropagation()}
+              />
+            }
+          >
+            <AlertCircle
+              className="size-4"
+              style={{ color: isActivating ? 'var(--color-info-dark)' : 'var(--color-warning-main)' }}
+            />
+          </TooltipTrigger>
+          <TooltipContent>{isActivating ? 'Activating' : 'Inactive'}</TooltipContent>
+        </Tooltip>
+      )}
       <AccountItem.ChainBadge safes={safes} className="justify-end" />
     </div>
 
