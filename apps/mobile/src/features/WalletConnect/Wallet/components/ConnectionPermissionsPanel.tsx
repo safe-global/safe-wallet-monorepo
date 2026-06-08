@@ -1,6 +1,5 @@
 import React from 'react'
 import { Text, YStack, XStack } from 'tamagui'
-import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import type { IconName } from '@/src/types/iconTypes'
 import type { VerifyVariant } from '../utils/verifyStatus'
@@ -8,7 +7,6 @@ import { VerifyStatusIcon } from './VerifyStatusIcon'
 
 type Props = {
   variant: VerifyVariant
-  onDismiss: () => void
 }
 
 type PermissionRow = { allowed: boolean; text: string }
@@ -41,60 +39,55 @@ const Row: React.FC<PermissionRow> = ({ allowed, text }) => {
   )
 }
 
-export const ConnectionPermissionsPanel: React.FC<Props> = ({ variant, onDismiss }) => {
+// Content only — the "Got it" CTA is rendered by RequestSheetHost as a pinned BottomSheetFooter.
+export const ConnectionPermissionsPanel: React.FC<Props> = ({ variant }) => {
   const isVerified = variant === 'verified'
 
   return (
-    <YStack gap="$4" paddingHorizontal="$4" paddingTop="$2" paddingBottom="$4">
-      <Text fontSize={20} fontWeight="600" letterSpacing={-0.2} textAlign="center">
+    <YStack paddingHorizontal="$4" paddingTop="$2">
+      <Text fontSize={20} fontWeight="600" letterSpacing={-0.2} marginBottom="$6" textAlign="center">
         Connection request
       </Text>
 
-      <YStack gap="$8">
-        <YStack gap="$6">
-          <XStack
-            gap="$3"
-            paddingHorizontal="$3"
-            paddingVertical="$4"
-            borderRadius="$4"
-            alignItems="center"
-            testID="wc-permissions-banner"
-            backgroundColor={isVerified ? '$backgroundSuccess' : '$backgroundError'}
-          >
-            <VerifyStatusIcon variant={variant} size={24} />
-            <Text flex={1} fontSize={16} fontWeight="700" lineHeight={22}>
-              {BANNER_COPY[variant]}
-            </Text>
-          </XStack>
+      <YStack gap="$6">
+        <XStack
+          gap="$3"
+          paddingHorizontal="$3"
+          paddingVertical="$4"
+          borderRadius="$4"
+          alignItems="center"
+          testID="wc-permissions-banner"
+          backgroundColor={isVerified ? '$backgroundSuccess' : '$backgroundError'}
+        >
+          <VerifyStatusIcon variant={variant} size={24} />
+          <Text flex={1} fontSize={16} fontWeight="700" lineHeight={22}>
+            {BANNER_COPY[variant]}
+          </Text>
+        </XStack>
 
-          <YStack gap="$2">
-            <Text paddingHorizontal="$2" fontSize={16} lineHeight={22} color="$colorSecondary">
-              This website will be able to:
-            </Text>
-            {CAN.map((row) => (
-              <Row key={row.text} {...row} />
-            ))}
-          </YStack>
-
-          <YStack gap="$2">
-            <Text paddingHorizontal="$2" fontSize={16} lineHeight={22} color="$colorSecondary">
-              This website won't be able to:
-            </Text>
-            {CANNOT.map((row) => (
-              <Row key={row.text} {...row} />
-            ))}
-          </YStack>
-
-          {!isVerified && (
-            <Text paddingHorizontal="$2" fontSize={16} fontWeight="700" lineHeight={22}>
-              Only continue if you trust the source.
-            </Text>
-          )}
+        <YStack gap="$2">
+          <Text paddingHorizontal="$2" fontSize={16} lineHeight={22} color="$colorSecondary">
+            This website will be able to:
+          </Text>
+          {CAN.map((row) => (
+            <Row key={row.text} {...row} />
+          ))}
         </YStack>
 
-        <SafeButton primary onPress={onDismiss} testID="wc-proposal-permissions-dismiss">
-          Got it
-        </SafeButton>
+        <YStack gap="$2">
+          <Text paddingHorizontal="$2" fontSize={16} lineHeight={22} color="$colorSecondary">
+            This website won't be able to:
+          </Text>
+          {CANNOT.map((row) => (
+            <Row key={row.text} {...row} />
+          ))}
+        </YStack>
+
+        {!isVerified && (
+          <Text paddingHorizontal="$2" fontSize={16} fontWeight="700" lineHeight={22}>
+            Only continue if you trust the source.
+          </Text>
+        )}
       </YStack>
     </YStack>
   )

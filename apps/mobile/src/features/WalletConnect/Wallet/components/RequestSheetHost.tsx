@@ -1,39 +1,69 @@
-import React, { useCallback, useEffect, useRef } from 'react'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { BottomSheetModal, BottomSheetView, BottomSheetFooter, type BottomSheetFooterProps } from '@gorhom/bottom-sheet'
 import type { IWalletKit } from '@reown/walletkit'
 import { useStore } from 'react-redux'
-import { getVariable, useTheme } from 'tamagui'
+import { getVariable, useTheme, YStack } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { formatJsonRpcError } from '@walletconnect/jsonrpc-utils'
 import { getSdkError } from '@walletconnect/utils'
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
+import { SafeButton } from '@/src/components/SafeButton'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import type { RootState } from '@/src/store'
 import { removePending, selectCurrentRequest } from '../store/walletKitSlice'
+import { useApproveProposal } from '../hooks/useApproveProposal'
+import { verifyStatusToVariant } from '../utils/verifyStatus'
 import { logWalletKitError } from '../utils/errors'
 import { SessionProposalSheet } from './SessionProposalSheet'
+import { ConnectionPermissionsPanel } from './ConnectionPermissionsPanel'
 
 type Props = { walletKit: IWalletKit | null }
+
+// Sheet snap indices: 0 = compact (proposal), 1 = taller (permissions panel).
+const SNAP_COMPACT = 0
+const SNAP_EXPANDED = 1
 
 /**
  * Root-level host for incoming WalletConnect request sheets. Reads the FIFO head of the
  * pending queue and presents the sheet for it. The sheet is dismissable by swipe-down or
  * backdrop tap; an implicit dismissal is treated as the user declining, so we send a
  * USER_REJECTED reply to the dApp (rejectSession for proposals, an error response for
- * requests). The request-type sheets themselves are added in WA-2318 (proposal) and
- * WA-2321/2322 (transactions); this ticket ships only the shell, which renders nothing
- * inside while the queue is empty.
+ * requests).
+ *
+ * The proposal flow has two views — the proposal and a permissions detail panel — and both
+ * primary CTAs ("Connect" / "Got it") are rendered here as a BottomSheetFooter so they sit
+ * pinned to the sheet's bottom edge regardless of content height. The body components are
+ * pure presentation; the approve flow lives in useApproveProposal.
  */
 export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
   const current = useAppSelector(selectCurrentRequest)
   const dispatch = useAppDispatch()
   const store = useStore<RootState>()
   const theme = useTheme()
+  const insets = useSafeAreaInsets()
   const ref = useRef<BottomSheetModal>(null)
+  const [permissionsOpen, setPermissionsOpen] = useState(false)
+  const { approve, busy } = useApproveProposal(walletKit)
   const renderBackdrop = useCallback(() => <BackdropComponent shouldNavigateBack={false} />, [])
 
-  // The proposal's permissions panel is taller than the main state, so grow the sheet
-  // (index 1 = 60%) while it's open and shrink back (index 0 = 40%) when it closes.
-  const onPermissionsOpenChange = useCallback((open: boolean) => ref.current?.snapToIndex(open ? 1 : 0), [])
+  const proposal = current?.kind === 'proposal' ? current : null
+  const variant = proposal ? verifyStatusToVariant(proposal.proposal.verifyContext?.verified) : 'unverified'
+
+  // Reset the permissions view whenever the queue head changes (new proposal or cleared).
+  useEffect(() => {
+    setPermissionsOpen(false)
+  }, [current?.id, current?.kind])
+
+  // The permissions panel is taller than the proposal, so grow the sheet (index 1) while
+  // it's open and shrink back (index 0) when it closes.
+  const openPermissions = useCallback(() => {
+    setPermissionsOpen(true)
+    ref.current?.snapToIndex(SNAP_EXPANDED)
+  }, [])
+  const closePermissions = useCallback(() => {
+    setPermissionsOpen(false)
+    ref.current?.snapToIndex(SNAP_COMPACT)
+  }, [])
 
   useEffect(() => {
     if (!current || !walletKit) {
@@ -44,9 +74,9 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
   }, [current, walletKit])
 
   // Treat an implicit sheet dismissal (swipe-down, backdrop tap) as a USER_REJECTED reply
-  // to the dApp. Once the inner sheets land, tapping an explicit action will dispatch
-  // removePending first, clearing `current` synchronously — so by the time onDismiss fires
-  // from those paths this is a no-op. Reading state imperatively avoids a stale closure.
+  // to the dApp. Tapping an explicit action dispatches removePending first, clearing
+  // `current` synchronously — so by the time onDismiss fires from those paths this is a
+  // no-op. Reading state imperatively avoids a stale closure.
   const onSheetDismiss = useCallback(async () => {
     if (!walletKit) {
       return
@@ -79,6 +109,39 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
     dispatch(removePending({ id: currentAtDismiss.id, kind: 'request' }))
   }, [walletKit, store, dispatch])
 
+  // The active view's primary CTA, pinned to the bottom edge of the sheet. No background so
+  // its top edge doesn't show a seam against the content; the panel/proposal content is short
+  // enough that it never scrolls under the CTA.
+  const renderFooter = useCallback(
+    (footerProps: BottomSheetFooterProps) => {
+      if (!walletKit || !proposal) {
+        return null
+      }
+      return (
+        <BottomSheetFooter {...footerProps} bottomInset={insets.bottom}>
+          <YStack paddingHorizontal="$4" paddingTop="$2" paddingBottom="$2">
+            {permissionsOpen ? (
+              <SafeButton primary onPress={closePermissions} testID="wc-proposal-permissions-dismiss">
+                Got it
+              </SafeButton>
+            ) : (
+              <SafeButton
+                primary
+                onPress={() => approve(proposal)}
+                loading={busy}
+                loadingText="Connecting…"
+                testID="wc-proposal-connect"
+              >
+                Connect
+              </SafeButton>
+            )}
+          </YStack>
+        </BottomSheetFooter>
+      )
+    },
+    [walletKit, proposal, permissionsOpen, closePermissions, approve, busy, insets.bottom],
+  )
+
   return (
     <BottomSheetModal
       ref={ref}
@@ -87,16 +150,16 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
       onDismiss={onSheetDismiss}
       backgroundComponent={BackgroundComponent}
       backdropComponent={renderBackdrop}
+      footerComponent={renderFooter}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
-      {walletKit && current?.kind === 'proposal' && (
-        <SessionProposalSheet
-          walletKit={walletKit}
-          pending={current}
-          onPermissionsOpenChange={onPermissionsOpenChange}
-        />
-      )}
-      {/* Transaction request sheet (current?.kind === 'request') added in WA-2321 / WA-2322. */}
+      <BottomSheetView style={{ flex: 1 }}>
+        {walletKit && proposal && !permissionsOpen && (
+          <SessionProposalSheet pending={proposal} onOpenPermissions={openPermissions} />
+        )}
+        {walletKit && proposal && permissionsOpen && <ConnectionPermissionsPanel variant={variant} />}
+        {/* Transaction request sheet (current?.kind === 'request') added in WA-2321 / WA-2322. */}
+      </BottomSheetView>
     </BottomSheetModal>
   )
 }
