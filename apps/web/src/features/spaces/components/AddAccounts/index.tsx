@@ -379,11 +379,11 @@ const AddAccounts = ({
       )}
 
       <ModalDialog open={isOpen} fullScreen hideChainIndicator>
-        <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-          <div className="flex h-dvh max-h-dvh w-full min-w-0 max-w-full flex-col overflow-y-auto overflow-x-hidden bg-secondary p-4">
-            <div className="mx-auto flex w-full min-w-0 max-w-full flex-col gap-6 sm:max-w-[520px]">
+        <div className={cn('shadcn-scope flex h-dvh max-h-dvh flex-col', isDarkMode && 'dark')}>
+          <div className="flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col overflow-hidden bg-secondary p-4">
+            <div className="mx-auto flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col gap-6 sm:max-w-[520px]">
               <FormProvider {...formMethods}>
-                <form onSubmit={onSubmit} className="flex flex-col w-full gap-6">
+                <form onSubmit={onSubmit} className="flex min-h-0 w-full flex-1 flex-col gap-6">
                   <div className="flex shrink-0 flex-col gap-4">
                     <div className="flex items-center justify-between">
                       <Button type="button" variant="ghost" size="icon" onClick={handleClose} className="rounded-md">
@@ -414,40 +414,46 @@ const AddAccounts = ({
 
                   {!wallet && <ConnectWalletHint testId="add-accounts-connect-wallet-button" />}
 
-                  <div className="relative min-w-0 w-full" data-testid="add-accounts-safes-list-region">
-                    {isListEmpty ? (
-                      <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                        {emptyStateMessage}
-                      </Typography>
-                    ) : hasNoSearchMatch ? (
-                      <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                        No safes match your search
-                      </Typography>
-                    ) : (
-                      <>
-                        {isAtLimit && (
-                          <Typography variant="paragraph" color="muted" className="text-xs pb-1">
-                            Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
-                          </Typography>
-                        )}
-                        <OnboardingSafesList
-                          trustedSafes={visibleTrusted}
-                          ownedSafes={visibleOwned}
-                          similarAddresses={similarAddresses}
-                          trustedSelectAll={{
-                            state: trustedSelection.state,
-                            count: trustedSelection.selectedCount,
-                            total: trustedSelection.total,
-                            onToggle: (check) => handleSelectAll('trusted', check),
-                          }}
-                          ownedSelectAll={{
-                            state: ownedSelection.state,
-                            count: ownedSelection.selectedCount,
-                            total: ownedSelection.total,
-                            onToggle: (check) => handleSelectAll('owned', check),
-                          }}
-                        />
-                      </>
+                  <div className="relative min-h-0 w-full min-w-0 flex-1">
+                    <div className="h-full w-full overflow-y-auto" data-testid="add-accounts-safes-list-region">
+                      {isListEmpty ? (
+                        <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                          {emptyStateMessage}
+                        </Typography>
+                      ) : hasNoSearchMatch ? (
+                        <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                          No safes match your search
+                        </Typography>
+                      ) : (
+                        <>
+                          {isAtLimit && (
+                            <Typography variant="paragraph" color="muted" className="text-xs pb-1">
+                              Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
+                            </Typography>
+                          )}
+                          <OnboardingSafesList
+                            trustedSafes={visibleTrusted}
+                            ownedSafes={visibleOwned}
+                            similarAddresses={similarAddresses}
+                            trustedSelectAll={{
+                              state: trustedSelection.state,
+                              count: trustedSelection.selectedCount,
+                              total: trustedSelection.total,
+                              onToggle: (check) => handleSelectAll('trusted', check),
+                            }}
+                            ownedSelectAll={{
+                              state: ownedSelection.state,
+                              count: ownedSelection.selectedCount,
+                              total: ownedSelection.total,
+                              onToggle: (check) => handleSelectAll('owned', check),
+                            }}
+                          />
+                        </>
+                      )}
+                    </div>
+
+                    {!isListEmpty && !hasNoSearchMatch && (
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-secondary to-transparent" />
                     )}
                   </div>
 
