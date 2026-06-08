@@ -1,26 +1,195 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
-.feeBreakdownWide {
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/*
+ * Brand gradient stops for the "How fees work" chip (Figma PLA-1440). These are decorative
+ * brand colors with no semantic equivalent in @safe-global/theme, so they live here as named
+ * vars rather than bare inline hex. Fixed widths are pixel-perfect Figma values.
+ */
+.howFeesWork {
+  --gtf-fees-chip-gradient-light: linear-gradient(to right, #b0ffc9, #d7f6ff 99.5%);
+  --gtf-fees-chip-gradient-dark: linear-gradient(190.78deg, #5fddff 12.5%, #12ff80 88%);
+  width: 126px;
+  height: 24px;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  color: var(--color-text-primary);
+  background: var(--gtf-fees-chip-gradient-light);
+  padding: 0 6px;
+  border-radius: 4px;
+  text-decoration: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  line-height: 16px;
+}
+
+.howFeesWork:hover {
+  opacity: 0.85;
+}
+
+[data-theme='dark'] .howFeesWork {
+  background: var(--gtf-fees-chip-gradient-dark);
+  color: var(--color-static-main);
+}
+
+.feeCard {
   border: 1px solid var(--color-border-light);
   border-radius: 8px;
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 12px;
 }
 
-.feeRow {
+.paymentRow {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
 }
 
-.feeLabel {
+.paymentRowGroup {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.paymentSourceSelector {
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 32px;
+  width: 87px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border-light);
+  background-color: var(--color-background-paper);
+  cursor: pointer;
+}
+
+.gasTokenSelector {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 2px 6px 2px 4px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border-light);
+  background-color: var(--color-background-paper);
+  cursor: pointer;
+}
+
+.gasTokenSelectorLocked {
+  cursor: default;
+}
+
+.selectorPopoverPaper:global(.MuiPaper-root) {
+  margin-top: 4px;
+  border-radius: 16px;
+  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 0;
+}
+
+.selectorPopoverPaperPayment {
+  width: 87px;
+}
+
+.selectorPopoverPaperGasToken {
+  width: 102px;
+}
+
+.selectorPopoverInner {
+  display: flex;
+  flex-direction: column;
+  padding: 2px;
+  border-radius: 14px;
+}
+
+.selectorPopoverInnerGasToken {
+  gap: 8px;
+}
+
+.selectorMenuItem {
+  border-radius: 14px;
+  min-height: 28px;
+  padding: 0 12px;
+}
+
+.selectorMenuItem:global(.Mui-selected),
+.selectorMenuItem:global(.Mui-selected:hover) {
+  background-color: var(--color-background-skeleton);
+}
+
+.gasTokenMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  padding: 2px 4px;
+}
+
+.gasTokenMenuItemText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.selectorCaret {
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-secondary);
+  transition: transform 120ms ease;
+}
+
+.selectorCaretOpen {
+  transform: rotate(180deg);
+}
+
+.tooltipIcon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.signerFeeNotice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.signerFeeNoticeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.totalOutgoing {
+  background-color: var(--color-background-skeleton);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.totalOutgoingValue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }

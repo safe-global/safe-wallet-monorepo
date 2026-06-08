@@ -4,6 +4,7 @@ import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/types-kit'
 import { type ReactElement } from 'react'
 import { ExecuteForm } from '../ExecuteForm'
+import { RelaySimulationError } from '@/services/tx/relayErrors'
 import * as useGasLimit from '@/hooks/useGasLimit'
 import * as useIsValidExecution from '@/hooks/useIsValidExecution'
 import * as useWalletCanRelay from '@/hooks/useWalletCanRelay'
@@ -250,5 +251,70 @@ describe('ExecuteForm', () => {
 
     expect(button).toBeInTheDocument()
     expect(button).not.toBeDisabled()
+  })
+
+  it('blocks execution and shows the simulation-failed banner on SIMULATION_FAILED', async () => {
+    const mockExecuteTx = jest.fn().mockRejectedValue(new RelaySimulationError('SIMULATION_FAILED', 'expected revert'))
+
+    const { getByText } = render(
+      <ExecuteForm
+        {...defaultProps}
+        safeTx={safeTransaction}
+        txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+      />,
+    )
+
+    fireEvent.click(getByText('Execute'))
+
+    await waitFor(() => {
+      expect(getByText(/expected to fail on-chain/i)).toBeInTheDocument()
+    })
+    // The doomed tx can no longer be submitted.
+    expect(getByText('Execute')).toBeDisabled()
+  })
+
+  it('offers an "Execute anyway" retry with acceptUnverifiedSimulation on INDETERMINATE_SIMULATION', async () => {
+    const mockExecuteTx = jest
+      .fn()
+      .mockRejectedValueOnce(new RelaySimulationError('INDETERMINATE_SIMULATION', 'service down'))
+      .mockResolvedValueOnce('0xnewtx')
+
+    const { getByText, getByTestId } = render(
+      <ExecuteForm
+        {...defaultProps}
+        safeTx={safeTransaction}
+        txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+      />,
+    )
+
+    fireEvent.click(getByText('Execute'))
+
+    await waitFor(() => {
+      expect(getByText(/couldn't review this transaction/i)).toBeInTheDocument()
+    })
+
+    // First attempt didn't opt into the unverified relay.
+    expect(mockExecuteTx).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      undefined,
+      expect.anything(),
+      false,
+    )
+
+    fireEvent.click(getByTestId('relay-accept-unverified-btn'))
+
+    await waitFor(() => {
+      // Retry forwards acceptUnverifiedSimulation = true.
+      expect(mockExecuteTx).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        undefined,
+        expect.anything(),
+        true,
+      )
+    })
   })
 })

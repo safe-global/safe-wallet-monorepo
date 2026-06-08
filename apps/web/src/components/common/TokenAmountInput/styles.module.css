@@ -56,6 +56,16 @@
 
 .select :global(.MuiSelect-icon) {
   margin-right: var(--space-2);
+  width: 24px;
+  height: 24px;
+  color: var(--color-text-secondary);
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 120ms ease;
+}
+
+.select :global(.MuiSelect-iconOpen) {
+  transform: translateY(-50%) rotate(180deg);
 }
 
 .fiatDisplay {
