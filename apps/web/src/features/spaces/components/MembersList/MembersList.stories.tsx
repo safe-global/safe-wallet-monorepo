@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
+import { faker } from '@faker-js/faker'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { createMockStory } from '@/stories/mocks'
 import MembersList from './index'
 
-const PAST = '2020-01-01T00:00:00.000Z'
-const FUTURE = '2999-01-01T00:00:00.000Z'
+const PAST = faker.date.past().toISOString()
+const FUTURE = faker.date.future().toISOString()
 
 const member = (overrides: Omit<Partial<MemberDto>, 'user'> & { user?: Partial<MemberDto['user']> }): MemberDto => ({
   id: 1,
@@ -14,8 +15,8 @@ const member = (overrides: Omit<Partial<MemberDto>, 'user'> & { user?: Partial<M
   name: 'Member',
   alias: null,
   invitedBy: null,
-  createdAt: '2026-04-22T00:00:00.000Z',
-  updatedAt: '2026-04-22T00:00:00.000Z',
+  createdAt: faker.date.past().toISOString(),
+  updatedAt: faker.date.recent().toISOString(),
   ...overrides,
   user: { id: 99, status: 'ACTIVE', email: null, ...overrides.user },
 })
