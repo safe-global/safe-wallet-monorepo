@@ -18,6 +18,11 @@ jest.mock('./EditMemberDialog', () => ({
   default: () => null,
 }))
 
+jest.mock('./RenewInviteButton', () => ({
+  __esModule: true,
+  default: () => <button>Renew invitation</button>,
+}))
+
 jest.mock('@/components/common/Track', () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -27,8 +32,13 @@ jest.mock('@/features/spaces', () => ({
   useIsAdmin: () => true,
   isAdmin: (member: { role: string }) => member.role === 'ADMIN',
   isActiveAdmin: (member: { role: string; status: string }) => member.role === 'ADMIN' && member.status === 'ACTIVE',
+  isInviteExpired: (member: { status: string; inviteExpiresAt?: string | null }) =>
+    member.status === 'INVITED' &&
+    member.inviteExpiresAt != null &&
+    new Date(member.inviteExpiresAt).getTime() <= Date.now(),
   MemberStatus: {
     INVITED: 'INVITED',
+    ACTIVE: 'ACTIVE',
     DECLINED: 'DECLINED',
   },
   useAdminCount: () => 2,
@@ -88,5 +98,76 @@ describe('MembersList', () => {
 
     await user.hover(emailNode)
     expect(await screen.findByRole('tooltip', { name: longEmail })).toBeInTheDocument()
+  })
+
+  it('shows an Expired chip for a pending invite past its expiry', () => {
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({ status: 'INVITED', name: 'Expired Bob', inviteExpiresAt: '2020-01-01T00:00:00.000Z' })
+            .build(),
+        ]}
+      />,
+    )
+
+    expect(screen.getByText('Expired')).toBeInTheDocument()
+  })
+
+  it('does not show an Expired chip for active members or unexpired invites', () => {
+    render(
+      <MembersList
+        members={[
+          memberBuilder().with({ status: 'ACTIVE', name: 'Alice' }).build(),
+          memberBuilder()
+            .with({ id: 2, status: 'INVITED', name: 'Future Bob', inviteExpiresAt: '2999-01-01T00:00:00.000Z' })
+            .build(),
+        ]}
+      />,
+    )
+
+    expect(screen.queryByText('Expired')).not.toBeInTheDocument()
+  })
+
+  it('renders the Renew button for pending email invites and for expired invites without an email', () => {
+    render(
+      <MembersList
+        members={[
+          // Active member — never renewable
+          memberBuilder().with({ id: 1, status: 'ACTIVE', name: 'Alice' }).build(),
+          // Pending email invite — renewable
+          memberBuilder()
+            .with({
+              id: 2,
+              status: 'INVITED',
+              name: 'Bob',
+              user: memberUserBuilder().with({ email: 'bob@x.io' }).build(),
+            })
+            .build(),
+          // Expired invite without email — renewable
+          memberBuilder()
+            .with({ id: 3, status: 'INVITED', name: 'Carol', inviteExpiresAt: '2020-01-01T00:00:00.000Z' })
+            .build(),
+          // Declined — never renewable
+          memberBuilder().with({ id: 4, status: 'DECLINED', name: 'Dave' }).build(),
+        ]}
+      />,
+    )
+
+    expect(screen.getAllByRole('button', { name: 'Renew invitation' })).toHaveLength(2)
+  })
+
+  it('does not render the Renew button for an unexpired invite without an email', () => {
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({ id: 1, status: 'INVITED', name: 'Bob', inviteExpiresAt: '2999-01-01T00:00:00.000Z' })
+            .build(),
+        ]}
+      />,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Renew invitation' })).not.toBeInTheDocument()
   })
 })
