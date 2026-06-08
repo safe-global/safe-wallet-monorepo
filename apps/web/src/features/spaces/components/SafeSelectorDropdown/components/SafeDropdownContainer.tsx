@@ -159,7 +159,7 @@ const SafeDropdownContainer = ({
       alignItemWithTrigger={false}
       // outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
       // :focus-visible and would otherwise draw the browser's blue outline around the whole popup.
-      className="w-[430px] max-w-[calc(100vw-2rem)] max-h-[min(34rem,var(--available-height))] overflow-y-auto overscroll-y-none bg-card border-0 ring-0 outline-hidden rounded-lg px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
+      className="w-[430px] max-w-[calc(100vw-2rem)] max-h-[min(34rem,var(--available-height))] overflow-y-auto overscroll-y-none bg-card border-0 ring-0 outline-hidden rounded-lg px-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
       sideOffset={20}
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
