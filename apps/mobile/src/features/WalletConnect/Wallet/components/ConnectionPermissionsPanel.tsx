@@ -32,9 +32,11 @@ const BANNER_COPY: Record<VerifyVariant, string> = {
 const Row: React.FC<PermissionRow> = ({ allowed, text }) => {
   const icon: IconName = allowed ? 'check' : 'close'
   return (
-    <XStack gap="$2" alignItems="center">
-      <SafeFontIcon name={icon} size={18} color={allowed ? '$success' : '$error'} />
-      <Text flex={1}>{text}</Text>
+    <XStack gap={10} paddingHorizontal="$2" alignItems="center">
+      <SafeFontIcon name={icon} size={16} color={allowed ? '$success' : '$error'} />
+      <Text flex={1} fontSize={16} lineHeight={22}>
+        {text}
+      </Text>
     </XStack>
   )
 }
@@ -43,43 +45,56 @@ export const ConnectionPermissionsPanel: React.FC<Props> = ({ variant, onDismiss
   const isVerified = variant === 'verified'
 
   return (
-    <YStack gap="$4" padding="$4">
-      <Text fontSize={18} fontWeight="600" textAlign="center">
+    <YStack gap="$4" paddingHorizontal="$4" paddingTop="$2" paddingBottom="$4">
+      <Text fontSize={20} fontWeight="600" letterSpacing={-0.2} textAlign="center">
         Connection request
       </Text>
 
-      <XStack
-        gap="$3"
-        padding="$3"
-        borderRadius="$3"
-        alignItems="center"
-        backgroundColor={isVerified ? '$successBackground' : '$errorBackground'}
-      >
-        <VerifyStatusIcon variant={variant} size={20} />
-        <Text flex={1} fontWeight="600">
-          {BANNER_COPY[variant]}
-        </Text>
-      </XStack>
+      <YStack gap="$8">
+        <YStack gap="$6">
+          <XStack
+            gap="$3"
+            paddingHorizontal="$3"
+            paddingVertical="$4"
+            borderRadius="$4"
+            alignItems="center"
+            backgroundColor={isVerified ? '$successBackground' : '$errorBackground'}
+          >
+            <VerifyStatusIcon variant={variant} size={24} />
+            <Text flex={1} fontSize={16} fontWeight="700" lineHeight={22}>
+              {BANNER_COPY[variant]}
+            </Text>
+          </XStack>
 
-      <YStack gap="$2">
-        <Text color="$colorSecondary">This website will be able to:</Text>
-        {CAN.map((row) => (
-          <Row key={row.text} {...row} />
-        ))}
+          <YStack gap="$2">
+            <Text paddingHorizontal="$2" fontSize={16} lineHeight={22} color="$colorSecondary">
+              This website will be able to:
+            </Text>
+            {CAN.map((row) => (
+              <Row key={row.text} {...row} />
+            ))}
+          </YStack>
+
+          <YStack gap="$2">
+            <Text paddingHorizontal="$2" fontSize={16} lineHeight={22} color="$colorSecondary">
+              This website won't be able to:
+            </Text>
+            {CANNOT.map((row) => (
+              <Row key={row.text} {...row} />
+            ))}
+          </YStack>
+
+          {!isVerified && (
+            <Text paddingHorizontal="$2" fontSize={16} fontWeight="700" lineHeight={22}>
+              Only continue if you trust the source.
+            </Text>
+          )}
+        </YStack>
+
+        <SafeButton primary onPress={onDismiss} testID="wc-proposal-permissions-dismiss">
+          Got it
+        </SafeButton>
       </YStack>
-
-      <YStack gap="$2">
-        <Text color="$colorSecondary">This website won't be able to:</Text>
-        {CANNOT.map((row) => (
-          <Row key={row.text} {...row} />
-        ))}
-      </YStack>
-
-      {!isVerified && <Text fontWeight="600">Only continue if you trust the source.</Text>}
-
-      <SafeButton primary onPress={onDismiss} testID="wc-proposal-permissions-dismiss">
-        Got it
-      </SafeButton>
     </YStack>
   )
 }

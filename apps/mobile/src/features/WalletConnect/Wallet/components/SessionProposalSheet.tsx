@@ -102,7 +102,7 @@ export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending, onPe
 
   return (
     <YStack gap="$5" padding="$4">
-      <Text fontSize={18} fontWeight="600" textAlign="center">
+      <Text fontSize={20} fontWeight="600" letterSpacing={-0.2} textAlign="center">
         Connection request
       </Text>
 
