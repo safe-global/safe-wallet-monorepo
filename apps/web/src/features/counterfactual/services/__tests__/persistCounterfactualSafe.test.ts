@@ -192,6 +192,24 @@ describe('persistCounterfactualSafe', () => {
     if (!result.ok) expect(result.error.message).toMatch(/space/i)
   })
 
+  it('surfaces the backend message when the space POST fails with a 400 (e.g. account limit reached)', async () => {
+    const backendMessage = 'This space only allows a maximum of 40 safe accounts, you can only add up to 0 more'
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') return { error: { status: 400, data: { message: backendMessage } } }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: '42',
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    expect(result).toEqual({ ok: false, error: expect.any(Error) })
+    if (!result.ok) expect(result.error.message).toBe(backendMessage)
+  })
+
   it('queues a pending CF delete when both the space POST and the rollback DELETE fail', async () => {
     // Double-failure mode: backend has the user-level CF safe but no space link,
     // and rollback couldn't clean it up. The orphan must be queued so the next

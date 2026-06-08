@@ -101,7 +101,7 @@ export const persistCounterfactualSafe = async ({
             // would re-surface the orphan locally as "Not activated".
             dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
           }
-          return { ok: false, error: new Error('Failed to add Safe Account to space') }
+          return { ok: false, error: toSpaceError(spaceResult.error) }
         }
       }
     }
@@ -117,13 +117,14 @@ export const persistCounterfactualSafe = async ({
 const CONFLICT_MESSAGE =
   'A counterfactual Safe with these parameters already exists on this chain. Please contact support if this is unexpected.'
 
+type BackendError = { status?: number; data?: { message?: string } }
+
+function toSpaceError(error: unknown): Error {
+  return new Error((error as BackendError)?.data?.message || 'Failed to add Safe account to workspace')
+}
+
 function toPersistError(error: unknown): Error {
-  if (
-    typeof error === 'object' &&
-    error !== null &&
-    'status' in error &&
-    (error as { status?: unknown }).status === 409
-  ) {
+  if ((error as BackendError)?.status === 409) {
     return new Error(CONFLICT_MESSAGE)
   }
   return new Error('Failed to save Safe Account to backend')

@@ -115,6 +115,13 @@ const ReplaySafeDialog = ({
       })
       if (!persistResult.ok) {
         setCreationError(persistResult.error)
+        dispatch(
+          showNotification({
+            variant: 'error',
+            groupKey: 'replay-safe-error',
+            message: persistResult.error.message,
+          }),
+        )
         return
       }
 
