@@ -127,7 +127,7 @@ const nextConfig = {
         },
       }
     : {}),
-  webpack(config) {
+  webpack(config, { dev }) {
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: { and: [/\.(js|ts|md)x?$/] },
