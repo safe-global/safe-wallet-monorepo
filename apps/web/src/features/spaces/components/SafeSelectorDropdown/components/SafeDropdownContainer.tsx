@@ -88,16 +88,13 @@ const SafeDropdownContainer = ({
 
   const showSearch = !isError && items.length > 0
 
-  const footerRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
   const [showScrollHint, setShowScrollHint] = useState(false)
 
-  // Custom scroll hint (a bottom fade over the last item) replaces base-ui's built-in scroll arrows,
-  // which sit at `bottom: 0` and collide with the sticky footer. Shown only while more rows lie below.
+  // Custom scroll hint: a bottom fade over the last row, shown only while more rows lie below.
+  // The middle list scrolls (not the whole popup) so its scrollbar stays clear of the header/footer.
   useEffect(() => {
-    const el = footerRef.current
-    if (!el) return
-    // base-ui's Popup is the scroll container; reach it via the project's `data-slot` marker.
-    const scroller = el.closest<HTMLElement>('[data-slot="select-content"]')
+    const scroller = scrollRef.current
     if (!scroller) return
 
     const update = () => {
@@ -159,52 +156,63 @@ const SafeDropdownContainer = ({
       alignItemWithTrigger={false}
       // outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
       // :focus-visible and would otherwise draw the browser's blue outline around the whole popup.
-      className="w-[430px] max-w-[calc(100vw-2rem)] max-h-[min(34rem,var(--available-height))] overflow-y-auto overscroll-y-none bg-card border-0 ring-0 outline-hidden rounded-lg px-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
+      // The popup itself doesn't scroll — only the middle list does (see below).
+      className="w-[430px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-lg [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
       sideOffset={20}
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
     >
-      {(header || showSearch) && (
-        <div className="sticky top-0 z-10 bg-card">
-          {header}
-          {showSearch && (
-            <div className="px-3 pb-2 pt-1">
-              <InputGroup className="rounded-md border-gray-100 shadow-none">
-                <InputGroupAddon>
-                  <Search className="size-4" />
-                </InputGroupAddon>
-                <InputGroupInput
-                  placeholder="Search by name, address or network"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  // Stop keystrokes reaching base-ui Select's typeahead, which would hijack typing.
-                  // Trade-off: arrows/Enter stay in the input (no list nav); Escape still closes.
-                  onKeyDown={(e) => {
-                    if (e.key !== 'Escape') e.stopPropagation()
-                  }}
-                  autoComplete="off"
-                  data-testid="safe-dropdown-search-input"
-                />
-              </InputGroup>
-            </div>
-          )}
+      <div className="flex max-h-[min(34rem,var(--available-height))] flex-col">
+        {(header || showSearch) && (
+          <div className="shrink-0 bg-card">
+            {header}
+            {showSearch && (
+              <div className="px-3 pb-2 pt-1">
+                <InputGroup className="rounded-md border-gray-100 shadow-none">
+                  <InputGroupAddon>
+                    <Search className="size-4" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    placeholder="Search by name, address or network"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    // Stop keystrokes reaching base-ui Select's typeahead, which would hijack typing.
+                    // Trade-off: arrows/Enter stay in the input (no list nav); Escape still closes.
+                    onKeyDown={(e) => {
+                      if (e.key !== 'Escape') e.stopPropagation()
+                    }}
+                    autoComplete="off"
+                    data-testid="safe-dropdown-search-input"
+                  />
+                </InputGroup>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div
+          ref={scrollRef}
+          data-testid="dropdown-scroll-area"
+          className="min-h-0 flex-1 overflow-y-auto overscroll-y-none px-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
+        >
+          {renderContent()}
         </div>
-      )}
-      {renderContent()}
-      {footer && (
-        <div ref={footerRef} className="sticky bottom-0 z-10 bg-card">
-          {showScrollHint && (
-            <div
-              data-testid="scroll-hint"
-              aria-hidden
-              // Fade to the dropdown's own background. `card` isn't a :root color token (so `to-card`
-              // renders transparent) — reference the actual paper var the card resolves to.
-              className="pointer-events-none absolute inset-x-0 -top-16 h-16 bg-gradient-to-b from-transparent to-[var(--color-background-paper)]"
-            />
-          )}
-          {typeof footer === 'function' ? footer(closeDropdown) : footer}
-        </div>
-      )}
+
+        {footer && (
+          <div className="relative shrink-0 bg-card">
+            {showScrollHint && (
+              <div
+                data-testid="scroll-hint"
+                aria-hidden
+                // Fade the last visible row into the dropdown background. `card` isn't a :root color
+                // token (so `to-card` renders transparent) — reference the paper var it resolves to.
+                className="pointer-events-none absolute inset-x-0 -top-16 h-16 bg-gradient-to-b from-transparent to-[var(--color-background-paper)]"
+              />
+            )}
+            {typeof footer === 'function' ? footer(closeDropdown) : footer}
+          </div>
+        )}
+      </div>
     </SelectContent>
   )
 }

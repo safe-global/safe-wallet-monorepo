@@ -238,7 +238,7 @@ describe('SafeDropdownContainer', () => {
         />,
       )
 
-      const scroller = screen.getByTestId('select-content')
+      const scroller = screen.getByTestId('dropdown-scroll-area')
       setScrollMetrics(scroller, { scrollHeight: 200, clientHeight: 320, scrollTop: 0 })
       fireScroll(scroller)
 
@@ -255,7 +255,7 @@ describe('SafeDropdownContainer', () => {
         />,
       )
 
-      const scroller = screen.getByTestId('select-content')
+      const scroller = screen.getByTestId('dropdown-scroll-area')
       setScrollMetrics(scroller, { scrollHeight: 1000, clientHeight: 320, scrollTop: 0 })
       fireScroll(scroller)
 
@@ -272,7 +272,7 @@ describe('SafeDropdownContainer', () => {
         />,
       )
 
-      const scroller = screen.getByTestId('select-content')
+      const scroller = screen.getByTestId('dropdown-scroll-area')
       setScrollMetrics(scroller, { scrollHeight: 1000, clientHeight: 320, scrollTop: 0 })
       fireScroll(scroller)
       expect(screen.getByTestId('scroll-hint')).toBeInTheDocument()
