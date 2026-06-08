@@ -1,4 +1,4 @@
-import { ChevronDown, RotateCw, Search } from 'lucide-react'
+import { RotateCw, Search } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { SelectContent, SelectItem } from '@/components/ui/select'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
@@ -91,8 +91,8 @@ const SafeDropdownContainer = ({
   const footerRef = useRef<HTMLDivElement>(null)
   const [showScrollHint, setShowScrollHint] = useState(false)
 
-  // Custom scroll hint replaces base-ui's built-in scroll arrows: they sit at `bottom: 0`
-  // (colliding with the sticky footer) and don't animate, so users miss that the list is scrollable.
+  // Custom scroll hint (a bottom fade over the last item) replaces base-ui's built-in scroll arrows,
+  // which sit at `bottom: 0` and collide with the sticky footer. Shown only while more rows lie below.
   useEffect(() => {
     const el = footerRef.current
     if (!el) return
@@ -194,10 +194,12 @@ const SafeDropdownContainer = ({
       {footer && (
         <div ref={footerRef} className="sticky bottom-0 z-10 bg-card">
           {showScrollHint && (
-            <ChevronDown
+            <div
               data-testid="scroll-hint"
               aria-hidden
-              className="pointer-events-none absolute -top-3 left-1/2 size-4 -translate-x-1/2 animate-bounce text-muted-foreground"
+              // Fade to the dropdown's own background. `card` isn't a :root color token (so `to-card`
+              // renders transparent) — reference the actual paper var the card resolves to.
+              className="pointer-events-none absolute inset-x-0 -top-16 h-16 bg-gradient-to-b from-transparent to-[var(--color-background-paper)]"
             />
           )}
           {typeof footer === 'function' ? footer(closeDropdown) : footer}
