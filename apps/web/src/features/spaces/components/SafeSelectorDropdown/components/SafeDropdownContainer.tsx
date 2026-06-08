@@ -1,11 +1,25 @@
-import { ChevronDown, RotateCw } from 'lucide-react'
+import { ChevronDown, RotateCw, Search } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { SelectContent, SelectItem } from '@/components/ui/select'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
+import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import type { SafeItemData } from '../types'
+
+// Matches a safe against a lowercased query by its resolved display name, address, or any of its
+// chains' names/short names. `displayName` is the same name shown in the row (the safe's own name OR
+// its address-book name), so searching also finds safes named only in the address book.
+const matchesSearch = (item: SafeItemData, displayName: string, query: string): boolean => {
+  const name = displayName.toLowerCase()
+  const address = item.address.toLowerCase()
+  if (name.includes(query) || address.includes(query)) return true
+  return item.chains.some(
+    (chain) => chain.chainName?.toLowerCase().includes(query) || chain.shortName?.toLowerCase().includes(query),
+  )
+}
 
 export interface SafeDropdownContainerProps {
   items: SafeItemData[]
@@ -63,8 +77,19 @@ const SafeDropdownContainer = ({
   footer,
   closeDropdown,
 }: SafeDropdownContainerProps) => {
+  const [search, setSearch] = useState('')
+  const query = search.trim().toLowerCase()
+  const resolveName = useSafeNameResolver()
+
   // Multi-chain items stay visible even when currently selected so the user can expand and switch chains.
-  const filteredItems = items.filter((item) => item.chains.length > 1 || item.id !== selectedItemId)
+  const structuralItems = items.filter((item) => item.chains.length > 1 || item.id !== selectedItemId)
+  const filteredItems = query
+    ? structuralItems.filter((item) =>
+        matchesSearch(item, resolveName(item.address, item.chains[0]?.chainId, item.name), query),
+      )
+    : structuralItems
+
+  const showSearch = !isError && items.length > 0
 
   const footerRef = useRef<HTMLDivElement>(null)
   const [showScrollHint, setShowScrollHint] = useState(false)
@@ -102,8 +127,16 @@ const SafeDropdownContainer = ({
       return <DropdownContentError onRetry={onRetry} />
     }
 
-    if (isLoading && filteredItems.length === 0) {
+    if (isLoading && filteredItems.length === 0 && !query) {
       return Array.from({ length: SKELETON_COUNT }, (_, i) => <SafeItemSkeleton key={i} />)
+    }
+
+    if (filteredItems.length === 0) {
+      return (
+        <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">
+          {query ? 'No safes match your search' : 'No safes yet'}
+        </p>
+      )
     }
 
     return filteredItems.map((item) => {
@@ -127,12 +160,38 @@ const SafeDropdownContainer = ({
       align="start"
       side="bottom"
       alignItemWithTrigger={false}
-      className="w-[430px] max-w-[calc(100vw-2rem)] max-h-[20rem] overflow-y-auto overscroll-y-none bg-card border-0 ring-0 rounded-lg px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
+      className="w-[430px] max-w-[calc(100vw-2rem)] max-h-[min(34rem,var(--available-height))] overflow-y-auto overscroll-y-none bg-card border-0 ring-0 rounded-lg px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
       sideOffset={20}
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
     >
-      {header}
+      {(header || showSearch) && (
+        <div className="sticky top-0 z-10 bg-card">
+          {header}
+          {showSearch && (
+            <div className="px-3 pb-2 pt-1">
+              <InputGroup className="rounded-md border-gray-100 shadow-none">
+                <InputGroupAddon>
+                  <Search className="size-4" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  placeholder="Search by name, address or network"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  // Stop keystrokes from reaching base-ui Select's typeahead/navigation handlers on
+                  // the popup, which would otherwise hijack typing. This also keeps arrow/Enter keys
+                  // in the input (no list navigation from the field); Escape still bubbles to close.
+                  onKeyDown={(e) => {
+                    if (e.key !== 'Escape') e.stopPropagation()
+                  }}
+                  autoComplete="off"
+                  data-testid="safe-dropdown-search-input"
+                />
+              </InputGroup>
+            </div>
+          )}
+        </div>
+      )}
       {renderContent()}
       {footer && (
         <div ref={footerRef} className="sticky bottom-0 z-10 bg-card">
