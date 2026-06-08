@@ -1,7 +1,7 @@
 import { type ReactElement, type ReactNode, Fragment, useCallback, useContext } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
-import { ArrowUpRight, ArrowDownLeft, QrCode, Repeat, SquareDashedBottomCode } from 'lucide-react'
+import { ArrowUpRight, QrCode, Repeat, SquareDashedBottomCode } from 'lucide-react'
 import { Tooltip } from '@mui/material'
 import { Button } from '@/components/ui/button'
 import Track from '@/components/common/Track'
@@ -134,7 +134,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
               onClick={handleOnReceive}
               disabled={noAssets}
             >
-              <ArrowDownLeft className="size-5" />
+              <QrCode className="size-4" />
               Receive
             </Button>
           ) : (
