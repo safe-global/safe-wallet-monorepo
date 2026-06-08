@@ -49,7 +49,7 @@ const AccountWidgetItem = ({
         </div>
       }
       actionNode={
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex w-20 flex-col items-end gap-2">
           {account.isUndeployed ? (
             <NotActivatedBadge isActivating={!!account.isActivating} />
           ) : (
