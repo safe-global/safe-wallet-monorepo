@@ -11,7 +11,7 @@
     "pw:test:ui": "npx playwright test --config=e2e/playwright.config.ts --grep @ui",
     "pw:report": "npx playwright show-report e2e/reports/html",
     "pw:ci": "CI=true npx playwright test --config=e2e/playwright.config.ts --grep @smoke",
-    "dev": "cross-env USE_RSPACK=1 next dev",
+    "dev": "next dev --turbopack",
     "dev:full": "cross-env USE_RSPACK=0 ENABLE_PWA=1 ENABLE_EXPERIMENTAL_OPTIMIZATIONS=1 next dev",
     "start": "next dev",
     "build": "node scripts/generate-version.mjs && next build",
