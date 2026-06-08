@@ -91,8 +91,7 @@ const SafeDropdownContainer = ({
   const scrollRef = useRef<HTMLDivElement>(null)
   const [showScrollHint, setShowScrollHint] = useState(false)
 
-  // Custom scroll hint: a bottom fade over the last row, shown only while more rows lie below.
-  // The middle list scrolls (not the whole popup) so its scrollbar stays clear of the header/footer.
+  // Bottom-fade scroll hint, shown only while more rows lie below the fold.
   useEffect(() => {
     const scroller = scrollRef.current
     if (!scroller) return
@@ -104,13 +103,15 @@ const SafeDropdownContainer = ({
     }
 
     update()
+    // base-ui sizes the popup async (and avatars load late), so the sync measure can miss the
+    // overflow — re-check next frame and on every size change.
+    const raf = requestAnimationFrame(update)
     scroller.addEventListener('scroll', update, { passive: true })
-    // base-ui sizes the popup async and avatars/logos load late, so the initial
-    // measurement often misses the overflow. Observe size changes to catch up.
     const resizeObserver = new ResizeObserver(update)
     resizeObserver.observe(scroller)
     Array.from(scroller.children).forEach((child) => resizeObserver.observe(child))
     return () => {
+      cancelAnimationFrame(raf)
       scroller.removeEventListener('scroll', update)
       resizeObserver.disconnect()
     }
@@ -156,7 +157,6 @@ const SafeDropdownContainer = ({
       alignItemWithTrigger={false}
       // outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
       // :focus-visible and would otherwise draw the browser's blue outline around the whole popup.
-      // The popup itself doesn't scroll — only the middle list does (see below).
       className="w-[430px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-lg [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
       sideOffset={20}
       alignOffset={9}
