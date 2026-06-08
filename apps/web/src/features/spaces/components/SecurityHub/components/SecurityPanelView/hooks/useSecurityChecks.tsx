@@ -1,24 +1,51 @@
 import { type ReactNode, useMemo, useState } from 'react'
 import { Button } from '@mui/material'
-import type { EvidenceItem, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
+import type { EvidenceItem, SafeGrade, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import {
   EvidenceList,
   Row,
-  StatusIcon,
   buildExpanded,
   isPassingStatus,
   makeBuildCta,
   sortBySeverity,
   type SectionRow,
 } from '../primitives'
+import { resolveStatusTone, SeverityIcon, type SeverityTone } from '../../SeverityIcon/SeverityIcon'
+
+export type FailingRow = { key: string; node: ReactNode; grade: SafeGrade }
 
 export type UseSecurityChecksResult = {
   isReady: boolean
-  failingRows: { key: string; node: ReactNode }[]
+  failingRows: FailingRow[]
   passingRows: { key: string; node: ReactNode }[]
+}
+
+/** Maps a per-check severity to the SafeGrade used by the issue chips. */
+const SEVERITY_TO_SAFE_GRADE: Record<SecurityGrade, SafeGrade> = {
+  Critical: 'critical',
+  High: 'at_risk',
+  Medium: 'needs_attention',
+  Low: 'needs_attention',
+}
+
+/** Accent-bar + icon colour per grade, matching the SafeGrade chip's dot. */
+const GRADE_ROW_COLOR: Record<SafeGrade, string> = {
+  critical: 'error.main',
+  at_risk: 'warning.main',
+  needs_attention: 'score.review',
+  passing: 'success.main',
+}
+
+/**
+ * Tone for a check row's accent bar + leading icon. Failing rows take their grade group's
+ * colour (so the bar/icon match the section chip); passing / N-A / inconclusive rows keep
+ * their neutral status tone. The glyph shape always comes from the status tone.
+ */
+const rowTone = (status: ScanResult['status'], severity: SecurityGrade): SeverityTone => {
+  const base = resolveStatusTone(status, severity)
+  return isPassingStatus(status) ? base : { ...base, color: GRADE_ROW_COLOR[SEVERITY_TO_SAFE_GRADE[severity]] }
 }
 
 /**
@@ -48,7 +75,7 @@ export const useSecurityChecks = (
   const { failingRows, passingRows } = useMemo(() => {
     if (!buildCta || !isKnownModuleByName || !zeroAddress) {
       return {
-        failingRows: [] as { key: string; node: ReactNode }[],
+        failingRows: [] as FailingRow[],
         passingRows: [] as { key: string; node: ReactNode }[],
       }
     }
@@ -59,7 +86,10 @@ export const useSecurityChecks = (
     const showModuleSummary = activeModules.length > 2 && !modulesExpanded
 
     const items: SectionRow[] = []
-    const iconFor = (r: ScanResult) => <StatusIcon status={r.status} />
+    const iconFor = (r: ScanResult) => <SeverityIcon tone={rowTone(r.status, r.severity)} />
+    const toneFor = (r: ScanResult) => rowTone(r.status, r.severity)
+    // Surface the remediation as the row subtitle for failing checks (passing rows need no action).
+    const subtitleFor = (r: ScanResult) => (!isPassingStatus(r.status) && r.remediation ? r.remediation : undefined)
 
     const accountSetupResult = results['account_setup']
     if (accountSetupResult) {
@@ -76,6 +106,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(accountSetupResult)}
+            accentTone={toneFor(accountSetupResult)}
+            subtitle={subtitleFor(accountSetupResult)}
             title={title}
             expandedContent={buildExpanded(
               accountSetupResult,
@@ -97,6 +129,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(multichainResult)}
+            accentTone={toneFor(multichainResult)}
+            subtitle={subtitleFor(multichainResult)}
             title={title}
             expandedContent={buildExpanded(
               multichainResult,
@@ -123,6 +157,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(recoveryResult)}
+            accentTone={toneFor(recoveryResult)}
+            subtitle={subtitleFor(recoveryResult)}
             title={title}
             expandedContent={buildExpanded(recoveryResult, buildCta('recovery', recoveryResult, safeQueryParam))}
           />
@@ -141,6 +177,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(versionResult)}
+            accentTone={toneFor(versionResult)}
+            subtitle={subtitleFor(versionResult)}
             title={title}
             expandedContent={buildExpanded(versionResult, buildCta('contract_version', versionResult, safeQueryParam))}
           />
@@ -164,6 +202,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(factoryResult)}
+            accentTone={toneFor(factoryResult)}
+            subtitle={subtitleFor(factoryResult)}
             title={title}
             expandedContent={buildExpanded(
               factoryResult,
@@ -191,6 +231,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(guardResult)}
+            accentTone={toneFor(guardResult)}
+            subtitle={subtitleFor(guardResult)}
             title={title}
             expandedContent={buildExpanded(guardResult, buildCta('guard', guardResult, safeQueryParam))}
           />
@@ -218,6 +260,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(fallbackResult)}
+            accentTone={toneFor(fallbackResult)}
+            subtitle={subtitleFor(fallbackResult)}
             title={title}
             expandedContent={buildExpanded(
               fallbackResult,
@@ -238,6 +282,8 @@ export const useSecurityChecks = (
           node: (
             <Row
               leadIcon={iconFor(modulesResult)}
+              accentTone={toneFor(modulesResult)}
+              subtitle={subtitleFor(modulesResult)}
               title="No modules installed"
               expandedContent={buildExpanded(modulesResult, buildCta('modules', modulesResult, safeQueryParam))}
             />
@@ -252,6 +298,7 @@ export const useSecurityChecks = (
           node: (
             <Row
               leadIcon={iconFor(modulesResult)}
+              accentTone={toneFor(modulesResult)}
               title={`Modules & Extensions · ${activeModules.length} installed`}
               trailing={
                 <Button
@@ -277,7 +324,7 @@ export const useSecurityChecks = (
           const status: ScanResult['status'] = trusted ? 'clear' : 'issue'
           // Show the module's name as the title for both trusted and unrecognized modules — users
           // need to identify *which* module when it's flagged. The icon + intro convey the verdict.
-          const title = mod.name || shortenAddress(mod.value)
+          const title = 'Unrecognized module detected'
           const perModuleEvidence: EvidenceItem[] = [
             { label: 'Address', value: mod.value },
             ...(mod.name ? [{ label: 'Name', value: mod.name }] : []),
@@ -291,7 +338,8 @@ export const useSecurityChecks = (
             isPassing: trusted,
             node: (
               <Row
-                leadIcon={<StatusIcon status={status} />}
+                leadIcon={<SeverityIcon tone={rowTone(status, severity)} />}
+                accentTone={rowTone(status, severity)}
                 title={title}
                 expandedContent={
                   <EvidenceList intro={intro} evidence={perModuleEvidence} cta={trusted ? null : modulesCta} />
@@ -314,6 +362,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(scanningResult)}
+            accentTone={toneFor(scanningResult)}
+            subtitle={subtitleFor(scanningResult)}
             title={title}
             expandedContent={buildExpanded(
               scanningResult,
@@ -340,6 +390,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(pendingResult)}
+            accentTone={toneFor(pendingResult)}
+            subtitle={subtitleFor(pendingResult)}
             title={title}
             expandedContent={buildExpanded(pendingResult, buildCta('pending_tx', pendingResult, safeQueryParam))}
           />
@@ -348,7 +400,11 @@ export const useSecurityChecks = (
     }
 
     return {
-      failingRows: sortBySeverity(items.filter((i) => !i.isPassing)).map(({ key, node }) => ({ key, node })),
+      failingRows: sortBySeverity(items.filter((i) => !i.isPassing)).map(({ key, node, severity }) => ({
+        key,
+        node,
+        grade: SEVERITY_TO_SAFE_GRADE[severity],
+      })),
       passingRows: items.filter((i) => i.isPassing).map(({ key, node }) => ({ key, node })),
     }
   }, [buildCta, isKnownModuleByName, zeroAddress, scanContext, results, safeQueryParam, modulesExpanded])

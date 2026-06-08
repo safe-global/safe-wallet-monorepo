@@ -58,10 +58,11 @@ jest.mock('@/hooks/safes', () => {
 })
 
 let mockIsAdmin = true
+let mockSpaceSafes: Array<{ chainId: string; address: string }> = []
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => mockIsAdmin,
-  useSpaceSafes: () => ({ allSafes: [] }),
+  useSpaceSafes: () => ({ allSafes: mockSpaceSafes }),
 }))
 
 const mockAddSafesToSpace = jest.fn()
@@ -84,37 +85,79 @@ describe('AddAccounts — wallet connection state', () => {
     mockWalletValue = { address: '0xWallet' }
     mockAllOwned = {}
     mockIsAdmin = true
+    mockSpaceSafes = []
   })
 
-  it('does not render ConnectWalletPrompt when a wallet is connected', () => {
+  it('does not render the connect-wallet hint when a wallet is connected', () => {
     mockWalletValue = { address: '0xWallet' }
     render(<AddAccounts externalOpen onExternalClose={() => {}} />)
 
     expect(screen.queryByTestId('add-accounts-connect-wallet-button')).not.toBeInTheDocument()
   })
 
-  it('renders ConnectWalletPrompt when no wallet is connected', () => {
+  it('renders an inline connect-wallet hint when no wallet is connected', () => {
     mockWalletValue = null
     render(<AddAccounts externalOpen onExternalClose={() => {}} />)
 
     expect(screen.getByTestId('add-accounts-connect-wallet-button')).toBeInTheDocument()
-    expect(screen.getByText('Connect your wallet to access all your Safes')).toBeInTheDocument()
   })
 
-  it('replaces the safes list with the ConnectWalletPrompt when wallet is disconnected', () => {
+  it('clicking the connect-wallet hint triggers wallet connection', () => {
     mockWalletValue = null
     render(<AddAccounts externalOpen onExternalClose={() => {}} />)
 
-    expect(screen.queryByTestId('add-accounts-safes-list-scroll-region')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByTestId('add-accounts-connect-wallet-button'))
+    expect(mockConnectWallet).toHaveBeenCalled()
+  })
+
+  it('still renders the safes list (does not replace it) when no wallet is connected', () => {
+    mockWalletValue = null
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, {
+      initialReduxState: {
+        addedSafes: { '1': { '0x0000000000000000000000000000000000001234': { owners: [], threshold: 1 } } },
+      },
+    })
+
+    // List region is present AND the list actually renders — not replaced by a connect prompt.
+    expect(screen.getByTestId('add-accounts-safes-list-region')).toBeInTheDocument()
+    expect(screen.getByTestId('onboarding-safes-list')).toBeInTheDocument()
+  })
+
+  it('keeps the manual add affordance available without a connected wallet', () => {
+    mockWalletValue = null
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />)
+
+    expect(screen.getByTestId('add-manually')).toBeInTheDocument()
+  })
+
+  it('shows locally stored (trusted) safes even without a connected wallet', () => {
+    mockWalletValue = null
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, {
+      initialReduxState: {
+        addedSafes: {
+          '1': {
+            '0x0000000000000000000000000000000000001234': { owners: [], threshold: 1 },
+          },
+        },
+      },
+    })
+
+    expect(screen.getByTestId('onboarding-safes-list')).toHaveAttribute('data-trusted-count', '1')
+  })
+
+  it('excludes safes already in the current space, even without a connected wallet', () => {
+    mockWalletValue = null
+    const address = '0x0000000000000000000000000000000000001234'
+    // The same safe is both locally stored and already part of the current space.
+    mockSpaceSafes = [{ chainId: '1', address }]
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, {
+      initialReduxState: {
+        addedSafes: { '1': { [address]: { owners: [], threshold: 1 } } },
+      },
+    })
+
+    // Its only saved safe is in the space → filtered out → list is empty (contrast with the test above).
     expect(screen.queryByTestId('onboarding-safes-list')).not.toBeInTheDocument()
-    expect(screen.getByTestId('add-accounts-connect-wallet-button')).toBeInTheDocument()
-  })
-
-  it('does not show the "No safes on your list" empty state when wallet is disconnected', () => {
-    mockWalletValue = null
-    render(<AddAccounts externalOpen onExternalClose={() => {}} />)
-
-    expect(screen.queryByText('No safes on your list')).not.toBeInTheDocument()
   })
 })
 

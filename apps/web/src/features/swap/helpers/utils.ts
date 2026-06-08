@@ -41,6 +41,7 @@ export const TWAP_FALLBACK_HANDLER_NETWORKS = [
   '232',
   '59144',
   '9745',
+  '57073',
 ]
 
 export const getExecutionPrice = (

@@ -23,6 +23,7 @@ import {
 } from './shared'
 import { PinnedSafeSubItem } from './PinnedSafeItem'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 interface MultiSafeItemCardProps {
   item: MultiChainSafeItem
@@ -91,7 +92,7 @@ const MultiSafeItemCard = ({
                 {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
               </div>
               <div className="flex items-center gap-1 min-w-0">
-                <ShortAddressWithTooltip address={address} />
+                <ShortAddressWithTooltip address={address} isSimilar={isSimilar} />
                 <CopyAddressButton address={address} />
               </div>
               {isSimilar && <SimilarityBadge />}
@@ -115,14 +116,23 @@ const MultiSafeItemCard = ({
           </CollapsibleTrigger>
 
           {/* Pin/Unpin toggle — outside trigger so it doesn't toggle the collapsible */}
-          <button
-            type="button"
-            onClick={handleTogglePin}
-            className="shrink-0 rounded p-1 hover:bg-muted"
-            aria-label={isPinned ? 'Unpin safe' : 'Pin safe'}
-          >
-            <Bookmark className={`size-4 ${isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`} />
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={handleTogglePin}
+                  className="shrink-0 cursor-pointer rounded p-1 hover:bg-muted"
+                  aria-label={isPinned ? 'Unpin safe' : 'Pin safe'}
+                />
+              }
+            >
+              <Bookmark
+                className={`size-4 ${isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
+              />
+            </TooltipTrigger>
+            <TooltipContent>{isPinned ? 'Remove from trusted Safes' : 'Add to trusted Safes'}</TooltipContent>
+          </Tooltip>
 
           {/* Context menu — outside trigger for the same reason */}
           <PinnedSafeContextMenu address={address} chainId={sortedSafes[0]?.chainId ?? ''} name={displayName} />

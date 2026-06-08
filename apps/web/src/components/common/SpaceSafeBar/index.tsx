@@ -6,6 +6,7 @@ import { AppRoutes } from '@/config/routes'
 import { useIsQualifiedSafe } from '@/features/spaces'
 import SafeSelectorDropdown from '@/features/spaces/components/SafeSelectorDropdown'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { pinSafe, unpinSafe, selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
@@ -45,26 +46,43 @@ function DropdownHeader({ isPinned, onPin }: { isPinned: boolean; onPin: () => v
   return (
     <div className="flex items-center gap-1 px-4 pt-3 pb-2">
       <span className="text-sm font-semibold text-secondary-foreground">Trusted Safes</span>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation()
-          onPin()
-        }}
-        className="ml-auto shrink-0 rounded p-1 hover:bg-muted transition-colors cursor-pointer"
-        aria-label={isPinned ? 'Trusted' : 'Trust this safe'}
-      >
-        <Bookmark className={`size-4 ${isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`} />
-      </button>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onPin()
+              }}
+              className="ml-auto shrink-0 rounded p-1 hover:bg-muted transition-colors cursor-pointer"
+              aria-label={isPinned ? 'Trusted' : 'Trust this safe'}
+            />
+          }
+        >
+          <Bookmark className={`size-4 ${isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`} />
+        </TooltipTrigger>
+        <TooltipContent>{isPinned ? 'Remove from trusted Safes' : 'Add to trusted Safes'}</TooltipContent>
+      </Tooltip>
     </div>
   )
 }
 
-function DropdownFooter({ onOpen }: { onOpen: () => void }) {
+function DropdownWorkspaceHeader() {
+  return (
+    <div className="flex items-center gap-1 px-4 pt-3 pb-2">
+      <span className="text-sm font-semibold text-secondary-foreground" data-testid="workspace-header">
+        Safes in this workspace
+      </span>
+    </div>
+  )
+}
+
+function DropdownFooter({ onOpen, label }: { onOpen: () => void; label: string }) {
   return (
     <div className="px-4 py-3">
       <Button variant="secondary" size="sm" className="w-full" onClick={onOpen} data-testid="all-accounts-btn">
-        All Accounts
+        {label}
         <ChevronRight className="size-4" />
       </Button>
     </div>
@@ -149,23 +167,27 @@ function SpaceSafeBar() {
     setAccountsModalOpen(true)
   }
 
-  const dropdownHeader = !isQualifiedSafe ? <DropdownHeader isPinned={isPinned} onPin={handleTogglePin} /> : undefined
+  const dropdownHeader = isQualifiedSafe ? (
+    <DropdownWorkspaceHeader />
+  ) : (
+    <DropdownHeader isPinned={isPinned} onPin={handleTogglePin} />
+  )
 
   const hasPinnedSafes = Object.values(addedSafes).some((chain) => Object.keys(chain).length > 0)
   const showConnectWallet = !wallet && !hasPinnedSafes
 
-  const dropdownFooter = !isQualifiedSafe
-    ? showConnectWallet
+  const dropdownFooter =
+    showConnectWallet && !isQualifiedSafe
       ? (close: () => void) => <ConnectWalletFooter onConnect={connectWallet} onClose={close} />
       : (close: () => void) => (
           <DropdownFooter
+            label={isQualifiedSafe ? 'Explore other Safes' : 'All Accounts'}
             onOpen={() => {
               close()
               handleOpenAccountsModal()
             }}
           />
         )
-    : undefined
 
   return (
     <div data-testid="safe-level-navigation" className="flex flex-wrap items-center gap-2">

@@ -23,7 +23,7 @@ export const RiskConfirmation = () => {
   }
 
   return (
-    <Card sx={{ px: 1, backgroundColor: 'background.main' }}>
+    <Card sx={{ px: 1 }}>
       <Track {...MODALS_EVENTS.ACCEPT_RISK}>
         <FormControlLabel
           data-testid="risk-confirmation-checkbox"

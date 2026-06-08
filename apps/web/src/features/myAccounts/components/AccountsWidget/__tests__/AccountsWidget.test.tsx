@@ -188,6 +188,29 @@ describe('AccountsWidget', () => {
     expect(screen.queryByLabelText(/39,950,000/)).not.toBeInTheDocument()
   })
 
+  it('renders the Not activated badge instead of the balance for an undeployed single-chain account', () => {
+    const undeployedAccount: Account[] = [{ ...mockAccounts[1], isUndeployed: true, isActivating: false }]
+    render(<AccountsWidget accounts={undeployedAccount} />)
+
+    expect(screen.getByText('Not activated')).toBeInTheDocument()
+    expect(screen.queryByLabelText('$ 1,200,000.00')).not.toBeInTheDocument()
+  })
+
+  it('renders the Activating badge for an activating single-chain account', () => {
+    const activatingAccount: Account[] = [{ ...mockAccounts[1], isUndeployed: true, isActivating: true }]
+    render(<AccountsWidget accounts={activatingAccount} />)
+
+    expect(screen.getByText('Activating')).toBeInTheDocument()
+  })
+
+  it('renders the Not activated badge for an undeployed multi-chain account', () => {
+    const undeployedMultichain: Account[] = [{ ...mockAccounts[0], isUndeployed: true, isActivating: false }]
+    render(<AccountsWidget accounts={undeployedMultichain} />)
+
+    expect(screen.getByText('Not activated')).toBeInTheDocument()
+    expect(screen.queryByLabelText('$ 39,950,000.00')).not.toBeInTheDocument()
+  })
+
   it('navigates to the safe home when a single-chain account is clicked', async () => {
     const mockPush = jest.fn()
     render(<AccountsWidget accounts={[mockAccounts[1]]} />, {

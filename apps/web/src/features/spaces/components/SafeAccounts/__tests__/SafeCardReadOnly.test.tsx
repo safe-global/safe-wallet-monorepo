@@ -22,7 +22,7 @@ Object.defineProperty(window, 'IntersectionObserver', {
   value: MockIntersectionObserver,
 })
 
-const mockChains = [chainBuilder().with({ chainId: '1', shortName: 'eth' }).build()]
+const mockChains = [chainBuilder().with({ chainId: '1', shortName: 'eth', chainName: 'Ethereum' }).build()]
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
@@ -90,5 +90,28 @@ describe('SafeCardReadOnly', () => {
     })
 
     expect(screen.getByText(/Not activated/i)).toBeInTheDocument()
+  })
+
+  it('renders the Not activated chip ahead of the chain badge and drops the balance column', () => {
+    const safe = safeItemBuilder().with({ chainId: '1', address: '0xDEADBEEF' }).build()
+
+    render(<SafeCardReadOnly safe={safe} />, {
+      initialReduxState: {
+        undeployedSafes: {
+          '1': {
+            '0xDEADBEEF': {
+              status: { status: 'AWAITING_EXECUTION' },
+              props: { safeAccountConfig: { owners: ['0x111'], threshold: 1 } },
+            },
+          },
+        },
+      } as unknown as Partial<RootState>,
+    })
+
+    const chip = screen.getByTestId('pending-activation-chip')
+
+    const balanceColumn = screen.getByTestId('balance-column')
+    expect(balanceColumn.contains(chip)).toBe(false)
+    expect(screen.queryByText(/\$/)).not.toBeInTheDocument()
   })
 })

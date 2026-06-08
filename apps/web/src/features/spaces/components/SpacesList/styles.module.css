@@ -11,6 +11,21 @@
   margin: var(--space-2);
 }
 
+/* When signed out, /welcome/spaces hides the Topbar while /welcome/accounts keeps
+   it (PageLayout adds .mainSpace { padding-top: var(--topbar-height) } there). Reserve
+   the same top space here so the Accounts/Workspaces tabs don't jump vertically when
+   switching between the two pages. Mirrors the 900px breakpoint where the Topbar stops
+   being absolutely positioned. */
+.headerSpacer {
+  padding-top: var(--topbar-height);
+}
+
+@media (max-width: 899.95px) {
+  .headerSpacer {
+    padding-top: 0;
+  }
+}
+
 .spacesHeader {
   display: flex;
   justify-content: space-between;

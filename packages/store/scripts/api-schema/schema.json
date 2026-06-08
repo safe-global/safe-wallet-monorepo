@@ -2813,6 +2813,59 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/members/{userId}/invite/renew": {
+      "post": {
+        "description": "Renews a pending invitation to a space, refreshing its expiry. Only space admins can renew, and only pending invitations can be renewed.Note: renewal for email invites also resends the invitation email.",
+        "operationId": "membersRenewInviteV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space ID containing the invitation",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "User ID of the invited member",
+            "schema": {
+              "example": 123,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invitation renewed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitation"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access forbidden - user is not an active admin of this space"
+          },
+          "404": {
+            "description": "User, space, or member not found"
+          },
+          "409": {
+            "description": "Invitation is not in a pending state"
+          }
+        },
+        "summary": "Renew space invitation",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/members": {
       "get": {
         "description": "Retrieves all members of a space including their roles, status, and membership information.",
@@ -3456,7 +3509,7 @@
     },
     "/v1/chains/{chainId}/relay": {
       "post": {
-        "description": "Relays a Safe transaction or Safe creation transaction using the relay service, which pays for gas fees. Supports execTransaction (Safe tx) and createProxyWithNonce (Safe creation) calldata. On relay-fee chains, safeTxHash is required and must match the hash derived on-chain from the submitted calldata.",
+        "description": "Relays a Safe transaction or Safe creation transaction using the relay service, which pays for gas fees. Supports execTransaction (Safe tx) and createProxyWithNonce (Safe creation) calldata. On relay-fee chains, safeTxHash is required and must match the hash derived on-chain from the submitted calldata. On chains where pre-relay Tenderly simulation is enabled, an execTransaction is simulated before being submitted: a confirmed revert returns SIMULATION_FAILED, and an unreachable simulator returns INDETERMINATE_SIMULATION (retry with acceptUnverifiedSimulation=true to proceed anyway when the simulator is unreachable).",
         "operationId": "relayRelayV1",
         "parameters": [
           {
@@ -3472,7 +3525,7 @@
         ],
         "requestBody": {
           "required": true,
-          "description": "Transaction data to relay. safeTxHash is required on relay-fee chains and must correspond to the to + data fields.",
+          "description": "Transaction data to relay. safeTxHash is required on relay-fee chains and must correspond to the to + data fields. Set acceptUnverifiedSimulation=true to retry a relay skipping the simulation which previously returned INDETERMINATE_SIMULATION.",
           "content": {
             "application/json": {
               "schema": {
@@ -3499,7 +3552,41 @@
             "description": "Relay denied: safeTxHash missing, fee service rejected, or unofficial proxy factory"
           },
           "422": {
-            "description": "safeTxHash does not match the transaction data, or unrecognised transaction type"
+            "description": "Relay rejected. The consumers MUST branch on the `code` field; `message` is informational. Possible cases: safeTxHash does not match the transaction data, unrecognised transaction type, SIMULATION_FAILED (Tenderly confirmed revert), or INDETERMINATE_SIMULATION (simulator unreachable; retry with `acceptUnverifiedSimulation=true` to proceed anyway).",
+            "schema": {
+              "examples": {
+                "simulationFailed": {
+                  "summary": "SIMULATION_FAILED",
+                  "value": {
+                    "code": "SIMULATION_FAILED",
+                    "message": "Relay denied: transaction simulation failed: Reverted with reason string: 'GS013'",
+                    "statusCode": 422
+                  }
+                },
+                "indeterminateSimulation": {
+                  "summary": "INDETERMINATE_SIMULATION",
+                  "value": {
+                    "code": "INDETERMINATE_SIMULATION",
+                    "message": "Relay simulation could not be completed.",
+                    "statusCode": 422
+                  }
+                },
+                "safeTxHashMismatch": {
+                  "summary": "safeTxHash mismatch (no `code`)",
+                  "value": {
+                    "message": "Safe transaction hash mismatch: provided hash 0x... does not match the transaction data",
+                    "statusCode": 422
+                  }
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayErrorResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Relay limit reached for this Safe"
@@ -8185,9 +8272,9 @@
         "type": "object",
         "properties": {
           "chainId": {
-            "type": "number",
+            "type": "string",
             "description": "Chain ID",
-            "example": 1
+            "example": "1"
           },
           "safeAddress": {
             "type": "string",
@@ -9924,6 +10011,10 @@
           "safeTxHash": {
             "type": "string",
             "description": "Safe transaction hash for relay-fee eligibility check"
+          },
+          "acceptUnverifiedSimulation": {
+            "type": "boolean",
+            "description": "Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk."
           }
         },
         "required": [
@@ -9941,6 +10032,32 @@
         },
         "required": [
           "taskId"
+        ]
+      },
+      "RelayErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "SIMULATION_FAILED",
+              "INDETERMINATE_SIMULATION"
+            ],
+            "description": "Stable identifier of the error condition. The frontend MUST branch on this value (not on `message`, which is informational and may change)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the error. Informational only; do not parse."
+          },
+          "statusCode": {
+            "type": "number",
+            "example": 422
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "statusCode"
         ]
       },
       "RelayTaskStatusReceipt": {

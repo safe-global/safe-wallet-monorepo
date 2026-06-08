@@ -105,6 +105,37 @@ describe('WorkspaceHealthCard', () => {
     expect(screen.queryByText('100')).not.toBeInTheDocument()
   })
 
+  it('surfaces a grade filter chip with the count of accounts at that grade', () => {
+    const withIssue = { ...allClear, contract_version: mkResult('issue', 'High') }
+    render(
+      <WorkspaceHealthCard
+        {...baseProps}
+        safes={[safe(SAFE_A), safe(SAFE_B)]}
+        scanResults={{
+          [scanKey(SAFE_A, '1')]: allClear,
+          [scanKey(SAFE_B, '1')]: withIssue,
+        }}
+        isScanning={false}
+      />,
+    )
+    expect(screen.getByText('1 At risk')).toBeInTheDocument()
+  })
+
+  it('shows the Healthy band label when every account passes', () => {
+    render(
+      <WorkspaceHealthCard
+        {...baseProps}
+        safes={[safe(SAFE_A), safe(SAFE_B)]}
+        scanResults={{
+          [scanKey(SAFE_A, '1')]: allClear,
+          [scanKey(SAFE_B, '1')]: allClear,
+        }}
+        isScanning={false}
+      />,
+    )
+    expect(screen.getByText('Healthy')).toBeInTheDocument()
+  })
+
   it('shows an incomplete-scan note when the last scan was partial and not running', () => {
     render(
       <WorkspaceHealthCard
