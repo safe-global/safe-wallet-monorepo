@@ -167,8 +167,10 @@ export const useAddressBookItem = (address: string, chainId: string | undefined)
  * Returns a source-aware resolver for safe display names, mirroring {@link useSafeDisplayName}
  * (`preferredName > address book`) but usable across many addresses without a hook per item.
  *
- * Needed for list filtering (e.g. the account dropdown search): the visible name often comes
- * from the address book, not the safe's own `name`, so searching the raw name misses those safes.
+ * Use this only to resolve names in bulk inside a loop / filter / sort (e.g. the account dropdown
+ * search) — the visible name often comes from the address book, not the safe's own `name`, so
+ * filtering the raw name misses those safes. For a single name in a component use the lighter
+ * {@link useSafeDisplayName} instead.
  *
  * Keep the source priority below in sync with {@link useSafeDisplayName}/{@link useAddressBookItem}:
  * this is the array-friendly twin of that per-item hook, so the two must resolve names identically.
