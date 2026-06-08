@@ -16,7 +16,8 @@ const toneToCssVar = (color: string): string => `var(--color-${color.replace('.'
 
 export type SectionRow = { key: string; severity: SecurityGrade; isPassing: boolean; node: ReactNode }
 
-export type Cta = { label: string; href: string }
+/** A CTA is either a navigation link (`href`) or an in-app action (`onClick`, e.g. open a tx flow). */
+export type Cta = { label: string } & ({ href: string } | { onClick: () => void })
 
 /**
  * A row is considered "passing" (bucketed into the accordion) when the user has no action to take.
@@ -144,18 +145,35 @@ export const makeBuildCta =
     return { label, href: `${def.fixRoute}?safe=${encodeURIComponent(safeQueryParam)}` }
   }
 
-const CtaLink = ({ cta }: { cta: Cta }): ReactElement => (
-  <Link
-    href={cta.href}
-    onClick={(e) => e.stopPropagation()}
-    className="group inline-flex items-center gap-1.5 self-start rounded text-primary no-underline transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-  >
+const ctaClassName =
+  'group inline-flex items-center gap-1.5 self-start rounded text-primary no-underline transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
+
+const CtaBody = ({ label }: { label: string }): ReactElement => (
+  <>
     <Typography variant="paragraph-mini" className="font-bold leading-normal text-inherit group-hover:underline">
-      {cta.label}
+      {label}
     </Typography>
     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-  </Link>
+  </>
 )
+
+const CtaLink = ({ cta }: { cta: Cta }): ReactElement =>
+  'href' in cta ? (
+    <Link href={cta.href} onClick={(e) => e.stopPropagation()} className={ctaClassName}>
+      <CtaBody label={cta.label} />
+    </Link>
+  ) : (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation()
+        cta.onClick()
+      }}
+      className={ctaClassName}
+    >
+      <CtaBody label={cta.label} />
+    </button>
+  )
 
 /** Expanded-row body: optional intro paragraph + evidence key/value list + optional CTA. */
 export const EvidenceList = ({
