@@ -31,6 +31,18 @@ describe('ConnectionPermissionsPanel', () => {
     expect(getByText('Only continue if you trust the source.')).toBeTruthy()
   })
 
+  // Guards against a regression: `$successBackground` is not a real theme token, so the
+  // verified banner used to resolve to no background. The valid token is `$backgroundSuccess`.
+  it.each(['verified', 'unverified', 'malicious'] as const)('renders the %s banner with a background colour', (v) => {
+    const { getByTestId } = renderWithStore(
+      <ConnectionPermissionsPanel variant={v} onDismiss={jest.fn()} />,
+      createTestStore(),
+    )
+    const style = getByTestId('wc-permissions-banner').props.style
+    const flat = Array.isArray(style) ? Object.assign({}, ...style.flat(Infinity).filter(Boolean)) : style
+    expect(flat.backgroundColor).toBeTruthy()
+  })
+
   it('calls onDismiss when "Got it" is pressed', () => {
     const onDismiss = jest.fn()
     const { getByTestId } = renderWithStore(

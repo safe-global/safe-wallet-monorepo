@@ -58,7 +58,8 @@ export const ConnectionPermissionsPanel: React.FC<Props> = ({ variant, onDismiss
             paddingVertical="$4"
             borderRadius="$4"
             alignItems="center"
-            backgroundColor={isVerified ? '$successBackground' : '$errorBackground'}
+            testID="wc-permissions-banner"
+            backgroundColor={isVerified ? '$backgroundSuccess' : '$backgroundError'}
           >
             <VerifyStatusIcon variant={variant} size={24} />
             <Text flex={1} fontSize={16} fontWeight="700" lineHeight={22}>
