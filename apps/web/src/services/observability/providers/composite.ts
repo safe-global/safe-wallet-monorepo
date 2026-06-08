@@ -9,7 +9,7 @@ export class CompositeProvider implements IObservabilityProvider {
   }
 
   async init(): Promise<void> {
-    await Promise.allSettled(this.providers.map((provider) => provider.init()))
+    await Promise.allSettled(this.providers.map((provider) => Promise.resolve(provider.init())))
   }
 
   getLogger(): ILogger {
