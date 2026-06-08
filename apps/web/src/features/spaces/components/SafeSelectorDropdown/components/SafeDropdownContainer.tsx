@@ -1,5 +1,5 @@
 import { RotateCw, Search } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { SelectContent, SelectItem } from '@/components/ui/select'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -88,34 +88,49 @@ const SafeDropdownContainer = ({
 
   const showSearch = !isError && items.length > 0
 
-  const scrollRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
+  const detachScrollRef = useRef<(() => void) | null>(null)
   const [showScrollHint, setShowScrollHint] = useState(false)
 
   // Bottom-fade scroll hint, shown only while more rows lie below the fold.
+  const measureScrollHint = useCallback(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const hasOverflow = el.scrollHeight > el.clientHeight + 1
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1
+    setShowScrollHint(hasOverflow && !atBottom)
+  }, [])
+
+  // Callback ref so the listeners/observer always bind to the LIVE scroll node. base-ui can remount
+  // the popup content after it sizes the popup async; a plain effect (deps unchanged) would stay
+  // closed over a stale, detached node and leave the hint stuck off. Re-measure next frame too.
+  const attachScrollArea = useCallback(
+    (node: HTMLDivElement | null) => {
+      detachScrollRef.current?.()
+      detachScrollRef.current = null
+      scrollRef.current = node
+      if (!node) return
+      node.addEventListener('scroll', measureScrollHint, { passive: true })
+      const resizeObserver = new ResizeObserver(measureScrollHint)
+      resizeObserver.observe(node)
+      Array.from(node.children).forEach((child) => resizeObserver.observe(child))
+      measureScrollHint()
+      const raf = requestAnimationFrame(measureScrollHint)
+      detachScrollRef.current = () => {
+        cancelAnimationFrame(raf)
+        node.removeEventListener('scroll', measureScrollHint)
+        resizeObserver.disconnect()
+      }
+    },
+    [measureScrollHint],
+  )
+
+  // Re-measure when the rendered rows change (the scroll node itself can stay the same).
   useEffect(() => {
-    const scroller = scrollRef.current
-    if (!scroller) return
-
-    const update = () => {
-      const hasOverflow = scroller.scrollHeight > scroller.clientHeight + 1
-      const atBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1
-      setShowScrollHint(hasOverflow && !atBottom)
-    }
-
-    update()
-    // base-ui sizes the popup async (and avatars load late), so the sync measure can miss the
-    // overflow — re-check next frame and on every size change.
-    const raf = requestAnimationFrame(update)
-    scroller.addEventListener('scroll', update, { passive: true })
-    const resizeObserver = new ResizeObserver(update)
-    resizeObserver.observe(scroller)
-    Array.from(scroller.children).forEach((child) => resizeObserver.observe(child))
-    return () => {
-      cancelAnimationFrame(raf)
-      scroller.removeEventListener('scroll', update)
-      resizeObserver.disconnect()
-    }
-  }, [filteredItems.length, isLoading, isError])
+    measureScrollHint()
+    const raf = requestAnimationFrame(measureScrollHint)
+    return () => cancelAnimationFrame(raf)
+  }, [filteredItems.length, isLoading, isError, measureScrollHint])
 
   const renderContent = () => {
     if (isError) {
@@ -162,7 +177,9 @@ const SafeDropdownContainer = ({
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
     >
-      <div className="flex max-h-[min(34rem,var(--available-height))] flex-col">
+      {/* Fallback to 34rem: until base-ui sets --available-height the clamp must still apply, else the
+          list expands to full height, measures as non-overflowing, and the scroll-hint fade is missed. */}
+      <div className="flex max-h-[min(34rem,var(--available-height,34rem))] flex-col">
         {(header || showSearch) && (
           <div className="shrink-0 bg-card">
             {header}
@@ -191,7 +208,7 @@ const SafeDropdownContainer = ({
         )}
 
         <div
-          ref={scrollRef}
+          ref={attachScrollArea}
           data-testid="dropdown-scroll-area"
           className="min-h-0 flex-1 overflow-y-auto overscroll-y-none px-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
         >
