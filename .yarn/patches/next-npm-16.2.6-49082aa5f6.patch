@@ -1,0 +1,15 @@
+diff --git a/dist/client/route-loader.js b/dist/client/route-loader.js
+index 5bdbaa8d1bb5a484e1edb4fbf9d1674e9cad06aa..b7728c5bd578a46d6904d7cce10fe8899a588d53 100644
+--- a/dist/client/route-loader.js
++++ b/dist/client/route-loader.js
+@@ -120,6 +120,10 @@ function appendScript(src, script) {
+         // 3. Finally, set the source and inject into the DOM in case the child
+         //    must be appended for fetching to start.
+         script.src = src;
++        const hashManifest = window.__CHUNK_SRI_MANIFEST || {};
++        if (hashManifest[src]) {
++            script.integrity = hashManifest[src];
++        }
+         document.body.appendChild(script);
+     });
+ }
