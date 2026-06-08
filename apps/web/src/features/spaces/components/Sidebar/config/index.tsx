@@ -35,7 +35,7 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
   // },
   {
     icon: WalletCards,
-    label: 'Accounts',
+    label: 'Safe accounts',
     href: AppRoutes.spaces.safeAccounts,
   },
   {

@@ -32,7 +32,7 @@ const mockMainNavItems: ResolvedSidebarItem[] = [
   },
   {
     icon: WalletCards,
-    label: 'Accounts',
+    label: 'Safe accounts',
     href: AppRoutes.spaces.safeAccounts,
     isActive: false,
     disabled: false,
@@ -40,7 +40,7 @@ const mockMainNavItems: ResolvedSidebarItem[] = [
   },
   {
     icon: BookUser,
-    label: 'Address book',
+    label: 'Address Book',
     href: AppRoutes.spaces.addressBook,
     isActive: false,
     disabled: false,
