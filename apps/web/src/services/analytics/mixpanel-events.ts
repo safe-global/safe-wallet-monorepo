@@ -117,6 +117,7 @@ export enum MixpanelEventParams {
   CHAIN_ID = 'Chain ID',
   TX_ID = 'TX ID',
   SAFE_SELECTOR_DROPDOWN = 'Safe Selector Dropdown',
+  GAS_PAYMENT_SOURCE = 'Gas Payment Source',
 }
 
 export enum AuthLoginMethod {

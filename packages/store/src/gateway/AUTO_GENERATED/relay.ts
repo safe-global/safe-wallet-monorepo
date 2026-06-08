@@ -31,7 +31,7 @@ export type RelayRelayV1ApiResponse = /** status 200 Transaction relayed success
 export type RelayRelayV1ApiArg = {
   /** Chain ID where the Safe transaction will be executed */
   chainId: string
-  /** Transaction data to relay. safeTxHash is required on relay-fee chains and must correspond to the to + data fields. */
+  /** Transaction data to relay. safeTxHash is required on relay-fee chains and must correspond to the to + data fields. Set acceptUnverifiedSimulation=true to retry a relay skipping the simulation which previously returned INDETERMINATE_SIMULATION. */
   relayDto: RelayDto
 }
 export type RelayGetTaskStatusV1ApiResponse = /** status 200 Task status retrieved successfully */ RelayTaskStatus
@@ -54,6 +54,13 @@ export type RelayGetRelaysRemainingV1ApiArg = {
 export type Relay = {
   taskId: string
 }
+export type RelayErrorResponse = {
+  /** Stable identifier of the error condition. The frontend MUST branch on this value (not on `message`, which is informational and may change). */
+  code: 'SIMULATION_FAILED' | 'INDETERMINATE_SIMULATION'
+  /** Human-readable description of the error. Informational only; do not parse. */
+  message: string
+  statusCode: number
+}
 export type RelayDto = {
   version: string
   to: string
@@ -62,6 +69,8 @@ export type RelayDto = {
   gasLimit?: string | null
   /** Safe transaction hash for relay-fee eligibility check */
   safeTxHash?: string
+  /** Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk. */
+  acceptUnverifiedSimulation?: boolean
 }
 export type RelayTaskStatusReceipt = {
   transactionHash: string
