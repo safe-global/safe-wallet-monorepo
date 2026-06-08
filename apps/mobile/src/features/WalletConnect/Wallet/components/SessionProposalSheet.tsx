@@ -18,9 +18,11 @@ import { logWalletKitError } from '../utils/errors'
 type Props = {
   walletKit: IWalletKit
   pending: { id: number; proposal: WalletKitTypes.SessionProposal }
+  // Lets the host resize the bottom sheet (the permissions panel is taller than the main state).
+  onPermissionsOpenChange?: (open: boolean) => void
 }
 
-export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending }) => {
+export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending, onPermissionsOpenChange }) => {
   const dispatch = useAppDispatch()
   const toast = useToastController()
   const activeSafe = useAppSelector(selectActiveSafe)
@@ -40,6 +42,15 @@ export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending }) =>
   const domain = useMemo(() => meta.url?.replace(/^https?:\/\//, '').replace(/\/+$/, '') || meta.url || '', [meta.url])
 
   const close = () => dispatch(removePending({ id: pending.id, kind: 'proposal' }))
+
+  const openPermissions = () => {
+    setShowPermissions(true)
+    onPermissionsOpenChange?.(true)
+  }
+  const closePermissions = () => {
+    setShowPermissions(false)
+    onPermissionsOpenChange?.(false)
+  }
 
   const onConnect = async () => {
     // Defensive fallback only — the handler has already auto-rejected proposals missing an
@@ -86,7 +97,7 @@ export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending }) =>
 
   // The info symbol on the domain pill opens the permissions detail; "Got it" returns here.
   if (showPermissions) {
-    return <ConnectionPermissionsPanel variant={variant} onDismiss={() => setShowPermissions(false)} />
+    return <ConnectionPermissionsPanel variant={variant} onDismiss={closePermissions} />
   }
 
   return (
@@ -101,7 +112,7 @@ export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending }) =>
           {/* Verify badge overlapping the icon's bottom-right corner. The $background ring
               separates the badge from the dApp icon, matching the design. */}
           <YStack position="absolute" bottom={-4} right={-4} borderRadius={100} backgroundColor="$background">
-            <VerifyStatusIcon variant={variant} size={22} onPress={() => setShowPermissions(true)} />
+            <VerifyStatusIcon variant={variant} size={22} onPress={openPermissions} />
           </YStack>
         </YStack>
 
@@ -117,7 +128,7 @@ export const SessionProposalSheet: React.FC<Props> = ({ walletKit, pending }) =>
           borderRadius="$2"
           backgroundColor="$backgroundSecondary"
           pressStyle={{ opacity: 0.6 }}
-          onPress={() => setShowPermissions(true)}
+          onPress={openPermissions}
           testID="wc-proposal-domain"
         >
           <Text color="$colorSecondary">{domain}</Text>

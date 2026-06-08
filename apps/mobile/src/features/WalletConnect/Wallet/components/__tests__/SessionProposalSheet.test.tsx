@@ -52,13 +52,34 @@ describe('SessionProposalSheet', () => {
     expect(getByText('uniswap.org')).toBeTruthy()
   })
 
-  it('opens the permissions panel from the domain pill', () => {
+  it('opens the permissions panel from the domain pill and signals the host to grow the sheet', () => {
+    const onPermissionsOpenChange = jest.fn()
     const { getByTestId, getByText } = renderWithStore(
-      <SessionProposalSheet walletKit={makeWalletKit()} pending={makePending()} />,
+      <SessionProposalSheet
+        walletKit={makeWalletKit()}
+        pending={makePending()}
+        onPermissionsOpenChange={onPermissionsOpenChange}
+      />,
       makeStore(),
     )
     fireEvent.press(getByTestId('wc-proposal-domain'))
     expect(getByText('This domain has been verified.')).toBeTruthy()
+    expect(onPermissionsOpenChange).toHaveBeenLastCalledWith(true)
+  })
+
+  it('signals the host to shrink the sheet when the permissions panel is dismissed', () => {
+    const onPermissionsOpenChange = jest.fn()
+    const { getByTestId } = renderWithStore(
+      <SessionProposalSheet
+        walletKit={makeWalletKit()}
+        pending={makePending()}
+        onPermissionsOpenChange={onPermissionsOpenChange}
+      />,
+      makeStore(),
+    )
+    fireEvent.press(getByTestId('wc-proposal-domain'))
+    fireEvent.press(getByTestId('wc-proposal-permissions-dismiss'))
+    expect(onPermissionsOpenChange).toHaveBeenLastCalledWith(false)
   })
 
   it('approves the session and adds it to the slice on Connect', async () => {

@@ -31,6 +31,10 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
   const ref = useRef<BottomSheetModal>(null)
   const renderBackdrop = useCallback(() => <BackdropComponent shouldNavigateBack={false} />, [])
 
+  // The proposal's permissions panel is taller than the main state, so grow the sheet
+  // (index 1 = 60%) while it's open and shrink back (index 0 = 40%) when it closes.
+  const onPermissionsOpenChange = useCallback((open: boolean) => ref.current?.snapToIndex(open ? 1 : 0), [])
+
   useEffect(() => {
     if (!current || !walletKit) {
       ref.current?.dismiss()
@@ -78,14 +82,20 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
   return (
     <BottomSheetModal
       ref={ref}
-      snapPoints={['50%']}
+      snapPoints={['40%', '60%']}
       enableDynamicSizing={false}
       onDismiss={onSheetDismiss}
       backgroundComponent={BackgroundComponent}
       backdropComponent={renderBackdrop}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
-      {walletKit && current?.kind === 'proposal' && <SessionProposalSheet walletKit={walletKit} pending={current} />}
+      {walletKit && current?.kind === 'proposal' && (
+        <SessionProposalSheet
+          walletKit={walletKit}
+          pending={current}
+          onPermissionsOpenChange={onPermissionsOpenChange}
+        />
+      )}
       {/* Transaction request sheet (current?.kind === 'request') added in WA-2321 / WA-2322. */}
     </BottomSheetModal>
   )
