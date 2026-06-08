@@ -9,9 +9,6 @@ import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import type { SafeItemData } from '../types'
 
-// Matches a safe against a lowercased query by its resolved display name, address, or any of its
-// chains' names/short names. `displayName` is the same name shown in the row (the safe's own name OR
-// its address-book name), so searching also finds safes named only in the address book.
 const matchesSearch = (item: SafeItemData, displayName: string, query: string): boolean => {
   const name = displayName.toLowerCase()
   const address = item.address.toLowerCase()
@@ -160,7 +157,9 @@ const SafeDropdownContainer = ({
       align="start"
       side="bottom"
       alignItemWithTrigger={false}
-      className="w-[430px] max-w-[calc(100vw-2rem)] max-h-[min(34rem,var(--available-height))] overflow-y-auto overscroll-y-none bg-card border-0 ring-0 rounded-lg px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
+      // outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
+      // :focus-visible and would otherwise draw the browser's blue outline around the whole popup.
+      className="w-[430px] max-w-[calc(100vw-2rem)] max-h-[min(34rem,var(--available-height))] overflow-y-auto overscroll-y-none bg-card border-0 ring-0 outline-hidden rounded-lg px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
       sideOffset={20}
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
@@ -178,9 +177,8 @@ const SafeDropdownContainer = ({
                   placeholder="Search by name, address or network"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  // Stop keystrokes from reaching base-ui Select's typeahead/navigation handlers on
-                  // the popup, which would otherwise hijack typing. This also keeps arrow/Enter keys
-                  // in the input (no list navigation from the field); Escape still bubbles to close.
+                  // Stop keystrokes reaching base-ui Select's typeahead, which would hijack typing.
+                  // Trade-off: arrows/Enter stay in the input (no list nav); Escape still closes.
                   onKeyDown={(e) => {
                     if (e.key !== 'Escape') e.stopPropagation()
                   }}

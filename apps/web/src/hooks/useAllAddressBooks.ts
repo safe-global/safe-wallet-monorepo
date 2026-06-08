@@ -169,7 +169,6 @@ export const useAddressBookItem = (address: string, chainId: string | undefined)
  *
  * Needed for list filtering (e.g. the account dropdown search): the visible name often comes
  * from the address book, not the safe's own `name`, so searching the raw name misses those safes.
- * Calls one merged-books hook + the full local books, then resolves each address inline.
  *
  * Keep the source priority below in sync with {@link useSafeDisplayName}/{@link useAddressBookItem}:
  * this is the array-friendly twin of that per-item hook, so the two must resolve names identically.
