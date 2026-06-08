@@ -193,6 +193,31 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ isSpacesLoading: true }))
   })
 
+  // WA-2486: the sign-in card title (logo + heading) is centered, not left-aligned.
+  it('centers the "Sign in to your workspace" heading', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
+    mockUseAppSelector.mockReturnValue(false)
+
+    render(<SpacesList />)
+
+    const heading = screen.getByRole('heading', { name: /sign in to your workspace/i })
+    expect(heading.className).toContain('text-center')
+  })
+
+  // WA-2486: the "By continuing…" Terms/Privacy text is moved out of the card
+  // (below it) to reduce text overload inside the box.
+  it('renders the "By continuing" text outside the sign-in card', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
+    mockUseAppSelector.mockReturnValue(false)
+
+    const { container } = render(<SpacesList />)
+
+    const card = container.querySelector('.bg-card')
+    const termsLink = screen.getByRole('link', { name: /^terms$/i })
+    expect(card).toBeInTheDocument()
+    expect(card).not.toContainElement(termsLink)
+  })
+
   it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {
     mockUseAppSelector.mockReturnValue(true)
     const tenSpaces = Array.from({ length: 10 }, (_, i) => ({ id: i + 1, name: `Space ${i + 1}` }))

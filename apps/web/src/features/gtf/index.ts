@@ -7,3 +7,6 @@ export const GTFFeature = createFeatureHandle<GTFContract>('gtf', FEATURES.GTF)
 export type { GTFContract } from './contract'
 export { useFeesPreview } from './hooks/useFeesPreview'
 export { useIsGtfSlotVisible } from './hooks/useIsGtfSlotVisible'
+export { useHistoryFeesBreakdown } from './hooks/useHistoryFeesBreakdown'
+export { useResolvedGasToken } from './hooks/useResolvedGasToken'
+export type { ResolvedGasTokenState, FeePreviewTx } from './hooks/useResolvedGasToken'

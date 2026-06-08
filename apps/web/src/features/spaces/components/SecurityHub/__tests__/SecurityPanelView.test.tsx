@@ -76,8 +76,8 @@ const renderPanel = (overrides: Partial<React.ComponentProps<typeof SecurityPane
   return render(<SecurityPanelView {...defaults} {...overrides} />)
 }
 
-/** Find the "N checks passing" accordion summary (distinct from the header's "All checks passing."). */
-const getChecksAccordion = () => screen.getByText(/^\d+ checks? passing$/)
+/** Find the collapsible "Healthy · N" passing-group chip (distinct from the header's "All checks passing."). */
+const getChecksAccordion = () => screen.getByText(/^Healthy · \d+$/)
 
 // ─── tests ────────────────────────────────────────────────────────────────────
 
@@ -95,9 +95,9 @@ describe('SecurityPanelView', () => {
   })
 
   describe('header', () => {
-    it('renders strength level and "all checks passing" copy when everything clears', () => {
+    it('renders the score band and "all checks passing" copy when everything clears', () => {
       renderPanel()
-      expect(screen.getByText('Strong')).toBeInTheDocument()
+      expect(screen.getByText('Healthy')).toBeInTheDocument()
       expect(screen.getByText('All checks passing.')).toBeInTheDocument()
     })
 
@@ -258,10 +258,9 @@ describe('SecurityPanelView', () => {
           modules: [{ value: '0xbbbb000000000000000000000000000000000002', name: 'Mystery Module' }],
         }),
       })
-      // Unrecognized module → failing → visible at top. Title + evidence both render the name;
-      // assert at least one match exists and that it's a body2 title element.
-      const matches = screen.getAllByText('Mystery Module')
-      expect(matches.length).toBeGreaterThanOrEqual(1)
+      // Unrecognized module → failing → visible at top under its grade group, without expanding
+      // the passing accordion. The row title flags it; the module name lives in the expanded evidence.
+      expect(screen.getByText('Unrecognized module detected')).toBeInTheDocument()
     })
   })
 
@@ -284,9 +283,9 @@ describe('SecurityPanelView', () => {
       })
       const row = screen.getByText('Single signer controls this Safe')
       fireEvent.click(row)
-      const paper = row.closest('.MuiPaper-root')!
-      expect(within(paper as HTMLElement).getByText('Raise the threshold.')).toBeInTheDocument()
-      expect(within(paper as HTMLElement).getByText('1 of 3')).toBeInTheDocument()
+      const panel = row.closest('.rounded-lg')!
+      expect(within(panel as HTMLElement).getByText('Raise the threshold.')).toBeInTheDocument()
+      expect(within(panel as HTMLElement).getByText('1 of 3')).toBeInTheDocument()
     })
   })
 })

@@ -1,15 +1,18 @@
 import { type ReactElement, type ReactNode, useState } from 'react'
-import { Box, Collapse, Stack, Typography } from '@mui/material'
-import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
-import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
-import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded'
-import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded'
-import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
-import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutlineRounded'
-import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowRight, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
+import { isAddress } from 'ethers'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { cn } from '@/utils/cn'
+import { Typography } from '@/components/ui/typography'
+import CopyButton from '@/components/common/CopyButton'
 import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SEVERITY_RANK, type SecurityContract } from '@/features/security'
+import { resolveStatusTone, SeverityIcon, type SeverityTone } from '../SeverityIcon/SeverityIcon'
+
+/** Map a SeverityTone's MUI color token (e.g. 'error.main') to its generated CSS var. */
+const toneToCssVar = (color: string): string => `var(--color-${color.replace('.', '-')})`
 
 export type SectionRow = { key: string; severity: SecurityGrade; isPassing: boolean; node: ReactNode }
 
@@ -27,79 +30,95 @@ export const isPassingStatus = (s: ScanResult['status']) =>
 export const sortBySeverity = <T extends { severity: SecurityGrade }>(items: T[]): T[] =>
   [...items].sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity])
 
-/** Leading icon reflecting a check's status. Sized & colored to match the accordion summary icon. */
-export const StatusIcon = ({ status }: { status: ScanResult['status'] }): ReactElement => {
-  const sx = { fontSize: 18, flexShrink: 0 } as const
-  if (status === 'clear') return <CheckCircleOutlineRoundedIcon sx={{ ...sx, color: 'success.main' }} />
-  if (status === 'not_applicable') return <RemoveCircleOutlineRoundedIcon sx={{ ...sx, color: 'text.secondary' }} />
-  if (status === 'inconclusive') return <HelpOutlineRoundedIcon sx={{ ...sx, color: 'text.disabled' }} />
-  if (status === 'partial') return <WarningAmberRoundedIcon sx={{ ...sx, color: 'warning.main' }} />
-  // issue
-  return <ErrorOutlineRoundedIcon sx={{ ...sx, color: 'error.main' }} />
-}
+/**
+ * Leading icon reflecting a check's status. Sized & colored to match the accordion summary icon.
+ * A Critical-severity issue escalates to the "dangerous" glyph (see `resolveStatusTone`).
+ */
+export const StatusIcon = ({
+  status,
+  severity,
+}: {
+  status: ScanResult['status']
+  severity?: SecurityGrade
+}): ReactElement => <SeverityIcon tone={resolveStatusTone(status, severity)} />
 
 type RowProps = {
   /** Leading status icon (same visual weight as accordion summary icon) */
   leadIcon?: ReactNode
   title: string
+  /** Secondary line under the title (e.g. the check's remediation summary). */
+  subtitle?: ReactNode
+  /** Severity tone driving the leading accent bar color; omit to hide the bar. */
+  accentTone?: SeverityTone
   /** Trailing action node (used by modules summary's "View N" button) */
   trailing?: ReactNode
   /** Reveal additional content on click */
   expandedContent?: ReactNode
 }
 
-export const Row = ({ leadIcon, title, trailing, expandedContent }: RowProps): ReactElement => {
+export const Row = ({ leadIcon, title, subtitle, accentTone, trailing, expandedContent }: RowProps): ReactElement => {
   const [expanded, setExpanded] = useState(false)
-  const expandable = !!expandedContent
+  const expandable = !!expandedContent || !!subtitle
 
   return (
-    <Box
-      sx={{
-        px: 2,
-        cursor: expandable ? 'pointer' : 'default',
-        '&:hover': expandable ? { backgroundColor: 'action.hover' } : {},
-      }}
+    <div
+      className={cn('px-5 py-2', expandable ? 'cursor-pointer hover:bg-muted/60' : 'cursor-default')}
       onClick={expandable ? () => setExpanded((v) => !v) : undefined}
     >
-      <Stack direction="row" spacing={1.25} alignItems="center" sx={{ py: 1.25 }}>
-        {leadIcon && <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>{leadIcon}</Box>}
-        <Typography
-          variant="body2"
-          fontWeight={600}
-          sx={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}
-          noWrap
-          title={title}
-        >
+      <div className="flex items-center gap-2.5 py-2.5">
+        {accentTone && (
+          <div
+            className="w-1 shrink-0 self-stretch rounded-full"
+            style={{ backgroundColor: toneToCssVar(accentTone.color) }}
+          />
+        )}
+        {leadIcon && <div className="flex shrink-0 items-center">{leadIcon}</div>}
+        <Typography variant="paragraph-small" className="min-w-0 flex-1 truncate" title={title}>
           {title}
         </Typography>
         {trailing}
         {expandable && (
-          <KeyboardArrowDownRoundedIcon
-            sx={{
-              color: 'text.secondary',
-              fontSize: 18,
-              flexShrink: 0,
-              transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s',
-            }}
+          <ChevronDown
+            className={cn(
+              'h-[18px] w-[18px] shrink-0 text-muted-foreground transition-transform',
+              expanded && 'rotate-180',
+            )}
           />
         )}
-      </Stack>
+      </div>
       {expandable && (
-        <Collapse in={expanded}>
-          {/* Align expanded body's left edge with the title (icon 18px + gap 1.25 = 3.5 spacing units). */}
-          <Box sx={{ pb: 1.5, pl: leadIcon ? 3.5 : 0 }} onClick={(e) => e.stopPropagation()}>
-            {typeof expandedContent === 'string' ? (
-              <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5, display: 'block' }}>
-                {expandedContent}
-              </Typography>
-            ) : (
-              expandedContent
-            )}
-          </Box>
-        </Collapse>
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              {/* Align expanded body's left edge with the title (icon 18px + gap 2.5 → pl-7). */}
+              <div
+                className={cn('flex flex-col gap-1.5 py-3 px-5 rounded-md bg-muted my-2')}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {subtitle && (
+                  <Typography variant="paragraph-mini" color="muted" className="block leading-normal">
+                    {subtitle}
+                  </Typography>
+                )}
+                {typeof expandedContent === 'string' ? (
+                  <Typography variant="paragraph-mini" color="muted" className="block leading-normal">
+                    {expandedContent}
+                  </Typography>
+                ) : (
+                  expandedContent
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
-    </Box>
+    </div>
   )
 }
 
@@ -129,34 +148,12 @@ const CtaLink = ({ cta }: { cta: Cta }): ReactElement => (
   <Link
     href={cta.href}
     onClick={(e) => e.stopPropagation()}
-    style={{ textDecoration: 'none', alignSelf: 'flex-start', borderRadius: 4 }}
-    className="security-cta-link"
+    className="group inline-flex items-center gap-1.5 self-start rounded text-primary no-underline transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
   >
-    <Stack
-      direction="row"
-      spacing={0.75}
-      alignItems="center"
-      sx={{
-        color: 'primary.main',
-        cursor: 'pointer',
-        transition: 'color 0.15s',
-        '& .cta-icon': { transition: 'transform 0.15s' },
-        '&:hover': { color: 'primary.dark' },
-        '&:hover .cta-label': { textDecoration: 'underline' },
-        '&:hover .cta-icon': { transform: 'translateX(2px)' },
-        '.security-cta-link:focus-visible &': {
-          outline: '2px solid',
-          outlineColor: 'primary.main',
-          outlineOffset: 2,
-          borderRadius: 4,
-        },
-      }}
-    >
-      <Typography className="cta-label" variant="caption" fontWeight={700} sx={{ color: 'inherit', lineHeight: 1.5 }}>
-        {cta.label}
-      </Typography>
-      <ArrowForwardRoundedIcon className="cta-icon" sx={{ fontSize: 14, color: 'inherit' }} />
-    </Stack>
+    <Typography variant="paragraph-mini" className="font-bold leading-normal text-inherit group-hover:underline">
+      {cta.label}
+    </Typography>
+    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
   </Link>
 )
 
@@ -173,51 +170,54 @@ export const EvidenceList = ({
   const hasEvidence = !!evidence && evidence.length > 0
   if (!intro && !hasEvidence && !cta) return null
   return (
-    <Stack spacing={0.75}>
+    <div className="flex flex-col gap-1.5">
       {intro && (
-        <Typography variant="caption" color="text.primary" sx={{ lineHeight: 1.5, display: 'block' }}>
+        <Typography variant="paragraph-mini" className="block leading-normal">
           {intro}
         </Typography>
       )}
       {hasEvidence && (
-        <Stack spacing={0.25}>
+        <div className="flex flex-col gap-0.5">
           {evidence!.map((item, idx) =>
             typeof item === 'string' ? (
-              <Typography
-                key={idx}
-                variant="caption"
-                color="text.secondary"
-                sx={{ lineHeight: 1.5, display: 'block', wordBreak: 'break-word' }}
-              >
+              <Typography key={idx} variant="paragraph-mini" color="muted" className="block leading-normal break-words">
                 {item}
               </Typography>
             ) : (
-              <Stack key={idx} direction="row" spacing={1} alignItems="baseline">
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ minWidth: 96, flexShrink: 0, lineHeight: 1.5 }}
-                >
+              <div key={idx} className="flex items-baseline gap-2">
+                <Typography variant="paragraph-mini" color="muted" className="w-24 shrink-0 leading-normal">
                   {item.label}
                 </Typography>
-                <Typography variant="caption" color="text.primary" sx={{ lineHeight: 1.5, wordBreak: 'break-word' }}>
-                  {item.value}
-                </Typography>
-              </Stack>
+                {isAddress(item.value) ? (
+                  <span className="flex items-center gap-1">
+                    <Typography variant="paragraph-mini" className="leading-normal">
+                      {shortenAddress(item.value)}
+                    </Typography>
+                    <CopyButton text={item.value} className="!p-0.5 text-muted-foreground [&_svg]:!size-3" />
+                  </span>
+                ) : (
+                  <Typography variant="paragraph-mini" className="leading-normal break-words">
+                    {item.value}
+                  </Typography>
+                )}
+              </div>
             ),
           )}
-        </Stack>
+        </div>
       )}
       {cta && <CtaLink cta={cta} />}
-    </Stack>
+    </div>
   )
 }
 
-/** Build expanded body for a row backed by a ScanResult. Returns undefined when there's nothing to show. */
+/**
+ * Build expanded body for a row backed by a ScanResult. Returns undefined when there's nothing to show.
+ * The remediation summary is surfaced in the row's subtitle (see `Row`), so the expanded body
+ * carries only the evidence list and CTA.
+ */
 export const buildExpanded = (result: ScanResult | undefined, cta?: Cta | null): ReactNode => {
   if (!result) return cta ? <EvidenceList cta={cta} /> : undefined
-  const intro = !isPassingStatus(result.status) && result.remediation ? result.remediation : undefined
   const hasEvidence = result.evidence && result.evidence.length > 0
-  if (!intro && !hasEvidence && !cta) return undefined
-  return <EvidenceList intro={intro} evidence={result.evidence} cta={cta} />
+  if (!hasEvidence && !cta) return undefined
+  return <EvidenceList evidence={result.evidence} cta={cta} />
 }

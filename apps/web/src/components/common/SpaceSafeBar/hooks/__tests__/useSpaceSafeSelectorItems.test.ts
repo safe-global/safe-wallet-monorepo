@@ -72,6 +72,7 @@ import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
+import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useRouter } from 'next/router'
 
@@ -631,5 +632,64 @@ describe('useSpaceSafeSelectorItems', () => {
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
     expect(result.current.items[0].id).toBe('137:0xSafe2')
     expect(result.current.selectedItemId).toBe('137:0xSafe2')
+  })
+
+  // ── undeployed (counterfactual) status on single-chain safes ──
+
+  const mockUndeployedSafes = (undeployedSafes: Record<string, Record<string, { status: { status: string } }>>) => {
+    ;(useAppSelector as jest.Mock).mockImplementation((selector: unknown) =>
+      selector === selectUndeployedSafes ? undeployedSafes : 'usd',
+    )
+  }
+
+  it('marks a single-chain safe as undeployed when it has a counterfactual entry', () => {
+    setupDefaults({ overviews: [] as never[] })
+    mockUndeployedSafes({ '1': { '0xSafe1': { status: { status: 'AWAITING_EXECUTION' } } } })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isUndeployed).toBe(true)
+    expect(result.current.items[0].chains[0].isActivating).toBe(false)
+  })
+
+  it('marks a single-chain safe as activating when its counterfactual status is not awaiting execution', () => {
+    setupDefaults({ overviews: [] as never[] })
+    mockUndeployedSafes({ '1': { '0xSafe1': { status: { status: 'PROCESSING' } } } })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isUndeployed).toBe(true)
+    expect(result.current.items[0].chains[0].isActivating).toBe(true)
+  })
+
+  it('leaves a deployed single-chain safe as not undeployed', () => {
+    setupDefaults()
+    mockUndeployedSafes({})
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    expect(result.current.items[0].chains[0].isUndeployed).toBe(false)
+  })
+
+  // ── undeployed status mapped per-chain on multi-chain safes ──
+
+  it('maps undeployed/activating status per chain for a multi-chain safe', () => {
+    setupDefaults({
+      allSafes: [multiChainSafe],
+      safeAddress: '0xSafe2',
+      currentChainId: '1',
+      overviews: [
+        { address: { value: '0xSafe2' }, chainId: '137', fiatTotal: '200', threshold: 1, owners: [{ value: '0xO' }] },
+      ],
+    })
+    // Chain '1' is undeployed and activating; chain '137' is deployed.
+    mockUndeployedSafes({ '1': { '0xSafe2': { status: { status: 'PROCESSING' } } } })
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    const chains = result.current.items[0].chains
+    const ethChain = chains.find((c) => c.chainId === '1')
+    const polygonChain = chains.find((c) => c.chainId === '137')
+
+    expect(ethChain?.isUndeployed).toBe(true)
+    expect(ethChain?.isActivating).toBe(true)
+    expect(polygonChain?.isUndeployed).toBe(false)
+    expect(polygonChain?.isActivating).toBe(false)
   })
 })

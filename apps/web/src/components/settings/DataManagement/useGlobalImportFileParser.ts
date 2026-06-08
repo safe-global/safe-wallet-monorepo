@@ -84,76 +84,78 @@ type Data = {
   addedSafesCount: number
 }
 
-export const useGlobalImportJsonParser = (jsonData: string | undefined): Data => {
-  return useMemo(() => {
-    const data: Data = {
-      addressBookEntriesCount: 0,
-      addedSafesCount: 0,
-      addressBook: undefined,
-      addedSafes: undefined,
-      settings: undefined,
-      safeApps: undefined,
-      undeployedSafes: undefined,
-      visitedSafes: undefined,
-    }
+export const parseGlobalImportJson = (jsonData: string | undefined): Data => {
+  const data: Data = {
+    addressBookEntriesCount: 0,
+    addedSafesCount: 0,
+    addressBook: undefined,
+    addedSafes: undefined,
+    settings: undefined,
+    safeApps: undefined,
+    undeployedSafes: undefined,
+    visitedSafes: undefined,
+  }
 
-    if (!jsonData) {
-      return data
-    }
-
-    let parsedFile
-
-    try {
-      parsedFile = JSON.parse(jsonData)
-    } catch (err) {
-      logError(ErrorCodes._704, err)
-
-      data.error = ImportErrors.INVALID_JSON_FORMAT
-      return data
-    }
-
-    if (!parsedFile.data || Object.keys(parsedFile.data).length === 0) {
-      data.error = ImportErrors.NO_IMPORT_DATA_FOUND
-      return data
-    }
-
-    switch (parsedFile.version) {
-      case SAFE_EXPORT_VERSION.V1: {
-        data.addressBook = migrateAddressBook(parsedFile.data) ?? undefined
-        data.addedSafes = migrateAddedSafes(parsedFile.data) ?? undefined
-
-        break
-      }
-
-      case SAFE_EXPORT_VERSION.V2: {
-        data.addressBook = _filterValidAbEntries(parsedFile.data.addressBook)
-        data.addedSafes = parsedFile.data.addedSafes
-        data.settings = parsedFile.data.settings
-        data.safeApps = parsedFile.data.safeApps
-        data.undeployedSafes = parsedFile.data.undeployedSafes
-
-        break
-      }
-
-      case SAFE_EXPORT_VERSION.V3: {
-        data.addressBook = _filterValidAbEntries(parsedFile.data.addressBook)
-        data.addedSafes = parsedFile.data.addedSafes
-        data.settings = parsedFile.data.settings
-        data.safeApps = parsedFile.data.safeApps
-        data.undeployedSafes = parsedFile.data.undeployedSafes
-        data.visitedSafes = parsedFile.data.visitedSafes
-
-        break
-      }
-
-      default: {
-        data.error = ImportErrors.INVALID_VERSION
-      }
-    }
-
-    data.addressBookEntriesCount = data.addressBook ? countEntries(data.addressBook) : 0
-    data.addedSafesCount = data.addedSafes ? countEntries(data.addedSafes) : 0
-
+  if (!jsonData) {
     return data
-  }, [jsonData])
+  }
+
+  let parsedFile
+
+  try {
+    parsedFile = JSON.parse(jsonData)
+  } catch (err) {
+    logError(ErrorCodes._704, err)
+
+    data.error = ImportErrors.INVALID_JSON_FORMAT
+    return data
+  }
+
+  if (!parsedFile.data || Object.keys(parsedFile.data).length === 0) {
+    data.error = ImportErrors.NO_IMPORT_DATA_FOUND
+    return data
+  }
+
+  switch (parsedFile.version) {
+    case SAFE_EXPORT_VERSION.V1: {
+      data.addressBook = migrateAddressBook(parsedFile.data) ?? undefined
+      data.addedSafes = migrateAddedSafes(parsedFile.data) ?? undefined
+
+      break
+    }
+
+    case SAFE_EXPORT_VERSION.V2: {
+      data.addressBook = _filterValidAbEntries(parsedFile.data.addressBook)
+      data.addedSafes = parsedFile.data.addedSafes
+      data.settings = parsedFile.data.settings
+      data.safeApps = parsedFile.data.safeApps
+      data.undeployedSafes = parsedFile.data.undeployedSafes
+
+      break
+    }
+
+    case SAFE_EXPORT_VERSION.V3: {
+      data.addressBook = _filterValidAbEntries(parsedFile.data.addressBook)
+      data.addedSafes = parsedFile.data.addedSafes
+      data.settings = parsedFile.data.settings
+      data.safeApps = parsedFile.data.safeApps
+      data.undeployedSafes = parsedFile.data.undeployedSafes
+      data.visitedSafes = parsedFile.data.visitedSafes
+
+      break
+    }
+
+    default: {
+      data.error = ImportErrors.INVALID_VERSION
+    }
+  }
+
+  data.addressBookEntriesCount = data.addressBook ? countEntries(data.addressBook) : 0
+  data.addedSafesCount = data.addedSafes ? countEntries(data.addedSafes) : 0
+
+  return data
+}
+
+export const useGlobalImportJsonParser = (jsonData: string | undefined): Data => {
+  return useMemo(() => parseGlobalImportJson(jsonData), [jsonData])
 }

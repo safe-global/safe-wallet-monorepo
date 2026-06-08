@@ -9,43 +9,40 @@ exports[`./WorkspaceHealthCard.stories CriticalFilterActive 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-a6mz0g-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="bg-card text-card-foreground overflow-hidden rounded-xl text-sm has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex mb-6 flex-col items-start gap-6 p-6 md:flex-row md:items-center"
+      data-size="default"
+      data-slot="card"
     >
       <div
-        class="MuiStack-root mui-style-19f0b8n-MuiStack-root"
+        class="bg-muted animate-pulse size-[100px] shrink-0 rounded-full"
+        data-slot="skeleton"
+      />
+      <div
+        class="min-w-0 flex-1"
       >
-        <span
-          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
-          style="width: 120px; height: 120px;"
+        <div
+          class="bg-muted animate-pulse mb-2 h-6 w-[180px] rounded"
+          data-slot="skeleton"
         />
         <div
-          class="MuiBox-root mui-style-1fjtzvx"
+          class="bg-muted animate-pulse mb-1 h-4 w-[320px] rounded"
+          data-slot="skeleton"
+        />
+        <div
+          class="bg-muted animate-pulse mb-4 h-4 w-[260px] rounded"
+          data-slot="skeleton"
+        />
+        <div
+          class="flex gap-2"
         >
-          <span
-            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-fxtlyh-MuiSkeleton-root"
-            style="width: 180px; height: 24px;"
-          />
-          <span
-            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-53wl0q-MuiSkeleton-root"
-            style="width: 320px; height: 16px;"
-          />
-          <span
-            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-1x7xl34-MuiSkeleton-root"
-            style="width: 260px; height: 16px;"
+          <div
+            class="bg-muted animate-pulse h-5 w-20 rounded-[10px]"
+            data-slot="skeleton"
           />
           <div
-            class="MuiStack-root mui-style-niqf4j-MuiStack-root"
-          >
-            <span
-              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
-              style="width: 80px; height: 20px;"
-            />
-            <span
-              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
-              style="width: 100px; height: 20px;"
-            />
-          </div>
+            class="bg-muted animate-pulse h-5 w-[100px] rounded-[10px]"
+            data-slot="skeleton"
+          />
         </div>
       </div>
     </div>
@@ -62,43 +59,40 @@ exports[`./WorkspaceHealthCard.stories Healthy 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-a6mz0g-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="bg-card text-card-foreground overflow-hidden rounded-xl text-sm has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex mb-6 flex-col items-start gap-6 p-6 md:flex-row md:items-center"
+      data-size="default"
+      data-slot="card"
     >
       <div
-        class="MuiStack-root mui-style-19f0b8n-MuiStack-root"
+        class="bg-muted animate-pulse size-[100px] shrink-0 rounded-full"
+        data-slot="skeleton"
+      />
+      <div
+        class="min-w-0 flex-1"
       >
-        <span
-          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
-          style="width: 120px; height: 120px;"
+        <div
+          class="bg-muted animate-pulse mb-2 h-6 w-[180px] rounded"
+          data-slot="skeleton"
         />
         <div
-          class="MuiBox-root mui-style-1fjtzvx"
+          class="bg-muted animate-pulse mb-1 h-4 w-[320px] rounded"
+          data-slot="skeleton"
+        />
+        <div
+          class="bg-muted animate-pulse mb-4 h-4 w-[260px] rounded"
+          data-slot="skeleton"
+        />
+        <div
+          class="flex gap-2"
         >
-          <span
-            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-fxtlyh-MuiSkeleton-root"
-            style="width: 180px; height: 24px;"
-          />
-          <span
-            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-53wl0q-MuiSkeleton-root"
-            style="width: 320px; height: 16px;"
-          />
-          <span
-            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-1x7xl34-MuiSkeleton-root"
-            style="width: 260px; height: 16px;"
+          <div
+            class="bg-muted animate-pulse h-5 w-20 rounded-[10px]"
+            data-slot="skeleton"
           />
           <div
-            class="MuiStack-root mui-style-niqf4j-MuiStack-root"
-          >
-            <span
-              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
-              style="width: 80px; height: 20px;"
-            />
-            <span
-              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
-              style="width: 100px; height: 20px;"
-            />
-          </div>
+            class="bg-muted animate-pulse h-5 w-[100px] rounded-[10px]"
+            data-slot="skeleton"
+          />
         </div>
       </div>
     </div>
@@ -115,43 +109,40 @@ exports[`./WorkspaceHealthCard.stories MixedGrades 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-a6mz0g-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="bg-card text-card-foreground overflow-hidden rounded-xl text-sm has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex mb-6 flex-col items-start gap-6 p-6 md:flex-row md:items-center"
+      data-size="default"
+      data-slot="card"
     >
       <div
-        class="MuiStack-root mui-style-19f0b8n-MuiStack-root"
+        class="bg-muted animate-pulse size-[100px] shrink-0 rounded-full"
+        data-slot="skeleton"
+      />
+      <div
+        class="min-w-0 flex-1"
       >
-        <span
-          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
-          style="width: 120px; height: 120px;"
+        <div
+          class="bg-muted animate-pulse mb-2 h-6 w-[180px] rounded"
+          data-slot="skeleton"
         />
         <div
-          class="MuiBox-root mui-style-1fjtzvx"
+          class="bg-muted animate-pulse mb-1 h-4 w-[320px] rounded"
+          data-slot="skeleton"
+        />
+        <div
+          class="bg-muted animate-pulse mb-4 h-4 w-[260px] rounded"
+          data-slot="skeleton"
+        />
+        <div
+          class="flex gap-2"
         >
-          <span
-            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-fxtlyh-MuiSkeleton-root"
-            style="width: 180px; height: 24px;"
-          />
-          <span
-            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-53wl0q-MuiSkeleton-root"
-            style="width: 320px; height: 16px;"
-          />
-          <span
-            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-1x7xl34-MuiSkeleton-root"
-            style="width: 260px; height: 16px;"
+          <div
+            class="bg-muted animate-pulse h-5 w-20 rounded-[10px]"
+            data-slot="skeleton"
           />
           <div
-            class="MuiStack-root mui-style-niqf4j-MuiStack-root"
-          >
-            <span
-              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
-              style="width: 80px; height: 20px;"
-            />
-            <span
-              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
-              style="width: 100px; height: 20px;"
-            />
-          </div>
+            class="bg-muted animate-pulse h-5 w-[100px] rounded-[10px]"
+            data-slot="skeleton"
+          />
         </div>
       </div>
     </div>
@@ -168,43 +159,40 @@ exports[`./WorkspaceHealthCard.stories Scanning 1`] = `
     style="--Paper-shadow: none;"
   >
     <div
-      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-a6mz0g-MuiPaper-root"
-      style="--Paper-shadow: none;"
+      class="bg-card text-card-foreground overflow-hidden rounded-xl text-sm has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex mb-6 flex-col items-start gap-6 p-6 md:flex-row md:items-center"
+      data-size="default"
+      data-slot="card"
     >
       <div
-        class="MuiStack-root mui-style-19f0b8n-MuiStack-root"
+        class="bg-muted animate-pulse size-[100px] shrink-0 rounded-full"
+        data-slot="skeleton"
+      />
+      <div
+        class="min-w-0 flex-1"
       >
-        <span
-          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse mui-style-143xw5x-MuiSkeleton-root"
-          style="width: 120px; height: 120px;"
+        <div
+          class="bg-muted animate-pulse mb-2 h-6 w-[180px] rounded"
+          data-slot="skeleton"
         />
         <div
-          class="MuiBox-root mui-style-1fjtzvx"
+          class="bg-muted animate-pulse mb-1 h-4 w-[320px] rounded"
+          data-slot="skeleton"
+        />
+        <div
+          class="bg-muted animate-pulse mb-4 h-4 w-[260px] rounded"
+          data-slot="skeleton"
+        />
+        <div
+          class="flex gap-2"
         >
-          <span
-            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-fxtlyh-MuiSkeleton-root"
-            style="width: 180px; height: 24px;"
-          />
-          <span
-            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-53wl0q-MuiSkeleton-root"
-            style="width: 320px; height: 16px;"
-          />
-          <span
-            class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-1x7xl34-MuiSkeleton-root"
-            style="width: 260px; height: 16px;"
+          <div
+            class="bg-muted animate-pulse h-5 w-20 rounded-[10px]"
+            data-slot="skeleton"
           />
           <div
-            class="MuiStack-root mui-style-niqf4j-MuiStack-root"
-          >
-            <span
-              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
-              style="width: 80px; height: 20px;"
-            />
-            <span
-              class="MuiSkeleton-root MuiSkeleton-rounded MuiSkeleton-pulse mui-style-m4f463-MuiSkeleton-root"
-              style="width: 100px; height: 20px;"
-            />
-          </div>
+            class="bg-muted animate-pulse h-5 w-[100px] rounded-[10px]"
+            data-slot="skeleton"
+          />
         </div>
       </div>
     </div>

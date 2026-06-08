@@ -26,6 +26,7 @@ import {
   ShortAddressWithTooltip,
 } from './shared'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 interface SafeItemCardProps {
   safeItem: SafeItem
@@ -101,19 +102,24 @@ const SafeItemCard = ({
       </div>
 
       {/* Name + address + optional status badge */}
-      <div className="flex min-w-0 w-[160px] shrink-0 flex-col gap-0.5 overflow-hidden">
+      <div data-testid="name-column" className="flex min-w-0 w-[160px] shrink-0 flex-col gap-0.5 overflow-hidden">
         <div className="flex items-center gap-1 min-w-0">
           <span className="truncate text-sm font-semibold text-foreground">{displayName}</span>
           {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
         </div>
         <div className="flex items-center gap-1 min-w-0">
-          <ShortAddressWithTooltip address={safeItem.address} />
+          <ShortAddressWithTooltip address={safeItem.address} isSimilar={isSimilar} />
           <CopyAddressButton address={safeItem.address} />
         </div>
         {isSimilar && <SimilarityBadge />}
-        {undeployedSafe && <NotActivatedBadge isActivating={isActivating} />}
         {!undeployedSafe && safeItem.isReadOnly && !isSimilar && <ReadOnlyBadge />}
       </div>
+
+      {undeployedSafe && (
+        <div className="shrink-0">
+          <NotActivatedBadge isActivating={isActivating} />
+        </div>
+      )}
 
       {/* Chain logo */}
       <div className="mx-auto shrink-0">
@@ -148,17 +154,24 @@ const SafeItemCard = ({
       )}
 
       {/* Pin/Unpin toggle */}
-      <button
-        type="button"
-        onClick={handleTogglePin}
-        className="shrink-0 rounded p-1 hover:bg-muted"
-        aria-label={safeItem.isPinned ? 'Unpin safe' : 'Pin safe'}
-        data-testid="bookmark-icon"
-      >
-        <Bookmark
-          className={`size-4 ${safeItem.isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
-        />
-      </button>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              onClick={handleTogglePin}
+              className="shrink-0 cursor-pointer rounded p-1 hover:bg-muted"
+              aria-label={safeItem.isPinned ? 'Unpin safe' : 'Pin safe'}
+              data-testid="bookmark-icon"
+            />
+          }
+        >
+          <Bookmark
+            className={`size-4 ${safeItem.isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
+          />
+        </TooltipTrigger>
+        <TooltipContent>{safeItem.isPinned ? 'Remove from trusted Safes' : 'Add to trusted Safes'}</TooltipContent>
+      </Tooltip>
 
       {/* Context menu */}
       <PinnedSafeContextMenu address={safeItem.address} chainId={safeItem.chainId} name={displayName} />
