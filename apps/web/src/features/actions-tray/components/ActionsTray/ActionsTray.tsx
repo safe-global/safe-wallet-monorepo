@@ -130,7 +130,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
           {isSpace ? (
             <Button
               variant={secondaryVariant}
-              className={cn('px-6 hover:bg-border dark:border-border dark:hover:bg-[rgba(255,255,255,0.12)]')}
+              className={cn('px-6 hover:bg-secondary-hover dark:border-border')}
               onClick={handleOnReceive}
               disabled={noAssets}
             >
@@ -139,10 +139,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
             </Button>
           ) : (
             <QrCodeButton>
-              <Button
-                variant={secondaryVariant}
-                className={cn('px-6 hover:bg-border dark:border-border dark:hover:bg-[rgba(255,255,255,0.12)]')}
-              >
+              <Button variant={secondaryVariant} className={cn('px-6 hover:bg-secondary-hover dark:border-border')}>
                 <QrCode className="size-4" />
                 Receive
               </Button>
@@ -161,9 +158,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                       {isSpace ? (
                         <Button
                           variant={secondaryVariant}
-                          className={cn(
-                            'px-6 hover:bg-border dark:border-border dark:hover:bg-[rgba(255,255,255,0.12)]',
-                          )}
+                          className={cn('px-6 hover:bg-secondary-hover dark:border-border')}
                           data-testid="overview-swap-btn"
                           disabled={swapDisabled}
                           onClick={handleOnSwap}
@@ -174,9 +169,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
                       ) : (
                         <Button
                           variant={secondaryVariant}
-                          className={cn(
-                            'px-6 hover:bg-border dark:border-border dark:hover:bg-[rgba(255,255,255,0.12)]',
-                          )}
+                          className={cn('px-6 hover:bg-secondary-hover dark:border-border')}
                           data-testid="overview-swap-btn"
                           disabled={swapDisabled}
                           render={
@@ -202,7 +195,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
             const buildTxButton = isSpace ? (
               <Button
                 variant={secondaryVariant}
-                className="px-6 hover:bg-border dark:border-border dark:hover:bg-[rgba(255,255,255,0.12)]"
+                className="px-6 hover:bg-secondary-hover dark:border-border"
                 disabled={!isOk || noAssets}
                 onClick={handleOnBuildTx}
                 aria-label="Transaction builder"
@@ -214,7 +207,7 @@ const ActionsTray = ({ noAssets, variant = 'safe' }: ActionsTrayProps): ReactEle
               <Button
                 variant={secondaryVariant}
                 size="icon"
-                className="rounded-lg hover:bg-border dark:border-border dark:hover:bg-[rgba(255,255,255,0.12)]"
+                className="rounded-lg hover:bg-secondary-hover dark:border-border"
                 disabled={!isOk}
                 render={isOk ? <Link href={txBuilderLink} /> : undefined}
                 aria-label="Transaction builder"
