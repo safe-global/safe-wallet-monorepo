@@ -7,6 +7,7 @@ import { useAppSelector } from '@/src/store/hooks'
 import { selectSessions, selectVerifyByTopic } from '../store/walletKitSlice'
 import { useDisconnectSession } from '../hooks/useDisconnectSession'
 import { ConnectedDappRow } from './ConnectedDappRow'
+import { ConnectedDappContextMenu, type MenuAnchor } from './ConnectedDappContextMenu'
 import { DisconnectConfirmModal } from './DisconnectConfirmModal'
 
 /**
@@ -21,6 +22,9 @@ export const ConnectedDappsScreen: React.FC = () => {
   const { disconnect, busyTopic } = useDisconnectSession()
   const insets = useSafeAreaInsets()
   const [selected, setSelected] = useState<SessionTypes.Struct | null>(null)
+  // Single screen-level menu state: opening one closes any other, and a full-window backdrop
+  // dismisses it on a tap anywhere outside.
+  const [menu, setMenu] = useState<{ session: SessionTypes.Struct; anchor: MenuAnchor } | null>(null)
 
   const handleConfirm = useCallback(async () => {
     if (!selected) {
@@ -30,11 +34,18 @@ export const ConnectedDappsScreen: React.FC = () => {
     setSelected(null)
   }, [selected, disconnect])
 
+  const openMenu = useCallback((session: SessionTypes.Struct, anchor: MenuAnchor) => setMenu({ session, anchor }), [])
+
   const renderItem = useCallback(
     ({ item }: { item: SessionTypes.Struct }) => (
-      <ConnectedDappRow session={item} variant={verifyByTopic[item.topic]} onRequestDisconnect={setSelected} />
+      <ConnectedDappRow
+        session={item}
+        variant={verifyByTopic[item.topic]}
+        onOpenMenu={openMenu}
+        onRequestDisconnect={setSelected}
+      />
     ),
-    [verifyByTopic],
+    [verifyByTopic, openMenu],
   )
 
   return (
@@ -57,6 +68,17 @@ export const ConnectedDappsScreen: React.FC = () => {
           </Text>
         }
       />
+      {menu ? (
+        <ConnectedDappContextMenu
+          anchor={menu.anchor}
+          onClose={() => setMenu(null)}
+          onDisconnect={() => {
+            setSelected(menu.session)
+            setMenu(null)
+          }}
+          testID={`connected-dapp-disconnect-${menu.session.topic}`}
+        />
+      ) : null}
       <DisconnectConfirmModal
         dapp={selected ? { name: selected.peer.metadata.name, iconUrl: selected.peer.metadata.icons?.[0] } : null}
         isBusy={busyTopic === selected?.topic}

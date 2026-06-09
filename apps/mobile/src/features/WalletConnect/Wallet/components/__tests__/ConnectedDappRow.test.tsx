@@ -30,26 +30,26 @@ const session = (topic: string, name: string): SessionTypes.Struct =>
 describe('ConnectedDappRow', () => {
   it('renders the dApp name', () => {
     const { getByText } = render(
-      <ConnectedDappRow session={session('t1', 'Uniswap')} onRequestDisconnect={jest.fn()} />,
+      <ConnectedDappRow session={session('t1', 'Uniswap')} onOpenMenu={jest.fn()} onRequestDisconnect={jest.fn()} />,
     )
     expect(getByText('Uniswap')).toBeTruthy()
   })
 
-  it('opens the 3-dots menu and requests disconnect from it', () => {
-    const onRequest = jest.fn()
-    const { getByTestId, queryByTestId } = render(
-      <ConnectedDappRow session={session('t1', 'Uniswap')} onRequestDisconnect={onRequest} />,
+  it('opens the overflow menu anchored at the tapped point', () => {
+    const onOpenMenu = jest.fn()
+    const { getByTestId } = render(
+      <ConnectedDappRow session={session('t1', 'Uniswap')} onOpenMenu={onOpenMenu} onRequestDisconnect={jest.fn()} />,
     )
 
-    expect(queryByTestId('connected-dapp-disconnect-t1')).toBeNull()
-    fireEvent.press(getByTestId('connected-dapp-menu-t1'))
-    fireEvent.press(getByTestId('connected-dapp-disconnect-t1'))
-    expect(onRequest).toHaveBeenCalledWith(expect.objectContaining({ topic: 't1' }))
+    fireEvent.press(getByTestId('connected-dapp-menu-t1'), { nativeEvent: { pageX: 300, pageY: 120 } })
+    expect(onOpenMenu).toHaveBeenCalledWith(expect.objectContaining({ topic: 't1' }), { x: 300, y: 120 })
   })
 
   it('requests disconnect from the swipe-left trash action', () => {
     const onRequest = jest.fn()
-    const { getByTestId } = render(<ConnectedDappRow session={session('t2', 'Aave')} onRequestDisconnect={onRequest} />)
+    const { getByTestId } = render(
+      <ConnectedDappRow session={session('t2', 'Aave')} onOpenMenu={jest.fn()} onRequestDisconnect={onRequest} />,
+    )
     fireEvent.press(getByTestId('connected-dapp-trash-t2'))
     expect(onRequest).toHaveBeenCalledWith(expect.objectContaining({ topic: 't2' }))
   })

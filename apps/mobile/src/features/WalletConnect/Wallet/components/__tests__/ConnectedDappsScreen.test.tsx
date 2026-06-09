@@ -9,21 +9,54 @@ jest.mock('../../hooks/useDisconnectSession', () => ({
   useDisconnectSession: () => ({ disconnect: mockDisconnect, busyTopic: mockBusyTopic }),
 }))
 
-// Stub the row: expose the name and a trigger that asks the screen to disconnect, so the
-// screen's selection + confirm wiring is observable without the swipe/menu internals.
+// Stub the row: expose a menu trigger (reports an anchor) and a swipe trigger, so the screen's
+// menu + selection wiring is observable without the swipe/gesture internals.
 jest.mock('../ConnectedDappRow', () => {
   const { Text } = jest.requireActual('react-native')
   return {
     ConnectedDappRow: ({
       session,
+      onOpenMenu,
       onRequestDisconnect,
     }: {
       session: { topic: string; peer: { metadata: { name: string } } }
+      onOpenMenu: (s: unknown, anchor: { x: number; y: number }) => void
       onRequestDisconnect: (s: unknown) => void
     }) => (
-      <Text testID={`row-${session.topic}`} onPress={() => onRequestDisconnect(session)}>
-        {session.peer.metadata.name}
-      </Text>
+      <>
+        <Text testID={`row-menu-${session.topic}`} onPress={() => onOpenMenu(session, { x: 0, y: 0 })}>
+          {session.peer.metadata.name}
+        </Text>
+        <Text testID={`row-swipe-${session.topic}`} onPress={() => onRequestDisconnect(session)}>
+          swipe
+        </Text>
+      </>
+    ),
+  }
+})
+
+// Stub the menu: surface the screen-provided testID + a close trigger so we can assert which
+// session's menu is open and that only one is open at a time.
+jest.mock('../ConnectedDappContextMenu', () => {
+  const { Text, View } = jest.requireActual('react-native')
+  return {
+    ConnectedDappContextMenu: ({
+      testID,
+      onDisconnect,
+      onClose,
+    }: {
+      testID?: string
+      onDisconnect: () => void
+      onClose: () => void
+    }) => (
+      <View testID="context-menu">
+        <Text testID={testID} onPress={onDisconnect}>
+          Disconnect
+        </Text>
+        <Text testID="menu-close" onPress={onClose}>
+          close
+        </Text>
+      </View>
     ),
   }
 })
@@ -74,11 +107,25 @@ describe('ConnectedDappsScreen', () => {
       <ConnectedDappsScreen />,
       storeWith([session('t1', 'Uniswap'), session('t2', 'Aave')]),
     )
-    expect(getByTestId('row-t1')).toBeTruthy()
-    expect(getByTestId('row-t2')).toBeTruthy()
+    expect(getByTestId('row-menu-t1')).toBeTruthy()
+    expect(getByTestId('row-menu-t2')).toBeTruthy()
   })
 
-  it('opens the confirm sheet and disconnects the selected dApp', async () => {
+  it('keeps only one menu open at a time', () => {
+    const { getByTestId, queryByTestId } = renderWithStore(
+      <ConnectedDappsScreen />,
+      storeWith([session('t1', 'Uniswap'), session('t2', 'Aave')]),
+    )
+
+    fireEvent.press(getByTestId('row-menu-t1'))
+    expect(getByTestId('connected-dapp-disconnect-t1')).toBeTruthy()
+
+    fireEvent.press(getByTestId('row-menu-t2'))
+    expect(queryByTestId('connected-dapp-disconnect-t1')).toBeNull()
+    expect(getByTestId('connected-dapp-disconnect-t2')).toBeTruthy()
+  })
+
+  it('opens the confirm sheet from the menu and disconnects the selected dApp', async () => {
     const { getByTestId, getByText, queryByTestId } = renderWithStore(
       <ConnectedDappsScreen />,
       storeWith([session('t1', 'Uniswap')]),
@@ -86,12 +133,22 @@ describe('ConnectedDappsScreen', () => {
 
     expect(queryByTestId('confirm-modal')).toBeNull()
 
-    fireEvent.press(getByTestId('row-t1'))
+    fireEvent.press(getByTestId('row-menu-t1'))
+    fireEvent.press(getByTestId('connected-dapp-disconnect-t1'))
+    // Menu closes, confirm sheet opens.
+    expect(queryByTestId('context-menu')).toBeNull()
     expect(getByText('confirm:Uniswap')).toBeTruthy()
 
     await act(async () => {
       fireEvent.press(getByTestId('confirm-action'))
     })
     expect(mockDisconnect).toHaveBeenCalledWith('t1', 'Uniswap')
+  })
+
+  it('opens the confirm sheet from the swipe trash action', () => {
+    const { getByTestId, getByText } = renderWithStore(<ConnectedDappsScreen />, storeWith([session('t1', 'Uniswap')]))
+
+    fireEvent.press(getByTestId('row-swipe-t1'))
+    expect(getByText('confirm:Uniswap')).toBeTruthy()
   })
 })
