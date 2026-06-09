@@ -116,7 +116,7 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
       inputValue={value}
       onInputChange={(_, newValue, reason) => {
         if (reason === 'input') {
-          inputProps.onChange({ target: { name: inputProps.name, value: newValue } } as never)
+          inputProps.onChange({ target: { name: inputProps.name, value: newValue } })
         }
       }}
       onChange={(_, option) => {
