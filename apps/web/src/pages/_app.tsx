@@ -37,6 +37,7 @@ import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
 import useSafeMessagePendingStatuses from '@/hooks/messages/useSafeMessagePendingStatuses'
 import useChangedValue from '@/hooks/useChangedValue'
+import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
 import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
@@ -141,6 +142,7 @@ const InitApp = (): ReactElement | null => {
   useOidcLoginCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
+  useUnlockBodyScroll()
 
   const isGateBlocking = useIsAuthGateBlocking()
   return isGateBlocking ? null : <SafeScopedSubscriptions />
