@@ -68,7 +68,8 @@ export const getInviteeIdentifierValidationError = ({
     return undefined
   }
 
-  if (isAddress(normalized)) {
+  // strict: false to accept non-checksummed addresses, like the onboarding flow
+  if (isAddress(normalized, { strict: false })) {
     if (walletAddresses?.some((walletAddress) => sameAddress(walletAddress, normalized))) {
       return SELF_INVITE_ERROR
     }

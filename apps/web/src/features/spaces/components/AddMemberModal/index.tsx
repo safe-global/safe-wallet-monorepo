@@ -113,7 +113,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   })
 
   useEffect(() => {
-    if (!isAddress(inviteeIdentifierValue)) {
+    if (!isAddress(inviteeIdentifierValue, { strict: false })) {
       return
     }
 

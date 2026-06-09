@@ -42,7 +42,7 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
   const [isOpen, setIsOpen] = useState(false)
   const inviteeIdentifier = value.trim()
   const shouldResolveEns = Boolean(
-    inviteeIdentifier && !isEmailAddress(inviteeIdentifier) && !isAddress(inviteeIdentifier),
+    inviteeIdentifier && !isEmailAddress(inviteeIdentifier) && !isAddress(inviteeIdentifier, { strict: false }),
   )
   const { address: resolvedAddress } = useNameResolver(shouldResolveEns ? inviteeIdentifier : '')
 
@@ -59,11 +59,11 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
 
   const matches = useAddressBookSearch(contacts, inviteeIdentifier)
   const options = useMemo(
-    () => (isAddress(inviteeIdentifier) ? [] : matches.slice(0, MAX_VISIBLE_OPTIONS)),
+    () => (isAddress(inviteeIdentifier, { strict: false }) ? [] : matches.slice(0, MAX_VISIBLE_OPTIONS)),
     [inviteeIdentifier, matches],
   )
 
-  const showIdenticon = Boolean(value && !error && isAddress(value))
+  const showIdenticon = Boolean(value && !error && isAddress(value, { strict: false }))
 
   // The initials avatar colors itself from the full email, which would change
   // on every keystroke. Debounce it so the color doesn't flicker while typing.
