@@ -47,6 +47,7 @@ jest.mock('@gorhom/bottom-sheet', () => {
     BottomSheetModal,
     BottomSheetModalProvider: View,
     BottomSheetView: View,
+    BottomSheetScrollView: View,
     BottomSheetFooter: View,
   }
 })

@@ -1,5 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { BottomSheetModal, BottomSheetView, BottomSheetFooter, type BottomSheetFooterProps } from '@gorhom/bottom-sheet'
+import {
+  BottomSheetModal,
+  BottomSheetScrollView,
+  BottomSheetFooter,
+  type BottomSheetFooterProps,
+} from '@gorhom/bottom-sheet'
 import type { IWalletKit } from '@reown/walletkit'
 import { useStore } from 'react-redux'
 import { getVariable, useTheme, YStack } from 'tamagui'
@@ -22,6 +27,10 @@ type Props = { walletKit: IWalletKit | null }
 // Sheet snap indices: 0 = compact (proposal), 1 = taller (permissions panel).
 const SNAP_COMPACT = 0
 const SNAP_EXPANDED = 1
+
+// Bottom padding for the scroll content so it never sits under the pinned footer CTA
+// (button + its vertical padding). Added on top of the safe-area inset.
+const FOOTER_CLEARANCE = 72
 
 /**
  * Root-level host for incoming WalletConnect request sheets. Reads the FIFO head of the
@@ -158,13 +167,14 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
       footerComponent={renderFooter}
       handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
     >
-      <BottomSheetView style={{ flex: 1 }}>
+      {/* Scrollable so content can't clip under large font scaling; the footer is pinned. */}
+      <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_CLEARANCE }}>
         {walletKit && proposal && !permissionsOpen && (
           <SessionProposalSheet pending={proposal} onOpenPermissions={openPermissions} />
         )}
         {walletKit && proposal && permissionsOpen && <ConnectionPermissionsPanel variant={variant} />}
         {/* Transaction request sheet (current?.kind === 'request') added in WA-2321 / WA-2322. */}
-      </BottomSheetView>
+      </BottomSheetScrollView>
     </BottomSheetModal>
   )
 }
