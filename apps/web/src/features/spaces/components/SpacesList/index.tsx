@@ -2,6 +2,7 @@ import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import SpaceCard from 'src/features/spaces/components/SpaceCard'
 import SignInOptions from '../SignInOptions'
+import WorkspaceBanner from '../WorkspaceBanner'
 import LocalSafesAlert from './LocalSafesAlert'
 import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import { useIsClassicViewFeatureEnabled } from '@/hooks/useClassicView'
@@ -84,20 +85,29 @@ const SignedOutState = ({
         )}
       >
         <div className="flex w-full max-w-[440px] flex-col items-center">
-          <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
-            <div className="mx-auto mb-6 flex size-10 items-center justify-center text-foreground">
-              <SafeMarkIcon className="size-10" />
+          {/* Inline (classic view) keeps the banner in normal flow above the card.
+              The full-screen takeover floats it absolutely so the login card stays
+              vertically centered in the viewport. */}
+          {inline && <WorkspaceBanner className="mb-3" />}
+
+          <div className="relative w-full">
+            {!inline && <WorkspaceBanner className="absolute inset-x-0 bottom-full mb-3" />}
+
+            <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
+              <div className="mx-auto mb-6 flex size-10 items-center justify-center text-foreground">
+                <SafeMarkIcon className="size-10" />
+              </div>
+
+              <ShadcnTypography variant="h3" className="mb-6 text-center">
+                Sign in to your workspace
+              </ShadcnTypography>
+
+              <LocalSafesAlert />
+
+              <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+
+              {isClassicViewFeatureEnabled && <ClassicViewLink />}
             </div>
-
-            <ShadcnTypography variant="h3" className="mb-6 text-center">
-              Sign in to your workspace
-            </ShadcnTypography>
-
-            <LocalSafesAlert />
-
-            <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
-
-            {isClassicViewFeatureEnabled && <ClassicViewLink />}
           </div>
 
           <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
