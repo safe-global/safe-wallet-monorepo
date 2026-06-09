@@ -21,11 +21,17 @@ export class WalletPage {
   readonly siweContinueBtn: Locator
 
   constructor(private readonly page: Page) {
-    // On /welcome/accounts there are multiple connect buttons (a hidden header
-    // one and the visible page one); target only the visible match so we click
-    // the button that actually opens the onboard modal.
-    this.connectWalletBtn = page.getByTestId('connect-wallet-btn').filter({ visible: true })
+    // On /welcome/accounts there are several visible connect affordances (a
+    // header "Connect Wallet", a top "Connect" button, and a card "Connect
+    // wallet"). Keep this an UNfiltered base locator; the action narrows it to a
+    // single visible target with `.filter({ visible: true }).first()` so the
+    // click never trips Playwright strict mode.
+    this.connectWalletBtn = page.getByTestId('connect-wallet-btn')
     this.onboardModal = page.locator('onboard-v2')
+    // The web3-onboard modal renders inside the <onboard-v2> custom element's
+    // SHADOW DOM as an overlay; the HOST element stays "hidden", so its
+    // visibility is the wrong readiness signal. Playwright pierces shadow roots,
+    // so we key off the shadow "Private key" button instead.
     this.privateKeyOption = this.onboardModal.getByRole('button', { name: 'Private key' })
     this.privateKeyInput = page.getByTestId('private-key-input').locator('input')
     this.pkConnectBtn = page.getByTestId('pk-connect-btn')
@@ -39,23 +45,37 @@ export class WalletPage {
    */
   async connectWallet(privateKey: string): Promise<void> {
     // Clicking the connect button opens the onboard modal, but the click can be
-    // swallowed (hydration / transient state). Retry a few times until onboard
-    // is visible; surface a clear failure if it never opens.
-    for (let attempt = 0; attempt < 5; attempt++) {
-      if (await this.onboardModal.isVisible()) {
-        break
-      }
-      await this.connectWalletBtn.click().catch(() => {})
-      await this.onboardModal.waitFor({ state: 'visible', timeout: 3000 }).catch(() => {})
+    // swallowed (hydration / transient state). Retry a few times, keyed off the
+    // shadow "Private key" button (not the host), until the modal is open.
+    for (let attempt = 0; attempt < 6; attempt++) {
+      if (await this.privateKeyOption.isVisible()) break
+      await this.connectWalletBtn
+        .filter({ visible: true })
+        .first()
+        .click({ timeout: 5000 })
+        .catch(() => {})
+      await this.privateKeyOption.waitFor({ state: 'visible', timeout: 3000 }).catch(() => {})
     }
-    await this.onboardModal.waitFor({ state: 'visible' })
 
+    // Surfaces a clear failure if the modal never opened.
     await this.privateKeyOption.click()
 
     await this.privateKeyInput.fill(privateKey)
     await this.pkConnectBtn.click()
 
     await this.accountCenter.waitFor({ state: 'visible' })
+  }
+
+  /**
+   * Dismiss the cookie consent banner if it is on screen. No-op when the banner
+   * is already suppressed (the seeded consent normally handles this), so it is
+   * safe to call unconditionally after the first navigation.
+   */
+  async acceptCookies(): Promise<void> {
+    const acceptAll = this.page.getByRole('button', { name: 'Accept all' })
+    if (await acceptAll.isVisible().catch(() => false)) {
+      await acceptAll.click().catch(() => {})
+    }
   }
 
   /**

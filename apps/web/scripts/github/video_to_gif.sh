@@ -51,12 +51,16 @@ GIF_OUT="$OUT_DIR/clickthrough.gif"
 MP4_OUT="$OUT_DIR/clickthrough.mp4"
 
 # GIF: two-pass palette approach for good quality.
-# Downscale to 640px wide and cap at 10 fps to keep the file size reasonable.
+# Downscale to 640px wide. `mpdecimate` drops near-duplicate frames (the
+# recording can sit on one page for a long time), and `setpts=N/(12*TB)`
+# re-times the surviving frames to ~12fps so static stretches collapse instead
+# of being re-inserted as dupes. Note: no explicit `fps=` — that would
+# re-duplicate the frames mpdecimate just removed.
 # Write the intermediate palette into OUT_DIR (guaranteed writable) and remove it on exit.
 PALETTE="$OUT_DIR/palette.png"
 trap 'rm -f "$PALETTE"' EXIT
 
-GIF_FILTERS="fps=10,scale=640:-1:flags=lanczos"
+GIF_FILTERS="mpdecimate,setpts=N/(12*TB),scale=640:-1:flags=lanczos"
 
 ffmpeg -y -i "$VIDEO_FILE" -vf "$GIF_FILTERS,palettegen" "$PALETTE"
 ffmpeg -y -i "$VIDEO_FILE" -i "$PALETTE" \

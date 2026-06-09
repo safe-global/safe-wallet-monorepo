@@ -22,6 +22,7 @@ test.describe('Safe creation — pay later', { tag: '@one-shot' }, () => {
   test('should create a counterfactual Safe via the pay-later flow', async ({ safePage, walletPage, credentials }) => {
     // 1. Entry on Sepolia + connect the signer wallet.
     await safePage.goto('/welcome/accounts?chain=sep')
+    await walletPage.acceptCookies()
     await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
     await expect(walletPage.accountCenter).toBeVisible()
 

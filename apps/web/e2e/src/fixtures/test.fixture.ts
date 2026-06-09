@@ -16,14 +16,18 @@ import { SafeApiClient } from '../api/safe-api-client'
 import { LS_KEYS, STAGING_CGW_URL } from '../data/constants'
 import { WalletPage } from '../pages/wallet.page'
 import { getWalletCredentials, type WalletCredentials } from '../data/credentials'
+import { version as TERMS_VERSION } from '../../../src/markdown/terms/version'
 
-// Cookie consent state — mirrors Cypress localstorage_data.js
+// Cookie consent state — mirrors Cypress localstorage_data.js.
+// `hasAcceptedTerms` only treats consent as valid when `termsVersion` matches
+// the app's current terms version, so seeding `undefined` left the banner open.
+// Seed the real version so the banner stays suppressed.
 const COOKIE_STATE = JSON.stringify({
   necessary: true,
   updates: true,
   analytics: true,
   terms: true,
-  termsVersion: undefined, // Will be set dynamically if needed
+  termsVersion: TERMS_VERSION,
 })
 
 /**
