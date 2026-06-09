@@ -5,7 +5,7 @@
   "version": "1.89.1",
   "type": "module",
   "scripts": {
-    "pw:test": "npx playwright test --config=e2e/playwright.config.ts",
+    "pw:test": "npx playwright test --config=e2e/playwright.config.ts --project=chromium",
     "pw:test:smoke": "npx playwright test --config=e2e/playwright.config.ts --grep @smoke",
     "pw:test:api": "npx playwright test --config=e2e/playwright.config.ts --grep @api",
     "pw:test:ui": "npx playwright test --config=e2e/playwright.config.ts --grep @ui",
