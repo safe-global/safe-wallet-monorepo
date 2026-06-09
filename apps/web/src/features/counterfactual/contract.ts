@@ -44,6 +44,7 @@ export interface PayNowPayLaterProps {
   canRelay: boolean
   payMethod: PayMethod
   setPayMethod: Dispatch<SetStateAction<PayMethod>>
+  isUserAuthenticated?: boolean
 }
 
 export interface CounterfactualFormProps extends SignOrExecuteProps {

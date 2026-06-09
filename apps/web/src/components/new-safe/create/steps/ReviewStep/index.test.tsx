@@ -10,6 +10,12 @@ import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { type SafeVersion } from '@safe-global/types-kit'
+import * as cfServices from '@/features/counterfactual/services'
+import * as multichain from '@/features/multichain'
+import * as createLogic from '@/components/new-safe/create/logic'
+import * as web3 from '@/hooks/wallets/web3'
+import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 
 const mockChain = {
   chainId: '100',
@@ -202,5 +208,42 @@ describe('ReviewStep', () => {
     expect(queryByTestId('pay-now-later-message-box')).not.toBeInTheDocument()
     expect(queryByText('Pay now')).not.toBeInTheDocument()
     expect(queryByText(/Pay later/)).not.toBeInTheDocument()
+  })
+
+  it('creates counterfactual safes for multichain even when the user is not authenticated', async () => {
+    const chainWithFeatures = { ...mockChain, features: [] } as Chain
+    const mockMultiChain = [chainWithFeatures, { ...chainWithFeatures, chainId: '1', chainName: 'Ethereum' } as Chain]
+    const mockData: NewSafeFormData = {
+      name: 'Test',
+      networks: mockMultiChain,
+      threshold: 1,
+      owners: [{ name: '', address: '0x1' }],
+      saltNonce: 0,
+      safeVersion: LATEST_SAFE_VERSION as SafeVersion,
+    }
+
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainWithFeatures)
+    jest.spyOn(useWallet, 'default').mockReturnValue({ provider: {} } as unknown as ConnectedWallet)
+    jest
+      .spyOn(createLogic, 'createNewUndeployedSafeWithoutSalt')
+      .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
+    jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
+    jest
+      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .mockResolvedValue('0x0000000000000000000000000000000000000001')
+    const persistSpy = jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+
+    // No auth state provided -> the user is not authenticated.
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('review-step-next-btn'))
+    })
+
+    expect(persistSpy).toHaveBeenCalledTimes(mockMultiChain.length)
+    expect(persistSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ payMethod: PayMethod.PayLater, isUserAuthenticated: false }),
+    )
   })
 })

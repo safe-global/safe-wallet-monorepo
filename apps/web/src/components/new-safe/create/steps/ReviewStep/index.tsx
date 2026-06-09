@@ -22,6 +22,7 @@ import { getAvailableSaltNonce } from '@/components/new-safe/create/logic/utils'
 import {
   buildTransactionOptions,
   getDeploymentType,
+  getEffectivePayMethod,
   getNetworkLabel,
   getPaymentMethodLabel,
   getThresholdLabel,
@@ -249,13 +250,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const customRPCs = useAppSelector(selectRpc)
 
   // Derive effective pay method synchronously to avoid one-render gap.
-  // Multichain creations are always counterfactual (PayLater) — paying upfront
-  // on every network at once isn't offered.
-  const effectivePayMethod = isMultiChainDeployment
-    ? PayMethod.PayLater
-    : !isUserAuthenticated && payMethod === PayMethod.PayLater
-      ? PayMethod.PayNow
-      : payMethod
+  const effectivePayMethod = getEffectivePayMethod(isMultiChainDeployment, isUserAuthenticated, payMethod)
 
   const handleBack = () => {
     onBack(data)
