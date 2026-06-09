@@ -11,7 +11,6 @@ import { useTransactionSigningState } from '@/src/hooks/useTransactionSigningSta
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { useIsMounted } from '@/src/hooks/useIsMounted'
 import { getErrorMessage } from '@/src/features/ExecuteTx/components/ReviewAndExecute/helpers'
-import { WcRejectOnBack } from '@/src/features/WalletConnect/Wallet/components/WcRejectOnBack'
 
 export function ReviewAndConfirmContainer() {
   const { txId } = useLocalSearchParams<{ txId: string }>()
@@ -97,7 +96,6 @@ export function ReviewAndConfirmContainer() {
 
   return (
     <ReviewAndConfirmView txDetails={txDetails}>
-      <WcRejectOnBack safeTxHash={txId} />
       <ReviewFooter
         txId={txId}
         activeSigner={activeSigner}

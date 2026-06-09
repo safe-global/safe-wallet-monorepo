@@ -16,6 +16,7 @@ import { PendingStatus, selectPendingTxById } from '@/src/store/pendingTxsSlice'
 import { useTransactionProcessingState } from '@/src/hooks/useTransactionProcessingState'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import { WcRejectOnBack } from '@/src/features/WalletConnect/Wallet/components/WcRejectOnBack'
 
 const getHeaderText = (isExecuting: boolean, isSigning: boolean): string => {
   if (isExecuting) {
@@ -79,6 +80,7 @@ function ConfirmTxContainer() {
 
   return (
     <View flex={1}>
+      <WcRejectOnBack safeTxHash={txId} />
       <ScrollView
         onScroll={handleScroll}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}

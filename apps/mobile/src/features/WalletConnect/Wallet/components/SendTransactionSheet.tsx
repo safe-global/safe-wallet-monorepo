@@ -42,7 +42,7 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
   )
   const [composing, setComposing] = useState(false)
   const [composedHash, setComposedHash] = useState<string | null>(null)
-  // Becomes true when the user taps Sign and we hand the draft off to review-and-confirm.
+  // Becomes true when the user taps Sign and we hand the draft off to the confirm-transaction flow.
   // The unmount cleanup uses this to decide whether to GC the draft.
   const handedOffRef = useRef(false)
 
@@ -127,8 +127,8 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
     if (!composedHash) {
       return
     }
-    // Hand off to review-and-confirm. The dApp response is sent later by the propose-success
-    // listener in WalletKitProvider, NOT here — the user hasn't actually signed yet.
+    // Hand off to the confirm-transaction flow. The dApp response is sent later by the
+    // propose-success listener in WalletKitProvider, NOT here — the user hasn't actually signed yet.
     dispatch(
       setOutstandingRequest({
         safeTxHash: composedHash,
@@ -139,7 +139,7 @@ export const SendTransactionSheet: React.FC<Props> = ({ walletKit, pending }) =>
     )
     handedOffRef.current = true // tell the cleanup effect to leave the draft alone
     dispatch(removePending({ id: pending.id, kind: 'request' }))
-    router.push({ pathname: '/review-and-confirm', params: { txId: composedHash } })
+    router.push({ pathname: '/confirm-transaction', params: { txId: composedHash } })
   }
 
   // Secondary GC for the path where composedHash was already in state at unmount — covers
