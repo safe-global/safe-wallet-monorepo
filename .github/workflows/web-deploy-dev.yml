@@ -160,6 +160,7 @@ jobs:
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: https://${{ steps.extract_branch.outputs.slug }}--walletweb.review.5afe.dev
+          CYPRESS_WALLET_CREDENTIALS: ${{ secrets.CYPRESS_WALLET_CREDENTIALS }}
         run: npx playwright test --config=e2e/playwright.config.ts --project=one-shots --retries=0 --workers=1
 
       - name: Convert the video to GIF and MP4

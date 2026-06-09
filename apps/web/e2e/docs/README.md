@@ -97,6 +97,21 @@ PLAYWRIGHT_BASE_URL=https://my-preview.example yarn workspace @safe-global/web p
 
 After the PR preview deploys, CI runs the same one-shot against the preview, converts the recording, and posts the GIF in a PR comment automatically.
 
+### Wallet-connected one-shots
+
+One-shots can drive a connected wallet and SiWE-login using the framework helpers. Pull the `walletPage` and `credentials` fixtures, then:
+
+```typescript
+test('...', async ({ safePage, walletPage, credentials }) => {
+  await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY) // web3-onboard "Private key" module, no mocks
+  await walletPage.signInWithEthereum() // SiWE — the PK module signs programmatically, no popup
+})
+```
+
+See `safe-creation-paylater.spec.ts` for a complete example: it connects a wallet, steps through the new Safe creation wizard, and triggers SiWE by selecting "Pay later" (a counterfactual Safe — no on-chain tx, no funds).
+
+Wallet one-shots require `CYPRESS_WALLET_CREDENTIALS` (the same secret Cypress uses) to be set locally; CI passes it automatically.
+
 ## Writing Tests
 
 ### Import from fixtures, not from @playwright/test
