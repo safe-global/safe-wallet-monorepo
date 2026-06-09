@@ -60,7 +60,7 @@ export const useApproveProposal = (walletKit: IWalletKit | null) => {
       } catch (e) {
         // Show a friendly toast; log the underlying (often technical) error for diagnostics.
         logWalletKitError('approveSession failed', e)
-        toast.show('Connection to app failed', { native: false, duration: 3000 })
+        toast.show('Connection to app failed', { native: false, duration: 3000, variant: 'error' })
         try {
           await rejectProposal(walletKit, id)
         } catch (rejectErr) {

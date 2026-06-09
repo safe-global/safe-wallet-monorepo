@@ -161,6 +161,34 @@ describe('RequestSheetHost', () => {
     await waitFor(() => expect(getPending(store)).toHaveLength(0))
   })
 
+  it('does not reject the proposal on dismiss while a connect is in flight', async () => {
+    let resolveApprove!: (v: { topic: string; namespaces: object }) => void
+    const approvePromise = new Promise<{ topic: string; namespaces: object }>((res) => {
+      resolveApprove = res
+    })
+    const walletKit = {
+      approveSession: jest.fn(() => approvePromise),
+      rejectSession: jest.fn().mockResolvedValue(undefined),
+    } as unknown as IWalletKit & { rejectSession: jest.Mock }
+    const store = proposalStore(7)
+    const { getByTestId } = renderWithStore(<RequestSheetHost walletKit={walletKit} />, store)
+
+    // Start the connect (sets busy); approveSession stays pending.
+    fireEvent.press(getByTestId('wc-proposal-connect'))
+
+    // Dismissing mid-flight must NOT reject — approve owns the outcome.
+    await act(async () => {
+      await mockOnDismiss?.()
+    })
+    expect(walletKit.rejectSession).not.toHaveBeenCalled()
+
+    // Let the in-flight approve settle so the promise isn't left dangling.
+    await act(async () => {
+      resolveApprove({ topic: 'topic-7', namespaces: {} })
+      await approvePromise
+    })
+  })
+
   it('opens the permissions panel and swaps the footer CTA to "Got it", restoring Connect on dismiss', () => {
     const store = proposalStore(5)
     const { getByTestId, queryByTestId, getByText } = renderWithStore(

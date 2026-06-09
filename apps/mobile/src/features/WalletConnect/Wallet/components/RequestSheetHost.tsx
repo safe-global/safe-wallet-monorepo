@@ -81,6 +81,11 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
     if (!walletKit) {
       return
     }
+    // A connect is in flight — let useApproveProposal own the outcome (approve resolves to
+    // success/reject and clears the pending item). Rejecting here would race its response.
+    if (busy) {
+      return
+    }
     const currentAtDismiss = selectCurrentRequest(store.getState())
     if (!currentAtDismiss) {
       return
@@ -107,7 +112,7 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
       logWalletKitError('respondSessionRequest on sheet dismiss failed', e)
     }
     dispatch(removePending({ id: currentAtDismiss.id, kind: 'request' }))
-  }, [walletKit, store, dispatch])
+  }, [walletKit, busy, store, dispatch])
 
   // The active view's primary CTA, pinned to the bottom edge of the sheet. No background so
   // its top edge doesn't show a seam against the content; the panel/proposal content is short

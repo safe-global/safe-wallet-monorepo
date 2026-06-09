@@ -68,7 +68,10 @@ describe('useApproveProposal', () => {
       await result.current.approve(makePending(3))
     })
 
-    expect(mockToastShow).toHaveBeenCalledWith('Connection to app failed', expect.anything())
+    expect(mockToastShow).toHaveBeenCalledWith(
+      'Connection to app failed',
+      expect.objectContaining({ variant: 'error' }),
+    )
     expect(wk.rejectSession).toHaveBeenCalledWith({ id: 3, reason: getSdkError('USER_REJECTED') })
   })
 
