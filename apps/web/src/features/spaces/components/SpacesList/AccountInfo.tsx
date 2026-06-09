@@ -34,7 +34,6 @@ export const AccountInfo = ({ membership }: MembershipProps) => {
 
         <div className={sidebarCss.profileInfo}>
           <span className={sidebarCss.profileName}>{membership?.name || ''}</span>
-          <span className={sidebarCss.profileRole}>{membership?.role}</span>
         </div>
 
         <Separator />
