@@ -24,6 +24,11 @@ export const filterSpacesByStatus = (
   })
 }
 
+export const getInvitedByName = (
+  space: GetSpaceResponse | undefined,
+  currentUserId: number | undefined,
+): string | undefined => space?.members.find((member) => member.user.id === currentUserId)?.invitedByName
+
 export const getNonDeclinedSpaces = (currentUser: UserWithWallets | undefined, spaces: GetSpaceResponse[]) => {
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
