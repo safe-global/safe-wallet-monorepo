@@ -6,9 +6,10 @@ import RenewInviteButton from './RenewInviteButton'
 
 const mockRenew = jest.fn()
 const mockDispatch = jest.fn()
+let mockIsLoading = false
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
-  useMembersRenewInviteV1Mutation: () => [mockRenew, { isLoading: false }],
+  useMembersRenewInviteV1Mutation: () => [mockRenew, { isLoading: mockIsLoading }],
 }))
 
 jest.mock('@/features/spaces', () => ({
@@ -31,6 +32,7 @@ jest.mock('@/components/common/Track', () => ({
 describe('RenewInviteButton', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockIsLoading = false
   })
 
   const invitedMember = memberBuilder()
@@ -72,6 +74,14 @@ describe('RenewInviteButton', () => {
         payload: expect.objectContaining({ message: 'Cannot renew', variant: 'error' }),
       }),
     )
+  })
+
+  it('disables the button while the renew request is in flight', () => {
+    mockIsLoading = true
+
+    render(<RenewInviteButton member={invitedMember} />)
+
+    expect(screen.getByRole('button')).toBeDisabled()
   })
 
   it('shows an email-specific tooltip when the invite has an email', async () => {
