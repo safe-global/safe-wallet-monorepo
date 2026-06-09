@@ -50,7 +50,7 @@ export const HelpCenterArticle = {
   RELAYING: `${HELP_CENTER_URL}/articles/1901481110-what-is-gas-fee-sponsoring`,
   SAFE_SETUP: `${HELP_CENTER_URL}/articles/1038062742-what-safe-setup-should-i-use`,
   SIGNED_MESSAGES: `${HELP_CENTER_URL}/articles/7507962149-what-are-signed-messages`,
-  SPAM_TOKENS: `${HELP_CENTER_URL}/articles/3481782709-40784-default-token-list-local-hiding-of-spam-tokens`,
+  SPAM_TOKENS: `${HELP_CENTER_URL}/articles/8123132082-token-visibility-spam-protection-and-hiding-tokens?lang=en`,
   SPENDING_LIMITS: `${HELP_CENTER_URL}/articles/3961440620-set-up-and-use-spending-limits`,
   TRANSACTION_GUARD: `${HELP_CENTER_URL}/articles/6757075087-what-is-a-transaction-guard`,
   UNEXPECTED_DELEGATE_CALL: `${HELP_CENTER_URL}/articles/4308960633-why-do-i-see-an-unexpected-delegate-call-warning-in-my-transaction`,
