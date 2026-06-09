@@ -2,7 +2,11 @@ import { buildApprovedNamespaces } from '@walletconnect/utils'
 import type { SessionTypes, ProposalTypes } from '@walletconnect/types'
 import { getAddress } from 'ethers'
 import { getEip155ChainId, chainIdToHex } from '@safe-global/utils/features/walletconnect/utils'
-import { buildAtomicCapabilities, type AtomicCapability } from '@safe-global/utils/features/walletconnect/eip5792'
+import {
+  ATOMIC_CAPABILITY,
+  buildAtomicCapabilities,
+  type AtomicCapability,
+} from '@safe-global/utils/features/walletconnect/eip5792'
 import { WALLET_SUPPORTED_METHODS, EVENTS_TO_EMIT, SUPPORTED_NAMESPACE } from './constants'
 
 export type SupportedChain = {
@@ -63,7 +67,7 @@ export const buildSafeSessionProperties = ({
     [checksummed]: buildAtomicCapabilities(supportedChains.map((c) => chainIdToHex(c.chainId))),
   }
   return {
-    atomic: JSON.stringify({ status: 'supported' }),
+    atomic: JSON.stringify(ATOMIC_CAPABILITY.atomic),
     capabilities: JSON.stringify(capabilities),
   }
 }
