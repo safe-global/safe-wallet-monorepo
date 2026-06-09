@@ -212,9 +212,16 @@ Every code change must include tests. See [`apps/web/docs/TESTING.md`](apps/web/
 
 ### Fast Feedback Loop
 
-The repo provides automated verification:
+The repo provides automated verification via **shared Claude Code `Stop` hooks** checked into `.claude/settings.json` (so every contributor's Claude Code runs them automatically):
 
-1. **Automatic**: A Claude Code `Stop` hook runs `verify:changed` once at the end of each agent turn. It early-exits (no-op) when no `.ts/.tsx/.js/.jsx` files have been modified. When it does run, type-check runs on the full project (TSC requires this), while lint, prettier, and tests are scoped to changed files only. The workspace (web/mobile) is auto-detected from the changed file paths. Set `SKIP_VERIFY=1` to disable. Fix any errors before moving on.
+1. **Automatic verification**: A `Stop` hook runs `verify:changed` once at the end of each agent turn. It early-exits (no-op) when no `.ts/.tsx/.js/.jsx` files have been modified. When it does run, type-check runs on the full project (TSC requires this), while lint, prettier, and tests are scoped to changed files only. The workspace (web/mobile) is auto-detected from the changed file paths. Set `SKIP_VERIFY=1` to disable. Fix any errors before moving on.
+
+1b. **Automatic test reminders** (advisory — never blocks): the `Stop` hook `.claude/hooks/check-tests.mjs` inspects the branch's changed files and nudges, at most once per new set of changes, when:
+
+- web app code (`apps/web/src/**`) changed but no Playwright **one-shot** clickthrough (`apps/web/e2e/tests/one-shots/**`) was added — see [One-shot clickthroughs](apps/web/e2e/docs/README.md#one-shot-clickthroughs);
+- significant source (`apps/web/src`, `apps/mobile/src`, `packages/*/src`) changed but no colocated **unit test** (`*.test.ts(x)`) was added/updated.
+
+These are reminders, not gates: add the test, or note in the PR why one genuinely doesn't apply. Set `SKIP_TEST_REMINDERS=1` to disable.
 
 2. **Manual**: Run `yarn verify:changed:web` anytime to check your work. Run `yarn verify:web` for a full check before committing.
 
