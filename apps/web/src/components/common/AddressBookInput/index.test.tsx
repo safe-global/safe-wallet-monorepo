@@ -2,6 +2,7 @@ import { act } from 'react'
 import { fireEvent, render, waitFor } from '@/tests/test-utils'
 import { FormProvider, useForm } from 'react-hook-form'
 import AddressBookInput from '.'
+import { AddressBookSourceProvider } from '../AddressBookSourceProvider'
 import type { AddressInputProps } from '../AddressInput'
 import * as useChains from '@/hooks/useChains'
 import { faker } from '@faker-js/faker'
@@ -9,6 +10,34 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { AddressBook } from '@/store/addressBookSlice'
+import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useGetPrivateAddressBook, useGetSpaceAddressBook } from '@/features/spaces'
+
+jest.mock('@/features/spaces/hooks/useGetPrivateAddressBook', () => ({
+  __esModule: true,
+  default: jest.fn((): SpaceAddressBookItemDto[] => []),
+}))
+
+jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
+  __esModule: true,
+  default: jest.fn((): SpaceAddressBookItemDto[] => []),
+}))
+
+const mockUseGetPrivateAddressBook = useGetPrivateAddressBook as jest.MockedFunction<typeof useGetPrivateAddressBook>
+const mockUseGetSpaceAddressBook = useGetSpaceAddressBook as jest.MockedFunction<typeof useGetSpaceAddressBook>
+
+const privateContactBuilder = (overrides: Partial<SpaceAddressBookItemDto> = {}): SpaceAddressBookItemDto => ({
+  name: 'Server Contact',
+  address: checksumAddress(faker.finance.ethereumAddress()),
+  chainIds: ['4'],
+  createdBy: '',
+  createdByUserId: 0,
+  lastUpdatedBy: '',
+  lastUpdatedByUserId: 0,
+  createdAt: '',
+  updatedAt: '',
+  ...overrides,
+})
 
 // We use Rinkeby and chainId 4 here as this is our default url chain (see jest.setup.js)
 const mockChain = chainBuilder()
@@ -96,6 +125,8 @@ describe('AddressBookInput', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseGetPrivateAddressBook.mockReturnValue([])
+    mockUseGetSpaceAddressBook.mockReturnValue([])
     jest.spyOn(useChains, 'default').mockImplementation(() => ({
       configs: [mockChain],
       error: undefined,
@@ -271,5 +302,49 @@ describe('AddressBookInput', () => {
     })
 
     await waitFor(() => expect(utils.queryByText('add it to your address book', { exact: false })).toBeNull())
+  })
+
+  it('should show a cloud icon for a server-stored (private) contact even in a spaceOnly context', async () => {
+    const privateContact = privateContactBuilder({ name: 'Server Contact' })
+    mockUseGetPrivateAddressBook.mockReturnValue([privateContact])
+
+    const name = 'recipient'
+    const SpaceForm = () => {
+      const methods = useForm<{ [name]: string }>({ defaultValues: { [name]: '' }, mode: 'all' })
+      return (
+        <FormProvider {...methods}>
+          <AddressBookSourceProvider source="spaceOnly">
+            <AddressBookInput data-testid={testId} name={name} label="Recipient address" />
+          </AddressBookSourceProvider>
+        </FormProvider>
+      )
+    }
+
+    const utils = render(<SpaceForm />, {
+      initialReduxState: { addressBook: { [mockChain.chainId]: {} } },
+    })
+    const input = utils.getByLabelText('Recipient address', { exact: false }) as HTMLInputElement
+
+    act(() => {
+      fireEvent.mouseDown(input)
+      fireEvent.mouseUp(input)
+    })
+
+    await waitFor(() => expect(utils.getByText('Server Contact', { exact: false })).toBeDefined())
+    expect(utils.getByTestId('CloudOutlinedIcon')).toBeInTheDocument()
+  })
+
+  it('should not show a cloud icon for a local contact', async () => {
+    const { input, utils } = setup('', {
+      [checksumAddress(faker.finance.ethereumAddress())]: 'Local Contact',
+    })
+
+    act(() => {
+      fireEvent.mouseDown(input)
+      fireEvent.mouseUp(input)
+    })
+
+    await waitFor(() => expect(utils.getByText('Local Contact', { exact: false })).toBeDefined())
+    expect(utils.queryByTestId('CloudOutlinedIcon')).not.toBeInTheDocument()
   })
 })
