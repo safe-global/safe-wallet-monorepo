@@ -34,4 +34,22 @@ describe('SessionProposalSheet', () => {
     fireEvent.press(getByTestId('wc-proposal-domain'))
     expect(onOpenPermissions).toHaveBeenCalledTimes(1)
   })
+
+  it('hides the domain pill when the dApp provides no URL', () => {
+    const pending = {
+      id: 123,
+      proposal: {
+        id: 123,
+        params: {
+          proposer: { metadata: { name: 'Uniswap', icons: [] } },
+          requiredNamespaces: { eip155: { chains: ['eip155:1'], methods: [], events: [] } },
+          optionalNamespaces: {},
+        },
+        verifyContext: { verified: { validation: 'VALID' } },
+      } as unknown as WalletKitTypes.SessionProposal,
+    }
+    const { getByText, queryByTestId } = renderWithStore(<SessionProposalSheet pending={pending} />, createTestStore())
+    expect(getByText('Uniswap')).toBeTruthy()
+    expect(queryByTestId('wc-proposal-domain')).toBeNull()
+  })
 })

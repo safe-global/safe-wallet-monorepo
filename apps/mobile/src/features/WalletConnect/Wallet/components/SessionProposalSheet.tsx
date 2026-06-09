@@ -45,20 +45,24 @@ export const SessionProposalSheet: React.FC<Props> = ({ pending, onOpenPermissio
           {meta.name}
         </Text>
 
-        <XStack
-          gap="$1"
-          alignItems="center"
-          paddingVertical="$1"
-          paddingHorizontal="$2"
-          borderRadius="$8"
-          backgroundColor="$backgroundSecondary"
-          pressStyle={{ opacity: 0.6 }}
-          onPress={onOpenPermissions}
-          testID="wc-proposal-domain"
-        >
-          <Text color="$colorSecondary">{domain}</Text>
-          <SafeFontIcon name="info" size={14} color="$colorSecondary" />
-        </XStack>
+        {/* Only render the URL pill when the dApp provides one — an empty pill looks broken.
+            The verify badge above still opens the permissions panel. */}
+        {!!domain && (
+          <XStack
+            gap="$1"
+            alignItems="center"
+            paddingVertical="$1"
+            paddingHorizontal="$2"
+            borderRadius="$8"
+            backgroundColor="$backgroundSecondary"
+            pressStyle={{ opacity: 0.6 }}
+            onPress={onOpenPermissions}
+            testID="wc-proposal-domain"
+          >
+            <Text color="$colorSecondary">{domain}</Text>
+            <SafeFontIcon name="info" size={14} color="$colorSecondary" />
+          </XStack>
+        )}
       </YStack>
     </YStack>
   )
