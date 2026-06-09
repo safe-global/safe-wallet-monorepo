@@ -103,6 +103,14 @@ describe('SafeSelectorTriggerContent', () => {
     expect(getByTestId('safe-selector-not-activated-icon')).toHaveAttribute('aria-label', 'Activating')
   })
 
+  it('renders the threshold badge on the avatar', () => {
+    const item = createItem({ threshold: 2, owners: 3 })
+
+    const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />)
+
+    expect(getByTestId('safe-selector-threshold')).toHaveTextContent('2/3')
+  })
+
   it('shows the balance when the selected chain is deployed', () => {
     const item = createItem()
 

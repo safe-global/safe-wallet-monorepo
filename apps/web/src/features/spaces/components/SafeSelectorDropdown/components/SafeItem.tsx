@@ -23,6 +23,8 @@ const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading
         address={address}
         chainShortName={chainShortName}
         className="flex-1 min-w-0"
+        threshold={threshold}
+        owners={owners}
       />
       <div className="flex items-center gap-2 bg-muted rounded-full p-0.5 shrink-0">
         {chains.slice(0, 3).map((chainItem, index) => (
@@ -43,7 +45,7 @@ const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading
           threshold={threshold}
           owners={owners}
           isLoading={isLoading}
-          showThreshold={chains.length <= 1}
+          showThreshold={false}
         />
       )}
     </div>

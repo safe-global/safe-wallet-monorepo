@@ -7,6 +7,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { getInitials, getSafeDisplayInfo } from '../utils'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
+import ThresholdBadge from './ThresholdBadge'
 import type { SafeItemData } from '../types'
 import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
@@ -74,10 +75,13 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
 
   return (
     <div className="flex items-center gap-2 sm:gap-4 w-full">
-      <Avatar size="sm" data-testid="safe-icon">
-        <AvatarImage src={blo(selectedItem.address as `0x${string}`)} alt={displayName} />
-        <AvatarFallback>{getInitials(displayName || '?')}</AvatarFallback>
-      </Avatar>
+      <div className="relative shrink-0">
+        <Avatar size="sm" data-testid="safe-icon">
+          <AvatarImage src={blo(selectedItem.address as `0x${string}`)} alt={displayName} />
+          <AvatarFallback>{getInitials(displayName || '?')}</AvatarFallback>
+        </Avatar>
+        <ThresholdBadge threshold={selectedItem.threshold} owners={selectedItem.owners} />
+      </div>
       <div className="flex flex-col items-start flex-1 min-w-0" data-testid="safe-selector-trigger-details">
         <div className="flex items-center gap-1">
           <Typography data-testid="safe-selector-trigger-name" variant="paragraph-small-medium" className="truncate">
@@ -121,7 +125,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
           balance={selectedItem.balance}
           threshold={selectedItem.threshold}
           owners={selectedItem.owners}
-          showBalanceDisplay
+          showBalanceDisplay={false}
         />
       )}
     </div>
