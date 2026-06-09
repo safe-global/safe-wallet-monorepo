@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import NotActivatedBadge from '.'
 
 describe('NotActivatedBadge', () => {
@@ -25,5 +25,14 @@ describe('NotActivatedBadge', () => {
     render(<NotActivatedBadge className="shrink-0" />)
 
     expect(screen.getByTestId('not-activated-badge')).toHaveClass('shrink-0')
+  })
+
+  it('forwards a click handler to the trigger', () => {
+    const onClick = jest.fn()
+    render(<NotActivatedBadge onClick={onClick} />)
+
+    fireEvent.click(screen.getByTestId('not-activated-badge'))
+
+    expect(onClick).toHaveBeenCalledTimes(1)
   })
 })

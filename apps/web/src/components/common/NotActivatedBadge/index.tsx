@@ -6,12 +6,14 @@ export interface NotActivatedBadgeProps {
   isActivating?: boolean
   className?: string
   'data-testid'?: string
+  onClick?: (e: React.MouseEvent) => void
 }
 
 function NotActivatedBadge({
   isActivating = false,
   className,
   'data-testid': dataTestId = 'not-activated-badge',
+  onClick,
 }: NotActivatedBadgeProps) {
   const label = isActivating ? 'Activating' : 'Inactive'
 
@@ -23,6 +25,7 @@ function NotActivatedBadge({
             tabIndex={0}
             data-testid={dataTestId}
             aria-label={label}
+            onClick={onClick}
             className={cn('flex shrink-0 items-center', className)}
           />
         }

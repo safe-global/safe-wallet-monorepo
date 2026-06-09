@@ -350,6 +350,21 @@ const AddAccounts = ({
   const hasNoSearchMatch = trustedSelection.total === 0 && ownedSelection.total === 0 && Boolean(debouncedSearchQuery)
   const emptyStateMessage = wallet ? 'No safes on your list' : 'No saved Safe accounts yet — add one by address below.'
 
+  const listRegionRef = useRef<HTMLDivElement>(null)
+  const [isListOverflowing, setIsListOverflowing] = useState(false)
+
+  useEffect(() => {
+    const region = listRegionRef.current
+    if (!region) return
+
+    const updateOverflow = () => setIsListOverflowing(region.scrollHeight > region.clientHeight)
+    updateOverflow()
+
+    const observer = new ResizeObserver(updateOverflow)
+    observer.observe(region)
+    return () => observer.disconnect()
+  }, [visibleTrusted, visibleOwned, isListEmpty, hasNoSearchMatch])
+
   return (
     <>
       {externalOpen === undefined && (
@@ -415,7 +430,11 @@ const AddAccounts = ({
                   {!wallet && <ConnectWalletHint testId="add-accounts-connect-wallet-button" />}
 
                   <div className="relative min-h-0 w-full min-w-0 flex-1">
-                    <div className="h-full w-full overflow-y-auto" data-testid="add-accounts-safes-list-region">
+                    <div
+                      ref={listRegionRef}
+                      className="h-full w-full overflow-y-auto"
+                      data-testid="add-accounts-safes-list-region"
+                    >
                       {isListEmpty ? (
                         <Typography variant="paragraph" align="center" color="muted" className="py-8">
                           {emptyStateMessage}
@@ -454,8 +473,11 @@ const AddAccounts = ({
                       )}
                     </div>
 
-                    {!isListEmpty && !hasNoSearchMatch && (
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-secondary to-transparent" />
+                    {!isListEmpty && !hasNoSearchMatch && isListOverflowing && (
+                      <div
+                        data-testid="add-accounts-list-fade"
+                        className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-secondary to-transparent"
+                      />
                     )}
                   </div>
 
