@@ -165,7 +165,7 @@ describe('ReviewStep', () => {
     expect(getByText(/Who will pay gas fees:/)).toBeInTheDocument()
   })
 
-  it('should display the execution method for counterfactual safes if the user selects pay now and there is relaying', async () => {
+  it('should not display the pay now/pay later block for multichain creation', () => {
     const mockMultiChain = [
       {
         chainId: '100',
@@ -195,10 +195,12 @@ describe('ReviewStep', () => {
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
     jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
 
-    const { getByText } = render(
+    const { queryByTestId, queryByText } = render(
       <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
-    expect(getByText(/activate your account/)).toBeInTheDocument()
+    expect(queryByTestId('pay-now-later-message-box')).not.toBeInTheDocument()
+    expect(queryByText('Pay now')).not.toBeInTheDocument()
+    expect(queryByText(/Pay later/)).not.toBeInTheDocument()
   })
 })

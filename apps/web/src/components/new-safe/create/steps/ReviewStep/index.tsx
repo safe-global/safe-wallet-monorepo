@@ -248,8 +248,14 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   const customRPCs = useAppSelector(selectRpc)
 
-  // Derive effective pay method synchronously to avoid one-render gap
-  const effectivePayMethod = !isUserAuthenticated && payMethod === PayMethod.PayLater ? PayMethod.PayNow : payMethod
+  // Derive effective pay method synchronously to avoid one-render gap.
+  // Multichain creations are always counterfactual (PayLater) — paying upfront
+  // on every network at once isn't offered.
+  const effectivePayMethod = isMultiChainDeployment
+    ? PayMethod.PayLater
+    : !isUserAuthenticated && payMethod === PayMethod.PayLater
+      ? PayMethod.PayNow
+      : payMethod
 
   const handleBack = () => {
     onBack(data)
@@ -438,13 +444,12 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       <Box data-testid="safe-setup-overview" className={layoutCss.row}>
         <SafeSetupOverview name={data.name} owners={data.owners} threshold={data.threshold} networks={data.networks} />
       </Box>
-      {isCounterfactualEnabled && (
+      {isCounterfactualEnabled && !isMultiChainDeployment && (
         <>
           <Divider />
           <Box data-testid="pay-now-later-message-box" className={layoutCss.row}>
             <PayNowPayLater
               totalFee={totalFee}
-              isMultiChain={isMultiChainDeployment}
               canRelay={canRelay}
               payMethod={effectivePayMethod}
               setPayMethod={setPayMethod}
