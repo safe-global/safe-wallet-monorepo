@@ -115,13 +115,16 @@ const MemberInviteRow = ({
                 if (isEmailAddress(trimmed)) {
                   if (trimmed.length > EMAIL_MAX_LENGTH) return `Email must be ${EMAIL_MAX_LENGTH} characters or less.`
 
-                  const isDuplicateEmail = members?.some(
-                    (member, i) =>
+                  const isDuplicateEmail = members?.some((member, i) => {
+                    // Trim to match the trimmed-on-submit value
+                    const otherIdentifier = member.identifier?.trim()
+                    return (
                       i !== index &&
-                      member.identifier &&
-                      isEmailAddress(member.identifier) &&
-                      member.identifier.trim().toLowerCase() === trimmed.toLowerCase(),
-                  )
+                      otherIdentifier &&
+                      isEmailAddress(otherIdentifier) &&
+                      otherIdentifier.toLowerCase() === trimmed.toLowerCase()
+                    )
+                  })
                   if (isDuplicateEmail) return 'Email already added'
 
                   return undefined
@@ -135,7 +138,8 @@ const MemberInviteRow = ({
                 if (addressError) return addressError
 
                 const isDuplicate = members?.some(
-                  (member, i) => i !== index && member.identifier && sameAddress(member.identifier, trimmed),
+                  (member, i) =>
+                    i !== index && member.identifier?.trim() && sameAddress(member.identifier.trim(), trimmed),
                 )
                 if (isDuplicate) return 'Address already added'
               },
