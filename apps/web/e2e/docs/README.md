@@ -34,7 +34,8 @@ e2e/
 │   ├── smoke/                 # Critical path — run on every PR
 │   ├── api/                   # Pure API tests (no browser)
 │   ├── e2e/                   # Full user flows
-│   └── regression/            # Bug-specific regression tests
+│   ├── regression/            # Bug-specific regression tests
+│   └── one-shots/             # Temporary per-PR happy-path clickthroughs (recorded as a GIF)
 ├── src/                       # Framework code (not tests)
 │   ├── pages/                 # Page interactions (locators + actions, NO assertions)
 │   ├── api/                   # API clients (CGW, TX Service)
@@ -66,6 +67,36 @@ Before writing any test, answer: **What is the right test level?**
 
 **Default:** if unsure, don't automate yet — create a manual test case first.
 
+## One-shot clickthroughs
+
+A **one-shot** is a complete happy-path clickthrough of the feature a PR adds or fixes. It runs once and produces a single video recording, which CI converts to a GIF and posts as a PR comment — so reviewers can _watch_ the new flow without checking out the branch.
+
+One-shots are an integral part of feature development: for every non-trivial web feature/bugfix, the author (including AI agents) adds a one-shot under `tests/one-shots/` and runs it locally before opening the PR. You do **not** manually attach a video or paste any URL into the PR — CI records and posts the GIF automatically.
+
+The suite is **temporary**: one-shots are periodically pruned, or promoted into `tests/regression/` once they prove stable.
+
+- **Tag:** `@one-shot`
+- **Directory:** `tests/one-shots/`
+- **Playwright project:** `one-shots` (records one video per run via `video: 'on'`)
+
+### Run it locally
+
+```bash
+# Start a local dev server (in another terminal):
+yarn workspace @safe-global/web dev
+
+# Record + preview the one-shot (defaults to http://localhost:3000):
+yarn workspace @safe-global/web pw:oneshot:record
+```
+
+`pw:oneshot:record` runs the `one-shots` project, then reuses `scripts/github/video_to_gif.sh` to write `e2e/reports/one-shots/clickthrough.gif` and `.mp4` for local preview. To point at a different target, set `PLAYWRIGHT_BASE_URL`:
+
+```bash
+PLAYWRIGHT_BASE_URL=https://my-preview.example yarn workspace @safe-global/web pw:oneshot:record
+```
+
+After the PR preview deploys, CI runs the same one-shot against the preview, converts the recording, and posts the GIF in a PR comment automatically.
+
 ## Writing Tests
 
 ### Import from fixtures, not from @playwright/test
@@ -88,16 +119,17 @@ test.describe('Feature name', { tag: '@smoke' }, () => { ... })
 
 Use categories intentionally:
 
-| Tag            | Purpose                           | Rules                                                                                       |
-| -------------- | --------------------------------- | ------------------------------------------------------------------------------------------- |
-| `@smoke`       | Critical path — runs every PR     | Must be small and stable. If it flakes, fix immediately or demote.                          |
-| `@regression`  | Feature-specific — runs on-demand | Can be broader but must still provide clear value.                                          |
-| `@api`         | Pure API tests — no browser       | Fast, stable, run every PR alongside smoke.                                                 |
-| `@ui`          | UI-specific rendering checks      | Only for things that require visual/browser verification.                                   |
-| `@critical`    | High-risk business flows          | Transaction creation, signing, owner changes — financial impact.                            |
-| `@permissions` | Role-based access tests           | Owner vs non-owner, proposer, threshold-dependent flows.                                    |
-| `@flaky`       | Quarantined flaky tests           | Temporary tag. Flaky tests must be fixed, quarantined, or removed — never ignored silently. |
-| `@migration`   | Migrated from Cypress             | Tracks migration progress. Remove tag once test is stable in Playwright.                    |
+| Tag            | Purpose                           | Rules                                                                                                                                       |
+| -------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@smoke`       | Critical path — runs every PR     | Must be small and stable. If it flakes, fix immediately or demote.                                                                          |
+| `@regression`  | Feature-specific — runs on-demand | Can be broader but must still provide clear value.                                                                                          |
+| `@api`         | Pure API tests — no browser       | Fast, stable, run every PR alongside smoke.                                                                                                 |
+| `@ui`          | UI-specific rendering checks      | Only for things that require visual/browser verification.                                                                                   |
+| `@critical`    | High-risk business flows          | Transaction creation, signing, owner changes — financial impact.                                                                            |
+| `@permissions` | Role-based access tests           | Owner vs non-owner, proposer, threshold-dependent flows.                                                                                    |
+| `@flaky`       | Quarantined flaky tests           | Temporary tag. Flaky tests must be fixed, quarantined, or removed — never ignored silently.                                                 |
+| `@migration`   | Migrated from Cypress             | Tracks migration progress. Remove tag once test is stable in Playwright.                                                                    |
+| `@one-shot`    | Per-PR happy-path clickthrough    | Temporary; recorded as a GIF by CI. Pruned or promoted to `@regression` once stable. See [One-shot clickthroughs](#one-shot-clickthroughs). |
 
 **Tag must match directory.** A `@smoke` test lives in `tests/smoke/`, a `@api` test in `tests/api/`, etc. If unsure, default to `tests/regression/` — promotion to `tests/smoke/` is a deliberate decision after the test proves stable.
 

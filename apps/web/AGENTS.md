@@ -132,6 +132,17 @@ yarn workspace @safe-global/web cypress:run    # headless
 
 Coverage report: [cypress/COVERAGE.md](cypress/COVERAGE.md)
 
+### One-shot clickthroughs
+
+For every non-trivial web feature/bugfix, agents MUST add a Playwright one-shot happy-path clickthrough under `e2e/tests/one-shots/` (tag `@one-shot`) and run it locally before opening the PR:
+
+```bash
+yarn workspace @safe-global/web dev              # local dev server (or set PLAYWRIGHT_BASE_URL)
+yarn workspace @safe-global/web pw:oneshot:record
+```
+
+CI records the clickthrough against the PR preview and posts the GIF as a PR comment automatically — do NOT attach a video or paste a URL into the PR. The suite is temporary (pruned, or promoted to `e2e/tests/regression/` once stable). See [e2e/docs/README.md](e2e/docs/README.md#one-shot-clickthroughs).
+
 ### Test Coverage
 
 - Aim for comprehensive test coverage of business logic and critical paths
