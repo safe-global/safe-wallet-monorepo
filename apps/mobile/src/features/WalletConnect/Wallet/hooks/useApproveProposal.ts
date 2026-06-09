@@ -61,11 +61,8 @@ export const useApproveProposal = (walletKit: IWalletKit | null) => {
         // Show a friendly toast; log the underlying (often technical) error for diagnostics.
         logWalletKitError('approveSession failed', e)
         toast.show('Connection to app failed', { native: false, duration: 3000, variant: 'error' })
-        try {
-          await rejectProposal(walletKit, id)
-        } catch (rejectErr) {
-          logWalletKitError('rejectProposal after approve failure also failed', rejectErr)
-        }
+        // rejectProposal swallows + logs its own errors, so it never throws here.
+        await rejectProposal(walletKit, id)
         dispatch(removePending({ id, kind: 'proposal' }))
       } finally {
         setBusy(false)
