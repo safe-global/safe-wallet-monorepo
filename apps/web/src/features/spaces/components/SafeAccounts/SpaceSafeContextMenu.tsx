@@ -32,7 +32,6 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
   const allAddressBooks = useAppSelector(selectAllAddressBooks)
   const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
   const name = isMultiChainSafeItem(safeItem) ? safeItem.name : allAddressBooks[safeItem.chainId]?.[safeItem.address]
-  const hasName = !!name
 
   const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
     e.preventDefault()
@@ -77,7 +76,7 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
           <ListItemIcon>
             <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
           </ListItemIcon>
-          <ListItemText>{hasName ? 'Rename' : 'Give name'}</ListItemText>
+          <ListItemText>Rename</ListItemText>
         </MenuItem>
 
         {isAdmin && (

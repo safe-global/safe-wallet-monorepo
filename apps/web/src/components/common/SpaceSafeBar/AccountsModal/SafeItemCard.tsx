@@ -115,20 +115,16 @@ const SafeItemCard = ({
         {!undeployedSafe && safeItem.isReadOnly && !isSimilar && <ReadOnlyBadge />}
       </div>
 
-      {undeployedSafe && (
-        <div className="shrink-0">
-          <NotActivatedBadge isActivating={isActivating} />
-        </div>
-      )}
-
       {/* Chain logo */}
       <div className="mx-auto shrink-0">
         <ChainLogo chainId={safeItem.chainId} />
       </div>
 
-      {/* Balance */}
+      {/* Balance or inactive badge */}
       <div className="flex w-[70px] shrink-0 items-center justify-end mr-2">
-        {!hasOverview && !undeployedSafe ? (
+        {undeployedSafe ? (
+          <NotActivatedBadge isActivating={isActivating} />
+        ) : !hasOverview ? (
           <Skeleton className="h-3 w-12" />
         ) : safeOverview?.fiatTotal !== undefined ? (
           <span className="text-sm text-muted-foreground whitespace-nowrap">

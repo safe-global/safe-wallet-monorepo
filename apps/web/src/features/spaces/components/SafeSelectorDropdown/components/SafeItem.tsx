@@ -4,7 +4,7 @@ import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeInfoDisplay from './SafeInfoDisplay'
 import BalanceDisplay from './BalanceDisplay'
 import ChainLogo from './ChainLogo'
-import NotActivatedBadge from './NotActivatedBadge'
+import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData } from '../types'
 
 const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading, parentSafeId }: SafeItemData) => {

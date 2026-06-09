@@ -1,5 +1,27 @@
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { act, fireEvent, render, screen } from '@/tests/test-utils'
 import AddAccounts from '../index'
+
+// jsdom doesn't implement ResizeObserver; the list region uses one to detect
+// whether the safe list overflows (which gates the bottom fade gradient).
+let resizeCallback: ResizeObserverCallback | undefined
+class ResizeObserverStub {
+  constructor(cb: ResizeObserverCallback) {
+    resizeCallback = cb
+  }
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+;(globalThis as unknown as { ResizeObserver: typeof ResizeObserverStub }).ResizeObserver = ResizeObserverStub
+
+const setListOverflow = (overflow: boolean) => {
+  const region = screen.getByTestId('add-accounts-safes-list-region')
+  Object.defineProperty(region, 'scrollHeight', { configurable: true, value: overflow ? 1000 : 100 })
+  Object.defineProperty(region, 'clientHeight', { configurable: true, value: 100 })
+  act(() => {
+    resizeCallback?.([], {} as ResizeObserver)
+  })
+}
 
 jest.mock('../../Sidebar/constants', () => ({
   SAFE_ACCOUNTS_LIMIT: 10,
@@ -208,5 +230,36 @@ describe('AddAccounts — admin guard on submit', () => {
     expect(screen.queryByText('Only admins can add or remove Safe accounts in this workspace')).not.toBeInTheDocument()
     expect(mockAddSafesToSpace).not.toHaveBeenCalled()
     expect(mockRemoveSafesFromSpace).not.toHaveBeenCalled()
+  })
+})
+
+describe('AddAccounts — list fade gradient', () => {
+  const withSafe = {
+    initialReduxState: {
+      addedSafes: { '1': { '0x0000000000000000000000000000000000001234': { owners: [], threshold: 1 } } },
+    },
+  }
+
+  beforeEach(() => {
+    resizeCallback = undefined
+    mockWalletValue = { address: '0xWallet' }
+    mockIsAdmin = true
+    mockSpaceSafes = []
+  })
+
+  it('hides the fade when the list does not overflow', () => {
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withSafe)
+
+    setListOverflow(false)
+
+    expect(screen.queryByTestId('add-accounts-list-fade')).not.toBeInTheDocument()
+  })
+
+  it('shows the fade when the list overflows', () => {
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />, withSafe)
+
+    setListOverflow(true)
+
+    expect(screen.getByTestId('add-accounts-list-fade')).toBeInTheDocument()
   })
 })

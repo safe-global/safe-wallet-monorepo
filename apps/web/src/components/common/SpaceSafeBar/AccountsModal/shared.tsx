@@ -4,10 +4,11 @@
  */
 import { type MouseEvent, useState } from 'react'
 import { isAddress } from 'ethers'
-import { Eye, AlertCircle, Cloud, Copy, Check, TriangleAlert } from 'lucide-react'
+import { Eye, Cloud, Copy, Check, TriangleAlert } from 'lucide-react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useChain } from '@/hooks/useChains'
 import { Skeleton } from '@/components/ui/skeleton'
+import NotActivatedBadgeBase from '@/components/common/NotActivatedBadge'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
@@ -241,19 +242,7 @@ export function ReadOnlyBadge() {
 
 /** Not activated / activating badge */
 export function NotActivatedBadge({ isActivating }: { isActivating: boolean }) {
-  return (
-    <span
-      className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full px-1.5 py-px text-[11px] leading-none"
-      style={{
-        backgroundColor: isActivating ? 'var(--color-info-light)' : 'var(--color-warning-background)',
-        color: isActivating ? 'var(--color-info-dark)' : 'var(--color-warning-main)',
-      }}
-      data-testid="pending-activation-icon"
-    >
-      <AlertCircle className="size-3 shrink-0" />
-      {isActivating ? 'Activating' : 'Not activated'}
-    </span>
-  )
+  return <NotActivatedBadgeBase isActivating={isActivating} data-testid="pending-activation-icon" />
 }
 
 /** "High similarity" warning badge */
