@@ -10,11 +10,11 @@
  */
 
 export type WalletCredentials = {
-  OWNER_1_PRIVATE_KEY: string
-  OWNER_2_PRIVATE_KEY: string
   OWNER_4_PRIVATE_KEY: string
-  OWNER_1_WALLET_ADDRESS: string
-  OWNER_2_WALLET_ADDRESS: string
+  OWNER_1_PRIVATE_KEY?: string
+  OWNER_2_PRIVATE_KEY?: string
+  OWNER_1_WALLET_ADDRESS?: string
+  OWNER_2_WALLET_ADDRESS?: string
 }
 
 /**
@@ -43,13 +43,33 @@ export function getWalletCredentials(
     throw new Error(`Failed to parse CYPRESS_WALLET_CREDENTIALS as JSON: ${message}`)
   }
 
-  const creds = parsed as Partial<WalletCredentials>
+  if (typeof parsed !== 'object' || parsed === null) {
+    throw new Error('CYPRESS_WALLET_CREDENTIALS must be a JSON object.')
+  }
 
-  if (!creds.OWNER_4_PRIVATE_KEY || creds.OWNER_4_PRIVATE_KEY.trim() === '') {
+  const record = parsed as Record<string, unknown>
+
+  const knownFields: (keyof WalletCredentials)[] = [
+    'OWNER_4_PRIVATE_KEY',
+    'OWNER_1_PRIVATE_KEY',
+    'OWNER_2_PRIVATE_KEY',
+    'OWNER_1_WALLET_ADDRESS',
+    'OWNER_2_WALLET_ADDRESS',
+  ]
+
+  for (const field of knownFields) {
+    const value = record[field]
+    if (value !== undefined && typeof value !== 'string') {
+      throw new Error(`CYPRESS_WALLET_CREDENTIALS field ${field} must be a string.`)
+    }
+  }
+
+  const signerKey = record.OWNER_4_PRIVATE_KEY
+  if (typeof signerKey !== 'string' || signerKey.trim() === '') {
     throw new Error('CYPRESS_WALLET_CREDENTIALS is missing the required OWNER_4_PRIVATE_KEY field.')
   }
 
-  return creds as WalletCredentials
+  return record as WalletCredentials
 }
 
 /**

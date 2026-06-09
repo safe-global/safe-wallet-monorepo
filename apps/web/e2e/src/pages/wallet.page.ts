@@ -21,7 +21,10 @@ export class WalletPage {
   readonly siweContinueBtn: Locator
 
   constructor(private readonly page: Page) {
-    this.connectWalletBtn = page.getByTestId('connect-wallet-btn')
+    // On /welcome/accounts there are multiple connect buttons (a hidden header
+    // one and the visible page one); target only the visible match so we click
+    // the button that actually opens the onboard modal.
+    this.connectWalletBtn = page.getByTestId('connect-wallet-btn').filter({ visible: true })
     this.onboardModal = page.locator('onboard-v2')
     this.privateKeyOption = this.onboardModal.getByRole('button', { name: 'Private key' })
     this.privateKeyInput = page.getByTestId('private-key-input').locator('input')
@@ -35,12 +38,18 @@ export class WalletPage {
    * Returns only once the connected-state signal (account center) is visible.
    */
   async connectWallet(privateKey: string): Promise<void> {
-    // The connect button may be the home one or the welcome one — clicking opens onboard.
-    if (await this.connectWalletBtn.isVisible()) {
-      await this.connectWalletBtn.click()
+    // Clicking the connect button opens the onboard modal, but the click can be
+    // swallowed (hydration / transient state). Retry a few times until onboard
+    // is visible; surface a clear failure if it never opens.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      if (await this.onboardModal.isVisible()) {
+        break
+      }
+      await this.connectWalletBtn.click().catch(() => {})
+      await this.onboardModal.waitFor({ state: 'visible', timeout: 3000 }).catch(() => {})
     }
-
     await this.onboardModal.waitFor({ state: 'visible' })
+
     await this.privateKeyOption.click()
 
     await this.privateKeyInput.fill(privateKey)
@@ -57,7 +66,9 @@ export class WalletPage {
    * the session cookie is set by the `/v1/auth/verify` response.
    */
   async signInWithEthereum(): Promise<void> {
-    const verify = this.page.waitForResponse((r) => /\/v1\/auth\/verify/.test(r.url()))
+    const verify = this.page.waitForResponse(
+      (r) => /\/v1\/auth\/verify/.test(r.url()) && r.request().method() === 'POST' && r.ok(),
+    )
     await this.siweContinueBtn.click()
     await verify
   }

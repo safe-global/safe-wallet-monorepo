@@ -46,7 +46,9 @@ test.describe('Safe creation — pay later', { tag: '@one-shot' }, () => {
     // 6. Select "Pay later" (counter-intuitively `connected-wallet-execution-method`).
     //    Selecting it while unauthenticated triggers SiWE; the PK module auto-signs.
     //    Arm the verify wait BEFORE clicking to avoid a race.
-    const siweVerify = safePage.waitForResponse((r) => /\/v1\/auth\/verify/.test(r.url()))
+    const siweVerify = safePage.waitForResponse(
+      (r) => /\/v1\/auth\/verify/.test(r.url()) && r.request().method() === 'POST' && r.ok(),
+    )
     await safePage.getByTestId('connected-wallet-execution-method').click()
     await siweVerify
 

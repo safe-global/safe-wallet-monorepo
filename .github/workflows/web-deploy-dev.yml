@@ -138,6 +138,9 @@ jobs:
       - name: Install Playwright Chromium
         run: yarn workspace @safe-global/web exec playwright install --with-deps chromium
 
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
       - name: Wait for the preview to be live
         env:
           PREVIEW_URL: https://${{ steps.extract_branch.outputs.slug }}--walletweb.review.5afe.dev
@@ -177,13 +180,15 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Upload the clickthrough artifacts to the review bucket
+        id: upload
+        continue-on-error: true
         if: steps.convert.outcome == 'success'
         run: |
           aws s3 cp apps/web/e2e/reports/one-shots/clickthrough.gif s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.slug }}/one-shots/clickthrough.gif --content-type image/gif
           aws s3 cp apps/web/e2e/reports/one-shots/clickthrough.mp4 s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.slug }}/one-shots/clickthrough.mp4 --content-type video/mp4
 
       - name: Post the clickthrough GIF in the PR
-        if: always() && steps.convert.outcome == 'success'
+        if: always() && steps.upload.outcome == 'success'
         uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
         with:
           message-id: oneshot-clickthrough
@@ -201,14 +206,14 @@ jobs:
           repo-token-user-login: 'github-actions[bot]'
 
       - name: Post a fallback comment when no video was produced
-        if: always() && steps.convert.outcome != 'success'
+        if: always() && steps.upload.outcome != 'success'
         uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
         with:
           message-id: oneshot-clickthrough
           message: |
             ## 🎬 One-shot clickthrough
 
-            No one-shot clickthrough video was produced for this PR. This usually means no `@one-shot` test ran, or the branch preview wasn't reachable in time.
+            No one-shot clickthrough video could be recorded or uploaded for this PR. This usually means no `@one-shot` test ran, the branch preview wasn't reachable in time, or the artifact upload failed.
 
             Add a clickthrough for your feature under `apps/web/e2e/tests/one-shots/` so it gets recorded automatically on the next run.
 

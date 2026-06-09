@@ -27,11 +27,16 @@ if [[ ! -d "$VIDEO_DIR" ]]; then
   exit 1
 fi
 
+if ! command -v ffmpeg >/dev/null 2>&1; then
+  echo "video_to_gif: ffmpeg is not installed" >&2
+  exit 1
+fi
+
 # Find the largest .webm under VIDEO_DIR (Playwright writes one per one-shot test;
 # picking the largest yields the most complete recording if several exist).
-VIDEO_FILE="$(find "$VIDEO_DIR" -type f -name '*.webm' -print0 \
-  | xargs -0 ls -S 2>/dev/null \
-  | head -n 1)"
+# `-exec ls -S {} +` only runs ls when there ARE matches, so an empty result
+# stays empty (instead of ls listing the cwd) and is portable across CI/macOS.
+VIDEO_FILE="$(find "$VIDEO_DIR" -type f -name '*.webm' -exec ls -S {} + 2>/dev/null | head -n 1)"
 
 if [[ -z "$VIDEO_FILE" ]]; then
   echo "video_to_gif: no .webm video found under '$VIDEO_DIR'" >&2

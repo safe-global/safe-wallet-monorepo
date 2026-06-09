@@ -24,6 +24,26 @@ test.describe('Wallet credentials parser', { tag: '@api' }, () => {
     expect(creds.OWNER_1_WALLET_ADDRESS).toMatch(/^0x[a-fA-F0-9]{40}$/)
   })
 
+  test('allows the optional owner fields to be absent', () => {
+    const onlySigner = JSON.stringify({
+      OWNER_4_PRIVATE_KEY: '0x4444444444444444444444444444444444444444444444444444444444444444',
+    })
+
+    const creds = getWalletCredentials(onlySigner)
+
+    expect(creds.OWNER_4_PRIVATE_KEY).toBe('0x4444444444444444444444444444444444444444444444444444444444444444')
+    expect(creds.OWNER_1_PRIVATE_KEY).toBeUndefined()
+    expect(creds.OWNER_2_WALLET_ADDRESS).toBeUndefined()
+  })
+
+  test('throws when OWNER_4_PRIVATE_KEY is present but not a string', () => {
+    const nonStringSigner = JSON.stringify({
+      OWNER_4_PRIVATE_KEY: 1234,
+    })
+
+    expect(() => getWalletCredentials(nonStringSigner)).toThrow(/OWNER_4_PRIVATE_KEY/)
+  })
+
   test('getDefaultSignerKey returns OWNER_4_PRIVATE_KEY', () => {
     const creds = getWalletCredentials(VALID_CREDS)
 
