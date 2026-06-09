@@ -455,7 +455,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           <Box data-testid="pay-now-later-message-box" className={layoutCss.row}>
             <PayNowPayLater
               totalFee={totalFee}
-              canRelay={canRelay}
+              willRelay={willRelay}
               isMultiChain={isMultiChainDeployment}
               payMethod={effectivePayMethod}
               setPayMethod={setPayMethod}

@@ -41,7 +41,7 @@ import type {
 // Component prop types (for components with external props)
 export interface PayNowPayLaterProps {
   totalFee: string
-  canRelay: boolean
+  willRelay: boolean
   isMultiChain?: boolean
   payMethod: PayMethod
   setPayMethod: Dispatch<SetStateAction<PayMethod>>
