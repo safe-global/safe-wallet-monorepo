@@ -69,7 +69,7 @@ export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onRequestD
           <View width={40} height={40}>
             <DappIcon url={meta.icons?.[0]} size={40} />
             {variant ? (
-              <View position="absolute" bottom={-2} right={-2}>
+              <View position="absolute" bottom={-8} right={-8}>
                 <VerifyStatusIcon variant={variant} size={16} />
               </View>
             ) : null}

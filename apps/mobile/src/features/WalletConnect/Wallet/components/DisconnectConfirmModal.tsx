@@ -61,8 +61,8 @@ export const DisconnectConfirmModal: React.FC<DisconnectConfirmModalProps> = ({
       accessible={true}
     >
       <BottomSheetView>
-        <YStack gap="$4" paddingHorizontal="$4" paddingTop="$2" paddingBottom={insets.bottom + 16}>
-          <YStack gap="$3" alignItems="center" testID="disconnect-confirm-modal">
+        <YStack gap="$5" paddingHorizontal="$4" paddingTop="$2" paddingBottom={insets.bottom + 16}>
+          <YStack gap="$5" alignItems="center" testID="disconnect-confirm-modal">
             <Text fontWeight="700" fontSize={16} letterSpacing={-0.1}>
               Disconnect app?
             </Text>
@@ -74,7 +74,7 @@ export const DisconnectConfirmModal: React.FC<DisconnectConfirmModalProps> = ({
             </YStack>
           </YStack>
           <SafeButton
-            primary
+            danger
             width="100%"
             onPress={onConfirm}
             loading={isBusy}

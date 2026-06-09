@@ -43,7 +43,7 @@ export const ConnectedDappsScreen: React.FC = () => {
         data={sessions}
         keyExtractor={(s) => s.topic}
         ListHeaderComponent={
-          <YStack gap="$2" paddingVertical="$3">
+          <YStack gap="$2" paddingVertical="$6">
             <H2 fontWeight="600">Connected apps</H2>
             <Text color="$colorSecondary">Third-party apps you've connected to your Safe.</Text>
           </YStack>
