@@ -29,11 +29,14 @@ test.describe('Safe creation — pay later', { tag: '@one-shot' }, () => {
     await safePage.getByTestId('create-safe-btn').click()
     await expect(safePage).toHaveURL(/\/new-safe\/create/)
 
-    // 3. Set-name step. Network auto-selects Sepolia from the connected wallet.
+    // 3. Set-name step. Network auto-selects Sepolia from the connected wallet;
+    //    wait for Next to enable so we don't advance before the chain resolves.
     await safePage.locator('input[name="name"]').fill('One-shot CF Safe')
+    await expect(safePage.getByTestId('next-btn')).toBeEnabled()
     await safePage.getByTestId('next-btn').click()
 
     // 4. Owners step — connected signer as sole owner, threshold 1 (defaults).
+    await expect(safePage.getByTestId('owner-policy-step-form')).toBeVisible()
     await safePage.getByTestId('next-btn').click()
 
     // 5. Review step.

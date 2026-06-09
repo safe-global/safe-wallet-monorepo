@@ -104,7 +104,7 @@ One-shots can drive a connected wallet and SiWE-login using the framework helper
 ```typescript
 test('...', async ({ safePage, walletPage, credentials }) => {
   await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY) // web3-onboard "Private key" module, no mocks
-  await walletPage.signInWithEthereum() // SiWE — the PK module signs programmatically, no popup
+  await walletPage.signInWithEthereum() // SiWE on screens with an explicit sign-in button; PK module signs programmatically, no popup
 })
 ```
 
