@@ -20,6 +20,9 @@ export default defineConfig({
     actionTimeout: 15_000,
     navigationTimeout: 30_000,
     timezoneId: 'UTC',
+    // Note: Safe Wallet keeps WebSocket connections open, so waitUntil: 'load'
+    // never resolves. All navigation uses safeGoto() from src/utils/navigation.ts
+    // which passes waitUntil: 'commit' per-call.
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

@@ -35,15 +35,10 @@ export const NETWORK_PREFIXES = {
 } as const
 
 // ---------------------------------------------------------------------------
-// Static test Safes on Sepolia (read-only — shared across parallel tests)
+// Static test Safes — moved to dedicated registry
+// Import from: import { staticSafes } from '../data/safes'
+// See: src/data/safes/static.ts for full lookup table and AI selection guide
 // ---------------------------------------------------------------------------
-
-export const SAFES = {
-  /** 1/1 Safe with ETH balance — use for dashboard and balance tests */
-  SEP_STATIC_SAFE_1: 'sep:0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7',
-  /** 1/2 Safe — use for multi-owner and tx queue tests */
-  SEP_STATIC_SAFE_2: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
-} as const
 
 // ---------------------------------------------------------------------------
 // Test wallet addresses

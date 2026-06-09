@@ -27,9 +27,9 @@ CI=true yarn pw:ci        # Smoke tests with retries, JUnit output
 ## Project Structure
 
 ```
-e2e/
+playwright/
 ├── playwright.config.ts       # Chromium-only, traces on failure
-├── tsconfig.json              # TypeScript config for e2e
+├── tsconfig.json              # TypeScript config for Playwright
 ├── tests/                     # Tests describe business behavior, not implementation
 │   ├── smoke/                 # Critical path — run on every PR
 │   ├── api/                   # Pure API tests (no browser)

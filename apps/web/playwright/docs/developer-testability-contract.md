@@ -112,7 +112,7 @@ What QA does NOT need from you:
 Before refactoring a component's DOM structure:
 
 - Search for `data-testid` attributes on the elements you're changing
-- Search for the component's visible text strings in `e2e/tests/` and `cypress/e2e/`
+- Search for the component's visible text strings in `playwright/tests/` and `cypress/e2e/`
 - If you find matches, coordinate with QA or update the test locators in the same PR
 
 Broken selectors = broken CI = blocked merges.

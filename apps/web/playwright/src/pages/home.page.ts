@@ -6,6 +6,7 @@
  */
 import { type Page, type Locator } from '@playwright/test'
 import { ROUTES } from '../data/constants'
+import { safeGoto } from '../utils/navigation'
 
 export class HomePage {
   readonly page: Page
@@ -30,9 +31,9 @@ export class HomePage {
     this.swapBtn = page.getByRole('button', { name: /swap/i })
   }
 
-  /** Navigate to dashboard for a given Safe address */
+  /** Navigate to dashboard for a given Safe address. Retries on 429. */
   async goto(safeAddress: string): Promise<void> {
-    await this.page.goto(`${ROUTES.home}?safe=${safeAddress}`)
+    await safeGoto(this.page, `${ROUTES.home}?safe=${safeAddress}`)
   }
 
   /** Wait for the dashboard to finish loading */

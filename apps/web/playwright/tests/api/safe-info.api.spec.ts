@@ -5,10 +5,10 @@
  * They run fast, are highly stable, and catch backend regressions early.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
-import { SAFES, CHAIN_IDS } from '../../src/data/constants'
+import { staticSafes, parseSafeAddress } from '../../src/data/safes'
+import { CHAIN_IDS } from '../../src/data/constants'
 
-// Extract the raw address from prefixed format "sep:0xABC..." → "0xABC..."
-const safeAddress = SAFES.SEP_STATIC_SAFE_1.split(':')[1]
+const safeAddress = parseSafeAddress(staticSafes.SEP_STATIC_SAFE_5)
 
 test.describe('Safe Info API', { tag: '@api' }, () => {
   test('should return Safe info with valid structure', async ({ safeApiClient }) => {

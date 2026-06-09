@@ -27,6 +27,7 @@ export class SafeApiClient {
    */
   private async get<T>(path: string, retries = 1): Promise<T> {
     const url = `${this.baseUrl}${path}`
+    let lastError: Error | undefined
 
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
@@ -49,17 +50,17 @@ export class SafeApiClient {
         const body = await response.text().catch(() => '')
         throw new Error(`API ${response.status}: ${response.statusText} — ${url}${body ? `\n${body}` : ''}`)
       } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err))
+
         // Network error or timeout — retry if attempts remain
-        if (attempt < retries && !(err instanceof Error && err.message.startsWith('API '))) {
+        if (attempt < retries) {
           await new Promise((r) => setTimeout(r, RETRY_DELAY_MS))
           continue
         }
-        throw err
       }
     }
 
-    // TypeScript: unreachable, but satisfies return type
-    throw new Error(`API request failed after ${retries + 1} attempts: ${path}`)
+    throw lastError ?? new Error(`API request failed after ${retries + 1} attempts: ${path}`)
   }
 
   /** Get Safe info (owners, threshold, nonce, modules) */
