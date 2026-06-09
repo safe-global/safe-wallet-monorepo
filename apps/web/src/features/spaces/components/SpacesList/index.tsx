@@ -20,7 +20,7 @@ import { useCallback, useState } from 'react'
 import css from './styles.module.css'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
-import { MemberStatus } from '@/features/spaces'
+import { MemberStatus, useCurrentMemberProfile } from '@/features/spaces'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
@@ -32,6 +32,9 @@ import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSi
 import AddIcon from '@/public/images/common/add.svg'
 import { SPACES_LIMIT } from '../Sidebar/constants'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import SafeLogo from '@/public/images/logo-no-text.svg'
+import { Pulse } from '../Sidebar/SidebarSkeleton/SidebarSkeleton'
+import { AccountInfo } from './AccountInfo'
 
 const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?: boolean }) => {
   const button = (
@@ -172,7 +175,7 @@ const SpacesList = () => {
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
   const inviteAmount = pendingInvites?.length
   const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
-
+  const { membership, isLoading } = useCurrentMemberProfile()
   const singleSpaceId = activeSpaces.length === 1 ? String(activeSpaces[0].id) : null
 
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
@@ -208,18 +211,36 @@ const SpacesList = () => {
   return (
     <Box className={css.container}>
       <Box className={cn(css.mySpaces, { [css.headerSpacer]: !isUserSignedIn })}>
-        <Box className={css.spacesHeader}>
-          {!isRequireLoginEnabled && <AccountsNavigation />}
+        {isRequireLoginEnabled ? (
+          <div className="py-6 mb-6 flex items-center justify-between border-b">
+            <div className="flex gap-6 items-center">
+              <SafeLogo alt="Safe logo" width={40} height={40} />
+            </div>
 
-          {isUserSignedIn && activeSpaces.length > 0 && (
-            <AddSpaceButton
-              disabled={isAtSpacesLimit}
-              onClick={() =>
-                trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
-              }
-            />
-          )}
-        </Box>
+            {isUserSignedIn && activeSpaces.length > 0 && (
+              <div className="flex gap-4">
+                <AddSpaceButton
+                  disabled={isAtSpacesLimit}
+                  onClick={() =>
+                    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
+                      entry_point: WorkspaceCreateEntryPoint.WELCOME,
+                    })
+                  }
+                />
+
+                {isLoading ? (
+                  <Pulse className="h-12 w-12 rounded-full group-data-[collapsible=icon]:w-9" />
+                ) : (
+                  <AccountInfo membership={membership} />
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <Box className={css.spacesHeader}>
+            <AccountsNavigation />
+          </Box>
+        )}
 
         {isUserSignedIn &&
           pendingInvites.length > 0 &&

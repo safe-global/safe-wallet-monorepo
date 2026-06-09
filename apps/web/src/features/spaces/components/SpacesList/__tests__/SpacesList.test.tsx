@@ -53,6 +53,11 @@ jest.mock('@/features/myAccounts', () => ({
 
 jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE', INVITED: 'INVITED', DECLINED: 'DECLINED' },
+  useCurrentMemberProfile: jest.fn(() => ({ membership: undefined, isLoading: false })),
+}))
+
+jest.mock('../AccountInfo', () => ({
+  AccountInfo: () => <div data-testid="account-info" />,
 }))
 
 jest.mock('@/features/spaces/utils', () => ({
@@ -219,6 +224,8 @@ describe('SpacesList — auth/expiry state rendering', () => {
   })
 
   it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {
+    // The Create workspace button lives in the require-login-ON workspace header.
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
     mockUseAppSelector.mockReturnValue(true)
     const tenSpaces = Array.from({ length: 10 }, (_, i) => ({ id: i + 1, name: `Space ${i + 1}` }))
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: tenSpaces, isFetching: false, error: undefined })

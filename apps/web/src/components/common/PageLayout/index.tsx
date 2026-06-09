@@ -62,9 +62,11 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   // /welcome/spaces still renders the sign-in form when signed out and the
   // legacy workspaces list when signed in — only the list needs the Topbar.
   const isLoginPath = pathname === AppRoutes.welcome.spaces || pathname === AppRoutes.index
+  const isWelcomeWorskpacePage = pathname === AppRoutes.welcome.spaces
   const hideHeader =
     NO_HEADER_ROUTES.includes(pathname) ||
     (isRequireLoginEnabled && isLoginPath) ||
+    (isRequireLoginEnabled && isWelcomeWorskpacePage) ||
     (pathname === AppRoutes.welcome.spaces && !isSignedIn)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()

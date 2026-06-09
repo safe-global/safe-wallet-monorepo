@@ -15,7 +15,7 @@ import css from '../styles.module.css'
 const SIDEBAR_CONTAINER_CLASSNAME = '!p-0 border-r-0 group-data-[side=left]:border-r-0'
 const SIDEBAR_INNER_CLASSNAME = 'rounded-none rounded-tr-[8px] rounded-br-[8px] shadow-none'
 
-const Pulse = ({ className }: { className: string }): ReactElement => (
+export const Pulse = ({ className }: { className: string }): ReactElement => (
   <div className={`bg-sidebar-border animate-pulse ${className}`} />
 )
 
