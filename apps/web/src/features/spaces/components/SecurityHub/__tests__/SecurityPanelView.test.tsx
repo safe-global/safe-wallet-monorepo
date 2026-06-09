@@ -262,6 +262,69 @@ describe('SecurityPanelView', () => {
       // the passing accordion. The row title flags it; the module name lives in the expanded evidence.
       expect(screen.getByText('Unrecognized module detected')).toBeInTheDocument()
     })
+
+    describe('vulnerable Zodiac modules', () => {
+      const DELAY = '0xcccc000000000000000000000000000000000001'
+
+      it('flags a vulnerable module as Critical with a working remove CTA', () => {
+        const onRemoveModule = jest.fn()
+        renderPanel({
+          scanContext: createMockContext({ modules: [{ value: DELAY, name: 'Delay Modifier' }] }),
+          results: {
+            ...allClearResults,
+            modules: mkResult({
+              status: 'issue',
+              severity: 'Critical',
+              remediation: 'Remove it.',
+              vulnerableModules: [DELAY],
+              ctaLabelOverride: 'Remove unsupported module',
+            }),
+          },
+          onRemoveModule,
+        })
+
+        const row = screen.getByText('Vulnerable module · Delay Modifier')
+        fireEvent.click(row)
+        const button = screen.getByRole('button', { name: /remove unsupported module/i })
+        fireEvent.click(button)
+        expect(onRemoveModule).toHaveBeenCalledWith(DELAY)
+      })
+
+      it('falls back to an external link when no remove handler is provided', () => {
+        renderPanel({
+          scanContext: createMockContext({ modules: [{ value: DELAY, name: 'Delay Modifier' }] }),
+          results: {
+            ...allClearResults,
+            modules: mkResult({
+              status: 'issue',
+              severity: 'Critical',
+              vulnerableModules: [DELAY],
+              ctaLabelOverride: 'Remove unsupported module',
+            }),
+          },
+        })
+
+        fireEvent.click(screen.getByText('Vulnerable module · Delay Modifier'))
+        expect(screen.getByRole('link', { name: /check affected safes/i })).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: /remove unsupported module/i })).not.toBeInTheDocument()
+      })
+
+      it('renders a Critical warning without a remove button for the nested (no removable module) case', () => {
+        const onRemoveModule = jest.fn()
+        renderPanel({
+          scanContext: createMockContext({ modules: [{ value: DELAY, name: 'Mystery Module' }] }),
+          results: {
+            ...allClearResults,
+            modules: mkResult({ status: 'issue', severity: 'Critical', vulnerableModules: [] }),
+          },
+          onRemoveModule,
+        })
+
+        // Affected, but no module matched as removable → a single warning row, no remove button.
+        expect(screen.getByText('Vulnerable module detected')).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: /remove unsupported module/i })).not.toBeInTheDocument()
+      })
+    })
   })
 
   describe('row expansion', () => {
