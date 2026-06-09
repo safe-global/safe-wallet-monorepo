@@ -212,9 +212,9 @@ const SpacesList = () => {
     <Box className={css.container}>
       <Box className={cn(css.mySpaces, { [css.headerSpacer]: !isUserSignedIn })}>
         {isRequireLoginEnabled ? (
-          <div className="py-6 mb-6 flex items-center justify-between border-b">
-            <div className="flex gap-6 items-center">
-              <SafeLogo alt="Safe logo" width={40} height={40} />
+          <div className="py-6 mb-6 flex items-center justify-end border-b">
+            <div className="flex gap-6 absolute left-6 top-6 items-center">
+              <SafeLogo alt="Safe logo" width={24} height={24} />
             </div>
 
             {isUserSignedIn && activeSpaces.length > 0 && (
