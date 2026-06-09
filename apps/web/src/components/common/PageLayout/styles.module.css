@@ -1,71 +1,20 @@
 @reference '../../../styles/shadcn.css';
 
+/* The topbar lives in normal flow as the first child of .main, so it pushes the
+   page content down by its own height — no fixed reservation to keep in sync,
+   so it can wrap onto extra rows on narrow viewports without clipping content.
+   .main owns the sidebar offset (padding-left), so the topbar inherits it. */
 .topbar {
-  @apply absolute top-0 right-0 z-[1];
-  left: 230px;
-}
-
-.topbarCollapsed {
-  left: 4rem;
-}
-
-.topbarNoSidebar {
-  left: 0;
-}
-
-.topbarElevated {
-  position: fixed;
-  z-index: 99;
-  left: 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
   width: 100%;
-  transition: none;
-
-  header {
-    padding-left: 230px;
-  }
 }
 
-.topbarElevated:not(.topbarNoSidebar) header {
-  padding-left: calc(230px + 1.5rem);
-}
-
-.topbarElevated.topbarNoSidebar header {
-  padding-left: 1.5rem;
-}
-
-@media (max-width: 899.95px) {
-  .topbar {
-    left: 0;
-    position: sticky;
-    top: 0;
-  }
-
-  .mainSpace {
-    && {
-      @apply pt-0;
-    }
-  }
-}
-
-.mainSpace {
-  /* we need it in order to have higher importance than the .main class */
-  && {
-    padding-top: var(--topbar-height);
-
-    @media (max-width: 640px) {
-      padding-top: 0;
-    }
-  }
-}
-
-/* Compact variant: settings page without an active safe — topbar collapses
-   to a single row (logo only) so we shrink the reserved space accordingly.
-   The topbar is ~76px tall (header --header-height plus the wallet button row),
-   so we leave one space-3 of breathing room below it. */
-@media (min-width: 900px) {
-  .mainSpace.mainSpaceCompact {
-    padding-top: calc(var(--header-height) + var(--space-3));
-  }
+/* Elevated above a modal backdrop (e.g. tx flow). Stays in flow so the page
+   doesn't shift, just raised. */
+.topbarElevated {
+  z-index: 99;
 }
 
 .main {

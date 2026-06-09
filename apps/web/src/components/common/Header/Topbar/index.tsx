@@ -91,8 +91,8 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   return (
     <>
       <header
-        className={`flex flex-wrap ${isSettingsWithoutSafe ? 'items-center' : 'items-start'} gap-y-2 px-6 py-4 bg-secondary dark:bg-background ${
-          showMenuButton ? 'justify-between pl-2' : 'justify-between'
+        className={`@container flex flex-wrap ${isSettingsWithoutSafe ? 'items-center' : 'items-start'} gap-y-2 px-6 py-4 bg-secondary dark:bg-background ${
+          showMenuButton ? 'pl-2' : ''
         }`}
       >
         {showMenuButton ? (
@@ -106,8 +106,11 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
           </Button>
         ) : null}
 
-        {/* Left content: SpaceSafeBar must not shrink so its children stay on one line */}
-        <div className="shrink-0 max-md:order-last flex items-center max-md:basis-full max-md:mt-2">
+        {/* Left content (context): the safe selector must not shrink so its children stay on
+            one line. When the header (container query — accounts for sidebar + route) is too
+            narrow to fit both groups, this drops onto its own full-width row below the actions.
+            Below md (sidebar hidden) the wrapped rows align right; at/above md they align left. */}
+        <div className="shrink-0 flex items-center @max-[1100px]:order-1 @max-[1100px]:basis-full max-[899px]:justify-end">
           {isSettingsWithoutSafe ? (
             <SafeLogo />
           ) : showSpaceSafeBar ? (
@@ -117,8 +120,10 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
           )}
         </div>
 
-        {/* Right content: navigation buttons — wraps to next row when viewport is narrow */}
-        <div className="flex items-center gap-1 shrink-0">
+        {/* Right content (actions): ml-auto pushes it right (page padding) on one row. When the
+            header wraps at/above md (sidebar shown) ml-0 left-aligns it with the context below;
+            below md (sidebar hidden) it keeps ml-auto so the wrapped rows hug the right edge. */}
+        <div className="flex items-center gap-1 shrink-0 ml-auto @max-[1100px]:min-[900px]:ml-0">
           {showSafeToken && (
             <div className="hidden sm:block">
               <SafenetStakingButton />
