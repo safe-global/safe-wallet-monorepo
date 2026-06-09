@@ -21,7 +21,6 @@ import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
-import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
 import { Tooltip } from '@mui/material'
 import { BRIDGE_EVENTS, BRIDGE_LABELS } from '@/services/analytics/events/bridge'
@@ -48,8 +47,6 @@ const Navigation = (): ReactElement | null => {
   const currentSubdirectory = getSubdirectory(router.pathname)
   const queueSize = useQueuedTxsLength()
   const isBlockedCountry = useContext(GeoblockingContext)
-  // The standalone address book is only relevant when login isn't required (REQUIRE_LOGIN_DISABLED enabled).
-  const showAddressBook = useIsRequireLoginEnabled() === false
 
   const visibleNavItems = useMemo(() => {
     return navItems.filter((item) => {
@@ -57,13 +54,9 @@ const Navigation = (): ReactElement | null => {
         return false
       }
 
-      if (item.href === AppRoutes.addressBook && !showAddressBook) {
-        return false
-      }
-
       return isRouteEnabled(item.href, chain)
     })
-  }, [chain, isBlockedCountry, showAddressBook])
+  }, [chain, isBlockedCountry])
 
   const enabledNavItems = useMemo(() => {
     return safe.deployed

@@ -2,10 +2,8 @@ import type { ParseResult } from 'papaparse'
 
 import { validateAddress } from '@safe-global/utils/utils/validation'
 
-export const AB_FILE_SIZE_LIMIT = 1_000_000
-
 export const abCsvReaderValidator = ({ size }: File): string[] | undefined => {
-  if (size > AB_FILE_SIZE_LIMIT) {
+  if (size > 1_000_000) {
     return ['Address book cannot be larger than 1MB']
   }
 }
