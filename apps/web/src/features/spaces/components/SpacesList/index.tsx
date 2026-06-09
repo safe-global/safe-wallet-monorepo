@@ -35,6 +35,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import SafeLogo from '@/public/images/logo-no-text.svg'
 import { Pulse } from '../Sidebar/SidebarSkeleton/SidebarSkeleton'
 import { AccountInfo } from './AccountInfo'
+import { getSidebarProfileInfo } from '../Sidebar/SidebarProfileSection'
 
 const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?: boolean }) => {
   const button = (
@@ -175,7 +176,9 @@ const SpacesList = () => {
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
   const inviteAmount = pendingInvites?.length
   const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
-  const { membership, isLoading } = useCurrentMemberProfile()
+  const { membership, signerAddress, isLoading, email } = useCurrentMemberProfile()
+  const { profileName, displayName } = membership ? getSidebarProfileInfo(membership, signerAddress, email) : {}
+
   const singleSpaceId = activeSpaces.length === 1 ? String(activeSpaces[0].id) : null
 
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
@@ -231,7 +234,7 @@ const SpacesList = () => {
                 {isLoading ? (
                   <Pulse className="h-12 w-12 rounded-full group-data-[collapsible=icon]:w-9" />
                 ) : (
-                  <AccountInfo membership={membership} />
+                  <AccountInfo profileName={profileName} displayName={displayName} />
                 )}
               </div>
             )}

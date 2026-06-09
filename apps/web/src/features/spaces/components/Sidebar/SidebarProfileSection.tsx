@@ -12,6 +12,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { ProfilePopoverContent } from './ProfilePopoverContent'
 import css from './styles.module.css'
+import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 export interface SidebarProfileViewProps {
   profileName: string
@@ -73,6 +74,17 @@ const ProfileSkeleton = () => (
   </>
 )
 
+export const getSidebarProfileInfo = (membership: MemberDto, signerAddress?: string, email?: string) => {
+  const memberName = membership.name || 'User'
+  const profileName = email || memberName
+  const displayName = email || (signerAddress ? shortenAddress(signerAddress) : memberName)
+
+  return {
+    profileName,
+    displayName,
+  }
+}
+
 export const SidebarProfileSection = (): ReactElement | null => {
   const { membership, email, signerAddress, isLoading } = useCurrentMemberProfile()
   const { logout } = useLogout()
@@ -80,9 +92,7 @@ export const SidebarProfileSection = (): ReactElement | null => {
   if (isLoading && !membership) return <ProfileSkeleton />
   if (!membership || membership.status !== MemberStatus.ACTIVE) return null
 
-  const memberName = membership.name || 'User'
-  const profileName = email || memberName
-  const displayName = email || (signerAddress ? shortenAddress(signerAddress) : memberName)
+  const { profileName, displayName } = getSidebarProfileInfo(membership, signerAddress, email)
   const role = membership.role.toLowerCase()
 
   const handleSignOut = () => {

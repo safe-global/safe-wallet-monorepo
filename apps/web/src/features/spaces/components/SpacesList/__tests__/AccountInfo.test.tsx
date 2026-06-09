@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { AccountInfo } from '../AccountInfo'
-import { memberBuilder } from '@/tests/builders/member'
 
 const mockLogout = jest.fn()
 
@@ -16,7 +15,9 @@ jest.mock('@/hooks/useLogout', () => ({
 jest.mock('@/components/ui/popover', () => ({
   Popover: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   PopoverTrigger: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  PopoverContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  PopoverContent: ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
+    <div data-testid={testId}>{children}</div>
+  ),
 }))
 
 jest.mock('@/components/common/InitialsAvatar', () => ({
@@ -29,17 +30,15 @@ describe('AccountInfo', () => {
     jest.clearAllMocks()
   })
 
-  it('renders the member name and role', () => {
-    const membership = memberBuilder().with({ name: 'Alice', role: 'ADMIN' }).build()
-
-    render(<AccountInfo membership={membership} />)
+  it('renders the avatar from the profile name and the display name in the popover', () => {
+    render(<AccountInfo profileName="Alice" displayName="alice@safe.global" />)
 
     expect(screen.getAllByTestId('initials-avatar')[0]).toHaveTextContent('Alice')
-    expect(screen.getByText('ADMIN')).toBeInTheDocument()
+    expect(screen.getByText('alice@safe.global')).toBeInTheDocument()
     expect(screen.getByText('Signed in')).toBeInTheDocument()
   })
 
-  it('falls back to an empty name when membership is undefined', () => {
+  it('falls back to empty names when no props are provided', () => {
     render(<AccountInfo />)
 
     screen.getAllByTestId('initials-avatar').forEach((avatar) => {
@@ -49,9 +48,7 @@ describe('AccountInfo', () => {
   })
 
   it('logs out when the sign-out button is clicked', async () => {
-    const membership = memberBuilder().build()
-
-    render(<AccountInfo membership={membership} />)
+    render(<AccountInfo profileName="Alice" displayName="Alice" />)
 
     await userEvent.click(screen.getByTestId('sidebar-profile-sign-out'))
 
