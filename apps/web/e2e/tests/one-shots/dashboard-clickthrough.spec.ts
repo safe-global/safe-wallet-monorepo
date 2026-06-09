@@ -3,8 +3,8 @@
  *
  * A read-only, wallet-free end-to-end walkthrough of the core dashboard
  * experience for a known static Safe on Sepolia staging. Intended to be run
- * against a deployed PR preview; produces a video recording on every run
- * (pass or fail) for PR commentary.
+ * against a deployed PR preview; the single continuous clickthrough produces
+ * one cohesive video recording on every run (pass or fail) for PR commentary.
  *
  * Tag: @one-shot — runs only under the "one-shots" Playwright project.
  * No mutations, no wallet connection required.
@@ -21,18 +21,14 @@ test.describe('Dashboard clickthrough', { tag: '@one-shot' }, () => {
     await homePage.goto(SAFES.SEP_STATIC_SAFE_1)
   })
 
-  test('should load the dashboard with Safe header and sidebar visible', async ({ safePage }) => {
+  test('should walk through the dashboard happy path', async ({ safePage }) => {
+    // Dashboard loads with Safe header and sidebar visible
     await homePage.waitForDashboardLoaded()
     await expect(homePage.safeHeaderInfo).toBeVisible()
     await expect(homePage.sidebar).toBeVisible()
-  })
 
-  test('should show the connect wallet button when no wallet is connected', async () => {
+    // Wallet-free state shows the connect wallet button
     await expect(homePage.connectWalletBtn).toBeVisible()
-  })
-
-  test('should navigate to the balances page and return to dashboard', async ({ safePage }) => {
-    await homePage.waitForDashboardLoaded()
 
     // Navigate to balances via the URL — stays read-only, no wallet needed
     await safePage.goto(`${ROUTES.balances}?safe=${SAFES.SEP_STATIC_SAFE_1}`)
