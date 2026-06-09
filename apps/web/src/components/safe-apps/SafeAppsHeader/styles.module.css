@@ -27,6 +27,14 @@
   padding: 0 var(--space-3);
 }
 
+/* In dark mode the page background is black (var(--background), set on .mainSpace),
+   so match it here — otherwise these opaque backgrounds show as a lighter strip
+   behind the hero and the sticky tabs. */
+[data-theme='dark'] .container,
+[data-theme='dark'] .tabs {
+  background-color: var(--background);
+}
+
 @media (max-width: 599.95px) {
   .tabs {
     padding: 0 24px;
