@@ -432,20 +432,26 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     isCounterfactualEnabled,
   )
 
-  const isDisabled = showNetworkWarning || isCreating
+  // Pay later persists counterfactual data to the backend, so it requires an
+  // authenticated session. This only blocks multichain (where Pay now is
+  // disabled and Pay later is forced); single-chain Pay later falls back to
+  // Pay now when not signed in, so effectivePayMethod is never PayLater there.
+  const requiresSignIn = effectivePayMethod === PayMethod.PayLater && !isUserAuthenticated
+  const isDisabled = showNetworkWarning || isCreating || requiresSignIn
 
   return (
     <>
       <Box data-testid="safe-setup-overview" className={layoutCss.row}>
         <SafeSetupOverview name={data.name} owners={data.owners} threshold={data.threshold} networks={data.networks} />
       </Box>
-      {isCounterfactualEnabled && !isMultiChainDeployment && (
+      {isCounterfactualEnabled && (
         <>
           <Divider />
           <Box data-testid="pay-now-later-message-box" className={layoutCss.row}>
             <PayNowPayLater
               totalFee={totalFee}
               canRelay={canRelay}
+              isMultiChain={isMultiChainDeployment}
               payMethod={effectivePayMethod}
               setPayMethod={setPayMethod}
               isUserAuthenticated={isUserAuthenticated}

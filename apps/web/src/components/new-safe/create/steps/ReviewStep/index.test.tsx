@@ -171,59 +171,60 @@ describe('ReviewStep', () => {
     expect(getByText(/Who will pay gas fees:/)).toBeInTheDocument()
   })
 
-  it('should not display the pay now/pay later block for multichain creation', () => {
-    const mockMultiChain = [
-      {
-        chainId: '100',
-        chainName: 'Gnosis Chain',
-        l2: false,
-        nativeCurrency: {
-          symbol: 'ETH',
-        },
-      },
-      {
-        chainId: '1',
-        chainName: 'Ethereum',
-        l2: false,
-        nativeCurrency: {
-          symbol: 'ETH',
-        },
-      },
-    ] as Chain[]
-    const mockData: NewSafeFormData = {
+  const authReduxState = {
+    auth: {
+      sessionExpiresAt: Date.now() + 60000,
+      lastUsedSpace: null,
+      isStoreHydrated: true,
+      cfSafeSynced: false,
+      isOidcLoginPending: false,
+    },
+  }
+
+  const buildMultiChainData = (): NewSafeFormData => {
+    const chainWithFeatures = { ...mockChain, features: [] } as Chain
+    return {
       name: 'Test',
-      networks: mockMultiChain,
+      networks: [chainWithFeatures, { ...chainWithFeatures, chainId: '1', chainName: 'Ethereum' } as Chain],
       threshold: 1,
       owners: [{ name: '', address: '0x1' }],
       saltNonce: 0,
       safeVersion: LATEST_SAFE_VERSION as SafeVersion,
     }
-    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
-    jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
+  }
 
-    const { queryByTestId, queryByText } = render(
-      <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+  it('shows the selector with Pay now disabled for multichain creation', () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+
+    const { getByTestId, getByText } = render(
+      <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+      { initialReduxState: authReduxState },
     )
 
-    expect(queryByTestId('pay-now-later-message-box')).not.toBeInTheDocument()
-    expect(queryByText('Pay now')).not.toBeInTheDocument()
-    expect(queryByText(/Pay later/)).not.toBeInTheDocument()
+    expect(getByTestId('pay-now-later-message-box')).toBeInTheDocument()
+    expect(getByText(/activate your account/)).toBeInTheDocument()
+    expect(getByText(/Start exploring the accounts now/)).toBeInTheDocument()
+    expect(getByText('Not available for multiple networks')).toBeInTheDocument()
+    expect(getByTestId('pay-now-execution-method').querySelector('input')).toBeDisabled()
+    expect(screen.getByRole('radio', { name: /Pay later/i })).toBeChecked()
   })
 
-  it('creates counterfactual safes for multichain even when the user is not authenticated', async () => {
-    const chainWithFeatures = { ...mockChain, features: [] } as Chain
-    const mockMultiChain = [chainWithFeatures, { ...chainWithFeatures, chainId: '1', chainName: 'Ethereum' } as Chain]
-    const mockData: NewSafeFormData = {
-      name: 'Test',
-      networks: mockMultiChain,
-      threshold: 1,
-      owners: [{ name: '', address: '0x1' }],
-      saltNonce: 0,
-      safeVersion: LATEST_SAFE_VERSION as SafeVersion,
-    }
+  it('disables creation for multichain until the user signs in (Pay later writes to the backend)', () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+
+    // No auth state provided -> the user is not authenticated.
+    const { getByTestId } = render(
+      <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+    )
+
+    expect(getByTestId('review-step-next-btn')).toBeDisabled()
+  })
+
+  it('creates counterfactual safes on each network for multichain when authenticated', async () => {
+    const mockData = buildMultiChainData()
 
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
-    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainWithFeatures)
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockData.networks[0])
     jest.spyOn(useWallet, 'default').mockReturnValue({ provider: {} } as unknown as ConnectedWallet)
     jest
       .spyOn(createLogic, 'createNewUndeployedSafeWithoutSalt')
@@ -234,16 +235,17 @@ describe('ReviewStep', () => {
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
     const persistSpy = jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
 
-    // No auth state provided -> the user is not authenticated.
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+      initialReduxState: authReduxState,
+    })
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('review-step-next-btn'))
     })
 
-    expect(persistSpy).toHaveBeenCalledTimes(mockMultiChain.length)
+    expect(persistSpy).toHaveBeenCalledTimes(mockData.networks.length)
     expect(persistSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ payMethod: PayMethod.PayLater, isUserAuthenticated: false }),
+      expect.objectContaining({ payMethod: PayMethod.PayLater, isUserAuthenticated: true }),
     )
   })
 })

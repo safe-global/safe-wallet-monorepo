@@ -42,6 +42,7 @@ import type {
 export interface PayNowPayLaterProps {
   totalFee: string
   canRelay: boolean
+  isMultiChain?: boolean
   payMethod: PayMethod
   setPayMethod: Dispatch<SetStateAction<PayMethod>>
   isUserAuthenticated?: boolean
