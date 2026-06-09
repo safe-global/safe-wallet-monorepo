@@ -1,4 +1,4 @@
-import { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useState } from 'react'
 import {
   Alert,
   Box,
@@ -123,6 +123,14 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
     }
   }, [addressBook, inviteeIdentifierValue, setValue])
 
+  const handleSelectAddress = useCallback(
+    (address: string, name: string) => {
+      setValue('inviteeIdentifier', address, { shouldValidate: true })
+      setValue('name', name, { shouldValidate: true })
+    },
+    [setValue],
+  )
+
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
 
@@ -188,10 +196,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
               <AddMemberInput
                 error={formState.errors.inviteeIdentifier?.message}
                 inputProps={inviteeIdentifierInputProps}
-                onSelectAddress={(address, name) => {
-                  setValue('inviteeIdentifier', address, { shouldValidate: true })
-                  setValue('name', name, { shouldValidate: true })
-                }}
+                onSelectAddress={handleSelectAddress}
                 value={inviteeIdentifierValue}
               />
             </Stack>
