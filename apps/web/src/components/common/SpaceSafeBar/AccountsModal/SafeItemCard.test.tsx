@@ -108,7 +108,7 @@ describe('SafeItemCard – undeployed', () => {
 
     render(<SafeItemCard safeItem={safeItem} onClose={noopClose} />)
 
-    const badge = screen.getByText('Not activated')
+    const badge = screen.getByTestId('pending-activation-icon')
     const nameColumn = screen.getByTestId('name-column')
 
     expect(nameColumn.contains(badge)).toBe(false)

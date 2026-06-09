@@ -1,12 +1,13 @@
 import { useState, useCallback, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react'
 import { blo } from 'blo'
-import { Copy, Check, AlertCircle } from 'lucide-react'
+import { Copy, Check } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { getInitials, getSafeDisplayInfo } from '../utils'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
+import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData } from '../types'
 import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
@@ -97,24 +98,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
         )}
       </div>
       {isUndeployed ? (
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <span
-                tabIndex={0}
-                className="flex shrink-0 items-center"
-                data-testid="safe-selector-not-activated-icon"
-                aria-label={isActivating ? 'Activating' : 'Not activated'}
-              />
-            }
-          >
-            <AlertCircle
-              className="size-4"
-              style={{ color: isActivating ? 'var(--color-info-dark)' : 'var(--color-warning-main)' }}
-            />
-          </TooltipTrigger>
-          <TooltipContent>{isActivating ? 'Activating' : 'Not activated'}</TooltipContent>
-        </Tooltip>
+        <NotActivatedBadge isActivating={isActivating} data-testid="safe-selector-not-activated-icon" />
       ) : (
         <SafeBalanceBlock
           isLoading={selectedItem.isLoading ?? false}

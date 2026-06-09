@@ -24,14 +24,8 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
       </Typography>
 
       <div
-        className={cn(
-          'flex items-center justify-between gap-6 py-4 first:pt-0',
-          isAdmin && 'border-b border-border/60',
-        )}
+        className={cn('flex items-center justify-start gap-6 py-4 first:pt-0', isAdmin && 'border-b border-border/60')}
       >
-        <Typography variant="paragraph-small-bold" className="flex-1 min-w-0">
-          Leave this workspace
-        </Typography>
         {isLastActiveAdmin ? (
           <Tooltip>
             <TooltipTrigger
@@ -69,10 +63,7 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
       </div>
 
       {isAdmin && (
-        <div className="flex items-center justify-between gap-6 py-4 last:pb-0">
-          <Typography variant="paragraph-small-bold" className="flex-1 min-w-0">
-            Delete workspace
-          </Typography>
+        <div className="flex items-center justify-start gap-6 py-4 last:pb-0">
           <Button
             variant="destructive"
             size="sm"

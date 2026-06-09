@@ -1,8 +1,10 @@
-import { type ReactElement, useEffect, useRef } from 'react'
+import { type ReactElement, useCallback, useContext, useEffect, useRef } from 'react'
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import { useSecurityScan } from '@/features/security'
 import { useChain } from '@/hooks/useChains'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { TxModalContext } from '@/components/tx-flow'
+import { RemoveModuleFlow } from '@/components/tx-flow/flows'
 import SecurityDrawerHeader from './SecurityDrawerHeader'
 import SecurityDrawerContent from './SecurityDrawerContent'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
@@ -24,8 +26,19 @@ const SecurityReportDrawer = ({
 }: SecurityReportDrawerProps): ReactElement => {
   const { results, isComplete, lastScannedAt } = useSecurityScan(scanContext)
   const chain = useChain(selectedSafe?.chainId ?? '')
+  const { setTxFlow } = useContext(TxModalContext)
   const scanContextRef = useRef(scanContext)
   scanContextRef.current = scanContext
+
+  // Close the report drawer before launching the remove-module tx flow so the tx modal
+  // isn't fighting the sheet for focus, mirroring the Settings → Modules remove action.
+  const handleRemoveModule = useCallback(
+    (address: string) => {
+      onClose()
+      setTxFlow(<RemoveModuleFlow address={address} />)
+    },
+    [onClose, setTxFlow],
+  )
 
   // Forward scan completion to parent
   useEffect(() => {
@@ -60,6 +73,7 @@ const SecurityReportDrawer = ({
               isComplete={isComplete}
               lastScannedAt={lastScannedAt}
               safeQueryParam={chain?.shortName ? `${chain.shortName}:${selectedSafe.address}` : undefined}
+              onRemoveModule={handleRemoveModule}
             />
           </div>
         )}
