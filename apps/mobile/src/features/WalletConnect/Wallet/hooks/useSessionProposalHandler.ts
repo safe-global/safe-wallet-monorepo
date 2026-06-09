@@ -99,7 +99,11 @@ export const useSessionProposalHandler = (walletKit: IWalletKit | null) => {
         })
         const dappName = proposal.params.proposer.metadata.name || 'This dApp'
         const networkName = selectChainById(state, activeSafe.chainId)?.chainName ?? `chain ${activeSafe.chainId}`
-        toast.show(`${dappName} doesn't support ${networkName}`, { native: false, duration: 3000 })
+        toast.show(`${dappName} doesn't support network ${networkName}`, {
+          native: false,
+          duration: 3000,
+          variant: 'error',
+        })
         return
       }
 
