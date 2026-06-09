@@ -75,7 +75,7 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
             <Box mb={2}>
               <NameInput
                 data-testid="invite-name-input"
-                label="How should we call you?"
+                label="What should we call you?"
                 autoFocus
                 name="name"
                 required
