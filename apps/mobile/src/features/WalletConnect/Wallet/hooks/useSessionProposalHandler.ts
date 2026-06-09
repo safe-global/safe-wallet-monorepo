@@ -96,8 +96,8 @@ export const useSessionProposalHandler = (walletKit: IWalletKit | null) => {
           reason: getSdkError('UNSUPPORTED_CHAINS'),
         })
         const dappName = proposal.params.proposer.metadata.name || 'This dApp'
-        const networkName = selectChainById(state, activeSafe.chainId)?.chainName ?? `chain ${activeSafe.chainId}`
-        toast.show(`${dappName} doesn't support network ${networkName}`, {
+        const networkName = selectChainById(state, activeSafe.chainId)?.chainName ?? 'this network'
+        toast.show(`${dappName} doesn't support ${networkName}`, {
           native: false,
           duration: 3000,
           variant: 'error',
