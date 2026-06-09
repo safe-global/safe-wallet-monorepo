@@ -4866,6 +4866,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ensdomains/ethers-patch-v6@npm:^0.0.5":
+  version: 0.0.5
+  resolution: "@ensdomains/ethers-patch-v6@npm:0.0.5"
+  peerDependencies:
+    ethers: 6
+    typescript: ^5
+  checksum: 10/dd8b14cccacd4f6493922a98741372f9f968471de2429d08d57c86ca62eb46898f8840e6ec2583581b7fca8d359f724f351abbd30ee8afce02a1818a0426206c
+  languageName: node
+  linkType: hard
+
 "@esbuild/aix-ppc64@npm:0.19.12":
   version: 0.19.12
   resolution: "@esbuild/aix-ppc64@npm:0.19.12"
@@ -13661,6 +13671,7 @@ __metadata:
     "@emotion/react": "npm:^11.14.0"
     "@emotion/server": "npm:^11.11.0"
     "@emotion/styled": "npm:^11.14.0"
+    "@ensdomains/ethers-patch-v6": "npm:^0.0.5"
     "@eslint/eslintrc": "npm:^3.3.1"
     "@eslint/js": "npm:^9.18.0"
     "@faker-js/faker": "npm:^9.0.3"

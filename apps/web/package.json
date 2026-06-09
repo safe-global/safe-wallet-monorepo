@@ -67,6 +67,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/server": "^11.11.0",
     "@emotion/styled": "^11.14.0",
+    "@ensdomains/ethers-patch-v6": "^0.0.5",
     "@gnosis.pm/zodiac": "^4.0.3",
     "@ledgerhq/context-module": "^1.8.0",
     "@ledgerhq/device-management-kit": "^0.9.1",

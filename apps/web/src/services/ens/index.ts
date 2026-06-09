@@ -1,3 +1,4 @@
+import '@ensdomains/ethers-patch-v6'
 import { type Provider } from 'ethers'
 import { logError } from '../exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
