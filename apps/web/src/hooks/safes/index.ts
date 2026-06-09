@@ -21,6 +21,7 @@ export {
 } from './useAllSafesGrouped'
 export { useSafesSearch } from './useSafesSearch'
 export { useGetHref } from './useGetHref'
+export { default as useGetIsSafeAddress } from './useIsSafeAddress'
 
 // Comparators/utilities
 export { getComparator, nameComparator, lastVisitedComparator } from './comparators'

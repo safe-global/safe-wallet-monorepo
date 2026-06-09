@@ -11,6 +11,8 @@ import inputCss from '@/styles/inputs.module.css'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
+import { useGetIsSafeAddress } from '@/hooks/safes'
+import SafeTag from '@/components/common/SafeTag'
 
 const abFilterOptions = createFilterOptions({
   stringify: (option: { label: string; name: string }) => option.name + ' ' + option.label,
@@ -23,6 +25,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   const [open, setOpen] = useState(false)
   const [openAddressBook, setOpenAddressBook] = useState<boolean>(false)
   const mergedAddressBook = useMergedAddressBooks()
+  const getIsSafeAddress = useGetIsSafeAddress()
 
   const { setValue, control } = useFormContext()
   const addressValue = useWatch({ name, control })
@@ -89,7 +92,13 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
               const { key, ...rest } = props
               return (
                 <Typography data-testid="address-item" component="li" variant="body2" {...rest} key={key}>
-                  <EthHashInfo address={option.label} name={option.name} shortAddress={false} copyAddress={false} />
+                  <EthHashInfo
+                    address={option.label}
+                    name={option.name}
+                    shortAddress={false}
+                    copyAddress={false}
+                    badgeTooltip={getIsSafeAddress(option.label) ? <SafeTag /> : undefined}
+                  />
                 </Typography>
               )
             }}

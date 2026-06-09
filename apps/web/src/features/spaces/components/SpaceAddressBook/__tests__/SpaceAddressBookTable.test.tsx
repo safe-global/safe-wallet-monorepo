@@ -5,6 +5,11 @@ import { Builder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
 
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
+
+const mockIsSafeAddress = jest.fn().mockReturnValue(false)
+jest.mock('@/hooks/safes', () => ({
+  useGetIsSafeAddress: () => mockIsSafeAddress,
+}))
 jest.mock('@/components/common/EthHashInfo', () => {
   const EthHashInfo = ({ address }: { address: string }) => <span data-testid="eth-hash-info">{address}</span>
   return EthHashInfo
@@ -55,6 +60,23 @@ const entryBuilder = () =>
   })
 
 describe('SpaceAddressBookTable', () => {
+  beforeEach(() => {
+    mockIsSafeAddress.mockReturnValue(false)
+  })
+
+  it('tags an entry as a Safe when its address is a workspace Safe', () => {
+    mockIsSafeAddress.mockReturnValue(true)
+    render(<SpaceAddressBookTable entries={[entryBuilder().build()]} />)
+
+    expect(screen.getByTestId('safe-tag')).toBeInTheDocument()
+  })
+
+  it('does not tag an entry that is not a Safe', () => {
+    render(<SpaceAddressBookTable entries={[entryBuilder().build()]} />)
+
+    expect(screen.queryByTestId('safe-tag')).not.toBeInTheDocument()
+  })
+
   it('renders actions for non-local entries', () => {
     render(<SpaceAddressBookTable entries={[entryBuilder().build()]} />)
 

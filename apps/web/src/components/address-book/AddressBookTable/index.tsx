@@ -14,6 +14,8 @@ import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import RemoveDialog from '@/components/address-book/RemoveDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import SafeTag from '@/components/common/SafeTag'
+import { useGetIsSafeAddress } from '@/hooks/safes'
 import AddressBookHeader from '../AddressBookHeader'
 import useAddressBook from '@/hooks/useAddressBook'
 import Track from '@/components/common/Track'
@@ -74,6 +76,7 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
   }
 
   const addressBook = useAddressBook()
+  const getIsSafeAddress = useGetIsSafeAddress()
   const addressBookEntries = Object.entries(addressBook)
   const filteredEntries = useMemo(() => {
     if (!searchQuery) {
@@ -138,7 +141,12 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
     cells: {
       name: {
         rawValue: name,
-        content: name,
+        content: (
+          <Box display="flex" alignItems="center" gap={1}>
+            <span>{name}</span>
+            {getIsSafeAddress(address) && <SafeTag />}
+          </Box>
+        ),
       },
       address: {
         rawValue: address,
@@ -176,7 +184,14 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
                 {filteredEntries.map(([address, name]) => (
                   <Box key={address} className={css.mobileRow}>
                     <Box className={css.mobileEntryInfo}>
-                      <EthHashInfo address={address} showName={true} shortAddress hasExplorer showCopyButton />
+                      <EthHashInfo
+                        address={address}
+                        showName={true}
+                        shortAddress
+                        hasExplorer
+                        showCopyButton
+                        badgeTooltip={getIsSafeAddress(address) ? <SafeTag /> : undefined}
+                      />
                     </Box>
                     <Box className={css.mobileActions}>{renderActionButtons(address, name)}</Box>
                   </Box>

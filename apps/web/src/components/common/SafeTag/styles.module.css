@@ -1,0 +1,17 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px 1px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 18px;
+  white-space: nowrap;
+  color: var(--color-primary-main);
+  background-color: var(--color-background-light);
+}
+
+.icon {
+  font-size: 12px;
+}

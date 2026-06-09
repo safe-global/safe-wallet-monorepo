@@ -5,6 +5,8 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EmailInfo from '@/components/common/EmailInfo'
+import SafeTag from '@/components/common/SafeTag'
+import { useGetIsSafeAddress } from '@/hooks/safes'
 import { NetworkLogosList } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { BookUser, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
@@ -35,6 +37,7 @@ function SpaceAddressBookTable({
   renderExtraAction,
 }: SpaceAddressBookTableProps) {
   const [page, setPage] = useState(0)
+  const getIsSafeAddress = useGetIsSafeAddress()
 
   useEffect(() => {
     setPage(0)
@@ -72,6 +75,7 @@ function SpaceAddressBookTable({
                   >
                     {entry.isLocal && <BookUser className="text-muted-foreground size-4 flex-shrink-0" />}
                     <span className="min-w-0 truncate">{entry.name}</span>
+                    {getIsSafeAddress(entry.address) && <SafeTag />}
                   </TooltipTrigger>
                   <TooltipContent>{entry.name}</TooltipContent>
                 </Tooltip>
