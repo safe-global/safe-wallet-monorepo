@@ -55,8 +55,12 @@ export const useApproveProposal = (walletKit: IWalletKit | null) => {
         const session = await walletKit.approveSession({ id, namespaces, sessionProperties })
         dispatch(addSession(session))
         dispatch(removePending({ id, kind: 'proposal' }))
+        // WalletKit auto-redirects back to the dApp; surface a success toast on our side.
+        toast.show('Connected to app', { native: false, duration: 3000 })
       } catch (e) {
-        toast.show(e instanceof Error ? e.message : 'Failed to connect', { native: false, duration: 3000 })
+        // Show a friendly toast; log the underlying (often technical) error for diagnostics.
+        logWalletKitError('approveSession failed', e)
+        toast.show('Connection to app failed', { native: false, duration: 3000 })
         try {
           await rejectProposal(walletKit, id)
         } catch (rejectErr) {

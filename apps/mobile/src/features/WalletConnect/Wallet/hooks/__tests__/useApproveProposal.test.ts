@@ -54,9 +54,10 @@ describe('useApproveProposal', () => {
     expect(arg.sessionProperties).toBeDefined()
     expect(selectSessions(store.getState() as RootState)).toHaveLength(1)
     expect(selectPending(store.getState() as RootState)).toHaveLength(0)
+    expect(mockToastShow).toHaveBeenCalledWith('Connected to app', expect.anything())
   })
 
-  it('shows a toast and rejects when approveSession fails', async () => {
+  it('shows an error toast and rejects when approveSession fails', async () => {
     const wk = {
       approveSession: jest.fn().mockRejectedValue(new Error('boom')),
       rejectSession: jest.fn().mockResolvedValue(undefined),
@@ -67,7 +68,7 @@ describe('useApproveProposal', () => {
       await result.current.approve(makePending(3))
     })
 
-    expect(mockToastShow).toHaveBeenCalledWith('boom', expect.anything())
+    expect(mockToastShow).toHaveBeenCalledWith('Connection to app failed', expect.anything())
     expect(wk.rejectSession).toHaveBeenCalledWith({ id: 3, reason: getSdkError('USER_REJECTED') })
   })
 
