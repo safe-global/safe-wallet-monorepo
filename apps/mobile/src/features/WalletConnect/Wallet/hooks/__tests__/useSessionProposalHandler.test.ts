@@ -115,4 +115,20 @@ describe('useSessionProposalHandler', () => {
     })
     expect(rejectSession).not.toHaveBeenCalled()
   })
+
+  it('accepts a proposal whose namespaces are keyed by CAIP-2 chain id (no chains array)', async () => {
+    const { wk, rejectSession, emit } = makeWalletKit()
+    const store = seededStore()
+    renderHookWithStore(() => useSessionProposalHandler(wk), store)
+    // Chain lives in the namespace key, not a `chains` array — must not be treated as "no chains".
+    emit(
+      makeProposal({
+        proposer: { metadata: { name: 'dApp', url: 'https://dapp.test', icons: [] } },
+        requiredNamespaces: { 'eip155:1': { methods: [], events: [] } },
+        optionalNamespaces: {},
+      }),
+    )
+    await waitFor(() => expect(selectPending(store.getState() as RootState)).toHaveLength(1))
+    expect(rejectSession).not.toHaveBeenCalled()
+  })
 })

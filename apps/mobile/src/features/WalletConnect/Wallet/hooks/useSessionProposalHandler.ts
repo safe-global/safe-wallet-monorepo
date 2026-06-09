@@ -9,7 +9,7 @@ import type { RootState } from '@/src/store'
 import { pushPending } from '../store/walletKitSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectChainById } from '@/src/store/chains'
-import { isProposalSupported } from '../services/namespaces'
+import { collectNamespaceChains, isProposalSupported } from '../services/namespaces'
 import { SUPPORTED_NAMESPACE } from '../services/constants'
 import { logWalletKitError } from '../utils/errors'
 
@@ -18,9 +18,7 @@ import { logWalletKitError } from '../utils/errors'
 // the dApp never lists (whether required or optional) can never end up in the session.
 const getDappSupportedChains = (proposal: WalletKitTypes.SessionProposal): Set<string> => {
   const { requiredNamespaces, optionalNamespaces } = proposal.params
-  return new Set(
-    [...Object.values(requiredNamespaces), ...Object.values(optionalNamespaces ?? {})].flatMap((ns) => ns.chains ?? []),
-  )
+  return new Set([...collectNamespaceChains(requiredNamespaces), ...collectNamespaceChains(optionalNamespaces ?? {})])
 }
 
 // Swallow stale-proposal errors from WalletKit (typical after a Metro reload / long
@@ -78,7 +76,7 @@ export const useSessionProposalHandler = (walletKit: IWalletKit | null) => {
       // Auto-reject: required chains the Safe isn't deployed on
       const safeDeployments = state.safes[activeSafe.address] ?? {}
       const supportedSet = new Set(Object.keys(safeDeployments).map((c) => `${SUPPORTED_NAMESPACE}:${c}`))
-      const requiredChains = Object.values(proposal.params.requiredNamespaces).flatMap((ns) => ns.chains ?? [])
+      const requiredChains = collectNamespaceChains(proposal.params.requiredNamespaces)
       const missing = requiredChains.find((c) => !supportedSet.has(c))
       if (missing) {
         await safeRejectSession(walletKit, {

@@ -1,5 +1,10 @@
 import type { ProposalTypes } from '@walletconnect/types'
-import { buildSafeApprovedNamespaces, buildSafeSessionProperties, isProposalSupported } from '../namespaces'
+import {
+  buildSafeApprovedNamespaces,
+  buildSafeSessionProperties,
+  collectNamespaceChains,
+  isProposalSupported,
+} from '../namespaces'
 
 // Fixed checksummed address so the snapshot is deterministic.
 const SAFE = '0x1111111111111111111111111111111111111111'
@@ -73,5 +78,18 @@ describe('isProposalSupported', () => {
       } as unknown as ProposalTypes.Struct['requiredNamespaces'],
     })
     expect(isProposalSupported(proposal)).toBe(false)
+  })
+})
+
+describe('collectNamespaceChains', () => {
+  it('reads chain-agnostic namespaces from their chains array', () => {
+    expect(collectNamespaceChains({ eip155: { chains: ['eip155:1', 'eip155:137'] } })).toEqual([
+      'eip155:1',
+      'eip155:137',
+    ])
+  })
+
+  it('derives the chain from CAIP-2 namespace keys that have no chains array', () => {
+    expect(collectNamespaceChains({ 'eip155:1': {}, 'eip155:10': {} })).toEqual(['eip155:1', 'eip155:10'])
   })
 })

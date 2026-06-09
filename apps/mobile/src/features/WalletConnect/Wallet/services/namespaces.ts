@@ -81,3 +81,14 @@ export const isProposalSupported = (proposal: ProposalTypes.Struct): boolean => 
   }
   return true
 }
+
+/**
+ * The CAIP-2 chains a namespaces map covers, handling both WalletConnect shapes:
+ *  - chain-agnostic key with a `chains` array:  `{ eip155: { chains: ['eip155:1'] } }`
+ *  - CAIP-2 key (the chain is the key itself):  `{ 'eip155:1': { accounts, methods } }`
+ *
+ * Reading only `chains` misses the second shape, leaving the supported-chain set empty and
+ * spuriously rejecting valid proposals with UNSUPPORTED_CHAINS.
+ */
+export const collectNamespaceChains = (namespaces: Record<string, { chains?: string[] }>): string[] =>
+  Object.entries(namespaces).flatMap(([key, ns]) => [...(ns.chains ?? []), ...(key.includes(':') ? [key] : [])])
