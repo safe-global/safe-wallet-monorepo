@@ -14,6 +14,8 @@
 import { test as base, expect, type Page, type TestInfo } from '@playwright/test'
 import { SafeApiClient } from '../api/safe-api-client'
 import { LS_KEYS, STAGING_CGW_URL } from '../data/constants'
+import { WalletPage } from '../pages/wallet.page'
+import { getWalletCredentials, type WalletCredentials } from '../data/credentials'
 
 // Cookie consent state — mirrors Cypress localstorage_data.js
 const COOKIE_STATE = JSON.stringify({
@@ -170,6 +172,10 @@ type SafeFixtures = {
   safePage: Page
   /** Safe Client Gateway API client — use for API-first test setup */
   safeApiClient: SafeApiClient
+  /** Wallet page object — connect a private-key wallet and SiWE login */
+  walletPage: WalletPage
+  /** Parsed wallet credentials (lazy — only parses env when a test uses it) */
+  credentials: WalletCredentials
 }
 
 // ---------------------------------------------------------------------------
@@ -193,6 +199,14 @@ export const test = base.extend<SafeFixtures>({
   safeApiClient: async ({}, use) => {
     const client = new SafeApiClient()
     await use(client)
+  },
+
+  walletPage: async ({ safePage }, use) => {
+    await use(new WalletPage(safePage))
+  },
+
+  credentials: async ({}, use) => {
+    await use(getWalletCredentials())
   },
 })
 
