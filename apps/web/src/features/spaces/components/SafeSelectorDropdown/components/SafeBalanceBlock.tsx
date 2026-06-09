@@ -11,6 +11,9 @@ export interface SafeBalanceBlockProps {
 }
 
 function SafeBalanceBlock({ isLoading, balance, threshold, owners, showBalanceDisplay }: SafeBalanceBlockProps) {
+  // 0/0 means the overview hasn't loaded (a deployed safe is always >= 1/1) — keep the skeleton.
+  const thresholdLoading = isLoading || (threshold === 0 && owners === 0)
+
   return (
     <div className="flex flex-col items-end gap-1 py-2 min-w-0 shrink sm:min-w-[90px] sm:shrink-0">
       {isLoading ? (
@@ -21,7 +24,7 @@ function SafeBalanceBlock({ isLoading, balance, threshold, owners, showBalanceDi
         </span>
       )}
       {showBalanceDisplay &&
-        (isLoading ? (
+        (thresholdLoading ? (
           <Skeleton className="h-5 w-12 rounded-full" />
         ) : (
           <BalanceDisplay threshold={threshold} owners={owners} />
