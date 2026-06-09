@@ -32,13 +32,13 @@ test.describe('Dashboard clickthrough', { tag: '@one-shot' }, () => {
 
     // Navigate to balances via the URL — stays read-only, no wallet needed
     await safePage.goto(`${ROUTES.balances}?safe=${SAFES.SEP_STATIC_SAFE_1}`)
-    await expect(safePage).toHaveURL(new RegExp(ROUTES.balances))
+    await expect(safePage).toHaveURL(/\/balances/)
 
     // Sidebar navigation remains visible throughout
     await expect(homePage.sidebar).toBeVisible()
 
     // Navigate back to the dashboard
-    await safePage.goto(`${ROUTES.home}?safe=${SAFES.SEP_STATIC_SAFE_1}`)
+    await homePage.goto(SAFES.SEP_STATIC_SAFE_1)
     await homePage.waitForDashboardLoaded()
     await expect(homePage.safeHeaderInfo).toBeVisible()
   })
