@@ -122,12 +122,14 @@ const SelectSafesOnboarding = (): ReactElement => {
                   count: trustedSelection.selectedCount,
                   total: trustedSelection.total,
                   onToggle: (check) => handleSelectAll('trusted', check),
+                  disabled: trustedSelection.disabled,
                 }}
                 ownedSelectAll={{
                   state: ownedSelection.state,
                   count: ownedSelection.selectedCount,
                   total: ownedSelection.total,
                   onToggle: (check) => handleSelectAll('owned', check),
+                  disabled: ownedSelection.disabled,
                 }}
               />
             </div>

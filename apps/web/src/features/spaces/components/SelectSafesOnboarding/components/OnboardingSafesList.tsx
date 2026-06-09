@@ -9,6 +9,7 @@ interface SectionSelectAll {
   count: number
   total: number
   onToggle: (check: boolean) => void
+  disabled?: boolean
 }
 
 interface SafeListProps {
@@ -37,6 +38,7 @@ const SectionRow = ({ label, selectAll, testId }: { label: string; selectAll?: S
         count={selectAll.count}
         total={selectAll.total}
         onToggle={selectAll.onToggle}
+        disabled={selectAll.disabled}
         label="Select all"
         labelTooltip={`You can select up to ${SAFE_ACCOUNTS_LIMIT} Safe accounts`}
         showCount

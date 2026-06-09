@@ -10,10 +10,14 @@ type Scope = 'all' | 'trusted' | 'owned'
 
 // When the global cap is reached, a section with selections can't grow, so it
 // behaves as fully selected: show it checked and let the next click deselect.
-const applyCap = (selection: ReturnType<typeof getSelectionState>, isAtLimit: boolean) =>
-  selection.state === 'all' || (isAtLimit && selection.selectedCount > 0)
-    ? { ...selection, state: 'all' as const }
-    : selection
+// A section with nothing selected can't grow either, so its toggle is disabled
+// to avoid dead clicks that look like no-ops.
+const applyCap = (selection: ReturnType<typeof getSelectionState>, isAtLimit: boolean) => {
+  const disabled = isAtLimit && selection.selectedCount === 0
+  return selection.state === 'all' || (isAtLimit && selection.selectedCount > 0)
+    ? { ...selection, state: 'all' as const, disabled }
+    : { ...selection, disabled }
+}
 
 interface Args {
   visibleTrusted: AllSafeItems

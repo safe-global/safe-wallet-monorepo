@@ -61,6 +61,7 @@ const OnboardingSelectAllHarness = ({
           count={trustedSelection.selectedCount}
           total={trustedSelection.total}
           onToggle={(check) => handleSelectAll('trusted', check)}
+          disabled={trustedSelection.disabled}
           label="Select all"
           showCount
           testId="select-all-trusted"
@@ -70,6 +71,7 @@ const OnboardingSelectAllHarness = ({
           count={ownedSelection.selectedCount}
           total={ownedSelection.total}
           onToggle={(check) => handleSelectAll('owned', check)}
+          disabled={ownedSelection.disabled}
           label="Select all"
           showCount
           testId="select-all-owned"
@@ -164,6 +166,21 @@ describe('SelectSafesOnboarding — select-all form behavior (mirrors screen wir
     fireEvent.click(screen.getByTestId('select-all-owned'))
     expect(getSelected()['10:0xB']).toBe(false)
     expect(getSelected()['1:0xA']).toBeUndefined()
+  })
+
+  it('disables an empty section toggle when the cap is reached via another section', () => {
+    const trustedSafes = Array.from({ length: 10 }, (_, i) => makeSafe('1', `0x${i}`))
+    const trusted = trustedSafes as AllSafeItems
+    const owned = [makeSafe('10', '0xB')] as AllSafeItems
+    const initialSelected = Object.fromEntries(trustedSafes.map((s) => [`${s.chainId}:${s.address}`, true]))
+
+    render(<OnboardingSelectAllHarness trusted={trusted} owned={owned} initialSelected={initialSelected} />)
+
+    expect(screen.getByTestId('select-all-owned')).toBeDisabled()
+    expect(screen.getByTestId('select-all-trusted')).not.toBeDisabled()
+
+    fireEvent.click(screen.getByTestId('select-all-owned'))
+    expect(getSelected()['10:0xB']).toBeUndefined()
   })
 
   it('owned section over the cap: first click selects up to the limit, second click deselects', () => {
