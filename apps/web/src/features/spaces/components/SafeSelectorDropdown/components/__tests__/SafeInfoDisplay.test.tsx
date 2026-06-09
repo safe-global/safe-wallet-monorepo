@@ -4,7 +4,6 @@ import SafeInfoDisplay from '../SafeInfoDisplay'
 const baseProps = {
   name: 'My Safe',
   address: '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-  chainShortName: 'eth',
 }
 
 describe('SafeInfoDisplay', () => {
@@ -21,5 +20,11 @@ describe('SafeInfoDisplay', () => {
   it('does not render the threshold badge when threshold or owners is 0', () => {
     render(<SafeInfoDisplay {...baseProps} threshold={0} owners={0} />)
     expect(screen.queryByTestId('safe-selector-threshold')).not.toBeInTheDocument()
+  })
+
+  it('renders the name and a copy button on the address line', () => {
+    render(<SafeInfoDisplay {...baseProps} />)
+    expect(screen.getByText('My Safe')).toBeInTheDocument()
+    expect(screen.getByTestId('safe-item-copy-address')).toBeInTheDocument()
   })
 })

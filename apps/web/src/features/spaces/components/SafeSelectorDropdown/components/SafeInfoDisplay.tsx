@@ -4,19 +4,19 @@ import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { getInitials, getSafeDisplayInfo } from '../utils'
 import ThresholdBadge from './ThresholdBadge'
+import CopyAddressButton from './CopyAddressButton'
 
 export interface SafeInfoDisplayProps {
   name: string
   address: string
-  chainShortName?: string
   className?: string
   /** When provided, renders a threshold/owners badge on the avatar's bottom-right corner. */
   threshold?: number
   owners?: number
 }
 
-const SafeInfoDisplay = ({ name, address, chainShortName, className, threshold, owners }: SafeInfoDisplayProps) => {
-  const { addressWithPrefix, displayName, showAddressLine } = getSafeDisplayInfo(name, address, chainShortName)
+const SafeInfoDisplay = ({ name, address, className, threshold, owners }: SafeInfoDisplayProps) => {
+  const { shortAddress, displayName } = getSafeDisplayInfo(name, address)
 
   return (
     <div className={cn('flex items-center gap-3', className)}>
@@ -28,12 +28,15 @@ const SafeInfoDisplay = ({ name, address, chainShortName, className, threshold, 
         {threshold !== undefined && owners !== undefined && <ThresholdBadge threshold={threshold} owners={owners} />}
       </div>
       <div className="flex flex-col items-start flex-1 min-w-0">
-        <Typography variant="paragraph-small-medium">{displayName}</Typography>
-        {showAddressLine && (
-          <Typography variant="paragraph-mini" color="muted">
-            {addressWithPrefix}
+        <Typography variant="paragraph-small-medium" className="truncate">
+          {displayName}
+        </Typography>
+        <div className="flex items-center gap-1 min-w-0">
+          <Typography variant="paragraph-mini" color="muted" className="truncate">
+            {shortAddress}
           </Typography>
-        )}
+          <CopyAddressButton address={address} testId="safe-item-copy-address" />
+        </div>
       </div>
     </div>
   )

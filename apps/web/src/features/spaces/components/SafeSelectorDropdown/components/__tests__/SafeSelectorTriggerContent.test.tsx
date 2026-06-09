@@ -62,10 +62,10 @@ describe('SafeSelectorTriggerContent', () => {
     mockUseSafeDisplayName.mockReturnValue('')
     const item = createItem({ name: 'Name from Ethereum' })
 
-    const { getByText } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" />)
+    const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" />)
 
-    // When no name is resolved, getSafeDisplayInfo falls back to prefixed address
-    expect(getByText(/0xabc/)).toBeInTheDocument()
+    // When no name is resolved, the address line shows the (unprefixed) shortened address.
+    expect(getByTestId('safe-selector-trigger-address')).toHaveTextContent(/0xabc/)
   })
 
   it('shows the not-activated warning icon instead of the balance when the selected chain is undeployed', () => {

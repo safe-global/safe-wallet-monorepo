@@ -33,18 +33,12 @@ function StatusBadge({ chain }: { chain: SafeItemDataChain }) {
 
 const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
   const chainId = item.chains[0]?.chainId ?? ''
-  const chainShortName = item.chains[0]?.shortName ?? ''
   const resolvedName = useSafeDisplayName(item.address, chainId, item.name)
 
   return (
     <Collapsible className="my-1 rounded-lg">
       <CollapsibleTrigger className="flex w-full items-center gap-3 rounded-lg px-4 py-4 text-left outline-none hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring cursor-pointer">
-        <SafeInfoDisplay
-          name={resolvedName}
-          address={item.address}
-          chainShortName={chainShortName}
-          className="flex-1 min-w-0"
-        />
+        <SafeInfoDisplay name={resolvedName} address={item.address} className="flex-1 min-w-0" />
         <div className="flex items-center bg-muted rounded-full p-0.5 shrink-0">
           {item.chains.slice(0, 3).map((chainItem, index) => (
             <span

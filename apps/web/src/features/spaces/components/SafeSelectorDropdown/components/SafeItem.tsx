@@ -10,7 +10,6 @@ import type { SafeItemData } from '../types'
 const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading, parentSafeId }: SafeItemData) => {
   const isNested = Boolean(parentSafeId)
   const chainId = chains[0]?.chainId ?? ''
-  const chainShortName = chains[0]?.shortName ?? ''
   const isUndeployed = Boolean(chains[0]?.isUndeployed)
   const isActivating = Boolean(chains[0]?.isActivating)
 
@@ -21,7 +20,6 @@ const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading
       <SafeInfoDisplay
         name={resolvedName}
         address={address}
-        chainShortName={chainShortName}
         className="flex-1 min-w-0"
         threshold={threshold}
         owners={owners}
