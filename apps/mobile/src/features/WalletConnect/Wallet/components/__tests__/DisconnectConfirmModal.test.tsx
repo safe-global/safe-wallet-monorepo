@@ -24,35 +24,28 @@ jest.mock('@gorhom/bottom-sheet', () => {
 })
 
 describe('DisconnectConfirmModal', () => {
-  it('shows the dApp name and confirms / cancels via the action buttons', () => {
+  it('shows the title, dApp name, and confirms via the Disconnect button', () => {
     const onConfirm = jest.fn()
-    const onClose = jest.fn()
     const { getByText, getByTestId } = render(
-      <DisconnectConfirmModal dappName="Uniswap" onConfirm={onConfirm} onClose={onClose} />,
+      <DisconnectConfirmModal dapp={{ name: 'Uniswap' }} onConfirm={onConfirm} onClose={jest.fn()} />,
     )
 
-    expect(getByText("You'll no longer be connected to Uniswap.")).toBeTruthy()
-
-    fireEvent.press(getByTestId('disconnect-cancel-button'))
-    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(getByText('Disconnect app?')).toBeTruthy()
+    expect(getByText('Uniswap')).toBeTruthy()
 
     fireEvent.press(getByTestId('disconnect-confirm-button'))
     expect(onConfirm).toHaveBeenCalledTimes(1)
   })
 
   it('stays closed when no dApp is selected', () => {
-    const { queryByTestId } = render(
-      <DisconnectConfirmModal dappName={null} onConfirm={jest.fn()} onClose={jest.fn()} />,
-    )
-
+    const { queryByTestId } = render(<DisconnectConfirmModal dapp={null} onConfirm={jest.fn()} onClose={jest.fn()} />)
     expect(queryByTestId('disconnect-confirm-modal')).toBeNull()
   })
 
   it('shows the busy label on the confirm action while disconnecting', () => {
     const { getByText, queryByText } = render(
-      <DisconnectConfirmModal dappName="Uniswap" isBusy onConfirm={jest.fn()} onClose={jest.fn()} />,
+      <DisconnectConfirmModal dapp={{ name: 'Uniswap' }} isBusy onConfirm={jest.fn()} onClose={jest.fn()} />,
     )
-
     expect(getByText('Disconnecting')).toBeTruthy()
     expect(queryByText('Disconnect')).toBeNull()
   })

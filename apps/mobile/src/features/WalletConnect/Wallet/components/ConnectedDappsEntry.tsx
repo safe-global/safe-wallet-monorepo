@@ -29,7 +29,7 @@ export const ConnectedDappsEntry: React.FC = () => {
       <SafeListItem
         label="Connected apps"
         testID="settings-connected-apps-list-item"
-        leftNode={<SafeFontIcon name="apps" color="$colorSecondary" />}
+        leftNode={<SafeFontIcon name="link" color="$colorSecondary" />}
         rightNode={
           <View flexDirection="row" alignItems="center" gap="$2">
             <Text color="$colorSecondary" testID="connected-apps-count">

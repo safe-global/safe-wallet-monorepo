@@ -1,16 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Platform } from 'react-native'
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
-import { getVariable, H4, Text, useTheme, XStack, YStack } from 'tamagui'
+import { getVariable, Text, useTheme, YStack } from 'tamagui'
 import { FullWindowOverlay } from 'react-native-screens'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
 import { SafeButton } from '@/src/components/SafeButton'
+import { DappIcon } from './DappIcon'
+
+export type DisconnectTarget = { name: string; iconUrl?: string }
 
 export interface DisconnectConfirmModalProps {
-  /** Name of the dApp pending disconnect. `null` keeps the sheet closed. */
-  dappName: string | null
-  /** Disables the actions while the relay teardown is in flight. */
+  /** The dApp pending disconnect. `null` keeps the sheet closed. */
+  dapp: DisconnectTarget | null
+  /** Disables the action while the relay teardown is in flight. */
   isBusy?: boolean
   onConfirm: () => void
   onClose: () => void
@@ -18,12 +21,12 @@ export interface DisconnectConfirmModalProps {
 
 /**
  * Controlled confirmation sheet for disconnecting a connected dApp. Presenting is driven by
- * `dappName` (non-null opens it); the last name is retained locally so the copy doesn't flash
- * empty during the close animation. Swiping the sheet down routes through `onClose` so the
- * parent's selection state resets in lockstep with the SDK.
+ * `dapp` (non-null opens it); the last target is retained locally so the icon/name don't flash
+ * empty during the close animation. Mirrors the Figma: title, the dApp's icon + name, and a
+ * single primary "Disconnect" action — dismissing (swipe / backdrop) routes through `onClose`.
  */
 export const DisconnectConfirmModal: React.FC<DisconnectConfirmModalProps> = ({
-  dappName,
+  dapp,
   isBusy = false,
   onConfirm,
   onClose,
@@ -31,16 +34,16 @@ export const DisconnectConfirmModal: React.FC<DisconnectConfirmModalProps> = ({
   const ref = useRef<BottomSheetModal>(null)
   const insets = useSafeAreaInsets()
   const theme = useTheme()
-  const [displayName, setDisplayName] = useState<string | null>(dappName)
+  const [displayed, setDisplayed] = useState<DisconnectTarget | null>(dapp)
 
   useEffect(() => {
-    if (dappName) {
-      setDisplayName(dappName)
+    if (dapp) {
+      setDisplayed(dapp)
       ref.current?.present()
     } else {
       ref.current?.dismiss()
     }
-  }, [dappName])
+  }, [dapp])
 
   const renderBackdrop = useCallback(() => <BackdropComponent shouldNavigateBack={false} />, [])
 
@@ -58,30 +61,28 @@ export const DisconnectConfirmModal: React.FC<DisconnectConfirmModalProps> = ({
       accessible={true}
     >
       <BottomSheetView>
-        <YStack gap="$4" padding="$4" paddingBottom={insets.bottom + 16} testID="disconnect-confirm-modal">
-          <YStack gap="$2" alignItems="center">
-            <H4 fontWeight="600" letterSpacing={-0.2}>
-              Disconnect dApp?
-            </H4>
-            <Text textAlign="center" color="$colorSecondary">
-              {`You'll no longer be connected to ${displayName ?? 'this app'}.`}
+        <YStack gap="$4" paddingHorizontal="$4" paddingTop="$2" paddingBottom={insets.bottom + 16}>
+          <YStack gap="$3" alignItems="center" testID="disconnect-confirm-modal">
+            <Text fontWeight="700" fontSize={16} letterSpacing={-0.1}>
+              Disconnect app?
             </Text>
+            <YStack gap="$2" alignItems="center">
+              <DappIcon url={displayed?.iconUrl} size={36} />
+              <Text fontWeight="700" fontSize={16} letterSpacing={0.15}>
+                {displayed?.name ?? ''}
+              </Text>
+            </YStack>
           </YStack>
-          <XStack gap="$3" paddingTop="$2">
-            <SafeButton secondary flex={1} onPress={onClose} disabled={isBusy} testID="disconnect-cancel-button">
-              Cancel
-            </SafeButton>
-            <SafeButton
-              danger
-              flex={1}
-              onPress={onConfirm}
-              loading={isBusy}
-              loadingText="Disconnecting"
-              testID="disconnect-confirm-button"
-            >
-              Disconnect
-            </SafeButton>
-          </XStack>
+          <SafeButton
+            primary
+            width="100%"
+            onPress={onConfirm}
+            loading={isBusy}
+            loadingText="Disconnecting"
+            testID="disconnect-confirm-button"
+          >
+            Disconnect
+          </SafeButton>
         </YStack>
       </BottomSheetView>
     </BottomSheetModal>

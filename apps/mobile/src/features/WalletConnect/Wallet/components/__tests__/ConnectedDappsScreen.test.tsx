@@ -9,15 +9,33 @@ jest.mock('../../hooks/useDisconnectSession', () => ({
   useDisconnectSession: () => ({ disconnect: mockDisconnect, busyTopic: mockBusyTopic }),
 }))
 
-// Stub the confirm sheet: render the pending dApp name and an inline confirm trigger so the
-// screen's selection + confirm wiring is observable without the bottom-sheet internals.
+// Stub the row: expose the name and a trigger that asks the screen to disconnect, so the
+// screen's selection + confirm wiring is observable without the swipe/menu internals.
+jest.mock('../ConnectedDappRow', () => {
+  const { Text } = jest.requireActual('react-native')
+  return {
+    ConnectedDappRow: ({
+      session,
+      onRequestDisconnect,
+    }: {
+      session: { topic: string; peer: { metadata: { name: string } } }
+      onRequestDisconnect: (s: unknown) => void
+    }) => (
+      <Text testID={`row-${session.topic}`} onPress={() => onRequestDisconnect(session)}>
+        {session.peer.metadata.name}
+      </Text>
+    ),
+  }
+})
+
+// Stub the confirm sheet: render the pending dApp name + an inline confirm trigger.
 jest.mock('../DisconnectConfirmModal', () => {
   const { Text, View } = jest.requireActual('react-native')
   return {
-    DisconnectConfirmModal: ({ dappName, onConfirm }: { dappName: string | null; onConfirm: () => void }) =>
-      dappName ? (
+    DisconnectConfirmModal: ({ dapp, onConfirm }: { dapp: { name: string } | null; onConfirm: () => void }) =>
+      dapp ? (
         <View testID="confirm-modal">
-          <Text>{`confirm:${dappName}`}</Text>
+          <Text>{`confirm:${dapp.name}`}</Text>
           <Text testID="confirm-action" onPress={onConfirm}>
             confirm
           </Text>
@@ -26,8 +44,8 @@ jest.mock('../DisconnectConfirmModal', () => {
   }
 })
 
-const session = (topic: string, name: string, url = `https://${name}.test`): SessionTypes.Struct =>
-  ({ topic, peer: { metadata: { name, url, icons: [] } } }) as unknown as SessionTypes.Struct
+const session = (topic: string, name: string): SessionTypes.Struct =>
+  ({ topic, peer: { metadata: { name, url: `https://${name}.test`, icons: [] } } }) as unknown as SessionTypes.Struct
 
 const storeWith = (sessions: SessionTypes.Struct[]) =>
   createTestStore({
@@ -45,19 +63,19 @@ describe('ConnectedDappsScreen', () => {
     mockBusyTopic = null
   })
 
-  it('shows the empty state when there are no sessions', () => {
+  it('renders the title and the empty state when there are no sessions', () => {
     const { getByText } = renderWithStore(<ConnectedDappsScreen />, storeWith([]))
+    expect(getByText('Connected apps')).toBeTruthy()
     expect(getByText('No connected apps.')).toBeTruthy()
   })
 
   it('renders a row per connected dApp', () => {
-    const { getByText, getAllByTestId } = renderWithStore(
+    const { getByTestId } = renderWithStore(
       <ConnectedDappsScreen />,
       storeWith([session('t1', 'Uniswap'), session('t2', 'Aave')]),
     )
-    expect(getAllByTestId('connected-dapp-row')).toHaveLength(2)
-    expect(getByText('Uniswap')).toBeTruthy()
-    expect(getByText('https://Aave.test')).toBeTruthy()
+    expect(getByTestId('row-t1')).toBeTruthy()
+    expect(getByTestId('row-t2')).toBeTruthy()
   })
 
   it('opens the confirm sheet and disconnects the selected dApp', async () => {
@@ -68,7 +86,7 @@ describe('ConnectedDappsScreen', () => {
 
     expect(queryByTestId('confirm-modal')).toBeNull()
 
-    fireEvent.press(getByTestId('connected-dapp-menu-t1'))
+    fireEvent.press(getByTestId('row-t1'))
     expect(getByText('confirm:Uniswap')).toBeTruthy()
 
     await act(async () => {

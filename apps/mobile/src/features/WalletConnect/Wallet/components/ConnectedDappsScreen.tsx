@@ -1,25 +1,25 @@
 import React, { useCallback, useState } from 'react'
-import { FlatList, Pressable } from 'react-native'
-import { Text, XStack, YStack } from 'tamagui'
+import { FlatList } from 'react-native'
+import { H2, Text, YStack } from 'tamagui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { SessionTypes } from '@walletconnect/types'
 import { useAppSelector } from '@/src/store/hooks'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { selectSessions, selectVerifyByTopic } from '../store/walletKitSlice'
 import { useDisconnectSession } from '../hooks/useDisconnectSession'
-import { DappIcon } from './DappIcon'
-import { VerifyStatusIcon } from './VerifyStatusIcon'
+import { ConnectedDappRow } from './ConnectedDappRow'
 import { DisconnectConfirmModal } from './DisconnectConfirmModal'
 
 /**
- * Lists the Safe's live WalletConnect dApp sessions. Each row carries the verify badge
- * captured at approval and an overflow (3-dots) control that opens the disconnect confirmation.
- * Disconnecting is delegated to the shared `useDisconnectSession` helper; the confirm sheet
- * reflects its busy state and the row drops out as soon as the slice mirror updates.
+ * Lists the Safe's live WalletConnect dApp sessions. Each row exposes a 3-dots menu and a
+ * left-swipe, both routing to a shared confirmation sheet; confirming delegates to
+ * `useDisconnectSession`. The row drops out as soon as the slice mirror updates, and a
+ * dApp-initiated `session_delete` removes it silently (handled in the provider, no toast).
  */
 export const ConnectedDappsScreen: React.FC = () => {
   const sessions = useAppSelector(selectSessions)
   const verifyByTopic = useAppSelector(selectVerifyByTopic)
   const { disconnect, busyTopic } = useDisconnectSession()
+  const insets = useSafeAreaInsets()
   const [selected, setSelected] = useState<SessionTypes.Struct | null>(null)
 
   const handleConfirm = useCallback(async () => {
@@ -31,46 +31,26 @@ export const ConnectedDappsScreen: React.FC = () => {
   }, [selected, disconnect])
 
   const renderItem = useCallback(
-    ({ item }: { item: SessionTypes.Struct }) => {
-      const meta = item.peer.metadata
-      const variant = verifyByTopic[item.topic]
-      return (
-        <XStack gap="$3" paddingVertical="$3" alignItems="center" testID="connected-dapp-row">
-          <DappIcon url={meta.icons?.[0]} size={40} />
-          <YStack flex={1}>
-            <XStack gap="$2" alignItems="center">
-              <Text fontWeight="600" numberOfLines={1}>
-                {meta.name}
-              </Text>
-              {variant ? <VerifyStatusIcon variant={variant} size={16} /> : null}
-            </XStack>
-            {meta.url ? (
-              <Text color="$colorSecondary" numberOfLines={1}>
-                {meta.url}
-              </Text>
-            ) : null}
-          </YStack>
-          <Pressable
-            hitSlop={8}
-            onPress={() => setSelected(item)}
-            accessibilityLabel={`Disconnect ${meta.name}`}
-            testID={`connected-dapp-menu-${item.topic}`}
-          >
-            <SafeFontIcon name="options-horizontal" color="$colorSecondary" />
-          </Pressable>
-        </XStack>
-      )
-    },
+    ({ item }: { item: SessionTypes.Struct }) => (
+      <ConnectedDappRow session={item} variant={verifyByTopic[item.topic]} onRequestDisconnect={setSelected} />
+    ),
     [verifyByTopic],
   )
 
   return (
-    <YStack flex={1}>
+    <YStack flex={1} backgroundColor="$background">
       <FlatList
         data={sessions}
         keyExtractor={(s) => s.topic}
-        contentContainerStyle={{ padding: 16 }}
+        ListHeaderComponent={
+          <YStack gap="$2" paddingVertical="$3">
+            <H2 fontWeight="600">Connected apps</H2>
+            <Text color="$colorSecondary">Third-party apps you've connected to your Safe.</Text>
+          </YStack>
+        }
         renderItem={renderItem}
+        ItemSeparatorComponent={() => <YStack height="$2" />}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: insets.bottom + 16 }}
         ListEmptyComponent={
           <Text color="$colorSecondary" textAlign="center" marginTop="$8">
             No connected apps.
@@ -78,7 +58,7 @@ export const ConnectedDappsScreen: React.FC = () => {
         }
       />
       <DisconnectConfirmModal
-        dappName={selected?.peer.metadata.name ?? null}
+        dapp={selected ? { name: selected.peer.metadata.name, iconUrl: selected.peer.metadata.icons?.[0] } : null}
         isBusy={busyTopic === selected?.topic}
         onConfirm={handleConfirm}
         onClose={() => setSelected(null)}
