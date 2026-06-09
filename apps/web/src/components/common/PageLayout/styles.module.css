@@ -3,10 +3,11 @@
 /* The topbar lives in normal flow as the first child of .main, so it pushes the
    page content down by its own height — no fixed reservation to keep in sync,
    so it can wrap onto extra rows on narrow viewports without clipping content.
-   .main owns the sidebar offset (padding-left), so the topbar inherits it. */
+   .main owns the sidebar offset (padding-left), so the topbar inherits it.
+   It scrolls away with the page (not sticky) so a page's own sticky sub-header
+   — e.g. the Assets tabs — can pin to the top cleanly without overlapping it. */
 .topbar {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 2;
   width: 100%;
 }
