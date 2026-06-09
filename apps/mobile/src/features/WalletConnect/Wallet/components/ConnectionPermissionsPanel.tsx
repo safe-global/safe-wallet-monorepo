@@ -9,14 +9,9 @@ type Props = {
   variant: VerifyVariant
 }
 
-type PermissionRow = { allowed: boolean; text: string }
+const CAN = ['View your balance and activity', 'Request transactions approval'] as const
 
-const CAN: PermissionRow[] = [
-  { allowed: true, text: 'View your balance and activity' },
-  { allowed: true, text: 'Request transactions approval' },
-]
-
-const CANNOT: PermissionRow[] = [{ allowed: false, text: 'Move funds without permission' }]
+const CANNOT = ['Move funds without permission'] as const
 
 // Three copy variants over a binary colour: verified is green, unverified/malicious share
 // the red error treatment (the linked Figma has no distinct malicious colour). Malicious
@@ -27,7 +22,7 @@ const BANNER_COPY: Record<VerifyVariant, string> = {
   malicious: 'This domain is flagged as a known scam.',
 }
 
-const Row: React.FC<PermissionRow> = ({ allowed, text }) => {
+const Row: React.FC<{ allowed: boolean; text: string }> = ({ allowed, text }) => {
   const icon: IconName = allowed ? 'check' : 'close'
   return (
     <XStack gap={10} paddingHorizontal="$2" alignItems="center">
@@ -69,8 +64,8 @@ export const ConnectionPermissionsPanel: React.FC<Props> = ({ variant }) => {
           <Text paddingHorizontal="$2" fontSize={16} lineHeight={22} color="$colorSecondary">
             This website will be able to:
           </Text>
-          {CAN.map((row) => (
-            <Row key={row.text} {...row} />
+          {CAN.map((text) => (
+            <Row key={text} text={text} allowed={true} />
           ))}
         </YStack>
 
@@ -78,8 +73,8 @@ export const ConnectionPermissionsPanel: React.FC<Props> = ({ variant }) => {
           <Text paddingHorizontal="$2" fontSize={16} lineHeight={22} color="$colorSecondary">
             This website won't be able to:
           </Text>
-          {CANNOT.map((row) => (
-            <Row key={row.text} {...row} />
+          {CANNOT.map((text) => (
+            <Row key={text} text={text} allowed={false} />
           ))}
         </YStack>
 
