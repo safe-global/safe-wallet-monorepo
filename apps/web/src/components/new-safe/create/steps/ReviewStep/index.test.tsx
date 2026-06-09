@@ -220,6 +220,17 @@ describe('ReviewStep', () => {
     expect(getByTestId('review-step-next-btn')).toBeDisabled()
   })
 
+  it('does not block multichain creation when counterfactual is disabled', () => {
+    // Counterfactual off -> no PayLater forcing, no sign-in gate (direct deployment path).
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+
+    const { getByTestId } = render(
+      <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+    )
+
+    expect(getByTestId('review-step-next-btn')).not.toBeDisabled()
+  })
+
   it('creates counterfactual safes on each network for multichain when authenticated', async () => {
     const mockData = buildMultiChainData()
 

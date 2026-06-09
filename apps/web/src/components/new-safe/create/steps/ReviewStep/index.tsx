@@ -250,7 +250,12 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const customRPCs = useAppSelector(selectRpc)
 
   // Derive effective pay method synchronously to avoid one-render gap.
-  const effectivePayMethod = getEffectivePayMethod(isMultiChainDeployment, isUserAuthenticated, payMethod)
+  const effectivePayMethod = getEffectivePayMethod(
+    isMultiChainDeployment,
+    isUserAuthenticated,
+    payMethod,
+    isCounterfactualEnabled,
+  )
 
   const handleBack = () => {
     onBack(data)

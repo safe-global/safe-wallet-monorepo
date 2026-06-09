@@ -12,20 +12,28 @@ import {
 } from './utils'
 
 describe('getEffectivePayMethod', () => {
-  it('forces PayLater for multichain deployments regardless of selection or auth', () => {
-    expect(getEffectivePayMethod(true, true, PayMethod.PayNow)).toBe(PayMethod.PayLater)
-    expect(getEffectivePayMethod(true, false, PayMethod.PayNow)).toBe(PayMethod.PayLater)
-    expect(getEffectivePayMethod(true, false, PayMethod.PayLater)).toBe(PayMethod.PayLater)
+  it('forces PayLater for multichain deployments when counterfactual is enabled, regardless of selection or auth', () => {
+    expect(getEffectivePayMethod(true, true, PayMethod.PayNow, true)).toBe(PayMethod.PayLater)
+    expect(getEffectivePayMethod(true, false, PayMethod.PayNow, true)).toBe(PayMethod.PayLater)
+    expect(getEffectivePayMethod(true, false, PayMethod.PayLater, true)).toBe(PayMethod.PayLater)
+  })
+
+  it('does not force PayLater for multichain when counterfactual is disabled', () => {
+    // Falls back to the single-chain rule: unauthenticated PayLater -> PayNow.
+    expect(getEffectivePayMethod(true, false, PayMethod.PayLater, false)).toBe(PayMethod.PayNow)
+    expect(getEffectivePayMethod(true, false, PayMethod.PayNow, false)).toBe(PayMethod.PayNow)
+    expect(getEffectivePayMethod(true, false, PayMethod.PayLater, undefined)).toBe(PayMethod.PayNow)
+    expect(getEffectivePayMethod(true, true, PayMethod.PayNow, false)).toBe(PayMethod.PayNow)
   })
 
   it('falls back to PayNow for single-chain PayLater when the user is not authenticated', () => {
-    expect(getEffectivePayMethod(false, false, PayMethod.PayLater)).toBe(PayMethod.PayNow)
+    expect(getEffectivePayMethod(false, false, PayMethod.PayLater, true)).toBe(PayMethod.PayNow)
   })
 
   it('keeps the selected method for single-chain when authenticated', () => {
-    expect(getEffectivePayMethod(false, true, PayMethod.PayLater)).toBe(PayMethod.PayLater)
-    expect(getEffectivePayMethod(false, true, PayMethod.PayNow)).toBe(PayMethod.PayNow)
-    expect(getEffectivePayMethod(false, false, PayMethod.PayNow)).toBe(PayMethod.PayNow)
+    expect(getEffectivePayMethod(false, true, PayMethod.PayLater, true)).toBe(PayMethod.PayLater)
+    expect(getEffectivePayMethod(false, true, PayMethod.PayNow, true)).toBe(PayMethod.PayNow)
+    expect(getEffectivePayMethod(false, false, PayMethod.PayNow, true)).toBe(PayMethod.PayNow)
   })
 })
 
