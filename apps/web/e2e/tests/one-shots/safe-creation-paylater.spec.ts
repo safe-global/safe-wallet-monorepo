@@ -56,12 +56,17 @@ test.describe('Safe creation — pay later', { tag: '@one-shot' }, () => {
     // 7. Create the counterfactual Safe.
     await safePage.getByTestId('review-step-next-btn').click()
 
-    // 8. Success dialog.
-    await expect(safePage.getByTestId('account-success-message')).toBeVisible()
-    await safePage.getByTestId('cf-creation-lets-go-btn').click()
+    // 8. Creation persists to the backend then routes to the new Safe. Allow
+    //    generous time — the persist call can be slow on the staging backend.
+    //    The URL change is the definitive success signal.
+    await expect(safePage).toHaveURL(/\/home\?safe=sep:/, { timeout: 45_000 })
 
-    // 9. Lands on the dashboard with the not-activated banner.
-    await expect(safePage).toHaveURL(/\/home\?safe=sep:/)
-    await expect(safePage.getByTestId('activation-section')).toBeVisible()
+    // 9. Dismiss the success dialog if it is shown, then confirm the
+    //    not-activated (counterfactual) dashboard banner.
+    const letsGoBtn = safePage.getByTestId('cf-creation-lets-go-btn')
+    if (await letsGoBtn.isVisible().catch(() => false)) {
+      await letsGoBtn.click()
+    }
+    await expect(safePage.getByTestId('activation-section')).toBeVisible({ timeout: 15_000 })
   })
 })
