@@ -190,7 +190,7 @@ export const test = base.extend<SafeFixtures>({
     await attachFailureEvidence(testInfo, page, consoleErrors, consoleWarnings, failedRequests)
   },
 
-  safeApiClient: async (_, use) => {
+  safeApiClient: async ({}, use) => {
     const client = new SafeApiClient()
     await use(client)
   },
