@@ -151,6 +151,7 @@ jobs:
             sleep 10
           done
           echo "Preview did not become reachable after ~5 minutes; continuing anyway."
+          exit 0
 
       - name: Run the one-shot Playwright project
         id: oneshot
@@ -165,7 +166,7 @@ jobs:
         id: convert
         continue-on-error: true
         working-directory: apps/web/e2e
-        run: bash ./scripts/github/video_to_gif.sh
+        run: bash ../scripts/github/video_to_gif.sh
 
       - name: Configure AWS credentials
         if: steps.convert.outcome == 'success'
