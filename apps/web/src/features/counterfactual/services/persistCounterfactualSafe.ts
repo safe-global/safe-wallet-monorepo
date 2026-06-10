@@ -8,6 +8,7 @@ import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { normalizeSpaceId } from '@/utils/spaces'
+import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/constants'
 
 type PersistArgs = {
   chainId: string
@@ -24,6 +25,10 @@ type PersistArgs = {
    *  safe is not auto-attached to the space (the backend would reject the call
    *  with 403). The safe is still persisted at the user level. */
   isAdminOfActiveSpace: boolean
+  /** Number of safes already in the active space. When at `SAFE_ACCOUNTS_LIMIT`
+   *  the backend would reject the add; the safe is still persisted at the user
+   *  level and the user is informed via a toast. */
+  spaceSafeCount?: number
   dispatch: AppDispatch
 }
 
@@ -49,6 +54,7 @@ export const persistCounterfactualSafe = async ({
   spaceId,
   isUserAuthenticated,
   isAdminOfActiveSpace,
+  spaceSafeCount,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
   // 1. Save to backend (blocking). Unauth users fall back to local-only —
@@ -77,6 +83,17 @@ export const persistCounterfactualSafe = async ({
             variant: 'info',
             groupKey: 'cf-safe-space-skipped',
             message: 'Safe added to your accounts — ask an admin to add it to the workspace',
+          }),
+        )
+      } else if (spaceSafeCount !== undefined && spaceSafeCount >= SAFE_ACCOUNTS_LIMIT) {
+        // Space is full — the backend would reject the add. Skip it and keep the
+        // user-level safe so creation still succeeds, but tell the user it
+        // wasn't added to the workspace.
+        dispatch(
+          showNotification({
+            variant: 'info',
+            groupKey: 'cf-safe-space-limit',
+            message: `Safe created. This workspace is full (${SAFE_ACCOUNTS_LIMIT} Safes), so it wasn't added — you can add it to another workspace`,
           }),
         )
       } else {

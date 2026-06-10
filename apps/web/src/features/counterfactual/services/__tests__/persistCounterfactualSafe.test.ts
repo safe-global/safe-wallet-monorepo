@@ -307,6 +307,43 @@ describe('persistCounterfactualSafe', () => {
     expect(result.ok).toBe(true)
   })
 
+  it('skips the space POST and shows an info toast when the space is already at the safe limit', async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      spaceSafeCount: 40,
+      dispatch,
+    })
+
+    expect(userInitiate).toHaveBeenCalledTimes(1)
+    expect(spaceInitiate).not.toHaveBeenCalled()
+    expect(userDeleteInitiate).not.toHaveBeenCalled()
+    expect(replayImpl).toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledWith(
+      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-limit' }),
+    )
+    expect(result.ok).toBe(true)
+  })
+
+  it('still POSTs to the space endpoint when the space is below the safe limit', async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      spaceSafeCount: 39,
+      dispatch,
+    })
+
+    expect(spaceInitiate).toHaveBeenCalled()
+    expect(showNotificationImpl).not.toHaveBeenCalled()
+    expect(result.ok).toBe(true)
+  })
+
   it('does not show the skip toast when the user is admin and the space POST succeeds', async () => {
     const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
 

@@ -2,9 +2,11 @@ import { render, screen, fireEvent } from '@/tests/test-utils'
 import AddAccountsChooser from '../index'
 
 let mockIsAdmin = true
+let mockIsAtSafeLimit = false
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => mockIsAdmin,
+  useIsCurrentSpaceAtSafeLimit: () => mockIsAtSafeLimit,
 }))
 
 const mockTrackEvent = jest.fn()
@@ -38,6 +40,7 @@ jest.mock('@/components/common/SpaceSafeBar/AccountsModal', () => ({
 describe('AddAccountsChooser', () => {
   beforeEach(() => {
     mockIsAdmin = true
+    mockIsAtSafeLimit = false
     mockTrackEvent.mockClear()
     mockPush.mockClear()
     mockAddAccountsMount.mockClear()
@@ -143,6 +146,33 @@ describe('AddAccountsChooser', () => {
   })
 
   it('navigates to /new-safe/create when "Create new Safe" is clicked', () => {
+    render(<AddAccountsChooser entryPoint="dashboard" />)
+
+    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    fireEvent.click(screen.getByText('Create new Safe'))
+
+    expect(mockPush).toHaveBeenCalledWith('/new-safe/create')
+  })
+
+  it('shows a warning on the "Create new Safe" row when the workspace is at the safe limit', () => {
+    mockIsAtSafeLimit = true
+    render(<AddAccountsChooser entryPoint="dashboard" />)
+
+    fireEvent.click(screen.getByTestId('add-space-account-button'))
+
+    expect(screen.getByText(/already has 40 Safes/i)).toBeInTheDocument()
+  })
+
+  it('does not show the safe-limit warning when the workspace is below the limit', () => {
+    render(<AddAccountsChooser entryPoint="dashboard" />)
+
+    fireEvent.click(screen.getByTestId('add-space-account-button'))
+
+    expect(screen.queryByText(/already has 40 Safes/i)).not.toBeInTheDocument()
+  })
+
+  it('still navigates to /new-safe/create when at the limit (creation is never blocked)', () => {
+    mockIsAtSafeLimit = true
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
     fireEvent.click(screen.getByTestId('add-space-account-button'))

@@ -7,7 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { cn } from '@/utils/cn'
 import AccountsModal from '@/components/common/SpaceSafeBar/AccountsModal'
 import AddAccounts from '@/features/spaces/components/AddAccounts'
-import { useCurrentSpaceId, useIsAdmin } from '@/features/spaces'
+import { useCurrentSpaceId, useIsAdmin, useIsCurrentSpaceAtSafeLimit } from '@/features/spaces'
+import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/constants'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { OVERVIEW_LABELS } from '@/services/analytics/events/overview'
@@ -30,10 +31,20 @@ interface ChooserRowProps {
   onClick: () => void
   disabled?: boolean
   disabledTooltip?: string
+  warning?: string
   testId?: string
 }
 
-const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip, testId }: ChooserRowProps) => {
+const ChooserRow = ({
+  icon,
+  title,
+  subtitle,
+  onClick,
+  disabled,
+  disabledTooltip,
+  warning,
+  testId,
+}: ChooserRowProps) => {
   const row = (
     <button
       type="button"
@@ -54,6 +65,7 @@ const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip,
         <span className="block text-xs text-muted-foreground mt-1 group-hover:text-sidebar-accent-foreground/70">
           {subtitle}
         </span>
+        {warning && <span className="block text-xs text-destructive mt-1">{warning}</span>}
       </span>
       <ChevronRight className="size-3.5 shrink-0" />
     </button>
@@ -80,6 +92,7 @@ const AddAccountsChooser = ({
   const [subModal, setSubModal] = useState<SubModal>(null)
   const isAdmin = useIsAdmin()
   const spaceId = useCurrentSpaceId()
+  const isSpaceAtSafeLimit = useIsCurrentSpaceAtSafeLimit()
 
   const router = useRouter()
 
@@ -144,6 +157,11 @@ const AddAccountsChooser = ({
               title="Create new Safe"
               subtitle="Create a new Safe account"
               onClick={handleCreate}
+              warning={
+                isSpaceAtSafeLimit
+                  ? `This workspace already has ${SAFE_ACCOUNTS_LIMIT} Safes (the maximum). Your new Safe won't be added to it, but you can still create it.`
+                  : undefined
+              }
             />
           </div>
         </DialogContent>
