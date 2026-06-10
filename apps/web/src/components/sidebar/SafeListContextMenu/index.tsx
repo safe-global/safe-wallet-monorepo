@@ -15,7 +15,6 @@ import PlusIcon from '@/public/images/common/plus.svg'
 import ContextMenu from '@/components/common/ContextMenu'
 import { trackEvent, OVERVIEW_EVENTS, OVERVIEW_LABELS, type AnalyticsEvent } from '@/services/analytics'
 import { SvgIcon } from '@mui/material'
-import useAddressBook from '@/hooks/useAddressBook'
 import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
 import { CreateSafeOnNewChain } from '@/features/multichain'
@@ -66,8 +65,6 @@ const SafeListContextMenu = ({
     { chainId, ownerAddress: address },
     { skip: !isNestedSafesEnabled || hideNestedSafes || !address || !anchorEl },
   )
-  const addressBook = useAddressBook()
-  const hasName = address in addressBook
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
 
   const nestedSafesForChain = ownedSafes?.safes ?? []
@@ -142,7 +139,7 @@ const SafeListContextMenu = ({
             <ListItemIcon>
               <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
             </ListItemIcon>
-            <ListItemText data-testid="rename-btn">{hasName ? 'Rename' : 'Give name'}</ListItemText>
+            <ListItemText data-testid="rename-btn">Rename</ListItemText>
           </MenuItem>
         )}
 

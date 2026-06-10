@@ -3,7 +3,6 @@ import { MoreVertical, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import useAddressBook from '@/hooks/useAddressBook'
 
 interface PinnedSafeContextMenuProps {
   address: string
@@ -14,8 +13,6 @@ interface PinnedSafeContextMenuProps {
 const PinnedSafeContextMenu = ({ address, chainId, name }: PinnedSafeContextMenuProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [renameOpen, setRenameOpen] = useState(false)
-  const addressBook = useAddressBook(chainId)
-  const hasName = address in addressBook
 
   const handleRename = (e: MouseEvent) => {
     e.stopPropagation()
@@ -43,7 +40,7 @@ const PinnedSafeContextMenu = ({ address, chainId, name }: PinnedSafeContextMenu
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={handleRename} onSelect={(e) => e.stopPropagation()} data-testid="rename-btn">
             <Pencil className="size-4 text-success" />
-            <span>{hasName ? 'Rename' : 'Give name'}</span>
+            <span>Rename</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

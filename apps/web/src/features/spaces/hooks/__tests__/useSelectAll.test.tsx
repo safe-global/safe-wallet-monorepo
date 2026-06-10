@@ -64,8 +64,30 @@ describe('useSelectAll', () => {
 
     const { result } = renderUseSelectAll(trusted, owned, { '1:0xA': true })
 
-    expect(result.current.trustedSelection).toEqual({ state: 'all', selectedCount: 1, total: 1 })
-    expect(result.current.ownedSelection).toEqual({ state: 'none', selectedCount: 0, total: 1 })
+    expect(result.current.trustedSelection).toEqual({ state: 'all', selectedCount: 1, total: 1, disabled: false })
+    expect(result.current.ownedSelection).toEqual({ state: 'none', selectedCount: 0, total: 1, disabled: false })
+  })
+
+  it('disables a section with no selections once the global limit is reached', () => {
+    const trusted = [makeSafe('1', '0xA'), makeSafe('1', '0xB'), makeSafe('1', '0xC')]
+    const owned = [makeSafe('10', '0xD')]
+
+    const { result } = renderUseSelectAll(trusted, owned, { '1:0xA': true, '1:0xB': true, '1:0xC': true })
+
+    expect(result.current.isAtLimit).toBe(true)
+    expect(result.current.trustedSelection.disabled).toBe(false)
+    expect(result.current.ownedSelection.disabled).toBe(true)
+  })
+
+  it('keeps both sections enabled while below the global limit', () => {
+    const trusted = [makeSafe('1', '0xA'), makeSafe('1', '0xB')]
+    const owned = [makeSafe('10', '0xD')]
+
+    const { result } = renderUseSelectAll(trusted, owned, { '1:0xA': true })
+
+    expect(result.current.isAtLimit).toBe(false)
+    expect(result.current.trustedSelection.disabled).toBe(false)
+    expect(result.current.ownedSelection.disabled).toBe(false)
   })
 
   it('selects every visible safe when scope=all and check=true', () => {

@@ -80,7 +80,7 @@ describe('SafeSelectorTriggerContent', () => {
       <SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />,
     )
 
-    expect(getByTestId('safe-selector-not-activated-icon')).toHaveAttribute('aria-label', 'Not activated')
+    expect(getByTestId('safe-selector-not-activated-icon')).toHaveAttribute('aria-label', 'Inactive')
     expect(queryByTestId('safe-balance-block')).not.toBeInTheDocument()
   })
 

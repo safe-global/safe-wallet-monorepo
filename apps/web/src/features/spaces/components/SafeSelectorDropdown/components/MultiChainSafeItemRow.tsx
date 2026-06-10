@@ -9,7 +9,7 @@ import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeInfoDisplay from './SafeInfoDisplay'
 import BalanceDisplay from './BalanceDisplay'
 import ChainLogo from './ChainLogo'
-import NotActivatedBadge from './NotActivatedBadge'
+import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData, SafeItemDataChain } from '../types'
 
 interface MultiChainSafeItemRowProps {

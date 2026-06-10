@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
 const isCI = !!process.env.CI
+const hasExternalBaseURL = !!process.env.PLAYWRIGHT_BASE_URL
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || (isCI ? 'http://localhost:8080' : 'http://localhost:3000')
 
 export default defineConfig({
@@ -28,10 +29,16 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: '**/tests/one-shots/**',
+    },
+    {
+      name: 'one-shots',
+      testDir: './tests/one-shots',
+      use: { ...devices['Desktop Chrome'], video: 'on' },
     },
   ],
   outputDir: './test-results',
-  ...(isCI
+  ...(isCI && !hasExternalBaseURL
     ? {
         webServer: {
           command: 'npx serve out -p 8080',
