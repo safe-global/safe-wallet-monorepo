@@ -127,9 +127,9 @@ function SpaceSafeBar() {
   const connectWallet = useConnectWallet()
   const { txFlow } = useContext(TxModalContext)
 
-  // `usePathname` reflects the browser URL, but error pages (404/403) render under
-  // the original unmatched URL (e.g. `/hom`), so also check the matched Next.js route.
-  if (HIDDEN_ROUTES.includes(pathname ?? '') || HIDDEN_ROUTES.includes(router.pathname)) return null
+  // Use the matched Next.js route, not `usePathname`: error pages (404/403) render
+  // under the original unmatched URL (e.g. `/hom`), where `usePathname` wouldn't match.
+  if (HIDDEN_ROUTES.includes(router.pathname)) return null
   // /settings/* serves both per-safe (URL has ?safe=) and global pages — hide when no safe context.
   if (pathname?.startsWith(AppRoutes.settings.index) && !urlSafeAddress) return null
 
