@@ -25,7 +25,7 @@ const useSpaceSubmit = (
   const [updateSpace] = useSpacesUpdateV1Mutation()
 
   const editSpace = async (name: string) => {
-    const response = await updateSpace({ id: Number(spaceId), updateSpaceDto: { name } })
+    const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name } })
 
     if (response.error) {
       throw new Error(getRtkQueryErrorMessage(response.error))
@@ -42,7 +42,7 @@ const useSpaceSubmit = (
     const response = await createSpaceWithUser({ createSpaceDto: { name } })
 
     if (response.data) {
-      const newSpaceId = response.data.id.toString()
+      const newSpaceId = response.data.uuid
       trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: newSpaceId }, { workspace_id: newSpaceId })
 
       dispatch(setLastUsedSpace(newSpaceId))

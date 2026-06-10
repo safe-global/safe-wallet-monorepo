@@ -18,7 +18,7 @@ const SpaceBreadcrumbs = () => {
   const isQualifiedSafe = useIsQualifiedSafe()
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
+  const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isUserSignedIn || !spaceId })
 
   const safeAddress = useSafeAddressFromUrl()
   const parentSafe = useParentSafe()

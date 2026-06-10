@@ -51,7 +51,7 @@ const SelectSafesOnboarding = (): ReactElement => {
     setValue,
   })
 
-  const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
+  const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
 
   const selectedSafes = useWatch({ control, name: 'selectedSafes' })

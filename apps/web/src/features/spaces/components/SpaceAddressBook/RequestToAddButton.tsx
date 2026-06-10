@@ -38,7 +38,7 @@ const RequestToAddButton = ({ address, name, chainIds, isLocal, alreadyRequested
       // Local contacts need to be uploaded as private first
       if (isLocal) {
         const uploadResult = await upsertPrivate({
-          spaceId: Number(spaceId),
+          spaceId: spaceId ?? '',
           upsertAddressBookItemsDto: { items: [{ name, address, chainIds }] },
         })
         if (uploadResult.error) {
@@ -59,7 +59,7 @@ const RequestToAddButton = ({ address, name, chainIds, isLocal, alreadyRequested
       }
 
       const result = await createRequest({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         createAddressBookRequestDto: { address },
       })
 

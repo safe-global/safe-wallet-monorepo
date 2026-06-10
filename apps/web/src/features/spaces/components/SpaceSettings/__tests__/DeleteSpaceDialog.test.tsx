@@ -4,6 +4,7 @@ import { makeStore } from '@/store'
 import DeleteSpaceDialog from '../DeleteSpaceDialog'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockDeleteSpace = jest.fn()
 const mockRouterPush = jest.fn()
@@ -20,7 +21,7 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
-const mockSpace: GetSpaceResponse = { id: 7, name: 'My Workspace', members: [], safeCount: 0 }
+const mockSpace: GetSpaceResponse = { id: 7, uuid: MOCK_SPACE_UUID, name: 'My Workspace', members: [], safeCount: 0 }
 
 const renderDialog = (space = mockSpace, onClose = jest.fn()) => {
   const store = makeStore(undefined, { skipBroadcast: true })
@@ -85,7 +86,7 @@ describe('DeleteSpaceDialog', () => {
     fireEvent.click(screen.getByTestId('space-confirm-delete-button'))
 
     await waitFor(() => {
-      expect(mockDeleteSpace).toHaveBeenCalledWith({ id: 7 })
+      expect(mockDeleteSpace).toHaveBeenCalledWith({ id: MOCK_SPACE_UUID })
     })
   })
 

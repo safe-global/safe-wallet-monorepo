@@ -104,6 +104,8 @@ jest.mock('../../store/pendingCfDeletesSlice', () => ({
 import { useAppSelector } from '@/store'
 import useCounterfactualSafeSync from '../useCounterfactualSafeSync'
 import { isAuthenticated, selectIsStoreHydrated, lastUsedSpace } from '@/store/authSlice'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
+const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
 
 const mockSelectors = (authenticated: boolean, hydrated: boolean, spaceId: string | null) => {
   ;(useAppSelector as jest.Mock).mockImplementation((selector: unknown) => {
@@ -161,30 +163,30 @@ describe('useCounterfactualSafeSync', () => {
   })
 
   it('fetches space CF safes when a space is active', async () => {
-    mockSelectors(true, true, '42')
+    mockSelectors(true, true, MOCK_SPACE_UUID)
     renderHook(() => useCounterfactualSafeSync())
     await flush()
 
-    expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: 42 })
+    expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID })
   })
 
   it('re-fetches when spaceId changes', async () => {
-    mockSelectors(true, true, '1')
+    mockSelectors(true, true, MOCK_SPACE_UUID)
     const { rerender } = renderHook(() => useCounterfactualSafeSync())
     await flush()
-    expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: 1 })
+    expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID })
 
     // Switch to another space — hook must re-run and fetch the new space's safes.
-    mockSelectors(true, true, '2')
+    mockSelectors(true, true, MOCK_SPACE_UUID_ALT)
     rerender()
     await flush()
 
-    expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: 2 })
+    expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID_ALT })
     expect(spaceInitiate).toHaveBeenCalledTimes(2)
   })
 
-  it('does not call the space endpoint when spaceId is non-numeric (legacy persisted state)', async () => {
-    mockSelectors(true, true, 'abc')
+  it('does not call the space endpoint when spaceId is empty (legacy persisted state)', async () => {
+    mockSelectors(true, true, '   ')
     renderHook(() => useCounterfactualSafeSync())
     await flush()
 
@@ -193,11 +195,11 @@ describe('useCounterfactualSafeSync', () => {
   })
 
   it('does not re-fetch when the same spaceId is retained across rerenders', async () => {
-    mockSelectors(true, true, '1')
+    mockSelectors(true, true, MOCK_SPACE_UUID)
     const { rerender } = renderHook(() => useCounterfactualSafeSync())
     await flush()
 
-    mockSelectors(true, true, '1')
+    mockSelectors(true, true, MOCK_SPACE_UUID)
     rerender()
     await flush()
 
@@ -297,7 +299,7 @@ describe('useCounterfactualSafeSync', () => {
 
     pendingDeletesState = [{ chainId: '11155111', address: '0xc21a' }]
     spaceResponse = { safes: { '11155111': [{ ...dtoBase, address: '0xc21a' }] } }
-    mockSelectors(true, true, '42')
+    mockSelectors(true, true, MOCK_SPACE_UUID)
 
     renderHook(() => useCounterfactualSafeSync())
     await flush()
@@ -340,7 +342,7 @@ describe('useCounterfactualSafeSync', () => {
       },
     }
 
-    mockSelectors(true, true, '42')
+    mockSelectors(true, true, MOCK_SPACE_UUID)
     renderHook(() => useCounterfactualSafeSync())
     await flush()
 

@@ -4,6 +4,7 @@ import { makeStore } from '@/store'
 import LeaveSpaceDialog from '../LeaveSpaceDialog'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockLeaveSpace = jest.fn()
 const mockRouterPush = jest.fn()
@@ -21,7 +22,7 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
-const mockSpace: GetSpaceResponse = { id: 7, name: 'My Workspace', members: [], safeCount: 0 }
+const mockSpace: GetSpaceResponse = { id: 7, uuid: MOCK_SPACE_UUID, name: 'My Workspace', members: [], safeCount: 0 }
 
 const renderDialog = (opts: { space?: GetSpaceResponse | undefined; onClose?: () => void } = {}) => {
   const space = 'space' in opts ? opts.space : mockSpace
@@ -62,7 +63,7 @@ describe('LeaveSpaceDialog', () => {
     fireEvent.click(screen.getByTestId('space-confirm-leave-button'))
 
     await waitFor(() => {
-      expect(mockLeaveSpace).toHaveBeenCalledWith({ spaceId: 7 })
+      expect(mockLeaveSpace).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID })
     })
   })
 

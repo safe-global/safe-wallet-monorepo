@@ -180,7 +180,7 @@ const SpacesList = () => {
   const { membership, signerAddress, isLoading, email } = useCurrentMemberProfile()
   const { profileName, displayName } = membership ? getSidebarProfileInfo(membership, signerAddress, email) : {}
 
-  const singleSpaceId = activeSpaces.length === 1 ? String(activeSpaces[0].id) : null
+  const singleSpaceId = activeSpaces.length === 1 ? activeSpaces[0].uuid : null
 
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,

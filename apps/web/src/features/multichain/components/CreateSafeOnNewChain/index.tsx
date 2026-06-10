@@ -28,7 +28,7 @@ import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../type
 import { persistCounterfactualSafe } from '@/features/counterfactual/services'
 import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
 import { useIsAdmin } from '@/features/spaces'
-import { parseSpaceId } from '@/utils/spaces'
+import { normalizeSpaceId } from '@/utils/spaces'
 
 const ReplaySafeDialog = ({
   safeAddress,
@@ -53,7 +53,7 @@ const ReplaySafeDialog = ({
   const customRpc = useAppSelector(selectRpc)
   const isUserAuthenticated = useAppSelector(isAuthenticated)
   const spaceId = useAppSelector(lastUsedSpace)
-  const isAdminOfActiveSpace = useIsAdmin(parseSpaceId(spaceId) ?? undefined)
+  const isAdminOfActiveSpace = useIsAdmin(normalizeSpaceId(spaceId) ?? undefined)
   const dispatch = useAppDispatch()
   const [creationError, setCreationError] = useState<Error>()
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)

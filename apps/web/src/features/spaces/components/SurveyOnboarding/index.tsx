@@ -64,10 +64,10 @@ const SurveyOnboarding = (): ReactElement | null => {
   const spaceId = router.query.spaceId as string | undefined
 
   const { data, isLoading, error } = useSurveysGetStateV1Query(
-    { spaceId: Number(spaceId), slug: SURVEY_SLUG },
+    { spaceId: spaceId ?? '', slug: SURVEY_SLUG },
     { skip: !spaceId },
   )
-  const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
+  const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
   const nameLookup = useSafeNameLookup()
   const sidePanelAccounts = useMemo(
@@ -112,7 +112,7 @@ const SurveyOnboarding = (): ReactElement | null => {
     const selections = Array.from(selected).sort()
     try {
       await submit({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         slug: SURVEY_SLUG,
         submitSurveyResponseDto: { selections: { [page.id]: selections } },
       }).unwrap()
