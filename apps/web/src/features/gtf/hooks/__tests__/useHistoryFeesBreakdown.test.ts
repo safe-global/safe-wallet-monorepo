@@ -103,7 +103,7 @@ describe('useHistoryFeesBreakdown', () => {
       const { result } = renderHook(() => useHistoryFeesBreakdown(mockSafePaysTx))
 
       await waitFor(() => expect(result.current).not.toBeNull())
-      expect(result.current?.gasFee).toEqual(expect.objectContaining({ label: 'Gas fee', currency: 'WETH' }))
+      expect(result.current?.gasFee).toEqual(expect.objectContaining({ label: 'Max gas fee', currency: 'WETH' }))
       expect(result.current?.gasFee.amount).toMatch(/^0\.0001/)
       expect(result.current?.gasFee.fiatAmount).toBeDefined()
     })
@@ -147,7 +147,7 @@ describe('useHistoryFeesBreakdown', () => {
 
       await waitFor(() => expect(result.current).not.toBeNull())
       expect(result.current?.gasFee).toEqual(
-        expect.objectContaining({ label: 'Gas fee', currency: 'ETH', amount: '0.0024' }),
+        expect.objectContaining({ label: 'Max gas fee', currency: 'ETH', amount: '0.0024' }),
       )
       expect(result.current?.gasFee.fiatAmount).toBeDefined()
       expect(result.current?.executionFee).toEqual({ label: 'Execution fee', isFree: true })
