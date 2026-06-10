@@ -3,7 +3,7 @@ import { IconButton, InputAdornment, Skeleton, SvgIcon, TextField, Typography } 
 import Autocomplete from '@mui/material/Autocomplete'
 import classnames from 'classnames'
 import type { UseFormRegisterReturn } from 'react-hook-form'
-import { isAddress } from 'viem'
+import { isAddress } from 'ethers'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
 import useAddressBook from '@/hooks/useAddressBook'
@@ -116,7 +116,7 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
       inputValue={value}
       onInputChange={(_, newValue, reason) => {
         if (reason === 'input') {
-          inputProps.onChange({ target: { name: inputProps.name, value: newValue } } as never)
+          inputProps.onChange({ target: { name: inputProps.name, value: newValue } })
         }
       }}
       onChange={(_, option) => {

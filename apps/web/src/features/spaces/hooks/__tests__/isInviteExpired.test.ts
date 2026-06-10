@@ -17,6 +17,11 @@ describe('isInviteExpired', () => {
     expect(isInviteExpired(memberBuilder().with({ status: 'INVITED', inviteExpiresAt: undefined }).build())).toBe(false)
   })
 
+  it('returns false when inviteExpiresAt is a malformed date', () => {
+    const member = memberBuilder().with({ status: 'INVITED', inviteExpiresAt: 'not-a-date' }).build()
+    expect(isInviteExpired(member)).toBe(false)
+  })
+
   it('returns false for non-INVITED members even with a past expiry', () => {
     const past = '2020-01-01T00:00:00.000Z'
     expect(isInviteExpired(memberBuilder().with({ status: 'ACTIVE', inviteExpiresAt: past }).build())).toBe(false)

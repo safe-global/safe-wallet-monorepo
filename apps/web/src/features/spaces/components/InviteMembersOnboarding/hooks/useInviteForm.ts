@@ -66,7 +66,6 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     }
 
     if (validMembers.length === 0) {
-      setIsSubmitting(true)
       onSuccess()
       return
     }

@@ -1,4 +1,4 @@
-import { isAddress } from 'viem'
+import { isAddress } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { MemberRole } from '../../hooks/useSpaceMembers'
 import type { EmailInviteUserDto, WalletInviteUserDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'

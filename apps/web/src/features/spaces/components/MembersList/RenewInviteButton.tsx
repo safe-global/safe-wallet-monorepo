@@ -16,7 +16,7 @@ const RenewInviteButton = ({ member }: { member: MemberDto }) => {
   const handleRenew = async () => {
     if (!spaceId) return
 
-    const { error } = await renewInvite({ spaceId: Number(spaceId), userId: member.user.id })
+    const { error } = await renewInvite({ spaceId, userId: member.user.id })
 
     if (error) {
       dispatch(
