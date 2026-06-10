@@ -44,7 +44,6 @@ enum ErrorCodes {
   _632 = '632: Error fetching relay task status',
   _633 = '633: Notification (un-)registration failed',
   _640 = '640: Error signing in with Ethereum',
-  _650 = '650: Error syncing counterfactual safes with backend',
 
   _700 = '700: Failed to read from local/session storage',
   _701 = '701: Failed to write to local/session storage',

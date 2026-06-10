@@ -4,7 +4,6 @@ import { getStoreInstance } from '@/store'
 import { isAuthenticated, selectIsStoreHydrated, lastUsedSpace, setCfSafeSynced } from '@/store/authSlice'
 import { addUndeployedSafe, selectUndeployedSafes } from '../store/undeployedSafesSlice'
 import { removePendingCfDelete, selectPendingCfDeletes } from '../store/pendingCfDeletesSlice'
-import { Errors, logError } from '@/services/exceptions'
 import { fromBackendDto } from '../services/counterfactualSafeMapper'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import {
@@ -16,9 +15,6 @@ import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/s
 import { parseSpaceId } from '@/utils/spaces'
 
 const SYNC_RETRY_DELAY_MS = 2000
-
-const is404 = (error: unknown): boolean =>
-  typeof error === 'object' && error !== null && 'status' in error && (error as { status?: unknown }).status === 404
 
 /**
  * Syncs counterfactual safes from the backend into Redux on app load.
@@ -72,13 +68,7 @@ const useCounterfactualSafeSync = () => {
               ).unwrap()
               dispatch(removePendingCfDelete({ chainId, address }))
             } catch (e) {
-              // 404 means the record is already gone server-side — our intended end
-              // state. Drop the queue entry so we stop retrying it on every page load.
-              if (is404(e)) {
-                dispatch(removePendingCfDelete({ chainId, address }))
-                return
-              }
-              logError(Errors._650, e)
+              console.error('[CF Sync] Failed to flush pending CF delete', e)
             }
           }),
         )
@@ -160,12 +150,12 @@ const useCounterfactualSafeSync = () => {
       try {
         await fetchAndMerge()
       } catch (firstError) {
-        logError(Errors._650, firstError)
+        console.error('[CF Sync] Initial sync failed, retrying once', firstError)
         await new Promise((resolve) => setTimeout(resolve, SYNC_RETRY_DELAY_MS))
         try {
           await fetchAndMerge()
         } catch (retryError) {
-          logError(Errors._650, retryError)
+          console.error('[CF Sync] Retry also failed, giving up until next auth/space change', retryError)
         }
       }
       // Settle regardless of outcome — leaving consumers waiting forever is worse
