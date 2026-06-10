@@ -326,6 +326,7 @@ describe('SpaceSafeBar', () => {
     'renders nothing on hidden route %s',
     (pathname) => {
       mockUsePathname.mockReturnValue(pathname)
+      mockUseRouter.mockReturnValue({ pathname })
 
       const { queryByTestId } = render(<SpaceSafeBar />)
       expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()
@@ -393,6 +394,7 @@ describe('SpaceSafeBar', () => {
     'renders nothing on static page %s',
     (pathname) => {
       mockUsePathname.mockReturnValue(pathname)
+      mockUseRouter.mockReturnValue({ pathname })
 
       const { queryByTestId } = render(<SpaceSafeBar />)
       expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()
