@@ -19,7 +19,7 @@ type SpaceListInvite = {
 }
 
 const SpaceListInvite = ({ space, invitedByName }: SpaceListInvite) => {
-  const { id, name, members, safeCount } = space
+  const { uuid, name, members, safeCount } = space
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
 
   return (
@@ -34,7 +34,7 @@ const SpaceListInvite = ({ space, invitedByName }: SpaceListInvite) => {
         <Inviter invitedByName={invitedByName} variant="h4" avatarSize={24} />
       </Stack>
 
-      <Link href={{ pathname: AppRoutes.spaces.index, query: { spaceId: id } }} passHref legacyBehavior>
+      <Link href={{ pathname: AppRoutes.spaces.index, query: { spaceId: uuid } }} passHref legacyBehavior>
         <MUILink
           underline="none"
           sx={{ display: 'block' }}

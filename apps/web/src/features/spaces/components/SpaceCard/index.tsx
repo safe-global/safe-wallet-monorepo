@@ -56,16 +56,16 @@ const SpaceCard = ({
   isLink?: boolean
   currentUserId?: number
 }) => {
-  const { id, name, members, safeCount } = space
+  const { uuid, name, members, safeCount } = space
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
   const isAdmin = isUserActiveAdmin(members, currentUserId)
 
   const handleClick = () => {
     trackEvent(
-      { ...SPACE_EVENTS.WORKSPACE_SWITCHED, label: String(id) },
+      { ...SPACE_EVENTS.WORKSPACE_SWITCHED, label: uuid },
       {
         from_workspace_id: undefined,
-        to_workspace_id: String(id),
+        to_workspace_id: uuid,
         source: 'space_selector',
         safe_count: safeCount,
       },
@@ -78,7 +78,9 @@ const SpaceCard = ({
       className={classNames(css.card, { [css.compact]: isCompact })}
       onClick={isLink ? handleClick : undefined}
     >
-      {isLink && <Link className={css.cardLink} href={{ pathname: AppRoutes.spaces.index, query: { spaceId: id } }} />}
+      {isLink && (
+        <Link className={css.cardLink} href={{ pathname: AppRoutes.spaces.index, query: { spaceId: uuid } }} />
+      )}
 
       <InitialsAvatar name={name} size={isCompact ? 'medium' : 'large'} />
 

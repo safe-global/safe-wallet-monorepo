@@ -7,7 +7,7 @@ const mockPush = jest.fn()
 const mockSubmit = jest.fn()
 const mockUnwrap = jest.fn()
 
-let routerQuery: Record<string, string | undefined> = { spaceId: '42' }
+let routerQuery: Record<string, string | undefined> = { spaceId: '11111111-1111-1111-1111-111111111111' }
 let routerIsReady = true
 let queryResult: {
   data: SurveyStateDto | undefined
@@ -98,7 +98,7 @@ function setQueryResult(result: Partial<typeof queryResult>): void {
 describe('SurveyOnboarding', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    routerQuery = { spaceId: '42' }
+    routerQuery = { spaceId: '11111111-1111-1111-1111-111111111111' }
     routerIsReady = true
     setQueryResult({ data: surveyFixture })
     mutationState = { isLoading: false, error: undefined }
@@ -158,7 +158,7 @@ describe('SurveyOnboarding', () => {
 
     await waitFor(() => {
       expect(mockSubmit).toHaveBeenCalledWith({
-        spaceId: 42,
+        spaceId: '11111111-1111-1111-1111-111111111111',
         slug: 'onboarding',
         submitSurveyResponseDto: {
           // Selections are sorted alphabetically before submit so the same set
@@ -171,7 +171,7 @@ describe('SurveyOnboarding', () => {
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/spaces',
-        query: { spaceId: '42' },
+        query: { spaceId: '11111111-1111-1111-1111-111111111111' },
       })
     })
   })
@@ -199,7 +199,7 @@ describe('SurveyOnboarding', () => {
     await waitFor(() => {
       expect(mockReplace).toHaveBeenCalledWith({
         pathname: '/spaces',
-        query: { spaceId: '42' },
+        query: { spaceId: '11111111-1111-1111-1111-111111111111' },
       })
     })
     expect(screen.queryByText('Failed to load survey. Please refresh.')).not.toBeInTheDocument()

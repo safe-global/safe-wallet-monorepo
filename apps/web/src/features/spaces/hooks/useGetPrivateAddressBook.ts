@@ -11,7 +11,7 @@ const useGetPrivateAddressBook = (): SpaceAddressBookItemDto[] => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: addressBook } = useUserAddressBookGetPrivateItemsV1Query(
-    { spaceId: Number(spaceId) },
+    { spaceId: spaceId ?? '' },
     { skip: !isUserSignedIn || !spaceId },
   )
 

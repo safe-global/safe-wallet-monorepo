@@ -127,7 +127,7 @@ const useOnboardingSubmit = (
     ([key, isSelected]) => isSelected && !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX),
   ).length
 
-  const addNewSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdNum: number) => {
+  const addNewSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
     const flatSpaceSafes = flattenSafeItems(spaceSafes)
 
     const safesToAdd = Object.entries(selectedSafes)
@@ -145,7 +145,7 @@ const useOnboardingSubmit = (
     if (safesToAdd.length === 0) return
 
     const result = await addSafesToSpace({
-      spaceId: spaceIdNum,
+      spaceId: spaceIdStr,
       createSpaceSafesDto: { safes: safesToAdd },
     })
     if (result.error) {
@@ -153,7 +153,7 @@ const useOnboardingSubmit = (
     }
   }
 
-  const removeUnselectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdNum: number) => {
+  const removeUnselectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
     const flatSpaceSafes = flattenSafeItems(spaceSafes)
 
     const safesToRemove = flatSpaceSafes
@@ -166,7 +166,7 @@ const useOnboardingSubmit = (
     if (safesToRemove.length === 0) return
 
     const result = await removeSafesFromSpace({
-      spaceId: spaceIdNum,
+      spaceId: spaceIdStr,
       deleteSpaceSafesDto: { safes: safesToRemove },
     })
     if (result.error) {
@@ -174,9 +174,9 @@ const useOnboardingSubmit = (
     }
   }
 
-  const processSelectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdNum: number) => {
-    await addNewSafes(selectedSafes, spaceIdNum)
-    await removeUnselectedSafes(selectedSafes, spaceIdNum)
+  const processSelectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
+    await addNewSafes(selectedSafes, spaceIdStr)
+    await removeUnselectedSafes(selectedSafes, spaceIdStr)
   }
 
   const onSubmit = handleSubmit(async (data) => {
@@ -187,7 +187,7 @@ const useOnboardingSubmit = (
 
     try {
       trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNTS })
-      await processSelectedSafes(data.selectedSafes, Number(spaceId))
+      await processSelectedSafes(data.selectedSafes, spaceId)
 
       onSuccess()
     } catch (e) {

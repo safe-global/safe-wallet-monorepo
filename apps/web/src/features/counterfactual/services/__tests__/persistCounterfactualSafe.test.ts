@@ -2,6 +2,7 @@ import { persistCounterfactualSafe } from '../persistCounterfactualSafe'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { AppDispatch } from '@/store'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const userInitiate = jest.fn()
 const userDeleteInitiate = jest.fn()
@@ -115,14 +116,14 @@ describe('persistCounterfactualSafe', () => {
 
     const result = await persistCounterfactualSafe({
       ...baseArgs,
-      spaceId: '42',
+      spaceId: MOCK_SPACE_UUID,
       isUserAuthenticated: true,
       dispatch,
     })
 
     expect(userInitiate).toHaveBeenCalledTimes(1)
     expect(spaceInitiate).toHaveBeenCalledWith({
-      spaceId: 42,
+      spaceId: MOCK_SPACE_UUID,
       createSpaceSafesDto: { safes: [{ chainId: '100', address: '0xSafe' }] },
     })
     expect(replayImpl).toHaveBeenCalled()
@@ -137,7 +138,7 @@ describe('persistCounterfactualSafe', () => {
 
     const result = await persistCounterfactualSafe({
       ...baseArgs,
-      spaceId: '42',
+      spaceId: MOCK_SPACE_UUID,
       isUserAuthenticated: true,
       dispatch,
     })
@@ -176,7 +177,7 @@ describe('persistCounterfactualSafe', () => {
 
     const result = await persistCounterfactualSafe({
       ...baseArgs,
-      spaceId: '42',
+      spaceId: MOCK_SPACE_UUID,
       isUserAuthenticated: true,
       dispatch,
     })
@@ -222,7 +223,7 @@ describe('persistCounterfactualSafe', () => {
 
     const result = await persistCounterfactualSafe({
       ...baseArgs,
-      spaceId: '42',
+      spaceId: MOCK_SPACE_UUID,
       isUserAuthenticated: true,
       dispatch,
     })
@@ -244,7 +245,7 @@ describe('persistCounterfactualSafe', () => {
 
     const result = await persistCounterfactualSafe({
       ...baseArgs,
-      spaceId: '42',
+      spaceId: MOCK_SPACE_UUID,
       isUserAuthenticated: true,
       dispatch,
     })
@@ -254,12 +255,12 @@ describe('persistCounterfactualSafe', () => {
     expect(result.ok).toBe(false)
   })
 
-  it('skips the space POST when spaceId is non-numeric (legacy persisted state)', async () => {
+  it('skips the space POST when spaceId is empty (legacy persisted state)', async () => {
     const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
 
     const result = await persistCounterfactualSafe({
       ...baseArgs,
-      spaceId: 'abc',
+      spaceId: '   ',
       isUserAuthenticated: true,
       dispatch,
     })
@@ -275,7 +276,7 @@ describe('persistCounterfactualSafe', () => {
 
     const result = await persistCounterfactualSafe({
       ...baseArgs,
-      spaceId: '42',
+      spaceId: MOCK_SPACE_UUID,
       isUserAuthenticated: false,
       dispatch,
     })
@@ -291,7 +292,7 @@ describe('persistCounterfactualSafe', () => {
 
     const result = await persistCounterfactualSafe({
       ...baseArgs,
-      spaceId: '42',
+      spaceId: MOCK_SPACE_UUID,
       isUserAuthenticated: true,
       isAdminOfActiveSpace: false,
       dispatch,
@@ -311,7 +312,7 @@ describe('persistCounterfactualSafe', () => {
 
     await persistCounterfactualSafe({
       ...baseArgs,
-      spaceId: '42',
+      spaceId: MOCK_SPACE_UUID,
       isUserAuthenticated: true,
       dispatch,
     })

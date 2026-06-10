@@ -40,7 +40,7 @@ const RemoveSafeDialog = ({
 
     try {
       const result = await removeSafeAccounts({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         deleteSpaceSafesDto: { safes: safeAccounts },
       })
 

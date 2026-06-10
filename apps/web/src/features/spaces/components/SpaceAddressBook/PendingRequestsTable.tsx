@@ -35,7 +35,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     if (!spaceId) return
     setLoadingId(requestId)
     try {
-      const result = await approveRequest({ spaceId: Number(spaceId), requestId })
+      const result = await approveRequest({ spaceId: spaceId ?? '', requestId })
       if (result.error) {
         dispatch(
           showNotification({ message: 'Failed to approve request', variant: 'error', groupKey: 'approve-error' }),
@@ -60,7 +60,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     if (!spaceId) return
     setLoadingId(requestId)
     try {
-      const result = await rejectRequest({ spaceId: Number(spaceId), requestId })
+      const result = await rejectRequest({ spaceId: spaceId ?? '', requestId })
       if (result.error) {
         dispatch(showNotification({ message: 'Failed to reject request', variant: 'error', groupKey: 'reject-error' }))
         return

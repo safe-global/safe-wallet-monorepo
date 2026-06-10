@@ -16,7 +16,7 @@ export const SpacesSidebarContent = ({
   isLoading = false,
 }: SidebarVariantContentProps): ReactElement => {
   const spaceId = useCurrentSpaceId()
-  const isActiveMember = useIsActiveMember(selectedSpace?.id)
+  const isActiveMember = useIsActiveMember(selectedSpace?.uuid)
   const isSecurityHubEnabled = useHasFeature(FEATURES.SECURITY_HUB)
 
   const getLink = (item: SidebarItemConfig) => ({

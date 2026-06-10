@@ -38,10 +38,10 @@ export const SpaceSummaryNew = ({
 }
 
 const SpaceCardNew = ({ space, isLink = true }: { space: GetSpaceResponse; isLink?: boolean }) => {
-  const { id, name, members, safeCount } = space
+  const { uuid, name, members, safeCount } = space
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
   const numberOfAccounts = safeCount
-  const isAdmin = useIsAdmin(id)
+  const isAdmin = useIsAdmin(uuid)
 
   const logoColor = getDeterministicColor(name)
   const logoLetter = name.slice(0, 1).toUpperCase()
@@ -55,7 +55,7 @@ const SpaceCardNew = ({ space, isLink = true }: { space: GetSpaceResponse; isLin
       {isLink && (
         <Link
           className="absolute left-0 top-0 size-full"
-          href={{ pathname: AppRoutes.spaces.index, query: { spaceId: id } }}
+          href={{ pathname: AppRoutes.spaces.index, query: { spaceId: uuid } }}
           aria-label={`Go to ${name}`}
         />
       )}

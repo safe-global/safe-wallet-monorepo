@@ -38,11 +38,11 @@ jest.mock('../variants', () => ({
 
 describe('EnhancedSidebar', () => {
   const mockSpaces: SpaceItem[] = [
-    { id: 1, name: 'Space 1', safeCount: 0 },
-    { id: 2, name: 'Space 2', safeCount: 0 },
+    { uuid: 'uuid-1', name: 'Space 1', safeCount: 0 },
+    { uuid: 'uuid-2', name: 'Space 2', safeCount: 0 },
   ]
 
-  const mockSelectedSpace: SpaceItem = { id: 1, name: 'Space 1', safeCount: 0 }
+  const mockSelectedSpace: SpaceItem = { uuid: 'uuid-1', name: 'Space 1', safeCount: 0 }
 
   it('renders all required components', () => {
     render(<EnhancedSidebar type="spaces" spaceInitial="T" selectedSpace={mockSelectedSpace} spaces={mockSpaces} />)

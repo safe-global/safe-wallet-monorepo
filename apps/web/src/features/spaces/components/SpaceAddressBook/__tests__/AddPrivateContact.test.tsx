@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import AddPrivateContact from '../AddPrivateContact'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUpsertPrivate = jest.fn()
 
@@ -58,10 +59,10 @@ describe('AddPrivateContact', () => {
     mockUpsertPrivate.mockResolvedValue({})
     render(<AddPrivateContact />)
 
-    await lastProps!.submit({ name: 'Bob', address: '0xdef', chainIds: ['137'] }, '42')
+    await lastProps!.submit({ name: 'Bob', address: '0xdef', chainIds: ['137'] }, MOCK_SPACE_UUID)
 
     expect(mockUpsertPrivate).toHaveBeenCalledWith({
-      spaceId: 42,
+      spaceId: MOCK_SPACE_UUID,
       upsertAddressBookItemsDto: { items: [{ name: 'Bob', address: '0xdef', chainIds: ['137'] }] },
     })
   })
