@@ -3,9 +3,9 @@ import type { SessionTypes } from '@walletconnect/types'
 import { render, fireEvent } from '@/src/tests/test-utils'
 import { ConnectedDappRow } from '../ConnectedDappRow'
 
-// Swipeable renders its primary child inline and exposes renderRightActions; render both so the
-// trash action is queryable without driving a real gesture.
-jest.mock('react-native-gesture-handler/Swipeable', () => {
+// ReanimatedSwipeable renders its primary child inline and exposes renderRightActions; render
+// both so the trash action is queryable without driving a real gesture.
+jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () => {
   const react = jest.requireActual('react')
   const { View } = jest.requireActual('react-native')
   return react.forwardRef(

@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from 'react'
 import { Pressable } from 'react-native'
-import Swipeable from 'react-native-gesture-handler/Swipeable'
+import ReanimatedSwipeable, { type SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable'
 import { Text, View, XStack } from 'tamagui'
 import type { SessionTypes } from '@walletconnect/types'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -25,7 +25,7 @@ interface Props {
  */
 export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onOpenMenu, onRequestDisconnect }) => {
   const meta = session.peer.metadata
-  const swipeRef = useRef<Swipeable>(null)
+  const swipeRef = useRef<SwipeableMethods>(null)
 
   const requestDisconnect = useCallback(() => {
     swipeRef.current?.close()
@@ -57,7 +57,7 @@ export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onOpenMenu
   )
 
   return (
-    <Swipeable ref={swipeRef} renderRightActions={renderTrash} overshootRight={false}>
+    <ReanimatedSwipeable ref={swipeRef} renderRightActions={renderTrash} overshootRight={false}>
       <XStack
         backgroundColor="$backgroundPaper"
         borderRadius="$2"
@@ -86,6 +86,6 @@ export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onOpenMenu
           <SafeFontIcon name="options-horizontal" color="$colorSecondary" />
         </Pressable>
       </XStack>
-    </Swipeable>
+    </ReanimatedSwipeable>
   )
 }
