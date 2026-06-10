@@ -10,5 +10,3 @@
 export * from './typeGuards'
 export * from './safeDeployment'
 export * from './safeCreationEvents'
-export * from './counterfactualSafeMapper'
-export * from './persistCounterfactualSafe'

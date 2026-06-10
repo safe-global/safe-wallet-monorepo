@@ -36,7 +36,6 @@ jest.mock('@/store', () => ({
 
 jest.mock('@/store/authSlice', () => ({
   setAuthenticated: (value: number) => ({ type: 'auth/setAuthenticated', payload: value }),
-  SESSION_LIFETIME_MS: 24 * 60 * 60 * 1000,
   isAuthenticated: () => false,
 }))
 

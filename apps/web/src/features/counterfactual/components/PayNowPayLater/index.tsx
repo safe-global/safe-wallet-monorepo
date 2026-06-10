@@ -5,7 +5,6 @@ import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
 import {
   Box,
-  CircularProgress,
   FormControl,
   FormControlLabel,
   List,
@@ -19,9 +18,6 @@ import {
 import css from './styles.module.css'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
-import { useSiwe } from '@/services/siwe/useSiwe'
-import { useAppDispatch } from '@/store'
-import { setAuthenticated, SESSION_LIFETIME_MS } from '@/store/authSlice'
 
 const PayNowPayLater = ({
   totalFee,
@@ -29,34 +25,17 @@ const PayNowPayLater = ({
   isMultiChain = false,
   payMethod,
   setPayMethod,
-  isUserAuthenticated = true,
 }: {
   totalFee: string
   willRelay: boolean
   isMultiChain?: boolean
   payMethod: PayMethod
   setPayMethod: Dispatch<SetStateAction<PayMethod>>
-  isUserAuthenticated?: boolean
 }) => {
   const chain = useCurrentChain()
-  const dispatch = useAppDispatch()
   const { showGasFeeEstimation, showStablecoinFeeInfo } = useNativeTokenDisplay()
-  const { signIn, loading: signingIn } = useSiwe()
 
-  const signInAndSelectPayLater = async () => {
-    if (signingIn) return
-    const result = await signIn()
-    if (result && !result.error) {
-      dispatch(setAuthenticated(Date.now() + SESSION_LIFETIME_MS))
-      setPayMethod(PayMethod.PayLater)
-    }
-  }
-
-  const onChoosePayMethod = async (_: ChangeEvent<HTMLInputElement>, newPayMethod: string) => {
-    if (newPayMethod === PayMethod.PayLater && !isUserAuthenticated) {
-      await signInAndSelectPayLater()
-      return
-    }
+  const onChoosePayMethod = (_: ChangeEvent<HTMLInputElement>, newPayMethod: string) => {
     setPayMethod(newPayMethod as PayMethod)
   }
 
@@ -150,44 +129,20 @@ const PayNowPayLater = ({
             data-testid="connected-wallet-execution-method"
             sx={{ flex: 1 }}
             value={PayMethod.PayLater}
-            disabled={signingIn}
             className={classnames(css.radioContainer, {
               [css.active]: payMethod === PayMethod.PayLater,
             })}
             label={
               <>
-                <Typography className={css.radioTitle}>
-                  Pay later {signingIn && <CircularProgress size={14} sx={{ ml: 0.5 }} />}
-                </Typography>
+                <Typography className={css.radioTitle}>Pay later</Typography>
                 <Typography className={css.radioSubtitle} variant="body2" color="text.secondary">
-                  {isUserAuthenticated ? 'with the first transaction' : 'Sign in to enable'}
+                  with the first transaction
                 </Typography>
               </>
             }
             control={<Radio />}
           />
         </RadioGroup>
-        {!isUserAuthenticated && (
-          <Box mt={1}>
-            <ErrorMessage level="info">
-              <Typography
-                variant="body2"
-                component="span"
-                onClick={signInAndSelectPayLater}
-                sx={{
-                  color: 'primary.main',
-                  cursor: signingIn ? 'default' : 'pointer',
-                  textDecoration: 'underline',
-                  fontWeight: 'bold',
-                  opacity: signingIn ? 0.6 : 1,
-                }}
-              >
-                Sign into a workspace
-              </Typography>{' '}
-              to create a Safe and activate later.
-            </ErrorMessage>
-          </Box>
-        )}
       </FormControl>
     </>
   )

@@ -39,14 +39,6 @@ export type UndeployedSafeProps = PredictedSafeProps | ReplayedSafeProps
 export type UndeployedSafe = {
   status: UndeployedSafeStatus
   props: UndeployedSafeProps
-  /**
-   * Whether the currently authenticated user created this counterfactual safe.
-   * Only creators can DELETE on the backend (others get 40x); consumers use this
-   * to avoid pointless backend calls. Undefined is treated as `true` for
-   * backwards compatibility with pre-backend-sync persisted state, which only
-   * ever contained the user's own entries.
-   */
-  isCreator?: boolean
 }
 type UndeployedSafesSlice = { [address: string]: UndeployedSafe }
 export type UndeployedSafesState = { [chainId: string]: UndeployedSafesSlice }

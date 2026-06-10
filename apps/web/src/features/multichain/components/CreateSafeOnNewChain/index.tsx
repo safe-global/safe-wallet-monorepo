@@ -9,6 +9,8 @@ import { showNotification } from '@/store/notificationsSlice'
 import { Box, Button, CircularProgress, DialogActions, DialogContent, Stack, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useSafeCreationData } from '../../hooks/useSafeCreationData'
+import { CounterfactualFeature } from '@/features/counterfactual'
+import { useLoadFeature } from '@/features/__core__'
 import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
@@ -25,10 +27,6 @@ import { MULTICHAIN_HELP_ARTICLE } from '@/config/constants'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../types'
-import { persistCounterfactualSafe } from '@/features/counterfactual/services'
-import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
-import { useIsAdmin } from '@/features/spaces'
-import { parseSpaceId } from '@/utils/spaces'
 
 const ReplaySafeDialog = ({
   safeAddress,
@@ -51,10 +49,8 @@ const ReplaySafeDialog = ({
   const addressBook = useAddressBook()
 
   const customRpc = useAppSelector(selectRpc)
-  const isUserAuthenticated = useAppSelector(isAuthenticated)
-  const spaceId = useAppSelector(lastUsedSpace)
-  const isAdminOfActiveSpace = useIsAdmin(parseSpaceId(spaceId) ?? undefined)
   const dispatch = useAppDispatch()
+  const { replayCounterfactualSafeDeployment } = useLoadFeature(CounterfactualFeature)
   const [creationError, setCreationError] = useState<Error>()
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
@@ -99,24 +95,15 @@ const ReplaySafeDialog = ({
 
       trackEvent({ ...OVERVIEW_EVENTS.SUBMIT_ADD_NEW_NETWORK, label: selectedChain.chainId })
 
-      // 2. Persist to backend (if authenticated) + add to Redux. Shared code
-      //    path with the initial create-safe flow so any future backend write
-      //    added to one path is automatically covered for the other.
-      const persistResult = await persistCounterfactualSafe({
-        chainId: selectedChain.chainId,
+      // 2. Replay Safe creation and add it to the counterfactual Safes
+      replayCounterfactualSafeDeployment?.(
+        selectedChain.chainId,
         safeAddress,
-        props: safeCreationData,
-        name: currentName || '',
-        payMethod: PayMethod.PayLater,
-        spaceId,
-        isUserAuthenticated,
-        isAdminOfActiveSpace,
+        safeCreationData,
+        currentName || '',
         dispatch,
-      })
-      if (!persistResult.ok) {
-        setCreationError(persistResult.error)
-        return
-      }
+        PayMethod.PayLater,
+      )
 
       trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
       trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })

@@ -22,12 +22,6 @@ export {
   selectUndeployedSafes,
   selectUndeployedSafe,
   selectIsUndeployedSafe,
-  pendingCfDeletesSlice,
-  enqueuePendingCfDelete,
-  removePendingCfDelete,
-  clearPendingCfDeletes,
-  selectPendingCfDeletes,
-  counterfactualSyncListener,
 } from '@/features/counterfactual/store'
 export * from '@/features/swap/store'
 export * from './swapOrderSlice'

@@ -5,10 +5,6 @@ import * as useChains from '@/hooks/useChains'
 import * as nativeToken from '@/hooks/useNativeTokenDisplay'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
-jest.mock('@/services/siwe/useSiwe', () => ({
-  useSiwe: () => ({ signIn: jest.fn(), loading: false }),
-}))
-
 describe('PayNowPayLater', () => {
   beforeEach(() => {
     jest.clearAllMocks()
