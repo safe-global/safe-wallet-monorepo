@@ -1,23 +1,20 @@
-import { parseSpaceId } from '../spaces'
+import { normalizeSpaceId } from '../spaces'
 
-describe('parseSpaceId', () => {
+describe('normalizeSpaceId', () => {
   it('returns null for null input', () => {
-    expect(parseSpaceId(null)).toBe(null)
+    expect(normalizeSpaceId(null)).toBe(null)
   })
 
-  it('parses a numeric string to a number', () => {
-    expect(parseSpaceId('42')).toBe(42)
-    expect(parseSpaceId('0')).toBe(0)
+  it('returns null for empty or whitespace-only strings', () => {
+    expect(normalizeSpaceId('')).toBe(null)
+    expect(normalizeSpaceId('   ')).toBe(null)
   })
 
-  it('returns null for non-numeric strings', () => {
-    expect(parseSpaceId('abc')).toBe(null)
-    expect(parseSpaceId('')).toBe(null)
-    expect(parseSpaceId('42abc')).toBe(null)
+  it('passes a UUID string through unchanged', () => {
+    expect(normalizeSpaceId('11111111-1111-1111-1111-111111111111')).toBe('11111111-1111-1111-1111-111111111111')
   })
 
-  it('returns null for special numeric values that JS coerces to non-finite', () => {
-    expect(parseSpaceId('Infinity')).toBe(null)
-    expect(parseSpaceId('NaN')).toBe(null)
+  it('passes a legacy numeric string through unchanged', () => {
+    expect(normalizeSpaceId('42')).toBe('42')
   })
 })

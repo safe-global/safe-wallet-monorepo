@@ -88,7 +88,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
       trackEvent({ ...SPACE_EVENTS.EDIT_ADDRESS_SUBMIT })
 
       const result = await upsertAddressBook({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         upsertAddressBookItemsDto: { items: [addressBookItem] },
       })
 

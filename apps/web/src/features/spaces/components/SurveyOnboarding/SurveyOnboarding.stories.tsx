@@ -5,7 +5,7 @@ import { createMockStory } from '@/stories/mocks'
 import type { SurveyStateDto } from '@safe-global/store/gateway/AUTO_GENERATED/surveys'
 import SurveyOnboarding from '.'
 
-const SURVEY_STATE_URL = /\/v1\/spaces\/\d+\/surveys\/[\w-]+\/state$/
+const SURVEY_STATE_URL = /\/v1\/spaces\/[\w-]+\/surveys\/[\w-]+\/state$/
 
 const onboardingSurveyState: SurveyStateDto = {
   survey: {
@@ -71,7 +71,7 @@ const baseSetup = createMockStory({
   wallet: 'owner',
   features: { spaces: true },
   pathname: '/welcome/survey',
-  query: { spaceId: '1' },
+  query: { spaceId: 'uuid-1' },
   shadcn: true,
   handlers: [http.get(SURVEY_STATE_URL, () => HttpResponse.json(onboardingSurveyState))],
 })
@@ -100,7 +100,7 @@ export const Loading: Story = {
       wallet: 'owner',
       features: { spaces: true },
       pathname: '/welcome/survey',
-      query: { spaceId: '1' },
+      query: { spaceId: 'uuid-1' },
       shadcn: true,
       handlers: [
         http.get(SURVEY_STATE_URL, async () => {
@@ -120,7 +120,7 @@ export const Error: Story = {
       wallet: 'owner',
       features: { spaces: true },
       pathname: '/welcome/survey',
-      query: { spaceId: '1' },
+      query: { spaceId: 'uuid-1' },
       shadcn: true,
       handlers: [http.get(SURVEY_STATE_URL, () => HttpResponse.json({ message: 'kaboom' }, { status: 500 }))],
     }).parameters,

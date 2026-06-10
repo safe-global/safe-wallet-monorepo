@@ -62,33 +62,33 @@ export const SpaceSelectorDropdown = ({
   const chainId = useChainId()
 
   const { addToSpace, loadingSpaceId } = useAddSafeToSpace({ spaces, onSpaceAdded })
-  const spaceId = selectedSpace?.id?.toString()
+  const spaceId = selectedSpace?.uuid
   const isSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isSignedIn })
 
   const spaceColors = useMemo(
-    () => Object.fromEntries(spaces.map((s) => [s.id, getDeterministicColor(s.name)])),
+    () => Object.fromEntries(spaces.map((s) => [s.uuid, getDeterministicColor(s.name)])),
     [spaces],
   )
 
-  const handleSelectSpace = async (targetSpaceId: number) => {
+  const handleSelectSpace = async (targetSpaceId: string) => {
     if (triggerVariant === 'addToWorkspace') {
       const success = await addToSpace(targetSpaceId)
       if (success) setIsOpen(false)
     } else {
-      const targetSpace = spaces.find((s) => s.id === targetSpaceId)
+      const targetSpace = spaces.find((s) => s.uuid === targetSpaceId)
       trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_SWITCHED, label: String(targetSpaceId) },
+        { ...SPACE_EVENTS.WORKSPACE_SWITCHED, label: targetSpaceId },
         {
-          from_workspace_id: selectedSpace?.id !== undefined ? String(selectedSpace.id) : undefined,
-          to_workspace_id: String(targetSpaceId),
+          from_workspace_id: selectedSpace?.uuid,
+          to_workspace_id: targetSpaceId,
           source: 'sidebar',
           safe_count: targetSpace?.safeCount ?? 0,
         },
       )
       router.push({
         pathname: router.pathname,
-        query: { ...router.query, spaceId: targetSpaceId.toString() },
+        query: { ...router.query, spaceId: targetSpaceId },
       })
     }
   }
@@ -111,23 +111,23 @@ export const SpaceSelectorDropdown = ({
   const renderSpaceMenuItem = (space: SpaceItem) => {
     const isAdmin = isAdminOfSpace(space)
     const atSafeLimit = isAtSafeLimit(space)
-    const spaceColor = spaceColors[space.id]
+    const spaceColor = spaceColors[space.uuid]
 
     return (
       <SpaceMenuRow
-        key={space.id}
+        key={space.uuid}
         space={space}
         spaceColor={spaceColor}
         isAdmin={isAdmin}
         atSafeLimit={atSafeLimit}
         isAddToWorkspace={isAddToWorkspace}
-        isSelected={selectedSpace?.id === space.id}
+        isSelected={selectedSpace?.uuid === space.uuid}
         loadingSpaceId={loadingSpaceId}
         chainId={chainId}
         safeAddress={safeAddress}
         isOpen={isOpen}
         isSignedIn={isSignedIn}
-        onSelect={() => void handleSelectSpace(space.id)}
+        onSelect={() => void handleSelectSpace(space.uuid)}
       />
     )
   }
@@ -256,7 +256,7 @@ interface SpaceMenuRowProps {
   atSafeLimit: boolean
   isAddToWorkspace: boolean
   isSelected: boolean
-  loadingSpaceId: number | null
+  loadingSpaceId: string | null
   chainId: string
   safeAddress: string
   isOpen: boolean
@@ -282,7 +282,7 @@ const SpaceMenuRow = ({
   // AND we have a safe/chain to check against. RTK Query caches the result via
   // keepUnusedDataFor, so reopening within the cache window is free.
   const shouldCheckMembership = isOpen && isAddToWorkspace && isSignedIn && Boolean(safeAddress) && Boolean(chainId)
-  const { currentData: spaceSafes } = useSpaceSafesGetV1Query({ spaceId: space.id }, { skip: !shouldCheckMembership })
+  const { currentData: spaceSafes } = useSpaceSafesGetV1Query({ spaceId: space.uuid }, { skip: !shouldCheckMembership })
 
   const isAlreadyAdded = useMemo(() => {
     if (!shouldCheckMembership || !spaceSafes) return false
@@ -303,7 +303,7 @@ const SpaceMenuRow = ({
         </AvatarFallback>
       </Avatar>
       <span className="flex-1">{space.name}</span>
-      {loadingSpaceId === space.id ? (
+      {loadingSpaceId === space.uuid ? (
         <Loader2 className="ml-auto size-4 animate-spin" />
       ) : isSelected ? (
         <Check className="ml-auto size-4" />
