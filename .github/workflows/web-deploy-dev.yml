@@ -231,7 +231,7 @@ jobs:
 
             ▶️ [Full-resolution MP4](https://${{ steps.extract_branch.outputs.slug }}--walletweb.review.5afe.dev/one-shots/clickthrough.mp4?${{ github.run_id }})
 
-            _Recorded from this PR's one-shot spec(s): `${{ steps.specs.outputs.args }}`_
+            _This PR's one-shot spec(s): `${{ steps.specs.outputs.args }}`. When several specs record videos, only the longest recording is shown._
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]'
 
@@ -259,6 +259,6 @@ jobs:
 
             This PR doesn't add or modify any one-shot clickthrough, so nothing was recorded.
 
-            Add a happy-path clickthrough of your feature under `apps/web/e2e/tests/one-shots/` (tag `@one-shot`) and it will be recorded against the branch preview and posted here as a GIF. See [One-shot clickthroughs](${{ github.server_url }}/${{ github.repository }}/blob/dev/apps/web/e2e/docs/README.md#one-shot-clickthroughs).
+            Add a happy-path clickthrough of your feature under `apps/web/e2e/tests/one-shots/` (tag `@one-shot`) and it will be recorded against the branch preview and posted here as a GIF. See [One-shot clickthroughs](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.base_ref }}/apps/web/e2e/docs/README.md#one-shot-clickthroughs).
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]'
