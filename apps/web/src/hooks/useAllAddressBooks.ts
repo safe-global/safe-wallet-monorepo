@@ -48,7 +48,8 @@ const mapPrivateToContacts = (addressBook: SpaceAddressBookItemDto[]): ExtendedC
   }))
 }
 
-const addressBookKey = (address: string, chainId: string) => `${chainId}:${address.toLowerCase()}`
+const addressBookKey = (address: string, chainId: string) =>
+  `${chainId}:${typeof address === 'string' ? address.toLowerCase() : address}`
 
 export type MergedAddressBook = {
   list: ExtendedContact[]
