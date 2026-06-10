@@ -30,8 +30,11 @@ export const ConnectedDappsScreen: React.FC = () => {
     if (!selected) {
       return
     }
-    await disconnect(selected.topic, selected.peer.metadata.name)
-    setSelected(null)
+    // Keep the sheet open on failure (the error is toasted) so the user can retry or cancel.
+    const disconnected = await disconnect(selected.topic, selected.peer.metadata.name)
+    if (disconnected) {
+      setSelected(null)
+    }
   }, [selected, disconnect])
 
   const openMenu = useCallback((session: SessionTypes.Struct, anchor: MenuAnchor) => setMenu({ session, anchor }), [])

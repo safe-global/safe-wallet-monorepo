@@ -92,7 +92,7 @@ const storeWith = (sessions: SessionTypes.Struct[]) =>
 
 describe('ConnectedDappsScreen', () => {
   beforeEach(() => {
-    mockDisconnect.mockReset().mockResolvedValue(undefined)
+    mockDisconnect.mockReset().mockResolvedValue(true)
     mockBusyTopic = null
   })
 
@@ -143,6 +143,24 @@ describe('ConnectedDappsScreen', () => {
       fireEvent.press(getByTestId('confirm-action'))
     })
     expect(mockDisconnect).toHaveBeenCalledWith('t1', 'Uniswap')
+    // Sheet closes once the disconnect succeeds.
+    expect(queryByTestId('confirm-modal')).toBeNull()
+  })
+
+  it('keeps the confirm sheet open when the disconnect fails', async () => {
+    mockDisconnect.mockResolvedValue(false)
+    const { getByTestId, queryByTestId } = renderWithStore(
+      <ConnectedDappsScreen />,
+      storeWith([session('t1', 'Uniswap')]),
+    )
+
+    fireEvent.press(getByTestId('row-menu-t1'))
+    fireEvent.press(getByTestId('connected-dapp-disconnect-t1'))
+
+    await act(async () => {
+      fireEvent.press(getByTestId('confirm-action'))
+    })
+    expect(queryByTestId('confirm-modal')).toBeTruthy()
   })
 
   it('opens the confirm sheet from the swipe trash action', () => {

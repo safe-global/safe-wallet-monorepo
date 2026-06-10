@@ -38,10 +38,12 @@ describe('useDisconnectSession', () => {
     const store = storeWithSession('topic-1')
     const { result } = renderHookWithStore(() => useDisconnectSession(), store)
 
+    let returned: boolean | undefined
     await act(async () => {
-      await result.current.disconnect('topic-1', 'dApp')
+      returned = await result.current.disconnect('topic-1', 'dApp')
     })
 
+    expect(returned).toBe(true)
     expect(mockDisconnectSession).toHaveBeenCalledWith({
       topic: 'topic-1',
       reason: getSdkError('USER_DISCONNECTED'),
@@ -51,15 +53,17 @@ describe('useDisconnectSession', () => {
     expect(result.current.busyTopic).toBeNull()
   })
 
-  it('keeps the session and shows an error toast when the relay call fails', async () => {
+  it('resolves false, keeps the session, and shows an error toast when the relay call fails', async () => {
     mockDisconnectSession.mockRejectedValue(new Error('relay down'))
     const store = storeWithSession('topic-2')
     const { result } = renderHookWithStore(() => useDisconnectSession(), store)
 
+    let returned: boolean | undefined
     await act(async () => {
-      await result.current.disconnect('topic-2', 'dApp')
+      returned = await result.current.disconnect('topic-2', 'dApp')
     })
 
+    expect(returned).toBe(false)
     expect(selectSessionsRecord(store.getState() as RootState)['topic-2']).toBeDefined()
     expect(mockToastShow).toHaveBeenCalledWith('Failed to disconnect', expect.objectContaining({ variant: 'error' }))
     expect(result.current.busyTopic).toBeNull()

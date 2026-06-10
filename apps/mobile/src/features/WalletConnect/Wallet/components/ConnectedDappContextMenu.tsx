@@ -14,6 +14,26 @@ interface Props {
 }
 
 const MENU_WIDTH = 200
+const GUTTER = 16
+const GAP = 8
+// Single-item menu; enough to decide whether it would overflow the bottom edge.
+const MENU_HEIGHT_ESTIMATE = 56
+
+type MenuPlacement = { right: number; top?: number; bottom?: number }
+
+/**
+ * Right-aligns the menu to the tapped point and flips it above the tap when anchoring below
+ * would run it off the bottom of the window, so the action stays on-screen on the last rows.
+ */
+export const getMenuPlacement = (
+  anchor: MenuAnchor,
+  window: { width: number; height: number },
+  menuHeight: number = MENU_HEIGHT_ESTIMATE,
+): MenuPlacement => {
+  const right = Math.max(GUTTER, window.width - anchor.x)
+  const overflowsBottom = anchor.y + GAP + menuHeight > window.height
+  return overflowsBottom ? { right, bottom: window.height - anchor.y + GAP } : { right, top: anchor.y + GAP }
+}
 
 /**
  * Overflow menu for a connected-dApp row, rendered in a full-window Modal so a tap anywhere
@@ -21,16 +41,17 @@ const MENU_WIDTH = 200
  * Positioned against the tapped point rather than measured layout to stay simple and testable.
  */
 export const ConnectedDappContextMenu: React.FC<Props> = ({ anchor, onDisconnect, onClose, testID }) => {
-  const { width } = useWindowDimensions()
-  const right = Math.max(16, width - anchor.x)
+  const window = useWindowDimensions()
+  const placement = getMenuPlacement(anchor, window)
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose} accessibilityLabel="Close menu">
         <YStack
           position="absolute"
-          top={anchor.y + 8}
-          right={right}
+          top={placement.top}
+          bottom={placement.bottom}
+          right={placement.right}
           width={MENU_WIDTH}
           backgroundColor="$errorBackground"
           borderRadius="$2"
