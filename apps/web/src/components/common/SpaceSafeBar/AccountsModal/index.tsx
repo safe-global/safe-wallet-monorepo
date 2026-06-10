@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { Search, CircleFadingPlus, Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Button } from '@/components/ui/button'
 import { AppRoutes } from '@/config/routes'
+import { buildCurrentNextUrl } from '@/utils/nextUrl'
 import { isMultiChainSafeItem } from '@/hooks/safes'
 import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
@@ -73,6 +75,7 @@ const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar 
   const wallet = useWallet()
   const isWalletConnected = Boolean(wallet)
   const connectWallet = useConnectWallet()
+  const router = useRouter()
   const {
     trustedItems,
     otherItems,
@@ -98,6 +101,9 @@ const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar 
   if (!open || isConnecting) return null
 
   const isEmpty = trustedItems.length === 0 && otherItems.length === 0
+
+  // Round-trip the originating page so Cancel/Back in the new-safe flow returns here.
+  const next = buildCurrentNextUrl(router.pathname, router.query)
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -169,7 +175,7 @@ const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar 
           <Button
             render={
               <Link
-                href={AppRoutes.newSafe.load}
+                href={{ pathname: AppRoutes.newSafe.load, query: { next } }}
                 onClick={() => {
                   trackEvent({ ...OVERVIEW_EVENTS.ADD_TO_WATCHLIST, label: trackingLabel })
                   onClose()
@@ -187,7 +193,7 @@ const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar 
           <Button
             render={
               <Link
-                href={AppRoutes.newSafe.create}
+                href={{ pathname: AppRoutes.newSafe.create, query: { next } }}
                 onClick={() => {
                   trackEvent({ ...OVERVIEW_EVENTS.CREATE_NEW_SAFE, label: trackingLabel })
                   onClose()
