@@ -115,7 +115,7 @@ const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapO
                 <EthHashInfo address={receiver} hasExplorer={true} avatarSize={24} />
               </DataRow>
               <div key="recipient">
-                <Alert data-testid="recipient-alert" severity="warning" icon={AlertIcon}>
+                <Alert data-testid="recipient-alert" severity="warning" icon={<AlertIcon />}>
                   <Typography variant="body2">
                     <Typography component="span" sx={{ fontWeight: 'bold' }}>
                       Order recipient address differs from order owner.

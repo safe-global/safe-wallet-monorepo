@@ -20,6 +20,10 @@ report.json
 # production
 /build
 
+# tanstack migration experiment
+apps/web-tanstack/dist/
+.playwright-mcp/
+
 # misc
 .DS_Store
 *.pem
@@ -120,6 +124,7 @@ todos/*
 /docs/todos/
 /docs/brainstorms/
 /docs/superpowers/
+/docs/migration/
 
 .codemod
 .serena
