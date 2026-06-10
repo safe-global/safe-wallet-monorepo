@@ -3,8 +3,10 @@ import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import SpacesList from '../index'
 import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import { useIsClassicViewFeatureEnabled } from '@/hooks/useClassicView'
 
 const mockUseIsRequireLoginEnabled = useIsRequireLoginEnabled as jest.Mock
+const mockUseIsClassicViewFeatureEnabled = useIsClassicViewFeatureEnabled as jest.Mock
 const mockUseAppSelector = jest.fn()
 const mockUseSpacesGetV1Query = jest.fn()
 const mockUseUsersGetWithWalletsV1Query = jest.fn()
@@ -65,6 +67,11 @@ jest.mock('../../SignInOptions', () => ({
   default: () => <div data-testid="sign-in-options" />,
 }))
 
+jest.mock('../../ClassicViewLink', () => ({
+  __esModule: true,
+  default: () => <div data-testid="classic-view-link" />,
+}))
+
 jest.mock('../../SpaceCard', () => ({
   __esModule: true,
   default: () => <div data-testid="space-card" />,
@@ -95,6 +102,9 @@ describe('SpacesList — auth/expiry state rendering', () => {
     // clearAllMocks wipes call history but not implementations, so reset the
     // gate to its default (OFF) each test; gate-ON cases opt in explicitly.
     mockUseIsRequireLoginEnabled.mockReturnValue(false)
+    // Default the classic-view escape hatch to exposed so the link's render
+    // condition is governed solely by the layout context under test.
+    mockUseIsClassicViewFeatureEnabled.mockReturnValue(true)
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: undefined, isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
     mockUseSignInRedirect.mockReturnValue({ setHasSignedIn: jest.fn(), redirectLoading: false })
@@ -216,6 +226,31 @@ describe('SpacesList — auth/expiry state rendering', () => {
     const termsLink = screen.getByRole('link', { name: /^terms$/i })
     expect(card).toBeInTheDocument()
     expect(card).not.toContainElement(termsLink)
+  })
+
+  // The "Use the old UI" escape hatch belongs to the full-screen login
+  // takeover (gate ON). It must render there so signed-out users can opt out.
+  it('renders the "Use the old UI" link on the full-screen login gate when classic view is exposed', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
+    mockUseAppSelector.mockReturnValue(false)
+
+    render(<SpacesList />)
+
+    expect(screen.getByTestId('classic-view-link')).toBeInTheDocument()
+  })
+
+  // Regression: once the gate is OFF, /welcome/spaces renders the tabbed
+  // layout with the sign-in card inline — the user is already in the old UI,
+  // so the "Use the old UI" link must NOT appear (QA feedback).
+  it('does not render the "Use the old UI" link in the inline tabbed layout (already in the old UI)', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(false)
+    mockUseAppSelector.mockReturnValue(false)
+
+    render(<SpacesList />)
+
+    // Sanity: we are in the inline signed-out card, not the full-screen gate.
+    expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
+    expect(screen.queryByTestId('classic-view-link')).not.toBeInTheDocument()
   })
 
   it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {

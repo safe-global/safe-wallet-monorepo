@@ -97,7 +97,10 @@ const SignedOutState = ({
 
             <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
 
-            {isClassicViewFeatureEnabled && <ClassicViewLink />}
+            {/* The escape hatch only belongs on the full-screen login takeover.
+                Inline means the user is already in the tabbed old UI, so the
+                "Use the old UI" link would be redundant there. */}
+            {isClassicViewFeatureEnabled && !inline && <ClassicViewLink />}
           </div>
 
           <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
