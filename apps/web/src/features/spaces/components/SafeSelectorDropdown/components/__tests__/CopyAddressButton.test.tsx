@@ -10,9 +10,15 @@ jest.mock('@/services/analytics', () => ({
 
 describe('CopyAddressButton', () => {
   const writeText = jest.fn()
+  const originalClipboard = navigator.clipboard
 
   beforeAll(() => {
-    Object.assign(navigator, { clipboard: { writeText } })
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
+  })
+
+  afterAll(() => {
+    // Restore the original clipboard so this stub doesn't leak into other test files.
+    Object.defineProperty(navigator, 'clipboard', { value: originalClipboard, configurable: true })
   })
 
   beforeEach(() => {
