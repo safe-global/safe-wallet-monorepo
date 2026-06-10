@@ -15,7 +15,7 @@ import { lazy, memo, Suspense, useMemo, type ReactElement } from 'react'
 import { AppProviders } from '@/pages/_app'
 import { BRAND_NAME } from '@/config/constants'
 import { GATEWAY_URL } from '@/config/gateway'
-import { makeStore, setStoreInstance, useHydrateStore, useInitStaticChains } from '@/store'
+import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
 import createEmotionCache from '@/utils/createEmotionCache'
 import MetaTags from '@/components/common/MetaTags'
 import PageLayout from '@/components/common/PageLayout'
@@ -89,7 +89,7 @@ const TargetedOutreachPopupLoader = () => {
 
 const InitApp = (): null => {
   useHydrateStore(reduxStore)
-  useInitStaticChains()
+  useInitChains()
   useAdjustUrl()
   useGtm()
   useMixpanel()

@@ -31,10 +31,6 @@ jobs:
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
-      # chains.json is a build input reused from apps/web. It's produced by
-      # web's postinstall, which the yarn cache skips on a hit, so generate it
-      # explicitly here.
-      - run: yarn workspace @safe-global/web fetch-chains
       - run: yarn workspace @safe-global/web-tanstack build
       # Assert every emitted JS/CSS chunk matches its recorded sha384 integrity
       # (re-hash after build; fails on tamper or gaps).
@@ -59,6 +55,4 @@ jobs:
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
-      # type-check reuses apps/web source that imports chains.json (see build job).
-      - run: yarn workspace @safe-global/web fetch-chains
       - run: node scripts/verify.mjs --changed --workspace=web-tanstack
