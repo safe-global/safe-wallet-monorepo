@@ -6,9 +6,8 @@ import { Buffer } from 'buffer'
 ;(globalThis as any).Buffer = (globalThis as any).Buffer ?? Buffer
 ;(globalThis as any).global = (globalThis as any).global ?? globalThis
 
-// Sync `require()` polyfill for the two reused files that need it
-// (chains.json for store seeding, 'blo' for blockie avatars). Must run
-// before the store is constructed.
+// Sync `require()` polyfill for the reused file that needs it
+// ('blo' for blockie avatars). Must run before any reused code runs.
 import './compat/require-shim'
 
 import { createRoot } from 'react-dom/client'
