@@ -504,7 +504,7 @@ describe('useFlowActivationGuard', () => {
       expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.index })
     })
 
-    it('should allow access when spaceId is a legacy numeric id matching a user space', async () => {
+    it('should redirect to welcome when spaceId is a legacy numeric id (uuid-only matching)', async () => {
       setupMocks({
         pathname: AppRoutes.spaces.index,
         query: { spaceId: String(defaultSpaces[0].id) },
@@ -515,7 +515,7 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({ success: true })
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.index })
     })
   })
 
