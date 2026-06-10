@@ -91,6 +91,18 @@ describe('walletKitSlice reducers', () => {
     expect(state.verifyByTopic).toEqual({ a: 'verified' })
   })
 
+  it('setSessions with no active sessions prunes verifyByTopic entirely', () => {
+    let state = reducer(undefined, addSession({ session: session('a'), verifyVariant: 'verified' }))
+    // Rehydrate path where getActiveSessions() returns nothing must not leave a growing map.
+    state = reducer(state, setSessions({}))
+    expect(state.verifyByTopic).toEqual({})
+  })
+
+  it('setSessions never adds verifyByTopic entries for restored sessions', () => {
+    const state = reducer(undefined, setSessions({ a: session('a'), b: session('b') }))
+    expect(state.verifyByTopic).toEqual({})
+  })
+
   it('selectVerifyByTopic returns the map', () => {
     const state = reducer(undefined, addSession({ session: session('a'), verifyVariant: 'verified' }))
     expect(selectVerifyByTopic({ [walletKitSliceName]: state } as never)).toEqual({ a: 'verified' })
