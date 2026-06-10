@@ -95,7 +95,7 @@ yarn workspace @safe-global/web pw:oneshot:record
 PLAYWRIGHT_BASE_URL=https://my-preview.example yarn workspace @safe-global/web pw:oneshot:record
 ```
 
-After the PR preview deploys, CI runs the same one-shot against the preview, converts the recording, and posts the GIF in a PR comment automatically.
+After the PR preview deploys, CI runs **only the one-shot specs the PR adds or modifies** (not the whole directory) against the preview, converts the recording, and posts the GIF in a PR comment automatically. PRs that don't touch `tests/one-shots/` get a nudge comment instead of a recording.
 
 ### Wallet-connected one-shots
 
