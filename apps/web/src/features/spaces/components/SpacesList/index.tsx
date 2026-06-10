@@ -211,6 +211,9 @@ const SpacesList = () => {
     setHasSignedIn(true)
   }, [setHasSignedIn])
 
+  const onAddSpaceBtnClick = () =>
+    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
+
   // When the require-login gate is ON (or still resolving), /welcome/spaces is
   // the canonical full-screen login page: take over the viewport. When the gate
   // is OFF, classic view is available — fall through to the tabbed layout below
@@ -232,14 +235,7 @@ const SpacesList = () => {
 
             {isUserSignedIn && activeSpaces.length > 0 && (
               <div className="flex gap-4 flex-1 justify-between">
-                <AddSpaceButton
-                  disabled={isAtSpacesLimit}
-                  onClick={() =>
-                    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
-                      entry_point: WorkspaceCreateEntryPoint.WELCOME,
-                    })
-                  }
-                />
+                <AddSpaceButton disabled={isAtSpacesLimit} onClick={onAddSpaceBtnClick} />
 
                 {isLoading ? (
                   <Pulse className="h-12 w-12 rounded-full group-data-[collapsible=icon]:w-9" />
@@ -252,6 +248,10 @@ const SpacesList = () => {
         ) : (
           <Box className={css.spacesHeader}>
             <AccountsNavigation />
+
+            {isUserSignedIn && activeSpaces.length > 0 && (
+              <AddSpaceButton disabled={isAtSpacesLimit} onClick={onAddSpaceBtnClick} />
+            )}
           </Box>
         )}
 
