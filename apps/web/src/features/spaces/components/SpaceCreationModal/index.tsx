@@ -10,6 +10,7 @@ import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
+import { setLastUsedSpace } from '@/store/authSlice'
 import { useAppDispatch } from '@/store'
 import ExternalLink from '@/components/common/ExternalLink'
 
@@ -32,6 +33,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       if (response.data) {
         const spaceId = response.data.uuid
         trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: spaceId }, { workspace_id: spaceId })
+        dispatch(setLastUsedSpace(spaceId))
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
         onClose()
 

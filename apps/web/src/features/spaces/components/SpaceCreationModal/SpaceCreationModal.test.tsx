@@ -2,6 +2,7 @@ import type * as ReactHookForm from 'react-hook-form'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { setLastUsedSpace } from '@/store/authSlice'
 import SpaceCreationModal from './index'
 
 const mockPush = jest.fn()
@@ -84,6 +85,45 @@ describe('SpaceCreationModal tracking', () => {
         { workspace_id: '11111111-1111-1111-1111-111111111111' },
       )
     })
+  })
+
+  it('persists the new space uuid as lastUsedSpace after successful creation', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 99, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
+
+    render(<SpaceCreationModal onClose={jest.fn()} />)
+
+    fireEvent.change(screen.getByTestId('space-name-input'), { target: { value: 'My Space' } })
+
+    const submitButton = screen.getByTestId('create-space-modal-button')
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled()
+    })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith(setLastUsedSpace('11111111-1111-1111-1111-111111111111'))
+    })
+  })
+
+  it('does not persist lastUsedSpace when the API returns an error', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({ error: { status: 500 } })
+
+    render(<SpaceCreationModal onClose={jest.fn()} />)
+
+    fireEvent.change(screen.getByTestId('space-name-input'), { target: { value: 'My Space' } })
+
+    const submitButton = screen.getByTestId('create-space-modal-button')
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled()
+    })
+    fireEvent.click(submitButton)
+
+    await waitFor(() => {
+      expect(mockCreateSpaceWithUser).toHaveBeenCalled()
+    })
+    expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: setLastUsedSpace.type }))
   })
 
   it('does not track WORKSPACE_CREATED when the API returns an error', async () => {
