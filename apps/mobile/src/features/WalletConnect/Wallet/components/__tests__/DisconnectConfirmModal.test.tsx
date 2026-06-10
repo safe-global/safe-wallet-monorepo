@@ -49,4 +49,15 @@ describe('DisconnectConfirmModal', () => {
     expect(getByText('Disconnecting')).toBeTruthy()
     expect(queryByText('Disconnect')).toBeNull()
   })
+
+  it('updates the shown dApp when the target changes without closing first', () => {
+    const { getByText, queryByText, rerender } = render(
+      <DisconnectConfirmModal dapp={{ name: 'Uniswap' }} onConfirm={jest.fn()} onClose={jest.fn()} />,
+    )
+    expect(getByText('Uniswap')).toBeTruthy()
+
+    rerender(<DisconnectConfirmModal dapp={{ name: 'Aave' }} onConfirm={jest.fn()} onClose={jest.fn()} />)
+    expect(getByText('Aave')).toBeTruthy()
+    expect(queryByText('Uniswap')).toBeNull()
+  })
 })
