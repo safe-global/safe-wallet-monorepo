@@ -8,6 +8,7 @@ import { useHasFeature } from '@/src/hooks/useHasFeature'
 import { selectSessionCount } from '../store/walletKitSlice'
 import { SafeListItem } from '@/src/components/SafeListItem/SafeListItem'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { SafeSkeleton } from '@/src/components/SafeSkeleton'
 
 /**
  * Settings row linking to the connected-dApps screen. Hidden entirely unless the
@@ -31,11 +32,15 @@ export const ConnectedDappsEntry: React.FC = () => {
         testID="settings-connected-apps-list-item"
         leftNode={<SafeFontIcon name="link" color="$colorSecondary" />}
         rightNode={
-          <View flexDirection="row" alignItems="center" gap="$2">
-            <Text color="$colorSecondary" testID="connected-apps-count">
-              {count}
-            </Text>
-            <SafeFontIcon name="chevron-right" />
+          <View flexDirection="row" alignItems="center" justifyContent="center">
+            <SafeSkeleton height={17}>
+              <Text minWidth={15} marginRight="$3" color="$colorSecondary" testID="connected-apps-count">
+                {count}
+              </Text>
+            </SafeSkeleton>
+            <View>
+              <SafeFontIcon name="chevron-right" />
+            </View>
           </View>
         }
       />
