@@ -7,6 +7,10 @@ import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces
 import { AppRoutes } from '@/config/routes'
 import * as useIsSpaceRouteModule from '@/hooks/useIsSpaceRoute'
 import * as useIsRequireLoginEnabledModule from '@/hooks/useIsRequireLoginEnabled'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
+const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
+
+const UNKNOWN_SPACE_UUID = '99999999-9999-9999-9999-999999999999'
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -40,14 +44,14 @@ interface SetupOptions {
   walletContext?: { isReady: boolean } | null
   isAuthenticated?: boolean
   isStoreHydrated?: boolean
-  spaces?: Array<{ id: number; name: string }> | undefined
+  spaces?: Array<{ id: number; uuid: string; name: string }> | undefined
   isSpaceRoute?: boolean
   isRequireLoginEnabled?: boolean | undefined
 }
 
 const defaultSpaces = [
-  { id: 1, name: 'Space 1' },
-  { id: 2, name: 'Space 2' },
+  { id: 1, uuid: MOCK_SPACE_UUID, name: 'Space 1' },
+  { id: 2, uuid: MOCK_SPACE_UUID_ALT, name: 'Space 2' },
 ]
 
 const setupMocks = ({
@@ -456,7 +460,7 @@ describe('useFlowActivationGuard', () => {
     it('should allow onboarding route when spaceId is present', async () => {
       setupMocks({
         pathname: AppRoutes.welcome.createSpace,
-        query: { spaceId: '1' },
+        query: { spaceId: MOCK_SPACE_UUID },
         spaces: defaultSpaces,
       })
 
@@ -475,7 +479,7 @@ describe('useFlowActivationGuard', () => {
     it('should allow access when user has a valid spaceId in query', async () => {
       setupMocks({
         pathname: AppRoutes.spaces.index,
-        query: { spaceId: '1' },
+        query: { spaceId: MOCK_SPACE_UUID },
         spaces: defaultSpaces,
         isSpaceRoute: true,
       })
@@ -489,7 +493,21 @@ describe('useFlowActivationGuard', () => {
     it('should redirect to welcome when spaceId does not match any user space on space route', async () => {
       setupMocks({
         pathname: AppRoutes.spaces.index,
-        query: { spaceId: '999' },
+        query: { spaceId: UNKNOWN_SPACE_UUID },
+        spaces: defaultSpaces,
+        isSpaceRoute: true,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.index })
+    })
+
+    it('should redirect to welcome when spaceId is a legacy numeric id (uuid-only matching)', async () => {
+      setupMocks({
+        pathname: AppRoutes.spaces.index,
+        query: { spaceId: String(defaultSpaces[0].id) },
         spaces: defaultSpaces,
         isSpaceRoute: true,
       })
@@ -524,7 +542,7 @@ describe('useFlowActivationGuard', () => {
     it('should redirect to welcome when spaceId in query is not part of user spaces on space route', async () => {
       setupMocks({
         pathname: AppRoutes.spaces.index,
-        query: { spaceId: '999' },
+        query: { spaceId: UNKNOWN_SPACE_UUID },
         spaces: defaultSpaces,
         isSpaceRoute: true,
       })
@@ -555,7 +573,7 @@ describe('useFlowActivationGuard', () => {
     })
 
     it('should fetch spaces when authenticated', async () => {
-      setupMocks({ pathname: '/spaces', query: { spaceId: '1' } })
+      setupMocks({ pathname: '/spaces', query: { spaceId: MOCK_SPACE_UUID } })
 
       const { result } = renderHook(() => useFlowActivationGuard())
       await result.current.activationGuard()

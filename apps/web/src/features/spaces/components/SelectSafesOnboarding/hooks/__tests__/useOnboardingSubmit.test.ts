@@ -123,7 +123,7 @@ describe('useOnboardingSubmit', () => {
     })
 
     expect(mockAddSafesToSpace).toHaveBeenCalledWith({
-      spaceId: 42,
+      spaceId: '42',
       createSpaceSafesDto: { safes: [{ chainId: '1', address: '0xnew' }] },
     })
     expect(onSuccess).toHaveBeenCalled()
@@ -147,7 +147,7 @@ describe('useOnboardingSubmit', () => {
     })
 
     expect(mockRemoveSafesFromSpace).toHaveBeenCalledWith({
-      spaceId: 42,
+      spaceId: '42',
       deleteSpaceSafesDto: { safes: [{ chainId: '1', address: '0xexisting' }] },
     })
     expect(onSuccess).toHaveBeenCalled()
@@ -174,7 +174,7 @@ describe('useOnboardingSubmit', () => {
     })
 
     expect(mockAddSafesToSpace).toHaveBeenCalledWith({
-      spaceId: 42,
+      spaceId: '42',
       createSpaceSafesDto: { safes: [{ chainId: '5', address: '0xnewone' }] },
     })
   })

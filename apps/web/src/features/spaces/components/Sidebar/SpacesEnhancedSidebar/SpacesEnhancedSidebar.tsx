@@ -85,15 +85,12 @@ const HydratedSidebar = ({ contained = false }: { contained?: boolean }): ReactE
   const spaceIdForSidebarSelection = isSpaceRoute ? resolvedSpaceId : getQuerySpaceId(router.query)
 
   const selectedSpace =
-    spaceIdForSidebarSelection != null
-      ? spaces?.find((space) => space.id === Number(spaceIdForSidebarSelection))
-      : undefined
+    spaceIdForSidebarSelection != null ? spaces?.find((space) => space.uuid === spaceIdForSidebarSelection) : undefined
 
   const nonDeclinedSpaces = getNonDeclinedSpaces(currentUser, spaces ?? [])
 
   const qualifiedSpaceId = isQualifiedSafe ? resolvedSpaceId : null
-  const qualifiedSpace =
-    qualifiedSpaceId != null ? spaces?.find((space) => space.id === Number(qualifiedSpaceId)) : undefined
+  const qualifiedSpace = qualifiedSpaceId != null ? spaces?.find((space) => space.uuid === qualifiedSpaceId) : undefined
 
   const effectiveSelectedSpace = selectedSpace ?? addedToSpace ?? qualifiedSpace
 

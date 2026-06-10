@@ -111,7 +111,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
     try {
       setIsSubmitting(true)
       const response = await inviteMembers({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         inviteUsersDto: { users: [{ type: 'wallet', address: data.address, role: data.role, name: data.name }] },
       })
 

@@ -2,6 +2,7 @@ import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import SpaceCard from 'src/features/spaces/components/SpaceCard'
 import SignInOptions from '../SignInOptions'
+import WorkspaceBanner from '../WorkspaceBanner'
 import LocalSafesAlert from './LocalSafesAlert'
 import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import { useIsClassicViewFeatureEnabled } from '@/hooks/useClassicView'
@@ -20,7 +21,7 @@ import { useCallback, useState } from 'react'
 import css from './styles.module.css'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
-import { MemberStatus } from '@/features/spaces'
+import { MemberStatus, useCurrentMemberProfile } from '@/features/spaces'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
@@ -32,6 +33,10 @@ import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSi
 import AddIcon from '@/public/images/common/add.svg'
 import { SPACES_LIMIT } from '../Sidebar/constants'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import SafeLogo from '@/public/images/logo-no-text.svg'
+import { Pulse } from '../Sidebar/SidebarSkeleton/SidebarSkeleton'
+import { AccountInfo } from './AccountInfo'
+import { getSidebarProfileInfo } from '../Sidebar/SidebarProfileSection'
 
 const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?: boolean }) => {
   const button = (
@@ -84,21 +89,29 @@ const SignedOutState = ({
         )}
       >
         <div className="flex w-full max-w-[440px] flex-col items-center">
-          <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
-            <div className="mx-auto mb-6 flex size-10 items-center justify-center text-foreground">
-              <SafeMarkIcon className="size-10" />
+          {/* Inline (classic view) keeps the banner in normal flow above the card.
+              The full-screen takeover floats it absolutely so the login card stays
+              vertically centered in the viewport. */}
+          {inline && <WorkspaceBanner className="mb-3" />}
+
+          <div className="relative w-full">
+            {!inline && <WorkspaceBanner className="absolute inset-x-0 bottom-full mb-3" />}
+
+            <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
+              <div className="mx-auto mb-6 flex size-10 items-center justify-center text-foreground">
+                <SafeMarkIcon className="size-10" />
+              </div>
+
+              <ShadcnTypography variant="h3" className="mb-6 text-center">
+                Sign in to your workspace
+              </ShadcnTypography>
+
+              <LocalSafesAlert />
+
+              <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+
+              {isClassicViewFeatureEnabled && !inline && <ClassicViewLink />}
             </div>
-
-            <ShadcnTypography variant="h3" className="mb-6 text-center">
-              Sign in to your workspace
-            </ShadcnTypography>
-
-            <LocalSafesAlert />
-
-            <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
-
-            {/* Escape hatch only belongs on the full-screen gate — redundant once inline (already in the old UI). */}
-            {isClassicViewFeatureEnabled && !inline && <ClassicViewLink />}
           </div>
 
           <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
@@ -173,8 +186,10 @@ const SpacesList = () => {
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
   const inviteAmount = pendingInvites?.length
   const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
+  const { membership, signerAddress, isLoading, email } = useCurrentMemberProfile()
+  const { profileName, displayName } = membership ? getSidebarProfileInfo(membership, signerAddress, email) : {}
 
-  const singleSpaceId = activeSpaces.length === 1 ? String(activeSpaces[0].id) : null
+  const singleSpaceId = activeSpaces.length === 1 ? activeSpaces[0].uuid : null
 
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,
@@ -209,18 +224,36 @@ const SpacesList = () => {
   return (
     <Box className={css.container}>
       <Box className={cn(css.mySpaces, { [css.headerSpacer]: !isUserSignedIn })}>
-        <Box className={css.spacesHeader}>
-          {!isRequireLoginEnabled && <AccountsNavigation />}
+        {isRequireLoginEnabled ? (
+          <div className="py-6 mb-6 flex items-center justify-between border-b">
+            <div className="flex gap-6 absolute left-6 top-6 items-center">
+              <SafeLogo alt="Safe logo" width={24} height={24} />
+            </div>
 
-          {isUserSignedIn && activeSpaces.length > 0 && (
-            <AddSpaceButton
-              disabled={isAtSpacesLimit}
-              onClick={() =>
-                trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
-              }
-            />
-          )}
-        </Box>
+            {isUserSignedIn && activeSpaces.length > 0 && (
+              <div className="flex gap-4 flex-1 justify-between">
+                <AddSpaceButton
+                  disabled={isAtSpacesLimit}
+                  onClick={() =>
+                    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
+                      entry_point: WorkspaceCreateEntryPoint.WELCOME,
+                    })
+                  }
+                />
+
+                {isLoading ? (
+                  <Pulse className="h-12 w-12 rounded-full group-data-[collapsible=icon]:w-9" />
+                ) : (
+                  <AccountInfo profileName={profileName} displayName={displayName} />
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <Box className={css.spacesHeader}>
+            <AccountsNavigation />
+          </Box>
+        )}
 
         {isUserSignedIn &&
           pendingInvites.length > 0 &&

@@ -9,7 +9,7 @@ import { AppRoutes } from '@/config/routes'
 export function useSpaceBackLink() {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
+  const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isUserSignedIn || !spaceId })
   const router = useRouter()
 
   const handleBackToSpace = useCallback(() => {

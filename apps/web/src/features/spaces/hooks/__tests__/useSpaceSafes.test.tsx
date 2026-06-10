@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import { useSpaceSafes } from '../useSpaceSafes'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUseCurrentSpaceId = jest.fn()
 const mockUseSpaceSafesGetV1Query = jest.fn()
@@ -73,14 +74,14 @@ describe('useSpaceSafes', () => {
 
   it('skips the query when the user is not authenticated', () => {
     mockIsAuthenticated = false
-    mockUseCurrentSpaceId.mockReturnValue('7')
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
 
     renderHook(() => useSpaceSafes())
 
     expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
   })
 
-  it('skips the query when there is no current spaceId (Number(null) is 0 — must not hit /v1/spaces/0/...)', () => {
+  it('skips the query when there is no current spaceId', () => {
     mockUseCurrentSpaceId.mockReturnValue(null)
 
     renderHook(() => useSpaceSafes())
@@ -89,10 +90,10 @@ describe('useSpaceSafes', () => {
   })
 
   it('fires the query when authenticated and spaceId is set', () => {
-    mockUseCurrentSpaceId.mockReturnValue('5')
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
 
     renderHook(() => useSpaceSafes())
 
-    expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: 5 }, { skip: false })
+    expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID }, { skip: false })
   })
 })

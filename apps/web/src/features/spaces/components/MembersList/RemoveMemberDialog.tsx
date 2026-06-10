@@ -31,7 +31,7 @@ const RemoveMemberDialog = ({
     setErrorMessage('')
     trackEvent({ ...SPACE_EVENTS.REMOVE_MEMBER, label: isInvite ? SPACE_LABELS.invite_list : SPACE_LABELS.member_list })
     try {
-      const { error } = await deleteMember({ spaceId: Number(spaceId), userId })
+      const { error } = await deleteMember({ spaceId: spaceId ?? '', userId })
 
       if (error) {
         throw error

@@ -95,7 +95,7 @@ const AddContactDialog = ({
       setIsSubmitting(true)
       onSubmitStart?.()
 
-      const result = await submit(item, String(spaceId))
+      const result = await submit(item, spaceId ?? '')
 
       if (result.error) {
         setError('Something went wrong. Please try again.')

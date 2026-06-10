@@ -19,7 +19,7 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
       successGroupKey="add-contact-success"
       submit={(item, sid) =>
         upsertAddressBook({
-          spaceId: Number(sid),
+          spaceId: sid,
           upsertAddressBookItemsDto: { items: [item] },
         })
       }

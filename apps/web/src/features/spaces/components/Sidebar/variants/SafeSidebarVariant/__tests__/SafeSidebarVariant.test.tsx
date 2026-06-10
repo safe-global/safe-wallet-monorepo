@@ -409,8 +409,8 @@ describe('SafeSidebarVariant', () => {
 
     it('passes spaces array to addToWorkspace variant', () => {
       const spaces = [
-        { id: 1, name: 'Team', safeCount: 5, members: adminMembersForCurrentUser },
-        { id: 2, name: 'Personal', safeCount: 2, members: adminMembersForCurrentUser },
+        { id: 1, uuid: 'uuid-1', name: 'Team', safeCount: 5, members: adminMembersForCurrentUser },
+        { id: 2, uuid: 'uuid-2', name: 'Personal', safeCount: 2, members: adminMembersForCurrentUser },
       ]
       render(
         <SafeSidebarVariant
@@ -440,7 +440,7 @@ describe('SafeSidebarVariant', () => {
 
     it('hides the addToWorkspace section entirely when Safe is counterfactual (undeployed)', () => {
       mockUseIsCounterfactualSafe.mockReturnValue(true)
-      const spaces = [{ id: 1, name: 'Team', safeCount: 0 }]
+      const spaces = [{ id: 1, uuid: 'uuid-1', name: 'Team', safeCount: 0 }]
 
       render(
         <SafeSidebarVariant
@@ -471,6 +471,7 @@ describe('SafeSidebarVariant', () => {
     it('renders correct number of spaces in addToWorkspace when multiple spaces provided', () => {
       const spaces = Array.from({ length: 5 }, (_, i) => ({
         id: i + 1,
+        uuid: `uuid-${i + 1}`,
         name: `Space ${i + 1}`,
         safeCount: 0,
         members: adminMembersForCurrentUser,

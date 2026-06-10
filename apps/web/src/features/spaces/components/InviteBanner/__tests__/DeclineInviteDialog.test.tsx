@@ -57,8 +57,8 @@ describe('DeclineInviteDialog tracking', () => {
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledTimes(1)
       expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.DECLINE_INVITE_SUBMIT, label: '42' },
-        { workspace_id: '42' },
+        { ...SPACE_EVENTS.DECLINE_INVITE_SUBMIT, label: mockSpace.uuid },
+        { workspace_id: mockSpace.uuid },
       )
     })
   })

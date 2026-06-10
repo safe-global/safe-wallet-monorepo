@@ -228,7 +228,7 @@ export const useFlowActivationGuard: UseGuard = () => {
       }
 
       if (query.spaceId) {
-        isPartOfSpaceUrl = hasSpaces && !!spaces && spaces.some((s) => String(s.id) === query.spaceId)
+        isPartOfSpaceUrl = hasSpaces && !!spaces && spaces.some((s) => s.uuid === query.spaceId)
       }
     }
 
