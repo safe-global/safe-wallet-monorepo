@@ -97,7 +97,8 @@ const SignedOutState = ({
 
             <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
 
-            {isClassicViewFeatureEnabled && <ClassicViewLink />}
+            {/* Escape hatch only belongs on the full-screen gate — redundant once inline (already in the old UI). */}
+            {isClassicViewFeatureEnabled && !inline && <ClassicViewLink />}
           </div>
 
           <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
