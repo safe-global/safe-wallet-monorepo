@@ -15,6 +15,7 @@ import {
 import useWallet from '@/hooks/wallets/useWallet'
 import { type AllSafeItems } from '@/hooks/safes'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { useOnboardingStepCount } from '@/features/spaces/hooks/useOnboardingStepCount'
 import OnboardingSafesList from './components/OnboardingSafesList'
 import ConnectWalletHint from '../ConnectWalletHint'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
@@ -29,11 +30,11 @@ import {
 } from './utils/deriveSelectedAccounts'
 
 const ONBOARDING_STEP = 2
-const TOTAL_STEPS = 4
 const FORM_ID = 'select-safes-form'
 
 const SelectSafesOnboarding = (): ReactElement => {
   const wallet = useWallet()
+  const totalSteps = useOnboardingStepCount()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
   const { trustedSafes, ownedSafes, similarAddresses, handleSearch, hasNoSafes } = useOnboardingSafes()
   const allSafes = useMemo<AllSafeItems>(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
@@ -78,7 +79,7 @@ const SelectSafesOnboarding = (): ReactElement => {
   const main = (
     <FormProvider {...formMethods}>
       <form id={FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-6">
-        <StepCounter currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
+        <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
 
         <div className="flex flex-col gap-2 shrink-0">
           <Typography variant="h2">Select Safes</Typography>
