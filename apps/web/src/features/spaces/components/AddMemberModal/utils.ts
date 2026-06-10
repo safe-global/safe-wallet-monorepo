@@ -1,4 +1,4 @@
-import { isAddress } from 'viem'
+import { isAddress } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { MemberRole } from '../../hooks/useSpaceMembers'
 import type { EmailInviteUserDto, WalletInviteUserDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -68,8 +68,7 @@ export const getInviteeIdentifierValidationError = ({
     return undefined
   }
 
-  // strict: false to accept non-checksummed addresses, like the onboarding flow
-  if (isAddress(normalized, { strict: false })) {
+  if (isAddress(normalized)) {
     if (walletAddresses?.some((walletAddress) => sameAddress(walletAddress, normalized))) {
       return SELF_INVITE_ERROR
     }

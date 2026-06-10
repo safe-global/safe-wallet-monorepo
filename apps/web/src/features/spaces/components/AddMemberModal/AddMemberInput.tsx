@@ -3,7 +3,7 @@ import { IconButton, InputAdornment, Skeleton, SvgIcon, TextField, Typography } 
 import Autocomplete from '@mui/material/Autocomplete'
 import classnames from 'classnames'
 import type { UseFormRegisterReturn } from 'react-hook-form'
-import { isAddress } from 'viem'
+import { isAddress } from 'ethers'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
 import useAddressBook from '@/hooks/useAddressBook'
@@ -42,7 +42,7 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
   const [isOpen, setIsOpen] = useState(false)
   const inviteeIdentifier = value.trim()
   const shouldResolveEns = Boolean(
-    inviteeIdentifier && !isEmailAddress(inviteeIdentifier) && !isAddress(inviteeIdentifier, { strict: false }),
+    inviteeIdentifier && !isEmailAddress(inviteeIdentifier) && !isAddress(inviteeIdentifier),
   )
   const { address: resolvedAddress } = useNameResolver(shouldResolveEns ? inviteeIdentifier : '')
 
@@ -59,11 +59,11 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
 
   const matches = useAddressBookSearch(contacts, inviteeIdentifier)
   const options = useMemo(
-    () => (isAddress(inviteeIdentifier, { strict: false }) ? [] : matches.slice(0, MAX_VISIBLE_OPTIONS)),
+    () => (isAddress(inviteeIdentifier) ? [] : matches.slice(0, MAX_VISIBLE_OPTIONS)),
     [inviteeIdentifier, matches],
   )
 
-  const showIdenticon = Boolean(value && !error && isAddress(value, { strict: false }))
+  const showIdenticon = Boolean(value && !error && isAddress(value))
 
   // The initials avatar colors itself from the full email, which would change
   // on every keystroke. Debounce it so the color doesn't flicker while typing.

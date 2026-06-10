@@ -29,7 +29,7 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { isAuthenticated } from '@/store/authSlice'
 import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { isAddress } from 'viem'
+import { isAddress } from 'ethers'
 import {
   type MemberField,
   buildInviteUserPayload,
@@ -113,7 +113,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   })
 
   useEffect(() => {
-    if (!isAddress(inviteeIdentifierValue, { strict: false })) {
+    if (!isAddress(inviteeIdentifierValue)) {
       return
     }
 
