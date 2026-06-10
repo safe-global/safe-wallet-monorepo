@@ -88,8 +88,8 @@ const mockDisabledSetupGroup: ResolvedSidebarGroup = {
 }
 
 const mockSpaces: SpaceItem[] = [
-  { id: 1, uuid: 'uuid-1', name: 'Company Space', safeCount: 0 },
-  { id: 2, uuid: 'uuid-2', name: 'Personal Space', safeCount: 0 },
+  { uuid: 'uuid-1', name: 'Company Space', safeCount: 0 },
+  { uuid: 'uuid-2', name: 'Personal Space', safeCount: 0 },
 ]
 
 const selectedSpace = mockSpaces[0]

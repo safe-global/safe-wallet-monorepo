@@ -24,7 +24,7 @@ const SAFE_SIDEBAR_ROUTER_QUERY = {
   safe: '0x1234567890123456789012345678901234567890',
 }
 
-const STORY_SELECTED_SPACE: SpaceItem = { id: 1, uuid: 'uuid-1', name: 'Company Space', safeCount: 0 }
+const STORY_SELECTED_SPACE: SpaceItem = { uuid: 'uuid-1', name: 'Company Space', safeCount: 0 }
 
 const storyChain = (() => {
   const base = createChainData()
@@ -335,8 +335,8 @@ export const VariantAddToWorkspace: Story = {
         workspaceHeader={{
           variant: 'addToWorkspace',
           spaces: [
-            { id: 1, uuid: 'uuid-1', name: 'Company Space', safeCount: 2 },
-            { id: 2, uuid: 'uuid-2', name: 'Treasury', safeCount: 5 },
+            { uuid: 'uuid-1', name: 'Company Space', safeCount: 2 },
+            { uuid: 'uuid-2', name: 'Treasury', safeCount: 5 },
           ],
         }}
         mainNavItems={variantMainNavItems}

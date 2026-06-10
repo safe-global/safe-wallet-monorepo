@@ -72,15 +72,14 @@ jest.mock('../../SpacesSidebarVariant', () => ({
 
 describe('SpacesSidebarContent', () => {
   const mockSpace: SpaceItem = {
-    id: 1,
     uuid: 'uuid-1',
     name: 'Test Space',
     safeCount: 0,
   }
 
   const mockSpaces: SpaceItem[] = [
-    { id: 1, uuid: 'uuid-1', name: 'Space 1', safeCount: 0 },
-    { id: 2, uuid: 'uuid-2', name: 'Space 2', safeCount: 0 },
+    { uuid: 'uuid-1', name: 'Space 1', safeCount: 0 },
+    { uuid: 'uuid-2', name: 'Space 2', safeCount: 0 },
   ]
 
   const mockResolvedNavItems = {

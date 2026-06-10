@@ -266,7 +266,7 @@ describe('SafeSidebarContent', () => {
       render(
         <GeoblockingContext.Provider value={false}>
           <SafeSidebarContent
-            spaces={[{ id: 1, uuid: 'uuid-1', name: 'My Space', safeCount: 0 }]}
+            spaces={[{ uuid: 'uuid-1', name: 'My Space', safeCount: 0 }]}
             onSpaceAdded={onSpaceAdded}
           />
         </GeoblockingContext.Provider>,
