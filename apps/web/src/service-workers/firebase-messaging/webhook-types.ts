@@ -1,5 +1,7 @@
 // Be careful what you import here as it will increase the service worker bundle size
 
+import type { MessagePayload } from 'firebase/messaging'
+
 export enum WebhookType {
   EXECUTED_MULTISIG_TRANSACTION = 'EXECUTED_MULTISIG_TRANSACTION',
   INCOMING_ETHER = 'INCOMING_ETHER',
@@ -106,3 +108,7 @@ export type WebhookEvent =
   | ModuleTransactionEvent
   | ConfirmationRequestEvent
   | SafeCreatedEvent
+
+export const isWebhookEvent = (data: MessagePayload['data']): data is WebhookEvent => {
+  return Object.values(WebhookType).some((type) => type === data?.type)
+}

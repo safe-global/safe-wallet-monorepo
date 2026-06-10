@@ -220,25 +220,31 @@ export function useLoadFeature<T extends FeatureImplementation>(
     }
   }, [isEnabled, handle])
 
-  // Derive meta from current state
+  // Derive meta primitives from current state. We deliberately do NOT
+  // build a `meta` object up here and feed it into the final useMemo:
+  // a fresh object reference every render would invalidate the memo on
+  // every commit, making every `useLoadFeature` consumer receive a new
+  // feature reference each time. That cascades through their downstream
+  // useEffect/useCallback dep chains and contributed to the render
+  // storm we observed in dev.
   const feature = getFeature(loaded)
-  const meta: FeatureMeta = {
-    $isDisabled: isEnabled === false,
-    $isReady: !!feature,
-    $error: getError(loaded),
-  }
+  const $isDisabled = isEnabled === false
+  const $isReady = !!feature
+  const $error = getError(loaded)
 
   // Stable proxy — created once per hook instance, reads meta from ref
-  const metaRef = useRef<FeatureMeta>(meta)
-  metaRef.current = meta
+  const metaRef = useRef<FeatureMeta>({ $isDisabled, $isReady, $error })
+  metaRef.current = { $isDisabled, $isReady, $error }
 
   const stubProxy = useMemo(() => createStableStubProxy<T>(metaRef), [])
 
-  // Return feature with meta, or the stable stub proxy
+  // Return feature with meta, or the stable stub proxy. Deps are
+  // primitives so the returned reference only changes when an actual
+  // value flipped.
   return useMemo(() => {
     if (feature) {
-      return { ...feature, ...meta } as LoadedFeature & FeatureMeta
+      return { ...feature, $isDisabled, $isReady, $error } as LoadedFeature & FeatureMeta
     }
     return stubProxy as unknown as LoadedFeature & FeatureMeta
-  }, [feature, stubProxy, meta])
+  }, [feature, stubProxy, $isDisabled, $isReady, $error])
 }
