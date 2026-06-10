@@ -7,11 +7,11 @@
   border-bottom: 1px solid var(--color-border-light);
 }
 
-.header :global .MuiCardHeader-title {
+.header :global(.MuiCardHeader-title) {
   font-weight: 700;
 }
 
-.header :global .MuiCardHeader-subheader {
+.header :global(.MuiCardHeader-subheader) {
   color: var(--color-text-primary);
 }
 
@@ -29,7 +29,7 @@
   padding: var(--space-3) 52px;
 }
 
-.progress :global .MuiLinearProgress-root::before {
+.progress :global(.MuiLinearProgress-root::before) {
   display: none;
 }
 

@@ -11,16 +11,16 @@
   height: calc(100% - 40px);
 }
 
-.status :global .MuiListItem-root:first-of-type {
+.status :global(.MuiListItem-root:first-of-type) {
   padding-top: 0;
 }
 
-.status :global .MuiListItem-root {
+.status :global(.MuiListItem-root) {
   padding-left: 0;
   padding-right: 0;
 }
 
-.status :global .MuiListItemIcon-root {
+.status :global(.MuiListItemIcon-root) {
   color: var(--color-primary-main);
   justify-content: center;
   min-width: auto;
@@ -29,7 +29,7 @@
   background-color: var(--color-background-main);
 }
 
-[data-theme='light'] .status :global .MuiListItemIcon-root {
+[data-theme='light'] .status :global(.MuiListItemIcon-root) {
   color: var(--color-primary-main);
 }
 

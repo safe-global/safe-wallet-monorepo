@@ -6,7 +6,7 @@
   font-size: 13px;
 }
 
-.button :global .MuiButton-startIcon {
+.button :global(.MuiButton-startIcon) {
   margin-left: 0;
   margin-right: 4px;
 }

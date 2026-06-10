@@ -15,7 +15,7 @@
   font-size: 12px;
 }
 
-.tipsList :global .MuiCardContent-root {
+.tipsList :global(.MuiCardContent-root) {
   padding: 0;
 }
 
@@ -24,15 +24,15 @@
   border: none;
 }
 
-.tipAccordion :global .MuiAccordionSummary-root:hover {
+.tipAccordion :global(.MuiAccordionSummary-root:hover) {
   background: inherit;
 }
 
-.tipAccordion :global .Mui-expanded.MuiAccordionSummary-root {
+.tipAccordion :global(.Mui-expanded.MuiAccordionSummary-root) {
   background: inherit;
   font-weight: bold;
 }
 
-.tipAccordion :global .MuiAccordionDetails-root {
+.tipAccordion :global(.MuiAccordionDetails-root) {
   padding-top: 0;
 }

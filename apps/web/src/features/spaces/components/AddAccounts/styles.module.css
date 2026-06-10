@@ -10,7 +10,7 @@
   border-radius: 6px;
 }
 
-.search :global .MuiInputBase-root {
+.search :global(.MuiInputBase-root) {
   border: 1px solid transparent !important;
 }
 

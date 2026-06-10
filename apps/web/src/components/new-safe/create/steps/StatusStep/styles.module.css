@@ -8,7 +8,7 @@
   padding: 0;
 }
 
-.connector :global .MuiStepConnector-line {
+.connector :global(.MuiStepConnector-line) {
   border-color: var(--color-border-light);
 }
 

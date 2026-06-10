@@ -1,4 +1,4 @@
-.badge :global .MuiBadge-badge {
+.badge :global(.MuiBadge-badge) {
   border: 1px solid var(--color-background-main);
   border-radius: 50%;
   box-sizing: content-box;

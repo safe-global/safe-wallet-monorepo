@@ -13,6 +13,10 @@ export default class WebCoreDocument extends Document {
       <Html lang="en">
         <Head>
           <meta name="emotion-insertion-point" content="" />
+          {/* Loaded here instead of via @import in globals.css: Turbopack
+              (default bundler since Next 16) can't resolve server-relative
+              CSS imports, while this is a plain public/ asset. */}
+          <link rel="stylesheet" href="/fonts/fonts.css" />
           {(this.props as any).emotionStyleTags}
         </Head>
         <body>

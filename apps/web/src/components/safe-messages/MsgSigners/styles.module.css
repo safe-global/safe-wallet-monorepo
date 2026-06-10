@@ -21,21 +21,21 @@
   height: calc(100% - 40px);
 }
 
-.signers :global .MuiListItem-root:first-of-type {
+.signers :global(.MuiListItem-root:first-of-type) {
   padding-top: 0;
 }
 
-.signers :global .MuiListItem-root {
+.signers :global(.MuiListItem-root) {
   padding-left: 0;
   padding-right: 0;
 }
 
-.signers :global .MuiListItemText-root {
+.signers :global(.MuiListItemText-root) {
   margin-top: var(--space-1);
   margin-bottom: var(--space-1);
 }
 
-.signers :global .MuiListItemIcon-root {
+.signers :global(.MuiListItemIcon-root) {
   color: var(--color-primary-main);
   justify-content: center;
   min-width: 32px;

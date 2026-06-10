@@ -96,6 +96,7 @@ jest.mock('@/hooks/useIsSignedIn', () => ({
 }))
 
 jest.mock('@/features/__core__', () => ({
+  ...jest.requireActual('@/features/__core__'),
   useLoadFeature: jest.fn(() => ({
     BatchSidebar: () => null,
     SelectSafeModal: () => null,

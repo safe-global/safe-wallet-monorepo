@@ -12,7 +12,7 @@
   outline: 5px auto -webkit-focus-ring-color;
 }
 
-.select :global .MuiSelect-select {
+.select :global(.MuiSelect-select) {
   padding-right: 40px !important;
   padding-left: 16px;
   height: 100%;
@@ -20,15 +20,15 @@
   align-items: center;
 }
 
-.select :global .MuiSelect-icon {
+.select :global(.MuiSelect-icon) {
   margin-right: var(--space-2);
 }
 
-.select :global .Mui-disabled {
+.select :global(.Mui-disabled) {
   pointer-events: none;
 }
 
-.select :global .MuiMenuItem-root {
+.select :global(.MuiMenuItem-root) {
   padding: 0;
 }
 

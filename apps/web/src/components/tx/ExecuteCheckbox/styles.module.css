@@ -15,23 +15,23 @@
   margin-top: var(--space-2);
 }
 
-.select :global .MuiFormLabel-root {
+.select :global(.MuiFormLabel-root) {
   color: var(--color-text-primary);
   transform: translate(22px, 22px) scale(1);
 }
 
-.select :global .MuiSelect-select {
+.select :global(.MuiSelect-select) {
   padding: 22px;
   text-align: right;
   font-weight: 700;
   padding-right: 52px !important;
 }
 
-.select :global .MuiInputBase-root fieldset {
+.select :global(.MuiInputBase-root fieldset) {
   border-color: var(--color-border-light) !important;
   border-width: 1px !important;
 }
 
-.select :global .MuiSvgIcon-root {
+.select :global(.MuiSvgIcon-root) {
   right: 22px;
 }

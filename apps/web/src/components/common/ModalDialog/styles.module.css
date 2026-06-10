@@ -1,28 +1,28 @@
-.dialog :global .MuiDialogActions-root {
+.dialog :global(.MuiDialogActions-root) {
   border-top: 1px solid var(--color-border-light);
   padding: var(--space-2) var(--space-3);
 }
 
-.dialog :global .MuiDialogActions-root > :last-of-type:not(:first-of-type) {
+.dialog :global(.MuiDialogActions-root > :last-of-type:not(:first-of-type)) {
   order: 2;
 }
 
-.dialog :global .MuiDialogActions-root:after {
+.dialog :global(.MuiDialogActions-root:after) {
   content: '';
   order: 1;
   flex: 1;
 }
 
-.dialog :global .MuiDialogTitle-root {
+.dialog :global(.MuiDialogTitle-root) {
   border-bottom: 1px solid var(--color-border-light);
 }
 
-.dialog :global .MuiDialogTitle-root + .MuiDialogContent-root {
+.dialog :global(.MuiDialogTitle-root + .MuiDialogContent-root) {
   padding-top: var(--space-3);
 }
 
 @media (min-width: 600px) {
-  .dialog :global .MuiDialog-paper {
+  .dialog :global(.MuiDialog-paper) {
     min-width: 600px;
     margin: 0;
     border-radius: 24px;

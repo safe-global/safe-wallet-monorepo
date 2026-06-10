@@ -76,6 +76,7 @@ jest.mock('@/features/myAccounts', () => ({
 }))
 
 jest.mock('@/features/__core__', () => ({
+  ...jest.requireActual('@/features/__core__'),
   useLoadFeature: () => ({
     SafeSelectionModal: () => null,
   }),

@@ -100,7 +100,7 @@
   width: 100%;
 }
 
-.accordion :global .MuiAccordionSummary-content {
+.accordion :global(.MuiAccordionSummary-content) {
   width: 100%;
   overflow: hidden;
   margin: 0;

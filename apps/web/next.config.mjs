@@ -1,11 +1,7 @@
 import path from 'path'
 import withBundleAnalyzer from '@next/bundle-analyzer'
 import withPWAInit from '@ducanh2912/next-pwa'
-import remarkGfm from 'remark-gfm'
-import remarkHeadingId from 'remark-heading-id'
 import createMDX from '@next/mdx'
-import remarkFrontmatter from 'remark-frontmatter'
-import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { readFile } from 'fs/promises'
 import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'
@@ -83,6 +79,33 @@ const nextConfig = {
   output: 'export', // static site export
 
   transpilePackages: ['@safe-global/store', '@safe-global/theme'],
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: [
+          {
+            loader: '@svgr/webpack',
+            options: {
+              prettier: false,
+              svgo: false,
+              svgoConfig: {
+                plugins: [
+                  {
+                    name: 'preset-default',
+                    params: {
+                      overrides: { removeViewBox: false },
+                    },
+                  },
+                ],
+              },
+              titleProp: true,
+            },
+          },
+        ],
+        as: '*.js',
+      },
+    },
+  },
   images: {
     unoptimized: true,
   },
@@ -97,9 +120,6 @@ const nextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   reactStrictMode: false,
   productionBrowserSourceMaps: true,
-  eslint: {
-    dirs: ['src', 'cypress'],
-  },
   ...(isProd || enableExperimentalOptimizations
     ? {
         experimental: {
@@ -173,7 +193,14 @@ const withMDX = isRspack
       extension: /\.(md|mdx)?$/,
       jsx: true,
       options: {
-        remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter, { name: 'metadata' }], remarkHeadingId, remarkGfm],
+        // String-based plugin specs: Turbopack (default in Next 16) requires
+        // serializable loader options, so plugin functions can't be passed.
+        remarkPlugins: [
+          'remark-frontmatter',
+          ['remark-mdx-frontmatter', { name: 'metadata' }],
+          'remark-heading-id',
+          'remark-gfm',
+        ],
         rehypePlugins: [],
       },
     })

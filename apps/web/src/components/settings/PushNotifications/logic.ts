@@ -98,7 +98,7 @@ export const getRegisterDevicePayload = async ({
   let safeRegistrations: RegisterDeviceDto['safeRegistrations'] = []
 
   // We cannot `Promise.all` here as Ledger/Trezor return a "busy" error when signing multiple messages at once
-  for await (const [chainId, safeAddresses] of Object.entries(safesToRegister)) {
+  for (const [chainId, safeAddresses] of Object.entries(safesToRegister)) {
     const checksummedSafeAddresses = safeAddresses.map((address) => checksumAddress(address))
 
     // We require a signature for confirmation request notifications

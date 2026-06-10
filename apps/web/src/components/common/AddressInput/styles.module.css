@@ -1,8 +1,8 @@
-.wrapper :global .MuiInputLabel-root.Mui-error[data-shrink='false'] {
+.wrapper :global(.MuiInputLabel-root.Mui-error[data-shrink='false']) {
   padding: 5px 4px;
 }
 
-.wrapper :global .MuiInputAdornment-root {
+.wrapper :global(.MuiInputAdornment-root) {
   margin-left: 0;
 }
 
@@ -14,6 +14,6 @@
   transform: rotate(180deg);
 }
 
-.readOnly :global .MuiInputBase-input {
+.readOnly :global(.MuiInputBase-input) {
   visibility: hidden;
 }

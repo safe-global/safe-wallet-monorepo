@@ -24,17 +24,17 @@
   gap: var(--space-2);
 }
 
-.stepper :global .MuiStepConnector-root {
+.stepper :global(.MuiStepConnector-root) {
   left: -8px;
   transform: translateX(-50%);
   width: calc(100% - 40px);
 }
 
-.stepper :global .MuiStepConnector-line {
+.stepper :global(.MuiStepConnector-line) {
   border: 1px solid var(--color-border-main);
 }
 
-.stepper :global .MuiStep-root:not(:nth-of-type(2)) .MuiStepConnector-line {
+.stepper :global(.MuiStep-root:not(:nth-of-type(2)) .MuiStepConnector-line) {
   border-color: var(--color-border-light);
 }
 
@@ -68,7 +68,7 @@
     gap: 0;
   }
 
-  .stepper :global .MuiStep-root {
+  .stepper :global(.MuiStep-root) {
     padding: 0 !important;
     flex-shrink: 0;
     flex-grow: 0;
@@ -76,13 +76,13 @@
     width: 25%;
   }
 
-  .stepper :global .MuiTypography-root {
+  .stepper :global(.MuiTypography-root) {
     font-size: 11px;
     line-height: 16px;
     letter-spacing: 0.4px;
   }
 
-  .stepper :global .MuiStepConnector-root {
+  .stepper :global(.MuiStepConnector-root) {
     left: 0;
     width: calc(100% - 50px);
   }

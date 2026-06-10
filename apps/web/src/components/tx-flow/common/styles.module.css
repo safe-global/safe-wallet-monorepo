@@ -5,7 +5,7 @@
   padding: var(--space-3);
 }
 
-.cardContent :global .errorMessage {
+.cardContent :global(.errorMessage) {
   margin: 0;
 }
 

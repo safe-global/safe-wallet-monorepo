@@ -10,8 +10,8 @@
   background-color: transparent;
 }
 
-.card :global .MuiCardHeader-root,
-.card :global .MuiCardContent-root {
+.card :global(.MuiCardHeader-root),
+.card :global(.MuiCardContent-root) {
   padding: 0;
 }
 

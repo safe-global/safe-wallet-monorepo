@@ -1,8 +1,8 @@
 diff --git a/dist/client/route-loader.js b/dist/client/route-loader.js
-index 888fc23e628cd87fbbf60742aeaaea37b9703f6e..e541dc188c9a8408d11c49f515fde0bfb50d66f7 100644
+index 5bdbaa8d1bb5a484e1edb4fbf9d1674e9cad06aa..b7728c5bd578a46d6904d7cce10fe8899a588d53 100644
 --- a/dist/client/route-loader.js
 +++ b/dist/client/route-loader.js
-@@ -124,6 +124,10 @@ function appendScript(src, script) {
+@@ -120,6 +120,10 @@ function appendScript(src, script) {
          // 3. Finally, set the source and inject into the DOM in case the child
          //    must be appended for fetching to start.
          script.src = src;

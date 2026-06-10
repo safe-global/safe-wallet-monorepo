@@ -12,12 +12,12 @@
   height: calc(100% - 40px);
 }
 
-.signers :global .MuiListItem-root {
+.signers :global(.MuiListItem-root) {
   padding-left: 0;
   padding-right: 0;
 }
 
-.signers :global .MuiListItemIcon-root {
+.signers :global(.MuiListItemIcon-root) {
   color: var(--color-primary-main);
   justify-content: center;
   min-width: 32px;

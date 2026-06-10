@@ -1,4 +1,4 @@
-.dialog :global .MuiPaper-root {
+.dialog :global(.MuiPaper-root) {
   max-width: 600px;
 }
 
@@ -6,7 +6,7 @@
   font-weight: bold;
 }
 
-.dialog :global .MuiDialogContent-root {
+.dialog :global(.MuiDialogContent-root) {
   border: 0;
   padding: var(--space-3);
 }
@@ -17,15 +17,15 @@
   border-radius: 6px;
 }
 
-.buttonGroup :global .MuiRadio-root {
+.buttonGroup :global(.MuiRadio-root) {
   display: none;
 }
 
-.buttonGroup :global .MuiRadio-root.Mui-checked + span > div {
+.buttonGroup :global(.MuiRadio-root.Mui-checked + span > div) {
   border-color: var(--color-primary-main);
 }
 
-.buttonGroup :global .MuiFormControlLabel-root {
+.buttonGroup :global(.MuiFormControlLabel-root) {
   margin: 0;
   width: 100%;
 }
@@ -37,8 +37,8 @@
   gap: var(--space-2);
 }
 
-.buttonGroup :global .MuiFormControlLabel-root span,
-.buttonGroup :global .MuiFormControlLabel-root span > div {
+.buttonGroup :global(.MuiFormControlLabel-root span),
+.buttonGroup :global(.MuiFormControlLabel-root span > div) {
   height: 100%;
   width: 100%;
 }
@@ -70,16 +70,16 @@
 }
 
 @media (min-width: 900px) {
-  .dialog :global .MuiPaper-root {
+  .dialog :global(.MuiPaper-root) {
     max-width: 1000px;
   }
 
-  .buttonGroup :global .MuiFormControlLabel-root {
+  .buttonGroup :global(.MuiFormControlLabel-root) {
     margin: 0;
     flex: 1;
   }
 
-  .dialog :global .MuiDialogContent-root {
+  .dialog :global(.MuiDialogContent-root) {
     padding: var(--space-8);
   }
 

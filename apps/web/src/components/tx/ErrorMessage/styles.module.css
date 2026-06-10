@@ -28,7 +28,7 @@
 }
 
 /* Ensure body text uses 14px font-size */
-.message :global .MuiTypography-body2 {
+.message :global(.MuiTypography-body2) {
   font-size: 14px;
 }
 
