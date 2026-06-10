@@ -122,20 +122,27 @@ function SpaceSafeBar() {
         )
 
   return (
-    <div data-testid="safe-level-navigation" className="flex flex-wrap items-center gap-2">
-      {isQualifiedSafe && space && !txFlow && <SpaceBackLink space={space} onClick={handleBackToSpace} />}
-      <SpaceChainSelector isLoading={isLoading} />
+    <div data-testid="safe-level-navigation" className="flex flex-wrap items-center gap-2 max-[899px]:justify-end">
+      {/* Back-link + safe selector are one unit so they never split across rows. Under 430px
+          the group dissolves (display:contents) so the back-link joins the nested/network
+          controls on one row and the safe selector drops to its own full-width row below. */}
+      <div className="flex min-w-0 items-center gap-2 max-[429px]:contents">
+        {isQualifiedSafe && space && !txFlow && <SpaceBackLink space={space} onClick={handleBackToSpace} />}
+        <div className="contents max-[429px]:block max-[429px]:order-[10000] max-[429px]:min-w-0 max-[429px]:basis-full">
+          <SafeSelectorDropdown
+            items={items}
+            selectedItemId={selectedItemId}
+            onItemSelect={handleItemSelect}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={refetch}
+            header={dropdownHeader}
+            footer={dropdownFooter}
+          />
+        </div>
+      </div>
       <SpaceNestedSafesButton />
-      <SafeSelectorDropdown
-        items={items}
-        selectedItemId={selectedItemId}
-        onItemSelect={handleItemSelect}
-        isLoading={isLoading}
-        isError={isError}
-        onRetry={refetch}
-        header={dropdownHeader}
-        footer={dropdownFooter}
-      />
+      <SpaceChainSelector isLoading={isLoading} />
       <AccountsModal open={accountsModalOpen} onClose={() => setAccountsModalOpen(false)} />
     </div>
   )

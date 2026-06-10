@@ -18,7 +18,7 @@ export const useSpaceSafes = () => {
     isError: isSpaceSafesError,
     error: spaceSafesError,
     refetch: refetchSpaceSafes,
-  } = useSpaceSafesGetV1Query({ spaceId: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
+  } = useSpaceSafesGetV1Query({ spaceId: spaceId ?? '' }, { skip: !isUserSignedIn || !spaceId })
   const spaceContacts = useGetSpaceAddressBook()
 
   // We are doing this in order to reuse the _buildSafeItems function but only take space contacts into account

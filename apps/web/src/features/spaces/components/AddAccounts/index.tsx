@@ -253,7 +253,7 @@ const AddAccounts = ({
       // Add new safes
       if (safesToAdd.length > 0) {
         const result = await addSafesToSpace({
-          spaceId: Number(spaceId),
+          spaceId: spaceId ?? '',
           createSpaceSafesDto: { safes: safesToAdd },
         })
 
@@ -274,7 +274,7 @@ const AddAccounts = ({
       // Remove unchecked safes
       if (safesToRemove.length > 0) {
         const result = await removeSafesFromSpace({
-          spaceId: Number(spaceId),
+          spaceId: spaceId ?? '',
           deleteSpaceSafesDto: { safes: safesToRemove },
         })
 

@@ -10,6 +10,7 @@ const mockAcceptInvite = jest.fn()
 
 const mockSpace = spaceBuilder()
   .with({
+    uuid: '11111111-1111-1111-1111-111111111111',
     members: [
       spaceMemberBuilder()
         .with({ user: { id: 1 }, name: 'Test User' })
@@ -95,8 +96,8 @@ describe('AcceptInviteDialog tracking', () => {
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledTimes(1)
       expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: '42' },
-        { workspace_id: '42', user_id: 1 },
+        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: '11111111-1111-1111-1111-111111111111' },
+        { workspace_id: '11111111-1111-1111-1111-111111111111', user_id: 1 },
       )
     })
   })

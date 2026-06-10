@@ -14,7 +14,7 @@ export const useSpaceSafesWithQueue = () => {
   const currency = useAppSelector(selectCurrency)
 
   const { currentData: spaceSafes, isFetching: isLoadingSafes } = useSpaceSafesGetV1Query(
-    { spaceId: Number(spaceId) },
+    { spaceId: spaceId ?? '' },
     { skip: !isUserSignedIn || !spaceId },
   )
 

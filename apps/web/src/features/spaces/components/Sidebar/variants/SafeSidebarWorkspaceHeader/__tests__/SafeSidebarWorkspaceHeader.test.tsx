@@ -275,7 +275,7 @@ describe('SafeSidebarWorkspaceHeader', () => {
     })
 
     it('renders SpaceSelectorDropdown when at least one space exists', () => {
-      const spaces = [{ id: 1, name: 'My Space', safeCount: 1, members: adminMembers }]
+      const spaces = [{ id: 1, uuid: 'uuid-1', name: 'My Space', safeCount: 1, members: adminMembers }]
       const onSpaceAdded = jest.fn()
 
       render(
@@ -302,8 +302,8 @@ describe('SafeSidebarWorkspaceHeader', () => {
 
     it('prefers SpaceSelectorDropdown over Dialog when multiple spaces exist', () => {
       const spaces = [
-        { id: 1, name: 'A', safeCount: 1, members: adminMembers },
-        { id: 2, name: 'B', safeCount: 0, members: memberMembers },
+        { id: 1, uuid: 'uuid-1', name: 'A', safeCount: 1, members: adminMembers },
+        { id: 2, uuid: 'uuid-2', name: 'B', safeCount: 0, members: memberMembers },
       ]
 
       render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces })} />)
@@ -314,8 +314,8 @@ describe('SafeSidebarWorkspaceHeader', () => {
 
     it('renders SpaceSelectorDropdown even when the user is admin of zero spaces — rows handle the disabled state and tooltip', () => {
       const spaces = [
-        { id: 1, name: 'A', safeCount: 1, members: memberMembers },
-        { id: 2, name: 'B', safeCount: 0, members: memberMembers },
+        { id: 1, uuid: 'uuid-1', name: 'A', safeCount: 1, members: memberMembers },
+        { id: 2, uuid: 'uuid-2', name: 'B', safeCount: 0, members: memberMembers },
       ]
 
       render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces })} />)
@@ -326,8 +326,8 @@ describe('SafeSidebarWorkspaceHeader', () => {
 
     it('renders SpaceSelectorDropdown when the user is admin of at least one space', () => {
       const spaces = [
-        { id: 1, name: 'A', safeCount: 1, members: memberMembers },
-        { id: 2, name: 'B', safeCount: 0, members: adminMembers },
+        { id: 1, uuid: 'uuid-1', name: 'A', safeCount: 1, members: memberMembers },
+        { id: 2, uuid: 'uuid-2', name: 'B', safeCount: 0, members: adminMembers },
       ]
 
       render(<SafeSidebarWorkspaceHeader workspaceHeader={createAddHeader({ spaces })} />)

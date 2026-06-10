@@ -46,7 +46,7 @@ const SpaceAddressBookCTA = () => {
   const isAdmin = useIsAdmin()
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
+  const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isUserSignedIn || !spaceId })
 
   if (!isQualifiedSafe || !isAdmin) return null
 
