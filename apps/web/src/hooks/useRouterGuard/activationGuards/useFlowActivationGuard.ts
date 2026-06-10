@@ -228,7 +228,13 @@ export const useFlowActivationGuard: UseGuard = () => {
       }
 
       if (query.spaceId) {
-        isPartOfSpaceUrl = hasSpaces && !!spaces && spaces.some((s) => s.uuid === query.spaceId)
+        // Match the UUID, and also the deprecated numeric id so bookmarked
+        // legacy /spaces?spaceId=42 URLs still resolve. The numeric half is
+        // self-retiring: once CGW stops issuing/resolving numeric ids it can
+        // no longer match a real space, so it becomes harmless dead code — no
+        // FE change is required when the pipe is removed.
+        isPartOfSpaceUrl =
+          hasSpaces && !!spaces && spaces.some((s) => s.uuid === query.spaceId || String(s.id) === query.spaceId)
       }
     }
 
