@@ -37,7 +37,6 @@ describe('store', () => {
         arr1: ['arr1', 'arr2'],
         auth: {
           isStoreHydrated: true,
-          cfSafeSynced: false,
           isOidcLoginPending: false,
         },
       })
@@ -107,7 +106,6 @@ describe('store', () => {
         arr1: ['arr1'],
         auth: {
           isStoreHydrated: true,
-          cfSafeSynced: false,
           isOidcLoginPending: false,
         },
       })
@@ -134,7 +132,6 @@ describe('store', () => {
         str2: 'str2',
         auth: {
           isStoreHydrated: true,
-          cfSafeSynced: false,
           isOidcLoginPending: false,
         },
       })

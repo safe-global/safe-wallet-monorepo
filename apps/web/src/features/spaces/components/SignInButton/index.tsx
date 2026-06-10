@@ -6,7 +6,7 @@ import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analyti
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { useSiwe } from '@/services/siwe/useSiwe'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { isAuthenticated, setAuthenticated, SESSION_LIFETIME_MS } from '@/store/authSlice'
+import { isAuthenticated, setAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
@@ -66,7 +66,8 @@ const SignInButton = ({ afterSignIn, redirectLoading = false, buttonStyle, butto
       }
 
       if (result) {
-        dispatch(setAuthenticated(Date.now() + SESSION_LIFETIME_MS))
+        const oneDayInMs = 24 * 60 * 60 * 1000
+        dispatch(setAuthenticated(Date.now() + oneDayInMs))
         trackEvent(
           { ...SPACE_EVENTS.AUTH_LOGIN_SUCCEEDED, label: spaceId ?? undefined },
           { spaceId, method: AuthLoginMethod.SIWE, timestamp: new Date().toISOString() },

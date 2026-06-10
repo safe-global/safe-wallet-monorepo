@@ -70,17 +70,7 @@ describe('ReviewStep', () => {
     }
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
-      initialReduxState: {
-        auth: {
-          sessionExpiresAt: Date.now() + 60000,
-          lastUsedSpace: null,
-          isStoreHydrated: true,
-          cfSafeSynced: false,
-          isOidcLoginPending: false,
-        },
-      },
-    })
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
 
     const payLaterOption = screen.getByRole('radio', { name: /Pay later/i })
     expect(payLaterOption).toBeChecked()
@@ -171,16 +161,6 @@ describe('ReviewStep', () => {
     expect(getByText(/Who will pay gas fees:/)).toBeInTheDocument()
   })
 
-  const authReduxState = {
-    auth: {
-      sessionExpiresAt: Date.now() + 60000,
-      lastUsedSpace: null,
-      isStoreHydrated: true,
-      cfSafeSynced: false,
-      isOidcLoginPending: false,
-    },
-  }
-
   const buildMultiChainData = (): NewSafeFormData => {
     const chainWithFeatures = { ...mockChain, features: [] } as Chain
     return {
@@ -198,7 +178,6 @@ describe('ReviewStep', () => {
 
     const { getByTestId, getByText } = render(
       <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
-      { initialReduxState: authReduxState },
     )
 
     expect(getByTestId('pay-now-later-message-box')).toBeInTheDocument()
@@ -209,19 +188,8 @@ describe('ReviewStep', () => {
     expect(screen.getByRole('radio', { name: /Pay later/i })).toBeChecked()
   })
 
-  it('disables creation for multichain until the user signs in (Pay later writes to the backend)', () => {
-    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
-
-    // No auth state provided -> the user is not authenticated.
-    const { getByTestId } = render(
-      <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
-    )
-
-    expect(getByTestId('review-step-next-btn')).toBeDisabled()
-  })
-
   it('does not block multichain creation when counterfactual is disabled', () => {
-    // Counterfactual off -> no PayLater forcing, no sign-in gate (direct deployment path).
+    // Counterfactual off -> no PayLater forcing (direct deployment path).
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
 
     const { getByTestId } = render(
@@ -231,7 +199,7 @@ describe('ReviewStep', () => {
     expect(getByTestId('review-step-next-btn')).not.toBeDisabled()
   })
 
-  it('creates counterfactual safes on each network for multichain when authenticated', async () => {
+  it('creates counterfactual safes on each network for multichain', async () => {
     const mockData = buildMultiChainData()
 
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
@@ -244,19 +212,22 @@ describe('ReviewStep', () => {
     jest
       .spyOn(multichain, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    const persistSpy = jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+    const replaySpy = jest.spyOn(cfServices, 'replayCounterfactualSafeDeployment').mockImplementation(jest.fn())
 
-    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
-      initialReduxState: authReduxState,
-    })
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('review-step-next-btn'))
     })
 
-    expect(persistSpy).toHaveBeenCalledTimes(mockData.networks.length)
-    expect(persistSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ payMethod: PayMethod.PayLater, isUserAuthenticated: true }),
+    expect(replaySpy).toHaveBeenCalledTimes(mockData.networks.length)
+    expect(replaySpy).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      PayMethod.PayLater,
     )
   })
 })
