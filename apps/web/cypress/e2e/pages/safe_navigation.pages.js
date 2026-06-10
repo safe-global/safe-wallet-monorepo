@@ -25,7 +25,19 @@ export const multichainSafeSepoliaLabel = 'Multichain Sepolia'
 
 export function openSelector() {
   cy.get(safeSelectorBlock).should('be.visible')
-  cy.get(openSafesIcon).click()
+  // A click before React hydration finishes is swallowed, so retry until the
+  // dropdown actually opens
+  const clickUntilOpen = (attempt = 0) => {
+    cy.get(openSafesIcon).click()
+    cy.get('body').then(($body) => {
+      if ($body.find(dropdownContent).length === 0 && attempt < 9) {
+        cy.wait(500)
+        clickUntilOpen(attempt + 1)
+      }
+    })
+  }
+  clickUntilOpen()
+  cy.get(dropdownContent).should('be.visible')
 }
 
 export function verifyItemExistsInSelector(name) {

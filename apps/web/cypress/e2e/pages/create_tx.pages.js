@@ -622,20 +622,15 @@ function verifyIconAlt($container, expectedAlt, context = 'element') {
  * Handles both single-word tokens (e.g., "ETH") and multi-word tokens (e.g., "FLOWER #6188", "$ ETH35.com")
  */
 function verifyTokenSymbol($element, expectedToken) {
-  const tokenTextElements = $element.find('b[class*="tokenText"]')
-  expect(tokenTextElements.length, 'At least one token text element should exist').to.be.greaterThan(0)
+  // Retry via cy.wrap: the token symbol comes from the chain config, which can
+  // load after the transaction items are first rendered
+  cy.wrap($element).should(($el) => {
+    const tokenTextElements = $el.find('b[class*="tokenText"]')
+    expect(tokenTextElements.length, 'At least one token text element should exist').to.be.greaterThan(0)
 
-  // Check if the expected token appears in any of the token text elements
-  let found = false
-  tokenTextElements.each((index, el) => {
-    const tokenText = Cypress.$(el).text().trim()
-    if (tokenText && tokenText.includes(expectedToken)) {
-      found = true
-      return false // Break the loop
-    }
+    const found = tokenTextElements.toArray().some((el) => Cypress.$(el).text().trim().includes(expectedToken))
+    expect(found, `Token "${expectedToken}" should be found in token text elements`).to.be.true
   })
-
-  expect(found, `Token "${expectedToken}" should be found in token text elements`).to.be.true
 }
 
 export function verifySummaryByName(name, token, data, alt, altToken) {

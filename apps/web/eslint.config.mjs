@@ -69,6 +69,11 @@ export default [
   prettierConfig,
   ...storybook.configs['flat/recommended'],
   {
+    // Same extensions eslint-config-next registers its plugins for. Without this
+    // scope the react-hooks rules below also apply to files like *.cjs, where the
+    // plugin is not registered, and ESLint crashes with "Could not find plugin".
+    files: ['**/*.{js,jsx,mjs,ts,tsx,mts,cts}'],
+
     plugins: {
       'unused-imports': unusedImports,
       'no-only-tests': noOnlyTests,
