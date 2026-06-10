@@ -5,7 +5,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@source '../components/ui';
+/* Scan the whole apps/web/src tree so Tailwind generates every utility used
+   in JSX. Under Next.js the framework auto-scans the project; under Vite
+   (apps/web-tanstack) we need to declare the scan explicitly here so the
+   directive lives in the same file that imports tailwindcss/utilities.css
+   — that's how Tailwind v4's source detection aggregates correctly. */
+@source '../';
+/* Also scan shared packages whose JSX is reused via path aliases. */
+@source '../../../../packages';
 
 /* CSS variables scoped to .shadcn-scope ONLY — never :root */
 .shadcn-scope {

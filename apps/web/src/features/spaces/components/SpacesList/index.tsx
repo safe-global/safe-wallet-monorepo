@@ -106,7 +106,7 @@ const SignedOutState = ({
 
               <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
 
-              {isClassicViewFeatureEnabled && <ClassicViewLink />}
+              {isClassicViewFeatureEnabled && !inline && <ClassicViewLink />}
             </div>
           </div>
 
