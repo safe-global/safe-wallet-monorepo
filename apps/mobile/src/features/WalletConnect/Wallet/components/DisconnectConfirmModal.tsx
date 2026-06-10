@@ -61,9 +61,9 @@ export const DisconnectConfirmModal: React.FC<DisconnectConfirmModalProps> = ({
             <Text fontWeight="700" fontSize={16} letterSpacing={-0.1}>
               Disconnect app?
             </Text>
-            <YStack gap="$2" alignItems="center">
+            <YStack gap="$2" alignItems="center" alignSelf="stretch">
               <DappIcon url={displayed?.iconUrl} size={36} />
-              <Text fontWeight="700" fontSize={16} letterSpacing={0.15}>
+              <Text fontWeight="700" fontSize={16} letterSpacing={0.15} textAlign="center" alignSelf="stretch">
                 {displayed?.name ?? ''}
               </Text>
             </YStack>
