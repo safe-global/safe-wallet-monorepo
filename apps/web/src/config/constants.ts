@@ -147,6 +147,9 @@ export const ECOSYSTEM_ID_ADDRESS =
   process.env.NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS || '0x0000000000000000000000000000000000000000'
 export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/en/articles/222612-multi-chain-safe`
 
+export const WORKSPACE_ANNOUNCEMENT_URL =
+  'https://safe.global/blog/introducing-workspace-the-onchain-operating-environment-for-treasury-teams'
+
 // Hypernative Campaign IDs
 export const PROD_HYPERNATIVE_OUTREACH_ID = parseInt(process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID ?? `${3}`)
 export const STAGING_HYPERNATIVE_OUTREACH_ID = parseInt(
