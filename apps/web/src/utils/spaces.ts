@@ -6,7 +6,7 @@
  * the backend's LegacySpaceIdPipe during the deprecation window, so we
  * pass any non-empty string through unchanged.
  */
-export const parseSpaceId = (spaceId: string | null): string | null => {
+export const normalizeSpaceId = (spaceId: string | null): string | null => {
   if (spaceId === null || spaceId.trim() === '') return null
   return spaceId
 }

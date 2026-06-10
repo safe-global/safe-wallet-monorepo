@@ -13,7 +13,7 @@ import {
   type GetCounterfactualSafesResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { parseSpaceId } from '@/utils/spaces'
+import { normalizeSpaceId } from '@/utils/spaces'
 
 const SYNC_RETRY_DELAY_MS = 2000
 
@@ -88,7 +88,7 @@ const useCounterfactualSafeSync = () => {
       const userQuery = dispatch(counterfactualSafesApi.endpoints.counterfactualSafesGetV1.initiate(undefined))
       // Guard against persisted/legacy lastUsedSpace values that aren't a clean
       // UUID or non-empty string — pass through unchanged, null means skip.
-      const resolvedSpaceId = parseSpaceId(spaceId)
+      const resolvedSpaceId = normalizeSpaceId(spaceId)
       const spaceQuery =
         resolvedSpaceId !== null
           ? dispatch(spacesApi.endpoints.spaceCounterfactualSafesGetV1.initiate({ spaceId: resolvedSpaceId }))

@@ -7,7 +7,7 @@ import { toBackendDto } from './counterfactualSafeMapper'
 import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { parseSpaceId } from '@/utils/spaces'
+import { normalizeSpaceId } from '@/utils/spaces'
 
 type PersistArgs = {
   chainId: string
@@ -67,7 +67,7 @@ export const persistCounterfactualSafe = async ({
 
     // Guard against persisted/legacy lastUsedSpace values that are empty or
     // whitespace-only — pass any non-empty string through unchanged.
-    const resolvedSpaceId = parseSpaceId(spaceId)
+    const resolvedSpaceId = normalizeSpaceId(spaceId)
     if (resolvedSpaceId !== null) {
       if (!isAdminOfActiveSpace) {
         // Backend gates this endpoint on admin role and would 403. Inform the

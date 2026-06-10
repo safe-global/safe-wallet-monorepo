@@ -1,20 +1,20 @@
-import { parseSpaceId } from '../spaces'
+import { normalizeSpaceId } from '../spaces'
 
-describe('parseSpaceId', () => {
+describe('normalizeSpaceId', () => {
   it('returns null for null input', () => {
-    expect(parseSpaceId(null)).toBe(null)
+    expect(normalizeSpaceId(null)).toBe(null)
   })
 
   it('returns null for empty or whitespace-only strings', () => {
-    expect(parseSpaceId('')).toBe(null)
-    expect(parseSpaceId('   ')).toBe(null)
+    expect(normalizeSpaceId('')).toBe(null)
+    expect(normalizeSpaceId('   ')).toBe(null)
   })
 
   it('passes a UUID string through unchanged', () => {
-    expect(parseSpaceId('11111111-1111-1111-1111-111111111111')).toBe('11111111-1111-1111-1111-111111111111')
+    expect(normalizeSpaceId('11111111-1111-1111-1111-111111111111')).toBe('11111111-1111-1111-1111-111111111111')
   })
 
   it('passes a legacy numeric string through unchanged', () => {
-    expect(parseSpaceId('42')).toBe('42')
+    expect(normalizeSpaceId('42')).toBe('42')
   })
 })
