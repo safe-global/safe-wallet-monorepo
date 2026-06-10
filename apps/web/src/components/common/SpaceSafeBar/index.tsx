@@ -1,5 +1,6 @@
 import { useContext, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { useRouter } from 'next/router'
 import { TxModalContext } from '@/components/tx-flow'
 import { Bookmark, ChevronRight, Wallet } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
@@ -111,6 +112,7 @@ function ConnectWalletFooter({ onConnect, onClose }: { onConnect: () => void; on
 
 function SpaceSafeBar() {
   const pathname = usePathname()
+  const router = useRouter()
   const urlSafeAddress = useSafeAddressFromUrl()
   const dispatch = useAppDispatch()
   const isQualifiedSafe = useIsQualifiedSafe()
@@ -125,7 +127,9 @@ function SpaceSafeBar() {
   const connectWallet = useConnectWallet()
   const { txFlow } = useContext(TxModalContext)
 
-  if (HIDDEN_ROUTES.includes(pathname ?? '')) return null
+  // Use the matched Next.js route, not `usePathname`: error pages (404/403) render
+  // under the original unmatched URL (e.g. `/hom`), where `usePathname` wouldn't match.
+  if (HIDDEN_ROUTES.includes(router.pathname)) return null
   // /settings/* serves both per-safe (URL has ?safe=) and global pages — hide when no safe context.
   if (pathname?.startsWith(AppRoutes.settings.index) && !urlSafeAddress) return null
 
