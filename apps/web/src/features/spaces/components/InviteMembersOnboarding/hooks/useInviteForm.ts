@@ -61,7 +61,7 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
       }))
 
       const result = await inviteMembers({
-        spaceId: Number(spaceId),
+        spaceId,
         inviteUsersDto: { users: usersToInvite },
       })
 

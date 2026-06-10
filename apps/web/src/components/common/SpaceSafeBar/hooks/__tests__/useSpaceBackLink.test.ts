@@ -24,6 +24,11 @@ import { useCurrentSpaceId } from '@/features/spaces'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppSelector } from '@/store'
 import { AppRoutes } from '@/config/routes'
+import { spaceBuilder } from '@/tests/builders/space'
+
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
+const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
+const mockSpace = spaceBuilder().with({ id: 42, uuid: MOCK_SPACE_UUID, name: 'Acme Corp' }).build()
 
 const mockUseRouter = useRouter as jest.Mock
 const mockUseCurrentSpaceId = useCurrentSpaceId as jest.Mock
@@ -32,10 +37,10 @@ const mockUseAppSelector = useAppSelector as jest.Mock
 
 function setupDefaults(overrides: { spaceId?: string | null; isSignedIn?: boolean; space?: object | null } = {}) {
   mockUseRouter.mockReturnValue({ push: mockPush })
-  mockUseCurrentSpaceId.mockReturnValue('spaceId' in overrides ? overrides.spaceId : '42')
+  mockUseCurrentSpaceId.mockReturnValue('spaceId' in overrides ? overrides.spaceId : MOCK_SPACE_UUID)
   mockUseAppSelector.mockReturnValue(overrides.isSignedIn ?? true)
   mockUseSpacesGetOneV1Query.mockReturnValue({
-    currentData: 'space' in overrides ? overrides.space : { id: 42, name: 'Acme Corp' },
+    currentData: 'space' in overrides ? overrides.space : mockSpace,
   })
 }
 
@@ -48,7 +53,7 @@ describe('useSpaceBackLink', () => {
   it('returns space data from the query', () => {
     const { result } = renderHook(() => useSpaceBackLink())
 
-    expect(result.current.space).toEqual({ id: 42, name: 'Acme Corp' })
+    expect(result.current.space).toEqual(mockSpace)
   })
 
   it('navigates to the space page when handleBackToSpace is called', () => {
@@ -60,7 +65,7 @@ describe('useSpaceBackLink', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: AppRoutes.spaces.index,
-      query: { spaceId: '42' },
+      query: { spaceId: MOCK_SPACE_UUID },
     })
   })
 
@@ -81,7 +86,10 @@ describe('useSpaceBackLink', () => {
 
     renderHook(() => useSpaceBackLink())
 
-    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith({ id: 42 }, expect.objectContaining({ skip: true }))
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(
+      { id: MOCK_SPACE_UUID },
+      expect.objectContaining({ skip: true }),
+    )
   })
 
   it('skips the query when spaceId is not available', () => {
@@ -93,11 +101,14 @@ describe('useSpaceBackLink', () => {
   })
 
   it('does not skip the query when both signed in and spaceId are available', () => {
-    setupDefaults({ spaceId: '10', isSignedIn: true })
+    setupDefaults({ spaceId: MOCK_SPACE_UUID_ALT, isSignedIn: true })
 
     renderHook(() => useSpaceBackLink())
 
-    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith({ id: 10 }, expect.objectContaining({ skip: false }))
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(
+      { id: MOCK_SPACE_UUID_ALT },
+      expect.objectContaining({ skip: false }),
+    )
   })
 
   it('returns undefined space when query has no data', () => {

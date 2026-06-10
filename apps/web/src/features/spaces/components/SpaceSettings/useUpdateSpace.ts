@@ -20,7 +20,7 @@ export const useUpdateSpace = (space: GetSpaceResponse | undefined) => {
     }
 
     try {
-      await updateSpace({ id: space.id, updateSpaceDto: { name: data.name } }).unwrap()
+      await updateSpace({ id: space.uuid, updateSpaceDto: { name: data.name } }).unwrap()
 
       dispatch(
         showNotification({

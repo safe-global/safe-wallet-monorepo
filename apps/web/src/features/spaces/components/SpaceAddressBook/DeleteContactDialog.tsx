@@ -34,7 +34,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
     try {
       setIsSubmitting(true)
       trackEvent({ ...SPACE_EVENTS.REMOVE_ADDRESS_SUBMIT })
-      const response = await deleteEntry({ spaceId: Number(spaceId), address })
+      const response = await deleteEntry({ spaceId: spaceId ?? '', address })
 
       if (response.error) {
         setError('Something went wrong deleting the contact. Please try again.')

@@ -55,6 +55,11 @@ jest.mock('@/features/myAccounts', () => ({
 
 jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE', INVITED: 'INVITED', DECLINED: 'DECLINED' },
+  useCurrentMemberProfile: jest.fn(() => ({ membership: undefined, isLoading: false })),
+}))
+
+jest.mock('../AccountInfo', () => ({
+  AccountInfo: () => <div data-testid="account-info" />,
 }))
 
 jest.mock('@/features/spaces/utils', () => ({
@@ -202,6 +207,37 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ isSpacesLoading: true }))
   })
 
+  it('passes the space uuid as singleSpaceId to useSignInRedirect when the user has exactly one space', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [{ uuid: 'uuid-1', name: 'Solo Space' }],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ singleSpaceId: 'uuid-1' }))
+  })
+
+  it('passes singleSpaceId=null to useSignInRedirect when the user has multiple spaces', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [
+        { uuid: 'uuid-1', name: 'Space 1' },
+        { uuid: 'uuid-2', name: 'Space 2' },
+      ],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ singleSpaceId: null }))
+  })
+
   // WA-2486: the sign-in card title (logo + heading) is centered, not left-aligned.
   it('centers the "Sign in to your workspace" heading', () => {
     mockUseIsRequireLoginEnabled.mockReturnValue(true)
@@ -248,8 +284,14 @@ describe('SpacesList — auth/expiry state rendering', () => {
   })
 
   it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {
+    // The Create workspace button lives in the require-login-ON workspace header.
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
     mockUseAppSelector.mockReturnValue(true)
-    const tenSpaces = Array.from({ length: 10 }, (_, i) => ({ id: i + 1, name: `Space ${i + 1}` }))
+    const tenSpaces = Array.from({ length: 10 }, (_, i) => ({
+      id: i + 1,
+      uuid: `00000000-0000-0000-0000-0000000000${String(i + 1).padStart(2, '0')}`,
+      name: `Space ${i + 1}`,
+    }))
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: tenSpaces, isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
 

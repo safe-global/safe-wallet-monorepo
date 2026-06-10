@@ -22,9 +22,9 @@ const DeclineInviteDialog = ({ space, onClose }: DeclineInviteDialogProps) => {
 
   const handleConfirm = async () => {
     setErrorMessage('')
-    trackEvent({ ...SPACE_EVENTS.DECLINE_INVITE_SUBMIT, label: String(space.id) }, { workspace_id: String(space.id) })
+    trackEvent({ ...SPACE_EVENTS.DECLINE_INVITE_SUBMIT, label: space.uuid }, { workspace_id: space.uuid })
     try {
-      const { error } = await declineInvite({ spaceId: space.id })
+      const { error } = await declineInvite({ spaceId: space.uuid })
 
       if (error) {
         throw error

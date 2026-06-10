@@ -26,7 +26,7 @@ const SpaceSidebarSelector = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
-  const selectedSpace = spaces?.find((space) => space.id === Number(spaceId))
+  const selectedSpace = spaces?.find((space) => space.uuid === spaceId)
 
   const nonDeclinedSpaces = getNonDeclinedSpaces(currentUser, spaces || [])
 
@@ -41,7 +41,7 @@ const SpaceSidebarSelector = () => {
   const handleSelectSpace = (space: GetSpaceResponse) => {
     router.push({
       pathname: router.pathname,
-      query: { ...router.query, spaceId: space.id.toString() },
+      query: { ...router.query, spaceId: space.uuid },
     })
 
     handleClose()
@@ -95,9 +95,9 @@ const SpaceSidebarSelector = () => {
 
           {nonDeclinedSpaces.map((space) => (
             <MenuItem
-              key={space.id}
+              key={space.uuid}
               onClick={() => handleSelectSpace(space)}
-              selected={space.id === selectedSpace.id}
+              selected={space.uuid === selectedSpace.uuid}
               sx={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -108,7 +108,7 @@ const SpaceSidebarSelector = () => {
                 <InitialsAvatar name={space.name} size="small" />
                 <Typography variant="body2">{space.name}</Typography>
               </Box>
-              {space.id === selectedSpace.id && <CheckIcon fontSize="small" color="primary" />}
+              {space.uuid === selectedSpace.uuid && <CheckIcon fontSize="small" color="primary" />}
             </MenuItem>
           ))}
 

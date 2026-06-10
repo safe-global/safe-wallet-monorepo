@@ -46,10 +46,18 @@ describe('useInviteForm tracking', () => {
 
   it('tracks WORKSPACE_MEMBER_INVITE_SENT per member with workspace_id, user_id, role and batch_size on submit', async () => {
     mockInviteMembers.mockResolvedValue({
-      data: [{ userId: 7, spaceId: 42, name: 'Alice', role: 'MEMBER', status: 'INVITED' }],
+      data: [
+        {
+          userId: 7,
+          spaceId: '11111111-1111-1111-1111-111111111111',
+          name: 'Alice',
+          role: 'MEMBER',
+          status: 'INVITED',
+        },
+      ],
     })
 
-    render(<TestComponent spaceId="42" />)
+    render(<TestComponent spaceId="11111111-1111-1111-1111-111111111111" />)
 
     fireEvent.change(screen.getByTestId('address-0'), {
       target: { value: '0x1234567890123456789012345678901234567890' },
@@ -59,8 +67,8 @@ describe('useInviteForm tracking', () => {
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledTimes(1)
       expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: '42' },
-        { workspace_id: '42', user_id: 7, role: 'member', batch_size: 1 },
+        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: '11111111-1111-1111-1111-111111111111' },
+        { workspace_id: '11111111-1111-1111-1111-111111111111', user_id: 7, role: 'member', batch_size: 1 },
       )
     })
   })
