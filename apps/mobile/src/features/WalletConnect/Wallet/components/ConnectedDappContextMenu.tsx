@@ -1,6 +1,6 @@
 import React from 'react'
-import { Modal, Pressable, StyleSheet, useWindowDimensions } from 'react-native'
-import { Text, XStack, YStack } from 'tamagui'
+import { Modal, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native'
+import { Text, XStack } from 'tamagui'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 
 export type MenuAnchor = { x: number; y: number }
@@ -21,10 +21,7 @@ const MENU_HEIGHT_ESTIMATE = 56
 
 type MenuPlacement = { right: number; top?: number; bottom?: number }
 
-/**
- * Right-aligns the menu to the tapped point and flips it above the tap when anchoring below
- * would run it off the bottom of the window, so the action stays on-screen on the last rows.
- */
+/** Right-aligns the menu to the tapped point, flipping above it when anchoring below would run off the bottom. */
 export const getMenuPlacement = (
   anchor: MenuAnchor,
   window: { width: number; height: number },
@@ -35,50 +32,48 @@ export const getMenuPlacement = (
   return overflowsBottom ? { right, bottom: window.height - anchor.y + GAP } : { right, top: anchor.y + GAP }
 }
 
-/**
- * Overflow menu for a connected-dApp row, rendered in a full-window Modal so a tap anywhere
- * outside dismisses it and only one can be open at a time (the screen owns its single state).
- * Positioned against the tapped point rather than measured layout to stay simple and testable.
- */
+/** Single-open overflow menu in a full-window Modal: outside taps dismiss, the menu itself stays. */
 export const ConnectedDappContextMenu: React.FC<Props> = ({ anchor, onDisconnect, onClose, testID }) => {
   const window = useWindowDimensions()
   const placement = getMenuPlacement(anchor, window)
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.overlay} onPress={onClose} accessibilityLabel="Close menu">
-        <YStack
-          position="absolute"
-          top={placement.top}
-          bottom={placement.bottom}
-          right={placement.right}
-          width={MENU_WIDTH}
-          backgroundColor="$errorBackground"
-          borderRadius="$2"
-          overflow="hidden"
+      <View style={styles.root}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close menu" />
+        {/* The whole menu is the press target so taps on its padding/corners don't reach the backdrop. */}
+        <Pressable
+          onPress={onDisconnect}
+          testID={testID}
+          style={[styles.menu, { top: placement.top, bottom: placement.bottom, right: placement.right }]}
         >
-          <Pressable onPress={onDisconnect} testID={testID}>
-            <XStack
-              paddingHorizontal="$4"
-              paddingVertical="$4"
-              gap="$2"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Text color="$error" fontSize={16}>
-                Disconnect
-              </Text>
-              <SafeFontIcon name="delete" size={24} color="$error" />
-            </XStack>
-          </Pressable>
-        </YStack>
-      </Pressable>
+          <XStack
+            backgroundColor="$errorBackground"
+            borderRadius="$2"
+            overflow="hidden"
+            paddingHorizontal="$4"
+            paddingVertical="$4"
+            gap="$2"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Text color="$error" fontSize={16}>
+              Disconnect
+            </Text>
+            <SafeFontIcon name="delete" size={24} color="$error" />
+          </XStack>
+        </Pressable>
+      </View>
     </Modal>
   )
 }
 
 const styles = StyleSheet.create({
-  overlay: {
+  root: {
     flex: 1,
+  },
+  menu: {
+    position: 'absolute',
+    width: MENU_WIDTH,
   },
 })
