@@ -18,11 +18,7 @@ interface Props {
   onRequestDisconnect: (session: SessionTypes.Struct) => void
 }
 
-/**
- * One connected-dApp card: brand icon with a verify badge overlay, the dApp name, and a 3-dots
- * trigger. The overflow menu is owned by the screen (so only one opens at a time); a left-swipe
- * reveals a destructive trash action that hands the session back to the screen to confirm.
- */
+/** A connected-dApp card; the overflow menu is owned by the screen and a left-swipe reveals a trash action. */
 export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onOpenMenu, onRequestDisconnect }) => {
   const meta = session.peer.metadata
   const swipeRef = useRef<SwipeableMethods>(null)

@@ -19,12 +19,7 @@ export interface DisconnectConfirmModalProps {
   onClose: () => void
 }
 
-/**
- * Controlled confirmation sheet for disconnecting a connected dApp. Presenting is driven by
- * `dapp` (non-null opens it); the last target is retained locally so the icon/name don't flash
- * empty during the close animation. Mirrors the Figma: title, the dApp's icon + name, and a
- * single primary "Disconnect" action — dismissing (swipe / backdrop) routes through `onClose`.
- */
+/** Confirm sheet for disconnecting a dApp; `dapp` drives presenting and the last target is retained so the icon/name don't flash during the close animation. */
 export const DisconnectConfirmModal: React.FC<DisconnectConfirmModalProps> = ({
   dapp,
   isBusy = false,

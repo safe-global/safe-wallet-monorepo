@@ -10,12 +10,7 @@ import { ConnectedDappRow } from './ConnectedDappRow'
 import { ConnectedDappContextMenu, type MenuAnchor } from './ConnectedDappContextMenu'
 import { DisconnectConfirmModal } from './DisconnectConfirmModal'
 
-/**
- * Lists the Safe's live WalletConnect dApp sessions. Each row exposes a 3-dots menu and a
- * left-swipe, both routing to a shared confirmation sheet; confirming delegates to
- * `useDisconnectSession`. The row drops out as soon as the slice mirror updates, and a
- * dApp-initiated `session_delete` removes it silently (handled in the provider, no toast).
- */
+/** Lists live WalletConnect dApp sessions; a 3-dots menu or left-swipe routes to a shared confirm sheet. */
 export const ConnectedDappsScreen: React.FC = () => {
   const sessions = useAppSelector(selectSessions)
   const verifyByTopic = useAppSelector(selectVerifyByTopic)

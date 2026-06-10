@@ -7,11 +7,9 @@ import { getWalletKit } from '../walletKit'
 import { logWalletKitError } from '../utils/errors'
 
 /**
- * Shared teardown for a connected dApp: tell the relay the user disconnected, then drop the
- * session from the slice. `busyTopic` lets callers disable the row being torn down. Resolves
- * `true` on success and `false` on failure (the slice entry is left intact since the relay call
- * is the source of truth) so callers can keep a confirmation open for retry; the technical error
- * is logged and a generic toast is shown.
+ * Disconnects a dApp: tells the relay then drops the session from the slice, returning whether it
+ * succeeded so callers can keep a confirmation open to retry. `busyTopic` tracks a single in-flight
+ * teardown — screen-scoped, one row at a time (use a Set if ever called concurrently per-row).
  */
 export const useDisconnectSession = () => {
   const dispatch = useAppDispatch()
