@@ -204,7 +204,7 @@ export function CopyAddressButton({ address }: { address: string }) {
 /** Skeleton row mimicking a safe card — used while data is loading */
 export function SafeItemSkeleton() {
   return (
-    <div className="flex items-center gap-3 rounded-md border border-border bg-card px-3 py-3 mb-2">
+    <div className="flex items-center gap-3 rounded-lg px-3 py-3 mb-1">
       <Skeleton className="size-9 rounded-full shrink-0" />
       <div className="flex flex-col gap-1.5 flex-1 min-w-0">
         <Skeleton className="h-3.5 w-28" />

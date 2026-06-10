@@ -72,7 +72,7 @@ const MultiSafeItemCard = ({
 
   return (
     <Collapsible open={open} onOpenChange={handleOpenChange}>
-      <div className="rounded-md border border-border bg-card mb-2 overflow-hidden" data-testid="safe-item-card">
+      <div className="rounded-lg mb-1 overflow-hidden" data-testid="safe-item-card">
         <div className="flex items-center gap-1 px-3 py-3 hover:bg-muted/30 transition-colors">
           <CollapsibleTrigger className="flex flex-1 min-w-0 cursor-pointer items-center gap-3 text-left">
             {/* Avatar with threshold overlay */}
