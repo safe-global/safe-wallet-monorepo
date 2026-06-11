@@ -1,5 +1,5 @@
 import { LogOut } from 'lucide-react'
-import { useCurrentMemberProfile, MemberStatus } from '@/features/spaces'
+import { useCurrentMemberProfile, MemberStatus, getMemberDisplayName } from '@/features/spaces'
 import useLogout from '@/hooks/useLogout'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -49,7 +49,7 @@ const AccountPage = () => {
     )
   }
 
-  const memberName = membership.name || 'User'
+  const memberName = getMemberDisplayName(membership) || 'User'
   const role = membership.role.toLowerCase()
 
   return (

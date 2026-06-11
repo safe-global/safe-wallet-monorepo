@@ -8,6 +8,7 @@ const mockLogout = jest.fn()
 
 jest.mock('@/features/spaces', () => ({
   useCurrentMemberProfile: () => mockUseCurrentMemberProfile(),
+  getMemberDisplayName: (member: { name: string; alias?: string | null }) => member.alias || member.name,
   MemberStatus: { INVITED: 'INVITED', ACTIVE: 'ACTIVE', DECLINED: 'DECLINED' },
 }))
 

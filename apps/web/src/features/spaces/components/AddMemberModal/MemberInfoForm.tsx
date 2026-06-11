@@ -5,12 +5,18 @@ import { RoleMenuItem } from './index'
 import { MemberRole } from '@/features/spaces'
 import css from './styles.module.css'
 
-const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {
+const MemberInfoForm = ({
+  disableName = false,
+  disableRole = false,
+}: {
+  disableName?: boolean
+  disableRole?: boolean
+}) => {
   const { control } = useFormContext()
 
   return (
     <Stack direction="row" spacing={2} alignItems="center">
-      <NameInput data-testid="member-name-input" name="name" label="Name" required disabled={isEdit} />
+      <NameInput data-testid="member-name-input" name="name" label="Name" required disabled={disableName} />
 
       <Controller
         control={control}
@@ -23,6 +29,7 @@ const MemberInfoForm = ({ isEdit = false }: { isEdit?: boolean }) => {
             onChange={onChange}
             required
             className={css.roleSelect}
+            disabled={disableRole}
             renderValue={(role) => <RoleMenuItem role={role as MemberRole} />}
           >
             <MenuItem value={MemberRole.ADMIN} className={css.menuItem}>

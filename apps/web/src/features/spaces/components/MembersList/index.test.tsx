@@ -36,6 +36,8 @@ jest.mock('@/features/spaces', () => ({
     member.status === 'INVITED' &&
     member.inviteExpiresAt != null &&
     new Date(member.inviteExpiresAt).getTime() <= Date.now(),
+  getMemberDisplayName: (member: { name: string; alias?: string | null }) => member.alias || member.name,
+  useCurrentMembership: () => ({ user: { id: 11 } }),
   MemberStatus: {
     INVITED: 'INVITED',
     ACTIVE: 'ACTIVE',
