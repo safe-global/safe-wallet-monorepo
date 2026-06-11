@@ -13,6 +13,7 @@ import reducer, {
   selectCurrentRequest,
   selectOutstandingRequestByHash,
   selectVerifyByTopic,
+  selectDappMetadataByTxHash,
   walletKitSliceName,
   type PendingItem,
 } from '../walletKitSlice'
@@ -138,5 +139,20 @@ describe('walletKitSlice selectors', () => {
       id: 1,
       method: 'eth_sendTransaction',
     })
+  })
+
+  it('selectDappMetadataByTxHash resolves safeTxHash → session peer metadata', () => {
+    const metadata = { name: 'Uniswap', url: 'https://uniswap.org', icons: ['https://x/i.png'] }
+    let state = reducer(undefined, addSession({ topic: 't', peer: { metadata } } as unknown as SessionTypes.Struct))
+    state = reducer(
+      state,
+      setOutstandingRequest({ safeTxHash: '0xabc', topic: 't', id: 1, method: 'eth_sendTransaction' }),
+    )
+    expect(selectDappMetadataByTxHash(wrap(state), '0xabc')).toEqual(metadata)
+  })
+
+  it('selectDappMetadataByTxHash returns undefined for an unknown hash (non-WC tx)', () => {
+    const state = reducer(undefined, { type: '@@init' })
+    expect(selectDappMetadataByTxHash(wrap(state), '0xnope')).toBeUndefined()
   })
 })

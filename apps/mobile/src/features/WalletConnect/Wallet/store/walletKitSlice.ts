@@ -129,5 +129,13 @@ export const selectOutstandingRequests = (state: RootState) => state[sliceName].
 export const selectOutstandingRequestByHash = (state: RootState, safeTxHash: string) =>
   state[sliceName].outstandingRequests[safeTxHash]
 
+// Resolve the originating dApp's metadata for a handed-off tx: safeTxHash → outstanding
+// request (topic) → active session → peer metadata. Returns undefined for non-WC txs and
+// after the request is cleared on propose-success.
+export const selectDappMetadataByTxHash = (state: RootState, safeTxHash: string) => {
+  const topic = state[sliceName].outstandingRequests[safeTxHash]?.topic
+  return topic ? state[sliceName].sessions[topic]?.peer.metadata : undefined
+}
+
 export default walletKitSlice.reducer
 export const walletKitSliceName = sliceName
