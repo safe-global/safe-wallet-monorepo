@@ -77,6 +77,7 @@ export {
   useIsInvited,
   isAdmin,
   isActiveAdmin,
+  isInviteExpired,
   MemberStatus,
   MemberRole,
 } from './hooks/useSpaceMembers'

@@ -7,10 +7,52 @@
   column-gap: var(--space-1);
 }
 
+.roleIcon {
+  grid-area: icon;
+  display: flex;
+  align-items: center;
+}
+
+.roleDescription {
+  grid-area: description;
+  max-width: 300px;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.roleCheckIcon {
+  grid-area: checkIcon;
+  margin: 0 var(--space-1);
+}
+
+.roleCheckIconHidden {
+  grid-area: checkIcon;
+  margin: 0 var(--space-1);
+  visibility: hidden;
+}
+
+.roleCheckSvg {
+  color: var(--color-text-primary);
+}
+
+.roleSelect {
+  min-width: 150px;
+  padding-block: 4px;
+  background-color: var(--color-background-main);
+}
+
 .menuItem:hover {
   background-color: var(--color-background-main) !important;
 }
 
 .menuItem:global(.Mui-selected) {
   background-color: var(--color-background-main);
+}
+
+.openButton svg {
+  transition: transform 0.3s ease-in-out;
+}
+
+.rotated svg {
+  transform: rotate(180deg);
 }
