@@ -22,6 +22,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsTablet } from '@/hooks/use-tablet'
 import { PanelLeftIcon } from 'lucide-react'
 
 /**
@@ -149,6 +150,7 @@ type SidebarContextProps = {
   openMobile: boolean
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
+  isTablet: boolean
   toggleSidebar: () => void
 }
 
@@ -203,6 +205,7 @@ function SidebarProvider({
   onOpenMobileChange?: (open: boolean) => void
 }) {
   const isMobile = useIsMobile()
+  const isTablet = useIsTablet()
   const initialOpen = useMemo(
     () => getSidebarStateFromCookie(defaultOpen),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- read cookie only once on mount
@@ -249,11 +252,12 @@ function SidebarProvider({
       open,
       setOpen,
       isMobile,
+      isTablet,
       openMobile,
       setOpenMobile,
       toggleSidebar,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+    [state, open, setOpen, isMobile, isTablet, openMobile, setOpenMobile, toggleSidebar],
   )
 
   return (

@@ -55,7 +55,7 @@ interface NavItemProps {
 }
 
 export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: NavItemProps): ReactElement => {
-  const { state, isMobile } = useSidebar()
+  const { state, isMobile, isTablet, setOpenMobile } = useSidebar()
 
   if (isLoading || !item) {
     return (
@@ -74,6 +74,9 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false }: Na
       trackEvent({ ...customEvent.event, label: customEvent.label }, customEvent.mixpanelParams)
     }
     trackEvent({ ...OVERVIEW_EVENTS.SIDEBAR_CLICKED }, { [MixpanelEventParams.SIDEBAR_ELEMENT]: item.label })
+    if (isMobile || isTablet) {
+      setOpenMobile(false)
+    }
   }
 
   const menuButton = (
