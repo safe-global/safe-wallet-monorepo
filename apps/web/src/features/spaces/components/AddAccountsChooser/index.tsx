@@ -158,7 +158,7 @@ const AddAccountsChooser = ({
               subtitle="Create a new Safe account"
               onClick={handleCreate}
               warning={
-                isSpaceAtSafeLimit
+                isSpaceAtSafeLimit && isAdmin
                   ? `This workspace already has ${SAFE_ACCOUNTS_LIMIT} Safes (the maximum). Your new Safe won't be added to it, but you can still create it.`
                   : undefined
               }

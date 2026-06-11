@@ -163,6 +163,16 @@ describe('AddAccountsChooser', () => {
     expect(screen.getByText(/already has 40 Safes/i)).toBeInTheDocument()
   })
 
+  it('does not show the safe-limit warning to non-admins even when the workspace is at the limit', () => {
+    mockIsAdmin = false
+    mockIsAtSafeLimit = true
+    render(<AddAccountsChooser entryPoint="dashboard" />)
+
+    fireEvent.click(screen.getByTestId('add-space-account-button'))
+
+    expect(screen.queryByText(/already has 40 Safes/i)).not.toBeInTheDocument()
+  })
+
   it('does not show the safe-limit warning when the workspace is below the limit', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
