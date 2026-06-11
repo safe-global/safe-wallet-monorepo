@@ -14,6 +14,7 @@ export function spaceMemberBuilder(): IBuilder<SpaceMemberDto> {
     role: 'MEMBER',
     name: faker.person.firstName(),
     invitedBy: faker.number.int({ min: 1, max: 10 }),
+    inviteExpiresAt: null,
     status: 'ACTIVE',
     user: spaceMemberUserBuilder().build(),
   })

@@ -46,10 +46,18 @@ export const SpacesFeature = createFeatureHandle<SpacesContract>('spaces')
 // Contract type (for type annotations if needed)
 export type { SpacesContract } from './contract'
 
+// Domain constants (max accounts/workspaces, shared limit copy)
+export { SAFE_ACCOUNTS_LIMIT, SPACES_LIMIT, safeAccountsLimitReachedText } from './constants'
+
 // Hooks exported directly (always loaded, not in contract)
 // Keep hooks lightweight - minimal imports, heavy logic in services if needed
 export { default as useAddressBookSearch } from './hooks/useAddressBookSearch'
 export { useCurrentSpaceId } from './hooks/useCurrentSpaceId'
+export {
+  useIsCurrentSpaceAtSafeLimit,
+  useCurrentSpaceSafeCount,
+  useSpaceSafeCount,
+} from './hooks/useIsCurrentSpaceAtSafeLimit'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
 export { default as useGetSpaceAddressBook } from './hooks/useGetSpaceAddressBook'
 export { default as useGetPrivateAddressBook } from './hooks/useGetPrivateAddressBook'
@@ -69,6 +77,7 @@ export {
   useIsInvited,
   isAdmin,
   isActiveAdmin,
+  isInviteExpired,
   MemberStatus,
   MemberRole,
 } from './hooks/useSpaceMembers'
