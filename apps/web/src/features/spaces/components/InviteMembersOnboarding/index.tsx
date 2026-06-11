@@ -13,6 +13,7 @@ import {
   useSafeNameLookup,
 } from '@/features/spaces/components/OnboardingLayout'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { useOnboardingStepCount } from '@/features/spaces/hooks/useOnboardingStepCount'
 import { flattenSafeItems } from '@/hooks/safes'
 import MemberInviteRow from './components/MemberInviteRow'
 import useInviteNavigation from './hooks/useInviteNavigation'
@@ -20,10 +21,10 @@ import useInviteForm from './hooks/useInviteForm'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
 
 const ONBOARDING_STEP = 3
-const TOTAL_STEPS = 4
 const FORM_ID = 'invite-members-form'
 
 const InviteMembersOnboarding = (): ReactElement => {
+  const totalSteps = useOnboardingStepCount()
   const { spaceId, goBack, redirectToNextStep } = useInviteNavigation()
   const { control, formState, register, setValue, trigger, fields, append, remove, onSubmit, error, isSubmitting } =
     useInviteForm(spaceId, redirectToNextStep)
@@ -39,7 +40,7 @@ const InviteMembersOnboarding = (): ReactElement => {
 
   const main = (
     <form id={FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-6">
-      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
+      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
 
       <div className="flex flex-col gap-2">
         <Typography variant="h2">Invite your team</Typography>

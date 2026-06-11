@@ -8,12 +8,9 @@
  * next/router's — no `query`/`pathname`/`asPath`, just navigation methods.
  */
 import { useMemo } from 'react'
-import {
-  useNavigate,
-  useRouter as useTanStackRouter,
-  useRouterState,
-  useParams as useTanStackParams,
-} from '@tanstack/react-router'
+import { useNavigate, useRouter as useTanStackRouter, useParams as useTanStackParams } from '@tanstack/react-router'
+import { useRenderedPathname, useRenderedSearchStr } from './next-location'
+import { toNavigateOptions } from './next-url'
 
 type AppRouterInstance = {
   push: (href: string) => void
@@ -29,8 +26,8 @@ export function useRouter(): AppRouterInstance {
   const tsRouter = useTanStackRouter()
   return useMemo(
     () => ({
-      push: (href) => void navigate({ to: href }),
-      replace: (href) => void navigate({ to: href, replace: true }),
+      push: (href) => void navigate(toNavigateOptions(href)),
+      replace: (href) => void navigate({ ...toNavigateOptions(href), replace: true }),
       refresh: () => {
         if (typeof window !== 'undefined') window.location.reload()
       },
@@ -43,7 +40,7 @@ export function useRouter(): AppRouterInstance {
 }
 
 export function usePathname(): string {
-  return useRouterState({ select: (s) => s.location.pathname })
+  return useRenderedPathname()
 }
 
 export function useSearchParams(): URLSearchParams {
@@ -52,8 +49,9 @@ export function useSearchParams(): URLSearchParams {
   // tick (~50 per nav), which would create a new URLSearchParams instance
   // each time and cascade through every consumer's useEffect/useCallback
   // deps. Selector subscriptions only wake up when the value changes.
-  const searchStr = useRouterState({ select: (s) => s.location.searchStr })
-  return useMemo(() => new URLSearchParams(searchStr ?? ''), [searchStr])
+  // Bound to the rendered matches (see next-location.ts) for Next parity.
+  const searchStr = useRenderedSearchStr()
+  return useMemo(() => new URLSearchParams(searchStr), [searchStr])
 }
 
 export function useParams<T extends Record<string, string> = Record<string, string>>(): T {

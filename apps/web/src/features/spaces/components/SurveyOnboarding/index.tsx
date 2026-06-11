@@ -37,6 +37,10 @@ import { flattenSafeItems } from '@/hooks/safes'
 import SurveyOptionCard from './SurveyOptionCard'
 
 const ONBOARDING_STEP = 4
+// This step only renders when SPACE_ONBOARDING_SURVEY is on (the survey page
+// guards on the flag), so it is always the 4th of 4 steps. The earlier steps,
+// which render regardless of the flag, derive their total from
+// useOnboardingStepCount() instead.
 const TOTAL_STEPS = 4
 const SURVEY_SLUG = 'onboarding'
 
