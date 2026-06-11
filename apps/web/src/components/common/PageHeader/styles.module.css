@@ -10,6 +10,15 @@
   top: calc(var(--header-height) - 76px);
 }
 
+/* The topbar is sticky on desktop (see PageLayout), so pin just under it; the
+   -20px lets the header's own top padding tuck underneath, matching the
+   overlap it previously had with the viewport edge. */
+@media (min-width: 900px) {
+  .container {
+    top: calc(var(--topbar-height) - 20px);
+  }
+}
+
 /* In dark mode the page background is black (var(--background), set on .mainSpace),
    so match it here — otherwise the header's opaque sticky background shows as a
    lighter strip behind the tabs even when it isn't pinned. */

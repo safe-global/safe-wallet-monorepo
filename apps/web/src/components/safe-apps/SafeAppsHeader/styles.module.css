@@ -27,6 +27,13 @@
   padding: 0 var(--space-3);
 }
 
+/* Pin under the sticky desktop topbar (see PageLayout) */
+@media (min-width: 900px) {
+  .tabs {
+    top: var(--topbar-height);
+  }
+}
+
 /* In dark mode the page background is black (var(--background), set on .mainSpace),
    so match it here — otherwise these opaque backgrounds show as a lighter strip
    behind the hero and the sticky tabs. */

@@ -4,12 +4,21 @@
    page content down by its own height — no fixed reservation to keep in sync,
    so it can wrap onto extra rows on narrow viewports without clipping content.
    .main owns the sidebar offset (padding-left), so the topbar inherits it.
-   It scrolls away with the page (not sticky) so a page's own sticky sub-header
-   — e.g. the Assets tabs — can pin to the top cleanly without overlapping it. */
+   On desktop it is sticky so it always occupies the top of the viewport: every
+   `top: var(--topbar-height)` consumer (TxModalDialog, SafeAppsSDKLink, sticky
+   page sub-headers) relies on the topbar actually being there at any scroll
+   position. Z-order: page sub-headers (2) < topbar (3) < elevated topbar (99). */
 .topbar {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   width: 100%;
+}
+
+@media (min-width: 900px) {
+  .topbar {
+    position: sticky;
+    top: 0;
+  }
 }
 
 /* Elevated above a modal backdrop (e.g. tx flow). Stays in flow so the page

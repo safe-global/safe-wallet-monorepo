@@ -7,6 +7,13 @@
   padding: var(--space-1) 0 var(--space-1) 0;
 }
 
+/* Pin under the sticky desktop topbar + the Safe Apps tabs (49px) */
+@media (min-width: 900px) {
+  .filterContainer {
+    top: calc(var(--topbar-height) + 49px);
+  }
+}
+
 .optimizedWithBatchLabel {
   font-size: 12px;
   color: var(--color-text-primary);
