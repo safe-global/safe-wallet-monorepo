@@ -25,14 +25,14 @@ import { setAuthenticated, SESSION_LIFETIME_MS } from '@/store/authSlice'
 
 const PayNowPayLater = ({
   totalFee,
-  canRelay,
+  willRelay,
   isMultiChain,
   payMethod,
   setPayMethod,
   isUserAuthenticated = true,
 }: {
   totalFee: string
-  canRelay: boolean
+  willRelay: boolean
   isMultiChain: boolean
   payMethod: PayMethod
   setPayMethod: Dispatch<SetStateAction<PayMethod>>
@@ -126,7 +126,7 @@ const PayNowPayLater = ({
                   <Typography className={css.radioTitle}>Pay now</Typography>
                   {showGasFeeEstimation && (
                     <Typography className={css.radioSubtitle} variant="body2" color="text.secondary">
-                      {canRelay ? (
+                      {willRelay ? (
                         'Sponsored free transaction'
                       ) : (
                         <>

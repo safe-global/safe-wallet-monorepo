@@ -201,4 +201,30 @@ describe('ReviewStep', () => {
 
     expect(getByText(/activate your account/)).toBeInTheDocument()
   })
+
+  it('should update the pay now subtitle when switching the execution method from relay to connected wallet', () => {
+    const mockData: NewSafeFormData = {
+      name: 'Test',
+      networks: [mockChain],
+      threshold: 1,
+      owners: [{ name: '', address: '0x1' }],
+      saltNonce: 0,
+      safeVersion: LATEST_SAFE_VERSION as SafeVersion,
+    }
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
+
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
+
+    // Pay now is the effective method for unauthenticated users, relay is selected by default
+    expect(screen.getByText('Sponsored free transaction')).toBeInTheDocument()
+
+    // Switch the execution method to the connected wallet
+    act(() => {
+      fireEvent.click(screen.getByRole('radio', { name: /Connected wallet/i }))
+    })
+
+    // The subtitle must no longer advertise a sponsored free transaction
+    expect(screen.queryByText('Sponsored free transaction')).not.toBeInTheDocument()
+  })
 })

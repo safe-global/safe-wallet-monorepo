@@ -448,7 +448,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
             <PayNowPayLater
               totalFee={totalFee}
               isMultiChain={isMultiChainDeployment}
-              canRelay={canRelay}
+              willRelay={willRelay}
               payMethod={effectivePayMethod}
               setPayMethod={setPayMethod}
               isUserAuthenticated={isUserAuthenticated}
