@@ -4,6 +4,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
 import useInviteForm, { toInviteName } from './useInviteForm'
 
+const mockSpaceId = '11111111-1111-1111-1111-111111111111'
 const mockInviteMembers = jest.fn()
 const mockOnSuccess = jest.fn()
 
@@ -27,7 +28,7 @@ jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
 }))
 
 const TestComponent = ({ spaceId }: { spaceId: string | undefined }) => {
-  const { onSubmit, register, fields, append } = useInviteForm(spaceId, mockOnSuccess)
+  const { onSubmit, register, fields, append, isSubmitting } = useInviteForm(spaceId, mockOnSuccess)
   return (
     <form onSubmit={onSubmit}>
       {fields.map((field, index) => (
@@ -36,9 +37,10 @@ const TestComponent = ({ spaceId }: { spaceId: string | undefined }) => {
       <button type="button" data-testid="append" onClick={() => append({ identifier: '', role: MemberRole.MEMBER })}>
         Add
       </button>
-      <button type="submit" data-testid="submit">
+      <button type="submit" data-testid="submit" disabled={isSubmitting}>
         Submit
       </button>
+      <span data-testid="is-submitting">{String(isSubmitting)}</span>
     </form>
   )
 }
@@ -78,7 +80,7 @@ describe('useInviteForm tracking', () => {
       data: [
         {
           userId: 7,
-          spaceId: '11111111-1111-1111-1111-111111111111',
+          spaceId: mockSpaceId,
           name: 'Alice',
           role: 'MEMBER',
           status: 'INVITED',
@@ -86,7 +88,7 @@ describe('useInviteForm tracking', () => {
       ],
     })
 
-    render(<TestComponent spaceId="11111111-1111-1111-1111-111111111111" />)
+    render(<TestComponent spaceId={mockSpaceId} />)
 
     fireEvent.change(screen.getByTestId('address-0'), {
       target: { value: '0x1234567890123456789012345678901234567890' },
@@ -95,7 +97,7 @@ describe('useInviteForm tracking', () => {
 
     await waitFor(() => {
       expect(mockInviteMembers).toHaveBeenCalledWith({
-        spaceId: 42,
+        spaceId: mockSpaceId,
         inviteUsersDto: {
           users: [
             {
@@ -109,18 +111,18 @@ describe('useInviteForm tracking', () => {
       })
       expect(trackEvent).toHaveBeenCalledTimes(1)
       expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: '11111111-1111-1111-1111-111111111111' },
-        { workspace_id: '11111111-1111-1111-1111-111111111111', user_id: 7, role: 'member', batch_size: 1 },
+        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: mockSpaceId },
+        { workspace_id: mockSpaceId, user_id: 7, role: 'member', batch_size: 1 },
       )
     })
   })
 
   it('builds an email invite payload with a lowercased email and a name derived from the local part', async () => {
     mockInviteMembers.mockResolvedValue({
-      data: [{ userId: 9, spaceId: 42, name: 'Bob', role: 'MEMBER', status: 'INVITED' }],
+      data: [{ userId: 9, spaceId: mockSpaceId, name: 'Bob', role: 'MEMBER', status: 'INVITED' }],
     })
 
-    render(<TestComponent spaceId="42" />)
+    render(<TestComponent spaceId={mockSpaceId} />)
 
     fireEvent.change(screen.getByTestId('address-0'), {
       target: { value: 'Bob@Example.com' },
@@ -129,7 +131,7 @@ describe('useInviteForm tracking', () => {
 
     await waitFor(() => {
       expect(mockInviteMembers).toHaveBeenCalledWith({
-        spaceId: 42,
+        spaceId: mockSpaceId,
         inviteUsersDto: {
           users: [
             {
@@ -146,10 +148,10 @@ describe('useInviteForm tracking', () => {
 
   it('submits identifiers with surrounding whitespace instead of blocking on "unresolved" names', async () => {
     mockInviteMembers.mockResolvedValue({
-      data: [{ userId: 3, spaceId: 42, name: 'Dave', role: 'MEMBER', status: 'INVITED' }],
+      data: [{ userId: 3, spaceId: mockSpaceId, name: 'Dave', role: 'MEMBER', status: 'INVITED' }],
     })
 
-    render(<TestComponent spaceId="42" />)
+    render(<TestComponent spaceId={mockSpaceId} />)
 
     fireEvent.change(screen.getByTestId('address-0'), {
       target: { value: '  Dave@Example.com  ' },
@@ -158,7 +160,7 @@ describe('useInviteForm tracking', () => {
 
     await waitFor(() => {
       expect(mockInviteMembers).toHaveBeenCalledWith({
-        spaceId: 42,
+        spaceId: mockSpaceId,
         inviteUsersDto: {
           users: [
             {
@@ -176,12 +178,12 @@ describe('useInviteForm tracking', () => {
   it('builds a mixed payload of wallet and email invites in order', async () => {
     mockInviteMembers.mockResolvedValue({
       data: [
-        { userId: 1, spaceId: 42, name: 'wallet', role: 'MEMBER', status: 'INVITED' },
-        { userId: 2, spaceId: 42, name: 'email', role: 'MEMBER', status: 'INVITED' },
+        { userId: 1, spaceId: mockSpaceId, name: 'wallet', role: 'MEMBER', status: 'INVITED' },
+        { userId: 2, spaceId: mockSpaceId, name: 'email', role: 'MEMBER', status: 'INVITED' },
       ],
     })
 
-    render(<TestComponent spaceId="42" />)
+    render(<TestComponent spaceId={mockSpaceId} />)
 
     fireEvent.click(screen.getByTestId('append'))
 
@@ -195,7 +197,7 @@ describe('useInviteForm tracking', () => {
 
     await waitFor(() => {
       expect(mockInviteMembers).toHaveBeenCalledWith({
-        spaceId: 42,
+        spaceId: mockSpaceId,
         inviteUsersDto: {
           users: [
             {
@@ -215,5 +217,55 @@ describe('useInviteForm tracking', () => {
       })
       expect(trackEvent).toHaveBeenCalledTimes(2)
     })
+  })
+})
+
+describe('useInviteForm isSubmitting state', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('keeps isSubmitting true after a successful invite so the spinner persists through navigation', async () => {
+    mockInviteMembers.mockResolvedValue({
+      data: [{ userId: 7, spaceId: mockSpaceId, name: 'Alice', role: 'MEMBER', status: 'INVITED' }],
+    })
+
+    render(<TestComponent spaceId={mockSpaceId} />)
+
+    fireEvent.change(screen.getByTestId('address-0'), {
+      target: { value: '0x1234567890123456789012345678901234567890' },
+    })
+    fireEvent.click(screen.getByTestId('submit'))
+
+    await waitFor(() => expect(mockOnSuccess).toHaveBeenCalled())
+    expect(screen.getByTestId('is-submitting')).toHaveTextContent('true')
+  })
+
+  it('resets isSubmitting when the mutation returns an error', async () => {
+    mockInviteMembers.mockResolvedValue({ error: { status: 500, data: 'boom' } })
+
+    render(<TestComponent spaceId={mockSpaceId} />)
+
+    fireEvent.change(screen.getByTestId('address-0'), {
+      target: { value: '0x1234567890123456789012345678901234567890' },
+    })
+    fireEvent.click(screen.getByTestId('submit'))
+
+    await waitFor(() => expect(screen.getByTestId('is-submitting')).toHaveTextContent('false'))
+    expect(mockOnSuccess).not.toHaveBeenCalled()
+  })
+
+  it('resets isSubmitting when the mutation throws, so the button never stays stuck', async () => {
+    mockInviteMembers.mockRejectedValue(new Error('network down'))
+
+    render(<TestComponent spaceId={mockSpaceId} />)
+
+    fireEvent.change(screen.getByTestId('address-0'), {
+      target: { value: '0x1234567890123456789012345678901234567890' },
+    })
+    fireEvent.click(screen.getByTestId('submit'))
+
+    await waitFor(() => expect(screen.getByTestId('is-submitting')).toHaveTextContent('false'))
+    expect(mockOnSuccess).not.toHaveBeenCalled()
   })
 })

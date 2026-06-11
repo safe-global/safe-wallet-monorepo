@@ -4,6 +4,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import type { showNotification } from '@/store/notificationsSlice'
 import AddMemberModal from './index'
 
+const mockSpaceId = '11111111-1111-1111-1111-111111111111'
 const mockDispatch = jest.fn()
 const mockInviteMembers = jest.fn()
 const mockUseAuthGetMeV1Query = jest.fn()
@@ -23,7 +24,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  useCurrentSpaceId: () => '11111111-1111-1111-1111-111111111111',
+  useCurrentSpaceId: () => mockSpaceId,
   MemberRole: { MEMBER: 'MEMBER', ADMIN: 'ADMIN' },
   useAddressBookSearch: (contacts: { name: string; address: string }[], query: string) =>
     query
@@ -105,7 +106,7 @@ describe('AddMemberModal tracking', () => {
       data: [
         {
           userId: 1,
-          spaceId: '11111111-1111-1111-1111-111111111111',
+          spaceId: mockSpaceId,
           name: 'Alice',
           role: 'MEMBER',
           status: 'INVITED',
@@ -126,15 +127,15 @@ describe('AddMemberModal tracking', () => {
     await waitFor(() => {
       expect(trackEvent).toHaveBeenCalledTimes(1)
       expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: '11111111-1111-1111-1111-111111111111' },
-        { workspace_id: '11111111-1111-1111-1111-111111111111', user_id: 1, role: 'member' },
+        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: mockSpaceId },
+        { workspace_id: mockSpaceId, user_id: 1, role: 'member' },
       )
     })
   })
 
   it('submits email invites with the email field instead of address', async () => {
     mockInviteMembers.mockResolvedValue({
-      data: [{ userId: 1, spaceId: 42, name: 'invitee@example.com', role: 'MEMBER', status: 'INVITED' }],
+      data: [{ userId: 1, spaceId: mockSpaceId, name: 'invitee@example.com', role: 'MEMBER', status: 'INVITED' }],
     })
 
     render(<AddMemberModal onClose={jest.fn()} />)
@@ -149,7 +150,7 @@ describe('AddMemberModal tracking', () => {
 
     await waitFor(() => {
       expect(mockInviteMembers).toHaveBeenCalledWith({
-        spaceId: 42,
+        spaceId: mockSpaceId,
         inviteUsersDto: {
           users: [{ type: 'email', email: 'invitee@example.com', role: 'MEMBER', name: '' }],
         },
@@ -229,7 +230,7 @@ describe('AddMemberModal tracking', () => {
 
     mockUseAddressBook.mockReturnValue({ [address]: name })
     mockInviteMembers.mockResolvedValue({
-      data: [{ userId: 1, spaceId: 42, name, role: 'MEMBER', status: 'INVITED' }],
+      data: [{ userId: 1, spaceId: mockSpaceId, name, role: 'MEMBER', status: 'INVITED' }],
     })
 
     render(<AddMemberModal onClose={jest.fn()} />)
@@ -247,7 +248,7 @@ describe('AddMemberModal tracking', () => {
 
     await waitFor(() => {
       expect(mockInviteMembers).toHaveBeenCalledWith({
-        spaceId: 42,
+        spaceId: mockSpaceId,
         inviteUsersDto: {
           users: [{ type: 'wallet', address, role: 'MEMBER', name }],
         },

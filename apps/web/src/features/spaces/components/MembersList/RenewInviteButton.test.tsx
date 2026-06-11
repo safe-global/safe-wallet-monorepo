@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { memberBuilder, memberUserBuilder } from '@/tests/builders/member'
 import RenewInviteButton from './RenewInviteButton'
 
+const mockSpaceId = '11111111-1111-1111-1111-111111111111'
 const mockRenew = jest.fn()
 const mockDispatch = jest.fn()
 let mockIsLoading = false
@@ -13,7 +14,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  useCurrentSpaceId: () => '123',
+  useCurrentSpaceId: () => mockSpaceId,
 }))
 
 jest.mock('@/store', () => ({
@@ -54,7 +55,7 @@ describe('RenewInviteButton', () => {
 
     await userEvent.click(screen.getByRole('button'))
 
-    expect(mockRenew).toHaveBeenCalledWith({ spaceId: 123, userId: 42 })
+    expect(mockRenew).toHaveBeenCalledWith({ spaceId: mockSpaceId, userId: 42 })
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         payload: expect.objectContaining({ message: 'Invitation renewed for Bob', variant: 'success' }),

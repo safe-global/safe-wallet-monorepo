@@ -73,6 +73,10 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     setError(undefined)
     setIsSubmitting(true)
 
+    // On success we hand off to onSuccess(), which navigates away and unmounts the form,
+    // so the spinner stays up through the route change. On every other exit the finally
+    // block resets isSubmitting so a failed/aborted submit can never leave the button stuck.
+    let succeeded = false
     try {
       const usersToInvite: InviteUsersDto['users'] = validMembers.map((member) =>
         buildInviteUserPayload({
@@ -89,7 +93,6 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
 
       if (result.error) {
         setError(getRtkQueryErrorMessage(result.error) || 'Failed to invite members. Please try again.')
-        setIsSubmitting(false)
         return
       }
 
@@ -105,10 +108,12 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
         )
       })
 
+      succeeded = true
       onSuccess()
     } catch {
       setError('Something went wrong inviting members. Please try again.')
-      setIsSubmitting(false)
+    } finally {
+      if (!succeeded) setIsSubmitting(false)
     }
   })
 
