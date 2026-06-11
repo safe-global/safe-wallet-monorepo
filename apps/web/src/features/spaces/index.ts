@@ -46,6 +46,9 @@ export const SpacesFeature = createFeatureHandle<SpacesContract>('spaces')
 // Contract type (for type annotations if needed)
 export type { SpacesContract } from './contract'
 
+// Domain constants (max accounts/workspaces, shared limit copy)
+export { SAFE_ACCOUNTS_LIMIT, SPACES_LIMIT, safeAccountsLimitReachedText } from './constants'
+
 // Hooks exported directly (always loaded, not in contract)
 // Keep hooks lightweight - minimal imports, heavy logic in services if needed
 export { default as useAddressBookSearch } from './hooks/useAddressBookSearch'

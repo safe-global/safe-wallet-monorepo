@@ -8,7 +8,7 @@ import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { normalizeSpaceId } from '@/utils/spaces'
-import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/constants'
+import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
 
 type PersistArgs = {
   chainId: string

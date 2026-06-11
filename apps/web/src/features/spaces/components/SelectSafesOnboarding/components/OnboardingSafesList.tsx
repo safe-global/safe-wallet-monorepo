@@ -2,7 +2,8 @@ import { type AllSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
 import SafeCard from './SafeCard'
 import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 import SelectAllToggle, { type SelectAllState } from '@/features/spaces/components/SelectAllToggle/SelectAllToggle'
-import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/constants'
+import { Typography } from '@/components/ui/typography'
+import { SAFE_ACCOUNTS_LIMIT, safeAccountsLimitReachedText } from '@/features/spaces/constants'
 
 interface SectionSelectAll {
   state: SelectAllState
@@ -61,6 +62,12 @@ const OnboardingSafesList = ({
 }: SafeListProps) => {
   return (
     <div className="flex w-full min-w-0 flex-col gap-2">
+      {isAtLimit && (
+        <Typography variant="paragraph" className="text-destructive text-xs pb-1">
+          {safeAccountsLimitReachedText()}
+        </Typography>
+      )}
+
       {similarAddresses.size > 0 && <SimilarAddressAlert />}
 
       {trustedSafes.length > 0 && (

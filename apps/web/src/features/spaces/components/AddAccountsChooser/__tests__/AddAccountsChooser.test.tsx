@@ -7,6 +7,7 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => mockIsAdmin,
   useIsCurrentSpaceAtSafeLimit: () => mockIsAtSafeLimit,
+  SAFE_ACCOUNTS_LIMIT: jest.requireActual('@/features/spaces/constants').SAFE_ACCOUNTS_LIMIT,
 }))
 
 const mockTrackEvent = jest.fn()

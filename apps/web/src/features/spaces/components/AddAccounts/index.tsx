@@ -45,7 +45,7 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
-import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
+import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 import { useSelectAll } from '../../hooks/useSelectAll'
 import type { AddAccountsFormValues } from '../../hooks/useSelectAll.types'
@@ -444,33 +444,26 @@ const AddAccounts = ({
                           No safes match your search
                         </Typography>
                       ) : (
-                        <>
-                          {isAtLimit && (
-                            <Typography variant="paragraph" className="text-destructive text-xs pb-1">
-                              Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
-                            </Typography>
-                          )}
-                          <OnboardingSafesList
-                            trustedSafes={visibleTrusted}
-                            ownedSafes={visibleOwned}
-                            similarAddresses={similarAddresses}
-                            isAtLimit={isAtLimit}
-                            trustedSelectAll={{
-                              state: trustedSelection.state,
-                              count: trustedSelection.selectedCount,
-                              total: trustedSelection.total,
-                              onToggle: (check) => handleSelectAll('trusted', check),
-                              disabled: trustedSelection.disabled,
-                            }}
-                            ownedSelectAll={{
-                              state: ownedSelection.state,
-                              count: ownedSelection.selectedCount,
-                              total: ownedSelection.total,
-                              onToggle: (check) => handleSelectAll('owned', check),
-                              disabled: ownedSelection.disabled,
-                            }}
-                          />
-                        </>
+                        <OnboardingSafesList
+                          trustedSafes={visibleTrusted}
+                          ownedSafes={visibleOwned}
+                          similarAddresses={similarAddresses}
+                          isAtLimit={isAtLimit}
+                          trustedSelectAll={{
+                            state: trustedSelection.state,
+                            count: trustedSelection.selectedCount,
+                            total: trustedSelection.total,
+                            onToggle: (check) => handleSelectAll('trusted', check),
+                            disabled: trustedSelection.disabled,
+                          }}
+                          ownedSelectAll={{
+                            state: ownedSelection.state,
+                            count: ownedSelection.selectedCount,
+                            total: ownedSelection.total,
+                            onToggle: (check) => handleSelectAll('owned', check),
+                            disabled: ownedSelection.disabled,
+                          }}
+                        />
                       )}
                     </div>
 

@@ -23,7 +23,8 @@ const setListOverflow = (overflow: boolean) => {
   })
 }
 
-jest.mock('../../Sidebar/constants', () => ({
+jest.mock('@/features/spaces/constants', () => ({
+  ...jest.requireActual('@/features/spaces/constants'),
   SAFE_ACCOUNTS_LIMIT: 10,
 }))
 

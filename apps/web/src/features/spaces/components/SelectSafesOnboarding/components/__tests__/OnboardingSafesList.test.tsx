@@ -118,6 +118,22 @@ describe('OnboardingSafesList', () => {
     expect(getByTestId('safe-card-0xTrusted').dataset.atLimit).toBe('false')
   })
 
+  it('shows the limit-reached notice when isAtLimit', () => {
+    const { getByText } = render(
+      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set()} isAtLimit />,
+    )
+
+    expect(getByText(/maximum of \d+ Safe accounts per workspace/i)).toBeInTheDocument()
+  })
+
+  it('hides the limit-reached notice when below the limit', () => {
+    const { queryByText } = render(
+      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set()} />,
+    )
+
+    expect(queryByText(/maximum of \d+ Safe accounts per workspace/i)).not.toBeInTheDocument()
+  })
+
   it('passes isSimilar=true to SafeCard for flagged addresses', () => {
     const trusted = [buildSafeItem('0xflagged')]
     const owned = [buildSafeItem('0xnormal')]

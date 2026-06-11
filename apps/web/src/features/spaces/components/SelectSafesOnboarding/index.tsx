@@ -21,7 +21,6 @@ import useOnboardingNavigation from './hooks/useOnboardingNavigation'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
 import { useSelectAll } from '@/features/spaces/hooks/useSelectAll'
-import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/constants'
 import {
   deriveSidePanelAccounts,
   deriveSelectedBalanceSafes,
@@ -108,11 +107,6 @@ const SelectSafesOnboarding = (): ReactElement => {
             </InputGroup>
 
             <div className="relative min-w-0" data-testid="onboarding-safes-list-region">
-              {isAtLimit && (
-                <Typography variant="paragraph" className="text-destructive text-xs pb-1">
-                  Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
-                </Typography>
-              )}
               <OnboardingSafesList
                 trustedSafes={trustedSafes}
                 ownedSafes={ownedSafes}

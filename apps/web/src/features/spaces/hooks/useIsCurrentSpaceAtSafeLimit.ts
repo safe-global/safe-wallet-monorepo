@@ -2,7 +2,7 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { normalizeSpaceId } from '@/utils/spaces'
-import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/constants'
+import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/constants'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 
 /**
