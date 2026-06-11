@@ -193,8 +193,8 @@ describe('persistCounterfactualSafe', () => {
     if (!result.ok) expect(result.error.message).toMatch(/space/i)
   })
 
-  it('surfaces the backend message when the space POST fails with a 400 (e.g. account limit reached)', async () => {
-    const backendMessage = 'This space only allows a maximum of 40 safe accounts, you can only add up to 0 more'
+  it('keeps the user-level safe and shows the backend message as a toast when the space POST fails with a 400 (stale-snapshot limit)', async () => {
+    const backendMessage = 'This space only allows a maximum of 40 safe accounts'
     const dispatch = jest.fn((action) => {
       if (action.type === 'space-create-thunk') return { error: { status: 400, data: { message: backendMessage } } }
       return action
@@ -202,13 +202,17 @@ describe('persistCounterfactualSafe', () => {
 
     const result = await persistCounterfactualSafe({
       ...baseArgs,
-      spaceId: '42',
+      spaceId: MOCK_SPACE_UUID,
       isUserAuthenticated: true,
       dispatch,
     })
 
-    expect(result).toEqual({ ok: false, error: expect.any(Error) })
-    if (!result.ok) expect(result.error.message).toBe(backendMessage)
+    expect(userDeleteInitiate).not.toHaveBeenCalled()
+    expect(replayImpl).toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledWith(
+      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-limit', message: backendMessage }),
+    )
+    expect(result.ok).toBe(true)
   })
 
   it('queues a pending CF delete when both the space POST and the rollback DELETE fail', async () => {

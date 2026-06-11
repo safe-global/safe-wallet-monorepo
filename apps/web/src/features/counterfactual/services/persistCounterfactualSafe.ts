@@ -104,21 +104,34 @@ export const persistCounterfactualSafe = async ({
           }),
         )
         if ('error' in spaceResult) {
-          // Roll back the user-level entry so the backend doesn't end up with
-          // a safe that the user "created" but failed to associate with their
-          // active space.
-          const rollbackResult = await dispatch(
-            counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
-              deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
-            }),
-          )
-          if ('error' in rollbackResult) {
-            // Rollback also failed — orphan now exists server-side. Queue the
-            // cleanup so the next sign-in's sync flushes it, otherwise the GET
-            // would re-surface the orphan locally as "Not activated".
-            dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
+          // Use case: another admin added Safes to the same workspace in the meantime.
+          // The cached count was stale and the backend returned 400.
+          // The Safe itself was still created, so keep it and show the warning.
+          if (isLimitRejection(spaceResult.error)) {
+            dispatch(
+              showNotification({
+                variant: 'info',
+                groupKey: 'cf-safe-space-limit',
+                message: toSpaceError(spaceResult.error).message,
+              }),
+            )
+          } else {
+            // Roll back the user-level entry so the backend doesn't end up with
+            // a safe that the user "created" but failed to associate with their
+            // active space.
+            const rollbackResult = await dispatch(
+              counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
+                deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
+              }),
+            )
+            if ('error' in rollbackResult) {
+              // Rollback also failed — orphan now exists server-side. Queue the
+              // cleanup so the next sign-in's sync flushes it, otherwise the GET
+              // would re-surface the orphan locally as "Not activated".
+              dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
+            }
+            return { ok: false, error: toSpaceError(spaceResult.error) }
           }
-          return { ok: false, error: toSpaceError(spaceResult.error) }
         }
       }
     }
@@ -138,6 +151,10 @@ type BackendError = { status?: number; data?: { message?: string } }
 
 function toSpaceError(error: unknown): Error {
   return new Error((error as BackendError)?.data?.message || 'Failed to add Safe account to workspace')
+}
+
+function isLimitRejection(error: unknown): boolean {
+  return (error as BackendError)?.status === 400
 }
 
 function toPersistError(error: unknown): Error {
