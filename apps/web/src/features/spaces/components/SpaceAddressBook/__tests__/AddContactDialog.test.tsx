@@ -69,7 +69,7 @@ const openDialog = () => fireEvent.click(screen.getByRole('button', { name: /add
 
 const fillRequiredFields = () => {
   fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Alice' } })
-  fireEvent.change(screen.getByLabelText('Address'), { target: { value: '0xabc' } })
+  fireEvent.change(screen.getByLabelText('Address or ENS'), { target: { value: '0xabc' } })
 }
 
 describe('AddContactDialog', () => {

@@ -6,7 +6,8 @@ import { useSelectAll } from '@/features/spaces/hooks/useSelectAll'
 import type { AddAccountsFormValues } from '@/features/spaces/hooks/useSelectAll.types'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 
-jest.mock('@/features/spaces/components/Sidebar/constants', () => ({
+jest.mock('@/features/spaces/constants', () => ({
+  ...jest.requireActual('@/features/spaces/constants'),
   SAFE_ACCOUNTS_LIMIT: 10,
 }))
 
@@ -61,6 +62,7 @@ const OnboardingSelectAllHarness = ({
           count={trustedSelection.selectedCount}
           total={trustedSelection.total}
           onToggle={(check) => handleSelectAll('trusted', check)}
+          disabled={trustedSelection.disabled}
           label="Select all"
           showCount
           testId="select-all-trusted"
@@ -70,6 +72,7 @@ const OnboardingSelectAllHarness = ({
           count={ownedSelection.selectedCount}
           total={ownedSelection.total}
           onToggle={(check) => handleSelectAll('owned', check)}
+          disabled={ownedSelection.disabled}
           label="Select all"
           showCount
           testId="select-all-owned"
@@ -164,6 +167,86 @@ describe('SelectSafesOnboarding — select-all form behavior (mirrors screen wir
     fireEvent.click(screen.getByTestId('select-all-owned'))
     expect(getSelected()['10:0xB']).toBe(false)
     expect(getSelected()['1:0xA']).toBeUndefined()
+  })
+
+  it('disables an empty section toggle when the cap is reached via another section', () => {
+    const trustedSafes = Array.from({ length: 10 }, (_, i) => makeSafe('1', `0x${i}`))
+    const trusted = trustedSafes as AllSafeItems
+    const owned = [makeSafe('10', '0xB')] as AllSafeItems
+    const initialSelected = Object.fromEntries(trustedSafes.map((s) => [`${s.chainId}:${s.address}`, true]))
+
+    render(<OnboardingSelectAllHarness trusted={trusted} owned={owned} initialSelected={initialSelected} />)
+
+    expect(screen.getByTestId('select-all-owned')).toBeDisabled()
+    expect(screen.getByTestId('select-all-trusted')).not.toBeDisabled()
+
+    fireEvent.click(screen.getByTestId('select-all-owned'))
+    expect(getSelected()['10:0xB']).toBeUndefined()
+  })
+
+  it('owned section over the cap: first click selects up to the limit, second click deselects', () => {
+    const owned = Array.from({ length: 12 }, (_, i) => makeSafe('10', `0x${i}`)) as AllSafeItems
+    const trusted: AllSafeItems = []
+
+    render(<OnboardingSelectAllHarness trusted={trusted} owned={owned} />)
+
+    fireEvent.click(screen.getByTestId('select-all-owned'))
+
+    const afterSelect = getSelected()
+    const selectedCount = Object.values(afterSelect).filter(Boolean).length
+    expect(selectedCount).toBe(10)
+    expect(ownedCountText()).toContain('(10/12)')
+
+    fireEvent.click(screen.getByTestId('select-all-owned'))
+
+    const afterDeselect = getSelected()
+    expect(Object.values(afterDeselect).filter(Boolean)).toHaveLength(0)
+  })
+
+  it('owned section at the cap renders the toggle as checked, not indeterminate', () => {
+    const owned = Array.from({ length: 12 }, (_, i) => makeSafe('10', `0x${i}`)) as AllSafeItems
+    const trusted: AllSafeItems = []
+
+    render(<OnboardingSelectAllHarness trusted={trusted} owned={owned} />)
+
+    fireEvent.click(screen.getByTestId('select-all-owned'))
+
+    expect(screen.getByTestId('select-all-owned')).toHaveAttribute('aria-checked', 'true')
+  })
+
+  it('owned section below the cap with one selected: clicking select-all selects up to the cap, does not clear', () => {
+    const owned = Array.from({ length: 12 }, (_, i) => makeSafe('10', `0x${i}`)) as AllSafeItems
+    const trusted: AllSafeItems = []
+
+    render(
+      <OnboardingSelectAllHarness
+        key="one-preselected"
+        trusted={trusted}
+        owned={owned}
+        initialSelected={{ '10:0x0': true }}
+      />,
+    )
+
+    expect(ownedCountText()).toContain('(1/12)')
+    expect(screen.getByTestId('select-all-owned')).toHaveAttribute('aria-checked', 'mixed')
+
+    fireEvent.click(screen.getByTestId('select-all-owned'))
+
+    expect(Object.values(getSelected()).filter(Boolean)).toHaveLength(10)
+  })
+
+  it('split across sections at the cap: both sections render checked once the global limit is hit', () => {
+    const trusted = Array.from({ length: 6 }, (_, i) => makeSafe('1', `0xA${i}`)) as AllSafeItems
+    const owned = Array.from({ length: 8 }, (_, i) => makeSafe('10', `0xB${i}`)) as AllSafeItems
+
+    render(<OnboardingSelectAllHarness trusted={trusted} owned={owned} />)
+
+    fireEvent.click(screen.getByTestId('select-all-trusted'))
+    fireEvent.click(screen.getByTestId('select-all-owned'))
+
+    expect(Object.values(getSelected()).filter(Boolean)).toHaveLength(10)
+    expect(screen.getByTestId('select-all-trusted')).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByTestId('select-all-owned')).toHaveAttribute('aria-checked', 'true')
   })
 
   it('trusted deselect clears multichain parent and every sub-safe key', () => {

@@ -19,7 +19,6 @@ import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 import { useIsTopbarElevated } from '@/hooks/useTopbarElevation'
-import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
@@ -62,14 +61,14 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   // /welcome/spaces still renders the sign-in form when signed out and the
   // legacy workspaces list when signed in — only the list needs the Topbar.
   const isLoginPath = pathname === AppRoutes.welcome.spaces || pathname === AppRoutes.index
+  const isWelcomeWorskpacePage = pathname === AppRoutes.welcome.spaces
   const hideHeader =
     NO_HEADER_ROUTES.includes(pathname) ||
     (isRequireLoginEnabled && isLoginPath) ||
+    (isRequireLoginEnabled && isWelcomeWorskpacePage) ||
     (pathname === AppRoutes.welcome.spaces && !isSignedIn)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
-  const urlSafeAddress = useSafeAddressFromUrl()
-  const isSettingsWithoutSafe = pathname.startsWith(AppRoutes.settings.index) && !urlSafeAddress
   const parentSafe = useParentSafe()
   const menuToggleHandler = isSidebarRoute ? setSidebarOpen : undefined
 
@@ -99,18 +98,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
     <>
       <ClassicViewToast />
 
-      {!hideHeader && (
-        <div
-          className={classnames(css.topbar, {
-            [css.topbarCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
-            [css.topbarNoSidebar]: !isSidebarVisible || !isSidebarRoute,
-            [css.topbarElevated]: isTopbarElevated,
-          })}
-        >
-          <Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
-        </div>
-      )}
-
       {isStaticPage && (
         <div className="px-6 py-4">
           <SafeLogo />
@@ -131,10 +118,19 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
           [css.mainAnimated]: isSidebarRoute && isAnimated,
           [css.mainNoHeader]: hideHeader,
           [css.mainSpace]: !hideHeader,
-          [css.mainSpaceCompact]: isSettingsWithoutSafe,
           [css.mainSpaceCollapsed]: isSpaceRoute && !isSpacesSidebarExpanded,
         })}
       >
+        {!hideHeader && (
+          <div
+            className={classnames(css.topbar, {
+              [css.topbarElevated]: isTopbarElevated,
+            })}
+          >
+            <Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
+          </div>
+        )}
+
         <div className={css.content}>
           <SafeLoadingError>
             {!hideHeader && parentSafe && <Breadcrumbs />}

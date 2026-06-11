@@ -29,7 +29,7 @@ const InviteMembersOnboarding = (): ReactElement => {
   const { control, formState, register, setValue, trigger, fields, append, remove, onSubmit, error, isSubmitting } =
     useInviteForm(spaceId, redirectToNextStep)
 
-  const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
+  const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
   const nameLookup = useSafeNameLookup()
   const sidePanelAccounts = useMemo(
@@ -70,7 +70,7 @@ const InviteMembersOnboarding = (): ReactElement => {
 
       <button
         type="button"
-        onClick={() => append({ address: '', role: MemberRole.MEMBER })}
+        onClick={() => append({ identifier: '', role: MemberRole.MEMBER })}
         className="flex cursor-pointer items-center justify-center gap-2"
         data-testid="add-another-member"
       >

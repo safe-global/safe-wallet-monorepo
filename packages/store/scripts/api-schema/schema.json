@@ -1859,10 +1859,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to get address book for",
+            "description": "Space UUID to get address book for (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -1900,10 +1900,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to update address book for",
+            "description": "Space UUID to update address book for",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -1957,10 +1957,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID containing the address book",
+            "description": "Space UUID containing the address book",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -1999,10 +1999,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2037,10 +2037,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2088,10 +2088,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -2130,10 +2130,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2168,10 +2168,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2219,10 +2219,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -2264,10 +2264,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -2420,10 +2420,10 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2461,10 +2461,10 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Space ID to update",
+            "description": "Space UUID to update",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2513,10 +2513,10 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Space ID to delete",
+            "description": "Space UUID to delete",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2549,10 +2549,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to add Safes to",
+            "description": "Space UUID to add Safes to",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2594,10 +2594,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to get Safes for",
+            "description": "Space UUID to get Safes for (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2635,10 +2635,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to remove Safes from",
+            "description": "Space UUID to remove Safes from",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2682,10 +2682,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to invite users to",
+            "description": "Space UUID to invite users to",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2739,10 +2739,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to accept invitation for",
+            "description": "Space UUID to accept invitation for",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2786,10 +2786,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to decline invitation for",
+            "description": "Space UUID to decline invitation for",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2822,10 +2822,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID containing the invitation",
+            "description": "Space UUID containing the invitation (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -2875,10 +2875,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to get members for",
+            "description": "Space UUID to get members for (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2913,8 +2913,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space UUID to remove own membership from",
             "schema": {
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2950,10 +2952,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to fetch the caller's membership for",
+            "description": "Space UUID to fetch the caller's membership for (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2990,10 +2992,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID containing the member",
+            "description": "Space UUID containing the member",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -3050,8 +3052,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space UUID to update own member alias in",
             "schema": {
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -3091,10 +3095,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to remove member from",
+            "description": "Space UUID to remove member from",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -3224,10 +3228,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -3264,9 +3268,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space UUID to get survey state for (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -3315,9 +3320,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space UUID to submit a survey response for",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -8866,7 +8872,13 @@
         "type": "object",
         "properties": {
           "spaceId": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
           },
           "data": {
             "type": "array",
@@ -8877,6 +8889,7 @@
         },
         "required": [
           "spaceId",
+          "spaceUuid",
           "data"
         ]
       },
@@ -8960,7 +8973,13 @@
         "type": "object",
         "properties": {
           "spaceId": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
           },
           "data": {
             "type": "array",
@@ -8971,6 +8990,7 @@
         },
         "required": [
           "spaceId",
+          "spaceUuid",
           "data"
         ]
       },
@@ -9045,7 +9065,13 @@
         "type": "object",
         "properties": {
           "spaceId": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
           },
           "data": {
             "type": "array",
@@ -9056,6 +9082,7 @@
         },
         "required": [
           "spaceId",
+          "spaceUuid",
           "data"
         ]
       },
@@ -9089,12 +9116,19 @@
             "type": "string"
           },
           "id": {
-            "type": "number"
+            "type": "number",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use uuid). Kept for FE fallback"
+          },
+          "uuid": {
+            "type": "string",
+            "description": "Space UUID"
           }
         },
         "required": [
           "name",
-          "id"
+          "id",
+          "uuid"
         ]
       },
       "UserDto": {
@@ -9158,7 +9192,13 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "number"
+            "type": "number",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use uuid). Kept for FE fallback"
+          },
+          "uuid": {
+            "type": "string",
+            "description": "Space UUID"
           },
           "name": {
             "type": "string"
@@ -9177,6 +9217,7 @@
         },
         "required": [
           "id",
+          "uuid",
           "name",
           "members",
           "safeCount"
@@ -9200,11 +9241,18 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "number"
+            "type": "number",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use uuid). Kept for FE fallback"
+          },
+          "uuid": {
+            "type": "string",
+            "description": "Space UUID"
           }
         },
         "required": [
-          "id"
+          "id",
+          "uuid"
         ]
       },
       "SpaceSafeDto": {
@@ -9367,7 +9415,13 @@
             "type": "string"
           },
           "spaceId": {
-            "type": "number"
+            "type": "number",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
           },
           "role": {
             "type": "string",
@@ -9393,6 +9447,7 @@
           "userId",
           "name",
           "spaceId",
+          "spaceUuid",
           "role",
           "status",
           "invitedBy"
@@ -9936,7 +9991,13 @@
             "type": "number"
           },
           "spaceId": {
-            "type": "number"
+            "type": "number",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
           },
           "surveySlug": {
             "type": "string"
@@ -9969,6 +10030,7 @@
         "required": [
           "id",
           "spaceId",
+          "spaceUuid",
           "surveySlug",
           "surveyVersion",
           "selections",

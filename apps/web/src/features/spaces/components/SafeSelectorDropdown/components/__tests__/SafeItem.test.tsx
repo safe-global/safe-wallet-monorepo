@@ -52,20 +52,26 @@ describe('SafeItem undeployed state', () => {
   it('renders the Not activated badge instead of the balance for an undeployed chain', () => {
     render(<SafeItem {...createItem(makeChain({ isUndeployed: true }))} />)
 
-    expect(screen.getByText('Not activated')).toBeInTheDocument()
+    expect(screen.getByLabelText('Inactive')).toBeInTheDocument()
     expect(screen.queryByTestId('balance-display')).not.toBeInTheDocument()
   })
 
   it('renders the Activating label for an activating chain', () => {
     render(<SafeItem {...createItem(makeChain({ isUndeployed: true, isActivating: true }))} />)
 
-    expect(screen.getByText('Activating')).toBeInTheDocument()
+    expect(screen.getByLabelText('Activating')).toBeInTheDocument()
   })
 
   it('renders the balance for a deployed chain', () => {
     render(<SafeItem {...createItem(makeChain())} />)
 
     expect(screen.getByTestId('balance-display')).toBeInTheDocument()
-    expect(screen.queryByText('Not activated')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('not-activated-badge')).not.toBeInTheDocument()
+  })
+
+  it('renders the activation status in the shared row-end column (same trailing slot as the balance)', () => {
+    render(<SafeItem {...createItem(makeChain({ isUndeployed: true }))} />)
+
+    expect(screen.getByTestId('row-end-column')).toContainElement(screen.getByTestId('not-activated-badge'))
   })
 })

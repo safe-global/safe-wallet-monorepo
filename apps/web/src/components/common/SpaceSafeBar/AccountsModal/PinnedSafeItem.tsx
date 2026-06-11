@@ -42,7 +42,6 @@ export function PinnedSafeSubItem({ safeItem, onNavigate }: PinnedSafeItemProps)
         {/* Chain name + optional per-network status badge */}
         <div className="flex flex-1 min-w-0 flex-col gap-0.5">
           <span className="text-xs font-medium text-foreground truncate">{chain?.chainName ?? safeItem.chainId}</span>
-          {undeployedSafe && <NotActivatedBadge isActivating={isActivating} />}
           {!undeployedSafe && safeItem.isReadOnly && <ReadOnlyBadge />}
         </div>
 
@@ -52,7 +51,9 @@ export function PinnedSafeSubItem({ safeItem, onNavigate }: PinnedSafeItemProps)
           </Badge>
         )}
 
-        {!hasOverview && !undeployedSafe ? (
+        {undeployedSafe ? (
+          <NotActivatedBadge isActivating={isActivating} />
+        ) : !hasOverview ? (
           <Skeleton className="h-3 w-10" />
         ) : safeOverview?.fiatTotal !== undefined ? (
           <span className="text-xs text-muted-foreground whitespace-nowrap">

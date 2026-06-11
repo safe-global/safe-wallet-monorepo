@@ -46,9 +46,17 @@ jest.mock('@/components/ui/tooltip', () => ({
 }))
 
 // Controls the mocked sidebar collapse state per test.
-const mockSidebarState: { state: 'expanded' | 'collapsed'; isMobile: boolean } = {
+const mockSetOpenMobile = jest.fn()
+const mockSidebarState: {
+  state: 'expanded' | 'collapsed'
+  isMobile: boolean
+  isTablet: boolean
+  setOpenMobile: jest.Mock
+} = {
   state: 'expanded',
   isMobile: false,
+  isTablet: false,
+  setOpenMobile: mockSetOpenMobile,
 }
 
 // Mock sidebar UI components
@@ -107,6 +115,7 @@ describe('NavItem', () => {
     jest.clearAllMocks()
     mockSidebarState.state = 'expanded'
     mockSidebarState.isMobile = false
+    mockSidebarState.isTablet = false
   })
 
   it('renders with icon and label', () => {
@@ -270,6 +279,39 @@ describe('NavItem', () => {
 
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', '/transactions')
+  })
+
+  describe('mobile sidebar', () => {
+    it('closes the mobile sidebar when a nav link is clicked', () => {
+      mockSidebarState.isMobile = true
+      render(<NavItem item={baseItem} />)
+      fireEvent.click(screen.getByRole('link'))
+
+      expect(mockSetOpenMobile).toHaveBeenCalledWith(false)
+    })
+
+    it('closes the drawer when a nav link is clicked on tablet', () => {
+      mockSidebarState.isTablet = true
+      render(<NavItem item={baseItem} />)
+      fireEvent.click(screen.getByRole('link'))
+
+      expect(mockSetOpenMobile).toHaveBeenCalledWith(false)
+    })
+
+    it('does not touch the mobile sidebar state on desktop', () => {
+      render(<NavItem item={baseItem} />)
+      fireEvent.click(screen.getByRole('link'))
+
+      expect(mockSetOpenMobile).not.toHaveBeenCalled()
+    })
+
+    it('does not close the mobile sidebar when a disabled item is clicked', () => {
+      mockSidebarState.isMobile = true
+      render(<NavItem item={{ ...baseItem, disabled: true }} />)
+      fireEvent.click(screen.getByRole('button'))
+
+      expect(mockSetOpenMobile).not.toHaveBeenCalled()
+    })
   })
 
   describe('tracking events', () => {

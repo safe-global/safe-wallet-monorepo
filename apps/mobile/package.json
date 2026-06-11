@@ -1,7 +1,7 @@
 {
   "name": "@safe-global/mobile",
   "main": "index.js",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "doctor": {
     "reactNativeDirectoryCheck": {
       "enabled": true
@@ -72,6 +72,7 @@
     "@reduxjs/toolkit": "^2.11.0",
     "@reown/appkit-ethers-react-native": "^2.0.3",
     "@reown/appkit-react-native": "^2.0.3",
+    "@reown/walletkit": "^1.2.7",
     "@safe-global/protocol-kit": "^7.1.0",
     "@safe-global/store": "workspace:^",
     "@safe-global/theme": "workspace:^",
@@ -83,7 +84,10 @@
     "@tamagui/config": "2.0.0-rc.26",
     "@tamagui/font-dm-sans": "2.0.0-rc.26",
     "@tamagui/toast": "2.0.0-rc.26",
+    "@walletconnect/core": "^2.21.0",
+    "@walletconnect/jsonrpc-utils": "^1.0.8",
     "@walletconnect/react-native-compat": "^2.23.8",
+    "@walletconnect/utils": "^2.21.0",
     "babel-plugin-react-native-web": "^0.19.13",
     "blo": "^1.2.0",
     "burnt": "^0.12.2",

@@ -2,6 +2,7 @@ import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import Identicon from '@/components/common/Identicon'
+import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TriangleAlert, Copy, Check, RotateCw } from 'lucide-react'
@@ -192,7 +193,6 @@ const SafeCardReadOnly = ({
               </div>
             )
           )}
-          {isUndeployed && <AccountItem.StatusChip undeployedSafe isActivating={isActivating} />}
           <AccountItem.ChainBadge safes={safes} className="justify-end" />
         </div>
 
@@ -200,7 +200,11 @@ const SafeCardReadOnly = ({
           data-testid="balance-column"
           className="flex min-w-0 shrink-0 flex-col items-end gap-2 pl-1 sm:min-w-16 sm:pl-0"
         >
-          {!isUndeployed && <FiatBalance value={fiatValue} />}
+          {isUndeployed ? (
+            <NotActivatedBadge isActivating={isActivating} data-testid="pending-activation-chip" />
+          ) : (
+            <FiatBalance value={fiatValue} />
+          )}
           {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
         </div>
 

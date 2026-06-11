@@ -62,10 +62,10 @@ describe('SafeSelectorTriggerContent', () => {
     mockUseSafeDisplayName.mockReturnValue('')
     const item = createItem({ name: 'Name from Ethereum' })
 
-    const { getByText } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" />)
+    const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" />)
 
-    // When no name is resolved, getSafeDisplayInfo falls back to prefixed address
-    expect(getByText(/0xabc/)).toBeInTheDocument()
+    // When no name is resolved, the address line shows the (unprefixed) shortened address.
+    expect(getByTestId('safe-selector-trigger-address')).toHaveTextContent(/0xabc/)
   })
 
   it('shows the not-activated warning icon instead of the balance when the selected chain is undeployed', () => {
@@ -80,7 +80,7 @@ describe('SafeSelectorTriggerContent', () => {
       <SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />,
     )
 
-    expect(getByTestId('safe-selector-not-activated-icon')).toHaveAttribute('aria-label', 'Not activated')
+    expect(getByTestId('safe-selector-not-activated-icon')).toHaveAttribute('aria-label', 'Inactive')
     expect(queryByTestId('safe-balance-block')).not.toBeInTheDocument()
   })
 
@@ -101,6 +101,14 @@ describe('SafeSelectorTriggerContent', () => {
     const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />)
 
     expect(getByTestId('safe-selector-not-activated-icon')).toHaveAttribute('aria-label', 'Activating')
+  })
+
+  it('renders the threshold badge on the avatar', () => {
+    const item = createItem({ threshold: 2, owners: 3 })
+
+    const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />)
+
+    expect(getByTestId('safe-selector-threshold')).toHaveTextContent('2/3')
   })
 
   it('shows the balance when the selected chain is deployed', () => {

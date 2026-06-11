@@ -4,7 +4,8 @@ import type { ReactElement, ReactNode, CSSProperties } from 'react'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { getDeterministicColor } from '@/utils/colors'
-import { SPACE_SELECTOR_NAME_MAX_LENGTH, SPACES_LIMIT } from '../../../constants'
+import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '../../../constants'
+import { SPACES_LIMIT } from '@/features/spaces/constants'
 import { truncateSpaceName } from '../../../utils'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
 
@@ -212,13 +213,17 @@ describe('SpaceSelectorDropdown', () => {
   })
 
   it('adds an accessible label to the trigger', () => {
-    render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Company Space', safeCount: 0 }} spaces={[]} />)
+    render(
+      <SpaceSelectorDropdown selectedSpace={{ uuid: 'uuid-1', name: 'Company Space', safeCount: 0 }} spaces={[]} />,
+    )
 
     expect(screen.getByRole('button', { name: 'Open workspace selector' })).toBeVisible()
   })
 
   it('sets aria-expanded on the trigger based on dropdown state', () => {
-    render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Company Space', safeCount: 0 }} spaces={[]} />)
+    render(
+      <SpaceSelectorDropdown selectedSpace={{ uuid: 'uuid-1', name: 'Company Space', safeCount: 0 }} spaces={[]} />,
+    )
 
     const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
     expect(trigger).toHaveAttribute('aria-expanded', 'false')
@@ -229,9 +234,9 @@ describe('SpaceSelectorDropdown', () => {
 
   it('shows all space items when the dropdown is opened', () => {
     const spaces = [
-      { id: 1, name: 'Alpha', safeCount: 0 },
-      { id: 2, name: 'Beta', safeCount: 0 },
-      { id: 3, name: 'Gamma', safeCount: 0 },
+      { uuid: 'uuid-1', name: 'Alpha', safeCount: 0 },
+      { uuid: 'uuid-2', name: 'Beta', safeCount: 0 },
+      { uuid: 'uuid-3', name: 'Gamma', safeCount: 0 },
     ]
     render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
 
@@ -246,8 +251,8 @@ describe('SpaceSelectorDropdown', () => {
 
   it('calls router.push with the correct spaceId when a space is selected', () => {
     const spaces = [
-      { id: 1, name: 'Alpha', safeCount: 0 },
-      { id: 2, name: 'Beta', safeCount: 0 },
+      { uuid: 'uuid-1', name: 'Alpha', safeCount: 0 },
+      { uuid: 'uuid-2', name: 'Beta', safeCount: 0 },
     ]
     render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
 
@@ -257,11 +262,29 @@ describe('SpaceSelectorDropdown', () => {
     const betaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Beta')
     fireEvent.click(betaButton!)
 
-    expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: '2' } })
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: 'uuid-2' } })
+  })
+
+  it('routes and tracks by uuid for spaces that carry no numeric id', () => {
+    const spaces = [
+      { uuid: 'uuid-1', name: 'Alpha', safeCount: 0 },
+      { uuid: 'uuid-2', name: 'Beta', safeCount: 3 },
+    ]
+    render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open workspace selector' }))
+    const betaButton = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'Beta')
+    fireEvent.click(betaButton!)
+
+    expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: 'uuid-2' } })
+    expect(trackEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ label: 'uuid-2' }),
+      expect.objectContaining({ from_workspace_id: 'uuid-1', to_workspace_id: 'uuid-2' }),
+    )
   })
 
   it('tracks WORKSPACE_CREATE_STARTED event and navigates when "Add new space" is clicked', () => {
-    render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha', safeCount: 0 }} spaces={[]} />)
+    render(<SpaceSelectorDropdown selectedSpace={{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }} spaces={[]} />)
 
     const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
     fireEvent.click(trigger)
@@ -276,7 +299,7 @@ describe('SpaceSelectorDropdown', () => {
 
   it('includes safe query param in create space navigation when safe is in the URL', () => {
     mockRouterQuery = { spaceId: '1', safe: '1:0xdeadbeef' }
-    render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha', safeCount: 0 }} spaces={[]} />)
+    render(<SpaceSelectorDropdown selectedSpace={{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }} spaces={[]} />)
 
     const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
     fireEvent.click(trigger)
@@ -289,7 +312,7 @@ describe('SpaceSelectorDropdown', () => {
   })
 
   it('tracks OPEN_SPACE_LIST_PAGE event and navigates when "View all" is clicked', () => {
-    render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Alpha', safeCount: 0 }} spaces={[]} />)
+    render(<SpaceSelectorDropdown selectedSpace={{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }} spaces={[]} />)
 
     const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
     fireEvent.click(trigger)
@@ -312,8 +335,8 @@ describe('SpaceSelectorDropdown', () => {
 
   it('shows a checkmark only next to the currently selected space', () => {
     const spaces = [
-      { id: 1, name: 'Alpha', safeCount: 0 },
-      { id: 2, name: 'Beta', safeCount: 0 },
+      { uuid: 'uuid-1', name: 'Alpha', safeCount: 0 },
+      { uuid: 'uuid-2', name: 'Beta', safeCount: 0 },
     ]
     render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
 
@@ -332,8 +355,8 @@ describe('SpaceSelectorDropdown', () => {
 
     it('disables a space that has reached the safe limit', () => {
       const spaces = [
-        { id: 1, name: 'Full Space', safeCount: LIMIT, members: adminMembersForCurrentUser },
-        { id: 2, name: 'Empty Space', safeCount: 0, members: adminMembersForCurrentUser },
+        { uuid: 'uuid-1', name: 'Full Space', safeCount: LIMIT, members: adminMembersForCurrentUser },
+        { uuid: 'uuid-2', name: 'Empty Space', safeCount: 0, members: adminMembersForCurrentUser },
       ]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
@@ -351,7 +374,7 @@ describe('SpaceSelectorDropdown', () => {
     })
 
     it('shows a tooltip with the limit message for a space at the limit', () => {
-      const spaces = [{ id: 1, name: 'Full Space', safeCount: LIMIT, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Full Space', safeCount: LIMIT, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -360,7 +383,7 @@ describe('SpaceSelectorDropdown', () => {
     })
 
     it('does not show a limit tooltip for a space below the limit', () => {
-      const spaces = [{ id: 1, name: 'Space', safeCount: LIMIT - 1 }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Space', safeCount: LIMIT - 1 }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -369,7 +392,7 @@ describe('SpaceSelectorDropdown', () => {
     })
 
     it('does not disable spaces at the limit in the default variant', () => {
-      const spaces = [{ id: 1, name: 'Full Space', safeCount: LIMIT }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Full Space', safeCount: LIMIT }]
       render(<SpaceSelectorDropdown triggerVariant="default" selectedSpace={spaces[0]} spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Open workspace selector' }))
@@ -381,7 +404,7 @@ describe('SpaceSelectorDropdown', () => {
     })
 
     it('shows the full tooltip text including the limit number', () => {
-      const spaces = [{ id: 1, name: 'Full Space', safeCount: LIMIT, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Full Space', safeCount: LIMIT, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -393,8 +416,8 @@ describe('SpaceSelectorDropdown', () => {
   describe('admin role gating (addToWorkspace variant)', () => {
     it('disables a space where the user is not an active admin', () => {
       const spaces = [
-        { id: 1, name: 'AdminSpace', safeCount: 0, members: adminMembersForCurrentUser },
-        { id: 2, name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser },
+        { uuid: 'uuid-1', name: 'AdminSpace', safeCount: 0, members: adminMembersForCurrentUser },
+        { uuid: 'uuid-2', name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser },
       ]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
@@ -412,7 +435,7 @@ describe('SpaceSelectorDropdown', () => {
     })
 
     it('shows the admin tooltip for non-admin spaces', () => {
-      const spaces = [{ id: 1, name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -422,7 +445,7 @@ describe('SpaceSelectorDropdown', () => {
 
     it('prefers the admin tooltip over the limit tooltip when both apply', () => {
       const LIMIT = 40
-      const spaces = [{ id: 1, name: 'FullMember', safeCount: LIMIT, members: memberMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'FullMember', safeCount: LIMIT, members: memberMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -432,7 +455,7 @@ describe('SpaceSelectorDropdown', () => {
     })
 
     it('does not gate by role in the default variant', () => {
-      const spaces = [{ id: 1, name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="default" selectedSpace={spaces[0]} spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Open workspace selector' }))
@@ -451,7 +474,7 @@ describe('SpaceSelectorDropdown', () => {
       }
       useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
 
-      const spaces = [{ id: 1, name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -473,7 +496,7 @@ describe('SpaceSelectorDropdown', () => {
       }
       useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
 
-      const spaces = [{ id: 1, name: 'AdminSpace', safeCount: 0, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'AdminSpace', safeCount: 0, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -485,7 +508,7 @@ describe('SpaceSelectorDropdown', () => {
         fireEvent.click(adminBtn!)
       })
 
-      expect(mockAddToSpace).toHaveBeenCalledWith(1)
+      expect(mockAddToSpace).toHaveBeenCalledWith('uuid-1')
     })
 
     it('in a mixed list, only admin items trigger addToSpace', async () => {
@@ -496,8 +519,8 @@ describe('SpaceSelectorDropdown', () => {
       useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
 
       const spaces = [
-        { id: 1, name: 'AdminSpace', safeCount: 0, members: adminMembersForCurrentUser },
-        { id: 2, name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser },
+        { uuid: 'uuid-1', name: 'AdminSpace', safeCount: 0, members: adminMembersForCurrentUser },
+        { uuid: 'uuid-2', name: 'MemberSpace', safeCount: 0, members: memberMembersForCurrentUser },
       ]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
@@ -518,16 +541,16 @@ describe('SpaceSelectorDropdown', () => {
       })
 
       expect(mockAddToSpace).toHaveBeenCalledTimes(1)
-      expect(mockAddToSpace).toHaveBeenCalledWith(1)
+      expect(mockAddToSpace).toHaveBeenCalledWith('uuid-1')
     })
   })
 
   describe('already-in-workspace gating (addToWorkspace variant)', () => {
     const SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
 
-    const setMembership = (membership: Record<number, Record<string, string[]>>) => {
+    const setMembership = (membership: Record<string, Record<string, string[]>>) => {
       mockUseSpaceSafesGetV1Query.mockImplementation((...args: unknown[]) => {
-        const { spaceId } = args[0] as { spaceId: number }
+        const { spaceId } = args[0] as { spaceId: string }
         const safes = membership[spaceId]
         return { currentData: safes ? { safes } : undefined }
       })
@@ -535,11 +558,11 @@ describe('SpaceSelectorDropdown', () => {
 
     it('disables a space that already contains the current Safe', () => {
       mockSafeAddressFromUrl = SAFE_ADDRESS
-      setMembership({ 1: { '1': [SAFE_ADDRESS] }, 2: { '1': [] } })
+      setMembership({ 'uuid-1': { '1': [SAFE_ADDRESS] }, 'uuid-2': { '1': [] } })
 
       const spaces = [
-        { id: 1, name: 'AlreadyIn', safeCount: 1, members: adminMembersForCurrentUser },
-        { id: 2, name: 'NotIn', safeCount: 0, members: adminMembersForCurrentUser },
+        { uuid: 'uuid-1', name: 'AlreadyIn', safeCount: 1, members: adminMembersForCurrentUser },
+        { uuid: 'uuid-2', name: 'NotIn', safeCount: 0, members: adminMembersForCurrentUser },
       ]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
@@ -556,9 +579,9 @@ describe('SpaceSelectorDropdown', () => {
 
     it('shows the "already in workspace" tooltip for matching spaces', () => {
       mockSafeAddressFromUrl = SAFE_ADDRESS
-      setMembership({ 1: { '1': [SAFE_ADDRESS] } })
+      setMembership({ 'uuid-1': { '1': [SAFE_ADDRESS] } })
 
-      const spaces = [{ id: 1, name: 'AlreadyIn', safeCount: 1, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'AlreadyIn', safeCount: 1, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -569,9 +592,9 @@ describe('SpaceSelectorDropdown', () => {
     it('matches membership by current chainId only', () => {
       mockSafeAddressFromUrl = SAFE_ADDRESS
       mockChainId = '1'
-      setMembership({ 1: { '137': [SAFE_ADDRESS] } })
+      setMembership({ 'uuid-1': { '137': [SAFE_ADDRESS] } })
 
-      const spaces = [{ id: 1, name: 'OtherChain', safeCount: 1, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'OtherChain', safeCount: 1, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -583,9 +606,9 @@ describe('SpaceSelectorDropdown', () => {
 
     it('prefers the "already in workspace" tooltip over the admin tooltip', () => {
       mockSafeAddressFromUrl = SAFE_ADDRESS
-      setMembership({ 1: { '1': [SAFE_ADDRESS] } })
+      setMembership({ 'uuid-1': { '1': [SAFE_ADDRESS] } })
 
-      const spaces = [{ id: 1, name: 'MemberAlreadyIn', safeCount: 1, members: memberMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'MemberAlreadyIn', safeCount: 1, members: memberMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -596,9 +619,9 @@ describe('SpaceSelectorDropdown', () => {
 
     it('does not disable already-added spaces in the default variant', () => {
       mockSafeAddressFromUrl = SAFE_ADDRESS
-      setMembership({ 1: { '1': [SAFE_ADDRESS] } })
+      setMembership({ 'uuid-1': { '1': [SAFE_ADDRESS] } })
 
-      const spaces = [{ id: 1, name: 'AlreadyIn', safeCount: 1, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'AlreadyIn', safeCount: 1, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="default" selectedSpace={spaces[0]} spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Open workspace selector' }))
@@ -610,9 +633,9 @@ describe('SpaceSelectorDropdown', () => {
 
     it('does not disable any space when no Safe is in the URL', () => {
       mockSafeAddressFromUrl = ''
-      setMembership({ 1: { '1': [SAFE_ADDRESS] } })
+      setMembership({ 'uuid-1': { '1': [SAFE_ADDRESS] } })
 
-      const spaces = [{ id: 1, name: 'Space', safeCount: 1, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Space', safeCount: 1, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -623,36 +646,36 @@ describe('SpaceSelectorDropdown', () => {
 
     it('skips the membership query while the dropdown is closed and fires it once opened', () => {
       mockSafeAddressFromUrl = SAFE_ADDRESS
-      setMembership({ 1: { '1': [SAFE_ADDRESS] } })
+      setMembership({ 'uuid-1': { '1': [SAFE_ADDRESS] } })
 
-      const spaces = [{ id: 1, name: 'Space', safeCount: 1, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Space', safeCount: 1, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       expect(mockUseSpaceSafesGetV1Query).not.toHaveBeenCalled()
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
 
-      expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: 1 }, { skip: false })
+      expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: 'uuid-1' }, { skip: false })
     })
 
     it('skips the membership query when the user is signed out', () => {
       mockIsAuthenticated = false
       mockSafeAddressFromUrl = SAFE_ADDRESS
-      setMembership({ 1: { '1': [SAFE_ADDRESS] } })
+      setMembership({ 'uuid-1': { '1': [SAFE_ADDRESS] } })
 
-      const spaces = [{ id: 1, name: 'Space', safeCount: 1, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Space', safeCount: 1, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
 
-      expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: 1 }, { skip: true })
+      expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: 'uuid-1' }, { skip: true })
     })
 
     it('matches membership when the stored address differs in case from the URL address', () => {
       mockSafeAddressFromUrl = SAFE_ADDRESS
-      setMembership({ 1: { '1': [SAFE_ADDRESS.toLowerCase()] } })
+      setMembership({ 'uuid-1': { '1': [SAFE_ADDRESS.toLowerCase()] } })
 
-      const spaces = [{ id: 1, name: 'AlreadyIn', safeCount: 1, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'AlreadyIn', safeCount: 1, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -669,7 +692,7 @@ describe('SpaceSelectorDropdown', () => {
         useAddSafeToSpace: jest.Mock
       }
       const onSpaceAdded = jest.fn()
-      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }]
 
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} onSpaceAdded={onSpaceAdded} />)
 
@@ -683,7 +706,7 @@ describe('SpaceSelectorDropdown', () => {
       }
       useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
 
-      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -696,7 +719,7 @@ describe('SpaceSelectorDropdown', () => {
         fireEvent.click(alphaButton!)
       })
 
-      expect(mockAddToSpace).toHaveBeenCalledWith(1)
+      expect(mockAddToSpace).toHaveBeenCalledWith('uuid-1')
       expect(screen.queryByText('Alpha')).not.toBeInTheDocument()
     })
   })
@@ -708,12 +731,12 @@ describe('SpaceSelectorDropdown', () => {
       }
       useAddSafeToSpace.mockReturnValue({
         addToSpace: jest.fn(),
-        loadingSpaceId: 1,
+        loadingSpaceId: 'uuid-1',
       })
 
       const spaces = [
-        { id: 1, name: 'Alpha', safeCount: 0 },
-        { id: 2, name: 'Beta', safeCount: 0 },
+        { uuid: 'uuid-1', name: 'Alpha', safeCount: 0 },
+        { uuid: 'uuid-2', name: 'Beta', safeCount: 0 },
       ]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
@@ -734,10 +757,10 @@ describe('SpaceSelectorDropdown', () => {
       }
       useAddSafeToSpace.mockReturnValue({
         addToSpace: jest.fn(),
-        loadingSpaceId: 1,
+        loadingSpaceId: 'uuid-1',
       })
 
-      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -756,7 +779,7 @@ describe('SpaceSelectorDropdown', () => {
       }
       useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
 
-      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -769,14 +792,14 @@ describe('SpaceSelectorDropdown', () => {
         fireEvent.click(alphaButton!)
       })
 
-      expect(mockAddToSpace).toHaveBeenCalledWith(1)
+      expect(mockAddToSpace).toHaveBeenCalledWith('uuid-1')
       expect(screen.getByText('Alpha')).toBeInTheDocument()
     })
 
     it('navigates to the correct space in default variant when clicked', () => {
       const spaces = [
-        { id: 10, name: 'Gamma', safeCount: 0 },
-        { id: 20, name: 'Delta', safeCount: 0 },
+        { uuid: 'uuid-10', name: 'Gamma', safeCount: 0 },
+        { uuid: 'uuid-20', name: 'Delta', safeCount: 0 },
       ]
       render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
 
@@ -787,13 +810,13 @@ describe('SpaceSelectorDropdown', () => {
         .find((btn) => btn.querySelector('span')?.textContent === 'Delta')
       fireEvent.click(deltaButton!)
 
-      expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: '20' } })
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: 'uuid-20' } })
     })
   })
 
   describe('edge cases and error states', () => {
     it('renders correctly with no spaces', () => {
-      render(<SpaceSelectorDropdown selectedSpace={{ id: 1, name: 'Space', safeCount: 0 }} spaces={[]} />)
+      render(<SpaceSelectorDropdown selectedSpace={{ uuid: 'uuid-1', name: 'Space', safeCount: 0 }} spaces={[]} />)
 
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
       fireEvent.click(trigger)
@@ -803,7 +826,7 @@ describe('SpaceSelectorDropdown', () => {
     })
 
     it('renders correctly when selectedSpace is undefined', () => {
-      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }]
       render(<SpaceSelectorDropdown spaces={spaces} />)
 
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
@@ -814,7 +837,7 @@ describe('SpaceSelectorDropdown', () => {
 
     it('handles spaces with very long names', () => {
       const longName = 'A'.repeat(100)
-      const spaces = [{ id: 1, name: longName, safeCount: 0 }]
+      const spaces = [{ uuid: 'uuid-1', name: longName, safeCount: 0 }]
       render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
 
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
@@ -824,7 +847,7 @@ describe('SpaceSelectorDropdown', () => {
     })
 
     it('handles space names with special characters for avatar initial', () => {
-      const spaces = [{ id: 1, name: '123SpecialSpace', safeCount: 0 }]
+      const spaces = [{ uuid: 'uuid-1', name: '123SpecialSpace', safeCount: 0 }]
       render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
 
       const avatarFallback = screen.getByTestId('avatar-fallback')
@@ -832,7 +855,7 @@ describe('SpaceSelectorDropdown', () => {
     })
 
     it('handles single space in list', () => {
-      const spaces = [{ id: 1, name: 'OnlySpace', safeCount: 0 }]
+      const spaces = [{ uuid: 'uuid-1', name: 'OnlySpace', safeCount: 0 }]
       render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
 
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
@@ -847,9 +870,9 @@ describe('SpaceSelectorDropdown', () => {
     it('disables spaces when multiple are at the safe limit', () => {
       const LIMIT = 40
       const spaces = [
-        { id: 1, name: 'Full1', safeCount: LIMIT, members: adminMembersForCurrentUser },
-        { id: 2, name: 'Full2', safeCount: LIMIT, members: adminMembersForCurrentUser },
-        { id: 3, name: 'Available', safeCount: LIMIT - 1, members: adminMembersForCurrentUser },
+        { uuid: 'uuid-1', name: 'Full1', safeCount: LIMIT, members: adminMembersForCurrentUser },
+        { uuid: 'uuid-2', name: 'Full2', safeCount: LIMIT, members: adminMembersForCurrentUser },
+        { uuid: 'uuid-3', name: 'Available', safeCount: LIMIT - 1, members: adminMembersForCurrentUser },
       ]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
@@ -868,7 +891,7 @@ describe('SpaceSelectorDropdown', () => {
 
     it('handles space with safeCount exactly one below the limit', () => {
       const LIMIT = 40
-      const spaces = [{ id: 1, name: 'AlmostFull', safeCount: LIMIT - 1, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'AlmostFull', safeCount: LIMIT - 1, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -880,7 +903,7 @@ describe('SpaceSelectorDropdown', () => {
     })
 
     it('multiple open/close cycles preserve state correctly', () => {
-      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0 }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }]
       render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
 
       const trigger = screen.getByRole('button', { name: 'Open workspace selector' })
@@ -902,8 +925,8 @@ describe('SpaceSelectorDropdown', () => {
 
     it('correctly displays checkmark only for the selected space after re-renders', () => {
       const spaces = [
-        { id: 1, name: 'Alpha', safeCount: 0 },
-        { id: 2, name: 'Beta', safeCount: 0 },
+        { uuid: 'uuid-1', name: 'Alpha', safeCount: 0 },
+        { uuid: 'uuid-2', name: 'Beta', safeCount: 0 },
       ]
       const { rerender } = render(<SpaceSelectorDropdown selectedSpace={spaces[0]} spaces={spaces} />)
 
@@ -928,7 +951,7 @@ describe('SpaceSelectorDropdown', () => {
       }
       useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
 
-      const spaces = [{ id: 1, name: 'Alpha', safeCount: 0, members: adminMembersForCurrentUser }]
+      const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to workspace' }))
@@ -940,7 +963,7 @@ describe('SpaceSelectorDropdown', () => {
         fireEvent.click(alphaButton!)
       })
 
-      expect(mockAddToSpace).toHaveBeenCalledWith(1)
+      expect(mockAddToSpace).toHaveBeenCalledWith('uuid-1')
     })
   })
 
@@ -948,6 +971,7 @@ describe('SpaceSelectorDropdown', () => {
     it('disables "Add new space" button when spaces are at the limit', () => {
       const spaces = Array.from({ length: SPACES_LIMIT }, (_, i) => ({
         id: i + 1,
+        uuid: `uuid-${i + 1}`,
         name: `Space${i + 1}`,
         safeCount: 0,
       }))
@@ -965,6 +989,7 @@ describe('SpaceSelectorDropdown', () => {
     it('shows a tooltip when "Add new space" button is disabled due to spaces limit', () => {
       const spaces = Array.from({ length: SPACES_LIMIT }, (_, i) => ({
         id: i + 1,
+        uuid: `uuid-${i + 1}`,
         name: `Space${i + 1}`,
         safeCount: 0,
       }))
@@ -979,6 +1004,7 @@ describe('SpaceSelectorDropdown', () => {
     it('does not disable "Add new space" button when spaces are below the limit', () => {
       const spaces = Array.from({ length: SPACES_LIMIT - 1 }, (_, i) => ({
         id: i + 1,
+        uuid: `uuid-${i + 1}`,
         name: `Space${i + 1}`,
         safeCount: 0,
       }))
@@ -996,6 +1022,7 @@ describe('SpaceSelectorDropdown', () => {
     it('does not show a tooltip when "Add new space" button is enabled', () => {
       const spaces = Array.from({ length: SPACES_LIMIT - 1 }, (_, i) => ({
         id: i + 1,
+        uuid: `uuid-${i + 1}`,
         name: `Space${i + 1}`,
         safeCount: 0,
       }))
@@ -1010,6 +1037,7 @@ describe('SpaceSelectorDropdown', () => {
     it('disables "Add new space" button when spaces exceed the limit', () => {
       const spaces = Array.from({ length: SPACES_LIMIT + 1 }, (_, i) => ({
         id: i + 1,
+        uuid: `uuid-${i + 1}`,
         name: `Space${i + 1}`,
         safeCount: 0,
       }))
@@ -1027,6 +1055,7 @@ describe('SpaceSelectorDropdown', () => {
     it('shows the correct limit message in the tooltip', () => {
       const spaces = Array.from({ length: SPACES_LIMIT }, (_, i) => ({
         id: i + 1,
+        uuid: `uuid-${i + 1}`,
         name: `Space${i + 1}`,
         safeCount: 0,
       }))

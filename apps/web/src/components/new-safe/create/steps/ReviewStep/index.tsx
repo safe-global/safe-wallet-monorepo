@@ -66,8 +66,8 @@ import { useAllSafes } from '@/hooks/safes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
 import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
-import { useIsAdmin } from '@/features/spaces'
-import { parseSpaceId } from '@/utils/spaces'
+import { useIsAdmin, useSpaceSafeCount } from '@/features/spaces'
+import { normalizeSpaceId } from '@/utils/spaces'
 import { AppRoutes } from '@/config/routes'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
@@ -194,7 +194,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const isCounterfactualEnabled = useHasFeature(FEATURES.COUNTERFACTUAL)
   const isUserAuthenticated = useAppSelector(isAuthenticated)
   const spaceId = useAppSelector(lastUsedSpace)
-  const isAdminOfActiveSpace = useIsAdmin(parseSpaceId(spaceId) ?? undefined)
+  const isAdminOfActiveSpace = useIsAdmin(normalizeSpaceId(spaceId) ?? undefined)
+  const spaceSafeCount = useSpaceSafeCount(spaceId)
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
   const { showGasFeeEstimation, showInsufficientFundsWarning, showFeeInConfirmationText } = chain
     ? getNativeTokenDisplay(chain)
@@ -360,6 +361,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           spaceId,
           isUserAuthenticated,
           isAdminOfActiveSpace,
+          spaceSafeCount,
+          isMultiChainCreation: isMultiChainDeployment,
           dispatch,
         })
         if (!result.ok) throw result.error

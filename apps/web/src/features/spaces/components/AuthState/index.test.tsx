@@ -115,13 +115,16 @@ describe('AuthState', () => {
     expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
   })
 
-  it('fires the space query with the numeric id when authenticated and spaceId is set', () => {
+  it('fires the space query with the uuid when authenticated and spaceId is set', () => {
     render(
-      <AuthState spaceId="42">
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div />
       </AuthState>,
     )
 
-    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith({ id: 42 }, { skip: false })
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(
+      { id: '11111111-1111-1111-1111-111111111111' },
+      { skip: false },
+    )
   })
 })

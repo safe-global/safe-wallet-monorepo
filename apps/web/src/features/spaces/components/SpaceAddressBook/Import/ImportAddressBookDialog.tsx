@@ -86,7 +86,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
       setIsSubmitting(true)
 
       const result = await upsertAddressBook({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         upsertAddressBookItemsDto: { items: contactItems },
       })
 

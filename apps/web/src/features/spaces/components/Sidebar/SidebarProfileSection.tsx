@@ -1,17 +1,18 @@
 import type { ReactElement } from 'react'
 import { SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
+import { Popover, PopoverTrigger } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/utils/cn'
-import { LogOut, User } from 'lucide-react'
+import { User } from 'lucide-react'
 import { useCurrentMemberProfile, MemberStatus } from '@/features/spaces'
 import useLogout from '@/hooks/useLogout'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import InitialsAvatar from '@/components/common/InitialsAvatar'
+import { ProfilePopoverContent } from './ProfilePopoverContent'
 import css from './styles.module.css'
+import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 export interface SidebarProfileViewProps {
   profileName: string
@@ -48,36 +49,12 @@ export const SidebarProfileView = ({
               <span className={css.profileName}>{profileName}</span>
             </PopoverTrigger>
 
-            <PopoverContent
-              side="top"
-              align="center"
-              sideOffset={12}
-              className={css.profilePopover}
-              data-testid="sidebar-profile-popover"
-            >
-              <div className={css.profileHeader}>
-                <InitialsAvatar name={profileName} size="medium" rounded />
-                <span className={css.profileSignedIn}>Signed in</span>
-              </div>
-
-              <div className={css.profileInfo}>
-                <span className={css.profileName}>{displayName}</span>
-                <span className={css.profileRole}>{role}</span>
-              </div>
-
-              <Separator />
-
-              <button
-                type="button"
-                className={css.profileSignOut}
-                onClick={onSignOut}
-                data-testid="sidebar-profile-sign-out"
-                aria-label="Sign out"
-              >
-                <LogOut className="size-4" aria-hidden="true" />
-                <span>Sign out</span>
-              </button>
-            </PopoverContent>
+            <ProfilePopoverContent
+              avatarName={profileName}
+              displayName={displayName}
+              role={role}
+              onSignOut={onSignOut}
+            />
           </Popover>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -97,6 +74,17 @@ const ProfileSkeleton = () => (
   </>
 )
 
+export const getSidebarProfileInfo = (membership: MemberDto, signerAddress?: string, email?: string) => {
+  const memberName = membership.name || 'User'
+  const profileName = email || memberName
+  const displayName = email || (signerAddress ? shortenAddress(signerAddress) : memberName)
+
+  return {
+    profileName,
+    displayName,
+  }
+}
+
 export const SidebarProfileSection = (): ReactElement | null => {
   const { membership, email, signerAddress, isLoading } = useCurrentMemberProfile()
   const { logout } = useLogout()
@@ -104,9 +92,7 @@ export const SidebarProfileSection = (): ReactElement | null => {
   if (isLoading && !membership) return <ProfileSkeleton />
   if (!membership || membership.status !== MemberStatus.ACTIVE) return null
 
-  const memberName = membership.name || 'User'
-  const profileName = email || memberName
-  const displayName = email || (signerAddress ? shortenAddress(signerAddress) : memberName)
+  const { profileName, displayName } = getSidebarProfileInfo(membership, signerAddress, email)
   const role = membership.role.toLowerCase()
 
   const handleSignOut = () => {

@@ -32,6 +32,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
       mergedAddressBook.list.map((entry) => ({
         label: entry.address,
         name: entry.name,
+        source: entry.source,
       })),
     [mergedAddressBook],
   )
@@ -89,7 +90,13 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
               const { key, ...rest } = props
               return (
                 <Typography data-testid="address-item" component="li" variant="body2" {...rest} key={key}>
-                  <EthHashInfo address={option.label} name={option.name} shortAddress={false} copyAddress={false} />
+                  <EthHashInfo
+                    address={option.label}
+                    name={option.name}
+                    shortAddress={false}
+                    copyAddress={false}
+                    addressBookNameSource={option.source}
+                  />
                 </Typography>
               )
             }}
