@@ -3,13 +3,11 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useSiwe } from '@/services/siwe/useSiwe'
-import { isAuthenticated, setAuthenticated } from '@/store/authSlice'
+import { isAuthenticated, setAuthenticated, SESSION_LIFETIME_MS } from '@/store/authSlice'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { showNotification } from '@/store/notificationsSlice'
 import type { AppDispatch } from '@/store'
-
-const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000
 
 interface UseSIWEAuthArgs {
   onSuccess: () => void
@@ -33,7 +31,7 @@ const performSignIn = async (signIn: ReturnType<typeof useSiwe>['signIn'], dispa
 
   if (!result) return false
 
-  dispatch(setAuthenticated(Date.now() + ONE_DAY_IN_MS))
+  dispatch(setAuthenticated(Date.now() + SESSION_LIFETIME_MS))
   return true
 }
 
