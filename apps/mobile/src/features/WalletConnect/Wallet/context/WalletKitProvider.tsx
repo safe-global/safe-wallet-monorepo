@@ -1,13 +1,29 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import * as Linking from 'expo-linking'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { getSdkError } from '@walletconnect/utils'
+import { formatJsonRpcResult } from '@walletconnect/jsonrpc-utils'
+import { skipToken } from '@reduxjs/toolkit/query'
 import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
-import { useAppDispatch } from '@/src/store/hooks'
+import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { startAppListening } from '@/src/store'
+import { selectActiveSafe } from '@/src/store/activeSafeSlice'
+import { selectChainById } from '@/src/store/chains'
+import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { getWalletKit } from '../walletKit'
 import { useActiveSafeBinding } from '../hooks/useActiveSafeBinding'
 import { useSessionProposalHandler } from '../hooks/useSessionProposalHandler'
-import { setSessions, removeSession, pushPending, isDeferredTxMethod } from '../store/walletKitSlice'
+import { useSessionRequestHandler, type SessionRequestHandlerDeps } from '../hooks/useSessionRequestHandler'
+import {
+  setSessions,
+  removeSession,
+  pushPending,
+  isDeferredTxMethod,
+  clearOutstandingRequest,
+  selectOutstandingRequestByHash,
+} from '../store/walletKitSlice'
 import { RequestSheetHost } from '../components/RequestSheetHost'
 import { logWalletKitError } from '../utils/errors'
 
@@ -40,6 +56,7 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               chainId: r.params.chainId,
               method,
               params: r.params.request.params,
+              verifyContext: r.verifyContext,
             }),
           )
         })
@@ -50,19 +67,16 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [dispatch])
 
-  // Subscribe to session events. session_proposal is handled by useSessionProposalHandler
-  // (WA-2318). session_request handling is wired in WA-2321/2322. delete/expire/update keep
-  // the slice's session mirror in sync; authenticate is rejected (out of scope).
+  // Subscribe to session lifecycle events. session_proposal is handled by
+  // useSessionProposalHandler (WA-2318) and session_request by useSessionRequestHandler
+  // (WA-2321). delete/expire keep the slice's session mirror in sync; authenticate is
+  // rejected (out of scope).
   useEffect(() => {
     if (!walletKit) {
       return
     }
     const refreshSessions = () => dispatch(setSessions(walletKit.getActiveSessions()))
 
-    const onRequest = (r: WalletKitTypes.SessionRequest) => {
-      // TODO(WA-2321 / WA-2322): route + render request sheets.
-      console.log('[walletKit] session_request (stub)', r.id)
-    }
     const onDelete = ({ topic }: { topic: string }) => dispatch(removeSession(topic))
     // proposal_expire / session_request_expire are the lifecycle-expiry events @reown/walletkit
     // actually surfaces (its event map has no `session_expire` / `session_update`). Re-seed from
@@ -77,20 +91,54 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
     }
 
-    walletKit.on('session_request', onRequest)
     walletKit.on('session_delete', onDelete)
     walletKit.on('proposal_expire', onProposalExpire)
     walletKit.on('session_request_expire', onRequestExpire)
     walletKit.on('session_authenticate', onAuthenticate)
 
     return () => {
-      walletKit.off('session_request', onRequest)
       walletKit.off('session_delete', onDelete)
       walletKit.off('proposal_expire', onProposalExpire)
       walletKit.off('session_request_expire', onRequestExpire)
       walletKit.off('session_authenticate', onAuthenticate)
     }
   }, [walletKit, dispatch])
+
+  // Respond to the dApp once the user has actually signed. The existing confirm flow calls
+  // transactionsProposeTransactionV1 after signing; match its fulfilled action against any
+  // outstanding tx request keyed by safeTxHash and reply with the hash (or { id } for 5792).
+  useEffect(() => {
+    if (!walletKit) {
+      return
+    }
+    const unsubscribe = startAppListening({
+      matcher: cgwApi.endpoints.transactionsProposeTransactionV1.matchFulfilled,
+      effect: async (action, api) => {
+        const arg = action.meta.arg.originalArgs as { proposeTransactionDto?: { safeTxHash?: string } }
+        const safeTxHash = arg.proposeTransactionDto?.safeTxHash
+        if (!safeTxHash) {
+          return
+        }
+        const outstanding = selectOutstandingRequestByHash(api.getState(), safeTxHash)
+        if (!outstanding) {
+          return
+        }
+        const result = outstanding.method === 'wallet_sendCalls' ? { id: safeTxHash } : safeTxHash
+        try {
+          await walletKit.respondSessionRequest({
+            topic: outstanding.topic,
+            response: formatJsonRpcResult(outstanding.id, result),
+          })
+        } catch (e) {
+          logWalletKitError('respondSessionRequest after propose failed', e)
+        }
+        api.dispatch(clearOutstandingRequest(safeTxHash))
+      },
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [walletKit])
 
   // Deep-link listener: wc: URIs arriving via the OS land here.
   useEffect(() => {
@@ -123,7 +171,22 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [walletKit])
 
+  // Active context for the session-request router. `safe` is the full SafeState (owners,
+  // threshold, version) the compose path needs; `hasSigner` gates tx requests with 4100.
+  const activeSafe = useAppSelector(selectActiveSafe)
+  const activeChain = useAppSelector((s) => (activeSafe ? (selectChainById(s, activeSafe.chainId) ?? null) : null))
+  const { data: safe } = useSafesGetSafeV1Query(
+    activeSafe ? { chainId: activeSafe.chainId, safeAddress: activeSafe.address } : skipToken,
+  )
+  const activeSigner = useAppSelector((s) => (activeSafe ? selectActiveSigner(s, activeSafe.address) : undefined))
+
+  const deps: SessionRequestHandlerDeps = useMemo(
+    () => ({ activeChain: activeChain ?? null, activeSafe: safe ?? null, hasSigner: !!activeSigner }),
+    [activeChain, safe, activeSigner],
+  )
+
   useSessionProposalHandler(walletKit)
+  useSessionRequestHandler(walletKit, deps)
   useActiveSafeBinding(walletKit)
 
   return (
