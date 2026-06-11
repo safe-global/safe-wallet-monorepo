@@ -50,4 +50,24 @@ describe('SafeCardLayout', () => {
     fireEvent.click(card)
     expect(onToggle).not.toHaveBeenCalled()
   })
+
+  it('disables the inner checkbox and does not fire onCheckedChange when disabled', () => {
+    const onCheckedChange = jest.fn()
+    render(<SafeCardLayout {...baseProps} onToggle={jest.fn()} onCheckedChange={onCheckedChange} disabled />)
+
+    const checkbox = screen.getAllByRole('checkbox').find((el) => el.getAttribute('data-slot') === 'checkbox')!
+    expect(checkbox).toHaveAttribute('data-disabled')
+    fireEvent.click(checkbox)
+    expect(onCheckedChange).not.toHaveBeenCalled()
+  })
+
+  it('remains interactive when not disabled', () => {
+    const onToggle = jest.fn()
+    render(<SafeCardLayout {...baseProps} onToggle={onToggle} />)
+
+    const card = screen.getAllByRole('checkbox').find((el) => el.tagName === 'BUTTON') as HTMLButtonElement
+    expect(card).not.toBeDisabled()
+    fireEvent.click(card)
+    expect(onToggle).toHaveBeenCalled()
+  })
 })

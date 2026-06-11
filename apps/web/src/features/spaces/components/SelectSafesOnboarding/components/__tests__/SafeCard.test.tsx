@@ -230,4 +230,30 @@ describe('SafeCard', () => {
 
     expect(getCardButton()).toBeDisabled()
   })
+
+  it('clicking a disabled single-chain safe does not select it', () => {
+    render(
+      <FormWrapper>
+        <SafeCard safe={buildSafe('0xabc123')} isAtLimit />
+      </FormWrapper>,
+    )
+
+    const cardButton = getCardButton()
+    expect(cardButton).toHaveAttribute('aria-checked', 'false')
+    fireEvent.click(cardButton)
+    expect(cardButton).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('clicking a disabled multi-chain safe does not select it', () => {
+    render(
+      <FormWrapper>
+        <SafeCard safe={buildMultiChain('0xmulti', ['1', '137'])} isAtLimit />
+      </FormWrapper>,
+    )
+
+    const cardButton = getCardButton()
+    expect(cardButton).toHaveAttribute('aria-checked', 'false')
+    fireEvent.click(cardButton)
+    expect(cardButton).toHaveAttribute('aria-checked', 'false')
+  })
 })

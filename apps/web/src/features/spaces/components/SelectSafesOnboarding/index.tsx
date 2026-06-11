@@ -109,7 +109,7 @@ const SelectSafesOnboarding = (): ReactElement => {
 
             <div className="relative min-w-0" data-testid="onboarding-safes-list-region">
               {isAtLimit && (
-                <Typography variant="paragraph" color="muted" className="text-xs pb-1">
+                <Typography variant="paragraph" className="text-destructive text-xs pb-1">
                   Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
                 </Typography>
               )}
@@ -117,6 +117,7 @@ const SelectSafesOnboarding = (): ReactElement => {
                 trustedSafes={trustedSafes}
                 ownedSafes={ownedSafes}
                 similarAddresses={similarAddresses}
+                isAtLimit={isAtLimit}
                 trustedSelectAll={{
                   state: trustedSelection.state,
                   count: trustedSelection.selectedCount,

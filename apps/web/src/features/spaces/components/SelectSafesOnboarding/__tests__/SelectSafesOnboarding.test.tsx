@@ -146,6 +146,29 @@ describe('SelectSafesOnboarding — SelectAll wiring', () => {
 
     expect(screen.getByText('Limit of 10 accounts reached')).toBeInTheDocument()
   })
+
+  it('passes isAtLimit to OnboardingSafesList once the cap is hit', () => {
+    mockTrustedSafes = Array.from({ length: 11 }, (_, i) =>
+      makeSafe('1', `0x${i.toString().padStart(40, '0')}`),
+    ) as AllSafeItems
+
+    render(<SelectSafesOnboarding />)
+
+    expect(capturedListProps.isAtLimit).toBe(false)
+
+    const trustedSelectAll = capturedListProps.trustedSelectAll as { onToggle: (check: boolean) => void }
+    const { act } = require('@testing-library/react')
+    act(() => trustedSelectAll.onToggle(true))
+
+    expect(capturedListProps.isAtLimit).toBe(true)
+  })
+
+  it('does not pass isAtLimit when below the cap', () => {
+    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
+    render(<SelectSafesOnboarding />)
+
+    expect(capturedListProps.isAtLimit).toBe(false)
+  })
 })
 
 describe('SelectSafesOnboarding — wallet connection state', () => {
