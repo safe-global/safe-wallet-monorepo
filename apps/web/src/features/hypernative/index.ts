@@ -64,11 +64,11 @@ export { useShowHypernativeAssessment } from './hooks/useShowHypernativeAssessme
 // Auth token hook (used by safe-shield context)
 export { useAuthToken } from './hooks/useAuthToken'
 
-// Banner visibility hooks (used by dashboard, queue, history pages)
+// Banner visibility hooks (used by dashboard)
 export { useBannerVisibility, BannerType } from './hooks/useBannerVisibility'
 
-// Banner components for carousel/pages (used by dashboard, queue, history pages)
-export { HnBannerForCarousel, HnBannerForQueue, HnBannerForHistory, HnBannerForSettings } from './components/HnBanner'
+// Banner components for carousel/settings (used by dashboard, settings pages)
+export { HnBannerForCarousel, HnBannerForSettings } from './components/HnBanner'
 
 // Dashboard banner variant (used by FirstSteps)
 export { HnDashboardBannerWithNoBalanceCheck } from './components/HnDashboardBanner'

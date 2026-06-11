@@ -1254,8 +1254,6 @@ Detailed view - every component with its coverage status.
 | HnAnalysisGroupCard              | other       | features/hypernative/components/HnAnalysisGroupCard/index.tsx                                | Group (Hypernative)                   |
 | HnBanner                         | other       | features/hypernative/components/HnBanner/HnBanner.tsx                                        | Own story (HnBanner)                  |
 | HnBannerForCarousel              | other       | features/hypernative/components/HnBanner/HnBannerForCarousel.tsx                             | Family (HnBanner)                     |
-| HnBannerForHistory               | other       | features/hypernative/components/HnBanner/HnBannerForHistory.tsx                              | Family (HnBanner)                     |
-| HnBannerForQueue                 | other       | features/hypernative/components/HnBanner/HnBannerForQueue.tsx                                | Family (HnBanner)                     |
 | HnBannerWithDismissal            | other       | features/hypernative/components/HnBanner/HnBannerWithDismissal.tsx                           | Family (HnBanner)                     |
 | HnCalendlyStep                   | other       | features/hypernative/components/HnSignupFlow/HnCalendlyStep.tsx                              | Family (HnSignupFlow)                 |
 | HnCustomChecksCard               | other       | features/hypernative/components/HnCustomChecksCard/index.tsx                                 | Group (Hypernative)                   |
