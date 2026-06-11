@@ -11,12 +11,35 @@ import { BookUser, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from './SpaceAddressBookActions'
 import { cn } from '@/utils/cn'
-import { formatDate } from './ActivityLog'
+import { formatDate } from '@/features/spaces/utils'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
+import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
   isLocal: boolean
   isPrivate?: boolean
   isDuplicate?: boolean
+}
+
+// Resolution order: space member name → wallet address → email. Shared
+// address-book names are member-editable and are deliberately not used here.
+function AddedBy({ createdBy, memberName }: { createdBy: string; memberName?: string }) {
+  if (memberName) {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        <InitialsAvatar name={memberName} size="xsmall" rounded />
+        <span className="min-w-0 truncate text-sm">{memberName}</span>
+      </span>
+    )
+  }
+
+  if (isAddress(createdBy)) {
+    return (
+      <EthHashInfo address={createdBy} avatarSize={20} showName={false} showPrefix={false} showCopyButton={false} />
+    )
+  }
+
+  return <EmailInfo email={createdBy} size="xsmall" />
 }
 
 type SpaceAddressBookTableProps = {
@@ -35,6 +58,7 @@ function SpaceAddressBookTable({
   renderExtraAction,
 }: SpaceAddressBookTableProps) {
   const [page, setPage] = useState(0)
+  const resolveMemberName = useMemberNameResolver()
 
   useEffect(() => {
     setPage(0)
@@ -119,17 +143,7 @@ function SpaceAddressBookTable({
               {hasMiddleColumn && (
                 <TableCell>
                   {showAddedBy && entry.createdBy ? (
-                    isAddress(entry.createdBy) ? (
-                      <EthHashInfo
-                        address={entry.createdBy}
-                        avatarSize={20}
-                        onlyName
-                        showPrefix={false}
-                        showCopyButton={false}
-                      />
-                    ) : (
-                      <EmailInfo email={entry.createdBy} size="xsmall" />
-                    )
+                    <AddedBy createdBy={entry.createdBy} memberName={resolveMemberName(entry.createdByUserId)} />
                   ) : showLastUpdated ? (
                     <span className="text-muted-foreground text-xs">
                       {formatDate(entry.updatedAt || entry.createdAt)}

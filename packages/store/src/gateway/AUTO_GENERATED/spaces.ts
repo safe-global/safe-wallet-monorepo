@@ -124,6 +124,27 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.id}`, method: 'DELETE' }),
         invalidatesTags: ['spaces'],
       }),
+      spaceAuditGetAuditLogV1: build.query<SpaceAuditGetAuditLogV1ApiResponse, SpaceAuditGetAuditLogV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/audit-log`,
+          params: {
+            event_type: queryArg.eventType,
+            actor_user_id: queryArg.actorUserId,
+            created_at__gte: queryArg.createdAtGte,
+            created_at__lte: queryArg.createdAtLte,
+            sort_direction: queryArg.sortDirection,
+            cursor: queryArg.cursor,
+          },
+        }),
+        providesTags: ['spaces'],
+      }),
+      spaceAuditGetAuditLogActorsV1: build.query<
+        SpaceAuditGetAuditLogActorsV1ApiResponse,
+        SpaceAuditGetAuditLogActorsV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/audit-log/actors` }),
+        providesTags: ['spaces'],
+      }),
       spaceSafesCreateV1: build.mutation<SpaceSafesCreateV1ApiResponse, SpaceSafesCreateV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/spaces/${queryArg.spaceId}/safes`,
@@ -312,6 +333,29 @@ export type SpacesDeleteV1ApiResponse = unknown
 export type SpacesDeleteV1ApiArg = {
   /** Space UUID to delete */
   id: string
+}
+export type SpaceAuditGetAuditLogV1ApiResponse = /** status 200 Paginated audit log entries */ SpaceAuditLogPage
+export type SpaceAuditGetAuditLogV1ApiArg = {
+  /** Space identifier (UUID, or legacy numeric id) */
+  spaceId: string
+  /** Comma-separated list of event types to filter by */
+  eventType?: string
+  /** Filter by acting user id */
+  actorUserId?: number
+  /** ISO 8601 lower bound (inclusive) on event creation time */
+  createdAtGte?: string
+  /** ISO 8601 upper bound (inclusive) on event creation time */
+  createdAtLte?: string
+  /** Sort direction over (created_at, id). Defaults to desc. */
+  sortDirection?: 'asc' | 'desc'
+  /** Pagination cursor for retrieving the next set of results */
+  cursor?: string
+}
+export type SpaceAuditGetAuditLogActorsV1ApiResponse =
+  /** status 200 Distinct audit log actors */ SpaceAuditLogActorDto[]
+export type SpaceAuditGetAuditLogActorsV1ApiArg = {
+  /** Space identifier (UUID, or legacy numeric id) */
+  spaceId: string
 }
 export type SpaceSafesCreateV1ApiResponse = unknown
 export type SpaceSafesCreateV1ApiArg = {
@@ -519,6 +563,45 @@ export type UpdateSpaceDto = {
   name?: string
   status?: 'ACTIVE'
 }
+export type SpaceAuditLogEntryDto = {
+  /** Monotonic entry id (bigint serialized as string). Stable row key — clients dedupe on it. */
+  id: string
+  eventType:
+    | 'SPACE_CREATED'
+    | 'SPACE_UPDATED'
+    | 'SPACE_DELETED'
+    | 'MEMBER_INVITED'
+    | 'MEMBER_INVITE_ACCEPTED'
+    | 'MEMBER_INVITE_DECLINED'
+    | 'MEMBER_INVITE_RENEWED'
+    | 'MEMBER_ROLE_UPDATED'
+    | 'MEMBER_ALIAS_UPDATED'
+    | 'MEMBER_REMOVED'
+    | 'MEMBER_LEFT'
+    | 'SAFE_ADDED'
+    | 'SAFE_REMOVED'
+    | 'ADDRESS_BOOK_UPSERTED'
+    | 'ADDRESS_BOOK_DELETED'
+  actorUserId: number
+  /** Resolved (and masked) display string of the acting user. */
+  actor: string
+  /** Resolved (and masked) display string of the affected user, when the event has one. */
+  targetUser?: string | null
+  /** Event-specific payload, allowlisted per event type. Clients must treat every field as optional. */
+  payload: object
+  createdAt: string
+}
+export type SpaceAuditLogPage = {
+  count?: number | null
+  next?: string | null
+  previous?: string | null
+  results: SpaceAuditLogEntryDto[]
+}
+export type SpaceAuditLogActorDto = {
+  actorUserId: number
+  /** Resolved (and masked) display string of the actor. */
+  actor: string
+}
 export type SpaceSafeDto = {
   chainId: string
   address: string
@@ -632,6 +715,10 @@ export const {
   useLazySpacesGetOneV1Query,
   useSpacesUpdateV1Mutation,
   useSpacesDeleteV1Mutation,
+  useSpaceAuditGetAuditLogV1Query,
+  useLazySpaceAuditGetAuditLogV1Query,
+  useSpaceAuditGetAuditLogActorsV1Query,
+  useLazySpaceAuditGetAuditLogActorsV1Query,
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesGetV1Query,
   useLazySpaceSafesGetV1Query,

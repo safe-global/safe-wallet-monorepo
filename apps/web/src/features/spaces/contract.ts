@@ -34,6 +34,7 @@ import type InviteMembersOnboarding from './components/InviteMembersOnboarding'
 import type SurveyOnboarding from './components/SurveyOnboarding'
 import type SelectSafeModal from './components/SelectSafeModal'
 import type SecurityHubPage from './components/SecurityHub/Page'
+import type SpaceActivityLogPage from './components/SpaceActivityLog/Page'
 
 // Utility services
 import type { isUnauthorized, filterSpacesByStatus, getNonDeclinedSpaces } from './utils'
@@ -66,6 +67,7 @@ export interface SpacesContract {
   SpaceAddressBookPage: typeof SpaceAddressBookPage
   SpaceSettingsPage: typeof SpaceSettingsPage
   SecurityHubPage: typeof SecurityHubPage
+  SpaceActivityLogPage: typeof SpaceActivityLogPage
 
   // Modal components (PascalCase) - stub renders null
   SelectSafeModal: typeof SelectSafeModal
