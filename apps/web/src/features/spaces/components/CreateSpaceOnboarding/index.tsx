@@ -1,6 +1,5 @@
 import { useMemo, useState, type ReactElement } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { useRouter } from 'next/router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Typography } from '@/components/ui/typography'
@@ -18,15 +17,14 @@ import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
 import { flattenSafeItems } from '@/hooks/safes'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '@/features/spaces/hooks/useOnboardingStepCount'
-import { AppRoutes } from '@/config/routes'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
+import useOnboardingExit from './hooks/useOnboardingExit'
 
 const ONBOARDING_STEP = 1
 const FORM_ID = 'create-space-form'
 
 const CreateSpaceOnboarding = (): ReactElement => {
-  const router = useRouter()
   const totalSteps = useOnboardingStepCount()
   const isCheckingAccess = useIsCheckingAccess() ?? true
 
@@ -39,6 +37,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
   } = useForm<{ name: string }>({ mode: 'onChange', defaultValues: { name: '' } })
 
   const { spaceId, isEditMode, isSpaceLoading, existingSpace } = useExistingSpace(setValue)
+  const { onExit, hasNoSpaces } = useOnboardingExit(isEditMode)
   const { error, isSubmitting, onSubmit } = useSpaceSubmit(handleSubmit, spaceId, isEditMode)
   const watchedName = useWatch({ control, name: 'name' }) ?? ''
 
@@ -124,7 +123,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
       <Button
         type="button"
         variant="ghost"
-        onClick={() => router.push(AppRoutes.welcome.spaces)}
+        onClick={onExit}
         disabled={isSubmitting}
         className="w-full h-12 rounded-lg bg-muted hover:bg-border xl:flex-1"
       >
@@ -154,6 +153,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
     <OnboardingLayout
       main={main}
       footer={footer}
+      onLogoClick={hasNoSpaces ? onExit : undefined}
       sidePanel={
         <SafeAppMockup
           name={displayName}
