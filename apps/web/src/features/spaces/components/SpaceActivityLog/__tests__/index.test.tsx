@@ -138,6 +138,25 @@ describe('SpaceActivityLog', () => {
     expect(screen.queryByTestId('activity-log-load-more')).not.toBeInTheDocument()
   })
 
+  it('keeps a disabled loading button while the next page is being fetched', () => {
+    // Page 2 data is never provided — the fetch stays pending.
+    mockPages({
+      '': {
+        results: [buildEvent('1')],
+        next: 'https://gw/v1/spaces/1/audit-log?cursor=limit%3D1%26offset%3D1',
+        previous: null,
+        count: 2,
+      },
+    })
+
+    render(<SpaceActivityLog />)
+    fireEvent.click(screen.getByTestId('activity-log-load-more'))
+
+    const button = screen.getByTestId('activity-log-load-more')
+    expect(button).toBeDisabled()
+    expect(button).toHaveTextContent('Loading…')
+  })
+
   it('shows the filter bar only when showFilters is set', () => {
     mockPages({ '': { results: [], next: null, previous: null, count: 0 } })
 
