@@ -46,15 +46,19 @@ jest.mock('@/components/tx/ErrorMessage', () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }))
 
-// Minimal form bound to react-hook-form so we can drive name/role and read disabled state
+// Minimal form bound to react-hook-form so we can drive name/role and read disabled state.
+// Reading formState mirrors the real NameInput's subscription, which keeps isValid recomputing.
 jest.mock('../AddMemberModal/MemberInfoForm', () => ({
   __esModule: true,
   default: ({ disableName, disableRole }: { disableName?: boolean; disableRole?: boolean }) => {
-    const { register } = (jest.requireActual('react-hook-form') as typeof ReactHookForm).useFormContext()
+    const { register, formState } = (jest.requireActual('react-hook-form') as typeof ReactHookForm).useFormContext()
     return (
       <>
         <input {...register('name')} data-testid="member-name-input" disabled={disableName} />
         <input {...register('role')} data-testid="member-role-input" disabled={disableRole} />
+        <span data-testid="form-valid" hidden>
+          {String(formState.isValid)}
+        </span>
       </>
     )
   },
@@ -63,13 +67,20 @@ jest.mock('../AddMemberModal/MemberInfoForm', () => ({
 describe('EditMemberDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUpdateRole.mockReturnValue({ error: undefined })
-    mockUpdateAlias.mockReturnValue({ error: undefined })
+    mockUpdateRole.mockResolvedValue({ error: undefined })
+    mockUpdateAlias.mockResolvedValue({ error: undefined })
   })
 
   const member = memberBuilder()
     .with({ name: 'Treasry Dev Inc creator', role: 'ADMIN', user: memberUserBuilder().with({ id: 7 }).build() })
     .build()
+
+  // The Update button enables only after react-hook-form's async validation pass
+  const clickUpdate = async () => {
+    const button = screen.getByTestId('update-btn')
+    await waitFor(() => expect(button).toBeEnabled())
+    fireEvent.click(button)
+  }
 
   it('lets the current user rename themselves via the alias endpoint', async () => {
     render(<EditMemberDialog member={member} handleClose={jest.fn()} isCurrentUser />)
@@ -78,7 +89,7 @@ describe('EditMemberDialog', () => {
     expect(nameInput.disabled).toBe(false)
 
     fireEvent.change(nameInput, { target: { value: '  Alice  ' } })
-    fireEvent.click(screen.getByText('Update'))
+    await clickUpdate()
 
     await waitFor(() => {
       expect(mockUpdateAlias).toHaveBeenCalledWith({
@@ -96,7 +107,7 @@ describe('EditMemberDialog', () => {
     expect(nameInput.disabled).toBe(true)
 
     fireEvent.change(screen.getByTestId('member-role-input'), { target: { value: 'MEMBER' } })
-    fireEvent.click(screen.getByText('Update'))
+    await clickUpdate()
 
     await waitFor(() => {
       expect(mockUpdateRole).toHaveBeenCalledWith({
@@ -114,7 +125,7 @@ describe('EditMemberDialog', () => {
     expect((screen.getByTestId('member-role-input') as HTMLInputElement).disabled).toBe(true)
 
     fireEvent.change(screen.getByTestId('member-name-input'), { target: { value: 'New name' } })
-    fireEvent.click(screen.getByText('Update'))
+    await clickUpdate()
 
     await waitFor(() => {
       expect(mockUpdateAlias).toHaveBeenCalledWith({
@@ -125,12 +136,35 @@ describe('EditMemberDialog', () => {
     expect(mockUpdateRole).not.toHaveBeenCalled()
   })
 
+  it('shows the self-worded toast and skips the alias endpoint when the current user only changes their role', async () => {
+    const handleClose = jest.fn()
+    render(<EditMemberDialog member={member} handleClose={handleClose} isCurrentUser />)
+
+    fireEvent.change(screen.getByTestId('member-role-input'), { target: { value: 'MEMBER' } })
+    await clickUpdate()
+
+    await waitFor(() => {
+      expect(mockUpdateRole).toHaveBeenCalledWith({
+        spaceId: '42',
+        userId: 7,
+        updateRoleDto: { role: 'MEMBER' },
+      })
+    })
+    expect(mockUpdateAlias).not.toHaveBeenCalled()
+    expect(mockDispatch).toHaveBeenCalledTimes(1)
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'notifications/show',
+      payload: expect.objectContaining({ message: 'Updated your role to MEMBER' }),
+    })
+    expect(handleClose).toHaveBeenCalled()
+  })
+
   it('shows an error and does not PATCH when the name is whitespace-only', async () => {
     const handleClose = jest.fn()
     render(<EditMemberDialog member={member} handleClose={handleClose} isCurrentUser />)
 
     fireEvent.change(screen.getByTestId('member-name-input'), { target: { value: '   ' } })
-    fireEvent.click(screen.getByText('Update'))
+    await clickUpdate()
 
     await waitFor(() => {
       expect(screen.getByText('Name cannot be empty.')).toBeInTheDocument()
@@ -140,14 +174,14 @@ describe('EditMemberDialog', () => {
   })
 
   it('shows a distinguished error and no name toast when the role saved but renaming failed', async () => {
-    mockUpdateAlias.mockReturnValue({ error: { status: 500, data: {} } })
+    mockUpdateAlias.mockResolvedValue({ error: { status: 500, data: {} } })
     const handleClose = jest.fn()
 
     render(<EditMemberDialog member={member} handleClose={handleClose} isCurrentUser />)
 
     fireEvent.change(screen.getByTestId('member-role-input'), { target: { value: 'MEMBER' } })
     fireEvent.change(screen.getByTestId('member-name-input'), { target: { value: 'Alice' } })
-    fireEvent.click(screen.getByText('Update'))
+    await clickUpdate()
 
     await waitFor(() => {
       expect(screen.getByText('The role was updated, but renaming failed. Please try again.')).toBeInTheDocument()
@@ -159,14 +193,14 @@ describe('EditMemberDialog', () => {
   })
 
   it('does not update the name or show any success toast when the role update fails first', async () => {
-    mockUpdateRole.mockReturnValue({ error: { status: 500, data: {} } })
+    mockUpdateRole.mockResolvedValue({ error: { status: 500, data: {} } })
     const handleClose = jest.fn()
 
     render(<EditMemberDialog member={member} handleClose={handleClose} isCurrentUser />)
 
     fireEvent.change(screen.getByTestId('member-role-input'), { target: { value: 'MEMBER' } })
     fireEvent.change(screen.getByTestId('member-name-input'), { target: { value: 'Alice' } })
-    fireEvent.click(screen.getByText('Update'))
+    await clickUpdate()
 
     await waitFor(() => {
       expect(screen.getByText('An unexpected error occurred while updating the role.')).toBeInTheDocument()
@@ -179,12 +213,12 @@ describe('EditMemberDialog', () => {
   })
 
   it('surfaces the backend error message when a mutation fails', async () => {
-    mockUpdateAlias.mockReturnValue({ error: { status: 400, data: { message: 'Alias already taken' } } })
+    mockUpdateAlias.mockResolvedValue({ error: { status: 400, data: { message: 'Alias already taken' } } })
 
     render(<EditMemberDialog member={member} handleClose={jest.fn()} isCurrentUser />)
 
     fireEvent.change(screen.getByTestId('member-name-input'), { target: { value: 'Alice' } })
-    fireEvent.click(screen.getByText('Update'))
+    await clickUpdate()
 
     await waitFor(() => {
       expect(screen.getByText('Alias already taken')).toBeInTheDocument()

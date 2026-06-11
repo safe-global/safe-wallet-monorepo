@@ -145,7 +145,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
           rawValue: getMemberDisplayName(member),
           content: (
             <Stack direction="row" alignItems="center" justifyContent="left" gap={1}>
-              <MemberName member={member} />
+              <MemberName member={member} isCurrentUser={isCurrentUser} />
               {isDeclined && (
                 <Chip
                   label="Declined"

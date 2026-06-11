@@ -194,7 +194,7 @@ const EditMemberDialog = ({
               data-testid="update-btn"
               variant="contained"
               disableElevation
-              disabled={!formState.isDirty || formState.isSubmitting}
+              disabled={!formState.isDirty || !formState.isValid || formState.isSubmitting}
             >
               Update
             </Button>

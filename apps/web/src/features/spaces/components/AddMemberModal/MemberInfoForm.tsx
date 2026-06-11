@@ -18,10 +18,10 @@ const MemberInfoForm = ({
     <Stack direction="row" spacing={2} alignItems="center">
       <NameInput data-testid="member-name-input" name="name" label="Name" required disabled={disableName} />
 
+      {/* Both callers seed `role` via useForm defaultValues, so no Controller defaultValue */}
       <Controller
         control={control}
         name="role"
-        defaultValue={MemberRole.MEMBER}
         render={({ field: { value, onChange, ...field } }) => (
           <Select
             {...field}

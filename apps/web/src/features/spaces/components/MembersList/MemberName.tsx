@@ -1,15 +1,9 @@
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { Stack, Typography } from '@mui/material'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
 import { getMemberDisplayName } from '@/features/spaces'
 
-const MemberName = ({ member }: { member: MemberDto }) => {
-  const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const isCurrentUser = member.user.id === user?.id
+const MemberName = ({ member, isCurrentUser }: { member: MemberDto; isCurrentUser: boolean }) => {
   const displayName = getMemberDisplayName(member)
 
   return (
