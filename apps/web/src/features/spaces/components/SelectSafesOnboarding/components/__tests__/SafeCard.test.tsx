@@ -221,14 +221,14 @@ describe('SafeCard', () => {
     expect(getCardButton()).not.toBeDisabled()
   })
 
-  it('disables a partially-selected multi-chain safe when at limit', () => {
+  it('keeps a partially-selected multi-chain safe enabled when at limit so it can be deselected', () => {
     render(
       <FormWrapper defaultValues={{ selectedSafes: { '1:0xmulti': true } }}>
         <SafeCard safe={buildMultiChain('0xmulti', ['1', '137'])} isAtLimit />
       </FormWrapper>,
     )
 
-    expect(getCardButton()).toBeDisabled()
+    expect(getCardButton()).not.toBeDisabled()
   })
 
   it('clicking a disabled single-chain safe does not select it', () => {

@@ -356,6 +356,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           isUserAuthenticated,
           isAdminOfActiveSpace,
           spaceSafeCount,
+          isMultiChainCreation: isMultiChainDeployment,
           dispatch,
         })
         if (!result.ok) throw result.error

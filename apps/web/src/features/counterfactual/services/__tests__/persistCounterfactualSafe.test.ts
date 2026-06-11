@@ -215,6 +215,31 @@ describe('persistCounterfactualSafe', () => {
     expect(result.ok).toBe(true)
   })
 
+  it('rolls back and fails the chain on a 400 limit rejection during multi-chain creation', async () => {
+    const backendMessage = 'This space only allows a maximum of 40 safe accounts'
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') return { error: { status: 400, data: { message: backendMessage } } }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      isMultiChainCreation: true,
+      dispatch,
+    })
+
+    expect(userDeleteInitiate).toHaveBeenCalledWith({
+      deleteCounterfactualSafesDto: { safes: [{ chainId: '100', address: '0xSafe' }] },
+    })
+    expect(replayImpl).not.toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledWith(
+      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-limit', message: backendMessage }),
+    )
+    expect(result).toEqual({ ok: false, error: expect.any(Error) })
+  })
+
   it('rolls back and fails when the space POST returns a non-limit 400 (e.g. validation error)', async () => {
     const backendMessage = 'Validation failed (uuid is expected)'
     const dispatch = jest.fn((action) => {

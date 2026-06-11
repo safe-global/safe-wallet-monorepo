@@ -27,6 +27,7 @@ const SafeCard = ({ safe, isSimilar, isAtLimit = false }: SafeCardProps) => {
   const watchedSubSafeIds = subSafeIds.map((id) => `selectedSafes.${id}` as const)
   const subSafeValues = (isMultiChain ? watch(watchedSubSafeIds as readonly string[] as never) : []) as boolean[]
   const allSubSafesChecked = subSafeValues.every(Boolean) && subSafeValues.length > 0
+  const noSubSafesChecked = !subSafeValues.some(Boolean)
 
   const handleMultiChainToggle = () => {
     const newValue = !allSubSafesChecked
@@ -42,7 +43,7 @@ const SafeCard = ({ safe, isSimilar, isAtLimit = false }: SafeCardProps) => {
         ref={elementRef as React.Ref<HTMLButtonElement>}
         checked={allSubSafesChecked}
         onToggle={handleMultiChainToggle}
-        disabled={isAtLimit && !allSubSafesChecked}
+        disabled={isAtLimit && noSubSafesChecked}
         name={name}
         address={safe.address}
         safes={safes}

@@ -29,6 +29,12 @@ type PersistArgs = {
    *  the backend would reject the add; the safe is still persisted at the user
    *  level and the user is informed via a toast. */
   spaceSafeCount?: number
+  /** True when this call is one chain of a multi-chain creation batch. A space
+   *  limit rejection (400) then means the safe genuinely wasn't attached on this
+   *  chain, so we surface it as a failure (after rolling back the user-level
+   *  entry) instead of swallowing it as success. Single-create flows keep the
+   *  soft toast-and-succeed behavior. */
+  isMultiChainCreation?: boolean
   dispatch: AppDispatch
 }
 
@@ -55,6 +61,7 @@ export const persistCounterfactualSafe = async ({
   isUserAuthenticated,
   isAdminOfActiveSpace,
   spaceSafeCount,
+  isMultiChainCreation,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
   // 1. Save to backend (blocking). Unauth users fall back to local-only —
@@ -115,6 +122,20 @@ export const persistCounterfactualSafe = async ({
                 message: toSpaceError(spaceResult.error).message,
               }),
             )
+            // In a multi-chain batch the safe genuinely wasn't attached on this
+            // chain. Roll back the user-level entry and report failure so the
+            // caller doesn't record this chain as successfully created.
+            if (isMultiChainCreation) {
+              const rollbackResult = await dispatch(
+                counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
+                  deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
+                }),
+              )
+              if ('error' in rollbackResult) {
+                dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
+              }
+              return { ok: false, error: toSpaceError(spaceResult.error) }
+            }
           } else {
             // Roll back the user-level entry so the backend doesn't end up with
             // a safe that the user "created" but failed to associate with their
