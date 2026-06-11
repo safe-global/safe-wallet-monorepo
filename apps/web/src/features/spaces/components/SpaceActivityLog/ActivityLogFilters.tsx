@@ -76,7 +76,7 @@ function ActivityLogFilters({
         <Input
           id="activity-from-filter"
           type="date"
-          className="bg-card w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark]"
+          className="bg-card border-input w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark]"
           onChange={(event) => onFiltersChange({ ...filters, createdAtGte: toIsoBound(event.target.value, false) })}
         />
       </div>
@@ -88,7 +88,7 @@ function ActivityLogFilters({
         <Input
           id="activity-to-filter"
           type="date"
-          className="bg-card w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark]"
+          className="bg-card border-input w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark]"
           onChange={(event) => onFiltersChange({ ...filters, createdAtLte: toIsoBound(event.target.value, true) })}
         />
       </div>
