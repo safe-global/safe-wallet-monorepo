@@ -1,0 +1,140 @@
+import { formatJsonRpcError, formatJsonRpcResult } from '@walletconnect/jsonrpc-utils'
+import { getSdkError } from '@walletconnect/utils'
+import type { WalletKitTypes } from '@reown/walletkit'
+import type { AppDispatch, RootState } from '@/src/store'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { chainIdToHex } from '@safe-global/utils/features/walletconnect/utils'
+import { REJECTED_SIGNING_METHODS, SUPPORTED_NAMESPACE } from './constants'
+
+export type RoutedResponse = ReturnType<typeof formatJsonRpcResult> | ReturnType<typeof formatJsonRpcError>
+
+export type RouteContext = {
+  request: WalletKitTypes.SessionRequest
+  dispatch: AppDispatch
+  getState: () => RootState
+  // Active context resolved by the caller — null when no Safe is selected or its chain
+  // config hasn't loaded. The router answers account/chain queries regardless and defers
+  // the tx methods only when the active context is complete.
+  activeChain: Chain | null
+  activeSafe: SafeState | null
+  hasSigner: boolean
+}
+
+const NS = SUPPORTED_NAMESPACE + ':'
+
+// EIP-1193 4100 "Unauthorized" — returned when the active Safe has no signer attached.
+// useSessionRequestHandler keys its "No signer attached" toast off this code.
+export const NO_SIGNER_ERROR_CODE = 4100
+
+// Sentinel result the caller checks for via isDeferredResponse: the request needs UI, so
+// the caller pushes it to the slice and does NOT call respondSessionRequest yet.
+const DEFERRED_RESULT = '__DEFERRED__'
+
+const crossNamespaceError = (id: number) => formatJsonRpcError(id, getSdkError('UNAUTHORIZED_METHOD').message)
+
+const unsupportedError = (id: number) => formatJsonRpcError(id, getSdkError('UNSUPPORTED_METHODS').message)
+
+// Scope (WA-2321): the transaction-request flow only. Read-only RPC passthrough and the
+// EIP-5792 capabilities / getCallsStatus / showCallsStatus surface (plus
+// wallet_switchEthereumChain) are wired in WA-2322 — they slot in as extra branches here
+// without reworking this router or its RouteContext.
+export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResponse> => {
+  const { request, activeChain, activeSafe, hasSigner } = ctx
+  const { id, params } = request
+  const { request: rpc, chainId } = params
+  const { method } = rpc
+  const rpcParams = (rpc.params as unknown[]) ?? []
+
+  if (!chainId.startsWith(NS)) {
+    return crossNamespaceError(id)
+  }
+
+  // Methods we explicitly reject without UI (message signing isn't supported on mobile yet).
+  // dApps like CowSwap fire these in parallel with their tx request; the handler surfaces a
+  // toast so the rejection is explained rather than showing an opaque dApp-side error.
+  if ((REJECTED_SIGNING_METHODS as readonly string[]).includes(method)) {
+    return unsupportedError(id)
+  }
+
+  // Local-answerable methods — a dApp needs these to establish the session before it can
+  // send a transaction.
+  if (method === 'eth_accounts') {
+    return formatJsonRpcResult(id, activeSafe ? [activeSafe.address.value] : [])
+  }
+  if (method === 'eth_chainId') {
+    return formatJsonRpcResult(id, activeChain ? chainIdToHex(activeChain.chainId) : '0x0')
+  }
+  if (method === 'net_version') {
+    return formatJsonRpcResult(id, activeChain?.chainId ?? '0')
+  }
+
+  // Transaction methods — the handler pushes the request to the slice so RequestSheetHost
+  // renders the sheet. The sheet sends the response when the user reviews+signs or rejects.
+  if (method === 'eth_sendTransaction' || method === 'wallet_sendCalls') {
+    if (!activeSafe) {
+      return formatJsonRpcError(id, { code: -32603, message: 'No active Safe' })
+    }
+    if (!hasSigner) {
+      return formatJsonRpcError(id, { code: NO_SIGNER_ERROR_CODE, message: 'No signer attached to this Safe' })
+    }
+    // Both tx methods need the active chain config (downstream compose uses it to look up
+    // CreateCall deployments and to verify the SDK is bound to the same chain). Fail
+    // synchronously so the dApp sees a structured error instead of an opaque compose
+    // failure later.
+    if (!activeChain) {
+      return formatJsonRpcError(id, { code: -32603, message: 'No active chain' })
+    }
+    // The dApp's session can be bound to a chain the active Safe is no longer on (the user
+    // switched networks after connecting). We can only sign on the active chain, so reject
+    // here rather than composing on the wrong chain; useSessionRequestHandler surfaces a
+    // toast telling the user which network to switch back to. `chainId` is the dApp's
+    // session chain.
+    if (chainId !== `${NS}${activeChain.chainId}`) {
+      return formatJsonRpcError(id, getSdkError('UNSUPPORTED_CHAINS'))
+    }
+    // wallet_sendCalls — validate the bundle envelope up front (mirrors apps/web/.../
+    // safe-wallet-provider/index.ts wallet_sendCalls). chainId / from mismatches and
+    // malformed calls fail synchronously rather than burning a sheet + compose pass.
+    if (method === 'wallet_sendCalls') {
+      const [bundle] = rpcParams as [
+        | {
+            chainId?: `0x${string}`
+            from?: `0x${string}`
+            calls?: { to?: string; value?: string; data?: string }[]
+          }
+        | undefined,
+      ]
+      if (!bundle) {
+        return formatJsonRpcError(id, { code: -32602, message: 'Invalid call parameters.' })
+      }
+      const expectedChainHex = chainIdToHex(activeChain.chainId)
+      if (bundle.chainId !== expectedChainHex) {
+        return formatJsonRpcError(id, {
+          code: -32602,
+          message: `Safe is not on chain ${activeChain.chainId}`,
+        })
+      }
+      if (bundle.from !== activeSafe.address.value) {
+        return formatJsonRpcError(id, { code: -32602, message: 'Invalid from address' })
+      }
+      // Per-call shape (web's mapping rules):
+      //   - all-fields-empty → invalid
+      //   - no-to + only data → contract deployment (allowed; composeSafeTxDraft routes via CreateCall)
+      //   - no-to + (value or no-data) → invalid
+      for (const call of bundle.calls ?? []) {
+        if (!call.to) {
+          const isDeployment = !call.value && !!call.data
+          if (!isDeployment) {
+            return formatJsonRpcError(id, { code: -32602, message: 'Invalid call parameters.' })
+          }
+        }
+      }
+    }
+    return { id, jsonrpc: '2.0', result: DEFERRED_RESULT } as unknown as RoutedResponse
+  }
+
+  return unsupportedError(id)
+}
+
+export const isDeferredResponse = (r: RoutedResponse): boolean => 'result' in r && r.result === DEFERRED_RESULT
