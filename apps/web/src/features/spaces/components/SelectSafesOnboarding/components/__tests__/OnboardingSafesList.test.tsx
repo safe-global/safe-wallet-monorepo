@@ -6,8 +6,16 @@ import OnboardingSafesList from '../OnboardingSafesList'
 // Mock child components to keep tests focused on list rendering logic
 jest.mock('../SafeCard', () => ({
   __esModule: true,
-  default: ({ safe, isSimilar }: { safe: SafeItem | MultiChainSafeItem; isSimilar?: boolean }) => (
-    <div data-testid={`safe-card-${safe.address}`} data-similar={isSimilar}>
+  default: ({
+    safe,
+    isSimilar,
+    isAtLimit,
+  }: {
+    safe: SafeItem | MultiChainSafeItem
+    isSimilar?: boolean
+    isAtLimit?: boolean
+  }) => (
+    <div data-testid={`safe-card-${safe.address}`} data-similar={isSimilar} data-at-limit={isAtLimit}>
       {safe.address}
     </div>
   ),
@@ -86,6 +94,28 @@ describe('OnboardingSafesList', () => {
     )
 
     expect(queryByTestId('similar-address-alert')).not.toBeInTheDocument()
+  })
+
+  it('passes isAtLimit down to safe cards in both sections', () => {
+    const trusted = [buildSafeItem('0xTrusted')]
+    const owned = [buildSafeItem('0xOwned')]
+
+    const { getByTestId } = render(
+      <OnboardingSafesList trustedSafes={trusted} ownedSafes={owned} similarAddresses={new Set()} isAtLimit />,
+    )
+
+    expect(getByTestId('safe-card-0xTrusted').dataset.atLimit).toBe('true')
+    expect(getByTestId('safe-card-0xOwned').dataset.atLimit).toBe('true')
+  })
+
+  it('defaults isAtLimit to false on safe cards when not provided', () => {
+    const trusted = [buildSafeItem('0xTrusted')]
+
+    const { getByTestId } = render(
+      <OnboardingSafesList trustedSafes={trusted} ownedSafes={[]} similarAddresses={new Set()} />,
+    )
+
+    expect(getByTestId('safe-card-0xTrusted').dataset.atLimit).toBe('false')
   })
 
   it('passes isSimilar=true to SafeCard for flagged addresses', () => {

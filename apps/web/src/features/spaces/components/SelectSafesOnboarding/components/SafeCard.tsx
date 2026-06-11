@@ -12,9 +12,10 @@ const getMultiChainSafeId = (mcSafe: MultiChainSafeItem) => `${MULTICHAIN_SAFE_K
 interface SafeCardProps {
   safe: SafeItem | MultiChainSafeItem
   isSimilar?: boolean
+  isAtLimit?: boolean
 }
 
-const SafeCard = ({ safe, isSimilar }: SafeCardProps) => {
+const SafeCard = ({ safe, isSimilar, isAtLimit = false }: SafeCardProps) => {
   const isMultiChain = isMultiChainSafeItem(safe)
   const { setValue, watch, control } = useFormContext<AddAccountsFormValues>()
   const { name, fiatValue, threshold, ownersCount, elementRef, isUndeployed, isActivating } = useSafeCardData(safe)
@@ -41,6 +42,7 @@ const SafeCard = ({ safe, isSimilar }: SafeCardProps) => {
         ref={elementRef as React.Ref<HTMLButtonElement>}
         checked={allSubSafesChecked}
         onToggle={handleMultiChainToggle}
+        disabled={isAtLimit && !allSubSafesChecked}
         name={name}
         address={safe.address}
         safes={safes}
@@ -64,6 +66,7 @@ const SafeCard = ({ safe, isSimilar }: SafeCardProps) => {
           checked={Boolean(field.value)}
           onToggle={() => field.onChange(!field.value)}
           onCheckedChange={(checked) => field.onChange(checked)}
+          disabled={isAtLimit && !field.value}
           name={name}
           address={safe.address}
           safes={safes}

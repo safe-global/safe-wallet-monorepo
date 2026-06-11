@@ -446,7 +446,7 @@ const AddAccounts = ({
                       ) : (
                         <>
                           {isAtLimit && (
-                            <Typography variant="paragraph" color="muted" className="text-xs pb-1">
+                            <Typography variant="paragraph" className="text-destructive text-xs pb-1">
                               Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
                             </Typography>
                           )}
@@ -454,6 +454,7 @@ const AddAccounts = ({
                             trustedSafes={visibleTrusted}
                             ownedSafes={visibleOwned}
                             similarAddresses={similarAddresses}
+                            isAtLimit={isAtLimit}
                             trustedSelectAll={{
                               state: trustedSelection.state,
                               count: trustedSelection.selectedCount,
@@ -489,7 +490,7 @@ const AddAccounts = ({
 
                   <div className="flex shrink-0 flex-col gap-2">
                     <Track {...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY_MODAL}>
-                      <AddManually handleAddSafe={handleAddSafe} />
+                      <AddManually handleAddSafe={handleAddSafe} disabled={isAtLimit} />
                     </Track>
 
                     <div className="flex shrink-0 flex-col gap-2">
