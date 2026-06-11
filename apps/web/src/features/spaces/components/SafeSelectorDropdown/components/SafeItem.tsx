@@ -3,6 +3,7 @@ import { cn } from '@/utils/cn'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeInfoDisplay from './SafeInfoDisplay'
 import BalanceDisplay from './BalanceDisplay'
+import RowEndColumn from './RowEndColumn'
 import ChainLogo from './ChainLogo'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData } from '../types'
@@ -36,7 +37,9 @@ const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading
         ))}
       </div>
       {isUndeployed ? (
-        <NotActivatedBadge isActivating={isActivating} className="shrink-0" />
+        <RowEndColumn>
+          <NotActivatedBadge isActivating={isActivating} />
+        </RowEndColumn>
       ) : (
         <BalanceDisplay balance={<FiatValue value={balance} />} isLoading={isLoading} />
       )}
