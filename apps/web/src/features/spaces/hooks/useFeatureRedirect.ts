@@ -14,7 +14,10 @@ const useFeatureRedirect = (feature: FEATURES, redirectRoute: string): void => {
 
   useEffect(() => {
     if (isEnabled === false) {
-      router.push({ pathname: redirectRoute })
+      // Keep the workspace context — without spaceId the spaces index bounces
+      // the user out to /welcome/spaces.
+      const spaceId = router.query.spaceId
+      router.push({ pathname: redirectRoute, query: spaceId ? { spaceId } : undefined })
     }
   }, [isEnabled, redirectRoute, router])
 }
