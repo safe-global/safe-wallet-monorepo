@@ -268,4 +268,29 @@ describe('RequestSheetHost', () => {
     expect(mockRejectSession).not.toHaveBeenCalled()
     expect(mockRespondSessionRequest).not.toHaveBeenCalled()
   })
+
+  it('renders the Reject/Review footer for a tx request and wires Reject to USER_REJECTED', async () => {
+    const store = createTestStore({
+      activeSafe: { address: safeAddress, chainId: '1' },
+      [walletKitSliceName]: {
+        sessions: { 'topic-1': { peer: { metadata: { name: 'Uniswap', url: 'https://uniswap.org' } } } },
+        pending: [
+          { kind: 'request', id: 4, topic: 'topic-1', chainId: 'eip155:1', method: 'eth_sendTransaction', params: {} },
+        ],
+        outstandingRequests: {},
+      },
+    } as never)
+    const { getByTestId } = renderWithStore(<RequestSheetHost walletKit={fakeWalletKit} />, store)
+
+    expect(getByTestId('wc-tx-review')).toBeTruthy()
+    fireEvent.press(getByTestId('wc-tx-reject'))
+
+    await waitFor(() =>
+      expect(mockRespondSessionRequest).toHaveBeenCalledWith({
+        topic: 'topic-1',
+        response: formatJsonRpcError(4, getSdkError('USER_REJECTED').message),
+      }),
+    )
+    await waitFor(() => expect(getPending(store)).toHaveLength(0))
+  })
 })
