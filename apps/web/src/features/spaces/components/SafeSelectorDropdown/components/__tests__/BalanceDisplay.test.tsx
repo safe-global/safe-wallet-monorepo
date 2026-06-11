@@ -11,6 +11,12 @@ describe('BalanceDisplay', () => {
     expect(querySkeleton(container)).not.toBeInTheDocument()
   })
 
+  it('renders the balance in the shared row-end column (same trailing slot as the activation status)', () => {
+    render(<BalanceDisplay balance="$ 1,234" />)
+
+    expect(screen.getByTestId('row-end-column')).toContainElement(screen.getByText('$ 1,234'))
+  })
+
   it('shows a skeleton while loading', () => {
     const { container } = render(<BalanceDisplay balance="$ 1,234" isLoading />)
 
