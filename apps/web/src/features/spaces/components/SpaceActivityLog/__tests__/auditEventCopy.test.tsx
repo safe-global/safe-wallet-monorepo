@@ -84,6 +84,7 @@ describe('getAuditEventDescription', () => {
       'left the space (account deleted)',
     ],
     ['SAFE_ADDED', { eventType: 'SAFE_ADDED' as const, payload: { safes: [{}, {}] } }, 'added 2 Safe accounts'],
+    ['SAFE_ADDED (missing safes)', { eventType: 'SAFE_ADDED' as const, payload: {} }, 'added Safe accounts'],
     ['SAFE_REMOVED', { eventType: 'SAFE_REMOVED' as const, payload: { safes: [{}] } }, 'removed 1 Safe account'],
     [
       'ADDRESS_BOOK_UPSERTED (created only)',

@@ -1,4 +1,4 @@
-import { endOfDay, isValid, startOfDay } from 'date-fns'
+import { endOfDay, format, isValid, startOfDay } from 'date-fns'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -26,6 +26,13 @@ function toIsoBound(dateValue: string, isUpperBound: boolean): string | undefine
   const date = new Date(`${dateValue}T00:00:00`)
   if (!isValid(date)) return undefined
   return (isUpperBound ? endOfDay(date) : startOfDay(date)).toISOString()
+}
+
+/** ISO bound → the `YYYY-MM-DD` (local) value a date input expects. */
+function toDateInputValue(isoBound: string | undefined): string {
+  if (!isoBound) return ''
+  const date = new Date(isoBound)
+  return isValid(date) ? format(date, 'yyyy-MM-dd') : ''
 }
 
 function ActivityLogFilters({
@@ -77,6 +84,7 @@ function ActivityLogFilters({
           id="activity-from-filter"
           type="date"
           className="bg-card border-input w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark]"
+          value={toDateInputValue(filters.createdAtGte)}
           onChange={(event) => onFiltersChange({ ...filters, createdAtGte: toIsoBound(event.target.value, false) })}
         />
       </div>
@@ -89,6 +97,7 @@ function ActivityLogFilters({
           id="activity-to-filter"
           type="date"
           className="bg-card border-input w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark]"
+          value={toDateInputValue(filters.createdAtLte)}
           onChange={(event) => onFiltersChange({ ...filters, createdAtLte: toIsoBound(event.target.value, true) })}
         />
       </div>

@@ -41,11 +41,17 @@ describe('ActivityLogFilters', () => {
     expect(filters.createdAtGte).toBeUndefined()
   })
 
-  it('clears a date bound when its input is emptied', () => {
+  it('shows the controlled value and clears the bound when the input is emptied', () => {
     const onFiltersChange = jest.fn()
-    render(<ActivityLogFilters filters={EMPTY_FILTERS} onFiltersChange={onFiltersChange} />)
+    render(
+      <ActivityLogFilters
+        filters={{ createdAtGte: new Date('2026-06-01T00:00:00').toISOString() }}
+        onFiltersChange={onFiltersChange}
+      />,
+    )
 
-    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-06-01' } })
+    expect(screen.getByLabelText('From')).toHaveValue('2026-06-01')
+
     fireEvent.change(screen.getByLabelText('From'), { target: { value: '' } })
 
     const [filters] = onFiltersChange.mock.lastCall

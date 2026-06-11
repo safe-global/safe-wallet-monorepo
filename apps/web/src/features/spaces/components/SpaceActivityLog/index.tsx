@@ -95,11 +95,12 @@ function SpaceActivityLog({ eventTypes, showFilters = false }: SpaceActivityLogP
   }, [])
 
   const lastPage = extraCursors.length > 0 ? extraPages[extraCursors.length - 1] : firstPage
+  const isLoadingMore = extraCursors.length > 0 && !extraPages[extraCursors.length - 1]
   const nextCursor = getCursor(lastPage?.next)
 
   const onLoadMore = () => {
     if (nextCursor) {
-      setExtraCursors((prev) => prev.concat(nextCursor))
+      setExtraCursors((prev) => (prev[prev.length - 1] === nextCursor ? prev : prev.concat(nextCursor)))
     }
   }
 
@@ -126,7 +127,12 @@ function SpaceActivityLog({ eventTypes, showFilters = false }: SpaceActivityLogP
       {showFilters && <ActivityLogFilters filters={filters} onFiltersChange={setFilters} />}
 
       {extraCursors.map((cursor, index) => (
-        <AuditLogPageFetcher key={cursor} args={{ ...queryArgs, cursor }} pageIndex={index} onPage={onPage} />
+        <AuditLogPageFetcher
+          key={`${index}:${cursor}`}
+          args={{ ...queryArgs, cursor }}
+          pageIndex={index}
+          onPage={onPage}
+        />
       ))}
 
       <div className="bg-card rounded-lg border px-4">
@@ -144,10 +150,16 @@ function SpaceActivityLog({ eventTypes, showFilters = false }: SpaceActivityLogP
               ))}
             </div>
 
-            {nextCursor && (
+            {(nextCursor || isLoadingMore) && (
               <div className="border-t py-3 text-center">
-                <Button data-testid="activity-log-load-more" variant="outline" size="sm" onClick={onLoadMore}>
-                  Load more
+                <Button
+                  data-testid="activity-log-load-more"
+                  variant="outline"
+                  size="sm"
+                  disabled={isLoadingMore}
+                  onClick={onLoadMore}
+                >
+                  {isLoadingMore ? 'Loading…' : 'Load more'}
                 </Button>
               </div>
             )}

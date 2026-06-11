@@ -134,10 +134,14 @@ export function getAuditEventDescription(
       )
     case 'MEMBER_LEFT':
       return payload.accountDeleted === true ? 'left the space (account deleted)' : 'left the space'
-    case 'SAFE_ADDED':
-      return `added ${pluralize(Math.max(asCount(payload.safes), 1), 'Safe account')}`
-    case 'SAFE_REMOVED':
-      return `removed ${pluralize(Math.max(asCount(payload.safes), 1), 'Safe account')}`
+    case 'SAFE_ADDED': {
+      const count = asCount(payload.safes)
+      return count > 0 ? `added ${pluralize(count, 'Safe account')}` : 'added Safe accounts'
+    }
+    case 'SAFE_REMOVED': {
+      const count = asCount(payload.safes)
+      return count > 0 ? `removed ${pluralize(count, 'Safe account')}` : 'removed Safe accounts'
+    }
     case 'ADDRESS_BOOK_UPSERTED': {
       const created = asContacts(payload.created)
       const updated = asContacts(payload.updated)
