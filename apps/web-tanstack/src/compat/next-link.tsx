@@ -10,6 +10,7 @@ import { forwardRef, cloneElement, isValidElement } from 'react'
 import type { AnchorHTMLAttributes, MouseEvent, ReactElement, ReactNode } from 'react'
 import type { UrlObject } from 'url'
 import { useNavigate } from '@tanstack/react-router'
+import { toHref, toNavigateOptions } from './next-url'
 
 export type LinkProps = {
   href: string | UrlObject
@@ -23,25 +24,6 @@ export type LinkProps = {
   locale?: string | false
   children?: ReactNode
 } & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
-
-function hrefToString(href: LinkProps['href']): string {
-  if (typeof href === 'string') return href
-  const pathname = href.pathname ?? '/'
-  let qs = ''
-  if (typeof href.query === 'string') {
-    qs = href.query
-  } else if (href.query) {
-    const params = new URLSearchParams()
-    for (const [k, v] of Object.entries(href.query)) {
-      if (v == null) continue
-      if (Array.isArray(v)) v.forEach((vv) => params.append(k, String(vv)))
-      else params.append(k, String(v))
-    }
-    qs = params.toString()
-  }
-  const hash = href.hash ? `#${href.hash.replace(/^#/, '')}` : ''
-  return `${pathname}${qs ? `?${qs}` : ''}${hash}`
-}
 
 const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
   {
@@ -62,7 +44,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
   ref,
 ) {
   const navigate = useNavigate()
-  const hrefStr = hrefToString(href)
+  const hrefStr = toHref(href)
 
   const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(event)
@@ -71,7 +53,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
     if (/^https?:|^mailto:|^tel:/i.test(hrefStr)) return
     event.preventDefault()
-    void navigate({ to: hrefStr, replace })
+    void navigate({ ...toNavigateOptions(href), replace })
   }
 
   if (legacyBehavior && isValidElement(children)) {
