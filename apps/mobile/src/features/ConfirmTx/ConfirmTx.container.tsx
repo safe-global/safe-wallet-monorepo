@@ -17,6 +17,7 @@ import { useTransactionProcessingState } from '@/src/hooks/useTransactionProcess
 import { useFocusEffect, useRouter } from 'expo-router'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { selectDappMetadataByTxHash } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
+import { WcRejectOnBack } from '@/src/features/WalletConnect/Wallet/components/WcRejectOnBack'
 import { DappOriginProvider } from './components/DappOriginContext'
 
 const getHeaderText = (isExecuting: boolean, isSigning: boolean): string => {
@@ -87,6 +88,7 @@ function ConfirmTxContainer() {
   return (
     <DappOriginProvider value={dappOrigin}>
       <View flex={1}>
+        <WcRejectOnBack safeTxHash={txId} />
         <ScrollView
           onScroll={handleScroll}
           refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
