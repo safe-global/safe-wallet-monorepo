@@ -4,7 +4,8 @@ import { FormProvider, useForm, useFormContext } from 'react-hook-form'
 import type { AllSafeItems, MultiChainSafeItem, SafeItem } from '@/hooks/safes'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../../components/SelectSafesOnboarding/constants'
 
-jest.mock('../../components/Sidebar/constants', () => ({
+jest.mock('../../constants', () => ({
+  ...jest.requireActual('../../constants'),
   SAFE_ACCOUNTS_LIMIT: 3,
 }))
 
@@ -77,6 +78,34 @@ describe('useSelectAll', () => {
     expect(result.current.isAtLimit).toBe(true)
     expect(result.current.trustedSelection.disabled).toBe(false)
     expect(result.current.ownedSelection.disabled).toBe(true)
+  })
+
+  it('renders a section with selections as checked (state="all") once at the limit, even if not all its safes are selected', () => {
+    const trusted = [makeSafe('1', '0xA'), makeSafe('1', '0xB'), makeSafe('1', '0xE')]
+    const owned = [makeSafe('10', '0xC'), makeSafe('10', '0xD')]
+
+    // 3 selected total (= limit), split so owned has one selected but not all
+    const { result } = renderUseSelectAll(trusted, owned, { '1:0xA': true, '1:0xB': true, '10:0xC': true })
+
+    expect(result.current.isAtLimit).toBe(true)
+    // owned has 1/2 selected but at the limit it presents as fully checked so the next click deselects
+    expect(result.current.ownedSelection.state).toBe('all')
+    expect(result.current.ownedSelection.disabled).toBe(false)
+    // trusted has 2/3 selected, also presented as checked
+    expect(result.current.trustedSelection.state).toBe('all')
+  })
+
+  it('excludes the multi-chain parent key from the limit count', () => {
+    const trusted = [makeMulti('0xC', ['1', '137'])]
+
+    // 2 real sub-safes + 1 parent key = limit is 3; parent must not count, so this is below the cap
+    const { result } = renderUseSelectAll(trusted, [], {
+      '1:0xC': true,
+      '137:0xC': true,
+      [`${MULTICHAIN_SAFE_KEY_PREFIX}0xC`]: true,
+    })
+
+    expect(result.current.isAtLimit).toBe(false)
   })
 
   it('keeps both sections enabled while below the global limit', () => {

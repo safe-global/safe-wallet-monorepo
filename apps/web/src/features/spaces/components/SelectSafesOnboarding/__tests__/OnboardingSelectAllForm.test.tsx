@@ -6,7 +6,8 @@ import { useSelectAll } from '@/features/spaces/hooks/useSelectAll'
 import type { AddAccountsFormValues } from '@/features/spaces/hooks/useSelectAll.types'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 
-jest.mock('@/features/spaces/components/Sidebar/constants', () => ({
+jest.mock('@/features/spaces/constants', () => ({
+  ...jest.requireActual('@/features/spaces/constants'),
   SAFE_ACCOUNTS_LIMIT: 10,
 }))
 
