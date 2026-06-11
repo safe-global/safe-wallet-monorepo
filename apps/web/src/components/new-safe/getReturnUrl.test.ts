@@ -1,5 +1,6 @@
+import { renderHook } from '@/tests/test-utils'
 import { AppRoutes } from '@/config/routes'
-import { getNewSafeReturnUrl } from './getReturnUrl'
+import { getNewSafeReturnUrl, useNewSafeNextParam } from './getReturnUrl'
 
 describe('getNewSafeReturnUrl', () => {
   it('returns the parsed return URL when a valid `next` is provided', () => {
@@ -36,5 +37,23 @@ describe('getNewSafeReturnUrl', () => {
 
   it('falls back when `next` is not a string (e.g. a query-param array)', () => {
     expect(getNewSafeReturnUrl(['/spaces', '/welcome'])).toBe(AppRoutes.welcome.spaces)
+  })
+})
+
+describe('useNewSafeNextParam', () => {
+  it('builds the `next` value from the current route (pathname + query)', () => {
+    const { result } = renderHook(() => useNewSafeNextParam(), {
+      routerProps: { pathname: '/welcome/accounts', query: { foo: 'bar' } },
+    })
+
+    expect(result.current).toBe('/welcome/accounts?foo=bar')
+  })
+
+  it('round-trips through getNewSafeReturnUrl back to the originating page', () => {
+    const { result } = renderHook(() => useNewSafeNextParam(), {
+      routerProps: { pathname: '/welcome/accounts', query: {} },
+    })
+
+    expect(getNewSafeReturnUrl(result.current)).toEqual({ pathname: '/welcome/accounts', query: {} })
   })
 })
