@@ -4,6 +4,9 @@ import type { ReactNode } from 'react'
 import SpacesList from '../index'
 import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import { useIsClassicViewFeatureEnabled } from '@/hooks/useClassicView'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 
 const mockUseIsRequireLoginEnabled = useIsRequireLoginEnabled as jest.Mock
 const mockUseIsClassicViewFeatureEnabled = useIsClassicViewFeatureEnabled as jest.Mock
@@ -94,7 +97,14 @@ jest.mock('../../SpaceInfoModal', () => ({
 
 jest.mock('next/link', () => ({
   __esModule: true,
-  default: ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a>,
+  // Spread the rest of the props: Button's `render` prop forwards data-testid,
+  // className and onClick onto the anchor — dropping them hides the button
+  // from queries and swallows click tracking.
+  default: ({ children, href, ...props }: { children: ReactNode; href: string }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -281,6 +291,45 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
     expect(screen.queryByTestId('classic-view-link')).not.toBeInTheDocument()
+  })
+
+  // The Create workspace button must be reachable outside the require-login
+  // feature flag too: the classic tabbed layout shows it next to the
+  // Accounts/Workspaces tabs when the user is signed in and has spaces.
+  it('renders the Create workspace button in the classic tabbed layout when signed in with active spaces', async () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(false)
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [{ uuid: 'uuid-1', name: 'Space 1' }],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByTestId('accounts-nav')).toBeInTheDocument()
+    const button = screen.getByTestId('create-space-button')
+    expect(button).toBeInTheDocument()
+
+    await userEvent.click(button)
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
+      entry_point: WorkspaceCreateEntryPoint.WELCOME,
+    })
+  })
+
+  it('does not render the Create workspace button in the classic tabbed layout when the user has no active spaces', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(false)
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    // The header button is absent; only the empty-state CTA inside the
+    // No-workspaces card renders (it lives outside the spacesHeader).
+    expect(screen.getByText(/no workspaces found/i)).toBeInTheDocument()
+    expect(screen.getAllByTestId('create-space-button')).toHaveLength(1)
   })
 
   it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {

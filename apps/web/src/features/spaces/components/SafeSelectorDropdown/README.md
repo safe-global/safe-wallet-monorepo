@@ -57,7 +57,7 @@ The component uses a layered architecture with pure presentational components:
 SafeSelectorDropdown/
 ├── components/
 │   ├── SafeInfoDisplay.tsx         # Avatar + name/address
-│   ├── BalanceDisplay.tsx          # Balance + threshold badge
+│   ├── BalanceDisplay.tsx          # Balance (threshold badge lives on the avatar, see ThresholdBadge)
 │   ├── ChainLogo.tsx               # Chain logo wrapper
 │   ├── SafeItem.tsx                # Single safe item (atomic)
 │   └── SafeDropdownContainer.tsx   # List container
@@ -72,7 +72,7 @@ SafeSelectorDropdown/
 - **`SafeDropdownContainer`**: Renders list of items with filtering
 - **`SafeItem`**: Atomic item component (avatar, name, chains, balance, threshold)
 - **`SafeInfoDisplay`**: Reusable avatar + name/address display
-- **`BalanceDisplay`**: Reusable balance + threshold badge
+- **`BalanceDisplay`**: Reusable fiat balance (the threshold/owners badge renders on the avatar via `ThresholdBadge`)
 - **`ChainLogo`**: Reusable chain logo wrapper
 
 All components are pure and stateless, accepting pre-formatted data via props.

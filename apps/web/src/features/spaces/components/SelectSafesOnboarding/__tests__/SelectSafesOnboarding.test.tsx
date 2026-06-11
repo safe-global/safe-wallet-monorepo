@@ -1,10 +1,14 @@
 import { render, screen } from '@/tests/test-utils'
 import SelectSafesOnboarding from '../index'
 import type { AllSafeItems } from '@/hooks/safes'
+import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
 
 jest.mock('../../Sidebar/constants', () => ({
   SAFE_ACCOUNTS_LIMIT: 10,
 }))
+
+jest.mock('@/hooks/useIsSurveyEnabled')
+const mockedUseIsSurveyEnabled = useIsSurveyEnabled as jest.MockedFunction<typeof useIsSurveyEnabled>
 
 // Captured props from OnboardingSafesList renders
 let capturedListProps: Record<string, unknown> = {}
@@ -180,5 +184,29 @@ describe('SelectSafesOnboarding — wallet connection state', () => {
     render(<SelectSafesOnboarding />)
 
     expect(screen.getByTestId('select-safes-skip-link')).toBeInTheDocument()
+  })
+})
+
+describe('SelectSafesOnboarding — step counter reflects the survey flag', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    capturedListProps = {}
+    mockTrustedSafes = []
+    mockOwnedSafes = []
+    mockWalletValue = { address: '0xWallet' }
+  })
+
+  // Regression guard for WA-2537: the survey is the optional last step, so when
+  // SPACE_ONBOARDING_SURVEY is off the always-rendered steps must total 3, not 4.
+  it('shows 3 total steps when the survey is disabled', () => {
+    mockedUseIsSurveyEnabled.mockReturnValue(false)
+    render(<SelectSafesOnboarding />)
+    expect(screen.getByRole('group', { name: 'Step 2 of 3' })).toBeInTheDocument()
+  })
+
+  it('shows 4 total steps when the survey is enabled', () => {
+    mockedUseIsSurveyEnabled.mockReturnValue(true)
+    render(<SelectSafesOnboarding />)
+    expect(screen.getByRole('group', { name: 'Step 2 of 4' })).toBeInTheDocument()
   })
 })

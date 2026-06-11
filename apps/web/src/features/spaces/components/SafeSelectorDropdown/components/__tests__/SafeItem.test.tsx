@@ -68,4 +68,10 @@ describe('SafeItem undeployed state', () => {
     expect(screen.getByTestId('balance-display')).toBeInTheDocument()
     expect(screen.queryByTestId('not-activated-badge')).not.toBeInTheDocument()
   })
+
+  it('renders the activation status in the shared row-end column (same trailing slot as the balance)', () => {
+    render(<SafeItem {...createItem(makeChain({ isUndeployed: true }))} />)
+
+    expect(screen.getByTestId('row-end-column')).toContainElement(screen.getByTestId('not-activated-badge'))
+  })
 })

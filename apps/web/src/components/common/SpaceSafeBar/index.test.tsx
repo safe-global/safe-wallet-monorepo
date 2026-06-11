@@ -18,6 +18,10 @@ jest.mock('next/navigation', () => ({
   usePathname: jest.fn(() => '/home'),
 }))
 
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(() => ({ pathname: '/home' })),
+}))
+
 jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: jest.fn(() => false),
 }))
@@ -119,6 +123,7 @@ jest.mock('./SpaceBackLink', () => {
 })
 
 import { usePathname } from 'next/navigation'
+import { useRouter } from 'next/router'
 import { useIsQualifiedSafe } from '@/features/spaces'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -126,6 +131,7 @@ import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 
 const mockUsePathname = usePathname as jest.Mock
+const mockUseRouter = useRouter as jest.Mock
 const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 const mockUseSafeAddressFromUrl = useSafeAddressFromUrl as jest.Mock
 const mockUseSpaceSafeSelectorItems = useSpaceSafeSelectorItems as jest.Mock
@@ -136,6 +142,7 @@ describe('SpaceSafeBar', () => {
   beforeEach(() => {
     jest.resetAllMocks()
     mockUsePathname.mockReturnValue('/home')
+    mockUseRouter.mockReturnValue({ pathname: '/home' })
     mockUseSafeAddressFromUrl.mockReturnValue('0xSafe1')
     mockUseSpaceSafeSelectorItems.mockReturnValue({
       items: mockItems,
@@ -319,6 +326,7 @@ describe('SpaceSafeBar', () => {
     'renders nothing on hidden route %s',
     (pathname) => {
       mockUsePathname.mockReturnValue(pathname)
+      mockUseRouter.mockReturnValue({ pathname })
 
       const { queryByTestId } = render(<SpaceSafeBar />)
       expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()
@@ -359,10 +367,34 @@ describe('SpaceSafeBar', () => {
     expect(getByTestId('safe-selector-dropdown')).toBeInTheDocument()
   })
 
+  it.each([['/404'], ['/403'], ['/_offline']])('renders nothing on error route %s', (pathname) => {
+    mockUsePathname.mockReturnValue(pathname)
+    mockUseRouter.mockReturnValue({ pathname })
+
+    const { queryByTestId } = render(<SpaceSafeBar />)
+    expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()
+    expect(queryByTestId('space-chain-selector')).not.toBeInTheDocument()
+    expect(queryByTestId('nested-safes-button')).not.toBeInTheDocument()
+  })
+
+  it.each([['/ho'], ['/some/unmatched/url']])(
+    'renders nothing on unmatched URL %s where the matched route is /404',
+    (browserPathname) => {
+      mockUsePathname.mockReturnValue(browserPathname)
+      mockUseRouter.mockReturnValue({ pathname: '/404' })
+
+      const { queryByTestId } = render(<SpaceSafeBar />)
+      expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()
+      expect(queryByTestId('space-chain-selector')).not.toBeInTheDocument()
+      expect(queryByTestId('nested-safes-button')).not.toBeInTheDocument()
+    },
+  )
+
   it.each([['/terms'], ['/privacy'], ['/licenses'], ['/imprint'], ['/cookie']])(
     'renders nothing on static page %s',
     (pathname) => {
       mockUsePathname.mockReturnValue(pathname)
+      mockUseRouter.mockReturnValue({ pathname })
 
       const { queryByTestId } = render(<SpaceSafeBar />)
       expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()

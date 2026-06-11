@@ -1,4 +1,5 @@
 import { createRouter } from '@tanstack/react-router'
+import { parseNextQuery, stringifyNextQuery } from './compat/next-url'
 import { Route as RootRoute } from './routes/__root'
 
 // Existing
@@ -162,6 +163,12 @@ export const router = createRouter({
   // trailing slash, matching the Next.js semantics 175 reused
   // call-sites expect.
   trailingSlash: 'never',
+  // Next-style search-param semantics for reused apps/web code: values stay
+  // plain strings (TanStack's default JSON-parses `?x=true` into a boolean)
+  // and string[] round-trips as repeated keys (`?k=a&k=b`) — the same shape
+  // the next/router shim exposes as `query`.
+  parseSearch: parseNextQuery,
+  stringifySearch: stringifyNextQuery,
 })
 
 declare module '@tanstack/react-router' {

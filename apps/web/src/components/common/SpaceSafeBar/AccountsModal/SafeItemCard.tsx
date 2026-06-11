@@ -139,7 +139,7 @@ const SafeItemCard = ({
     <div
       ref={elementRef}
       data-testid="safe-item-card"
-      className="flex items-center gap-1 rounded-md border border-border bg-card px-3 py-3 mb-2 hover:bg-muted/30 transition-colors"
+      className="flex items-center gap-1 rounded-lg px-3 py-3 mb-1 hover:bg-muted/30 transition-colors"
     >
       {href ? (
         <Link href={href} onClick={handleOpenSafeNav} className={mainContentClasses}>

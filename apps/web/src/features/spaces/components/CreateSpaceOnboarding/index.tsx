@@ -17,16 +17,17 @@ import {
 import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
 import { flattenSafeItems } from '@/hooks/safes'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { useOnboardingStepCount } from '@/features/spaces/hooks/useOnboardingStepCount'
 import { AppRoutes } from '@/config/routes'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 
 const ONBOARDING_STEP = 1
-const TOTAL_STEPS = 4
 const FORM_ID = 'create-space-form'
 
 const CreateSpaceOnboarding = (): ReactElement => {
   const router = useRouter()
+  const totalSteps = useOnboardingStepCount()
   const isCheckingAccess = useIsCheckingAccess() ?? true
 
   const {
@@ -69,7 +70,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
   const main = (
     <>
-      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={TOTAL_STEPS} />
+      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
 
       <div className="flex flex-col gap-2">
         <Typography variant="h2">Create a Workspace</Typography>

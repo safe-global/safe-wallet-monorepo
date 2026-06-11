@@ -4,49 +4,12 @@
  * here so they keep working against a router-shaped object.
  */
 import { useMemo } from 'react'
-import type { UrlObject } from 'url'
-import { useNavigate, useRouter as useTanStackRouter, useRouterState } from '@tanstack/react-router'
-
-// Mirror next's own `Url` type (string | node's UrlObject) so reused web code
-// that passes a full UrlObject (host, hostname, numeric query values, ...) or
-// next's imported `Url` type type-checks unchanged.
-type Url = string | UrlObject
+import { useNavigate, useRouter as useTanStackRouter } from '@tanstack/react-router'
+import { useRenderedPathname, useRenderedSearchStr } from './next-location'
+import { parseNextQuery, toNavigateOptions, type Url } from './next-url'
 
 // next router push/replace/prefetch accept (url, as?, options?).
 type TransitionOptions = { shallow?: boolean; locale?: string | false; scroll?: boolean }
-
-function toHref(url: Url): string {
-  if (typeof url === 'string') return url
-  const pathname = url.pathname ?? '/'
-  let qs = ''
-  if (typeof url.query === 'string') {
-    qs = url.query
-  } else if (url.query) {
-    const params = new URLSearchParams()
-    for (const [k, v] of Object.entries(url.query)) {
-      if (v == null) continue
-      if (Array.isArray(v)) v.forEach((vv) => params.append(k, String(vv)))
-      else params.append(k, String(v))
-    }
-    qs = params.toString()
-  }
-  const hash = url.hash ? `#${url.hash.replace(/^#/, '')}` : ''
-  return `${pathname}${qs ? `?${qs}` : ''}${hash}`
-}
-
-function parseQuery(search: string): Record<string, string | string[]> {
-  const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search)
-  const result: Record<string, string | string[]> = {}
-  for (const [k, v] of params.entries()) {
-    if (k in result) {
-      const existing = result[k]
-      result[k] = Array.isArray(existing) ? [...existing, v] : [existing as string, v]
-    } else {
-      result[k] = v
-    }
-  }
-  return result
-}
 
 export interface NextRouterLike {
   pathname: string
@@ -87,15 +50,17 @@ export function useRouter(): NextRouterLike {
   // navigation, producing the Redux action storm observed in dev. By
   // using `useRouterState({ select })` with primitive selectors, the
   // subscriber only wakes up when the selected value actually changes.
-  const pathname = useRouterState({ select: (s) => s.location.pathname })
-  const href = useRouterState({ select: (s) => s.location.href })
-  const searchStr = useRouterState({ select: (s) => s.location.searchStr })
-  const query = useMemo(() => parseQuery(searchStr ?? ''), [searchStr])
+  //
+  // Both primitives are bound to the RENDERED matches (see next-location.ts)
+  // so pathname/query/asPath swap atomically with the page, like in Next.
+  const pathname = useRenderedPathname()
+  const searchStr = useRenderedSearchStr()
+  const query = useMemo(() => parseNextQuery(searchStr), [searchStr])
 
   return useMemo<NextRouterLike>(
     () => ({
       pathname,
-      asPath: href,
+      asPath: `${pathname}${searchStr}`,
       route: pathname,
       basePath: '',
       isReady: true,
@@ -103,13 +68,11 @@ export function useRouter(): NextRouterLike {
       isPreview: false,
       query,
       push: async (url) => {
-        const next = toHref(url)
-        await navigate({ to: next })
+        await navigate(toNavigateOptions(url))
         return true
       },
       replace: async (url) => {
-        const next = toHref(url)
-        await navigate({ to: next, replace: true })
+        await navigate({ ...toNavigateOptions(url), replace: true })
         return true
       },
       back: () => tsRouter.history.back(),
@@ -121,7 +84,7 @@ export function useRouter(): NextRouterLike {
       beforePopState: () => undefined,
       events: noopEvents,
     }),
-    [navigate, tsRouter, pathname, href, query],
+    [navigate, tsRouter, pathname, searchStr, query],
   )
 }
 

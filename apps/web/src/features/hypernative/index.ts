@@ -68,13 +68,7 @@ export { useAuthToken } from './hooks/useAuthToken'
 export { useBannerVisibility, BannerType } from './hooks/useBannerVisibility'
 
 // Banner components for carousel/pages (used by dashboard, queue, history pages)
-export {
-  HnBannerForCarousel,
-  hnBannerID,
-  HnBannerForQueue,
-  HnBannerForHistory,
-  HnBannerForSettings,
-} from './components/HnBanner'
+export { HnBannerForCarousel, HnBannerForQueue, HnBannerForHistory, HnBannerForSettings } from './components/HnBanner'
 
 // Dashboard banner variant (used by FirstSteps)
 export { HnDashboardBannerWithNoBalanceCheck } from './components/HnDashboardBanner'
