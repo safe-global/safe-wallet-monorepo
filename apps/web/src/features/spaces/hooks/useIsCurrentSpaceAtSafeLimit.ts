@@ -6,11 +6,12 @@ import { SAFE_ACCOUNTS_LIMIT } from '@/features/spaces/components/Sidebar/consta
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 
 /**
- * Number of Safe accounts already in the current space, or undefined when there
- * is no current space or the count is unknown (e.g. spaces not yet loaded).
+ * Number of Safe accounts already in the given space, or undefined when there
+ * is no space id or the count is unknown (e.g. spaces not yet loaded). Callers
+ * that act on a specific space (e.g. the space POST target) must pass that same
+ * id here rather than relying on the current-space resolution.
  */
-export const useCurrentSpaceSafeCount = (): number | undefined => {
-  const spaceId = useCurrentSpaceId()
+export const useSpaceSafeCount = (spaceId: string | null): number | undefined => {
   const isSiweAuthenticated = useAppSelector(isAuthenticated)
   const { data: spaces } = useSpacesGetV1Query(undefined, { skip: !isSiweAuthenticated })
 
@@ -18,6 +19,14 @@ export const useCurrentSpaceSafeCount = (): number | undefined => {
   if (resolvedSpaceId === null) return undefined
 
   return spaces?.find((s) => s.uuid === resolvedSpaceId)?.safeCount
+}
+
+/**
+ * Number of Safe accounts already in the current space, or undefined when there
+ * is no current space or the count is unknown (e.g. spaces not yet loaded).
+ */
+export const useCurrentSpaceSafeCount = (): number | undefined => {
+  return useSpaceSafeCount(useCurrentSpaceId())
 }
 
 /**

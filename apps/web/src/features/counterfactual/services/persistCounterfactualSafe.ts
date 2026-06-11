@@ -153,8 +153,11 @@ function toSpaceError(error: unknown): Error {
   return new Error((error as BackendError)?.data?.message || 'Failed to add Safe account to workspace')
 }
 
+/** Matches the CGW limit message, e.g. "This space only allows a maximum of 40 safe accounts...".
+ *  Other 400s (validation, malformed payload) must keep the rollback path. */
 function isLimitRejection(error: unknown): boolean {
-  return (error as BackendError)?.status === 400
+  const { status, data } = (error as BackendError) ?? {}
+  return status === 400 && typeof data?.message === 'string' && /maximum of \d+/i.test(data.message)
 }
 
 function toPersistError(error: unknown): Error {

@@ -27,7 +27,7 @@ import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../types'
 import { persistCounterfactualSafe } from '@/features/counterfactual/services'
 import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
-import { useIsAdmin, useCurrentSpaceSafeCount } from '@/features/spaces'
+import { useIsAdmin, useSpaceSafeCount } from '@/features/spaces'
 import { normalizeSpaceId } from '@/utils/spaces'
 
 const ReplaySafeDialog = ({
@@ -54,7 +54,7 @@ const ReplaySafeDialog = ({
   const isUserAuthenticated = useAppSelector(isAuthenticated)
   const spaceId = useAppSelector(lastUsedSpace)
   const isAdminOfActiveSpace = useIsAdmin(normalizeSpaceId(spaceId) ?? undefined)
-  const spaceSafeCount = useCurrentSpaceSafeCount()
+  const spaceSafeCount = useSpaceSafeCount(spaceId)
   const dispatch = useAppDispatch()
   const [creationError, setCreationError] = useState<Error>()
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)

@@ -1,6 +1,10 @@
 import { renderHook } from '@testing-library/react'
 import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceSafeCount, useIsCurrentSpaceAtSafeLimit } from '../useIsCurrentSpaceAtSafeLimit'
+import {
+  useCurrentSpaceSafeCount,
+  useIsCurrentSpaceAtSafeLimit,
+  useSpaceSafeCount,
+} from '../useIsCurrentSpaceAtSafeLimit'
 
 jest.mock('../useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
@@ -30,6 +34,23 @@ describe('useIsCurrentSpaceAtSafeLimit hooks', () => {
     jest.resetAllMocks()
     ;(useAppSelector as jest.Mock).mockReturnValue(true)
     ;(useCurrentSpaceId as jest.Mock).mockReturnValue(SPACE_A)
+  })
+
+  describe('useSpaceSafeCount', () => {
+    it('resolves the count by the passed space id, ignoring the current space', () => {
+      mockSpaces([
+        { uuid: SPACE_A, safeCount: 12 },
+        { uuid: SPACE_B, safeCount: 40 },
+      ])
+      const { result } = renderHook(() => useSpaceSafeCount(SPACE_B))
+      expect(result.current).toBe(40)
+    })
+
+    it('returns undefined when passed null', () => {
+      mockSpaces([{ uuid: SPACE_A, safeCount: 12 }])
+      const { result } = renderHook(() => useSpaceSafeCount(null))
+      expect(result.current).toBeUndefined()
+    })
   })
 
   describe('useCurrentSpaceSafeCount', () => {

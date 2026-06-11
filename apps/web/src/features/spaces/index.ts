@@ -50,7 +50,11 @@ export type { SpacesContract } from './contract'
 // Keep hooks lightweight - minimal imports, heavy logic in services if needed
 export { default as useAddressBookSearch } from './hooks/useAddressBookSearch'
 export { useCurrentSpaceId } from './hooks/useCurrentSpaceId'
-export { useIsCurrentSpaceAtSafeLimit, useCurrentSpaceSafeCount } from './hooks/useIsCurrentSpaceAtSafeLimit'
+export {
+  useIsCurrentSpaceAtSafeLimit,
+  useCurrentSpaceSafeCount,
+  useSpaceSafeCount,
+} from './hooks/useIsCurrentSpaceAtSafeLimit'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
 export { default as useGetSpaceAddressBook } from './hooks/useGetSpaceAddressBook'
 export { default as useGetPrivateAddressBook } from './hooks/useGetPrivateAddressBook'

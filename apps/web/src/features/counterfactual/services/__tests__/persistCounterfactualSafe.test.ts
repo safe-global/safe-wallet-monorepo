@@ -215,6 +215,27 @@ describe('persistCounterfactualSafe', () => {
     expect(result.ok).toBe(true)
   })
 
+  it('rolls back and fails when the space POST returns a non-limit 400 (e.g. validation error)', async () => {
+    const backendMessage = 'Validation failed (uuid is expected)'
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') return { error: { status: 400, data: { message: backendMessage } } }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    expect(userDeleteInitiate).toHaveBeenCalled()
+    expect(showNotificationImpl).not.toHaveBeenCalled()
+    expect(replayImpl).not.toHaveBeenCalled()
+    expect(result).toEqual({ ok: false, error: expect.any(Error) })
+    if (!result.ok) expect(result.error.message).toBe(backendMessage)
+  })
+
   it('queues a pending CF delete when both the space POST and the rollback DELETE fail', async () => {
     // Double-failure mode: backend has the user-level CF safe but no space link,
     // and rollback couldn't clean it up. The orphan must be queued so the next
