@@ -248,12 +248,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   const customRPCs = useAppSelector(selectRpc)
 
-  // Multichain Safes can only be deployed counterfactually (same address across networks
-  // via CREATE2 replay) — relay and pay-now are single-chain only. Never coerce multichain
-  // into PayNow: it surfaces relay options that don't apply and advances the creation
-  // stepper once per network, overrunning the step list and crashing. See WA-2555 / WA-2524.
-  // Single chain keeps the prior behaviour: unauthenticated users pay now to avoid the
-  // one-render gap before sign-in.
+  // Multichain must deploy counterfactually; coercing it to PayNow shows invalid relay
+  // options and crashes the stepper (onSubmit fires per network). See WA-2555 / WA-2524.
   const effectivePayMethod = isMultiChainDeployment
     ? PayMethod.PayLater
     : !isUserAuthenticated && payMethod === PayMethod.PayLater
