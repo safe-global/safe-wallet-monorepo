@@ -64,6 +64,16 @@
   }
 }
 
+/* Between 900–1148px the topbar wraps onto a second row (148px instead of
+   --topbar-height) — see Topbar's @max-[1100px] container classes plus its 48px
+   padding. The elevated topbar (z-index 99) paints over the dialog, so start
+   the dialog below it to keep the close button visible and clickable. */
+@media (min-width: 900px) and (max-width: 1147.95px) {
+  .dialog {
+    top: 148px;
+  }
+}
+
 @media (max-width: 899.95px) {
   .dialog {
     left: 0;
