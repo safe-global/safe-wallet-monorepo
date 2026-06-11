@@ -2,24 +2,16 @@ import { useContext, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { TxModalContext } from '@/components/tx-flow'
-import { Bookmark, ChevronRight, Wallet } from 'lucide-react'
+import { ChevronRight, Wallet } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { useIsQualifiedSafe } from '@/features/spaces'
 import SafeSelectorDropdown from '@/features/spaces/components/SafeSelectorDropdown'
 import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { pinSafe, unpinSafe, selectAllAddedSafes } from '@/store/addedSafesSlice'
-import { showNotification } from '@/store/notificationsSlice'
-import { trackEvent } from '@/services/analytics'
-import { OVERVIEW_EVENTS, PIN_SAFE_LABELS } from '@/services/analytics/events/overview'
-import useSafeInfo from '@/hooks/useSafeInfo'
-import useChainId from '@/hooks/useChainId'
+import { useAppSelector } from '@/store'
+import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import { useAllSafes } from '@/hooks/safes'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 import SpaceBackLink from './SpaceBackLink'
@@ -43,37 +35,11 @@ const HIDDEN_ROUTES = [
   AppRoutes['_offline'],
 ]
 
-function DropdownHeader({ isPinned, onPin }: { isPinned: boolean; onPin: () => void }) {
+function DropdownHeader({ label, testId }: { label: string; testId?: string }) {
   return (
     <div className="flex items-center gap-1 px-4 pt-3 pb-2">
-      <span className="text-sm font-semibold text-secondary-foreground">Trusted Safes</span>
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation()
-                onPin()
-              }}
-              className="ml-auto shrink-0 rounded p-1 hover:bg-muted transition-colors cursor-pointer"
-              aria-label={isPinned ? 'Trusted' : 'Trust this safe'}
-            />
-          }
-        >
-          <Bookmark className={`size-4 ${isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`} />
-        </TooltipTrigger>
-        <TooltipContent>{isPinned ? 'Remove from trusted Safes' : 'Add to trusted Safes'}</TooltipContent>
-      </Tooltip>
-    </div>
-  )
-}
-
-function DropdownWorkspaceHeader() {
-  return (
-    <div className="flex items-center gap-1 px-4 pt-3 pb-2">
-      <span className="text-sm font-semibold text-secondary-foreground" data-testid="workspace-header">
-        Safes in this workspace
+      <span className="text-sm font-semibold text-secondary-foreground" data-testid={testId}>
+        {label}
       </span>
     </div>
   )
@@ -114,15 +80,11 @@ function SpaceSafeBar() {
   const pathname = usePathname()
   const router = useRouter()
   const urlSafeAddress = useSafeAddressFromUrl()
-  const dispatch = useAppDispatch()
   const isQualifiedSafe = useIsQualifiedSafe()
   const { items, selectedItemId, handleItemSelect, isLoading, isError, refetch } = useSpaceSafeSelectorItems()
   const { space, handleBackToSpace } = useSpaceBackLink()
   const [accountsModalOpen, setAccountsModalOpen] = useState(false)
-  const { safeAddress } = useSafeInfo()
-  const chainId = useChainId()
   const addedSafes = useAppSelector(selectAllAddedSafes)
-  const allSafeItems = useAllSafes()
   const wallet = useWallet()
   const connectWallet = useConnectWallet()
   const { txFlow } = useContext(TxModalContext)
@@ -133,48 +95,14 @@ function SpaceSafeBar() {
   // /settings/* serves both per-safe (URL has ?safe=) and global pages — hide when no safe context.
   if (pathname?.startsWith(AppRoutes.settings.index) && !urlSafeAddress) return null
 
-  // Check if current safe is pinned on any chain
-  const isPinned = Boolean(addedSafes[chainId]?.[safeAddress])
-
-  const handleTogglePin = () => {
-    // Find all chains where this safe address exists
-    const safesOnAllChains = allSafeItems?.filter((s) => sameAddress(s.address, safeAddress)) ?? []
-
-    if (isPinned) {
-      safesOnAllChains.forEach((s) => dispatch(unpinSafe({ chainId: s.chainId, address: s.address })))
-      dispatch(
-        showNotification({
-          title: 'Safe removed',
-          message: safeAddress,
-          groupKey: `unpin-safe-${safeAddress}`,
-          variant: 'success',
-        }),
-      )
-      trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.unpin })
-    } else {
-      // If safe is only known on current chain (e.g. navigated via URL), pin just that
-      const toPinList = safesOnAllChains.length > 0 ? safesOnAllChains : [{ chainId, address: safeAddress }]
-      toPinList.forEach((s) => dispatch(pinSafe({ chainId: s.chainId, address: s.address })))
-      dispatch(
-        showNotification({
-          title: 'Safe trusted',
-          message: safeAddress,
-          groupKey: `pin-safe-${safeAddress}`,
-          variant: 'success',
-        }),
-      )
-      trackEvent({ ...OVERVIEW_EVENTS.PIN_SAFE, label: PIN_SAFE_LABELS.pin })
-    }
-  }
-
   const handleOpenAccountsModal = () => {
     setAccountsModalOpen(true)
   }
 
   const dropdownHeader = isQualifiedSafe ? (
-    <DropdownWorkspaceHeader />
+    <DropdownHeader label="Safes in this workspace" testId="workspace-header" />
   ) : (
-    <DropdownHeader isPinned={isPinned} onPin={handleTogglePin} />
+    <DropdownHeader label="Trusted Safes" />
   )
 
   const hasPinnedSafes = Object.values(addedSafes).some((chain) => Object.keys(chain).length > 0)

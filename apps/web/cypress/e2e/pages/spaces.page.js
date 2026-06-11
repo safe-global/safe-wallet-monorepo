@@ -353,15 +353,9 @@ function verifySafeDashboardUrlSafeQuery(expectedSafeParam) {
   })
 }
 
-function verifySafeSelectorNavigationPanel({
-  expectedName,
-  fullAddress,
-  chainShortName,
-  balanceRegex,
-  ownersThreshold,
-}) {
-  const short = main.shortenAddress(fullAddress)
-  const expectedLine = `${chainShortName}:${short}`
+function verifySafeSelectorNavigationPanel({ expectedName, fullAddress, balanceRegex, ownersThreshold }) {
+  // The selector no longer shows the chain prefix; assert the (unprefixed) shortened address only.
+  const expectedLine = main.shortenAddress(fullAddress)
   cy.get(safeSelectorTriggerIdenticon, { timeout: 30000 }).should('be.visible')
   cy.get(safeSelectorTriggerName, { timeout: 30000 }).should('be.visible').and('contain.text', expectedName)
   cy.get(safeSelectorTriggerAddress).should('be.visible').and('contain.text', expectedLine)

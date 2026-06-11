@@ -9,6 +9,7 @@ import { isMultiChainSafeItem } from '@/hooks/safes'
 import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import InlineRetryError from '@/components/common/InlineRetryError'
+import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
 import { SafeListSkeleton } from './shared'
 import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 import ConnectWalletHint from '@/features/spaces/components/ConnectWalletHint'
@@ -83,6 +84,16 @@ const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar 
     isQualifiedSafe,
   } = useAccountsModalItems({ search, open })
 
+  // Bottom-fade scroll hint, shown only while more rows lie below the fold.
+  const { setScrollNode, showFade } = useBottomScrollFade([
+    isLoading,
+    trustedItems.length,
+    otherItems.length,
+    isWalletConnected,
+    isOwnedSafesError,
+    similarAddresses.size,
+  ])
+
   // Unmount the dialog while the wallet-connect modal is open: the shadcn Dialog
   // stacks above web3-onboard's connect modal, so hiding it lets the connect
   // window come to the front. The dialog re-renders once connecting resolves.
@@ -122,6 +133,7 @@ const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar 
         </div>
 
         <div
+          ref={setScrollNode}
           className="min-h-0 flex-1 overflow-y-auto px-3 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
           data-testid="accounts-list"
         >
@@ -165,7 +177,15 @@ const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar 
           )}
         </div>
 
-        <DialogFooter className="shrink-0 flex-row gap-2 border-t border-border/50 px-4 py-3">
+        <DialogFooter className="relative shrink-0 flex-row gap-2 border-t border-border/50 px-4 py-3">
+          {showFade && (
+            <div
+              data-testid="scroll-hint"
+              aria-hidden
+              // Fade the last visible row into the dialog background (DialogContent uses bg-background).
+              className="pointer-events-none absolute inset-x-0 -top-24 h-24 bg-gradient-to-b from-transparent to-[var(--background)]"
+            />
+          )}
           <Button
             render={
               <Link
