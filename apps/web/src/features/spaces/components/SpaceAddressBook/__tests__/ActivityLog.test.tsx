@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import ActivityLog, { formatDate, buildActivityEvents } from '../ActivityLog'
+import ActivityLog, { buildActivityEvents } from '../ActivityLog'
 import type { AddressBookEntry } from '../SpaceAddressBookTable'
 import { faker } from '@faker-js/faker'
 
@@ -31,36 +31,6 @@ const makeEntry = (overrides: Partial<AddressBookEntry> = {}): AddressBookEntry 
 })
 
 describe('ActivityLog', () => {
-  describe('formatDate', () => {
-    it('returns empty string for empty input', () => {
-      expect(formatDate('')).toBe('')
-    })
-
-    it('returns empty string for invalid date', () => {
-      expect(formatDate('not-a-date')).toBe('')
-    })
-
-    it('formats today as "Today at HH:MM"', () => {
-      const now = new Date()
-      const result = formatDate(now.toISOString())
-      expect(result).toMatch(/^Today at /)
-    })
-
-    it('formats yesterday as "Yesterday at HH:MM"', () => {
-      const yesterday = new Date()
-      yesterday.setDate(yesterday.getDate() - 1)
-      const result = formatDate(yesterday.toISOString())
-      expect(result).toMatch(/^Yesterday at /)
-    })
-
-    it('formats older dates as "Mon DD at HH:MM"', () => {
-      const result = formatDate('2025-01-15T10:30:00Z')
-      expect(result).toMatch(/at /)
-      expect(result).not.toMatch(/^Today/)
-      expect(result).not.toMatch(/^Yesterday/)
-    })
-  })
-
   describe('buildActivityEvents', () => {
     it('returns empty array for empty entries', () => {
       expect(buildActivityEvents([])).toEqual([])

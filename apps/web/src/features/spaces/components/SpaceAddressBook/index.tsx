@@ -30,6 +30,7 @@ import AddPrivateContact from './AddPrivateContact'
 import SpaceAddressBookTable from './SpaceAddressBookTable'
 import PendingRequestsTable from './PendingRequestsTable'
 import ActivityLog from './ActivityLog'
+import SpaceActivityLog from '../SpaceActivityLog'
 import ImportAddressBook from './Import'
 import RequestToAddButton from './RequestToAddButton'
 import AddToWorkspaceButton from './AddToWorkspaceButton'
@@ -42,6 +43,7 @@ const SpaceAddressBook = () => {
   const isInvited = useIsInvited()
   const isDarkMode = useDarkMode()
   const isPrivateAddressBookEnabled = useHasFeature(FEATURES.PRIVATE_ADDRESS_BOOK) ?? false
+  const isAuditLogEnabled = useHasFeature(FEATURES.SPACE_AUDIT_LOG) ?? false
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const addressBookItems = useGetSpaceAddressBook()
@@ -243,7 +245,11 @@ const SpaceAddressBook = () => {
             )}
 
             <TabsContent value="activity">
-              <ActivityLog entries={filteredAll} />
+              {isAuditLogEnabled ? (
+                <SpaceActivityLog eventTypes={['ADDRESS_BOOK_UPSERTED', 'ADDRESS_BOOK_DELETED']} />
+              ) : (
+                <ActivityLog entries={filteredAll} />
+              )}
             </TabsContent>
           </div>
         </Tabs>

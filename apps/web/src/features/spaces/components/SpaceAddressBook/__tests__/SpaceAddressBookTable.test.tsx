@@ -44,6 +44,11 @@ jest.mock('../SpaceAddressBookActions', () => {
   return SpaceAddressBookActions
 })
 
+const mockResolveMemberName = jest.fn()
+jest.mock('../../../hooks/useMemberNameResolver', () => ({
+  useMemberNameResolver: () => mockResolveMemberName,
+}))
+
 const entryBuilder = () =>
   Builder.new<AddressBookEntry>().with({
     name: faker.person.fullName(),
@@ -55,6 +60,26 @@ const entryBuilder = () =>
   })
 
 describe('SpaceAddressBookTable', () => {
+  beforeEach(() => {
+    mockResolveMemberName.mockReset()
+    mockResolveMemberName.mockReturnValue(undefined)
+  })
+
+  it('resolves the "Added by" cell to the space member name by user id', () => {
+    const memberName = 'My space creator'
+    mockResolveMemberName.mockImplementation((userId: number | undefined) => (userId === 7 ? memberName : undefined))
+
+    render(
+      <SpaceAddressBookTable
+        entries={[entryBuilder().with({ createdBy: faker.finance.ethereumAddress(), createdByUserId: 7 }).build()]}
+      />,
+    )
+
+    expect(screen.getByText(memberName)).toBeInTheDocument()
+    // Only the Address column renders EthHashInfo; the attribution shows the member name
+    expect(screen.getAllByTestId('eth-hash-info')).toHaveLength(1)
+  })
+
   it('renders actions for non-local entries', () => {
     render(<SpaceAddressBookTable entries={[entryBuilder().build()]} />)
 

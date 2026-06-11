@@ -2540,6 +2540,145 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/audit-log": {
+      "get": {
+        "description": "Retrieves the append-only audit log of a space — who did what, when. Requires ACTIVE membership. Events are ordered by creation time (newest first by default) with a stable id tie-break.",
+        "operationId": "spaceAuditGetAuditLogV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space identifier (UUID, or legacy numeric id)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "event_type",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated list of event types to filter by",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "actor_user_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by acting user id",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "created_at__gte",
+            "required": false,
+            "in": "query",
+            "description": "ISO 8601 lower bound (inclusive) on event creation time",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "created_at__lte",
+            "required": false,
+            "in": "query",
+            "description": "ISO 8601 upper bound (inclusive) on event creation time",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort_direction",
+            "required": false,
+            "in": "query",
+            "description": "Sort direction over (created_at, id). Defaults to desc.",
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated audit log entries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceAuditLogPage"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "User is not an ACTIVE member of the space, or the feature is disabled"
+          }
+        },
+        "summary": "Get space audit log",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/audit-log/actors": {
+      "get": {
+        "description": "Retrieves the distinct actors appearing in a space audit log — including former and deleted members — as a filter dropdown source. Requires ACTIVE membership.",
+        "operationId": "spaceAuditGetAuditLogActorsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space identifier (UUID, or legacy numeric id)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Distinct audit log actors",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SpaceAuditLogActorDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "User is not an ACTIVE member of the space, or the feature is disabled"
+          }
+        },
+        "summary": "Get space audit log actors",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/safes": {
       "post": {
         "description": "Adds one or more Safe addresses to a space. This allows the space members to collectively manage these Safes.",
@@ -6291,7 +6430,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main",
+    "version": "",
     "contact": {}
   },
   "tags": [],
@@ -9253,6 +9392,105 @@
         "required": [
           "id",
           "uuid"
+        ]
+      },
+      "SpaceAuditLogEntryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Monotonic entry id (bigint serialized as string). Stable row key — clients dedupe on it."
+          },
+          "eventType": {
+            "type": "string",
+            "enum": [
+              "SPACE_CREATED",
+              "SPACE_UPDATED",
+              "SPACE_DELETED",
+              "MEMBER_INVITED",
+              "MEMBER_INVITE_ACCEPTED",
+              "MEMBER_INVITE_DECLINED",
+              "MEMBER_INVITE_RENEWED",
+              "MEMBER_ROLE_UPDATED",
+              "MEMBER_ALIAS_UPDATED",
+              "MEMBER_REMOVED",
+              "MEMBER_LEFT",
+              "SAFE_ADDED",
+              "SAFE_REMOVED",
+              "ADDRESS_BOOK_UPSERTED",
+              "ADDRESS_BOOK_DELETED"
+            ]
+          },
+          "actorUserId": {
+            "type": "number"
+          },
+          "actor": {
+            "type": "string",
+            "description": "Resolved (and masked) display string of the acting user."
+          },
+          "targetUser": {
+            "type": "string",
+            "nullable": true,
+            "description": "Resolved (and masked) display string of the affected user, when the event has one."
+          },
+          "payload": {
+            "type": "object",
+            "description": "Event-specific payload, allowlisted per event type. Clients must treat every field as optional."
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "eventType",
+          "actorUserId",
+          "actor",
+          "payload",
+          "createdAt"
+        ]
+      },
+      "SpaceAuditLogPage": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "nullable": true
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceAuditLogEntryDto"
+            }
+          }
+        },
+        "required": [
+          "results"
+        ]
+      },
+      "SpaceAuditLogActorDto": {
+        "type": "object",
+        "properties": {
+          "actorUserId": {
+            "type": "number"
+          },
+          "actor": {
+            "type": "string",
+            "description": "Resolved (and masked) display string of the actor."
+          }
+        },
+        "required": [
+          "actorUserId",
+          "actor"
         ]
       },
       "SpaceSafeDto": {
