@@ -25,6 +25,8 @@ export type PendingSessionRequest = {
   chainId: string // CAIP-2, e.g. 'eip155:1'
   method: DeferredTxMethod
   params: unknown
+  // WC's per-request domain verification, used by the sheet to render the verify badge.
+  verifyContext?: WalletKitTypes.SessionRequest['verifyContext']
 }
 
 export type PendingItem = PendingSessionProposal | PendingSessionRequest

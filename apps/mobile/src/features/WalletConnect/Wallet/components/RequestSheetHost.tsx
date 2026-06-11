@@ -7,7 +7,7 @@ import {
 } from '@gorhom/bottom-sheet'
 import type { IWalletKit } from '@reown/walletkit'
 import { useStore } from 'react-redux'
-import { getVariable, useTheme, YStack } from 'tamagui'
+import { getVariable, useTheme, YStack, XStack } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { formatJsonRpcError } from '@walletconnect/jsonrpc-utils'
 import { getSdkError } from '@walletconnect/utils'
@@ -17,9 +17,11 @@ import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import type { RootState } from '@/src/store'
 import { removePending, selectCurrentRequest } from '../store/walletKitSlice'
 import { useApproveProposal } from '../hooks/useApproveProposal'
+import { useSendTransaction } from '../hooks/useSendTransaction'
 import { verifyStatusToVariant } from '../utils/verifyStatus'
 import { logWalletKitError } from '../utils/errors'
 import { SessionProposalSheet } from './SessionProposalSheet'
+import { SendTransactionSheet } from './SendTransactionSheet'
 import { ConnectionPermissionsPanel } from './ConnectionPermissionsPanel'
 
 type Props = { walletKit: IWalletKit | null }
@@ -56,7 +58,12 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
   const renderBackdrop = useCallback(() => <BackdropComponent shouldNavigateBack={false} />, [])
 
   const proposal = current?.kind === 'proposal' ? current : null
+  const request = current?.kind === 'request' ? current : null
   const variant = proposal ? verifyStatusToVariant(proposal.proposal.verifyContext?.verified) : 'unverified'
+
+  // Review/Reject for the transaction-request sheet. Review composes a draft and navigates to
+  // the confirm flow; the dApp is answered later by the propose-success listener.
+  const { review, reject, composing, ready } = useSendTransaction(walletKit, request)
 
   // Reset the permissions view whenever the queue head changes (new proposal or cleared).
   useEffect(() => {
@@ -90,9 +97,9 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
     if (!walletKit) {
       return
     }
-    // A connect is in flight — let useApproveProposal own the outcome (approve resolves to
-    // success/reject and clears the pending item). Rejecting here would race its response.
-    if (busy) {
+    // A connect or compose is in flight — let useApproveProposal / useSendTransaction own the
+    // outcome (each clears the pending item). Rejecting here would race their response.
+    if (busy || composing) {
       return
     }
     const currentAtDismiss = selectCurrentRequest(store.getState())
@@ -121,39 +128,80 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
       logWalletKitError('respondSessionRequest on sheet dismiss failed', e)
     }
     dispatch(removePending({ id: currentAtDismiss.id, kind: 'request' }))
-  }, [walletKit, busy, store, dispatch])
+  }, [walletKit, busy, composing, store, dispatch])
 
   // The active view's primary CTA, pinned to the bottom edge of the sheet. No background so
   // its top edge doesn't show a seam against the content; the panel/proposal content is short
   // enough that it never scrolls under the CTA.
   const renderFooter = useCallback(
     (footerProps: BottomSheetFooterProps) => {
-      if (!walletKit || !proposal) {
+      if (!walletKit) {
         return null
       }
-      return (
-        <BottomSheetFooter {...footerProps} bottomInset={insets.bottom}>
-          <YStack paddingHorizontal="$4" paddingTop="$2" paddingBottom="$2">
-            {permissionsOpen ? (
-              <SafeButton primary onPress={closePermissions} testID="wc-proposal-permissions-dismiss">
-                Got it
+      if (proposal) {
+        return (
+          <BottomSheetFooter {...footerProps} bottomInset={insets.bottom}>
+            <YStack paddingHorizontal="$4" paddingTop="$2" paddingBottom="$2">
+              {permissionsOpen ? (
+                <SafeButton primary onPress={closePermissions} testID="wc-proposal-permissions-dismiss">
+                  Got it
+                </SafeButton>
+              ) : (
+                <SafeButton
+                  primary
+                  onPress={() => approve(proposal)}
+                  loading={busy}
+                  loadingText="Connecting…"
+                  testID="wc-proposal-connect"
+                >
+                  Connect
+                </SafeButton>
+              )}
+            </YStack>
+          </BottomSheetFooter>
+        )
+      }
+      if (request) {
+        // Identity-only gate: Reject answers the dApp with USER_REJECTED; Review composes the
+        // draft and routes to the confirm flow. Review is disabled until the Safe/chain/SDK
+        // are ready (Figma `16755-4705`).
+        return (
+          <BottomSheetFooter {...footerProps} bottomInset={insets.bottom}>
+            <XStack gap="$3" paddingHorizontal="$4" paddingTop="$2" paddingBottom="$2">
+              <SafeButton flex={1} danger onPress={reject} disabled={composing} testID="wc-tx-reject">
+                Reject
               </SafeButton>
-            ) : (
               <SafeButton
+                flex={1}
                 primary
-                onPress={() => approve(proposal)}
-                loading={busy}
-                loadingText="Connecting…"
-                testID="wc-proposal-connect"
+                onPress={review}
+                loading={composing}
+                loadingText="Preparing…"
+                disabled={!ready}
+                testID="wc-tx-review"
               >
-                Connect
+                Review
               </SafeButton>
-            )}
-          </YStack>
-        </BottomSheetFooter>
-      )
+            </XStack>
+          </BottomSheetFooter>
+        )
+      }
+      return null
     },
-    [walletKit, proposal, permissionsOpen, closePermissions, approve, busy, insets.bottom],
+    [
+      walletKit,
+      proposal,
+      request,
+      permissionsOpen,
+      closePermissions,
+      approve,
+      busy,
+      review,
+      reject,
+      composing,
+      ready,
+      insets.bottom,
+    ],
   )
 
   return (
@@ -173,7 +221,7 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
           <SessionProposalSheet pending={proposal} onOpenPermissions={openPermissions} />
         )}
         {walletKit && proposal && permissionsOpen && <ConnectionPermissionsPanel variant={variant} />}
-        {/* Transaction request sheet (current?.kind === 'request') added in WA-2321 / WA-2322. */}
+        {walletKit && request && <SendTransactionSheet pending={request} />}
       </BottomSheetScrollView>
     </BottomSheetModal>
   )
