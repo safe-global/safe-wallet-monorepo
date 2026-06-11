@@ -39,13 +39,13 @@ const buildFees = (
 ): HistoryFeesData => ({
   totalFee: { amount, currency, fiatAmount },
   executionFee: EXECUTION_FEE,
-  gasFee: { label: 'Gas fee', amount, currency, fiatAmount },
+  gasFee: { label: 'Max gas fee', amount, currency, fiatAmount },
   paidFrom,
 })
 
 /**
  * Fee breakdown for executed multisig txs. Execution fee is always "Free" in Phase 2.
- * Gas fee derives from:
+ * Max gas fee derives from:
  *   - Safe-pays → the signed payload (safeTxGas + baseGas × gasPrice) — deterministic.
  *   - Signer-pays → the on-chain tx receipt (gasUsed × gasPrice) — signer wallet's actual cost.
  * Deps are narrowed to scalars so polling `balances` doesn't re-trigger the receipt RPC.

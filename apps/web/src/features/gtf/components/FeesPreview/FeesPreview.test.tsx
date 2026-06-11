@@ -10,7 +10,7 @@ jest.mock('@/hooks/useChains', () => ({
 const defaultProps: FeesPreviewData = {
   canCoverFees: true,
   executionFee: { label: 'Execution fee', isFree: true },
-  gasFee: { label: 'Gas fee', amount: '0.0002733', currency: 'ETH', fiatAmount: '$97.30' },
+  gasFee: { label: 'Max gas fee', amount: '0.0002733', currency: 'ETH', fiatAmount: '$97.30' },
   totalOutgoing: { primary: [{ amount: '0.60126', currency: 'ETH' }], fiatTotal: '$1,768.85' },
   availableGasTokens: [{ address: '0x0000000000000000000000000000000000000000', symbol: 'ETH', logoUri: '' }],
   selectedGasToken: '0x0000000000000000000000000000000000000000',
@@ -49,7 +49,7 @@ describe('FeesPreview', () => {
   it('renders gas fee with fiat', () => {
     render(<FeesPreview {...defaultProps} />)
 
-    expect(screen.getByText('Gas fee')).toBeInTheDocument()
+    expect(screen.getByText('Max gas fee')).toBeInTheDocument()
     expect(screen.getByText('$97.30')).toBeInTheDocument()
   })
 
@@ -89,7 +89,7 @@ describe('FeesPreview', () => {
   it('renders skeleton when loading', () => {
     render(<FeesPreview {...defaultProps} loading />)
 
-    expect(screen.getByText('Gas fee')).toBeInTheDocument()
+    expect(screen.getByText('Max gas fee')).toBeInTheDocument()
     expect(screen.queryByText('0.0002733 ETH')).not.toBeInTheDocument()
   })
 
@@ -109,7 +109,7 @@ describe('FeesPreview', () => {
     const fallbackProps: FeesPreviewData = {
       canCoverFees: false,
       executionFee: { label: 'Execution fee', isFree: true },
-      gasFee: { label: 'Gas fee', amount: '0.0002733', currency: 'ETH' },
+      gasFee: { label: 'Max gas fee', amount: '0.0002733', currency: 'ETH' },
     }
 
     it('does not render payment source selector', () => {
@@ -123,7 +123,7 @@ describe('FeesPreview', () => {
       render(<FeesPreview {...fallbackProps} />)
 
       expect(screen.getByText('FREE')).toBeInTheDocument()
-      expect(screen.getByText('Gas fee')).toBeInTheDocument()
+      expect(screen.getByText('Max gas fee')).toBeInTheDocument()
     })
 
     it('renders signer fallback notice', () => {
