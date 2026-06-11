@@ -187,7 +187,7 @@ const SpacesList = () => {
   const inviteAmount = pendingInvites?.length
   const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
   const { membership, signerAddress, isLoading, email } = useCurrentMemberProfile()
-  const { profileName, displayName } = membership ? getSidebarProfileInfo(membership, signerAddress, email) : {}
+  const { profileName, displayName } = getSidebarProfileInfo(membership, signerAddress, email)
 
   const singleSpaceId = activeSpaces.length === 1 ? activeSpaces[0].uuid : null
 

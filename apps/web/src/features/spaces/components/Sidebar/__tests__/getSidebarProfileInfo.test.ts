@@ -37,4 +37,22 @@ describe('getSidebarProfileInfo', () => {
 
     expect(result).toEqual({ profileName: 'User', displayName: 'User' })
   })
+
+  it('uses the email without a membership', () => {
+    const result = getSidebarProfileInfo(undefined, '0x1234567890abcdef', 'alice@safe.global')
+
+    expect(result).toEqual({ profileName: 'alice@safe.global', displayName: 'alice@safe.global' })
+  })
+
+  it('uses the shortened signer address without a membership', () => {
+    const result = getSidebarProfileInfo(undefined, '0x1234567890abcdef')
+
+    expect(result).toEqual({ profileName: 'User', displayName: '0x1234...cdef' })
+  })
+
+  it('defaults to "User" without a membership, email, or signer address', () => {
+    const result = getSidebarProfileInfo()
+
+    expect(result).toEqual({ profileName: 'User', displayName: 'User' })
+  })
 })

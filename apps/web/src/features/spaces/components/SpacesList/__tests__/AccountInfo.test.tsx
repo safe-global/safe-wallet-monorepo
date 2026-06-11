@@ -14,7 +14,9 @@ jest.mock('@/hooks/useLogout', () => ({
 // opened (the real component renders content into a portal only when open).
 jest.mock('@/components/ui/popover', () => ({
   Popover: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  PopoverTrigger: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  PopoverTrigger: ({ children, 'aria-label': ariaLabel }: { children: ReactNode; 'aria-label'?: string }) => (
+    <button aria-label={ariaLabel}>{children}</button>
+  ),
   PopoverContent: ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
     <div data-testid={testId}>{children}</div>
   ),
@@ -30,20 +32,23 @@ describe('AccountInfo', () => {
     jest.clearAllMocks()
   })
 
-  it('renders the avatar from the profile name and the display name in the popover', () => {
+  it('renders a user icon trigger and the display name in the popover', () => {
     render(<AccountInfo profileName="Alice" displayName="alice@safe.global" />)
 
-    expect(screen.getAllByTestId('initials-avatar')[0]).toHaveTextContent('Alice')
+    expect(screen.getByRole('button', { name: 'Account menu' })).toBeInTheDocument()
     expect(screen.getByText('alice@safe.global')).toBeInTheDocument()
     expect(screen.getByText('Signed in')).toBeInTheDocument()
   })
 
-  it('falls back to empty names when no props are provided', () => {
+  it('shows the wallet address in the popover when signed in with SIWE', () => {
+    render(<AccountInfo profileName="User" displayName="0x1234...5678" />)
+
+    expect(screen.getByText('0x1234...5678')).toBeInTheDocument()
+  })
+
+  it('renders the sign-out button when no props are provided', () => {
     render(<AccountInfo />)
 
-    screen.getAllByTestId('initials-avatar').forEach((avatar) => {
-      expect(avatar).toHaveTextContent('')
-    })
     expect(screen.getByTestId('sidebar-profile-sign-out')).toBeInTheDocument()
   })
 
