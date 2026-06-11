@@ -8,6 +8,8 @@ import { BadgeThemeTypes } from '@/src/components/Logo/Logo'
 import { Identicon } from '@/src/components/Identicon'
 import { Address } from 'blo'
 import { formatWithSchema } from '@/src/utils/date'
+import { DappIcon } from '@/src/features/WalletConnect/Wallet/components/DappIcon'
+import { useDappOrigin } from '../DappOriginContext'
 
 interface TransactionHeaderProps {
   logo?: string
@@ -32,10 +34,22 @@ export function TransactionHeader({
 }: TransactionHeaderProps) {
   const date = formatWithSchema(submittedAt, 'd MMM yyyy')
   const time = formatWithSchema(submittedAt, 'hh:mm a')
+  // When the tx originates from a WalletConnect dApp, surface its logo + name in place of the
+  // contract logo/title (Figma `5316-26402`). Absent provider (history, native flows) → no-op.
+  const dappOrigin = useDappOrigin()
+  const showTitle = dappOrigin?.name ?? title
 
   return (
     <YStack position="relative" alignItems="center" gap="$2" marginTop="$4">
-      {isIdenticon ? (
+      {dappOrigin ? (
+        <DappIcon
+          url={dappOrigin.logoUri}
+          size={44}
+          badgeContent={<SafeFontIcon name={badgeIcon} color={badgeColor} size={12} />}
+          badgeThemeName={badgeThemeName}
+          circle
+        />
+      ) : isIdenticon ? (
         <Identicon address={logo as Address} size={44} />
       ) : (
         (customLogo ?? (
@@ -49,12 +63,12 @@ export function TransactionHeader({
       )}
 
       <View alignItems="center" gap="$2">
-        {typeof title === 'string' ? (
-          <H3 fontWeight={600} fontSize="$7">
-            {title}
+        {typeof showTitle === 'string' ? (
+          <H3 fontWeight={600} fontSize="$7" textAlign="center">
+            {showTitle}
           </H3>
         ) : (
-          title
+          showTitle
         )}
         <Text color="$textSecondaryLight" fontSize="$2" lineHeight={16}>
           {date}, {time}
