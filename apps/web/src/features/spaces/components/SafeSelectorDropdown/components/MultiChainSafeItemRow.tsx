@@ -58,13 +58,7 @@ const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
             </span>
           )}
         </div>
-        <BalanceDisplay
-          balance={<FiatValue value={item.balance} />}
-          threshold={item.threshold}
-          owners={item.owners}
-          isLoading={item.isLoading}
-          showThreshold={false}
-        />
+        <BalanceDisplay balance={<FiatValue value={item.balance} />} isLoading={item.isLoading} />
       </CollapsibleTrigger>
 
       <CollapsibleContent>

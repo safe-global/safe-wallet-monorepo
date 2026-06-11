@@ -42,4 +42,13 @@ describe('CopyAddressButton', () => {
     expect(writeText).toHaveBeenCalledWith('0xdeadbeef')
     expect(trackEvent).toHaveBeenCalled()
   })
+
+  it('copies once per pointer-driven click (pointerdown + click do not double-fire)', () => {
+    render(<CopyAddressButton address="0xdeadbeef" />)
+    const btn = screen.getByTestId('copy-address-btn')
+    fireEvent.pointerDown(btn)
+    fireEvent.click(btn)
+    expect(writeText).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+  })
 })

@@ -34,19 +34,11 @@ const HIDDEN_ROUTES = [
   AppRoutes['_offline'],
 ]
 
-function DropdownHeader() {
+function DropdownHeader({ label, testId }: { label: string; testId?: string }) {
   return (
     <div className="flex items-center gap-1 px-4 pt-3 pb-2">
-      <span className="text-sm font-semibold text-secondary-foreground">Trusted Safes</span>
-    </div>
-  )
-}
-
-function DropdownWorkspaceHeader() {
-  return (
-    <div className="flex items-center gap-1 px-4 pt-3 pb-2">
-      <span className="text-sm font-semibold text-secondary-foreground" data-testid="workspace-header">
-        Safes in this workspace
+      <span className="text-sm font-semibold text-secondary-foreground" data-testid={testId}>
+        {label}
       </span>
     </div>
   )
@@ -103,7 +95,11 @@ function SpaceSafeBar() {
     setAccountsModalOpen(true)
   }
 
-  const dropdownHeader = isQualifiedSafe ? <DropdownWorkspaceHeader /> : <DropdownHeader />
+  const dropdownHeader = isQualifiedSafe ? (
+    <DropdownHeader label="Safes in this workspace" testId="workspace-header" />
+  ) : (
+    <DropdownHeader label="Trusted Safes" />
+  )
 
   const hasPinnedSafes = Object.values(addedSafes).some((chain) => Object.keys(chain).length > 0)
   const showConnectWallet = !wallet && !hasPinnedSafes

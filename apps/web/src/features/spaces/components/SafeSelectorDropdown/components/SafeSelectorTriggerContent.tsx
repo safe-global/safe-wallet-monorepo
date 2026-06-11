@@ -47,13 +47,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
       {isUndeployed ? (
         <NotActivatedBadge isActivating={isActivating} data-testid="safe-selector-not-activated-icon" />
       ) : (
-        <SafeBalanceBlock
-          isLoading={selectedItem.isLoading ?? false}
-          balance={selectedItem.balance}
-          threshold={selectedItem.threshold}
-          owners={selectedItem.owners}
-          showBalanceDisplay={false}
-        />
+        <SafeBalanceBlock isLoading={selectedItem.isLoading ?? false} balance={selectedItem.balance} />
       )}
     </div>
   )

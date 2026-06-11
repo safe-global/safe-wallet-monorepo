@@ -48,6 +48,8 @@ export function useBottomScrollFade(deps: ReadonlyArray<unknown> = []) {
     measure()
     const raf = requestAnimationFrame(measure)
     return () => cancelAnimationFrame(raf)
+    // `deps` is a caller-supplied rest array, so the linter can't statically verify it; `measure` is
+    // stable (useCallback with no deps) and re-measuring is idempotent, so spreading deps here is safe.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [measure, ...deps])
 

@@ -1,4 +1,4 @@
-import { useState, useCallback, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react'
+import { useState, useCallback, useEffect, useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react'
 import { Copy, Check } from 'lucide-react'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
@@ -7,17 +7,28 @@ import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/ana
 // a distinct testId so the trigger's `copy-address-btn` stays a single, unambiguous element.
 const CopyAddressButton = ({ address, testId = 'copy-address-btn' }: { address: string; testId?: string }) => {
   const [copied, setCopied] = useState(false)
+  const resetTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   const runCopy = useCallback(() => {
     navigator.clipboard.writeText(address)
     setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    clearTimeout(resetTimer.current)
+    resetTimer.current = setTimeout(() => setCopied(false), 2000)
     trackEvent(OVERVIEW_EVENTS.COPY_ADDRESS, { [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Copy Address' })
   }, [address])
 
-  // Stop the click from bubbling to the surrounding SelectItem / collapsible trigger (which would
-  // switch the safe or expand the row instead of copying).
-  const handlePointer = (e: MouseEvent | PointerEvent) => {
+  useEffect(() => () => clearTimeout(resetTimer.current), [])
+
+  // pointerdown only blocks the event from reaching the surrounding SelectItem / collapsible trigger
+  // (which select the safe or expand the row on pointer down). The copy runs on click, so a pointer
+  // click copies exactly once — running it on both would double the clipboard write and analytics
+  // event, since preventDefault on pointerdown does not cancel the synthetic click.
+  const stopParent = (e: MouseEvent | PointerEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+  }
+
+  const handleClick = (e: MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
     runCopy()
@@ -37,8 +48,8 @@ const CopyAddressButton = ({ address, testId = 'copy-address-btn' }: { address: 
           <span
             role="button"
             tabIndex={0}
-            onClick={handlePointer}
-            onPointerDown={handlePointer}
+            onClick={handleClick}
+            onPointerDown={stopParent}
             onKeyDown={handleKeyDown}
             className="shrink-0 rounded p-0.5 hover:bg-muted transition-colors cursor-pointer inline-flex"
             aria-label="Copy address"

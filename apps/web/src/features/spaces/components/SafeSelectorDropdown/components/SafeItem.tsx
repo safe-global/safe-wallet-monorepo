@@ -38,13 +38,7 @@ const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading
       {isUndeployed ? (
         <NotActivatedBadge isActivating={isActivating} className="shrink-0" />
       ) : (
-        <BalanceDisplay
-          balance={<FiatValue value={balance} />}
-          threshold={threshold}
-          owners={owners}
-          isLoading={isLoading}
-          showThreshold={false}
-        />
+        <BalanceDisplay balance={<FiatValue value={balance} />} isLoading={isLoading} />
       )}
     </div>
   )
