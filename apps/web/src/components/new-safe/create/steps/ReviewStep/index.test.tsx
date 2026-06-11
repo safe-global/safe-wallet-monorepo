@@ -201,4 +201,42 @@ describe('ReviewStep', () => {
 
     expect(getByText(/activate your account/)).toBeInTheDocument()
   })
+
+  it('should never offer relay / pay-now options for multichain safes, even when unauthenticated with relays available (WA-2555)', () => {
+    const mockMultiChain = [
+      {
+        chainId: '100',
+        chainName: 'Gnosis Chain',
+        l2: false,
+        nativeCurrency: { symbol: 'ETH' },
+      },
+      {
+        chainId: '1',
+        chainName: 'Ethereum',
+        l2: false,
+        nativeCurrency: { symbol: 'ETH' },
+      },
+    ] as Chain[]
+    const mockData: NewSafeFormData = {
+      name: 'Test',
+      networks: mockMultiChain,
+      threshold: 1,
+      owners: [{ name: '', address: '0x1' }],
+      saltNonce: 0,
+      safeVersion: LATEST_SAFE_VERSION as SafeVersion,
+    }
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
+
+    // No auth redux state => unauthenticated. Previously this coerced the pay method to
+    // PayNow, which surfaced the relay selector for multichain and crashed on "Create".
+    const { queryByText } = render(
+      <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+    )
+
+    // The counterfactual section is still shown for multichain...
+    expect(queryByText(/activate your account/)).toBeInTheDocument()
+    // ...but the relay execution-method selector must never appear for multichain.
+    expect(queryByText(/Who will pay gas fees:/)).not.toBeInTheDocument()
+  })
 })

@@ -248,8 +248,17 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   const customRPCs = useAppSelector(selectRpc)
 
-  // Derive effective pay method synchronously to avoid one-render gap
-  const effectivePayMethod = !isUserAuthenticated && payMethod === PayMethod.PayLater ? PayMethod.PayNow : payMethod
+  // Multichain Safes can only be deployed counterfactually (same address across networks
+  // via CREATE2 replay) — relay and pay-now are single-chain only. Never coerce multichain
+  // into PayNow: it surfaces relay options that don't apply and advances the creation
+  // stepper once per network, overrunning the step list and crashing. See WA-2555 / WA-2524.
+  // Single chain keeps the prior behaviour: unauthenticated users pay now to avoid the
+  // one-render gap before sign-in.
+  const effectivePayMethod = isMultiChainDeployment
+    ? PayMethod.PayLater
+    : !isUserAuthenticated && payMethod === PayMethod.PayLater
+      ? PayMethod.PayNow
+      : payMethod
 
   const handleBack = () => {
     onBack(data)
