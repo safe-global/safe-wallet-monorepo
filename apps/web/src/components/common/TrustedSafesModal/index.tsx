@@ -43,7 +43,7 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
-        <DialogContent className="flex max-h-[90vh] w-full max-w-[700px] flex-col gap-0 p-0">
+        <DialogContent className="flex max-h-[90vh] w-full max-w-[min(900px,calc(100vw-2rem))] flex-col gap-0 p-0">
           <DialogHeader className="shrink-0 border-b border-border px-6 pb-4 pt-6">
             <DialogTitle className="font-bold">Manage trusted Safes</DialogTitle>
           </DialogHeader>

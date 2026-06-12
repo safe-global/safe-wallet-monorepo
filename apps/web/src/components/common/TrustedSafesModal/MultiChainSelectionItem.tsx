@@ -110,7 +110,7 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
                 showPrefix={false}
                 highlight4bytes={!!multiSafe.similarityGroup}
               >
-                <span className="hidden sm:contents">{statusChips}</span>
+                {statusChips}
               </AccountItem.Info>
               <AccountItem.ChainBadge safes={safes} />
               <AccountItem.Balance fiatTotal={totalFiatValue?.toString()} isLoading={totalFiatValue === undefined} />
@@ -133,7 +133,6 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
           </div>
         )}
       </div>
-      <div className={`${css.accountItemChips} sm:hidden`}>{statusChips}</div>
     </div>
   )
 }

@@ -3,7 +3,6 @@ import type { SelectableSafe } from './useTrustedSafesModal.types'
 import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
 import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import SimilarityWarning from './SimilarityWarning'
-import css from '@/features/myAccounts/components/AccountItems/styles.module.css'
 
 interface TrustedSafesItemProps {
   safe: SelectableSafe
@@ -62,7 +61,7 @@ const TrustedSafesItem = ({ safe, onToggle }: TrustedSafesItemProps) => {
         hasExplorer
         highlight4bytes={!!safe.similarityGroup}
       >
-        <span className="hidden sm:contents">{statusChips}</span>
+        {statusChips}
       </AccountItem.Info>
       <AccountItem.ChainBadge chainId={safe.chainId} />
       <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
@@ -74,7 +73,6 @@ const TrustedSafesItem = ({ safe, onToggle }: TrustedSafesItemProps) => {
         undeployedSafe={!!undeployedSafe}
         hideNestedSafes
       />
-      <div className={`${css.accountItemChips} sm:hidden`}>{statusChips}</div>
     </AccountItem.Button>
   )
 }
