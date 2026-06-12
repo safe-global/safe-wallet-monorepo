@@ -55,6 +55,7 @@ const baseMockModal: UseTrustedSafesModalReturn = {
   confirmSimilarAddress: () => {},
   cancelSimilarAddress: () => {},
   confirmSelectAll: () => {},
+  skipSimilarSelectAll: () => {},
   cancelSelectAll: () => {},
   submitSelection: () => {},
   setSearchQuery: () => {},

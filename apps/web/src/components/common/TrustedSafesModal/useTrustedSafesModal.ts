@@ -8,6 +8,7 @@ import { useAllSafesGrouped } from '@/hooks/safes/useAllSafesGrouped'
 import useAllSafes from '@/hooks/safes/useAllSafes'
 import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
 import type { SelectableSafe, SelectableMultiChainSafe, SelectableItem } from './useTrustedSafesModal.types'
+import { isSelectableMultiChainSafe } from './useTrustedSafesModal.types'
 
 // Pinned addresses across all chains, normalized to lowercase
 const collectPinnedAddresses = (addedSafes: Record<string, Record<string, unknown>>): Set<string> => {
@@ -80,6 +81,7 @@ export interface UseTrustedSafesModalReturn {
   confirmSimilarAddress: () => void
   cancelSimilarAddress: () => void
   confirmSelectAll: () => void
+  skipSimilarSelectAll: () => void
   cancelSelectAll: () => void
   submitSelection: () => void
   setSearchQuery: (query: string) => void
@@ -103,7 +105,9 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
 
   const similarityResult = useMemo(() => detectSimilarAddresses(addresses), [addresses])
 
-  const availableItems = useMemo<SelectableItem[]>(() => {
+  // Structural list (no selection state) — rebuilds only when the underlying safes, pins,
+  // similarity, or search change, not on every checkbox click.
+  const structuralItems = useMemo<SelectableItem[]>(() => {
     if (!allMultiChainSafes || !allSingleSafes) return []
 
     const items: SelectableItem[] = []
@@ -118,13 +122,11 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
       if (!matchesSearch(multiSafe.address, multiSafe.name)) continue
 
       const group = similarityResult.getGroup(multiSafe.address)
-      const normalizedAddress = multiSafe.address.toLowerCase()
-      const isSelected = selectedAddresses.has(normalizedAddress)
 
       const selectableSafes: SelectableSafe[] = multiSafe.safes.map((safe) => ({
         ...safe,
         isPinned: Boolean(addedSafes[safe.chainId]?.[safe.address]),
-        isSelected,
+        isSelected: false,
         similarityGroup: group?.bucketKey,
       }))
 
@@ -136,7 +138,7 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
         isPinned,
         lastVisited: multiSafe.lastVisited,
         name: multiSafe.name,
-        isSelected,
+        isSelected: false,
         isPartiallySelected: false, // All chains share same selection
         similarityGroup: group?.bucketKey,
       } as SelectableMultiChainSafe)
@@ -151,13 +153,28 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
       items.push({
         ...safe,
         isPinned,
-        isSelected: selectedAddresses.has(safe.address.toLowerCase()),
+        isSelected: false,
         similarityGroup: group?.bucketKey,
       } as SelectableSafe)
     }
 
     return items
-  }, [allMultiChainSafes, allSingleSafes, addedSafes, similarityResult, selectedAddresses, searchQuery])
+  }, [allMultiChainSafes, allSingleSafes, addedSafes, similarityResult, searchQuery])
+
+  // Thin overlay injecting selection state over the structural list
+  const availableItems = useMemo<SelectableItem[]>(() => {
+    return structuralItems.map((item) => {
+      const isSelected = selectedAddresses.has(item.address.toLowerCase())
+      if (isSelectableMultiChainSafe(item)) {
+        return {
+          ...item,
+          isSelected,
+          safes: item.safes.map((safe) => ({ ...safe, isSelected })),
+        }
+      }
+      return { ...item, isSelected }
+    })
+  }, [structuralItems, selectedAddresses])
 
   // Check if there are any changes to submit (pins or unpins) across the full list,
   // not just the search-filtered view — selection persists across searches, so Save
@@ -227,30 +244,37 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     setPendingConfirmation(null)
   }, [])
 
-  // Select All acts on the visible (search-filtered) safes only; flagged ones are deferred
-  // to a confirmation dialog rather than selected directly.
+  // Select All acts on the visible (search-filtered) safes. When any are flagged, it defers the
+  // whole action to a confirmation dialog without touching the selection, so Cancel is a clean revert.
   const selectAll = useCallback(() => {
     if (similarAddressesForSelectAll.length > 0) {
-      setSelectedAddresses((prev) => {
-        const next = new Set(prev)
-        for (const item of availableItems) {
-          if (!similarityResult.isFlagged(item.address)) next.add(item.address.toLowerCase())
-        }
-        return next
-      })
       setPendingSelectAllConfirmation(true)
       return
     }
 
     setSelectedAddresses((prev) => new Set([...prev, ...visibleAddresses]))
-  }, [availableItems, similarAddressesForSelectAll, similarityResult, visibleAddresses])
+  }, [similarAddressesForSelectAll, visibleAddresses])
 
+  // "Yes, include them anyway" — select everything visible, similar addresses included
   const confirmSelectAll = useCallback(() => {
     setSelectedAddresses((prev) => new Set([...prev, ...visibleAddresses]))
     setPendingSelectAllConfirmation(false)
     trackEvent({ ...OVERVIEW_EVENTS.TRUSTED_SAFES_SIMILAR_ADDRESS_CONFIRM, label: 'select_all' })
   }, [visibleAddresses])
 
+  // "No, skip similar addresses" — select the visible non-flagged safes, leave the flagged ones out
+  const skipSimilarSelectAll = useCallback(() => {
+    setSelectedAddresses((prev) => {
+      const next = new Set(prev)
+      for (const item of availableItems) {
+        if (!similarityResult.isFlagged(item.address)) next.add(item.address.toLowerCase())
+      }
+      return next
+    })
+    setPendingSelectAllConfirmation(false)
+  }, [availableItems, similarityResult])
+
+  // X / overlay dismissal — abort Select All without changing the selection
   const cancelSelectAll = useCallback(() => {
     setPendingSelectAllConfirmation(false)
   }, [])
@@ -353,6 +377,7 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     confirmSimilarAddress,
     cancelSimilarAddress,
     confirmSelectAll,
+    skipSimilarSelectAll,
     cancelSelectAll,
     submitSelection,
     setSearchQuery,

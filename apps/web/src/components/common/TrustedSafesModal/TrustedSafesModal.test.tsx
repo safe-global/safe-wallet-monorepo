@@ -75,6 +75,7 @@ const mockModal: UseTrustedSafesModalReturn = {
   confirmSimilarAddress: jest.fn(),
   cancelSimilarAddress: jest.fn(),
   confirmSelectAll: jest.fn(),
+  skipSimilarSelectAll: jest.fn(),
   cancelSelectAll: jest.fn(),
   submitSelection: jest.fn(),
   setSearchQuery: jest.fn(),
@@ -99,6 +100,26 @@ describe('TrustedSafesModal', () => {
     // AccountItem uses checkbox data-testid format: safe-item-checkbox-{address}
     expect(screen.getByTestId('safe-item-checkbox-0x1234567890abcdef1234567890abcdef12345678')).toBeInTheDocument()
     expect(screen.getByTestId('safe-item-checkbox-0xabcdef1234567890abcdef1234567890abcdef12')).toBeInTheDocument()
+  })
+
+  it('should render the search bar when there are items', () => {
+    render(<TrustedSafesModal modal={mockModal} />)
+
+    expect(screen.getByPlaceholderText('Search by name or full address')).toBeInTheDocument()
+  })
+
+  it('should hide the search bar when there are no items and no query', () => {
+    const emptyModal = { ...mockModal, availableItems: [], searchQuery: '' }
+    render(<TrustedSafesModal modal={emptyModal} />)
+
+    expect(screen.queryByPlaceholderText('Search by name or full address')).not.toBeInTheDocument()
+  })
+
+  it('should keep the search bar when a query matches nothing', () => {
+    const noMatchModal = { ...mockModal, availableItems: [], searchQuery: 'nope' }
+    render(<TrustedSafesModal modal={noMatchModal} />)
+
+    expect(screen.getByPlaceholderText('Search by name or full address')).toBeInTheDocument()
   })
 
   it('should call close when cancel clicked', () => {
@@ -240,7 +261,7 @@ describe('TrustedSafesModal', () => {
     expect(mockModal.confirmSelectAll).toHaveBeenCalled()
   })
 
-  it('should call cancelSelectAll when cancel clicked in select all dialog', () => {
+  it('should call skipSimilarSelectAll when skip clicked in select all dialog', () => {
     const modalWithSelectAllConfirmation = {
       ...mockModal,
       pendingSelectAllConfirmation: true,
@@ -262,6 +283,6 @@ describe('TrustedSafesModal', () => {
 
     fireEvent.click(screen.getByText('No, skip similar addresses'))
 
-    expect(mockModal.cancelSelectAll).toHaveBeenCalled()
+    expect(mockModal.skipSimilarSelectAll).toHaveBeenCalled()
   })
 })

@@ -232,8 +232,7 @@ describe('useTrustedSafesModal', () => {
     expect(result.current.selectedAddresses.has(mockSafes[1].address.toLowerCase())).toBe(true)
   })
 
-  it('should show confirmation when selecting all with similar addresses', () => {
-    // Mock similar address detection
+  it('should show confirmation without changing selection when selecting all with similar addresses', () => {
     ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
       groups: [],
       addressToGroups: new Map(),
@@ -247,11 +246,8 @@ describe('useTrustedSafesModal', () => {
       result.current.selectAll()
     })
 
-    // Should show confirmation dialog
     expect(result.current.pendingSelectAllConfirmation).toBe(true)
-    // Should have only selected non-similar addresses
-    expect(result.current.selectedAddresses.has(mockSafes[0].address.toLowerCase())).toBe(false)
-    expect(result.current.selectedAddresses.has(mockSafes[1].address.toLowerCase())).toBe(true)
+    expect(result.current.selectedAddresses.size).toBe(0)
   })
 
   it('should select all including similar when confirmed', () => {
@@ -278,7 +274,7 @@ describe('useTrustedSafesModal', () => {
     expect(result.current.selectedAddresses.size).toBe(mockSafes.length)
   })
 
-  it('should keep only non-similar when select all cancelled', () => {
+  it('should revert to the prior selection when select all cancelled', () => {
     ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
       groups: [],
       addressToGroups: new Map(),
@@ -297,10 +293,30 @@ describe('useTrustedSafesModal', () => {
     })
 
     expect(result.current.pendingSelectAllConfirmation).toBe(false)
-    // Non-similar should remain selected
-    expect(result.current.selectedAddresses.has(mockSafes[1].address.toLowerCase())).toBe(true)
-    // Similar should not be selected
+    expect(result.current.selectedAddresses.size).toBe(0)
+  })
+
+  it('should select only non-similar safes when skipping similar addresses', () => {
+    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
+      groups: [],
+      addressToGroups: new Map(),
+      isFlagged: (addr: string) => addr === mockSafes[0].address,
+      getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
+    })
+
+    const { result } = renderHook(() => useTrustedSafesModal())
+
+    act(() => {
+      result.current.selectAll()
+    })
+
+    act(() => {
+      result.current.skipSimilarSelectAll()
+    })
+
+    expect(result.current.pendingSelectAllConfirmation).toBe(false)
     expect(result.current.selectedAddresses.has(mockSafes[0].address.toLowerCase())).toBe(false)
+    expect(result.current.selectedAddresses.has(mockSafes[1].address.toLowerCase())).toBe(true)
   })
 
   it('should deselect all safes', () => {

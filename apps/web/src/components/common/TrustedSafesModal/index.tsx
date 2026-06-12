@@ -30,6 +30,7 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
     confirmSimilarAddress,
     cancelSimilarAddress,
     confirmSelectAll,
+    skipSimilarSelectAll,
     cancelSelectAll,
     submitSelection,
     setSearchQuery,
@@ -97,6 +98,7 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
         open={pendingSelectAllConfirmation}
         similarAddresses={similarAddressesForSelectAll}
         onConfirm={confirmSelectAll}
+        onSkip={skipSimilarSelectAll}
         onCancel={cancelSelectAll}
       />
     </>

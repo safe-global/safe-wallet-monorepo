@@ -104,19 +104,23 @@ const TrustedSafesList = ({ items, isLoading, searchQuery, onSearchChange, onTog
     )
   }
 
+  const showSearch = items.length > 0 || Boolean(searchQuery)
+
   return (
     <div>
-      <InputGroup className="mb-4 rounded-md border-gray-100 shadow-none">
-        <InputGroupAddon>
-          <Search className="size-4" />
-        </InputGroupAddon>
-        <InputGroupInput
-          placeholder="Search by name or full address"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          autoComplete="off"
-        />
-      </InputGroup>
+      {showSearch && (
+        <InputGroup className="mb-4 rounded-md border-gray-100 shadow-none">
+          <InputGroupAddon>
+            <Search className="size-4" />
+          </InputGroupAddon>
+          <InputGroupInput
+            placeholder="Search by name or full address"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            autoComplete="off"
+          />
+        </InputGroup>
+      )}
 
       <div>
         {items.length === 0 ? (

@@ -9,10 +9,17 @@ interface SelectAllConfirmDialogProps {
   open: boolean
   similarAddresses: SelectableItem[]
   onConfirm: () => void
+  onSkip: () => void
   onCancel: () => void
 }
 
-const SelectAllConfirmDialog = ({ open, similarAddresses, onConfirm, onCancel }: SelectAllConfirmDialogProps) => {
+const SelectAllConfirmDialog = ({
+  open,
+  similarAddresses,
+  onConfirm,
+  onSkip,
+  onCancel,
+}: SelectAllConfirmDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
       <DialogContent className="max-w-[500px]">
@@ -43,7 +50,7 @@ const SelectAllConfirmDialog = ({ open, similarAddresses, onConfirm, onCancel }:
         <p className="mt-4 text-sm text-muted-foreground">Do you want to include these addresses in your selection?</p>
 
         <DialogFooter>
-          <Button onClick={onCancel} variant="ghost">
+          <Button onClick={onSkip} variant="ghost">
             No, skip similar addresses
           </Button>
           <Button onClick={onConfirm}>

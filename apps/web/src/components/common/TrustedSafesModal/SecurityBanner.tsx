@@ -17,8 +17,8 @@ const SecurityBanner = ({ title, className }: SecurityBannerProps) => {
     <Alert className={cn('mb-4 border-transparent bg-[var(--color-info-background)]', className)}>
       {title && <AlertTitle className="font-bold">{title}</AlertTitle>}
       <AlertDescription>
-        Some Safes linked to your wallet may be malicious or impersonations(address poisoning). Only trust Safes you can
-        verify.{' '}
+        Some Safes linked to your wallet may be malicious or impersonations (address poisoning). Only trust Safes you
+        can verify.{' '}
         <ExternalLink href={HelpCenterArticle.ADDRESS_POISONING} noIcon>
           Learn more about address poisoning
         </ExternalLink>
