@@ -23,8 +23,8 @@ jest.mock('@/features/spaces', () => ({
   useIsInvited: jest.fn(() => false),
   useAddressBookSearch: jest.fn(() => []),
   useGetSpaceAddressBook: jest.fn(() => []),
-  useGetPrivateAddressBook: jest.fn(() => []),
   useGetAddressBookRequests: jest.fn(() => []),
+  useCurrentSpaceId: jest.fn(() => '1'),
 }))
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   useUsersGetWithWalletsV1Query: jest.fn(),

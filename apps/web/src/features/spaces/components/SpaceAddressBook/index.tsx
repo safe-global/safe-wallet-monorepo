@@ -5,10 +5,8 @@ import {
   useIsAdmin,
   useAddressBookSearch,
   useGetSpaceAddressBook,
-  useGetPrivateAddressBook,
   useGetAddressBookRequests,
 } from '@/features/spaces'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -26,7 +24,7 @@ import PreviewInvite from '../InviteBanner/PreviewInvite'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import AddContact from './AddContact'
-import AddPrivateContact from './AddPrivateContact'
+import AddLocalContact from './AddLocalContact'
 import SpaceAddressBookTable from './SpaceAddressBookTable'
 import PendingRequestsTable from './PendingRequestsTable'
 import ActivityLog from './ActivityLog'
@@ -47,14 +45,8 @@ const SpaceAddressBook = () => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const addressBookItems = useGetSpaceAddressBook()
-  const privateContacts = useGetPrivateAddressBook()
   const pendingRequests = useGetAddressBookRequests()
   const allLocalAddressBooks = useAllAddressBooks()
-
-  const privateEntries: AddressBookEntry[] = useMemo(
-    () => privateContacts.map((item) => ({ ...item, isLocal: false, isPrivate: true })),
-    [privateContacts],
-  )
 
   const localContacts: AddressBookEntry[] = useMemo(() => {
     const walletAddress = user?.wallets[0]?.address ?? ''
@@ -81,31 +73,24 @@ const SpaceAddressBook = () => {
       createdAt: '',
       updatedAt: '',
       isLocal: true,
-      isPrivate: false,
     }))
   }, [allLocalAddressBooks, user?.wallets])
 
-  // My contacts = private contacts + local contacts (no space contacts)
+  // My contacts = the local address book (no space contacts)
   // Contacts that duplicate a space address are marked and sorted to the bottom
   const myContacts: AddressBookEntry[] = useMemo(() => {
     const spaceAddresses = new Set(addressBookItems.map((item) => item.address.toLowerCase()))
 
-    const uniqueLocal = localContacts.filter(
-      (local) => !privateEntries.some((priv) => sameAddress(priv.address, local.address)),
-    )
-    const allMine = [...privateEntries, ...uniqueLocal]
-
-    // Mark duplicates and sort them to the bottom
-    const marked = allMine.map((entry) => ({
+    const marked = localContacts.map((entry) => ({
       ...entry,
       isDuplicate: spaceAddresses.has(entry.address.toLowerCase()),
     }))
     return marked.sort((a, b) => Number(a.isDuplicate) - Number(b.isDuplicate))
-  }, [privateEntries, localContacts, addressBookItems])
+  }, [localContacts, addressBookItems])
 
   const filteredAllRaw = useAddressBookSearch(addressBookItems, searchQuery)
   const filteredAll: AddressBookEntry[] = useMemo(
-    () => filteredAllRaw.map((item) => ({ ...item, isLocal: false, isPrivate: false })),
+    () => filteredAllRaw.map((item) => ({ ...item, isLocal: false })),
     [filteredAllRaw],
   )
   const filteredMine = useAddressBookSearch(myContacts, searchQuery) as AddressBookEntry[]
@@ -163,7 +148,7 @@ const SpaceAddressBook = () => {
                     <ImportAddressBook />
                   </>
                 )}
-                {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddPrivateContact />}
+                {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddLocalContact />}
               </div>
               {(activeTab === 'workspace' ? addressBookItems.length > 0 : myContacts.length > 0) && (
                 <div className="relative w-full sm:w-[320px]">
@@ -207,32 +192,27 @@ const SpaceAddressBook = () => {
                           return (
                             <span className="inline-flex items-center gap-2">
                               <Badge variant="secondary">Already shared</Badge>
-                              <RemoveDuplicateButton
-                                address={entry.address}
-                                chainIds={entry.chainIds}
-                                isLocal={entry.isLocal}
-                                isPrivate={entry.isPrivate}
-                              />
+                              <RemoveDuplicateButton address={entry.address} chainIds={entry.chainIds} />
                             </span>
                           )
                         }
-                        if (isAdmin && (entry.isLocal || entry.isPrivate)) {
+                        if (isAdmin) {
                           return (
                             <AddToWorkspaceButton address={entry.address} name={entry.name} chainIds={entry.chainIds} />
                           )
                         }
-                        if (entry.isPrivate || entry.isLocal) {
-                          return (
-                            <RequestToAddButton
-                              address={entry.address}
-                              name={entry.name}
-                              chainIds={entry.chainIds}
-                              isLocal={entry.isLocal}
-                              alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
-                            />
-                          )
+                        // Invitees can preview the space but cannot propose contacts
+                        if (isInvited) {
+                          return null
                         }
-                        return null
+                        return (
+                          <RequestToAddButton
+                            address={entry.address}
+                            name={entry.name}
+                            chainIds={entry.chainIds}
+                            alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
+                          />
+                        )
                       }}
                     />
                   )}

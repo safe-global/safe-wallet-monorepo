@@ -34,34 +34,6 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['spaces'],
       }),
-      userAddressBookGetPrivateItemsV1: build.query<
-        UserAddressBookGetPrivateItemsV1ApiResponse,
-        UserAddressBookGetPrivateItemsV1ApiArg
-      >({
-        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/address-book/private` }),
-        providesTags: ['spaces'],
-      }),
-      userAddressBookUpsertPrivateItemsV1: build.mutation<
-        UserAddressBookUpsertPrivateItemsV1ApiResponse,
-        UserAddressBookUpsertPrivateItemsV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/spaces/${queryArg.spaceId}/address-book/private`,
-          method: 'PUT',
-          body: queryArg.upsertAddressBookItemsDto,
-        }),
-        invalidatesTags: ['spaces'],
-      }),
-      userAddressBookDeletePrivateItemV1: build.mutation<
-        UserAddressBookDeletePrivateItemV1ApiResponse,
-        UserAddressBookDeletePrivateItemV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/spaces/${queryArg.spaceId}/address-book/private/${queryArg.address}`,
-          method: 'DELETE',
-        }),
-        invalidatesTags: ['spaces'],
-      }),
       addressBookRequestsGetPendingRequestsV1: build.query<
         AddressBookRequestsGetPendingRequestsV1ApiResponse,
         AddressBookRequestsGetPendingRequestsV1ApiArg
@@ -256,27 +228,6 @@ export type AddressBooksDeleteByAddressV1ApiArg = {
   /** Address to remove from the address book (0x prefixed hex string) */
   address: string
 }
-export type UserAddressBookGetPrivateItemsV1ApiResponse =
-  /** status 200 Private address book items retrieved successfully */ UserAddressBookDto
-export type UserAddressBookGetPrivateItemsV1ApiArg = {
-  /** Space UUID (numeric ID accepted for legacy clients, deprecated) */
-  spaceId: string
-}
-export type UserAddressBookUpsertPrivateItemsV1ApiResponse =
-  /** status 200 Private address book updated successfully */ UserAddressBookDto
-export type UserAddressBookUpsertPrivateItemsV1ApiArg = {
-  /** Space UUID */
-  spaceId: string
-  /** Address book items to create or update */
-  upsertAddressBookItemsDto: UpsertAddressBookItemsDto
-}
-export type UserAddressBookDeletePrivateItemV1ApiResponse = unknown
-export type UserAddressBookDeletePrivateItemV1ApiArg = {
-  /** Space UUID */
-  spaceId: string
-  /** Address to remove (0x prefixed) */
-  address: string
-}
 export type AddressBookRequestsGetPendingRequestsV1ApiResponse =
   /** status 200 Pending requests retrieved successfully */ AddressBookRequestsDto
 export type AddressBookRequestsGetPendingRequestsV1ApiArg = {
@@ -288,7 +239,7 @@ export type AddressBookRequestsCreateRequestV1ApiResponse =
 export type AddressBookRequestsCreateRequestV1ApiArg = {
   /** Space UUID */
   spaceId: string
-  /** Address of the private contact to request adding */
+  /** The contact to propose for the space address book */
   createAddressBookRequestDto: CreateAddressBookRequestDto
 }
 export type AddressBookRequestsApproveRequestV1ApiResponse = unknown
@@ -475,24 +426,6 @@ export type AddressBookItem = {
 export type UpsertAddressBookItemsDto = {
   items: AddressBookItem[]
 }
-export type UserAddressBookItemDto = {
-  name: string
-  address: string
-  chainIds: string[]
-  /** Email or wallet address of the creator, "Unknown user" if the user has no display identity, or "Deleted user" */
-  createdBy: string
-  /** User ID of the creator */
-  createdByUserId: number
-  createdAt: object
-  updatedAt: object
-}
-export type UserAddressBookDto = {
-  /** Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback */
-  spaceId: string
-  /** Space UUID */
-  spaceUuid: string
-  data: UserAddressBookItemDto[]
-}
 export type AddressBookRequestItemDto = {
   id: number
   name: string
@@ -518,8 +451,12 @@ export type AddressBookRequestsDto = {
   data: AddressBookRequestItemDto[]
 }
 export type CreateAddressBookRequestDto = {
-  /** Address of the private contact to request adding to space */
+  /** Name of the proposed contact */
+  name: string
+  /** Address of the contact to propose for the space address book */
   address: string
+  /** Chain ids the contact applies to (at least one, duplicates are removed) */
+  chainIds: string[]
 }
 export type CreateSpaceResponse = {
   name: string
@@ -564,7 +501,7 @@ export type UpdateSpaceDto = {
   status?: 'ACTIVE'
 }
 export type SpaceAuditLogEntryDto = {
-  /** Monotonic entry id (bigint serialized as string). Stable row key — clients dedupe on it. */
+  /** Monotonic entry id (bigint serialized as string) */
   id: string
   eventType:
     | 'SPACE_CREATED'
@@ -698,10 +635,6 @@ export const {
   useLazyAddressBooksGetAddressBookItemsV1Query,
   useAddressBooksUpsertAddressBookItemsV1Mutation,
   useAddressBooksDeleteByAddressV1Mutation,
-  useUserAddressBookGetPrivateItemsV1Query,
-  useLazyUserAddressBookGetPrivateItemsV1Query,
-  useUserAddressBookUpsertPrivateItemsV1Mutation,
-  useUserAddressBookDeletePrivateItemV1Mutation,
   useAddressBookRequestsGetPendingRequestsV1Query,
   useLazyAddressBookRequestsGetPendingRequestsV1Query,
   useAddressBookRequestsCreateRequestV1Mutation,
