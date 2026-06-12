@@ -6,6 +6,8 @@ import { ChevronRight, Wallet } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { useIsQualifiedSafe } from '@/features/spaces'
 import SafeSelectorDropdown from '@/features/spaces/components/SafeSelectorDropdown'
+import TrustedSafesModal from '@/components/common/TrustedSafesModal'
+import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import { Button } from '@/components/ui/button'
 import { useAppSelector } from '@/store'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
@@ -88,6 +90,7 @@ function SpaceSafeBar() {
   const wallet = useWallet()
   const connectWallet = useConnectWallet()
   const { txFlow } = useContext(TxModalContext)
+  const trustedSafesModal = useTrustedSafesModal()
 
   // Use the matched Next.js route, not `usePathname`: error pages (404/403) render
   // under the original unmatched URL (e.g. `/hom`), where `usePathname` wouldn't match.
@@ -138,12 +141,14 @@ function SpaceSafeBar() {
             onRetry={refetch}
             header={dropdownHeader}
             footer={dropdownFooter}
+            onManageTrustedSafes={trustedSafesModal.open}
           />
         </div>
       </div>
       <SpaceNestedSafesButton />
       <SpaceChainSelector isLoading={isLoading} />
       <AccountsModal open={accountsModalOpen} onClose={() => setAccountsModalOpen(false)} />
+      <TrustedSafesModal modal={trustedSafesModal} />
     </div>
   )
 }

@@ -28,6 +28,7 @@ export interface SafeDropdownContainerProps {
   onRetry?: () => void
   header?: React.ReactNode
   footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
+  onManageTrustedSafes?: () => void
   closeDropdown: () => void
 }
 
@@ -73,6 +74,7 @@ const SafeDropdownContainer = ({
   onRetry,
   header,
   footer,
+  onManageTrustedSafes,
   closeDropdown,
 }: SafeDropdownContainerProps) => {
   const [search, setSearch] = useState('')
@@ -102,6 +104,31 @@ const SafeDropdownContainer = ({
     }
 
     if (filteredItems.length === 0) {
+      if (!query && onManageTrustedSafes) {
+        return (
+          <div className="px-4 py-6 text-center" data-testid="dropdown-empty">
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={() => {
+                closeDropdown()
+                onManageTrustedSafes()
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  closeDropdown()
+                  onManageTrustedSafes()
+                }
+              }}
+              className="cursor-pointer text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              data-testid="manage-trusted-safes-link"
+            >
+              Manage trusted Safes
+            </span>
+          </div>
+        )
+      }
       return (
         <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">
           {query ? 'No safes match your search' : 'No safes yet'}

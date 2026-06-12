@@ -64,6 +64,7 @@ function SafeSelectorDropdown({
   onRetry,
   header,
   footer,
+  onManageTrustedSafes,
 }: SafeSelectorDropdownProps) {
   const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
   // Force-openable so `isSingleSafe` can't hide the chevron when only one other safe exists.
@@ -142,6 +143,7 @@ function SafeSelectorDropdown({
         onRetry={onRetry}
         header={header}
         footer={footer}
+        onManageTrustedSafes={onManageTrustedSafes}
         closeDropdown={closeDropdown}
       />
     </Select>

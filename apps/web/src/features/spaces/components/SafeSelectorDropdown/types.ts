@@ -36,4 +36,6 @@ export interface SafeSelectorDropdownProps {
   onRetry?: () => void
   header?: React.ReactNode
   footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
+  /** When provided, the empty state shows a tertiary "Manage trusted Safes" action instead of plain "No safes yet" text. */
+  onManageTrustedSafes?: () => void
 }
