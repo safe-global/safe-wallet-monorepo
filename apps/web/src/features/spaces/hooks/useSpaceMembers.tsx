@@ -5,6 +5,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
+import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
@@ -38,7 +39,7 @@ const useAllMembers = (spaceId?: string) => {
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { data: currentData } = useMembersGetUsersV1Query(
     { spaceId: actualSpaceId ?? '' },
-    { skip: !isUserSignedIn || !actualSpaceId },
+    { skip: !isUserSignedIn || !actualSpaceId, ...SPACE_REFRESH_OPTIONS },
   )
   return currentData?.members || []
 }
