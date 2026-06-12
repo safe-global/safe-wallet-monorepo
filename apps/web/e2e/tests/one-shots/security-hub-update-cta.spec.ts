@@ -31,17 +31,12 @@ test.describe('Security Hub — outdated contract version CTA', { tag: '@one-sho
     walletPage,
     credentials,
   }) => {
-    // --- 1. Sign in to Spaces: connect the PK wallet, then SiWE.
+    // --- 1. Sign in to Spaces. The spaces sign-in screen chains wallet connect
+    // straight into SiWE; the returned CGW origin lets the API setup below talk
+    // to the same gateway (and session cookie) the app under test uses.
     await safePage.goto('/welcome/spaces')
     await walletPage.acceptCookies()
-    await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
-    // Capture the CGW origin from the SiWE verify call so the API setup below
-    // talks to the same gateway (and session cookie) the app under test uses.
-    const verifyResponse = safePage.waitForResponse(
-      (r) => /\/v1\/auth\/verify/.test(r.url()) && r.request().method() === 'POST' && r.ok(),
-    )
-    await walletPage.signInWithEthereum()
-    const cgwOrigin = new URL((await verifyResponse).url()).origin
+    const cgwOrigin = await walletPage.signInToSpaces(credentials.OWNER_4_PRIVATE_KEY)
 
     /** Authenticated CGW call from the page context (reuses the SiWE cookie). */
     const cgwFetch = (path: string, method: 'POST' | 'DELETE', body?: unknown): Promise<unknown> =>

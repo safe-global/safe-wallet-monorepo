@@ -44,6 +44,32 @@ export class WalletPage {
    * Returns only once the connected-state signal (account center) is visible.
    */
   async connectWallet(privateKey: string): Promise<void> {
+    await this.submitPkConnectForm(privateKey)
+
+    await this.accountCenter.waitFor({ state: 'visible' })
+  }
+
+  /**
+   * Sign in to Spaces from a Spaces sign-in screen (e.g. /welcome/spaces).
+   *
+   * Spaces login screens render no account center, so `connectWallet` cannot be
+   * used there. Connecting through the "Connect wallet" SignInButton chains
+   * straight into SiWE (the PK module signs programmatically, no popup), so the
+   * `/v1/auth/verify` response is the connected-and-authenticated signal.
+   *
+   * Returns the CGW origin extracted from the verify call — useful for
+   * follow-up API calls that must reuse the session cookie.
+   */
+  async signInToSpaces(privateKey: string): Promise<string> {
+    const verify = this.page.waitForResponse(
+      (r) => /\/v1\/auth\/verify/.test(r.url()) && r.request().method() === 'POST' && r.ok(),
+    )
+    await this.submitPkConnectForm(privateKey)
+    return new URL((await verify).url()).origin
+  }
+
+  /** Open the onboard modal and submit the "Private key" connect form. */
+  private async submitPkConnectForm(privateKey: string): Promise<void> {
     // Clicking the connect button opens the onboard modal, but the click can be
     // swallowed (hydration / transient state). Retry a few times, keyed off the
     // shadow "Private key" button (not the host), until the modal is open.
@@ -62,8 +88,6 @@ export class WalletPage {
 
     await this.privateKeyInput.fill(privateKey)
     await this.pkConnectBtn.click()
-
-    await this.accountCenter.waitFor({ state: 'visible' })
   }
 
   /**
