@@ -24,23 +24,25 @@ const SimilarityConfirmDialog = ({ open, safe, onConfirm, onCancel }: Similarity
           <DialogTitle>Similar address detected</DialogTitle>
         </DialogHeader>
 
-        <Alert variant="warning" className="mb-4">
-          <AlertDescription>
-            This address is similar to another safe in your list. This could indicate an address poisoning attack.
-          </AlertDescription>
-        </Alert>
+        <div className="flex flex-col gap-4 px-4">
+          <Alert variant="warning">
+            <AlertDescription>
+              This address is similar to another safe in your list. This could indicate an address poisoning attack.
+            </AlertDescription>
+          </Alert>
 
-        <div className="mb-4">
-          <p className="mb-1 text-sm text-muted-foreground">Selected safe</p>
-          <div className="rounded-md border border-border/50 bg-background p-4">
-            <EthHashInfo address={safe.address} showCopyButton shortAddress={false} showAvatar avatarSize={32} />
-            {safe.name && <p className="mt-2 text-sm text-foreground">Name: {safe.name}</p>}
+          <div>
+            <p className="mb-1 text-sm text-muted-foreground">Selected safe</p>
+            <div className="overflow-hidden rounded-md border border-border/50 bg-background p-4">
+              <EthHashInfo address={safe.address} showCopyButton shortAddress={false} showAvatar avatarSize={32} />
+              {safe.name && <p className="mt-2 text-sm text-foreground">Name: {safe.name}</p>}
+            </div>
           </div>
-        </div>
 
-        <p className="text-sm text-muted-foreground">
-          Verify the full address carefully. Continue only if you recognize this Safe.
-        </p>
+          <p className="text-sm text-muted-foreground">
+            Verify the full address carefully. Continue only if you recognize this Safe.
+          </p>
+        </div>
 
         <DialogFooter>
           <Button onClick={onCancel} variant="ghost">

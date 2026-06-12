@@ -27,27 +27,29 @@ const SelectAllConfirmDialog = ({
           <DialogTitle>Similar addresses detected</DialogTitle>
         </DialogHeader>
 
-        <Alert variant="warning" className="mb-4">
-          <AlertDescription>
-            {similarAddresses.length} Safe{similarAddresses.length === 1 ? '' : 's'} in your list closely resemble other
-            addresses. Review them carefully before continuing.
-          </AlertDescription>
-        </Alert>
+        <div className="flex flex-col gap-4 px-4">
+          <Alert variant="warning">
+            <AlertDescription>
+              {similarAddresses.length} Safe{similarAddresses.length === 1 ? '' : 's'} in your list closely resemble
+              other addresses. Review them carefully before continuing.
+            </AlertDescription>
+          </Alert>
 
-        <p className="mb-4 text-sm text-muted-foreground">The following addresses have been flagged as similar:</p>
+          <p className="text-sm text-muted-foreground">The following addresses have been flagged as similar:</p>
 
-        <ul className="max-h-[200px] overflow-auto rounded-md border border-border/50 bg-background">
-          {similarAddresses.map((item) => (
-            <li key={item.address} className="px-3 py-2">
-              <div className="w-full">
-                <EthHashInfo address={item.address} showCopyButton shortAddress={false} showAvatar avatarSize={24} />
-                {item.name && <span className="text-xs text-muted-foreground">{item.name}</span>}
-              </div>
-            </li>
-          ))}
-        </ul>
+          <ul className="max-h-[200px] overflow-auto rounded-md border border-border/50 bg-background">
+            {similarAddresses.map((item) => (
+              <li key={item.address} className="px-3 py-2">
+                <div className="w-full">
+                  <EthHashInfo address={item.address} showCopyButton shortAddress={false} showAvatar avatarSize={24} />
+                  {item.name && <span className="text-xs text-muted-foreground">{item.name}</span>}
+                </div>
+              </li>
+            ))}
+          </ul>
 
-        <p className="mt-4 text-sm text-muted-foreground">Do you want to include these addresses in your selection?</p>
+          <p className="text-sm text-muted-foreground">Do you want to include these addresses in your selection?</p>
+        </div>
 
         <DialogFooter>
           <Button onClick={onSkip} variant="ghost">
