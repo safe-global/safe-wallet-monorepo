@@ -3,6 +3,15 @@
   margin-bottom: var(--space-2);
 }
 
+.paper {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.progressBar :global(.MuiLinearProgress-root) {
+  border-radius: 0;
+}
+
 .pane {
   display: flex;
   flex-direction: column;

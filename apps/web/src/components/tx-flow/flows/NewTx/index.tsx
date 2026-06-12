@@ -41,7 +41,7 @@ const NewTxFlow = () => {
         >
           <ChainIndicator inline className={css.chain} />
 
-          <Grid container component={Paper}>
+          <Grid container component={Paper} className={css.paper}>
             <Grid item xs={12} className={css.progressBar}>
               <ProgressBar value={progress} />
             </Grid>

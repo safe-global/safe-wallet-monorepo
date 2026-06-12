@@ -12,6 +12,10 @@
   border-bottom-right-radius: 0;
 }
 
+.progressBar :global(.MuiLinearProgress-root) {
+  border-radius: 0;
+}
+
 .headerInner {
   display: flex;
   justify-content: space-between;
