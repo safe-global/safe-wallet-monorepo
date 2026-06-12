@@ -5,6 +5,7 @@ import type { AppDispatch, RootState } from '@/src/store'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { chainIdToHex } from '@safe-global/utils/features/walletconnect/utils'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { REJECTED_SIGNING_METHODS, SUPPORTED_NAMESPACE } from './constants'
 
 export type RoutedResponse = ReturnType<typeof formatJsonRpcResult> | ReturnType<typeof formatJsonRpcError>
@@ -115,7 +116,8 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
           message: `Safe is not on chain ${activeChain.chainId}`,
         })
       }
-      if (bundle.from !== activeSafe.address.value) {
+      // Case-insensitive: dApps don't reliably checksum `from`, while CGW's address is checksummed.
+      if (!sameAddress(bundle.from, activeSafe.address.value)) {
         return formatJsonRpcError(id, { code: -32602, message: 'Invalid from address' })
       }
       // Per-call shape (web's mapping rules):
