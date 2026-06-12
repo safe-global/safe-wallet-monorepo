@@ -1,0 +1,104 @@
+import { cgwApi, type Operation } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type { SafeTransaction } from '@safe-global/types-kit'
+import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
+import { setDraft, type DraftTx } from '@/src/store/draftTxSlice'
+import { synthesizeDraftTxDetails } from '@/src/features/ConfirmTx/utils/synthesizeDraftTxDetails'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
+import type { AppDispatch } from '@/src/store'
+
+type SafeSDK = NonNullable<ReturnType<typeof getSafeSDK>>
+
+/**
+ * Returns the protocol-kit SDK singleton, verified to be bound to the expected chain.
+ * Composing on a mismatched SDK would produce a draft for the wrong chain, so this throws
+ * instead — shared by the Send flow and the WalletConnect tx-request flow.
+ */
+export async function getVerifiedSafeSDK(chainId: string): Promise<SafeSDK> {
+  const safeSDK = getSafeSDK()
+  if (!safeSDK) {
+    throw new Error('Safe SDK is not initialized')
+  }
+
+  const sdkChainId = await safeSDK.getChainId()
+  if (sdkChainId.toString() !== chainId) {
+    throw new Error(`Chain mismatch: SDK on chain ${sdkChainId}, expected ${chainId}`)
+  }
+
+  return safeSDK
+}
+
+export type PreviewAndStashDraftArgs = {
+  safeSDK: SafeSDK
+  safeTx: SafeTransaction
+  chainId: string
+  safeAddress: string
+  safe: Pick<SafeState, 'owners' | 'threshold'>
+  dispatch: AppDispatch
+}
+
+/**
+ * Shared tail of the local draft pipeline: hash the composed SafeTransaction, ask CGW for a
+ * /preview, synthesize a TransactionDetails shape, and stash a DraftTx so the existing
+ * sign/review screens render it without a /propose round-trip. The /propose call only
+ * happens when the user signs.
+ *
+ * Throws (without stashing anything) when the preview fails.
+ *
+ * Returns the `safeTxHash` (used as the synthetic txId for the downstream review screens).
+ */
+export const previewAndStashDraft = async ({
+  safeSDK,
+  safeTx,
+  chainId,
+  safeAddress,
+  safe,
+  dispatch,
+}: PreviewAndStashDraftArgs): Promise<string> => {
+  const safeTxHash = await safeSDK.getTransactionHash(safeTx)
+
+  const previewPromise = dispatch(
+    cgwApi.endpoints.transactionsPreviewTransactionV1.initiate({
+      chainId,
+      safeAddress,
+      previewTransactionDto: {
+        to: safeTx.data.to,
+        data: safeTx.data.data || null,
+        value: safeTx.data.value?.toString() ?? '0',
+        operation: (safeTx.data.operation ?? 0) as Operation,
+      },
+    }),
+  )
+
+  let txDetails
+  try {
+    const previewResult = await previewPromise
+
+    if ('error' in previewResult || !previewResult.data) {
+      throw asError('error' in previewResult ? previewResult.error : new Error('Preview unavailable'))
+    }
+
+    txDetails = synthesizeDraftTxDetails({
+      safeAddress,
+      safeTxHash,
+      buildParams: safeTx.data,
+      owners: safe.owners,
+      threshold: safe.threshold,
+      preview: previewResult.data,
+    })
+  } finally {
+    previewPromise.reset()
+  }
+
+  const draft: DraftTx = {
+    chainId,
+    safeAddress,
+    buildParams: safeTx.data,
+    safeTxHash,
+    txDetails,
+  }
+
+  dispatch(setDraft(draft))
+
+  return safeTxHash
+}
