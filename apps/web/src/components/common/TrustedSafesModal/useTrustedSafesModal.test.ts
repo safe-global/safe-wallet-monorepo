@@ -421,5 +421,72 @@ describe('useTrustedSafesModal', () => {
 
       expect(result.current.hasChanges).toBe(false)
     })
+
+    it('is false when an already-pinned, still-selected safe is hidden by the search', () => {
+      const pinnedAddress = mockSafes[0].address
+      ;(store.useAppSelector as jest.Mock).mockReturnValue({
+        '1': { [pinnedAddress]: { owners: [], threshold: 1 } },
+      })
+
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      act(() => {
+        result.current.open()
+      })
+
+      act(() => {
+        result.current.setSearchQuery('Safe 2')
+      })
+
+      expect(result.current.selectedAddresses.has(pinnedAddress.toLowerCase())).toBe(true)
+      expect(result.current.hasChanges).toBe(false)
+    })
+  })
+
+  describe('multi-chain safes', () => {
+    const multiChainAddress = '0xdddddddddddddddddddddddddddddddddddddddd'
+    const multiChainSafes = [
+      { chainId: '1', address: multiChainAddress, name: 'Multichain Safe', isPinned: false },
+      { chainId: '137', address: multiChainAddress, name: 'Multichain Safe', isPinned: false },
+    ]
+
+    beforeEach(() => {
+      ;(useAllSafes.default as jest.Mock).mockReturnValue(multiChainSafes)
+    })
+
+    it('groups same-address chains into a single selectable item', () => {
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      expect(result.current.availableItems).toHaveLength(1)
+      expect(result.current.totalSafesCount).toBe(1)
+    })
+
+    it('toggling the group selects the shared address', () => {
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      act(() => {
+        result.current.toggleSelection(multiChainAddress)
+      })
+
+      expect(result.current.selectedAddresses.has(multiChainAddress.toLowerCase())).toBe(true)
+      expect(result.current.selectedCount).toBe(1)
+    })
+
+    it('submit dispatches addOrUpdateSafe once per chain', () => {
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      act(() => {
+        result.current.toggleSelection(multiChainAddress)
+      })
+
+      act(() => {
+        result.current.submitSelection()
+      })
+
+      const pinDispatches = mockDispatch.mock.calls.filter(([action]) => action?.type === 'addedSafes/addOrUpdateSafe')
+      expect(pinDispatches).toHaveLength(2)
+      const pinnedChainIds = pinDispatches.map(([action]) => action.payload.safe.chainId).sort()
+      expect(pinnedChainIds).toEqual(['1', '137'])
+    })
   })
 })
