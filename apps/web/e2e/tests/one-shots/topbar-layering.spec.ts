@@ -26,7 +26,8 @@
  * Tag: @one-shot — runs only under the "one-shots" Playwright project.
  * Requires CYPRESS_WALLET_CREDENTIALS (same secret the Cypress suite uses).
  */
-import { test, expect, type Page } from '../../src/fixtures/test.fixture'
+import { type Page } from '@playwright/test'
+import { test, expect } from '../../src/fixtures/test.fixture'
 import { SAFES } from '../../src/data/constants'
 
 test.use({ viewport: { width: 1280, height: 800 } })
@@ -38,7 +39,7 @@ const TEST_SAFE = process.env.LAYERING_TEST_SAFE || SAFES.SEP_STATIC_SAFE_2
 
 /** y of the element's top edge, or null when it has no box */
 const topOf = async (page: Page, selector: string): Promise<number | null> => {
-  return page.evaluate((sel) => {
+  return page.evaluate((sel: string) => {
     const el = document.querySelector(sel)
     return el ? el.getBoundingClientRect().top : null
   }, selector)
@@ -46,11 +47,10 @@ const topOf = async (page: Page, selector: string): Promise<number | null> => {
 
 /** Whether the topmost element painted at (x, y) lies inside `containerSelector` */
 const hitIsInside = async (page: Page, x: number, y: number, containerSelector: string): Promise<boolean> => {
-  return page.evaluate(({ x, y, sel }) => !!document.elementFromPoint(x, y)?.closest(sel), {
-    x,
-    y,
-    sel: containerSelector,
-  })
+  return page.evaluate(
+    ({ x, y, sel }: { x: number; y: number; sel: string }) => !!document.elementFromPoint(x, y)?.closest(sel),
+    { x, y, sel: containerSelector },
+  )
 }
 
 const TOPBAR = 'header' // the banner landmark rendered by the Topbar
