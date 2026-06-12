@@ -13,7 +13,6 @@
 
 import type HnBanner from './components/HnBanner'
 import type HnDashboardBanner from './components/HnDashboardBanner'
-import type HnMiniTxBanner from './components/HnMiniTxBanner'
 import type HnPendingBanner from './components/HnPendingBanner'
 import type { HnQueueAssessmentBanner } from './components/HnQueueAssessmentBanner'
 import type { HnActivatedBannerForSettings } from './components/HnActivatedSettingsBanner'
@@ -33,7 +32,6 @@ export interface HypernativeContract {
   // Banner Components (PascalCase → stub renders null)
   HnBanner: typeof HnBanner
   HnDashboardBanner: typeof HnDashboardBanner
-  HnMiniTxBanner: typeof HnMiniTxBanner
   HnPendingBanner: typeof HnPendingBanner
   HnQueueAssessmentBanner: typeof HnQueueAssessmentBanner
   HnQueueAssessment: typeof HnQueueAssessment

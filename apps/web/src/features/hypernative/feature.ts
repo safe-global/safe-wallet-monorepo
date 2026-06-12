@@ -13,7 +13,6 @@ import type { HypernativeContract } from './contract'
 // Direct component imports (already lazy-loaded at feature level)
 import HnBanner from './components/HnBanner'
 import HnDashboardBanner from './components/HnDashboardBanner'
-import HnMiniTxBanner from './components/HnMiniTxBanner'
 import HnPendingBanner from './components/HnPendingBanner'
 import { HnQueueAssessmentBanner } from './components/HnQueueAssessmentBanner'
 import { HnActivatedBannerForSettings } from './components/HnActivatedSettingsBanner'
@@ -36,7 +35,6 @@ const feature: HypernativeContract = {
   // Banner Components
   HnBanner,
   HnDashboardBanner,
-  HnMiniTxBanner,
   HnPendingBanner,
   HnQueueAssessmentBanner,
 
