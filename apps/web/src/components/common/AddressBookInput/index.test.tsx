@@ -119,6 +119,9 @@ describe('AddressBookInput', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    // The address book is persisted to localStorage by the store middleware. Clear it
+    // so entries added in one test (e.g. via EntryDialog) don't hydrate into the next.
+    window.localStorage.clear()
     mockUseGetSpaceAddressBook.mockReturnValue([])
     jest.spyOn(useChains, 'default').mockImplementation(() => ({
       configs: [mockChain],
@@ -297,7 +300,7 @@ describe('AddressBookInput', () => {
     await waitFor(() => expect(utils.queryByText('add it to your address book', { exact: false })).toBeNull())
   })
 
-  it('should show a cloud icon for a server-stored (space) contact in a spaceOnly context', async () => {
+  it('should group a server-stored (space) contact under the workspace header in a spaceOnly context', async () => {
     const spaceContact = spaceContactBuilder({ name: 'Server Contact' })
     mockUseGetSpaceAddressBook.mockReturnValue([spaceContact])
 
@@ -323,13 +326,52 @@ describe('AddressBookInput', () => {
       fireEvent.mouseUp(input)
     })
 
-    await waitFor(() => expect(utils.getByText('Server Contact', { exact: false })).toBeDefined())
-    expect(utils.getByTestId('CloudOutlinedIcon')).toBeInTheDocument()
+    await waitFor(() => expect(utils.getByText('Server Contact')).toBeDefined())
+    const groupHeader = utils.getByTestId('contact-group-header')
+    expect(groupHeader).toHaveTextContent('Contacts of your Workspace')
+    expect(utils.queryByText('Local contacts')).not.toBeInTheDocument()
   })
 
-  it('should not show a cloud icon for a local contact', async () => {
+  it('should show the "Added by" provenance for a space contact', async () => {
+    const creator = checksumAddress(faker.finance.ethereumAddress())
+    const spaceContact = spaceContactBuilder({
+      name: 'Server Contact',
+      createdBy: creator,
+      createdAt: new Date().toISOString(),
+    })
+    mockUseGetSpaceAddressBook.mockReturnValue([spaceContact])
+
+    const name = 'recipient'
+    const SpaceForm = () => {
+      const methods = useForm<{ [name]: string }>({ defaultValues: { [name]: '' }, mode: 'all' })
+      return (
+        <FormProvider {...methods}>
+          <AddressBookSourceProvider source="spaceOnly">
+            <AddressBookInput data-testid={testId} name={name} label="Recipient address" />
+          </AddressBookSourceProvider>
+        </FormProvider>
+      )
+    }
+
+    const utils = render(<SpaceForm />, {
+      initialReduxState: { addressBook: { [mockChain.chainId]: {} } },
+    })
+    const input = utils.getByLabelText('Recipient address', { exact: false }) as HTMLInputElement
+
+    act(() => {
+      fireEvent.mouseDown(input)
+      fireEvent.mouseUp(input)
+    })
+
+    await waitFor(() => expect(utils.getByText('Server Contact')).toBeDefined())
+    expect(utils.getByText('Added by')).toBeInTheDocument()
+    expect(utils.getByText(creator)).toBeInTheDocument()
+    expect(utils.queryByText('Saved on this device')).not.toBeInTheDocument()
+  })
+
+  it('should group a local contact under the local header with its provenance', async () => {
     const { input, utils } = setup('', {
-      [checksumAddress(faker.finance.ethereumAddress())]: 'Local Contact',
+      [checksumAddress(faker.finance.ethereumAddress())]: 'Browser Contact',
     })
 
     act(() => {
@@ -337,7 +379,10 @@ describe('AddressBookInput', () => {
       fireEvent.mouseUp(input)
     })
 
-    await waitFor(() => expect(utils.getByText('Local Contact', { exact: false })).toBeDefined())
-    expect(utils.queryByTestId('CloudOutlinedIcon')).not.toBeInTheDocument()
+    await waitFor(() => expect(utils.getByText('Browser Contact')).toBeDefined())
+    const groupHeader = utils.getByTestId('contact-group-header')
+    expect(groupHeader).toHaveTextContent('Local contacts')
+    expect(utils.getByText('Saved on this device')).toBeInTheDocument()
+    expect(utils.queryByText('Contacts of', { exact: false })).not.toBeInTheDocument()
   })
 })
