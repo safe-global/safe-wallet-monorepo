@@ -18,6 +18,7 @@ import '@/styles/shadcn.css'
 import { BRAND_NAME } from '@/config/constants'
 import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
+import LaunchScreen from '@/components/common/LaunchScreen'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import useTxNotifications from '@/hooks/useTxNotifications'
@@ -213,6 +214,8 @@ const SafeWalletApp = ({
             <InitApp />
 
             <LazyWeb3Init />
+
+            <LaunchScreen />
 
             <PageLayout pathname={router.pathname}>
               <Component {...pageProps} key={safeKey} />
