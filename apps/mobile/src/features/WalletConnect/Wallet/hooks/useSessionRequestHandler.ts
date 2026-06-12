@@ -97,7 +97,8 @@ export const useSessionRequestHandler = (walletKit: IWalletKit | null, deps: Ses
         const dappName = walletKit.getActiveSessions()[request.topic]?.peer.metadata.name || 'this dApp'
         toast.show(`Switch your active Safe to ${network} to use ${dappName}`, { native: false, duration: 3000 })
       }
-      // Ensure no stray pending entry for this id.
+      // Defensive only: sync-answered methods were never pushed to pending, so this is
+      // normally a no-op — it just guarantees no stray entry can survive for this id.
       dispatch(removePending({ id: request.id, kind: 'request' }))
     },
     [walletKit, dispatch, store, deps, toast],

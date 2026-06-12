@@ -210,6 +210,8 @@ export const WalletKitProvider: React.FC = () => {
     const unsubscribe = startAppListening({
       matcher: isAnyOf(setActiveSafe, switchActiveChain, clearActiveSafe),
       effect: async (action, api) => {
+        // For clearActiveSafe (and setActiveSafe(null)) both `next` and `nextChainId` stay
+        // undefined, so matchesNext is false for every entry — all requests get rejected.
         const next = setActiveSafe.match(action) ? action.payload : null
         const nextChainId = switchActiveChain.match(action) ? action.payload.chainId : next?.chainId
         // switchActiveChain keeps the Safe address; the other actions carry the full context.
