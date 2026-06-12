@@ -24,7 +24,7 @@ export const CHECK_DEFS: Record<string, CheckDef> = {
     id: 'contract_version',
     title: 'Contract version',
     shortDescription: 'Whether the Safe is running the latest and most secure version.',
-    fixRoute: AppRoutes.settings.modules,
+    fixRoute: AppRoutes.settings.setup,
     ctaLabel: 'Update',
     category: 'account',
   },

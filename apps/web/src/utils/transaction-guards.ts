@@ -55,10 +55,10 @@ import { Operation } from '@safe-global/store/gateway/types'
 // NOTE: Import directly from deployments file (not barrel) to avoid circular dependency
 // transaction-guards.ts is imported by store slices, and the barrel imports createFeatureHandle
 // which has dependencies that create a circular import chain
-import { getDeployedSpendingLimitModuleAddress } from '@/features/spending-limits/services/spendingLimitDeployments'
+import { getDeployedSpendingLimitModuleAddress } from '@/features/spending-limits/services'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { NamedAddress } from '@/components/new-safe/create/types'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '@/features/recovery'
 import { id } from 'ethers'
 import {
   getSafeToL2MigrationDeployment,

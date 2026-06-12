@@ -37,11 +37,8 @@
  * - camelCase → service (undefined when not ready)
  */
 
-import { createFeatureHandle } from '@/features/__core__'
-import type { SpacesContract } from './contract'
-
 // Feature handle - uses semantic mapping
-export const SpacesFeature = createFeatureHandle<SpacesContract>('spaces')
+export { SpacesFeature } from './SpacesFeature'
 
 // Contract type (for type annotations if needed)
 export type { SpacesContract } from './contract'
@@ -100,3 +97,17 @@ export {
 
 // Public types (compile-time only, no runtime cost)
 export { mapSpaceContactsToAddressBookState } from './utils'
+
+// Components consumed from outside the feature
+export { HeaderNavigation } from './components/HeaderNavigation'
+export { SpacesEnhancedSidebar } from './components/Sidebar/SpacesEnhancedSidebar'
+export { default as ConnectWalletHint } from './components/ConnectWalletHint'
+export { default as ChainSelectorBlock } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'
+export type { ChainSelectorBlockProps } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'
+export type { SafeItemData, SafeItemDataChain } from './components/SafeSelectorDropdown/types'
+export { default as SafeSelectorDropdown } from './components/SafeSelectorDropdown'
+export { default as SafeWidget, WidgetItem } from './components/SafeWidget'
+export { default as SafeCardReadOnly } from './components/SafeAccounts/SafeCardReadOnly'
+export { default as FiatBalance } from './components/SelectSafesOnboarding/components/FiatBalance'
+export { DashboardHeader } from './components/Dashboard/DashboardHeader'
+export { default as SpacesLogin } from './components/SpacesLogin'

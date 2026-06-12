@@ -11,14 +11,14 @@ import {
   SafeAppMockup,
   deriveSidePanelAccountsFromSpace,
   useSafeNameLookup,
-} from '@/features/spaces/components/OnboardingLayout'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
-import { useOnboardingStepCount } from '@/features/spaces/hooks/useOnboardingStepCount'
+} from '../OnboardingLayout'
+import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import { flattenSafeItems } from '@/hooks/safes'
 import MemberInviteRow from './components/MemberInviteRow'
 import useInviteNavigation from './hooks/useInviteNavigation'
 import useInviteForm from './hooks/useInviteForm'
-import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberRole } from '../../hooks/useSpaceMembers'
 
 const ONBOARDING_STEP = 3
 const FORM_ID = 'invite-members-form'

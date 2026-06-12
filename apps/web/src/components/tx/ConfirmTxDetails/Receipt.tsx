@@ -14,7 +14,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { Operation } from '@safe-global/store/gateway/types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { useGtfFeePreview } from '@/features/gtf/hooks/useGtfFeePreview'
+import { useGtfFeePreview } from '@/features/gtf'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import {
   useDomainHash,

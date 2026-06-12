@@ -2,18 +2,15 @@ import { renderHook } from '@/tests/test-utils'
 import * as reactRedux from 'react-redux'
 import { useRoleProps } from './useRoleProps'
 import { Role } from '../config'
-import * as spendingLimitsSlice from '@/features/spending-limits/store/spendingLimitsSlice'
 import type { SpendingLimitState } from '@/features/spending-limits'
 
 describe('useRoleProps', () => {
-  const selectSpendingLimitsSpy = jest.spyOn(spendingLimitsSlice, 'selectSpendingLimits')
   const useSelectorSpy = jest.spyOn(reactRedux, 'useSelector')
 
   const mockSpendingLimits = [{ limit: 1000 }, { limit: 2000 }] as unknown as SpendingLimitState[]
 
   beforeEach(() => {
-    selectSpendingLimitsSpy.mockReturnValue(mockSpendingLimits)
-    useSelectorSpy.mockImplementation((sliceFn) => sliceFn({}))
+    useSelectorSpy.mockReturnValue(mockSpendingLimits)
   })
 
   afterEach(() => {

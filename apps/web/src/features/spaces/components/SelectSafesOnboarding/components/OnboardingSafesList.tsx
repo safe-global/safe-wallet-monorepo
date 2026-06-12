@@ -1,7 +1,7 @@
 import { type AllSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
 import SafeCard from './SafeCard'
 import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
-import SelectAllToggle, { type SelectAllState } from '@/features/spaces/components/SelectAllToggle/SelectAllToggle'
+import SelectAllToggle, { type SelectAllState } from '../../SelectAllToggle/SelectAllToggle'
 import { Typography } from '@/components/ui/typography'
 import { SAFE_ACCOUNTS_LIMIT, safeAccountsLimitReachedText } from '@/features/spaces/constants'
 

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import { getSafeSetups, getSharedSetup, hasMultiChainAddNetworkFeature } from '@/features/multichain'
 import { isPredictedSafeProps } from '@/features/counterfactual/services'
 import { AppRoutes } from '@/config/routes'

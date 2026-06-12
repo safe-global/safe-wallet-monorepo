@@ -10,10 +10,10 @@ import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import isEmpty from 'lodash/isEmpty'
-import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
+import { HypernativeFeature, type HypernativeAuthStatus, HnViewMoreOnHypernativeRow } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
 import { AnalysisGroupCardDisabled } from './AnalysisGroupCardDisabled'
-import { HnViewMoreOnHypernativeRow } from '@/features/hypernative/components/HnViewMoreOnHypernativeRow'
+// eslint-disable-next-line no-restricted-imports -- re-exporting this hook from the hypernative barrel closes a hypernative<->safe-shield<->tx-flow module-init cycle (TDZ)
 import { useSafeShieldAssessmentUrl } from '@/features/hypernative/hooks/useSafeShieldAssessmentUrl'
 
 const VISIBLE_CAP = 3

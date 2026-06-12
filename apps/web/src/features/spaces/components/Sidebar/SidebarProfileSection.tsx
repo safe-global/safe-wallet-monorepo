@@ -74,8 +74,8 @@ const ProfileSkeleton = () => (
   </>
 )
 
-export const getSidebarProfileInfo = (membership: MemberDto, signerAddress?: string, email?: string) => {
-  const memberName = membership.name || 'User'
+export const getSidebarProfileInfo = (membership?: MemberDto, signerAddress?: string, email?: string) => {
+  const memberName = membership?.name || 'User'
   const profileName = email || memberName
   const displayName = email || (signerAddress ? shortenAddress(signerAddress) : memberName)
 

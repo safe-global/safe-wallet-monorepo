@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { SpacesFeature } from '@/features/spaces'
+import { SpacesFeature } from '../../SpacesFeature'
 import { useLoadFeature } from '@/features/__core__'
 import { BRAND_NAME } from '@/config/constants'
 import { useHasFeature } from '@/hooks/useChains'
