@@ -18,7 +18,7 @@ const SimilarityWarning = () => {
           <Badge
             variant="outline"
             data-testid="similarity-warning"
-            className="cursor-help gap-1 border-yellow-300 text-yellow-800"
+            className="cursor-help gap-1 border-yellow-300 text-yellow-800 dark:border-[var(--color-warning-main)] dark:text-[var(--color-warning1-contrast-text)]"
           >
             <TriangleAlert className="size-4" />
             High similarity

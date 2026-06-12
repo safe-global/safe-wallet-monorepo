@@ -77,8 +77,10 @@ const SimilarityGroupContainer = ({
       className="my-0.5 overflow-hidden rounded-md border border-border/50"
       data-testid={`similarity-group-${group.groupKey}`}
     >
-      <div className="bg-yellow-50 px-3 py-1.5">
-        <span className="text-xs font-medium text-yellow-800">Similar addresses – verify carefully</span>
+      <div className="bg-yellow-50 px-3 py-1.5 dark:bg-[var(--color-warning-background)]">
+        <span className="text-xs font-medium text-yellow-800 dark:text-[var(--color-warning1-contrast-text)]">
+          Similar addresses – verify carefully
+        </span>
       </div>
       <div className="mb-4 bg-background p-2">
         {group.items.map((item) => (
