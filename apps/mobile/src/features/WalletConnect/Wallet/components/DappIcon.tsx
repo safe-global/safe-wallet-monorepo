@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Image } from 'expo-image'
 import { SvgUri } from 'react-native-svg'
 import { View, YStack } from 'tamagui'
@@ -15,19 +15,33 @@ type Props = {
 
 // dApp metadata icons come in both raster (png/jpg/webp) and SVG. Tamagui's Image (RN Image)
 // and expo-image can't render SVG, so route SVG URLs through react-native-svg's SvgUri.
-// Detection is by extension — SVGs served without one fall through to expo-image and simply
-// render blank, the same as today; the placeholder covers the missing-icon case.
+// Detection is by extension — SVGs served without one (common behind CDNs) fail to load in
+// expo-image, which triggers onError and falls back to the placeholder below, same as any
+// other broken icon URL.
 const isSvgUrl = (url?: string): boolean => !!url && /\.svg($|\?|#)/i.test(url)
 
 export const DappIcon: React.FC<Props> = ({ url, size = 64, circle = false, badgeContent, badgeThemeName }) => {
-  if (!url) {
-    return <YStack width={size} height={size} borderRadius="$3" backgroundColor="$backgroundSecondary" />
-  }
+  const [failed, setFailed] = useState(false)
+  const showPlaceholder = !url || failed
 
-  const image = isSvgUrl(url) ? (
-    <SvgUri uri={url} width={size} height={size} />
+  const image = showPlaceholder ? (
+    <YStack
+      width={size}
+      height={size}
+      borderRadius={circle ? size : '$3'}
+      backgroundColor="$backgroundSecondary"
+      testID="dapp-icon-placeholder"
+    />
+  ) : isSvgUrl(url) ? (
+    <SvgUri uri={url} width={size} height={size} onError={() => setFailed(true)} />
   ) : (
-    <Image source={url} style={{ width: size, height: size }} contentFit="contain" />
+    <Image
+      source={url}
+      style={{ width: size, height: size }}
+      contentFit="contain"
+      onError={() => setFailed(true)}
+      testID="dapp-icon-image"
+    />
   )
 
   return (
