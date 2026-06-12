@@ -22,7 +22,11 @@ export type SessionRequestHandlerDeps = Omit<RouteContext, 'request' | 'dispatch
 
 const WRONG_ACTIVE_CHAIN_CODE = getSdkError('UNSUPPORTED_CHAINS').code
 
-const REJECTED_SIGNING_METHODS_SET: ReadonlySet<string> = new Set(REJECTED_SIGNING_METHODS)
+// safe_setSettings is in the reject list but isn't a signing method — showing the
+// "message signing" toast for it would be misleading, so it's rejected silently.
+const MESSAGE_SIGNING_METHODS_SET: ReadonlySet<string> = new Set(
+  REJECTED_SIGNING_METHODS.filter((m) => m !== 'safe_setSettings'),
+)
 
 export const useSessionRequestHandler = (walletKit: IWalletKit | null, deps: SessionRequestHandlerDeps) => {
   const dispatch = useAppDispatch()
@@ -79,7 +83,7 @@ export const useSessionRequestHandler = (walletKit: IWalletKit | null, deps: Ses
       // Explain rejections of message-signing methods (eth_signTypedData_v4, personal_sign, …) —
       // dApps like CowSwap fire these in parallel with their tx request, and without a toast
       // the user just sees a red "unknown RPC error" in the dApp with no context.
-      if (REJECTED_SIGNING_METHODS_SET.has(request.params.request.method)) {
+      if (MESSAGE_SIGNING_METHODS_SET.has(request.params.request.method)) {
         toast.show('Message signing is not yet supported on mobile', { native: false, duration: 2500 })
       }
       // Explain tx requests we auto-reject because the active Safe was switched to a chain the

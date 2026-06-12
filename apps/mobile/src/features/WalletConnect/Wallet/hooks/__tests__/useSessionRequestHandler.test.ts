@@ -75,6 +75,14 @@ describe('useSessionRequestHandler', () => {
     expect(mockToastShow).toHaveBeenCalledWith('Message signing is not yet supported on mobile', expect.anything())
   })
 
+  it('rejects safe_setSettings silently — no message-signing toast', async () => {
+    const { wk, respond, emit } = makeWalletKit()
+    renderHookWithStore(() => useSessionRequestHandler(wk, baseDeps), createTestStore({}))
+    emit(makeRequest('safe_setSettings', [{ offChainSigning: true }]))
+    await waitFor(() => expect(respond).toHaveBeenCalled())
+    expect(mockToastShow).not.toHaveBeenCalled()
+  })
+
   it('toasts a switch-network hint when the dApp session is on a different chain', async () => {
     const { wk, respond, emit } = makeWalletKit()
     renderHookWithStore(() => useSessionRequestHandler(wk, baseDeps), createTestStore({}))
