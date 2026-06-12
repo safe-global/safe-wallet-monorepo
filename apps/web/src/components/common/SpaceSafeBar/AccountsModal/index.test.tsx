@@ -208,4 +208,20 @@ describe('AccountsModal', () => {
 
     expect(screen.getByTestId('safe-item-card-mock').getAttribute('data-open-label')).toBe('owned_safes_modal')
   })
+
+  it('appends the originating page as `next` on the Add existing and Create new links', () => {
+    render(<AccountsModal open onClose={jest.fn()} />, {
+      routerProps: { pathname: '/spaces', query: { spaceId: '1' } },
+    })
+
+    const addHref = screen.getByTestId('add-safe-button').getAttribute('href') ?? ''
+    const addUrl = new URL(addHref, 'http://localhost')
+    expect(addUrl.pathname).toBe('/new-safe/load')
+    expect(addUrl.searchParams.get('next')).toBe('/spaces?spaceId=1')
+
+    const createHref = screen.getByRole('link', { name: /Create new/i }).getAttribute('href') ?? ''
+    const createUrl = new URL(createHref, 'http://localhost')
+    expect(createUrl.pathname).toBe('/new-safe/create')
+    expect(createUrl.searchParams.get('next')).toBe('/spaces?spaceId=1')
+  })
 })

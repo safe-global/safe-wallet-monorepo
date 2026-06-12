@@ -253,7 +253,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       ...base,
       canCoverFees: true,
       gasFee: {
-        label: 'Gas fee',
+        label: 'Max gas fee',
         amount: gasAmount,
         currency: gasSymbol,
         fiatAmount: formatCurrencyMinimal(gasFiatUsd, currency),
@@ -274,7 +274,7 @@ export const useFeesPreview = (): FeesPreviewData => {
         isConfirmation: true,
         isLegacySigned: true,
         canCoverFees: true,
-        gasFee: { label: 'Gas fee', note: 'Calculated at execution' },
+        gasFee: { label: 'Max gas fee', note: 'Calculated at execution' },
         loading: false,
         error: false,
       }
@@ -285,7 +285,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       isLegacySigned: true,
       canCoverFees: true,
       gasFee: {
-        label: 'Gas fee',
+        label: 'Max gas fee',
         amount: getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain),
         currency: nativeSymbol,
       },
@@ -301,7 +301,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       return {
         ...base,
         canCoverFees: true,
-        gasFee: { label: 'Gas fee', note: 'Calculated at execution' },
+        gasFee: { label: 'Max gas fee', note: 'Calculated at execution' },
         loading: false,
         error: false,
       }
@@ -327,7 +327,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       ...base,
       canCoverFees: true,
       gasFee: {
-        label: 'Gas fee',
+        label: 'Max gas fee',
         amount: getTotalFeeFormatted(gasPrice?.maxFeePerGas, gasLimit, chain),
         currency: nativeSymbol,
       },
@@ -343,7 +343,7 @@ export const useFeesPreview = (): FeesPreviewData => {
     return {
       ...base,
       canCoverFees: true,
-      gasFee: { label: 'Gas fee', currency: gasSymbol },
+      gasFee: { label: 'Max gas fee', currency: gasSymbol },
       loading: true,
       error: false,
     }
@@ -377,7 +377,7 @@ export const useFeesPreview = (): FeesPreviewData => {
       ...base,
       canCoverFees: true,
       gasFee: {
-        label: 'Gas fee',
+        label: 'Max gas fee',
         amount: gasAmount,
         currency: gasSymbol,
         fiatAmount: formatCurrencyMinimal(relayCostFiat, relayCostFiatCode),
@@ -399,7 +399,7 @@ export const useFeesPreview = (): FeesPreviewData => {
     return {
       ...base,
       canCoverFees: false,
-      gasFee: { label: 'Gas fee', note: 'Calculated at execution' },
+      gasFee: { label: 'Max gas fee', note: 'Calculated at execution' },
       loading: false,
       error: false,
     }
@@ -409,7 +409,7 @@ export const useFeesPreview = (): FeesPreviewData => {
     ...base,
     canCoverFees: false,
     gasFee: {
-      label: 'Gas fee',
+      label: 'Max gas fee',
       amount: fallbackAmount,
       currency: nativeSymbol,
     },

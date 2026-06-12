@@ -140,7 +140,7 @@ const AddMemberInput = ({ error, inputProps, onSelectAddress, value }: AddMember
           name={inputProps.name}
           inputRef={inputProps.ref}
           onBlur={inputProps.onBlur}
-          label={error || 'Address or email'}
+          label={error || 'Address, email or ENS'}
           required={!error}
           error={!!error}
           fullWidth

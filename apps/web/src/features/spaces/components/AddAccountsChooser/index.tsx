@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
+import { buildCurrentNextUrl } from '@/utils/nextUrl'
 import { ChevronRight, CirclePlus, Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -97,7 +98,10 @@ const AddAccountsChooser = ({
 
   const handleCreate = () => {
     setChooserOpen(false)
-    router.push(AppRoutes.newSafe.create)
+    router.push({
+      pathname: AppRoutes.newSafe.create,
+      query: { next: buildCurrentNextUrl(router.pathname, router.query) },
+    })
   }
 
   const handleAdd = () => {

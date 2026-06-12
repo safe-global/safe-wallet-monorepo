@@ -22,6 +22,7 @@ import { getAvailableSaltNonce } from '@/components/new-safe/create/logic/utils'
 import {
   buildTransactionOptions,
   getDeploymentType,
+  getEffectivePayMethod,
   getNetworkLabel,
   getPaymentMethodLabel,
   getThresholdLabel,
@@ -249,8 +250,13 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   const customRPCs = useAppSelector(selectRpc)
 
-  // Derive effective pay method synchronously to avoid one-render gap
-  const effectivePayMethod = !isUserAuthenticated && payMethod === PayMethod.PayLater ? PayMethod.PayNow : payMethod
+  // Derive effective pay method synchronously to avoid one-render gap.
+  const effectivePayMethod = getEffectivePayMethod(
+    isMultiChainDeployment,
+    isUserAuthenticated,
+    payMethod,
+    isCounterfactualEnabled,
+  )
 
   const handleBack = () => {
     onBack(data)
@@ -434,7 +440,12 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     isCounterfactualEnabled,
   )
 
-  const isDisabled = showNetworkWarning || isCreating
+  // Pay later persists counterfactual data to the backend, so it requires an
+  // authenticated session. This only blocks multichain (where Pay now is
+  // disabled and Pay later is forced); single-chain Pay later falls back to
+  // Pay now when not signed in, so effectivePayMethod is never PayLater there.
+  const requiresSignIn = effectivePayMethod === PayMethod.PayLater && !isUserAuthenticated
+  const isDisabled = showNetworkWarning || isCreating || requiresSignIn
 
   return (
     <>
@@ -447,8 +458,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           <Box data-testid="pay-now-later-message-box" className={layoutCss.row}>
             <PayNowPayLater
               totalFee={totalFee}
+              willRelay={willRelay}
               isMultiChain={isMultiChainDeployment}
-              canRelay={canRelay}
               payMethod={effectivePayMethod}
               setPayMethod={setPayMethod}
               isUserAuthenticated={isUserAuthenticated}
