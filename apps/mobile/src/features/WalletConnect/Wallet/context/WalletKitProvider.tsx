@@ -17,6 +17,7 @@ import { getWalletKit } from '../walletKit'
 import { useActiveSafeBinding } from '../hooks/useActiveSafeBinding'
 import { useSessionProposalHandler } from '../hooks/useSessionProposalHandler'
 import { useSessionRequestHandler, type SessionRequestHandlerDeps } from '../hooks/useSessionRequestHandler'
+import { isValidTxRequestParams } from '../services/methodRouter'
 import {
   setSessions,
   removeSession,
@@ -55,6 +56,16 @@ export const WalletKitProvider: React.FC = () => {
         pendings.forEach((r) => {
           const method = r.params.request.method
           if (!isDeferredTxMethod(method)) {
+            return
+          }
+          // Restored requests never passed routeSessionRequest, so enforce the same param
+          // shape here — a malformed bundle would otherwise only blow up inside compose
+          // with an unactionable toast. Reject it back to the dApp instead of seeding.
+          if (!isValidTxRequestParams(method, r.params.request.params)) {
+            wk.respondSessionRequest({
+              topic: r.topic,
+              response: formatJsonRpcError(r.id, { code: -32602, message: 'Invalid call parameters.' }),
+            }).catch((e) => logWalletKitError('respondSessionRequest (restored, invalid params) failed', e))
             return
           }
           dispatch(
