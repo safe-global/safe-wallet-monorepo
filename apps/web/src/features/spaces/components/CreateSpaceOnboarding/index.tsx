@@ -13,11 +13,11 @@ import {
   SafeAppMockup,
   deriveSidePanelAccountsFromSpace,
   useSafeNameLookup,
-} from '@/features/spaces/components/OnboardingLayout'
+} from '../OnboardingLayout'
 import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
 import { flattenSafeItems } from '@/hooks/safes'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
-import { useOnboardingStepCount } from '@/features/spaces/hooks/useOnboardingStepCount'
+import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import { AppRoutes } from '@/config/routes'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'

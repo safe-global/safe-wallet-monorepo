@@ -29,7 +29,7 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { AdminOnlyWorkspaceTooltip } from '@/features/spaces/components/AdminOnlyWorkspaceTooltip'
+import { AdminOnlyWorkspaceTooltip } from '../../../AdminOnlyWorkspaceTooltip'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getDeterministicColor } from '@/utils/colors'
 

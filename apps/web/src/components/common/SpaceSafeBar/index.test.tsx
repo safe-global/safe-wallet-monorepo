@@ -24,6 +24,9 @@ jest.mock('next/router', () => ({
 
 jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: jest.fn(() => false),
+  get SafeSelectorDropdown() {
+    return jest.requireMock('@/features/spaces/components/SafeSelectorDropdown').default
+  },
 }))
 
 jest.mock('./hooks/useSpaceSafeSelectorItems', () => ({

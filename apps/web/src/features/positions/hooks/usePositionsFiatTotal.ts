@@ -1,4 +1,4 @@
-import usePositions from '@/features/positions/hooks/usePositions'
+import usePositions from './usePositions'
 import { calculatePositionsFiatTotal } from '@safe-global/utils/features/positions'
 
 const usePositionsFiatTotal = () => {

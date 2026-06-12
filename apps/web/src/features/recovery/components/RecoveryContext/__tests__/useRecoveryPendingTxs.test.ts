@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 
-import { RecoveryEvent, recoveryDispatch, RecoveryTxType } from '@/features/recovery/services/recoveryEvents'
+import { RecoveryEvent, recoveryDispatch, RecoveryTxType } from '../../../services/recoveryEvents'
 import { act, renderHook } from '@/tests/test-utils'
 import { useRecoveryPendingTxs } from '../useRecoveryPendingTxs'
 

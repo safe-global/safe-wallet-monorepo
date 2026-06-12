@@ -192,7 +192,12 @@ describe('AddAccountsChooser', () => {
     fireEvent.click(screen.getByTestId('add-space-account-button'))
     fireEvent.click(screen.getByText('Create new Safe'))
 
-    expect(mockPush).toHaveBeenCalledWith('/new-safe/create')
+    expect(mockPush).toHaveBeenCalledWith(
+      expect.objectContaining({
+        pathname: '/new-safe/create',
+        query: { next: '/spaces?spaceId=1' },
+      }),
+    )
   })
 
   it('lets non-admin members open AccountsModal from "See all Safe accounts"', () => {

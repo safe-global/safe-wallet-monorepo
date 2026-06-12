@@ -1,7 +1,7 @@
 import { Popover, PopoverTrigger } from '@/components/ui/popover'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import useLogout from '@/hooks/useLogout'
-import { ProfilePopoverContent } from '@/features/spaces/components/Sidebar/ProfilePopoverContent'
+import { ProfilePopoverContent } from '../Sidebar/ProfilePopoverContent'
 
 interface MembershipProps {
   profileName?: string
