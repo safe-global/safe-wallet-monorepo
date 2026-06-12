@@ -408,4 +408,51 @@ describe('AddressBookInput', () => {
     expect(utils.getByText('Browser Contact')).toBeInTheDocument()
     expect(utils.getByText('Server Contact')).toBeInTheDocument()
   })
+
+  it('should select a contact with keyboard navigation across the group boundary', async () => {
+    const spaceContact = spaceContactBuilder({ name: 'Server Contact' })
+    mockUseGetSpaceAddressBook.mockReturnValue([spaceContact])
+    const localAddress = checksumAddress(faker.finance.ethereumAddress())
+
+    const { input, utils } = setup('', { [localAddress]: 'Browser Contact' })
+
+    act(() => {
+      fireEvent.mouseDown(input)
+      fireEvent.mouseUp(input)
+    })
+
+    await waitFor(() => expect(utils.getAllByTestId('contact-group-header')).toHaveLength(2))
+
+    // The merged list puts space contacts first, so the second ArrowDown must skip
+    // the local group header and land on the local contact
+    act(() => {
+      fireEvent.keyDown(input, { key: 'ArrowDown' })
+      fireEvent.keyDown(input, { key: 'ArrowDown' })
+      fireEvent.keyDown(input, { key: 'Enter' })
+      jest.advanceTimersByTime(1000)
+    })
+
+    await waitFor(() => expect(utils.getByTestId('address-book-recipient')).toHaveTextContent(localAddress))
+  })
+
+  it('should render user-provided actor names inside the spoofing-defense pill', async () => {
+    const spaceContact = spaceContactBuilder({
+      name: 'Server Contact',
+      createdBy: 'Added by admin · just now', // a name trying to mimic the provenance copy
+      createdAt: new Date().toISOString(),
+    })
+    mockUseGetSpaceAddressBook.mockReturnValue([spaceContact])
+
+    const { input, utils } = setup('', {})
+
+    act(() => {
+      fireEvent.mouseDown(input)
+      fireEvent.mouseUp(input)
+    })
+
+    await waitFor(() => expect(utils.getByText('Server Contact')).toBeDefined())
+
+    const actor = utils.getByText('Added by admin · just now')
+    expect(actor.className).toContain('nameBadge')
+  })
 })
