@@ -168,74 +168,84 @@ const SpaceAddressBook = () => {
             </div>
           )}
 
-          <div className="bg-card rounded-lg border p-4">
-            <TabsContent value="workspace">
-              {searchQuery && filteredAll.length === 0 ? (
-                <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
-              ) : addressBookItems.length === 0 ? (
+          <TabsContent value="workspace">
+            {searchQuery && filteredAll.length === 0 ? (
+              <div className="bg-card rounded-lg border p-4">
+                <p className="text-muted-foreground text-sm">Found 0 results</p>
+              </div>
+            ) : addressBookItems.length === 0 ? (
+              <div className="bg-card rounded-lg border p-4">
                 <p className="text-muted-foreground text-sm">No contacts in this workspace yet.</p>
-              ) : (
-                <SpaceAddressBookTable entries={filteredAll} />
-              )}
-            </TabsContent>
+              </div>
+            ) : (
+              <SpaceAddressBookTable entries={filteredAll} />
+            )}
+          </TabsContent>
 
-            {isPrivateAddressBookEnabled && (
-              <>
-                <TabsContent value="mine">
-                  {searchQuery && filteredMine.length === 0 ? (
-                    <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
-                  ) : filteredMine.length === 0 ? (
+          {isPrivateAddressBookEnabled && (
+            <>
+              <TabsContent value="mine">
+                {searchQuery && filteredMine.length === 0 ? (
+                  <div className="bg-card rounded-lg border p-4">
+                    <p className="text-muted-foreground text-sm">Found 0 results</p>
+                  </div>
+                ) : filteredMine.length === 0 ? (
+                  <div className="bg-card rounded-lg border p-4">
                     <p className="text-muted-foreground text-sm">You haven&apos;t added any contacts yet.</p>
-                  ) : (
-                    <SpaceAddressBookTable
-                      entries={filteredMine}
-                      showAddedBy={false}
-                      renderExtraAction={(entry) => {
-                        if (entry.isDuplicate) {
-                          return (
-                            <span className="inline-flex items-center gap-2">
-                              <Badge variant="secondary">Already shared</Badge>
-                              <RemoveDuplicateButton
-                                address={entry.address}
-                                chainIds={entry.chainIds}
-                                isLocal={entry.isLocal}
-                                isPrivate={entry.isPrivate}
-                              />
-                            </span>
-                          )
-                        }
-                        if (isAdmin && (entry.isLocal || entry.isPrivate)) {
-                          return (
-                            <AddToWorkspaceButton address={entry.address} name={entry.name} chainIds={entry.chainIds} />
-                          )
-                        }
-                        if (entry.isPrivate || entry.isLocal) {
-                          return (
-                            <RequestToAddButton
+                  </div>
+                ) : (
+                  <SpaceAddressBookTable
+                    entries={filteredMine}
+                    showAddedBy={false}
+                    renderExtraAction={(entry) => {
+                      if (entry.isDuplicate) {
+                        return (
+                          <span className="inline-flex items-center gap-2">
+                            <Badge variant="secondary">Already shared</Badge>
+                            <RemoveDuplicateButton
                               address={entry.address}
-                              name={entry.name}
                               chainIds={entry.chainIds}
                               isLocal={entry.isLocal}
-                              alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
+                              isPrivate={entry.isPrivate}
                             />
-                          )
-                        }
-                        return null
-                      }}
-                    />
-                  )}
-                </TabsContent>
+                          </span>
+                        )
+                      }
+                      if (isAdmin && (entry.isLocal || entry.isPrivate)) {
+                        return (
+                          <AddToWorkspaceButton address={entry.address} name={entry.name} chainIds={entry.chainIds} />
+                        )
+                      }
+                      if (entry.isPrivate || entry.isLocal) {
+                        return (
+                          <RequestToAddButton
+                            address={entry.address}
+                            name={entry.name}
+                            chainIds={entry.chainIds}
+                            isLocal={entry.isLocal}
+                            alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
+                          />
+                        )
+                      }
+                      return null
+                    }}
+                  />
+                )}
+              </TabsContent>
 
-                <TabsContent value="pending">
+              <TabsContent value="pending">
+                <div className="bg-card rounded-lg border p-4">
                   <PendingRequestsTable requests={pendingRequests} />
-                </TabsContent>
-              </>
-            )}
+                </div>
+              </TabsContent>
+            </>
+          )}
 
-            <TabsContent value="activity">
+          <TabsContent value="activity">
+            <div className="bg-card rounded-lg border p-4">
               <ActivityLog entries={filteredAll} />
-            </TabsContent>
-          </div>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </>

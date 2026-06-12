@@ -127,4 +127,22 @@ describe('SpaceAddressBookTable', () => {
     expect(screen.getAllByTestId('eth-hash-info')).toHaveLength(1)
     expect(screen.getByTestId('email-info')).toHaveTextContent(createdBy)
   })
+
+  it('dims and strikes through duplicate entries', () => {
+    const { container } = render(
+      <SpaceAddressBookTable entries={[entryBuilder().with({ isDuplicate: true }).build()]} />,
+    )
+
+    expect(container.querySelector('.opacity-50')).toBeInTheDocument()
+    expect(container.querySelector('.line-through')).toBeInTheDocument()
+  })
+
+  it('omits the middle column and its header when neither showAddedBy nor showLastUpdated is set', () => {
+    render(<SpaceAddressBookTable entries={[entryBuilder().build()]} showAddedBy={false} showLastUpdated={false} />)
+
+    expect(screen.queryByText('Added by')).not.toBeInTheDocument()
+    expect(screen.queryByText('Last updated')).not.toBeInTheDocument()
+    // Only the Address column renders EthHashInfo when there is no "Added by" column
+    expect(screen.getAllByTestId('eth-hash-info')).toHaveLength(1)
+  })
 })

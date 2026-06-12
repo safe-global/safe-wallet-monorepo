@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
+import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
+import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EmailInfo from '@/components/common/EmailInfo'
 import { NetworkLogosList } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { BookUser, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { BookUser } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from './SpaceAddressBookActions'
 import { cn } from '@/utils/cn'
@@ -26,7 +25,8 @@ type SpaceAddressBookTableProps = {
   renderExtraAction?: (entry: AddressBookEntry) => React.ReactNode
 }
 
-const PAGE_SIZE = 25
+type HeadCell = EnhancedTableProps['headCells'][number]
+type Row = EnhancedTableProps['rows'][number]
 
 function SpaceAddressBookTable({
   entries,
@@ -34,90 +34,86 @@ function SpaceAddressBookTable({
   showLastUpdated = false,
   renderExtraAction,
 }: SpaceAddressBookTableProps) {
-  const [page, setPage] = useState(0)
-
-  useEffect(() => {
-    setPage(0)
-  }, [entries])
-
   const hasMiddleColumn = showAddedBy || showLastUpdated
-  const totalPages = Math.ceil(entries.length / PAGE_SIZE)
-  const paginatedEntries = entries.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
-  return (
-    <>
-      <Table className="table-fixed">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[20%]">Name</TableHead>
-            <TableHead className="w-[30%]">Address</TableHead>
-            <TableHead className="w-[15%]">Chains</TableHead>
-            {hasMiddleColumn && <TableHead className="w-[20%]">{showAddedBy ? 'Added by' : 'Last updated'}</TableHead>}
-            <TableHead className={hasMiddleColumn ? 'w-[15%]' : 'w-[35%]'} />
-          </TableRow>
-        </TableHeader>
+  const headCells: HeadCell[] = [
+    { id: 'name', label: 'Name', width: '20%', disableSort: true },
+    { id: 'address', label: 'Address', width: '30%', disableSort: true },
+    { id: 'chains', label: 'Chains', width: '15%', disableSort: true },
+    ...(hasMiddleColumn
+      ? [{ id: 'info', label: showAddedBy ? 'Added by' : 'Last updated', width: '20%', disableSort: true }]
+      : []),
+    { id: 'actions', label: '', width: hasMiddleColumn ? '15%' : '35%', sticky: true, disableSort: true },
+  ]
 
-        <TableBody>
-          {paginatedEntries.map((entry) => (
-            <TableRow key={entry.address} className={entry.isDuplicate ? 'opacity-50' : ''}>
-              {/* Name */}
-              <TableCell className="font-bold">
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <div
-                        className={cn('flex items-center gap-1.5 overflow-hidden', entry.isDuplicate && 'line-through')}
-                      />
-                    }
-                  >
-                    {entry.isLocal && <BookUser className="text-muted-foreground size-4 flex-shrink-0" />}
-                    <span className="min-w-0 truncate">{entry.name}</span>
-                  </TooltipTrigger>
-                  <TooltipContent>{entry.name}</TooltipContent>
-                </Tooltip>
-              </TableCell>
+  const rows: Row[] = entries.map((entry) => {
+    const dim = entry.isDuplicate ? 'opacity-50' : undefined
 
-              {/* Address */}
-              <TableCell>
-                <div className="text-[0.8em]">
-                  <EthHashInfo
-                    address={entry.address}
-                    shortAddress={false}
-                    showPrefix={false}
-                    showName={false}
-                    highlight4bytes
-                    hasExplorer
-                    showCopyButton
-                    avatarSize={24}
-                  />
-                </div>
-              </TableCell>
-
-              {/* Chains */}
-              <TableCell>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <span className="inline-flex origin-left scale-85">
-                      <NetworkLogosList
-                        networks={entry.chainIds.map((chainId) => ({ chainId }))}
-                        showHasMore
-                        maxVisible={3}
-                      />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <div className="flex flex-col gap-1">
-                      {entry.chainIds.map((chainId) => (
-                        <ChainIndicator key={chainId} chainId={chainId} />
-                      ))}
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TableCell>
-
-              {/* 4th column: Added by / Last updated (only if applicable) */}
-              {hasMiddleColumn && (
-                <TableCell>
+    const cells: Row['cells'] = {
+      name: {
+        rawValue: entry.name,
+        content: (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <div
+                  className={cn('flex items-center gap-1.5 overflow-hidden', dim, entry.isDuplicate && 'line-through')}
+                />
+              }
+            >
+              {entry.isLocal && <BookUser className="text-muted-foreground size-4 flex-shrink-0" />}
+              <span className="min-w-0 truncate">{entry.name}</span>
+            </TooltipTrigger>
+            <TooltipContent>{entry.name}</TooltipContent>
+          </Tooltip>
+        ),
+      },
+      address: {
+        rawValue: entry.address,
+        content: (
+          <div className={cn('text-[0.8em]', dim)}>
+            <EthHashInfo
+              address={entry.address}
+              shortAddress={false}
+              showPrefix={false}
+              showName={false}
+              highlight4bytes
+              hasExplorer
+              showCopyButton
+              avatarSize={24}
+            />
+          </div>
+        ),
+      },
+      chains: {
+        rawValue: entry.chainIds.length,
+        content: (
+          <Tooltip>
+            <TooltipTrigger>
+              <span className={cn('inline-flex origin-left scale-85', dim)}>
+                <NetworkLogosList
+                  networks={entry.chainIds.map((chainId) => ({ chainId }))}
+                  showHasMore
+                  maxVisible={3}
+                />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="flex flex-col gap-1">
+                {entry.chainIds.map((chainId) => (
+                  <ChainIndicator key={chainId} chainId={chainId} />
+                ))}
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        ),
+      },
+      ...(hasMiddleColumn
+        ? {
+            info: {
+              rawValue: showAddedBy ? (entry.createdBy ?? '') : entry.updatedAt || entry.createdAt,
+              content: (
+                <span className={dim}>
                   {showAddedBy && entry.createdBy ? (
                     isAddress(entry.createdBy) ? (
                       <EthHashInfo
@@ -135,43 +131,27 @@ function SpaceAddressBookTable({
                       {formatDate(entry.updatedAt || entry.createdAt)}
                     </span>
                   ) : null}
-                </TableCell>
-              )}
-
-              {/* Actions */}
-              <TableCell className="text-right">
-                <span className="inline-flex items-center gap-1">
-                  {renderExtraAction?.(entry)}
-                  {!entry.isLocal && !entry.isPrivate && <SpaceAddressBookActions entry={entry} />}
                 </span>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4 pr-16">
-          <p className="text-muted-foreground text-sm">
-            {page * PAGE_SIZE + 1}&ndash;{Math.min((page + 1) * PAGE_SIZE, entries.length)} of {entries.length}
-          </p>
-          <div className="flex gap-1">
-            <Button variant="outline" size="icon-sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
-              <ChevronLeftIcon />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              disabled={page >= totalPages - 1}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              <ChevronRightIcon />
-            </Button>
+              ),
+            },
+          }
+        : {}),
+      actions: {
+        rawValue: '',
+        sticky: true,
+        content: (
+          <div className={cn(tableCss.actions, dim)}>
+            {renderExtraAction?.(entry)}
+            {!entry.isLocal && !entry.isPrivate && <SpaceAddressBookActions entry={entry} />}
           </div>
-        </div>
-      )}
-    </>
-  )
+        ),
+      },
+    }
+
+    return { key: entry.address, cells }
+  })
+
+  return <EnhancedTable rows={rows} headCells={headCells} fixedLayout />
 }
 
 export default SpaceAddressBookTable
