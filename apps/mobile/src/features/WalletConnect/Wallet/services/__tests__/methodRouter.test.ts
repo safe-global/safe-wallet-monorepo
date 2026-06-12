@@ -3,7 +3,8 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getSdkError } from '@walletconnect/utils'
 import { routeSessionRequest, isDeferredResponse, NO_SIGNER_ERROR_CODE, type RouteContext } from '../methodRouter'
 
-const SAFE_ADDRESS = '0x1111111111111111111111111111111111111111'
+// Contains hex letters so casing-sensitivity tests actually exercise a different string.
+const SAFE_ADDRESS = '0xAbCd111111111111111111111111111111111111'
 const CHAIN_ID = '1'
 
 const chain = { chainId: CHAIN_ID } as unknown as Chain
@@ -135,7 +136,10 @@ describe('routeSessionRequest', () => {
   })
 
   it('accepts a wallet_sendCalls bundle whose from differs only in casing', async () => {
-    const params = [{ chainId: '0x1', from: SAFE_ADDRESS.toUpperCase().replace('0X', '0x'), calls: [{ to: '0xabc' }] }]
+    const from = SAFE_ADDRESS.toLowerCase()
+    // Guard against a vacuous comparison — the fixture must actually differ in casing.
+    expect(from).not.toBe(SAFE_ADDRESS)
+    const params = [{ chainId: '0x1', from, calls: [{ to: '0xabc' }] }]
     const res = await routeSessionRequest(makeCtx(makeRequest('wallet_sendCalls', params)))
     expect(isDeferredResponse(res)).toBe(true)
   })
