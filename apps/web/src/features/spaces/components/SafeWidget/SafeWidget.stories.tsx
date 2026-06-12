@@ -120,6 +120,31 @@ export const ErrorStateWithoutRefresh: Story = {
   ),
 }
 
+/**
+ * Two widgets side by side — one with a large action button, one without.
+ * The titles must sit on the same line (the title row reserves the action height).
+ */
+export const SideBySideHeaderAlignment: Story = {
+  render: () => (
+    <div className="grid grid-cols-2 gap-6">
+      <SafeWidget
+        title="Accounts"
+        action={
+          <Button size="lg" variant="outline" className="font-normal px-4 py-0">
+            <Plus className="size-4" />
+            Manage accounts
+          </Button>
+        }
+      >
+        <SafeWidget.Item label="Test Safe One" info="0x9483...fd61" />
+      </SafeWidget>
+      <SafeWidget title="Pending">
+        <SafeWidget.Item label="changeThreshold" info="about 2 hours ago" />
+      </SafeWidget>
+    </div>
+  ),
+}
+
 export const WithoutActionAndFooter: Story = {
   render: () => (
     <SafeWidget title="Assets">

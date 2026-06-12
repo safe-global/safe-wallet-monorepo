@@ -27,7 +27,8 @@ const SafeWidgetRoot = ({
       className={cn('flex h-full min-h-0 flex-col rounded-xl bg-card p-1', className)}
     >
       <div className="flex shrink-0 items-center px-6 justify-between pb-3 pt-6">
-        <div className={cn('flex items-center', onTitleClick && 'cursor-pointer')} onClick={onTitleClick}>
+        {/* min-h-10 matches the tallest action (lg button) so titles align across widgets with and without actions */}
+        <div className={cn('flex min-h-10 items-center', onTitleClick && 'cursor-pointer')} onClick={onTitleClick}>
           <Typography variant="h4">{title}</Typography>
         </div>
         {action && <div className="flex items-center">{action}</div>}
