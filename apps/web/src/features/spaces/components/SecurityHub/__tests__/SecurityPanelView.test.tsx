@@ -168,7 +168,8 @@ describe('SecurityPanelView', () => {
       // Expand the failing row
       fireEvent.click(screen.getByText('Contract version is outdated'))
       const link = screen.getByRole('link', { name: /update/i })
-      expect(link).toHaveAttribute('href', expect.stringContaining('safe='))
+      // The mastercopy upgrade lives on Settings → Setup, not the modules page
+      expect(link).toHaveAttribute('href', expect.stringContaining('/settings/setup?safe='))
     })
 
     it('honors ScanResult.ctaLabelOverride over the CHECK_DEFS default', () => {
