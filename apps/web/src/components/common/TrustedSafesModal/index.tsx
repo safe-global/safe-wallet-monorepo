@@ -73,12 +73,12 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
             />
           </div>
 
-          <DialogFooter className="shrink-0 flex-row justify-start border-t border-border px-6 pb-6 pt-4">
-            <Button onClick={submitSelection} disabled={!hasChanges}>
-              Save
-            </Button>
+          <DialogFooter className="shrink-0 flex-row justify-end border-t border-border px-6 pb-6 pt-4">
             <Button onClick={close} variant="ghost">
               Cancel
+            </Button>
+            <Button onClick={submitSelection} disabled={!hasChanges}>
+              Save
             </Button>
           </DialogFooter>
         </DialogContent>

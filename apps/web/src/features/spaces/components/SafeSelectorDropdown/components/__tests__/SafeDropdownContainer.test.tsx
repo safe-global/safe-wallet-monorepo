@@ -209,6 +209,27 @@ describe('SafeDropdownContainer', () => {
       expect(screen.getByTestId('safe-dropdown-search-input')).toBeInTheDocument()
     })
 
+    it('hides the search input when the only safe is the currently-selected one', () => {
+      render(
+        <SafeDropdownContainer
+          items={[createItem({ id: '1:0xaaaa', address: '0xaaaa' })]}
+          selectedItemId="1:0xaaaa"
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+        />,
+      )
+
+      expect(screen.queryByTestId('safe-dropdown-search-input')).not.toBeInTheDocument()
+      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes yet')
+    })
+
+    it('keeps the search input visible when a query matches nothing', async () => {
+      renderWithSearch()
+      await userEvent.type(screen.getByTestId('safe-dropdown-search-input'), 'nonexistent')
+
+      expect(screen.getByTestId('safe-dropdown-search-input')).toBeInTheDocument()
+    })
+
     it('does not render the search input on error', () => {
       render(
         <SafeDropdownContainer
