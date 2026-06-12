@@ -61,6 +61,13 @@ describe('routeSessionRequest', () => {
     expect((res as { result: string }).result).toBe('1')
   })
 
+  it('errors on eth_chainId / net_version while the chain config is unresolved', async () => {
+    const chainIdRes = await routeSessionRequest(makeCtx(makeRequest('eth_chainId'), { activeChain: null }))
+    expect((chainIdRes as { error: { code: number } }).error.code).toBe(-32603)
+    const netVersionRes = await routeSessionRequest(makeCtx(makeRequest('net_version'), { activeChain: null }))
+    expect((netVersionRes as { error: { code: number } }).error.code).toBe(-32603)
+  })
+
   it('defers eth_sendTransaction for the sheet', async () => {
     const res = await routeSessionRequest(makeCtx(makeRequest('eth_sendTransaction', sendTxParams)))
     expect(isDeferredResponse(res)).toBe(true)
