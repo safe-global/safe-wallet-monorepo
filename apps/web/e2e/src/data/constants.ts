@@ -43,6 +43,8 @@ export const SAFES = {
   SEP_STATIC_SAFE_1: 'sep:0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7',
   /** 1/2 Safe — use for multi-owner and tx queue tests */
   SEP_STATIC_SAFE_2: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
+  /** Mainnet Safe stuck on contract v1.1.1 — read-only, for outdated-version checks */
+  ETH_OUTDATED_SAFE_111: 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7',
 } as const
 
 // ---------------------------------------------------------------------------
