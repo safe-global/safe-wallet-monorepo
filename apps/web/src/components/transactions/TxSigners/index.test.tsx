@@ -345,6 +345,52 @@ describe('TxSigners (Audit Log)', () => {
     expect(screen.getByText('Signed (1/2)')).toBeInTheDocument()
   })
 
+  it('copies the transaction hash to clipboard via the hash button', async () => {
+    const writeTextMock = jest.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText: writeTextMock } })
+
+    const txHash = faker.string.hexadecimal({ length: 64 })
+    const executor = addressExBuilder().build()
+    const { confirmations } = buildConfirmations(2, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2, executor })
+          .build(),
+        txStatus: TransactionStatus.SUCCESS,
+        executedAt: Date.now(),
+        txHash,
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
+
+    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+
+    fireEvent.click(screen.getByTestId('copy-tx-hash-btn'))
+
+    await waitFor(() => {
+      expect(writeTextMock).toHaveBeenCalledWith(txHash)
+    })
+  })
+
+  it('disables the hash button when the transaction has no hash yet', () => {
+    const { confirmations } = buildConfirmations(1, 2)
+    const txDetails = transactionDetailsBuilder()
+      .with({
+        detailedExecutionInfo: multisigExecutionDetailsBuilder()
+          .with({ confirmations, confirmationsRequired: 2 })
+          .build(),
+        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+        txHash: null,
+      })
+      .build()
+    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+
+    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+
+    expect(screen.queryByTestId('copy-tx-hash-btn')).not.toBeInTheDocument()
+  })
+
   it('copies address to clipboard on click', async () => {
     const writeTextMock = jest.fn().mockResolvedValue(undefined)
     Object.assign(navigator, { clipboard: { writeText: writeTextMock } })
