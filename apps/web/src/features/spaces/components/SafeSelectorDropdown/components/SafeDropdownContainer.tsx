@@ -4,6 +4,7 @@ import { SelectContent, SelectItem } from '@/components/ui/select'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
 import SafeItem from './SafeItem'
@@ -191,17 +192,26 @@ const SafeDropdownContainer = ({
             )}
             {onManageTrustedSafes && (
               <div className="px-4 pb-1 pt-2 text-center">
-                <button
-                  type="button"
-                  onClick={() => {
-                    closeDropdown()
-                    onManageTrustedSafes()
-                  }}
-                  className="cursor-pointer text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
-                  data-testid="manage-trusted-safes-link"
-                >
-                  Manage trusted Safes
-                </button>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <button
+                        type="button"
+                        onClick={() => {
+                          closeDropdown()
+                          onManageTrustedSafes()
+                        }}
+                        className="cursor-pointer text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                        data-testid="manage-trusted-safes-link"
+                      />
+                    }
+                  >
+                    Manage trusted Safes
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[260px]">
+                    Trusted Safes aren&apos;t added to this workspace automatically — add them separately.
+                  </TooltipContent>
+                </Tooltip>
               </div>
             )}
             {footer && (typeof footer === 'function' ? footer(closeDropdown) : footer)}
