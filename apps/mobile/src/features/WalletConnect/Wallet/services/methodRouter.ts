@@ -38,6 +38,9 @@ const unsupportedError = (id: number) => formatJsonRpcError(id, getSdkError('UNS
 
 const invalidParamsError = (id: number) => formatJsonRpcError(id, { code: -32602, message: 'Invalid call parameters.' })
 
+// The active chain config hasn't resolved (yet) — the dApp can retry.
+const noActiveChainError = (id: number) => formatJsonRpcError(id, { code: -32603, message: 'No active chain' })
+
 // Per-call shape (web's mapping rules), shared by eth_sendTransaction and wallet_sendCalls:
 //   - missing / all-fields-empty → invalid
 //   - no-to + only data → contract deployment (allowed; composeSafeTxDraft routes via CreateCall)
@@ -79,19 +82,13 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
   if (method === 'eth_accounts') {
     return formatJsonRpcResult(id, activeSafeAddress ? [activeSafeAddress] : [])
   }
-  // A fabricated '0x0' would be an invalid EIP-695 response — error instead when the
-  // chain config hasn't resolved yet, so the dApp can retry.
-  if (method === 'eth_chainId') {
+  // A fabricated '0x0' / '0' would be an invalid EIP-695 / net_version response — error
+  // instead when the chain config hasn't resolved yet.
+  if (method === 'eth_chainId' || method === 'net_version') {
     if (!activeChain) {
-      return formatJsonRpcError(id, { code: -32603, message: 'No active chain' })
+      return noActiveChainError(id)
     }
-    return formatJsonRpcResult(id, chainIdToHex(activeChain.chainId))
-  }
-  if (method === 'net_version') {
-    if (!activeChain) {
-      return formatJsonRpcError(id, { code: -32603, message: 'No active chain' })
-    }
-    return formatJsonRpcResult(id, activeChain.chainId)
+    return formatJsonRpcResult(id, method === 'eth_chainId' ? chainIdToHex(activeChain.chainId) : activeChain.chainId)
   }
 
   // Transaction methods — the handler pushes the request to the slice so RequestSheetHost
@@ -108,7 +105,7 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     // synchronously so the dApp sees a structured error instead of an opaque compose
     // failure later.
     if (!activeChain) {
-      return formatJsonRpcError(id, { code: -32603, message: 'No active chain' })
+      return noActiveChainError(id)
     }
     // The dApp's session can be bound to a chain the active Safe is no longer on (the user
     // switched networks after connecting). We can only sign on the active chain, so reject
