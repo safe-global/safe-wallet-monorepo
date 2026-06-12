@@ -1,6 +1,7 @@
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getSdkError } from '@walletconnect/utils'
+import { getAddress } from 'ethers'
 import { routeSessionRequest, isDeferredResponse, NO_SIGNER_ERROR_CODE, type RouteContext } from '../methodRouter'
 
 // Contains hex letters so casing-sensitivity tests actually exercise a different string.
@@ -42,9 +43,13 @@ describe('routeSessionRequest', () => {
     expect((res as { error: { message: string } }).error.message).toBe(getSdkError('UNSUPPORTED_METHODS').message)
   })
 
-  it('answers eth_accounts with the active Safe address', async () => {
-    const res = await routeSessionRequest(makeCtx(makeRequest('eth_accounts')))
-    expect((res as { result: string[] }).result).toEqual([SAFE_ADDRESS])
+  it('answers eth_accounts with the checksummed active Safe address', async () => {
+    // Lowercase input must come back EIP-55 checksummed — dApps compare against the
+    // session-namespace accounts verbatim.
+    const res = await routeSessionRequest(
+      makeCtx(makeRequest('eth_accounts'), { activeSafeAddress: SAFE_ADDRESS.toLowerCase() }),
+    )
+    expect((res as { result: string[] }).result).toEqual([getAddress(SAFE_ADDRESS.toLowerCase())])
   })
 
   it('answers eth_accounts with [] when no active Safe', async () => {

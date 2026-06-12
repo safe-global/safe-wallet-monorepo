@@ -1,5 +1,6 @@
 import { formatJsonRpcError, formatJsonRpcResult } from '@walletconnect/jsonrpc-utils'
 import { getSdkError } from '@walletconnect/utils'
+import { getAddress } from 'ethers'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { AppDispatch, RootState } from '@/src/store'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -80,7 +81,11 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
   // Local-answerable methods — a dApp needs these to establish the session before it can
   // send a transaction.
   if (method === 'eth_accounts') {
-    return formatJsonRpcResult(id, activeSafeAddress ? [activeSafeAddress] : [])
+    // EIP-55 checksummed to match the session-namespace accounts (buildSafeApprovedNamespaces
+    // checksums them the same way) — dApps compare the two strings verbatim. Lowercase first:
+    // getAddress treats mixed-case input as a checksum assertion and throws on a mismatch,
+    // while lowercase input is always re-checksummed.
+    return formatJsonRpcResult(id, activeSafeAddress ? [getAddress(activeSafeAddress.toLowerCase())] : [])
   }
   // A fabricated '0x0' / '0' would be an invalid EIP-695 / net_version response — error
   // instead when the chain config hasn't resolved yet.
