@@ -1,15 +1,17 @@
 import { useState } from 'react'
-import { Alert, Button as MuiButton, DialogActions, DialogContent } from '@mui/material'
+import { Alert, Button as MuiButton, DialogActions, DialogContent, Tooltip } from '@mui/material'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Spinner } from '@/components/ui/spinner'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ChainIndicator from '@/components/common/ChainIndicator'
+import { NetworkLogosList } from '@/features/multichain'
 import { useAddressBookRequestsCreateRequestV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
+import useChains from '@/hooks/useChains'
 import { validateContactName } from './utils'
 
 type RequestToAddButtonProps = {
@@ -29,6 +31,7 @@ const getRequestErrorMessage = (error: unknown): string => {
 
 const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: RequestToAddButtonProps) => {
   const spaceId = useCurrentSpaceId()
+  const chains = useChains()
   const dispatch = useAppDispatch()
   const [createRequest] = useAddressBookRequestsCreateRequestV1Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -125,11 +128,25 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
 
             <div>
               <p className="mb-1 text-sm font-bold">Networks</p>
-              <div className="flex flex-col gap-1">
-                {chainIds.map((chainId) => (
-                  <ChainIndicator key={chainId} chainId={chainId} />
-                ))}
-              </div>
+              {chains.configs.length === chainIds.length ? (
+                <p className="text-sm">All networks</p>
+              ) : (
+                <Tooltip
+                  title={
+                    <div className="flex flex-col gap-1">
+                      {chainIds.map((chainId) => (
+                        <ChainIndicator key={chainId} chainId={chainId} />
+                      ))}
+                    </div>
+                  }
+                  placement="top"
+                  arrow
+                >
+                  <span className="inline-flex">
+                    <NetworkLogosList networks={chainIds.map((chainId) => ({ chainId }))} showHasMore maxVisible={6} />
+                  </span>
+                </Tooltip>
+              )}
             </div>
 
             {nameError && (

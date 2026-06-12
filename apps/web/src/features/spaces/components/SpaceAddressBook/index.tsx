@@ -32,7 +32,6 @@ import SpaceActivityLog from '../SpaceActivityLog'
 import ImportAddressBook from './Import'
 import RequestToAddButton from './RequestToAddButton'
 import AddToWorkspaceButton from './AddToWorkspaceButton'
-import RemoveDuplicateButton from './RemoveDuplicateButton'
 
 const SpaceAddressBook = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -189,12 +188,7 @@ const SpaceAddressBook = () => {
                       showAddedBy={false}
                       renderExtraAction={(entry) => {
                         if (entry.isDuplicate) {
-                          return (
-                            <span className="inline-flex items-center gap-2">
-                              <Badge variant="secondary">Already shared</Badge>
-                              <RemoveDuplicateButton address={entry.address} chainIds={entry.chainIds} />
-                            </span>
-                          )
+                          return <Badge variant="secondary">Already shared</Badge>
                         }
                         if (isAdmin) {
                           return (
