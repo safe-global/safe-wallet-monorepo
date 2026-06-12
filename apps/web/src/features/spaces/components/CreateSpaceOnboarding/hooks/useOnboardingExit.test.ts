@@ -1,9 +1,11 @@
 import { renderHook, act } from '@testing-library/react'
 import { AppRoutes } from '@/config/routes'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useOnboardingExit from './useOnboardingExit'
 
 const mockPush = jest.fn()
 const mockLogout = jest.fn()
+const mockTrackEvent = jest.fn()
 
 let mockIsSignedIn = true
 let mockSpacesResult: { currentData: Array<{ id: number }> | undefined } = { currentData: undefined }
@@ -29,6 +31,10 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetV1Query: jest.fn(() => mockSpacesResult),
 }))
 
+jest.mock('@/services/analytics', () => ({
+  trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
+}))
+
 describe('useOnboardingExit', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -44,6 +50,7 @@ describe('useOnboardingExit', () => {
     expect(result.current.hasNoSpaces).toBe(true)
     act(() => result.current.onExit())
 
+    expect(mockTrackEvent).toHaveBeenCalledWith(SPACE_EVENTS.AUTH_LOGGED_OUT, expect.any(Object))
     expect(mockLogout).toHaveBeenCalledTimes(1)
     expect(mockPush).not.toHaveBeenCalled()
   })
@@ -66,6 +73,7 @@ describe('useOnboardingExit', () => {
 
     expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.spaces)
     expect(mockLogout).not.toHaveBeenCalled()
+    expect(mockTrackEvent).not.toHaveBeenCalled()
   })
 
   it('navigates instead of logging out in edit mode, even with no spaces', () => {

@@ -2,12 +2,18 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { AccountInfo } from '../AccountInfo'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 const mockLogout = jest.fn()
+const mockTrackEvent = jest.fn()
 
 jest.mock('@/hooks/useLogout', () => ({
   __esModule: true,
   default: () => ({ logout: mockLogout }),
+}))
+
+jest.mock('@/services/analytics', () => ({
+  trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
 }))
 
 // Render the Base UI popover content inline so the trigger does not need to be
@@ -52,11 +58,12 @@ describe('AccountInfo', () => {
     expect(screen.getByTestId('sidebar-profile-sign-out')).toBeInTheDocument()
   })
 
-  it('logs out when the sign-out button is clicked', async () => {
+  it('logs out and tracks the event when the sign-out button is clicked', async () => {
     render(<AccountInfo profileName="Alice" displayName="Alice" />)
 
     await userEvent.click(screen.getByTestId('sidebar-profile-sign-out'))
 
+    expect(mockTrackEvent).toHaveBeenCalledWith(SPACE_EVENTS.AUTH_LOGGED_OUT, expect.any(Object))
     expect(mockLogout).toHaveBeenCalledTimes(1)
   })
 })

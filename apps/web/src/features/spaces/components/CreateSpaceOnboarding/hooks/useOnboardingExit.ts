@@ -5,6 +5,8 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { AppRoutes } from '@/config/routes'
 import useLogout from '@/hooks/useLogout'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 /**
  * Resolves what "Back"/logo should do on the first onboarding step.
@@ -25,6 +27,7 @@ const useOnboardingExit = (isEditMode: boolean) => {
 
   const onExit = useCallback(() => {
     if (hasNoSpaces) {
+      trackEvent(SPACE_EVENTS.AUTH_LOGGED_OUT, { timestamp: new Date().toISOString() })
       logout()
       return
     }
