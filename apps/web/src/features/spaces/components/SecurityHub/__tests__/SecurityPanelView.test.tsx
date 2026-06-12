@@ -263,6 +263,18 @@ describe('SecurityPanelView', () => {
       expect(screen.getByText('Unrecognized module detected')).toBeInTheDocument()
     })
 
+    it('labels a recognized module by name and routes it to the passing rows', () => {
+      renderPanel({
+        scanContext: createMockContext({
+          modules: [{ value: '0xaaaa000000000000000000000000000000000001', name: 'Delay Modifier' }],
+        }),
+      })
+      // Recognized module → passing → hidden until the "Healthy" accordion is expanded.
+      fireEvent.click(getChecksAccordion())
+      expect(screen.getByText('Recognized module · Delay Modifier')).toBeInTheDocument()
+      expect(screen.queryByText('Unrecognized module detected')).not.toBeInTheDocument()
+    })
+
     describe('vulnerable Zodiac modules', () => {
       const DELAY = '0xcccc000000000000000000000000000000000001'
 
