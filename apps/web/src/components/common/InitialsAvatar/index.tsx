@@ -8,12 +8,13 @@ const InitialsAvatar = ({
   rounded = false,
 }: {
   name: string
-  size?: 'xsmall' | 'small' | 'medium' | 'large'
+  size?: 'xxsmall' | 'xsmall' | 'small' | 'medium' | 'large'
   rounded?: boolean
 }) => {
   const logoLetters = name.slice(0, 1)
   const logoColor = getDeterministicColor(name)
   const dimensions = {
+    xxsmall: { width: 16, height: 16, fontSize: '9px !important' },
     xsmall: { width: 20, height: 20, fontSize: '12px !important' },
     small: { width: 24, height: 24, fontSize: '12px !important' },
     medium: { width: 32, height: 32, fontSize: '16px !important' },

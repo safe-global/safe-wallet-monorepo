@@ -2,9 +2,8 @@ import classnames from 'classnames'
 import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
 import { isAddress } from 'ethers'
 import { useTheme } from '@mui/material/styles'
-import { Box, SvgIcon, Tooltip } from '@mui/material'
-import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
-import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined'
+import { Box, Tooltip } from '@mui/material'
+import { Building2, HardDrive } from 'lucide-react'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import Identicon from '../../Identicon'
 import CopyAddressButton from '../../CopyAddressButton'
@@ -126,13 +125,12 @@ const SrcEthHashInfo = ({
               ? badgeTooltip
               : !!addressBookNameSource && (
                   <Tooltip title={`From your ${addressBookNameSource} address book`} placement="top">
-                    <span style={{ lineHeight: 0 }}>
-                      <SvgIcon
-                        component={addressBookNameSource === ContactSource.local ? AddressBookIcon : CloudOutlinedIcon}
-                        inheritViewBox
-                        color="border"
-                        fontSize="small"
-                      />
+                    <span style={{ lineHeight: 0, color: 'var(--color-border-main)' }}>
+                      {addressBookNameSource === ContactSource.local ? (
+                        <HardDrive size={16} />
+                      ) : (
+                        <Building2 size={16} />
+                      )}
                     </span>
                   </Tooltip>
                 )}
