@@ -24,6 +24,14 @@ export const isAdmin = (member: MemberDto) => member.role === MemberRole.ADMIN
 
 export const isActiveAdmin = (member: MemberDto) => isAdmin(member) && member.status === MemberStatus.ACTIVE
 
+export const isInviteExpired = (member: MemberDto): boolean => {
+  if (member.status !== MemberStatus.INVITED || member.inviteExpiresAt == null) return false
+
+  // Guard NaN explicitly so a malformed date isn't silently treated as not-expired
+  const expiresAt = new Date(member.inviteExpiresAt).getTime()
+  return Number.isFinite(expiresAt) && expiresAt <= Date.now()
+}
+
 const useAllMembers = (spaceId?: string) => {
   const currentSpaceId = useCurrentSpaceId()
   const actualSpaceId = spaceId ?? currentSpaceId

@@ -66,11 +66,11 @@ export default defineConfig(({ mode }) => {
     publicDir: path.resolve(webRoot, 'public'),
     envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
     server: {
-      port: 3001,
+      port: 3000,
       strictPort: true,
     },
     preview: {
-      port: 3001,
+      port: 3000,
       strictPort: true,
     },
     // Eagerly pre-bundle the heavy MUI / web3 / Redux subgraph. By default Vite

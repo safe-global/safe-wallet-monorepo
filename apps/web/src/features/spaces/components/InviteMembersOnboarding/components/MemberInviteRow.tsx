@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Controller } from 'react-hook-form'
 import type { InviteMembersFormValues } from '../hooks/useInviteForm'
+import { EMAIL_MAX_LENGTH, INVALID_IDENTIFIER_ERROR, isEmailAddress } from '../../AddMemberModal/utils'
 
 const ROLE_LABELS: Record<MemberRole, string> = {
   [MemberRole.ADMIN]: 'Admin',
@@ -21,11 +22,17 @@ const ROLE_LABELS: Record<MemberRole, string> = {
 
 const ADDRESS_RE = /^0x[0-9a-f]{40}$/i
 const ERROR_DEBOUNCE_MS = 500
+const INVALID_ADDRESS_ERROR = 'Invalid address'
 
 type AutoChecksumCallback = (checksummed: string) => void
 
 function validateEthereumAddress(value: string, onAutoChecksum: AutoChecksumCallback): string | undefined {
-  if (!ADDRESS_RE.test(value)) return 'Invalid address'
+  // A "0x" prefix signals an address attempt — show the address-specific error rather than the generic one
+  const looksLikeAddress = value.toLowerCase().startsWith('0x')
+
+  if (!ADDRESS_RE.test(value)) {
+    return looksLikeAddress ? INVALID_ADDRESS_ERROR : INVALID_IDENTIFIER_ERROR
+  }
 
   const hex = value.slice(2)
   const hasNoChecksumIntent = hex === hex.toLowerCase() || hex === hex.toUpperCase()
@@ -36,7 +43,7 @@ function validateEthereumAddress(value: string, onAutoChecksum: AutoChecksumCall
     return undefined
   }
 
-  if (!isChecksummedAddress(value)) return 'Invalid address checksum'
+  if (!isChecksummedAddress(value)) return INVALID_ADDRESS_ERROR
 
   return undefined
 }
@@ -63,19 +70,24 @@ const MemberInviteRow = ({
   onRemove,
 }: MemberInviteRowProps) => {
   const members = useWatch({ control, name: 'members' })
-  const addressValue = members?.[index]?.address ?? ''
-  const fieldErrorMessage = errors?.members?.[index]?.address?.message
+  const identifierValue = members?.[index]?.identifier ?? ''
+  const fieldErrorMessage = errors?.members?.[index]?.identifier?.message
   const debouncedError = useDebounce(fieldErrorMessage, ERROR_DEBOUNCE_MS)
   const displayError = fieldErrorMessage ? debouncedError : undefined
 
   const handleAddressResolved = useCallback(
     (address: string) => {
-      setValue(`members.${index}.address`, address, { shouldValidate: true })
+      setValue(`members.${index}.identifier`, address, { shouldValidate: true })
     },
     [setValue, index],
   )
 
-  const { address: resolvedAddress, resolverError, resolving } = useNameResolver(addressValue)
+  // Emails are not ENS names — don't try to resolve them (it would surface a resolver error).
+  const {
+    address: resolvedAddress,
+    resolverError,
+    resolving,
+  } = useNameResolver(isEmailAddress(identifierValue.trim()) ? '' : identifierValue)
 
   useEffect(() => {
     if (resolvedAddress) handleAddressResolved(resolvedAddress)
@@ -88,33 +100,54 @@ const MemberInviteRow = ({
           <Input
             address
             autoComplete="off"
-            {...register(`members.${index}.address`, {
+            {...register(`members.${index}.identifier`, {
               required: index === 0,
               onChange: () => {
                 const otherFields = members
-                  ?.map((_, i) => (i !== index ? (`members.${i}.address` as const) : null))
-                  .filter(Boolean) as `members.${number}.address`[]
+                  ?.map((_, i) => (i !== index ? (`members.${i}.identifier` as const) : null))
+                  .filter(Boolean) as `members.${number}.identifier`[]
                 if (otherFields?.length) trigger(otherFields)
               },
               validate: (value) => {
-                if (!value?.trim()) return undefined
-                if (isDomain(value)) return undefined
+                const trimmed = value?.trim()
+                if (!trimmed) return undefined
 
-                const addressError = validateEthereumAddress(value, (checksummed) => {
-                  setValue(`members.${index}.address`, checksummed, { shouldValidate: true })
+                if (isEmailAddress(trimmed)) {
+                  if (trimmed.length > EMAIL_MAX_LENGTH) return `Email must be ${EMAIL_MAX_LENGTH} characters or less.`
+
+                  const isDuplicateEmail = members?.some((member, i) => {
+                    // Trim to match the trimmed-on-submit value
+                    const otherIdentifier = member.identifier?.trim()
+                    return (
+                      i !== index &&
+                      otherIdentifier &&
+                      isEmailAddress(otherIdentifier) &&
+                      otherIdentifier.toLowerCase() === trimmed.toLowerCase()
+                    )
+                  })
+                  if (isDuplicateEmail) return 'Email already added'
+
+                  return undefined
+                }
+
+                if (isDomain(trimmed)) return undefined
+
+                const addressError = validateEthereumAddress(trimmed, (checksummed) => {
+                  setValue(`members.${index}.identifier`, checksummed, { shouldValidate: true })
                 })
                 if (addressError) return addressError
 
                 const isDuplicate = members?.some(
-                  (member, i) => i !== index && member.address && sameAddress(member.address, value),
+                  (member, i) =>
+                    i !== index && member.identifier?.trim() && sameAddress(member.identifier.trim(), trimmed),
                 )
                 if (isDuplicate) return 'Address already added'
               },
             })}
-            placeholder="Wallet address or ENS name"
+            placeholder="Email, wallet address or ENS name"
             className={cn('h-11 rounded-lg bg-card px-4', resolving && 'pr-10')}
             error={displayError}
-            data-testid={`invite-address-input-${index}`}
+            data-testid={`invite-identifier-input-${index}`}
           />
           {resolving && (
             <div className="pointer-events-none absolute right-3 top-0 flex h-11 items-center">

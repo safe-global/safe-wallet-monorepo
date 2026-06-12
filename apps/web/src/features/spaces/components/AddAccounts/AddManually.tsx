@@ -18,7 +18,13 @@ export type AddManuallyFormValues = {
   chainId: string
 }
 
-const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormValues) => void }) => {
+const AddManually = ({
+  handleAddSafe,
+  disabled = false,
+}: {
+  handleAddSafe: (data: AddManuallyFormValues) => void
+  disabled?: boolean
+}) => {
   const [addManuallyOpen, setAddManuallyOpen] = useState(false)
   const { configs } = useChains()
   const [triggerGetSafe] = useLazySafesGetSafeV1Query()
@@ -86,6 +92,7 @@ const AddManually = ({ handleAddSafe }: { handleAddSafe: (data: AddManuallyFormV
         data-testid="add-manually-button"
         size="medium"
         fullWidth
+        disabled={disabled}
         onClick={() => setAddManuallyOpen(true)}
         sx={{ borderRadius: 'var(--radius-md)' }}
       >
