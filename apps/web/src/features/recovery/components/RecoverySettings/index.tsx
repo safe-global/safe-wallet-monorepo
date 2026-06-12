@@ -5,7 +5,7 @@ import { type ReactElement, useContext, useMemo } from 'react'
 
 import ExternalLink from '@/components/common/ExternalLink'
 import { DelayModifierRow } from './DelayModifierRow'
-import useRecovery from '@/features/recovery/hooks/useRecovery'
+import useRecovery from '../../hooks/useRecovery'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import InfoIcon from '@/public/images/notifications/info.svg'

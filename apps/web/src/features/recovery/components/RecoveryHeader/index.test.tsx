@@ -2,11 +2,11 @@ import { faker } from '@faker-js/faker'
 
 import { InternalRecoveryHeader, useIsProposalInProgress } from '.'
 import { render, renderHook, waitFor } from '@/tests/test-utils'
-import store from '@/features/recovery/components/RecoveryContext'
-import { RecoveryEvent, recoveryDispatch, RecoveryTxType } from '@/features/recovery/services/recoveryEvents'
-import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
+import store from '../RecoveryContext'
+import { RecoveryEvent, recoveryDispatch, RecoveryTxType } from '../../services/recoveryEvents'
+import { useRecoveryQueue } from '../../hooks/useRecoveryQueue'
 
-jest.mock('@/features/recovery/hooks/useRecoveryQueue')
+jest.mock('../../hooks/useRecoveryQueue')
 
 const mockUseRecoveryQueue = useRecoveryQueue as jest.MockedFunction<typeof useRecoveryQueue>
 

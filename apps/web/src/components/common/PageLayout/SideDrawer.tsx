@@ -1,4 +1,4 @@
-import { SpacesEnhancedSidebar } from '@/features/spaces/components/Sidebar/SpacesEnhancedSidebar'
+import { SpacesEnhancedSidebar } from '@/features/spaces'
 import { useRouter } from 'next/router'
 import { useEffect, type ReactElement } from 'react'
 import { IconButton, Drawer, useMediaQuery } from '@mui/material'

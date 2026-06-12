@@ -8,7 +8,7 @@ import { selectCurrency } from '@/store/settingsSlice'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { AppRoutes } from '@/config/routes'
-import SafeWidget from '@/features/spaces/components/SafeWidget'
+import { SafeWidget } from '@/features/spaces'
 import { Button } from '@/components/ui/button'
 import TokenIcon from '@/components/common/TokenIcon'
 

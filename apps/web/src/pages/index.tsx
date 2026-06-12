@@ -6,7 +6,7 @@ import isEmpty from 'lodash/isEmpty'
 import local from '@/services/local-storage/local'
 import { addedSafesSlice, type AddedSafesState } from '@/store/addedSafesSlice'
 import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
-import SpacesLogin from '@/features/spaces/components/SpacesLogin'
+import { SpacesLogin } from '@/features/spaces'
 
 const IndexPage: NextPage = () => {
   const router = useRouter()
