@@ -4,7 +4,6 @@ import { SelectContent, SelectItem } from '@/components/ui/select'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
 import SafeItem from './SafeItem'
@@ -29,7 +28,6 @@ export interface SafeDropdownContainerProps {
   onRetry?: () => void
   header?: React.ReactNode
   footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
-  onManageTrustedSafes?: () => void
   closeDropdown: () => void
 }
 
@@ -75,7 +73,6 @@ const SafeDropdownContainer = ({
   onRetry,
   header,
   footer,
-  onManageTrustedSafes,
   closeDropdown,
 }: SafeDropdownContainerProps) => {
   const [search, setSearch] = useState('')
@@ -179,7 +176,7 @@ const SafeDropdownContainer = ({
           {renderContent()}
         </div>
 
-        {(footer || onManageTrustedSafes) && (
+        {footer && (
           <div className="relative shrink-0 bg-card">
             {showScrollHint && (
               <div
@@ -190,31 +187,7 @@ const SafeDropdownContainer = ({
                 className="pointer-events-none absolute inset-x-0 -top-16 h-16 bg-gradient-to-b from-transparent to-[var(--color-background-paper)]"
               />
             )}
-            {onManageTrustedSafes && (
-              <div className="px-4 pb-1 pt-2 text-center">
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <button
-                        type="button"
-                        onClick={() => {
-                          closeDropdown()
-                          onManageTrustedSafes()
-                        }}
-                        className="cursor-pointer text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
-                        data-testid="manage-trusted-safes-link"
-                      />
-                    }
-                  >
-                    Manage trusted Safes
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="max-w-[260px]">
-                    Trusted Safes aren&apos;t added to this workspace automatically — add them separately.
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            )}
-            {footer && (typeof footer === 'function' ? footer(closeDropdown) : footer)}
+            {typeof footer === 'function' ? footer(closeDropdown) : footer}
           </div>
         )}
       </div>

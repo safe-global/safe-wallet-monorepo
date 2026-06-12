@@ -36,6 +36,4 @@ export interface SafeSelectorDropdownProps {
   onRetry?: () => void
   header?: React.ReactNode
   footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
-  /** When provided, an always-visible "Manage trusted Safes" action is shown above the dropdown footer. */
-  onManageTrustedSafes?: () => void
 }

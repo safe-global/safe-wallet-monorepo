@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/utils/cn'
 import AccountsModal from '@/components/common/SpaceSafeBar/AccountsModal'
+import TrustedSafesModal from '@/components/common/TrustedSafesModal'
+import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import AddAccounts from '@/features/spaces/components/AddAccounts'
 import { SAFE_ACCOUNTS_LIMIT, useCurrentSpaceId, useIsAdmin, useIsCurrentSpaceAtSafeLimit } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
@@ -93,6 +95,7 @@ const AddAccountsChooser = ({
   const isAdmin = useIsAdmin()
   const spaceId = useCurrentSpaceId()
   const isSpaceAtSafeLimit = useIsCurrentSpaceAtSafeLimit()
+  const trustedSafesModal = useTrustedSafesModal()
 
   const router = useRouter()
 
@@ -170,9 +173,15 @@ const AddAccountsChooser = ({
         </DialogContent>
       </Dialog>
       {subModal === 'find' && (
-        <AccountsModal open onClose={() => setSubModal(null)} trackingLabel={OVERVIEW_LABELS.owned_safes_modal} />
+        <AccountsModal
+          open
+          onClose={() => setSubModal(null)}
+          trackingLabel={OVERVIEW_LABELS.owned_safes_modal}
+          onManageTrustedSafes={trustedSafesModal.open}
+        />
       )}
       {subModal === 'add' && <AddAccounts externalOpen onExternalClose={() => setSubModal(null)} />}
+      <TrustedSafesModal modal={trustedSafesModal} />
     </>
   )
 }

@@ -144,13 +144,16 @@ function SpaceSafeBar() {
             onRetry={refetch}
             header={dropdownHeader}
             footer={dropdownFooter}
-            onManageTrustedSafes={trustedSafesModal.open}
           />
         </div>
       </div>
       <SpaceNestedSafesButton />
       <SpaceChainSelector isLoading={isLoading} />
-      <AccountsModal open={accountsModalOpen} onClose={() => setAccountsModalOpen(false)} />
+      <AccountsModal
+        open={accountsModalOpen}
+        onClose={() => setAccountsModalOpen(false)}
+        onManageTrustedSafes={trustedSafesModal.open}
+      />
       <TrustedSafesModal modal={trustedSafesModal} />
     </div>
   )
