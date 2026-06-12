@@ -1,3 +1,81 @@
+.groupHeader {
+  position: sticky;
+  /* compensate the MuiAutocomplete-listbox top padding so the header sticks flush */
+  top: -8px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--color-background-paper);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.groupIcon {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+
+.groupInfoIcon {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  cursor: help;
+}
+
+.groupCount {
+  margin-left: auto;
+}
+
+.groupList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  min-width: 0;
+}
+
+.optionMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.nameLine {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.stateBadge {
+  font-size: 12px;
+}
+
+.optionAddress {
+  color: var(--color-text-secondary);
+}
+
+.provenance {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--space-1) / 2);
+  flex-wrap: wrap;
+}
+
+.provenanceIcon {
+  font-size: 12px;
+}
+
+.relativeTime {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
 .unknownAddress {
   margin-top: calc(-1 * var(--space-2));
   padding: 20px 12px 4px;

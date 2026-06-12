@@ -1,16 +1,20 @@
-import { type ReactElement, useState, useMemo } from 'react'
+import { type ReactElement, useState, useMemo, Children } from 'react'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import { SvgIcon, Typography } from '@mui/material'
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete'
 import AddressInput, { type AddressInputProps } from '../AddressInput'
-import EthHashInfo from '../EthHashInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import css from './styles.module.css'
 import inputCss from '@/styles/inputs.module.css'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
+import { useMergedAddressBooks, type ContactSource } from '@/hooks/useAllAddressBooks'
+import { useCurrentChain } from '@/hooks/useChains'
+import RecipientOption from './RecipientOption'
+import RecipientGroupHeader from './RecipientGroupHeader'
+import useWorkspaceName from './useWorkspaceName'
+import type { RecipientContact } from './provenance'
 
 const abFilterOptions = createFilterOptions({
   stringify: (option: { label: string; name: string }) => option.name + ' ' + option.label,
@@ -23,6 +27,8 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   const [open, setOpen] = useState(false)
   const [openAddressBook, setOpenAddressBook] = useState<boolean>(false)
   const mergedAddressBook = useMergedAddressBooks()
+  const workspaceName = useWorkspaceName()
+  const prefix = useCurrentChain()?.shortName
 
   const { setValue, control } = useFormContext()
   const addressValue = useWatch({ name, control })
@@ -33,6 +39,7 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
         label: entry.address,
         name: entry.name,
         source: entry.source,
+        contact: entry as RecipientContact,
       })),
     [mergedAddressBook],
   )
@@ -86,17 +93,22 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
                 elevation: 2,
               },
             }}
+            groupBy={(option) => option.source}
+            renderGroup={(params) => (
+              <li key={params.key}>
+                <RecipientGroupHeader
+                  source={params.group as ContactSource}
+                  workspaceName={workspaceName}
+                  count={Children.count(params.children)}
+                />
+                <ul className={css.groupList}>{params.children}</ul>
+              </li>
+            )}
             renderOption={(props, option) => {
               const { key, ...rest } = props
               return (
                 <Typography data-testid="address-item" component="li" variant="body2" {...rest} key={key}>
-                  <EthHashInfo
-                    address={option.label}
-                    name={option.name}
-                    shortAddress={false}
-                    copyAddress={false}
-                    addressBookNameSource={option.source}
-                  />
+                  <RecipientOption contact={option.contact} prefix={prefix} />
                 </Typography>
               )
             }}

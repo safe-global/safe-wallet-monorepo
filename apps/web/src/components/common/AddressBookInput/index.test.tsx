@@ -304,7 +304,7 @@ describe('AddressBookInput', () => {
     await waitFor(() => expect(utils.queryByText('add it to your address book', { exact: false })).toBeNull())
   })
 
-  it('should show a cloud icon for a server-stored (private) contact even in a spaceOnly context', async () => {
+  it('should group a server-stored (private) contact under the private contacts header', async () => {
     const privateContact = privateContactBuilder({ name: 'Server Contact' })
     mockUseGetPrivateAddressBook.mockReturnValue([privateContact])
 
@@ -331,10 +331,10 @@ describe('AddressBookInput', () => {
     })
 
     await waitFor(() => expect(utils.getByText('Server Contact', { exact: false })).toBeDefined())
-    expect(utils.getByTestId('CloudOutlinedIcon')).toBeInTheDocument()
+    expect(utils.getByText('Private contacts')).toBeInTheDocument()
   })
 
-  it('should not show a cloud icon for a local contact', async () => {
+  it('should group a local contact under the local contacts header with device provenance', async () => {
     const { input, utils } = setup('', {
       [checksumAddress(faker.finance.ethereumAddress())]: 'Local Contact',
     })
@@ -345,6 +345,69 @@ describe('AddressBookInput', () => {
     })
 
     await waitFor(() => expect(utils.getByText('Local Contact', { exact: false })).toBeDefined())
-    expect(utils.queryByTestId('CloudOutlinedIcon')).not.toBeInTheDocument()
+    expect(utils.getByText('Local contacts')).toBeInTheDocument()
+    expect(utils.getByText('Saved on this device')).toBeInTheDocument()
+    expect(utils.queryByText('Private contacts')).not.toBeInTheDocument()
+  })
+
+  it('should group workspace and local contacts under separate headers', async () => {
+    const spaceContact = privateContactBuilder({ name: 'Workspace Contact', createdBy: 'dasha@acme.com' })
+    mockUseGetSpaceAddressBook.mockReturnValue([spaceContact])
+
+    const { input, utils } = setup('', {
+      [checksumAddress(faker.finance.ethereumAddress())]: 'Local Contact',
+    })
+
+    act(() => {
+      fireEvent.mouseDown(input)
+      fireEvent.mouseUp(input)
+    })
+
+    await waitFor(() => expect(utils.getByText('Workspace Contact', { exact: false })).toBeDefined())
+
+    const headers = utils.getAllByTestId('contact-group-header')
+    expect(headers).toHaveLength(2)
+    expect(headers[0]).toHaveTextContent('Workspace contacts')
+    expect(headers[1]).toHaveTextContent('Local contacts')
+    expect(utils.getByText('Added by dasha@acme.com')).toBeInTheDocument()
+  })
+
+  it('should show a New badge for a recently created workspace contact', async () => {
+    const recentContact = privateContactBuilder({
+      name: 'Fresh Contact',
+      createdBy: 'franco@acme.com',
+      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    })
+    mockUseGetSpaceAddressBook.mockReturnValue([recentContact])
+
+    const { input, utils } = setup('', {})
+
+    act(() => {
+      fireEvent.mouseDown(input)
+      fireEvent.mouseUp(input)
+    })
+
+    await waitFor(() => expect(utils.getByText('Fresh Contact', { exact: false })).toBeDefined())
+    expect(utils.getByText('New')).toBeInTheDocument()
+    expect(utils.getByText('Added by franco@acme.com')).toBeInTheDocument()
+  })
+
+  it('should not show a New badge for an established workspace contact', async () => {
+    const oldContact = privateContactBuilder({
+      name: 'Established Contact',
+      createdBy: 'dasha@acme.com',
+      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    })
+    mockUseGetSpaceAddressBook.mockReturnValue([oldContact])
+
+    const { input, utils } = setup('', {})
+
+    act(() => {
+      fireEvent.mouseDown(input)
+      fireEvent.mouseUp(input)
+    })
+
+    await waitFor(() => expect(utils.getByText('Established Contact', { exact: false })).toBeDefined())
+    expect(utils.queryByText('New')).not.toBeInTheDocument()
   })
 })
