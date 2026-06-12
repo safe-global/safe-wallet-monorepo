@@ -104,31 +104,6 @@ const SafeDropdownContainer = ({
     }
 
     if (filteredItems.length === 0) {
-      if (!query && onManageTrustedSafes) {
-        return (
-          <div className="px-4 py-6 text-center" data-testid="dropdown-empty">
-            <span
-              role="button"
-              tabIndex={0}
-              onClick={() => {
-                closeDropdown()
-                onManageTrustedSafes()
-              }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  closeDropdown()
-                  onManageTrustedSafes()
-                }
-              }}
-              className="cursor-pointer text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
-              data-testid="manage-trusted-safes-link"
-            >
-              Manage trusted Safes
-            </span>
-          </div>
-        )
-      }
       return (
         <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">
           {query ? 'No safes match your search' : 'No safes yet'}
@@ -202,7 +177,7 @@ const SafeDropdownContainer = ({
           {renderContent()}
         </div>
 
-        {footer && (
+        {(footer || onManageTrustedSafes) && (
           <div className="relative shrink-0 bg-card">
             {showScrollHint && (
               <div
@@ -213,7 +188,22 @@ const SafeDropdownContainer = ({
                 className="pointer-events-none absolute inset-x-0 -top-16 h-16 bg-gradient-to-b from-transparent to-[var(--color-background-paper)]"
               />
             )}
-            {typeof footer === 'function' ? footer(closeDropdown) : footer}
+            {onManageTrustedSafes && (
+              <div className="px-4 pb-1 pt-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeDropdown()
+                    onManageTrustedSafes()
+                  }}
+                  className="cursor-pointer text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                  data-testid="manage-trusted-safes-link"
+                >
+                  Manage trusted Safes
+                </button>
+              </div>
+            )}
+            {footer && (typeof footer === 'function' ? footer(closeDropdown) : footer)}
           </div>
         )}
       </div>

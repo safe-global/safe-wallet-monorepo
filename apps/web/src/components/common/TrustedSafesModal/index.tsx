@@ -20,7 +20,6 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
   const {
     isOpen,
     availableItems,
-    selectedAddresses,
     pendingConfirmation,
     pendingSelectAllConfirmation,
     similarAddressesForSelectAll,
@@ -28,6 +27,8 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
     isLoading,
     hasChanges,
     totalSafesCount,
+    selectedCount,
+    allSelected,
     close,
     toggleSelection,
     selectAll,
@@ -43,9 +44,6 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
   const pendingItem = pendingConfirmation
     ? availableItems.find((s) => s.address.toLowerCase() === pendingConfirmation)
     : null
-
-  const allSelected = totalSafesCount > 0 && selectedAddresses.size === totalSafesCount
-  const selectedCount = selectedAddresses.size
 
   return (
     <>

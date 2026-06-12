@@ -65,6 +65,8 @@ const mockModal: UseTrustedSafesModalReturn = {
   isLoading: false,
   hasChanges: false,
   totalSafesCount: 2,
+  selectedCount: 1,
+  allSelected: false,
   open: jest.fn(),
   close: jest.fn(),
   toggleSelection: jest.fn(),

@@ -45,6 +45,8 @@ const baseMockModal: UseTrustedSafesModalReturn = {
   isLoading: false,
   hasChanges: false,
   totalSafesCount: 3,
+  selectedCount: 1,
+  allSelected: false,
   open: () => {},
   close: () => {},
   toggleSelection: () => {},
