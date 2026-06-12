@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { ScrollView, View } from 'tamagui'
 import { RefreshControl } from 'react-native'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
@@ -62,8 +62,12 @@ function ConfirmTxContainer() {
 
   // When the tx originates from a WalletConnect dApp, surface its logo + name in the
   // on-screen TransactionHeader (provided via context, consumed by TransactionHeader).
+  // Memoized so context consumers don't re-render on every unrelated parent render.
   const dappMetadata = useAppSelector((state) => selectDappMetadataByTxHash(state, txId))
-  const dappOrigin = dappMetadata ? { name: dappMetadata.name, logoUri: dappMetadata.icons?.[0] } : null
+  const dappOrigin = useMemo(
+    () => (dappMetadata ? { name: dappMetadata.name, logoUri: dappMetadata.icons?.[0] } : null),
+    [dappMetadata],
+  )
 
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>{headerText}</NavBarTitle>,
