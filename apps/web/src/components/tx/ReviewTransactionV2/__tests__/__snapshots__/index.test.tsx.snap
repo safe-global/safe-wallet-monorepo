@@ -128,7 +128,17 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                     class="MuiTypography-root MuiTypography-subtitle2 css-8ydk8b-MuiTypography-root"
                     data-testid="tx-advanced-details"
                   >
-                    Advanced details
+                    Transaction details
+                    <span
+                      class=""
+                      data-mui-internal-clone-element="true"
+                    >
+                      <mock-icon
+                        aria-hidden=""
+                        class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-17ibv3e-MuiSvgIcon-root"
+                        focusable="false"
+                      />
+                    </span>
                   </h6>
                 </div>
               </span>

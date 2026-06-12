@@ -193,8 +193,8 @@ describe('persistCounterfactualSafe', () => {
     if (!result.ok) expect(result.error.message).toMatch(/space/i)
   })
 
-  it('surfaces the backend message when the space POST fails with a 400 (e.g. account limit reached)', async () => {
-    const backendMessage = 'This space only allows a maximum of 40 safe accounts, you can only add up to 0 more'
+  it('keeps the user-level safe and shows the backend message as a toast when the space POST fails with a 400 (stale-snapshot limit)', async () => {
+    const backendMessage = 'This space only allows a maximum of 40 safe accounts'
     const dispatch = jest.fn((action) => {
       if (action.type === 'space-create-thunk') return { error: { status: 400, data: { message: backendMessage } } }
       return action
@@ -202,11 +202,61 @@ describe('persistCounterfactualSafe', () => {
 
     const result = await persistCounterfactualSafe({
       ...baseArgs,
-      spaceId: '42',
+      spaceId: MOCK_SPACE_UUID,
       isUserAuthenticated: true,
       dispatch,
     })
 
+    expect(userDeleteInitiate).not.toHaveBeenCalled()
+    expect(replayImpl).toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledWith(
+      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-limit', message: backendMessage }),
+    )
+    expect(result.ok).toBe(true)
+  })
+
+  it('rolls back and fails the chain on a 400 limit rejection during multi-chain creation', async () => {
+    const backendMessage = 'This space only allows a maximum of 40 safe accounts'
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') return { error: { status: 400, data: { message: backendMessage } } }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      isMultiChainCreation: true,
+      dispatch,
+    })
+
+    expect(userDeleteInitiate).toHaveBeenCalledWith({
+      deleteCounterfactualSafesDto: { safes: [{ chainId: '100', address: '0xSafe' }] },
+    })
+    expect(replayImpl).not.toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledWith(
+      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-limit', message: backendMessage }),
+    )
+    expect(result).toEqual({ ok: false, error: expect.any(Error) })
+  })
+
+  it('rolls back and fails when the space POST returns a non-limit 400 (e.g. validation error)', async () => {
+    const backendMessage = 'Validation failed (uuid is expected)'
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') return { error: { status: 400, data: { message: backendMessage } } }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    expect(userDeleteInitiate).toHaveBeenCalled()
+    expect(showNotificationImpl).not.toHaveBeenCalled()
+    expect(replayImpl).not.toHaveBeenCalled()
     expect(result).toEqual({ ok: false, error: expect.any(Error) })
     if (!result.ok) expect(result.error.message).toBe(backendMessage)
   })
@@ -304,6 +354,43 @@ describe('persistCounterfactualSafe', () => {
     expect(showNotificationImpl).toHaveBeenCalledWith(
       expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-skipped' }),
     )
+    expect(result.ok).toBe(true)
+  })
+
+  it('skips the space POST and shows an info toast when the space is already at the safe limit', async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      spaceSafeCount: 40,
+      dispatch,
+    })
+
+    expect(userInitiate).toHaveBeenCalledTimes(1)
+    expect(spaceInitiate).not.toHaveBeenCalled()
+    expect(userDeleteInitiate).not.toHaveBeenCalled()
+    expect(replayImpl).toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledWith(
+      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-limit' }),
+    )
+    expect(result.ok).toBe(true)
+  })
+
+  it('still POSTs to the space endpoint when the space is below the safe limit', async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      spaceSafeCount: 39,
+      dispatch,
+    })
+
+    expect(spaceInitiate).toHaveBeenCalled()
+    expect(showNotificationImpl).not.toHaveBeenCalled()
     expect(result.ok).toBe(true)
   })
 

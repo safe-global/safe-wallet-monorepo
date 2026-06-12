@@ -16,7 +16,7 @@ import { EXECUTION_FEE_TOOLTIP, GAS_FEE_TOOLTIP } from '../shared/tooltips'
 import css from './styles.module.css'
 import accordionCss from '@/styles/accordion.module.css'
 
-// Match ColorCodedTxAccordion ("Advanced details") so both accordions stack with matching
+// Match ColorCodedTxAccordion ("Transaction details") so both accordions stack with matching
 // border + summary background per tx category. CSS vars are theme-aware — no light/dark branch.
 type AccordionPalette = { border: string; bg: string }
 const TX_PALETTE_BY_TYPE: Record<string, AccordionPalette> = {

@@ -24,6 +24,7 @@ interface SafeCardLayoutProps {
   isSimilar?: boolean
   isUndeployed?: boolean
   isActivating?: boolean
+  disabled?: boolean
 }
 
 export const SafeCardLayout = ({
@@ -40,6 +41,7 @@ export const SafeCardLayout = ({
   isSimilar,
   isUndeployed = false,
   isActivating = false,
+  disabled = false,
 }: SafeCardLayoutProps) => (
   <button
     ref={ref}
@@ -47,8 +49,9 @@ export const SafeCardLayout = ({
     role="checkbox"
     aria-checked={checked}
     onClick={onToggle}
+    disabled={disabled}
     className={cn(
-      'box-border flex w-full min-w-0 max-w-full cursor-pointer items-center gap-1.5 rounded-3xl border-2 py-4 pl-2 pr-3 text-left transition-colors disabled:opacity-60 sm:gap-2 sm:pr-6',
+      'box-border flex w-full min-w-0 max-w-full cursor-pointer items-center gap-1.5 rounded-3xl border-2 py-4 pl-2 pr-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:gap-2 sm:pr-6',
       checked
         ? 'border-[var(--color-secondary-light)] bg-[var(--color-secondary-background)]'
         : 'border-card bg-card hover:bg-muted/50',
@@ -57,6 +60,7 @@ export const SafeCardLayout = ({
     <div className="flex shrink-0 items-center px-2">
       <Checkbox
         checked={checked}
+        disabled={disabled}
         onCheckedChange={onCheckedChange ?? (() => onToggle())}
         onClick={(e) => e.stopPropagation()}
       />

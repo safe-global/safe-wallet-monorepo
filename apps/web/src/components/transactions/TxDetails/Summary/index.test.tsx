@@ -163,7 +163,7 @@ describe('DecodedTx', () => {
       expect(result.queryByText('native transfer')).toBeInTheDocument()
     })
 
-    fireEvent.click(result.getByText('Advanced details'))
+    fireEvent.click(result.getByText('Transaction details'))
 
     await waitFor(() => {
       const dataField = result.queryAllByText('Data').pop()
@@ -218,7 +218,7 @@ describe('DecodedTx', () => {
       expect(result.queryAllByText('Data').pop()).toBeInTheDocument()
     })
 
-    fireEvent.click(result.getByText('Advanced details'))
+    fireEvent.click(result.getByText('Transaction details'))
 
     await waitFor(() => {
       expect(result.queryByText('SafeTxGas')).toBeInTheDocument()
@@ -267,7 +267,7 @@ describe('DecodedTx', () => {
       />,
     )
 
-    fireEvent.click(result.getByText('Advanced details'))
+    fireEvent.click(result.getByText('Transaction details'))
 
     await waitFor(() => {
       expect(result.queryAllByText('transfer').pop()).toBeInTheDocument()
@@ -309,7 +309,7 @@ describe('DecodedTx', () => {
       />,
     )
 
-    fireEvent.click(result.getByText('Advanced details'))
+    fireEvent.click(result.getByText('Transaction details'))
 
     expect(result.queryAllByText('deposit').pop()).toBeInTheDocument()
   })

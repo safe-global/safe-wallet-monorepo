@@ -1,13 +1,14 @@
 import { useState, type ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
+import { buildCurrentNextUrl } from '@/utils/nextUrl'
 import { ChevronRight, CirclePlus, Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/utils/cn'
 import AccountsModal from '@/components/common/SpaceSafeBar/AccountsModal'
 import AddAccounts from '@/features/spaces/components/AddAccounts'
-import { useCurrentSpaceId, useIsAdmin } from '@/features/spaces'
+import { SAFE_ACCOUNTS_LIMIT, useCurrentSpaceId, useIsAdmin, useIsCurrentSpaceAtSafeLimit } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { OVERVIEW_LABELS } from '@/services/analytics/events/overview'
@@ -30,10 +31,20 @@ interface ChooserRowProps {
   onClick: () => void
   disabled?: boolean
   disabledTooltip?: string
+  warning?: string
   testId?: string
 }
 
-const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip, testId }: ChooserRowProps) => {
+const ChooserRow = ({
+  icon,
+  title,
+  subtitle,
+  onClick,
+  disabled,
+  disabledTooltip,
+  warning,
+  testId,
+}: ChooserRowProps) => {
   const row = (
     <button
       type="button"
@@ -54,6 +65,7 @@ const ChooserRow = ({ icon, title, subtitle, onClick, disabled, disabledTooltip,
         <span className="block text-xs text-muted-foreground mt-1 group-hover:text-sidebar-accent-foreground/70">
           {subtitle}
         </span>
+        {warning && <span className="block text-xs text-destructive mt-1">{warning}</span>}
       </span>
       <ChevronRight className="size-3.5 shrink-0" />
     </button>
@@ -80,12 +92,16 @@ const AddAccountsChooser = ({
   const [subModal, setSubModal] = useState<SubModal>(null)
   const isAdmin = useIsAdmin()
   const spaceId = useCurrentSpaceId()
+  const isSpaceAtSafeLimit = useIsCurrentSpaceAtSafeLimit()
 
   const router = useRouter()
 
   const handleCreate = () => {
     setChooserOpen(false)
-    router.push(AppRoutes.newSafe.create)
+    router.push({
+      pathname: AppRoutes.newSafe.create,
+      query: { next: buildCurrentNextUrl(router.pathname, router.query) },
+    })
   }
 
   const handleAdd = () => {
@@ -144,6 +160,11 @@ const AddAccountsChooser = ({
               title="Create new Safe"
               subtitle="Create a new Safe account"
               onClick={handleCreate}
+              warning={
+                isSpaceAtSafeLimit && isAdmin
+                  ? `This workspace already has ${SAFE_ACCOUNTS_LIMIT} Safes (the maximum). Your new Safe won't be added to it, but you can still create it.`
+                  : undefined
+              }
             />
           </div>
         </DialogContent>

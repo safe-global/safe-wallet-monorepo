@@ -3,7 +3,8 @@ import SelectSafesOnboarding from '../index'
 import type { AllSafeItems } from '@/hooks/safes'
 import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
 
-jest.mock('../../Sidebar/constants', () => ({
+jest.mock('@/features/spaces/constants', () => ({
+  ...jest.requireActual('@/features/spaces/constants'),
   SAFE_ACCOUNTS_LIMIT: 10,
 }))
 
@@ -135,20 +136,27 @@ describe('SelectSafesOnboarding — SelectAll wiring', () => {
     expect(trusted.count).toBe(0)
   })
 
-  it('shows cap message when section select-all hits the limit', () => {
-    // Pre-fill 11 safes — exceeding the mocked SAFE_ACCOUNTS_LIMIT of 10
+  it('passes isAtLimit to OnboardingSafesList once the cap is hit', () => {
     mockTrustedSafes = Array.from({ length: 11 }, (_, i) =>
       makeSafe('1', `0x${i.toString().padStart(40, '0')}`),
     ) as AllSafeItems
 
     render(<SelectSafesOnboarding />)
 
-    // Simulate clicking "Select all" for the trusted section via captured props
+    expect(capturedListProps.isAtLimit).toBe(false)
+
     const trustedSelectAll = capturedListProps.trustedSelectAll as { onToggle: (check: boolean) => void }
     const { act } = require('@testing-library/react')
     act(() => trustedSelectAll.onToggle(true))
 
-    expect(screen.getByText('Limit of 10 accounts reached')).toBeInTheDocument()
+    expect(capturedListProps.isAtLimit).toBe(true)
+  })
+
+  it('does not pass isAtLimit when below the cap', () => {
+    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
+    render(<SelectSafesOnboarding />)
+
+    expect(capturedListProps.isAtLimit).toBe(false)
   })
 })
 

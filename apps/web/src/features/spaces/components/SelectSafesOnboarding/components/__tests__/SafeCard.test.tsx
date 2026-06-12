@@ -165,4 +165,95 @@ describe('SafeCard', () => {
 
     expect(cardButton).toHaveAttribute('aria-checked', 'true')
   })
+
+  const getCardButton = () => screen.getAllByRole('checkbox').find((el) => el.tagName === 'BUTTON')!
+
+  it('disables an unselected single-chain safe when at limit', () => {
+    render(
+      <FormWrapper>
+        <SafeCard safe={buildSafe('0xabc123')} isAtLimit />
+      </FormWrapper>,
+    )
+
+    expect(getCardButton()).toBeDisabled()
+  })
+
+  it('keeps a selected single-chain safe enabled when at limit so it can be deselected', () => {
+    render(
+      <FormWrapper defaultValues={{ selectedSafes: { '1:0xabc123': true } }}>
+        <SafeCard safe={buildSafe('0xabc123')} isAtLimit />
+      </FormWrapper>,
+    )
+
+    const cardButton = getCardButton()
+    expect(cardButton).not.toBeDisabled()
+    fireEvent.click(cardButton)
+    expect(cardButton).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('does not disable single-chain safes when not at limit', () => {
+    render(
+      <FormWrapper>
+        <SafeCard safe={buildSafe('0xabc123')} isAtLimit={false} />
+      </FormWrapper>,
+    )
+
+    expect(getCardButton()).not.toBeDisabled()
+  })
+
+  it('disables an unselected multi-chain safe when at limit', () => {
+    render(
+      <FormWrapper>
+        <SafeCard safe={buildMultiChain('0xmulti', ['1', '137'])} isAtLimit />
+      </FormWrapper>,
+    )
+
+    expect(getCardButton()).toBeDisabled()
+  })
+
+  it('keeps a fully-selected multi-chain safe enabled when at limit', () => {
+    render(
+      <FormWrapper defaultValues={{ selectedSafes: { '1:0xmulti': true, '137:0xmulti': true } }}>
+        <SafeCard safe={buildMultiChain('0xmulti', ['1', '137'])} isAtLimit />
+      </FormWrapper>,
+    )
+
+    expect(getCardButton()).not.toBeDisabled()
+  })
+
+  it('keeps a partially-selected multi-chain safe enabled when at limit so it can be deselected', () => {
+    render(
+      <FormWrapper defaultValues={{ selectedSafes: { '1:0xmulti': true } }}>
+        <SafeCard safe={buildMultiChain('0xmulti', ['1', '137'])} isAtLimit />
+      </FormWrapper>,
+    )
+
+    expect(getCardButton()).not.toBeDisabled()
+  })
+
+  it('clicking a disabled single-chain safe does not select it', () => {
+    render(
+      <FormWrapper>
+        <SafeCard safe={buildSafe('0xabc123')} isAtLimit />
+      </FormWrapper>,
+    )
+
+    const cardButton = getCardButton()
+    expect(cardButton).toHaveAttribute('aria-checked', 'false')
+    fireEvent.click(cardButton)
+    expect(cardButton).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('clicking a disabled multi-chain safe does not select it', () => {
+    render(
+      <FormWrapper>
+        <SafeCard safe={buildMultiChain('0xmulti', ['1', '137'])} isAtLimit />
+      </FormWrapper>,
+    )
+
+    const cardButton = getCardButton()
+    expect(cardButton).toHaveAttribute('aria-checked', 'false')
+    fireEvent.click(cardButton)
+    expect(cardButton).toHaveAttribute('aria-checked', 'false')
+  })
 })
