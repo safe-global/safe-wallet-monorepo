@@ -9,7 +9,7 @@ import DangerZoneSection from '../sections/DangerZoneSection'
 const GeneralPage = () => {
   const spaceId = useCurrentSpaceId()
   const isSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isSignedIn || !spaceId })
+  const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isSignedIn || !spaceId })
 
   return (
     <div data-testid="settings-general-page">

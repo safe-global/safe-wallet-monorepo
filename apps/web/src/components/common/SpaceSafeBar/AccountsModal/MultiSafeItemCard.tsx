@@ -23,6 +23,7 @@ import {
 } from './shared'
 import { PinnedSafeSubItem } from './PinnedSafeItem'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 interface MultiSafeItemCardProps {
   item: MultiChainSafeItem
@@ -71,7 +72,7 @@ const MultiSafeItemCard = ({
 
   return (
     <Collapsible open={open} onOpenChange={handleOpenChange}>
-      <div className="rounded-md border border-border bg-card mb-2 overflow-hidden" data-testid="safe-item-card">
+      <div className="rounded-lg mb-1 overflow-hidden" data-testid="safe-item-card">
         <div className="flex items-center gap-1 px-3 py-3 hover:bg-muted/30 transition-colors">
           <CollapsibleTrigger className="flex flex-1 min-w-0 cursor-pointer items-center gap-3 text-left">
             {/* Avatar with threshold overlay */}
@@ -91,7 +92,7 @@ const MultiSafeItemCard = ({
                 {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
               </div>
               <div className="flex items-center gap-1 min-w-0">
-                <ShortAddressWithTooltip address={address} />
+                <ShortAddressWithTooltip address={address} isSimilar={isSimilar} />
                 <CopyAddressButton address={address} />
               </div>
               {isSimilar && <SimilarityBadge />}
@@ -115,14 +116,23 @@ const MultiSafeItemCard = ({
           </CollapsibleTrigger>
 
           {/* Pin/Unpin toggle — outside trigger so it doesn't toggle the collapsible */}
-          <button
-            type="button"
-            onClick={handleTogglePin}
-            className="shrink-0 rounded p-1 hover:bg-muted"
-            aria-label={isPinned ? 'Unpin safe' : 'Pin safe'}
-          >
-            <Bookmark className={`size-4 ${isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`} />
-          </button>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <button
+                  type="button"
+                  onClick={handleTogglePin}
+                  className="shrink-0 cursor-pointer rounded p-1 hover:bg-muted"
+                  aria-label={isPinned ? 'Unpin safe' : 'Pin safe'}
+                />
+              }
+            >
+              <Bookmark
+                className={`size-4 ${isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
+              />
+            </TooltipTrigger>
+            <TooltipContent>{isPinned ? 'Remove from trusted Safes' : 'Add to trusted Safes'}</TooltipContent>
+          </Tooltip>
 
           {/* Context menu — outside trigger for the same reason */}
           <PinnedSafeContextMenu address={address} chainId={sortedSafes[0]?.chainId ?? ''} name={displayName} />

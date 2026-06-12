@@ -31,7 +31,7 @@ const RemoveDuplicateButton = ({ address, chainIds, isLocal, isPrivate }: Remove
         if (!spaceId) {
           throw new Error('Missing space id')
         }
-        await deletePrivate({ spaceId: Number(spaceId), address }).unwrap()
+        await deletePrivate({ spaceId: spaceId ?? '', address }).unwrap()
       }
 
       if (isLocal) {

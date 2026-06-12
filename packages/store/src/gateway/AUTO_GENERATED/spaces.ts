@@ -164,6 +164,13 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members/decline`, method: 'POST' }),
         invalidatesTags: ['spaces'],
       }),
+      membersRenewInviteV1: build.mutation<MembersRenewInviteV1ApiResponse, MembersRenewInviteV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/members/${queryArg.userId}/invite/renew`,
+          method: 'POST',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       membersGetUsersV1: build.query<MembersGetUsersV1ApiResponse, MembersGetUsersV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/members` }),
         providesTags: ['spaces'],
@@ -210,70 +217,70 @@ export { injectedRtkApi as cgwApi }
 export type AddressBooksGetAddressBookItemsV1ApiResponse =
   /** status 200 Address book items retrieved successfully */ SpaceAddressBookDto
 export type AddressBooksGetAddressBookItemsV1ApiArg = {
-  /** Space ID to get address book for */
-  spaceId: number
+  /** Space UUID to get address book for (numeric ID accepted for legacy clients, deprecated) */
+  spaceId: string
 }
 export type AddressBooksUpsertAddressBookItemsV1ApiResponse =
   /** status 200 Address book updated successfully */ SpaceAddressBookDto
 export type AddressBooksUpsertAddressBookItemsV1ApiArg = {
-  /** Space ID to update address book for */
-  spaceId: number
+  /** Space UUID to update address book for */
+  spaceId: string
   /** Address book items to create or update, including addresses and their labels */
   upsertAddressBookItemsDto: UpsertAddressBookItemsDto
 }
 export type AddressBooksDeleteByAddressV1ApiResponse = unknown
 export type AddressBooksDeleteByAddressV1ApiArg = {
-  /** Space ID containing the address book */
-  spaceId: number
+  /** Space UUID containing the address book */
+  spaceId: string
   /** Address to remove from the address book (0x prefixed hex string) */
   address: string
 }
 export type UserAddressBookGetPrivateItemsV1ApiResponse =
   /** status 200 Private address book items retrieved successfully */ UserAddressBookDto
 export type UserAddressBookGetPrivateItemsV1ApiArg = {
-  /** Space ID */
-  spaceId: number
+  /** Space UUID (numeric ID accepted for legacy clients, deprecated) */
+  spaceId: string
 }
 export type UserAddressBookUpsertPrivateItemsV1ApiResponse =
   /** status 200 Private address book updated successfully */ UserAddressBookDto
 export type UserAddressBookUpsertPrivateItemsV1ApiArg = {
-  /** Space ID */
-  spaceId: number
+  /** Space UUID */
+  spaceId: string
   /** Address book items to create or update */
   upsertAddressBookItemsDto: UpsertAddressBookItemsDto
 }
 export type UserAddressBookDeletePrivateItemV1ApiResponse = unknown
 export type UserAddressBookDeletePrivateItemV1ApiArg = {
-  /** Space ID */
-  spaceId: number
+  /** Space UUID */
+  spaceId: string
   /** Address to remove (0x prefixed) */
   address: string
 }
 export type AddressBookRequestsGetPendingRequestsV1ApiResponse =
   /** status 200 Pending requests retrieved successfully */ AddressBookRequestsDto
 export type AddressBookRequestsGetPendingRequestsV1ApiArg = {
-  /** Space ID */
-  spaceId: number
+  /** Space UUID (numeric ID accepted for legacy clients, deprecated) */
+  spaceId: string
 }
 export type AddressBookRequestsCreateRequestV1ApiResponse =
   /** status 201 Request created successfully */ AddressBookRequestItemDto
 export type AddressBookRequestsCreateRequestV1ApiArg = {
-  /** Space ID */
-  spaceId: number
+  /** Space UUID */
+  spaceId: string
   /** Address of the private contact to request adding */
   createAddressBookRequestDto: CreateAddressBookRequestDto
 }
 export type AddressBookRequestsApproveRequestV1ApiResponse = unknown
 export type AddressBookRequestsApproveRequestV1ApiArg = {
-  /** Space ID */
-  spaceId: number
+  /** Space UUID */
+  spaceId: string
   /** Request ID to approve */
   requestId: number
 }
 export type AddressBookRequestsRejectRequestV1ApiResponse = unknown
 export type AddressBookRequestsRejectRequestV1ApiArg = {
-  /** Space ID */
-  spaceId: number
+  /** Space UUID */
+  spaceId: string
   /** Request ID to reject */
   requestId: number
 }
@@ -291,77 +298,85 @@ export type SpacesCreateWithUserV1ApiArg = {
 }
 export type SpacesGetOneV1ApiResponse = /** status 200 Space information retrieved successfully */ GetSpaceResponse
 export type SpacesGetOneV1ApiArg = {
-  /** Space ID */
-  id: number
+  /** Space UUID (numeric ID accepted for legacy clients, deprecated) */
+  id: string
 }
 export type SpacesUpdateV1ApiResponse = /** status 200 Space updated successfully */ UpdateSpaceResponse
 export type SpacesUpdateV1ApiArg = {
-  /** Space ID to update */
-  id: number
+  /** Space UUID to update */
+  id: string
   /** Space update data including new name or other properties */
   updateSpaceDto: UpdateSpaceDto
 }
 export type SpacesDeleteV1ApiResponse = unknown
 export type SpacesDeleteV1ApiArg = {
-  /** Space ID to delete */
-  id: number
+  /** Space UUID to delete */
+  id: string
 }
 export type SpaceSafesCreateV1ApiResponse = unknown
 export type SpaceSafesCreateV1ApiArg = {
-  /** Space ID to add Safes to */
-  spaceId: number
+  /** Space UUID to add Safes to */
+  spaceId: string
   /** List of Safe addresses and their chain information to add to the space */
   createSpaceSafesDto: CreateSpaceSafesDto
 }
 export type SpaceSafesGetV1ApiResponse = /** status 200 Space Safes retrieved successfully */ GetSpaceSafeResponse
 export type SpaceSafesGetV1ApiArg = {
-  /** Space ID to get Safes for */
-  spaceId: number
+  /** Space UUID to get Safes for (numeric ID accepted for legacy clients, deprecated) */
+  spaceId: string
 }
 export type SpaceSafesDeleteV1ApiResponse = unknown
 export type SpaceSafesDeleteV1ApiArg = {
-  /** Space ID to remove Safes from */
-  spaceId: number
+  /** Space UUID to remove Safes from */
+  spaceId: string
   /** List of Safe addresses and their chain information to remove from the space */
   deleteSpaceSafesDto: DeleteSpaceSafesDto
 }
 export type MembersInviteUserV1ApiResponse = /** status 200 Users invited successfully */ Invitation[]
 export type MembersInviteUserV1ApiArg = {
-  /** Space ID to invite users to */
-  spaceId: number
+  /** Space UUID to invite users to */
+  spaceId: string
   /** List of wallet addresses to invite to the space */
   inviteUsersDto: InviteUsersDto
 }
 export type MembersAcceptInviteV1ApiResponse = unknown
 export type MembersAcceptInviteV1ApiArg = {
-  /** Space ID to accept invitation for */
-  spaceId: number
+  /** Space UUID to accept invitation for */
+  spaceId: string
   /** Invitation acceptance data including any required confirmation */
   acceptInviteDto: AcceptInviteDto
 }
 export type MembersDeclineInviteV1ApiResponse = unknown
 export type MembersDeclineInviteV1ApiArg = {
-  /** Space ID to decline invitation for */
-  spaceId: number
+  /** Space UUID to decline invitation for */
+  spaceId: string
+}
+export type MembersRenewInviteV1ApiResponse = /** status 200 Invitation renewed successfully */ Invitation
+export type MembersRenewInviteV1ApiArg = {
+  /** Space UUID containing the invitation (numeric ID accepted for legacy clients, deprecated) */
+  spaceId: string
+  /** User ID of the invited member */
+  userId: number
 }
 export type MembersGetUsersV1ApiResponse = /** status 200 Space members retrieved successfully */ MembersDto
 export type MembersGetUsersV1ApiArg = {
-  /** Space ID to get members for */
-  spaceId: number
+  /** Space UUID to get members for (numeric ID accepted for legacy clients, deprecated) */
+  spaceId: string
 }
 export type MembersSelfRemoveV1ApiResponse = unknown
 export type MembersSelfRemoveV1ApiArg = {
-  spaceId: number
+  /** Space UUID to remove own membership from */
+  spaceId: string
 }
 export type MembersGetMembershipV1ApiResponse = /** status 200 Membership retrieved successfully */ MemberDto
 export type MembersGetMembershipV1ApiArg = {
-  /** Space ID to fetch the caller's membership for */
-  spaceId: number
+  /** Space UUID to fetch the caller's membership for (numeric ID accepted for legacy clients, deprecated) */
+  spaceId: string
 }
 export type MembersUpdateRoleV1ApiResponse = unknown
 export type MembersUpdateRoleV1ApiArg = {
-  /** Space ID containing the member */
-  spaceId: number
+  /** Space UUID containing the member */
+  spaceId: string
   /** User ID of the member to update */
   userId: number
   /** New role information for the member */
@@ -369,21 +384,22 @@ export type MembersUpdateRoleV1ApiArg = {
 }
 export type MembersUpdateAliasV1ApiResponse = unknown
 export type MembersUpdateAliasV1ApiArg = {
-  spaceId: number
+  /** Space UUID to update own member alias in */
+  spaceId: string
   updateMemberAliasDto: UpdateMemberAliasDto
 }
 export type MembersRemoveUserV1ApiResponse = unknown
 export type MembersRemoveUserV1ApiArg = {
-  /** Space ID to remove member from */
-  spaceId: number
+  /** Space UUID to remove member from */
+  spaceId: string
   /** User ID of the member to remove */
   userId: number
 }
 export type SpaceCounterfactualSafesGetV1ApiResponse =
   /** status 200 Counterfactual Safes retrieved successfully */ GetCounterfactualSafesResponse
 export type SpaceCounterfactualSafesGetV1ApiArg = {
-  /** Space ID */
-  spaceId: number
+  /** Space UUID (numeric ID accepted for legacy clients, deprecated) */
+  spaceId: string
 }
 export type SpaceAddressBookItemDto = {
   name: string
@@ -401,7 +417,10 @@ export type SpaceAddressBookItemDto = {
   updatedAt: string
 }
 export type SpaceAddressBookDto = {
+  /** Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback */
   spaceId: string
+  /** Space UUID */
+  spaceUuid: string
   data: SpaceAddressBookItemDto[]
 }
 export type AddressBookItem = {
@@ -424,7 +443,10 @@ export type UserAddressBookItemDto = {
   updatedAt: object
 }
 export type UserAddressBookDto = {
+  /** Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback */
   spaceId: string
+  /** Space UUID */
+  spaceUuid: string
   data: UserAddressBookItemDto[]
 }
 export type AddressBookRequestItemDto = {
@@ -445,7 +467,10 @@ export type AddressBookRequestItemDto = {
   updatedAt: string
 }
 export type AddressBookRequestsDto = {
+  /** Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback */
   spaceId: string
+  /** Space UUID */
+  spaceUuid: string
   data: AddressBookRequestItemDto[]
 }
 export type CreateAddressBookRequestDto = {
@@ -454,7 +479,10 @@ export type CreateAddressBookRequestDto = {
 }
 export type CreateSpaceResponse = {
   name: string
+  /** Numeric Space id (deprecated, use uuid). Kept for FE fallback */
   id: number
+  /** Space UUID */
+  uuid: string
 }
 export type CreateSpaceDto = {
   name: string
@@ -472,14 +500,20 @@ export type SpaceMemberDto = {
   user: UserDto
 }
 export type GetSpaceResponse = {
+  /** Numeric Space id (deprecated, use uuid). Kept for FE fallback */
   id: number
+  /** Space UUID */
+  uuid: string
   name: string
   members: SpaceMemberDto[]
   /** Total count of Safes in the space */
   safeCount: number
 }
 export type UpdateSpaceResponse = {
+  /** Numeric Space id (deprecated, use uuid). Kept for FE fallback */
   id: number
+  /** Space UUID */
+  uuid: string
 }
 export type UpdateSpaceDto = {
   name?: string
@@ -503,7 +537,10 @@ export type DeleteSpaceSafesDto = {
 export type Invitation = {
   userId: number
   name: string
+  /** Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback */
   spaceId: number
+  /** Space UUID */
+  spaceUuid: string
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   invitedBy: number | null
@@ -602,6 +639,7 @@ export const {
   useMembersInviteUserV1Mutation,
   useMembersAcceptInviteV1Mutation,
   useMembersDeclineInviteV1Mutation,
+  useMembersRenewInviteV1Mutation,
   useMembersGetUsersV1Query,
   useLazyMembersGetUsersV1Query,
   useMembersSelfRemoveV1Mutation,

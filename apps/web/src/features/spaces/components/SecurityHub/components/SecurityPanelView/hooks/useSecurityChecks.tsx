@@ -1,24 +1,53 @@
 import { type ReactNode, useMemo, useState } from 'react'
 import { Button } from '@mui/material'
-import type { EvidenceItem, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import type { EvidenceItem, SafeGrade, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import {
   EvidenceList,
   Row,
-  StatusIcon,
   buildExpanded,
   isPassingStatus,
   makeBuildCta,
   sortBySeverity,
   type SectionRow,
 } from '../primitives'
+import { resolveStatusTone, SeverityIcon, type SeverityTone } from '../../SeverityIcon/SeverityIcon'
+import { VULNERABLE_MODULE_INTRO, ZODIAC_VULNERABILITY_CTA, getModuleRowContent } from '../utils'
+
+export type FailingRow = { key: string; node: ReactNode; grade: SafeGrade }
 
 export type UseSecurityChecksResult = {
   isReady: boolean
-  failingRows: { key: string; node: ReactNode }[]
+  failingRows: FailingRow[]
   passingRows: { key: string; node: ReactNode }[]
+}
+
+/** Maps a per-check severity to the SafeGrade used by the issue chips. */
+const SEVERITY_TO_SAFE_GRADE: Record<SecurityGrade, SafeGrade> = {
+  Critical: 'critical',
+  High: 'at_risk',
+  Medium: 'needs_attention',
+  Low: 'needs_attention',
+}
+
+/** Accent-bar + icon colour per grade, matching the SafeGrade chip's dot. */
+const GRADE_ROW_COLOR: Record<SafeGrade, string> = {
+  critical: 'error.main',
+  at_risk: 'warning.main',
+  needs_attention: 'score.review',
+  passing: 'success.main',
+}
+
+/**
+ * Tone for a check row's accent bar + leading icon. Failing rows take their grade group's
+ * colour (so the bar/icon match the section chip); passing / N-A / inconclusive rows keep
+ * their neutral status tone. The glyph shape always comes from the status tone.
+ */
+const rowTone = (status: ScanResult['status'], severity: SecurityGrade): SeverityTone => {
+  const base = resolveStatusTone(status, severity)
+  return isPassingStatus(status) ? base : { ...base, color: GRADE_ROW_COLOR[SEVERITY_TO_SAFE_GRADE[severity]] }
 }
 
 /**
@@ -33,6 +62,8 @@ export const useSecurityChecks = (
   scanContext: ScanContext,
   results: Record<string, ScanResult>,
   safeQueryParam: string | undefined,
+  /** Launches the remove-module tx flow for a vulnerable module (drawer-provided). */
+  onRemoveModule?: (address: string) => void,
 ): UseSecurityChecksResult => {
   const security = useLoadFeature(SecurityFeature)
   const [modulesExpanded, setModulesExpanded] = useState(false)
@@ -48,18 +79,30 @@ export const useSecurityChecks = (
   const { failingRows, passingRows } = useMemo(() => {
     if (!buildCta || !isKnownModuleByName || !zeroAddress) {
       return {
-        failingRows: [] as { key: string; node: ReactNode }[],
+        failingRows: [] as FailingRow[],
         passingRows: [] as { key: string; node: ReactNode }[],
       }
     }
 
     const hasGuard = scanContext.guard !== null && scanContext.guard.value !== zeroAddress
     const hasFallback = scanContext.fallbackHandler !== null && scanContext.fallbackHandler.value !== zeroAddress
-    const activeModules = (scanContext.modules ?? []).filter((m) => m.value !== zeroAddress)
-    const showModuleSummary = activeModules.length > 2 && !modulesExpanded
+    const activeModules = (scanContext.modules ?? [])
+      .filter((m) => m.value !== zeroAddress)
+      // Defensive de-dupe: never render the same module address twice.
+      .filter((m, i, arr) => arr.findIndex((o) => o.value.toLowerCase() === m.value.toLowerCase()) === i)
+    // The Safe is affected by a known Zodiac vulnerability when the modules scanner sets
+    // `vulnerableModules` (an empty array still means "affected" — see the nested case below).
+    const vulnerableModules = results['modules']?.vulnerableModules
+    const isVulnerable = Array.isArray(vulnerableModules)
+    const vulnerableSet = new Set(vulnerableModules ?? [])
+    // Never collapse into a summary when affected — the vulnerable row + remove CTA must stay visible.
+    const showModuleSummary = activeModules.length > 2 && !modulesExpanded && !isVulnerable
 
     const items: SectionRow[] = []
-    const iconFor = (r: ScanResult) => <StatusIcon status={r.status} />
+    const iconFor = (r: ScanResult) => <SeverityIcon tone={rowTone(r.status, r.severity)} />
+    const toneFor = (r: ScanResult) => rowTone(r.status, r.severity)
+    // Surface the remediation as the row subtitle for failing checks (passing rows need no action).
+    const subtitleFor = (r: ScanResult) => (!isPassingStatus(r.status) && r.remediation ? r.remediation : undefined)
 
     const accountSetupResult = results['account_setup']
     if (accountSetupResult) {
@@ -76,6 +119,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(accountSetupResult)}
+            accentTone={toneFor(accountSetupResult)}
+            subtitle={subtitleFor(accountSetupResult)}
             title={title}
             expandedContent={buildExpanded(
               accountSetupResult,
@@ -97,6 +142,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(multichainResult)}
+            accentTone={toneFor(multichainResult)}
+            subtitle={subtitleFor(multichainResult)}
             title={title}
             expandedContent={buildExpanded(
               multichainResult,
@@ -123,6 +170,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(recoveryResult)}
+            accentTone={toneFor(recoveryResult)}
+            subtitle={subtitleFor(recoveryResult)}
             title={title}
             expandedContent={buildExpanded(recoveryResult, buildCta('recovery', recoveryResult, safeQueryParam))}
           />
@@ -141,6 +190,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(versionResult)}
+            accentTone={toneFor(versionResult)}
+            subtitle={subtitleFor(versionResult)}
             title={title}
             expandedContent={buildExpanded(versionResult, buildCta('contract_version', versionResult, safeQueryParam))}
           />
@@ -164,6 +215,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(factoryResult)}
+            accentTone={toneFor(factoryResult)}
+            subtitle={subtitleFor(factoryResult)}
             title={title}
             expandedContent={buildExpanded(
               factoryResult,
@@ -191,6 +244,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(guardResult)}
+            accentTone={toneFor(guardResult)}
+            subtitle={subtitleFor(guardResult)}
             title={title}
             expandedContent={buildExpanded(guardResult, buildCta('guard', guardResult, safeQueryParam))}
           />
@@ -218,6 +273,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(fallbackResult)}
+            accentTone={toneFor(fallbackResult)}
+            subtitle={subtitleFor(fallbackResult)}
             title={title}
             expandedContent={buildExpanded(
               fallbackResult,
@@ -238,6 +295,8 @@ export const useSecurityChecks = (
           node: (
             <Row
               leadIcon={iconFor(modulesResult)}
+              accentTone={toneFor(modulesResult)}
+              subtitle={subtitleFor(modulesResult)}
               title="No modules installed"
               expandedContent={buildExpanded(modulesResult, buildCta('modules', modulesResult, safeQueryParam))}
             />
@@ -252,6 +311,7 @@ export const useSecurityChecks = (
           node: (
             <Row
               leadIcon={iconFor(modulesResult)}
+              accentTone={toneFor(modulesResult)}
               title={`Modules & Extensions · ${activeModules.length} installed`}
               trailing={
                 <Button
@@ -271,31 +331,48 @@ export const useSecurityChecks = (
         })
       } else {
         const modulesCta = buildCta('modules', modulesResult, safeQueryParam)
+        // Affected but no removable module on this Safe (implicated via a related Safe) — surface a
+        // single Critical warning instead of per-module rows that would have no remove target.
+        if (isVulnerable && vulnerableSet.size === 0) {
+          const severity: SecurityGrade = 'Critical'
+          items.push({
+            key: 'modules-vulnerable-nested',
+            severity,
+            isPassing: false,
+            node: (
+              <Row
+                leadIcon={<SeverityIcon tone={rowTone('issue', severity)} />}
+                accentTone={rowTone('issue', severity)}
+                title="Vulnerable module detected"
+                expandedContent={<EvidenceList intro={VULNERABLE_MODULE_INTRO} cta={ZODIAC_VULNERABILITY_CTA} />}
+              />
+            ),
+          })
+        }
         activeModules.forEach((mod) => {
-          const trusted = isKnownModuleByName(mod.name)
-          const severity: SecurityGrade = trusted ? 'Low' : 'High'
+          const vulnerable = vulnerableSet.has(mod.value)
+          const trusted = !vulnerable && isKnownModuleByName(mod.name)
+          const severity: SecurityGrade = vulnerable ? 'Critical' : trusted ? 'Low' : 'High'
           const status: ScanResult['status'] = trusted ? 'clear' : 'issue'
-          // Show the module's name as the title for both trusted and unrecognized modules — users
-          // need to identify *which* module when it's flagged. The icon + intro convey the verdict.
-          const title = mod.name || shortenAddress(mod.value)
+          // Identify which module each row is so multiple flagged modules aren't indistinguishable.
+          const title = vulnerable
+            ? `Vulnerable module · ${mod.name || shortenAddress(mod.value)}`
+            : 'Unrecognized module detected'
           const perModuleEvidence: EvidenceItem[] = [
             { label: 'Address', value: mod.value },
             ...(mod.name ? [{ label: 'Name', value: mod.name }] : []),
           ]
-          const intro = trusted
-            ? 'Recognized Safe ecosystem module.'
-            : "Unrecognized module — not in the known Safe ecosystem deployments. Review carefully and remove if you don't recognize it."
+          const { intro, cta } = getModuleRowContent(mod, { vulnerable, trusted }, modulesCta, onRemoveModule)
           items.push({
             key: `module-${mod.value}`,
             severity,
             isPassing: trusted,
             node: (
               <Row
-                leadIcon={<StatusIcon status={status} />}
+                leadIcon={<SeverityIcon tone={rowTone(status, severity)} />}
+                accentTone={rowTone(status, severity)}
                 title={title}
-                expandedContent={
-                  <EvidenceList intro={intro} evidence={perModuleEvidence} cta={trusted ? null : modulesCta} />
-                }
+                expandedContent={<EvidenceList intro={intro} evidence={perModuleEvidence} cta={cta} />}
               />
             ),
           })
@@ -314,6 +391,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(scanningResult)}
+            accentTone={toneFor(scanningResult)}
+            subtitle={subtitleFor(scanningResult)}
             title={title}
             expandedContent={buildExpanded(
               scanningResult,
@@ -340,6 +419,8 @@ export const useSecurityChecks = (
         node: (
           <Row
             leadIcon={iconFor(pendingResult)}
+            accentTone={toneFor(pendingResult)}
+            subtitle={subtitleFor(pendingResult)}
             title={title}
             expandedContent={buildExpanded(pendingResult, buildCta('pending_tx', pendingResult, safeQueryParam))}
           />
@@ -348,10 +429,23 @@ export const useSecurityChecks = (
     }
 
     return {
-      failingRows: sortBySeverity(items.filter((i) => !i.isPassing)).map(({ key, node }) => ({ key, node })),
+      failingRows: sortBySeverity(items.filter((i) => !i.isPassing)).map(({ key, node, severity }) => ({
+        key,
+        node,
+        grade: SEVERITY_TO_SAFE_GRADE[severity],
+      })),
       passingRows: items.filter((i) => i.isPassing).map(({ key, node }) => ({ key, node })),
     }
-  }, [buildCta, isKnownModuleByName, zeroAddress, scanContext, results, safeQueryParam, modulesExpanded])
+  }, [
+    buildCta,
+    isKnownModuleByName,
+    zeroAddress,
+    scanContext,
+    results,
+    safeQueryParam,
+    modulesExpanded,
+    onRemoveModule,
+  ])
 
   if (!security.$isReady || !buildCta) {
     return { isReady: false, failingRows: [], passingRows: [] }

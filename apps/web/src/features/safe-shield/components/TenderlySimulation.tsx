@@ -8,6 +8,7 @@ import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
 import { useCurrentChain } from '@/hooks/useChains'
 import {
+  getSimulationOutcome,
   isTxSimulationEnabled,
   type SimulationTxParams,
 } from '@safe-global/utils/components/tx/security/tenderly/utils'
@@ -95,15 +96,11 @@ export const TenderlySimulation = ({
     setSimulationExpanded(true)
   }
 
-  const mainIsFinished = status.isFinished
-  const nestedIsFinished = isNested ? nestedTx.status.isFinished : true
-  const isSimulationFinished = mainIsFinished && nestedIsFinished
-
-  const mainIsSuccess = status.isSuccess && !status.isError
-  const nestedIsSuccess = isNested ? nestedTx.status.isSuccess && !nestedTx.status.isError : true
-  const isSimulationSuccess = mainIsSuccess && nestedIsSuccess
-
-  const isLoading = status.isLoading || (isNested && nestedTx.status.isLoading)
+  const { mainIsSuccess, nestedIsSuccess, isSimulationSuccess, isSimulationFinished, isLoading } = getSimulationOutcome(
+    status,
+    nestedTx,
+    isNested,
+  )
 
   const mainSimulationResult = isSimulationFinished
     ? mainIsSuccess

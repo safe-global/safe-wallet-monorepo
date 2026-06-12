@@ -37,17 +37,17 @@ describe('useExistingSpace', () => {
     expect(result.current.spaceId).toBeUndefined()
     expect(result.current.isEditMode).toBe(false)
     expect(result.current.isSpaceLoading).toBe(false)
-    expect(useSpacesGetOneV1Query).toHaveBeenCalledWith({ id: NaN }, { skip: true })
+    expect(useSpacesGetOneV1Query).toHaveBeenCalledWith({ id: '' }, { skip: true })
   })
 
   it('is in edit mode and runs the query when the URL carries a spaceId', () => {
-    mockRouterQuery = { spaceId: '42' }
+    mockRouterQuery = { spaceId: '11111111-1111-1111-1111-111111111111' }
 
     const { result } = renderHook(() => useExistingSpace(mockSetValue))
 
-    expect(result.current.spaceId).toBe('42')
+    expect(result.current.spaceId).toBe('11111111-1111-1111-1111-111111111111')
     expect(result.current.isEditMode).toBe(true)
-    expect(useSpacesGetOneV1Query).toHaveBeenCalledWith({ id: 42 }, { skip: false })
+    expect(useSpacesGetOneV1Query).toHaveBeenCalledWith({ id: '11111111-1111-1111-1111-111111111111' }, { skip: false })
   })
 
   it('sets the form name once the existing space resolves', () => {

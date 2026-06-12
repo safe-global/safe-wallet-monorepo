@@ -37,6 +37,10 @@ import { flattenSafeItems } from '@/hooks/safes'
 import SurveyOptionCard from './SurveyOptionCard'
 
 const ONBOARDING_STEP = 4
+// This step only renders when SPACE_ONBOARDING_SURVEY is on (the survey page
+// guards on the flag), so it is always the 4th of 4 steps. The earlier steps,
+// which render regardless of the flag, derive their total from
+// useOnboardingStepCount() instead.
 const TOTAL_STEPS = 4
 const SURVEY_SLUG = 'onboarding'
 
@@ -64,10 +68,10 @@ const SurveyOnboarding = (): ReactElement | null => {
   const spaceId = router.query.spaceId as string | undefined
 
   const { data, isLoading, error } = useSurveysGetStateV1Query(
-    { spaceId: Number(spaceId), slug: SURVEY_SLUG },
+    { spaceId: spaceId ?? '', slug: SURVEY_SLUG },
     { skip: !spaceId },
   )
-  const { data: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !spaceId })
+  const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()
   const nameLookup = useSafeNameLookup()
   const sidePanelAccounts = useMemo(
@@ -112,7 +116,7 @@ const SurveyOnboarding = (): ReactElement | null => {
     const selections = Array.from(selected).sort()
     try {
       await submit({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         slug: SURVEY_SLUG,
         submitSurveyResponseDto: { selections: { [page.id]: selections } },
       }).unwrap()

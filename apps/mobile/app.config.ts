@@ -4,15 +4,25 @@ const IS_DEV = process.env.APP_VARIANT === 'development'
 
 const appleDevTeamId = '86487MHG6V'
 
+// SPKI (public key) pins, matched against any cert in the validated chain. Per AWS guidance for
+// ACM-managed certs, pin all Amazon Trust Services roots — leaf and intermediate certs rotate
+// (ACM re-keys the leaf ~every 6 months and picks one of several intermediates at random):
+// https://docs.aws.amazon.com/acm/latest/userguide/acm-bestpractices.html#best-practices-pinning
+// Covers RSA (CA 1/2), ECDSA (CA 3/4), and the Starfield cross-sign path on older trust stores.
+const amazonRootCAs = [
+  '++MBgDH5WGvL9Bcn5Be30cRcL0f5O+NyoXuWtQdX1aI=', // 🌳 Amazon Root CA 1 (RSA 2048, valid until: Jan 17 2038)
+  'f0KW/FtqTjs108NpYj42SrGvOB2PpxIVM8nWxjPqJGE=', // 🌳 Amazon Root CA 2 (RSA 4096, valid until: May 26 2040)
+  'NqvDJlas/GRcYbcWE8S/IceH9cq77kg0jVhZeAPXq8k=', // 🌳 Amazon Root CA 3 (ECDSA 256, valid until: May 26 2040)
+  '9+ze1cZgR9KO1kZrVDxA4HQ6voHRCSVNz4RdTCx4U8U=', // 🌳 Amazon Root CA 4 (ECDSA 384, valid until: May 26 2040)
+  'KwccWaCgrnaw6tsrrSO61FgLacNgG2MMLq8GE6+oP5I=', // 🌳 Starfield Services Root CA G2 (valid until: Dec 31 2037)
+  'jZNVWOajyJYzAUj/32oawKW/uhq0RUUTWjs3bJoaMI0=', // 🌳 Amazon RSA 2048 Root EU M1 (valid until: Nov 14 2042, pending trust-store inclusion)
+  'lWWQdyVGS+C/9EsSMvhe6GKpoNmduXG6IDRKr0FDHVg=', // 🌳 Amazon ECDSA 256 Root EU M1 (valid until: Nov 14 2042, pending trust-store inclusion)
+  'eY/hCVfoxaCHQgHK8J1e9LLiQSxHv5kZSVZstULTrz8=', // 🌳 Amazon ECDSA 384 Root EU M1 (valid until: Nov 14 2042, pending trust-store inclusion)
+]
+
 const sslPinningDomains = {
-  'safe-client.staging.5afe.dev': [
-    'QHATxmJ9BkdBNaheGWDzmef6AvXrsvSm6//NSIir448=', // 🍃 Leaf cert (Valid: Jul 12 00:00:00 2025 GMT → Aug 10 23:59:59 2026 GMT)
-    'G9LNNAql897egYsabashkzUCTEJkWBzgoEtk8X/678c=', // 🔗 Intermediate (Valid: Aug 23 22:25:30 2022 GMT → Aug 23 22:25:30 2030 GMT)
-  ],
-  'safe-client.safe.global': [
-    'VOstDe9L/YZ7RKPPd7iwAMbsAwCqqblfg3l1IqjUvuE=', // 🍃 Leaf cert (Valid: Jul 12 00:00:00 2025 GMT → Aug 10 23:59:59 2026 GMT)
-    '18tkPyr2nckv4fgo0dhAkaUtJ2hu2831xlO2SKhq8dg=', // 🔗 Intermediate cert (Valid: Aug 23 22:25:30 2022 GMT → Aug 23 22:25:30 2030 GMT)
-  ],
+  'safe-client.staging.5afe.dev': amazonRootCAs,
+  'safe-client.safe.global': amazonRootCAs,
 }
 
 const name = IS_DEV ? 'Dev-Safe{Mobile}' : 'Safe{Mobile}'
@@ -21,7 +31,7 @@ const config: ExpoConfig = {
   name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.12',
+  version: '1.0.14',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
@@ -30,7 +40,7 @@ const config: ExpoConfig = {
   },
   orientation: 'portrait',
   icon: './assets/images/icon.png',
-  scheme: 'myapp',
+  scheme: ['myapp', 'wc'],
   userInterfaceStyle: 'automatic',
   ios: {
     config: {

@@ -26,6 +26,7 @@ import {
   ShortAddressWithTooltip,
 } from './shared'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 interface SafeItemCardProps {
   safeItem: SafeItem
@@ -101,17 +102,16 @@ const SafeItemCard = ({
       </div>
 
       {/* Name + address + optional status badge */}
-      <div className="flex min-w-0 w-[160px] shrink-0 flex-col gap-0.5 overflow-hidden">
+      <div data-testid="name-column" className="flex min-w-0 w-[160px] shrink-0 flex-col gap-0.5 overflow-hidden">
         <div className="flex items-center gap-1 min-w-0">
           <span className="truncate text-sm font-semibold text-foreground">{displayName}</span>
           {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
         </div>
         <div className="flex items-center gap-1 min-w-0">
-          <ShortAddressWithTooltip address={safeItem.address} />
+          <ShortAddressWithTooltip address={safeItem.address} isSimilar={isSimilar} />
           <CopyAddressButton address={safeItem.address} />
         </div>
         {isSimilar && <SimilarityBadge />}
-        {undeployedSafe && <NotActivatedBadge isActivating={isActivating} />}
         {!undeployedSafe && safeItem.isReadOnly && !isSimilar && <ReadOnlyBadge />}
       </div>
 
@@ -120,9 +120,11 @@ const SafeItemCard = ({
         <ChainLogo chainId={safeItem.chainId} />
       </div>
 
-      {/* Balance */}
+      {/* Balance or inactive badge */}
       <div className="flex w-[70px] shrink-0 items-center justify-end mr-2">
-        {!hasOverview && !undeployedSafe ? (
+        {undeployedSafe ? (
+          <NotActivatedBadge isActivating={isActivating} />
+        ) : !hasOverview ? (
           <Skeleton className="h-3 w-12" />
         ) : safeOverview?.fiatTotal !== undefined ? (
           <span className="text-sm text-muted-foreground whitespace-nowrap">
@@ -137,7 +139,7 @@ const SafeItemCard = ({
     <div
       ref={elementRef}
       data-testid="safe-item-card"
-      className="flex items-center gap-1 rounded-md border border-border bg-card px-3 py-3 mb-2 hover:bg-muted/30 transition-colors"
+      className="flex items-center gap-1 rounded-lg px-3 py-3 mb-1 hover:bg-muted/30 transition-colors"
     >
       {href ? (
         <Link href={href} onClick={handleOpenSafeNav} className={mainContentClasses}>
@@ -148,17 +150,24 @@ const SafeItemCard = ({
       )}
 
       {/* Pin/Unpin toggle */}
-      <button
-        type="button"
-        onClick={handleTogglePin}
-        className="shrink-0 rounded p-1 hover:bg-muted"
-        aria-label={safeItem.isPinned ? 'Unpin safe' : 'Pin safe'}
-        data-testid="bookmark-icon"
-      >
-        <Bookmark
-          className={`size-4 ${safeItem.isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
-        />
-      </button>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <button
+              type="button"
+              onClick={handleTogglePin}
+              className="shrink-0 cursor-pointer rounded p-1 hover:bg-muted"
+              aria-label={safeItem.isPinned ? 'Unpin safe' : 'Pin safe'}
+              data-testid="bookmark-icon"
+            />
+          }
+        >
+          <Bookmark
+            className={`size-4 ${safeItem.isPinned ? 'fill-foreground text-foreground' : 'text-muted-foreground'}`}
+          />
+        </TooltipTrigger>
+        <TooltipContent>{safeItem.isPinned ? 'Remove from trusted Safes' : 'Add to trusted Safes'}</TooltipContent>
+      </Tooltip>
 
       {/* Context menu */}
       <PinnedSafeContextMenu address={safeItem.address} chainId={safeItem.chainId} name={displayName} />

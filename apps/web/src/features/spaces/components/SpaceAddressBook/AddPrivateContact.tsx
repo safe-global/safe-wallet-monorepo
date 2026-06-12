@@ -13,7 +13,7 @@ const AddPrivateContact = () => {
       successGroupKey="add-private-contact-success"
       submit={(item, sid) =>
         upsertPrivate({
-          spaceId: Number(sid),
+          spaceId: sid,
           upsertAddressBookItemsDto: { items: [item] },
         })
       }

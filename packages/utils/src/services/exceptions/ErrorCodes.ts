@@ -38,6 +38,7 @@ enum ErrorCodes {
   _616 = '616: Failed to retrieve recommended nonce',
   _619 = '619: Error fetching data from master-copies',
   _620 = '620: Error loading chains',
+  _621 = '621: Error checking modules for known vulnerabilities',
   _630 = '630: Error fetching remaining daily relays',
   _631 = '631: Transaction failed to be relayed',
   _632 = '632: Error fetching relay task status',
@@ -74,6 +75,7 @@ enum ErrorCodes {
   _818 = '818: Error validating transaction data',
   _819 = '819: Error adding a transaction to the batch',
   _820 = '820: Error signing or submitting delegation',
+  _821 = '821: Untrusted gas-fee refundReceiver returned by CGW',
 
   _900 = '900: Error loading Safe App',
   _901 = '901: Error processing Safe Apps SDK request',

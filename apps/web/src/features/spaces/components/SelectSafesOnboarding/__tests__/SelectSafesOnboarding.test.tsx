@@ -1,10 +1,15 @@
 import { render, screen } from '@/tests/test-utils'
 import SelectSafesOnboarding from '../index'
 import type { AllSafeItems } from '@/hooks/safes'
+import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
 
-jest.mock('../../Sidebar/constants', () => ({
+jest.mock('@/features/spaces/constants', () => ({
+  ...jest.requireActual('@/features/spaces/constants'),
   SAFE_ACCOUNTS_LIMIT: 10,
 }))
+
+jest.mock('@/hooks/useIsSurveyEnabled')
+const mockedUseIsSurveyEnabled = useIsSurveyEnabled as jest.MockedFunction<typeof useIsSurveyEnabled>
 
 // Captured props from OnboardingSafesList renders
 let capturedListProps: Record<string, unknown> = {}
@@ -131,20 +136,27 @@ describe('SelectSafesOnboarding — SelectAll wiring', () => {
     expect(trusted.count).toBe(0)
   })
 
-  it('shows cap message when section select-all hits the limit', () => {
-    // Pre-fill 11 safes — exceeding the mocked SAFE_ACCOUNTS_LIMIT of 10
+  it('passes isAtLimit to OnboardingSafesList once the cap is hit', () => {
     mockTrustedSafes = Array.from({ length: 11 }, (_, i) =>
       makeSafe('1', `0x${i.toString().padStart(40, '0')}`),
     ) as AllSafeItems
 
     render(<SelectSafesOnboarding />)
 
-    // Simulate clicking "Select all" for the trusted section via captured props
+    expect(capturedListProps.isAtLimit).toBe(false)
+
     const trustedSelectAll = capturedListProps.trustedSelectAll as { onToggle: (check: boolean) => void }
     const { act } = require('@testing-library/react')
     act(() => trustedSelectAll.onToggle(true))
 
-    expect(screen.getByText('Limit of 10 accounts reached')).toBeInTheDocument()
+    expect(capturedListProps.isAtLimit).toBe(true)
+  })
+
+  it('does not pass isAtLimit when below the cap', () => {
+    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
+    render(<SelectSafesOnboarding />)
+
+    expect(capturedListProps.isAtLimit).toBe(false)
   })
 })
 
@@ -165,20 +177,44 @@ describe('SelectSafesOnboarding — wallet connection state', () => {
     expect(screen.queryByTestId('select-safes-connect-wallet-button')).not.toBeInTheDocument()
   })
 
-  it('renders the ConnectWalletPrompt when no wallet is connected', () => {
+  it('still renders the list, Continue, and an inline connect hint when no wallet is connected', () => {
     mockWalletValue = null
     render(<SelectSafesOnboarding />)
 
+    // No-wallet users can still pick their locally stored Safes; the wallet CTA is just an inline hint.
+    expect(screen.getByTestId('onboarding-safes-list')).toBeInTheDocument()
+    expect(screen.getByTestId('select-safes-continue-button')).toBeInTheDocument()
     expect(screen.getByTestId('select-safes-connect-wallet-button')).toBeInTheDocument()
-    expect(screen.getByText('Connect your wallet to access all your Safes')).toBeInTheDocument()
-    expect(screen.queryByTestId('onboarding-safes-list')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('select-safes-continue-button')).not.toBeInTheDocument()
   })
 
-  it('still shows the Skip button when no wallet is connected', () => {
+  it('shows the skip link when no wallet is connected', () => {
     mockWalletValue = null
     render(<SelectSafesOnboarding />)
 
-    expect(screen.getByTestId('select-safes-skip-button')).toBeInTheDocument()
+    expect(screen.getByTestId('select-safes-skip-link')).toBeInTheDocument()
+  })
+})
+
+describe('SelectSafesOnboarding — step counter reflects the survey flag', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    capturedListProps = {}
+    mockTrustedSafes = []
+    mockOwnedSafes = []
+    mockWalletValue = { address: '0xWallet' }
+  })
+
+  // Regression guard for WA-2537: the survey is the optional last step, so when
+  // SPACE_ONBOARDING_SURVEY is off the always-rendered steps must total 3, not 4.
+  it('shows 3 total steps when the survey is disabled', () => {
+    mockedUseIsSurveyEnabled.mockReturnValue(false)
+    render(<SelectSafesOnboarding />)
+    expect(screen.getByRole('group', { name: 'Step 2 of 3' })).toBeInTheDocument()
+  })
+
+  it('shows 4 total steps when the survey is enabled', () => {
+    mockedUseIsSurveyEnabled.mockReturnValue(true)
+    render(<SelectSafesOnboarding />)
+    expect(screen.getByRole('group', { name: 'Step 2 of 4' })).toBeInTheDocument()
   })
 })

@@ -5,7 +5,7 @@ import useTxQueue from '@/hooks/useTxQueue'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
 import TxHeader from '@/components/transactions/TxHeader'
 import BatchExecuteButton from '@/components/transactions/BatchExecuteButton'
-import { Box, Skeleton } from '@mui/material'
+import { Box } from '@mui/material'
 import { BatchExecuteHoverProvider } from '@/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import { RecoveryFeature } from '@/features/recovery'
@@ -14,9 +14,6 @@ import { BRAND_NAME } from '@/config/constants'
 import {
   useIsHypernativeEligible,
   useIsHypernativeQueueScanFeature,
-  useBannerVisibility,
-  BannerType,
-  HnBannerForQueue,
   HypernativeFeature,
   useHnQueueAssessment,
 } from '@/features/hypernative'
@@ -25,7 +22,6 @@ const Queue: NextPage = () => {
   const { RecoveryList } = useLoadFeature(RecoveryFeature)
   const showPending = useShowUnsignedQueue()
   const hn = useLoadFeature(HypernativeFeature)
-  const { showBanner: showHnBanner, loading: hnLoading } = useBannerVisibility(BannerType.Promo)
   const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
   const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()
   const { setPages: setQueuePages } = useHnQueueAssessment()
@@ -49,17 +45,6 @@ const Queue: NextPage = () => {
 
         <main>
           <Box mb={4}>
-            {hnLoading && (
-              <Box mb={3}>
-                <Skeleton variant="rounded" height={30} />
-              </Box>
-            )}
-            {showHnBanner && !hnLoading && (
-              <Box mb={3}>
-                <HnBannerForQueue />
-              </Box>
-            )}
-
             <RecoveryList />
 
             {/* Pending unsigned transactions */}

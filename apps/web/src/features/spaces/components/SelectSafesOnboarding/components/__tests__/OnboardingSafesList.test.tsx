@@ -6,14 +6,22 @@ import OnboardingSafesList from '../OnboardingSafesList'
 // Mock child components to keep tests focused on list rendering logic
 jest.mock('../SafeCard', () => ({
   __esModule: true,
-  default: ({ safe, isSimilar }: { safe: SafeItem | MultiChainSafeItem; isSimilar?: boolean }) => (
-    <div data-testid={`safe-card-${safe.address}`} data-similar={isSimilar}>
+  default: ({
+    safe,
+    isSimilar,
+    isAtLimit,
+  }: {
+    safe: SafeItem | MultiChainSafeItem
+    isSimilar?: boolean
+    isAtLimit?: boolean
+  }) => (
+    <div data-testid={`safe-card-${safe.address}`} data-similar={isSimilar} data-at-limit={isAtLimit}>
       {safe.address}
     </div>
   ),
 }))
 
-jest.mock('../SimilarAddressAlert', () => ({
+jest.mock('@/components/common/SimilarAddressAlert', () => ({
   __esModule: true,
   default: () => <div data-testid="similar-address-alert">Similar addresses detected</div>,
 }))
@@ -86,6 +94,44 @@ describe('OnboardingSafesList', () => {
     )
 
     expect(queryByTestId('similar-address-alert')).not.toBeInTheDocument()
+  })
+
+  it('passes isAtLimit down to safe cards in both sections', () => {
+    const trusted = [buildSafeItem('0xTrusted')]
+    const owned = [buildSafeItem('0xOwned')]
+
+    const { getByTestId } = render(
+      <OnboardingSafesList trustedSafes={trusted} ownedSafes={owned} similarAddresses={new Set()} isAtLimit />,
+    )
+
+    expect(getByTestId('safe-card-0xTrusted').dataset.atLimit).toBe('true')
+    expect(getByTestId('safe-card-0xOwned').dataset.atLimit).toBe('true')
+  })
+
+  it('defaults isAtLimit to false on safe cards when not provided', () => {
+    const trusted = [buildSafeItem('0xTrusted')]
+
+    const { getByTestId } = render(
+      <OnboardingSafesList trustedSafes={trusted} ownedSafes={[]} similarAddresses={new Set()} />,
+    )
+
+    expect(getByTestId('safe-card-0xTrusted').dataset.atLimit).toBe('false')
+  })
+
+  it('shows the limit-reached notice when isAtLimit', () => {
+    const { getByText } = render(
+      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set()} isAtLimit />,
+    )
+
+    expect(getByText(/maximum of \d+ Safe accounts per workspace/i)).toBeInTheDocument()
+  })
+
+  it('hides the limit-reached notice when below the limit', () => {
+    const { queryByText } = render(
+      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set()} />,
+    )
+
+    expect(queryByText(/maximum of \d+ Safe accounts per workspace/i)).not.toBeInTheDocument()
   })
 
   it('passes isSimilar=true to SafeCard for flagged addresses', () => {

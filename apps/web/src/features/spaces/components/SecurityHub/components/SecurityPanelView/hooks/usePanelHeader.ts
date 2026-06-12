@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import type { ScanResult, StrengthLevel } from '@/features/security/types'
+import type { ScanResult, ScoreBandDef } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 
@@ -8,7 +8,7 @@ import { useLoadFeature } from '@/features/__core__'
  * Three states the header can be in:
  * - `loading`  — feature still resolving, or no summary yet and scan not complete.
  * - `empty`    — feature ready but `computeSummary` returned nothing (nothing applicable to score).
- * - `ready`    — derived header viewmodel (score / level / color / action line).
+ * - `ready`    — derived header viewmodel (score / band / action line).
  */
 export type PanelHeaderState =
   | { status: 'loading' }
@@ -16,15 +16,14 @@ export type PanelHeaderState =
   | {
       status: 'ready'
       score: number
-      level: StrengthLevel
-      color: string
+      band: ScoreBandDef
       actionLine: string
     }
 
 /**
- * Computes the score, strength level, color, and action line for the panel header
- * from raw scan results. Keeps the math + feature-handle plumbing out of the view
- * component so the header is a pure render of the viewmodel.
+ * Computes the score, score band, and action line for the panel header from raw scan
+ * results. Keeps the math + feature-handle plumbing out of the view component so the
+ * header is a pure render of the viewmodel.
  */
 export const usePanelHeader = (results: Record<string, ScanResult>, isComplete: boolean): PanelHeaderState => {
   const security = useLoadFeature(SecurityFeature)
@@ -39,11 +38,10 @@ export const usePanelHeader = (results: Record<string, ScanResult>, isComplete: 
 
   const clearRatio = summary.applicableCount > 0 ? summary.passing / summary.applicableCount : 0
   const score = Math.round(clearRatio * 100)
-  const level = security.getStrengthLevel(clearRatio, summary.hasCriticalIssue)
-  const color = security.getStrengthColor(level)
+  const band = security.getScoreBand(score, summary.hasCriticalIssue)
   const failureCount = summary.applicableCount - summary.passing
   const actionLine =
     failureCount === 0 ? 'All checks passing.' : `${failureCount} issue${maybePlural(failureCount)} need attention.`
 
-  return { status: 'ready', score, level, color, actionLine }
+  return { status: 'ready', score, band, actionLine }
 }

@@ -95,7 +95,7 @@ const AddContactDialog = ({
       setIsSubmitting(true)
       onSubmitStart?.()
 
-      const result = await submit(item, String(spaceId))
+      const result = await submit(item, spaceId ?? '')
 
       if (result.error) {
         setError('Something went wrong. Please try again.')
@@ -134,7 +134,7 @@ const AddContactDialog = ({
                 {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
 
                 <NameInput name="name" label="Name" required />
-                <AddressInput name="address" label="Address" required showPrefix={false} />
+                <AddressInput name="address" label="Address or ENS" required showPrefix={false} />
 
                 <div>
                   <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>

@@ -12,7 +12,6 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import ExternalLink from '@/components/common/ExternalLink'
 import CheckIcon from '@/public/images/common/check.svg'
 import CloseIcon from '@/public/images/common/close.svg'
-import WarningIcon from '@/public/images/notifications/warning.svg'
 import { getSimulationStatus, isTxSimulationEnabled } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
@@ -21,20 +20,14 @@ import { useMemo } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 
 const getSimulationIconProps = (isCallTraceError: boolean, isSuccess: boolean) => {
-  if (isCallTraceError) {
-    return { color: 'warning' as const, component: WarningIcon }
-  }
-  if (isSuccess) {
+  if (isSuccess && !isCallTraceError) {
     return { color: 'success' as const, component: CheckIcon }
   }
   return { color: 'error' as const, component: CloseIcon }
 }
 
 const getSimulationStatusText = (isCallTraceError: boolean, isSuccess: boolean) => {
-  if (isCallTraceError) {
-    return 'Can execute (with warnings)'
-  }
-  if (isSuccess) {
+  if (isSuccess && !isCallTraceError) {
     return 'Simulation successful'
   }
   return 'Simulation failed'

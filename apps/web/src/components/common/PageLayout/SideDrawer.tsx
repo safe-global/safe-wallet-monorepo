@@ -12,6 +12,7 @@ import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { useIsTablet } from '@/hooks/use-tablet'
 
 type SideDrawerProps = {
   isOpen: boolean
@@ -22,7 +23,7 @@ type SideDrawerProps = {
 const SideDrawer = ({ isOpen, onToggle, onSidebarOpenChange }: SideDrawerProps): ReactElement => {
   const { breakpoints } = useTheme()
   const isSmallScreen = useMediaQuery(breakpoints.down('md'))
-  const isTabletDrawer = useMediaQuery('(min-width:768px) and (max-width:899.95px)')
+  const isTabletDrawer = useIsTablet()
   const [, isSafeAppRoute] = useIsSidebarRoute()
   const isDarkMode = useDarkMode()
 

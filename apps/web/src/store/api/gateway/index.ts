@@ -2,6 +2,7 @@ import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react'
 
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { safeOverviewEndpoints } from './safeOverviews'
+import { gtfFeePreviewEndpoints } from './gtfFeePreview'
 
 async function _buildQueryFn<T>(fn: () => Promise<T>) {
   try {
@@ -25,7 +26,8 @@ export const gatewayApi = createApi({
   tagTypes: ['Submissions', 'SafeOverviews'],
   endpoints: (builder) => ({
     ...safeOverviewEndpoints(builder),
+    ...gtfFeePreviewEndpoints(builder),
   }),
 })
 
-export const { useGetSafeOverviewQuery, useGetMultipleSafeOverviewsQuery } = gatewayApi
+export const { useGetSafeOverviewQuery, useGetMultipleSafeOverviewsQuery, useGetGtfFeePreviewQuery } = gatewayApi

@@ -3,6 +3,7 @@ import { useSpaceSafesWithQueue } from '../useSpaceSafesWithQueue'
 import { faker } from '@faker-js/faker'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { GetSpaceSafeResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -61,7 +62,7 @@ const createOverview = (overrides: Partial<SafeOverview> = {}): SafeOverview => 
 })
 
 const setupDefaults = ({
-  spaceId = '5',
+  spaceId = MOCK_SPACE_UUID,
   isAuthenticated = true,
   spaceSafes,
   isLoadingSafes = false,
@@ -124,11 +125,11 @@ describe('useSpaceSafesWithQueue', () => {
   })
 
   it('should not skip space safes query when authenticated with spaceId', () => {
-    setupDefaults({ spaceId: '5', isAuthenticated: true })
+    setupDefaults({ spaceId: MOCK_SPACE_UUID, isAuthenticated: true })
 
     renderHook(() => useSpaceSafesWithQueue())
 
-    expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: 5 }, { skip: false })
+    expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID }, { skip: false })
   })
 
   it('should build safes param from space safes response', () => {

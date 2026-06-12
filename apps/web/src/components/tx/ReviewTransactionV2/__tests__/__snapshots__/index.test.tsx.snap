@@ -101,7 +101,7 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
         </div>
       </div>
       <div
-        class="MuiBox-root css-1yuhvjn"
+        class="MuiBox-root css-147wzsh"
       >
         <div
           class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-mu8qg7-MuiPaper-root-MuiAccordion-root"
@@ -183,11 +183,6 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                       <div
                         class="MuiBox-root css-0"
                       >
-                        <h6
-                          class="MuiTypography-root MuiTypography-subtitle2 css-4lr168-MuiTypography-root"
-                        >
-                          Advanced details
-                        </h6>
                         <p
                           class="MuiTypography-root MuiTypography-body2 css-gkag80-MuiTypography-root"
                         >
@@ -503,20 +498,11 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                                     GasToken
                                   </p>
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 css-g7pohz-MuiTypography-root"
                                   >
                                     <div
                                       class="container"
                                     >
-                                      <div
-                                        class="avatarContainer"
-                                        style="width: 20px; height: 20px;"
-                                      >
-                                        <span
-                                          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
-                                          style="width: 20px; height: 20px;"
-                                        />
-                                      </div>
                                       <div
                                         class="MuiBox-root css-1lchl8k"
                                       >
@@ -555,20 +541,11 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                                     RefundReceiver
                                   </p>
                                   <p
-                                    class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
+                                    class="MuiTypography-root MuiTypography-body2 css-g7pohz-MuiTypography-root"
                                   >
                                     <div
                                       class="container"
                                     >
-                                      <div
-                                        class="avatarContainer"
-                                        style="width: 20px; height: 20px;"
-                                      >
-                                        <span
-                                          class="MuiSkeleton-root MuiSkeleton-circular MuiSkeleton-pulse css-143xw5x-MuiSkeleton-root"
-                                          style="width: 20px; height: 20px;"
-                                        />
-                                      </div>
                                       <div
                                         class="MuiBox-root css-1lchl8k"
                                       >
@@ -590,6 +567,19 @@ exports[`ReviewTransaction should display a confirmation screen 1`] = `
                                           <div
                                             class="MuiBox-root css-yjghm1"
                                           />
+                                          <svg
+                                            aria-hidden="true"
+                                            aria-label="The RefundReceiver address is the one that will be reimbursed for the gas costs of executing this transaction."
+                                            class="MuiSvgIcon-root MuiSvgIcon-colorSuccess MuiSvgIcon-fontSizeMedium css-1e1jr16-MuiSvgIcon-root"
+                                            data-mui-internal-clone-element="true"
+                                            data-testid="CheckIcon"
+                                            focusable="false"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path
+                                              d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
+                                            />
+                                          </svg>
                                         </div>
                                       </div>
                                     </div>

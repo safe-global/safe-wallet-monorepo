@@ -2,7 +2,14 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import SpacesList from '../index'
+import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import { useIsClassicViewFeatureEnabled } from '@/hooks/useClassicView'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 
+const mockUseIsRequireLoginEnabled = useIsRequireLoginEnabled as jest.Mock
+const mockUseIsClassicViewFeatureEnabled = useIsClassicViewFeatureEnabled as jest.Mock
 const mockUseAppSelector = jest.fn()
 const mockUseSpacesGetV1Query = jest.fn()
 const mockUseUsersGetWithWalletsV1Query = jest.fn()
@@ -51,6 +58,11 @@ jest.mock('@/features/myAccounts', () => ({
 
 jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE', INVITED: 'INVITED', DECLINED: 'DECLINED' },
+  useCurrentMemberProfile: jest.fn(() => ({ membership: undefined, isLoading: false })),
+}))
+
+jest.mock('../AccountInfo', () => ({
+  AccountInfo: () => <div data-testid="account-info" />,
 }))
 
 jest.mock('@/features/spaces/utils', () => ({
@@ -61,6 +73,11 @@ jest.mock('@/features/spaces/utils', () => ({
 jest.mock('../../SignInOptions', () => ({
   __esModule: true,
   default: () => <div data-testid="sign-in-options" />,
+}))
+
+jest.mock('../../ClassicViewLink', () => ({
+  __esModule: true,
+  default: () => <div data-testid="classic-view-link" />,
 }))
 
 jest.mock('../../SpaceCard', () => ({
@@ -80,7 +97,14 @@ jest.mock('../../SpaceInfoModal', () => ({
 
 jest.mock('next/link', () => ({
   __esModule: true,
-  default: ({ children, href }: { children: ReactNode; href: string }) => <a href={href}>{children}</a>,
+  // Spread the rest of the props: Button's `render` prop forwards data-testid,
+  // className and onClick onto the anchor — dropping them hides the button
+  // from queries and swallows click tracking.
+  default: ({ children, href, ...props }: { children: ReactNode; href: string }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -90,12 +114,19 @@ jest.mock('@/services/analytics', () => ({
 describe('SpacesList — auth/expiry state rendering', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    // clearAllMocks wipes call history but not implementations, so reset the
+    // gate to its default (OFF) each test; gate-ON cases opt in explicitly.
+    mockUseIsRequireLoginEnabled.mockReturnValue(false)
+    // Expose the escape hatch by default so its visibility hinges only on layout.
+    mockUseIsClassicViewFeatureEnabled.mockReturnValue(true)
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: undefined, isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
     mockUseSignInRedirect.mockReturnValue({ setHasSignedIn: jest.fn(), redirectLoading: false })
   })
 
   it('renders the Sign in card (not Create space) when the user is unauthenticated — i.e. after a session expiry redirect', () => {
+    // Session-expiry redirect lands on the gate-ON login page.
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
     // After sessionExpired() runs, setUnauthenticated clears sessionExpiresAt → isAuthenticated returns false.
     mockUseAppSelector.mockReturnValue(false)
 
@@ -111,16 +142,31 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(screen.queryByText(/no workspaces found/i)).not.toBeInTheDocument()
   })
 
-  // The signed-out screen is meant to take over the viewport when the
-  // require-login gate is on. The signed-out branch in SpacesList is an
-  // early return, so the regular layout chrome (AccountsNavigation) must
-  // not render alongside the SignInOptions card.
-  it('does not render the AccountsNavigation chrome when the user is signed out', () => {
+  // When the require-login gate is OFF, classic view is available and
+  // /welcome/spaces keeps its Topbar + tabbed layout. The Accounts/Workspaces
+  // tabs must therefore render regardless of auth state, with the sign-in card
+  // offered below the tabs.
+  it('renders the AccountsNavigation chrome when signed out and require-login is OFF', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(false)
+    mockUseAppSelector.mockReturnValue(false)
+
+    render(<SpacesList />)
+
+    expect(screen.getByTestId('accounts-nav')).toBeInTheDocument()
+    expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
+  })
+
+  // When the gate is ON, /welcome/spaces is the canonical full-screen login
+  // page: it takes over the viewport (no Topbar) via an early return, so the
+  // tabbed layout chrome (AccountsNavigation) must NOT render.
+  it('does not render the AccountsNavigation chrome when signed out and require-login is ON', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
     mockUseAppSelector.mockReturnValue(false)
 
     render(<SpacesList />)
 
     expect(screen.queryByTestId('accounts-nav')).not.toBeInTheDocument()
+    expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
   })
 
   it('renders the AccountsNavigation chrome when the user is signed in (and require-login is OFF)', () => {
@@ -171,9 +217,130 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ isSpacesLoading: true }))
   })
 
-  it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {
+  it('passes the space uuid as singleSpaceId to useSignInRedirect when the user has exactly one space', () => {
     mockUseAppSelector.mockReturnValue(true)
-    const tenSpaces = Array.from({ length: 10 }, (_, i) => ({ id: i + 1, name: `Space ${i + 1}` }))
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [{ uuid: 'uuid-1', name: 'Solo Space' }],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ singleSpaceId: 'uuid-1' }))
+  })
+
+  it('passes singleSpaceId=null to useSignInRedirect when the user has multiple spaces', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [
+        { uuid: 'uuid-1', name: 'Space 1' },
+        { uuid: 'uuid-2', name: 'Space 2' },
+      ],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ singleSpaceId: null }))
+  })
+
+  // WA-2486: the sign-in card title (logo + heading) is centered, not left-aligned.
+  it('centers the "Sign in to your workspace" heading', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
+    mockUseAppSelector.mockReturnValue(false)
+
+    render(<SpacesList />)
+
+    const heading = screen.getByRole('heading', { name: /sign in to your workspace/i })
+    expect(heading.className).toContain('text-center')
+  })
+
+  // WA-2486: the "By continuing…" Terms/Privacy text is moved out of the card
+  // (below it) to reduce text overload inside the box.
+  it('renders the "By continuing" text outside the sign-in card', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
+    mockUseAppSelector.mockReturnValue(false)
+
+    const { container } = render(<SpacesList />)
+
+    const card = container.querySelector('.bg-card')
+    const termsLink = screen.getByRole('link', { name: /^terms$/i })
+    expect(card).toBeInTheDocument()
+    expect(card).not.toContainElement(termsLink)
+  })
+
+  it('renders the "Use the old UI" link on the full-screen login gate when classic view is exposed', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
+    mockUseAppSelector.mockReturnValue(false)
+
+    render(<SpacesList />)
+
+    expect(screen.getByTestId('classic-view-link')).toBeInTheDocument()
+  })
+
+  // Regression (QA): gate OFF means the user is already in the old UI — the link must not reappear.
+  it('does not render the "Use the old UI" link in the inline tabbed layout (already in the old UI)', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(false)
+    mockUseAppSelector.mockReturnValue(false)
+
+    render(<SpacesList />)
+
+    expect(screen.getByTestId('sign-in-options')).toBeInTheDocument()
+    expect(screen.queryByTestId('classic-view-link')).not.toBeInTheDocument()
+  })
+
+  // The Create workspace button must be reachable outside the require-login
+  // feature flag too: the classic tabbed layout shows it next to the
+  // Accounts/Workspaces tabs when the user is signed in and has spaces.
+  it('renders the Create workspace button in the classic tabbed layout when signed in with active spaces', async () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(false)
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [{ uuid: 'uuid-1', name: 'Space 1' }],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByTestId('accounts-nav')).toBeInTheDocument()
+    const button = screen.getByTestId('create-space-button')
+    expect(button).toBeInTheDocument()
+
+    await userEvent.click(button)
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
+      entry_point: WorkspaceCreateEntryPoint.WELCOME,
+    })
+  })
+
+  it('does not render the Create workspace button in the classic tabbed layout when the user has no active spaces', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(false)
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    // The header button is absent; only the empty-state CTA inside the
+    // No-workspaces card renders (it lives outside the spacesHeader).
+    expect(screen.getByText(/no workspaces found/i)).toBeInTheDocument()
+    expect(screen.getAllByTestId('create-space-button')).toHaveLength(1)
+  })
+
+  it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {
+    // The Create workspace button lives in the require-login-ON workspace header.
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
+    mockUseAppSelector.mockReturnValue(true)
+    const tenSpaces = Array.from({ length: 10 }, (_, i) => ({
+      id: i + 1,
+      uuid: `00000000-0000-0000-0000-0000000000${String(i + 1).padStart(2, '0')}`,
+      name: `Space ${i + 1}`,
+    }))
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: tenSpaces, isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
 

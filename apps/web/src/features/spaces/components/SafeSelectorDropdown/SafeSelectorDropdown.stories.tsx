@@ -188,6 +188,47 @@ export const WithNestedSafes: Story = {
   args: {} as any,
 }
 
+// A multi-chain "current" safe (so it isn't filtered out of the list) followed by single-chain rows
+// in every activation state: deployed (balance), counterfactual (Inactive) and activating.
+const mixedActivationItems: SafeItemData[] = [
+  createMockSafeItem(0, {
+    id: '1:0xa77de01c5b6f829cbe4604cf71ddc8c4d608b000',
+    name: 'My Safe',
+    address: '0xa77de01c5b6f829cbe4604cf71ddc8c4d608b000',
+    balance: '16780000',
+  }),
+  createMockSafeItem(1, {
+    id: '1:0x1111111111111111111111111111111111111111',
+    name: 'Treasury',
+    address: '0x1111111111111111111111111111111111111111',
+    balance: '8420000',
+    chains: [baseChains[0]],
+  }),
+  createMockSafeItem(2, {
+    id: '100:0x2222222222222222222222222222222222222222',
+    name: 'New counterfactual Safe',
+    address: '0x2222222222222222222222222222222222222222',
+    balance: '0',
+    chains: [{ ...baseChains[1], isUndeployed: true }],
+  }),
+  createMockSafeItem(3, {
+    id: '8453:0x3333333333333333333333333333333333333333',
+    name: 'Activating Safe',
+    address: '0x3333333333333333333333333333333333333333',
+    balance: '0',
+    chains: [{ ...baseChains[2], isUndeployed: true, isActivating: true }],
+  }),
+]
+
+/**
+ * Single-chain rows in mixed activation states. The fiat balance, the "Inactive"/"Activating" status
+ * and the chain logos must all stay column-aligned across deployed and counterfactual rows.
+ */
+export const MixedActivationStates: Story = {
+  render: () => <InteractiveWrapper items={mixedActivationItems} initialItemId={mixedActivationItems[0].id} />,
+  args: {} as any,
+}
+
 /** Dropdown content shows loading skeletons while safe data is being fetched. */
 export const Loading: Story = {
   render: () => (
@@ -233,6 +274,33 @@ export const LoadingWithHeaderFooter: Story = {
         items={[mockItems[0]]}
         selectedItemId={mockItems[0].id}
         isLoading
+        onItemSelect={action('Item selected')}
+        header={header}
+        footer={footer}
+      />
+    )
+  },
+  args: {} as any,
+}
+
+/** Many safes with header + footer — exercises the scrollbar and the bottom scroll-hint fade. */
+export const ManySafesWithFooter: Story = {
+  render: () => {
+    const items = createMockItems(13)
+    const header = (
+      <div className="flex items-center gap-1 px-4 pt-3 pb-2">
+        <span className="text-sm font-semibold text-secondary-foreground">Safes in this workspace</span>
+      </div>
+    )
+    const footer = (
+      <div className="px-4 py-3">
+        <button className="w-full rounded-md border px-3 py-1.5 text-sm">Explore other Safes &rsaquo;</button>
+      </div>
+    )
+    return (
+      <SafeSelectorDropdown
+        items={items}
+        selectedItemId={items[1].id}
         onItemSelect={action('Item selected')}
         header={header}
         footer={footer}

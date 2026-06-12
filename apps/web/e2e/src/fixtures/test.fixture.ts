@@ -14,14 +14,20 @@
 import { test as base, expect, type Page, type TestInfo } from '@playwright/test'
 import { SafeApiClient } from '../api/safe-api-client'
 import { LS_KEYS, STAGING_CGW_URL } from '../data/constants'
+import { WalletPage } from '../pages/wallet.page'
+import { getWalletCredentials, type WalletCredentials } from '../data/credentials'
+import { version as TERMS_VERSION } from '../../../src/markdown/terms/version'
 
-// Cookie consent state — mirrors Cypress localstorage_data.js
+// Cookie consent state — mirrors Cypress localstorage_data.js.
+// `hasAcceptedTerms` only treats consent as valid when `termsVersion` matches
+// the app's current terms version, so seeding `undefined` left the banner open.
+// Seed the real version so the banner stays suppressed.
 const COOKIE_STATE = JSON.stringify({
   necessary: true,
   updates: true,
   analytics: true,
   terms: true,
-  termsVersion: undefined, // Will be set dynamically if needed
+  termsVersion: TERMS_VERSION,
 })
 
 /**
@@ -170,6 +176,10 @@ type SafeFixtures = {
   safePage: Page
   /** Safe Client Gateway API client — use for API-first test setup */
   safeApiClient: SafeApiClient
+  /** Wallet page object — connect a private-key wallet and SiWE login */
+  walletPage: WalletPage
+  /** Parsed wallet credentials (lazy — only parses env when a test uses it) */
+  credentials: WalletCredentials
 }
 
 // ---------------------------------------------------------------------------
@@ -190,9 +200,17 @@ export const test = base.extend<SafeFixtures>({
     await attachFailureEvidence(testInfo, page, consoleErrors, consoleWarnings, failedRequests)
   },
 
-  safeApiClient: async (_, use) => {
+  safeApiClient: async ({}, use) => {
     const client = new SafeApiClient()
     await use(client)
+  },
+
+  walletPage: async ({ safePage }, use) => {
+    await use(new WalletPage(safePage))
+  },
+
+  credentials: async ({}, use) => {
+    await use(getWalletCredentials())
   },
 })
 

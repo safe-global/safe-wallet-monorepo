@@ -22,7 +22,7 @@ const SpaceMembers = () => {
       {isInvited && <PreviewInvite />}
       <div className="mb-6 flex flex-col gap-6">
         <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
-          Members
+          Team
         </Typography>
         {isAdmin && (
           <Track {...SPACE_EVENTS.ADD_MEMBER_MODAL} label={SPACE_LABELS.members_page}>

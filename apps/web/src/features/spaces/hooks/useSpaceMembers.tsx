@@ -24,12 +24,20 @@ export const isAdmin = (member: MemberDto) => member.role === MemberRole.ADMIN
 
 export const isActiveAdmin = (member: MemberDto) => isAdmin(member) && member.status === MemberStatus.ACTIVE
 
-const useAllMembers = (spaceId?: number) => {
+export const isInviteExpired = (member: MemberDto): boolean => {
+  if (member.status !== MemberStatus.INVITED || member.inviteExpiresAt == null) return false
+
+  // Guard NaN explicitly so a malformed date isn't silently treated as not-expired
+  const expiresAt = new Date(member.inviteExpiresAt).getTime()
+  return Number.isFinite(expiresAt) && expiresAt <= Date.now()
+}
+
+const useAllMembers = (spaceId?: string) => {
   const currentSpaceId = useCurrentSpaceId()
   const actualSpaceId = spaceId ?? currentSpaceId
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { data: currentData } = useMembersGetUsersV1Query(
-    { spaceId: Number(actualSpaceId) },
+    { spaceId: actualSpaceId ?? '' },
     { skip: !isUserSignedIn || !actualSpaceId },
   )
   return currentData?.members || []
@@ -46,7 +54,7 @@ export const useSpaceMembersByStatus = () => {
   return { activeMembers, invitedMembers }
 }
 
-export const useCurrentMembership = (spaceId?: number) => {
+export const useCurrentMembership = (spaceId?: string) => {
   const allMembers = useAllMembers(spaceId)
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
@@ -61,7 +69,7 @@ export const useCurrentMemberProfile = () => {
     skip: !isUserSignedIn,
   })
   const { currentData: membership, isLoading: isMembershipLoading } = useMembersGetMembershipV1Query(
-    { spaceId: Number(spaceId) },
+    { spaceId: spaceId ?? '' },
     { skip: !isUserSignedIn || !spaceId },
   )
 
@@ -73,12 +81,12 @@ export const useCurrentMemberProfile = () => {
   }
 }
 
-export const useIsActiveMember = (spaceId?: number) => {
+export const useIsActiveMember = (spaceId?: string) => {
   const currentMembership = useCurrentMembership(spaceId)
   return !!currentMembership && currentMembership.status === MemberStatus.ACTIVE
 }
 
-export const useIsAdmin = (spaceId?: number) => {
+export const useIsAdmin = (spaceId?: string) => {
   const currentMembership = useCurrentMembership(spaceId)
   return !!currentMembership && isActiveAdmin(currentMembership)
 }
