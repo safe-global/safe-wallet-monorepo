@@ -17,6 +17,16 @@ describe('TransactionHeader', () => {
     expect(getByText('Some contract')).toBeTruthy()
   })
 
+  it('falls back to the contract title when the dApp publishes an empty name', () => {
+    const { getByText } = renderWithStore(
+      <DappOriginProvider value={{ name: '', logoUri: 'https://x/icon.png' }}>
+        <TransactionHeader {...baseProps} />
+      </DappOriginProvider>,
+      createTestStore(),
+    )
+    expect(getByText('Some contract')).toBeTruthy()
+  })
+
   it('replaces the title with the originating dApp name when present', () => {
     const { getByText, queryByText } = renderWithStore(
       <DappOriginProvider value={{ name: 'Uniswap', logoUri: 'https://x/icon.png' }}>

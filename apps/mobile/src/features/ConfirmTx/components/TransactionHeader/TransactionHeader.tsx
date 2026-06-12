@@ -37,7 +37,8 @@ export function TransactionHeader({
   // When the tx originates from a WalletConnect dApp, surface its logo + name in place of the
   // contract logo/title (Figma `5316-26402`). Absent provider (history, native flows) → no-op.
   const dappOrigin = useDappOrigin()
-  const showTitle = dappOrigin?.name ?? title
+  // `||` not `??`: a dApp publishing metadata.name = '' must not blank the header.
+  const showTitle = dappOrigin?.name || title
 
   return (
     <YStack position="relative" alignItems="center" gap="$2" marginTop="$4">
