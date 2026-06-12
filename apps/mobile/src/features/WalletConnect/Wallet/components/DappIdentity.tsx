@@ -34,8 +34,18 @@ export const DappIdentity: React.FC<Props> = ({
   onPressDomain,
   domainTestID,
 }) => {
-  // dApp domain without the scheme/trailing slash, e.g. 'https://uniswap.org/' -> 'uniswap.org'.
-  const domain = useMemo(() => url?.replace(/^https?:\/\//, '').replace(/\/+$/, '') || url || '', [url])
+  // dApp domain only, e.g. 'https://app.uniswap.org/swap?chain=1' -> 'app.uniswap.org'.
+  // Fall back to naive scheme/trailing-slash stripping for unparseable metadata URLs.
+  const domain = useMemo(() => {
+    if (!url) {
+      return ''
+    }
+    try {
+      return new URL(url).host
+    } catch {
+      return url.replace(/^https?:\/\//, '').replace(/\/+$/, '')
+    }
+  }, [url])
 
   return (
     <YStack gap="$5" padding="$4">
