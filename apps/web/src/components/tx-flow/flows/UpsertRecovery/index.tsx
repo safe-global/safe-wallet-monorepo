@@ -4,7 +4,7 @@ import { UpsertRecoveryFlowReview as UpsertRecoveryFlowReview } from './UpsertRe
 import { UpsertRecoveryFlowSettings as UpsertRecoveryFlowSettings } from './UpsertRecoveryFlowSettings'
 import { UpsertRecoveryFlowIntro as UpsertRecoveryFlowIntro } from './UpsertRecoveryFlowIntro'
 import { DAY_IN_SECONDS } from './useRecoveryPeriods'
-import type { RecoveryState } from '@/features/recovery/services/recovery-state'
+import type { RecoveryState } from '@/features/recovery'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'

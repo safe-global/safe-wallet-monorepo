@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/utils/cn'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, BATCH_EVENTS } from '@/services/analytics'
-import BatchTooltip from '@/features/batching/components/BatchTooltip'
+import { BatchTooltip } from '@/features/batching'
 
 export interface HeaderNavigationProps {
   /**

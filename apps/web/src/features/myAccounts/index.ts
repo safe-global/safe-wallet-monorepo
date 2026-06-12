@@ -61,5 +61,12 @@ export { default as useNonPinnedSafeWarning } from './hooks/useNonPinnedSafeWarn
 export { default as useSimilarAddressDetection } from './hooks/useSimilarAddressDetection'
 export { useTrustSafe } from './hooks/useTrustSafe'
 
+// ─────────────────────────────────────────────────────────────────
+// PUBLIC COMPONENTS
+// ─────────────────────────────────────────────────────────────────
+
+export { AccountItem } from './components/AccountItem'
+export { default as AddTrustedSafeDialog } from './components/NonPinnedWarning/AddTrustedSafeDialog'
+
 // Public types
 export type * from './types'

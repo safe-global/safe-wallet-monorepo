@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
-import ClassicViewLink from '@/features/spaces/components/ClassicViewLink'
+import ClassicViewLink from './'
 import { disableClassicView, useIsClassicViewOptedIn } from '@/hooks/useClassicView'
 import { AppRoutes } from '@/config/routes'
 import { renderHook } from '@testing-library/react'
