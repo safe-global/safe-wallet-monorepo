@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
-import useSafeSelectionModal from './useSafeSelectionModal'
+import useTrustedSafesModal from './useTrustedSafesModal'
 import * as store from '@/store'
 import * as useAllSafes from '@/hooks/safes/useAllSafes'
 import * as addressSimilarity from '@safe-global/utils/utils/addressSimilarity'
@@ -18,7 +18,7 @@ jest.mock('@safe-global/utils/utils/addressSimilarity', () => ({
   detectSimilarAddresses: jest.fn(),
 }))
 
-describe('useSafeSelectionModal', () => {
+describe('useTrustedSafesModal', () => {
   const mockDispatch = jest.fn()
   const mockSafes = [
     { chainId: '1', address: '0x1234567890abcdef1234567890abcdef12345678', name: 'Safe 1', isPinned: false },
@@ -39,14 +39,14 @@ describe('useSafeSelectionModal', () => {
   })
 
   it('should initialize with modal closed', () => {
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     expect(result.current.isOpen).toBe(false)
     expect(result.current.selectedAddresses.size).toBe(0)
   })
 
   it('should open modal', () => {
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.open()
@@ -56,7 +56,7 @@ describe('useSafeSelectionModal', () => {
   })
 
   it('should close modal', () => {
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.open()
@@ -70,7 +70,7 @@ describe('useSafeSelectionModal', () => {
   })
 
   it('should toggle selection', () => {
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.toggleSelection(mockSafes[0].address)
@@ -93,7 +93,7 @@ describe('useSafeSelectionModal', () => {
       getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
     })
 
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.toggleSelection(mockSafes[0].address)
@@ -110,7 +110,7 @@ describe('useSafeSelectionModal', () => {
       getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
     })
 
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.toggleSelection(mockSafes[0].address)
@@ -125,7 +125,7 @@ describe('useSafeSelectionModal', () => {
   })
 
   it('should filter safes by search query', () => {
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.setSearchQuery('Safe 1')
@@ -136,7 +136,7 @@ describe('useSafeSelectionModal', () => {
   })
 
   it('should dispatch actions on submit', () => {
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.toggleSelection(mockSafes[0].address)
@@ -156,7 +156,7 @@ describe('useSafeSelectionModal', () => {
       '1': { [pinnedAddress]: { owners: [], threshold: 1 } },
     })
 
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.open()
@@ -171,7 +171,7 @@ describe('useSafeSelectionModal', () => {
       '1': { [pinnedAddress]: { owners: [], threshold: 1 } },
     })
 
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.open()
@@ -196,7 +196,7 @@ describe('useSafeSelectionModal', () => {
       '1': { [pinnedAddress]: { owners: [], threshold: 1 } },
     })
 
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.open()
@@ -221,7 +221,7 @@ describe('useSafeSelectionModal', () => {
   })
 
   it('should select all safes when no similar addresses', () => {
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.selectAll()
@@ -241,7 +241,7 @@ describe('useSafeSelectionModal', () => {
       getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
     })
 
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.selectAll()
@@ -262,7 +262,7 @@ describe('useSafeSelectionModal', () => {
       getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
     })
 
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.selectAll()
@@ -286,7 +286,7 @@ describe('useSafeSelectionModal', () => {
       getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
     })
 
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     act(() => {
       result.current.selectAll()
@@ -304,7 +304,7 @@ describe('useSafeSelectionModal', () => {
   })
 
   it('should deselect all safes', () => {
-    const { result } = renderHook(() => useSafeSelectionModal())
+    const { result } = renderHook(() => useTrustedSafesModal())
 
     // First select some safes
     act(() => {

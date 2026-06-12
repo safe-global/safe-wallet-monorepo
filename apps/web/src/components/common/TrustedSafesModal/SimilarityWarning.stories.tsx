@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import SimilarityWarning from './SimilarityWarning'
 
 const meta = {
-  title: 'Features/MyAccounts/SimilarityWarning',
+  title: 'Common/SimilarityWarning',
   component: SimilarityWarning,
   parameters: {
     layout: 'centered',

@@ -76,13 +76,20 @@ jest.mock('./AccountsModal', () => {
 
 jest.mock('@/features/myAccounts', () => ({
   MyAccountsFeature: {},
-  useSafeSelectionModal: () => ({ open: jest.fn(), close: jest.fn(), isOpen: false }),
 }))
 
 jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({
-    SafeSelectionModal: () => null,
-  }),
+  useLoadFeature: () => ({}),
+}))
+
+jest.mock('@/components/common/TrustedSafesModal', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+
+jest.mock('@/components/common/TrustedSafesModal/useTrustedSafesModal', () => ({
+  __esModule: true,
+  default: () => ({ open: jest.fn(), close: jest.fn(), isOpen: false }),
 }))
 
 jest.mock('@/hooks/useSafeInfo', () => () => ({ safeAddress: '0xSafe1' }))

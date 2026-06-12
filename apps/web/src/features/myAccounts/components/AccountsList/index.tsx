@@ -3,11 +3,11 @@ import PinnedSafes from '../PinnedSafes'
 import CurrentSafe from '../CurrentSafe'
 import ConnectWalletPrompt from '../ConnectWalletPrompt'
 import { type AllSafeItems, type AllSafeItemsGrouped, getComparator } from '@/hooks/safes'
-import SafeSelectionModal from '../SafeSelectionModal'
+import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import MigrationPrompt from '../MigrationPrompt'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import useSafeSelectionModal from '../../hooks/useSafeSelectionModal'
+import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import useMigrationPrompt from '../../hooks/useMigrationPrompt'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useMemo, useCallback } from 'react'
@@ -30,7 +30,7 @@ const AccountsList = ({
   const sortComparator = getComparator(orderBy)
 
   // Safe selection modal hook
-  const modal = useSafeSelectionModal()
+  const modal = useTrustedSafesModal()
 
   // Migration prompt hook
   const migration = useMigrationPrompt()
@@ -70,7 +70,7 @@ const AccountsList = ({
       )}
 
       {/* Safe selection modal - only way to manage safes */}
-      <SafeSelectionModal modal={modal} />
+      <TrustedSafesModal modal={modal} />
     </>
   )
 }

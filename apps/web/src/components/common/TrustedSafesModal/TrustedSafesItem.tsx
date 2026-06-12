@@ -1,12 +1,12 @@
 import type { MouseEvent } from 'react'
 import { useMediaQuery, useTheme } from '@mui/material'
-import type { SelectableSafe } from '../../hooks/useSafeSelectionModal.types'
-import { useSafeItemData } from '../../hooks/useSafeItemData'
-import { AccountItem } from '../AccountItem'
+import type { SelectableSafe } from './useTrustedSafesModal.types'
+import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
+import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import SimilarityWarning from './SimilarityWarning'
-import css from '../AccountItems/styles.module.css'
+import css from '@/features/myAccounts/components/AccountItems/styles.module.css'
 
-interface SafeSelectionItemProps {
+interface TrustedSafesItemProps {
   safe: SelectableSafe
   onToggle: (address: string) => void
 }
@@ -17,7 +17,7 @@ interface SafeSelectionItemProps {
  * Includes balance, signers, status chips, queue actions, and rename menu.
  * Allows selecting/deselecting safes including already-pinned ones.
  */
-const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
+const TrustedSafesItem = ({ safe, onToggle }: TrustedSafesItemProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
 
@@ -83,4 +83,4 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
   )
 }
 
-export default SafeSelectionItem
+export default TrustedSafesItem

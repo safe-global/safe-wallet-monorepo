@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
 import { Box, Typography, CircularProgress, TextField, InputAdornment } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
-import SafeSelectionItem from './SafeSelectionItem'
+import TrustedSafesItem from './TrustedSafesItem'
 import MultiChainSelectionItem from './MultiChainSelectionItem'
-import type { SelectableSafe, SelectableItem } from '../../hooks/useSafeSelectionModal.types'
-import { isSelectableMultiChainSafe } from '../../hooks/useSafeSelectionModal.types'
+import type { SelectableSafe, SelectableItem } from './useTrustedSafesModal.types'
+import { isSelectableMultiChainSafe } from './useTrustedSafesModal.types'
 
-interface SafeSelectionListProps {
+interface TrustedSafesListProps {
   items: SelectableItem[]
   isLoading: boolean
   searchQuery: string
@@ -57,7 +57,7 @@ const SelectionItem = ({ item, onToggle }: { item: SelectableItem; onToggle: (ad
   if (isSelectableMultiChainSafe(item)) {
     return <MultiChainSelectionItem multiSafe={item} onToggle={onToggle} />
   }
-  return <SafeSelectionItem safe={item as SelectableSafe} onToggle={onToggle} />
+  return <TrustedSafesItem safe={item as SelectableSafe} onToggle={onToggle} />
 }
 
 /**
@@ -106,7 +106,7 @@ const SimilarityGroupContainer = ({
  * List of safes for selection
  * Groups similar addresses together with visual highlighting
  */
-const SafeSelectionList = ({ items, isLoading, searchQuery, onSearchChange, onToggle }: SafeSelectionListProps) => {
+const TrustedSafesList = ({ items, isLoading, searchQuery, onSearchChange, onToggle }: TrustedSafesListProps) => {
   const { groups, ungroupedItems } = useMemo(() => groupItemsBySimilarity(items), [items])
 
   if (isLoading) {
@@ -164,4 +164,4 @@ const SafeSelectionList = ({ items, isLoading, searchQuery, onSearchChange, onTo
   )
 }
 
-export default SafeSelectionList
+export default TrustedSafesList

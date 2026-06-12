@@ -7,7 +7,7 @@ import { OVERVIEW_EVENTS, PIN_SAFE_LABELS, trackEvent } from '@/services/analyti
 import { useAllSafesGrouped } from '@/hooks/safes/useAllSafesGrouped'
 import useAllSafes from '@/hooks/safes/useAllSafes'
 import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
-import type { SelectableSafe, SelectableMultiChainSafe, SelectableItem } from './useSafeSelectionModal.types'
+import type { SelectableSafe, SelectableMultiChainSafe, SelectableItem } from './useTrustedSafesModal.types'
 
 /**
  * Collect all pinned addresses from addedSafes state (normalized to lowercase)
@@ -50,7 +50,7 @@ const getSubmitNotification = (
   return null
 }
 
-export interface UseSafeSelectionModalReturn {
+export interface UseTrustedSafesModalReturn {
   /** Whether the modal is currently open */
   isOpen: boolean
   /** List of safes available for selection with their status (includes both single and multichain) */
@@ -95,7 +95,7 @@ export interface UseSafeSelectionModalReturn {
  * - Similarity detection and confirmation flow
  * - Submitting selection to pin safes
  */
-const useSafeSelectionModal = (): UseSafeSelectionModalReturn => {
+const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
   const dispatch = useAppDispatch()
   const [isOpen, setIsOpen] = useState(false)
   const [selectedAddresses, setSelectedAddresses] = useState<Set<string>>(new Set())
@@ -393,4 +393,4 @@ const useSafeSelectionModal = (): UseSafeSelectionModalReturn => {
   }
 }
 
-export default useSafeSelectionModal
+export default useTrustedSafesModal

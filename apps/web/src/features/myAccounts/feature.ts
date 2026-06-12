@@ -28,7 +28,6 @@ import AccountItemQueueActions from './components/AccountItem/AccountItemQueueAc
 import AccountItemContent from './components/AccountItem/AccountItemContent'
 import SafesList from './components/SafesList'
 import AccountsNavigation from './components/AccountsNavigation'
-import SafeSelectionModal from './components/SafeSelectionModal'
 import NonPinnedWarning from './components/NonPinnedWarning'
 import AccountsWidget from './components/AccountsWidget/AccountsWidget'
 
@@ -57,7 +56,6 @@ const feature: MyAccountsContract = {
   AccountsWidget,
 
   // Address safety components
-  SafeSelectionModal,
   NonPinnedWarning,
 }
 

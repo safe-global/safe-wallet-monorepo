@@ -1,13 +1,13 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, Box, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import SecurityBanner from './SecurityBanner'
-import SafeSelectionList from './SafeSelectionList'
+import TrustedSafesList from './TrustedSafesList'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
 import SelectAllConfirmDialog from './SelectAllConfirmDialog'
-import type { UseSafeSelectionModalReturn } from '../../hooks/useSafeSelectionModal'
+import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 
-interface SafeSelectionModalProps {
-  modal: UseSafeSelectionModalReturn
+interface TrustedSafesModalProps {
+  modal: UseTrustedSafesModalReturn
 }
 
 /**
@@ -16,7 +16,7 @@ interface SafeSelectionModalProps {
  * Shows a security warning banner, list of available safes with selection,
  * and handles similarity confirmation for flagged addresses.
  */
-const SafeSelectionModal = ({ modal }: SafeSelectionModalProps) => {
+const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
   const {
     isOpen,
     availableItems,
@@ -87,7 +87,7 @@ const SafeSelectionModal = ({ modal }: SafeSelectionModalProps) => {
             </Box>
           </Box>
 
-          <SafeSelectionList
+          <TrustedSafesList
             items={availableItems}
             isLoading={isLoading}
             searchQuery={searchQuery}
@@ -135,4 +135,4 @@ const SafeSelectionModal = ({ modal }: SafeSelectionModalProps) => {
   )
 }
 
-export default SafeSelectionModal
+export default TrustedSafesModal

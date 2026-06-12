@@ -12,7 +12,7 @@ import {
 } from '@mui/material'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import type { SelectableItem } from '../../hooks/useSafeSelectionModal.types'
+import type { SelectableItem } from './useTrustedSafesModal.types'
 
 interface SelectAllConfirmDialogProps {
   open: boolean

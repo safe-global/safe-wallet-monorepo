@@ -1,12 +1,12 @@
 import { useState, type MouseEvent } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Box, useMediaQuery, useTheme } from '@mui/material'
 import classnames from 'classnames'
-import type { SelectableMultiChainSafe } from '../../hooks/useSafeSelectionModal.types'
-import { useMultiAccountItemData } from '../../hooks/useMultiAccountItemData'
-import { useSafeItemData } from '../../hooks/useSafeItemData'
-import { AccountItem } from '../AccountItem'
+import type { SelectableMultiChainSafe } from './useTrustedSafesModal.types'
+import { useMultiAccountItemData } from '@/features/myAccounts/hooks/useMultiAccountItemData'
+import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
+import { AccountItem } from '@/features/myAccounts/components/AccountItem'
 import SimilarityWarning from './SimilarityWarning'
-import css from '../AccountItems/styles.module.css'
+import css from '@/features/myAccounts/components/AccountItems/styles.module.css'
 
 interface MultiChainSelectionItemProps {
   multiSafe: SelectableMultiChainSafe

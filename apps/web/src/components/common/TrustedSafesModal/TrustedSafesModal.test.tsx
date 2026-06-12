@@ -1,13 +1,13 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
-import SafeSelectionModal from './index'
-import type { UseSafeSelectionModalReturn } from '../../hooks/useSafeSelectionModal'
+import TrustedSafesModal from './index'
+import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 import { useRouter } from 'next/router'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('../../hooks/useSafeItemData', () => ({
+jest.mock('@/features/myAccounts/hooks/useSafeItemData', () => ({
   useSafeItemData: () => ({
     chain: { chainId: '1', shortName: 'eth' },
     name: undefined,
@@ -33,7 +33,7 @@ const mockRouter = {
   push: jest.fn(),
 }
 
-const mockModal: UseSafeSelectionModalReturn = {
+const mockModal: UseTrustedSafesModalReturn = {
   isOpen: true,
   availableItems: [
     {
@@ -78,21 +78,21 @@ const mockModal: UseSafeSelectionModalReturn = {
   setSearchQuery: jest.fn(),
 }
 
-describe('SafeSelectionModal', () => {
+describe('TrustedSafesModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
   })
 
   it('should render modal when open', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     expect(screen.getByText('Manage trusted Safes')).toBeInTheDocument()
     expect(screen.getByText('Verify before you trust')).toBeInTheDocument()
   })
 
   it('should render safe items', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     // AccountItem uses checkbox data-testid format: safe-item-checkbox-{address}
     expect(screen.getByTestId('safe-item-checkbox-0x1234567890abcdef1234567890abcdef12345678')).toBeInTheDocument()
@@ -100,7 +100,7 @@ describe('SafeSelectionModal', () => {
   })
 
   it('should call close when cancel clicked', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     fireEvent.click(screen.getByText('Cancel'))
 
@@ -109,13 +109,13 @@ describe('SafeSelectionModal', () => {
 
   it('should not render when closed', () => {
     const closedModal = { ...mockModal, isOpen: false }
-    const { container } = render(<SafeSelectionModal modal={closedModal} />)
+    const { container } = render(<TrustedSafesModal modal={closedModal} />)
 
     expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument()
   })
 
   it('should call toggleSelection when clicking safe item', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     // Click on the first safe item (AccountItem.Button has data-testid="safe-list-item")
     const safeItems = screen.getAllByTestId('safe-list-item')
@@ -136,20 +136,20 @@ describe('SafeSelectionModal', () => {
       ],
     }
 
-    render(<SafeSelectionModal modal={modalWithPending} />)
+    render(<TrustedSafesModal modal={modalWithPending} />)
 
     expect(screen.getByText('Similar address detected')).toBeInTheDocument()
   })
 
   it('should display Select All and Deselect All buttons', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     expect(screen.getByText('Select All')).toBeInTheDocument()
     expect(screen.getByText('Deselect All')).toBeInTheDocument()
   })
 
   it('should call selectAll when Select All clicked', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     fireEvent.click(screen.getByText('Select All'))
 
@@ -157,7 +157,7 @@ describe('SafeSelectionModal', () => {
   })
 
   it('should call deselectAll when Deselect All clicked', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     fireEvent.click(screen.getByText('Deselect All'))
 
@@ -165,7 +165,7 @@ describe('SafeSelectionModal', () => {
   })
 
   it('should show selection count', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     expect(screen.getByText('1 of 2 selected')).toBeInTheDocument()
   })
@@ -188,7 +188,7 @@ describe('SafeSelectionModal', () => {
       ],
     }
 
-    render(<SafeSelectionModal modal={modalWithSelectAllConfirmation} />)
+    render(<TrustedSafesModal modal={modalWithSelectAllConfirmation} />)
 
     expect(screen.getByText('Similar addresses detected')).toBeInTheDocument()
     expect(screen.getByText('No, skip similar addresses')).toBeInTheDocument()
@@ -213,7 +213,7 @@ describe('SafeSelectionModal', () => {
       ],
     }
 
-    render(<SafeSelectionModal modal={modalWithSelectAllConfirmation} />)
+    render(<TrustedSafesModal modal={modalWithSelectAllConfirmation} />)
 
     fireEvent.click(screen.getByText('Yes, include them anyway'))
 
@@ -238,7 +238,7 @@ describe('SafeSelectionModal', () => {
       ],
     }
 
-    render(<SafeSelectionModal modal={modalWithSelectAllConfirmation} />)
+    render(<TrustedSafesModal modal={modalWithSelectAllConfirmation} />)
 
     fireEvent.click(screen.getByText('No, skip similar addresses'))
 

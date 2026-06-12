@@ -14,8 +14,8 @@ import BookmarkIcon from '@/public/images/apps/bookmark.svg'
 
 import ConnectWalletPrompt from '../../../ConnectWalletPrompt'
 import MigrationPrompt from '../../../MigrationPrompt'
-import SafeSelectionModal from '../../../SafeSelectionModal'
-import useSafeSelectionModal from '../../../../hooks/useSafeSelectionModal'
+import TrustedSafesModal from '@/components/common/TrustedSafesModal'
+import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import useMigrationPrompt from '../../../../hooks/useMigrationPrompt'
 import AccountItem from '../AccountItem'
 
@@ -33,7 +33,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)
 
-  const modal = useSafeSelectionModal()
+  const modal = useTrustedSafesModal()
   const migration = useMigrationPrompt()
 
   const { safe: currentSafe, safeAddress } = useSafeInfo()
@@ -145,7 +145,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
         </Typography>
       )}
 
-      <SafeSelectionModal modal={modal} />
+      <TrustedSafesModal modal={modal} />
     </>
   )
 }
