@@ -33,11 +33,15 @@ export type PendingItem = PendingSessionProposal | PendingSessionRequest
 
 // Tx requests handed off to the review-and-confirm flow, keyed by safeTxHash. We respond
 // to the dApp only after the propose mutation fulfils (user actually signed), not when the
-// sheet's Sign button is tapped.
+// sheet's Sign button is tapped. chainId/safeAddress record the Safe context the draft was
+// composed against, so the safe-switch listener can reject entries that became stale
+// (mirrors draftTxSlice's isSameSafe cleanup).
 export type OutstandingTxRequest = {
   topic: string
   id: number
   method: DeferredTxMethod
+  chainId: string
+  safeAddress: string
 }
 
 type State = {

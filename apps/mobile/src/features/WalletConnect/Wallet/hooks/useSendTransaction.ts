@@ -82,7 +82,16 @@ export const useSendTransaction = (walletKit: IWalletKit | null, pending: Pendin
       })
       // Hand off to the confirm-transaction flow. The dApp response is sent later by the
       // propose-success listener in WalletKitProvider, NOT here — the user hasn't signed yet.
-      dispatch(setOutstandingRequest({ safeTxHash, topic: pending.topic, id: pending.id, method: pending.method }))
+      dispatch(
+        setOutstandingRequest({
+          safeTxHash,
+          topic: pending.topic,
+          id: pending.id,
+          method: pending.method,
+          chainId: activeSafe.chainId,
+          safeAddress: activeSafe.address,
+        }),
+      )
       dispatch(removePending({ id: pending.id, kind: 'request' }))
       router.push({ pathname: '/confirm-transaction', params: { txId: safeTxHash } })
     } catch (e) {
