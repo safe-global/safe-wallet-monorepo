@@ -1,5 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useIsQualifiedSafe } from '@/features/spaces'
 import SecurityBanner from './SecurityBanner'
 import TrustedSafesList from './TrustedSafesList'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
@@ -36,6 +39,8 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
     setSearchQuery,
   } = modal
 
+  const isInSpace = useIsQualifiedSafe()
+
   const pendingItem = pendingConfirmation
     ? availableItems.find((s) => s.address.toLowerCase() === pendingConfirmation)
     : null
@@ -50,6 +55,15 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
 
           <div className="min-h-0 flex-1 overflow-y-auto px-6 pt-4">
             <SecurityBanner title="Verify before you trust" />
+
+            {isInSpace && (
+              <Alert className="mb-4 border-transparent bg-[var(--color-info-background)]" data-testid="space-notice">
+                <Info />
+                <AlertDescription className="text-current">
+                  Trusted Safes aren&apos;t added to this workspace automatically — add them separately.
+                </AlertDescription>
+              </Alert>
+            )}
 
             <div className="mb-4 flex items-center justify-between">
               <span className="text-sm text-muted-foreground">

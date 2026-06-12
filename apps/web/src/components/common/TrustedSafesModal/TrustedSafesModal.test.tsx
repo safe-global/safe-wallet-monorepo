@@ -2,10 +2,18 @@ import { render, screen, fireEvent } from '@/tests/test-utils'
 import TrustedSafesModal from './index'
 import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 import { useRouter } from 'next/router'
+import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
+
+jest.mock('@/features/spaces/hooks/useIsQualifiedSafe', () => ({
+  __esModule: true,
+  default: jest.fn(() => false),
+}))
+
+const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 
 jest.mock('@/features/myAccounts/hooks/useSafeItemData', () => ({
   useSafeItemData: () => ({
@@ -85,6 +93,7 @@ describe('TrustedSafesModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
+    mockUseIsQualifiedSafe.mockReturnValue(false)
   })
 
   it('should render modal when open', () => {
@@ -92,6 +101,22 @@ describe('TrustedSafesModal', () => {
 
     expect(screen.getByText('Manage trusted Safes')).toBeInTheDocument()
     expect(screen.getByText('Verify before you trust')).toBeInTheDocument()
+  })
+
+  it('shows the workspace notice when in a space', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+
+    render(<TrustedSafesModal modal={mockModal} />)
+
+    expect(screen.getByTestId('space-notice')).toBeInTheDocument()
+  })
+
+  it('hides the workspace notice when not in a space', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(false)
+
+    render(<TrustedSafesModal modal={mockModal} />)
+
+    expect(screen.queryByTestId('space-notice')).not.toBeInTheDocument()
   })
 
   it('should render safe items', () => {
