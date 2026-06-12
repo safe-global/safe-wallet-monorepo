@@ -221,27 +221,24 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           return switchActiveChain.match(action) ? true : sameAddress(safeAddress, next?.address)
         }
 
-        // Handed-off requests (waiting on /propose).
-        const outstanding = selectOutstandingRequests(api.getState())
-        for (const [safeTxHash, req] of Object.entries(outstanding)) {
-          if (matchesNext(req.chainId, req.safeAddress)) {
-            continue
-          }
-          await respondRejected(req.topic, req.id)
-          api.dispatch(clearOutstandingRequest(safeTxHash))
-        }
-
-        // Pre-compose requests still showing (or queued behind) the sheet.
-        const pendingRequests = selectPending(api.getState()).filter(
-          (p): p is PendingSessionRequest => p.kind === 'request',
+        // Handed-off requests (waiting on /propose) + pre-compose requests still showing
+        // (or queued behind) the sheet. Clear the state first so the UI dismisses
+        // immediately, then send all rejections in parallel — a slow relay must not
+        // serialize the cleanup (respondRejected swallows its own errors).
+        const staleOutstanding = Object.entries(selectOutstandingRequests(api.getState())).filter(
+          ([, req]) => !matchesNext(req.chainId, req.safeAddress),
         )
-        for (const p of pendingRequests) {
-          if (matchesNext(stripEip155Prefix(p.chainId), p.safeAddress)) {
-            continue
-          }
-          await respondRejected(p.topic, p.id)
-          api.dispatch(removePending({ id: p.id, kind: 'request' }))
-        }
+        const stalePending = selectPending(api.getState())
+          .filter((p): p is PendingSessionRequest => p.kind === 'request')
+          .filter((p) => !matchesNext(stripEip155Prefix(p.chainId), p.safeAddress))
+
+        staleOutstanding.forEach(([safeTxHash]) => api.dispatch(clearOutstandingRequest(safeTxHash)))
+        stalePending.forEach((p) => api.dispatch(removePending({ id: p.id, kind: 'request' })))
+
+        await Promise.all([
+          ...staleOutstanding.map(([, req]) => respondRejected(req.topic, req.id)),
+          ...stalePending.map((p) => respondRejected(p.topic, p.id)),
+        ])
       },
     })
     return () => {
