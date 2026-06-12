@@ -1,5 +1,4 @@
 import { useState, type MouseEvent } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Box, useMediaQuery, useTheme } from '@mui/material'
 import classnames from 'classnames'
 import type { SelectableMultiChainSafe } from './useTrustedSafesModal.types'
 import { useMultiAccountItemData } from '@/features/myAccounts/hooks/useMultiAccountItemData'
@@ -68,8 +67,6 @@ function MultiChainSubItem({
  * Shows a header with the address and multichain badge, with expandable sub-items for each chain
  */
 const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionItemProps) => {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [expanded, setExpanded] = useState(false)
 
   // Use multiSafe.safes directly as they're already SelectableSafe[]
@@ -91,18 +88,10 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
   const statusChips = <>{multiSafe.similarityGroup && <SimilarityWarning />}</>
 
   return (
-    <Box data-testid="safe-list-item" className={classnames(css.multiListItem, css.listItem)} sx={{ my: 0.5 }}>
-      <Accordion data-testid="multichain-selection-item" expanded={expanded} sx={{ border: 'none' }}>
-        <AccordionSummary
-          onClick={toggleExpand}
-          sx={{
-            p: 0,
-            '& .MuiAccordionSummary-content': { m: '0 !important', alignItems: 'center' },
-            '&.Mui-expanded': { backgroundColor: 'transparent !important' },
-          }}
-          component="div"
-        >
-          <Box sx={{ flex: 1, minWidth: 0 }} onClick={handleToggle}>
+    <div data-testid="safe-list-item" className={classnames(css.multiListItem, css.listItem, 'my-0.5')}>
+      <div data-testid="multichain-selection-item">
+        <div onClick={toggleExpand} className="flex items-center">
+          <div className="min-w-0 flex-1" onClick={handleToggle}>
             <AccountItem.Content data-testid="multichain-selection-content">
               <AccountItem.Checkbox checked={multiSafe.isSelected} address={address} />
               <AccountItem.Icon
@@ -121,7 +110,7 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
                 showPrefix={false}
                 highlight4bytes={!!multiSafe.similarityGroup}
               >
-                {!isMobile && statusChips}
+                <span className="hidden sm:contents">{statusChips}</span>
               </AccountItem.Info>
               <AccountItem.ChainBadge safes={safes} />
               <AccountItem.Balance fiatTotal={totalFiatValue?.toString()} isLoading={totalFiatValue === undefined} />
@@ -134,18 +123,18 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
                 hideNestedSafes
               />
             </AccountItem.Content>
-          </Box>
-        </AccordionSummary>
-        <AccordionDetails sx={{ padding: '0px 12px' }}>
-          <Box data-testid="multichain-subaccounts-container">
+          </div>
+        </div>
+        {expanded && (
+          <div className="px-3" data-testid="multichain-subaccounts-container">
             {safes.map((safeItem) => (
               <MultiChainSubItem key={`${safeItem.chainId}:${safeItem.address}`} safe={safeItem} onToggle={onToggle} />
             ))}
-          </Box>
-        </AccordionDetails>
-      </Accordion>
-      {isMobile && <div className={css.accountItemChips}>{statusChips}</div>}
-    </Box>
+          </div>
+        )}
+      </div>
+      <div className={`${css.accountItemChips} sm:hidden`}>{statusChips}</div>
+    </div>
   )
 }
 

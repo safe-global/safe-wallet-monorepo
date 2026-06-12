@@ -1,5 +1,5 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, Box, Typography } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import SecurityBanner from './SecurityBanner'
 import TrustedSafesList from './TrustedSafesList'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
@@ -49,69 +49,48 @@ const TrustedSafesModal = ({ modal }: TrustedSafesModalProps) => {
 
   return (
     <>
-      <Dialog open={isOpen} onClose={close} maxWidth="md" fullWidth>
-        <DialogTitle
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            fontWeight: 'bold',
-            borderBottom: '1px solid',
-            borderColor: 'border.light',
-            px: 3,
-            pt: 3,
-            pb: 2,
-          }}
-        >
-          <Box>Manage trusted Safes</Box>
-          <IconButton onClick={close} size="small" edge="end">
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
+        <DialogContent className="flex max-h-[90vh] w-full max-w-[700px] flex-col gap-0 p-0">
+          <DialogHeader className="shrink-0 border-b border-border/50 px-6 pb-4 pt-6">
+            <DialogTitle className="font-bold">Manage trusted Safes</DialogTitle>
+          </DialogHeader>
 
-        <DialogContent sx={{ maxHeight: '60vh', overflowY: 'auto', pt: '16px !important' }}>
-          <SecurityBanner title="Verify before you trust" />
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 pt-4">
+            <SecurityBanner title="Verify before you trust" />
 
-          {/* Selection controls */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              {selectedCount} of {totalSafesCount} selected
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button size="small" variant="outlined" onClick={selectAll} disabled={allSelected || isLoading}>
-                Select All
-              </Button>
-              <Button size="small" variant="outlined" onClick={deselectAll} disabled={selectedCount === 0 || isLoading}>
-                Deselect All
-              </Button>
-            </Box>
-          </Box>
+            {/* Selection controls */}
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">
+                {selectedCount} of {totalSafesCount} selected
+              </span>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={selectAll} disabled={allSelected || isLoading}>
+                  Select All
+                </Button>
+                <Button size="sm" variant="outline" onClick={deselectAll} disabled={selectedCount === 0 || isLoading}>
+                  Deselect All
+                </Button>
+              </div>
+            </div>
 
-          <TrustedSafesList
-            items={availableItems}
-            isLoading={isLoading}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onToggle={toggleSelection}
-          />
+            <TrustedSafesList
+              items={availableItems}
+              isLoading={isLoading}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              onToggle={toggleSelection}
+            />
+          </div>
+
+          <DialogFooter className="shrink-0 flex-row justify-start border-t border-border/50 px-6 pb-6 pt-4">
+            <Button onClick={submitSelection} disabled={!hasChanges}>
+              Save
+            </Button>
+            <Button onClick={close} variant="ghost">
+              Cancel
+            </Button>
+          </DialogFooter>
         </DialogContent>
-
-        <DialogActions
-          sx={{
-            px: 3,
-            pb: 3,
-            pt: 2,
-            borderTop: '1px solid',
-            borderColor: 'border.light',
-          }}
-        >
-          <Button onClick={close} variant="text">
-            Cancel
-          </Button>
-          <Button onClick={submitSelection} variant="contained" disabled={!hasChanges}>
-            Save
-          </Button>
-        </DialogActions>
       </Dialog>
 
       {/* Confirmation dialog for selecting individual similar address */}

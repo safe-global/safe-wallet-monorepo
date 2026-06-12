@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
-import { Box, Typography, CircularProgress, TextField, InputAdornment } from '@mui/material'
-import SearchIcon from '@mui/icons-material/Search'
+import { Search } from 'lucide-react'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Spinner } from '@/components/ui/spinner'
 import TrustedSafesItem from './TrustedSafesItem'
 import MultiChainSelectionItem from './MultiChainSelectionItem'
 import type { SelectableSafe, SelectableItem } from './useTrustedSafesModal.types'
@@ -72,33 +73,19 @@ const SimilarityGroupContainer = ({
   onToggle: (address: string) => void
 }) => {
   return (
-    <Box
-      sx={{
-        my: 0.5,
-        borderRadius: 1,
-        border: '1px solid',
-        borderColor: 'border.light',
-        overflow: 'hidden',
-      }}
+    <div
+      className="my-0.5 overflow-hidden rounded-md border border-border/50"
       data-testid={`similarity-group-${group.groupKey}`}
     >
-      <Box
-        sx={{
-          px: 1.5,
-          py: 0.75,
-          backgroundColor: 'warning.background',
-        }}
-      >
-        <Typography variant="caption" fontWeight={500} color="warning.main">
-          Similar addresses – verify carefully
-        </Typography>
-      </Box>
-      <Box sx={{ backgroundColor: 'background.paper', p: 1, mb: 2 }}>
+      <div className="bg-yellow-50 px-3 py-1.5">
+        <span className="text-xs font-medium text-yellow-800">Similar addresses – verify carefully</span>
+      </div>
+      <div className="mb-4 bg-background p-2">
         {group.items.map((item) => (
           <SelectionItem key={item.address} item={item} onToggle={onToggle} />
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 
@@ -111,39 +98,33 @@ const TrustedSafesList = ({ items, isLoading, searchQuery, onSearchChange, onTog
 
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center py-8">
+        <Spinner />
+      </div>
     )
   }
 
   return (
-    <Box>
-      <TextField
-        placeholder="Search by name or full address"
-        value={searchQuery}
-        onChange={(e) => onSearchChange(e.target.value)}
-        fullWidth
-        size="small"
-        sx={{ mb: 2 }}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-          },
-        }}
-      />
+    <div>
+      <InputGroup className="mb-4 rounded-md border-gray-100 shadow-none">
+        <InputGroupAddon>
+          <Search className="size-4" />
+        </InputGroupAddon>
+        <InputGroupInput
+          placeholder="Search by name or full address"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
+          autoComplete="off"
+        />
+      </InputGroup>
 
-      <Box>
+      <div>
         {items.length === 0 ? (
-          <Box sx={{ py: 4, textAlign: 'center' }}>
-            <Typography color="text.secondary">
+          <div className="py-8 text-center">
+            <span className="text-sm text-muted-foreground">
               {searchQuery ? 'No safes found matching your search' : 'No safes available'}
-            </Typography>
-          </Box>
+            </span>
+          </div>
         ) : (
           <>
             {/* Render similarity groups first */}
@@ -153,14 +134,14 @@ const TrustedSafesList = ({ items, isLoading, searchQuery, onSearchChange, onTog
 
             {/* Render ungrouped items */}
             {ungroupedItems.map((item) => (
-              <Box key={item.address} sx={{ my: 0.5 }}>
+              <div key={item.address} className="my-0.5">
                 <SelectionItem item={item} onToggle={onToggle} />
-              </Box>
+              </div>
             ))}
           </>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

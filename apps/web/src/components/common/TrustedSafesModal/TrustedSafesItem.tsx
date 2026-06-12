@@ -1,5 +1,4 @@
 import type { MouseEvent } from 'react'
-import { useMediaQuery, useTheme } from '@mui/material'
 import type { SelectableSafe } from './useTrustedSafesModal.types'
 import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
 import { AccountItem } from '@/features/myAccounts/components/AccountItem'
@@ -18,9 +17,6 @@ interface TrustedSafesItemProps {
  * Allows selecting/deselecting safes including already-pinned ones.
  */
 const TrustedSafesItem = ({ safe, onToggle }: TrustedSafesItemProps) => {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-
   // Get rich data (balance, threshold, owners, etc.)
   const { chain, name, safeOverview, isActivating, threshold, owners, undeployedSafe, elementRef } =
     useSafeItemData(safe)
@@ -66,7 +62,7 @@ const TrustedSafesItem = ({ safe, onToggle }: TrustedSafesItemProps) => {
         hasExplorer
         highlight4bytes={!!safe.similarityGroup}
       >
-        {!isMobile && statusChips}
+        <span className="hidden sm:contents">{statusChips}</span>
       </AccountItem.Info>
       <AccountItem.ChainBadge chainId={safe.chainId} />
       <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
@@ -78,7 +74,7 @@ const TrustedSafesItem = ({ safe, onToggle }: TrustedSafesItemProps) => {
         undeployedSafe={!!undeployedSafe}
         hideNestedSafes
       />
-      {isMobile && <div className={css.accountItemChips}>{statusChips}</div>}
+      <div className={`${css.accountItemChips} sm:hidden`}>{statusChips}</div>
     </AccountItem.Button>
   )
 }

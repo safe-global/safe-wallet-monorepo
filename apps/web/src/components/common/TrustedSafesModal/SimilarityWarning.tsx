@@ -1,5 +1,6 @@
-import { Chip, Tooltip } from '@mui/material'
-import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import { TriangleAlert } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 const TOOLTIP_TEXT =
   'This address looks similar to another address in your list. Attackers create lookalike addresses to trick you. Verify the full address before selecting.'
@@ -11,16 +12,20 @@ const TOOLTIP_TEXT =
  */
 const SimilarityWarning = () => {
   return (
-    <Tooltip title={TOOLTIP_TEXT} arrow>
-      <Chip
-        icon={<WarningAmberIcon sx={{ fontSize: '16px !important', ml: 0.5 }} />}
-        label="High similarity"
-        size="small"
-        color="warning"
-        variant="outlined"
-        data-testid="similarity-warning"
-        sx={{ cursor: 'help', pl: 0.5 }}
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Badge
+            variant="outline"
+            data-testid="similarity-warning"
+            className="cursor-help gap-1 border-yellow-300 text-yellow-800"
+          >
+            <TriangleAlert className="size-4" />
+            High similarity
+          </Badge>
+        }
       />
+      <TooltipContent className="max-w-xs">{TOOLTIP_TEXT}</TooltipContent>
     </Tooltip>
   )
 }
