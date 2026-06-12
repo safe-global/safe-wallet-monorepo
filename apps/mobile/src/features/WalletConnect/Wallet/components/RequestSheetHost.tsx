@@ -214,6 +214,10 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
     ],
   )
 
+  if (!walletKit) {
+    return null
+  }
+
   return (
     <BottomSheetModal
       ref={ref}
@@ -227,13 +231,11 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
     >
       {/* Scrollable so content can't clip under large font scaling; the footer is pinned. */}
       <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom + FOOTER_CLEARANCE }}>
-        {walletKit && proposal && !permissionsOpen && (
+        {proposal && !permissionsOpen && (
           <SessionProposalSheet pending={proposal} onOpenPermissions={openPermissions} />
         )}
-        {walletKit && request && !permissionsOpen && (
-          <SendTransactionSheet pending={request} onOpenPermissions={openPermissions} />
-        )}
-        {walletKit && (proposal || request) && permissionsOpen && <ConnectionPermissionsPanel variant={variant} />}
+        {request && !permissionsOpen && <SendTransactionSheet pending={request} onOpenPermissions={openPermissions} />}
+        {(proposal || request) && permissionsOpen && <ConnectionPermissionsPanel variant={variant} />}
       </BottomSheetScrollView>
     </BottomSheetModal>
   )
