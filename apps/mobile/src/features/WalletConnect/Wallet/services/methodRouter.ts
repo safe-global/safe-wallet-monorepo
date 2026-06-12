@@ -151,8 +151,15 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     // wallet_sendCalls additionally binds the bundle to the active context.
     if (method === 'wallet_sendCalls') {
       const [bundle] = rpcParams as [{ chainId?: `0x${string}`; from?: `0x${string}` }]
-      const expectedChainHex = chainIdToHex(activeChain.chainId)
-      if (bundle.chainId !== expectedChainHex) {
+      // Numeric comparison, not string equality: EIP-5792 specifies a Quantity but dApps
+      // do send padded hex like '0x01'. BigInt throws on malformed hex → mismatch.
+      let chainMatches = false
+      try {
+        chainMatches = bundle.chainId !== undefined && BigInt(bundle.chainId) === BigInt(activeChain.chainId)
+      } catch {
+        // malformed bundle.chainId
+      }
+      if (!chainMatches) {
         return formatJsonRpcError(id, {
           code: -32602,
           message: `Safe is not on chain ${activeChain.chainId}`,
