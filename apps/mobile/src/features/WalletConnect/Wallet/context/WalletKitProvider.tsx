@@ -3,11 +3,9 @@ import * as Linking from 'expo-linking'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { getSdkError } from '@walletconnect/utils'
 import { formatJsonRpcError, formatJsonRpcResult } from '@walletconnect/jsonrpc-utils'
-import { skipToken } from '@reduxjs/toolkit/query'
 import { isAnyOf } from '@reduxjs/toolkit'
 import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { startAppListening } from '@/src/store'
@@ -214,18 +212,20 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [walletKit])
 
-  // Active context for the session-request router. `safe` is the full SafeState (owners,
-  // threshold, version) the compose path needs; `hasSigner` gates tx requests with 4100.
+  // Active context for the session-request router, read from local slices so cold-start
+  // requests aren't rejected while CGW fetches are in flight (the compose path loads the
+  // full SafeState itself); `hasSigner` gates tx requests with 4100.
   const activeSafe = useAppSelector(selectActiveSafe)
   const activeChain = useAppSelector((s) => (activeSafe ? (selectChainById(s, activeSafe.chainId) ?? null) : null))
-  const { data: safe } = useSafesGetSafeV1Query(
-    activeSafe ? { chainId: activeSafe.chainId, safeAddress: activeSafe.address } : skipToken,
-  )
   const activeSigner = useAppSelector((s) => (activeSafe ? selectActiveSigner(s, activeSafe.address) : undefined))
 
   const deps: SessionRequestHandlerDeps = useMemo(
-    () => ({ activeChain: activeChain ?? null, activeSafe: safe ?? null, hasSigner: !!activeSigner }),
-    [activeChain, safe, activeSigner],
+    () => ({
+      activeChain: activeChain ?? null,
+      activeSafeAddress: activeSafe?.address ?? null,
+      hasSigner: !!activeSigner,
+    }),
+    [activeChain, activeSafe?.address, activeSigner],
   )
 
   useSessionProposalHandler(walletKit)
