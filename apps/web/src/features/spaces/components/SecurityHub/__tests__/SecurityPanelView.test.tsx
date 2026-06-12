@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { render, screen, fireEvent, within } from '@testing-library/react'
+import { AppRoutes } from '@/config/routes'
 import { createMockContext } from '@/features/security/testing'
 import type { ScanResult } from '@/features/security/types'
 import SecurityPanelView from '../components/SecurityPanelView/SecurityPanelView'
@@ -169,7 +170,8 @@ describe('SecurityPanelView', () => {
       fireEvent.click(screen.getByText('Contract version is outdated'))
       const link = screen.getByRole('link', { name: /update/i })
       // The mastercopy upgrade lives on Settings → Setup, not the modules page
-      expect(link).toHaveAttribute('href', expect.stringContaining('/settings/setup?safe='))
+      expect(link).toHaveAttribute('href', expect.stringContaining(AppRoutes.settings.setup))
+      expect(link).toHaveAttribute('href', expect.stringContaining('safe='))
     })
 
     it('honors ScanResult.ctaLabelOverride over the CHECK_DEFS default', () => {

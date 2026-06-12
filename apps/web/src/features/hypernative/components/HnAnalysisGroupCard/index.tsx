@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import { Stack, Typography, useTheme } from '@mui/material'
-import { AnalysisGroupCard, type AnalysisGroupCardProps } from '@/features/safe-shield/components/AnalysisGroupCard'
+import { AnalysisGroupCard, type AnalysisGroupCardProps } from '@/features/safe-shield'
 import HypernativeLogo from '../HypernativeLogo'
 
 type HnAnalysisGroupCardProps = Omit<AnalysisGroupCardProps, 'footer'> & {

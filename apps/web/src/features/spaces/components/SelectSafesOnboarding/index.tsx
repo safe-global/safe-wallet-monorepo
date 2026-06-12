@@ -6,22 +6,17 @@ import { Typography } from '@/components/ui/typography'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ChevronLeft, ChevronRight, Search, Loader2 } from 'lucide-react'
-import {
-  OnboardingLayout,
-  StepCounter,
-  SafeAppMockup,
-  deriveSidePanelAccountsFromSpace,
-} from '@/features/spaces/components/OnboardingLayout'
+import { OnboardingLayout, StepCounter, SafeAppMockup, deriveSidePanelAccountsFromSpace } from '../OnboardingLayout'
 import useWallet from '@/hooks/wallets/useWallet'
 import { type AllSafeItems } from '@/hooks/safes'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
-import { useOnboardingStepCount } from '@/features/spaces/hooks/useOnboardingStepCount'
+import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import OnboardingSafesList from './components/OnboardingSafesList'
 import ConnectWalletHint from '../ConnectWalletHint'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
-import { useSelectAll } from '@/features/spaces/hooks/useSelectAll'
+import { useSelectAll } from '../../hooks/useSelectAll'
 import {
   deriveSidePanelAccounts,
   deriveSelectedBalanceSafes,
