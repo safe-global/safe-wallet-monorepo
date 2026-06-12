@@ -34,6 +34,13 @@ describe('SendTransactionSheet', () => {
     expect(getByText('uniswap.org')).toBeTruthy()
   })
 
+  it('shows only the host for a metadata URL with path and query', () => {
+    const store = storeWith({ name: 'Uniswap', url: 'https://app.uniswap.org/swap?chain=1', icons: [] })
+    const { getByText, queryByText } = renderWithStore(<SendTransactionSheet pending={makePending()} />, store)
+    expect(getByText('app.uniswap.org')).toBeTruthy()
+    expect(queryByText(/swap\?chain=1/)).toBeNull()
+  })
+
   it('hides the domain pill when the dApp provides no URL', () => {
     const store = storeWith({ name: 'Uniswap', icons: [] })
     const { getByText, queryByTestId } = renderWithStore(<SendTransactionSheet pending={makePending()} />, store)
