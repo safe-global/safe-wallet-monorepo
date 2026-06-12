@@ -123,6 +123,19 @@ describe('routeSessionRequest', () => {
     expect((res as { error: { code: number } }).error.code).toBe(-32602)
   })
 
+  it('accepts a wallet_sendCalls bundle with zero-padded hex chainId', async () => {
+    // EIP-5792 says Quantity (no leading zeros), but dApps send '0x01' in the wild.
+    const params = [{ chainId: '0x01', from: SAFE_ADDRESS, calls: [{ to: '0xabc' }] }]
+    const res = await routeSessionRequest(makeCtx(makeRequest('wallet_sendCalls', params)))
+    expect(isDeferredResponse(res)).toBe(true)
+  })
+
+  it('rejects a wallet_sendCalls bundle with malformed hex chainId', async () => {
+    const params = [{ chainId: '0xZZ', from: SAFE_ADDRESS, calls: [{ to: '0xabc' }] }]
+    const res = await routeSessionRequest(makeCtx(makeRequest('wallet_sendCalls', params)))
+    expect((res as { error: { code: number } }).error.code).toBe(-32602)
+  })
+
   it('rejects an eth_sendTransaction with no tx object instead of deferring', async () => {
     const res = await routeSessionRequest(makeCtx(makeRequest('eth_sendTransaction', [])))
     expect((res as { error: { code: number } }).error.code).toBe(-32602)
