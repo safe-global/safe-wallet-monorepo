@@ -109,6 +109,24 @@ describe('TrustedSafesModal', () => {
     expect(mockModal.close).toHaveBeenCalled()
   })
 
+  it('should disable Save when there are no changes', () => {
+    render(<TrustedSafesModal modal={mockModal} />)
+
+    expect(screen.getByText('Save').closest('button')).toBeDisabled()
+  })
+
+  it('should enable Save and call submitSelection when there are changes', () => {
+    const modalWithChanges = { ...mockModal, hasChanges: true }
+    render(<TrustedSafesModal modal={modalWithChanges} />)
+
+    const saveButton = screen.getByText('Save').closest('button')
+    expect(saveButton).not.toBeDisabled()
+
+    fireEvent.click(screen.getByText('Save'))
+
+    expect(modalWithChanges.submitSelection).toHaveBeenCalled()
+  })
+
   it('should not render when closed', () => {
     const closedModal = { ...mockModal, isOpen: false }
     const { container } = render(<TrustedSafesModal modal={closedModal} />)

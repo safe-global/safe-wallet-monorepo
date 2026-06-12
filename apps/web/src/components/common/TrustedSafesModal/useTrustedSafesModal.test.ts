@@ -320,4 +320,90 @@ describe('useTrustedSafesModal', () => {
 
     expect(result.current.selectedAddresses.size).toBe(0)
   })
+
+  describe('search-filtered selection', () => {
+    it('scopes the counter to the visible safes', () => {
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      expect(result.current.totalSafesCount).toBe(mockSafes.length)
+
+      act(() => {
+        result.current.setSearchQuery('Safe 1')
+      })
+
+      expect(result.current.totalSafesCount).toBe(1)
+    })
+
+    it('selectAll only selects the visible safes', () => {
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      act(() => {
+        result.current.setSearchQuery('Safe 1')
+      })
+
+      act(() => {
+        result.current.selectAll()
+      })
+
+      expect(result.current.selectedAddresses.has(mockSafes[0].address.toLowerCase())).toBe(true)
+      expect(result.current.selectedAddresses.has(mockSafes[1].address.toLowerCase())).toBe(false)
+      expect(result.current.selectedCount).toBe(1)
+      expect(result.current.allSelected).toBe(true)
+    })
+
+    it('deselectAll only clears the visible safes and keeps the rest selected', () => {
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      act(() => {
+        result.current.selectAll()
+      })
+
+      act(() => {
+        result.current.setSearchQuery('Safe 1')
+      })
+
+      act(() => {
+        result.current.deselectAll()
+      })
+
+      expect(result.current.selectedAddresses.has(mockSafes[0].address.toLowerCase())).toBe(false)
+      expect(result.current.selectedAddresses.has(mockSafes[1].address.toLowerCase())).toBe(true)
+    })
+
+    it('preserves selections made before searching', () => {
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      act(() => {
+        result.current.toggleSelection(mockSafes[0].address)
+      })
+
+      act(() => {
+        result.current.setSearchQuery('Safe 2')
+      })
+
+      expect(result.current.selectedAddresses.has(mockSafes[0].address.toLowerCase())).toBe(true)
+    })
+  })
+
+  describe('hasChanges', () => {
+    it('reports a pending pin that is hidden by the active search', () => {
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      act(() => {
+        result.current.toggleSelection(mockSafes[0].address)
+      })
+
+      act(() => {
+        result.current.setSearchQuery('Safe 2')
+      })
+
+      expect(result.current.hasChanges).toBe(true)
+    })
+
+    it('is false when the selection matches the pinned state', () => {
+      const { result } = renderHook(() => useTrustedSafesModal())
+
+      expect(result.current.hasChanges).toBe(false)
+    })
+  })
 })

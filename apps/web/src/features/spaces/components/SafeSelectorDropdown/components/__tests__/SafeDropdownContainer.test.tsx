@@ -114,6 +114,75 @@ describe('SafeDropdownContainer', () => {
     })
   })
 
+  describe('manage trusted safes link', () => {
+    it('renders when onManageTrustedSafes is provided, even with items present', () => {
+      render(
+        <SafeDropdownContainer
+          items={[createItem()]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          onManageTrustedSafes={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByTestId('manage-trusted-safes-link')).toBeInTheDocument()
+    })
+
+    it('renders alongside the footer node', () => {
+      render(
+        <SafeDropdownContainer
+          items={[createItem()]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          footer={<div data-testid="footer-node">All Accounts</div>}
+          onManageTrustedSafes={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByTestId('manage-trusted-safes-link')).toBeInTheDocument()
+      expect(screen.getByTestId('footer-node')).toBeInTheDocument()
+    })
+
+    it('renders when the list is empty', async () => {
+      render(
+        <SafeDropdownContainer
+          items={[createItem()]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          onManageTrustedSafes={jest.fn()}
+        />,
+      )
+      await userEvent.type(screen.getByTestId('safe-dropdown-search-input'), 'nonexistent')
+
+      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes match your search')
+      expect(screen.getByTestId('manage-trusted-safes-link')).toBeInTheDocument()
+    })
+
+    it('is absent when onManageTrustedSafes is not provided', () => {
+      render(<SafeDropdownContainer items={[createItem()]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
+
+      expect(screen.queryByTestId('manage-trusted-safes-link')).not.toBeInTheDocument()
+    })
+
+    it('closes the dropdown and opens the modal when clicked', () => {
+      const closeDropdown = jest.fn()
+      const onManageTrustedSafes = jest.fn()
+      render(
+        <SafeDropdownContainer
+          items={[createItem()]}
+          onItemSelect={jest.fn()}
+          closeDropdown={closeDropdown}
+          onManageTrustedSafes={onManageTrustedSafes}
+        />,
+      )
+
+      fireEvent.click(screen.getByTestId('manage-trusted-safes-link'))
+
+      expect(closeDropdown).toHaveBeenCalled()
+      expect(onManageTrustedSafes).toHaveBeenCalled()
+    })
+  })
+
   describe('search', () => {
     const itemA = createItem({
       id: '1:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
