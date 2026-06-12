@@ -62,6 +62,7 @@ export const useSessionRequestHandler = (walletKit: IWalletKit | null, deps: Ses
             chainId: request.params.chainId,
             method,
             params: request.params.request.params,
+            safeAddress: deps.activeSafeAddress ?? undefined,
             verifyContext: request.verifyContext,
           }),
         )

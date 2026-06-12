@@ -55,6 +55,8 @@ describe('useSessionRequestHandler', () => {
     emit(makeRequest('eth_sendTransaction', [{ to: '0xabc', value: '0x0', data: '0x' }]))
     await waitFor(() => expect(selectPending(store.getState())).toHaveLength(1))
     expect(respond).not.toHaveBeenCalled()
+    // Stamped with the Safe it was routed against, so the safe-switch listener can match it.
+    expect(selectPending(store.getState())[0]).toMatchObject({ safeAddress: SAFE_ADDRESS })
   })
 
   it('responds with 4100 and toasts when no signer is attached', async () => {

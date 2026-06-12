@@ -25,6 +25,10 @@ export type PendingSessionRequest = {
   chainId: string // CAIP-2, e.g. 'eip155:1'
   method: DeferredTxMethod
   params: unknown
+  // The Safe the request was routed against. The safe-switch listener rejects entries whose
+  // context no longer matches, so Review can't compose a dApp's calls against a different
+  // Safe. Optional only because it may be unknown for requests restored after a restart.
+  safeAddress?: string
   // WC's per-request domain verification, used by the sheet to render the verify badge.
   verifyContext?: WalletKitTypes.SessionRequest['verifyContext']
 }
