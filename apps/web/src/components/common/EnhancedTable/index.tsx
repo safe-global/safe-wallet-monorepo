@@ -169,14 +169,8 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
   const isLastPage = to >= rows.length
 
   return (
-    <div className="mb-4 w-full">
-      <div
-        data-testid="table-container"
-        className={classNames('w-full overflow-x-auto bg-[var(--color-background-paper)] md:overflow-x-hidden', {
-          'rounded-b-none': showPagination,
-          'rounded-b-3xl': !showPagination,
-        })}
-      >
+    <div className="mb-4 w-full overflow-hidden rounded-3xl border border-[var(--color-border-light)] bg-[var(--color-background-paper)]">
+      <div data-testid="table-container" className="w-full overflow-x-auto md:overflow-x-hidden">
         <Table
           aria-labelledby="tableTitle"
           className={classNames({
@@ -232,7 +226,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
       </div>
 
       {showPagination && (
-        <div className="flex items-center justify-between rounded-b-3xl rounded-t-none border-t border-[var(--color-border-light)] bg-[var(--color-background-paper)]">
+        <div className="flex items-center justify-between border-t border-[var(--color-border-light)] bg-[var(--color-background-paper)]">
           {footer && <div className="flex h-[52px] items-center px-4">{footer}</div>}
           <div data-testid="table-pagination" className="flex h-[52px] flex-1 items-center justify-end gap-4 px-4">
             <Typography variant="paragraph-small" color="muted">
@@ -278,7 +272,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
         </div>
       )}
       {!showPagination && footer && (
-        <div className="flex h-[52px] items-center rounded-b-3xl rounded-t-none border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4">
+        <div className="flex h-[52px] items-center border-t border-[var(--color-background-main)] bg-[var(--color-background-paper)] px-4">
           {footer}
         </div>
       )}
