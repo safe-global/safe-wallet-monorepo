@@ -2,14 +2,16 @@ import React, { useEffect, useMemo, useState } from 'react'
 import * as Linking from 'expo-linking'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { getSdkError } from '@walletconnect/utils'
-import { formatJsonRpcResult } from '@walletconnect/jsonrpc-utils'
+import { formatJsonRpcError, formatJsonRpcResult } from '@walletconnect/jsonrpc-utils'
 import { skipToken } from '@reduxjs/toolkit/query'
+import { isAnyOf } from '@reduxjs/toolkit'
 import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { startAppListening } from '@/src/store'
-import { selectActiveSafe } from '@/src/store/activeSafeSlice'
+import { selectActiveSafe, setActiveSafe, switchActiveChain, clearActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectChainById } from '@/src/store/chains'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { getWalletKit } from '../walletKit'
@@ -23,6 +25,7 @@ import {
   isDeferredTxMethod,
   clearOutstandingRequest,
   selectOutstandingRequestByHash,
+  selectOutstandingRequests,
 } from '../store/walletKitSlice'
 import { RequestSheetHost } from '../components/RequestSheetHost'
 import { logWalletKitError } from '../utils/errors'
@@ -133,6 +136,46 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           logWalletKitError('respondSessionRequest after propose failed', e)
         }
         api.dispatch(clearOutstandingRequest(safeTxHash))
+      },
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [walletKit])
+
+  // A Safe/chain switch invalidates handed-off tx requests: draftTxSlice drops their drafts
+  // on the same actions, so the confirm flow can no longer answer them. Reject the stale
+  // entries so the dApp doesn't hang until the WC timeout (mirrors draftTxSlice's
+  // isSameSafe cleanup; entries matching the new active Safe are kept).
+  useEffect(() => {
+    if (!walletKit) {
+      return
+    }
+    const unsubscribe = startAppListening({
+      matcher: isAnyOf(setActiveSafe, switchActiveChain, clearActiveSafe),
+      effect: async (action, api) => {
+        const next = setActiveSafe.match(action) ? action.payload : null
+        const nextChainId = switchActiveChain.match(action) ? action.payload.chainId : next?.chainId
+        const outstanding = selectOutstandingRequests(api.getState())
+        for (const [safeTxHash, req] of Object.entries(outstanding)) {
+          const sameChain = req.chainId === nextChainId
+          // switchActiveChain keeps the Safe address; the other actions carry the full context.
+          const sameSafe = switchActiveChain.match(action)
+            ? sameChain
+            : sameChain && sameAddress(req.safeAddress, next?.address)
+          if (sameSafe) {
+            continue
+          }
+          try {
+            await walletKit.respondSessionRequest({
+              topic: req.topic,
+              response: formatJsonRpcError(req.id, getSdkError('USER_REJECTED').message),
+            })
+          } catch (e) {
+            logWalletKitError('respondSessionRequest after Safe switch failed', e)
+          }
+          api.dispatch(clearOutstandingRequest(safeTxHash))
+        }
       },
     })
     return () => {

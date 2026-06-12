@@ -60,9 +60,22 @@ describe('walletKitSlice reducers', () => {
   it('setOutstandingRequest / clearOutstandingRequest key by safeTxHash', () => {
     let state = reducer(
       undefined,
-      setOutstandingRequest({ safeTxHash: '0xhash', topic: 't', id: 7, method: 'wallet_sendCalls' }),
+      setOutstandingRequest({
+        safeTxHash: '0xhash',
+        topic: 't',
+        id: 7,
+        method: 'wallet_sendCalls',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
     )
-    expect(state.outstandingRequests['0xhash']).toEqual({ topic: 't', id: 7, method: 'wallet_sendCalls' })
+    expect(state.outstandingRequests['0xhash']).toEqual({
+      topic: 't',
+      id: 7,
+      method: 'wallet_sendCalls',
+      chainId: '1',
+      safeAddress: '0xsafe',
+    })
     state = reducer(state, clearOutstandingRequest('0xhash'))
     expect(state.outstandingRequests).toEqual({})
   })
@@ -91,12 +104,21 @@ describe('walletKitSlice selectors', () => {
   it('selectOutstandingRequestByHash looks up by hash', () => {
     const state = reducer(
       undefined,
-      setOutstandingRequest({ safeTxHash: '0xabc', topic: 't', id: 1, method: 'eth_sendTransaction' }),
+      setOutstandingRequest({
+        safeTxHash: '0xabc',
+        topic: 't',
+        id: 1,
+        method: 'eth_sendTransaction',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
     )
     expect(selectOutstandingRequestByHash(wrap(state), '0xabc')).toEqual({
       topic: 't',
       id: 1,
       method: 'eth_sendTransaction',
+      chainId: '1',
+      safeAddress: '0xsafe',
     })
   })
 
@@ -105,7 +127,14 @@ describe('walletKitSlice selectors', () => {
     let state = reducer(undefined, addSession({ topic: 't', peer: { metadata } } as unknown as SessionTypes.Struct))
     state = reducer(
       state,
-      setOutstandingRequest({ safeTxHash: '0xabc', topic: 't', id: 1, method: 'eth_sendTransaction' }),
+      setOutstandingRequest({
+        safeTxHash: '0xabc',
+        topic: 't',
+        id: 1,
+        method: 'eth_sendTransaction',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
     )
     expect(selectDappMetadataByTxHash(wrap(state), '0xabc')).toEqual(metadata)
   })
