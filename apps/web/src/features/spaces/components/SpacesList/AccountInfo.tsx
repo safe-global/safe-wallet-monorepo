@@ -22,7 +22,7 @@ export const AccountInfo = ({ profileName = '', displayName = '' }: MembershipPr
   return (
     <Popover>
       <PopoverTrigger className={`${css.profileTriggerAvatarPlain} cursor-pointer`} aria-label="Account menu">
-        <User className="size-5" aria-hidden="true" />
+        <User className="size-5 dark:stroke-white" aria-hidden="true" />
       </PopoverTrigger>
 
       <ProfilePopoverContent
