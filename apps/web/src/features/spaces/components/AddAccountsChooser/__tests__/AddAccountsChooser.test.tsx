@@ -17,7 +17,7 @@ jest.mock('@/services/analytics', () => ({
 
 const mockPush = jest.fn()
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, pathname: '/spaces', query: { spaceId: '1' } }),
 }))
 
 const mockAddAccountsMount = jest.fn()
@@ -146,13 +146,16 @@ describe('AddAccountsChooser', () => {
     expect(screen.getByRole('button', { name: /Add Safe accounts to this workspace/i })).not.toHaveAttribute('title')
   })
 
-  it('navigates to /new-safe/create when "Create new Safe" is clicked', () => {
+  it('navigates to /new-safe/create with the originating page as `next` when "Create new Safe" is clicked', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
     fireEvent.click(screen.getByTestId('add-space-account-button'))
     fireEvent.click(screen.getByText('Create new Safe'))
 
-    expect(mockPush).toHaveBeenCalledWith('/new-safe/create')
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/new-safe/create',
+      query: { next: '/spaces?spaceId=1' },
+    })
   })
 
   it('shows a warning on the "Create new Safe" row when the workspace is at the safe limit', () => {
@@ -209,7 +212,10 @@ describe('AddAccountsChooser', () => {
     fireEvent.click(screen.getByTestId('add-space-account-button'))
     fireEvent.click(screen.getByText('Create new Safe'))
 
-    expect(mockPush).toHaveBeenCalledWith('/new-safe/create')
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/new-safe/create',
+      query: { next: '/spaces?spaceId=1' },
+    })
   })
 
   it('does not fire WORKSPACE_SAFE_LINK_STARTED when a non-admin clicks the disabled row', () => {

@@ -10,7 +10,7 @@ import OwnerPolicyStep from '@/components/new-safe/create/steps/OwnerPolicyStep'
 import ReviewStep from '@/components/new-safe/create/steps/ReviewStep'
 import { CreateSafeStatus } from '@/components/new-safe/create/steps/StatusStep'
 import { CardStepper } from '@/components/new-safe/CardStepper'
-import { AppRoutes } from '@/config/routes'
+import { getNewSafeReturnUrl } from '@/components/new-safe/getReturnUrl'
 import { CREATE_SAFE_CATEGORY } from '@/services/analytics'
 import type { AlertColor } from '@mui/material'
 import type { CreateSafeInfoItem } from '@/components/new-safe/create/CreateSafeInfos'
@@ -178,7 +178,7 @@ const CreateSafe = () => {
   }
 
   const onClose = () => {
-    router.push(AppRoutes.welcome.index)
+    router.push(getNewSafeReturnUrl(router.query.next))
   }
 
   return (
