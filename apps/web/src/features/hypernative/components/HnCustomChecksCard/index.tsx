@@ -3,10 +3,10 @@ import { StatusGroup, type ThreatAnalysisResults, type Severity } from '@safe-gl
 import { sliceTopBySeverity } from '@safe-global/utils/features/safe-shield/utils'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
-import { AnalysisGroupCardDisabled } from '@/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
+import { AnalysisGroupCardDisabled } from '@/features/safe-shield'
 import { HnAnalysisGroupCard } from '../HnAnalysisGroupCard'
-import { HnViewMoreOnHypernativeRow } from '@/features/hypernative/components/HnViewMoreOnHypernativeRow'
-import { useSafeShieldAssessmentUrl } from '@/features/hypernative/hooks/useSafeShieldAssessmentUrl'
+import { HnViewMoreOnHypernativeRow } from '../HnViewMoreOnHypernativeRow'
+import { useSafeShieldAssessmentUrl } from '../../hooks/useSafeShieldAssessmentUrl'
 import type { HypernativeAuthStatus } from '../../hooks/useHypernativeOAuth'
 
 const VISIBLE_CAP = 3

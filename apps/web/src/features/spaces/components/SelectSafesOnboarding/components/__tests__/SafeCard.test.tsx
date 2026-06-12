@@ -1,7 +1,7 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
-import type { AddAccountsFormValues } from '@/features/spaces/hooks/useSelectAll.types'
+import type { AddAccountsFormValues } from '../../../../hooks/useSelectAll.types'
 import SafeCard from '../SafeCard'
 
 // Mock heavy child dependencies

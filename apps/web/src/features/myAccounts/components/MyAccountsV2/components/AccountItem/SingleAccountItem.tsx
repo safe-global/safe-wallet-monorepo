@@ -1,7 +1,7 @@
 import NextLink from 'next/link'
 import Identicon from '@/components/common/Identicon'
 import Track from '@/components/common/Track'
-import FiatBalance from '@/features/spaces/components/SelectSafesOnboarding/components/FiatBalance'
+import { FiatBalance } from '@/features/spaces'
 import { AccountItem as BaseAccountItem } from '../../../AccountItem'
 import { useSafeItemData } from '../../../../hooks/useSafeItemData'
 import { OVERVIEW_EVENTS } from '@/services/analytics'

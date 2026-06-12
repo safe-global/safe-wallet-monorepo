@@ -17,6 +17,7 @@ jest.mock('@/hooks/useIsRequireLoginEnabled', () => ({
 
 jest.mock('@/services/local-storage/local', () => ({
   __esModule: true,
+  ...jest.requireActual('@/services/local-storage/local'),
   default: { getItem: jest.fn(), setItem: jest.fn(), removeItem: jest.fn() },
 }))
 
