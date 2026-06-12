@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@/tests/test-utils'
 import TrustedSafesModal from './index'
 import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 import { useRouter } from 'next/router'
-import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
+import { useIsQualifiedSafe } from '@/features/spaces'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
