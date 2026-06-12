@@ -31,6 +31,9 @@ test.describe('Security Hub — outdated contract version CTA', { tag: '@one-sho
     walletPage,
     credentials,
   }) => {
+    // SiWE + API setup + an on-chain scan don't fit the default 60s budget.
+    test.slow()
+
     // --- 1. Sign in to Spaces. The spaces sign-in screen chains wallet connect
     // straight into SiWE; the returned CGW origin lets the API setup below talk
     // to the same gateway (and session cookie) the app under test uses.
@@ -39,7 +42,7 @@ test.describe('Security Hub — outdated contract version CTA', { tag: '@one-sho
     const cgwOrigin = await walletPage.signInToSpaces(credentials.OWNER_4_PRIVATE_KEY)
 
     /** Authenticated CGW call from the page context (reuses the SiWE cookie). */
-    const cgwFetch = (path: string, method: 'POST' | 'DELETE', body?: unknown): Promise<unknown> =>
+    const cgwFetch = (path: string, method: 'GET' | 'POST' | 'DELETE', body?: unknown): Promise<unknown> =>
       safePage.evaluate(
         async ({ url, method, body }) => {
           const res = await fetch(url, {
@@ -55,9 +58,23 @@ test.describe('Security Hub — outdated contract version CTA', { tag: '@one-sho
       )
 
     // --- 2. Setup via API (not UI clicks): throwaway space + tracked outdated Safe.
-    const space = (await cgwFetch('/v1/spaces/create-with-user', 'POST', {
-      name: `one-shot security hub ${Date.now()}`,
-    })) as { uuid: string }
+    type SpaceListItem = { id: number; uuid: string; name: string; safeCount: number }
+    const listSpaces = () => cgwFetch('/v1/spaces', 'GET') as Promise<SpaceListItem[]>
+    const deleteSpace = (uuid: string) => cgwFetch(`/v1/spaces/${uuid}`, 'DELETE').catch(() => null)
+    // Space names are capped at 30 characters — keep the prefix short.
+    const SPACE_NAME_PREFIX = 'one-shot hub'
+    const createSpace = () =>
+      cgwFetch('/v1/spaces', 'POST', { name: `${SPACE_NAME_PREFIX} ${Date.now()}` }) as Promise<{ uuid: string }>
+
+    // Drop stale spaces left behind by previous runs of THIS spec that died
+    // before their cleanup, so the suite stays within the per-user workspace
+    // cap. Spaces other suites leak are never touched — if the shared wallet
+    // is at the cap anyway, creation fails with CGW's explicit cap message,
+    // which means the wallet needs a manual cleanup.
+    for (const stale of (await listSpaces()).filter((s) => s.name.startsWith(SPACE_NAME_PREFIX))) {
+      await deleteSpace(stale.uuid)
+    }
+    const space = await createSpace()
 
     try {
       await cgwFetch(`/v1/spaces/${space.uuid}/safes`, 'POST', {

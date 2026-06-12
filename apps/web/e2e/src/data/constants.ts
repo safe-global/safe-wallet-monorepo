@@ -35,7 +35,7 @@ export const NETWORK_PREFIXES = {
 } as const
 
 // ---------------------------------------------------------------------------
-// Static test Safes on Sepolia (read-only — shared across parallel tests)
+// Static test Safes (read-only — shared across parallel tests)
 // ---------------------------------------------------------------------------
 
 export const SAFES = {
