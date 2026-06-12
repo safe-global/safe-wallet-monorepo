@@ -64,6 +64,23 @@ describe('WcRejectOnBack', () => {
     await waitFor(() => expect(store.getState()[walletKitSliceName].outstandingRequests).toEqual({}))
   })
 
+  it('does not reject while the propose mutation is in flight (proposing flag)', async () => {
+    const store = createTestStore({
+      draftTx: { drafts: { [HASH]: draft } },
+      [walletKitSliceName]: {
+        sessions: {},
+        pending: [],
+        outstandingRequests: { [HASH]: { topic: 't', id: 5, method: 'eth_sendTransaction', proposing: true } },
+      },
+    } as never)
+    renderWithStore(<WcRejectOnBack safeTxHash={HASH} />, store)
+    beforeRemoveCb?.()
+    await Promise.resolve()
+    expect(mockRespond).not.toHaveBeenCalled()
+    // Entry retained — the propose-fulfilled listener owns the response.
+    expect(store.getState()[walletKitSliceName].outstandingRequests[HASH]).toBeDefined()
+  })
+
   it('does not reject once the draft is cleared (tx already proposed)', async () => {
     const store = storeWith(false)
     renderWithStore(<WcRejectOnBack safeTxHash={HASH} />, store)

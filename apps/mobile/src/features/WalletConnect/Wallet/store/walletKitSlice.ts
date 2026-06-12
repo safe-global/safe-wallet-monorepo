@@ -45,6 +45,10 @@ export type OutstandingTxRequest = {
   method: DeferredTxMethod
   chainId: string
   safeAddress: string
+  // True while the /propose mutation is in flight (set from its pending/rejected actions).
+  // WcRejectOnBack must not reject during this window — the draft still exists, but a
+  // reject would race the propose-fulfilled success response.
+  proposing?: boolean
 }
 
 type State = {
@@ -91,6 +95,12 @@ const walletKitSlice = createSlice({
       const { safeTxHash, ...req } = action.payload
       state.outstandingRequests[safeTxHash] = req
     },
+    setOutstandingProposing(state, action: PayloadAction<{ safeTxHash: string; proposing: boolean }>) {
+      const req = state.outstandingRequests[action.payload.safeTxHash]
+      if (req) {
+        req.proposing = action.payload.proposing
+      }
+    },
     clearOutstandingRequest(state, action: PayloadAction<string>) {
       const { [action.payload]: _removed, ...rest } = state.outstandingRequests
       state.outstandingRequests = rest
@@ -109,6 +119,7 @@ export const {
   pushPending,
   removePending,
   setOutstandingRequest,
+  setOutstandingProposing,
   clearOutstandingRequest,
   clear: clearWalletKitState,
 } = walletKitSlice.actions

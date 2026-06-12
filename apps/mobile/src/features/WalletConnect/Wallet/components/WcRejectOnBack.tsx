@@ -48,6 +48,12 @@ export const WcRejectOnBack: React.FC<Props> = ({ safeTxHash }) => {
       if (!outstanding) {
         return
       }
+      // The /propose mutation is in flight — the draft still exists, but a reject here
+      // would race the propose-fulfilled success response. The flag is cleared again if
+      // the propose fails (draft retained), so a later back-out still rejects.
+      if (outstanding.proposing) {
+        return
+      }
       // Only reject drafted txs. A cleared draft means the tx was proposed — let the
       // propose-fulfilled listener handle the dApp response.
       const draft = selectDraftByHash(state, safeTxHash)

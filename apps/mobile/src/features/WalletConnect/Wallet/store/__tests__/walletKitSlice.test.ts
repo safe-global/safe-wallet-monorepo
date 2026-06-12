@@ -6,6 +6,7 @@ import reducer, {
   pushPending,
   removePending,
   setOutstandingRequest,
+  setOutstandingProposing,
   clearOutstandingRequest,
   clearWalletKitState,
   selectSessions,
@@ -55,6 +56,26 @@ describe('walletKitSlice reducers', () => {
     let state = reducer(undefined, setPending([requestItem(1), proposalItem(1)]))
     state = reducer(state, removePending({ id: 1, kind: 'request' }))
     expect(state.pending).toEqual([proposalItem(1)])
+  })
+
+  it('setOutstandingProposing toggles the flag and is a no-op for unknown hashes', () => {
+    let state = reducer(
+      undefined,
+      setOutstandingRequest({
+        safeTxHash: '0xhash',
+        topic: 't',
+        id: 7,
+        method: 'wallet_sendCalls',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
+    )
+    state = reducer(state, setOutstandingProposing({ safeTxHash: '0xhash', proposing: true }))
+    expect(state.outstandingRequests['0xhash'].proposing).toBe(true)
+    state = reducer(state, setOutstandingProposing({ safeTxHash: '0xhash', proposing: false }))
+    expect(state.outstandingRequests['0xhash'].proposing).toBe(false)
+    state = reducer(state, setOutstandingProposing({ safeTxHash: '0xnope', proposing: true }))
+    expect(state.outstandingRequests['0xnope']).toBeUndefined()
   })
 
   it('setOutstandingRequest / clearOutstandingRequest key by safeTxHash', () => {
