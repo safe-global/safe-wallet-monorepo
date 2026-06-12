@@ -106,6 +106,29 @@ describe('routeSessionRequest', () => {
     expect((res as { error: { code: number } }).error.code).toBe(-32602)
   })
 
+  it('rejects an eth_sendTransaction with no tx object instead of deferring', async () => {
+    const res = await routeSessionRequest(makeCtx(makeRequest('eth_sendTransaction', [])))
+    expect((res as { error: { code: number } }).error.code).toBe(-32602)
+    expect(isDeferredResponse(res)).toBe(false)
+  })
+
+  it('rejects an eth_sendTransaction whose call is neither valid nor a deployment', async () => {
+    const res = await routeSessionRequest(makeCtx(makeRequest('eth_sendTransaction', [{ value: '0x1' }])))
+    expect((res as { error: { code: number } }).error.code).toBe(-32602)
+  })
+
+  it('defers an eth_sendTransaction contract deployment (no-to + data only)', async () => {
+    const res = await routeSessionRequest(makeCtx(makeRequest('eth_sendTransaction', [{ data: '0xdeadbeef' }])))
+    expect(isDeferredResponse(res)).toBe(true)
+  })
+
+  it('rejects a wallet_sendCalls bundle with an empty calls array', async () => {
+    const params = [{ chainId: '0x1', from: SAFE_ADDRESS, calls: [] }]
+    const res = await routeSessionRequest(makeCtx(makeRequest('wallet_sendCalls', params)))
+    expect((res as { error: { code: number } }).error.code).toBe(-32602)
+    expect(isDeferredResponse(res)).toBe(false)
+  })
+
   it('accepts a wallet_sendCalls bundle whose from differs only in casing', async () => {
     const params = [{ chainId: '0x1', from: SAFE_ADDRESS.toUpperCase().replace('0X', '0x'), calls: [{ to: '0xabc' }] }]
     const res = await routeSessionRequest(makeCtx(makeRequest('wallet_sendCalls', params)))
