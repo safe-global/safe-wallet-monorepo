@@ -2,9 +2,10 @@ import { useRef, useState, useEffect } from 'react'
 import HnSignupLayout from './HnSignupLayout'
 import { useCalendly } from '../../hooks/useCalendly'
 import css from './styles.module.css'
-import { Typography, Skeleton, Button, Box, Stack } from '@mui/material'
-import AutorenewRoundedIcon from '@mui/icons-material/AutorenewRounded'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import { Typography } from '@/components/ui/typography'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
+import { RotateCw, ExternalLink as OpenInNewIcon } from 'lucide-react'
 
 export type HnCalendlyStepProps = {
   calendlyUrl: string
@@ -72,40 +73,30 @@ const HnCalendlyStep = ({ calendlyUrl, onBookingScheduled }: HnCalendlyStepProps
     <HnSignupLayout contentClassName={css.calendlyColumn}>
       <div className={css.calendlyWrapper}>
         {hasError ? (
-          <Box className={css.errorContainer}>
+          <div className={css.errorContainer}>
             <Typography variant="h3" className={css.errorTitle}>
               Something went wrong
             </Typography>
-            <Typography variant="body2" className={css.errorMessage}>
+            <Typography variant="paragraph-small" className={css.errorMessage}>
               Please reload the page.
             </Typography>
-            <Stack direction="column" spacing={2} sx={{ mt: 3 }}>
-              <Button
-                variant="contained"
-                startIcon={<AutorenewRoundedIcon />}
-                onClick={handleRefresh}
-                className={css.reloadButton}
-              >
+            <div className="mt-6 flex flex-col gap-4">
+              <Button onClick={handleRefresh} className={css.reloadButton}>
+                <RotateCw />
                 Reload
               </Button>
-              <Button
-                variant="outlined"
-                color="static"
-                fullWidth
-                startIcon={<OpenInNewIcon />}
-                onClick={handleOpenInNewTab}
-                sx={{ px: 2 }}
-              >
+              <Button variant="outline" onClick={handleOpenInNewTab} className="w-full px-4">
+                <OpenInNewIcon />
                 Open in a new tab
               </Button>
-            </Stack>
-          </Box>
+            </div>
+          </div>
         ) : (
           <>
             {showSkeleton && (
               <div className={css.calendlySkeletonOverlay}>
-                <Skeleton variant="rounded" width="100%" height="40px" sx={{ mb: 2, bgcolor: SKELETON_COLOR }} />
-                <Skeleton variant="rounded" width="100%" height="40px" sx={{ bgcolor: SKELETON_COLOR }} />
+                <Skeleton className="mb-4 h-10 w-full rounded-md" style={{ backgroundColor: SKELETON_COLOR }} />
+                <Skeleton className="h-10 w-full rounded-md" style={{ backgroundColor: SKELETON_COLOR }} />
               </div>
             )}
             <div

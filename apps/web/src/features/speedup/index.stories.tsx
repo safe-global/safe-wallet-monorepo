@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box, Button, Paper, Typography, CircularProgress, Alert, LinearProgress } from '@mui/material'
-import SpeedIcon from '@mui/icons-material/Speed'
+import { Gauge } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Progress, ProgressTrack, ProgressIndicator } from '@/components/ui/progress'
 
 /**
  * Speedup feature allows users to accelerate pending transactions by
@@ -22,44 +26,43 @@ export default meta
 
 export const SpeedUpModal: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 450 }}>
-      <Typography variant="h6" gutterBottom>
-        Speed Up Transaction
+    <div className="bg-background max-w-[450px] rounded-lg p-6">
+      <Typography variant="h4" className="mb-4">
+        Speed up transaction
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-6">
         Increase the gas price to prioritize your transaction in the mempool.
       </Typography>
 
-      <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="body2">Current Gas Price</Typography>
-          <Typography variant="body2">25 Gwei</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="body2" fontWeight="bold">
-            New Gas Price
-          </Typography>
-          <Typography variant="body2" fontWeight="bold" color="success.main">
+      <div className="mb-6">
+        <div className="mb-2 flex justify-between">
+          <Typography variant="paragraph-small">Current gas price</Typography>
+          <Typography variant="paragraph-small">25 Gwei</Typography>
+        </div>
+        <div className="mb-2 flex justify-between">
+          <Typography variant="paragraph-small-bold">New gas price</Typography>
+          <Typography variant="paragraph-small-bold" className="text-[var(--color-success-main)]">
             37.5 Gwei (+50%)
           </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="body2">Estimated Cost</Typography>
-          <Typography variant="body2">~$2.50</Typography>
-        </Box>
-      </Box>
+        </div>
+        <div className="flex justify-between">
+          <Typography variant="paragraph-small">Estimated cost</Typography>
+          <Typography variant="paragraph-small">~$2.50</Typography>
+        </div>
+      </div>
 
-      <Alert severity="info" sx={{ mb: 3 }}>
-        The new transaction will replace the pending one with a higher gas price.
+      <Alert className="mb-6">
+        <AlertDescription>The new transaction will replace the pending one with a higher gas price.</AlertDescription>
       </Alert>
 
-      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-        <Button variant="outlined">Cancel</Button>
-        <Button variant="contained" startIcon={<SpeedIcon />}>
-          Speed Up
+      <div className="flex justify-end gap-4">
+        <Button variant="outline">Cancel</Button>
+        <Button>
+          <Gauge className="size-4" />
+          Speed up
         </Button>
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -72,15 +75,15 @@ export const SpeedUpModal: StoryObj = {
 
 export const SpeedUpInProgress: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 450, textAlign: 'center' }}>
-      <CircularProgress sx={{ mb: 2 }} />
-      <Typography variant="h6" gutterBottom>
-        Speeding Up Transaction
+    <div className="bg-background max-w-[450px] rounded-lg p-6 text-center">
+      <Spinner className="mb-4 size-8" />
+      <Typography variant="h4" className="mb-4">
+        Speeding up transaction
       </Typography>
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="paragraph-small" color="muted">
         Please wait while we submit the new transaction with higher gas...
       </Typography>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -93,17 +96,17 @@ export const SpeedUpInProgress: StoryObj = {
 
 export const SpeedUpSuccess: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 450 }}>
-      <Alert severity="success" sx={{ mb: 2 }}>
-        Transaction successfully sped up!
+    <div className="bg-background max-w-[450px] rounded-lg p-6">
+      <Alert className="mb-4">
+        <AlertDescription>Transaction successfully sped up!</AlertDescription>
       </Alert>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-4">
         Your transaction has been resubmitted with a higher gas price. It should be processed soon.
       </Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <Button variant="contained">Close</Button>
-      </Box>
-    </Paper>
+      <div className="flex justify-end">
+        <Button>Close</Button>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -116,14 +119,14 @@ export const SpeedUpSuccess: StoryObj = {
 
 export const SpeedUpNotAvailable: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 450 }}>
-      <Alert severity="warning" sx={{ mb: 2 }}>
-        Speed up not available
+    <div className="bg-background max-w-[450px] rounded-lg p-6">
+      <Alert variant="warning" className="mb-4">
+        <AlertDescription>Speed up not available</AlertDescription>
       </Alert>
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="paragraph-small" color="muted">
         This transaction cannot be sped up. It may have already been processed or cancelled.
       </Typography>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -136,29 +139,30 @@ export const SpeedUpNotAvailable: StoryObj = {
 
 export const TransactionWithSpeedUp: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 2, maxWidth: 600 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box>
-          <Typography variant="body1">Send 1.5 ETH</Typography>
-          <Typography variant="caption" color="text.secondary">
+    <div className="bg-background max-w-[600px] rounded-lg p-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <Typography variant="paragraph">Send 1.5 ETH</Typography>
+          <Typography variant="paragraph-mini" color="muted">
             To: 0x1234...5678
           </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-          <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="caption" color="warning.main" display="block">
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <Typography variant="paragraph-mini" as="div" className="text-[var(--color-warning-main)]">
               Pending for 10 min
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="paragraph-mini" color="muted">
               Gas: 25 Gwei
             </Typography>
-          </Box>
-          <Button size="small" variant="outlined" startIcon={<SpeedIcon />}>
-            Speed Up
+          </div>
+          <Button size="sm" variant="outline">
+            <Gauge className="size-4" />
+            Speed up
           </Button>
-        </Box>
-      </Box>
-    </Paper>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -171,53 +175,48 @@ export const TransactionWithSpeedUp: StoryObj = {
 
 export const SpeedUpMonitor: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <Typography variant="h6" gutterBottom>
-        Transaction Monitor
+    <div className="bg-background max-w-[500px] rounded-lg p-6">
+      <Typography variant="h4" className="mb-4">
+        Transaction monitor
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-6">
         Monitoring pending transactions for potential speed-up opportunities.
       </Typography>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Box
-          sx={{
-            p: 2,
-            border: 1,
-            borderColor: 'warning.main',
-            borderRadius: 1,
-            bgcolor: 'warning.light',
-          }}
-        >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-            <Box>
-              <Typography variant="body2" fontWeight="bold">
-                Send 1.5 ETH
-              </Typography>
-              <Typography variant="caption">Pending for 15 minutes</Typography>
-            </Box>
-            <Button size="small" variant="contained" color="warning" startIcon={<SpeedIcon />}>
-              Speed Up
+      <div className="flex flex-col gap-4">
+        <div className="bg-[var(--color-warning-light)] rounded-md border border-[var(--color-warning-main)] p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <div>
+              <Typography variant="paragraph-small-bold">Send 1.5 ETH</Typography>
+              <Typography variant="paragraph-mini">Pending for 15 minutes</Typography>
+            </div>
+            <Button size="sm">
+              <Gauge className="size-4" />
+              Speed up
             </Button>
-          </Box>
-          <LinearProgress variant="determinate" value={75} color="warning" sx={{ height: 4, borderRadius: 2 }} />
-        </Box>
+          </div>
+          <Progress value={75}>
+            <ProgressTrack className="h-1">
+              <ProgressIndicator className="bg-[var(--color-warning-main)]" />
+            </ProgressTrack>
+          </Progress>
+        </div>
 
-        <Box sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box>
-              <Typography variant="body2">Approve USDC</Typography>
-              <Typography variant="caption" color="text.secondary">
+        <div className="rounded-md border border-border p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <Typography variant="paragraph-small">Approve USDC</Typography>
+              <Typography variant="paragraph-mini" color="muted">
                 Pending for 2 minutes
               </Typography>
-            </Box>
-            <Typography variant="caption" color="text.secondary">
+            </div>
+            <Typography variant="paragraph-mini" color="muted">
               Waiting...
             </Typography>
-          </Box>
-        </Box>
-      </Box>
-    </Paper>
+          </div>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -230,32 +229,30 @@ export const SpeedUpMonitor: StoryObj = {
 
 export const GasSlider: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 400 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Select Gas Increase
+    <div className="bg-background max-w-[400px] rounded-lg p-6">
+      <Typography variant="paragraph-small-bold" className="mb-4 block">
+        Select gas increase
       </Typography>
-      <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+      <div className="mb-4 flex gap-2">
         {['+10%', '+25%', '+50%', '+100%'].map((option) => (
-          <Button key={option} variant={option === '+50%' ? 'contained' : 'outlined'} size="small" sx={{ flex: 1 }}>
+          <Button key={option} variant={option === '+50%' ? 'default' : 'outline'} size="sm" className="flex-1">
             {option}
           </Button>
         ))}
-      </Box>
-      <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="body2">Current</Typography>
-          <Typography variant="body2">25 Gwei</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="body2" fontWeight="bold">
-            New
-          </Typography>
-          <Typography variant="body2" fontWeight="bold" color="success.main">
+      </div>
+      <div className="bg-muted rounded-md p-4">
+        <div className="mb-2 flex justify-between">
+          <Typography variant="paragraph-small">Current</Typography>
+          <Typography variant="paragraph-small">25 Gwei</Typography>
+        </div>
+        <div className="flex justify-between">
+          <Typography variant="paragraph-small-bold">New</Typography>
+          <Typography variant="paragraph-small-bold" className="text-[var(--color-success-main)]">
             37.5 Gwei
           </Typography>
-        </Box>
-      </Box>
-    </Paper>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {

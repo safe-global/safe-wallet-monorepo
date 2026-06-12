@@ -1,7 +1,10 @@
 import { type SyntheticEvent, useEffect } from 'react'
 import { useCallback, useContext } from 'react'
-import { Button, Divider, Drawer, IconButton, SvgIcon, Typography } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { X as CloseIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { Typography } from '@/components/ui/typography'
 import { useDraftBatch, useUpdateBatch } from '@/features/batching'
 import css from './styles.module.css'
 import { NewTxFlow } from '@/components/tx-flow/flows'
@@ -60,67 +63,74 @@ const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: 
   }, [txFlow, closeSidebar])
 
   return (
-    <Drawer variant="temporary" anchor="right" open={isOpen} onClose={closeSidebar} transitionDuration={100}>
-      <aside className={css.aside}>
-        <Typography variant="h4" fontWeight={700} mb={1}>
-          Batched transactions
-        </Typography>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) closeSidebar()
+      }}
+    >
+      <SheetContent
+        side="right"
+        showCloseButton={false}
+        overlayClassName="z-[100]"
+        className="z-[100] w-[700px] max-w-[100vw] gap-0 rounded-l-2xl p-0 sm:max-w-[min(700px,100vw)]"
+      >
+        <aside className={css.aside}>
+          <Typography variant="h4" className="pr-10 font-bold">
+            Batched transactions
+          </Typography>
 
-        <Divider />
+          <Separator className="my-[var(--space-3)] w-full" />
 
-        {batchTxs.length ? (
-          <>
-            <div className={css.txs}>
-              <BatchTxList txItems={batchTxs} onDelete={deleteTx} />
-            </div>
+          {batchTxs.length ? (
+            <>
+              <div className={css.txs}>
+                <BatchTxList txItems={batchTxs} onDelete={deleteTx} />
+              </div>
 
-            <CheckWallet>
-              {(isOk) => (
-                <Track {...BATCH_EVENTS.BATCH_NEW_TX}>
-                  <Button onClick={onAddClick} disabled={!isOk}>
-                    <SvgIcon component={PlusIcon} inheritViewBox fontSize="small" sx={{ mr: 1 }} />
-                    Add new transaction
-                  </Button>
-                </Track>
-              )}
-            </CheckWallet>
+              <CheckWallet>
+                {(isOk) => (
+                  <Track {...BATCH_EVENTS.BATCH_NEW_TX}>
+                    <Button variant="ghost" onClick={onAddClick} disabled={!isOk}>
+                      <PlusIcon className="mr-2 size-4" />
+                      Add new transaction
+                    </Button>
+                  </Track>
+                )}
+              </CheckWallet>
 
-            <Divider />
+              <Separator className="my-[var(--space-3)] w-full" />
 
-            <CheckWallet>
-              {(isOk) => (
-                <Track {...BATCH_EVENTS.BATCH_CONFIRM} label={batchTxs.length}>
-                  <Button
-                    variant="contained"
-                    onClick={onConfirmClick}
-                    disabled={!batchTxs.length || !isOk}
-                    className={css.confirmButton}
-                  >
-                    Confirm batch
-                  </Button>
-                </Track>
-              )}
-            </CheckWallet>
-          </>
-        ) : (
-          <EmptyBatch>
-            <CheckWallet>
-              {(isOk) => (
-                <Track {...BATCH_EVENTS.BATCH_NEW_TX}>
-                  <Button onClick={onAddClick} variant="contained" disabled={!isOk}>
-                    New transaction
-                  </Button>
-                </Track>
-              )}
-            </CheckWallet>
-          </EmptyBatch>
-        )}
+              <CheckWallet>
+                {(isOk) => (
+                  <Track {...BATCH_EVENTS.BATCH_CONFIRM} label={batchTxs.length}>
+                    <Button onClick={onConfirmClick} disabled={!batchTxs.length || !isOk} className={css.confirmButton}>
+                      Confirm batch
+                    </Button>
+                  </Track>
+                )}
+              </CheckWallet>
+            </>
+          ) : (
+            <EmptyBatch>
+              <CheckWallet>
+                {(isOk) => (
+                  <Track {...BATCH_EVENTS.BATCH_NEW_TX}>
+                    <Button onClick={onAddClick} disabled={!isOk}>
+                      New transaction
+                    </Button>
+                  </Track>
+                )}
+              </CheckWallet>
+            </EmptyBatch>
+          )}
 
-        <IconButton className={css.close} aria-label="close" onClick={closeSidebar} size="small">
-          <CloseIcon fontSize="medium" />
-        </IconButton>
-      </aside>
-    </Drawer>
+          <Button variant="ghost" size="icon-sm" className={css.close} aria-label="close" onClick={closeSidebar}>
+            <CloseIcon className="size-5" />
+          </Button>
+        </aside>
+      </SheetContent>
+    </Sheet>
   )
 }
 

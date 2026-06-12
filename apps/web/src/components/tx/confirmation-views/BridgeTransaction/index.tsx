@@ -5,7 +5,6 @@ import { DataTable } from '@/components/common/Table/DataTable'
 import TokenAmount from '@/components/common/TokenAmount'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
-import { Stack, Typography } from '@mui/material'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
@@ -21,7 +20,7 @@ interface BridgeTransactionProps {
 const BridgeTxRecipientRow = ({ txInfo }: BridgeTransactionProps) => {
   return (
     <DataRow datatestid="recipient" key="recipient" title="Recipient">
-      <Stack>
+      <div className="flex flex-col">
         <NamedAddressInfo
           address={txInfo.recipient.value}
           showCopyButton
@@ -31,7 +30,7 @@ const BridgeTxRecipientRow = ({ txInfo }: BridgeTransactionProps) => {
           showPrefix
           chainId={txInfo.toChain}
         />
-      </Stack>
+      </div>
     </DataRow>
   )
 }
@@ -42,7 +41,7 @@ function pendingBridgeTransactionRows(txInfo: BridgeAndSwapTransactionInfo & { s
 
   return [
     <DataRow datatestid="amount" key="amount" title="Amount">
-      <Typography display="flex" alignItems="center" flexDirection="row" gap={1}>
+      <div className="flex flex-row items-center gap-2">
         Sending{' '}
         <TokenAmount
           value={actualFromAmount.toString()}
@@ -51,7 +50,7 @@ function pendingBridgeTransactionRows(txInfo: BridgeAndSwapTransactionInfo & { s
           tokenSymbol={txInfo.fromToken.symbol}
         />{' '}
         to <ChainIndicator chainId={txInfo.toChain} inline />
-      </Typography>
+      </div>
     </DataRow>,
   ]
 }
@@ -61,7 +60,7 @@ function failedBridgeTransactionRows(txInfo: BridgeAndSwapTransactionInfo & { st
     BigInt(txInfo.fromAmount) + BigInt(txInfo.fees?.integratorFee ?? 0n) + BigInt(txInfo.fees?.lifiFee ?? 0n)
   return [
     <DataRow datatestid="amount" key="amount" title="Amount">
-      <Typography display="flex" alignItems="center" flexDirection="row" gap={1}>
+      <div className="flex flex-row items-center gap-2">
         Failed to send{' '}
         <TokenAmount
           value={actualFromAmount.toString()}
@@ -70,7 +69,7 @@ function failedBridgeTransactionRows(txInfo: BridgeAndSwapTransactionInfo & { st
           tokenSymbol={txInfo.fromToken.symbol}
         />{' '}
         to <ChainIndicator chainId={txInfo.toChain} inline />
-      </Typography>
+      </div>
     </DataRow>,
     <DataRow datatestid="substatus" key="substatus" title="Substatus">
       {txInfo.substatus}
@@ -97,8 +96,8 @@ function successfulBridgeTransactionRows(
 
   rows.push(
     <DataRow datatestid="amount" key="amount" title="Amount">
-      <Stack spacing={0.5}>
-        <Typography display="flex" alignItems="center" flexDirection="row" gap={1}>
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-row items-center gap-2">
           Sell{' '}
           <TokenAmount
             value={actualFromAmount.toString()}
@@ -108,8 +107,8 @@ function successfulBridgeTransactionRows(
             chainId={chainId}
           />{' '}
           on {fromChainConfig?.chainName ?? 'Unknown Chain'}
-        </Typography>
-        <Typography display="flex" alignItems="center" flexDirection="row" gap={1}>
+        </div>
+        <div className="flex flex-row items-center gap-2">
           {txInfo.toToken && txInfo.toAmount ? (
             <>
               For{' '}
@@ -125,8 +124,8 @@ function successfulBridgeTransactionRows(
           ) : (
             <>Could not find buy token information.</>
           )}
-        </Typography>
-      </Stack>
+        </div>
+      </div>
     </DataRow>,
   )
   if (exchangeRate) {
@@ -177,9 +176,9 @@ function BridgeTransaction({ txInfo }: BridgeTransactionProps) {
   }
 
   return (
-    <Stack>
+    <div className="flex flex-col">
       <DataTable rows={rows} />
-    </Stack>
+    </div>
   )
 }
 

@@ -1,4 +1,5 @@
-import { Box, Typography, Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import type { ReactElement } from 'react'
 
 import NestedSafesIllustration from '@/public/images/sidebar/nested-safes.svg'
@@ -11,32 +12,26 @@ interface NestedSafeIntroProps {
 
 export function NestedSafeIntro({ onReviewClick }: NestedSafeIntroProps): ReactElement {
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" textAlign="center">
+    <div className="flex flex-col items-center text-center">
       <NestedSafesIllustration />
 
-      <Typography variant="h6" fontWeight={700} mt={2}>
+      <Typography variant="h4" className="mt-4">
         Select Nested Safes
       </Typography>
 
-      <Typography variant="body2" color="text.secondary" mt={1}>
+      <Typography variant="paragraph-small" color="muted" className="mt-2">
         Nested Safes can include lookalike addresses.
       </Typography>
 
-      <Typography variant="body2" color="text.secondary" mt={1}>
+      <Typography variant="paragraph-small" color="muted" className="mt-2">
         Review and select the ones you recognize before adding them to your dashboard.
       </Typography>
 
       <Track {...NESTED_SAFE_EVENTS.REVIEW_NESTED_SAFES} label={NESTED_SAFE_LABELS.first_time}>
-        <Button
-          variant="contained"
-          fullWidth
-          sx={{ mt: 3 }}
-          onClick={onReviewClick}
-          data-testid="review-nested-safes-button"
-        >
+        <Button className="mt-6 w-full" onClick={onReviewClick} data-testid="review-nested-safes-button">
           Review Nested Safes
         </Button>
       </Track>
-    </Box>
+    </div>
   )
 }

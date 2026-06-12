@@ -1,5 +1,6 @@
 import { useState, type MouseEvent } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Box, useMediaQuery, useTheme } from '@mui/material'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { useIsMobile } from '@/hooks/use-mobile'
 import classnames from 'classnames'
 import type { SelectableMultiChainSafe } from '../../hooks/useSafeSelectionModal.types'
 import { useMultiAccountItemData } from '../../hooks/useMultiAccountItemData'
@@ -68,8 +69,7 @@ function MultiChainSubItem({
  * Shows a header with the address and multichain badge, with expandable sub-items for each chain
  */
 const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionItemProps) => {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useIsMobile()
   const [expanded, setExpanded] = useState(false)
 
   // Use multiSafe.safes directly as they're already SelectableSafe[]
@@ -83,26 +83,17 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
     onToggle(address)
   }
 
-  const toggleExpand = (e: MouseEvent) => {
-    e.stopPropagation()
+  const toggleExpand = () => {
     setExpanded((prev) => !prev)
   }
 
   const statusChips = <>{multiSafe.similarityGroup && <SimilarityWarning />}</>
 
   return (
-    <Box data-testid="safe-list-item" className={classnames(css.multiListItem, css.listItem)} sx={{ my: 0.5 }}>
-      <Accordion data-testid="multichain-selection-item" expanded={expanded} sx={{ border: 'none' }}>
-        <AccordionSummary
-          onClick={toggleExpand}
-          sx={{
-            p: 0,
-            '& .MuiAccordionSummary-content': { m: '0 !important', alignItems: 'center' },
-            '&.Mui-expanded': { backgroundColor: 'transparent !important' },
-          }}
-          component="div"
-        >
-          <Box sx={{ flex: 1, minWidth: 0 }} onClick={handleToggle}>
+    <div data-testid="safe-list-item" className={classnames(css.multiListItem, css.listItem, 'my-0.5')}>
+      <Collapsible data-testid="multichain-selection-item" open={expanded} onOpenChange={toggleExpand}>
+        <CollapsibleTrigger render={<div className="flex w-full cursor-pointer items-center p-2" />}>
+          <div className="min-w-0 flex-1" onClick={handleToggle}>
             <AccountItem.Content data-testid="multichain-selection-content">
               <AccountItem.Checkbox checked={multiSafe.isSelected} address={address} />
               <AccountItem.Icon
@@ -134,18 +125,18 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
                 hideNestedSafes
               />
             </AccountItem.Content>
-          </Box>
-        </AccordionSummary>
-        <AccordionDetails sx={{ padding: '0px 12px' }}>
-          <Box data-testid="multichain-subaccounts-container">
+          </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="px-3">
+          <div data-testid="multichain-subaccounts-container">
             {safes.map((safeItem) => (
               <MultiChainSubItem key={`${safeItem.chainId}:${safeItem.address}`} safe={safeItem} onToggle={onToggle} />
             ))}
-          </Box>
-        </AccordionDetails>
-      </Accordion>
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
       {isMobile && <div className={css.accountItemChips}>{statusChips}</div>}
-    </Box>
+    </div>
   )
 }
 

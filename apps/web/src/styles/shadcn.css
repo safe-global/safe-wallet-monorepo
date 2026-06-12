@@ -54,6 +54,7 @@
   --accent-success: #16a34a;
   --z-sidebar: 1300;
   --z-overlay: 1400;
+  --z-picker: 1500;
 }
 
 .dark.shadcn-scope,

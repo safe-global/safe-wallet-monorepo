@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { ExecTransaction } from './index'
 import { mockExecTransactionData } from './mockData'
@@ -24,9 +23,9 @@ const meta = {
             },
           }}
         >
-          <Paper sx={{ padding: 2 }}>
+          <div className="p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },

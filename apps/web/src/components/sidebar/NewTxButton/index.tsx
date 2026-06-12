@@ -1,7 +1,7 @@
 import { useIsCounterfactualSafe, CounterfactualFeature } from '@/features/counterfactual'
 import { useLoadFeature } from '@/features/__core__'
 import { type ReactElement, useContext } from 'react'
-import Button from '@mui/material/Button'
+import { Button } from '@/components/ui/button'
 import { OVERVIEW_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
@@ -27,15 +27,7 @@ const NewTxButton = (): ReactElement => {
   return (
     <CheckWallet allowSpendingLimit>
       {(isOk) => (
-        <Button
-          data-testid="new-tx-btn"
-          onClick={onClick}
-          variant="contained"
-          size="medium"
-          disabled={!isOk}
-          fullWidth
-          disableElevation
-        >
+        <Button data-testid="new-tx-btn" onClick={onClick} disabled={!isOk} className="w-full">
           New transaction
         </Button>
       )}

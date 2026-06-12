@@ -1,7 +1,8 @@
 import { useCallback, useState, type ReactElement } from 'react'
-import { Box, Divider, Drawer } from '@mui/material'
-import ChevronRight from '@mui/icons-material/ChevronRight'
+import { ChevronRight } from 'lucide-react'
 
+import { Separator } from '@/components/ui/separator'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import SidebarHeader from '@/components/sidebar/SidebarHeader'
 import SidebarNavigation from '@/components/sidebar/SidebarNavigation'
@@ -45,21 +46,24 @@ const Sidebar = (): ReactElement => {
         {/* Nav menu */}
         <SidebarNavigation />
 
-        <Box
-          sx={{
-            flex: 1,
-          }}
-        />
+        <div className="flex-1" />
 
-        <Divider flexItem sx={{ borderColor: 'background.main' }} />
+        <Separator className="bg-[var(--color-background-main)]" />
 
         <SidebarFooter />
       </div>
-      <Drawer variant="temporary" anchor="left" open={isDrawerOpen} onClose={onDrawerToggle}>
-        <div className={css.drawer}>
-          <MyAccounts onLinkClick={closeDrawer} isSidebar></MyAccounts>
-        </div>
-      </Drawer>
+      <Sheet
+        open={isDrawerOpen}
+        onOpenChange={(open) => {
+          if (!open) onDrawerToggle()
+        }}
+      >
+        <SheetContent side="left" showCloseButton={false} className="w-[550px] max-w-[90vw] gap-0 p-0">
+          <div className={css.drawer}>
+            <MyAccounts onLinkClick={closeDrawer} isSidebar></MyAccounts>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }

@@ -1,5 +1,4 @@
 import { type SyntheticEvent, useContext, useCallback, useEffect } from 'react'
-import { CircularProgress, CardActions, Button, Typography, Stack, Divider } from '@mui/material'
 import CheckWallet from '@/components/common/CheckWallet'
 import { Errors, trackError } from '@/services/exceptions'
 import { dispatchRecoveryExecution } from '@/features/recovery/services/recovery-sender'
@@ -19,6 +18,10 @@ import { SafeTxContext } from '../../SafeTxProvider'
 import useGasPrice from '@/hooks/useGasPrice'
 import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Spinner } from '@/components/ui/spinner'
 
 type RecoveryAttemptReviewProps = {
   item: RecoveryQueueItem
@@ -72,19 +75,14 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
   return (
     <TxCard>
       <form onSubmit={onFormSubmit}>
-        <Stack
-          sx={{
-            gap: 3,
-            mb: 2,
-          }}
-        >
+        <div className="mb-4 flex flex-col gap-6">
           <Typography>Execute this transaction to finalize the recovery.</Typography>
 
           <FieldsGrid title="Initiator">
             <EthHashInfo address={item.executor} showName showCopyButton hasExplorer />
           </FieldsGrid>
 
-          <Divider sx={{ mx: -3 }} />
+          <Separator className="-mx-6" />
 
           <RecoveryDescription item={item} />
 
@@ -93,26 +91,26 @@ const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
           <RecoveryValidationErrors item={item} />
 
           {error && <ErrorMessage error={error}>Error submitting the transaction.</ErrorMessage>}
-        </Stack>
+        </div>
 
-        <Divider sx={{ mx: -3, my: 3.5 }} />
+        <Separator className="-mx-6 my-7" />
 
-        <CardActions>
+        <div className="flex items-center">
           {/* Submit button, also available to non-owner role members */}
           <CheckWallet allowNonOwner>
             {(isOk) => (
               <Button
                 data-testid="execute-through-role-form-btn"
-                variant="contained"
+                variant="default"
                 type="submit"
                 disabled={!isOk || isLoading}
-                sx={{ minWidth: '112px' }}
+                className="min-w-[112px]"
               >
-                {isLoading ? <CircularProgress size={20} /> : 'Execute'}
+                {isLoading ? <Spinner className="size-5" /> : 'Execute'}
               </Button>
             )}
           </CheckWallet>
-        </CardActions>
+        </div>
       </form>
     </TxCard>
   )

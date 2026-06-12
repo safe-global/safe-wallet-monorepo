@@ -7,7 +7,7 @@
   border-color: var(--color-error-main);
 }
 
-.error :global(.MuiFormLabel-root) {
+.error .label {
   color: var(--color-error-main);
 }
 
@@ -46,26 +46,15 @@
   flex-shrink: 0;
 }
 
-.select :global(.MuiSelect-select) {
+.select :global([data-slot='select-trigger']) {
   margin: var(--space-1);
   display: flex;
+  height: auto;
   background-color: var(--color-background-main);
+  border: 0;
+  box-shadow: none;
   border-radius: 6px;
-  padding: var(--space-1) var(--space-5) var(--space-1) var(--space-2) !important;
-}
-
-.select :global(.MuiSelect-icon) {
-  margin-right: var(--space-2);
-  width: 24px;
-  height: 24px;
-  color: var(--color-text-secondary);
-  top: 50%;
-  transform: translateY(-50%);
-  transition: transform 120ms ease;
-}
-
-.select :global(.MuiSelect-iconOpen) {
-  transform: translateY(-50%) rotate(180deg);
+  padding: var(--space-1) var(--space-2);
 }
 
 .fiatDisplay {

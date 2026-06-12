@@ -1,14 +1,10 @@
 import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { MouseEvent } from 'react'
 import { type ReactElement, useContext, useState } from 'react'
-import IconButton from '@mui/material/IconButton'
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz'
-import MenuItem from '@mui/material/MenuItem'
-
-import ListItemText from '@mui/material/ListItemText'
+import { Ellipsis } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import useAddressBook from '@/hooks/useAddressBook'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import ContextMenu from '@/components/common/ContextMenu'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { isERC20Transfer, isNativeTokenTransfer, isOutgoingTransfer } from '@/utils/transaction-guards'
@@ -35,22 +31,14 @@ const TransferActions = ({
   txInfo: TransferTransactionInfo
   trusted: boolean
 }): ReactElement => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
+  const [menuOpen, setMenuOpen] = useState(false)
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const addressBook = useAddressBook()
   const name = addressBook?.[address]
   const { setTxFlow } = useContext(TxModalContext)
 
-  const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
-    setAnchorEl(e.currentTarget)
-  }
-
-  const handleCloseContextMenu = () => {
-    setAnchorEl(undefined)
-  }
-
   const handleOpenModal = (type: keyof typeof open, event?: typeof TX_LIST_EVENTS.ADDRESS_BOOK) => () => {
-    handleCloseContextMenu()
+    setMenuOpen(false)
     setOpen((prev) => ({ ...prev, [type]: true }))
 
     if (event) {
@@ -77,30 +65,34 @@ const TransferActions = ({
 
   return (
     <>
-      <IconButton edge="end" size="small" onClick={handleOpenContextMenu} sx={{ ml: '4px' }}>
-        <MoreHorizIcon sx={({ palette }) => ({ color: palette.border.main })} fontSize="small" />
-      </IconButton>
-      <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
-        {canSendAgain && (
-          <CheckWallet>
-            {(isOk) => (
-              <MenuItem
-                onClick={() => {
-                  handleCloseContextMenu()
-                  setTxFlow(<TokenTransferFlow recipients={[{ recipient, tokenAddress, amount }]} />)
-                }}
-                disabled={!isOk}
-              >
-                <ListItemText>Send again</ListItemText>
-              </MenuItem>
-            )}
-          </CheckWallet>
-        )}
+      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+        <DropdownMenuTrigger
+          render={<Button variant="ghost" size="icon-sm" className="ml-1 text-[var(--color-border-main)]" />}
+        >
+          <Ellipsis />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {canSendAgain && (
+            <CheckWallet>
+              {(isOk) => (
+                <DropdownMenuItem
+                  onClick={() => {
+                    setMenuOpen(false)
+                    setTxFlow(<TokenTransferFlow recipients={[{ recipient, tokenAddress, amount }]} />)
+                  }}
+                  disabled={!isOk}
+                >
+                  Send again
+                </DropdownMenuItem>
+              )}
+            </CheckWallet>
+          )}
 
-        <MenuItem onClick={handleOpenModal(ModalType.ADD_TO_AB, TX_LIST_EVENTS.ADDRESS_BOOK)}>
-          <ListItemText>Add to address book</ListItemText>
-        </MenuItem>
-      </ContextMenu>
+          <DropdownMenuItem onClick={handleOpenModal(ModalType.ADD_TO_AB, TX_LIST_EVENTS.ADDRESS_BOOK)}>
+            Add to address book
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {open[ModalType.ADD_TO_AB] && (
         <EntryDialog handleClose={handleCloseModal} defaultValues={{ name, address }} disableAddressInput />

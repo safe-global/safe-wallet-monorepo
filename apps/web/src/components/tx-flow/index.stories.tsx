@@ -1,24 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  TextField,
-  Stepper,
-  Step,
-  StepLabel,
-  Card,
-  Divider,
-  Alert,
-  LinearProgress,
-  Chip,
-} from '@mui/material'
-import SendIcon from '@mui/icons-material/Send'
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
-import EditIcon from '@mui/icons-material/Edit'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import { Send, ArrowLeftRight, Pencil, CircleCheck } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
+import { Card, CardContent } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Progress } from '@/components/ui/progress'
+import { Chip } from '@/components/ui/chip'
 
 /**
  * Transaction Flow (tx-flow) components orchestrate multi-step transaction
@@ -62,61 +53,70 @@ const MockTxLayout = ({
   totalSteps?: number
   children: React.ReactNode
 }) => (
-  <Box sx={{ display: 'flex', gap: 3, maxWidth: 900 }}>
+  <div className="flex max-w-[900px] gap-6">
     {/* Sidebar */}
-    <Paper sx={{ width: 280, p: 2, flexShrink: 0 }}>
-      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-        Safe Account
+    <div className="w-[280px] shrink-0 rounded bg-card p-4">
+      <Typography variant="paragraph-small-medium" color="muted" as="div" className="mb-2">
+        Safe account
       </Typography>
-      <Typography variant="body2" fontFamily="monospace" sx={{ mb: 2 }}>
+      <Typography variant="paragraph-small" as="div" className="mb-4 font-mono">
         0x1234...5678
       </Typography>
-      <Divider sx={{ my: 2 }} />
-      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+      <Separator className="my-4" />
+      <Typography variant="paragraph-small-medium" color="muted" as="div" className="mb-2">
         Network
       </Typography>
-      <Chip label="Ethereum" size="small" />
-    </Paper>
+      <Chip>Ethereum</Chip>
+    </div>
 
     {/* Main content */}
-    <Box sx={{ flex: 1 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+    <div className="flex-1">
+      <div className="mb-4 flex items-center gap-4">
         {icon}
-        <Box>
-          <Typography variant="h5">{title}</Typography>
+        <div>
+          <Typography variant="h4">{title}</Typography>
           {subtitle && (
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="paragraph-small" color="muted">
               {subtitle}
             </Typography>
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {totalSteps > 1 && (
-        <Stepper activeStep={step} sx={{ mb: 3 }}>
+        <div className="mb-6 flex items-center gap-2">
           {Array.from({ length: totalSteps }).map((_, i) => (
-            <Step key={i}>
-              <StepLabel>{['Create', 'Review', 'Execute'][i] || `Step ${i + 1}`}</StepLabel>
-            </Step>
+            <div key={i} className="flex items-center gap-2">
+              <Typography
+                variant="paragraph-small-medium"
+                color={i === step ? 'default' : 'muted'}
+                aria-current={i === step ? 'step' : undefined}
+              >
+                {['Create', 'Review', 'Execute'][i] || `Step ${i + 1}`}
+              </Typography>
+              {i < totalSteps - 1 && <Separator className="w-8" />}
+            </div>
           ))}
-        </Stepper>
+        </div>
       )}
 
       {children}
-    </Box>
-  </Box>
+    </div>
+  </div>
 )
 
 // Mock TxCard - Form container
 const MockTxCard = ({ children, actions }: { children: React.ReactNode; actions?: React.ReactNode }) => (
-  <Card sx={{ p: 3 }}>
-    {children}
-    {actions && (
-      <>
-        <Divider sx={{ my: 2 }} />
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>{actions}</Box>
-      </>
-    )}
+  <Card className="py-0">
+    <CardContent className="p-6">
+      {children}
+      {actions && (
+        <>
+          <Separator className="my-4" />
+          <div className="flex justify-end gap-4">{actions}</div>
+        </>
+      )}
+    </CardContent>
   </Card>
 )
 
@@ -132,62 +132,64 @@ const StepWrapper = ({
   description: string
   children: React.ReactNode
 }) => (
-  <Box sx={{ mb: 8 }}>
-    <Box sx={{ mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-      <Typography variant="overline" color="text.secondary">
+  <div className="mb-16">
+    <div className="mb-4 border-b border-border pb-4">
+      <Typography variant="paragraph-mini" color="muted" as="div" className="uppercase tracking-wide">
         Step {stepNumber}
       </Typography>
-      <Typography variant="h5">{stepName}</Typography>
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="h4">{stepName}</Typography>
+      <Typography variant="paragraph-small" color="muted">
         {description}
       </Typography>
-    </Box>
-    <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>{children}</Box>
-  </Box>
+    </div>
+    <div className="rounded-lg bg-muted p-6">{children}</div>
+  </div>
 )
 
 // All Steps - Scrollable view of entire Token Transfer flow with full UI at each step
 export const TokenTransferAllSteps: StoryObj = {
   render: () => (
-    <Box sx={{ maxWidth: 950 }}>
-      <Box sx={{ mb: 6, pb: 3, borderBottom: '2px solid', borderColor: 'primary.main' }}>
-        <Typography variant="h4">Token Transfer Flow</Typography>
-        <Typography variant="body1" color="text.secondary">
+    <div className="max-w-[950px]">
+      <div className="mb-12 border-b-2 border-primary pb-6">
+        <Typography variant="h4">Token transfer flow</Typography>
+        <Typography variant="paragraph" color="muted">
           Complete walkthrough of the token transfer process. Scroll to view each step.
         </Typography>
-      </Box>
+      </div>
 
       {/* Step 1: Create */}
       <StepWrapper
         stepNumber={1}
-        stepName="Create Transaction"
+        stepName="Create transaction"
         description="User enters recipient address and amount to send."
       >
         <MockTxLayout
           title="Send tokens"
           subtitle="Transfer tokens from your Safe"
-          icon={<SendIcon color="primary" />}
+          icon={<Send className="size-6 text-primary" />}
           step={0}
           totalSteps={3}
         >
-          <MockTxCard actions={<Button variant="contained">Next</Button>}>
-            <Typography variant="subtitle2" gutterBottom>
+          <MockTxCard actions={<Button>Next</Button>}>
+            <Typography variant="paragraph-small-medium" as="div" className="mb-2">
               Recipient
             </Typography>
-            <TextField fullWidth placeholder="0x..." defaultValue={mockRecipient} sx={{ mb: 3 }} />
+            <Input className="mb-6 w-full" placeholder="0x..." defaultValue={mockRecipient} />
 
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="paragraph-small-medium" as="div" className="mb-2">
               Amount
             </Typography>
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-              <TextField placeholder="0.0" defaultValue={mockAmount} sx={{ flex: 1 }} />
-              <TextField select defaultValue="ETH" sx={{ width: 120 }} SelectProps={{ native: true }}>
-                <option value="ETH">ETH</option>
-                <option value="USDC">USDC</option>
-                <option value="DAI">DAI</option>
-              </TextField>
-            </Box>
-            <Alert severity="info">Available balance: 10.5 ETH</Alert>
+            <div className="mb-4 flex gap-4">
+              <Input className="flex-1" placeholder="0.0" defaultValue={mockAmount} />
+              <NativeSelect defaultValue="ETH" className="w-[120px]">
+                <NativeSelectOption value="ETH">ETH</NativeSelectOption>
+                <NativeSelectOption value="USDC">USDC</NativeSelectOption>
+                <NativeSelectOption value="DAI">DAI</NativeSelectOption>
+              </NativeSelect>
+            </div>
+            <Alert>
+              <AlertDescription>Available balance: 10.5 ETH</AlertDescription>
+            </Alert>
           </MockTxCard>
         </MockTxLayout>
       </StepWrapper>
@@ -195,74 +197,68 @@ export const TokenTransferAllSteps: StoryObj = {
       {/* Step 2: Review */}
       <StepWrapper
         stepNumber={2}
-        stepName="Review Transaction"
+        stepName="Review transaction"
         description="User reviews transaction details, balance changes, and gas fees before signing."
       >
         <MockTxLayout
           title="Send tokens"
           subtitle="Transfer tokens from your Safe"
-          icon={<SendIcon color="primary" />}
+          icon={<Send className="size-6 text-primary" />}
           step={1}
           totalSteps={3}
         >
           <MockTxCard
             actions={
               <>
-                <Button>Back</Button>
-                <Button variant="contained">Submit</Button>
+                <Button variant="outline">Back</Button>
+                <Button>Submit</Button>
               </>
             }
           >
-            <Typography variant="h6" gutterBottom>
-              Review Transaction
+            <Typography variant="h4" as="div" className="mb-2">
+              Review transaction
             </Typography>
-            <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1, mb: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2" color="text.secondary">
+            <div className="mb-4 rounded bg-background p-4">
+              <div className="mb-2 flex justify-between">
+                <Typography variant="paragraph-small" color="muted">
                   Send
                 </Typography>
-                <Typography variant="body2" fontWeight="bold">
+                <Typography variant="paragraph-small-bold">
                   {mockAmount} {mockToken}
                 </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2" color="text.secondary">
+              </div>
+              <div className="mb-2 flex justify-between">
+                <Typography variant="paragraph-small" color="muted">
                   To
                 </Typography>
-                <Typography variant="body2" fontFamily="monospace">
+                <Typography variant="paragraph-small" className="font-mono">
                   {mockRecipient.slice(0, 10)}...{mockRecipient.slice(-8)}
                 </Typography>
-              </Box>
-              <Divider sx={{ my: 1 }} />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2" color="text.secondary">
+              </div>
+              <Separator className="my-2" />
+              <div className="flex justify-between">
+                <Typography variant="paragraph-small" color="muted">
                   Network fee
                 </Typography>
-                <Typography variant="body2">~0.002 ETH</Typography>
-              </Box>
-            </Box>
+                <Typography variant="paragraph-small">~0.002 ETH</Typography>
+              </div>
+            </div>
 
-            <Typography variant="subtitle2" gutterBottom>
-              Balance Changes
+            <Typography variant="paragraph-small-medium" as="div" className="mb-2">
+              Balance changes
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  p: 1.5,
-                  bgcolor: 'error.light',
-                  borderRadius: 1,
-                }}
-              >
-                <Typography variant="body2">ETH</Typography>
-                <Typography variant="body2" color="error.main" fontWeight="bold">
+            <div className="mb-4 flex flex-col gap-2">
+              <div className="flex justify-between rounded bg-[var(--color-error-light)] p-1.5">
+                <Typography variant="paragraph-small">ETH</Typography>
+                <Typography variant="paragraph-small-bold" className="text-[var(--color-error-main)]">
                   -{mockAmount} ETH
                 </Typography>
-              </Box>
-            </Box>
+              </div>
+            </div>
 
-            <Alert severity="info">This transaction requires 2 of 3 signatures to execute.</Alert>
+            <Alert>
+              <AlertDescription>This transaction requires 2 of 3 signatures to execute.</AlertDescription>
+            </Alert>
           </MockTxCard>
         </MockTxLayout>
       </StepWrapper>
@@ -270,37 +266,35 @@ export const TokenTransferAllSteps: StoryObj = {
       {/* Step 3: Sign & Execute */}
       <StepWrapper
         stepNumber={3}
-        stepName="Sign & Execute"
+        stepName="Sign & execute"
         description="User signs the transaction. Once threshold is reached, transaction can be executed."
       >
         <MockTxLayout
           title="Send tokens"
           subtitle="Transfer tokens from your Safe"
-          icon={<SendIcon color="primary" />}
+          icon={<Send className="size-6 text-primary" />}
           step={2}
           totalSteps={3}
         >
           <MockTxCard>
-            <Typography variant="h6" gutterBottom>
-              Sign & Execute
+            <Typography variant="h4" as="div" className="mb-2">
+              Sign & execute
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography variant="paragraph-small" color="muted" as="div" className="mb-6">
               Sign with your connected wallet to add your confirmation.
             </Typography>
-            <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1, mb: 3 }}>
-              <Typography variant="caption" color="text.secondary">
+            <div className="mb-6 rounded bg-background p-4">
+              <Typography variant="paragraph-mini" color="muted" as="div">
                 Confirmations: 1 of 2 required
               </Typography>
-              <LinearProgress variant="determinate" value={50} sx={{ mt: 1 }} />
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button variant="contained" fullWidth>
-                Sign transaction
-              </Button>
-              <Button variant="contained" color="success" fullWidth disabled>
+              <Progress value={50} className="mt-2" />
+            </div>
+            <div className="flex gap-4">
+              <Button className="w-full">Sign transaction</Button>
+              <Button className="w-full" disabled>
                 Execute
               </Button>
-            </Box>
+            </div>
           </MockTxCard>
         </MockTxLayout>
       </StepWrapper>
@@ -308,43 +302,43 @@ export const TokenTransferAllSteps: StoryObj = {
       {/* Step 4: Success */}
       <StepWrapper
         stepNumber={4}
-        stepName="Transaction Submitted"
+        stepName="Transaction submitted"
         description="Confirmation screen shown after transaction is submitted to the network."
       >
         <MockTxLayout
           title="Send tokens"
           subtitle="Transfer tokens from your Safe"
-          icon={<SendIcon color="primary" />}
+          icon={<Send className="size-6 text-primary" />}
           step={2}
           totalSteps={3}
         >
           <MockTxCard>
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                Transaction Submitted
+            <div className="py-8 text-center">
+              <CircleCheck className="mb-4 inline-block size-16 text-[var(--color-success-main)]" />
+              <Typography variant="h4" as="div" className="mb-2">
+                Transaction submitted
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              <Typography variant="paragraph-small" color="muted" as="div" className="mb-4">
                 Your transaction has been submitted and is awaiting confirmations.
               </Typography>
-              <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1, mb: 2, display: 'inline-block' }}>
-                <Typography variant="caption" color="text.secondary">
+              <div className="mb-4 inline-block rounded bg-background p-4">
+                <Typography variant="paragraph-mini" color="muted" as="div">
                   Transaction hash
                 </Typography>
-                <Typography variant="body2" fontFamily="monospace">
+                <Typography variant="paragraph-small" className="font-mono">
                   0xabc123...def456
                 </Typography>
-              </Box>
-              <Box>
-                <Button variant="outlined" size="small">
+              </div>
+              <div>
+                <Button variant="outline" size="sm">
                   View on Etherscan
                 </Button>
-              </Box>
-            </Box>
+              </div>
+            </div>
           </MockTxCard>
         </MockTxLayout>
       </StepWrapper>
-    </Box>
+    </div>
   ),
   parameters: {
     docs: {
@@ -365,34 +359,28 @@ export const TokenTransferInteractive: StoryObj = {
       <MockTxLayout
         title="Send tokens"
         subtitle="Transfer tokens from your Safe"
-        icon={<SendIcon color="primary" />}
+        icon={<Send className="size-6 text-primary" />}
         step={step}
         totalSteps={3}
       >
         {step === 0 && (
-          <MockTxCard
-            actions={
-              <Button variant="contained" onClick={() => setStep(1)}>
-                Next
-              </Button>
-            }
-          >
-            <Typography variant="subtitle2" gutterBottom>
+          <MockTxCard actions={<Button onClick={() => setStep(1)}>Next</Button>}>
+            <Typography variant="paragraph-small-medium" as="div" className="mb-2">
               Recipient
             </Typography>
-            <TextField fullWidth placeholder="0x..." defaultValue={mockRecipient} sx={{ mb: 3 }} />
+            <Input className="mb-6 w-full" placeholder="0x..." defaultValue={mockRecipient} />
 
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="paragraph-small-medium" as="div" className="mb-2">
               Amount
             </Typography>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField placeholder="0.0" defaultValue={mockAmount} sx={{ flex: 1 }} />
-              <TextField select defaultValue="ETH" sx={{ width: 120 }} SelectProps={{ native: true }}>
-                <option value="ETH">ETH</option>
-                <option value="USDC">USDC</option>
-                <option value="DAI">DAI</option>
-              </TextField>
-            </Box>
+            <div className="flex gap-4">
+              <Input className="flex-1" placeholder="0.0" defaultValue={mockAmount} />
+              <NativeSelect defaultValue="ETH" className="w-[120px]">
+                <NativeSelectOption value="ETH">ETH</NativeSelectOption>
+                <NativeSelectOption value="USDC">USDC</NativeSelectOption>
+                <NativeSelectOption value="DAI">DAI</NativeSelectOption>
+              </NativeSelect>
+            </div>
           </MockTxCard>
         )}
 
@@ -400,49 +388,51 @@ export const TokenTransferInteractive: StoryObj = {
           <MockTxCard
             actions={
               <>
-                <Button onClick={() => setStep(0)}>Back</Button>
-                <Button variant="contained" onClick={() => setStep(2)}>
-                  Submit
+                <Button variant="outline" onClick={() => setStep(0)}>
+                  Back
                 </Button>
+                <Button onClick={() => setStep(2)}>Submit</Button>
               </>
             }
           >
-            <Typography variant="h6" gutterBottom>
-              Review Transaction
+            <Typography variant="h4" as="div" className="mb-2">
+              Review transaction
             </Typography>
-            <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1, mb: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2" color="text.secondary">
+            <div className="mb-4 rounded bg-background p-4">
+              <div className="mb-2 flex justify-between">
+                <Typography variant="paragraph-small" color="muted">
                   Send
                 </Typography>
-                <Typography variant="body2" fontWeight="bold">
+                <Typography variant="paragraph-small-bold">
                   {mockAmount} {mockToken}
                 </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2" color="text.secondary">
+              </div>
+              <div className="flex justify-between">
+                <Typography variant="paragraph-small" color="muted">
                   To
                 </Typography>
-                <Typography variant="body2" fontFamily="monospace">
+                <Typography variant="paragraph-small" className="font-mono">
                   {mockRecipient.slice(0, 10)}...{mockRecipient.slice(-8)}
                 </Typography>
-              </Box>
-            </Box>
-            <Alert severity="info">This transaction requires 2 of 3 signatures to execute.</Alert>
+              </div>
+            </div>
+            <Alert>
+              <AlertDescription>This transaction requires 2 of 3 signatures to execute.</AlertDescription>
+            </Alert>
           </MockTxCard>
         )}
 
         {step === 2 && (
           <MockTxCard>
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                Transaction Submitted
+            <div className="py-8 text-center">
+              <CircleCheck className="mb-4 inline-block size-16 text-[var(--color-success-main)]" />
+              <Typography variant="h4" as="div" className="mb-2">
+                Transaction submitted
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="paragraph-small" color="muted">
                 Your transaction has been submitted and is awaiting confirmations.
               </Typography>
-            </Box>
+            </div>
           </MockTxCard>
         )}
       </MockTxLayout>
@@ -461,9 +451,9 @@ export const TokenTransferInteractive: StoryObj = {
 export const TxLayoutDefault: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <MockTxLayout title="New Transaction" subtitle="Create a new transaction">
+    <MockTxLayout title="New transaction" subtitle="Create a new transaction">
       <MockTxCard>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="paragraph-small" color="muted">
           Transaction form content goes here...
         </Typography>
       </MockTxCard>
@@ -481,9 +471,9 @@ export const TxLayoutDefault: StoryObj = {
 export const TxLayoutWithProgress: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <MockTxLayout title="Multi-step Transaction" step={1} totalSteps={4}>
+    <MockTxLayout title="Multi-step transaction" step={1} totalSteps={4}>
       <MockTxCard>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="paragraph-small" color="muted">
           Step 2 of 4
         </Typography>
       </MockTxCard>
@@ -502,11 +492,11 @@ export const TxLayoutWithProgress: StoryObj = {
 export const TxCardBasic: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <Paper sx={{ maxWidth: 500, p: 2 }}>
+    <div className="max-w-md rounded bg-card p-4">
       <MockTxCard>
-        <Typography variant="body1">Basic card content</Typography>
+        <Typography variant="paragraph">Basic card content</Typography>
       </MockTxCard>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -520,18 +510,18 @@ export const TxCardBasic: StoryObj = {
 export const TxCardWithActions: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <Paper sx={{ maxWidth: 500, p: 2 }}>
+    <div className="max-w-md rounded bg-card p-4">
       <MockTxCard
         actions={
           <>
-            <Button>Cancel</Button>
-            <Button variant="contained">Continue</Button>
+            <Button variant="outline">Cancel</Button>
+            <Button>Continue</Button>
           </>
         }
       >
-        <Typography variant="body1">Card with action buttons</Typography>
+        <Typography variant="paragraph">Card with action buttons</Typography>
       </MockTxCard>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -546,24 +536,30 @@ export const TxCardWithActions: StoryObj = {
 export const SignMessageFlow: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <MockTxLayout title="Sign Message" subtitle="Sign an off-chain message" icon={<EditIcon color="primary" />}>
+    <MockTxLayout
+      title="Sign message"
+      subtitle="Sign an off-chain message"
+      icon={<Pencil className="size-6 text-primary" />}
+    >
       <MockTxCard
         actions={
           <>
-            <Button>Reject</Button>
-            <Button variant="contained">Sign</Button>
+            <Button variant="outline">Reject</Button>
+            <Button>Sign</Button>
           </>
         }
       >
-        <Typography variant="subtitle2" gutterBottom>
+        <Typography variant="paragraph-small-medium" as="div" className="mb-2">
           Message to sign
         </Typography>
-        <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1, mb: 2 }}>
-          <Typography variant="body2" fontFamily="monospace">
+        <div className="mb-4 rounded bg-background p-4">
+          <Typography variant="paragraph-small" className="font-mono">
             Hello, this is a test message to be signed by the Safe.
           </Typography>
-        </Box>
-        <Alert severity="info">This is an off-chain signature. No transaction will be executed on-chain.</Alert>
+        </div>
+        <Alert>
+          <AlertDescription>This is an off-chain signature. No transaction will be executed on-chain.</AlertDescription>
+        </Alert>
       </MockTxCard>
     </MockTxLayout>
   ),
@@ -583,41 +579,41 @@ export const SwapFlow: StoryObj = {
     <MockTxLayout
       title="Swap tokens"
       subtitle="Exchange one token for another"
-      icon={<SwapHorizIcon color="primary" />}
+      icon={<ArrowLeftRight className="size-6 text-primary" />}
     >
       <MockTxCard
         actions={
           <>
-            <Button>Cancel</Button>
-            <Button variant="contained">Review swap</Button>
+            <Button variant="outline">Cancel</Button>
+            <Button>Review swap</Button>
           </>
         }
       >
-        <Typography variant="subtitle2" gutterBottom>
+        <Typography variant="paragraph-small-medium" as="div" className="mb-2">
           You sell
         </Typography>
-        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-          <TextField placeholder="0.0" defaultValue="1.0" sx={{ flex: 1 }} />
-          <Chip label="ETH" />
-        </Box>
+        <div className="mb-6 flex gap-4">
+          <Input className="flex-1" placeholder="0.0" defaultValue="1.0" />
+          <Chip>ETH</Chip>
+        </div>
 
-        <Box sx={{ textAlign: 'center', my: 2 }}>
-          <SwapHorizIcon sx={{ transform: 'rotate(90deg)' }} />
-        </Box>
+        <div className="my-4 text-center">
+          <ArrowLeftRight className="inline-block size-6 rotate-90" />
+        </div>
 
-        <Typography variant="subtitle2" gutterBottom>
+        <Typography variant="paragraph-small-medium" as="div" className="mb-2">
           You receive
         </Typography>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField placeholder="0.0" defaultValue="1850.00" disabled sx={{ flex: 1 }} />
-          <Chip label="USDC" />
-        </Box>
+        <div className="flex gap-4">
+          <Input className="flex-1" placeholder="0.0" defaultValue="1850.00" disabled />
+          <Chip>USDC</Chip>
+        </div>
 
-        <Box sx={{ mt: 2, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
-          <Typography variant="caption" color="text.secondary">
+        <div className="mt-4 rounded bg-background p-4">
+          <Typography variant="paragraph-mini" color="muted">
             Rate: 1 ETH = 1,850 USDC
           </Typography>
-        </Box>
+        </div>
       </MockTxCard>
     </MockTxLayout>
   ),
@@ -634,17 +630,17 @@ export const SwapFlow: StoryObj = {
 export const LoadingState: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <MockTxLayout title="Processing Transaction">
+    <MockTxLayout title="Processing transaction">
       <MockTxCard>
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <LinearProgress sx={{ mb: 3 }} />
-          <Typography variant="h6" gutterBottom>
+        <div className="py-8 text-center">
+          <Progress className="mb-6" value={null} />
+          <Typography variant="h4" as="div" className="mb-2">
             Submitting transaction...
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="paragraph-small" color="muted">
             Please confirm in your wallet
           </Typography>
-        </Box>
+        </div>
       </MockTxCard>
     </MockTxLayout>
   ),
@@ -660,19 +656,19 @@ export const LoadingState: StoryObj = {
 // Error state
 export const ErrorState: StoryObj = {
   render: () => (
-    <MockTxLayout title="Send tokens" icon={<SendIcon color="primary" />}>
+    <MockTxLayout title="Send tokens" icon={<Send className="size-6 text-primary" />}>
       <MockTxCard
         actions={
           <>
-            <Button>Cancel</Button>
-            <Button variant="contained">Try again</Button>
+            <Button variant="outline">Cancel</Button>
+            <Button>Try again</Button>
           </>
         }
       >
-        <Alert severity="error" sx={{ mb: 2 }}>
-          Transaction failed: Insufficient funds for gas
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>Transaction failed: Insufficient funds for gas</AlertDescription>
         </Alert>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="paragraph-small" color="muted">
           Your Safe does not have enough ETH to pay for the transaction gas fees.
         </Typography>
       </MockTxCard>
@@ -691,41 +687,25 @@ export const ErrorState: StoryObj = {
 export const ReviewWithBalanceChanges: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <Paper sx={{ maxWidth: 500, p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Balance Changes
+    <div className="max-w-md rounded bg-card p-6">
+      <Typography variant="h4" as="div" className="mb-2">
+        Balance changes
       </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            p: 2,
-            bgcolor: 'error.light',
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="body2">ETH</Typography>
-          <Typography variant="body2" color="error.main" fontWeight="bold">
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between rounded bg-[var(--color-error-light)] p-4">
+          <Typography variant="paragraph-small">ETH</Typography>
+          <Typography variant="paragraph-small-bold" className="text-[var(--color-error-main)]">
             -1.5 ETH
           </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            p: 2,
-            bgcolor: 'success.light',
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="body2">USDC</Typography>
-          <Typography variant="body2" color="success.main" fontWeight="bold">
+        </div>
+        <div className="flex justify-between rounded bg-[var(--color-success-light)] p-4">
+          <Typography variant="paragraph-small">USDC</Typography>
+          <Typography variant="paragraph-small-bold" className="text-[var(--color-success-main)]">
             +2,775 USDC
           </Typography>
-        </Box>
-      </Box>
-    </Paper>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -740,22 +720,18 @@ export const ReviewWithBalanceChanges: StoryObj = {
 export const ActionButtons: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 400 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Transaction Actions
+    <div className="max-w-sm rounded bg-card p-6">
+      <Typography variant="paragraph-small-medium" as="div" className="mb-2">
+        Transaction actions
       </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Button variant="contained" fullWidth>
-          Sign transaction
-        </Button>
-        <Button variant="contained" color="success" fullWidth>
-          Execute transaction
-        </Button>
-        <Button variant="outlined" color="error" fullWidth>
+      <div className="flex flex-col gap-4">
+        <Button className="w-full">Sign transaction</Button>
+        <Button className="w-full">Execute transaction</Button>
+        <Button variant="outline" className="w-full">
           Reject transaction
         </Button>
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {

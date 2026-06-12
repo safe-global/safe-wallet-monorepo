@@ -1,6 +1,6 @@
 import Track from '@/components/common/Track'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Box, Paper, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import partition from 'lodash/partition'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import type { ReactElement } from 'react'
@@ -17,14 +17,9 @@ import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils
 
 function Disclaimer({ isMalicious }: { isMalicious: boolean }): ReactElement {
   return (
-    <Box
-      className={css.disclaimerContainer}
-      sx={{ bgcolor: ({ palette }) => `${palette.warning.background} !important` }}
-    >
+    <div className={css.disclaimerContainer}>
       <Typography>
-        <Typography component="span" fontWeight={700}>
-          Cancelling {isMalicious ? 'malicious transaction' : 'Account recovery'}.
-        </Typography>{' '}
+        <span className="font-semibold">Cancelling {isMalicious ? 'malicious transaction' : 'Account recovery'}.</span>{' '}
         You will need to execute the cancellation.{' '}
         <Track {...RECOVERY_EVENTS.LEARN_MORE} label="tx-queue">
           <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
@@ -32,7 +27,7 @@ function Disclaimer({ isMalicious }: { isMalicious: boolean }): ReactElement {
           </ExternalLink>
         </Track>
       </Typography>
-    </Box>
+    </div>
   )
 }
 
@@ -50,14 +45,16 @@ export default function GroupedRecoveryListItems({
   const isMalicious = recoveries.some((recovery) => recovery.isMalicious)
 
   return (
-    <Paper className={[css.container, customCss.recoveryGroupContainer].join(' ')}>
-      <Box gridArea="warning" className={css.disclaimerContainer}>
+    <div
+      className={['rounded-xl border border-border bg-card', css.container, customCss.recoveryGroupContainer].join(' ')}
+    >
+      <div style={{ gridArea: 'warning' }} className={css.disclaimerContainer}>
         <Disclaimer isMalicious={isMalicious} />
-      </Box>
+      </div>
 
-      <Box gridArea="line" className={css.line} />
+      <div style={{ gridArea: 'line' }} className={css.line} />
 
-      <Box gridArea="items" className={css.txItems}>
+      <div style={{ gridArea: 'items' }} className={css.txItems}>
         {cancellations.map((tx) => (
           <div key={tx.transaction.id}>
             <ExpandableTransactionItem item={tx} />
@@ -67,7 +64,7 @@ export default function GroupedRecoveryListItems({
         {recoveries.map((recovery) => (
           <RecoveryListItem key={recovery.transactionHash} item={recovery} />
         ))}
-      </Box>
-    </Paper>
+      </div>
+    </div>
   )
 }

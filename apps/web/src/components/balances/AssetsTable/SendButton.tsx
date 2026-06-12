@@ -1,6 +1,7 @@
 import { useContext } from 'react'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { Button, IconButton, Tooltip, SvgIcon } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import ArrowIconNW from '@/public/images/common/arrow-up-right.svg'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useSpendingLimit } from '@/features/spending-limits'
@@ -31,31 +32,34 @@ const SendButton = ({
       {(isOk) => (
         <Track {...ASSETS_EVENTS.SEND}>
           {onlyIcon ? (
-            <Tooltip title={isOk ? 'Send' : ''} placement="top" arrow>
-              <span>
-                <IconButton
-                  data-testid="send-button"
-                  onClick={onSendClick}
-                  disabled={!isOk}
-                  size="small"
-                  aria-label="Send"
-                  className={css.assetActionIconButton}
-                >
-                  <SvgIcon component={ArrowIconNW} inheritViewBox />
-                </IconButton>
-              </span>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <span>
+                    <Button
+                      variant="ghost"
+                      data-testid="send-button"
+                      onClick={onSendClick}
+                      disabled={!isOk}
+                      aria-label="Send"
+                      className={`size-7 min-w-7 p-1.5 ${css.assetActionIconButton}`}
+                    >
+                      <ArrowIconNW />
+                    </Button>
+                  </span>
+                }
+              />
+              {isOk && <TooltipContent>Send</TooltipContent>}
             </Tooltip>
           ) : (
             <Button
               data-testid="send-button"
-              variant="contained"
-              color={light ? 'background.paper' : 'primary'}
-              size="medium"
-              startIcon={<ArrowIconNW />}
+              variant={light ? 'secondary' : 'default'}
               onClick={onSendClick}
               disabled={!isOk}
-              className={css.sendButton}
+              className={`h-8 ${css.sendButton}`}
             >
+              <ArrowIconNW />
               Send
             </Button>
           )}

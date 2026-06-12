@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import { Box, SvgIcon, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -12,18 +12,14 @@ export type { BalanceMap, OverviewMap, SelectedSafe, SpaceSafeEntry, ChainEntry 
 
 // Hover treatment for the Safe Shield logo — recolours the SVG's named layers on hover,
 // mirroring the Safe Shield widget (SafeShieldDisplay).
-const shieldLogoSx = {
-  width: 104,
-  height: 24,
-  flexShrink: 0,
-  '&:hover': {
-    cursor: 'pointer',
-    '& .shield-bg': { fill: 'var(--color-background-secondary)' },
-    '& .shield-img': { fill: 'var(--color-static-text-brand)', transition: 'fill 0.2s ease' },
-    '& .shield-lines': { fill: '#121312', transition: 'fill 0.2s ease' }, // consistent between dark/light modes
-    '& .shield-text': { fill: 'var(--color-text-primary)', transition: 'fill 0.2s ease' },
-  },
-} as const
+const shieldLogoOnHover = [
+  'h-6 w-[104px] shrink-0 cursor-pointer',
+  '[&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill]',
+  'hover:[&_.shield-bg]:fill-[var(--color-background-secondary)]',
+  'hover:[&_.shield-img]:fill-[var(--color-static-text-brand)]',
+  'hover:[&_.shield-lines]:fill-[#121312]', // consistent between dark/light modes
+  'hover:[&_.shield-text]:fill-[var(--color-text-primary)]',
+].join(' ')
 
 const SecurityHub = (): ReactElement => {
   // Remount the per-space body on every space switch. The scan-results map and the
@@ -32,31 +28,27 @@ const SecurityHub = (): ReactElement => {
   // back into the newly selected space — most visible on large, slow-scanning spaces.
   const currentSpaceId = useCurrentSpaceId()
   const isDarkMode = useDarkMode()
+  const SafeShieldLogo = isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull
 
   return (
-    <Box data-testid="security-hub">
-      <Box mb={3} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-        <Box>
-          <Typography variant="h1" mb={0.5}>
+    <div data-testid="security-hub">
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <div>
+          <Typography variant="h1" className="mb-1">
             Security
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="paragraph-small" color="muted">
             Overview of security checks across your accounts.
           </Typography>
-        </Box>
+        </div>
 
         <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
-          <SvgIcon
-            component={isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull}
-            inheritViewBox
-            aria-label="Safe Shield"
-            sx={shieldLogoSx}
-          />
+          <SafeShieldLogo aria-label="Safe Shield" className={shieldLogoOnHover} />
         </ExternalLink>
-      </Box>
+      </div>
 
       <SecurityHubContent key={currentSpaceId ?? 'no-space'} />
-    </Box>
+    </div>
   )
 }
 

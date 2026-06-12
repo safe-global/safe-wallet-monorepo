@@ -1,8 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
-import { Box, Paper, Typography, TextField, Collapse, Alert } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Field, FieldLabel, FieldDescription } from '@/components/ui/field'
+import { Textarea } from '@/components/ui/textarea'
 
 /**
  * Transaction Notes feature allows users to add optional notes to transactions.
@@ -38,42 +41,34 @@ const MockTxNoteInput = ({ onChange }: { onChange?: (note: string) => void }) =>
   }
 
   return (
-    <Box>
-      <Box
-        onClick={() => setExpanded(!expanded)}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          cursor: 'pointer',
-          py: 1,
-          '&:hover': { bgcolor: 'action.hover' },
-          borderRadius: 1,
-        }}
-      >
-        {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-        <Typography variant="body2">Add note (optional)</Typography>
-      </Box>
-      <Collapse in={expanded}>
-        <Box sx={{ mt: 1 }}>
-          <TextField
-            label="Transaction note"
-            multiline
+    <Collapsible open={expanded} onOpenChange={setExpanded}>
+      <CollapsibleTrigger
+        render={
+          <div className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md py-2">
+            {expanded ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+            <Typography variant="paragraph-small">Add note (optional)</Typography>
+          </div>
+        }
+      />
+      <CollapsibleContent>
+        <Field className="mt-2">
+          <FieldLabel htmlFor="tx-note">Transaction note</FieldLabel>
+          <Textarea
+            id="tx-note"
             rows={2}
-            fullWidth
             value={note}
             onChange={(e) => handleChange(e.target.value)}
-            helperText={`${note.length}/${MAX_NOTE_LENGTH} characters`}
-            inputProps={{ maxLength: MAX_NOTE_LENGTH }}
+            maxLength={MAX_NOTE_LENGTH}
           />
-          <Alert severity="warning" sx={{ mt: 1 }}>
-            <Typography variant="caption">
-              Transaction notes are publicly visible on-chain. Do not include sensitive information.
-            </Typography>
-          </Alert>
-        </Box>
-      </Collapse>
-    </Box>
+          <FieldDescription>{`${note.length}/${MAX_NOTE_LENGTH} characters`}</FieldDescription>
+        </Field>
+        <Alert variant="warning" className="mt-2">
+          <AlertDescription>
+            Transaction notes are publicly visible on-chain. Do not include sensitive information.
+          </AlertDescription>
+        </Alert>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }
 
@@ -82,72 +77,54 @@ const TxNoteInputWrapper = () => {
   const [note, setNote] = useState('')
 
   return (
-    <Paper sx={{ p: 3, maxWidth: 450 }}>
+    <div className="bg-background max-w-[450px] rounded-lg p-6">
       <MockTxNoteInput onChange={setNote} />
       {note && (
-        <Box sx={{ mt: 2, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
-          <Typography variant="caption" color="text.secondary">
+        <div className="bg-muted mt-4 rounded-md p-4">
+          <Typography variant="paragraph-mini" color="muted">
             Current note:
           </Typography>
-          <Typography variant="body2">{note}</Typography>
-        </Box>
+          <Typography variant="paragraph-small">{note}</Typography>
+        </div>
       )}
-    </Paper>
+    </div>
   )
 }
 
 // FULL PAGE FIRST - Multiple notes in transaction history
 export const NotesInHistory: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 600 }}>
-      <Typography variant="h6" gutterBottom>
-        Transaction History with Notes
+    <div className="bg-background max-w-[600px] rounded-lg p-6">
+      <Typography variant="h4" className="mb-4">
+        Transaction history with notes
       </Typography>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="flex flex-col gap-4">
         {[
           { amount: '1.5 ETH', to: '0x1234...5678', note: 'Monthly payroll' },
           { amount: '500 USDC', to: '0xABCD...EFGH', note: 'Marketing campaign budget' },
           { amount: '0.1 ETH', to: '0x9876...5432', note: null },
         ].map((tx, index) => (
-          <Box
-            key={index}
-            sx={{
-              p: 2,
-              border: 1,
-              borderColor: 'divider',
-              borderRadius: 1,
-            }}
-          >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body1" fontWeight="bold">
-                {tx.amount}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
+          <div key={index} className="rounded-md border border-border p-4">
+            <div className="mb-2 flex justify-between">
+              <Typography variant="paragraph-bold">{tx.amount}</Typography>
+              <Typography variant="paragraph-mini" color="muted">
                 To: {tx.to}
               </Typography>
-            </Box>
+            </div>
             {tx.note ? (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{
-                  p: 1,
-                  bgcolor: 'background.default',
-                  borderRadius: 0.5,
-                }}
-              >
+              <Typography variant="paragraph-small" color="muted" className="bg-muted rounded-sm p-2">
                 📝 {tx.note}
               </Typography>
             ) : (
-              <Typography variant="caption" color="text.secondary" fontStyle="italic">
+              <Typography variant="paragraph-mini" color="muted" className="italic">
                 No note added
               </Typography>
             )}
-          </Box>
+          </div>
         ))}
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -175,32 +152,32 @@ export const NoteInTransactionForm: StoryObj = {
     const [_note, setNote] = useState('')
 
     return (
-      <Paper sx={{ p: 3, maxWidth: 500 }}>
-        <Typography variant="h6" gutterBottom>
-          Transaction Details
+      <div className="bg-background max-w-[500px] rounded-lg p-6">
+        <Typography variant="h4" className="mb-4">
+          Transaction details
         </Typography>
 
-        <Box sx={{ mb: 3, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
-          <Typography variant="body2" color="text.secondary">
+        <div className="bg-muted mb-6 rounded-md p-4">
+          <Typography variant="paragraph-small" color="muted">
             Sending
           </Typography>
-          <Typography variant="h5">1.5 ETH</Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="h4">1.5 ETH</Typography>
+          <Typography variant="paragraph-small" color="muted">
             To: 0x1234...5678
           </Typography>
-        </Box>
+        </div>
 
         <MockTxNoteInput onChange={setNote} />
 
-        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-          <Typography variant="button" color="text.secondary" sx={{ mr: 'auto' }}>
+        <div className="mt-6 flex justify-end gap-4">
+          <Typography variant="paragraph-small-medium" color="muted" className="mr-auto">
             Cancel
           </Typography>
-          <Typography variant="button" color="primary">
+          <Typography variant="paragraph-small-medium" className="text-primary">
             Continue
           </Typography>
-        </Box>
-      </Paper>
+        </div>
+      </div>
     )
   },
   parameters: {
@@ -215,25 +192,19 @@ export const NoteInTransactionForm: StoryObj = {
 // Display of existing note
 export const DisplayedNote: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-        Transaction Note
+    <div className="bg-background max-w-[500px] rounded-lg p-6">
+      <Typography variant="paragraph-small-bold" color="muted" className="mb-4 block">
+        Transaction note
       </Typography>
-      <Box
-        sx={{
-          p: 2,
-          bgcolor: 'background.default',
-          borderRadius: 1,
-          border: 1,
-          borderColor: 'divider',
-        }}
-      >
-        <Typography variant="body2">Monthly payroll for engineering team - Q1 2024 budget allocation</Typography>
-      </Box>
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+      <div className="bg-muted rounded-md border border-border p-4">
+        <Typography variant="paragraph-small">
+          Monthly payroll for engineering team - Q1 2024 budget allocation
+        </Typography>
+      </div>
+      <Typography variant="paragraph-mini" color="muted" className="mt-2 block">
         Added by owner 0x1234...5678
       </Typography>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -250,29 +221,28 @@ export const NoteCharacterLimit: StoryObj = {
     const [note, setNote] = useState('This is a very long note that reaches the character limit!')
 
     return (
-      <Paper sx={{ p: 3, maxWidth: 450 }}>
-        <Box>
-          <TextField
-            label="Transaction note"
-            multiline
+      <div className="bg-background max-w-[450px] rounded-lg p-6">
+        <Field data-invalid={note.length === MAX_NOTE_LENGTH}>
+          <FieldLabel htmlFor="tx-note-limit">Transaction note</FieldLabel>
+          <Textarea
+            id="tx-note-limit"
             rows={2}
-            fullWidth
             value={note}
             onChange={(e) => setNote(e.target.value.slice(0, MAX_NOTE_LENGTH))}
-            helperText={`${note.length}/${MAX_NOTE_LENGTH} characters`}
-            inputProps={{ maxLength: MAX_NOTE_LENGTH }}
-            error={note.length === MAX_NOTE_LENGTH}
+            maxLength={MAX_NOTE_LENGTH}
+            aria-invalid={note.length === MAX_NOTE_LENGTH}
           />
-          <Alert severity="warning" sx={{ mt: 1 }}>
-            <Typography variant="caption">
-              Transaction notes are publicly visible on-chain. Do not include sensitive information.
-            </Typography>
-          </Alert>
-        </Box>
-        <Typography variant="caption" color="warning.main" sx={{ display: 'block', mt: 1 }}>
+          <FieldDescription>{`${note.length}/${MAX_NOTE_LENGTH} characters`}</FieldDescription>
+        </Field>
+        <Alert variant="warning" className="mt-2">
+          <AlertDescription>
+            Transaction notes are publicly visible on-chain. Do not include sensitive information.
+          </AlertDescription>
+        </Alert>
+        <Typography variant="paragraph-mini" className="mt-2 block text-[var(--color-warning-main)]">
           Note is at or near the 60 character limit
         </Typography>
-      </Paper>
+      </div>
     )
   },
   parameters: {

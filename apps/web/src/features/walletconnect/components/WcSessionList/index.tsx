@@ -6,7 +6,10 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { Button, CircularProgress, List, ListItem, ListItemAvatar, ListItemIcon, ListItemText } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { List, ListItem } from '@/components/ui/list'
+import { cn } from '@/utils/cn'
 import type { SessionTypes } from '@walletconnect/types'
 import { useCallback, useContext } from 'react'
 import css from './styles.module.css'
@@ -46,20 +49,22 @@ const WcSessionListItem = ({ session }: { session: SessionTypes.Struct }) => {
   }, [walletConnect, session, setLoading, setError])
 
   return (
-    <ListItem className={css.sessionListItem}>
+    <ListItem className={`px-4 ${css.sessionListItem}`}>
       {session.peer.metadata.icons[0] && (
-        <ListItemAvatar className={css.sessionListAvatar}>
+        <div className={`flex pr-1 ${css.sessionListAvatar}`}>
           <SafeAppIconCard src={session.peer.metadata.icons[0]} alt="icon" width={20} height={20} />
-        </ListItemAvatar>
+        </div>
       )}
 
-      <ListItemText primary={name} primaryTypographyProps={{ color: safeLoaded ? undefined : 'text.secondary' }} />
+      <span className={cn('flex-1 truncate text-sm', safeLoaded ? 'text-foreground' : 'text-muted-foreground')}>
+        {name}
+      </span>
 
-      <ListItemIcon className={css.sessionListSecondaryAction}>
-        <Button variant="danger" onClick={onDisconnect} className={css.button} disabled={!!loading}>
-          {loading === WCLoadingState.DISCONNECT ? <CircularProgress size={20} /> : 'Disconnect'}
+      <div className={css.sessionListSecondaryAction}>
+        <Button variant="destructive" onClick={onDisconnect} className={css.button} disabled={!!loading}>
+          {loading === WCLoadingState.DISCONNECT ? <Spinner className="size-5" /> : 'Disconnect'}
         </Button>
-      </ListItemIcon>
+      </div>
     </ListItem>
   )
 }

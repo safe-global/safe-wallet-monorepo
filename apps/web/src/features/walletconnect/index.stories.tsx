@@ -1,35 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  TextField,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  ListItemSecondaryAction,
-  Avatar,
-  IconButton,
-  Chip,
-  Alert,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Checkbox,
-  FormControlLabel,
-  InputAdornment,
-  Divider,
-} from '@mui/material'
-import LinkIcon from '@mui/icons-material/Link'
-import LinkOffIcon from '@mui/icons-material/LinkOff'
-import ContentPasteIcon from '@mui/icons-material/ContentPaste'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import WarningIcon from '@mui/icons-material/Warning'
-import DeleteIcon from '@mui/icons-material/Delete'
+import { Link2, Link2Off, Clipboard, CircleCheck, TriangleAlert, Trash2 } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupButton } from '@/components/ui/input-group'
+import { List, ListItem, ListItemText } from '@/components/ui/list'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { Chip } from '@/components/ui/chip'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Field, FieldLabel } from '@/components/ui/field'
+import { Separator } from '@/components/ui/separator'
 
 /**
  * WalletConnect feature enables connecting Safe accounts to dApps.
@@ -92,29 +75,17 @@ const mockProposal = {
 
 // Mock WcLogoHeader
 const MockWcLogoHeader = ({ error }: { error?: string }) => (
-  <Box sx={{ textAlign: 'center', mb: 3 }}>
-    <Box
-      sx={{
-        width: 60,
-        height: 60,
-        bgcolor: 'primary.main',
-        borderRadius: 2,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        mx: 'auto',
-        mb: 2,
-      }}
-    >
-      <LinkIcon sx={{ color: 'white', fontSize: 32 }} />
-    </Box>
-    <Typography variant="h6">WalletConnect</Typography>
+  <div className="mb-6 text-center">
+    <div className="bg-primary mx-auto mb-4 flex size-[60px] items-center justify-center rounded-lg">
+      <Link2 className="size-8 text-white" />
+    </div>
+    <Typography variant="h4">WalletConnect</Typography>
     {error && (
-      <Typography variant="body2" color="error">
+      <Typography variant="paragraph-small" className="text-[var(--color-error-main)]">
         {error}
       </Typography>
     )}
-  </Box>
+  </div>
 )
 
 // Docs-style wrapper for each state
@@ -127,214 +98,212 @@ const StateWrapper = ({
   description: string
   children: React.ReactNode
 }) => (
-  <Box sx={{ mb: 8 }}>
-    <Box sx={{ mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-      <Typography variant="h5">{stateName}</Typography>
-      <Typography variant="body2" color="text.secondary">
+  <div className="mb-16">
+    <div className="mb-4 border-b border-border pb-4">
+      <Typography variant="h3">{stateName}</Typography>
+      <Typography variant="paragraph-small" color="muted">
         {description}
       </Typography>
-    </Box>
-    <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>{children}</Box>
-  </Box>
+    </div>
+    <div className="bg-muted rounded-lg p-6">{children}</div>
+  </div>
+)
+
+const SessionRow = ({ session }: { session: (typeof mockSessions)[0] }) => (
+  <ListItem className="bg-muted mb-2 gap-3 rounded-md p-2">
+    <Avatar size="default">
+      <AvatarImage src={session.icon} />
+      <AvatarFallback>{session.name[0]}</AvatarFallback>
+    </Avatar>
+    <ListItemText
+      primary={session.name}
+      secondary={
+        <span className="flex flex-wrap gap-1">
+          {session.chains.map((chain) => (
+            <Chip key={chain}>{chain}</Chip>
+          ))}
+        </span>
+      }
+    />
+    <Button variant="ghost" size="icon-sm" className="ml-auto text-[var(--color-error-main)]" aria-label="Disconnect">
+      <Link2Off className="size-4" />
+    </Button>
+  </ListItem>
 )
 
 // All States - Scrollable view of entire WalletConnect flow
 export const WalletConnectAllStates: StoryObj = {
   render: () => {
     return (
-      <Box sx={{ maxWidth: 550 }}>
-        <Box sx={{ mb: 6, pb: 3, borderBottom: '2px solid', borderColor: 'primary.main' }}>
-          <Typography variant="h4">WalletConnect Flow</Typography>
-          <Typography variant="body1" color="text.secondary">
+      <div className="max-w-[550px]">
+        <div className="mb-12 border-b-2 border-primary pb-6">
+          <Typography variant="h2">WalletConnect flow</Typography>
+          <Typography variant="paragraph" color="muted">
             Complete walkthrough of the WalletConnect connection process. Scroll to view each state.
           </Typography>
-        </Box>
+        </div>
 
         {/* State 1: Empty - No Sessions */}
         <StateWrapper
-          stateName="Initial State (No Sessions)"
+          stateName="Initial state (no sessions)"
           description="User sees the connection form with no active sessions."
         >
-          <Paper sx={{ p: 3, maxWidth: 400 }}>
+          <div className="bg-background max-w-[400px] rounded-lg p-6">
             <MockWcLogoHeader />
-            <TextField fullWidth placeholder="Paste pairing code or URI" sx={{ mb: 3 }} />
-            <Button variant="contained" fullWidth disabled sx={{ mb: 3 }}>
+            <Input placeholder="Paste pairing code or URI" className="mb-6" />
+            <Button className="mb-6 w-full" disabled>
               Connect
             </Button>
-            <Divider sx={{ my: 2 }} />
-            <Box sx={{ textAlign: 'center', py: 3 }}>
-              <Typography variant="body2" color="text.secondary">
+            <Separator className="my-4" />
+            <div className="py-6 text-center">
+              <Typography variant="paragraph-small" color="muted">
                 No active sessions
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="paragraph-mini" color="muted">
                 Connect to a dApp to get started
               </Typography>
-            </Box>
-          </Paper>
+            </div>
+          </div>
         </StateWrapper>
 
         {/* State 2: Connection Proposal */}
         <StateWrapper
-          stateName="Connection Proposal"
+          stateName="Connection proposal"
           description="A dApp requests to connect. User reviews permissions before approving."
         >
-          <Paper sx={{ p: 3, maxWidth: 450 }}>
-            <Typography variant="h6" gutterBottom>
+          <div className="bg-background max-w-[450px] rounded-lg p-6">
+            <Typography variant="h4" className="mb-2">
               Connection request
             </Typography>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-              <Avatar sx={{ width: 48, height: 48 }}>{mockProposal.name[0]}</Avatar>
-              <Box>
-                <Typography variant="body1" fontWeight="bold">
-                  {mockProposal.name}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
+            <div className="mb-6 flex items-center gap-4">
+              <Avatar className="size-12">
+                <AvatarFallback>{mockProposal.name[0]}</AvatarFallback>
+              </Avatar>
+              <div>
+                <Typography variant="paragraph-bold">{mockProposal.name}</Typography>
+                <Typography variant="paragraph-mini" color="muted">
                   {mockProposal.url}
                 </Typography>
-              </Box>
-            </Box>
+              </div>
+            </div>
 
-            <Alert severity="info" sx={{ mb: 2 }}>
-              {mockProposal.name} wants to connect to your Safe
+            <Alert className="mb-4">
+              <AlertDescription>{mockProposal.name} wants to connect to your Safe</AlertDescription>
             </Alert>
 
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="paragraph-small-bold" className="mb-2 block">
               Requested permissions
             </Typography>
-            <Box sx={{ mb: 2 }}>
+            <div className="mb-4 flex flex-wrap gap-1">
               {mockProposal.methods.map((method) => (
-                <Chip key={method} label={method} size="small" sx={{ mr: 0.5, mb: 0.5 }} variant="outlined" />
+                <Chip key={method} variant="outline">
+                  {method}
+                </Chip>
               ))}
-            </Box>
+            </div>
 
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="paragraph-small-bold" className="mb-2 block">
               Networks
             </Typography>
-            <Box sx={{ mb: 3 }}>
+            <div className="mb-6 flex flex-wrap gap-1">
               {mockProposal.chains.map((chain) => (
-                <Chip key={chain} label={chain} size="small" sx={{ mr: 0.5 }} />
+                <Chip key={chain}>{chain}</Chip>
               ))}
-            </Box>
+            </div>
 
-            <FormControlLabel
-              control={<Checkbox defaultChecked />}
-              label="I understand the risks of connecting"
-              sx={{ mb: 2 }}
-            />
+            <Field orientation="horizontal" className="mb-4">
+              <Checkbox id="risk-1" defaultChecked />
+              <FieldLabel htmlFor="risk-1">I understand the risks of connecting</FieldLabel>
+            </Field>
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button variant="outlined" fullWidth>
+            <div className="flex gap-4">
+              <Button variant="outline" className="w-full">
                 Reject
               </Button>
-              <Button variant="contained" fullWidth>
-                Approve
-              </Button>
-            </Box>
-          </Paper>
+              <Button className="w-full">Approve</Button>
+            </div>
+          </div>
         </StateWrapper>
 
         {/* State 3: Connected */}
         <StateWrapper
-          stateName="Connected Successfully"
+          stateName="Connected successfully"
           description="Connection established. User sees confirmation with linked accounts."
         >
-          <Paper sx={{ p: 4, maxWidth: 400, textAlign: 'center' }}>
-            <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>
+          <div className="bg-background max-w-[400px] rounded-lg p-8 text-center">
+            <CircleCheck className="mx-auto mb-4 size-16 text-[var(--color-success-main)]" />
+            <Typography variant="h4" className="mb-2">
               Connected
             </Typography>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, my: 3 }}>
-              <Avatar>S</Avatar>
-              <LinkIcon color="success" />
-              <Avatar>{mockSessions[0].name[0]}</Avatar>
-            </Box>
+            <div className="my-6 flex items-center justify-center gap-4">
+              <Avatar>
+                <AvatarFallback>S</AvatarFallback>
+              </Avatar>
+              <Link2 className="size-5 text-[var(--color-success-main)]" />
+              <Avatar>
+                <AvatarFallback>{mockSessions[0].name[0]}</AvatarFallback>
+              </Avatar>
+            </div>
 
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="paragraph-small" color="muted">
               Your Safe is now connected to {mockSessions[0].name}
             </Typography>
-          </Paper>
+          </div>
         </StateWrapper>
 
         {/* State 4: Active Sessions */}
         <StateWrapper
-          stateName="Active Sessions"
+          stateName="Active sessions"
           description="User can view and manage all active WalletConnect sessions."
         >
-          <Paper sx={{ p: 3, maxWidth: 450 }}>
+          <div className="bg-background max-w-[450px] rounded-lg p-6">
             <MockWcLogoHeader />
-            <TextField fullWidth placeholder="Paste pairing code or URI" defaultValue="" sx={{ mb: 3 }} />
-            <Button variant="contained" fullWidth disabled sx={{ mb: 3 }}>
+            <Input placeholder="Paste pairing code or URI" defaultValue="" className="mb-6" />
+            <Button className="mb-6 w-full" disabled>
               Connect
             </Button>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle2" sx={{ mb: 2 }}>
+            <Separator className="my-4" />
+            <Typography variant="paragraph-small-bold" className="mb-4 block">
               Active sessions ({mockSessions.length})
             </Typography>
             <List>
               {mockSessions.map((session) => (
-                <ListItem key={session.topic} sx={{ bgcolor: 'background.default', borderRadius: 1, mb: 1 }}>
-                  <ListItemAvatar>
-                    <Avatar src={session.icon}>{session.name[0]}</Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={session.name}
-                    secondary={
-                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                        {session.chains.map((chain) => (
-                          <Chip key={chain} label={chain} size="small" />
-                        ))}
-                      </Box>
-                    }
-                  />
-                  <ListItemSecondaryAction>
-                    <IconButton edge="end" color="error">
-                      <LinkOffIcon />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
+                <SessionRow key={session.topic} session={session} />
               ))}
             </List>
-          </Paper>
+          </div>
         </StateWrapper>
 
         {/* State 5: Disconnected */}
         <StateWrapper stateName="Disconnected" description="Confirmation shown when a session is disconnected.">
-          <Paper sx={{ p: 4, maxWidth: 400, textAlign: 'center' }}>
-            <LinkOffIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>
+          <div className="bg-background max-w-[400px] rounded-lg p-8 text-center">
+            <Link2Off className="mx-auto mb-4 size-16 text-muted-foreground" />
+            <Typography variant="h4" className="mb-2">
               Disconnected
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="paragraph-small" color="muted">
               {mockSessions[0].name} has been disconnected from your Safe.
             </Typography>
-          </Paper>
+          </div>
         </StateWrapper>
 
         {/* State 6: Error */}
         <StateWrapper
-          stateName="Error State"
+          stateName="Error state"
           description="Shown when connection fails due to invalid URI or network error."
         >
-          <Paper sx={{ p: 3, maxWidth: 400 }}>
+          <div className="bg-background max-w-[400px] rounded-lg p-6">
             <MockWcLogoHeader error="Connection failed" />
-            <Alert severity="error" sx={{ mb: 2 }}>
-              Failed to connect: Invalid pairing URI
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>Failed to connect: Invalid pairing URI</AlertDescription>
             </Alert>
-            <TextField
-              fullWidth
-              placeholder="Paste pairing code or URI"
-              error
-              defaultValue="invalid-uri"
-              sx={{ mb: 2 }}
-            />
-            <Button variant="contained" fullWidth>
-              Try again
-            </Button>
-          </Paper>
+            <Input placeholder="Paste pairing code or URI" aria-invalid defaultValue="invalid-uri" className="mb-4" />
+            <Button className="w-full">Try again</Button>
+          </div>
         </StateWrapper>
-      </Box>
+      </div>
     )
   },
   parameters: {
@@ -352,76 +321,55 @@ export const FullWalletConnectUI: StoryObj = {
     const [uri, setUri] = useState('')
 
     return (
-      <Paper sx={{ p: 3, maxWidth: 450 }}>
+      <div className="bg-background max-w-[450px] rounded-lg p-6">
         <MockWcLogoHeader />
 
-        <TextField
-          fullWidth
-          placeholder="Paste pairing code or URI"
-          value={uri}
-          onChange={(e) => setUri(e.target.value)}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setUri('wc:example...')}>
-                  <ContentPasteIcon />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-          sx={{ mb: 3 }}
-        />
+        <InputGroup className="mb-6">
+          <InputGroupInput
+            placeholder="Paste pairing code or URI"
+            value={uri}
+            onChange={(e) => setUri(e.target.value)}
+          />
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton onClick={() => setUri('wc:example...')} aria-label="Paste">
+              <Clipboard className="size-4" />
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
 
-        <Button variant="contained" fullWidth disabled={!uri} sx={{ mb: 3 }}>
+        <Button className="mb-6 w-full" disabled={!uri}>
           Connect
         </Button>
 
-        <Divider sx={{ my: 2 }} />
+        <Separator className="my-4" />
 
-        <Typography variant="subtitle2" sx={{ mb: 2 }}>
+        <Typography variant="paragraph-small-bold" className="mb-4 block">
           Active sessions ({mockSessions.length})
         </Typography>
 
         <List>
           {mockSessions.map((session) => (
-            <ListItem key={session.topic} sx={{ bgcolor: 'background.default', borderRadius: 1, mb: 1 }}>
-              <ListItemAvatar>
-                <Avatar src={session.icon}>{session.name[0]}</Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={session.name}
-                secondary={
-                  <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                    {session.chains.map((chain) => (
-                      <Chip key={chain} label={chain} size="small" />
-                    ))}
-                  </Box>
-                }
-              />
-              <ListItemSecondaryAction>
-                <IconButton edge="end" color="error">
-                  <LinkOffIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
+            <SessionRow key={session.topic} session={session} />
           ))}
         </List>
 
-        <Accordion sx={{ mt: 2 }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="body2">How to connect</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Typography variant="body2" color="text.secondary">
-              1. Open a WalletConnect-compatible dApp
-              <br />
-              2. Click &quot;Connect Wallet&quot; and select WalletConnect
-              <br />
-              3. Copy the pairing code and paste it here
-            </Typography>
-          </AccordionDetails>
+        <Accordion className="mt-4">
+          <AccordionItem value="how-to">
+            <AccordionTrigger>
+              <Typography variant="paragraph-small">How to connect</Typography>
+            </AccordionTrigger>
+            <AccordionContent>
+              <Typography variant="paragraph-small" color="muted">
+                1. Open a WalletConnect-compatible dApp
+                <br />
+                2. Click &quot;Connect Wallet&quot; and select WalletConnect
+                <br />
+                3. Copy the pairing code and paste it here
+              </Typography>
+            </AccordionContent>
+          </AccordionItem>
         </Accordion>
-      </Paper>
+      </div>
     )
   },
   parameters: {
@@ -436,28 +384,22 @@ export const FullWalletConnectUI: StoryObj = {
 // Connection Form
 export const ConnectionForm: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 400 }}>
+    <div className="bg-background max-w-[400px] rounded-lg p-6">
       <MockWcLogoHeader />
 
-      <TextField
-        fullWidth
-        placeholder="Paste pairing code or URI"
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton>
-                <ContentPasteIcon />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-        sx={{ mb: 2 }}
-      />
+      <InputGroup className="mb-4">
+        <InputGroupInput placeholder="Paste pairing code or URI" />
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton aria-label="Paste">
+            <Clipboard className="size-4" />
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
 
-      <Button variant="contained" fullWidth disabled>
+      <Button className="w-full" disabled>
         Connect
       </Button>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -474,60 +416,61 @@ export const ProposalForm: StoryObj = {
     const [accepted, setAccepted] = useState(false)
 
     return (
-      <Paper sx={{ p: 3, maxWidth: 450 }}>
-        <Typography variant="h6" gutterBottom>
+      <div className="bg-background max-w-[450px] rounded-lg p-6">
+        <Typography variant="h4" className="mb-2">
           Connection request
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-          <Avatar sx={{ width: 48, height: 48 }}>{mockProposal.name[0]}</Avatar>
-          <Box>
-            <Typography variant="body1" fontWeight="bold">
-              {mockProposal.name}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
+        <div className="mb-6 flex items-center gap-4">
+          <Avatar className="size-12">
+            <AvatarFallback>{mockProposal.name[0]}</AvatarFallback>
+          </Avatar>
+          <div>
+            <Typography variant="paragraph-bold">{mockProposal.name}</Typography>
+            <Typography variant="paragraph-mini" color="muted">
               {mockProposal.url}
             </Typography>
-          </Box>
-        </Box>
+          </div>
+        </div>
 
-        <Alert severity="info" sx={{ mb: 2 }}>
-          {mockProposal.name} wants to connect to your Safe
+        <Alert className="mb-4">
+          <AlertDescription>{mockProposal.name} wants to connect to your Safe</AlertDescription>
         </Alert>
 
-        <Typography variant="subtitle2" gutterBottom>
+        <Typography variant="paragraph-small-bold" className="mb-2 block">
           Requested permissions
         </Typography>
-        <Box sx={{ mb: 2 }}>
+        <div className="mb-4 flex flex-wrap gap-1">
           {mockProposal.methods.map((method) => (
-            <Chip key={method} label={method} size="small" sx={{ mr: 0.5, mb: 0.5 }} variant="outlined" />
+            <Chip key={method} variant="outline">
+              {method}
+            </Chip>
           ))}
-        </Box>
+        </div>
 
-        <Typography variant="subtitle2" gutterBottom>
+        <Typography variant="paragraph-small-bold" className="mb-2 block">
           Networks
         </Typography>
-        <Box sx={{ mb: 3 }}>
+        <div className="mb-6 flex flex-wrap gap-1">
           {mockProposal.chains.map((chain) => (
-            <Chip key={chain} label={chain} size="small" sx={{ mr: 0.5 }} />
+            <Chip key={chain}>{chain}</Chip>
           ))}
-        </Box>
+        </div>
 
-        <FormControlLabel
-          control={<Checkbox checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />}
-          label="I understand the risks of connecting"
-          sx={{ mb: 2 }}
-        />
+        <Field orientation="horizontal" className="mb-4">
+          <Checkbox id="risk-proposal" checked={accepted} onCheckedChange={(value) => setAccepted(value === true)} />
+          <FieldLabel htmlFor="risk-proposal">I understand the risks of connecting</FieldLabel>
+        </Field>
 
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button variant="outlined" fullWidth>
+        <div className="flex gap-4">
+          <Button variant="outline" className="w-full">
             Reject
           </Button>
-          <Button variant="contained" fullWidth disabled={!accepted}>
+          <Button className="w-full" disabled={!accepted}>
             Approve
           </Button>
-        </Box>
-      </Paper>
+        </div>
+      </div>
     )
   },
   parameters: {
@@ -542,27 +485,32 @@ export const ProposalForm: StoryObj = {
 // Session List
 export const SessionList: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 400 }}>
-      <Typography variant="h6" gutterBottom>
+    <div className="bg-background max-w-[400px] rounded-lg p-6">
+      <Typography variant="h4" className="mb-2">
         Active sessions
       </Typography>
 
       <List>
         {mockSessions.map((session) => (
-          <ListItem key={session.topic} sx={{ bgcolor: 'background.default', borderRadius: 1, mb: 1 }}>
-            <ListItemAvatar>
-              <Avatar src={session.icon}>{session.name[0]}</Avatar>
-            </ListItemAvatar>
+          <ListItem key={session.topic} className="bg-muted mb-2 gap-3 rounded-md p-2">
+            <Avatar size="default">
+              <AvatarImage src={session.icon} />
+              <AvatarFallback>{session.name[0]}</AvatarFallback>
+            </Avatar>
             <ListItemText primary={session.name} secondary={session.url} />
-            <ListItemSecondaryAction>
-              <IconButton edge="end" color="error" title="Disconnect">
-                <DeleteIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="ml-auto text-[var(--color-error-main)]"
+              title="Disconnect"
+              aria-label="Disconnect"
+            >
+              <Trash2 className="size-4" />
+            </Button>
           </ListItem>
         ))}
       </List>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -576,22 +524,26 @@ export const SessionList: StoryObj = {
 // Connection State - Connected
 export const ConnectionStateConnected: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 4, maxWidth: 400, textAlign: 'center' }}>
-      <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-      <Typography variant="h6" gutterBottom>
+    <div className="bg-background max-w-[400px] rounded-lg p-8 text-center">
+      <CircleCheck className="mx-auto mb-4 size-16 text-[var(--color-success-main)]" />
+      <Typography variant="h4" className="mb-2">
         Connected
       </Typography>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, my: 3 }}>
-        <Avatar>S</Avatar>
-        <LinkIcon color="success" />
-        <Avatar>{mockSessions[0].name[0]}</Avatar>
-      </Box>
+      <div className="my-6 flex items-center justify-center gap-4">
+        <Avatar>
+          <AvatarFallback>S</AvatarFallback>
+        </Avatar>
+        <Link2 className="size-5 text-[var(--color-success-main)]" />
+        <Avatar>
+          <AvatarFallback>{mockSessions[0].name[0]}</AvatarFallback>
+        </Avatar>
+      </div>
 
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="paragraph-small" color="muted">
         Your Safe is now connected to {mockSessions[0].name}
       </Typography>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -605,16 +557,16 @@ export const ConnectionStateConnected: StoryObj = {
 // Connection State - Disconnected
 export const ConnectionStateDisconnected: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 4, maxWidth: 400, textAlign: 'center' }}>
-      <LinkOffIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-      <Typography variant="h6" gutterBottom>
+    <div className="bg-background max-w-[400px] rounded-lg p-8 text-center">
+      <Link2Off className="mx-auto mb-4 size-16 text-muted-foreground" />
+      <Typography variant="h4" className="mb-2">
         Disconnected
       </Typography>
 
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="paragraph-small" color="muted">
         {mockSessions[0].name} has been disconnected from your Safe.
       </Typography>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -628,26 +580,26 @@ export const ConnectionStateDisconnected: StoryObj = {
 // Empty Sessions
 export const EmptySessions: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 400 }}>
+    <div className="bg-background max-w-[400px] rounded-lg p-6">
       <MockWcLogoHeader />
 
-      <TextField fullWidth placeholder="Paste pairing code or URI" sx={{ mb: 3 }} />
+      <Input placeholder="Paste pairing code or URI" className="mb-6" />
 
-      <Button variant="contained" fullWidth disabled sx={{ mb: 3 }}>
+      <Button className="mb-6 w-full" disabled>
         Connect
       </Button>
 
-      <Divider sx={{ my: 2 }} />
+      <Separator className="my-4" />
 
-      <Box sx={{ textAlign: 'center', py: 3 }}>
-        <Typography variant="body2" color="text.secondary">
+      <div className="py-6 text-center">
+        <Typography variant="paragraph-small" color="muted">
           No active sessions
         </Typography>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="paragraph-mini" color="muted">
           Connect to a dApp to get started
         </Typography>
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -661,19 +613,17 @@ export const EmptySessions: StoryObj = {
 // Error State
 export const ErrorState: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 400 }}>
+    <div className="bg-background max-w-[400px] rounded-lg p-6">
       <MockWcLogoHeader error="Connection failed" />
 
-      <Alert severity="error" sx={{ mb: 2 }}>
-        Failed to connect: Invalid pairing URI
+      <Alert variant="destructive" className="mb-4">
+        <AlertDescription>Failed to connect: Invalid pairing URI</AlertDescription>
       </Alert>
 
-      <TextField fullWidth placeholder="Paste pairing code or URI" error defaultValue="invalid-uri" sx={{ mb: 2 }} />
+      <Input placeholder="Paste pairing code or URI" aria-invalid defaultValue="invalid-uri" className="mb-4" />
 
-      <Button variant="contained" fullWidth>
-        Try again
-      </Button>
-    </Paper>
+      <Button className="w-full">Try again</Button>
+    </div>
   ),
   parameters: {
     docs: {
@@ -687,45 +637,43 @@ export const ErrorState: StoryObj = {
 // High Risk Proposal
 export const HighRiskProposal: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 450 }}>
-      <Typography variant="h6" gutterBottom>
+    <div className="bg-background max-w-[450px] rounded-lg p-6">
+      <Typography variant="h4" className="mb-2">
         Connection request
       </Typography>
 
-      <Alert severity="warning" icon={<WarningIcon />} sx={{ mb: 3 }}>
-        <Typography variant="body2" fontWeight="bold">
-          Proceed with caution
-        </Typography>
-        <Typography variant="body2">This dApp is not verified and may be malicious.</Typography>
+      <Alert variant="warning" className="mb-6">
+        <TriangleAlert className="size-4" />
+        <AlertTitle>Proceed with caution</AlertTitle>
+        <AlertDescription>This dApp is not verified and may be malicious.</AlertDescription>
       </Alert>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-        <Avatar sx={{ bgcolor: 'warning.main' }}>?</Avatar>
-        <Box>
-          <Typography variant="body1" fontWeight="bold">
-            Unknown dApp
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
+      <div className="mb-6 flex items-center gap-4">
+        <Avatar className="bg-[var(--color-warning-main)]">
+          <AvatarFallback className="bg-[var(--color-warning-main)]">?</AvatarFallback>
+        </Avatar>
+        <div>
+          <Typography variant="paragraph-bold">Unknown dApp</Typography>
+          <Typography variant="paragraph-mini" color="muted">
             https://suspicious-site.com
           </Typography>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <FormControlLabel
-        control={<Checkbox />}
-        label="I understand this dApp is not verified and accept the risks"
-        sx={{ mb: 2 }}
-      />
+      <Field orientation="horizontal" className="mb-4">
+        <Checkbox id="risk-high" />
+        <FieldLabel htmlFor="risk-high">I understand this dApp is not verified and accept the risks</FieldLabel>
+      </Field>
 
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <Button variant="contained" color="error" fullWidth>
+      <div className="flex gap-4">
+        <Button variant="destructive" className="w-full">
           Reject
         </Button>
-        <Button variant="outlined" fullWidth disabled>
+        <Button variant="outline" className="w-full" disabled>
           Approve
         </Button>
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -739,45 +687,47 @@ export const HighRiskProposal: StoryObj = {
 // Help Hints
 export const HelpHints: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 400 }}>
+    <div className="bg-background max-w-[400px] rounded-lg p-6">
       <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="body2">How to connect to a dApp</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Typography variant="body2" color="text.secondary">
-            1. Open a WalletConnect-compatible dApp
-            <br />
-            2. Click &quot;Connect Wallet&quot; and select WalletConnect
-            <br />
-            3. Copy the pairing code and paste it above
-          </Typography>
-        </AccordionDetails>
-      </Accordion>
+        <AccordionItem value="how-to">
+          <AccordionTrigger>
+            <Typography variant="paragraph-small">How to connect to a dApp</Typography>
+          </AccordionTrigger>
+          <AccordionContent>
+            <Typography variant="paragraph-small" color="muted">
+              1. Open a WalletConnect-compatible dApp
+              <br />
+              2. Click &quot;Connect Wallet&quot; and select WalletConnect
+              <br />
+              3. Copy the pairing code and paste it above
+            </Typography>
+          </AccordionContent>
+        </AccordionItem>
 
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="body2">What is WalletConnect?</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Typography variant="body2" color="text.secondary">
-            WalletConnect is an open protocol that allows you to connect your Safe to decentralized applications (dApps)
-            securely.
-          </Typography>
-        </AccordionDetails>
-      </Accordion>
+        <AccordionItem value="what-is">
+          <AccordionTrigger>
+            <Typography variant="paragraph-small">What is WalletConnect?</Typography>
+          </AccordionTrigger>
+          <AccordionContent>
+            <Typography variant="paragraph-small" color="muted">
+              WalletConnect is an open protocol that allows you to connect your Safe to decentralized applications
+              (dApps) securely.
+            </Typography>
+          </AccordionContent>
+        </AccordionItem>
 
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="body2">Is it safe?</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Typography variant="body2" color="text.secondary">
-            Always verify the dApp URL before approving a connection. Only connect to trusted applications.
-          </Typography>
-        </AccordionDetails>
+        <AccordionItem value="is-safe">
+          <AccordionTrigger>
+            <Typography variant="paragraph-small">Is it safe?</Typography>
+          </AccordionTrigger>
+          <AccordionContent>
+            <Typography variant="paragraph-small" color="muted">
+              Always verify the dApp URL before approving a connection. Only connect to trusted applications.
+            </Typography>
+          </AccordionContent>
+        </AccordionItem>
       </Accordion>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {

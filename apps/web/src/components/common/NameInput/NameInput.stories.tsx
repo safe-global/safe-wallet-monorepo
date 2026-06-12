@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box } from '@mui/material'
 import { useForm, FormProvider } from 'react-hook-form'
 import NameInput from './index'
 
@@ -21,11 +20,11 @@ const meta: Meta<typeof NameInput> = {
   },
   decorators: [
     (Story) => (
-      <Box sx={{ width: 300 }}>
+      <div className="w-[300px]">
         <FormWrapper>
           <Story />
         </FormWrapper>
-      </Box>
+      </div>
     ),
   ],
   tags: ['autodocs'],

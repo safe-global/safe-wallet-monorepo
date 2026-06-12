@@ -362,7 +362,7 @@ describe('TxSigners (Audit Log)', () => {
 
     render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
 
-    const copyButtons = screen.getAllByRole('button', { name: /click to copy address/i })
+    const copyButtons = screen.getAllByRole('button', { name: /^By / })
     fireEvent.click(copyButtons[0])
 
     await waitFor(() => {

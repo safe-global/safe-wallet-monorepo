@@ -52,6 +52,6 @@ export const WithCustomStyling: Story = {
   args: {
     href: 'https://etherscan.io',
     children: 'View on Etherscan',
-    sx: { color: 'secondary.main', fontWeight: 'bold' },
+    className: 'text-[var(--color-secondary-main)] font-bold',
   },
 }

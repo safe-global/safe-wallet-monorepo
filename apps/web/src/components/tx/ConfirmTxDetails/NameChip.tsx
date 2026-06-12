@@ -3,7 +3,8 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { useAddressName } from '@/components/common/NamedAddressInfo'
 import useAddressBook from '@/hooks/useAddressBook'
 import { isCustomTxInfo } from '@/utils/transaction-guards'
-import { Chip } from '@mui/material'
+import { Chip } from '@/components/ui/chip'
+import { cn } from '@/utils/cn'
 
 const NameChip = ({ txData, txInfo }: { txData?: TransactionData | null; txInfo?: TransactionDetails['txInfo'] }) => {
   const addressBook = useAddressBook()
@@ -24,15 +25,15 @@ const NameChip = ({ txData, txInfo }: { txData?: TransactionData | null; txInfo?
   return toAddress && (name || logo) ? (
     <Chip
       data-testid="name-chip"
-      sx={{
-        backgroundColor: isUntrusted ? 'error.background' : 'background.paper',
-        color: isUntrusted ? 'error.main' : undefined,
-        height: 'unset',
-      }}
-      label={
-        <EthHashInfo address={toAddress} name={name} customAvatar={logo} showAvatar={!!logo} avatarSize={20} onlyName />
-      }
-    ></Chip>
+      className={cn(
+        'h-auto',
+        isUntrusted
+          ? 'bg-[var(--color-error-background)] text-[var(--color-error-main)]'
+          : 'bg-[var(--color-background-paper)]',
+      )}
+    >
+      <EthHashInfo address={toAddress} name={name} customAvatar={logo} showAvatar={!!logo} avatarSize={20} onlyName />
+    </Chip>
   ) : null
 }
 

@@ -83,15 +83,14 @@ describe('SafeHeaderInfo', () => {
 
       const { container } = render(<SafeHeaderInfo />)
 
-      // Check that the shield icon is rendered
-      // The HypernativeTooltip wraps the SvgIcon in a span with display: flex
-      const tooltipSpans = Array.from(container.querySelectorAll('span')).filter((span) => {
-        const styles = window.getComputedStyle(span)
-        return styles.display === 'flex' && span.querySelector('[class*="MuiSvgIcon"]') !== null
-      })
+      // Check that the shield icon is rendered.
+      // The HypernativeTooltip renders a flex tooltip trigger that wraps the shield icon SVG.
+      const tooltipTriggers = Array.from(container.querySelectorAll('[data-slot="tooltip-trigger"].flex')).filter(
+        (trigger) => trigger.querySelector('.size-6') !== null,
+      )
 
-      // Should have at least one span with flex display containing the shield icon
-      expect(tooltipSpans.length).toBeGreaterThan(0)
+      // Should have at least one tooltip trigger wrapping the shield icon
+      expect(tooltipTriggers.length).toBeGreaterThan(0)
     })
 
     it('renders shield icon when isHypernativeGuard is true and name is undefined', () => {
@@ -108,13 +107,12 @@ describe('SafeHeaderInfo', () => {
 
       const { container } = render(<SafeHeaderInfo />)
 
-      const tooltipSpans = Array.from(container.querySelectorAll('span')).filter((span) => {
-        const styles = window.getComputedStyle(span)
-        return styles.display === 'flex' && span.querySelector('[class*="MuiSvgIcon"]') !== null
-      })
+      const tooltipTriggers = Array.from(container.querySelectorAll('[data-slot="tooltip-trigger"].flex')).filter(
+        (trigger) => trigger.querySelector('.size-6') !== null,
+      )
 
-      // Should have at least one span with flex display containing the shield icon
-      expect(tooltipSpans.length).toBeGreaterThan(0)
+      // Should have at least one tooltip trigger wrapping the shield icon
+      expect(tooltipTriggers.length).toBeGreaterThan(0)
     })
 
     it('does not render shield icon when isHypernativeGuard is false', () => {
@@ -132,13 +130,11 @@ describe('SafeHeaderInfo', () => {
       const { container } = render(<SafeHeaderInfo />)
 
       // When isHypernativeGuard is false, the shield icon should not be rendered
-      const tooltipSpans = Array.from(container.querySelectorAll('span')).filter((span) => {
-        const styles = window.getComputedStyle(span)
-        const hasSvgIcon = span.querySelector('[class*="MuiSvgIcon"]') !== null
-        return styles.display === 'flex' && hasSvgIcon
-      })
+      const tooltipTriggers = Array.from(container.querySelectorAll('[data-slot="tooltip-trigger"].flex')).filter(
+        (trigger) => trigger.querySelector('.size-6') !== null,
+      )
 
-      expect(tooltipSpans.length).toBe(0)
+      expect(tooltipTriggers.length).toBe(0)
     })
   })
 })

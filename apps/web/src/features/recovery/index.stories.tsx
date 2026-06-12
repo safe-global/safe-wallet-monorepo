@@ -1,27 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Chip,
-  Alert,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  LinearProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import WarningIcon from '@mui/icons-material/Warning'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
-import SecurityIcon from '@mui/icons-material/Security'
+import { TriangleAlert, CircleCheck, Clock, ShieldCheck } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Chip } from '@/components/ui/chip'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
+import { Progress, ProgressTrack, ProgressIndicator } from '@/components/ui/progress'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 /**
  * Recovery feature allows Safe owners to set up account recovery mechanisms.
@@ -74,23 +59,36 @@ const mockRecoveryQueue = [
 
 // Mock RecoveryType component
 const MockRecoveryType = ({ isMalicious }: { isMalicious: boolean }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-    {isMalicious ? <WarningIcon color="error" fontSize="small" /> : <SecurityIcon color="primary" fontSize="small" />}
-    <Typography variant="body2">{isMalicious ? 'Malicious Transaction' : 'Account Recovery'}</Typography>
-  </Box>
+  <div className="flex items-center gap-2">
+    {isMalicious ? (
+      <TriangleAlert className="size-4 text-[var(--color-error-main)]" />
+    ) : (
+      <ShieldCheck className="size-4 text-primary" />
+    )}
+    <Typography variant="paragraph-small">{isMalicious ? 'Malicious transaction' : 'Account recovery'}</Typography>
+  </div>
 )
 
-// Mock RecoveryStatus component
-const MockRecoveryStatus = ({ status }: { status: 'pending' | 'processing' | 'ready' | 'expired' }) => {
-  const statusConfig = {
-    pending: { label: 'Pending', color: 'warning' as const },
-    processing: { label: 'Processing', color: 'info' as const },
-    ready: { label: 'Ready to execute', color: 'success' as const },
-    expired: { label: 'Expired', color: 'error' as const },
-  }
-  const config = statusConfig[status]
-  return <Chip label={config.label} color={config.color} size="small" />
+const statusColorClass = {
+  pending: 'text-[var(--color-warning-main)]',
+  processing: 'text-[var(--color-info-main)]',
+  ready: 'text-[var(--color-success-main)]',
+  expired: 'text-[var(--color-error-main)]',
 }
+
+const statusLabel = {
+  pending: 'Pending',
+  processing: 'Processing',
+  ready: 'Ready to execute',
+  expired: 'Expired',
+}
+
+// Mock RecoveryStatus component
+const MockRecoveryStatus = ({ status }: { status: 'pending' | 'processing' | 'ready' | 'expired' }) => (
+  <Chip variant="outline" className={statusColorClass[status]}>
+    {statusLabel[status]}
+  </Chip>
+)
 
 // Docs-style wrapper for each state
 const StateWrapper = ({
@@ -102,254 +100,250 @@ const StateWrapper = ({
   description: string
   children: React.ReactNode
 }) => (
-  <Box sx={{ mb: 8 }}>
-    <Box sx={{ mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-      <Typography variant="h5">{stateName}</Typography>
-      <Typography variant="body2" color="text.secondary">
+  <div className="mb-16">
+    <div className="mb-4 border-b border-border pb-4">
+      <Typography variant="h3">{stateName}</Typography>
+      <Typography variant="paragraph-small" color="muted">
         {description}
       </Typography>
-    </Box>
-    <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>{children}</Box>
-  </Box>
+    </div>
+    <div className="bg-muted rounded-lg p-6">{children}</div>
+  </div>
 )
 
 // All States - Scrollable view of all Recovery states
 export const RecoveryAllStates: StoryObj = {
   render: () => (
-    <Box sx={{ maxWidth: 900 }}>
-      <Box sx={{ mb: 6, pb: 3, borderBottom: '2px solid', borderColor: 'primary.main' }}>
-        <Typography variant="h4">Recovery Feature States</Typography>
-        <Typography variant="body1" color="text.secondary">
+    <div className="max-w-[900px]">
+      <div className="mb-12 border-b-2 border-primary pb-6">
+        <Typography variant="h2">Recovery feature states</Typography>
+        <Typography variant="paragraph" color="muted">
           All possible states of the account recovery feature. Scroll to view each state.
         </Typography>
-      </Box>
+      </div>
 
       {/* State 1: No Recovery Configured */}
       <StateWrapper
-        stateName="No Recovery Configured"
+        stateName="No recovery configured"
         description="Initial state when no recovery mechanism is set up for the Safe."
       >
-        <Box sx={{ maxWidth: 700 }}>
-          <Typography variant="h4" gutterBottom>
-            Account Recovery
+        <div className="max-w-[700px]">
+          <Typography variant="h2" className="mb-2">
+            Account recovery
           </Typography>
-          <Alert severity="info" sx={{ mb: 3 }}>
-            <Typography variant="body2" fontWeight="bold">
-              No recovery setup
-            </Typography>
-            <Typography variant="body2">
+          <Alert className="mb-6">
+            <AlertTitle>No recovery setup</AlertTitle>
+            <AlertDescription>
               Set up account recovery to allow trusted addresses to recover your Safe if you lose access.
-            </Typography>
+            </AlertDescription>
           </Alert>
 
-          <Paper sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-              <SecurityIcon color="primary" sx={{ fontSize: 40 }} />
-              <Box>
-                <Typography variant="h6">Set up account recovery</Typography>
-                <Typography variant="body2" color="text.secondary">
+          <div className="bg-background rounded-lg p-6">
+            <div className="mb-6 flex items-center gap-4">
+              <ShieldCheck className="size-10 text-primary" />
+              <div>
+                <Typography variant="h4">Set up account recovery</Typography>
+                <Typography variant="paragraph-small" color="muted">
                   Add trusted addresses that can help recover your Safe
                 </Typography>
-              </Box>
-            </Box>
+              </div>
+            </div>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <CheckCircleIcon color="success" fontSize="small" />
-                <Typography variant="body2">Recoverers can initiate account recovery after a delay</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <CheckCircleIcon color="success" fontSize="small" />
-                <Typography variant="body2">Owners can cancel malicious recovery attempts</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <CheckCircleIcon color="success" fontSize="small" />
-                <Typography variant="body2">Configurable delay period for added security</Typography>
-              </Box>
-            </Box>
+            <div className="mb-6 flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <CircleCheck className="size-4 text-[var(--color-success-main)]" />
+                <Typography variant="paragraph-small">
+                  Recoverers can initiate account recovery after a delay
+                </Typography>
+              </div>
+              <div className="flex items-center gap-4">
+                <CircleCheck className="size-4 text-[var(--color-success-main)]" />
+                <Typography variant="paragraph-small">Owners can cancel malicious recovery attempts</Typography>
+              </div>
+              <div className="flex items-center gap-4">
+                <CircleCheck className="size-4 text-[var(--color-success-main)]" />
+                <Typography variant="paragraph-small">Configurable delay period for added security</Typography>
+              </div>
+            </div>
 
-            <Button variant="contained">Set up recovery</Button>
-          </Paper>
-        </Box>
+            <Button>Set up recovery</Button>
+          </div>
+        </div>
       </StateWrapper>
 
       {/* State 2: Recovery Configured */}
       <StateWrapper
-        stateName="Recovery Configured"
+        stateName="Recovery configured"
         description="Recovery is set up with trusted recoverers and delay period."
       >
-        <Box sx={{ maxWidth: 700 }}>
-          <Typography variant="h4" gutterBottom>
-            Account Recovery
+        <div className="max-w-[700px]">
+          <Typography variant="h2" className="mb-2">
+            Account recovery
           </Typography>
 
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Recovery Settings
+          <div className="bg-background mb-6 rounded-lg p-6">
+            <Typography variant="h4" className="mb-2">
+              Recovery settings
             </Typography>
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-              <Typography variant="body2" color="text.secondary">
+            <div className="mb-4 flex justify-between">
+              <Typography variant="paragraph-small" color="muted">
                 Delay period
               </Typography>
-              <Typography variant="body2" fontWeight="bold">
-                7 days
-              </Typography>
-            </Box>
+              <Typography variant="paragraph-small-bold">7 days</Typography>
+            </div>
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-              <Typography variant="body2" color="text.secondary">
+            <div className="mb-6 flex justify-between">
+              <Typography variant="paragraph-small" color="muted">
                 Expiration period
               </Typography>
-              <Typography variant="body2" fontWeight="bold">
-                14 days
-              </Typography>
-            </Box>
+              <Typography variant="paragraph-small-bold">14 days</Typography>
+            </div>
 
-            <Typography variant="subtitle2" gutterBottom>
+            <Typography variant="paragraph-small-bold" className="mb-2 block">
               Recoverers
             </Typography>
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Address</TableCell>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Address</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mockRecoverers.map((recoverer) => (
+                  <TableRow key={recoverer.address}>
+                    <TableCell>{recoverer.name}</TableCell>
+                    <TableCell className="font-mono">
+                      {recoverer.address.slice(0, 10)}...{recoverer.address.slice(-8)}
+                    </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {mockRecoverers.map((recoverer) => (
-                    <TableRow key={recoverer.address}>
-                      <TableCell>{recoverer.name}</TableCell>
-                      <TableCell sx={{ fontFamily: 'monospace' }}>
-                        {recoverer.address.slice(0, 10)}...{recoverer.address.slice(-8)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
-          <Button variant="outlined">Edit recovery settings</Button>
-        </Box>
+          <Button variant="outline">Edit recovery settings</Button>
+        </div>
       </StateWrapper>
 
       {/* State 3: Recovery In Progress */}
       <StateWrapper
-        stateName="Recovery In Progress"
+        stateName="Recovery in progress"
         description="A recovery transaction has been initiated and is waiting for the delay period."
       >
-        <Box sx={{ maxWidth: 700 }}>
-          <Typography variant="h4" gutterBottom>
-            Account Recovery
+        <div className="max-w-[700px]">
+          <Typography variant="h2" className="mb-2">
+            Account recovery
           </Typography>
 
-          <Alert severity="warning" sx={{ mb: 3 }}>
-            <Typography variant="body2" fontWeight="bold">
-              Recovery in progress
-            </Typography>
-            <Typography variant="body2">
+          <Alert variant="warning" className="mb-6">
+            <AlertTitle>Recovery in progress</AlertTitle>
+            <AlertDescription>
               A recovery transaction has been initiated. If this was not you, cancel it immediately.
-            </Typography>
+            </AlertDescription>
           </Alert>
 
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Pending Recovery
+          <div className="bg-background rounded-lg p-6">
+            <Typography variant="h4" className="mb-2">
+              Pending recovery
             </Typography>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-              <AccessTimeIcon color="warning" />
-              <Box>
-                <Typography variant="body2" color="text.secondary">
+            <div className="mb-6 flex items-center gap-4">
+              <Clock className="size-6 text-[var(--color-warning-main)]" />
+              <div>
+                <Typography variant="paragraph-small" color="muted">
                   Can be executed in
                 </Typography>
-                <Typography variant="h6">2 days, 4 hours</Typography>
-              </Box>
-            </Box>
+                <Typography variant="h4">2 days, 4 hours</Typography>
+              </div>
+            </div>
 
-            <LinearProgress variant="determinate" value={30} sx={{ mb: 3 }} />
+            <Progress value={30} className="mb-6">
+              <ProgressTrack>
+                <ProgressIndicator />
+              </ProgressTrack>
+            </Progress>
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button variant="contained" color="error">
-                Cancel recovery
-              </Button>
-              <Button variant="outlined">View details</Button>
-            </Box>
-          </Paper>
-        </Box>
+            <div className="flex gap-4">
+              <Button variant="destructive">Cancel recovery</Button>
+              <Button variant="outline">View details</Button>
+            </div>
+          </div>
+        </div>
       </StateWrapper>
 
       {/* State 4: Recovery Queue */}
-      <StateWrapper stateName="Recovery Queue" description="List of all recovery transactions with their statuses.">
-        <Box sx={{ maxWidth: 700 }}>
-          <Typography variant="h6" gutterBottom>
-            Recovery Queue
+      <StateWrapper stateName="Recovery queue" description="List of all recovery transactions with their statuses.">
+        <div className="max-w-[700px]">
+          <Typography variant="h4" className="mb-2">
+            Recovery queue
           </Typography>
-          <Accordion defaultExpanded>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-                <MockRecoveryType isMalicious={false} />
-                <Box sx={{ flex: 1 }} />
-                <MockRecoveryStatus status="pending" />
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Initiated by
-                  </Typography>
-                  <Typography variant="body2" fontFamily="monospace">
-                    0x1234...5678
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Valid from
-                  </Typography>
-                  <Typography variant="body2">In 2 days</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Expires
-                  </Typography>
-                  <Typography variant="body2">In 7 days</Typography>
-                </Box>
-              </Box>
-            </AccordionDetails>
+          <Accordion defaultValue={['item-1']}>
+            <AccordionItem value="item-1">
+              <AccordionTrigger>
+                <div className="flex w-full items-center gap-4">
+                  <MockRecoveryType isMalicious={false} />
+                  <div className="flex-1" />
+                  <MockRecoveryStatus status="pending" />
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between">
+                    <Typography variant="paragraph-small" color="muted">
+                      Initiated by
+                    </Typography>
+                    <Typography variant="paragraph-small" className="font-mono">
+                      0x1234...5678
+                    </Typography>
+                  </div>
+                  <div className="flex justify-between">
+                    <Typography variant="paragraph-small" color="muted">
+                      Valid from
+                    </Typography>
+                    <Typography variant="paragraph-small">In 2 days</Typography>
+                  </div>
+                  <div className="flex justify-between">
+                    <Typography variant="paragraph-small" color="muted">
+                      Expires
+                    </Typography>
+                    <Typography variant="paragraph-small">In 7 days</Typography>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
-        </Box>
+        </div>
       </StateWrapper>
 
       {/* State 5: Status Variants */}
-      <StateWrapper stateName="Status Variants" description="All possible status indicators for recovery transactions.">
-        <Paper sx={{ p: 3, maxWidth: 400 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            Recovery Status Indicators
+      <StateWrapper stateName="Status variants" description="All possible status indicators for recovery transactions.">
+        <div className="bg-background max-w-[400px] rounded-lg p-6">
+          <Typography variant="paragraph-small-bold" className="mb-2 block">
+            Recovery status indicators
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Typography variant="body2">Waiting for delay period</Typography>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <Typography variant="paragraph-small">Waiting for delay period</Typography>
               <MockRecoveryStatus status="pending" />
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Typography variant="body2">Being processed</Typography>
+            </div>
+            <div className="flex items-center justify-between">
+              <Typography variant="paragraph-small">Being processed</Typography>
               <MockRecoveryStatus status="processing" />
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Typography variant="body2">Can be executed</Typography>
+            </div>
+            <div className="flex items-center justify-between">
+              <Typography variant="paragraph-small">Can be executed</Typography>
               <MockRecoveryStatus status="ready" />
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Typography variant="body2">Expired</Typography>
+            </div>
+            <div className="flex items-center justify-between">
+              <Typography variant="paragraph-small">Expired</Typography>
               <MockRecoveryStatus status="expired" />
-            </Box>
-          </Box>
-        </Paper>
+            </div>
+          </div>
+        </div>
       </StateWrapper>
-    </Box>
+    </div>
   ),
   parameters: {
     docs: {
@@ -363,97 +357,93 @@ export const RecoveryAllStates: StoryObj = {
 // Individual state: Full Recovery Settings Page
 export const FullRecoveryPage: StoryObj = {
   render: () => (
-    <Box sx={{ maxWidth: 900 }}>
-      <Typography variant="h4" gutterBottom>
-        Account Recovery
+    <div className="max-w-[900px]">
+      <Typography variant="h2" className="mb-2">
+        Account recovery
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-6">
         Set up recovery options to regain access to your Safe if you lose your owner keys.
       </Typography>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Recovery Settings
+      <div className="bg-background mb-6 rounded-lg p-6">
+        <Typography variant="h4" className="mb-2">
+          Recovery settings
         </Typography>
 
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Recoverer</TableCell>
-                <TableCell>Address</TableCell>
-                <TableCell align="right">Actions</TableCell>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Recoverer</TableHead>
+              <TableHead>Address</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {mockRecoverers.map((recoverer) => (
+              <TableRow key={recoverer.address}>
+                <TableCell>{recoverer.name}</TableCell>
+                <TableCell>
+                  <Typography variant="paragraph-small" className="font-mono">
+                    {recoverer.address.slice(0, 10)}...{recoverer.address.slice(-8)}
+                  </Typography>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button size="sm" variant="ghost" className="text-[var(--color-error-main)]">
+                    Remove
+                  </Button>
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {mockRecoverers.map((recoverer) => (
-                <TableRow key={recoverer.address}>
-                  <TableCell>{recoverer.name}</TableCell>
-                  <TableCell>
-                    <Typography variant="body2" fontFamily="monospace">
-                      {recoverer.address.slice(0, 10)}...{recoverer.address.slice(-8)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Button size="small" color="error">
-                      Remove
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            ))}
+          </TableBody>
+        </Table>
 
-        <Box sx={{ mt: 2, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
-          <Typography variant="body2" color="text.secondary">
+        <div className="bg-muted mt-4 rounded-md p-4">
+          <Typography variant="paragraph-small" color="muted">
             Recovery delay: <strong>2 days</strong>
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="paragraph-small" color="muted">
             Expiry period: <strong>7 days</strong>
           </Typography>
-        </Box>
+        </div>
 
-        <Button variant="contained" sx={{ mt: 2 }}>
-          Add Recoverer
-        </Button>
-      </Paper>
+        <Button className="mt-4">Add recoverer</Button>
+      </div>
 
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Recovery Queue
+      <div className="bg-background rounded-lg p-6">
+        <Typography variant="h4" className="mb-2">
+          Recovery queue
         </Typography>
-        {mockRecoveryQueue.map((item) => (
-          <Accordion key={item.id} sx={{ mb: 1 }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-                <MockRecoveryType isMalicious={item.isMalicious} />
-                <Box sx={{ flex: 1 }} />
-                <MockRecoveryStatus status={item.status as 'pending' | 'expired'} />
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Typography variant="body2" color="text.secondary">
-                Executor: {item.executor.slice(0, 10)}...{item.executor.slice(-8)}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Valid from: {new Date(item.validFrom).toLocaleDateString()}
-              </Typography>
-              {!item.isMalicious && item.status === 'pending' && (
-                <Box sx={{ mt: 2 }}>
-                  <Button variant="contained" size="small" sx={{ mr: 1 }}>
-                    Execute
-                  </Button>
-                  <Button variant="outlined" color="error" size="small">
-                    Cancel
-                  </Button>
-                </Box>
-              )}
-            </AccordionDetails>
-          </Accordion>
-        ))}
-      </Paper>
-    </Box>
+        <Accordion>
+          {mockRecoveryQueue.map((item) => (
+            <AccordionItem key={item.id} value={item.id}>
+              <AccordionTrigger>
+                <div className="flex w-full items-center gap-4">
+                  <MockRecoveryType isMalicious={item.isMalicious} />
+                  <div className="flex-1" />
+                  <MockRecoveryStatus status={item.status as 'pending' | 'expired'} />
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <Typography variant="paragraph-small" color="muted">
+                  Executor: {item.executor.slice(0, 10)}...{item.executor.slice(-8)}
+                </Typography>
+                <Typography variant="paragraph-small" color="muted">
+                  Valid from: {new Date(item.validFrom).toLocaleDateString()}
+                </Typography>
+                {!item.isMalicious && item.status === 'pending' && (
+                  <div className="mt-4 flex gap-2">
+                    <Button size="sm">Execute</Button>
+                    <Button variant="outline" size="sm" className="text-[var(--color-error-main)]">
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -467,17 +457,17 @@ export const FullRecoveryPage: StoryObj = {
 // Recovery not configured
 export const NoRecoveryConfigured: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 4, maxWidth: 600, textAlign: 'center' }}>
-      <SecurityIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-      <Typography variant="h6" gutterBottom>
+    <div className="bg-background max-w-[600px] rounded-lg p-8 text-center">
+      <ShieldCheck className="mx-auto mb-4 size-16 text-muted-foreground" />
+      <Typography variant="h4" className="mb-2">
         Recovery not set up
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-6">
         Account recovery allows you to regain access to your Safe if you lose your owner keys. Set up recovery to
         protect your assets.
       </Typography>
-      <Button variant="contained">Set up recovery</Button>
-    </Paper>
+      <Button>Set up recovery</Button>
+    </div>
   ),
   parameters: {
     docs: {
@@ -491,40 +481,40 @@ export const NoRecoveryConfigured: StoryObj = {
 // Active recovery in progress
 export const RecoveryInProgress: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 600 }}>
-      <Alert severity="warning" sx={{ mb: 2 }}>
-        <Typography variant="body2" fontWeight="bold">
-          Recovery in progress
-        </Typography>
+    <div className="bg-background max-w-[600px] rounded-lg p-6">
+      <Alert variant="warning" className="mb-4">
+        <AlertTitle>Recovery in progress</AlertTitle>
       </Alert>
 
-      <Box sx={{ mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="body2">Time remaining</Typography>
-          <Typography variant="body2" fontWeight="bold">
-            1 day 14 hours
-          </Typography>
-        </Box>
-        <LinearProgress variant="determinate" value={30} sx={{ height: 8, borderRadius: 1 }} />
-      </Box>
+      <div className="mb-6">
+        <div className="mb-2 flex justify-between">
+          <Typography variant="paragraph-small">Time remaining</Typography>
+          <Typography variant="paragraph-small-bold">1 day 14 hours</Typography>
+        </div>
+        <Progress value={30}>
+          <ProgressTrack className="h-2">
+            <ProgressIndicator />
+          </ProgressTrack>
+        </Progress>
+      </div>
 
-      <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1, mb: 2 }}>
-        <Typography variant="body2" color="text.secondary">
+      <div className="bg-muted mb-4 rounded-md p-4">
+        <Typography variant="paragraph-small" color="muted">
           Initiated by
         </Typography>
-        <Typography variant="body2" fontFamily="monospace">
+        <Typography variant="paragraph-small" className="font-mono">
           0x1234...5678
         </Typography>
-      </Box>
+      </div>
 
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-4">
         If you did not initiate this recovery, cancel it immediately to protect your Safe.
       </Typography>
 
-      <Button variant="contained" color="error" fullWidth>
-        Cancel Recovery
+      <Button variant="destructive" className="w-full">
+        Cancel recovery
       </Button>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -538,29 +528,29 @@ export const RecoveryInProgress: StoryObj = {
 // Recovery status chips
 export const RecoveryStatusVariants: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 400 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Recovery Status Variants
+    <div className="bg-background max-w-[400px] rounded-lg p-6">
+      <Typography variant="paragraph-small-bold" className="mb-2 block">
+        Recovery status variants
       </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="body2">Pending (delay period)</Typography>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <Typography variant="paragraph-small">Pending (delay period)</Typography>
           <MockRecoveryStatus status="pending" />
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="body2">Processing</Typography>
+        </div>
+        <div className="flex items-center justify-between">
+          <Typography variant="paragraph-small">Processing</Typography>
           <MockRecoveryStatus status="processing" />
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="body2">Ready to execute</Typography>
+        </div>
+        <div className="flex items-center justify-between">
+          <Typography variant="paragraph-small">Ready to execute</Typography>
           <MockRecoveryStatus status="ready" />
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="body2">Expired</Typography>
+        </div>
+        <div className="flex items-center justify-between">
+          <Typography variant="paragraph-small">Expired</Typography>
           <MockRecoveryStatus status="expired" />
-        </Box>
-      </Box>
-    </Paper>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -574,25 +564,25 @@ export const RecoveryStatusVariants: StoryObj = {
 // Recovery type indicators
 export const RecoveryTypeIndicators: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 400 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Recovery Type Indicators
+    <div className="bg-background max-w-[400px] rounded-lg p-6">
+      <Typography variant="paragraph-small-bold" className="mb-2 block">
+        Recovery type indicators
       </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Box sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+      <div className="flex flex-col gap-4">
+        <div className="rounded-md border border-border p-4">
           <MockRecoveryType isMalicious={false} />
-          <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
+          <Typography variant="paragraph-mini" color="muted" className="mt-2 block">
             Legitimate recovery attempt by authorized recoverer
           </Typography>
-        </Box>
-        <Box sx={{ p: 2, border: 1, borderColor: 'error.main', borderRadius: 1, bgcolor: 'error.light' }}>
+        </div>
+        <div className="bg-[var(--color-error-background)] rounded-md border border-[var(--color-error-main)] p-4">
           <MockRecoveryType isMalicious={true} />
-          <Typography variant="caption" color="error.main" display="block" sx={{ mt: 1 }}>
+          <Typography variant="paragraph-mini" className="mt-2 block text-[var(--color-error-main)]">
             Potentially malicious - review carefully before proceeding
           </Typography>
-        </Box>
-      </Box>
-    </Paper>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -606,49 +596,49 @@ export const RecoveryTypeIndicators: StoryObj = {
 // Recovery list item
 export const RecoveryListItem: StoryObj = {
   render: () => (
-    <Paper sx={{ maxWidth: 600 }}>
-      <Accordion defaultExpanded>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-            <MockRecoveryType isMalicious={false} />
-            <Box sx={{ flex: 1 }} />
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <AccessTimeIcon fontSize="small" color="action" />
-              <Typography variant="caption">2 days left</Typography>
-            </Box>
-            <MockRecoveryStatus status="pending" />
-          </Box>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Box>
-              <Typography variant="caption" color="text.secondary">
-                Executor
-              </Typography>
-              <Typography variant="body2" fontFamily="monospace">
-                0x1234567890123456789012345678901234567890
-              </Typography>
-            </Box>
-            <Box>
-              <Typography variant="caption" color="text.secondary">
-                Transaction Hash
-              </Typography>
-              <Typography variant="body2" fontFamily="monospace">
-                0xabcd...ef01
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button variant="contained" size="small">
-                Execute
-              </Button>
-              <Button variant="outlined" color="error" size="small">
-                Cancel
-              </Button>
-            </Box>
-          </Box>
-        </AccordionDetails>
+    <div className="bg-background max-w-[600px] rounded-lg">
+      <Accordion defaultValue={['item-1']}>
+        <AccordionItem value="item-1">
+          <AccordionTrigger>
+            <div className="flex w-full items-center gap-4">
+              <MockRecoveryType isMalicious={false} />
+              <div className="flex-1" />
+              <div className="flex items-center gap-2">
+                <Clock className="size-4 text-muted-foreground" />
+                <Typography variant="paragraph-mini">2 days left</Typography>
+              </div>
+              <MockRecoveryStatus status="pending" />
+            </div>
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className="flex flex-col gap-4">
+              <div>
+                <Typography variant="paragraph-mini" color="muted">
+                  Executor
+                </Typography>
+                <Typography variant="paragraph-small" className="font-mono">
+                  0x1234567890123456789012345678901234567890
+                </Typography>
+              </div>
+              <div>
+                <Typography variant="paragraph-mini" color="muted">
+                  Transaction hash
+                </Typography>
+                <Typography variant="paragraph-small" className="font-mono">
+                  0xabcd...ef01
+                </Typography>
+              </div>
+              <div className="flex gap-4">
+                <Button size="sm">Execute</Button>
+                <Button variant="outline" size="sm" className="text-[var(--color-error-main)]">
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
       </Accordion>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -662,43 +652,37 @@ export const RecoveryListItem: StoryObj = {
 // Recovery settings card
 export const RecoverySettingsCard: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-        <CheckCircleIcon color="success" />
-        <Typography variant="h6">Recovery Enabled</Typography>
-      </Box>
+    <div className="bg-background max-w-[500px] rounded-lg p-6">
+      <div className="mb-4 flex items-center gap-4">
+        <CircleCheck className="size-6 text-[var(--color-success-main)]" />
+        <Typography variant="h4">Recovery enabled</Typography>
+      </div>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="body2" color="text.secondary">
+      <div className="flex flex-col gap-4">
+        <div className="flex justify-between">
+          <Typography variant="paragraph-small" color="muted">
             Recoverers
           </Typography>
-          <Typography variant="body2" fontWeight="bold">
-            2
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="paragraph-small-bold">2</Typography>
+        </div>
+        <div className="flex justify-between">
+          <Typography variant="paragraph-small" color="muted">
             Delay period
           </Typography>
-          <Typography variant="body2" fontWeight="bold">
-            2 days
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="paragraph-small-bold">2 days</Typography>
+        </div>
+        <div className="flex justify-between">
+          <Typography variant="paragraph-small" color="muted">
             Expiry period
           </Typography>
-          <Typography variant="body2" fontWeight="bold">
-            7 days
-          </Typography>
-        </Box>
-      </Box>
+          <Typography variant="paragraph-small-bold">7 days</Typography>
+        </div>
+      </div>
 
-      <Button variant="outlined" fullWidth sx={{ mt: 3 }}>
-        Edit Recovery Settings
+      <Button variant="outline" className="mt-6 w-full">
+        Edit recovery settings
       </Button>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {

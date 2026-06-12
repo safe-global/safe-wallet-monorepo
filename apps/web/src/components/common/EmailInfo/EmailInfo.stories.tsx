@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box, Stack } from '@mui/material'
 import EmailInfo from './index'
 
 const meta: Meta<typeof EmailInfo> = {
@@ -31,9 +30,9 @@ export const LongEmailTruncated: Story = {
     email: 'a-very-long-address-that-will-not-fit@some-very-long-domain.example.com',
   },
   render: (args) => (
-    <Box width={240}>
+    <div className="w-[240px]">
       <EmailInfo {...args} />
-    </Box>
+    </div>
   ),
 }
 
@@ -49,12 +48,12 @@ export const AllSizes: Story = {
     email: 'alice@example.com',
   },
   render: ({ email }) => (
-    <Stack spacing={2} alignItems="flex-start">
+    <div className="flex flex-col items-start gap-4">
       <EmailInfo email={email} size="xsmall" />
       <EmailInfo email={email} size="small" />
       <EmailInfo email={email} size="medium" />
       <EmailInfo email={email} size="large" />
-    </Stack>
+    </div>
   ),
 }
 
@@ -63,9 +62,9 @@ export const EmptyEmail: Story = {
     email: '',
   },
   render: (args) => (
-    <Box width={240}>
+    <div className="w-[240px]">
       <EmailInfo {...args} />
-    </Box>
+    </div>
   ),
 }
 
@@ -74,8 +73,8 @@ export const WhitespaceOnly: Story = {
     email: '   ',
   },
   render: (args) => (
-    <Box width={240}>
+    <div className="w-[240px]">
       <EmailInfo {...args} />
-    </Box>
+    </div>
   ),
 }

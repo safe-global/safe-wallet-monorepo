@@ -1,5 +1,5 @@
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import { Stack, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
@@ -11,17 +11,17 @@ const MemberName = ({ member }: { member: MemberDto }) => {
   const isCurrentUser = member.user.id === user?.id
 
   return (
-    <Stack direction="row" spacing={1} alignItems="center" key={member.id}>
+    <div className="flex flex-row items-center gap-2" key={member.id}>
       <InitialsAvatar size="medium" name={member.name || ''} rounded />
-      <Typography variant="body2">
+      <Typography variant="paragraph-small">
         {member.name}{' '}
         {isCurrentUser && (
-          <Typography variant="body2" component="span" color="text.secondary" ml={1}>
+          <Typography variant="paragraph-small" color="muted" className="ml-2">
             You
           </Typography>
         )}
       </Typography>
-    </Stack>
+    </div>
   )
 }
 

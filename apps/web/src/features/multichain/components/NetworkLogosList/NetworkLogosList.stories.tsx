@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import NetworkLogosList from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
@@ -11,9 +10,9 @@ const meta = {
   decorators: [
     (Story) => (
       <StoreDecorator initialState={{}}>
-        <Paper sx={{ padding: 2 }}>
+        <div className="rounded-lg bg-card p-4">
           <Story />
-        </Paper>
+        </div>
       </StoreDecorator>
     ),
   ],

@@ -9,7 +9,10 @@ import { OVERVIEW_EVENTS, trackEvent, WALLET_EVENTS, MixpanelEventParams } from 
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import madProps from '@/utils/mad-props'
 import React, { type ReactElement, type SyntheticEvent, useContext, useState } from 'react'
-import { CircularProgress, Box, Button, CardActions, Divider, Alert } from '@mui/material'
+import { Spinner } from '@/components/ui/spinner'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Alert } from '@/components/ui/alert'
 import classNames from 'classnames'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -112,7 +115,7 @@ export const CounterfactualForm = ({
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <Alert severity="info" sx={{ mb: 2, border: 0 }}>
+        <Alert className="mb-4 border-0">
           Executing this transaction will activate your account.
           <br />
           <ul style={{ margin: 0, padding: '4px 16px 0' }}>
@@ -163,23 +166,23 @@ export const CounterfactualForm = ({
         )}
 
         {submitError && (
-          <Box mt={1}>
+          <div className="mt-2">
             <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
-          </Box>
+          </div>
         )}
 
-        <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
+        <Separator className={classNames(commonCss.nestedDivider, 'mt-6')} />
 
-        <CardActions>
+        <div className="flex items-center p-2">
           {/* Submit button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
             {(isOk) => (
-              <Button variant="contained" type="submit" disabled={!isOk || submitDisabled} sx={{ minWidth: '112px' }}>
-                {!isSubmittable ? <CircularProgress size={20} /> : 'Execute'}
+              <Button type="submit" disabled={!isOk || submitDisabled} className="min-w-[112px]">
+                {!isSubmittable ? <Spinner className="size-5" /> : 'Execute'}
               </Button>
             )}
           </CheckWallet>
-        </CardActions>
+        </div>
       </form>
     </>
   )

@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
-import { Button, DialogActions, DialogContent, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { DialogFooter } from '@/components/ui/dialog'
+import { Typography } from '@/components/ui/typography'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import ModalDialog from './index'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
@@ -53,13 +55,13 @@ export const Default: Story = {
     onClose: fn(),
     children: (
       <>
-        <DialogContent>
+        <div className="p-6">
           <Typography>Are you sure you want to proceed with this transaction?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined">Cancel</Button>
-          <Button variant="contained">Confirm</Button>
-        </DialogActions>
+        </div>
+        <DialogFooter className="p-6 pt-0 sm:flex-row sm:justify-end">
+          <Button variant="outline">Cancel</Button>
+          <Button>Confirm</Button>
+        </DialogFooter>
       </>
     ),
   },
@@ -72,9 +74,9 @@ export const WithoutChainIndicator: Story = {
     hideChainIndicator: true,
     onClose: fn(),
     children: (
-      <DialogContent>
+      <div className="p-6">
         <Typography>Modal without chain indicator.</Typography>
-      </DialogContent>
+      </div>
     ),
   },
 }

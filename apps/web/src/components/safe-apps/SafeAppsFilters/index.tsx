@@ -1,27 +1,18 @@
-import Grid from '@mui/material/Grid'
-import TextField from '@mui/material/TextField'
-import InputAdornment from '@mui/material/InputAdornment'
-import SvgIcon from '@mui/material/SvgIcon'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import OutlinedInput from '@mui/material/OutlinedInput'
-import ListItemText from '@mui/material/ListItemText'
-import Select from '@mui/material/Select'
-import IconButton from '@mui/material/IconButton'
-import Box from '@mui/material/Box'
-import Checkbox from '@mui/material/Checkbox'
-import FormLabel from '@mui/material/FormLabel'
-import FormControl from '@mui/material/FormControl'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Tooltip from '@mui/material/Tooltip'
-import CloseIcon from '@mui/icons-material/Close'
-import type { SelectChangeEvent } from '@mui/material/Select'
+import { X } from 'lucide-react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
+import SearchField from '@/components/common/SearchField'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Field, FieldLabel } from '@/components/ui/field'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getUniqueTags } from '@/components/safe-apps/utils'
-import SearchIcon from '@/public/images/common/search.svg'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
 import css from './styles.module.css'
+
+const filterFieldClassName = `${css.fieldControl} focus-visible:ring-1 focus-visible:ring-ring`
 
 export type safeAppCatogoryOptionType = {
   label: string
@@ -46,149 +37,100 @@ const SafeAppsFilters = ({
   const categoryOptions = getCategoryOptions(safeAppsList)
 
   return (
-    <Grid container spacing={2} className={css.filterContainer}>
-      <Grid item xs={12} sm={12} md={6} lg={6}>
-        {/* Search by name */}
-        <TextField
+    <div className={`grid grid-cols-12 items-end gap-4 ${css.filterContainer}`}>
+      <div className="col-span-12 md:col-span-6">
+        <Label htmlFor="search-by-name" className="mb-1.5">
+          Search
+        </Label>
+        <SearchField
           id="search-by-name"
           placeholder="Search by name or category"
           aria-label="Search Safe App by name"
-          variant="filled"
-          hiddenLabel
+          autoComplete="off"
           onChange={(e) => {
             onChangeQuery(e.target.value)
           }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SvgIcon component={SearchIcon} inheritViewBox color="border" />
-              </InputAdornment>
-            ),
-            disableUnderline: true,
-          }}
-          fullWidth
-          size="small"
-          sx={{
-            '& > .MuiInputBase-root': { padding: '8px 16px' },
-          }}
         />
-      </Grid>
+      </div>
 
       {/* Select Category */}
-      <Grid item xs={12} sm={6} md={3} lg={3}>
-        <FormControl fullWidth>
-          <InputLabel id="select-safe-app-category-label" shrink>
-            Category
-          </InputLabel>
-          <Select
-            labelId="select-safe-app-category-label"
-            id="safe-app-category-selector"
-            displayEmpty
-            multiple
-            value={selectedCategories}
-            onChange={(event: SelectChangeEvent<string[]>) => {
-              onChangeFilterCategory(event.target.value as string[])
-            }}
-            input={<OutlinedInput label="Category" fullWidth notched sx={{ paddingRight: '18px' }} />}
-            renderValue={(selected) =>
-              selected.length === 0 ? 'Select category' : `${selected.length} categories selected`
-            }
-            fullWidth
-            MenuProps={categoryMenuProps}
-          >
+      <div className="relative col-span-12 sm:col-span-6 md:col-span-3">
+        <Label htmlFor="safe-app-category-selector" className="mb-1.5">
+          Category
+        </Label>
+        <Select
+          multiple
+          value={selectedCategories}
+          onValueChange={(value) => {
+            onChangeFilterCategory(value as string[])
+          }}
+        >
+          <SelectTrigger id="safe-app-category-selector" className={`w-full pr-[18px] ${filterFieldClassName}`}>
+            <SelectValue className={selectedCategories.length === 0 ? css.selectPlaceholder : undefined}>
+              {selectedCategories.length === 0 ? 'Select category' : `${selectedCategories.length} categories selected`}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
             {categoryOptions.length > 0 ? (
               categoryOptions.map((category) => (
-                <MenuItem
-                  sx={{ padding: '0 6px 2px 6px', height: CATEGORY_OPTION_HEIGHT }}
-                  key={category.value}
-                  value={category.value}
-                  disableGutters
-                >
-                  <Checkbox
-                    disableRipple
-                    sx={{ '& .MuiSvgIcon-root': { fontSize: 24 }, padding: '3px' }}
-                    checked={selectedCategories.includes(category.value)}
-                  />
-                  <ListItemText
-                    primary={category.label}
-                    primaryTypographyProps={{ fontSize: 14, paddingLeft: '5px' }}
-                  />
-                </MenuItem>
+                <SelectItem key={category.value} value={category.value} className="text-sm">
+                  <Checkbox checked={selectedCategories.includes(category.value)} className="pointer-events-none" />
+                  {category.label}
+                </SelectItem>
               ))
             ) : (
-              <MenuItem disabled sx={{ padding: '0 6px 2px 6px', height: CATEGORY_OPTION_HEIGHT }} disableGutters>
-                <ListItemText
-                  primary="No categories defined"
-                  primaryTypographyProps={{ fontSize: 14, paddingLeft: '5px' }}
-                />
-              </MenuItem>
+              <SelectItem value="" disabled className="text-sm">
+                No categories defined
+              </SelectItem>
             )}
-          </Select>
+          </SelectContent>
+        </Select>
 
-          {/* clear selected categories button */}
-          {selectedCategories.length > 0 && (
-            <Tooltip title="clear selected categories" placement="top">
-              <IconButton
-                onClick={() => {
-                  onChangeFilterCategory([])
-                }}
-                sx={{ position: 'absolute', top: '16px', right: '28px' }}
-                color="default"
-                component="label"
-                size="small"
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-        </FormControl>
-      </Grid>
+        {/* clear selected categories button */}
+        {selectedCategories.length > 0 && (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="clear selected categories"
+                  onClick={() => {
+                    onChangeFilterCategory([])
+                  }}
+                  className="absolute top-[28px] right-[28px]"
+                />
+              }
+            >
+              <X className="size-4" />
+            </TooltipTrigger>
+            <TooltipContent>clear selected categories</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
 
       {/* Optimized with Batch Transaction */}
-      <Grid item xs={12} sm={6} md={3} lg={3}>
-        <Tooltip
-          title={
-            <div style={{ textAlign: 'center' }}>
-              Merge multiple transactions into one to save time and gas fees inside apps offering this feature
-            </div>
-          }
-        >
-          <FormControl variant="standard">
-            <FormLabel className={css.optimizedWithBatchLabel}>Optimized with</FormLabel>
-            <FormControlLabel
-              control={<Checkbox />}
-              onChange={(_, value) => {
-                onChangeOptimizedWithBatch(value)
-              }}
-              label={
-                <Box display="flex" alignItems="center" gap={1}>
-                  <span>Batch transactions</span> <BatchIcon />
-                </Box>
-              }
-            />
-          </FormControl>
+      <div className="col-span-12 sm:col-span-6 md:col-span-3">
+        <Tooltip>
+          <TooltipTrigger render={<div className="inline-block" />}>
+            <Label className={`${css.optimizedWithBatchLabel} mb-1.5`}>Optimized with</Label>
+            <Field orientation="horizontal">
+              <Checkbox id="optimized-with-batch" onCheckedChange={(value) => onChangeOptimizedWithBatch(value)} />
+              <FieldLabel htmlFor="optimized-with-batch" className="flex items-center gap-2 font-normal">
+                <span>Batch transactions</span> <BatchIcon />
+              </FieldLabel>
+            </Field>
+          </TooltipTrigger>
+          <TooltipContent className="text-center">
+            Merge multiple transactions into one to save time and gas fees inside apps offering this feature
+          </TooltipContent>
         </Tooltip>
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   )
 }
 
 export default SafeAppsFilters
-
-const CATEGORY_OPTION_HEIGHT = 34
-const CATEGORY_OPTION_PADDING_TOP = 8
-const ITEMS_SHOWED = 11.5
-const categoryMenuProps = {
-  sx: {
-    '& .MuiList-root': { padding: '9px 0' },
-  },
-  PaperProps: {
-    style: {
-      maxHeight: CATEGORY_OPTION_HEIGHT * ITEMS_SHOWED + CATEGORY_OPTION_PADDING_TOP,
-      overflow: 'scroll',
-    },
-  },
-}
 
 export const getCategoryOptions = (safeAppList: SafeAppData[]): safeAppCatogoryOptionType[] => {
   return getUniqueTags(safeAppList).map((category) => ({

@@ -4,10 +4,15 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useRouter } from 'next/router'
 import { type ReactElement, useState } from 'react'
-import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -20,6 +25,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const isDarkMode = useDarkMode()
 
   const dispatch = useAppDispatch()
   const router = useRouter()
@@ -69,39 +75,35 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
 
   return (
     <ModalDialog open onClose={onClose} dialogTitle="Accept invite" hideChainIndicator>
-      <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogContent sx={{ py: 2 }}>
-            <Box mb={2}>
-              <NameInput data-testid="invite-name-input" label="Name" autoFocus name="name" required />
-            </Box>
-            <Typography variant="body2" color="text.secondary">
-              How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
-            </Typography>
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <FormProvider {...methods}>
+          <form onSubmit={onSubmit}>
+            <div className="px-6 py-4">
+              <div className="mb-4">
+                <NameInput data-testid="invite-name-input" label="Name" autoFocus name="name" required />
+              </div>
+              <Typography variant="paragraph-small" color="muted">
+                How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
+              </Typography>
 
-            {error && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {error}
-              </Alert>
-            )}
-          </DialogContent>
+              {error && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
 
-          <DialogActions>
-            <Button data-testid="cancel-btn" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              data-testid="confirm-accept-invite-button"
-              type="submit"
-              variant="contained"
-              disabled={!formState.isValid}
-              disableElevation
-            >
-              {isSubmitting ? <CircularProgress size={20} /> : 'Accept invite'}
-            </Button>
-          </DialogActions>
-        </form>
-      </FormProvider>
+            <div className="flex justify-end gap-2 px-6 pb-6">
+              <Button variant="ghost" data-testid="cancel-btn" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button data-testid="confirm-accept-invite-button" type="submit" disabled={!formState.isValid}>
+                {isSubmitting ? <Spinner className="size-5" /> : 'Accept invite'}
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
+      </div>
     </ModalDialog>
   )
 }

@@ -1,7 +1,8 @@
 import useWallet from '@/hooks/wallets/useWallet'
 import type { ReactElement, SyntheticEvent } from 'react'
 import { useContext, useMemo, useState } from 'react'
-import { Button, CardActions, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import SendToBlock from '@/components/tx/SendToBlock'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import useBalances from '@/hooks/useBalances'
@@ -125,7 +126,7 @@ const ReviewSpendingLimitTx = ({
   return (
     <form onSubmit={handleSubmit}>
       <TxCard sx={{ mt: 0, borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-        <Typography variant="body2">
+        <Typography variant="paragraph-small">
           Spending limit transactions only appear in the interface once they are successfully processed and indexed.
           Pending transactions can only be viewed in your signer wallet application or under your wallet address on a
           Blockchain Explorer.
@@ -145,19 +146,19 @@ const ReviewSpendingLimitTx = ({
 
         {isRejectedByUser && <WalletRejectionError />}
 
-        <Typography variant="body2" color="primary.light" textAlign="center">
+        <Typography variant="paragraph-small" align="center" className="text-muted-foreground">
           You&apos;re about to create a transaction and will need to confirm it with your currently connected wallet.
         </Typography>
 
-        <CardActions>
+        <div className="flex p-2">
           <CheckWallet allowNonOwner checkNetwork={!submitDisabled}>
             {(isOk) => (
-              <Button variant="contained" type="submit" disabled={!isOk || submitDisabled}>
+              <Button type="submit" disabled={!isOk || submitDisabled}>
                 Execute
               </Button>
             )}
           </CheckWallet>
-        </CardActions>
+        </div>
       </TxCard>
     </form>
   )

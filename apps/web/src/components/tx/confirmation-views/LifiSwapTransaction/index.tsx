@@ -1,5 +1,4 @@
 import { DataTable } from '@/components/common/Table/DataTable'
-import { Stack, Typography } from '@mui/material'
 import { type SwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatUnits } from 'ethers'
 import { SwapFeature } from '@/features/swap'
@@ -34,8 +33,8 @@ const PreviewSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => {
 
 const ListSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => (
   <DataRow datatestid="amount" key="amount" title="Amount">
-    <Stack spacing={0.5}>
-      <Typography display="flex" alignItems="center" flexDirection="row" gap={1}>
+    <div className="flex flex-col gap-1">
+      <div className="flex flex-row items-center gap-2">
         Sell{' '}
         <TokenAmount
           value={txInfo.fromAmount}
@@ -43,8 +42,8 @@ const ListSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => (
           logoUri={txInfo.fromToken.logoUri ?? ''}
           tokenSymbol={txInfo.fromToken.symbol}
         />
-      </Typography>
-      <Typography display="flex" alignItems="center" flexDirection="row" gap={1}>
+      </div>
+      <div className="flex flex-row items-center gap-2">
         For{' '}
         <TokenAmount
           value={txInfo.toAmount}
@@ -52,8 +51,8 @@ const ListSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => (
           logoUri={txInfo.toToken.logoUri ?? ''}
           tokenSymbol={txInfo.toToken.symbol}
         />
-      </Typography>
-    </Stack>
+      </div>
+    </div>
   </DataRow>
 )
 
@@ -98,8 +97,8 @@ export const LifiSwapTransaction = ({ txInfo, isPreview }: { txInfo: SwapTransac
   }
 
   return (
-    <Stack>
+    <div className="flex flex-col">
       <DataTable rows={rows} />
-    </Stack>
+    </div>
   )
 }

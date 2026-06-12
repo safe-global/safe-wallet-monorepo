@@ -1,5 +1,6 @@
-import { ChevronRight } from '@mui/icons-material'
-import { List, Typography, SvgIcon, Tooltip } from '@mui/material'
+import { ChevronRight } from 'lucide-react'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 
 import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
@@ -57,14 +58,15 @@ function NestedSafeItem({
   if (!$isReady) return null
 
   const warningIcon = showWarning ? (
-    <Tooltip title="This Safe was not created by the parent Safe or its signers" placement="top">
-      <SvgIcon
-        component={WarningIcon}
-        inheritViewBox
-        fontSize="small"
-        sx={{ color: 'warning.main', ml: 1, flexShrink: 0 }}
-        data-testid="suspicious-safe-warning"
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <span className="ml-2 inline-flex shrink-0">
+            <WarningIcon className="size-5 text-[var(--color-warning-main)]" data-testid="suspicious-safe-warning" />
+          </span>
+        }
       />
+      <TooltipContent>This Safe was not created by the parent Safe or its signers</TooltipContent>
     </Tooltip>
   ) : null
 
@@ -209,7 +211,7 @@ export function NestedSafesList({
   // In manage mode with grouped safes, render groups first then ungrouped
   if (isManageMode && groupedSafes) {
     return (
-      <List sx={{ gap: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', p: 0 }}>
+      <ul className="m-0 flex list-none flex-col items-stretch gap-1 p-0">
         {/* Render similarity groups first */}
         {groupedSafes.groups.map((group) => (
           <SimilarityGroupContainer key={group.key}>
@@ -225,29 +227,27 @@ export function NestedSafesList({
           const safeItem = toSafeItem(safe)
           return safeItem ? renderSafeItem(safeItem) : null
         })}
-      </List>
+      </ul>
     )
   }
 
   // Default rendering (non-manage mode or manage mode without grouping)
   return (
-    <List sx={{ gap: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', p: 0 }}>
+    <ul className="m-0 flex list-none flex-col items-stretch gap-1 p-0">
       {nestedSafesToShow.map((safeItem) => renderSafeItem(safeItem))}
       {safeItems.length > MAX_NESTED_SAFES && !showAll && !isManageMode && (
         <Track {...NESTED_SAFE_EVENTS.SHOW_ALL}>
           <Typography
-            variant="caption"
-            color="text.secondary"
-            textTransform="uppercase"
-            fontWeight={700}
-            sx={{ cursor: 'pointer', textAlign: 'center', py: 1 }}
+            variant="paragraph-mini-bold"
+            color="muted"
+            className="flex cursor-pointer items-center justify-center py-2 uppercase"
             onClick={onShowAll}
           >
             Show all nested Safes
-            <ChevronRight color="border" sx={{ transform: 'rotate(90deg)', ml: 1 }} fontSize="inherit" />
+            <ChevronRight className="ml-2 size-3 rotate-90 text-[var(--color-border-main)]" />
           </Typography>
         </Track>
       )}
-    </List>
+    </ul>
   )
 }

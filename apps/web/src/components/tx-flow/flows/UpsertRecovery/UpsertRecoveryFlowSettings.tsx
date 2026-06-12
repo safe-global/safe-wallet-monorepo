@@ -1,23 +1,6 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import {
-  Divider,
-  CardActions,
-  Button,
-  Typography,
-  SvgIcon,
-  MenuItem,
-  TextField,
-  Collapse,
-  Checkbox,
-  FormControlLabel,
-  Tooltip,
-  Alert,
-  Box,
-  FormControl,
-} from '@mui/material'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { ChevronUp as ExpandLessIcon, ChevronDown as ExpandMoreIcon } from 'lucide-react'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
@@ -45,6 +28,15 @@ import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import { isSmartContractWallet } from '@/utils/wallets'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 
 enum AddressType {
   EOA = 'EOA',
@@ -134,27 +126,29 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
     <TxCard>
       <FormProvider {...formMethods}>
         <form onSubmit={formMethods.handleSubmit(handleSubmit)}>
-          <Alert severity="warning" sx={{ border: 'unset' }}>
-            Your Recoverer will be able to reset your Account setup. Only select an address that you trust.{' '}
-            <Track {...RECOVERY_EVENTS.LEARN_MORE} label="recover-setup-flow">
-              <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
-                Learn more
-              </ExternalLink>
-            </Track>
+          <Alert variant="warning" className="border-0">
+            <AlertDescription>
+              Your Recoverer will be able to reset your Account setup. Only select an address that you trust.{' '}
+              <Track {...RECOVERY_EVENTS.LEARN_MORE} label="recover-setup-flow">
+                <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
+                  Learn more
+                </ExternalLink>
+              </Track>
+            </AlertDescription>
           </Alert>
 
-          <Box my={2}>
-            <Typography variant="h5" gutterBottom>
+          <div className="my-4">
+            <Typography variant="h4" className="mb-2">
               Trusted Recoverer
             </Typography>
 
-            <Typography variant="body2">
+            <Typography variant="paragraph-small" className="block">
               Choose a Recoverer, such as a hardware wallet or a Safe Account controlled by family or friends, that can
               initiate the recovery process in the future.
             </Typography>
-          </Box>
+          </div>
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
+          <div className="mb-4 w-full">
             <AddressBookInput
               label="Recoverer address or ENS"
               name={UpsertRecoveryFlowFields.recoverer}
@@ -163,94 +157,72 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
               validate={validateRecoverer}
             />
             <RecovererWarning />
-          </FormControl>
+          </div>
 
-          <Box mb={2}>
-            <Typography variant="h5" gutterBottom>
+          <div className="mb-4">
+            <Typography variant="h4" className="mb-2">
               Review window
-              <Tooltip placement="top" arrow title={TOOLTIP_TITLES.REVIEW_WINDOW}>
-                <span>
-                  <SvgIcon
-                    component={InfoIcon}
-                    inheritViewBox
-                    fontSize="small"
-                    color="border"
-                    sx={{ verticalAlign: 'middle', ml: 0.5 }}
-                  />
-                </span>
+              <Tooltip>
+                <TooltipTrigger render={<span />}>
+                  <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
+                </TooltipTrigger>
+                <TooltipContent>{TOOLTIP_TITLES.REVIEW_WINDOW}</TooltipContent>
               </Tooltip>
             </Typography>
 
-            <Typography variant="body2">
+            <Typography variant="paragraph-small" className="block">
               The recovery proposal will be available for execution after this period of time. You can cancel any
               recovery proposal when it is not needed or wanted during this period.
             </Typography>
-          </Box>
+          </div>
 
-          <Box my={2}>
+          <div className="my-4">
             <Controller
               control={formMethods.control}
               name={UpsertRecoveryFlowFields.selectedDelay}
-              render={({ field: { ref, ...field } }) => (
-                <TextField
-                  data-testid="recovery-delay-select"
-                  fullWidth
-                  inputRef={ref}
-                  {...field}
-                  select
-                  sx={{ width: '55%', maxWidth: '240px' }}
-                >
-                  {periods.delay.map(({ label, value }, index) => (
-                    <MenuItem key={index} value={value}>
-                      {label}
-                    </MenuItem>
-                  ))}
-                </TextField>
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger data-testid="recovery-delay-select" className="w-[55%] max-w-[240px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {periods.delay.map(({ label, value }, index) => (
+                      <SelectItem key={index} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
             />
 
-            <Box
-              sx={{
-                display: 'flex',
-                flex: '1',
-                gap: 2,
-                maxWidth: '180px',
-                minWidth: '140px',
-              }}
-            >
+            <div className="flex max-w-[180px] min-w-[140px] flex-1 gap-4">
               {isCustomDelaySelected(selectedDelay) && (
                 <>
                   <Controller
                     control={formMethods.control}
                     name={UpsertRecoveryFlowFields.customDelay}
                     rules={{ validate: validateCustomDelay }}
-                    render={({ field: { ref, ...field }, fieldState }) => (
+                    render={({ field, fieldState }) => (
                       <NumberField
                         label={fieldState.error?.message}
                         error={!!fieldState.error}
-                        inputRef={ref}
                         {...field}
                         required
                         placeholder="E.g. 100"
                       />
                     )}
                   />
-                  <Typography
-                    sx={{
-                      my: 'auto',
-                    }}
-                  >
-                    days.
-                  </Typography>
+                  <Typography className="my-auto">days.</Typography>
                 </>
               )}
-            </Box>
-          </Box>
+            </div>
+          </div>
 
-          <Box mb={3}>
+          <div className="mb-6">
             <Typography
               data-testid="advanced-btn"
-              variant="body2"
+              variant="paragraph-small"
               onClick={onShowAdvanced}
               role="button"
               className={css.advanced}
@@ -258,67 +230,66 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
               Advanced {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             </Typography>
 
-            <Collapse in={showAdvanced}>
-              <Box>
-                <Typography variant="h5" gutterBottom>
-                  Proposal expiry
-                  <Tooltip placement="top" arrow title={TOOLTIP_TITLES.PROPOSAL_EXPIRY}>
-                    <span>
-                      <SvgIcon
-                        component={InfoIcon}
-                        inheritViewBox
-                        fontSize="small"
-                        color="border"
-                        sx={{ verticalAlign: 'middle', ml: 0.5 }}
-                      />
-                    </span>
-                  </Tooltip>
-                </Typography>
+            <Collapsible open={showAdvanced}>
+              <CollapsibleContent keepMounted>
+                <div>
+                  <Typography variant="h4" className="mb-2">
+                    Proposal expiry
+                    <Tooltip>
+                      <TooltipTrigger render={<span />}>
+                        <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
+                      </TooltipTrigger>
+                      <TooltipContent>{TOOLTIP_TITLES.PROPOSAL_EXPIRY}</TooltipContent>
+                    </Tooltip>
+                  </Typography>
 
-                <Typography mb={2} variant="body2">
-                  Set a period of time after which the recovery proposal will expire and can no longer be executed.
-                </Typography>
-              </Box>
+                  <Typography variant="paragraph-small" className="mb-4 block">
+                    Set a period of time after which the recovery proposal will expire and can no longer be executed.
+                  </Typography>
+                </div>
 
-              <Controller
-                control={formMethods.control}
-                name={UpsertRecoveryFlowFields.expiry}
-                // Don't reset value if advanced section is collapsed
-                shouldUnregister={false}
-                render={({ field: { ref, ...field } }) => (
-                  <TextField
-                    data-testid="recovery-expiry-select"
-                    inputRef={ref}
-                    {...field}
-                    fullWidth
-                    select
-                    sx={{ width: '55%', maxWidth: '240px' }}
-                  >
-                    {periods.expiration.map(({ label, value }, index) => (
-                      <MenuItem key={index} value={value}>
-                        {label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Collapse>
-          </Box>
+                <Controller
+                  control={formMethods.control}
+                  name={UpsertRecoveryFlowFields.expiry}
+                  // Don't reset value if advanced section is collapsed
+                  shouldUnregister={false}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger data-testid="recovery-expiry-select" className="w-[55%] max-w-[240px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {periods.expiration.map(({ label, value }, index) => (
+                          <SelectItem key={index} value={value}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </CollapsibleContent>
+            </Collapsible>
+          </div>
 
-          <Divider className={commonCss.nestedDivider} />
+          <Separator className={commonCss.nestedDivider} />
 
-          <FormControlLabel
-            data-testid="warning-section"
-            label={`I understand that the Recoverer will be able to initiate recovery of this Safe Account and that I will only be informed within the ${BRAND_NAME}.`}
-            control={<Checkbox checked={understandsRisk} onChange={(_, checked) => setUnderstandsRisk(checked)} />}
-            sx={{ my: 2, pl: 2 }}
-          />
+          <div data-testid="warning-section" className="my-4 flex items-start gap-2 pl-2">
+            <Checkbox
+              id="recovery-understands-risk"
+              checked={understandsRisk}
+              onCheckedChange={(checked) => setUnderstandsRisk(checked === true)}
+            />
+            <Label htmlFor="recovery-understands-risk" className="font-normal">
+              {`I understand that the Recoverer will be able to initiate recovery of this Safe Account and that I will only be informed within the ${BRAND_NAME}.`}
+            </Label>
+          </div>
 
-          <CardActions>
-            <Button data-testid="next-btn" variant="contained" type="submit" disabled={isDisabled}>
+          <div className="flex items-center">
+            <Button data-testid="next-btn" variant="default" type="submit" disabled={isDisabled}>
               Next
             </Button>
-          </CardActions>
+          </div>
         </form>
       </FormProvider>
     </TxCard>

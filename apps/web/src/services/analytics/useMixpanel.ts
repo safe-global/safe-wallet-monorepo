@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { useTheme } from '@mui/material/styles'
 import {
   mixpanelInit,
   mixpanelSetBlockchainNetwork,
@@ -20,7 +19,7 @@ import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { IS_PRODUCTION } from '@/config/constants'
-import { useMediaQuery } from '@mui/material'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { DeviceType } from './types'
 import { MixpanelUserProperty } from './mixpanel-events'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -35,9 +34,8 @@ import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/a
 const useMixpanel = () => {
   const isMixpanelEnabled = useHasFeature(FEATURES.MIXPANEL)
   const isAnalyticsEnabled = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.ANALYTICS))
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'))
+  const isMobile = useMediaQuery('(max-width:599.95px)')
+  const isTablet = useMediaQuery('(max-width:899.95px)')
   const deviceType = useMemo(() => {
     return isMobile ? DeviceType.MOBILE : isTablet ? DeviceType.TABLET : DeviceType.DESKTOP
   }, [isMobile, isTablet])

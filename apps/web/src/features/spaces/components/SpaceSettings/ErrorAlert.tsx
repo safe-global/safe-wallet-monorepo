@@ -1,4 +1,4 @@
-import { Alert } from '@mui/material'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import type { ReactElement } from 'react'
 
 const ErrorAlert = ({ error }: { error?: string }): ReactElement | null => {
@@ -7,8 +7,8 @@ const ErrorAlert = ({ error }: { error?: string }): ReactElement | null => {
   }
 
   return (
-    <Alert severity="error" sx={{ mt: 2 }}>
-      {error}
+    <Alert variant="destructive" className="mt-4">
+      <AlertDescription>{error}</AlertDescription>
     </Alert>
   )
 }

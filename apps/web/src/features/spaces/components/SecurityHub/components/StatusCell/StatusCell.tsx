@@ -1,4 +1,5 @@
-import { Skeleton, Typography } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 import type { SafeGrade } from '@/features/security/types'
 import SafeGradeChip, { SAFE_GRADE_LABEL } from '../SafeGradeChip/SafeGradeChip'
 
@@ -13,9 +14,9 @@ export type StatusCellProps = {
 
 const StatusCell = ({ grade, count, isScanning }: StatusCellProps) => {
   if (!grade) {
-    if (isScanning) return <Skeleton variant="rounded" width={70} height={20} />
+    if (isScanning) return <Skeleton className="h-5 w-[70px] rounded-md" />
     return (
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="paragraph-small" color="muted">
         {DASH}
       </Typography>
     )

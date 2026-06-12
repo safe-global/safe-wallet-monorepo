@@ -1,18 +1,8 @@
-import {
-  Box,
-  Button,
-  CardActions,
-  Divider,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  SvgIcon,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import classNames from 'classnames'
 import { Controller, FormProvider, useFieldArray, useForm, useFormContext } from 'react-hook-form'
 import { useContext, type ReactElement } from 'react'
@@ -73,12 +63,12 @@ export function SetUpNestedSafe(): ReactElement {
     <TxCard>
       <FormProvider {...formMethods}>
         <form onSubmit={formMethods.handleSubmit(onFormSubmit)}>
-          <Typography variant="body2" mt={1}>
+          <Typography variant="paragraph-small" className="mt-2">
             Name your Nested Safe and select which assets to fund it with. All selected assets will be transferred when
             deployed.
           </Typography>
 
-          <FormControl fullWidth sx={{ mt: 3 }}>
+          <div className="mt-6 w-full">
             <NameInput
               data-testid="nested-safe-name-input"
               name={SetupNestedSafeFormFields.name}
@@ -87,29 +77,32 @@ export function SetUpNestedSafe(): ReactElement {
               InputLabelProps={{ shrink: true }}
               InputProps={{
                 endAdornment: (
-                  <Tooltip
-                    title="This name is stored locally and will never be shared with us or any third parties."
-                    arrow
-                    placement="top"
-                  >
-                    <InputAdornment position="end">
-                      <SvgIcon component={InfoIcon} inheritViewBox />
-                    </InputAdornment>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <span className="flex">
+                          <InfoIcon className="size-4" />
+                        </span>
+                      }
+                    />
+                    <TooltipContent>
+                      This name is stored locally and will never be shared with us or any third parties.
+                    </TooltipContent>
                   </Tooltip>
                 ),
               }}
             />
-          </FormControl>
+          </div>
 
           <AssetInputs name={SetupNestedSafeFormFields.assets} />
 
-          <Divider className={commonCss.nestedDivider} />
+          <Separator className={commonCss.nestedDivider} />
 
-          <CardActions>
-            <Button data-testid="next-button" variant="contained" type="submit">
+          <div className="flex items-center p-2">
+            <Button data-testid="next-button" type="submit">
               Next
             </Button>
-          </CardActions>
+          </div>
         </form>
       </FormProvider>
     </TxCard>
@@ -157,11 +150,9 @@ function AssetInputs({ name }: { name: SetupNestedSafeFormFields.assets }) {
           )
         })
         return (
-          <Box data-testid="asset-data" className={css.assetInput} key={field.id}>
-            <FormControl className={classNames(tokenInputCss.outline, { [tokenInputCss.error]: isError })} fullWidth>
-              <InputLabel shrink required className={tokenInputCss.label}>
-                {label}
-              </InputLabel>
+          <div data-testid="asset-data" className={css.assetInput} key={field.id}>
+            <div className={classNames(tokenInputCss.outline, { [tokenInputCss.error]: isError }, 'w-full')}>
+              <label className={classNames(tokenInputCss.label, 'block text-xs font-medium')}>{label}</label>
 
               <div className={tokenInputCss.inputs}>
                 <Controller
@@ -185,15 +176,16 @@ function AssetInputs({ name }: { name: SetupNestedSafeFormFields.assets }) {
                     return (
                       <NumberField
                         data-testid="amount-input"
-                        variant="standard"
-                        InputProps={{
-                          disableUnderline: true,
-                          endAdornment: (
-                            <Button data-testid="max-button" className={tokenInputCss.max} onClick={onClickMax}>
-                              Max
-                            </Button>
-                          ),
-                        }}
+                        endAdornment={
+                          <Button
+                            variant="ghost"
+                            data-testid="max-button"
+                            className={tokenInputCss.max}
+                            onClick={onClickMax}
+                          >
+                            Max
+                          </Button>
+                        }
                         className={tokenInputCss.amount}
                         required
                         placeholder="0"
@@ -203,57 +195,56 @@ function AssetInputs({ name }: { name: SetupNestedSafeFormFields.assets }) {
                   }}
                 />
 
-                <Divider orientation="vertical" flexItem />
+                <Separator orientation="vertical" className="h-auto self-stretch" />
 
                 <Controller
                   name={`${name}.${index}.${SetupNestedSafeFormAssetFields.tokenAddress}`}
                   rules={{ required: true, deps: [`${name}.${index}.${SetupNestedSafeFormAssetFields.amount}`] }}
                   render={({ field }) => {
                     return (
-                      <TextField
-                        data-testid="token-selector"
-                        select
-                        variant="standard"
-                        InputProps={{
-                          disableUnderline: true,
-                        }}
-                        className={tokenInputCss.select}
-                        required
-                        sx={{ minWidth: '200px' }}
-                        {...field}
-                      >
-                        {thisAndNonSelectedAssets.map((item) => {
-                          return (
-                            <MenuItem key={item.tokenInfo.address} value={item.tokenInfo.address}>
-                              <AutocompleteItem {...item} />
-                            </MenuItem>
-                          )
-                        })}
-                      </TextField>
+                      <div data-testid="token-selector" className={tokenInputCss.select}>
+                        <Select value={field.value} onValueChange={field.onChange} required>
+                          <SelectTrigger className="min-w-[200px]">
+                            <SelectValue>{thisAsset && <AutocompleteItem {...thisAsset} />}</SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {thisAndNonSelectedAssets.map((item) => (
+                              <SelectItem key={item.tokenInfo.address} value={item.tokenInfo.address}>
+                                <AutocompleteItem {...item} />
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     )
                   }}
                 />
               </div>
-            </FormControl>
+            </div>
 
-            <IconButton data-testid="remove-asset-icon" onClick={() => fieldArray.remove(index)}>
-              <SvgIcon component={DeleteIcon} inheritViewBox />
-            </IconButton>
-          </Box>
+            <Button
+              variant="ghost"
+              size="icon"
+              data-testid="remove-asset-icon"
+              onClick={() => fieldArray.remove(index)}
+            >
+              <DeleteIcon className="size-4" />
+            </Button>
+          </div>
         )
       })}
 
       <Button
         data-testid="fund-asset-button"
-        variant="text"
+        variant="ghost"
         onClick={() => {
           fieldArray.append(defaultAsset, { shouldFocus: true })
         }}
-        startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-        size="large"
-        sx={{ my: 3 }}
+        size="lg"
+        className="my-6 self-start"
         disabled={nonSelectedAssets.length === 0}
       >
+        <AddIcon className="size-4" />
         Fund new asset
       </Button>
     </>

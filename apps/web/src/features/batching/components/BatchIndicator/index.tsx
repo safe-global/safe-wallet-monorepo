@@ -1,5 +1,5 @@
-import { Badge, ButtonBase, SvgIcon } from '@mui/material'
 import BatchIcon from '@/public/images/common/batch.svg'
+import { Badge } from '@/components/ui/badge'
 import { useDraftBatch } from '@/features/batching'
 import Track from '@/components/common/Track'
 import { BATCH_EVENTS } from '@/services/analytics'
@@ -15,29 +15,19 @@ const BatchIndicator = ({ onClick }: { onClick?: () => void }) => {
   return (
     <BatchTooltip>
       <Track {...BATCH_EVENTS.BATCH_SIDEBAR_OPEN} label={length}>
-        <ButtonBase
+        <button
+          type="button"
           title="Batch"
           onClick={onClick}
-          sx={{
-            p: '10px',
-            '&:hover': {
-              backgroundColor: 'background.light',
-              borderRadius: '6px',
-            },
-          }}
+          className="relative inline-flex cursor-pointer items-center justify-center border-0 bg-transparent p-2.5 hover:rounded-md hover:bg-[var(--color-background-light)]"
         >
-          <Badge
-            variant="standard"
-            badgeContent={length}
-            color="secondary"
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
-          >
-            <SvgIcon component={BatchIcon} inheritViewBox fontSize="medium" />
-          </Badge>
-        </ButtonBase>
+          <BatchIcon className="size-6" />
+          {length > 0 && (
+            <Badge variant="secondary" className="absolute right-1 bottom-1 translate-x-1/2 translate-y-1/2">
+              {length}
+            </Badge>
+          )}
+        </button>
       </Track>
     </BatchTooltip>
   )

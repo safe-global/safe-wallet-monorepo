@@ -54,8 +54,12 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { hasRemainingRelays } from '@/utils/relaying'
 import { isWalletRejection } from '@/utils/wallets'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { Box, Button, CircularProgress, Divider, Grid, Tooltip, Typography } from '@mui/material'
+import { ArrowLeft as ArrowBackIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Separator } from '@/components/ui/separator'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import classnames from 'classnames'
 import { useRouter } from 'next/router'
@@ -94,13 +98,13 @@ export const NetworkFee = ({
   inline?: boolean
 }) => {
   return (
-    <Box className={classnames(css.networkFee, { [css.networkFeeInline]: inline })}>
+    <div className={classnames(css.networkFee, { [css.networkFeeInline]: inline })}>
       <Typography className={classnames({ [css.strikethrough]: isWaived })}>
         <b>
           &asymp; {totalFee} {chain?.nativeCurrency.symbol}
         </b>
       </Typography>
-    </Box>
+    </div>
   )
 }
 
@@ -116,35 +120,27 @@ export const SafeSetupOverview = ({
   networks: Chain[]
 }) => {
   return (
-    <Grid container spacing={3}>
+    <div className="grid grid-cols-12 gap-6">
       <ReviewRow
         name={getNetworkLabel(networks.length)}
         value={
-          <Tooltip
-            title={
-              <Box>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <span data-testid="network-list" className="inline-block">
+                  <NetworkLogosList networks={networks} />
+                </span>
+              }
+            />
+            <TooltipContent>
+              <div>
                 {networks.map((safeItem) => (
-                  <Box
-                    key={safeItem.chainId}
-                    sx={{
-                      p: '4px 0px',
-                    }}
-                  >
+                  <div key={safeItem.chainId} className="py-1">
                     <ChainIndicator chainId={safeItem.chainId} />
-                  </Box>
+                  </div>
                 ))}
-              </Box>
-            }
-            arrow
-          >
-            <Box
-              data-testid="network-list"
-              sx={{
-                display: 'inline-block',
-              }}
-            >
-              <NetworkLogosList networks={networks} />
-            </Box>
+              </div>
+            </TooltipContent>
           </Tooltip>
         }
       />
@@ -152,7 +148,7 @@ export const SafeSetupOverview = ({
       <ReviewRow
         name="Signers"
         value={
-          <Box data-testid="review-step-owner-info" className={css.ownersArray}>
+          <div data-testid="review-step-owner-info" className={css.ownersArray}>
             {owners.map((owner, index) => (
               <EthHashInfo
                 address={owner.address}
@@ -165,7 +161,7 @@ export const SafeSetupOverview = ({
                 key={index}
               />
             ))}
-          </Box>
+          </div>
         }
       />
       <ReviewRow
@@ -174,7 +170,7 @@ export const SafeSetupOverview = ({
           <Typography data-testid="review-step-threshold">{getThresholdLabel(threshold, owners.length)}</Typography>
         }
       />
-    </Grid>
+    </div>
   )
 }
 
@@ -449,16 +445,16 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   return (
     <>
-      <Box data-testid="safe-setup-overview" className={layoutCss.row}>
+      <div data-testid="safe-setup-overview" className={layoutCss.row}>
         <SafeSetupOverview name={data.name} owners={data.owners} threshold={data.threshold} networks={data.networks} />
-      </Box>
+      </div>
       {isCounterfactualEnabled && (
         <>
-          <Divider />
-          <Box data-testid="pay-now-later-message-box" className={layoutCss.row}>
+          <Separator />
+          <div data-testid="pay-now-later-message-box" className={layoutCss.row}>
             <PayNowPayLater
               totalFee={totalFee}
-              willRelay={willRelay}
+              canRelay={willRelay}
               isMultiChain={isMultiChainDeployment}
               payMethod={effectivePayMethod}
               setPayMethod={setPayMethod}
@@ -466,41 +462,28 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
             />
 
             {canRelay && effectivePayMethod === PayMethod.PayNow && (
-              <>
-                <Grid
-                  container
-                  spacing={3}
-                  sx={{
-                    pt: 2,
-                  }}
-                >
-                  <ReviewRow
-                    value={
-                      <ExecutionMethodSelector
-                        executionMethod={executionMethod}
-                        setExecutionMethod={setExecutionMethod}
-                        relays={minRelays}
-                      />
-                    }
-                  />
-                </Grid>
-              </>
+              <div className="grid grid-cols-12 gap-6 pt-4">
+                <ReviewRow
+                  value={
+                    <ExecutionMethodSelector
+                      executionMethod={executionMethod}
+                      setExecutionMethod={setExecutionMethod}
+                      relays={minRelays}
+                    />
+                  }
+                />
+              </div>
             )}
 
             {showNetworkWarning && (
-              <Box sx={{ '&:not(:empty)': { mt: 3 } }}>
+              <div className="mt-6">
                 <NetworkWarning action="create a Safe Account" />
-              </Box>
+              </div>
             )}
 
             {effectivePayMethod === PayMethod.PayNow && (
-              <Grid item>
-                <Typography
-                  component="div"
-                  sx={{
-                    mt: 2,
-                  }}
-                >
+              <div className="mt-4">
+                <Typography>
                   {!showFeeInConfirmationText ? (
                     'You will have to confirm a transaction with your connected wallet'
                   ) : (
@@ -511,24 +494,17 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
                     </>
                   )}
                 </Typography>
-              </Grid>
+              </div>
             )}
-          </Box>
+          </div>
         </>
       )}
       {!isCounterfactualEnabled && (
         <>
-          <Divider />
-          <Box
-            className={layoutCss.row}
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 3,
-            }}
-          >
+          <Separator />
+          <div className={`${layoutCss.row} flex flex-col gap-6`}>
             {canRelay && (
-              <Grid container spacing={3}>
+              <div className="grid grid-cols-12 gap-6">
                 <ReviewRow
                   name="Execution method"
                   value={
@@ -539,11 +515,11 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
                     />
                   }
                 />
-              </Grid>
+              </div>
             )}
 
             {showGasFeeEstimation && (
-              <Grid data-testid="network-fee-section" container spacing={3}>
+              <div data-testid="network-fee-section" className="grid grid-cols-12 gap-6">
                 <ReviewRow
                   name="Est. network fee"
                   value={
@@ -551,20 +527,14 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
                       <NetworkFee totalFee={totalFee} isWaived={willRelay} chain={chain} />
 
                       {!willRelay && (
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            color: 'text.secondary',
-                            mt: 1,
-                          }}
-                        >
+                        <Typography variant="paragraph-small" className="mt-2 block text-[var(--color-text-secondary)]">
                           You will have to confirm a transaction with your connected wallet.
                         </Typography>
                       )}
                     </>
                   }
                 />
-              </Grid>
+              </div>
             )}
 
             {showNetworkWarning && <NetworkWarning action="create a Safe Account" />}
@@ -574,40 +544,28 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
                 Your connected wallet doesn&apos;t have enough funds to execute this transaction
               </ErrorMessage>
             )}
-          </Box>
+          </div>
         </>
       )}
-      <Divider />
-      <Box className={layoutCss.row}>
+      <Separator />
+      <div className={layoutCss.row}>
         {submitError && <ErrorMessage className={css.errorMessage}>{submitError}</ErrorMessage>}
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            gap: 3,
-          }}
-        >
-          <Button
-            data-testid="back-btn"
-            variant="outlined"
-            size="large"
-            onClick={handleBack}
-            startIcon={<ArrowBackIcon fontSize="small" />}
-          >
+        <div className="flex flex-row justify-between gap-6">
+          <Button data-testid="back-btn" variant="outline" size="lg" onClick={handleBack}>
+            <ArrowBackIcon className="size-4" />
             Back
           </Button>
           <Button
             data-testid="review-step-next-btn"
             onClick={handleCreateSafeClick}
-            variant="contained"
-            size="large"
+            variant="default"
+            size="lg"
             disabled={isDisabled}
           >
-            {isCreating ? <CircularProgress size={18} /> : 'Create account'}
+            {isCreating ? <Spinner className="size-[18px]" /> : 'Create account'}
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </div>
     </>
   )
 }

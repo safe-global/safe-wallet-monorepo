@@ -1,22 +1,19 @@
-import ListItem from '@mui/material/ListItem'
-import ListItemAvatar from '@mui/material/ListItemAvatar'
-import ListItemText from '@mui/material/ListItemText'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import ErrorIcon from '@/public/images/notifications/error.svg'
 import SuccessIcon from '@/public/images/notifications/success.svg'
 import { NotificationLink } from '@/components/common/Notifications'
-import type { AlertColor } from '@mui/material/Alert'
 import type { ReactElement } from 'react'
 
 import type { Notification } from '@/store/notificationsSlice'
+
+type NotificationVariant = Notification['variant']
 import UnreadBadge from '@/components/common/UnreadBadge'
 import { formatTimeInWords } from '@safe-global/utils/utils/date'
+import { Typography } from '@/components/ui/typography'
 
 import css from './styles.module.css'
 import classnames from 'classnames'
-import SvgIcon from '@mui/material/SvgIcon'
-import { Typography } from '@mui/material'
 
 const VARIANT_ICONS = {
   error: ErrorIcon,
@@ -25,8 +22,16 @@ const VARIANT_ICONS = {
   warning: WarningIcon,
 }
 
-const getNotificationIcon = (variant: AlertColor): ReactElement => {
-  return <SvgIcon component={VARIANT_ICONS[variant]} inheritViewBox color={variant} />
+const VARIANT_COLORS: Record<NotificationVariant, string> = {
+  error: 'text-[var(--color-error-main)]',
+  info: 'text-[var(--color-info-main)]',
+  success: 'text-[var(--color-success-main)]',
+  warning: 'text-[var(--color-warning-main)]',
+}
+
+const getNotificationIcon = (variant: NotificationVariant): ReactElement => {
+  const Icon = VARIANT_ICONS[variant]
+  return <Icon className={classnames('fill-current', VARIANT_COLORS[variant])} />
 }
 
 const NotificationCenterItem = ({
@@ -49,22 +54,14 @@ const NotificationCenterItem = ({
 
   const primaryText = (
     <>
-      {title && (
-        <Typography
-          sx={{
-            fontWeight: '700',
-          }}
-        >
-          {title}
-        </Typography>
-      )}
+      {title && <Typography className="font-bold">{title}</Typography>}
       <Typography>{message}</Typography>
     </>
   )
 
   return (
-    <ListItem className={classnames(css.item, { [css.requiresAction]: requiresAction })}>
-      <ListItemAvatar className={css.avatar}>
+    <li className={classnames(css.item, { [css.requiresAction]: requiresAction }, 'flex items-center gap-3')}>
+      <div className={classnames(css.avatar, 'flex items-center')}>
         <UnreadBadge
           invisible={isRead}
           anchorOrigin={{
@@ -74,9 +71,12 @@ const NotificationCenterItem = ({
         >
           {getNotificationIcon(variant)}
         </UnreadBadge>
-      </ListItemAvatar>
-      <ListItemText primary={primaryText} secondary={secondaryText} />
-    </ListItem>
+      </div>
+      <div className="flex min-w-0 flex-col">
+        {primaryText}
+        {secondaryText}
+      </div>
+    </li>
   )
 }
 

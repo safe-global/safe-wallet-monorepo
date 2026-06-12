@@ -1,7 +1,6 @@
 import type { TokenInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import type { ReactElement } from 'react'
-import { Typography } from '@mui/material'
 import TokenAmount from '@/components/common/TokenAmount'
 import TokenIcon from '@/components/common/TokenIcon'
 
@@ -15,10 +14,10 @@ const Amount = ({ value, token }: { value: string; token: TokenInfo }) => (
 )
 
 const OnlyToken = ({ token }: { token: TokenInfo }) => (
-  <Typography fontWeight="bold" component="span" display="flex" alignItems="center" gap={1}>
+  <span className="flex items-center gap-2 font-bold">
     <TokenIcon tokenSymbol={token.symbol} logoUri={token.logoUri ?? undefined} />
     {token.symbol}
-  </Typography>
+  </span>
 )
 
 export const SwapTx = ({ info }: { info: OrderTransactionInfo }): ReactElement => {
@@ -34,22 +33,10 @@ export const SwapTx = ({ info }: { info: OrderTransactionInfo }): ReactElement =
   }
 
   return (
-    <Typography
-      component="div"
-      display="flex"
-      alignItems="center"
-      fontWeight="bold"
-      whiteSpace="nowrap"
-      overflow="hidden"
-      textOverflow="ellipsis"
-      flexWrap="wrap"
-      gap={0.5}
-    >
+    <div className="flex flex-wrap items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap font-bold">
       {from}
-      <Typography component="span" mx={0.5}>
-        &nbsp;to&nbsp;
-      </Typography>
+      <span className="mx-1">&nbsp;to&nbsp;</span>
       {to}
-    </Typography>
+    </div>
   )
 }

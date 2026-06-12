@@ -1,20 +1,14 @@
-import { type ReactElement, useCallback, useEffect, useState } from 'react'
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  DialogActions,
-  DialogContent,
-  Stack,
-  SvgIcon,
-  Typography,
-} from '@mui/material'
+import { type ReactElement, useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import memberIcon from '@/public/images/spaces/member.svg'
 import adminIcon from '@/public/images/spaces/admin.svg'
-import CheckIcon from '@mui/icons-material/Check'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import css from './styles.module.css'
 import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, MemberRole } from '@/features/spaces'
@@ -22,55 +16,46 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { useAppDispatch, useAppSelector } from '@/store'
+import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import MemberInfoForm from './MemberInfoForm'
+import AddressBookInput from '@/components/common/AddressBookInput'
 import useAddressBook from '@/hooks/useAddressBook'
-import { isAuthenticated } from '@/store/authSlice'
-import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
-import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { isAddress } from 'ethers'
-import {
-  type MemberField,
-  buildInviteUserPayload,
-  getInviteeIdentifierValidationError,
-  normalizeInviteeIdentifier,
-} from './utils'
-import AddMemberInput from './AddMemberInput'
-import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+
+type MemberField = {
+  name: string
+  address: string
+  role: MemberRole
+}
 
 export const RoleMenuItem = ({
   role,
   hasDescription = false,
-  selected = false,
 }: {
   role: MemberRole
   hasDescription?: boolean
-  selected?: boolean
 }): ReactElement => {
   const isAdmin = role === MemberRole.ADMIN
+  const Icon = isAdmin ? adminIcon : memberIcon
 
   return (
-    <Box width="100%" alignItems="center" className={css.roleMenuItem}>
-      <Box className={css.roleIcon}>
-        <SvgIcon mr={1} component={isAdmin ? adminIcon : memberIcon} inheritViewBox fontSize="small" />
-      </Box>
-      <Typography gridArea="title" fontWeight={hasDescription ? 'bold' : undefined}>
+    <div className={cn('w-full items-center', css.roleMenuItem)}>
+      <div className="flex items-center" style={{ gridArea: 'icon' }}>
+        <Icon className="size-4" />
+      </div>
+      <Typography variant={hasDescription ? 'paragraph-bold' : 'paragraph'} style={{ gridArea: 'title' }}>
         {isAdmin ? 'Admin' : 'Member'}
       </Typography>
       {hasDescription && (
-        <>
-          <Box className={css.roleDescription}>
-            <Typography variant="body2">
-              {isAdmin ? 'Admins can create and delete spaces, invite members, and more.' : 'Can view the space data.'}
-            </Typography>
-          </Box>
-          <Box className={selected ? css.roleCheckIcon : css.roleCheckIconHidden}>
-            <CheckIcon fontSize="small" className={css.roleCheckSvg} />
-          </Box>
-        </>
+        <div style={{ gridArea: 'description' }}>
+          <Typography variant="paragraph-small" className="max-w-[300px] break-words whitespace-normal">
+            {isAdmin
+              ? 'Admins can create and delete workspaces, invite members, and more.'
+              : 'Can view the workspace data.'}
+          </Typography>
+        </div>
       )}
-    </Box>
+    </div>
   )
 }
 
@@ -82,59 +67,30 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [inviteMembers] = useMembersInviteUserV1Mutation()
   const addressBook = useAddressBook()
-  const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data: session } = useAuthGetMeV1Query(undefined, { skip: !isUserSignedIn })
-  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const sessionEmail = session && 'email' in session && typeof session.email === 'string' ? session.email : undefined
+  const isDarkMode = useDarkMode()
 
   const methods = useForm<MemberField>({
     mode: 'onChange',
     defaultValues: {
       name: '',
-      inviteeIdentifier: '',
+      address: '',
       role: MemberRole.MEMBER,
     },
   })
 
-  const { handleSubmit, formState, register, watch, setValue } = methods
+  const { handleSubmit, formState, watch, setValue } = methods
 
-  const inviteeIdentifierValue = watch('inviteeIdentifier')
-  const inviteeIdentifierInputProps = register('inviteeIdentifier', {
-    required: true,
-    validate: (value) => {
-      return (
-        getInviteeIdentifierValidationError({
-          inviteeIdentifier: value,
-          sessionEmail,
-          walletAddresses: currentUser?.wallets?.map((wallet) => wallet.address),
-        }) ?? true
-      )
-    },
-  })
+  const addressValue = watch('address')
 
   useEffect(() => {
-    if (!isAddress(inviteeIdentifierValue)) {
-      return
-    }
-
-    const addressBookName = addressBook[inviteeIdentifierValue]
+    const addressBookName = addressBook[addressValue]
     if (addressBookName) {
-      setValue('name', addressBookName, { shouldValidate: true })
+      setValue('name', addressBookName)
     }
-  }, [addressBook, inviteeIdentifierValue, setValue])
-
-  const handleSelectAddress = useCallback(
-    (address: string, name: string) => {
-      setValue('inviteeIdentifier', address, { shouldValidate: true })
-      setValue('name', name, { shouldValidate: true })
-    },
-    [setValue],
-  )
+  }, [addressBook, addressValue, setValue])
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
-
-    const inviteeIdentifier = normalizeInviteeIdentifier(data.inviteeIdentifier)
 
     if (!spaceId) {
       setError('Something went wrong. Please try again.')
@@ -144,10 +100,8 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
     try {
       setIsSubmitting(true)
       const response = await inviteMembers({
-        spaceId: spaceId ?? '',
-        inviteUsersDto: {
-          users: [buildInviteUserPayload(data)],
-        },
+        spaceId: String(spaceId),
+        inviteUsersDto: { users: [{ type: 'wallet', address: data.address, role: data.role, name: data.name }] },
       })
 
       if (response.data) {
@@ -164,7 +118,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
         dispatch(
           showNotification({
-            message: `Invited ${data.name || inviteeIdentifier} to space`,
+            message: `Invited ${data.name} to space`,
             variant: 'success',
             groupKey: 'invite-member-success',
           }),
@@ -173,7 +127,9 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
         onClose()
       }
       if (response.error) {
-        setError(getRtkQueryErrorMessage(response.error) || 'Invite failed. Please try again.')
+        // @ts-ignore
+        const errorMessage = response.error?.data?.message || 'Invite failed. Please try again.'
+        setError(errorMessage)
       }
     } catch (e) {
       console.error(e)
@@ -185,45 +141,45 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
   return (
     <ModalDialog open onClose={onClose} dialogTitle="Add member" hideChainIndicator>
-      <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogContent sx={{ overflow: 'visible', py: 2 }}>
-            <Typography mb={2}>Invite a member by email or wallet address.</Typography>
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <FormProvider {...methods}>
+          <form onSubmit={onSubmit}>
+            <div className="px-6 py-4">
+              <Typography variant="paragraph" className="mb-4">
+                Invite a signer of the Safe Accounts, or any other wallet address. Anyone in the workspace can see their
+                name.
+              </Typography>
 
-            <Stack spacing={3}>
-              <MemberInfoForm />
+              <div className="flex flex-col gap-6">
+                <MemberInfoForm />
 
-              <AddMemberInput
-                error={formState.errors.inviteeIdentifier?.message}
-                inputProps={inviteeIdentifierInputProps}
-                onSelectAddress={handleSelectAddress}
-                value={inviteeIdentifierValue}
-              />
-            </Stack>
+                <AddressBookInput
+                  data-testid="member-address-input"
+                  name="address"
+                  label="Address"
+                  required
+                  showPrefix={false}
+                />
+              </div>
 
-            {error && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {error}
-              </Alert>
-            )}
-          </DialogContent>
+              {error && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
 
-          <DialogActions>
-            <Button data-testid="cancel-btn" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              data-testid="add-member-modal-button"
-              type="submit"
-              variant="contained"
-              disabled={!formState.isValid || isSubmitting}
-              disableElevation
-            >
-              {isSubmitting ? <CircularProgress size={20} /> : 'Add member'}
-            </Button>
-          </DialogActions>
-        </form>
-      </FormProvider>
+            <div className="flex justify-end gap-2 px-6 pb-6">
+              <Button variant="ghost" data-testid="cancel-btn" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button data-testid="add-member-modal-button" type="submit" disabled={!formState.isValid || isSubmitting}>
+                {isSubmitting ? <Spinner className="size-5" /> : 'Add member'}
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
+      </div>
     </ModalDialog>
   )
 }

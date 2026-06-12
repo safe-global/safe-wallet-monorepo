@@ -1,5 +1,6 @@
 import { useContext } from 'react'
-import { Paper, Grid, Typography, Box, Button } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
 import { NoSpendingLimits } from './NoSpendingLimits'
 import { SpendingLimitsTable } from './SpendingLimitsTable'
 import { useHasFeature } from '@/hooks/useChains'
@@ -21,29 +22,17 @@ const SpendingLimitsSettings = () => {
   const spendingLimitsLoading = useAppSelector(selectSpendingLimitsLoading)
 
   return (
-    <Paper data-testid="spending-limit-section" sx={{ padding: 4 }}>
-      <Grid
-        container
-        direction="row"
-        spacing={3}
-        sx={{
-          justifyContent: 'space-between',
-        }}
-      >
-        <Grid item lg={4} xs={12}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
+    <div data-testid="spending-limit-section" className="bg-card text-card-foreground rounded-lg p-8">
+      <div className="flex flex-col justify-between gap-6 lg:flex-row">
+        <div className="lg:w-1/3">
+          <Typography variant="h4" className="font-bold">
             Spending limits
           </Typography>
-        </Grid>
+        </div>
 
-        <Grid item xs>
+        <div className="flex-1">
           {isEnabled ? (
-            <Box>
+            <div>
               <Typography>
                 You can set rules for specific beneficiaries to access funds from this Safe Account without having to
                 collect all signatures.
@@ -55,10 +44,9 @@ const SpendingLimitsSettings = () => {
                     <Button
                       data-testid="new-spending-limit"
                       onClick={() => setTxFlow(<NewSpendingLimitFlow />)}
-                      sx={{ mt: 2, mb: 2 }}
-                      variant="contained"
+                      className="my-4"
                       disabled={!isOk}
-                      size="small"
+                      size="sm"
                     >
                       New spending limit
                     </Button>
@@ -70,13 +58,13 @@ const SpendingLimitsSettings = () => {
               {spendingLimits.length > 0 && (
                 <SpendingLimitsTable isLoading={spendingLimitsLoading} spendingLimits={spendingLimits} />
               )}
-            </Box>
+            </div>
           ) : (
             <Typography>The spending limit feature is not yet available on this chain.</Typography>
           )}
-        </Grid>
-      </Grid>
-    </Paper>
+        </div>
+      </div>
+    </div>
   )
 }
 

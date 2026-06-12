@@ -1,11 +1,9 @@
-import { useEffect, useMemo, useRef, useState, type SyntheticEvent } from 'react'
-import Button from '@mui/material/Button'
-import ButtonGroup from '@mui/material/ButtonGroup'
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
-import MenuItem from '@mui/material/MenuItem'
-import MenuList from '@mui/material/MenuList'
-import { Box, CircularProgress, ListItemText, Popover, Tooltip } from '@mui/material'
-import CheckIcon from '@mui/icons-material/Check'
+import { useEffect, useMemo, useState, type SyntheticEvent } from 'react'
+import { ChevronDown, Check } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 type Option = {
   id: string
@@ -32,7 +30,6 @@ export default function SplitMenuButton({
   loading?: boolean
 }) {
   const [open, setOpen] = useState(false)
-  const anchorRef = useRef<HTMLDivElement>(null)
   const [selectedIndex, setSelectedIndex] = useState(0)
 
   useEffect(() => {
@@ -48,24 +45,10 @@ export default function SplitMenuButton({
     onClick?.(options[selectedIndex], e)
   }
 
-  const handleMenuItemClick = (e: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number) => {
-    e.preventDefault()
-
+  const handleMenuItemClick = (index: number) => {
     if (index !== selectedIndex) {
       setSelectedIndex(index)
       onChange?.(options[index])
-    }
-
-    setOpen(false)
-  }
-
-  const handleToggle = () => {
-    setOpen((prevOpen) => !prevOpen)
-  }
-
-  const handleClose = (event: Event) => {
-    if (anchorRef.current && anchorRef.current.contains(event.target as HTMLElement)) {
-      return
     }
 
     setOpen(false)
@@ -75,66 +58,60 @@ export default function SplitMenuButton({
   const maxCharLen = Math.max(...options.map(({ id, label }) => (label || id).length)) + 2
 
   return (
-    <>
-      <ButtonGroup variant="contained" ref={anchorRef} aria-label="Button group with a nested menu" fullWidth>
-        <Tooltip title={tooltip} placement="top">
-          <Box flex={1}>
+    <div data-slot="button-group" className="flex w-full" aria-label="Button group with a nested menu">
+      <Tooltip>
+        <TooltipTrigger
+          render={
             <Button
               data-testid={`combo-submit-${id}`}
               onClick={handleClick}
               type="submit"
               disabled={disabled}
-              sx={{ minWidth: `${maxCharLen}ch !important`, height: '100%' }}
-            >
-              {loading ? <CircularProgress size={20} /> : label || id}
-            </Button>
-          </Box>
-        </Tooltip>
+              className="h-full w-full rounded-r-none"
+              style={{ minWidth: `${maxCharLen}ch` }}
+            />
+          }
+        >
+          {loading ? <Spinner className="size-5" /> : label || id}
+        </TooltipTrigger>
+        {tooltip ? <TooltipContent>{tooltip}</TooltipContent> : null}
+      </Tooltip>
 
-        {options.length > 1 && (
-          <Button
-            aria-expanded={open ? 'true' : undefined}
-            aria-label="select action"
-            aria-haspopup="menu"
-            onClick={handleToggle}
-            disabled={loading}
-            data-testid="combo-submit-dropdown"
-            sx={{ minWidth: '0 !important', maxWidth: 48, px: 1.5, height: '100%' }}
+      {options.length > 1 && (
+        <DropdownMenu open={open} onOpenChange={setOpen}>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                aria-label="select action"
+                disabled={loading}
+                data-testid="combo-submit-dropdown"
+                className="h-full max-w-12 rounded-l-none border-l border-l-[var(--color-border-light)] px-3"
+              />
+            }
           >
-            <ArrowDropDownIcon />
-          </Button>
-        )}
-      </ButtonGroup>
+            <ChevronDown />
+          </DropdownMenuTrigger>
 
-      <Popover
-        open={open}
-        anchorEl={anchorRef.current}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{ horizontal: 'right', vertical: -2 }}
-        slotProps={{
-          root: { slotProps: { backdrop: { sx: { backgroundColor: 'transparent' } } } },
-        }}
-        data-testid="combo-submit-popover"
-      >
-        <MenuList autoFocusItem>
-          {options.map((option, index) => (
-            <MenuItem
-              key={option.id}
-              selected={index === selectedIndex}
-              disabled={disabledIndex === index}
-              onClick={(event) => handleMenuItemClick(event, index)}
-              sx={{ gap: 2 }}
-            >
-              <ListItemText>{option.label || option.id}</ListItemText>
-              {index === selectedIndex ? <CheckIcon /> : <Box sx={{ width: 24 }} />}
-            </MenuItem>
-          ))}
-        </MenuList>
-      </Popover>
-    </>
+          <DropdownMenuContent
+            data-testid="combo-submit-popover"
+            align="end"
+            side="bottom"
+            className="w-auto min-w-(--anchor-width)"
+          >
+            {options.map((option, index) => (
+              <DropdownMenuItem
+                key={option.id}
+                disabled={disabledIndex === index}
+                onClick={() => handleMenuItemClick(index)}
+                className="gap-4"
+              >
+                <span className="flex-1">{option.label || option.id}</span>
+                {index === selectedIndex ? <Check className="size-4" /> : <span className="w-6" />}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </div>
   )
 }

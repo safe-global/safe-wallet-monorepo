@@ -1,9 +1,10 @@
 import useGasPrice from '@/hooks/useGasPrice'
 import ModalDialog from '@/components/common/ModalDialog'
-import DialogContent from '@mui/material/DialogContent'
-import { Box, Button, CircularProgress, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import RocketSpeedup from '@/public/images/common/ic-rocket-speedup.svg'
-import DialogActions from '@mui/material/DialogActions'
 import useWallet from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -162,20 +163,20 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   if (safeTxHasSignatures) {
     return (
       <ModalDialog open={open} onClose={onCancel} dialogTitle="Speed up transaction">
-        <DialogContent sx={{ p: '24px !important' }}>
-          <Box display="flex" justifyContent="center" alignItems="center" mb={2}>
-            <SvgIcon inheritViewBox component={RocketSpeedup} sx={{ width: 90, height: 90 }} />
-          </Box>
+        <div className="p-6">
+          <div className="mb-4 flex items-center justify-center">
+            <RocketSpeedup className="size-[90px]" />
+          </div>
 
           <Typography data-testid="speedup-summary">
             This will speed up the pending transaction by{' '}
-            <Typography component="span" fontWeight={700}>
+            <Typography variant="paragraph-bold" className="inline">
               replacing
             </Typography>{' '}
             the original gas parameters with new ones.
           </Typography>
 
-          <Box mt={2}>
+          <div className="mt-4">
             {speedUpFee && signerNonce && (
               <GasParams
                 params={{
@@ -190,47 +191,46 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
                 willRelay={false}
               />
             )}
-          </Box>
-          <Box sx={{ '&:not(:empty)': { mt: 3 } }}>
+          </div>
+          <div className="[&:not(:empty)]:mt-6">
             <NetworkWarning />
-          </Box>
-        </DialogContent>
+          </div>
+        </div>
 
-        <DialogActions>
-          <Button onClick={onCancel}>Cancel</Button>
+        <div className="flex items-center justify-end gap-2 p-4">
+          <Button variant="ghost" onClick={onCancel}>
+            Cancel
+          </Button>
 
-          <Tooltip title="Speed up transaction">
-            <CheckWallet checkNetwork={!isDisabled}>
-              {(isOk) => (
-                <Button
-                  color="primary"
-                  disabled={!isOk || isDisabled}
-                  onClick={onSubmit}
-                  variant="contained"
-                  disableElevation
-                >
-                  {isDisabled ? <CircularProgress size={20} /> : 'Confirm'}
-                </Button>
-              )}
-            </CheckWallet>
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <CheckWallet checkNetwork={!isDisabled}>
+                {(isOk) => (
+                  <Button disabled={!isOk || isDisabled} onClick={onSubmit}>
+                    {isDisabled ? <Spinner className="size-5" /> : 'Confirm'}
+                  </Button>
+                )}
+              </CheckWallet>
+            </TooltipTrigger>
+            <TooltipContent>Speed up transaction</TooltipContent>
           </Tooltip>
-        </DialogActions>
+        </div>
       </ModalDialog>
     )
   }
 
   return (
     <ModalDialog open={open} onClose={handleClose} dialogTitle="Speed up transaction">
-      <DialogContent sx={{ p: '24px !important' }}>
-        <Box display="flex" justifyContent="center" alignItems="center" mb={2}>
-          <SvgIcon inheritViewBox component={RocketSpeedup} sx={{ width: 90, height: 90 }} />
-        </Box>
+      <div className="p-6">
+        <div className="mb-4 flex items-center justify-center">
+          <RocketSpeedup className="size-[90px]" />
+        </div>
 
         <Typography data-testid="speedup-summary">
           Is this transaction taking too long? Speed it up by using the &quot;speed up&quot; option in your connected
           wallet.
         </Typography>
-      </DialogContent>
+      </div>
     </ModalDialog>
   )
 }

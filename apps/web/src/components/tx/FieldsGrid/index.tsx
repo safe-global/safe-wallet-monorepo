@@ -1,11 +1,8 @@
 import { type ReactNode } from 'react'
-import { Grid, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 
-export const gridSx = {
-  width: { xl: '25%', lg: '170px', xs: 'auto' },
-  minWidth: '100px',
-  flexWrap: { xl: 'nowrap' },
-}
+// Title column sizing: xs auto, lg 170px, xl 25%, min 100px
+export const gridFieldClass = 'min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap'
 
 const FieldsGrid = ({
   title,
@@ -17,25 +14,16 @@ const FieldsGrid = ({
   testId?: string
 }) => {
   return (
-    <Grid
-      container
-      sx={[
-        {
-          gap: 1,
-          flexWrap: gridSx.flexWrap,
-        },
-      ]}
-      data-testid={testId}
-    >
-      <Grid item data-testid="tx-row-title" style={{ wordBreak: 'break-word' }} sx={gridSx}>
-        <Typography color="primary.light" variant="body2" component="span">
+    <div className="flex flex-wrap gap-2 xl:flex-nowrap" data-testid={testId}>
+      <div data-testid="tx-row-title" className={`break-words ${gridFieldClass}`}>
+        <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
           {title}
         </Typography>
-      </Grid>
-      <Grid item xs data-testid="tx-data-row">
+      </div>
+      <div data-testid="tx-data-row" className="flex-1">
         {children}
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   )
 }
 

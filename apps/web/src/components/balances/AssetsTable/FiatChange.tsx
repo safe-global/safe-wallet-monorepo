@@ -1,8 +1,11 @@
-import { Chip, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Chip } from '@/components/ui/chip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 import ArrowDown from '@/public/images/balances/change-down.svg'
 import ArrowUp from '@/public/images/balances/change-up.svg'
+import { cn } from '@/utils/cn'
 
 interface FiatChangeProps {
   balanceItem?: Balance
@@ -21,7 +24,7 @@ export const FiatChange = ({ balanceItem, change, inline = false }: FiatChangePr
 
   if (!fiatChange) {
     return (
-      <Typography variant="caption" color="text.secondary" paddingLeft={3} display="block">
+      <Typography variant="paragraph-mini" color="muted" className="block pl-6">
         n/a
       </Typography>
     )
@@ -31,32 +34,44 @@ export const FiatChange = ({ balanceItem, change, inline = false }: FiatChangePr
   const changeLabel = formatPercentage(changeAsNumber)
   const direction = changeAsNumber < 0 ? 'down' : changeAsNumber > 0 ? 'up' : 'none'
 
-  const backgroundColor =
-    direction === 'down' ? 'error.background' : direction === 'up' ? 'success.background' : 'default'
-  const color = direction === 'down' ? 'error.main' : direction === 'up' ? 'success.main' : 'default'
+  const colorClass =
+    direction === 'down'
+      ? 'text-[var(--color-error-main)]'
+      : direction === 'up'
+        ? 'text-[var(--color-success-main)]'
+        : ''
+  const backgroundClass = inline
+    ? 'bg-transparent'
+    : direction === 'down'
+      ? 'bg-[var(--color-error-background)]'
+      : direction === 'up'
+        ? 'bg-[var(--color-success-background)]'
+        : ''
 
   return (
-    <Tooltip title="24h change">
-      <Chip
-        size="small"
-        sx={{
-          backgroundColor: inline ? 'transparent' : backgroundColor,
-          color,
-          padding: inline ? '0' : '2px 8px',
-          height: inline ? '20px' : 'inherit',
-          '& .MuiChip-label': { pr: inline ? 0 : 1, fontSize: '13px' },
-        }}
-        label={changeLabel}
-        icon={
-          direction === 'down' ? (
-            <SvgIcon color="error" inheritViewBox component={ArrowDown} sx={{ width: '9px', height: '6px' }} />
-          ) : direction === 'up' ? (
-            <SvgIcon color="success" inheritViewBox component={ArrowUp} sx={{ width: '9px', height: '6px' }} />
-          ) : (
-            <>-</>
-          )
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Chip
+            className={cn(
+              colorClass,
+              backgroundClass,
+              inline ? 'h-5 px-0' : 'h-auto px-2 py-0.5',
+              inline ? 'pr-0' : 'pr-1',
+            )}
+          >
+            {direction === 'down' ? (
+              <ArrowDown className="h-[6px] w-[9px] text-[var(--color-error-main)]" />
+            ) : direction === 'up' ? (
+              <ArrowUp className="h-[6px] w-[9px] text-[var(--color-success-main)]" />
+            ) : (
+              '-'
+            )}
+            <span className="text-[13px]">{changeLabel}</span>
+          </Chip>
         }
       />
+      <TooltipContent>24h change</TooltipContent>
     </Tooltip>
   )
 }

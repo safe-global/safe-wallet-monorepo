@@ -1,5 +1,6 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { Stack, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { useIsBelowMd } from '@/hooks/useMediaQuery'
 
 import css from './styles.module.css'
 import useChainId from '@/hooks/useChainId'
@@ -23,25 +24,11 @@ export const SpenderField = ({ address }: { address: string }) => {
       setSpendingContract(contract)
     }
   }, [contract, shouldSkip])
-  const { breakpoints } = useTheme()
-  const isSmallScreen = useMediaQuery(breakpoints.down('md'))
+  const isSmallScreen = useIsBelowMd()
 
   return (
-    <Stack
-      direction="row"
-      className={css.approvalField}
-      sx={{
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        gap: 2,
-      }}
-    >
-      <Typography
-        variant="body2"
-        sx={{
-          color: 'text.secondary',
-        }}
-      >
+    <div className={`${css.approvalField} flex flex-row items-center justify-between gap-4`}>
+      <Typography variant="paragraph-small" className="text-muted-foreground">
         Spender
       </Typography>
       <div>
@@ -54,6 +41,6 @@ export const SpenderField = ({ address }: { address: string }) => {
           hasExplorer
         />
       </div>
-    </Stack>
+    </div>
   )
 }

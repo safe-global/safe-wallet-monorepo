@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box, Paper, Typography, Button, Divider } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 
 /**
  * Welcome components are displayed on the landing page to help users
@@ -21,25 +23,27 @@ export default meta
 // WelcomeLogin mockup - disconnected state
 export const LoginCard: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 4, maxWidth: 450, textAlign: 'center', bgcolor: '#fff' }}>
-      <Typography variant="h4" fontWeight={700} sx={{ mt: 3 }}>
+    <div className="max-w-[450px] rounded-lg bg-background p-8 text-center">
+      <Typography variant="h4" className="mt-6">
         Get started
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mt: 2, mb: 3 }}>
+      <Typography variant="paragraph" color="muted" className="mb-6 mt-4">
         Connect your wallet to create a Safe Account or watch an existing one
       </Typography>
-      <Button variant="contained" size="large" fullWidth>
+      <Button size="lg" className="w-full">
         Connect wallet
       </Button>
-      <Divider sx={{ my: 3 }}>
-        <Typography variant="overline" color="text.secondary">
+      <div className="my-6 flex items-center gap-4">
+        <Separator className="flex-1" />
+        <Typography variant="paragraph-mini" color="muted">
           or
         </Typography>
-      </Divider>
-      <Button variant="text" size="small">
+        <Separator className="flex-1" />
+      </div>
+      <Button variant="ghost" size="sm">
         Watch any account
       </Button>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -53,17 +57,17 @@ export const LoginCard: StoryObj = {
 // WelcomeLogin - connected state
 export const LoginCardConnected: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 4, maxWidth: 450, textAlign: 'center', bgcolor: '#fff' }}>
-      <Typography variant="h4" fontWeight={700} sx={{ mt: 3 }}>
+    <div className="max-w-[450px] rounded-lg bg-background p-8 text-center">
+      <Typography variant="h4" className="mt-6">
         Get started
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mt: 2, mb: 3 }}>
+      <Typography variant="paragraph" color="muted" className="mb-6 mt-4">
         Open your existing Safe Accounts or create a new one
       </Typography>
-      <Button variant="contained" size="large" fullWidth>
+      <Button size="lg" className="w-full">
         Continue
       </Button>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -76,25 +80,25 @@ export const LoginCardConnected: StoryObj = {
 
 export const LoginCardMobile: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 320, textAlign: 'center', bgcolor: '#fff' }}>
-      <Typography variant="h5" fontWeight={700} sx={{ mt: 2 }}>
+    <div className="max-w-[320px] rounded-lg bg-background p-6 text-center">
+      <Typography variant="h4" className="mt-4">
         Get started
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-4 mt-2">
         Connect your wallet to create a Safe Account
       </Typography>
-      <Button variant="contained" size="medium" fullWidth>
-        Connect wallet
-      </Button>
-      <Divider sx={{ my: 2 }}>
-        <Typography variant="overline" color="text.secondary">
+      <Button className="w-full">Connect wallet</Button>
+      <div className="my-4 flex items-center gap-4">
+        <Separator className="flex-1" />
+        <Typography variant="paragraph-mini" color="muted">
           or
         </Typography>
-      </Divider>
-      <Button variant="text" size="small">
+        <Separator className="flex-1" />
+      </div>
+      <Button variant="ghost" size="sm">
         Watch any account
       </Button>
-    </Paper>
+    </div>
   ),
   parameters: {
     viewport: {
@@ -111,22 +115,20 @@ export const LoginCardMobile: StoryObj = {
 // NewSafe component mockup
 export const NewSafeCard: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 4, maxWidth: 450 }}>
-      <Typography variant="h5" fontWeight={700} gutterBottom>
+    <div className="max-w-[450px] rounded-lg bg-background p-8">
+      <Typography variant="h4" className="mb-2">
         Create new Safe
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-6">
         A new Safe will be created on your chosen network with your connected wallet as the first owner.
       </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Button variant="contained" fullWidth>
-          Create new Safe
-        </Button>
-        <Button variant="outlined" fullWidth>
+      <div className="flex flex-col gap-4">
+        <Button className="w-full">Create new Safe</Button>
+        <Button variant="outline" className="w-full">
           Add existing Safe
         </Button>
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -140,35 +142,29 @@ export const NewSafeCard: StoryObj = {
 // Full welcome page layout
 export const WelcomePage: StoryObj = {
   render: () => (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 3,
-        maxWidth: 500,
-        alignItems: 'center',
-      }}
-    >
-      <Paper sx={{ p: 4, width: '100%', textAlign: 'center', bgcolor: '#fff' }}>
-        <Typography variant="h4" fontWeight={700} sx={{ mt: 3 }}>
+    <div className="flex max-w-[500px] flex-col items-center gap-6">
+      <div className="w-full rounded-lg bg-background p-8 text-center">
+        <Typography variant="h4" className="mt-6">
           Get started
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 2, mb: 3 }}>
+        <Typography variant="paragraph" color="muted" className="mb-6 mt-4">
           Connect your wallet to create a Safe Account or watch an existing one
         </Typography>
-        <Button variant="contained" size="large" fullWidth>
+        <Button size="lg" className="w-full">
           Connect wallet
         </Button>
-        <Divider sx={{ my: 3 }}>
-          <Typography variant="overline" color="text.secondary">
+        <div className="my-6 flex items-center gap-4">
+          <Separator className="flex-1" />
+          <Typography variant="paragraph-mini" color="muted">
             or
           </Typography>
-        </Divider>
-        <Button variant="text" size="small">
+          <Separator className="flex-1" />
+        </div>
+        <Button variant="ghost" size="sm">
           Watch any account
         </Button>
-      </Paper>
-    </Box>
+      </div>
+    </div>
   ),
   parameters: {
     layout: 'padded',
@@ -183,28 +179,19 @@ export const WelcomePage: StoryObj = {
 // Dark background variant
 export const OnDarkBackground: StoryObj = {
   render: () => (
-    <Paper
-      sx={{
-        p: 4,
-        bgcolor: 'primary.main',
-        minHeight: 400,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <Paper sx={{ p: 4, maxWidth: 400, textAlign: 'center', bgcolor: '#fff' }}>
-        <Typography variant="h4" fontWeight={700} sx={{ mt: 2 }}>
+    <div className="flex min-h-[400px] items-center justify-center rounded-lg bg-primary p-8">
+      <div className="max-w-[400px] rounded-lg bg-background p-8 text-center">
+        <Typography variant="h4" className="mt-4">
           Get started
         </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 2, mb: 3 }}>
+        <Typography variant="paragraph" color="muted" className="mb-6 mt-4">
           Connect your wallet to create a Safe Account
         </Typography>
-        <Button variant="contained" size="large" fullWidth>
+        <Button size="lg" className="w-full">
           Connect wallet
         </Button>
-      </Paper>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {

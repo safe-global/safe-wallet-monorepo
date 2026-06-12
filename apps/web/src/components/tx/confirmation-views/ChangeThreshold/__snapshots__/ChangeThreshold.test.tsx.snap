@@ -3,14 +3,18 @@
 exports[`ChangeThreshold should display the ChangeThreshold component with the new threshold range 1`] = `
 <div>
   <div>
-    <p
-      class="MuiTypography-root MuiTypography-body2 css-1q9800n-MuiTypography-root"
+    <span
+      class="m-0 text-sm leading-5 font-normal text-muted-foreground mb-1"
+      data-slot="typography"
+      data-variant="paragraph-small"
     >
       Any transaction will require the confirmation of:
-    </p>
+    </span>
     <p
       aria-label="threshold"
-      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
+      class="m-0 text-base leading-6 font-normal"
+      data-slot="typography"
+      data-variant="paragraph"
     >
       <b>
         3
@@ -24,10 +28,14 @@ exports[`ChangeThreshold should display the ChangeThreshold component with the n
     </p>
   </div>
   <div
-    class="MuiBox-root css-1xlzx9v"
+    class="my-2"
   >
-    <hr
-      class="MuiDivider-root MuiDivider-fullWidth nestedDivider css-1facvfi-MuiDivider-root"
+    <div
+      aria-orientation="horizontal"
+      class="bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px data-[orientation=vertical]:self-stretch nestedDivider"
+      data-orientation="horizontal"
+      data-slot="separator"
+      role="separator"
     />
   </div>
 </div>

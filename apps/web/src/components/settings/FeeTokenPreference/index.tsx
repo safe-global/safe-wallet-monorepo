@@ -1,18 +1,11 @@
 import { useState, useEffect } from 'react'
-import {
-  Box,
-  Button,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  InputAdornment,
-  MenuItem,
-  Select,
-  Typography,
-  Alert,
-  Paper,
-  Grid,
-} from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertAction, AlertDescription } from '@/components/ui/alert'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { XIcon } from 'lucide-react'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
@@ -254,112 +247,91 @@ export const FeeTokenPreference = () => {
   const loading = loadingBalances || loadingPreference
 
   return (
-    <Paper data-testid="fee-token-preference-section" sx={{ padding: 4, mt: 2 }}>
-      <Grid
-        container
-        direction="row"
-        spacing={3}
-        sx={{
-          justifyContent: 'space-between',
-        }}
-      >
-        <Grid item lg={4} xs={12}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
-            Fee token preference
-          </Typography>
-        </Grid>
+    <div data-testid="fee-token-preference-section" className="mt-4 rounded-lg bg-[var(--color-background-paper)] p-8">
+      <div className="grid grid-cols-1 justify-between gap-6 lg:grid-cols-[1fr_2fr]">
+        <div>
+          <Typography variant="h4">Fee token preference</Typography>
+        </div>
 
-        <Grid item xs>
+        <div>
           {wallet ? (
-            <Box>
-              <Typography mb={3}>
+            <div>
+              <Typography className="mb-6">
                 Select your preferred token for paying transaction fees on Tempo. This preference will be used for all
                 future transactions for the connected wallet.
               </Typography>
 
               {error && (
-                <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(undefined)}>
-                  {error}
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>{error}</AlertDescription>
+                  <AlertAction>
+                    <Button variant="ghost" size="icon-xs" aria-label="Dismiss" onClick={() => setError(undefined)}>
+                      <XIcon />
+                    </Button>
+                  </AlertAction>
                 </Alert>
               )}
 
               {success && (
-                <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(false)}>
-                  Fee token preference updated successfully!
+                <Alert className="mb-4">
+                  <AlertDescription>Fee token preference updated successfully!</AlertDescription>
+                  <AlertAction>
+                    <Button variant="ghost" size="icon-xs" aria-label="Dismiss" onClick={() => setSuccess(false)}>
+                      <XIcon />
+                    </Button>
+                  </AlertAction>
                 </Alert>
               )}
 
-              <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel id="fee-token-label">Fee token</InputLabel>
+              <div className="mb-4 flex flex-col gap-1.5">
+                <Label htmlFor="fee-token">Fee token</Label>
                 <Select
-                  labelId="fee-token-label"
-                  label="Fee token"
-                  value={loading ? '' : selectedToken || ''}
-                  onChange={(e) => {
-                    setSelectedToken(e.target.value as `0x${string}`)
+                  value={loading ? null : selectedToken || null}
+                  onValueChange={(value) => {
+                    setSelectedToken(value as `0x${string}`)
                     setSuccess(false)
                   }}
                   disabled={loading || saving}
-                  startAdornment={
-                    loading ? (
-                      <InputAdornment position="start">
-                        <CircularProgress size={20} />
-                      </InputAdornment>
-                    ) : undefined
-                  }
                 >
-                  {loading && (
-                    <MenuItem disabled>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <CircularProgress size={16} />
-                        <Typography>Loading...</Typography>
-                      </Box>
-                    </MenuItem>
-                  )}
-                  {!loading &&
-                    tokenOptions.map((token) => {
+                  <SelectTrigger id="fee-token" className="w-full">
+                    {loading && <Spinner className="size-5" />}
+                    <SelectValue placeholder={loading ? 'Loading...' : 'Fee token'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tokenOptions.map((token) => {
                       const balanceStr = formatVisualAmount(token.balance.toString(), token.decimals)
 
                       return (
-                        <MenuItem key={token.address} value={token.address}>
-                          <Box display="flex" justifyContent="space-between" width="100%">
+                        <SelectItem key={token.address} value={token.address}>
+                          <div className="flex w-full justify-between">
                             <Typography>{token.name}</Typography>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography variant="paragraph-small" className="text-muted-foreground">
                               Balance: {balanceStr}
                             </Typography>
-                          </Box>
-                        </MenuItem>
+                          </div>
+                        </SelectItem>
                       )
                     })}
+                  </SelectContent>
                 </Select>
-              </FormControl>
+              </div>
 
-              <Button
-                variant="contained"
-                onClick={handleSave}
-                disabled={!selectedToken || saving || loading}
-                sx={{ minWidth: 120 }}
-              >
+              <Button onClick={handleSave} disabled={!selectedToken || saving || loading} className="min-w-[120px]">
                 {saving ? (
                   <>
-                    <CircularProgress size={16} sx={{ mr: 1 }} />
+                    <Spinner className="mr-1 size-4" />
                     Saving...
                   </>
                 ) : (
                   'Save preference'
                 )}
               </Button>
-            </Box>
+            </div>
           ) : (
             <Typography>Please connect your wallet to configure fee token preference.</Typography>
           )}
-        </Grid>
-      </Grid>
-    </Paper>
+        </div>
+      </div>
+    </div>
   )
 }

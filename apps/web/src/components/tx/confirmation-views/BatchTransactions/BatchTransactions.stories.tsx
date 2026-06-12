@@ -1,9 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper, ThemeProvider } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import BatchTransactions from './index'
 import { mockedDraftBatch } from './mockData'
-import createSafeTheme from '@/components/theme/safeTheme'
 
 const meta = {
   component: BatchTransactions,
@@ -23,11 +21,9 @@ const meta = {
             },
           }}
         >
-          <ThemeProvider theme={createSafeTheme('dark')}>
-            <Paper sx={{ padding: 2 }}>
-              <Story />
-            </Paper>
-          </ThemeProvider>
+          <div className="p-4">
+            <Story />
+          </div>
         </StoreDecorator>
       )
     },

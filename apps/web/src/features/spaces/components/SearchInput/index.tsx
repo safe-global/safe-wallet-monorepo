@@ -1,7 +1,9 @@
-import { InputAdornment, SvgIcon, TextField } from '@mui/material'
 import SearchIcon from '@/public/images/common/search.svg'
 import { useCallback } from 'react'
 import { debounce } from 'lodash'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 interface SearchInputProps {
   placeholder?: string
@@ -10,35 +12,25 @@ interface SearchInputProps {
 }
 
 const SearchInput = ({ onSearch, debounceTime = 300 }: SearchInputProps) => {
+  const isDarkMode = useDarkMode()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleSearch = useCallback(debounce(onSearch, debounceTime), [onSearch, debounceTime])
 
   return (
-    <TextField
-      aria-label="Search"
-      placeholder="Search"
-      variant="filled"
-      hiddenLabel
-      onChange={(e) => {
-        handleSearch(e.target.value)
-      }}
-      InputProps={{
-        startAdornment: (
-          <InputAdornment position="start">
-            <SvgIcon component={SearchIcon} inheritViewBox color="border" fontSize="small" data-testid="search-icon" />
-          </InputAdornment>
-        ),
-        disableUnderline: true,
-      }}
-      size="small"
-      sx={{
-        transition: 'width 0.15s ease-in-out',
-        width: { xs: '100%', sm: '250px' },
-        '&:focus-within': {
-          width: { xs: '100%', sm: '470px' },
-        },
-      }}
-    />
+    <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+      <InputGroup className="w-full transition-[width] duration-150 ease-in-out focus-within:sm:w-[470px] sm:w-[250px]">
+        <InputGroupAddon>
+          <SearchIcon className="size-4 text-[var(--color-border-main)]" data-testid="search-icon" />
+        </InputGroupAddon>
+        <InputGroupInput
+          aria-label="Search"
+          placeholder="Search"
+          onChange={(e) => {
+            handleSearch(e.target.value)
+          }}
+        />
+      </InputGroup>
+    </div>
   )
 }
 

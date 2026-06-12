@@ -1,4 +1,5 @@
 import { render } from '@/tests/test-utils'
+import userEvent from '@testing-library/user-event'
 import { _GasParams as GasParams } from '@/components/tx/GasParams/index'
 import type { AdvancedParameters } from '@/components/tx/AdvancedParams'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -83,7 +84,7 @@ describe('GasParams', () => {
     expect(queryByText('0.21')).not.toBeInTheDocument()
   })
 
-  it('Shows the nonce if it exists', () => {
+  it('Shows the nonce if it exists', async () => {
     const params: AdvancedParameters = {
       nonce: 123,
       userNonce: 1,
@@ -91,13 +92,18 @@ describe('GasParams', () => {
       maxPriorityFeePerGas: BigInt('10000'),
     }
 
-    const { getByText } = render(<GasParams params={params} isExecution={true} isEIP1559={true} onEdit={jest.fn} />)
+    const { getByText, findByText } = render(
+      <GasParams params={params} isExecution={true} isEIP1559={true} onEdit={jest.fn} />,
+    )
 
-    expect(getByText('Safe Account transaction nonce')).toBeInTheDocument()
+    // Details are inside a collapsed accordion (unmounted) until expanded
+    await userEvent.click(getByText('Estimated fee'))
+
+    expect(await findByText('Safe Account transaction nonce')).toBeInTheDocument()
     expect(getByText('123')).toBeInTheDocument()
   })
 
-  it('Shows safeTxGas if it exists', () => {
+  it('Shows safeTxGas if it exists', async () => {
     const params: AdvancedParameters = {
       nonce: 123,
       userNonce: 1,
@@ -106,13 +112,17 @@ describe('GasParams', () => {
       safeTxGas: 100,
     }
 
-    const { getByText } = render(<GasParams params={params} isExecution={true} isEIP1559={true} onEdit={jest.fn} />)
+    const { getByText, findByText } = render(
+      <GasParams params={params} isExecution={true} isEIP1559={true} onEdit={jest.fn} />,
+    )
 
-    expect(getByText('safeTxGas')).toBeInTheDocument()
+    await userEvent.click(getByText('Estimated fee'))
+
+    expect(await findByText('safeTxGas')).toBeInTheDocument()
     expect(getByText('100')).toBeInTheDocument()
   })
 
-  it('Shows gasLimit if it exists', () => {
+  it('Shows gasLimit if it exists', async () => {
     const params: AdvancedParameters = {
       nonce: 123,
       userNonce: 1,
@@ -121,9 +131,13 @@ describe('GasParams', () => {
       maxPriorityFeePerGas: BigInt('10000'),
     }
 
-    const { getByText } = render(<GasParams params={params} isExecution={true} isEIP1559={true} onEdit={jest.fn} />)
+    const { getByText, findByText } = render(
+      <GasParams params={params} isExecution={true} isEIP1559={true} onEdit={jest.fn} />,
+    )
 
-    expect(getByText('Gas limit')).toBeInTheDocument()
+    await userEvent.click(getByText('Estimated fee'))
+
+    expect(await findByText('Gas limit')).toBeInTheDocument()
     expect(getByText('30000')).toBeInTheDocument()
   })
 
@@ -148,7 +162,7 @@ describe('GasParams', () => {
     expect(queryAllByText('Cannot estimate').length).toBeGreaterThan(0)
   })
 
-  it('Shows maxFee and maxPrioFee if EIP1559', () => {
+  it('Shows maxFee and maxPrioFee if EIP1559', async () => {
     const params: AdvancedParameters = {
       nonce: 123,
       userNonce: 1,
@@ -157,16 +171,20 @@ describe('GasParams', () => {
       maxPriorityFeePerGas: BigInt('20000'),
     }
 
-    const { getByText } = render(<GasParams params={params} isExecution={true} isEIP1559={true} onEdit={jest.fn} />)
+    const { getByText, findByText } = render(
+      <GasParams params={params} isExecution={true} isEIP1559={true} onEdit={jest.fn} />,
+    )
 
-    expect(getByText('Max priority fee (Gwei)')).toBeInTheDocument()
+    await userEvent.click(getByText('Estimated fee'))
+
+    expect(await findByText('Max priority fee (Gwei)')).toBeInTheDocument()
     expect(getByText('0.00002')).toBeInTheDocument()
 
     expect(getByText('Max fee (Gwei)')).toBeInTheDocument()
     expect(getByText('0.00001')).toBeInTheDocument()
   })
 
-  it('Shows Gas price if not EIP1559', () => {
+  it('Shows Gas price if not EIP1559', async () => {
     const params: AdvancedParameters = {
       nonce: 123,
       userNonce: 1,
@@ -175,13 +193,17 @@ describe('GasParams', () => {
       maxPriorityFeePerGas: BigInt('20000'),
     }
 
-    const { getByText } = render(<GasParams params={params} isExecution={true} isEIP1559={false} onEdit={jest.fn} />)
+    const { getByText, findByText } = render(
+      <GasParams params={params} isExecution={true} isEIP1559={false} onEdit={jest.fn} />,
+    )
 
-    expect(getByText('Gas price (Gwei)')).toBeInTheDocument()
+    await userEvent.click(getByText('Estimated fee'))
+
+    expect(await findByText('Gas price (Gwei)')).toBeInTheDocument()
     expect(getByText('0.00001')).toBeInTheDocument()
   })
 
-  it('Show Edit button if there is a gasLimitError', () => {
+  it('Show Edit button if there is a gasLimitError', async () => {
     const params: AdvancedParameters = {
       nonce: 123,
       userNonce: 1,
@@ -190,7 +212,7 @@ describe('GasParams', () => {
       maxPriorityFeePerGas: BigInt('20000'),
     }
 
-    const { getByText } = render(
+    const { getByText, findByText } = render(
       <GasParams
         params={params}
         isExecution={true}
@@ -200,10 +222,12 @@ describe('GasParams', () => {
       />,
     )
 
-    expect(getByText('Edit')).toBeInTheDocument()
+    await userEvent.click(getByText('Estimated fee'))
+
+    expect(await findByText('Edit')).toBeInTheDocument()
   })
 
-  it('Show Edit button if its not an execution', () => {
+  it('Show Edit button if its not an execution', async () => {
     const params: AdvancedParameters = {
       nonce: 123,
       userNonce: 1,
@@ -212,12 +236,16 @@ describe('GasParams', () => {
       maxPriorityFeePerGas: BigInt('20000'),
     }
 
-    const { getByText } = render(<GasParams params={params} isExecution={false} isEIP1559={false} onEdit={jest.fn} />)
+    const { getByText, findByText } = render(
+      <GasParams params={params} isExecution={false} isEIP1559={false} onEdit={jest.fn} />,
+    )
 
-    expect(getByText('Edit')).toBeInTheDocument()
+    await userEvent.click(getByText(/Signing the transaction with nonce/))
+
+    expect(await findByText('Edit')).toBeInTheDocument()
   })
 
-  it('Show Edit button if its an execution and loading finished', () => {
+  it('Show Edit button if its an execution and loading finished', async () => {
     const params: AdvancedParameters = {
       nonce: 123,
       userNonce: 1,
@@ -226,8 +254,12 @@ describe('GasParams', () => {
       maxPriorityFeePerGas: BigInt('20000'),
     }
 
-    const { getByText } = render(<GasParams params={params} isExecution={true} isEIP1559={false} onEdit={jest.fn} />)
+    const { getByText, findByText } = render(
+      <GasParams params={params} isExecution={true} isEIP1559={false} onEdit={jest.fn} />,
+    )
 
-    expect(getByText('Edit')).toBeInTheDocument()
+    await userEvent.click(getByText('Estimated fee'))
+
+    expect(await findByText('Edit')).toBeInTheDocument()
   })
 })

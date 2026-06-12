@@ -1,10 +1,11 @@
 import React from 'react'
-import { Box, Button, Divider, Grid, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
 
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { LoadSafeFormData } from '@/components/new-safe/load'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import css from '@/components/new-safe/create/steps/ReviewStep/styles.module.css'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -92,14 +93,14 @@ const SafeReviewStep = ({ data, onBack }: StepRenderProps<LoadSafeFormData>) => 
 
   return (
     <>
-      <Box className={layoutCss.row}>
-        <Grid container spacing={3}>
+      <div className={layoutCss.row}>
+        <div className="grid grid-cols-12 gap-6">
           <ReviewRow name="Network" value={<ChainIndicator chainId={chain?.chainId} inline />} />
           <ReviewRow name="Name" value={<Typography>{data.name}</Typography>} />
           <ReviewRow
             name="Signers"
             value={
-              <Box className={css.ownersArray}>
+              <div className={css.ownersArray}>
                 {data.owners.map((owner, index) => (
                   <EthHashInfo
                     address={owner.address}
@@ -112,7 +113,7 @@ const SafeReviewStep = ({ data, onBack }: StepRenderProps<LoadSafeFormData>) => 
                     key={index}
                   />
                 ))}
-              </Box>
+              </div>
             }
           />
           <ReviewRow
@@ -123,19 +124,19 @@ const SafeReviewStep = ({ data, onBack }: StepRenderProps<LoadSafeFormData>) => 
               </Typography>
             }
           />
-        </Grid>
-      </Box>
-      <Divider />
-      <Box className={layoutCss.row}>
-        <Box display="flex" flexDirection="row" justifyContent="space-between" gap={3}>
-          <Button variant="outlined" size="large" onClick={handleBack} startIcon={<ArrowBackIcon fontSize="small" />}>
+        </div>
+      </div>
+      <Separator />
+      <div className={layoutCss.row}>
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="outline" size="lg" onClick={handleBack}>
             Back
           </Button>
-          <Button onClick={addSafe} variant="contained" size="large">
+          <Button type="button" size="lg" onClick={addSafe}>
             Add
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </div>
     </>
   )
 }

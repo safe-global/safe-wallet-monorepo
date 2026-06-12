@@ -1,22 +1,11 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Box,
-  IconButton,
-  Alert,
-  Stack,
-  Paper,
-} from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { XIcon, InfoIcon } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import CopyButton from '@/components/common/CopyButton'
 import ledgerHashStore from '../../store/ledgerHashStore'
 import {
-  DIALOG_MAX_WIDTH,
   DIALOG_TITLE,
   DIALOG_DESCRIPTION,
   CLOSE_BUTTON_TEXT,
@@ -33,38 +22,48 @@ const LedgerHashComparison = () => {
   }
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth={DIALOG_MAX_WIDTH} fullWidth>
-      <DialogTitle>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography variant="h5">{DIALOG_TITLE}</Typography>
-          <IconButton onClick={handleClose} size="small">
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      </DialogTitle>
-      <DialogContent>
-        <Alert severity="info" sx={{ mb: 3 }}>
-          {DIALOG_DESCRIPTION}
-        </Alert>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) handleClose()
+      }}
+    >
+      <DialogContent showCloseButton={false} className="max-w-[600px]">
+        <DialogHeader>
+          <div className="flex items-center justify-between">
+            <DialogTitle>{DIALOG_TITLE}</DialogTitle>
+            <Button onClick={handleClose} variant="ghost" size="icon-sm">
+              <XIcon />
+            </Button>
+          </div>
+        </DialogHeader>
 
-        <Stack justifyContent="center" alignItems="center" direction="row">
-          <Paper
-            sx={{ maxWidth: HASH_DISPLAY_WIDTH, boxSizing: 'content-box', px: 12, py: 1, position: 'relative' }}
-            elevation={3}
-          >
-            <HexEncodedData hexData={hash || ''} highlightFirstBytes={false} limit={HASH_DISPLAY_LIMIT} />
+        <div className="px-4">
+          <Alert className="mb-6">
+            <InfoIcon />
+            <AlertDescription>{DIALOG_DESCRIPTION}</AlertDescription>
+          </Alert>
 
-            <Box position="absolute" top={2} right={2}>
-              <CopyButton text={hash || ''} />
-            </Box>
-          </Paper>
-        </Stack>
+          <div className="flex flex-row items-center justify-center">
+            <div
+              className="bg-card relative box-content rounded-lg px-24 py-2 shadow-lg"
+              style={{ maxWidth: HASH_DISPLAY_WIDTH }}
+            >
+              <HexEncodedData hexData={hash || ''} highlightFirstBytes={false} limit={HASH_DISPLAY_LIMIT} />
+
+              <div className="absolute top-0.5 right-0.5">
+                <CopyButton text={hash || ''} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button onClick={handleClose} variant="default">
+            {CLOSE_BUTTON_TEXT}
+          </Button>
+        </DialogFooter>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} variant="contained" sx={{ m: 2, mt: 0 }}>
-          {CLOSE_BUTTON_TEXT}
-        </Button>
-      </DialogActions>
     </Dialog>
   )
 }

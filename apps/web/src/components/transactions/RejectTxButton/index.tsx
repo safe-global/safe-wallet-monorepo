@@ -1,5 +1,5 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
 
 import type { ReactElement } from 'react'
 import { useContext } from 'react'
@@ -39,9 +39,9 @@ const RejectTxButton = ({
           <Button
             data-testid="reject-btn"
             onClick={openReplacementModal}
-            variant="danger"
+            variant="destructive"
             disabled={!isOk || isDisabled}
-            size="large"
+            size="lg"
           >
             Reject
           </Button>

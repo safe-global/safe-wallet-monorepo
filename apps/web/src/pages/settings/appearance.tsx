@@ -1,8 +1,11 @@
-import { Checkbox, FormControlLabel, FormGroup, Grid, Paper, Typography, Switch } from '@mui/material'
-import type { ChangeEvent } from 'react'
+import { useId } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 
+import { Checkbox } from '@/components/ui/checkbox'
+import { Switch } from '@/components/ui/switch'
+import { Field, FieldLabel } from '@/components/ui/field'
+import { Typography } from '@/components/ui/typography'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setCopyShortName, setDarkMode } from '@/store/settingsSlice'
 import SettingsHeader from '@/components/settings/SettingsHeader'
@@ -15,12 +18,14 @@ const Appearance: NextPage = () => {
   const dispatch = useAppDispatch()
   const settings = useAppSelector(selectSettings)
   const isDarkMode = useDarkMode()
+  const copyPrefixId = useId()
+  const darkModeId = useId()
 
   const handleToggle = (
     action: typeof setCopyShortName | typeof setDarkMode,
     event: typeof SETTINGS_EVENTS.APPEARANCE.COPY_PREFIXES | typeof SETTINGS_EVENTS.APPEARANCE.DARK_MODE,
   ) => {
-    return (_: ChangeEvent<HTMLInputElement>, checked: boolean) => {
+    return (checked: boolean) => {
       dispatch(action(checked))
 
       trackEvent({
@@ -37,76 +42,46 @@ const Appearance: NextPage = () => {
       </Head>
       <SettingsHeader />
       <main>
-        <Paper sx={{ p: 4 }}>
-          <Grid container spacing={3}>
-            <Grid item lg={4} xs={12}>
-              <Typography
-                variant="h4"
-                sx={{
-                  fontWeight: 'bold',
-                  mb: 1,
-                }}
-              >
-                Chain-specific addresses
-              </Typography>
-            </Grid>
+        <div className="rounded-lg bg-[var(--color-background-paper)] p-8">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
+            <div>
+              <Typography variant="h4">Chain-specific addresses</Typography>
+            </div>
 
-            <Grid item xs>
-              <Typography
-                sx={{
-                  mb: 2,
-                }}
-              >
+            <div>
+              <Typography className="mb-4">
                 Choose whether to copy{' '}
                 <ExternalLink href="https://eips.ethereum.org/EIPS/eip-3770">EIP-3770</ExternalLink> prefixes when
                 copying Ethereum addresses.
               </Typography>
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={settings.shortName.copy}
-                      onChange={handleToggle(setCopyShortName, SETTINGS_EVENTS.APPEARANCE.COPY_PREFIXES)}
-                    />
-                  }
-                  label="Copy addresses with chain prefix"
+              <Field orientation="horizontal">
+                <Checkbox
+                  id={copyPrefixId}
+                  checked={settings.shortName.copy}
+                  onCheckedChange={handleToggle(setCopyShortName, SETTINGS_EVENTS.APPEARANCE.COPY_PREFIXES)}
                 />
-              </FormGroup>
-            </Grid>
-          </Grid>
+                <FieldLabel htmlFor={copyPrefixId}>Copy addresses with chain prefix</FieldLabel>
+              </Field>
+            </div>
+          </div>
 
-          <Grid
-            container
-            spacing={3}
-            sx={{
-              alignItems: 'center',
-              marginTop: 2,
-            }}
-          >
-            <Grid item lg={4} xs={12}>
-              <Typography
-                variant="h4"
-                sx={{
-                  fontWeight: 'bold',
-                }}
-              >
-                Theme
-              </Typography>
-            </Grid>
+          <div className="mt-4 grid grid-cols-1 items-center gap-6 lg:grid-cols-[1fr_2fr]">
+            <div>
+              <Typography variant="h4">Theme</Typography>
+            </div>
 
-            <Grid item xs>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={isDarkMode}
-                    onChange={handleToggle(setDarkMode, SETTINGS_EVENTS.APPEARANCE.DARK_MODE)}
-                  />
-                }
-                label="Dark mode"
-              />
-            </Grid>
-          </Grid>
-        </Paper>
+            <div>
+              <Field orientation="horizontal">
+                <Switch
+                  id={darkModeId}
+                  checked={isDarkMode}
+                  onCheckedChange={handleToggle(setDarkMode, SETTINGS_EVENTS.APPEARANCE.DARK_MODE)}
+                />
+                <FieldLabel htmlFor={darkModeId}>Dark mode</FieldLabel>
+              </Field>
+            </div>
+          </div>
+        </div>
       </main>
     </>
   )

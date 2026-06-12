@@ -61,6 +61,7 @@ export default [
         'error',
         {
           varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
         },
       ],
 

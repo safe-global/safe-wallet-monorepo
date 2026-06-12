@@ -8,11 +8,6 @@ import dynamic from 'next/dynamic'
 // Lazy-load Web3 initialization to keep viem/protocol-kit out of the main _app chunk
 const LazyWeb3Init = dynamic(() => import('@/components/common/LazyWeb3Init'), { ssr: false })
 import { Provider } from 'react-redux'
-import CssBaseline from '@mui/material/CssBaseline'
-import type { Theme } from '@mui/material/styles'
-import { ThemeProvider } from '@mui/material/styles'
-import { CacheProvider, type EmotionCache } from '@emotion/react'
-import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
 import '@/styles/shadcn.css'
 import { BRAND_NAME } from '@/config/constants'
@@ -31,7 +26,6 @@ import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
 import useBeamer from '@/hooks/Beamer/useBeamer'
-import createEmotionCache from '@/utils/createEmotionCache'
 import MetaTags from '@/components/common/MetaTags'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
@@ -148,15 +142,8 @@ const InitApp = (): ReactElement | null => {
   return isGateBlocking ? null : <SafeScopedSubscriptions />
 }
 
-// Client-side cache, shared for the whole session of the user in the browser.
-const clientSideEmotionCache = createEmotionCache()
-
-const THEME_DARK = 'dark'
-const THEME_LIGHT = 'light'
-
 export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }) => {
   const isDarkMode = useDarkMode()
-  const themeMode = isDarkMode ? THEME_DARK : THEME_LIGHT
 
   const handleError = (error: Error, componentStack?: string) => {
     captureException(error, { componentStack })
@@ -176,27 +163,10 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
     </ShadcnProvider>
   )
 
-  return (
-    <SafeThemeProvider mode={themeMode}>
-      {(safeTheme: Theme) => (
-        <ThemeProvider theme={safeTheme}>
-          <ObservabilityErrorBoundary onError={handleError}>{content}</ObservabilityErrorBoundary>
-        </ThemeProvider>
-      )}
-    </SafeThemeProvider>
-  )
+  return <ObservabilityErrorBoundary onError={handleError}>{content}</ObservabilityErrorBoundary>
 }
 
-interface SafeWalletAppProps extends AppProps {
-  emotionCache?: EmotionCache
-}
-
-const SafeWalletApp = ({
-  Component,
-  pageProps,
-  router,
-  emotionCache = clientSideEmotionCache,
-}: SafeWalletAppProps): ReactElement => {
+const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement => {
   const safeKey = useChangedValue(router.query.safe?.toString())
 
   return (
@@ -206,37 +176,33 @@ const SafeWalletApp = ({
         <MetaTags prefetchUrl={GATEWAY_URL} />
       </Head>
 
-      <CacheProvider value={emotionCache}>
-        <AppProviders>
-          <CssBaseline />
+      <AppProviders>
+        <CaptchaProvider>
+          <InitApp />
 
-          <CaptchaProvider>
-            <InitApp />
+          <LazyWeb3Init />
 
-            <LazyWeb3Init />
+          <PageLayout pathname={router.pathname}>
+            <Component {...pageProps} key={safeKey} />
+          </PageLayout>
 
-            <PageLayout pathname={router.pathname}>
-              <Component {...pageProps} key={safeKey} />
-            </PageLayout>
+          <CookieAndTermBanner />
 
-            <CookieAndTermBanner />
+          <TargetedOutreachPopupLoader />
 
-            <TargetedOutreachPopupLoader />
+          <Notifications />
 
-            <Notifications />
+          <RecoveryLoader />
 
-            <RecoveryLoader />
+          <CounterfactualHooksLoader />
 
-            <CounterfactualHooksLoader />
+          <SpendingLimitsLoaderWrapper />
 
-            <SpendingLimitsLoaderWrapper />
+          <Analytics />
 
-            <Analytics />
-
-            <PkModulePopup />
-          </CaptchaProvider>
-        </AppProviders>
-      </CacheProvider>
+          <PkModulePopup />
+        </CaptchaProvider>
+      </AppProviders>
     </Provider>
   )
 }

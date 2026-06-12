@@ -29,27 +29,6 @@ jest.mock('mixpanel-browser', () => ({
   track: jest.fn(),
 }))
 
-// Mock MUI hooks
-jest.mock('@mui/material/styles', () => {
-  const original = jest.requireActual('@mui/material/styles')
-  return {
-    ...original,
-    useTheme: jest.fn(() => ({
-      breakpoints: {
-        down: jest.fn((breakpoint) => breakpoint === 'sm' || breakpoint === 'md'),
-      },
-    })),
-  }
-})
-
-jest.mock('@mui/material', () => {
-  const original = jest.requireActual('@mui/material')
-  return {
-    ...original,
-    useMediaQuery: jest.fn(() => false), // Default to desktop (not mobile, not tablet)
-  }
-})
-
 // Mock hooks
 jest.mock('@/hooks/useChains', () => ({
   useHasFeature: jest.fn(),

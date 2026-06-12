@@ -3,7 +3,6 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import ExplorePossibleWidget from './index'
-import { Box } from '@mui/material'
 
 const meta = {
   component: ExplorePossibleWidget,
@@ -42,9 +41,9 @@ const meta = {
               },
             }}
           >
-            <Box sx={{ maxWidth: '100%' }}>
+            <div className="max-w-full">
               <Story />
-            </Box>
+            </div>
           </RouterDecorator>
         </StoreDecorator>
       )

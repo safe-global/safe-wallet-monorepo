@@ -68,16 +68,20 @@ const variantElementMap = {
 
 interface TypographyProps
   extends Omit<React.HTMLAttributes<HTMLElement>, 'color'>,
-    VariantProps<typeof typographyVariants> {}
+    VariantProps<typeof typographyVariants> {
+  /** Override the rendered element (e.g. `as="div"` when wrapping block-level content to avoid invalid `<p>` nesting). */
+  as?: React.ElementType
+}
 
 function Typography({
   variant = 'paragraph',
   align = 'left',
   color = 'default',
   className,
+  as,
   ...props
 }: TypographyProps) {
-  const Tag = variantElementMap[variant ?? 'paragraph'] as React.ElementType
+  const Tag = (as ?? variantElementMap[variant ?? 'paragraph']) as React.ElementType
   return (
     <Tag
       data-slot="typography"

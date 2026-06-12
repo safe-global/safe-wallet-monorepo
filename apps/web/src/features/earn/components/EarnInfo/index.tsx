@@ -1,5 +1,8 @@
-import { Card, Box, Grid2 as Grid, Typography, Button, SvgIcon, Stack, Tooltip } from '@mui/material'
 import Image from 'next/image'
+import { Card } from '@/components/ui/card'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import EarnIllustrationLight from '@/public/images/common/earn-illustration-light.png'
 
 import CheckIcon from '@/public/images/common/check.svg'
@@ -31,30 +34,14 @@ export const EarnPoweredBy = () => {
   const isDarkMode = useDarkMode()
 
   return (
-    <Stack spacing={1} direction="row">
-      <Typography variant="overline" color="text.secondary" fontWeight="bold">
+    <div className="flex flex-row gap-2">
+      <Typography variant="paragraph-mini-bold" color="muted">
         Powered by
       </Typography>
-      <SvgIcon
-        component={Morpho}
-        inheritViewBox
-        color="border"
-        className={classNames(css.morphoIcon, { [css.kilnIconDarkMode]: isDarkMode })}
-      />
-      <SvgIcon
-        component={Cross}
-        inheritViewBox
-        color="border"
-        sx={{ width: 12, height: 12 }}
-        className={classNames({ [css.kilnIconDarkMode]: isDarkMode })}
-      />
-      <SvgIcon
-        component={Kiln}
-        inheritViewBox
-        color="border"
-        className={classNames(css.kilnIcon, { [css.kilnIconDarkMode]: isDarkMode })}
-      />
-    </Stack>
+      <Morpho className={classNames(css.morphoIcon, { [css.kilnIconDarkMode]: isDarkMode })} />
+      <Cross width={12} height={12} className={classNames({ [css.kilnIconDarkMode]: isDarkMode })} />
+      <Kiln className={classNames(css.kilnIcon, { [css.kilnIconDarkMode]: isDarkMode })} />
+    </div>
   )
 }
 
@@ -65,13 +52,11 @@ export const EarnBannerCopy = () => {
     <>
       <Typography variant="h2" className={classNames(css.header, { [css.gradientText]: isDarkMode })}>
         Earn up to{' '}
-        <Typography className={classNames({ [css.gradientText]: isDarkMode })} variant="h2" component="span">
-          {formatPercentage(ApproximateAPY)} APY*
-        </Typography>{' '}
+        <span className={classNames({ [css.gradientText]: isDarkMode })}>{formatPercentage(ApproximateAPY)} APY*</span>{' '}
         and get MORPHO rewards
       </Typography>
 
-      <Typography variant="body1" className={css.content} mt={2}>
+      <Typography variant="paragraph" className={classNames(css.content, 'mt-4')}>
         Deposit stablecoins, wstETH, ETH, and WBTC straight from your account and let your assets compound in minutes.{' '}
         <Track {...EARN_EVENTS.OPEN_EARN_LEARN_MORE} label={EARN_LABELS.safe_dashboard_banner}>
           <ExternalLink href={EARN_HELP_ARTICLE}>Learn more</ExternalLink>
@@ -89,105 +74,90 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
   const eligibleAssets = balances.items.filter((token) => EligibleEarnTokens[chainId].includes(token.tokenInfo.address))
 
   return (
-    <Box m={3}>
-      <Card sx={{ p: 4 }}>
-        <Grid container spacing={3}>
-          <Grid container size={{ xs: 12, md: 7 }} rowSpacing={3}>
-            <Grid size={{ xs: 12 }} zIndex={2}>
+    <div className="m-6">
+      <Card className="p-8">
+        <div className="flex flex-col gap-6 md:flex-row">
+          <div className="flex flex-col gap-6 md:w-7/12">
+            <div className="z-[2]">
               <EarnPoweredBy />
-            </Grid>
+            </div>
 
-            <Grid size={{ xs: 12 }} zIndex={2} maxWidth={600}>
+            <div className="z-[2] max-w-[600px]">
               <EarnBannerCopy />
-            </Grid>
+            </div>
 
-            <Grid container size={{ xs: 12 }} textAlign="center" spacing={2}>
-              <Grid size={{ xs: 12, md: 'auto' }}>
-                <Track {...EARN_EVENTS.GET_STARTED_WITH_EARN}>
-                  <Button fullWidth variant="contained" onClick={onGetStarted}>
-                    Get started
-                  </Button>
-                </Track>
-              </Grid>
-            </Grid>
-          </Grid>
+            <div className="text-center">
+              <Track {...EARN_EVENTS.GET_STARTED_WITH_EARN}>
+                <Button className="w-full md:w-auto" onClick={onGetStarted}>
+                  Get started
+                </Button>
+              </Track>
+            </div>
+          </div>
 
-          <Grid
-            size={{ xs: 12, md: 5 }}
-            display={{ xs: 'none', sm: 'flex' }}
-            position="relative"
-            sx={{ backgroundColor: 'background.main', alignItems: 'center', justifyContent: 'center' }}
-          >
+          <div className="relative hidden items-center justify-center bg-[var(--color-background-main)] sm:flex md:w-5/12">
             <Image src={EarnIllustrationLight} alt="Earn illustration" width={239} height={239} />
-          </Grid>
-        </Grid>
+          </div>
+        </div>
       </Card>
 
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 'grow' }}>
-          <Typography variant="h3" mt={3} mb={2} fontWeight="bold">
+      <div className="flex flex-col gap-6 md:flex-row">
+        <div className="flex-1">
+          <Typography variant="h3" className="mb-4 mt-6 font-bold">
             Your benefits
           </Typography>
-          <Card sx={{ p: 4 }}>
-            <Stack spacing={2}>
-              <Stack direction="row" spacing={2}>
-                <Box className={css.benefitIcon}>
-                  <SvgIcon component={CheckIcon} color="success" inheritViewBox fontSize="small" />
-                </Box>
-                <Box>
-                  <Typography fontWeight="bold" mb={0.5}>
-                    Never leave the app
-                  </Typography>
+          <Card className="p-8">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-row gap-4">
+                <div className={css.benefitIcon}>
+                  <CheckIcon className="size-5 text-[var(--color-success-main)]" />
+                </div>
+                <div>
+                  <Typography className="mb-1 font-bold">Never leave the app</Typography>
                   <Typography>Interact with your assets right in Safe Wallet UI.</Typography>
-                </Box>
-              </Stack>
+                </div>
+              </div>
 
-              <Stack direction="row" spacing={2} className={css.benefit}>
-                <Box className={css.benefitIcon}>
-                  <SvgIcon component={StarIcon} color="success" inheritViewBox fontSize="small" />
-                </Box>
-                <Box>
-                  <Typography fontWeight="bold" mb={0.5}>
-                    Collect earnings every day
-                  </Typography>
+              <div className={classNames('flex flex-row gap-4', css.benefit)}>
+                <div className={css.benefitIcon}>
+                  <StarIcon className="size-5 text-[var(--color-success-main)]" />
+                </div>
+                <div>
+                  <Typography className="mb-1 font-bold">Collect earnings every day</Typography>
                   <Typography>Your balance keeps working for you.</Typography>
-                </Box>
-              </Stack>
+                </div>
+              </div>
 
-              <Stack direction="row" spacing={2} className={css.benefit}>
-                <Box className={css.benefitIcon}>
-                  <SvgIcon component={EyeIcon} color="success" inheritViewBox fontSize="small" />
-                </Box>
-                <Box>
-                  <Typography fontWeight="bold" mb={0.5}>
-                    Understand every transaction
-                  </Typography>
+              <div className={classNames('flex flex-row gap-4', css.benefit)}>
+                <div className={css.benefitIcon}>
+                  <EyeIcon className="size-5 text-[var(--color-success-main)]" />
+                </div>
+                <div>
+                  <Typography className="mb-1 font-bold">Understand every transaction</Typography>
                   <Typography>User-friendly transactions that are easy to understand for all signers.</Typography>
-                </Box>
-              </Stack>
+                </div>
+              </div>
 
-              <Stack direction="row" spacing={2} className={css.benefit}>
-                <Box className={css.benefitIcon}>
-                  <SvgIcon component={FiatIcon} color="success" inheritViewBox fontSize="small" />
-                </Box>
-                <Box>
-                  <Typography fontWeight="bold" mb={0.5}>
-                    Cash out whenever you want
-                  </Typography>
+              <div className={classNames('flex flex-row gap-4', css.benefit)}>
+                <div className={css.benefitIcon}>
+                  <FiatIcon className="size-5 text-[var(--color-success-main)]" />
+                </div>
+                <div>
+                  <Typography className="mb-1 font-bold">Cash out whenever you want</Typography>
                   <Typography>Zero lock-ups, zero penalties.</Typography>
-                </Box>
-              </Stack>
-            </Stack>
+                </div>
+              </div>
+            </div>
           </Card>
-        </Grid>
+        </div>
 
         {eligibleAssets.length > 0 && (
-          <Grid size={{ xs: 12, md: 'grow' }}>
-            <Typography variant="h3" mt={3} mb={2} fontWeight="bold">
+          <div className="flex-1">
+            <Typography variant="h3" className="mb-4 mt-6 font-bold">
               Eligible assets
             </Typography>
 
-            <Stack spacing={2}>
+            <div className="flex flex-col gap-4">
               {eligibleAssets.map((asset) => {
                 const vaultAPY = formatPercentage(VaultAPYs[chainId][asset.tokenInfo.address] / 100)
 
@@ -206,12 +176,12 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
                 }
 
                 return (
-                  <Card key={asset.tokenInfo.address} sx={{ p: 2 }}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
-                      <Stack direction="row" spacing={2} alignItems="center">
+                  <Card key={asset.tokenInfo.address} className="p-4">
+                    <div className="flex flex-row items-center justify-between gap-2">
+                      <div className="flex flex-row items-center gap-4">
                         <TokenIcon logoUri={asset.tokenInfo.logoUri} tokenSymbol={asset.tokenInfo.symbol} size={32} />
-                        <Box>
-                          <Typography variant="body2">
+                        <div className="flex flex-col">
+                          <Typography variant="paragraph-small">
                             <TokenAmount
                               value={asset.balance}
                               decimals={asset.tokenInfo.decimals}
@@ -219,35 +189,36 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
                               logoUri={undefined}
                             />
                           </Typography>
-                          <Typography variant="body2">
+                          <Typography variant="paragraph-small">
                             <FiatValue value={asset.fiatBalance} />
                           </Typography>
-                        </Box>
-                      </Stack>
-                      <Stack direction="row" spacing={2} alignItems="center">
-                        <Tooltip title="as of 03.06.2025">
-                          <Typography variant="caption" className={css.apy}>
-                            Up to {vaultAPY}*
-                          </Typography>
+                        </div>
+                      </div>
+                      <div className="flex flex-row items-center gap-4">
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={<span className={classNames('text-xs leading-4', css.apy)}>Up to {vaultAPY}*</span>}
+                          />
+                          <TooltipContent>as of 03.06.2025</TooltipContent>
                         </Tooltip>
 
-                        <Button variant="outlined" size="small" onClick={onEarnClick}>
+                        <Button variant="outline" size="sm" onClick={onEarnClick}>
                           Earn
                         </Button>
-                      </Stack>
-                    </Stack>
+                      </div>
+                    </div>
                   </Card>
                 )
               })}
-            </Stack>
-          </Grid>
+            </div>
+          </div>
         )}
-      </Grid>
+      </div>
 
-      <Typography component="div" variant="caption" zIndex={2} mt={2}>
+      <Typography variant="paragraph-mini" className="z-[2] mt-4 block">
         {APYDisclaimer}
       </Typography>
-    </Box>
+    </div>
   )
 }
 

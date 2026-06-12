@@ -1,22 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Alert,
-  Chip,
-  LinearProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Divider,
-} from '@mui/material'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
-import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import { CircleCheck, Wallet, Rocket, ExternalLink } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Separator } from '@/components/ui/separator'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 /**
  * Counterfactual feature handles undeployed (counterfactual) Safe accounts.
@@ -54,251 +44,245 @@ const StateWrapper = ({
   description: string
   children: React.ReactNode
 }) => (
-  <Box sx={{ mb: 8 }}>
-    <Box sx={{ mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-      <Typography variant="h5">{stateName}</Typography>
-      <Typography variant="body2" color="text.secondary">
+  <div className="mb-16">
+    <div className="mb-4 border-b pb-4">
+      <Typography variant="h4">{stateName}</Typography>
+      <Typography variant="paragraph-small" color="muted">
         {description}
       </Typography>
-    </Box>
-    <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2, display: 'flex', justifyContent: 'center' }}>{children}</Box>
-  </Box>
+    </div>
+    <div className="flex justify-center rounded-lg bg-muted p-6">{children}</div>
+  </div>
+)
+
+const NotDeployedAlert = () => (
+  <Alert className="relative max-w-[500px]">
+    <AlertTitle>Safe not yet activated</AlertTitle>
+    <AlertDescription>
+      Your Safe needs to be activated before you can make transactions. You can receive funds to this address now.
+    </AlertDescription>
+    <AlertAction>
+      <Button variant="ghost" size="sm">
+        <Rocket className="size-4" />
+        Activate
+      </Button>
+    </AlertAction>
+  </Alert>
+)
+
+const ActivationForm = () => (
+  <div className="max-w-[500px] rounded-lg bg-background p-6">
+    <div className="mb-6 flex items-center gap-4">
+      <Rocket className="size-8 text-primary" />
+      <div>
+        <Typography variant="h4">Activate your Safe</Typography>
+        <Typography variant="paragraph-small" color="muted">
+          Deploy your Safe to start using it
+        </Typography>
+      </div>
+    </div>
+
+    <Alert className="mb-6">
+      <AlertDescription>
+        Your Safe exists as an address but is not yet deployed on-chain. Activate it to start making transactions.
+      </AlertDescription>
+    </Alert>
+
+    <div className="mb-6 rounded bg-muted p-4">
+      <Typography variant="paragraph-small" color="muted" as="div" className="mb-1">
+        Safe address
+      </Typography>
+      <Typography variant="code">{mockSafeAddress}</Typography>
+    </div>
+
+    <div className="mb-6 rounded bg-muted p-4">
+      <Typography variant="paragraph-small" color="muted" as="div" className="mb-1">
+        Network
+      </Typography>
+      <Badge variant="outline">{mockChain.name}</Badge>
+    </div>
+
+    <Separator className="my-4" />
+
+    <div className="mb-1 flex justify-between">
+      <Typography variant="paragraph-small">Estimated network fee</Typography>
+      <Typography variant="paragraph-small-bold">~0.005 ETH</Typography>
+    </div>
+
+    <Button size="lg" className="w-full">
+      Activate Safe
+    </Button>
+  </div>
+)
+
+const InsufficientBalanceCard = () => (
+  <div className="max-w-[500px] rounded-lg bg-background p-6">
+    <Typography variant="h4" className="mb-2">
+      Activate your Safe
+    </Typography>
+
+    <Alert variant="warning" className="mb-6">
+      <AlertTitle>Insufficient balance</AlertTitle>
+      <AlertDescription>You need at least 0.005 ETH to activate your Safe. Current balance: 0.001 ETH</AlertDescription>
+    </Alert>
+
+    <div className="mb-6 rounded bg-muted p-4">
+      <div className="mb-1 flex justify-between">
+        <Typography variant="paragraph-small" color="muted">
+          Required
+        </Typography>
+        <Typography variant="paragraph-small">~0.005 ETH</Typography>
+      </div>
+      <div className="flex justify-between">
+        <Typography variant="paragraph-small" color="muted">
+          Current balance
+        </Typography>
+        <Typography variant="paragraph-small" className="text-destructive">
+          0.001 ETH
+        </Typography>
+      </div>
+    </div>
+
+    <Button className="w-full" disabled>
+      Activate Safe
+    </Button>
+  </div>
+)
+
+const ActivatingCard = () => (
+  <div className="max-w-[400px] rounded-lg bg-background p-8 text-center">
+    <Rocket className="mx-auto mb-4 size-12 text-primary" />
+    <Typography variant="h4" className="mb-2">
+      Activating Safe...
+    </Typography>
+    <Typography variant="paragraph-small" color="muted" className="mb-6">
+      Please wait while your Safe is being deployed
+    </Typography>
+    <Progress value={null} className="mb-4" />
+    <Typography variant="paragraph-mini" color="muted">
+      This may take up to a minute
+    </Typography>
+  </div>
+)
+
+const PayNowPayLaterOptions = () => (
+  <>
+    <Typography variant="h4" className="mb-2">
+      Choose activation method
+    </Typography>
+    <Typography variant="paragraph-small" color="muted" className="mb-6">
+      Select how you want to pay for Safe deployment
+    </Typography>
+
+    <div className="mb-4 cursor-pointer rounded border-2 border-primary p-4">
+      <Typography variant="paragraph-small-bold" as="div">
+        Pay now
+      </Typography>
+      <Typography variant="paragraph-small" color="muted">
+        Deploy your Safe immediately by paying gas fees
+      </Typography>
+      <Typography variant="paragraph-mini" as="div" className="text-primary">
+        ~0.005 ETH
+      </Typography>
+    </div>
+
+    <div className="cursor-pointer rounded border p-4">
+      <Typography variant="paragraph-small-bold" as="div">
+        Pay later
+      </Typography>
+      <Typography variant="paragraph-small" color="muted">
+        Activate when you make your first transaction
+      </Typography>
+      <Typography variant="paragraph-mini" color="muted" as="div">
+        Deployment cost added to first transaction
+      </Typography>
+    </div>
+  </>
+)
+
+const SuccessDialog = () => (
+  <Dialog open>
+    <DialogContent>
+      <DialogHeader className="pt-4 text-center">
+        <CircleCheck className="mx-auto mb-4 size-16 text-[var(--color-success-main)]" />
+        <DialogTitle>Safe activated!</DialogTitle>
+      </DialogHeader>
+      <div className="text-center">
+        <Typography variant="paragraph-small" color="muted" className="mb-6">
+          Your Safe has been successfully deployed and is ready to use.
+        </Typography>
+
+        <div className="mb-4 rounded bg-muted p-4">
+          <Typography variant="paragraph-small" color="muted" as="div" className="mb-1">
+            Safe address
+          </Typography>
+          <Typography variant="code">{mockSafeAddress}</Typography>
+        </div>
+
+        <Button variant="ghost" size="sm" render={<a href={`${mockChain.explorerUrl}/address/${mockSafeAddress}`} />}>
+          View on Etherscan
+          <ExternalLink className="size-4" />
+        </Button>
+      </div>
+      <DialogFooter className="justify-center pb-2">
+        <Button>
+          <Wallet className="size-4" />
+          Open Safe
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 )
 
 // All States - Scrollable view of entire Counterfactual activation flow
 export const ActivationAllStates: StoryObj = {
   render: () => (
-    <Box sx={{ maxWidth: 600 }}>
-      <Box sx={{ mb: 6, pb: 3, borderBottom: '2px solid', borderColor: 'primary.main' }}>
-        <Typography variant="h4">Safe Activation Flow</Typography>
-        <Typography variant="body1" color="text.secondary">
+    <div className="max-w-[600px]">
+      <div className="mb-6 border-b-2 border-primary pb-6">
+        <Typography variant="h4">Safe activation flow</Typography>
+        <Typography variant="paragraph" color="muted">
           Complete walkthrough of activating a counterfactual (undeployed) Safe. Scroll to view each state.
         </Typography>
-      </Box>
+      </div>
 
-      {/* State 1: Not Deployed Alert */}
       <StateWrapper
-        stateName="Not Deployed Alert"
+        stateName="Not deployed alert"
         description="Banner shown on dashboard when Safe is not yet deployed on-chain."
       >
-        <Alert
-          severity="info"
-          sx={{ maxWidth: 500 }}
-          action={
-            <Button color="inherit" size="small" startIcon={<RocketLaunchIcon />}>
-              Activate
-            </Button>
-          }
-        >
-          <Typography variant="body2" fontWeight="bold" gutterBottom>
-            Safe not yet activated
-          </Typography>
-          <Typography variant="body2">
-            Your Safe needs to be activated before you can make transactions. You can receive funds to this address now.
-          </Typography>
-        </Alert>
+        <NotDeployedAlert />
       </StateWrapper>
 
-      {/* State 2: Activation Options */}
       <StateWrapper
-        stateName="Activation Options"
+        stateName="Activation options"
         description="User chooses between paying now or paying later (with first transaction)."
       >
-        <Paper sx={{ p: 3, maxWidth: 500 }}>
-          <Typography variant="h6" gutterBottom>
-            Choose activation method
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Select how you want to pay for Safe deployment
-          </Typography>
-
-          <Box
-            sx={{
-              p: 2,
-              border: 2,
-              borderColor: 'primary.main',
-              borderRadius: 1,
-              mb: 2,
-              cursor: 'pointer',
-            }}
-          >
-            <Typography variant="subtitle2">Pay now</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Deploy your Safe immediately by paying gas fees
-            </Typography>
-            <Typography variant="caption" color="primary">
-              ~0.005 ETH
-            </Typography>
-          </Box>
-
-          <Box
-            sx={{
-              p: 2,
-              border: 1,
-              borderColor: 'divider',
-              borderRadius: 1,
-              cursor: 'pointer',
-            }}
-          >
-            <Typography variant="subtitle2">Pay later</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Activate when you make your first transaction
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Deployment cost added to first transaction
-            </Typography>
-          </Box>
-        </Paper>
+        <div className="max-w-[500px] rounded-lg bg-background p-6">
+          <PayNowPayLaterOptions />
+        </div>
       </StateWrapper>
 
-      {/* State 3: Activation Form */}
       <StateWrapper
-        stateName="Activation Form"
+        stateName="Activation form"
         description="User reviews Safe details and estimated fees before activating."
       >
-        <Paper sx={{ p: 3, maxWidth: 500 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-            <RocketLaunchIcon color="primary" sx={{ fontSize: 32 }} />
-            <Box>
-              <Typography variant="h6">Activate your Safe</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Deploy your Safe to start using it
-              </Typography>
-            </Box>
-          </Box>
-
-          <Alert severity="info" sx={{ mb: 3 }}>
-            Your Safe exists as an address but is not yet deployed on-chain. Activate it to start making transactions.
-          </Alert>
-
-          <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1, mb: 3 }}>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              Safe address
-            </Typography>
-            <Typography variant="body2" fontFamily="monospace">
-              {mockSafeAddress}
-            </Typography>
-          </Box>
-
-          <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1, mb: 3 }}>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              Network
-            </Typography>
-            <Chip label={mockChain.name} size="small" />
-          </Box>
-
-          <Divider sx={{ my: 2 }} />
-
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="body2">Estimated network fee</Typography>
-            <Typography variant="body2" fontWeight="bold">
-              ~0.005 ETH
-            </Typography>
-          </Box>
-
-          <Button variant="contained" fullWidth size="large">
-            Activate Safe
-          </Button>
-        </Paper>
+        <ActivationForm />
       </StateWrapper>
 
-      {/* State 4: Insufficient Balance */}
       <StateWrapper
-        stateName="Insufficient Balance"
+        stateName="Insufficient balance"
         description="Activation blocked when user doesn't have enough funds for gas."
       >
-        <Paper sx={{ p: 3, maxWidth: 500 }}>
-          <Typography variant="h6" gutterBottom>
-            Activate your Safe
-          </Typography>
-
-          <Alert severity="warning" sx={{ mb: 3 }}>
-            <Typography variant="body2" fontWeight="bold" gutterBottom>
-              Insufficient balance
-            </Typography>
-            <Typography variant="body2">
-              You need at least 0.005 ETH to activate your Safe. Current balance: 0.001 ETH
-            </Typography>
-          </Alert>
-
-          <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1, mb: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-              <Typography variant="body2" color="text.secondary">
-                Required
-              </Typography>
-              <Typography variant="body2">~0.005 ETH</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="body2" color="text.secondary">
-                Current balance
-              </Typography>
-              <Typography variant="body2" color="error.main">
-                0.001 ETH
-              </Typography>
-            </Box>
-          </Box>
-
-          <Button variant="contained" fullWidth disabled>
-            Activate Safe
-          </Button>
-        </Paper>
+        <InsufficientBalanceCard />
       </StateWrapper>
 
-      {/* State 5: Activating */}
       <StateWrapper stateName="Activating" description="Loading state while Safe deployment is in progress.">
-        <Paper sx={{ p: 4, maxWidth: 400, textAlign: 'center' }}>
-          <RocketLaunchIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-          <Typography variant="h6" gutterBottom>
-            Activating Safe...
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Please wait while your Safe is being deployed
-          </Typography>
-          <LinearProgress sx={{ mb: 2 }} />
-          <Typography variant="caption" color="text.secondary">
-            This may take up to a minute
-          </Typography>
-        </Paper>
+        <ActivatingCard />
       </StateWrapper>
 
-      {/* State 6: Success */}
-      <StateWrapper stateName="Activation Success" description="Confirmation dialog shown after Safe is deployed.">
-        <Dialog open maxWidth="sm" fullWidth>
-          <DialogTitle sx={{ textAlign: 'center', pt: 4 }}>
-            <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-            <Typography variant="h5">Safe activated!</Typography>
-          </DialogTitle>
-          <DialogContent sx={{ textAlign: 'center' }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Your Safe has been successfully deployed and is ready to use.
-            </Typography>
-
-            <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1, mb: 2 }}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                Safe address
-              </Typography>
-              <Typography variant="body2" fontFamily="monospace">
-                {mockSafeAddress}
-              </Typography>
-            </Box>
-
-            <Button
-              variant="text"
-              size="small"
-              endIcon={<OpenInNewIcon />}
-              href={`${mockChain.explorerUrl}/address/${mockSafeAddress}`}
-            >
-              View on Etherscan
-            </Button>
-          </DialogContent>
-          <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
-            <Button variant="contained" startIcon={<AccountBalanceWalletIcon />}>
-              Open Safe
-            </Button>
-          </DialogActions>
-        </Dialog>
+      <StateWrapper stateName="Activation success" description="Confirmation dialog shown after Safe is deployed.">
+        <SuccessDialog />
       </StateWrapper>
-    </Box>
+    </div>
   ),
   parameters: {
     docs: {
@@ -312,54 +296,52 @@ export const ActivationAllStates: StoryObj = {
 // Individual state: Activate Account Flow
 export const FullActivateAccountFlow: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-        <RocketLaunchIcon color="primary" sx={{ fontSize: 32 }} />
-        <Box>
-          <Typography variant="h6">Activate your Safe</Typography>
-          <Typography variant="body2" color="text.secondary">
+    <div className="max-w-[500px] rounded-lg bg-background p-6">
+      <div className="mb-6 flex items-center gap-4">
+        <Rocket className="size-8 text-primary" />
+        <div>
+          <Typography variant="h4">Activate your Safe</Typography>
+          <Typography variant="paragraph-small" color="muted">
             Deploy your Safe to start using it
           </Typography>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Alert severity="info" sx={{ mb: 3 }}>
-        Your Safe exists as an address but is not yet deployed on-chain. Activate it to start making transactions.
+      <Alert className="mb-6">
+        <AlertDescription>
+          Your Safe exists as an address but is not yet deployed on-chain. Activate it to start making transactions.
+        </AlertDescription>
       </Alert>
 
-      <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1, mb: 3 }}>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+      <div className="mb-6 rounded bg-muted p-4">
+        <Typography variant="paragraph-small" color="muted" as="div" className="mb-1">
           Safe address
         </Typography>
-        <Typography variant="body2" fontFamily="monospace">
-          {mockSafeAddress}
-        </Typography>
-      </Box>
+        <Typography variant="code">{mockSafeAddress}</Typography>
+      </div>
 
-      <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1, mb: 3 }}>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+      <div className="mb-6 rounded bg-muted p-4">
+        <Typography variant="paragraph-small" color="muted" as="div" className="mb-1">
           Network
         </Typography>
-        <Chip label={mockChain.name} size="small" />
-      </Box>
+        <Badge variant="outline">{mockChain.name}</Badge>
+      </div>
 
-      <Divider sx={{ my: 2 }} />
+      <Separator className="my-4" />
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-        <Typography variant="body2">Estimated network fee</Typography>
-        <Typography variant="body2" fontWeight="bold">
-          ~0.005 ETH
-        </Typography>
-      </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="body2">Estimated time</Typography>
-        <Typography variant="body2">~30 seconds</Typography>
-      </Box>
+      <div className="mb-1 flex justify-between">
+        <Typography variant="paragraph-small">Estimated network fee</Typography>
+        <Typography variant="paragraph-small-bold">~0.005 ETH</Typography>
+      </div>
+      <div className="mb-6 flex justify-between">
+        <Typography variant="paragraph-small">Estimated time</Typography>
+        <Typography variant="paragraph-small">~30 seconds</Typography>
+      </div>
 
-      <Button variant="contained" fullWidth size="large">
+      <Button size="lg" className="w-full">
         Activate Safe
       </Button>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -372,24 +354,7 @@ export const FullActivateAccountFlow: StoryObj = {
 
 // Check Balance Alert
 export const CheckBalanceAlert: StoryObj = {
-  render: () => (
-    <Alert
-      severity="info"
-      sx={{ maxWidth: 500 }}
-      action={
-        <Button color="inherit" size="small" startIcon={<RocketLaunchIcon />}>
-          Activate
-        </Button>
-      }
-    >
-      <Typography variant="body2" fontWeight="bold" gutterBottom>
-        Safe not yet activated
-      </Typography>
-      <Typography variant="body2">
-        Your Safe needs to be activated before you can make transactions. You can receive funds to this address now.
-      </Typography>
-    </Alert>
-  ),
+  render: () => <NotDeployedAlert />,
   parameters: {
     docs: {
       description: {
@@ -401,42 +366,7 @@ export const CheckBalanceAlert: StoryObj = {
 
 // Activation Success
 export const ActivationSuccess: StoryObj = {
-  render: () => (
-    <Dialog open maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ textAlign: 'center', pt: 4 }}>
-        <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-        <Typography variant="h5">Safe activated!</Typography>
-      </DialogTitle>
-      <DialogContent sx={{ textAlign: 'center' }}>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Your Safe has been successfully deployed and is ready to use.
-        </Typography>
-
-        <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1, mb: 2 }}>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            Safe address
-          </Typography>
-          <Typography variant="body2" fontFamily="monospace">
-            {mockSafeAddress}
-          </Typography>
-        </Box>
-
-        <Button
-          variant="text"
-          size="small"
-          endIcon={<OpenInNewIcon />}
-          href={`${mockChain.explorerUrl}/address/${mockSafeAddress}`}
-        >
-          View on Etherscan
-        </Button>
-      </DialogContent>
-      <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
-        <Button variant="contained" startIcon={<AccountBalanceWalletIcon />}>
-          Open Safe
-        </Button>
-      </DialogActions>
-    </Dialog>
-  ),
+  render: () => <SuccessDialog />,
   parameters: {
     docs: {
       description: {
@@ -448,21 +378,7 @@ export const ActivationSuccess: StoryObj = {
 
 // Activation In Progress
 export const ActivationInProgress: StoryObj = {
-  render: () => (
-    <Paper sx={{ p: 4, maxWidth: 400, textAlign: 'center' }}>
-      <RocketLaunchIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-      <Typography variant="h6" gutterBottom>
-        Activating Safe...
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Please wait while your Safe is being deployed
-      </Typography>
-      <LinearProgress sx={{ mb: 2 }} />
-      <Typography variant="caption" color="text.secondary">
-        This may take up to a minute
-      </Typography>
-    </Paper>
-  ),
+  render: () => <ActivatingCard />,
   parameters: {
     docs: {
       description: {
@@ -475,17 +391,20 @@ export const ActivationInProgress: StoryObj = {
 // Activation Button
 export const ActivateAccountButton: StoryObj = {
   render: () => (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 300 }}>
-      <Button variant="contained" startIcon={<RocketLaunchIcon />} fullWidth>
+    <div className="flex max-w-[300px] flex-col gap-4">
+      <Button className="w-full">
+        <Rocket className="size-4" />
         Activate Safe
       </Button>
-      <Button variant="outlined" startIcon={<RocketLaunchIcon />} fullWidth>
+      <Button variant="outline" className="w-full">
+        <Rocket className="size-4" />
         Activate Safe
       </Button>
-      <Button variant="text" startIcon={<RocketLaunchIcon />}>
+      <Button variant="ghost">
+        <Rocket className="size-4" />
         Activate Safe
       </Button>
-    </Box>
+    </div>
   ),
   parameters: {
     docs: {
@@ -499,25 +418,25 @@ export const ActivateAccountButton: StoryObj = {
 // Not Deployed Chip
 export const NotDeployedChip: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 400 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Safe Status Indicators
+    <div className="max-w-[400px] rounded-lg bg-background p-6">
+      <Typography variant="paragraph-small-bold" as="div" className="mb-2">
+        Safe status indicators
       </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="body2">Counterfactual Safe</Typography>
-          <Chip label="Not deployed" size="small" color="info" variant="outlined" />
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="body2">Deployed Safe</Typography>
-          <Chip label="Active" size="small" color="success" />
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="body2">Deploying</Typography>
-          <Chip label="Pending" size="small" color="warning" />
-        </Box>
-      </Box>
-    </Paper>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <Typography variant="paragraph-small">Counterfactual Safe</Typography>
+          <Badge variant="outline">Not deployed</Badge>
+        </div>
+        <div className="flex items-center justify-between">
+          <Typography variant="paragraph-small">Deployed Safe</Typography>
+          <Badge variant="success">Active</Badge>
+        </div>
+        <div className="flex items-center justify-between">
+          <Typography variant="paragraph-small">Deploying</Typography>
+          <Badge variant="warning">Pending</Badge>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -530,43 +449,7 @@ export const NotDeployedChip: StoryObj = {
 
 // Insufficient Balance
 export const InsufficientBalance: StoryObj = {
-  render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <Typography variant="h6" gutterBottom>
-        Activate your Safe
-      </Typography>
-
-      <Alert severity="warning" sx={{ mb: 3 }}>
-        <Typography variant="body2" fontWeight="bold" gutterBottom>
-          Insufficient balance
-        </Typography>
-        <Typography variant="body2">
-          You need at least 0.005 ETH to activate your Safe. Current balance: 0.001 ETH
-        </Typography>
-      </Alert>
-
-      <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1, mb: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            Required
-          </Typography>
-          <Typography variant="body2">~0.005 ETH</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="body2" color="text.secondary">
-            Current balance
-          </Typography>
-          <Typography variant="body2" color="error.main">
-            0.001 ETH
-          </Typography>
-        </Box>
-      </Box>
-
-      <Button variant="contained" fullWidth disabled>
-        Activate Safe
-      </Button>
-    </Paper>
-  ),
+  render: () => <InsufficientBalanceCard />,
   parameters: {
     docs: {
       description: {
@@ -579,51 +462,9 @@ export const InsufficientBalance: StoryObj = {
 // Pay Now Pay Later Options
 export const PayNowPayLater: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <Typography variant="h6" gutterBottom>
-        Choose activation method
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Select how you want to pay for Safe deployment
-      </Typography>
-
-      <Box
-        sx={{
-          p: 2,
-          border: 2,
-          borderColor: 'primary.main',
-          borderRadius: 1,
-          mb: 2,
-          cursor: 'pointer',
-        }}
-      >
-        <Typography variant="subtitle2">Pay now</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Deploy your Safe immediately by paying gas fees
-        </Typography>
-        <Typography variant="caption" color="primary">
-          ~0.005 ETH
-        </Typography>
-      </Box>
-
-      <Box
-        sx={{
-          p: 2,
-          border: 1,
-          borderColor: 'divider',
-          borderRadius: 1,
-          cursor: 'pointer',
-        }}
-      >
-        <Typography variant="subtitle2">Pay later</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Activate when you make your first transaction
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Deployment cost added to first transaction
-        </Typography>
-      </Box>
-    </Paper>
+    <div className="max-w-[500px] rounded-lg bg-background p-6">
+      <PayNowPayLaterOptions />
+    </div>
   ),
   parameters: {
     docs: {
@@ -637,40 +478,34 @@ export const PayNowPayLater: StoryObj = {
 // First Transaction Flow
 export const FirstTransactionFlow: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <Alert severity="info" sx={{ mb: 3 }}>
-        <Typography variant="body2" fontWeight="bold" gutterBottom>
-          First transaction will activate your Safe
-        </Typography>
-        <Typography variant="body2">
+    <div className="max-w-[500px] rounded-lg bg-background p-6">
+      <Alert className="mb-6">
+        <AlertTitle>First transaction will activate your Safe</AlertTitle>
+        <AlertDescription>
           Your Safe will be deployed as part of this transaction. Deployment cost will be added to the gas fee.
-        </Typography>
+        </AlertDescription>
       </Alert>
 
-      <Box sx={{ bgcolor: 'background.default', p: 2, borderRadius: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="body2" color="text.secondary">
+      <div className="rounded bg-muted p-4">
+        <div className="mb-1 flex justify-between">
+          <Typography variant="paragraph-small" color="muted">
             Transaction fee
           </Typography>
-          <Typography variant="body2">~0.002 ETH</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="paragraph-small">~0.002 ETH</Typography>
+        </div>
+        <div className="mb-1 flex justify-between">
+          <Typography variant="paragraph-small" color="muted">
             Deployment fee
           </Typography>
-          <Typography variant="body2">~0.005 ETH</Typography>
-        </Box>
-        <Divider sx={{ my: 1 }} />
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="body2" fontWeight="bold">
-            Total
-          </Typography>
-          <Typography variant="body2" fontWeight="bold">
-            ~0.007 ETH
-          </Typography>
-        </Box>
-      </Box>
-    </Paper>
+          <Typography variant="paragraph-small">~0.005 ETH</Typography>
+        </div>
+        <Separator className="my-2" />
+        <div className="flex justify-between">
+          <Typography variant="paragraph-small-bold">Total</Typography>
+          <Typography variant="paragraph-small-bold">~0.007 ETH</Typography>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -684,14 +519,12 @@ export const FirstTransactionFlow: StoryObj = {
 // Receive Funds Info
 export const ReceiveFundsInfo: StoryObj = {
   render: () => (
-    <Alert severity="success" sx={{ maxWidth: 500 }}>
-      <Typography variant="body2" fontWeight="bold" gutterBottom>
-        Ready to receive funds
-      </Typography>
-      <Typography variant="body2">
+    <Alert className="max-w-[500px]">
+      <AlertTitle>Ready to receive funds</AlertTitle>
+      <AlertDescription>
         Even though your Safe is not deployed yet, you can already receive funds to this address. The Safe will be
         activated when you make your first transaction.
-      </Typography>
+      </AlertDescription>
     </Alert>
   ),
   parameters: {

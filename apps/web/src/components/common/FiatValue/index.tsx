@@ -1,11 +1,9 @@
-import type { CSSProperties, ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import { useMemo } from 'react'
-import { Tooltip, Typography } from '@mui/material'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
-
-const style = { whiteSpace: 'nowrap' } as CSSProperties
 
 const FiatValue = ({
   value,
@@ -32,30 +30,31 @@ const FiatValue = ({
   }, [preciseFiat])
 
   if (fiat == null) {
-    return (
-      <Typography component="span" color="text.secondary">
-        --
-      </Typography>
-    )
+    return <span className="text-muted-foreground">--</span>
+  }
+
+  const content = (
+    <span suppressHydrationWarning className="whitespace-nowrap">
+      {precise ? (
+        <>
+          {whole}
+          {decimals && <span className="text-muted-foreground">{decimals}</span>}
+          {endCurrency}
+        </>
+      ) : (
+        fiat
+      )}
+    </span>
+  )
+
+  if (precise || !preciseFiat) {
+    return content
   }
 
   return (
-    <Tooltip title={precise ? undefined : preciseFiat}>
-      <span suppressHydrationWarning style={style}>
-        {precise ? (
-          <>
-            {whole}
-            {decimals && (
-              <Typography component="span" color="text.secondary" fontSize="inherit" fontWeight="inherit">
-                {decimals}
-              </Typography>
-            )}
-            {endCurrency}
-          </>
-        ) : (
-          fiat
-        )}
-      </span>
+    <Tooltip>
+      <TooltipTrigger render={content} />
+      <TooltipContent>{preciseFiat}</TooltipContent>
     </Tooltip>
   )
 }

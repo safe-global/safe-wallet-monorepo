@@ -5,7 +5,8 @@ import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { COUNTERFACTUAL_EVENTS } from '@/services/analytics/events/counterfactual'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { Alert, Typography } from '@mui/material'
+import { Alert } from '@/components/ui/alert'
+import { Typography } from '@/components/ui/typography'
 
 const CheckBalance = () => {
   const { safe, safeAddress } = useSafeInfo()
@@ -16,16 +17,11 @@ const CheckBalance = () => {
   const blockExplorerLink = chain ? getBlockExplorerLink(chain, safeAddress) : undefined
 
   return (
-    <Alert
-      data-testid="no-tokens-alert"
-      icon={false}
-      severity="info"
-      sx={{ display: 'flex', maxWidth: '600px', mt: 3, px: 3, py: 2, mx: 'auto' }}
-    >
-      <Typography fontWeight="bold" mb={1}>
+    <Alert data-testid="no-tokens-alert" className="mx-auto mt-6 flex max-w-[600px] flex-col px-6 py-4">
+      <Typography variant="paragraph-bold" className="mb-2">
         Don&apos;t see your tokens?
       </Typography>
-      <Typography variant="body2" mb={2}>
+      <Typography variant="paragraph-small" className="mb-4">
         Your Safe Account is not activated yet so we can only display your native balance. Non-native tokens may not
         show up immediately after the Safe is deployed. Finish the onboarding to deploy your account onchain and unlock
         all features.{' '}

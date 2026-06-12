@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper, Box, Typography, Badge, ButtonBase, SvgIcon } from '@mui/material'
-import LayersIcon from '@mui/icons-material/Layers'
+import { Layers } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 
 /**
  * Batch components allow users to queue multiple transactions together
@@ -20,59 +22,45 @@ export default meta
 
 // BatchIndicator mockup (actual component requires useDraftBatch hook)
 const MockBatchIndicator = ({ count = 0 }: { count?: number }) => (
-  <ButtonBase
-    title="Batch"
-    sx={{
-      p: '10px',
-      '&:hover': {
-        backgroundColor: 'background.light',
-        borderRadius: '6px',
-      },
-    }}
-  >
-    <Badge
-      variant="standard"
-      badgeContent={count}
-      color="secondary"
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'right',
-      }}
-    >
-      <SvgIcon component={LayersIcon} fontSize="medium" />
-    </Badge>
-  </ButtonBase>
+  <Button variant="ghost" size="icon" title="Batch" className="relative">
+    <Layers className="size-6" />
+    {count > 0 && (
+      <span className="absolute -bottom-1 -right-1 flex size-4 items-center justify-center rounded-full bg-secondary px-1 text-xs font-medium text-secondary-foreground">
+        {count}
+      </span>
+    )}
+  </Button>
 )
 
 // Combined view showing both components - FULL PAGE FIRST
 export const FullBatchUI: StoryObj = {
   render: () => (
-    <Box sx={{ display: 'flex', gap: 4, alignItems: 'flex-start' }}>
-      <Paper sx={{ p: 2 }}>
-        <Typography variant="subtitle2" gutterBottom>
+    <div className="flex items-start gap-8">
+      <div className="rounded-lg bg-background p-4">
+        <Typography variant="paragraph-small-bold" as="div" className="mb-2">
           Indicator
         </Typography>
         <MockBatchIndicator count={3} />
-      </Paper>
-      <Paper sx={{ width: 350, minHeight: 300, p: 2 }}>
-        <Typography variant="subtitle2" sx={{ pb: 2, borderBottom: 1, borderColor: 'divider' }}>
-          Sidebar Preview
+      </div>
+      <div className="min-h-[300px] w-[350px] rounded-lg bg-background p-4">
+        <Typography variant="paragraph-small-bold" as="div" className="border-b pb-4">
+          Sidebar preview
         </Typography>
-        <Box sx={{ pt: 2 }}>
+        <div className="pt-4">
           {[
             { type: 'Send', amount: '1.5 ETH' },
             { type: 'Approve', amount: '1000 USDC' },
             { type: 'Send', amount: '500 DAI' },
           ].map((tx, i) => (
-            <Box key={i} sx={{ py: 1, borderBottom: 1, borderColor: 'divider' }}>
-              <Typography variant="body2">
+            <div key={i} className="border-b py-2">
+              <Typography variant="paragraph-small">
                 {tx.type}: {tx.amount}
               </Typography>
-            </Box>
+            </div>
           ))}
-        </Box>
-      </Paper>
-    </Box>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     layout: 'padded',
@@ -86,31 +74,31 @@ export const FullBatchUI: StoryObj = {
 
 export const Indicator: StoryObj = {
   render: () => (
-    <Box sx={{ p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
-      <Typography variant="caption" color="text.secondary" display="block" mb={2}>
+    <div className="rounded bg-background p-4">
+      <Typography variant="paragraph-mini" color="muted" as="div" className="mb-4">
         BatchIndicator shows the number of pending transactions
       </Typography>
-      <Box sx={{ display: 'flex', gap: 3 }}>
-        <Box sx={{ textAlign: 'center' }}>
+      <div className="flex gap-6">
+        <div className="text-center">
           <MockBatchIndicator count={0} />
-          <Typography variant="caption" display="block">
+          <Typography variant="paragraph-mini" as="div">
             Empty
           </Typography>
-        </Box>
-        <Box sx={{ textAlign: 'center' }}>
+        </div>
+        <div className="text-center">
           <MockBatchIndicator count={3} />
-          <Typography variant="caption" display="block">
+          <Typography variant="paragraph-mini" as="div">
             3 items
           </Typography>
-        </Box>
-        <Box sx={{ textAlign: 'center' }}>
+        </div>
+        <div className="text-center">
           <MockBatchIndicator count={12} />
-          <Typography variant="caption" display="block">
+          <Typography variant="paragraph-mini" as="div">
             12 items
           </Typography>
-        </Box>
-      </Box>
-    </Box>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -124,29 +112,20 @@ export const Indicator: StoryObj = {
 // BatchSidebar mockup
 export const SidebarEmpty: StoryObj = {
   render: () => (
-    <Paper sx={{ width: 400, minHeight: 400, p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Batch Transaction
+    <div className="min-h-[400px] w-[400px] rounded-lg bg-background p-6">
+      <Typography variant="h4" className="mb-2">
+        Batch transaction
       </Typography>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          py: 6,
-          color: 'text.secondary',
-        }}
-      >
-        <SvgIcon component={LayersIcon} sx={{ fontSize: 48, mb: 2, opacity: 0.5 }} />
-        <Typography variant="body1" color="text.secondary">
+      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+        <Layers className="mb-4 size-12 opacity-50" />
+        <Typography variant="paragraph" color="muted">
           No transactions in batch
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography variant="paragraph-small" color="muted" className="mt-2">
           Add transactions to execute them together
         </Typography>
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -159,51 +138,40 @@ export const SidebarEmpty: StoryObj = {
 
 export const SidebarWithItems: StoryObj = {
   render: () => (
-    <Paper sx={{ width: 400, minHeight: 400, p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Batch Transaction (3)
+    <div className="min-h-[400px] w-[400px] rounded-lg bg-background p-6">
+      <Typography variant="h4" className="mb-2">
+        Batch transaction (3)
       </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="flex flex-col gap-4">
         {[
           { type: 'Send', amount: '1.5 ETH', to: '0x1234...5678' },
           { type: 'Approve', amount: '1000 USDC', to: 'Uniswap' },
           { type: 'Send', amount: '500 DAI', to: '0xABCD...EFGH' },
         ].map((tx, i) => (
-          <Box
-            key={i}
-            sx={{
-              p: 2,
-              border: 1,
-              borderColor: 'divider',
-              borderRadius: 1,
-              display: 'flex',
-              justifyContent: 'space-between',
-            }}
-          >
-            <Box>
-              <Typography variant="body2" fontWeight="bold">
+          <div key={i} className="flex justify-between rounded border p-4">
+            <div>
+              <Typography variant="paragraph-small-bold" as="div">
                 {tx.type}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="paragraph-mini" color="muted">
                 {tx.amount} → {tx.to}
               </Typography>
-            </Box>
-            <Typography variant="caption" color="error" sx={{ cursor: 'pointer' }}>
+            </div>
+            <Typography variant="paragraph-mini" className="cursor-pointer text-destructive">
               Remove
             </Typography>
-          </Box>
+          </div>
         ))}
-      </Box>
-      <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-        <Typography variant="button" color="text.secondary">
+      </div>
+      <Separator className="my-6" />
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="sm">
           Clear all
-        </Typography>
-        <Box sx={{ flex: 1 }} />
-        <Typography variant="button" color="primary">
-          Execute batch
-        </Typography>
-      </Box>
-    </Paper>
+        </Button>
+        <div className="flex-1" />
+        <Button size="sm">Execute batch</Button>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {

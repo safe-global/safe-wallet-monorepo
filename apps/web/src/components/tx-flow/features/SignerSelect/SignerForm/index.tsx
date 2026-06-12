@@ -1,4 +1,5 @@
-import { SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { useCallback, useContext, useEffect, useMemo } from 'react'
@@ -89,17 +90,16 @@ export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?
 
   return (
     <>
-      <Typography variant="h5" display="flex" gap={1} alignItems="center">
-        <SvgIcon component={SignatureIcon} inheritViewBox fontSize="small" />
+      <Typography variant="h4" className="flex items-center gap-2">
+        <SignatureIcon className="size-4" />
         {willExecute ? 'Execute' : 'Sign'} with
-        <Tooltip
-          title={`Your connected wallet controls other Safe Accounts, which can sign this transaction. You can select which Account to ${
-            willExecute ? 'execute' : 'sign'
-          } with.`}
-          arrow
-          placement="top"
-        >
-          <SvgIcon component={InfoIcon} inheritViewBox color="border" fontSize="small" />
+        <Tooltip>
+          <TooltipTrigger render={<InfoIcon className="size-4 text-[var(--color-border-main)]" />} />
+          <TooltipContent side="top">
+            {`Your connected wallet controls other Safe Accounts, which can sign this transaction. You can select which Account to ${
+              willExecute ? 'execute' : 'sign'
+            } with.`}
+          </TooltipContent>
         </Tooltip>
       </Typography>
 

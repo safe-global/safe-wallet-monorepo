@@ -1,6 +1,8 @@
 import css from './styles.module.css'
-import { Box, Grid, IconButton, Link, SvgIcon, type SvgIconTypeMap, Typography } from '@mui/material'
-import HighlightOffIcon from '@mui/icons-material/HighlightOff'
+import { XCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Link } from '@/components/ui/link'
+import { Typography } from '@/components/ui/typography'
 import FileIcon from '@/public/images/settings/data/file.svg'
 import type { MouseEventHandler, ReactElement } from 'react'
 import type { DropzoneInputProps, DropzoneRootProps } from 'react-dropzone'
@@ -17,99 +19,56 @@ export enum FileTypes {
   CSV = 'CSV',
 }
 
-const ColoredFileIcon = ({ color }: { color: SvgIconTypeMap['props']['color'] }) => (
-  <SvgIcon component={FileIcon} inheritViewBox fontSize="small" color={color} sx={{ fill: 'none' }} />
+const ColoredFileIcon = ({ className }: { className?: string }) => (
+  <FileIcon className={`size-5 fill-none ${className ?? ''}`} />
 )
 
 const UploadSummary = ({ fileInfo, onRemove }: { fileInfo: FileInfo; onRemove: (() => void) | MouseEventHandler }) => {
   return (
-    <Grid
-      container
-      direction="column"
-      sx={{
-        gap: 1,
-        mt: 3,
-      }}
-    >
-      <Grid
-        container
-        sx={{
-          gap: 1,
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
-        <Grid item xs={1}>
-          <ColoredFileIcon color="primary" />
-        </Grid>
-        <Grid item xs={7}>
+    <div className="mt-6 flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <div className="basis-1/12">
+          <ColoredFileIcon className="text-[var(--color-primary-main)]" />
+        </div>
+        <div className="basis-7/12">
           {fileInfo.name}
           {fileInfo.additionalInfo && ` - ${fileInfo.additionalInfo}`}
-        </Grid>
+        </div>
 
-        <Grid
-          item
-          xs
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-          }}
-        >
-          <IconButton onClick={onRemove} size="small">
-            <HighlightOffIcon color="primary" />
-          </IconButton>
-        </Grid>
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-start',
-        }}
-      >
+        <div className="flex flex-1 justify-end">
+          <Button variant="ghost" size="icon-sm" onClick={onRemove}>
+            <XCircle className="text-[var(--color-primary-main)]" />
+          </Button>
+        </div>
+      </div>
+      <div className="flex justify-start">
         <div className={css.verticalLine} />
-      </Grid>
+      </div>
       <>
         {fileInfo.summary.map((summaryItem, idx) => (
-          <Grid
-            key={`${fileInfo.name}${idx}`}
-            container
-            sx={{
-              display: 'flex',
-              gap: 1,
-              alignItems: 'center',
-            }}
-          >
-            <Grid item xs={1}>
-              <ColoredFileIcon color="border" />
-            </Grid>
-            <Grid item xs>
+          <div key={`${fileInfo.name}${idx}`} className="flex items-center gap-2">
+            <div className="basis-1/12">
+              <ColoredFileIcon className="text-[var(--color-border-main)]" />
+            </div>
+            <div className="flex-1">
               <Typography>{summaryItem}</Typography>
-            </Grid>
-          </Grid>
+            </div>
+          </div>
         ))}
         {fileInfo.error && (
-          <Grid
-            container
-            sx={{
-              display: 'flex',
-              gap: 1,
-              alignItems: 'center',
-            }}
-          >
-            <Grid item xs={1}>
-              <ColoredFileIcon color="border" />
-            </Grid>
-            <Grid item xs>
-              <Typography color="error">
+          <div className="flex items-center gap-2">
+            <div className="basis-1/12">
+              <ColoredFileIcon className="text-[var(--color-border-main)]" />
+            </div>
+            <div className="flex-1">
+              <Typography className="text-[var(--color-error-main)]">
                 <strong>{fileInfo.error}</strong>
               </Typography>
-            </Grid>
-          </Grid>
+            </div>
+          </div>
         )}
       </>
-    </Grid>
+    </div>
   )
 }
 
@@ -134,38 +93,30 @@ const FileUpload = ({
     return <UploadSummary fileInfo={fileInfo} onRemove={onRemove} />
   }
   return (
-    <Box
+    <div
       data-testid="file-upload-section"
       {...getRootProps()}
       className={css.dropbox}
-      sx={{
+      style={{
         cursor: isDragReject ? 'not-allowed' : undefined,
-        background: ({ palette }) => `${isDragReject ? palette.error.light : undefined} !important`,
-        border: ({ palette }) =>
-          `1px dashed ${
-            isDragReject ? palette.error.dark : isDragActive ? palette.primary.main : palette.secondary.dark
-          }`,
+        background: isDragReject ? 'var(--color-error-light)' : undefined,
+        border: `1px dashed ${
+          isDragReject
+            ? 'var(--color-error-dark)'
+            : isDragActive
+              ? 'var(--color-primary-main)'
+              : 'var(--color-secondary-dark)'
+        }`,
       }}
     >
       {getInputProps && <input {...getInputProps()} />}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-        }}
-      >
-        <SvgIcon
-          component={FileIcon}
-          inheritViewBox
-          fontSize="small"
-          sx={{ fill: 'none', color: ({ palette }) => palette.primary.light }}
-        />
+      <div className="flex items-center gap-2">
+        <FileIcon className="size-5 fill-none text-[var(--color-primary-light)]" />
         <Typography>
-          Drag and drop a {fileType} file or <Link color="secondary">choose a file</Link>
+          Drag and drop a {fileType} file or <Link variant="muted">choose a file</Link>
         </Typography>
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

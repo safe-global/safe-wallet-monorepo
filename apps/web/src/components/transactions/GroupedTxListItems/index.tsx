@@ -1,7 +1,7 @@
 import type { AnyTransactionItem } from '@/utils/tx-list'
 import type { ReactElement } from 'react'
 import { useContext } from 'react'
-import { Box, Paper, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import ExpandableTransactionItem from '@/components/transactions/TxListItem/ExpandableTransactionItem'
 import css from './styles.module.css'
@@ -31,34 +31,13 @@ const TxGroup = ({ groupedListItems }: { groupedListItems: AnyTransactionItem[] 
   const { replacedTxIds } = useContext(ReplaceTxHoverContext)
 
   return (
-    <Paper className={css.container}>
-      <Typography
-        sx={{
-          gridArea: 'nonce',
-        }}
-      >
-        {nonce}
-      </Typography>
-      <Box
-        className={css.disclaimerContainer}
-        sx={{
-          gridArea: 'warning',
-        }}
-      >
+    <div className={css.container}>
+      <Typography style={{ gridArea: 'nonce' }}>{nonce}</Typography>
+      <div className={css.disclaimerContainer} style={{ gridArea: 'warning' }}>
         <Disclaimer />
-      </Box>
-      <Box
-        className={css.line}
-        sx={{
-          gridArea: 'line',
-        }}
-      />
-      <Box
-        className={css.txItems}
-        sx={{
-          gridArea: 'items',
-        }}
-      >
+      </div>
+      <div className={css.line} style={{ gridArea: 'line' }} />
+      <div className={css.txItems} style={{ gridArea: 'items' }}>
         {groupedListItems.map((tx) => (
           <div
             key={tx.transaction.id}
@@ -67,8 +46,8 @@ const TxGroup = ({ groupedListItems }: { groupedListItems: AnyTransactionItem[] 
             <ExpandableTransactionItem item={tx} isConflictGroup />
           </div>
         ))}
-      </Box>
-    </Paper>
+      </div>
+    </div>
   )
 }
 

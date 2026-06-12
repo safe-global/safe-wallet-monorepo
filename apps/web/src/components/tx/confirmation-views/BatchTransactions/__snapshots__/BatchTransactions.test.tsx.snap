@@ -3,10 +3,12 @@
 exports[`BatchTransactions should render a list of batch transactions 1`] = `
 <div>
   <ul
-    class="MuiList-root MuiList-padding css-8g50lk-MuiList-root"
+    class="m-0 flex list-none flex-col p-0 gap-4"
+    data-slot="list"
   >
     <li
-      class="MuiListItem-root MuiListItem-gutters css-rqnn2j-MuiListItem-root"
+      class="flex items-start gap-4 py-0"
+      data-slot="list-item"
     >
       <div
         class="number"
@@ -17,359 +19,185 @@ exports[`BatchTransactions should render a list of batch transactions 1`] = `
         class="accordion"
       >
         <div
-          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAccordion-root MuiAccordion-rounded MuiAccordion-gutters css-1622vx-MuiPaper-root-MuiAccordion-root"
+          class="flex w-full flex-col"
+          data-orientation="vertical"
+          data-slot="accordion"
           data-testid="action-accordion"
-          style="--Paper-shadow: none;"
+          dir="ltr"
+          role="region"
         >
-          <h3
-            class="MuiAccordion-heading css-cy7rkm-MuiAccordion-heading"
-          >
-            <button
-              aria-expanded="false"
-              class="MuiButtonBase-root MuiAccordionSummary-root MuiAccordionSummary-gutters accordion css-10sjung-MuiButtonBase-root-MuiAccordionSummary-root"
-              data-testid="action-item"
-              tabindex="0"
-              type="button"
-            >
-              <span
-                class="MuiAccordionSummary-content MuiAccordionSummary-contentGutters css-1r0e0ir-MuiAccordionSummary-content"
-              >
-                <div
-                  class="summary"
-                >
-                  <svg
-                    aria-hidden="true"
-                    class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
-                    data-testid="CodeIcon"
-                    focusable="false"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6z"
-                    />
-                  </svg>
-                  <p
-                    class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-                  />
-                  <div
-                    class="MuiStack-root css-kdc3n8-MuiStack-root"
-                  >
-                    <p
-                      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-                    >
-                      Send
-                    </p>
-                    <span
-                      aria-label="0.000001 ETH"
-                      class="container"
-                      data-mui-internal-clone-element="true"
-                    >
-                      <b
-                        class="tokenText"
-                      >
-                        &lt; 0.00001
-                         
-                        ETH
-                      </b>
-                    </span>
-                    <p
-                      class="MuiTypography-root MuiTypography-body1 css-v6lhhw-MuiTypography-root"
-                    >
-                      to
-                    </p>
-                    <div
-                      class="container"
-                    >
-                      <div
-                        class="avatarContainer"
-                        style="width: 16px; height: 16px;"
-                      >
-                        <div
-                          class="icon"
-                          style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjI2IDc1JSA0NCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCg3MCA1NyUgNTYlKSIgZD0iTTAsMGgxdjFoLTF6TTcsMGgxdjFoLTF6TTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTMsMmgxdjFoLTF6TTQsMmgxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDMzMSA4NiUgNDglKSIgZD0iTTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 16px; height: 16px;"
-                        />
-                      </div>
-                      <div
-                        class="inline MuiBox-root css-1lchl8k"
-                      >
-                        <div
-                          class="addressContainer inline"
-                        >
-                          <div
-                            class="MuiBox-root css-b5p5gz"
-                          >
-                            <span>
-                              0xA77D...98b6
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </span>
-              <span
-                class="MuiAccordionSummary-expandIconWrapper css-1wqf3nl-MuiAccordionSummary-expandIconWrapper"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1dhtbeh-MuiSvgIcon-root"
-                  data-testid="ExpandMoreIcon"
-                  focusable="false"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z"
-                  />
-                </svg>
-              </span>
-            </button>
-          </h3>
           <div
-            class="MuiCollapse-root MuiCollapse-vertical MuiCollapse-hidden css-cwrbtg-MuiCollapse-root"
-            style="min-height: 0px;"
+            class="not-last:border-b border-b border-border last:border-b-0"
+            data-closed=""
+            data-index="0"
+            data-orientation="vertical"
+            data-slot="accordion-item"
           >
             <div
-              class="MuiCollapse-wrapper MuiCollapse-vertical css-1x6hinx-MuiCollapse-wrapper"
+              class="bg-card text-card-foreground rounded-xl text-sm has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 overflow-hidden py-0 shadow-none"
+              data-size="default"
+              data-slot="card"
             >
-              <div
-                class="MuiCollapse-wrapperInner MuiCollapse-vertical css-1i4ywhz-MuiCollapse-wrapperInner"
+              <h3
+                class="flex"
+                data-closed=""
+                data-index="0"
+                data-orientation="vertical"
               >
                 <div
-                  class="MuiAccordion-region"
-                  role="region"
+                  aria-disabled="false"
+                  aria-expanded="false"
+                  class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex-1 justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 flex min-h-12 items-center px-4 py-3 hover:no-underline outlinedTrigger"
+                  data-orientation="vertical"
+                  data-slot="accordion-trigger"
+                  data-testid="action-item"
+                  data-value=""
+                  id="base-ui-_r_2_"
+                  role="button"
+                  tabindex="0"
+                  type="button"
                 >
                   <div
-                    class="MuiAccordionDetails-root css-w74p4c-MuiAccordionDetails-root"
+                    class="summary"
                   >
-                    <div
-                      class="MuiStack-root css-jfdv4h-MuiStack-root"
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-code size-4 shrink-0 text-muted-foreground"
+                      fill="none"
+                      height="24"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
+                      <path
+                        d="m16 18 6-6-6-6"
+                      />
+                      <path
+                        d="m8 6-6 6 6 6"
+                      />
+                    </svg>
+                    <span
+                      class="summaryIndex"
+                    />
+                    <div
+                      class="flex flex-row items-center gap-2"
+                    >
+                      <p
+                        class="m-0 text-base leading-6 font-normal"
+                        data-slot="typography"
+                        data-variant="paragraph"
+                      >
+                        Send
+                      </p>
+                      <span
+                        class="container"
+                        data-slot="tooltip-trigger"
+                        id="base-ui-_r_4_"
+                      >
+                        <b
+                          class="tokenText"
+                        >
+                          &lt; 0.00001
+                           
+                          ETH
+                        </b>
+                      </span>
+                      <p
+                        class="m-0 text-base leading-6 font-normal"
+                        data-slot="typography"
+                        data-variant="paragraph"
+                      >
+                        to
+                      </p>
                       <div
-                        class="MuiStack-root css-1sazv7p-MuiStack-root"
+                        class="container"
                       >
                         <div
-                          class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+                          class="avatarContainer"
+                          style="width: 16px; height: 16px;"
                         >
                           <div
-                            class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-                            data-testid="tx-row-title"
-                            style="word-break: break-word;"
-                          >
-                            <span
-                              class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-                            >
-                              Interacted with
-                            </span>
-                          </div>
-                          <div
-                            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-                            data-testid="tx-data-row"
-                          >
-                            <div
-                              class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
-                            >
-                              <div
-                                class="container"
-                              >
-                                <div
-                                  class="avatarContainer"
-                                  style="width: 20px; height: 20px;"
-                                >
-                                  <div
-                                    class="icon"
-                                    style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjI2IDc1JSA0NCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCg3MCA1NyUgNTYlKSIgZD0iTTAsMGgxdjFoLTF6TTcsMGgxdjFoLTF6TTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTMsMmgxdjFoLTF6TTQsMmgxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDMzMSA4NiUgNDglKSIgZD0iTTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 20px; height: 20px;"
-                                  />
-                                </div>
-                                <div
-                                  class="MuiBox-root css-1lchl8k"
-                                >
-                                  <div
-                                    class="ethHashInfo-name MuiBox-root css-171onha"
-                                    title="GnosisSafeProxy"
-                                  >
-                                    <div
-                                      class="MuiBox-root css-1o4wo1x"
-                                    >
-                                      GnosisSafeProxy
-                                    </div>
-                                  </div>
-                                  <div
-                                    class="addressContainer"
-                                  >
-                                    <div
-                                      class="MuiBox-root css-b5p5gz"
-                                    >
-                                      <span
-                                        aria-label="Copy to clipboard"
-                                        class=""
-                                        data-mui-internal-clone-element="true"
-                                        style="cursor: pointer;"
-                                      >
-                                        <span>
-                                          0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6
-                                        </span>
-                                      </span>
-                                    </div>
-                                    <span
-                                      aria-label="Copy to clipboard"
-                                      class=""
-                                      data-mui-internal-clone-element="true"
-                                      style="cursor: pointer;"
-                                    >
-                                      <button
-                                        aria-label="Copy to clipboard"
-                                        class="MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeSmall css-uneijd-MuiButtonBase-root-MuiIconButton-root"
-                                        tabindex="0"
-                                        type="button"
-                                      >
-                                        <mock-icon
-                                          aria-hidden=""
-                                          class="MuiSvgIcon-root MuiSvgIcon-colorBorder MuiSvgIcon-fontSizeSmall css-gvpe62-MuiSvgIcon-root"
-                                          data-testid="copy-btn-icon"
-                                          focusable="false"
-                                        />
-                                      </button>
-                                    </span>
-                                    <div
-                                      class="MuiBox-root css-yjghm1"
-                                    />
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                            class="icon"
+                            style="background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjI2IDc1JSA0NCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCg3MCA1NyUgNTYlKSIgZD0iTTAsMGgxdjFoLTF6TTcsMGgxdjFoLTF6TTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTIsMGgxdjFoLTF6TTUsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTEsMmgxdjFoLTF6TTYsMmgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTMsMmgxdjFoLTF6TTQsMmgxdjFoLTF6TTEsM2gxdjFoLTF6TTYsM2gxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTEsNmgxdjFoLTF6TTYsNmgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDMzMSA4NiUgNDglKSIgZD0iTTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6Ii8+PC9zdmc+); width: 16px; height: 16px;"
+                          />
                         </div>
                         <div
-                          class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
+                          class="gap-1 overflow-hidden inline"
                         >
                           <div
-                            class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-                            data-testid="tx-row-title"
-                            style="word-break: break-word;"
-                          >
-                            <span
-                              class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-                            >
-                              Value
-                            </span>
-                          </div>
-                          <div
-                            class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-                            data-testid="tx-data-row"
+                            class="addressContainer inline"
                           >
                             <div
-                              class="MuiBox-root css-axw7ok"
+                              class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
                             >
-                              <div
-                                class="MuiBox-root css-olq4e8"
-                              >
-                                <iframe
-                                  height="26"
-                                  loading="lazy"
-                                  referrerpolicy="strict-origin"
-                                  sandbox="allow-scripts"
-                                  srcdoc="
-    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="/images/common/token-placeholder.svg" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
-      <script>
-        document.querySelector('img').onerror = (e) => {
-          e.target.onerror = null
-          e.target.src = "/images/common/token-placeholder.svg"
-        }
-      </script>
-    </body>
-  "
-                                  style="pointer-events: none; border: 0px; display: block;"
-                                  tabindex="-1"
-                                  title="ETH"
-                                  width="26"
-                                />
-                              </div>
-                              <p
-                                class="MuiTypography-root MuiTypography-body2 css-1ct9qkn-MuiTypography-root"
-                              >
-                                ETH
-                              </p>
-                              <p
-                                class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
-                                data-testid="token-amount"
-                              >
-                                0.000001
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          class="MuiTypography-root MuiTypography-body2 css-17vdyq3-MuiTypography-root"
-                          data-testid="hexData"
-                        >
-                          <div
-                            class="MuiGrid-root MuiGrid-container css-1yff1ei-MuiGrid-root"
-                          >
-                            <div
-                              class="MuiGrid-root MuiGrid-item css-ezmk0c-MuiGrid-root"
-                              data-testid="tx-row-title"
-                              style="word-break: break-word;"
-                            >
-                              <span
-                                class="MuiTypography-root MuiTypography-body2 css-1ew0eu5-MuiTypography-root"
-                              >
-                                Data
+                              <span>
+                                0xA77D...98b6
                               </span>
-                            </div>
-                            <div
-                              class="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-true css-1vd824g-MuiGrid-root"
-                              data-testid="tx-data-row"
-                            >
-                              <div
-                                class="encodedData MuiBox-root css-0"
-                                data-testid="tx-hexData"
-                              >
-                                <span
-                                  aria-label="Copy to clipboard"
-                                  class=""
-                                  data-mui-internal-clone-element="true"
-                                  style="cursor: pointer;"
-                                >
-                                  <span
-                                    class="monospace"
-                                  >
-                                    <b
-                                      aria-label="The first 4 bytes determine the contract method that is being called"
-                                      class=""
-                                      data-mui-internal-clone-element="true"
-                                    >
-                                      0x
-                                    </b>
-                                     
-                                  </span>
-                                </span>
-                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-chevron-down pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+                    data-slot="accordion-trigger-icon"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="m6 9 6 6 6-6"
+                    />
+                  </svg>
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-chevron-up pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+                    data-slot="accordion-trigger-icon"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="m18 15-6-6-6 6"
+                    />
+                  </svg>
                 </div>
-              </div>
+              </h3>
             </div>
           </div>
         </div>
       </div>
     </li>
     <li
-      class="MuiListItem-root MuiListItem-gutters css-rqnn2j-MuiListItem-root"
+      class="flex items-start gap-4 py-0"
+      data-slot="list-item"
     >
       <div
         class="number"
       >
         2
       </div>
-      <span
-        class="MuiSkeleton-root MuiSkeleton-text MuiSkeleton-pulse css-1daydue-MuiSkeleton-root"
-        style="width: 100%; height: 56px;"
+      <div
+        class="bg-muted rounded-md animate-pulse h-[56px] w-full"
+        data-slot="skeleton"
       />
     </li>
   </ul>

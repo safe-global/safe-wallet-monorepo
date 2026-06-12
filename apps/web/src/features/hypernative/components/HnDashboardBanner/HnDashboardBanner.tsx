@@ -1,4 +1,5 @@
-import { Box, Button, Card, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import Image from 'next/image'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
@@ -19,32 +20,32 @@ export const HnDashboardBanner = ({ onHnSignupClick }: HnDashboardBannerProps) =
   }
 
   return (
-    <Card className={css.banner} onClick={handleBannerClick} role="button" sx={{ cursor: 'pointer' }}>
-      <Box className={css.tag}>
-        <Typography variant="body2" className={css.tagText}>
+    <div className={`cursor-pointer ${css.banner}`} onClick={handleBannerClick} role="button">
+      <div className={css.tag}>
+        <Typography variant="paragraph-small" className={css.tagText}>
           {tagLabel}
         </Typography>
-      </Box>
+      </div>
 
-      <Box className={css.content}>
-        <Box className={css.badgeContainer}>
+      <div className={css.content}>
+        <div className={css.badgeContainer}>
           <Image src={badgeSrc} alt={badgeAlt} width={54} height={54} className={css.badge} />
-        </Box>
+        </div>
 
-        <Box className={css.textContent}>
-          <Typography variant="h6" className={css.title}>
+        <div className={css.textContent}>
+          <Typography variant="h4" className={css.title}>
             {title}
           </Typography>
 
-          <Typography variant="body2" className={css.description}>
+          <Typography variant="paragraph-small" className={css.description}>
             {description}
           </Typography>
 
-          <Button variant="outlined" size="small" className={css.ctaButton}>
+          <Button variant="outline" size="sm" className={css.ctaButton}>
             {ctaLabel}
           </Button>
-        </Box>
-      </Box>
-    </Card>
+        </div>
+      </div>
+    </div>
   )
 }

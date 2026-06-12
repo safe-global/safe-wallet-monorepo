@@ -1,5 +1,4 @@
-import { Search } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import SearchField from '@/components/common/SearchField'
 
 interface GlobalSearchProps {
   value: string
@@ -8,17 +7,13 @@ interface GlobalSearchProps {
 
 const GlobalSearch = ({ value, onChange }: GlobalSearchProps) => {
   return (
-    <div className="relative">
-      <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-      <Input
-        placeholder="Search"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="pl-9 focus-visible:ring-1 focus-visible:ring-ring"
-        aria-label="Search"
-        autoFocus
-      />
-    </div>
+    <SearchField
+      placeholder="Search"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      aria-label="Search"
+      autoFocus
+    />
   )
 }
 

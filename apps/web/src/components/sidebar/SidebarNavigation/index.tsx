@@ -1,7 +1,8 @@
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import React, { useContext, useMemo, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import { Divider, ListItemButton } from '@mui/material'
+import { Separator } from '@/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 import {
   SidebarList,
@@ -22,7 +23,6 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
-import { Tooltip } from '@mui/material'
 import { BRIDGE_EVENTS, BRIDGE_LABELS } from '@/services/analytics/events/bridge'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
@@ -120,51 +120,44 @@ const Navigation = (): ReactElement | null => {
 
         const shouldPlaceDivider = item.href === AppRoutes.apps.index || item.href === AppRoutes.stake
 
-        return (
-          <Tooltip
-            title={isDisabled ? 'You need to activate your Safe first.' : ''}
-            placement="right"
-            key={item.externalUrl || item.href}
-            arrow
-          >
-            <div>
-              <ListItemButton
-                sx={{ padding: 0 }}
-                disabled={isDisabled}
-                selected={isSelected}
-                onClick={isDisabled ? undefined : () => handleNavigationClick(item)}
-                {...(item.externalUrl && {
-                  component: 'a',
-                  href: item.externalUrl,
-                  target: '_blank',
-                  rel: 'noopener noreferrer',
-                })}
-              >
-                <SidebarListItemButton
-                  selected={isSelected}
-                  href={
-                    item.href
-                      ? {
-                          pathname: getRoute(item.href),
-                          query,
-                        }
-                      : undefined
+        const listItemButton = (
+          <SidebarListItemButton
+            selected={isSelected}
+            externalUrl={item.externalUrl}
+            href={
+              !item.externalUrl && item.href
+                ? {
+                    pathname: getRoute(item.href),
+                    query,
                   }
-                  disabled={isDisabled}
-                >
-                  {item.icon && <SidebarListItemIcon badge={getBadge(item)}>{item.icon}</SidebarListItemIcon>}
+                : undefined
+            }
+            disabled={isDisabled}
+            onClick={isDisabled ? undefined : () => handleNavigationClick(item)}
+          >
+            {item.icon && <SidebarListItemIcon badge={getBadge(item)}>{item.icon}</SidebarListItemIcon>}
 
-                  <SidebarListItemText data-testid="sidebar-list-item" bold>
-                    {item.label}
+            <SidebarListItemText data-testid="sidebar-list-item" bold>
+              {item.label}
 
-                    {ItemTag}
-                  </SidebarListItemText>
-                </SidebarListItemButton>
-              </ListItemButton>
+              {ItemTag}
+            </SidebarListItemText>
+          </SidebarListItemButton>
+        )
 
-              {shouldPlaceDivider && <Divider sx={{ mt: 1, mb: 0.5, borderColor: 'background.main' }} />}
-            </div>
-          </Tooltip>
+        return (
+          <li className="list-none" key={item.externalUrl || item.href}>
+            {isDisabled ? (
+              <Tooltip>
+                <TooltipTrigger render={<div />}>{listItemButton}</TooltipTrigger>
+                <TooltipContent side="right">You need to activate your Safe first.</TooltipContent>
+              </Tooltip>
+            ) : (
+              listItemButton
+            )}
+
+            {shouldPlaceDivider && <Separator className="mb-1 mt-2 bg-[var(--color-background-main)]" />}
+          </li>
         )
       })}
     </SidebarList>

@@ -1,19 +1,17 @@
-import { Box, Card, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import SafeAccountsIcon from '@/public/images/spaces/safe-accounts.svg'
 
 const EmptySafeAccounts = () => {
   return (
-    <>
-      <Card sx={{ p: 5, textAlign: 'center' }}>
-        <Box display="flex" justifyContent="center">
-          <SafeAccountsIcon />
-        </Box>
+    <div className="rounded-xl bg-card p-10 text-center">
+      <div className="flex justify-center">
+        <SafeAccountsIcon />
+      </div>
 
-        <Typography color="text.secondary" mb={2}>
-          Add existing Safe Accounts in your space to see them here.
-        </Typography>
-      </Card>
-    </>
+      <Typography variant="paragraph" color="muted" className="mt-4">
+        Add existing Safe Accounts in your space to see them here.
+      </Typography>
+    </div>
   )
 }
 

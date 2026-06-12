@@ -2,7 +2,7 @@ import React from 'react'
 import { useRouter } from 'next/router'
 
 import { LOAD_SAFE_CATEGORY } from '@/services/analytics'
-import { Container, Grid, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { CardStepper } from '@/components/new-safe/CardStepper'
 import type { TxStepperProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NamedAddress } from '@/components/new-safe/create/types'
@@ -52,33 +52,14 @@ const LoadSafe = ({ initialData }: { initialData?: TxStepperProps<LoadSafeFormDa
   const initialSafe = initialData ?? loadSafeDefaultData
 
   return (
-    <Container data-testid="load-safe-form">
-      <Grid
-        container
-        columnSpacing={3}
-        sx={{
-          justifyContent: 'center',
-        }}
-      >
-        <Grid item xs={12} md={10} lg={8}>
-          <Typography
-            variant="h2"
-            sx={{
-              pb: 2,
-            }}
-          >
+    <div data-testid="load-safe-form" className="mx-auto w-full max-w-[1200px] px-4">
+      <div className="grid grid-cols-12 justify-center gap-x-6">
+        <div className="col-span-12 md:col-span-10 lg:col-span-8">
+          <Typography variant="h2" className="pb-4">
             Add existing Safe Account
           </Typography>
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          md={10}
-          lg={8}
-          sx={{
-            order: [1, null, 0],
-          }}
-        >
+        </div>
+        <div className="order-1 col-span-12 md:order-0 md:col-span-10 lg:col-span-8">
           <CardStepper
             // Populate initial data
             key={initialSafe.address}
@@ -87,9 +68,9 @@ const LoadSafe = ({ initialData }: { initialData?: TxStepperProps<LoadSafeFormDa
             steps={LoadSafeSteps}
             eventCategory={LOAD_SAFE_CATEGORY}
           />
-        </Grid>
-      </Grid>
-    </Container>
+        </div>
+      </div>
+    </div>
   )
 }
 

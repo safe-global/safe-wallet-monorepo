@@ -1,5 +1,5 @@
-import type { ReactElement, ReactNode } from 'react'
-import { Typography, Chip } from '@mui/material'
+import type { CSSProperties, ReactElement, ReactNode } from 'react'
+import { Badge } from '@/components/ui/badge'
 
 export type TxStatusChipProps = {
   children: ReactNode
@@ -7,27 +7,20 @@ export type TxStatusChipProps = {
   backgroundColor?: string
 }
 
+const toCssVar = (path: string): string => `var(--color-${path.replace('.', '-')})`
+
 const TxStatusChip = ({ children, color = 'primary', backgroundColor }: TxStatusChipProps): ReactElement => {
+  const textShade = color === 'success' ? 'dark' : color === 'primary' ? 'light' : 'main'
+
+  const style: CSSProperties = {
+    backgroundColor: backgroundColor ? toCssVar(backgroundColor) : toCssVar(`${color}.background`),
+    color: toCssVar(`${color}.${textShade}`),
+  }
+
   return (
-    <Chip
-      size="small"
-      sx={{
-        backgroundColor: backgroundColor ?? `${color}.background`,
-        color: `${color}.${color === 'success' ? 'dark' : color === 'primary' ? 'light' : 'main'}`,
-      }}
-      label={
-        <Typography
-          variant="caption"
-          fontWeight="bold"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          gap={0.7}
-        >
-          {children}
-        </Typography>
-      }
-    />
+    <Badge className="h-6 rounded-2xl px-3 text-xs font-bold" style={style}>
+      {children}
+    </Badge>
   )
 }
 

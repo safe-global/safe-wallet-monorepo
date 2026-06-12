@@ -74,18 +74,18 @@ describe('TxNonce', () => {
   describe('loading state', () => {
     it('shows a skeleton when nonce is undefined', () => {
       const { container } = renderTxNonce({ nonce: undefined })
-      // MUI Skeleton renders when nonce is undefined
-      expect(container.querySelector('.MuiSkeleton-root')).toBeInTheDocument()
+      // shadcn Skeleton renders when nonce is undefined
+      expect(container.querySelector('[data-slot="skeleton"]')).toBeInTheDocument()
     })
 
     it('shows a skeleton when recommendedNonce is undefined', () => {
       const { container } = renderTxNonce({ recommendedNonce: undefined })
-      expect(container.querySelector('.MuiSkeleton-root')).toBeInTheDocument()
+      expect(container.querySelector('[data-slot="skeleton"]')).toBeInTheDocument()
     })
 
     it('shows a skeleton when both nonce and recommendedNonce are undefined', () => {
       const { container } = renderTxNonce({ nonce: undefined, recommendedNonce: undefined })
-      expect(container.querySelector('.MuiSkeleton-root')).toBeInTheDocument()
+      expect(container.querySelector('[data-slot="skeleton"]')).toBeInTheDocument()
     })
   })
 

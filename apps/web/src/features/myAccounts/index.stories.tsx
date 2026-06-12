@@ -1,29 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  TextField,
-  InputAdornment,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Chip,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  IconButton,
-  Skeleton,
-} from '@mui/material'
-import SearchIcon from '@mui/icons-material/Search'
-import AddIcon from '@mui/icons-material/Add'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import StarIcon from '@mui/icons-material/Star'
-import StarBorderIcon from '@mui/icons-material/StarBorder'
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Separator } from '@/components/ui/separator'
+import { List, ListItem, ListItemText } from '@/components/ui/list'
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { Search, Plus, Star, Wallet } from 'lucide-react'
 
 /**
  * MyAccounts feature displays and manages the user's Safe accounts.
@@ -57,15 +42,15 @@ const StateWrapper = ({
   description: string
   children: React.ReactNode
 }) => (
-  <Box sx={{ mb: 8 }}>
-    <Box sx={{ mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-      <Typography variant="h5">{stateName}</Typography>
-      <Typography variant="body2" color="text.secondary">
+  <div className="mb-16">
+    <div className="mb-4 border-b border-border pb-4">
+      <Typography variant="h4">{stateName}</Typography>
+      <Typography variant="paragraph-small" color="muted">
         {description}
       </Typography>
-    </Box>
-    <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>{children}</Box>
-  </Box>
+    </div>
+    <div className="rounded-lg bg-muted p-6">{children}</div>
+  </div>
 )
 
 // Mock safe data
@@ -125,69 +110,99 @@ const mockMultiChainSafe = {
   isPinned: true,
 }
 
+// Mock search field
+const MockSearch = ({
+  defaultValue,
+  value,
+  onChange,
+  className,
+}: {
+  defaultValue?: string
+  value?: string
+  onChange?: (value: string) => void
+  className?: string
+}) => (
+  <InputGroup className={className}>
+    <InputGroupAddon align="inline-start">
+      <Search />
+    </InputGroupAddon>
+    <InputGroupInput
+      placeholder="Search by name or address"
+      defaultValue={defaultValue}
+      value={value}
+      onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+    />
+  </InputGroup>
+)
+
 // Mock SafeItem component
 const MockSafeItem = ({ safe, onPinToggle }: { safe: (typeof mockSafes)[0]; onPinToggle?: () => void }) => (
-  <ListItemButton sx={{ borderRadius: 1 }}>
-    <ListItemIcon>
-      <AccountBalanceWalletIcon />
-    </ListItemIcon>
+  <ListItem className="rounded-md px-2 hover:bg-muted">
+    <Wallet className="size-6 shrink-0 text-muted-foreground" />
     <ListItemText
+      className="flex-1"
       primary={
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant="body1">{safe.name || 'Unnamed Safe'}</Typography>
-          {safe.isReadOnly && <Chip label="Read only" size="small" variant="outlined" />}
-          {safe.pendingTxs > 0 && <Chip label={`${safe.pendingTxs} pending`} size="small" color="warning" />}
-        </Box>
+        <span className="flex items-center gap-2">
+          <Typography as="span" variant="paragraph">
+            {safe.name || 'Unnamed Safe'}
+          </Typography>
+          {safe.isReadOnly && <Badge variant="outline">Read only</Badge>}
+          {safe.pendingTxs > 0 && <Badge variant="warning">{`${safe.pendingTxs} pending`}</Badge>}
+        </span>
       }
       secondary={
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Chip label={safe.chainName} size="small" />
-          <Typography variant="caption" fontFamily="monospace">
+        <span className="flex items-center gap-2">
+          <Badge variant="secondary">{safe.chainName}</Badge>
+          <Typography as="span" variant="code">
             {safe.address.slice(0, 6)}...{safe.address.slice(-4)}
           </Typography>
-        </Box>
+        </span>
       }
     />
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-      <Typography variant="body2" fontWeight="bold">
-        {safe.balance}
-      </Typography>
-      <IconButton size="small" onClick={onPinToggle}>
-        {safe.isPinned ? <StarIcon color="warning" /> : <StarBorderIcon />}
-      </IconButton>
-    </Box>
-  </ListItemButton>
+    <div className="flex items-center gap-4">
+      <Typography variant="paragraph-small-bold">{safe.balance}</Typography>
+      <Button variant="ghost" size="icon-sm" onClick={onPinToggle}>
+        {safe.isPinned ? <Star className="size-4 fill-current" /> : <Star className="size-4" />}
+      </Button>
+    </div>
+  </ListItem>
 )
 
 // Mock MultiChainSafeItem
 const MockMultiChainSafeItem = ({ safe }: { safe: typeof mockMultiChainSafe }) => (
   <Accordion>
-    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', pr: 2 }}>
-        <AccountBalanceWalletIcon sx={{ mr: 2 }} />
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="body1">{safe.name}</Typography>
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
-            {safe.chains.map((chain) => (
-              <Chip key={chain.chainId} label={chain.chainName} size="small" />
-            ))}
-          </Box>
-        </Box>
-        <Typography variant="body2" fontWeight="bold">
-          {safe.totalBalance}
-        </Typography>
-      </Box>
-    </AccordionSummary>
-    <AccordionDetails>
-      <List dense>
-        {safe.chains.map((chain) => (
-          <ListItemButton key={chain.chainId}>
-            <ListItemText primary={chain.chainName} secondary={safe.address.slice(0, 10) + '...'} />
-            <Typography variant="body2">{chain.balance}</Typography>
-          </ListItemButton>
-        ))}
-      </List>
-    </AccordionDetails>
+    <AccordionItem value="multichain">
+      <AccordionTrigger>
+        <div className="flex w-full items-center pr-4">
+          <Wallet className="mr-4 size-6 shrink-0 text-muted-foreground" />
+          <div className="flex-1 text-left">
+            <Typography variant="paragraph">{safe.name}</Typography>
+            <div className="flex gap-1">
+              {safe.chains.map((chain) => (
+                <Badge key={chain.chainId} variant="secondary">
+                  {chain.chainName}
+                </Badge>
+              ))}
+            </div>
+          </div>
+          <Typography variant="paragraph-small-bold">{safe.totalBalance}</Typography>
+        </div>
+      </AccordionTrigger>
+      <AccordionContent>
+        <List>
+          {safe.chains.map((chain) => (
+            <ListItem key={chain.chainId} className="rounded-md px-2 hover:bg-muted">
+              <ListItemText
+                className="flex-1"
+                primary={chain.chainName}
+                secondary={safe.address.slice(0, 10) + '...'}
+              />
+              <Typography variant="paragraph-small">{chain.balance}</Typography>
+            </ListItem>
+          ))}
+        </List>
+      </AccordionContent>
+    </AccordionItem>
   </Accordion>
 )
 
@@ -198,83 +213,74 @@ export const MyAccountsAllStates: StoryObj = {
     const otherSafes = mockSafes.filter((s) => !s.isPinned)
 
     return (
-      <Box sx={{ maxWidth: 700 }}>
-        <Box sx={{ mb: 6, pb: 3, borderBottom: '2px solid', borderColor: 'primary.main' }}>
-          <Typography variant="h4">My Accounts Feature States</Typography>
-          <Typography variant="body1" color="text.secondary">
+      <div className="max-w-[700px]">
+        <div className="mb-12 border-b-2 border-primary pb-6">
+          <Typography variant="h4">My accounts feature states</Typography>
+          <Typography variant="paragraph" color="muted">
             All possible states of the accounts list. Scroll to view each state.
           </Typography>
-        </Box>
+        </div>
 
         {/* State 1: Empty */}
-        <StateWrapper stateName="Empty State" description="No Safe accounts added yet. User sees onboarding prompt.">
-          <Paper sx={{ p: 4, maxWidth: 500, textAlign: 'center' }}>
-            <AccountBalanceWalletIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-            <Typography variant="h6" gutterBottom>
+        <StateWrapper stateName="Empty state" description="No Safe accounts added yet. User sees onboarding prompt.">
+          <div className="max-w-[500px] rounded-lg bg-card p-8 text-center">
+            <Wallet className="mx-auto mb-4 size-16 text-muted-foreground" />
+            <Typography variant="h4" className="mb-2">
               No Safe accounts yet
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography variant="paragraph-small" color="muted" className="mb-6 block">
               Create a new Safe or add an existing one to get started.
             </Typography>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-              <Button variant="outlined">Add existing Safe</Button>
-              <Button variant="contained">Create new Safe</Button>
-            </Box>
-          </Paper>
+            <div className="flex justify-center gap-4">
+              <Button variant="outline">Add existing Safe</Button>
+              <Button>Create new Safe</Button>
+            </div>
+          </div>
         </StateWrapper>
 
         {/* State 2: Loading */}
-        <StateWrapper stateName="Loading State" description="Fetching Safe accounts from the network.">
-          <Paper sx={{ p: 2, maxWidth: 500 }}>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+        <StateWrapper stateName="Loading state" description="Fetching Safe accounts from the network.">
+          <div className="max-w-[500px] rounded-lg bg-card p-4">
+            <Typography variant="paragraph-small-medium" color="muted" className="mb-4 block">
               My Safes
             </Typography>
             {[1, 2, 3].map((i) => (
-              <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2 }}>
-                <Skeleton variant="circular" width={40} height={40} />
-                <Box sx={{ flex: 1 }}>
-                  <Skeleton width="60%" height={24} />
-                  <Skeleton width="40%" height={20} />
-                </Box>
-                <Skeleton width={80} height={24} />
-              </Box>
+              <div key={i} className="flex items-center gap-4 p-4">
+                <Skeleton className="size-10 rounded-full" />
+                <div className="flex-1">
+                  <Skeleton className="h-6 w-3/5" />
+                  <Skeleton className="mt-1 h-5 w-2/5" />
+                </div>
+                <Skeleton className="h-6 w-[80px]" />
+              </div>
             ))}
-          </Paper>
+          </div>
         </StateWrapper>
 
         {/* State 3: With Pinned Safes */}
         <StateWrapper
-          stateName="With Pinned & All Safes"
+          stateName="With pinned & all Safes"
           description="User has both pinned favorites and regular Safe accounts."
         >
-          <Box sx={{ maxWidth: 600 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h4">My Accounts</Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button variant="outlined" startIcon={<AddIcon />}>
+          <div className="max-w-[600px]">
+            <div className="mb-6 flex items-center justify-between">
+              <Typography variant="h4">My accounts</Typography>
+              <div className="flex gap-2">
+                <Button variant="outline">
+                  <Plus />
                   Add Safe
                 </Button>
-                <Button variant="contained" startIcon={<AddIcon />}>
+                <Button>
+                  <Plus />
                   Create Safe
                 </Button>
-              </Box>
-            </Box>
+              </div>
+            </div>
 
-            <TextField
-              fullWidth
-              placeholder="Search by name or address"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ mb: 3 }}
-            />
+            <MockSearch className="mb-6" />
 
-            <Paper sx={{ p: 2, mb: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+            <div className="mb-4 rounded-lg bg-card p-4">
+              <Typography variant="paragraph-small-medium" color="muted" className="mb-2 block">
                 Pinned
               </Typography>
               <List>
@@ -282,10 +288,10 @@ export const MyAccountsAllStates: StoryObj = {
                   <MockSafeItem key={safe.address} safe={safe} />
                 ))}
               </List>
-            </Paper>
+            </div>
 
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+            <div className="rounded-lg bg-card p-4">
+              <Typography variant="paragraph-small-medium" color="muted" className="mb-2 block">
                 All Safes
               </Typography>
               <List>
@@ -293,76 +299,64 @@ export const MyAccountsAllStates: StoryObj = {
                   <MockSafeItem key={safe.address} safe={safe} />
                 ))}
               </List>
-            </Paper>
-          </Box>
+            </div>
+          </div>
         </StateWrapper>
 
         {/* State 4: Search Results */}
-        <StateWrapper stateName="Search Results" description="Filtered list based on search query.">
-          <Box sx={{ maxWidth: 500 }}>
-            <TextField
-              fullWidth
-              placeholder="Search by name or address"
-              defaultValue="treasury"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ mb: 2 }}
-            />
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+        <StateWrapper stateName="Search results" description="Filtered list based on search query.">
+          <div className="max-w-[500px]">
+            <MockSearch defaultValue="treasury" className="mb-4" />
+            <div className="rounded-lg bg-card p-4">
+              <Typography variant="paragraph-small-medium" color="muted" className="mb-2 block">
                 1 result
               </Typography>
               <List>
                 <MockSafeItem safe={mockSafes[0]} />
               </List>
-            </Paper>
-          </Box>
+            </div>
+          </div>
         </StateWrapper>
 
         {/* State 5: Multi-Chain Account */}
         <StateWrapper
-          stateName="Multi-Chain Account"
+          stateName="Multi-chain account"
           description="Same Safe address deployed across multiple networks."
         >
-          <Paper sx={{ maxWidth: 500 }}>
+          <div className="max-w-[500px] rounded-lg bg-card">
             <MockMultiChainSafeItem safe={mockMultiChainSafe} />
-          </Paper>
+          </div>
         </StateWrapper>
 
         {/* State 6: Account Info Chips */}
-        <StateWrapper stateName="Account Status Indicators" description="Various status chips shown on account items.">
-          <Paper sx={{ p: 3, maxWidth: 400 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              Account Status Chips
+        <StateWrapper stateName="Account status indicators" description="Various status chips shown on account items.">
+          <div className="max-w-[400px] rounded-lg bg-card p-6">
+            <Typography variant="paragraph-small-medium" className="mb-2 block">
+              Account status chips
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Chip label="Read only" size="small" variant="outlined" />
-                <Typography variant="body2" color="text.secondary">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline">Read only</Badge>
+                <Typography variant="paragraph-small" color="muted">
                   Cannot sign transactions
                 </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Chip label="3 pending" size="small" color="warning" />
-                <Typography variant="body2" color="text.secondary">
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="warning">3 pending</Badge>
+                <Typography variant="paragraph-small" color="muted">
                   Transactions awaiting signatures
                 </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                <Chip label="Not deployed" size="small" color="info" />
-                <Typography variant="body2" color="text.secondary">
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary">Not deployed</Badge>
+                <Typography variant="paragraph-small" color="muted">
                   Counterfactual safe
                 </Typography>
-              </Box>
-            </Box>
-          </Paper>
+              </div>
+            </div>
+          </div>
         </StateWrapper>
-      </Box>
+      </div>
     )
   },
   parameters: {
@@ -390,37 +384,26 @@ export const FullMyAccountsPage: StoryObj = {
       : null
 
     return (
-      <Box sx={{ maxWidth: 700 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography variant="h4">My Accounts</Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" startIcon={<AddIcon />}>
+      <div className="max-w-[700px]">
+        <div className="mb-6 flex items-center justify-between">
+          <Typography variant="h4">My accounts</Typography>
+          <div className="flex gap-2">
+            <Button variant="outline">
+              <Plus />
               Add Safe
             </Button>
-            <Button variant="contained" startIcon={<AddIcon />}>
+            <Button>
+              <Plus />
               Create Safe
             </Button>
-          </Box>
-        </Box>
+          </div>
+        </div>
 
-        <TextField
-          fullWidth
-          placeholder="Search by name or address"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ mb: 3 }}
-        />
+        <MockSearch value={searchQuery} onChange={setSearchQuery} className="mb-6" />
 
         {filteredSafes ? (
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+          <div className="rounded-lg bg-card p-4">
+            <Typography variant="paragraph-small-medium" color="muted" className="mb-4 block">
               {filteredSafes.length} result{filteredSafes.length !== 1 ? 's' : ''}
             </Typography>
             <List>
@@ -428,25 +411,26 @@ export const FullMyAccountsPage: StoryObj = {
                 <MockSafeItem key={safe.address} safe={safe} />
               ))}
             </List>
-          </Paper>
+          </div>
         ) : (
           <>
             {pinnedSafes.length > 0 && (
-              <Paper sx={{ p: 2, mb: 2 }}>
-                <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+              <div className="mb-4 rounded-lg bg-card p-4">
+                <Typography variant="paragraph-small-medium" color="muted" className="mb-2 block">
                   Pinned
                 </Typography>
                 <List>
                   {pinnedSafes.map((safe) => (
                     <MockSafeItem key={safe.address} safe={safe} />
                   ))}
-                  <MockMultiChainSafeItem safe={mockMultiChainSafe} />
                 </List>
-              </Paper>
+                <Separator className="my-2" />
+                <MockMultiChainSafeItem safe={mockMultiChainSafe} />
+              </div>
             )}
 
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+            <div className="rounded-lg bg-card p-4">
+              <Typography variant="paragraph-small-medium" color="muted" className="mb-2 block">
                 All Safes
               </Typography>
               <List>
@@ -454,10 +438,10 @@ export const FullMyAccountsPage: StoryObj = {
                   <MockSafeItem key={safe.address} safe={safe} />
                 ))}
               </List>
-            </Paper>
+            </div>
           </>
         )}
-      </Box>
+      </div>
     )
   },
   parameters: {
@@ -475,8 +459,8 @@ export const PinnedSafes: StoryObj = {
     const pinnedSafes = mockSafes.filter((s) => s.isPinned)
 
     return (
-      <Paper sx={{ p: 2, maxWidth: 500 }}>
-        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+      <div className="max-w-[500px] rounded-lg bg-card p-4">
+        <Typography variant="paragraph-small-medium" color="muted" className="mb-2 block">
           Pinned
         </Typography>
         <List>
@@ -484,7 +468,7 @@ export const PinnedSafes: StoryObj = {
             <MockSafeItem key={safe.address} safe={safe} />
           ))}
         </List>
-      </Paper>
+      </div>
     )
   },
   parameters: {
@@ -499,19 +483,19 @@ export const PinnedSafes: StoryObj = {
 // Empty state
 export const EmptyState: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 4, maxWidth: 500, textAlign: 'center' }}>
-      <AccountBalanceWalletIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-      <Typography variant="h6" gutterBottom>
+    <div className="max-w-[500px] rounded-lg bg-card p-8 text-center">
+      <Wallet className="mx-auto mb-4 size-16 text-muted-foreground" />
+      <Typography variant="h4" className="mb-2">
         No Safe accounts yet
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-6 block">
         Create a new Safe or add an existing one to get started.
       </Typography>
-      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-        <Button variant="outlined">Add existing Safe</Button>
-        <Button variant="contained">Create new Safe</Button>
-      </Box>
-    </Paper>
+      <div className="flex justify-center gap-4">
+        <Button variant="outline">Add existing Safe</Button>
+        <Button>Create new Safe</Button>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -525,21 +509,21 @@ export const EmptyState: StoryObj = {
 // Loading state
 export const LoadingState: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 2, maxWidth: 500 }}>
-      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+    <div className="max-w-[500px] rounded-lg bg-card p-4">
+      <Typography variant="paragraph-small-medium" color="muted" className="mb-4 block">
         My Safes
       </Typography>
       {[1, 2, 3].map((i) => (
-        <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2 }}>
-          <Skeleton variant="circular" width={40} height={40} />
-          <Box sx={{ flex: 1 }}>
-            <Skeleton width="60%" height={24} />
-            <Skeleton width="40%" height={20} />
-          </Box>
-          <Skeleton width={80} height={24} />
-        </Box>
+        <div key={i} className="flex items-center gap-4 p-4">
+          <Skeleton className="size-10 rounded-full" />
+          <div className="flex-1">
+            <Skeleton className="h-6 w-3/5" />
+            <Skeleton className="mt-1 h-5 w-2/5" />
+          </div>
+          <Skeleton className="h-6 w-[80px]" />
+        </div>
       ))}
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -553,11 +537,11 @@ export const LoadingState: StoryObj = {
 // Single account item
 export const SingleAccountItem: StoryObj = {
   render: () => (
-    <Paper sx={{ maxWidth: 500 }}>
+    <div className="max-w-[500px] rounded-lg bg-card">
       <List>
         <MockSafeItem safe={mockSafes[0]} />
       </List>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -571,9 +555,9 @@ export const SingleAccountItem: StoryObj = {
 // Multi-chain account item
 export const MultiChainAccountItem: StoryObj = {
   render: () => (
-    <Paper sx={{ maxWidth: 500 }}>
+    <div className="max-w-[500px] rounded-lg bg-card">
       <MockMultiChainSafeItem safe={mockMultiChainSafe} />
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -587,31 +571,31 @@ export const MultiChainAccountItem: StoryObj = {
 // Account info chips
 export const AccountInfoChips: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 400 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Account Status Chips
+    <div className="max-w-[400px] rounded-lg bg-card p-6">
+      <Typography variant="paragraph-small-medium" className="mb-2 block">
+        Account status chips
       </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <Chip label="Read only" size="small" variant="outlined" />
-          <Typography variant="body2" color="text.secondary">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline">Read only</Badge>
+          <Typography variant="paragraph-small" color="muted">
             Cannot sign transactions
           </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <Chip label="3 pending" size="small" color="warning" />
-          <Typography variant="body2" color="text.secondary">
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="warning">3 pending</Badge>
+          <Typography variant="paragraph-small" color="muted">
             Transactions awaiting signatures
           </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <Chip label="Not deployed" size="small" color="info" />
-          <Typography variant="body2" color="text.secondary">
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">Not deployed</Badge>
+          <Typography variant="paragraph-small" color="muted">
             Counterfactual safe
           </Typography>
-        </Box>
-      </Box>
-    </Paper>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -625,29 +609,17 @@ export const AccountInfoChips: StoryObj = {
 // Search results
 export const SearchResults: StoryObj = {
   render: () => (
-    <Box sx={{ maxWidth: 500 }}>
-      <TextField
-        fullWidth
-        placeholder="Search by name or address"
-        defaultValue="treasury"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon />
-            </InputAdornment>
-          ),
-        }}
-        sx={{ mb: 2 }}
-      />
-      <Paper sx={{ p: 2 }}>
-        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+    <div className="max-w-[500px]">
+      <MockSearch defaultValue="treasury" className="mb-4" />
+      <div className="rounded-lg bg-card p-4">
+        <Typography variant="paragraph-small-medium" color="muted" className="mb-2 block">
           1 result
         </Typography>
         <List>
           <MockSafeItem safe={mockSafes[0]} />
         </List>
-      </Paper>
-    </Box>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -661,19 +633,21 @@ export const SearchResults: StoryObj = {
 // Header with actions
 export const AccountsHeader: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 2, maxWidth: 600 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h5">My Accounts</Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="outlined" size="small" startIcon={<AddIcon />}>
+    <div className="max-w-[600px] rounded-lg bg-card p-4">
+      <div className="flex items-center justify-between">
+        <Typography variant="h4">My accounts</Typography>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            <Plus />
             Add Safe
           </Button>
-          <Button variant="contained" size="small" startIcon={<AddIcon />}>
+          <Button size="sm">
+            <Plus />
             Create Safe
           </Button>
-        </Box>
-      </Box>
-    </Paper>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {

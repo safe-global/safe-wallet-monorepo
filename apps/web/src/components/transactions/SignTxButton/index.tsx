@@ -3,7 +3,8 @@ import { useIsExpiredSwap } from '@/features/swap'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import type { SyntheticEvent } from 'react'
 import { useContext, type ReactElement } from 'react'
-import { Button, Tooltip } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 import { isSignableBy } from '@/utils/transaction-guards'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -34,22 +35,31 @@ const SignTxButton = ({ txSummary, compact = false }: { txSummary: Transaction; 
 
   return (
     <CheckWallet>
-      {(isOk) => (
-        <Tooltip title={isOk && !isSignable && isSafeOwner ? "You've already signed this transaction" : ''}>
+      {(isOk) => {
+        const button = (
           <span>
             <Track {...TX_LIST_EVENTS.CONFIRM}>
               <Button
                 onClick={onClick}
-                variant={compact ? 'outlined' : 'contained'}
+                variant={compact ? 'outline' : 'default'}
                 disabled={!isOk || isDisabled}
-                size={compact ? 'small' : 'large'}
+                size={compact ? 'sm' : 'lg'}
               >
                 Confirm
               </Button>
             </Track>
           </span>
-        </Tooltip>
-      )}
+        )
+
+        return isOk && !isSignable && isSafeOwner ? (
+          <Tooltip>
+            <TooltipTrigger render={button} />
+            <TooltipContent>You&apos;ve already signed this transaction</TooltipContent>
+          </Tooltip>
+        ) : (
+          button
+        )
+      }}
     </CheckWallet>
   )
 }

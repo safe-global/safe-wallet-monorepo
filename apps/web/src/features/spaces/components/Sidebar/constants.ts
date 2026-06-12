@@ -1,5 +1,7 @@
 export const SPACE_SELECTOR_NAME_MAX_LENGTH = 15
 
+export const SPACES_LIMIT = 10
+
 export const containerVariants = Object.freeze({
   hidden: {},
   visible: {

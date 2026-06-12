@@ -1,6 +1,8 @@
-import { Tooltip, IconButton, SvgIcon, Badge, Typography } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import { useState } from 'react'
 import type { ReactElement } from 'react'
+import { cn } from '@/utils/cn'
 
 import NestedSafesIcon from '@/public/images/sidebar/nested-safes-icon.svg'
 import { NestedSafesPopover } from '@/components/sidebar/NestedSafesPopover'
@@ -48,25 +50,24 @@ export function NestedSafesButton({
 
   return (
     <>
-      <Tooltip title="Nested Safes" placement="top">
-        <Badge invisible={displayCount > 0} variant="dot" className={css.badge}>
-          <IconButton
-            className={headerCss.iconButton}
-            sx={{
-              width: 'auto !important',
-              minWidth: '32px !important',
-              backgroundColor: anchorEl ? '#f2fecd !important' : undefined,
-            }}
-            onClick={onClick}
-          >
-            <SvgIcon component={NestedSafesIcon} inheritViewBox color="primary" fontSize="small" />
-            {displayCount > 0 && (
-              <Typography component="span" variant="caption" className={css.count}>
-                {displayCount}
-              </Typography>
-            )}
-          </IconButton>
-        </Badge>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <button
+              className={cn(headerCss.iconButton, 'relative w-auto min-w-8', anchorEl && 'bg-[#f2fecd]')}
+              onClick={onClick}
+            >
+              {displayCount === 0 && <span className={css.badge} />}
+              <NestedSafesIcon className="size-4 text-[var(--color-primary-main)]" />
+              {displayCount > 0 && (
+                <Typography variant="paragraph-mini" className={css.count}>
+                  {displayCount}
+                </Typography>
+              )}
+            </button>
+          }
+        />
+        <TooltipContent side="top">Nested Safes</TooltipContent>
       </Tooltip>
       <NestedSafesPopover
         anchorEl={anchorEl}

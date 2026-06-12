@@ -1,4 +1,4 @@
-import { Checkbox } from '@mui/material'
+import { Checkbox } from '@/components/ui/checkbox'
 import css from '../AccountItems/styles.module.css'
 
 export interface AccountItemCheckboxProps {
@@ -9,7 +9,7 @@ export interface AccountItemCheckboxProps {
 function AccountItemCheckbox({ checked, address }: AccountItemCheckboxProps) {
   return (
     <div className={css.accountItemCheckbox}>
-      <Checkbox checked={checked} size="small" data-testid={address ? `safe-item-checkbox-${address}` : undefined} />
+      <Checkbox checked={checked} data-testid={address ? `safe-item-checkbox-${address}` : undefined} />
     </div>
   )
 }

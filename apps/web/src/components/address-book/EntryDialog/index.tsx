@@ -1,7 +1,7 @@
-import type { ReactElement, BaseSyntheticEvent } from 'react'
-import { Box, Button, DialogActions, DialogContent, type SxProps, type Theme } from '@mui/material'
+import type { ComponentProps, ReactElement, BaseSyntheticEvent } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 
+import { Button } from '@/components/ui/button'
 import AddressInput from '@/components/common/AddressInput'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
@@ -31,7 +31,7 @@ function EntryDialog({
   disableAddressInput?: boolean
   chainIds?: string[]
   currentChainId?: string
-  sx?: SxProps<Theme>
+  sx?: ComponentProps<typeof ModalDialog>['sx']
 }): ReactElement {
   const chainId = useChainId()
   const actualChainId = currentChainId ?? chainId
@@ -67,12 +67,12 @@ function EntryDialog({
     >
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>
-          <DialogContent>
-            <Box mb={2}>
+          <div className="p-6">
+            <div className="mb-4">
               <NameInput data-testid="name-input" label="Name" autoFocus name="name" required />
-            </Box>
+            </div>
 
-            <Box>
+            <div>
               <AddressInput
                 name="address"
                 label="Address"
@@ -83,23 +83,17 @@ function EntryDialog({
                 chain={currentChain}
                 showPrefix={!!currentChainId}
               />
-            </Box>
-          </DialogContent>
+            </div>
+          </div>
 
-          <DialogActions>
-            <Button data-testid="cancel-btn" onClick={handleClose}>
+          <div className="flex items-center justify-end gap-2 p-2">
+            <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
               Cancel
             </Button>
-            <Button
-              data-testid="save-btn"
-              type="submit"
-              variant="contained"
-              disabled={!formState.isValid}
-              disableElevation
-            >
+            <Button data-testid="save-btn" type="submit" disabled={!formState.isValid}>
               Save
             </Button>
-          </DialogActions>
+          </div>
         </form>
       </FormProvider>
     </ModalDialog>

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box } from '@mui/material'
 import { ProgressBar } from './index'
 
 const meta = {
@@ -10,9 +9,9 @@ const meta = {
   tags: ['autodocs'],
   decorators: [
     (Story) => (
-      <Box sx={{ width: 300 }}>
+      <div className="w-[300px]">
         <Story />
-      </Box>
+      </div>
     ),
   ],
 } satisfies Meta<typeof ProgressBar>

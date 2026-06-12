@@ -3,7 +3,8 @@ import { useIsExpiredSwap } from '@/features/swap'
 import useIsPending from '@/hooks/useIsPending'
 import type { SyntheticEvent } from 'react'
 import { type ReactElement, useContext } from 'react'
-import { Button, Tooltip } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
@@ -52,24 +53,33 @@ const ExecuteTxButton = ({
 
   return (
     <CheckWallet allowNonOwner>
-      {(isOk) => (
-        <Tooltip title={isOk && !isNext ? 'You must execute the transaction with the lowest nonce first' : ''}>
+      {(isOk) => {
+        const button = (
           <span>
             <Button
               data-testid="execute-tx-btn"
               onClick={onClick}
               onMouseEnter={onMouseEnter}
               onMouseLeave={onMouseLeave}
-              variant="contained"
+              variant="default"
               disabled={!isOk || isDisabled}
-              size={compact ? 'small' : 'large'}
-              sx={{ minWidth: '106.5px' }}
+              size={compact ? 'sm' : 'lg'}
+              className="min-w-[106.5px]"
             >
               Execute
             </Button>
           </span>
-        </Tooltip>
-      )}
+        )
+
+        return isOk && !isNext ? (
+          <Tooltip>
+            <TooltipTrigger render={button} />
+            <TooltipContent>You must execute the transaction with the lowest nonce first</TooltipContent>
+          </Tooltip>
+        ) : (
+          button
+        )
+      }}
     </CheckWallet>
   )
 }

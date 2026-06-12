@@ -1,8 +1,9 @@
-import { Box, Tooltip, Button, SvgIcon } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '@/components/ui/button'
 import { formatDistanceToNow } from 'date-fns'
 import { useChainsGetIndexingStatusV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChainId from '@/hooks/useChainId'
-import { OpenInNewRounded } from '@mui/icons-material'
+import { ExternalLink } from 'lucide-react'
 import { STATUS_PAGE_URL } from '@/config/constants'
 
 const MAX_SYNC_DELAY = 1000 * 60 * 5 // 5 minutes
@@ -59,28 +60,26 @@ const IndexingStatus = () => {
   const time = formatDistanceToNow(data.lastSync, { addSuffix: true })
 
   return (
-    <Tooltip title={`Last synced with the blockchain ${time}`} placement="right" arrow>
-      <Button
-        size="small"
-        href={STATUS_PAGE_URL}
-        target="_blank"
-        data-testid="index-status"
-        startIcon={
-          <Box width={16} height={16} borderRadius="50%" border={`2px solid var(--color-${status.color}-main)`} />
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="sm"
+            render={<a href={STATUS_PAGE_URL} target="_blank" rel="noopener noreferrer" />}
+            data-testid="index-status"
+            className="gap-2 p-2 text-xs font-normal"
+          >
+            <span
+              className="size-4 shrink-0 rounded-full border-2"
+              style={{ borderColor: `var(--color-${status.color}-main)` }}
+            />
+            {status.text}
+            <ExternalLink className="ml-auto size-4 text-[var(--color-border-main)]" />
+          </Button>
         }
-        endIcon={
-          <SvgIcon component={OpenInNewRounded} fontSize="small" inheritViewBox sx={{ color: 'border.main', ml: 1 }} />
-        }
-        sx={{
-          fontSize: '12px',
-          fontWeight: 'normal',
-          p: 1,
-          '& .MuiButton-startIcon': { marginLeft: 0 },
-          '& .MuiButton-endIcon': { justifySelf: 'flex-end', marginLeft: 'auto' },
-        }}
-      >
-        {status.text}
-      </Button>
+      />
+      <TooltipContent side="right">{`Last synced with the blockchain ${time}`}</TooltipContent>
     </Tooltip>
   )
 }

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import QRCode from './index'
 
 const meta = {
@@ -9,9 +8,9 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <Paper sx={{ padding: 2 }}>
+      <div className="rounded-lg bg-card p-4">
         <Story />
-      </Paper>
+      </div>
     ),
   ],
   tags: ['autodocs'],

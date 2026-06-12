@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { NoSpendingLimits } from './NoSpendingLimits'
 
 const meta: Meta<typeof NoSpendingLimits> = {
@@ -10,9 +9,9 @@ const meta: Meta<typeof NoSpendingLimits> = {
   },
   decorators: [
     (Story) => (
-      <Paper sx={{ p: 4, maxWidth: 600 }}>
+      <div className="bg-background max-w-[600px] rounded-lg p-8">
         <Story />
-      </Paper>
+      </div>
     ),
   ],
   tags: ['autodocs'],

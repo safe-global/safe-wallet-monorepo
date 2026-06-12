@@ -1,7 +1,9 @@
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { useUpdateSpace, type UpdateSpaceFormData } from './useUpdateSpace'
 import ErrorAlert from './ErrorAlert'
-import { Button, TextField } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsAdmin } from '@/features/spaces'
 
@@ -31,20 +33,16 @@ const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => 
           name="name"
           control={control}
           render={({ field }) => (
-            <TextField
-              {...field}
-              label="Workspace name"
-              fullWidth
-              value={field.value || ''}
-              slotProps={{ inputLabel: { shrink: true } }}
-              onKeyDown={(e) => e.stopPropagation()}
-            />
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="space-name">Workspace name</Label>
+              <Input {...field} id="space-name" value={field.value || ''} onKeyDown={(e) => e.stopPropagation()} />
+            </div>
           )}
         />
 
         <ErrorAlert error={error} />
 
-        <Button data-testid="space-save-button" variant="contained" type="submit" sx={{ mt: 2 }} disabled={!canSubmit}>
+        <Button data-testid="space-save-button" type="submit" className="mt-4" disabled={!canSubmit}>
           Save
         </Button>
       </form>

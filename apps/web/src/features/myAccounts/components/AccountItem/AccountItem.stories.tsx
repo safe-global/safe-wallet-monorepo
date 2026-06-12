@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper, Box } from '@mui/material'
 import { AccountItem } from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import type { SafeItem } from '@/hooks/safes'
@@ -38,9 +37,9 @@ const meta: Meta<typeof AccountItemStory> = {
   decorators: [
     (Story) => (
       <StoreDecorator initialState={{}}>
-        <Paper sx={{ p: 2, maxWidth: 600 }}>
+        <div className="max-w-[600px] rounded-lg bg-card p-4">
           <Story />
-        </Paper>
+        </div>
       </StoreDecorator>
     ),
   ],
@@ -211,7 +210,7 @@ export const SelectionMode: Story = {
  */
 export const DifferentChains: Story = {
   render: () => (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <div className="flex flex-col gap-4">
       <AccountItem.Link href="/safe" trackingLabel="storybook">
         <AccountItem.Icon address={MOCK_ADDRESS} chainId="1" threshold={2} owners={3} />
         <AccountItem.Info address={MOCK_ADDRESS} chainId="1" name="Ethereum Safe" />
@@ -232,7 +231,7 @@ export const DifferentChains: Story = {
         <AccountItem.ChainBadge chainId="10" />
         <AccountItem.Balance fiatTotal="2500.00" />
       </AccountItem.Link>
-    </Box>
+    </div>
   ),
 }
 

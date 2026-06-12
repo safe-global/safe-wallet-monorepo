@@ -28,6 +28,8 @@ jest.mock('@/store', () => ({
   useAppDispatch: () => mockDispatch,
 }))
 
+jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
+
 jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (payload: unknown) => ({ type: 'notifications/show', payload }),
 }))

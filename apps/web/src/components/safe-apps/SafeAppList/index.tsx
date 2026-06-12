@@ -8,7 +8,7 @@ import SafeAppsListHeader from '@/components/safe-apps/SafeAppsListHeader'
 import SafeAppsZeroResultsPlaceholder from '@/components/safe-apps/SafeAppsZeroResultsPlaceholder'
 import useSafeAppPreviewDrawer from '@/hooks/safe-apps/useSafeAppPreviewDrawer'
 import css from './styles.module.css'
-import { Skeleton } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
 import NativeSwapsCard from '@/components/safe-apps/NativeSwapsCard'
 import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent, SafeAppLaunchLocation } from '@/services/analytics'
@@ -79,11 +79,15 @@ const SafeAppList = ({
         {safeAppsListLoading &&
           Array.from({ length: 8 }, (_, index) => (
             <li key={index}>
-              <Skeleton variant="rounded" height="271px" />
+              <Skeleton className="h-[271px] w-full" />
             </li>
           ))}
 
-        {!isFiltered && showNativeSwapsCard && <NativeSwapsCard />}
+        {!isFiltered && showNativeSwapsCard && (
+          <li>
+            <NativeSwapsCard />
+          </li>
+        )}
 
         {/* Flat list filtered by search query */}
         {safeAppsList.map((safeApp) => (

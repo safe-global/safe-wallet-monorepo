@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box } from '@mui/material'
 import SplitMenuButton from './index'
 
 const meta = {
@@ -9,9 +8,9 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <Box sx={{ width: 300 }}>
+      <div className="w-[300px]">
         <Story />
-      </Box>
+      </div>
     ),
   ],
   tags: ['autodocs'],

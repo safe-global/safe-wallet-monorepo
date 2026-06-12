@@ -6,7 +6,7 @@ import { getOrderFeeBps } from '@safe-global/utils/features/swap/helpers/utils'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { BRAND_NAME } from '@/config/constants'
 import { HelpIconTooltip } from '../HelpIconTooltip'
-import MUILink from '@mui/material/Link'
+import { Link } from '@/components/ui/link'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 export const OrderFeeConfirmationView = ({
@@ -30,9 +30,9 @@ export const OrderFeeConfirmationView = ({
             automatically calculated into this quote. Part of the fee will contribute to a license fee that supports the
             Safe Community. Neither the Safe Ecosystem Foundation nor {`${BRAND_NAME}`} operate the CoW Swap Widget
             and/or CoW Swap.
-            <MUILink href={HelpCenterArticle.SWAP_WIDGET_FEES} target="_blank" rel="noopener noreferrer">
+            <Link href={HelpCenterArticle.SWAP_WIDGET_FEES} target="_blank" rel="noopener noreferrer">
               Learn more
-            </MUILink>
+            </Link>
           </>
         }
       />

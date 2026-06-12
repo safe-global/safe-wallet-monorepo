@@ -1,18 +1,4 @@
-import {
-  Typography,
-  Divider,
-  CardActions,
-  Button,
-  SvgIcon,
-  Grid,
-  MenuItem,
-  TextField,
-  IconButton,
-  Tooltip,
-  Alert,
-} from '@mui/material'
 import { useForm, FormProvider, useFieldArray, Controller } from 'react-hook-form'
-import { Fragment } from 'react'
 import type { ReactElement } from 'react'
 
 import TxCard from '../../common/TxCard'
@@ -29,6 +15,12 @@ import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safe
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export function _isSameSetup({
   oldOwners,
@@ -88,31 +80,20 @@ export function RecoverAccountFlowSetup({
       <form onSubmit={formMethods.handleSubmit(onSubmit)} className={commonCss.form}>
         <TxCard sx={{ mt: 0, borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
           <div>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{
-                fontWeight: 700,
-              }}
-            >
+            <Typography variant="h4" className="mb-2">
               Add signer(s)
             </Typography>
 
-            <Typography
-              variant="body2"
-              sx={{
-                mb: 1,
-              }}
-            >
+            <Typography variant="paragraph-small" className="mb-2 block">
               Set the new signer wallet(s) of this Safe Account and how many need to confirm a transaction before it can
               be executed.
             </Typography>
           </div>
 
-          <Grid container spacing={3} direction="row">
+          <div className="flex flex-col gap-6">
             {fields.map((field, index) => (
-              <Fragment key={index}>
-                <Grid item xs={11}>
+              <div className="flex items-center gap-6" key={index}>
+                <div className="flex-1">
                   <AddressBookInput
                     label={`Signer ${index + 1}`}
                     name={`${RecoverAccountFlowFields.owners}.${index}.value`}
@@ -130,121 +111,87 @@ export function RecoverAccountFlowSetup({
                       }
                     }}
                   />
-                </Grid>
+                </div>
 
-                <Grid
-                  item
-                  xs={1}
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
+                <div className="flex items-center justify-center">
                   {index > 0 && (
-                    <IconButton onClick={() => remove(index)}>
-                      <SvgIcon component={DeleteIcon} inheritViewBox />
-                    </IconButton>
+                    <Button variant="ghost" size="icon" onClick={() => remove(index)}>
+                      <DeleteIcon className="size-4" />
+                    </Button>
                   )}
-                </Grid>
-              </Fragment>
+                </div>
+              </div>
             ))}
-          </Grid>
+          </div>
 
-          <Button
-            onClick={() => append({ value: '' })}
-            variant="text"
-            startIcon={<SvgIcon component={AddIcon} inheritViewBox fontSize="small" />}
-            sx={{ alignSelf: 'flex-start', my: 1 }}
-          >
+          <Button variant="ghost" onClick={() => append({ value: '' })} className="my-2 self-start">
+            <AddIcon className="size-4" />
             Add new signer
           </Button>
 
-          <Divider className={commonCss.nestedDivider} />
+          <Separator className={commonCss.nestedDivider} />
 
           <div>
-            <Typography
-              variant="h6"
-              gutterBottom
-              sx={{
-                fontWeight: 700,
-              }}
-            >
+            <Typography variant="h4" className="mb-2">
               Threshold
-              <Tooltip title={TOOLTIP_TITLES.THRESHOLD} arrow placement="top">
-                <span>
-                  <SvgIcon
-                    component={InfoIcon}
-                    inheritViewBox
-                    color="border"
-                    fontSize="small"
-                    sx={{
-                      verticalAlign: 'middle',
-                      ml: 0.5,
-                    }}
-                  />
-                </span>
+              <Tooltip>
+                <TooltipTrigger render={<span />}>
+                  <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
+                </TooltipTrigger>
+                <TooltipContent>{TOOLTIP_TITLES.THRESHOLD}</TooltipContent>
               </Tooltip>
             </Typography>
 
-            <Typography
-              variant="body2"
-              sx={{
-                mb: 1,
-              }}
-            >
+            <Typography variant="paragraph-small" className="mb-2 block">
               After recovery, Safe Account transactions will require:
             </Typography>
           </div>
 
-          <Grid
-            container
-            direction="row"
-            sx={{
-              alignItems: 'center',
-              gap: 2,
-              mb: 1,
-            }}
-          >
-            <Grid item>
+          <div className="mb-2 flex flex-row items-center gap-4">
+            <div>
               <Controller
                 control={formMethods.control}
                 name={RecoverAccountFlowFields.threshold}
                 render={({ field }) => (
-                  <TextField select {...field}>
-                    {fields.map((_, index) => {
-                      const value = index + 1
-                      return (
-                        <MenuItem key={index} value={value}>
-                          {value}
-                        </MenuItem>
-                      )
-                    })}
-                  </TextField>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {fields.map((_, index) => {
+                        const value = index + 1
+                        return (
+                          <SelectItem key={index} value={String(value)}>
+                            {value}
+                          </SelectItem>
+                        )
+                      })}
+                    </SelectContent>
+                  </Select>
                 )}
               />
-            </Grid>
+            </div>
 
-            <Grid item>
+            <div>
               <Typography>
                 out of {fields.length} signer{maybePlural(fields)}
               </Typography>
-            </Grid>
-          </Grid>
+            </div>
+          </div>
 
           {isSameSetup && (
-            <Alert severity="error" sx={{ border: 'unset' }}>
-              The proposed Account setup is the same as the current one.
+            <Alert variant="destructive" className="border-0">
+              <AlertDescription>The proposed Account setup is the same as the current one.</AlertDescription>
             </Alert>
           )}
 
-          <Divider className={commonCss.nestedDivider} />
+          <Separator className={commonCss.nestedDivider} />
 
-          <CardActions sx={{ mt: '0 !important' }}>
-            <Button data-testid="next-btn" variant="contained" type="submit" sx={{ mt: 1 }} disabled={isSameSetup}>
+          <div className="mt-0 flex items-center">
+            <Button data-testid="next-btn" variant="default" type="submit" className="mt-2" disabled={isSameSetup}>
               Next
             </Button>
-          </CardActions>
+          </div>
         </TxCard>
       </form>
     </FormProvider>

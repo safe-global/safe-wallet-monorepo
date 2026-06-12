@@ -2,7 +2,9 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOnChainSigning, setOnChainSigning } from '@/store/settingsSlice'
-import { FormControlLabel, Checkbox, Paper, Typography, FormGroup, Grid } from '@mui/material'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Field, FieldLabel } from '@/components/ui/field'
+import { Typography } from '@/components/ui/typography'
 import { BRAND_NAME } from '@/config/constants'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
@@ -17,34 +19,31 @@ export const SafeAppsSigningMethod = () => {
   }
 
   return (
-    <Paper sx={{ padding: 4, mt: 2 }}>
-      <Grid container spacing={3}>
-        <Grid item lg={4} xs={12}>
-          <Typography variant="h4" fontWeight="bold" mb={1}>
+    <div className="mt-4 rounded-lg bg-[var(--color-background-paper)] p-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
+        <div>
+          <Typography variant="h4" className="mb-2">
             Signing method
           </Typography>
-        </Grid>
+        </div>
 
-        <Grid item xs>
-          <Typography mb={2}>
+        <div>
+          <Typography className="mb-4">
             This setting determines how the {BRAND_NAME} will sign message requests from Safe Apps. Gasless, off-chain
             signing is used by default. Learn more about message signing{' '}
             <ExternalLink href={HelpCenterArticle.SIGNED_MESSAGES}>here</ExternalLink>.
           </Typography>
-          <FormGroup>
-            <FormControlLabel
-              sx={({ palette }) => ({
-                flex: 1,
-                '.MuiIconButton-root:not(.Mui-checked)': {
-                  color: palette.text.disabled,
-                },
-              })}
-              control={<Checkbox checked={onChainSigning} onChange={onChange} name="use-on-chain-signing" />}
-              label="Always use on-chain signatures"
+          <Field orientation="horizontal" className="w-fit">
+            <Checkbox
+              id="use-on-chain-signing"
+              name="use-on-chain-signing"
+              checked={onChainSigning}
+              onCheckedChange={onChange}
             />
-          </FormGroup>
-        </Grid>
-      </Grid>
-    </Paper>
+            <FieldLabel htmlFor="use-on-chain-signing">Always use on-chain signatures</FieldLabel>
+          </Field>
+        </div>
+      </div>
+    </div>
   )
 }

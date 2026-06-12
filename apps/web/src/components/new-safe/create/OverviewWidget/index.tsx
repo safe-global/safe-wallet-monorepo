@@ -1,6 +1,7 @@
 import WalletOverview from 'src/components/common/WalletOverview'
 import useWallet from '@/hooks/wallets/useWallet'
-import { Box, Card, Grid, Typography } from '@mui/material'
+import { Card } from '@/components/ui/card'
+import { Typography } from '@/components/ui/typography'
 import type { ReactElement } from 'react'
 import SafeLogo from '@/public/images/logo-no-text.svg'
 
@@ -27,7 +28,7 @@ const OverviewWidget = ({ safeName, networks }: { safeName: string; networks: Ch
   ]
 
   return (
-    <Grid item xs={12}>
+    <div className="col-span-12">
       <Card className={css.card}>
         <div className={css.header}>
           <SafeLogo alt="Safe logo" width={LOGO_DIMENSIONS} height={LOGO_DIMENSIONS} />
@@ -36,20 +37,24 @@ const OverviewWidget = ({ safeName, networks }: { safeName: string; networks: Ch
         {wallet ? (
           rows.map((row) => (
             <div key={row.title} className={css.row}>
-              <Typography variant="body2">{row.title}</Typography>
+              <Typography variant="paragraph-small">{row.title}</Typography>
               {row.component}
             </div>
           ))
         ) : (
-          <Box p={2}>
-            <Typography variant="body2" color="border.main" textAlign="center" width={1} mb={1}>
+          <div className="p-4">
+            <Typography
+              variant="paragraph-small"
+              align="center"
+              className="mb-2 block w-full text-[var(--color-border-main)]"
+            >
               Connect your wallet to continue
             </Typography>
             <ConnectWalletButton fullWidth />
-          </Box>
+          </div>
         )}
       </Card>
-    </Grid>
+    </div>
   )
 }
 

@@ -13,7 +13,6 @@ import BridgeIcon from '@/public/images/common/bridge.svg'
 import SwapIcon from '@/public/images/common/swap.svg'
 import StakeIcon from '@/public/images/common/stake.svg'
 import EarnIcon from '@/public/images/common/earn.svg'
-import { SvgIcon } from '@mui/material'
 import { DEVELOPER_PORTAL_URL } from '@/config/constants'
 
 export type NavItem = {
@@ -26,32 +25,32 @@ export type NavItem = {
 }
 
 export const navItems: NavItem[] = [
-  { label: 'Home', icon: <SvgIcon component={HomeIcon} inheritViewBox />, href: AppRoutes.home },
-  { label: 'Assets', icon: <SvgIcon component={AssetsIcon} inheritViewBox />, href: AppRoutes.balances.index },
+  { label: 'Home', icon: <HomeIcon />, href: AppRoutes.home },
+  { label: 'Assets', icon: <AssetsIcon />, href: AppRoutes.balances.index },
   {
     label: 'Transactions',
-    icon: <SvgIcon component={TransactionIcon} inheritViewBox />,
+    icon: <TransactionIcon />,
     href: AppRoutes.transactions.history,
   },
-  { label: 'Address book', icon: <SvgIcon component={ABIcon} inheritViewBox />, href: AppRoutes.addressBook },
-  { label: 'Apps', icon: <SvgIcon component={AppsIcon} inheritViewBox />, href: AppRoutes.apps.index },
+  { label: 'Address book', icon: <ABIcon />, href: AppRoutes.addressBook },
+  { label: 'Apps', icon: <AppsIcon />, href: AppRoutes.apps.index },
 
-  { label: 'Swap', icon: <SvgIcon component={SwapIcon} inheritViewBox />, href: AppRoutes.swap },
-  { label: 'Bridge', icon: <SvgIcon component={BridgeIcon} inheritViewBox />, href: AppRoutes.bridge },
+  { label: 'Swap', icon: <SwapIcon />, href: AppRoutes.swap },
+  { label: 'Bridge', icon: <BridgeIcon />, href: AppRoutes.bridge },
   {
     label: 'Earn',
-    icon: <SvgIcon component={EarnIcon} inheritViewBox />,
+    icon: <EarnIcon />,
     href: AppRoutes.earn,
   },
-  { label: 'Stake', icon: <SvgIcon component={StakeIcon} inheritViewBox />, href: AppRoutes.stake },
+  { label: 'Stake', icon: <StakeIcon />, href: AppRoutes.stake },
   {
     label: 'Settings',
-    icon: <SvgIcon data-testid="settings-nav-icon" component={SettingsIcon} inheritViewBox />,
+    icon: <SettingsIcon data-testid="settings-nav-icon" />,
     href: AppRoutes.settings.setup,
   },
   {
     label: 'API',
-    icon: <SvgIcon component={ApiIcon} inheritViewBox />,
+    icon: <ApiIcon />,
     href: '',
     externalUrl: DEVELOPER_PORTAL_URL,
     tag: <Chip sx={{ backgroundColor: 'secondary.light', color: 'static.main' }} />,

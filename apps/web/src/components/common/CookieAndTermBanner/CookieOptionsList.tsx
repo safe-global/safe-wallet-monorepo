@@ -1,8 +1,9 @@
 import type { ReactElement } from 'react'
-import { Grid, Box, Typography, Checkbox, FormControlLabel } from '@mui/material'
 import { Controller, type Control } from 'react-hook-form'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { Typography } from '@/components/ui/typography'
 import { CookieAndTermType } from '@/store/cookiesAndTermsSlice'
-import { styles } from './constants'
 
 type CookieFormData = {
   [CookieAndTermType.TERMS]: boolean
@@ -12,64 +13,54 @@ type CookieFormData = {
 }
 
 const CookieCheckbox = ({
+  id,
   label,
   checked,
-  checkboxProps,
+  disabled,
+  onCheckedChange,
 }: {
+  id: string
   label: string
   checked: boolean
-  checkboxProps: React.ComponentProps<typeof Checkbox>
-}) => <FormControlLabel label={label} checked={checked} control={<Checkbox {...checkboxProps} />} sx={{ mt: '-9px' }} />
+  disabled?: boolean
+  onCheckedChange?: (checked: boolean) => void
+}) => (
+  <Label htmlFor={id} className="gap-2">
+    <Checkbox id={id} aria-label={label} checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} />
+    {label}
+  </Label>
+)
 
 const CookieOptionsList = ({ control }: { control: Control<CookieFormData> }): ReactElement => {
   return (
-    <Grid item xs={12} sm>
-      <Box sx={styles.optionBox}>
-        <CookieCheckbox checkboxProps={{ id: 'necessary', disabled: true }} label="Necessary" checked />
-        <br />
-        <Typography variant="body2">Locally stored data for core functionality</Typography>
-      </Box>
+    <div className="flex-1">
+      <div className="mb-2">
+        <CookieCheckbox id="necessary" disabled label="Necessary" checked />
+        <Typography variant="paragraph-small">Locally stored data for core functionality</Typography>
+      </div>
 
-      <Box sx={styles.optionBox}>
+      <div className="mb-2">
         <Controller
           name={CookieAndTermType.UPDATES}
           control={control}
           render={({ field }) => (
-            <CookieCheckbox
-              checkboxProps={{
-                ...field,
-                checked: field.value,
-                id: 'beamer',
-              }}
-              label="Beamer"
-              checked={field.value}
-            />
+            <CookieCheckbox id="beamer" label="Beamer" checked={field.value} onCheckedChange={field.onChange} />
           )}
         />
-        <br />
-        <Typography variant="body2">New features and product announcements</Typography>
-      </Box>
+        <Typography variant="paragraph-small">New features and product announcements</Typography>
+      </div>
 
-      <Box>
+      <div>
         <Controller
           name={CookieAndTermType.ANALYTICS}
           control={control}
           render={({ field }) => (
-            <CookieCheckbox
-              checkboxProps={{
-                ...field,
-                checked: field.value,
-                id: 'ga',
-              }}
-              label="Analytics"
-              checked={field.value}
-            />
+            <CookieCheckbox id="ga" label="Analytics" checked={field.value} onCheckedChange={field.onChange} />
           )}
         />
-        <br />
-        <Typography variant="body2">Analytics tools to understand usage patterns.</Typography>
-      </Box>
-    </Grid>
+        <Typography variant="paragraph-small">Analytics tools to understand usage patterns.</Typography>
+      </div>
+    </div>
   )
 }
 

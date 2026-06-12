@@ -1,19 +1,27 @@
-import type { ReactElement, SyntheticEvent } from 'react'
+import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
 import React, { useCallback, useEffect } from 'react'
 import groupBy from 'lodash/groupBy'
 import { useAppDispatch, useAppSelector } from '@/store'
 import type { Notification } from '@/store/notificationsSlice'
 import { closeNotification, readNotification, selectNotifications } from '@/store/notificationsSlice'
-import type { AlertColor, SnackbarCloseReason } from '@mui/material'
-import { Alert, Box, Link, Snackbar, Typography } from '@mui/material'
+import { Alert, AlertAction } from '@/components/ui/alert'
+import { Link } from '@/components/ui/link'
+import { Button } from '@/components/ui/button'
 import css from './styles.module.css'
 import NextLink from 'next/link'
-import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import { ChevronRight, X } from 'lucide-react'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import Track from '../Track'
 import { isRelativeUrl } from '@/utils/url'
 
-const toastStyle = { position: 'static', margin: 1 }
+type NotificationVariant = 'success' | 'info' | 'warning' | 'error'
+
+const variantToAlertVariant: Record<NotificationVariant, 'default' | 'destructive' | 'warning'> = {
+  success: 'default',
+  info: 'default',
+  warning: 'warning',
+  error: 'destructive',
+}
 
 export const NotificationLink = ({
   link,
@@ -32,7 +40,7 @@ export const NotificationLink = ({
         {children}
       </NextLink>
     ) : (
-      <Box display="flex">{children}</Box>
+      <div className="flex">{children}</div>
     )
 
   const handleClick = (event: SyntheticEvent) => {
@@ -51,12 +59,12 @@ export const NotificationLink = ({
       <LinkWrapper>
         <Link
           className={css.link}
+          variant="inherit"
           onClick={handleClick}
-          sx={{ cursor: 'pointer' }}
           {...(isExternal && { target: '_blank', rel: 'noopener noreferrer' })}
         >
           {link.title}
-          <ChevronRightIcon />
+          <ChevronRight />
         </Link>
       </LinkWrapper>
     </Track>
@@ -74,49 +82,54 @@ const Toast = ({
   icon = false,
   autoHideDuration: autoHideDurationOverride,
 }: {
-  variant: AlertColor
+  variant: NotificationVariant
   onClose: () => void
 } & Notification) => {
   const dispatch = useAppDispatch()
 
-  const handleClose = (_: Event | SyntheticEvent, reason?: SnackbarCloseReason) => {
-    if (reason === 'clickaway') return
+  // Manual dismiss: mark the notification as read, then close
+  const handleManualClose = useCallback(() => {
+    dispatch(readNotification({ id }))
+    onClose()
+  }, [dispatch, id, onClose])
 
-    // Manually closed
-    if (!reason) {
-      dispatch(readNotification({ id }))
+  // Auto-hide info/success toasts (or any toast with an explicit duration) without marking them as read
+  useEffect(() => {
+    const duration =
+      autoHideDurationOverride !== undefined
+        ? (autoHideDurationOverride ?? undefined)
+        : variant === 'info' || variant === 'success'
+          ? 5000
+          : undefined
+
+    if (duration === undefined) {
+      return
     }
 
-    onClose()
-  }
-
-  const autoHideDuration =
-    autoHideDurationOverride !== undefined
-      ? (autoHideDurationOverride ?? undefined)
-      : variant === 'info' || variant === 'success'
-        ? 5000
-        : undefined
+    const timer = setTimeout(onClose, duration)
+    return () => clearTimeout(timer)
+  }, [variant, onClose, autoHideDurationOverride])
 
   return (
-    <Snackbar open onClose={handleClose} sx={toastStyle} autoHideDuration={autoHideDuration}>
-      <Alert severity={variant} onClose={handleClose} elevation={3} sx={{ width: '340px' }} {...(icon && { icon })}>
-        {title && (
-          <Typography variant="body2" fontWeight="700">
-            {title}
-          </Typography>
-        )}
+    <Alert variant={variantToAlertVariant[variant]} className="w-[340px] shadow-lg">
+      {icon ? (icon as ReactNode) : null}
+      <AlertAction>
+        <Button variant="ghost" size="icon-xs" aria-label="Close" onClick={handleManualClose}>
+          <X />
+        </Button>
+      </AlertAction>
+      {title && <div className="text-sm leading-5 font-semibold">{title}</div>}
 
-        {message}
+      {message}
 
-        {detailedMessage && (
-          <details>
-            <Link component="summary">Details</Link>
-            <pre>{detailedMessage}</pre>
-          </details>
-        )}
-        <NotificationLink link={link} onClick={handleClose} />
-      </Alert>
-    </Snackbar>
+      {detailedMessage && (
+        <details>
+          <Link render={<summary />}>Details</Link>
+          <pre>{detailedMessage}</pre>
+        </details>
+      )}
+      <NotificationLink link={link} onClick={handleManualClose} />
+    </Alert>
   )
 }
 

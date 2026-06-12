@@ -6,7 +6,7 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '../ConnectWallet/useConnectWallet'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
-import { Tooltip } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 
@@ -95,8 +95,11 @@ const CheckWallet = ({
   if (noTooltip) return children(false)
 
   return (
-    <Tooltip title={message}>
-      <span onClick={wallet ? undefined : connectWallet}>{children(false)}</span>
+    <Tooltip>
+      <TooltipTrigger render={<span aria-label={message} onClick={wallet ? undefined : connectWallet} />}>
+        {children(false)}
+      </TooltipTrigger>
+      <TooltipContent>{message}</TooltipContent>
     </Tooltip>
   )
 }

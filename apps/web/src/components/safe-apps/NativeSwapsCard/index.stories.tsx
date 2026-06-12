@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import NativeSwapsCard from './index'
-import { Box } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {
@@ -13,9 +12,9 @@ const meta = {
     (Story) => {
       return (
         <StoreDecorator initialState={{ chains: { data: [{ chainId: '11155111', features: ['NATIVE_SWAPS'] }] } }}>
-          <Box sx={{ maxWidth: '500px' }}>
+          <div className="max-w-[500px]">
             <Story />
-          </Box>
+          </div>
         </StoreDecorator>
       )
     },

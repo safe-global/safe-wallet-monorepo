@@ -1,4 +1,9 @@
-import { SvgIcon, Popover, Button, Box, IconButton, Typography, Tooltip, CircularProgress } from '@mui/material'
+import { Popover, PopoverContent } from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
+import { Spinner } from '@/components/ui/spinner'
+import { cn } from '@/utils/cn'
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -44,7 +49,7 @@ function PopoverHeaderAction({
 }): ReactElement | null {
   if (isManageMode) {
     return (
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="paragraph-small" color="muted">
         {getSelectedCountLabel(selectedCount)}
       </Typography>
     )
@@ -53,10 +58,21 @@ function PopoverHeaderAction({
   if (showIntroScreen || !hasNestedSafes || isLoading) return null
 
   return (
-    <Tooltip title="Manage safes">
-      <IconButton onClick={onManageClick} size="small" sx={{ ml: 1 }} data-testid="manage-nested-safes-button">
-        <SvgIcon component={SettingsIcon} inheritViewBox fontSize="small" />
-      </IconButton>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={onManageClick}
+            className="ml-2"
+            data-testid="manage-nested-safes-button"
+          >
+            <SettingsIcon className="size-4" />
+          </Button>
+        }
+      />
+      <TooltipContent>Manage safes</TooltipContent>
     </Tooltip>
   )
 }
@@ -79,14 +95,9 @@ function NormalModeActions({
       {uncuratedCount > 0 && hasVisibleSafes && (
         <Track {...NESTED_SAFE_EVENTS.CLICK_MORE_INDICATOR}>
           <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              cursor: 'pointer',
-              textAlign: 'center',
-              mt: 2,
-              '&:hover': { textDecoration: 'underline' },
-            }}
+            variant="paragraph-small"
+            color="muted"
+            className="mt-4 block cursor-pointer text-center hover:underline"
             onClick={onManageClick}
             data-testid="more-nested-safes-indicator"
           >
@@ -98,14 +109,8 @@ function NormalModeActions({
         <Track {...NESTED_SAFE_EVENTS.ADD}>
           <CheckWallet>
             {(ok) => (
-              <Button
-                data-testid="add-nested-safe-button"
-                variant="contained"
-                sx={{ width: '100%', mt: 3 }}
-                onClick={onAdd}
-                disabled={!ok}
-              >
-                <SvgIcon component={AddIcon} inheritViewBox fontSize="small" />
+              <Button data-testid="add-nested-safe-button" className="mt-6 w-full" onClick={onAdd} disabled={!ok}>
+                <AddIcon className="size-4" />
                 Add nested Safe
               </Button>
             )}
@@ -147,9 +152,9 @@ function PopoverBody({
 }): ReactElement {
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" py={4}>
-        <CircularProgress size={32} />
-      </Box>
+      <div className="flex items-center justify-center py-8">
+        <Spinner className="size-8" />
+      </div>
     )
   }
 
@@ -173,11 +178,11 @@ function PopoverBody({
   return (
     <>
       {isManageMode && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flexShrink: 0 }}>
+        <Typography variant="paragraph-small" color="muted" className="mb-4 block shrink-0">
           Select which Nested Safes you want to see in your dashboard.
         </Typography>
       )}
-      <Box className={css.scrollContainer}>
+      <div className={css.scrollContainer}>
         <NestedSafesList
           onClose={onClose}
           safesWithStatus={safesToShow}
@@ -187,7 +192,7 @@ function PopoverBody({
           isFlagged={isFlagged}
           groupedSafes={isManageMode ? groupedSafes : undefined}
         />
-      </Box>
+      </div>
       {!isManageMode && (
         <NormalModeActions
           uncuratedCount={uncuratedCount}
@@ -215,29 +220,18 @@ function ManageModeFooter({
   onCancel: () => void
 }): ReactElement {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        borderTop: ({ palette }) => `1px solid ${palette.border.light}`,
-        p: 2,
-        px: 3,
-        flexShrink: 0,
-      }}
-    >
-      <Button variant="text" onClick={onCancel} data-testid="cancel-manage-nested-safes">
+    <div className="flex shrink-0 items-center justify-between border-t border-[var(--color-border-light)] px-6 py-4">
+      <Button variant="ghost" onClick={onCancel} data-testid="cancel-manage-nested-safes">
         Cancel
       </Button>
       <Button
-        variant="contained"
         onClick={onSave}
         disabled={isFirstTimeCuration ? selectedCount === 0 : !hasChanges}
         data-testid="save-manage-nested-safes"
       >
         {isFirstTimeCuration ? 'Confirm selection' : 'Save'}
       </Button>
-    </Box>
+    </div>
   )
 }
 
@@ -306,105 +300,87 @@ export function NestedSafesPopover({
   const uncuratedCount = getUncuratedCount(rawNestedSafes, visibleSafes)
   const canClose = !isManageMode
 
+  const centeredAnchor = () => ({
+    getBoundingClientRect: () => new DOMRect(window.innerWidth / 2, window.innerHeight / 2, 0, 0),
+  })
+
   return (
     <Popover
       open={!!anchorEl}
-      anchorEl={centered ? undefined : anchorEl}
-      anchorReference={centered ? 'anchorPosition' : 'anchorEl'}
-      anchorPosition={centered && anchorEl ? { top: window.innerHeight / 2, left: window.innerWidth / 2 } : undefined}
-      onClose={canClose ? onClose : undefined}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-      transformOrigin={
-        centered ? { vertical: 'center', horizontal: 'center' } : { vertical: 'top', horizontal: 'left' }
-      }
-      slotProps={{
-        paper: {
-          sx: {
-            width: getPopoverWidth(isManageMode),
-            height: 'calc(100vh - 100px)',
-            maxHeight: 'calc(100vh - 100px)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-            '@media (max-width: 599.95px)': {
-              top: '16px !important',
-              left: '16px !important',
-              height: 'calc(100vh - 32px)',
-              maxHeight: 'none',
-            },
-          },
-        },
+      onOpenChange={(open) => {
+        if (!open && canClose) onClose()
       }}
     >
-      <ModalDialogTitle
-        hideChainIndicator
-        onClose={canClose ? onClose : undefined}
-        sx={{ mt: -0.5, borderBottom: ({ palette }) => `1px solid ${palette.border.light}` }}
+      <PopoverContent
+        anchor={centered ? centeredAnchor : anchorEl}
+        side="bottom"
+        align="start"
+        className={cn(
+          'flex h-[calc(100vh-100px)] max-h-[calc(100vh-100px)] flex-col gap-0 overflow-hidden p-0',
+          // Centered mode: pin to the viewport center (matches the previous MUI transformOrigin center/center)
+          centered && 'fixed left-1/2 top-1/2 max-h-[calc(100vh-32px)] -translate-x-1/2 -translate-y-1/2',
+        )}
+        style={{ width: getPopoverWidth(isManageMode) }}
       >
-        <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
-          <span>Nested Safes</span>
-          <PopoverHeaderAction
-            isManageMode={isManageMode}
-            selectedCount={selectedCount}
-            showIntroScreen={showIntroScreen}
-            hasNestedSafes={rawNestedSafes.length > 0}
-            isLoading={isLoading}
-            onManageClick={handleManageClick}
-          />
-        </Box>
-      </ModalDialogTitle>
+        <ModalDialogTitle
+          hideChainIndicator
+          onClose={canClose ? onClose : undefined}
+          className="-mt-1 border-b border-[var(--color-border-light)]"
+        >
+          <div className="flex w-full items-center justify-between">
+            <span>Nested Safes</span>
+            <PopoverHeaderAction
+              isManageMode={isManageMode}
+              selectedCount={selectedCount}
+              showIntroScreen={showIntroScreen}
+              hasNestedSafes={rawNestedSafes.length > 0}
+              isLoading={isLoading}
+              onManageClick={handleManageClick}
+            />
+          </div>
+        </ModalDialogTitle>
 
-      <Box
-        data-testid="nested-safe-list"
-        p={3}
-        pt={2}
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          flex: '1 1 auto',
-          minHeight: 0,
-        }}
-      >
-        {showIntroScreen ? (
-          <NestedSafeIntro onReviewClick={() => setShowIntro(false)} />
-        ) : (
-          <PopoverBody
-            isLoading={isLoading}
-            isManageMode={isManageMode}
-            safesToShow={safesToShow}
-            onClose={onClose}
-            toggleSafe={toggleSafe}
-            isSafeSelected={isSafeSelected}
-            isFlagged={isFlagged}
-            groupedSafes={groupedSafes}
-            uncuratedCount={uncuratedCount}
-            hasVisibleSafes={visibleSafes.length > 0}
-            hideCreationButton={hideCreationButton}
-            onManageClick={handleManageClick}
-            onAdd={onAdd}
+        <div data-testid="nested-safe-list" className="flex min-h-0 flex-[1_1_auto] flex-col overflow-hidden p-6 pt-4">
+          {showIntroScreen ? (
+            <NestedSafeIntro onReviewClick={() => setShowIntro(false)} />
+          ) : (
+            <PopoverBody
+              isLoading={isLoading}
+              isManageMode={isManageMode}
+              safesToShow={safesToShow}
+              onClose={onClose}
+              toggleSafe={toggleSafe}
+              isSafeSelected={isSafeSelected}
+              isFlagged={isFlagged}
+              groupedSafes={groupedSafes}
+              uncuratedCount={uncuratedCount}
+              hasVisibleSafes={visibleSafes.length > 0}
+              hideCreationButton={hideCreationButton}
+              onManageClick={handleManageClick}
+              onAdd={onAdd}
+            />
+          )}
+        </div>
+
+        {isManageMode && (
+          <ManageModeFooter
+            isFirstTimeCuration={isFirstTimeCuration}
+            selectedCount={selectedCount}
+            hasChanges={hasChanges}
+            onSave={handleSave}
+            onCancel={handleCancel}
           />
         )}
-      </Box>
 
-      {isManageMode && (
-        <ManageModeFooter
-          isFirstTimeCuration={isFirstTimeCuration}
-          selectedCount={selectedCount}
-          hasChanges={hasChanges}
-          onSave={handleSave}
-          onCancel={handleCancel}
-        />
-      )}
-
-      {pendingConfirmation && (
-        <SimilarityConfirmDialog
-          address={pendingConfirmation}
-          similarAddresses={getSimilarAddresses(pendingConfirmation)}
-          onConfirm={confirmSimilarAddress}
-          onCancel={cancelSimilarAddress}
-        />
-      )}
+        {pendingConfirmation && (
+          <SimilarityConfirmDialog
+            address={pendingConfirmation}
+            similarAddresses={getSimilarAddresses(pendingConfirmation)}
+            onConfirm={confirmSimilarAddress}
+            onCancel={cancelSimilarAddress}
+          />
+        )}
+      </PopoverContent>
     </Popover>
   )
 }

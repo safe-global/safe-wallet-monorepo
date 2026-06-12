@@ -1,6 +1,12 @@
-import { useState } from 'react'
-import { Box, Button, ListItemText, MenuItem, SvgIcon, Typography } from '@mui/material'
-import ContextMenu from '@/components/common/ContextMenu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import TransactionsIcon from '@/public/images/transactions/transactions.svg'
 import CheckIcon from '@/public/images/common/check.svg'
 import { OrderByOption } from '@/store/orderByPreferenceSlice'
@@ -17,69 +23,46 @@ const orderByLabels = {
 }
 
 const OrderByButton = ({ orderBy: orderBy, onOrderByChange: onOrderByChange }: OrderByButtonProps) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = () => {
-    setAnchorEl(undefined)
-  }
-
   const handleOrderByChange = (newOrderBy: OrderByOption) => {
     trackEvent({ ...OVERVIEW_EVENTS.SORT_SAFES, label: orderByLabels[newOrderBy] })
     onOrderByChange(newOrderBy)
-    handleClose()
   }
 
   return (
-    <Box display="flex">
-      <Button
-        data-testid="sortby-button"
-        onClick={handleClick}
-        startIcon={<SvgIcon component={TransactionsIcon} inheritViewBox />}
-        sx={{ color: 'primary.light', fontWeight: 'normal' }}
-        size="small"
-      >
-        <Typography variant="body2" noWrap>
-          Sort by: {orderByLabels[orderBy]}
-        </Typography>
-      </Button>
+    <div className="flex">
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              data-testid="sortby-button"
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground font-normal"
+            />
+          }
+        >
+          <TransactionsIcon className="size-4" />
+          <Typography variant="paragraph-small" className="whitespace-nowrap">
+            Sort by: {orderByLabels[orderBy]}
+          </Typography>
+        </DropdownMenuTrigger>
 
-      <ContextMenu
-        anchorEl={anchorEl}
-        open={!!anchorEl}
-        onClose={handleClose}
-        sx={{
-          '& .MuiPaper-root': { minWidth: '250px' },
-          '& .Mui-selected, & .Mui-selected:hover': {
-            backgroundColor: `background.paper`,
-          },
-        }}
-      >
-        <MenuItem disabled>
-          <ListItemText>Sort by</ListItemText>
-        </MenuItem>
-        <MenuItem
-          data-testid="last-visited-option"
-          sx={{ borderRadius: 0 }}
-          onClick={() => handleOrderByChange(OrderByOption.LAST_VISITED)}
-          selected={orderBy === OrderByOption.LAST_VISITED}
-        >
-          <ListItemText sx={{ mr: 2 }}>{orderByLabels[OrderByOption.LAST_VISITED]}</ListItemText>
-          {orderBy === OrderByOption.LAST_VISITED && <CheckIcon sx={{ ml: 1 }} />}
-        </MenuItem>
-        <MenuItem
-          data-testid="name-option"
-          onClick={() => handleOrderByChange(OrderByOption.NAME)}
-          selected={orderBy === OrderByOption.NAME}
-        >
-          <ListItemText>{orderByLabels[OrderByOption.NAME]}</ListItemText>
-          {orderBy === OrderByOption.NAME && <CheckIcon sx={{ ml: 1 }} />}
-        </MenuItem>
-      </ContextMenu>
-    </Box>
+        <DropdownMenuContent align="end" className="min-w-[250px]">
+          <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+          <DropdownMenuItem
+            data-testid="last-visited-option"
+            onClick={() => handleOrderByChange(OrderByOption.LAST_VISITED)}
+          >
+            <span className="mr-4">{orderByLabels[OrderByOption.LAST_VISITED]}</span>
+            {orderBy === OrderByOption.LAST_VISITED && <CheckIcon className="ml-auto size-4" />}
+          </DropdownMenuItem>
+          <DropdownMenuItem data-testid="name-option" onClick={() => handleOrderByChange(OrderByOption.NAME)}>
+            <span>{orderByLabels[OrderByOption.NAME]}</span>
+            {orderBy === OrderByOption.NAME && <CheckIcon className="ml-auto size-4" />}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }
 

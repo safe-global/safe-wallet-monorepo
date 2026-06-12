@@ -46,7 +46,7 @@ describe('ActionRequiredPanel', () => {
       expectPanelHidden: () => {
         const panel = helpers.queries.getPanel()
         expect(panel).toBeInTheDocument()
-        expect(panel).not.toBeVisible()
+        expect(panel).toHaveClass('hidden')
       },
       expectCollapsed: () => {
         expect(helpers.queries.getExpandButton()).toBeInTheDocument()
@@ -122,14 +122,14 @@ describe('ActionRequiredPanel', () => {
 
     const chevronIcon = helpers.queries.getChevronIcon()
 
-    // Initially collapsed (rotated 0deg)
-    expect(chevronIcon).toHaveStyle({ transform: 'rotate(0deg)' })
+    // Initially collapsed (not rotated)
+    expect(chevronIcon).not.toHaveClass('rotate-180')
 
     // Click to expand
     helpers.actions.expandPanel()
 
-    // Should rotate to 180deg
-    expect(chevronIcon).toHaveStyle({ transform: 'rotate(180deg)' })
+    // Should rotate when expanded
+    expect(chevronIcon).toHaveClass('rotate-180')
   })
 
   it('should display correct badge count for one warning', async () => {
@@ -188,7 +188,7 @@ describe('ActionRequiredPanel', () => {
     helpers.renderPanel(<div>Test content</div>)
 
     const panel = helpers.queries.getPanelRequired()
-    // Card with component="section" creates a <section> element
+    // Collapsible with render={<section />} creates a <section> element
     expect(panel.tagName).toBe('SECTION')
 
     helpers.assertions.expectCollapsed()

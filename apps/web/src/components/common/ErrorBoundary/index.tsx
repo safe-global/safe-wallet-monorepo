@@ -1,5 +1,7 @@
-import { Typography, Link } from '@mui/material'
+import NextLink from 'next/link'
 
+import { Typography } from '@/components/ui/typography'
+import { Link } from '@/components/ui/link'
 import { IS_PRODUCTION } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import WarningIcon from '@/public/images/notifications/warning.svg'
@@ -17,12 +19,7 @@ const ErrorBoundary = ({ error, componentStack }: ErrorBoundaryProps) => {
   return (
     <div className={css.container}>
       <div className={css.wrapper}>
-        <Typography
-          variant="h3"
-          sx={{
-            color: 'text.primary',
-          }}
-        >
+        <Typography variant="h3" className="text-[var(--color-text-primary)]">
           Something went wrong,
           <br />
           please try again.
@@ -31,28 +28,18 @@ const ErrorBoundary = ({ error, componentStack }: ErrorBoundaryProps) => {
         <CircularIcon icon={WarningIcon} badgeColor="warning" />
 
         {IS_PRODUCTION ? (
-          <Typography
-            sx={{
-              color: 'text.primary',
-            }}
-          >
+          <Typography className="text-[var(--color-text-primary)]">
             In case the problem persists, please reach out to us via our{' '}
             <ExternalLink href={HELP_CENTER_URL}>Help Center</ExternalLink>
           </Typography>
         ) : (
           <>
             {/* Error may be undefined despite what the type says */}
-            <Typography color="error">{error?.toString()}</Typography>
-            <Typography color="error">{componentStack}</Typography>
+            <Typography className="text-destructive">{error?.toString()}</Typography>
+            <Typography className="text-destructive">{componentStack}</Typography>
           </>
         )}
-        <Link
-          href={AppRoutes.welcome.index}
-          color="primary"
-          sx={{
-            mt: 2,
-          }}
-        >
+        <Link href={AppRoutes.welcome.index} className="mt-4" render={<NextLink href={AppRoutes.welcome.index} />}>
           Go home
         </Link>
       </div>

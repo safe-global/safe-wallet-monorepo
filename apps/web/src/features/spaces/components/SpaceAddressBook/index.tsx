@@ -19,9 +19,8 @@ import type { AddressBookEntry } from './SpaceAddressBookTable'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Input } from '@/components/ui/input'
-import { Search } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import AddressBookSearchInput from '@/components/common/AddressBookSearchInput'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -164,16 +163,7 @@ const SpaceAddressBook = () => {
                 {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddPrivateContact />}
               </div>
               {(activeTab === 'workspace' ? addressBookItems.length > 0 : myContacts.length > 0) && (
-                <div className="relative w-full sm:w-[320px]">
-                  <Search className="text-muted-foreground absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />
-                  <Input
-                    placeholder="Search for contacts"
-                    aria-label="Search contacts by name or address"
-                    className="h-10 bg-white pl-8 dark:bg-white/10 hover:ring-1 hover:ring-ring"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
+                <AddressBookSearchInput value={searchQuery} onChange={setSearchQuery} />
               )}
             </div>
           )}

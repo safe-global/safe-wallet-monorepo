@@ -1,5 +1,5 @@
 import { NativeStakingStatus } from '@safe-global/store/gateway/types'
-import { SvgIcon } from '@mui/material'
+import type { SVGProps } from 'react'
 import CheckIcon from '@/public/images/common/circle-check.svg'
 import ClockIcon from '@/public/images/common/clock.svg'
 import SlashShield from '@/public/images/common/shield-off.svg'
@@ -11,7 +11,7 @@ const ColorIcons: Record<
   NativeStakingStatus,
   | {
       color: TxStatusChipProps['color']
-      icon?: React.ComponentType
+      icon?: React.ComponentType<SVGProps<SVGSVGElement>>
       text: string
     }
   | undefined
@@ -69,7 +69,7 @@ const StakingStatus = ({ status }: { status: NativeStakingValidatorsExitTransact
 
   return (
     <TxStatusChip color={config?.color}>
-      {config?.icon && <SvgIcon component={config.icon} fontSize="small" inheritViewBox />}
+      {config?.icon && <config.icon className="size-4" />}
       {config?.text || capitalizedStatus(status)}
     </TxStatusChip>
   )

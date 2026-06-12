@@ -1,9 +1,12 @@
 import { useCallback, useEffect } from 'react'
-import { Grid, Typography, Divider, SvgIcon, IconButton, Tooltip, Box } from '@mui/material'
 import type { ReactElement } from 'react'
 import type { SessionTypes } from '@walletconnect/types'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import InfoIcon from '@/public/images/notifications/info.svg'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import WcHints from '../WcHints'
 import WcSessionList from '../WcSessionList'
 import WcInput from '../WcInput'
@@ -30,70 +33,51 @@ const WcConnectionForm = ({ sessions, uri }: { sessions: SessionTypes.Struct[]; 
   }, [setShowHints])
 
   return (
-    <Grid className={css.container}>
-      <Grid
-        item
-        sx={{
-          textAlign: 'center',
-        }}
-      >
-        <Tooltip
-          title={showHints ? 'Hide how WalletConnect works' : 'How does WalletConnect work?'}
-          placement="top"
-          arrow
-          className={css.infoIcon}
-        >
-          <span>
-            <Track {...(showHints ? WALLETCONNECT_EVENTS.HINTS_HIDE : WALLETCONNECT_EVENTS.HINTS_SHOW)}>
-              <IconButton onClick={onToggle}>
-                <SvgIcon component={InfoIcon} inheritViewBox color="border" />
-              </IconButton>
-            </Track>
-          </span>
+    <div className="relative flex flex-col">
+      <div className="pb-6 text-center">
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span className="inline-flex">
+                <Track {...(showHints ? WALLETCONNECT_EVENTS.HINTS_HIDE : WALLETCONNECT_EVENTS.HINTS_SHOW)}>
+                  <Button variant="ghost" size="icon" onClick={onToggle} className={css.infoIcon}>
+                    <InfoIcon className="size-6 text-border" />
+                  </Button>
+                </Track>
+              </span>
+            }
+          />
+          <TooltipContent>{showHints ? 'Hide how WalletConnect works' : 'How does WalletConnect work?'}</TooltipContent>
         </Tooltip>
 
         <WcLogoHeader />
 
-        <Typography
-          variant="body2"
-          sx={{
-            color: 'text.secondary',
-          }}
-        >
+        <Typography variant="paragraph-small" className="text-muted-foreground">
           {safeLoaded
             ? `Paste the pairing code below to connect to your ${BRAND_NAME} via WalletConnect`
             : `Please open one of your Safe Accounts to connect to via WalletConnect`}
         </Typography>
 
         {safeLoaded ? (
-          <Box
-            sx={{
-              mt: 3,
-            }}
-          >
+          <div className="mt-6">
             <WcInput uri={uri} />
-          </Box>
+          </div>
         ) : null}
-      </Grid>
-      <Divider flexItem />
-      <Grid item>
+      </div>
+      <Separator />
+      <div className="py-6">
         <WcSessionList sessions={sessions} />
-      </Grid>
+      </div>
       {showHints && (
         <>
-          <Divider flexItem />
+          <Separator />
 
-          <Grid
-            item
-            sx={{
-              mt: 1,
-            }}
-          >
+          <div className="pt-6">
             <WcHints />
-          </Grid>
+          </div>
         </>
       )}
-    </Grid>
+    </div>
   )
 }
 

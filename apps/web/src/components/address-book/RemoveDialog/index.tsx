@@ -1,9 +1,7 @@
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
 import type { ReactElement } from 'react'
 
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
 import ModalDialog from '@/components/common/ModalDialog'
 import { useAppDispatch } from '@/store'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'
@@ -24,18 +22,20 @@ const RemoveDialog = ({ handleClose, address }: { handleClose: () => void; addre
 
   return (
     <ModalDialog open onClose={handleClose} dialogTitle="Delete entry">
-      <DialogContent sx={{ p: '24px !important' }}>
+      <div className="p-6">
         <Typography>
           Are you sure you want to permanently delete <b>{name}</b> from your address book?
         </Typography>
-      </DialogContent>
+      </div>
 
-      <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleConfirm} variant="danger" disableElevation>
+      <div className="flex items-center justify-end gap-2 p-2">
+        <Button variant="ghost" onClick={handleClose}>
+          Cancel
+        </Button>
+        <Button onClick={handleConfirm} variant="destructive">
           Delete
         </Button>
-      </DialogActions>
+      </div>
     </ModalDialog>
   )
 }

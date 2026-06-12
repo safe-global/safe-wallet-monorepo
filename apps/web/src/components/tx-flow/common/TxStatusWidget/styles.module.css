@@ -1,35 +1,45 @@
 .status {
+  position: relative;
+  list-style: none;
+  margin: 0;
   padding: 0;
 }
 
 .status::before {
   content: '';
   position: absolute;
-  border-left: 2px solid var(--color-border-light);
+  border-left: 2px solid var(--border);
   left: 7px;
   top: 20px;
   height: calc(100% - 40px);
 }
 
-.status :global .MuiListItem-root:first-of-type {
-  padding-top: 0;
-}
-
-.status :global .MuiListItem-root {
+.item {
+  display: flex;
+  align-items: center;
+  padding-top: var(--space-1);
+  padding-bottom: var(--space-1);
   padding-left: 0;
   padding-right: 0;
 }
 
-.status :global .MuiListItemIcon-root {
+.item:first-of-type {
+  padding-top: 0;
+}
+
+.itemIcon {
+  display: inline-flex;
+  align-items: center;
   color: var(--color-primary-main);
   justify-content: center;
   min-width: auto;
+  margin-right: var(--space-2);
   padding: var(--space-1);
   padding-left: 0;
   background-color: var(--color-background-main);
 }
 
-[data-theme='light'] .status :global .MuiListItemIcon-root {
+[data-theme='light'] .itemIcon {
   color: var(--color-primary-main);
 }
 
@@ -40,7 +50,7 @@
 .close {
   color: var(--color-border-main);
   padding: var(--space-2);
-  border-left: 1px solid var(--color-border-light);
+  border-left: 1px solid var(--border);
   border-radius: 0;
   margin-left: auto;
   display: none;
@@ -49,6 +59,8 @@
 .badge {
   margin-left: var(--space-1);
   padding-right: 2px;
+  font-size: 0.75rem;
+  line-height: 1rem;
   border-radius: 50%;
   width: 20px;
   height: 20px;

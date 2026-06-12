@@ -39,6 +39,8 @@ jest.mock('@/store/authSlice', () => ({
   isAuthenticated: jest.fn(),
 }))
 
+jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
+
 jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (payload: unknown) => ({ type: 'notifications/show', payload }),
 }))

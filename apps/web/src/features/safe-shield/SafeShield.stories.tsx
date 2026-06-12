@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box, Paper } from '@mui/material'
 import { SafeShieldDisplay } from './components/SafeShieldDisplay'
 import {
   FullAnalysisBuilder,
@@ -27,11 +26,11 @@ const meta: Meta<typeof SafeShieldDisplay> = {
     (Story, context) => (
       <StoreDecorator initialState={{}} context={context}>
         <RouterDecorator>
-          <Paper sx={{ padding: 2, backgroundColor: 'background.main' }}>
-            <Box sx={{ width: 320 }}>
+          <div className="bg-background rounded-lg p-4">
+            <div className="w-80">
               <Story />
-            </Box>
-          </Paper>
+            </div>
+          </div>
         </RouterDecorator>
       </StoreDecorator>
     ),

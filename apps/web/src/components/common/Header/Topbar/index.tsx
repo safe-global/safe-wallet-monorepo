@@ -10,8 +10,7 @@ import { WalletFeature, useWalletPopover } from '@/features/wallet'
 import { GlobalSearchFeature } from '@/features/global-search'
 import { WalletConnectFeature } from '@/features/walletconnect'
 import { useDraftBatch } from '@/features/batching'
-import { useMediaQuery } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { useIsBelowMd } from '@/hooks/useMediaQuery'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { openGlobalSearch } from '@/features/global-search/store/globalSearchSlice'
@@ -39,10 +38,9 @@ interface TopbarProps {
 
 const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const dispatch = useAppDispatch()
-  const { breakpoints } = useTheme()
   // Below `md` the sidebar is closed and rendered as an overlay,
   // so the burger needs to appear on the same range to keep it reachable.
-  const isBelowMd = useMediaQuery(breakpoints.down('md'))
+  const isBelowMd = useIsBelowMd()
   const {
     wallet,
     open: walletOpen,

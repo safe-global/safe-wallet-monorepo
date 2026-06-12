@@ -3,11 +3,26 @@
   z-index: 2;
   position: sticky !important;
   top: 49px;
-
-  padding: var(--space-1) 0 var(--space-1) 0;
+  padding: var(--space-3) 0 var(--space-4);
+  margin-bottom: var(--space-2);
 }
 
 .optimizedWithBatchLabel {
   font-size: 12px;
   color: var(--color-text-primary);
+}
+
+.fieldControl {
+  height: var(--space-5);
+  border-color: var(--border);
+  background-color: var(--card);
+  box-shadow: none;
+}
+
+.fieldControl:focus-visible {
+  border-color: var(--ring);
+}
+
+.selectPlaceholder {
+  color: var(--muted-foreground);
 }

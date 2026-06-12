@@ -1,9 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box } from '@mui/material'
-import SendIcon from '@mui/icons-material/Send'
-import AddIcon from '@mui/icons-material/Add'
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
+import { Send, Plus, ArrowLeftRight, Wallet } from 'lucide-react'
 import ChoiceButton from './index'
 
 const meta = {
@@ -13,9 +9,9 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <Box sx={{ width: 300 }}>
+      <div className="w-[300px]">
         <Story />
-      </Box>
+      </div>
     ),
   ],
   tags: ['autodocs'],
@@ -28,7 +24,7 @@ export const Default: Story = {
   args: {
     title: 'Send tokens',
     description: 'Send tokens to another address',
-    icon: SendIcon,
+    icon: Send,
     onClick: () => console.log('clicked'),
   },
 }
@@ -37,7 +33,7 @@ export const WithChip: Story = {
   args: {
     title: 'Swap tokens',
     description: 'Exchange one token for another',
-    icon: SwapHorizIcon,
+    icon: ArrowLeftRight,
     onClick: () => console.log('clicked'),
     chip: 'New',
   },
@@ -47,7 +43,7 @@ export const WithIconColor: Story = {
   args: {
     title: 'Add funds',
     description: 'Deposit funds into your Safe',
-    icon: AddIcon,
+    icon: Plus,
     iconColor: 'success',
     onClick: () => console.log('clicked'),
   },
@@ -56,7 +52,7 @@ export const WithIconColor: Story = {
 export const NoDescription: Story = {
   args: {
     title: 'Connect wallet',
-    icon: AccountBalanceWalletIcon,
+    icon: Wallet,
     onClick: () => console.log('clicked'),
   },
 }
@@ -65,7 +61,7 @@ export const Disabled: Story = {
   args: {
     title: 'Send tokens',
     description: 'Send tokens to another address',
-    icon: SendIcon,
+    icon: Send,
     onClick: () => console.log('clicked'),
     disabled: true,
   },

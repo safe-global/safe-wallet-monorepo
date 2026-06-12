@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import React, { type ReactElement } from 'react'
 import CopyIcon from '@/public/images/common/copy.svg'
-import { IconButton, SvgIcon } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import CopyTooltip from '../CopyTooltip'
 
 export interface ButtonProps {
@@ -25,9 +25,9 @@ const CopyButton = ({
   return (
     <CopyTooltip text={text} onCopy={onCopy} initialToolTipText={initialToolTipText} dialogContent={dialogContent}>
       {children ?? (
-        <IconButton aria-label={initialToolTipText} size="small" className={className}>
-          <SvgIcon data-testid="copy-btn-icon" component={CopyIcon} inheritViewBox color="border" fontSize="small" />
-        </IconButton>
+        <Button variant="ghost" size="icon-sm" aria-label={initialToolTipText} className={className}>
+          <CopyIcon data-testid="copy-btn-icon" className="size-5 text-[var(--color-border-main)]" />
+        </Button>
       )}
     </CopyTooltip>
   )

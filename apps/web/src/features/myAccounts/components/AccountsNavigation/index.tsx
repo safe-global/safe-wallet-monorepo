@@ -1,7 +1,7 @@
 import { AppRoutes } from '@/config/routes'
 import css from './styles.module.css'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
-import { Chip } from '@mui/material'
+import { Chip } from '@/components/ui/chip'
 import classNames from 'classnames'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -58,7 +58,7 @@ const AccountsNavigation = () => {
         >
           <span className={css.label}>
             {item.label}
-            {item.beta && <Chip label="Beta" size="small" sx={{ ml: 1, fontWeight: 'normal', borderRadius: '4px' }} />}
+            {item.beta && <Chip className="ml-2 rounded font-normal">Beta</Chip>}
           </span>
         </Link>
       ))}

@@ -1,6 +1,6 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { memo, type ReactElement } from 'react'
-import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
+import { TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { SafeTransactionData } from '@safe-global/types-kit'
 import { dateString } from '@safe-global/utils/utils/formatters'
@@ -8,13 +8,12 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { Receipt } from '@/components/tx/ConfirmTxDetails/Receipt'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
-import { Box, Divider, Stack, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 import DecoderLinks from './DecoderLinks'
 import isEqual from 'lodash/isEqual'
 import Multisend from '../TxData/DecodedData/Multisend'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
-import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature, useHistoryFeesBreakdown } from '@/features/gtf'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -26,15 +25,6 @@ interface Props {
   showAuditLogFields?: boolean
 }
 
-const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
-  const { HistoryFeesAccordion } = useLoadFeature(GTFFeature)
-  const feesData = useHistoryFeesBreakdown(txDetails)
-
-  if (!feesData) return null
-
-  return <HistoryFeesAccordion data={feesData} txInfo={txDetails.txInfo} />
-}
-
 const Summary = ({
   safeTxData,
   txData,
@@ -44,7 +34,7 @@ const Summary = ({
   showDecodedData = true,
   showAuditLogFields = true,
 }: Props): ReactElement => {
-  const { txHash, executedAt } = txDetails ?? {}
+  const { executedAt } = txDetails ?? {}
   const customTxInfo = txInfo && isCustomTxInfo(txInfo) ? txInfo : undefined
   const toInfo = customTxInfo?.to || txData?.addressInfoIndex?.[txData?.to.value] || txData?.to
   const showDetails = Boolean(txInfo && txData)
@@ -77,62 +67,48 @@ const Summary = ({
         <Multisend txData={transactionData} isExecuted={!!txDetails?.executedAt} compact />
       )}
 
-      {showAuditLogFields && txHash && (
-        <TxDataRow datatestid="tx-hash" title="Transaction hash">
-          {generateDataRowValue(txHash, 'hash', true)}{' '}
-        </TxDataRow>
-      )}
-
       {showAuditLogFields && submittedAt && (
         <TxDataRow datatestid="tx-created-at" title="Created">
-          <Typography variant="body2" component="div">
-            {dateString(submittedAt)}
-          </Typography>
+          <div className="text-sm">{dateString(submittedAt)}</div>
         </TxDataRow>
       )}
 
       {showAuditLogFields && executedAt && (
         <TxDataRow datatestid="tx-executed-at" title="Executed">
-          <Typography variant="body2" component="div">
-            {dateString(executedAt)}
-          </Typography>
+          <div className="text-sm">{dateString(executedAt)}</div>
         </TxDataRow>
       )}
 
-      {/* Fees + Advanced details stack with shared borders (margin-bottom: -1px on Fees) */}
-      {(txDetails?.executedAt || showDetails) && (
-        <Box
-          mt={2}
-          sx={{
-            '& > .MuiAccordion-root:not(:first-of-type)': {
-              borderTopLeftRadius: 0,
-              borderTopRightRadius: 0,
-            },
-          }}
-        >
-          {txDetails?.executedAt && <HistoryFees txDetails={txDetails} />}
+      {showDetails && (
+        <div className="mt-4">
+          <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
+            <div className="flex flex-col gap-2">
+              {showDecodedData && (
+                <>
+                  <DecodedData txData={txData} toInfo={toInfo} />
+                  <Separator className="-mx-4 my-2 w-[calc(100%+32px)]" />
+                </>
+              )}
 
-          {showDetails && (
-            <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
-              <Stack gap={1} divider={<Divider sx={{ mx: -2, my: 1 }} />}>
-                {showDecodedData && <DecodedData txData={txData} toInfo={toInfo} />}
+              <div>
+                <Typography variant="paragraph-small-bold" className="mb-4 block">
+                  Advanced details
+                </Typography>
 
-                <Box>
-                  <DecoderLinks />
+                <DecoderLinks />
 
-                  <Receipt
-                    safeTxData={safeTxData}
-                    txData={txData}
-                    txDetails={txDetails}
-                    txInfo={txInfo}
-                    withSignatures
-                    grid
-                  />
-                </Box>
-              </Stack>
-            </ColorCodedTxAccordion>
-          )}
-        </Box>
+                <Receipt
+                  safeTxData={safeTxData}
+                  txData={txData}
+                  txDetails={txDetails}
+                  txInfo={txInfo}
+                  withSignatures
+                  grid
+                />
+              </div>
+            </div>
+          </ColorCodedTxAccordion>
+        </div>
       )}
     </>
   )

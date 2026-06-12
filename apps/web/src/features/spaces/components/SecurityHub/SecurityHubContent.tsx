@@ -1,5 +1,5 @@
 import { type ReactElement, useState } from 'react'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import type { SafeGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
@@ -42,7 +42,7 @@ const SecurityHubContent = (): ReactElement => {
   return (
     <>
       {isLoadingSpacesSafes ? (
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="paragraph-small" color="muted">
           Loading accounts...
         </Typography>
       ) : safes.length === 0 ? (

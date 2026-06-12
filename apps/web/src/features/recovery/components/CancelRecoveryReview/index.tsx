@@ -1,6 +1,6 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useContext } from 'react'
 import type { PropsWithChildren, ReactElement } from 'react'
 
@@ -39,7 +39,7 @@ function CancelRecoveryReview({
 
   return (
     <ReviewTransaction onSubmit={handleSubmit}>
-      <Typography mb={1}>
+      <Typography className="mb-2">
         All actions initiated by the Recoverer will be cancelled. The current signers will remain the signers of the
         Safe Account.
       </Typography>

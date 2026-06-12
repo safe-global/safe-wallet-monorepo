@@ -2,7 +2,6 @@ import FirstSteps from '@/components/dashboard/FirstSteps'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ReactElement, useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { Stack } from '@mui/material'
 import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import AssetsWidget from '@/components/dashboard/Assets'
 import Overview from '@/components/dashboard/Overview/Overview'
@@ -54,10 +53,10 @@ const Dashboard = (): ReactElement => {
           <Overview />
 
           {noAssets && (
-            <Stack spacing={1}>
+            <div className="flex flex-col gap-2">
               {showHnBanner && <HnBannerForCarousel onDismiss={() => {}} />}
               {!showHnBanner && <AddFundsToGetStarted />}
-            </Stack>
+            </div>
           )}
 
           <div className={css.hideIfEmpty}>

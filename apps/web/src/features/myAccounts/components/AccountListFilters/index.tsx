@@ -3,9 +3,8 @@ import { type OrderByOption, selectOrderByPreference, setOrderByPreference } fro
 import debounce from 'lodash/debounce'
 import { type Dispatch, type SetStateAction, useCallback } from 'react'
 import OrderByButton from '../OrderByButton'
-import css from '../../styles.module.css'
 import SearchIcon from '@/public/images/common/search.svg'
-import { Box, InputAdornment, Paper, SvgIcon, TextField } from '@mui/material'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 
 const AccountListFilters = ({ setSearchQuery }: { setSearchQuery: Dispatch<SetStateAction<string>> }) => {
   const dispatch = useAppDispatch()
@@ -19,41 +18,24 @@ const AccountListFilters = ({ setSearchQuery }: { setSearchQuery: Dispatch<SetSt
   }
 
   return (
-    <Paper sx={{ px: 2, py: 1 }}>
-      <Box display="flex" justifyContent="space-between" width="100%" gap={1}>
-        <TextField
-          id="search-by-name"
-          placeholder="Search by name, ENS, address, or chain"
-          aria-label="Search Safe list by name"
-          variant="filled"
-          hiddenLabel
-          onChange={(e) => {
-            handleSearch(e.target.value)
-          }}
-          className={css.search}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SvgIcon
-                  component={SearchIcon}
-                  inheritViewBox
-                  fontWeight="bold"
-                  fontSize="small"
-                  sx={{
-                    color: 'var(--color-border-main)',
-                    '.MuiInputBase-root.Mui-focused &': { color: 'var(--color-text-primary)' },
-                  }}
-                />
-              </InputAdornment>
-            ),
-            disableUnderline: true,
-          }}
-          fullWidth
-          size="small"
-        />
+    <div className="px-4 py-2">
+      <div className="flex w-full justify-between gap-2">
+        <InputGroup className="w-full">
+          <InputGroupAddon align="inline-start">
+            <SearchIcon />
+          </InputGroupAddon>
+          <InputGroupInput
+            id="search-by-name"
+            placeholder="Search by name, ENS, address, or chain"
+            aria-label="Search Safe list by name"
+            onChange={(e) => {
+              handleSearch(e.target.value)
+            }}
+          />
+        </InputGroup>
         <OrderByButton orderBy={orderBy} onOrderByChange={handleOrderByChange} />
-      </Box>
-    </Paper>
+      </div>
+    </div>
   )
 }
 

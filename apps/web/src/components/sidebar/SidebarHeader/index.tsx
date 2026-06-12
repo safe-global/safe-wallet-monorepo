@@ -1,8 +1,7 @@
 import { CounterfactualFeature } from '@/features/counterfactual'
 import { useLoadFeature } from '@/features/__core__'
 import { type ReactElement } from 'react'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import NewTxButton from '@/components/sidebar/NewTxButton'
@@ -21,7 +20,6 @@ import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
-import { SvgIcon } from '@mui/material'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import ExplorerButton from '@/components/common/ExplorerButton'
@@ -52,10 +50,15 @@ const SafeHeader = (): ReactElement => {
             mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'QR Code' }}
           >
             <QrCodeButton>
-              <Tooltip title="Open QR code" placement="top">
-                <IconButton className={css.iconButton}>
-                  <SvgIcon component={QrIconBold} inheritViewBox color="primary" fontSize="small" />
-                </IconButton>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button className={css.iconButton}>
+                      <QrIconBold className="size-4" />
+                    </button>
+                  }
+                />
+                <TooltipContent side="top">Open QR code</TooltipContent>
               </Tooltip>
             </QrCodeButton>
           </Track>
@@ -65,9 +68,9 @@ const SafeHeader = (): ReactElement => {
             mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Copy Address' }}
           >
             <CopyTooltip text={addressCopyText}>
-              <IconButton data-testid="copy-address-btn" className={css.iconButton}>
-                <SvgIcon component={CopyIconBold} inheritViewBox color="primary" fontSize="small" />
-              </IconButton>
+              <button data-testid="copy-address-btn" className={css.iconButton}>
+                <CopyIconBold className="size-4" />
+              </button>
             </CopyTooltip>
           </Track>
 

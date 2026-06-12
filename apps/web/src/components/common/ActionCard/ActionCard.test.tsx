@@ -82,14 +82,14 @@ describe('ActionCard', () => {
       expect(button).toHaveAttribute('href', 'https://example.com')
     })
 
-    it('should always render button with arrow endIcon', () => {
+    it('should always render button with arrow icon', () => {
       const action: ActionCardButton = { label: 'Test Button', onClick: () => {} }
       const { container } = render(<ActionCard severity="info" title="Title" action={action} />)
 
-      // Verify endIcon is present (KeyboardArrowRightRoundedIcon is always rendered)
+      // Verify the arrow icon is present (lucide ChevronRight renders an <svg>)
       const button = container.querySelector('button')
       expect(button).toBeInTheDocument()
-      expect(button?.querySelector('.MuiButton-endIcon')).toBeInTheDocument()
+      expect(button?.querySelector('svg')).toBeInTheDocument()
     })
 
     it('should not render action section when action is undefined', () => {

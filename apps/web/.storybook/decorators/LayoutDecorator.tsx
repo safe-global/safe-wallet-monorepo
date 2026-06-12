@@ -1,7 +1,5 @@
 import React, { type ReactNode, useState } from 'react'
-import { Box, Drawer, IconButton } from '@mui/material'
-import DoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRightRounded'
-import DoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeftRounded'
+import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 
 import Sidebar from '@/components/sidebar/Sidebar'
 import Header from '@/components/common/Header'
@@ -54,99 +52,38 @@ export const LayoutDecorator = ({ children, showSidebar = true, showHeader = tru
   const [, setBatchOpen] = useState(false)
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        minHeight: '100vh',
-        width: '100%',
-        backgroundColor: 'background.default',
-      }}
-    >
+    <div className="flex min-h-screen w-full bg-[var(--color-background-default)]">
       {showSidebar && (
         <>
-          <Drawer
-            variant="persistent"
-            anchor="left"
-            open={isSidebarOpen}
-            sx={{
-              width: SIDEBAR_WIDTH,
-              flexShrink: 0,
-              '& .MuiDrawer-paper': {
-                width: SIDEBAR_WIDTH,
-                boxSizing: 'border-box',
-              },
-            }}
-          >
-            <aside>
+          {isSidebarOpen && (
+            <aside className="box-border shrink-0" style={{ width: SIDEBAR_WIDTH }}>
               <Sidebar />
             </aside>
-          </Drawer>
+          )}
 
           {/* Sidebar toggle button */}
-          <Box
-            sx={{
-              position: 'fixed',
-              left: isSidebarOpen ? SIDEBAR_WIDTH : 0,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              zIndex: 1200,
-              transition: 'left 0.3s ease',
-            }}
+          <button
+            type="button"
+            aria-label="toggle sidebar"
+            onClick={() => setSidebarOpen(!isSidebarOpen)}
+            className="fixed top-1/2 z-[1200] -translate-y-1/2 rounded-r border border-border bg-[var(--color-background-paper)] p-1 transition-[left] duration-300 hover:bg-muted"
+            style={{ left: isSidebarOpen ? SIDEBAR_WIDTH : 0 }}
           >
-            <IconButton
-              aria-label="toggle sidebar"
-              size="small"
-              onClick={() => setSidebarOpen(!isSidebarOpen)}
-              sx={{
-                backgroundColor: 'background.paper',
-                border: 1,
-                borderColor: 'divider',
-                borderRadius: '0 4px 4px 0',
-                '&:hover': {
-                  backgroundColor: 'action.hover',
-                },
-              }}
-            >
-              {isSidebarOpen ? <DoubleArrowLeftIcon fontSize="inherit" /> : <DoubleArrowRightIcon fontSize="inherit" />}
-            </IconButton>
-          </Box>
+            {isSidebarOpen ? <ChevronsLeft className="size-4" /> : <ChevronsRight className="size-4" />}
+          </button>
         </>
       )}
 
-      <Box
-        sx={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          // Note: No marginLeft needed - the persistent Drawer with flexShrink: 0
-          // already takes its width in the flex layout, pushing this content box
-          transition: 'margin-left 0.3s ease',
-        }}
-      >
+      <div className="flex flex-1 flex-col">
         {showHeader && (
-          <Box
-            component="header"
-            sx={{
-              position: 'sticky',
-              top: 0,
-              zIndex: 1100,
-            }}
-          >
+          <header className="sticky top-0 z-[1100]">
             <Header onMenuToggle={showSidebar ? setSidebarOpen : undefined} onBatchToggle={setBatchOpen} />
-          </Box>
+          </header>
         )}
 
-        <Box
-          component="main"
-          sx={{
-            flex: 1,
-            p: 3,
-          }}
-        >
-          {children}
-        </Box>
-      </Box>
-    </Box>
+        <main className="flex-1 p-6">{children}</main>
+      </div>
+    </div>
   )
 }
 

@@ -1,23 +1,17 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { ReactNode } from 'react'
-import { type SyntheticEvent, type ReactElement, memo, useMemo } from 'react'
+import type { ReactNode, CSSProperties } from 'react'
+import { type ReactElement, memo, useMemo } from 'react'
 import { isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'
-import {
-  Accordion,
-  accordionClasses,
-  AccordionDetails,
-  AccordionSummary,
-  accordionSummaryClasses,
-  Box,
-  Stack,
-  styled,
-  Typography,
-} from '@mui/material'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import accordionCss from '@/styles/accordion.module.css'
-import HelpTooltip from '@/components/tx/ColorCodedTxAccordion/HelpTooltip'
+import { cn } from '@/utils/cn'
+import HelpTooltip from './HelpTooltip'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import css from './styles.module.css'
 
 enum ColorLevel {
   info = 'info',
@@ -30,14 +24,13 @@ const TX_INFO_LEVEL = {
   [ColorLevel.success]: ['Transfer', 'SwapTransfer', 'TwapOrder', 'NativeStakingDeposit'],
 }
 
-const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; background: string; border?: string }> = {
+const TxInfoColors: Record<ColorLevel, { main: string; mainDark?: string; background: string }> = {
   [ColorLevel.info]: { main: 'info.dark', background: 'info.background' },
-  [ColorLevel.warning]: { main: 'warning.main', background: 'warning.background', border: 'warning.light' },
+  [ColorLevel.warning]: { main: 'warning.main', background: 'warning.background' },
   [ColorLevel.success]: {
     main: 'success.main',
     mainDark: 'primary.main',
     background: 'background.light',
-    border: 'success.light',
   },
 }
 
@@ -52,18 +45,6 @@ const getMethodLevel = (txInfo?: TransactionDetails['txInfo']['type']): ColorLev
 
 const toCssVar = (color: string) => `var(--color-${color.replace('.', '-')})`
 
-const StyledAccordion = styled(Accordion)<{ color?: ColorLevel }>(({ color = ColorLevel.info }) => {
-  const { main, border, background } = TxInfoColors[color]
-  return {
-    [`&.${accordionClasses.expanded}.${accordionClasses.root}, &:hover.${accordionClasses.root}`]: {
-      borderColor: toCssVar(border || main),
-    },
-    [`&.${accordionClasses.expanded} > * > .${accordionSummaryClasses.root}`]: {
-      backgroundColor: toCssVar(background),
-    },
-  }
-})
-
 type DecodedTxProps = {
   txInfo?: TransactionDetails['txInfo']
   txData?: TransactionDetails['txData']
@@ -71,17 +52,10 @@ type DecodedTxProps = {
   defaultExpanded?: boolean
 }
 
-export const Divider = () => (
-  <Box
-    borderBottom="1px solid var(--color-border-light)"
-    width="calc(100% + 32px)"
-    my={2}
-    sx={{ ml: '-16px !important' }}
-  />
-)
+export const Divider = () => <Separator className={css.divider} />
 
-const onChangeExpand = (_: SyntheticEvent, expanded: boolean) => {
-  trackEvent({ ...MODALS_EVENTS.TX_DETAILS, label: expanded ? 'Open' : 'Close' })
+const onValueChange = (value: string[]) => {
+  trackEvent({ ...MODALS_EVENTS.TX_DETAILS, label: value.includes('tx-details') ? 'Open' : 'Close' })
 }
 
 const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: DecodedTxProps): ReactElement => {
@@ -95,38 +69,41 @@ const ColorCodedTxAccordion = ({ txInfo, txData, children, defaultExpanded }: De
       ? 'native transfer'
       : decodedData?.method
 
+  const accordionVars = {
+    '--accordion-bg-active': toCssVar(colors.background),
+  } as CSSProperties
+
   return (
-    <StyledAccordion elevation={0} onChange={onChangeExpand} color={level} defaultExpanded={defaultExpanded}>
-      <AccordionSummary
-        data-testid="decoded-tx-summary"
-        expandIcon={<ExpandMoreIcon />}
-        className={accordionCss.accordion}
-      >
-        <Stack direction="row" justifyContent="space-between" alignItems="center" width="100%">
-          <Typography variant="subtitle2" fontWeight={700} data-testid="tx-advanced-details">
-            Transaction details
-            <HelpTooltip />
-          </Typography>
+    <Card style={accordionVars} className={css.item}>
+      <Accordion defaultValue={defaultExpanded ? ['tx-details'] : []} onValueChange={onValueChange}>
+        <AccordionItem value="tx-details" className="border-0">
+          <AccordionTrigger data-testid="decoded-tx-summary" className={cn(css.trigger, 'px-4 hover:no-underline')}>
+            <div className="flex w-full flex-row items-center justify-between">
+              <Typography variant="paragraph-small-bold" data-testid="tx-advanced-details">
+                Transaction details
+                <HelpTooltip />
+              </Typography>
 
-          {methodLabel && (
-            <Typography
-              component="span"
-              variant="body2"
-              alignContent="center"
-              color={isDarkMode ? (colors.mainDark ?? colors.main) : colors.main}
-              py={0.5}
-              px={1}
-              borderRadius={0.5}
-              bgcolor={colors.background}
-            >
-              {methodLabel}
-            </Typography>
-          )}
-        </Stack>
-      </AccordionSummary>
+              {methodLabel && (
+                <Badge
+                  variant="outline"
+                  className={css.methodChip}
+                  style={{
+                    color: isDarkMode ? toCssVar(colors.mainDark ?? colors.main) : toCssVar(colors.main),
+                  }}
+                >
+                  {methodLabel}
+                </Badge>
+              )}
+            </div>
+          </AccordionTrigger>
 
-      <AccordionDetails data-testid="decoded-tx-details">{children}</AccordionDetails>
-    </StyledAccordion>
+          <AccordionContent data-testid="decoded-tx-details" className={cn(css.content, 'px-4')}>
+            {children}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </Card>
   )
 }
 

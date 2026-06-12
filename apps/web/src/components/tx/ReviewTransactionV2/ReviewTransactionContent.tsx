@@ -14,7 +14,9 @@ import UnknownContractError from '@/components/tx/shared/errors/UnknownContractE
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { Slot, SlotName } from '@/components/tx-flow/slots'
 import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
-import { Button, CircularProgress, Divider } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Separator } from '@/components/ui/separator'
 import CheckWallet from '@/components/common/CheckWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
@@ -71,7 +73,7 @@ export const ReviewTransactionContent = ({
 
         <Slot name={SlotName.Main} />
 
-        <Divider sx={{ mt: 2, mx: -3 }} />
+        <Separator className="mt-4 -mx-6" />
 
         {safeTxError && (
           <ErrorMessage error={safeTxError}>
@@ -90,13 +92,12 @@ export const ReviewTransactionContent = ({
               return (
                 <Button
                   data-testid="continue-sign-btn"
-                  variant="contained"
                   type="submit"
                   onClick={onContinueClick}
                   disabled={!isOk || isSubmitDisabled || (needsRiskConfirmation && !isRiskConfirmed)}
-                  sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
+                  className="order-1 w-full min-w-[82px] lg:w-auto"
                 >
-                  {isSubmitLoading ? <CircularProgress size={20} /> : 'Continue'}
+                  {isSubmitLoading ? <Spinner className="size-5" /> : 'Continue'}
                 </Button>
               )
             }}

@@ -1,5 +1,6 @@
 import type { MouseEvent } from 'react'
-import { IconButton, SvgIcon, Tooltip } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/utils/cn'
 import { useSingleChainPinActions } from '../../hooks/useSingleChainPinActions'
 import { usePinActions } from '../../hooks/usePinActions'
 import BookmarkIcon from '@/public/images/apps/bookmark.svg'
@@ -69,17 +70,12 @@ function AccountItemPinButton(props: AccountItemPinButtonProps) {
     }
   }
 
+  const PinIcon = isPinned ? BookmarkedIcon : BookmarkIcon
+
   return (
-    <Tooltip title={isPinned ? 'Remove from trusted Safes' : 'Add to trusted Safes'}>
-      <IconButton data-testid="bookmark-icon" edge="end" size="medium" onClick={handleClick}>
-        <SvgIcon
-          component={isPinned ? BookmarkedIcon : BookmarkIcon}
-          inheritViewBox
-          color={isPinned ? 'primary' : undefined}
-          fontSize="small"
-        />
-      </IconButton>
-    </Tooltip>
+    <Button data-testid="bookmark-icon" variant="ghost" size="icon" onClick={handleClick}>
+      <PinIcon className={cn('size-4', isPinned ? 'fill-current text-primary' : 'text-[var(--color-border-main)]')} />
+    </Button>
   )
 }
 

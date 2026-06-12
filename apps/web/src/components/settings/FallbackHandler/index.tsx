@@ -1,5 +1,6 @@
 import NextLink from 'next/link'
-import { Typography, Box, Grid, Paper, Link } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Link } from '@/components/ui/link'
 import semverSatisfies from 'semver/functions/satisfies'
 import type { ReactElement } from 'react'
 import classnames from 'classnames'
@@ -31,10 +32,7 @@ export const FallbackHandlerWarning = ({
       {!!txBuilder && !!txBuilderLinkPrefix && (
         <>
           {` ${txBuilderLinkPrefix} `}
-          <NextLink href={txBuilder.link} passHref legacyBehavior>
-            <Link>Transaction Builder</Link>
-          </NextLink>
-          .
+          <Link render={<NextLink href={txBuilder.link} />}>Transaction Builder</Link>.
         </>
       )}
     </>
@@ -73,43 +71,28 @@ export const FallbackHandler = (): ReactElement | null => {
   ) : undefined
 
   return (
-    <Paper sx={{ padding: 4 }}>
-      <Grid
-        container
-        direction="row"
-        spacing={3}
-        sx={{
-          justifyContent: 'space-between',
-        }}
-      >
-        <Grid item lg={4} xs={12}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
-            Fallback handler
-          </Typography>
-        </Grid>
+    <div className="rounded-lg bg-[var(--color-background-paper)] p-8">
+      <div className="grid grid-cols-1 justify-between gap-6 lg:grid-cols-[1fr_2fr]">
+        <div>
+          <Typography variant="h4">Fallback handler</Typography>
+        </div>
 
-        <Grid item xs>
-          <Box>
+        <div>
+          <div>
             <Typography>
               The fallback handler adds fallback logic for funtionality that may not be present in the Safe Account
               contract. Learn more about the fallback handler{' '}
               <ExternalLink href={HelpCenterArticle.FALLBACK_HANDLER}>here</ExternalLink>
             </Typography>
 
-            <Box
-              className={classnames(css.guardDisplay, {
+            <div
+              className={classnames(css.guardDisplay, '!block', {
                 [css.warning]: !hasFallbackHandler,
                 [css.info]: hasFallbackHandler && isUntrusted,
               })}
-              sx={{ display: 'block !important' }}
             >
               {warning && (
-                <Typography variant="body2" width="100%" mb={hasFallbackHandler ? 1 : 0}>
+                <Typography variant="paragraph-small" className={classnames('w-full', { 'mb-2': hasFallbackHandler })}>
                   {warning}
                 </Typography>
               )}
@@ -124,10 +107,10 @@ export const FallbackHandler = (): ReactElement | null => {
                   hasExplorer
                 />
               )}
-            </Box>
-          </Box>
-        </Grid>
-      </Grid>
-    </Paper>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

@@ -1,5 +1,6 @@
 import { undeployedSafesSlice } from '@/features/counterfactual/store'
-import { DialogContent, Alert, AlertTitle, DialogActions, Button, Box, SvgIcon } from '@mui/material'
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import type { ReactElement, Dispatch, SetStateAction } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'
@@ -93,23 +94,18 @@ export const ImportDialog = ({
 
   return (
     <ModalDialog open onClose={handleClose} dialogTitle="Data import" hideChainIndicator>
-      <DialogContent>
+      <div className="p-6">
         {!jsonData || !fileName ? (
-          <Box mt={2}>
+          <div className="mt-4">
             <ImportFileUpload setFileName={setFileName} setJsonData={setJsonData} />
-          </Box>
+          </div>
         ) : (
           <>
             <FileListCard
               avatar={
-                <Box sx={{ borderRadius: ({ shape }) => `${shape.borderRadius}px` }}>
-                  <SvgIcon
-                    component={FileIcon}
-                    inheritViewBox
-                    fontSize="small"
-                    sx={{ fill: 'none', display: 'block' }}
-                  />
-                </Box>
+                <div className="rounded">
+                  <FileIcon className="block size-4 fill-none" />
+                </div>
               }
               title={<b>{fileName}</b>}
               className={css.header}
@@ -123,29 +119,25 @@ export const ImportDialog = ({
               showPreview
             />
             {!isDisabled && (
-              <Alert severity="warning">
-                <AlertTitle sx={{ fontWeight: 700 }}>Overwrite your current data?</AlertTitle>
-                This action will overwrite your currently added Safe Accounts, address book and settings with those from
-                the imported file.
+              <Alert variant="warning">
+                <AlertTitle>Overwrite your current data?</AlertTitle>
+                <AlertDescription>
+                  This action will overwrite your currently added Safe Accounts, address book and settings with those
+                  from the imported file.
+                </AlertDescription>
               </Alert>
             )}
           </>
         )}
-      </DialogContent>
-      <DialogActions>
-        <Button data-testid="dialog-cancel-btn" onClick={handleClose}>
+      </div>
+      <div className="flex justify-end gap-2 p-6 pt-0">
+        <Button data-testid="dialog-cancel-btn" variant="outline" onClick={handleClose}>
           Cancel
         </Button>
-        <Button
-          data-testid="dialog-import-btn"
-          onClick={handleImport}
-          variant="contained"
-          disableElevation
-          disabled={isDisabled}
-        >
+        <Button data-testid="dialog-import-btn" onClick={handleImport} disabled={isDisabled}>
           Import
         </Button>
-      </DialogActions>
+      </div>
     </ModalDialog>
   )
 }

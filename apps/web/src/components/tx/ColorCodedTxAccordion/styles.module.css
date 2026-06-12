@@ -1,0 +1,42 @@
+.item {
+  gap: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background-color: var(--accordion-bg-active);
+  box-shadow: none;
+  transition: background-color 0.2s ease;
+}
+
+.item:hover {
+  background-color: color-mix(in srgb, var(--accordion-bg-active) 88%, var(--foreground) 12%);
+}
+
+.trigger {
+  min-height: 56px;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none;
+  background-color: transparent !important;
+}
+
+.trigger:hover {
+  background-color: transparent !important;
+}
+
+.content {
+  background-color: transparent;
+}
+
+.methodChip {
+  border-color: color-mix(in srgb, var(--foreground) 12%, transparent);
+  background-color: color-mix(in srgb, var(--background) 72%, transparent);
+}
+
+.divider {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+  width: calc(100% + var(--space-4));
+}

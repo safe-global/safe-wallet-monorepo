@@ -8,9 +8,15 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 
-import { Button, Checkbox, CircularProgress, Divider, FormControlLabel, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Spinner } from '@/components/ui/spinner'
+import { Separator } from '@/components/ui/separator'
+import { Field, FieldLabel } from '@/components/ui/field'
+import { Typography } from '@/components/ui/typography'
 import type { WalletKitTypes } from '@reown/walletkit'
-import type { ChangeEvent, ReactElement } from 'react'
+import type { ReactElement } from 'react'
+import { useId } from 'react'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { CompatibilityWarning } from './CompatibilityWarning'
 import ProposalVerification from './ProposalVerification'
@@ -26,6 +32,7 @@ type ProposalFormProps = {
 
 const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): ReactElement => {
   const { loading } = useContext(WalletConnectContext)
+  const riskCheckboxId = useId()
 
   const { configs } = useChains()
   const { safeLoaded, safe } = useSafeInfo()
@@ -53,7 +60,7 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
     (Boolean(sanctionedAddress) && isSafePass)
 
   const onCheckboxClick = useCallback(
-    (_: ChangeEvent, checked: boolean) => {
+    (checked: boolean) => {
       setUnderstandsRisk(checked)
 
       if (checked) {
@@ -88,7 +95,7 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
 
   return (
     <div className={css.container}>
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="paragraph-small" className="text-muted-foreground">
         WalletConnect
       </Typography>
 
@@ -98,13 +105,11 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
         </div>
       )}
 
-      <Typography mb={1}>
+      <Typography className="mb-2">
         <b>{name}</b> wants to connect
       </Typography>
 
-      <Typography className={css.origin} mb={3}>
-        {proposal.verifyContext.verified.origin}
-      </Typography>
+      <Typography className={`mb-6 ${css.origin}`}>{proposal.verifyContext.verified.origin}</Typography>
 
       <div className={css.info}>
         <ProposalVerification proposal={proposal} />
@@ -113,33 +118,34 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
       </div>
 
       {!isBlocked && isHighRisk && !isUnsupportedChain && (
-        <FormControlLabel
-          className={css.checkbox}
-          control={<Checkbox checked={understandsRisk} onChange={onCheckboxClick} />}
-          label="I understand the risks associated with interacting with this dApp and would like to continue."
-        />
+        <Field orientation="horizontal" className={css.checkbox}>
+          <Checkbox id={riskCheckboxId} checked={understandsRisk} onCheckedChange={onCheckboxClick} />
+          <FieldLabel htmlFor={riskCheckboxId}>
+            I understand the risks associated with interacting with this dApp and would like to continue.
+          </FieldLabel>
+        </Field>
       )}
 
       {isSafePass && sanctionedAddress && (
         <BlockedAddress address={sanctionedAddress} featureTitle="Safe{Pass}" onClose={onReject} />
       )}
 
-      <Divider flexItem className={css.divider} />
+      <Separator className={css.divider} />
 
       <div className={css.buttons}>
         {!isUnsupportedChain && (
-          <Button variant="contained" onClick={onApprove} className={css.button} disabled={disabled}>
-            {loading === WCLoadingState.APPROVE ? <CircularProgress size={20} /> : 'Approve'}
+          <Button variant="default" onClick={onApprove} className={css.button} disabled={disabled}>
+            {loading === WCLoadingState.APPROVE ? <Spinner className="size-5" /> : 'Approve'}
           </Button>
         )}
 
         <Button
-          variant={isUnsupportedChain ? 'text' : 'danger'}
+          variant={isUnsupportedChain ? 'ghost' : 'destructive'}
           onClick={onReject}
           className={css.button}
           disabled={!!loading}
         >
-          {loading === WCLoadingState.REJECT ? <CircularProgress size={20} /> : isUnsupportedChain ? 'Close' : 'Reject'}
+          {loading === WCLoadingState.REJECT ? <Spinner className="size-5" /> : isUnsupportedChain ? 'Close' : 'Reject'}
         </Button>
       </div>
     </div>

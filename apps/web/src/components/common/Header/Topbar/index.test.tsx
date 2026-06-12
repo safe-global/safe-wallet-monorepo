@@ -20,10 +20,10 @@ jest.mock('@/hooks/use-mobile', () => ({
   useIsMobile: () => mockUseIsMobile(),
 }))
 
-const mockUseMediaQuery = jest.fn(() => false)
-jest.mock('@mui/material', () => ({
-  ...jest.requireActual('@mui/material'),
-  useMediaQuery: () => mockUseMediaQuery(),
+const mockUseIsBelowMd = jest.fn(() => false)
+jest.mock('@/hooks/useMediaQuery', () => ({
+  ...jest.requireActual('@/hooks/useMediaQuery'),
+  useIsBelowMd: () => mockUseIsBelowMd(),
 }))
 
 jest.mock('@/features/wallet', () => ({
@@ -132,6 +132,7 @@ describe('Topbar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseIsMobile.mockReturnValue(false)
+    mockUseIsBelowMd.mockReturnValue(false)
     mockIsSpaceRoute.mockReturnValue(true)
     mockUsePathname.mockReturnValue('/home')
     mockUseSafeAddressFromUrl.mockReturnValue('')
@@ -324,11 +325,11 @@ describe('Topbar', () => {
   describe('mobile', () => {
     beforeEach(() => {
       mockUseIsMobile.mockReturnValue(true)
-      mockUseMediaQuery.mockReturnValue(true)
+      mockUseIsBelowMd.mockReturnValue(true)
     })
 
     afterEach(() => {
-      mockUseMediaQuery.mockReturnValue(false)
+      mockUseIsBelowMd.mockReturnValue(false)
     })
 
     it('shows the sidebar menu button when on mobile and onMenuToggle is provided', () => {

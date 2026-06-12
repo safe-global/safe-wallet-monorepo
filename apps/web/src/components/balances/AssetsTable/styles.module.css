@@ -6,14 +6,6 @@
   padding-right: 16px !important;
 }
 
-.container thead th:first-child {
-  padding-left: 16px !important;
-}
-
-.container thead th:last-child {
-  padding-right: 16px !important;
-}
-
 .container .sticky {
   opacity: 1;
   position: absolute;
@@ -286,7 +278,7 @@
   }
 }
 
-@media (max-width: 599.95px) {
+@media (max-width: 767.98px) {
   /* Show mobile flex layout */
   .mobileContainer {
     display: flex;

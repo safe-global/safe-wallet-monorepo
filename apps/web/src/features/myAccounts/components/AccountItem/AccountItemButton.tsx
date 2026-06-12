@@ -1,5 +1,4 @@
 import { type ReactNode, type MouseEvent, type RefObject } from 'react'
-import { ListItemButton } from '@mui/material'
 import classnames from 'classnames'
 import css from '../AccountItems/styles.module.css'
 import AccountItemContent from './AccountItemContent'
@@ -22,14 +21,20 @@ export interface AccountItemButtonProps {
  */
 function AccountItemButton({ children, onClick, elementRef }: AccountItemButtonProps) {
   return (
-    <ListItemButton
+    <div
       ref={elementRef}
+      role="button"
+      tabIndex={0}
       data-testid="safe-list-item"
-      className={classnames(css.listItem, css.noActions)}
+      className={classnames(
+        css.listItem,
+        css.noActions,
+        'hover:bg-muted/40 flex cursor-pointer items-center p-2 transition-colors',
+      )}
       onClick={onClick}
     >
       <AccountItemContent>{children}</AccountItemContent>
-    </ListItemButton>
+    </div>
   )
 }
 

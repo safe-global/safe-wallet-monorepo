@@ -9,9 +9,8 @@ import type { Dispatch, SetStateAction } from 'react'
 import { type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import type { Url } from 'next/dist/shared/lib/router/router'
-import { Box, ButtonBase, IconButton, Paper, SvgIcon } from '@mui/material'
-import MenuIcon from '@mui/icons-material/Menu'
-import LogoutIcon from '@mui/icons-material/Logout'
+import { Menu, LogOut } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import classnames from 'classnames'
 import css from './styles.module.css'
 import ConnectWallet from '@/components/common/ConnectWallet'
@@ -78,12 +77,12 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
   const showBatchButton = safeAddress && (!isProposer || isSafeOwner)
 
   return (
-    <Paper className={css.container}>
+    <div className={css.container}>
       <div className={classnames(css.element, css.menuButton)}>
         {onMenuToggle && (
-          <IconButton onClick={handleMenuToggle} size="large" color="default" aria-label="menu">
-            <MenuIcon />
-          </IconButton>
+          <Button variant="ghost" size="icon-lg" onClick={handleMenuToggle} aria-label="menu">
+            <Menu className="size-6" />
+          </Button>
         )}
       </div>
 
@@ -105,7 +104,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
         </div>
       )}
 
-      <Box className={css.rightSideGroup}>
+      <div className={css.rightSideGroup}>
         <div data-testid="notifications-center" className={css.element}>
           <NotificationCenter />
         </div>
@@ -119,7 +118,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
         <div className={classnames(css.element, css.hideMobile)}>
           <WalletConnectWidget />
         </div>
-      </Box>
+      </div>
 
       <div className={classnames(css.element, css.connectWallet)}>
         <Track label={OVERVIEW_LABELS.top_bar} {...OVERVIEW_EVENTS.OPEN_ONBOARD}>
@@ -130,20 +129,9 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
       {/* TODO temporary sign out button til Spaces are not signer-protected */}
       {isOidcAuthEnabled && authenticated && (
         <div className={classnames(css.element, css.signOut)}>
-          <ButtonBase
-            onClick={logout}
-            aria-label="Sign out"
-            disableRipple
-            sx={{
-              p: '10px',
-              borderRadius: '6px',
-              '&:hover': {
-                backgroundColor: 'background.light',
-              },
-            }}
-          >
-            <SvgIcon component={LogoutIcon} inheritViewBox fontSize="medium" />
-          </ButtonBase>
+          <Button variant="ghost" size="icon" onClick={logout} aria-label="Sign out">
+            <LogOut className="size-6" />
+          </Button>
         </div>
       )}
 
@@ -152,7 +140,7 @@ const Header = ({ onMenuToggle, onBatchToggle }: HeaderProps): ReactElement => {
           <NetworkSelector offerSafeCreation compactButton={true} />
         </div>
       )}
-    </Paper>
+    </div>
   )
 }
 

@@ -1,6 +1,9 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { CardActions, Button, Typography, Divider, Box, CircularProgress } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
+import { Spinner } from '@/components/ui/spinner'
 import { useContext, useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -125,31 +128,31 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
   return (
     <>
       <TxCard>
-        <Typography mb={1}>
+        <Typography className="mb-2">
           This transaction will reset the Account setup, changing the signers
           {newThreshold !== safe.threshold ? ' and threshold' : ''}.
         </Typography>
 
         <OwnerList owners={newOwners} />
 
-        <Divider className={commonCss.nestedDivider} sx={{ mt: 'var(--space-2) !important' }} />
+        <Separator className={commonCss.nestedDivider} style={{ marginTop: 'var(--space-2)' }} />
 
-        <Box my={1}>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
+        <div className="my-2">
+          <Typography variant="paragraph-small" color="muted" className="mb-2">
             After recovery, Safe Account transactions will require:
           </Typography>
           <Typography>
             <b>{threshold}</b> out of <b>{owners.length} signers.</b>
           </Typography>
-        </Box>
+        </div>
 
-        <Divider className={commonCss.nestedDivider} />
+        <Separator className={commonCss.nestedDivider} />
 
         {txPreview && <Summary safeTxData={safeTx?.data} {...txPreview} />}
 
         <BalanceChanges />
 
-        <Divider sx={{ mt: 2, mx: -3 }} />
+        <Separator className="mx-[calc(-1*var(--space-3))] mt-4" />
 
         <ConfirmationTitle variant={ConfirmationTitleTypes.execute} />
 
@@ -181,22 +184,17 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
 
         {isRejectedByUser && <WalletRejectionError />}
 
-        <Divider className={commonCss.nestedDivider} />
+        <Separator className={commonCss.nestedDivider} />
 
-        <CardActions sx={{ mt: 'var(--space-1) !important' }}>
+        <div className="flex items-center p-2" style={{ marginTop: 'var(--space-1)' }}>
           <CheckWallet allowNonOwner checkNetwork>
             {(isOk) => (
-              <Button
-                data-testid="execute-btn"
-                variant="contained"
-                disabled={!isOk || submitDisabled}
-                onClick={onSubmit}
-              >
-                {!isSubmittable ? <CircularProgress size={20} /> : 'Execute'}
+              <Button data-testid="execute-btn" variant="default" disabled={!isOk || submitDisabled} onClick={onSubmit}>
+                {!isSubmittable ? <Spinner className="size-5" /> : 'Execute'}
               </Button>
             )}
           </CheckWallet>
-        </CardActions>
+        </div>
       </TxCard>
     </>
   )

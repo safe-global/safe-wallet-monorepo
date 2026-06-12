@@ -2,7 +2,8 @@ import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import { useSpendingLimit } from '@/features/spending-limits'
-import { Button, IconButton, Tooltip, SvgIcon } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
@@ -41,33 +42,41 @@ const EarnButton = (props: EarnButtonProps): ReactElement => {
           }}
         >
           {onlyIcon ? (
-            <Tooltip title={isOk ? 'Earn' : ''} placement="top" arrow>
-              <span>
-                <IconButton
-                  data-testid="earn-btn"
-                  aria-label="Earn"
-                  onClick={onEarnClick}
-                  disabled={!isOk}
-                  size="small"
-                  className={assetActionCss.assetActionIconButton}
-                >
-                  <SvgIcon component={EarnIcon} inheritViewBox />
-                </IconButton>
-              </span>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <span>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      data-testid="earn-btn"
+                      aria-label="Earn"
+                      onClick={onEarnClick}
+                      disabled={!isOk}
+                      className={assetActionCss.assetActionIconButton}
+                    >
+                      <EarnIcon />
+                    </Button>
+                  </span>
+                }
+              />
+              {isOk && <TooltipContent>Earn</TooltipContent>}
             </Tooltip>
           ) : (
             <Button
-              className={classnames({ [css.button]: compact, [css.buttonDisabled]: !isOk })}
+              className={classnames('gap-1', {
+                [css.button]: compact,
+                [css.buttonDisabled]: !isOk,
+                'bg-[var(--color-background-paper)]': !compact,
+              })}
               data-testid="earn-btn"
               aria-label="Earn"
-              variant={compact ? 'text' : 'contained'}
-              color={compact ? 'info' : 'background.paper'}
-              size="small"
-              disableElevation
-              startIcon={<EarnIcon />}
+              variant={compact ? 'ghost' : 'default'}
+              size="sm"
               onClick={onEarnClick}
               disabled={!isOk}
             >
+              <EarnIcon />
               Earn
             </Button>
           )}

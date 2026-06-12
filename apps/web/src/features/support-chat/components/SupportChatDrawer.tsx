@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Box, Typography, CircularProgress } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Spinner } from '@/components/ui/spinner'
+import { cn } from '@/utils/cn'
 
 // Types
 type ChatStatus = 'idle' | 'waiting' | 'config-sent' | 'ready' | 'error'
@@ -230,94 +232,44 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
 
   return (
     <>
-      <Box
-        aria-hidden
-        onClick={onClose}
-        sx={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 1300,
-          bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.2)'),
-        }}
-      />
-      <Box
-        sx={{
-          position: 'fixed',
-          bottom: { xs: 0, sm: 72 },
-          left: { xs: 0, sm: 24 },
-          width: { xs: '100vw', sm: chatWidth },
-          maxWidth: { xs: '100vw', sm: chatWidth },
-          height: { xs: '100vh', sm: 'auto' },
-          maxHeight: { xs: '100vh', sm: 'calc(100vh - 88px)' },
-          zIndex: 1301,
-          animation: 'supportChatOpen 150ms ease-out',
-          transformOrigin: 'bottom left',
-          '@keyframes supportChatOpen': {
-            from: { opacity: 0, transform: 'scale(0.95) translateY(8px)' },
-            to: { opacity: 1, transform: 'scale(1) translateY(0)' },
-          },
-        }}
+      <div aria-hidden onClick={onClose} className="fixed inset-0 z-[1300] bg-black/20 dark:bg-black/40" />
+      <div
+        className="fixed bottom-0 left-0 z-[1301] h-screen max-h-screen w-screen max-w-[100vw] origin-bottom-left animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-150 sm:bottom-[72px] sm:left-6 sm:h-auto sm:max-h-[calc(100vh-88px)] sm:w-[var(--chat-w)] sm:max-w-[var(--chat-w)]"
+        style={{ ['--chat-w' as string]: `${chatWidth}px` }}
       >
-        <Box
-          sx={{
-            position: 'relative',
+        <div
+          className={cn(
+            'relative max-h-full max-w-full shrink-0 self-start overflow-visible transition-[background-color,box-shadow] duration-[120ms] ease-linear',
+            showPlaceholder
+              ? 'bg-[var(--color-background-paper)] sm:rounded-lg sm:shadow-lg'
+              : 'bg-transparent shadow-none',
+          )}
+          style={{
             width: isError ? FRAME_DIMENSIONS.DEFAULT_WIDTH : chatWidth,
-            maxWidth: '100%',
             height: isError ? FRAME_DIMENSIONS.MIN_HEIGHT : chatHeight,
-            maxHeight: '100%',
             minWidth: isError ? FRAME_DIMENSIONS.MIN_WIDTH : undefined,
             minHeight: isError ? FRAME_DIMENSIONS.MIN_HEIGHT : undefined,
-            bgcolor: showPlaceholder ? 'background.paper' : 'transparent',
-            borderRadius: showPlaceholder ? { xs: 0, sm: 2 } : 0,
-            overflow: 'visible',
-            boxShadow: showPlaceholder ? { xs: 'none', sm: 8 } : 'none',
-            alignSelf: 'flex-start',
-            flexShrink: 0,
-            transition: 'background-color 120ms ease, box-shadow 120ms ease',
           }}
         >
           {showPlaceholder && (
-            <Box
-              sx={{
-                position: 'absolute',
-                inset: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 2,
-                px: 3,
-                textAlign: 'center',
-                zIndex: 1,
-                bgcolor: 'background.paper',
-              }}
-            >
+            <div className="absolute inset-0 z-[1] flex flex-col items-center justify-center gap-4 bg-[var(--color-background-paper)] px-6 text-center">
               {isError ? (
-                <Box
-                  sx={{
-                    bgcolor: 'transparent',
-                    borderRadius: 2,
-                    boxShadow: 'none',
-                    p: 3,
-                    maxWidth: 320,
-                    textAlign: 'center',
-                  }}
-                >
-                  <Typography variant="h5">{ERROR_STATE.heading}</Typography>
-                  <Typography variant="body2" color="text.secondary">
+                <div className="max-w-[320px] rounded-lg bg-transparent p-6 text-center shadow-none">
+                  <Typography variant="h3">{ERROR_STATE.heading}</Typography>
+                  <Typography variant="paragraph-small" color="muted">
                     {error || ERROR_STATE.subheading}
                   </Typography>
-                </Box>
+                </div>
               ) : (
                 <>
-                  <CircularProgress size={32} />
-                  <Typography variant="body1">Launching support chat…</Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Spinner className="size-8" />
+                  <Typography variant="paragraph">Launching support chat…</Typography>
+                  <Typography variant="paragraph-small" color="muted">
                     Please wait while we connect you to Safe Support.
                   </Typography>
                 </>
               )}
-            </Box>
+            </div>
           )}
 
           {chatUrl && (
@@ -340,8 +292,8 @@ function SupportChatDrawer({ open, onClose, config, user }: SupportChatDrawerPro
               }}
             />
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
     </>
   )
 }

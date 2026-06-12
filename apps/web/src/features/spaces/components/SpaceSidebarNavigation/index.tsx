@@ -1,6 +1,5 @@
 import React, { type ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import { ListItemButton } from '@mui/material'
 
 import {
   SidebarList,
@@ -33,19 +32,18 @@ const Navigation = (): ReactElement => {
 
         return (
           <div key={item.label}>
-            <ListItemButton disabled={item.disabled} sx={{ padding: 0 }} selected={isSelected}>
-              <SidebarListItemButton
-                selected={isSelected}
-                href={item.href ? { pathname: item.href, query: { spaceId } } : ''}
-              >
-                {item.icon && <SidebarListItemIcon>{item.icon}</SidebarListItemIcon>}
+            <SidebarListItemButton
+              disabled={item.disabled}
+              selected={isSelected}
+              href={item.href ? { pathname: item.href, query: { spaceId } } : ''}
+            >
+              {item.icon && <SidebarListItemIcon>{item.icon}</SidebarListItemIcon>}
 
-                <SidebarListItemText data-testid="sidebar-list-item" bold>
-                  {item.label}
-                  {item.tag}
-                </SidebarListItemText>
-              </SidebarListItemButton>
-            </ListItemButton>
+              <SidebarListItemText data-testid="sidebar-list-item" bold>
+                {item.label}
+                {item.tag}
+              </SidebarListItemText>
+            </SidebarListItemButton>
           </div>
         )
       })}

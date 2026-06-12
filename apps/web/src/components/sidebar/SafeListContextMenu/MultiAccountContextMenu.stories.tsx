@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper, Box } from '@mui/material'
 import MultiAccountContextMenu from './MultiAccountContextMenu'
 
 const MOCK_SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
@@ -12,12 +11,12 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <Paper sx={{ padding: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+      <div className="p-4">
+        <div className="flex items-center gap-4">
           <span>My Safe Account</span>
           <Story />
-        </Box>
-      </Paper>
+        </div>
+      </div>
     ),
   ],
   tags: ['autodocs'],

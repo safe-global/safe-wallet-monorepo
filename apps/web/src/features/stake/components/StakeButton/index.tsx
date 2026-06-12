@@ -2,7 +2,8 @@ import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import { useSpendingLimit } from '@/features/spending-limits'
-import { Button, IconButton, Tooltip, SvgIcon } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
@@ -51,33 +52,33 @@ const StakeButton = ({
           }}
         >
           {onlyIcon ? (
-            <Tooltip title={isOk ? 'Stake' : ''} placement="top" arrow>
-              <span>
-                <IconButton
+            <Tooltip>
+              <TooltipTrigger render={<span className="inline-flex" />}>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   data-testid="stake-btn"
                   aria-label="Stake"
                   onClick={handleClick}
                   disabled={!isOk}
-                  size="small"
                   className={assetActionCss.assetActionIconButton}
                 >
-                  <SvgIcon component={StakeIcon} inheritViewBox />
-                </IconButton>
-              </span>
+                  <StakeIcon className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              {isOk && <TooltipContent>Stake</TooltipContent>}
             </Tooltip>
           ) : (
             <Button
-              className={classnames({ [css.button]: compact, [css.buttonDisabled]: !isOk })}
+              className={classnames(compact ? css.button : 'bg-card', { [css.buttonDisabled]: !isOk })}
               data-testid="stake-btn"
               aria-label="Stake"
-              variant={compact ? 'text' : 'contained'}
-              color={compact ? 'info' : 'background.paper'}
-              size="small"
-              disableElevation
-              startIcon={<StakeIcon />}
+              variant={compact ? 'ghost' : 'outline'}
+              size="sm"
               onClick={handleClick}
               disabled={!isOk}
             >
+              <StakeIcon className="size-4" />
               Stake
             </Button>
           )}

@@ -1,7 +1,6 @@
 import { SettingsInfoType } from '@safe-global/store/gateway/types'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import { ownerAddress, txInfo } from './mockData'
@@ -17,9 +16,9 @@ const meta = {
       return (
         <StoreDecorator initialState={{}}>
           <RouterDecorator>
-            <Paper sx={{ padding: 2 }}>
+            <div className="rounded-lg bg-background p-4">
               <Story />
-            </Paper>
+            </div>
           </RouterDecorator>
         </StoreDecorator>
       )

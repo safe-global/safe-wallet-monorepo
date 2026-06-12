@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
-import { Box, Skeleton } from '@mui/material'
 import { motion } from 'framer-motion'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import PanelHeader from './PanelHeader'
 import SecurityChecksSection from './SecurityChecksSection'
@@ -13,8 +13,6 @@ type SecurityPanelViewProps = {
   safeQueryParam?: string
   onRemoveModule?: (address: string) => void
 }
-
-const MotionBox = motion.create(Box)
 
 /**
  * Top-level layout for the per-Safe security panel. Composes the three
@@ -33,30 +31,30 @@ const SecurityPanelView = ({
 
   if (!scanContext || (!hasResults && !isComplete)) {
     return (
-      <Box>
-        <Skeleton variant="rectangular" height={120} sx={{ borderRadius: '12px', mb: 3 }} />
-        <Skeleton variant="rectangular" height={200} sx={{ borderRadius: '12px', mb: 3 }} />
-        <Skeleton variant="rectangular" height={150} sx={{ borderRadius: '12px' }} />
-      </Box>
+      <div>
+        <Skeleton className="mb-6 h-[120px] rounded-xl" />
+        <Skeleton className="mb-6 h-[200px] rounded-xl" />
+        <Skeleton className="h-[150px] rounded-xl" />
+      </div>
     )
   }
 
   return (
-    <Box>
-      <MotionBox
+    <div>
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
       >
         <PanelHeader results={results} isComplete={isComplete} />
-      </MotionBox>
+      </motion.div>
       <SecurityChecksSection
         scanContext={scanContext}
         results={results}
         safeQueryParam={safeQueryParam}
         onRemoveModule={onRemoveModule}
       />
-    </Box>
+    </div>
   )
 }
 

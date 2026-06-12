@@ -1,8 +1,8 @@
 import { type ReactElement, useContext, useMemo, useCallback, useState, Suspense } from 'react'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
-import { Skeleton } from '@mui/material'
 import { Settings } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { DashboardHeader } from '@/features/spaces/components/Dashboard/DashboardHeader'
 import { TxModalContext } from '@/components/tx-flow'
@@ -102,10 +102,10 @@ const SafeAccountHeaderSkeleton = (): ReactElement => {
   return (
     <div className="mb-10 flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <Skeleton variant="rounded" width={80} height={16} />
-        <Skeleton variant="rounded" width={200} height={30} />
+        <Skeleton className="h-[16px] w-[80px]" />
+        <Skeleton className="h-[30px] w-[200px]" />
       </div>
-      <Skeleton variant="rounded" width={500} height={36} />
+      <Skeleton className="h-[36px] w-[500px]" />
     </div>
   )
 }

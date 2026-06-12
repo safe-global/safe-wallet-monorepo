@@ -1,5 +1,4 @@
 import { type ReactElement, useMemo } from 'react'
-import { Card, Box, Stack } from '@mui/material'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
@@ -26,24 +25,20 @@ const Overview = (): ReactElement => {
   if (isLoading) return <OverviewSkeleton />
 
   return (
-    <Card sx={{ border: 0, px: 3, pt: 2.5, borderRadius: '24px', pb: 1.5 }} component="section">
+    <section className="overflow-hidden rounded-3xl bg-[var(--color-background-paper)] px-6 pb-3 pt-5">
       {!portfolio.$isDisabled && (
-        <Box display="flex" justifyContent="flex-end" mb={-3}>
+        <div className="-mb-6 flex justify-end">
           <portfolio.PortfolioRefreshHint entryPoint="Dashboard" />
-        </Box>
+        </div>
       )}
-      <Box>
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          alignItems={{ xs: 'flex-start', md: 'flex-end' }}
-          justifyContent="space-between"
-        >
+      <div>
+        <div className="flex flex-col items-start justify-between md:flex-row md:items-end">
           <TotalAssetValue fiatTotal={balances.fiatTotal} size="lg" title="Total balance" />
 
           {safe.deployed && <ActionsTray noAssets={noAssets} />}
-        </Stack>
-      </Box>
-    </Card>
+        </div>
+      </div>
+    </section>
   )
 }
 

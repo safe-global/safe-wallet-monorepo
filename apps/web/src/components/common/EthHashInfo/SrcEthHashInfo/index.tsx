@@ -1,11 +1,10 @@
 import classnames from 'classnames'
 import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
 import { isAddress } from 'ethers'
-import { useTheme } from '@mui/material/styles'
-import { Box, SvgIcon, Tooltip } from '@mui/material'
+import { Cloud } from 'lucide-react'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
-import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined'
-import useMediaQuery from '@mui/material/useMediaQuery'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import Identicon from '../../Identicon'
 import CopyAddressButton from '../../CopyAddressButton'
 import ExplorerButton, { type ExplorerButtonProps } from '../../ExplorerButton'
@@ -61,8 +60,7 @@ const SrcEthHashInfo = ({
   badgeTooltip,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useIsMobile()
   const identicon = <Identicon address={address} size={avatarSize} />
   const shouldCopyPrefix = shouldPrefix && copyPrefix
 
@@ -108,46 +106,33 @@ const SrcEthHashInfo = ({
         </div>
       )}
 
-      <Box overflow="hidden" className={onlyName ? css.inline : undefined} gap={0.5}>
+      <div className={classnames('gap-1 overflow-hidden', { [css.inline]: onlyName })}>
         {!!name ? (
-          <Box
-            title={name}
-            className="ethHashInfo-name"
-            display="flex"
-            alignItems="center"
-            gap={0.5}
-            sx={accountStylesWithBadge}
-          >
-            <Box overflow="hidden" textOverflow="ellipsis">
-              {name}
-            </Box>
+          <div title={name} className="ethHashInfo-name flex items-center gap-1" style={accountStylesWithBadge}>
+            <div className="overflow-hidden text-ellipsis">{name}</div>
 
             {badgeTooltip
               ? badgeTooltip
               : !!addressBookNameSource && (
-                  <Tooltip title={`From your ${addressBookNameSource} address book`} placement="top">
-                    <span style={{ lineHeight: 0 }}>
-                      <SvgIcon
-                        component={addressBookNameSource === ContactSource.local ? AddressBookIcon : CloudOutlinedIcon}
-                        inheritViewBox
-                        color="border"
-                        fontSize="small"
-                      />
-                    </span>
+                  <Tooltip>
+                    <TooltipTrigger render={<span style={{ lineHeight: 0 }} />}>
+                      {addressBookNameSource === ContactSource.local ? (
+                        <AddressBookIcon className="size-5 text-border" />
+                      ) : (
+                        <Cloud className="size-5 text-border" />
+                      )}
+                    </TooltipTrigger>
+                    <TooltipContent>From your {addressBookNameSource} address book</TooltipContent>
                   </Tooltip>
                 )}
-          </Box>
+          </div>
         ) : (
-          badgeTooltip && (
-            <Box display="flex" alignItems="center" gap={0.5}>
-              {badgeTooltip}
-            </Box>
-          )
+          badgeTooltip && <div className="flex items-center gap-1">{badgeTooltip}</div>
         )}
 
         <div className={classnames(css.addressContainer, { [css.inline]: onlyName })}>
           {(!onlyName || !name) && (
-            <Box fontWeight="inherit" fontSize="inherit" overflow="hidden" textOverflow="ellipsis">
+            <div className="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]">
               {copyAddress ? (
                 <CopyAddressButton prefix={prefix} address={address} copyPrefix={shouldCopyPrefix} trusted={trusted}>
                   {addressElement}
@@ -155,7 +140,7 @@ const SrcEthHashInfo = ({
               ) : (
                 addressElement
               )}
-            </Box>
+            </div>
           )}
 
           {showCopyButton && (
@@ -163,14 +148,14 @@ const SrcEthHashInfo = ({
           )}
 
           {hasExplorer && ExplorerButtonProps && (
-            <Box color="border.main">
+            <div className="text-border">
               <ExplorerButton {...ExplorerButtonProps} onClick={stopPropagation} />
-            </Box>
+            </div>
           )}
 
           {children}
         </div>
-      </Box>
+      </div>
     </div>
   )
 }

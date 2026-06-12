@@ -1,7 +1,9 @@
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Button, Card, Divider, Grid, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
 import { useContext } from 'react'
 import type { ReactElement } from 'react'
 
@@ -51,7 +53,7 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
   const desc = 'Your connected wallet can help you regain access by adding a new signer.'
 
   const recoveryButton = (
-    <Button data-testid="start-recovery" variant="contained" onClick={handleRecoverWithTracking} className={css.button}>
+    <Button data-testid="start-recovery" variant="default" onClick={handleRecoverWithTracking} className={css.button}>
       Start recovery
     </Button>
   )
@@ -76,76 +78,44 @@ export function InternalRecoveryProposalCard({ orientation = 'vertical', onClose
   }
 
   return (
-    <Card data-testid="recovery-proposal" elevation={0} className={css.card}>
-      <Grid
-        container
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 4,
-        }}
-      >
-        <Grid
-          item
-          xs={12}
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
+    <div
+      data-testid="recovery-proposal"
+      className={[css.card, 'flex flex-col gap-8 rounded-lg bg-[var(--color-background-paper)]'].join(' ')}
+    >
+      <div className="flex justify-between">
+        {icon}
+
+        <Track {...RECOVERY_EVENTS.LEARN_MORE} label="proposal-card">
+          <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
+            Learn more
+          </ExternalLink>
+        </Track>
+      </div>
+
+      <div>
+        <Typography variant="h4" className="mb-4">
+          {title}
+        </Typography>
+
+        <Typography className="mb-4 text-[var(--color-primary-light)]">{desc}</Typography>
+      </div>
+
+      <Separator className="mx-[calc(-1*var(--space-4))]" />
+
+      <div className="flex justify-end gap-0 md:gap-2">
+        <Button
+          variant="ghost"
+          data-testid="postpone-recovery-btn"
+          onClick={() => {
+            trackEvent(RECOVERY_EVENTS.DISMISS_PROPOSAL_CARD)
+            onClose?.()
           }}
         >
-          {icon}
-
-          <Track {...RECOVERY_EVENTS.LEARN_MORE} label="proposal-card">
-            <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
-              Learn more
-            </ExternalLink>
-          </Track>
-        </Grid>
-
-        <Grid item xs={12}>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              mb: 2,
-            }}
-          >
-            {title}
-          </Typography>
-
-          <Typography
-            sx={{
-              color: 'primary.light',
-              mb: 2,
-            }}
-          >
-            {desc}
-          </Typography>
-        </Grid>
-
-        <Divider flexItem sx={{ mx: -4 }} />
-
-        <Grid
-          item
-          container
-          sx={{
-            justifyContent: 'flex-end',
-            gap: { md: 1 },
-          }}
-        >
-          <Button
-            data-testid="postpone-recovery-btn"
-            onClick={() => {
-              trackEvent(RECOVERY_EVENTS.DISMISS_PROPOSAL_CARD)
-              onClose?.()
-            }}
-          >
-            I&apos;ll do it later
-          </Button>
-          {recoveryButton}
-        </Grid>
-      </Grid>
-    </Card>
+          I&apos;ll do it later
+        </Button>
+        {recoveryButton}
+      </div>
+    </div>
   )
 }
 

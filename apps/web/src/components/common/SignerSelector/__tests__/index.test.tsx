@@ -1,4 +1,4 @@
-import { render, fireEvent } from '@/tests/test-utils'
+import { render, renderWithUserEvent } from '@/tests/test-utils'
 import SignerSelector from '..'
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
@@ -29,23 +29,25 @@ describe('SignerSelector', () => {
     expect(result.getByLabelText('Signer account')).toBeInTheDocument()
   })
 
-  it('should call onChange when a different option is selected', () => {
+  it('should call onChange when a different option is selected', async () => {
     const onChange = jest.fn()
-    const result = render(<SignerSelector options={[address1, address2]} value={address1} onChange={onChange} />)
+    const result = renderWithUserEvent(
+      <SignerSelector options={[address1, address2]} value={address1} onChange={onChange} />,
+    )
 
     // Open the select dropdown
-    const select = result.container.querySelector('[role="combobox"]')!
-    fireEvent.mouseDown(select)
+    const select = result.getByRole('combobox')
+    await result.user.click(select)
 
     // Click the second option
-    const options = result.getAllByRole('option')
-    fireEvent.click(options[1])
+    const options = await result.findAllByRole('option')
+    await result.user.click(options[1])
 
     expect(onChange).toHaveBeenCalledWith(address2)
   })
 
-  it('should show disabled pill for disabled options', () => {
-    const result = render(
+  it('should show disabled pill for disabled options', async () => {
+    const result = renderWithUserEvent(
       <SignerSelector
         options={[address1, address2]}
         value={address1}
@@ -56,24 +58,24 @@ describe('SignerSelector', () => {
     )
 
     // Open the select
-    const select = result.container.querySelector('[role="combobox"]')!
-    fireEvent.mouseDown(select)
+    const select = result.getByRole('combobox')
+    await result.user.click(select)
 
     // The disabled option should be present
-    const options = result.getAllByRole('option')
+    const options = await result.findAllByRole('option')
     expect(options[1]).toHaveAttribute('aria-disabled', 'true')
   })
 
-  it('should render all three options', () => {
-    const result = render(
+  it('should render all three options', async () => {
+    const result = renderWithUserEvent(
       <SignerSelector options={[address1, address2, address3]} value={address1} onChange={jest.fn()} />,
     )
 
     // Open the select
-    const select = result.container.querySelector('[role="combobox"]')!
-    fireEvent.mouseDown(select)
+    const select = result.getByRole('combobox')
+    await result.user.click(select)
 
-    const options = result.getAllByRole('option')
+    const options = await result.findAllByRole('option')
     expect(options).toHaveLength(3)
   })
 })

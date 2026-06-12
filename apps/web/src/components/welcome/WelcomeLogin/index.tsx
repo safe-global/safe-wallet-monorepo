@@ -1,5 +1,8 @@
 import { AppRoutes } from '@/config/routes'
-import { Paper, Typography, Divider, Box, Link, Button } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
+import { Link } from '@/components/ui/link'
+import { Button } from '@/components/ui/button'
 import css from './styles.module.css'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -20,19 +23,19 @@ const WelcomeLogin = () => {
   })
 
   return (
-    <Paper className={css.loginCard} data-testid="welcome-login" style={{ background: '#fff' }}>
-      <Box className={css.loginContent}>
-        <Typography variant="h2" mt={6} fontWeight={700}>
+    <div className={css.loginCard} data-testid="welcome-login" style={{ background: '#fff' }}>
+      <div className={css.loginContent}>
+        <Typography variant="h2" className="mt-12">
           Get started
         </Typography>
 
-        <Typography mb={2} textAlign="center" className={css.loginDescription}>
+        <Typography align="center" className={`mb-4 ${css.loginDescription}`}>
           {wallet
             ? 'Open your existing Safe Accounts or create a new one'
             : 'Connect your wallet to create a Safe Account or watch an existing one'}
         </Typography>
 
-        <Box className={css.fullWidth}>
+        <div className={css.fullWidth}>
           <Track {...OVERVIEW_EVENTS.OPEN_ONBOARD} label={OVERVIEW_LABELS.welcome_page}>
             <WalletLogin
               onLogin={performAuth}
@@ -42,25 +45,25 @@ const WelcomeLogin = () => {
               buttonStyle="walletBtnStatic"
             />
           </Track>
-        </Box>
+        </div>
 
         {!wallet && (
           <>
-            <Divider sx={{ mt: 2, mb: 2, width: '100%' }} className={css.orDivider}>
-              <Typography color="text.secondary" fontWeight={700} variant="overline">
+            <div className="my-4 flex w-full items-center gap-4">
+              <Separator className="flex-1" />
+              <Typography variant="paragraph-mini-bold" color="muted" className="uppercase tracking-wider">
                 or
               </Typography>
-            </Divider>
+              <Separator className="flex-1" />
+            </div>
 
             <Link href={AppRoutes.newSafe.load} className={css.watchViewAccountLink}>
-              <Button disableElevation size="small">
-                Watch any account
-              </Button>
+              <Button size="sm">Watch any account</Button>
             </Link>
           </>
         )}
-      </Box>
-    </Paper>
+      </div>
+    </div>
   )
 }
 

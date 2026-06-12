@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import SpendingLimitLabel from './index'
 
 const meta = {
@@ -29,7 +29,7 @@ export const OneTime: Story = {
 export const WithCustomLabel: Story = {
   args: {
     label: (
-      <Typography color="primary" fontWeight="bold">
+      <Typography variant="paragraph-bold" className="text-primary">
         Custom spending limit
       </Typography>
     ),

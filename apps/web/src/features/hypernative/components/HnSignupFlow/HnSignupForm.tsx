@@ -1,4 +1,4 @@
-import { Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import HubSpotForm from '@/features/hypernative/components/HubSpotForm/HubSpotForm'
 import HnSignupLayout from './HnSignupLayout'
 import css from './styles.module.css'
@@ -18,7 +18,7 @@ const HnSignupForm = ({ portalId, formId, region = 'eu1', onCancel, onSubmit }: 
         <HubSpotForm portalId={portalId} formId={formId} region={region} onSubmit={onSubmit} />
         {onCancel && (
           <div className={css.cancelButtonWrapper}>
-            <Button variant="text" onClick={onCancel} className={css.cancelButton}>
+            <Button variant="ghost" onClick={onCancel} className={css.cancelButton}>
               Cancel
             </Button>
           </div>

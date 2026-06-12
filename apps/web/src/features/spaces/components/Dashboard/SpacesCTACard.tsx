@@ -1,6 +1,7 @@
 import css from './styles.module.css'
 import LightbulbIcon from '@/public/images/common/lightbulb.svg'
-import { Typography, Paper, Box, Button, SvgIcon } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
 import SpaceInfoModal from '../SpaceInfoModal'
 import { useState } from 'react'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
@@ -16,35 +17,31 @@ const SpacesCTACard = () => {
 
   return (
     <>
-      <Paper sx={{ p: 3, borderRadius: '24px', height: '100%' }}>
-        <Box position="relative" width={1}>
-          <Box className={css.iconBG}>
-            <SvgIcon component={LightbulbIcon} inheritViewBox />
-          </Box>
+      <div className="h-full rounded-3xl bg-card p-6">
+        <div className="relative w-full">
+          <div className={css.iconBG}>
+            <LightbulbIcon />
+          </div>
 
           <Button
             onClick={handleLearnMore}
-            variant="outlined"
-            size="medium"
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-            }}
+            variant="outline"
+            size="lg"
+            className="absolute right-0 top-0"
             aria-label="Invite team members"
           >
             Learn more
           </Button>
-        </Box>
-        <Box>
-          <Typography variant="body1" color="text.primary" fontWeight={700} mb={1}>
+        </div>
+        <div>
+          <Typography variant="paragraph-bold" className="mb-2 text-foreground">
             Explore spaces
           </Typography>
-          <Typography variant="body2" color="primary.light">
+          <Typography variant="paragraph-small" color="muted">
             Seamlessly use your Safe Accounts from one place and collaborate with your team members.
           </Typography>
-        </Box>
-      </Paper>
+        </div>
+      </div>
       {isInfoOpen && <SpaceInfoModal showButtons={false} onClose={() => setIsInfoOpen(false)} />}
     </>
   )

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box, Paper, Typography, Button, Chip, LinearProgress } from '@mui/material'
-import MessageIcon from '@mui/icons-material/Message'
-import DataObjectIcon from '@mui/icons-material/DataObject'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
+import { Mail, Braces, CircleCheck, Hourglass } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Chip } from '@/components/ui/chip'
+import { Progress } from '@/components/ui/progress'
 
 /**
  * Safe Messages components handle off-chain message signing for Safe accounts.
@@ -25,10 +25,10 @@ export default meta
 
 // Mock message type component
 const MockMsgType = ({ isTypedData = false }: { isTypedData?: boolean }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-    {isTypedData ? <DataObjectIcon fontSize="small" /> : <MessageIcon fontSize="small" />}
-    <Typography variant="body2">{isTypedData ? 'Typed Data (EIP-712)' : 'Personal Message'}</Typography>
-  </Box>
+  <div className="flex items-center gap-2">
+    {isTypedData ? <Braces className="size-5" /> : <Mail className="size-5" />}
+    <Typography variant="paragraph-small">{isTypedData ? 'Typed data (EIP-712)' : 'Personal message'}</Typography>
+  </div>
 )
 
 // Mock message summary row
@@ -45,37 +45,27 @@ const MockMsgSummary = ({
   required: number
   isConfirmed?: boolean
 }) => (
-  <Box
-    sx={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      p: 2,
-      borderBottom: 1,
-      borderColor: 'divider',
-      '&:hover': { bgcolor: 'action.hover' },
-    }}
-  >
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+  <div className="flex items-center justify-between border-b border-border p-4 hover:bg-muted">
+    <div className="flex items-center gap-4">
       <MockMsgType isTypedData={isTypedData} />
-      <Typography variant="body2" sx={{ maxWidth: 300 }} noWrap>
+      <Typography variant="paragraph-small" className="max-w-[300px] truncate">
         {message}
       </Typography>
-    </Box>
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+    </div>
+    <div className="flex items-center gap-4">
       <Chip
-        size="small"
-        label={`${confirmations}/${required}`}
-        color={isConfirmed ? 'success' : 'warning'}
-        icon={isConfirmed ? <CheckCircleIcon /> : <HourglassEmptyIcon />}
-      />
-      {!isConfirmed && (
-        <Button variant="contained" size="small">
-          Sign
-        </Button>
-      )}
-    </Box>
-  </Box>
+        className={
+          isConfirmed
+            ? 'bg-[var(--color-success-light)] text-[var(--color-success-dark)]'
+            : 'bg-[var(--color-warning-light)] text-[var(--color-warning-dark)]'
+        }
+      >
+        {isConfirmed ? <CircleCheck className="size-3" /> : <Hourglass className="size-3" />}
+        {`${confirmations}/${required}`}
+      </Chip>
+      {!isConfirmed && <Button size="sm">Sign</Button>}
+    </div>
+  </div>
 )
 
 // Mock signers component
@@ -86,62 +76,51 @@ const MockMsgSigners = ({
   signers: { address: string; hasSigned: boolean }[]
   confirmations: number
 }) => (
-  <Box>
-    <Typography variant="subtitle2" gutterBottom>
+  <div>
+    <Typography variant="paragraph-small-medium" as="div" className="mb-2">
       Confirmations ({confirmations}/{signers.length} required)
     </Typography>
-    <LinearProgress
-      variant="determinate"
-      value={(confirmations / signers.length) * 100}
-      sx={{ mb: 2, height: 8, borderRadius: 1 }}
-    />
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+    <Progress value={(confirmations / signers.length) * 100} className="mb-4" />
+    <div className="flex flex-col gap-2">
       {signers.map((signer, i) => (
-        <Box
+        <div
           key={i}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            p: 1,
-            border: 1,
-            borderColor: 'divider',
-            borderRadius: 1,
-            bgcolor: signer.hasSigned ? 'success.light' : 'transparent',
-          }}
+          className={`flex items-center justify-between rounded border border-border p-2 ${
+            signer.hasSigned ? 'bg-[var(--color-success-light)]' : 'bg-transparent'
+          }`}
         >
-          <Typography variant="body2" fontFamily="monospace">
+          <Typography variant="paragraph-small" className="font-mono">
             {signer.address.slice(0, 10)}...{signer.address.slice(-8)}
           </Typography>
           {signer.hasSigned ? (
-            <CheckCircleIcon color="success" fontSize="small" />
+            <CircleCheck className="size-5 text-[var(--color-success-main)]" />
           ) : (
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="paragraph-mini" color="muted">
               Pending
             </Typography>
           )}
-        </Box>
+        </div>
       ))}
-    </Box>
-  </Box>
+    </div>
+  </div>
 )
 
 // Stories - FULL PAGE FIRST
 
 export const FullMessagePage: StoryObj = {
   render: () => (
-    <Box sx={{ maxWidth: 900 }}>
-      <Typography variant="h4" gutterBottom>
+    <div className="max-w-[900px]">
+      <Typography variant="h4" className="mb-2">
         Messages
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" as="div" className="mb-6">
         View and sign off-chain messages for your Safe account.
       </Typography>
 
-      <Paper sx={{ mb: 2 }}>
-        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Typography variant="subtitle1">Pending Messages</Typography>
-        </Box>
+      <div className="mb-4 rounded bg-card">
+        <div className="border-b border-border p-4">
+          <Typography variant="paragraph-medium">Pending messages</Typography>
+        </div>
         <MockMsgSummary message="Hello, Safe!" confirmations={1} required={2} />
         <MockMsgSummary
           message='{"types":{"Permit":[...]},"domain":{...}}'
@@ -149,15 +128,15 @@ export const FullMessagePage: StoryObj = {
           confirmations={0}
           required={2}
         />
-      </Paper>
+      </div>
 
-      <Paper>
-        <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Typography variant="subtitle1">Signed Messages</Typography>
-        </Box>
+      <div className="rounded bg-card">
+        <div className="border-b border-border p-4">
+          <Typography variant="paragraph-medium">Signed messages</Typography>
+        </div>
         <MockMsgSummary message="Contract agreement signed" confirmations={2} required={2} isConfirmed />
-      </Paper>
-    </Box>
+      </div>
+    </div>
   ),
   parameters: {
     layout: 'padded',
@@ -171,20 +150,20 @@ export const FullMessagePage: StoryObj = {
 
 export const MessageType: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Box>
-        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
-          Personal Message
+    <div className="flex flex-col gap-6 rounded bg-card p-6">
+      <div>
+        <Typography variant="paragraph-mini" color="muted" as="div" className="mb-2">
+          Personal message
         </Typography>
         <MockMsgType />
-      </Box>
-      <Box>
-        <Typography variant="caption" color="text.secondary" display="block" mb={1}>
-          Typed Data (EIP-712)
+      </div>
+      <div>
+        <Typography variant="paragraph-mini" color="muted" as="div" className="mb-2">
+          Typed data (EIP-712)
         </Typography>
         <MockMsgType isTypedData />
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -197,14 +176,14 @@ export const MessageType: StoryObj = {
 
 export const MessageSummary: StoryObj = {
   render: () => (
-    <Paper sx={{ maxWidth: 800 }}>
-      <Typography variant="subtitle2" sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-        Message Queue
+    <div className="max-w-[800px] rounded bg-card">
+      <Typography variant="paragraph-small-medium" as="div" className="border-b border-border p-4">
+        Message queue
       </Typography>
       <MockMsgSummary message="Hello, Safe!" confirmations={1} required={2} />
       <MockMsgSummary message='{"types":{"Permit":[...]},"domain":{...}}' isTypedData confirmations={1} required={2} />
       <MockMsgSummary message="Signed agreement for contract XYZ" confirmations={2} required={2} isConfirmed />
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -217,7 +196,7 @@ export const MessageSummary: StoryObj = {
 
 export const MessageSigners: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 400 }}>
+    <div className="max-w-sm rounded bg-card p-6">
       <MockMsgSigners
         confirmations={1}
         signers={[
@@ -225,7 +204,7 @@ export const MessageSigners: StoryObj = {
           { address: '0xABCDEF0123456789ABCDEF0123456789ABCDEF01', hasSigned: false },
         ]}
       />
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -238,22 +217,20 @@ export const MessageSigners: StoryObj = {
 
 export const SignButton: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, display: 'flex', gap: 2 }}>
-      <Box>
-        <Typography variant="caption" display="block" mb={1}>
-          Full Button
+    <div className="flex gap-4 rounded bg-card p-6">
+      <div>
+        <Typography variant="paragraph-mini" as="div" className="mb-2">
+          Full button
         </Typography>
-        <Button variant="contained">Sign Message</Button>
-      </Box>
-      <Box>
-        <Typography variant="caption" display="block" mb={1}>
-          Compact Button
+        <Button>Sign message</Button>
+      </div>
+      <div>
+        <Typography variant="paragraph-mini" as="div" className="mb-2">
+          Compact button
         </Typography>
-        <Button variant="contained" size="small">
-          Sign
-        </Button>
-      </Box>
-    </Paper>
+        <Button size="sm">Sign</Button>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -266,16 +243,16 @@ export const SignButton: StoryObj = {
 
 export const MessageInfoBox: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <Box sx={{ p: 2, bgcolor: 'info.light', borderRadius: 1, border: 1, borderColor: 'info.main' }}>
-        <Typography variant="subtitle2" fontWeight="bold" gutterBottom>
-          Message Signing
+    <div className="max-w-md rounded bg-card p-6">
+      <div className="rounded border border-[var(--color-info-main)] bg-[var(--color-info-light)] p-4">
+        <Typography variant="paragraph-small-bold" as="div" className="mb-2">
+          Message signing
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="paragraph-small" color="muted">
           This is an off-chain message that will be signed by your Safe. No transaction will be executed.
         </Typography>
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -288,28 +265,28 @@ export const MessageInfoBox: StoryObj = {
 
 export const DecodedMessage: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 600 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Personal Message
+    <div className="max-w-xl rounded bg-card p-6">
+      <Typography variant="paragraph-small-medium" as="div" className="mb-2">
+        Personal message
       </Typography>
-      <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1, mb: 3 }}>
-        <Typography variant="body2" fontFamily="monospace">
+      <div className="mb-6 rounded bg-background p-4">
+        <Typography variant="paragraph-small" className="font-mono">
           Hello, this is a test message!
         </Typography>
-      </Box>
+      </div>
 
-      <Typography variant="subtitle2" gutterBottom>
-        Typed Data (EIP-712)
+      <Typography variant="paragraph-small-medium" as="div" className="mb-2">
+        Typed data (EIP-712)
       </Typography>
-      <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
-        <Typography variant="caption" color="text.secondary" display="block">
+      <div className="rounded bg-background p-4">
+        <Typography variant="paragraph-mini" color="muted" as="div">
           Domain: USD Coin
         </Typography>
-        <Typography variant="caption" color="text.secondary" display="block">
-          Primary Type: Permit
+        <Typography variant="paragraph-mini" color="muted" as="div">
+          Primary type: Permit
         </Typography>
-        <Box sx={{ mt: 1 }}>
-          <pre style={{ margin: 0, fontSize: '12px', overflow: 'auto' }}>
+        <div className="mt-2">
+          <pre className="m-0 overflow-auto text-xs">
             {JSON.stringify(
               {
                 owner: '0x1234...5678',
@@ -321,9 +298,9 @@ export const DecodedMessage: StoryObj = {
               2,
             )}
           </pre>
-        </Box>
-      </Box>
-    </Paper>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {

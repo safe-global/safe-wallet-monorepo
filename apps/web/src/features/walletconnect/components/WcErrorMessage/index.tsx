@@ -1,5 +1,6 @@
 import { splitError } from '../../services/utils'
-import { Button, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import WcLogoHeader from '../WcLogoHeader'
 import css from './styles.module.css'
 
@@ -11,13 +12,9 @@ const WcErrorMessage = ({ error, onClose }: { error: Error; onClose: () => void 
     <div className={css.errorContainer}>
       <WcLogoHeader errorMessage={summary} />
 
-      {details && (
-        <Typography mt={1} className={css.details}>
-          {details}
-        </Typography>
-      )}
+      {details && <Typography className={`mt-1 ${css.details}`}>{details}</Typography>}
 
-      <Button variant="contained" onClick={onClose} className={css.button}>
+      <Button variant="default" onClick={onClose} className={css.button}>
         OK
       </Button>
     </div>

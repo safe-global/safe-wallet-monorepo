@@ -1,5 +1,4 @@
-import { Close } from '@mui/icons-material'
-import { Dialog, DialogContent, IconButton, Box } from '@mui/material'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { type ReactNode } from 'react'
 
 export type HnModalProps = {
@@ -12,36 +11,13 @@ const HnModal = ({ open, onClose, children }: HnModalProps) => {
   return (
     <Dialog
       open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="md"
-      PaperProps={{
-        sx: {
-          borderRadius: '16px',
-          backgroundColor: 'var(--color-background-paper)',
-          backgroundImage: 'none',
-        },
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onClose()
       }}
     >
-      <Box
-        position="absolute"
-        top={16}
-        zIndex={1}
-        sx={{
-          right: 16,
-        }}
-      >
-        <IconButton
-          aria-label="close"
-          onClick={onClose}
-          sx={{
-            color: ['var(--color-static-text-secondary)', 'var(--color-static-primary)'],
-          }}
-        >
-          <Close />
-        </IconButton>
-      </Box>
-      <DialogContent sx={{ padding: 0, overflow: 'auto' }}>{children}</DialogContent>
+      <DialogContent className="max-w-[900px] overflow-auto rounded-2xl bg-[var(--color-background-paper)] p-0">
+        {children}
+      </DialogContent>
     </Dialog>
   )
 }

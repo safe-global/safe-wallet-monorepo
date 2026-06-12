@@ -1,10 +1,9 @@
 import { type ReactElement } from 'react'
-import { SvgIcon } from '@mui/material'
 
 import { HypernativeTooltip } from '@/features/hypernative/components/HypernativeTooltip'
 import SafeShieldIconSvg from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 
-import { safeShieldSvgStyles } from './styles'
+import { safeShieldSvgClassName } from './styles'
 
 /**
  * SafeHeaderHnTooltip component
@@ -13,8 +12,8 @@ import { safeShieldSvgStyles } from './styles'
  */
 export const SafeHeaderHnTooltip = (): ReactElement | null => {
   return (
-    <HypernativeTooltip placement="right">
-      <SvgIcon component={SafeShieldIconSvg} inheritViewBox sx={safeShieldSvgStyles} />
+    <HypernativeTooltip side="right">
+      <SafeShieldIconSvg className={safeShieldSvgClassName} />
     </HypernativeTooltip>
   )
 }

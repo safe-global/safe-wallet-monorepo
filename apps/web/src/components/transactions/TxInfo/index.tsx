@@ -29,7 +29,6 @@ import {
 import { ellipsis, maybePlural, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useCurrentChain } from '@/hooks/useChains'
 import { StakingTxDepositInfo, StakingTxExitInfo, StakingTxWithdrawInfo } from './Staking'
-import { Box } from '@mui/material'
 import css from './styles.module.css'
 import { VaultDepositTxInfo, VaultRedeemTxInfo } from '@/features/earn'
 import { SwapTx } from './SwapTx'
@@ -100,18 +99,18 @@ export const TransferTx = ({
 }
 
 const CustomTx = ({ info }: { info: CustomTransactionInfo }): ReactElement => {
-  return <Box className={css.txInfo}>{info.methodName}</Box>
+  return <div className={css.txInfo}>{info.methodName}</div>
 }
 
 const CreationTx = ({ info }: { info: CreationTransactionInfo }): ReactElement => {
-  return <Box className={css.txInfo}>Created by {shortenAddress(info.creator.value)}</Box>
+  return <div className={css.txInfo}>Created by {shortenAddress(info.creator.value)}</div>
 }
 
 const MultiSendTx = ({ info }: { info: MultiSendTransactionInfo }): ReactElement => {
   return (
-    <Box className={css.txInfo}>
+    <div className={css.txInfo}>
       {info.actionCount} {`action${maybePlural(info.actionCount)}`}
-    </Box>
+    </div>
   )
 }
 
@@ -120,7 +119,7 @@ const SettingsChangeTx = ({ info }: { info: SettingsChangeTransaction }): ReactE
     info.settingsInfo?.type === SettingsInfoType.ENABLE_MODULE ||
     info.settingsInfo?.type === SettingsInfoType.DISABLE_MODULE
   ) {
-    return <Box className={css.txInfo}>{info.settingsInfo.module.name}</Box>
+    return <div className={css.txInfo}>{info.settingsInfo.module.name}</div>
   }
   return <></>
 }

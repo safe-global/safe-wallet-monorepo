@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { IconButton } from '@mui/material'
-import NotificationsIcon from '@mui/icons-material/Notifications'
+import { Bell } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import UnreadBadge from './index'
 
 const meta = {
@@ -17,9 +17,9 @@ type Story = StoryObj<typeof meta>
 export const Dot: Story = {
   args: {
     children: (
-      <IconButton>
-        <NotificationsIcon />
-      </IconButton>
+      <Button variant="ghost" size="icon">
+        <Bell className="size-4" />
+      </Button>
     ),
   },
 }
@@ -28,9 +28,9 @@ export const WithCount: Story = {
   args: {
     count: 5,
     children: (
-      <IconButton>
-        <NotificationsIcon />
-      </IconButton>
+      <Button variant="ghost" size="icon">
+        <Bell className="size-4" />
+      </Button>
     ),
   },
 }
@@ -39,9 +39,9 @@ export const HighCount: Story = {
   args: {
     count: 99,
     children: (
-      <IconButton>
-        <NotificationsIcon />
-      </IconButton>
+      <Button variant="ghost" size="icon">
+        <Bell className="size-4" />
+      </Button>
     ),
   },
 }
@@ -50,9 +50,9 @@ export const Invisible: Story = {
   args: {
     invisible: true,
     children: (
-      <IconButton>
-        <NotificationsIcon />
-      </IconButton>
+      <Button variant="ghost" size="icon">
+        <Bell className="size-4" />
+      </Button>
     ),
   },
 }

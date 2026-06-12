@@ -1,7 +1,9 @@
 /**
  * @usedBy pages/balances/index.tsx (StakingBanner, useIsStakingBannerVisible)
  */
-import { Typography, Card, SvgIcon, Button, Box, Stack, Link } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Link } from '@/components/ui/link'
 import css from './styles.module.css'
 import StakeIcon from '@/public/images/common/stake.svg'
 import classNames from 'classnames'
@@ -42,29 +44,14 @@ const StakingBanner = ({
 
   return (
     <>
-      <Card className={css.bannerWrapper}>
-        {!isDarkMode && <Box className={classNames(css.gradientBackground)} />}
+      <div className={classNames(css.bannerWrapper, 'overflow-hidden rounded-md bg-[var(--color-background-paper)]')}>
+        {!isDarkMode && <div className={classNames(css.gradientBackground)} />}
 
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={2}
-          sx={{
-            alignItems: { xs: 'initial', md: 'center' },
-            justifyContent: 'space-between',
-          }}
-        >
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1,
-            }}
-          >
-            <SvgIcon component={StakeIcon} sx={{ width: '16px', height: '16px' }} inheritViewBox />
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div className="z-[1] flex flex-row items-center justify-center gap-4">
+            <StakeIcon className="size-4" />
 
-            <Typography variant="body2">
+            <Typography variant="paragraph-small">
               <strong>Stake ETH and earn rewards up to 5% APY.</strong> Lock 32 ETH to become a validator via the Kiln
               widget. You can also{' '}
               <NextLink
@@ -84,20 +71,14 @@ const StakingBanner = ({
                 </>
               )}
             </Typography>
-          </Stack>
+          </div>
 
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            spacing={2}
-            sx={{
-              alignItems: { xs: 'center', md: 'flex-end' },
-            }}
-          >
-            <Box>
-              <Button variant="text" onClick={onHide} size="small" sx={{ whiteSpace: 'nowrap' }}>
+          <div className="flex flex-col items-center gap-4 md:flex-row md:items-end">
+            <div>
+              <Button variant="ghost" onClick={onHide} size="sm" className="whitespace-nowrap">
                 Don&apos;t show again
               </Button>
-            </Box>
+            </div>
             <NextLink
               href={AppRoutes.stake && { pathname: AppRoutes.stake, query: { safe: router.query.safe } }}
               passHref
@@ -105,13 +86,13 @@ const StakingBanner = ({
               onClick={onClick}
               className={classNames(css.stakeButton)}
             >
-              <Button fullWidth size="small" variant="contained">
+              <Button size="sm" className="w-full">
                 Stake
               </Button>
             </NextLink>
-          </Stack>
-        </Stack>
-      </Card>
+          </div>
+        </div>
+      </div>
     </>
   )
 }

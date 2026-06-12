@@ -1,9 +1,7 @@
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import Box from '@mui/material/Box'
-import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
-import SvgIcon from '@mui/material/SvgIcon'
 
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useShareSafeAppUrl } from '@/components/safe-apps/hooks/useShareSafeAppUrl'
 import { SAFE_APPS_EVENTS, trackSafeAppEvent } from '@/services/analytics'
 import CopyButton from '@/components/common/CopyButton'
@@ -12,6 +10,7 @@ import BookmarkIcon from '@/public/images/apps/bookmark.svg'
 import BookmarkedIcon from '@/public/images/apps/bookmarked.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
+import { cn } from '@/utils/cn'
 
 type SafeAppActionButtonsProps = {
   safeApp: SafeAppData
@@ -20,6 +19,8 @@ type SafeAppActionButtonsProps = {
   removeCustomApp?: (safeApp: SafeAppData) => void
   openPreviewDrawer?: (safeApp: SafeAppData) => void
 }
+
+const actionButtonClassName = 'shrink-0 bg-background text-foreground hover:bg-muted'
 
 const SafeAppActionButtons = ({
   safeApp,
@@ -37,69 +38,82 @@ const SafeAppActionButtons = ({
   }
 
   return (
-    <Box display="flex" gap={1} alignItems="center">
-      {/* Open the preview drawer */}
+    <div className="flex items-center gap-2">
       {openPreviewDrawer && (
-        <IconButton
-          size="small"
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className={actionButtonClassName}
           onClick={(event) => {
             event.preventDefault()
             event.stopPropagation()
             openPreviewDrawer(safeApp)
           }}
         >
-          <SvgIcon component={InfoIcon} inheritViewBox color="border" fontSize="small" />
-        </IconButton>
+          <InfoIcon className="size-4 text-[var(--color-border-main)]" />
+        </Button>
       )}
 
-      {/* Copy share Safe App url button */}
       <CopyButton
         initialToolTipText={`Copy share URL for ${safeApp.name}`}
         onCopy={handleCopyShareSafeAppUrl}
         text={shareSafeAppUrl}
       >
-        <IconButton data-testid="copy-btn-icon" size="small">
-          <SvgIcon component={ShareIcon} inheritViewBox color="border" fontSize="small" />
-        </IconButton>
+        <Button data-testid="copy-btn-icon" variant="ghost" size="icon-sm" className={actionButtonClassName}>
+          <ShareIcon className="size-4 text-[var(--color-border-main)]" />
+        </Button>
       </CopyButton>
 
-      {/* Bookmark Safe App button */}
       {onBookmarkSafeApp && (
-        <Tooltip title={`${isBookmarked ? 'Unpin' : 'Pin'} ${safeApp.name}`} placement="top">
-          <IconButton
-            size="small"
-            onClick={(event) => {
-              event.preventDefault()
-              event.stopPropagation()
-              onBookmarkSafeApp(safeApp.id)
-            }}
-          >
-            <SvgIcon
-              component={isBookmarked ? BookmarkedIcon : BookmarkIcon}
-              inheritViewBox
-              color={isBookmarked ? 'primary' : undefined}
-              fontSize="small"
-            />
-          </IconButton>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={`${isBookmarked ? 'Unpin' : 'Pin'} ${safeApp.name}`}
+                className={cn(actionButtonClassName, isBookmarked && 'bg-muted hover:bg-muted/80')}
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  onBookmarkSafeApp(safeApp.id)
+                }}
+              >
+                {isBookmarked ? (
+                  <BookmarkedIcon className="size-4 fill-current text-foreground" />
+                ) : (
+                  <BookmarkIcon className="size-4 text-[var(--color-border-main)]" />
+                )}
+              </Button>
+            }
+          />
+          <TooltipContent>{`${isBookmarked ? 'Unpin' : 'Pin'} ${safeApp.name}`}</TooltipContent>
         </Tooltip>
       )}
 
-      {/* Remove Custom Safe App button */}
       {removeCustomApp && (
-        <Tooltip title={`Delete ${safeApp.name}`} placement="top">
-          <IconButton
-            size="small"
-            onClick={(event) => {
-              event.preventDefault()
-              event.stopPropagation()
-              removeCustomApp(safeApp)
-            }}
-          >
-            <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="border" />
-          </IconButton>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={`Delete ${safeApp.name}`}
+                className={actionButtonClassName}
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  removeCustomApp(safeApp)
+                }}
+              >
+                <DeleteIcon className="size-4 text-[var(--color-error-main)]" />
+              </Button>
+            }
+          />
+          <TooltipContent>{`Delete ${safeApp.name}`}</TooltipContent>
         </Tooltip>
       )}
-    </Box>
+    </div>
   )
 }
 

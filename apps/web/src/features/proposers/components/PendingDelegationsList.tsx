@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Divider, Typography } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
+import { Chip } from '@/components/ui/chip'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
 import PendingDelegation from './PendingDelegation'
 import DelegationErrorBoundary from './DelegationErrorBoundary'
 import { usePendingDelegations } from '@/features/proposers/hooks/usePendingDelegations'
@@ -11,61 +13,35 @@ function PendingDelegationsList(): ReactElement | null {
   if (isLoading || pendingDelegations.length === 0) return null
 
   return (
-    <Box mb={2}>
+    <div className="mb-4">
       <DelegationErrorBoundary fallbackMessage="Failed to load pending delegations." onRetry={refetch}>
         <Accordion
-          defaultExpanded
-          disableGutters
-          elevation={0}
-          sx={{
-            '&.MuiAccordion-root': {
-              border: '1px solid var(--color-border-light)',
-              borderRadius: '6px',
-              backgroundColor: 'var(--color-background-paper) !important',
-            },
-            '& .MuiAccordionSummary-root': {
-              backgroundColor: 'var(--color-background-paper) !important',
-            },
-            '& .MuiAccordionDetails-root': {
-              backgroundColor: 'var(--color-background-paper) !important',
-            },
-          }}
+          defaultValue={['pending-delegations']}
+          className="rounded-md border border-[var(--color-border-light)] bg-[var(--color-background-paper)]"
         >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Typography variant="subtitle2" fontWeight={700}>
-                Pending confirmations
-              </Typography>
-              <Chip
-                label={pendingDelegations.length > 19 ? '19+' : pendingDelegations.length}
-                size="small"
-                sx={{
-                  bgcolor: 'warning.light',
-                  color: 'text.dark',
-                  fontWeight: 700,
-                  fontSize: '11px',
-                  letterSpacing: '1px',
-                  height: '20px',
-                  '& .MuiChip-label': {
-                    px: 0.5,
-                  },
-                }}
-              />
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails sx={{ pt: 0, px: 2 }}>
-            {pendingDelegations.map((delegation, index) => (
-              <Box key={delegation.messageHash}>
-                <DelegationErrorBoundary fallbackMessage="Failed to load this delegation.">
-                  <PendingDelegation delegation={delegation} onRefetch={refetch} />
-                </DelegationErrorBoundary>
-                {index < pendingDelegations.length - 1 && <Divider sx={{ my: 2 }} />}
-              </Box>
-            ))}
-          </AccordionDetails>
+          <AccordionItem value="pending-delegations" className="border-b-0">
+            <AccordionTrigger className="px-4">
+              <div className="flex items-center gap-2">
+                <Typography variant="paragraph-small-bold">Pending confirmations</Typography>
+                <Chip className="h-5 px-1 text-[11px] font-bold tracking-[1px] bg-[var(--color-warning-light)] text-[var(--color-text-primary)]">
+                  {pendingDelegations.length > 19 ? '19+' : pendingDelegations.length}
+                </Chip>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="px-4 pt-0">
+              {pendingDelegations.map((delegation, index) => (
+                <div key={delegation.messageHash}>
+                  <DelegationErrorBoundary fallbackMessage="Failed to load this delegation.">
+                    <PendingDelegation delegation={delegation} onRefetch={refetch} />
+                  </DelegationErrorBoundary>
+                  {index < pendingDelegations.length - 1 && <Separator className="my-4" />}
+                </div>
+              ))}
+            </AccordionContent>
+          </AccordionItem>
         </Accordion>
       </DelegationErrorBoundary>
-    </Box>
+    </div>
   )
 }
 

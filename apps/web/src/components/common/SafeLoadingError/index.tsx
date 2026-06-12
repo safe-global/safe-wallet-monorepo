@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import PagePlaceholder from '../PagePlaceholder'
 import { AppRoutes } from '@/config/routes'
@@ -15,11 +15,9 @@ const SafeLoadingError = ({ children }: { children: ReactNode }): ReactElement =
       img={<img src="/images/common/error.png" alt="A vault with a red icon in the bottom right corner" />}
       text="This Safe Account couldn't be loaded"
     >
-      <Link href={AppRoutes.welcome.index} passHref legacyBehavior>
-        <Button variant="contained" color="primary" size="large" sx={{ mt: 2 }}>
-          Go to the main page
-        </Button>
-      </Link>
+      <Button size="lg" className="mt-4" render={<Link href={AppRoutes.welcome.index} />}>
+        Go to the main page
+      </Button>
     </PagePlaceholder>
   )
 }

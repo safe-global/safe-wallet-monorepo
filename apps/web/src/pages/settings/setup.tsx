@@ -1,6 +1,8 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Grid, Paper, Skeleton, SvgIcon, Tooltip, Typography, Box } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { ContractVersion } from '@/components/settings/ContractVersion'
 import { OwnerList } from '@/components/settings/owner/OwnerList'
@@ -30,57 +32,54 @@ const Setup: NextPage = () => {
       <SettingsHeader />
 
       <main>
-        <Paper data-testid="setup-section" sx={{ p: 4, mb: 2 }}>
-          <Grid container spacing={3}>
-            <Grid item lg={4} xs={12}>
-              <Typography variant="h4" fontWeight={700}>
-                <Tooltip
-                  placement="top"
-                  title="For security reasons, transactions made with a Safe Account need to be executed in order. The nonce shows you which transaction will be executed next. You can find the nonce for a transaction in the transaction details."
-                >
-                  <span>
-                    Safe Account nonce
-                    <SvgIcon
-                      component={InfoIcon}
-                      inheritViewBox
-                      fontSize="small"
-                      color="border"
-                      sx={{ verticalAlign: 'middle', ml: 0.5 }}
-                    />
-                  </span>
+        <div data-testid="setup-section" className="mb-4 rounded-lg bg-[var(--color-background-paper)] p-8">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
+            <div>
+              <Typography variant="h4">
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <span>
+                        Safe Account nonce
+                        <InfoIcon className="ml-1 inline size-5 align-middle text-[var(--color-border-main)]" />
+                      </span>
+                    }
+                  />
+                  <TooltipContent>
+                    For security reasons, transactions made with a Safe Account need to be executed in order. The nonce
+                    shows you which transaction will be executed next. You can find the nonce for a transaction in the
+                    transaction details.
+                  </TooltipContent>
                 </Tooltip>
               </Typography>
 
-              <Typography pt={1}>
-                Current nonce:{' '}
-                {safeLoaded ? <b>{nonce}</b> : <Skeleton width="30px" sx={{ display: 'inline-block' }} />}
+              <Typography className="pt-2">
+                Current nonce: {safeLoaded ? <b>{nonce}</b> : <Skeleton className="inline-block h-4 w-[30px]" />}
               </Typography>
-            </Grid>
+            </div>
 
-            <Grid item xs>
+            <div>
               <ContractVersion />
-            </Grid>
-          </Grid>
-        </Paper>
+            </div>
+          </div>
+        </div>
 
-        <Paper sx={{ p: 4, mb: 2 }}>
-          <Grid container spacing={3}>
-            <Grid item lg={4} xs={12}>
-              <Typography variant="h4" fontWeight={700}>
-                Members
-              </Typography>
-            </Grid>
+        <div className="mb-4 rounded-lg bg-[var(--color-background-paper)] p-8">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_2fr]">
+            <div>
+              <Typography variant="h4">Members</Typography>
+            </div>
 
-            <Grid item xs>
-              <Box display="flex" flexDirection="column" gap={2}>
+            <div>
+              <div className="flex flex-col gap-4">
                 <OwnerList />
                 <ProposersList />
-              </Box>
-            </Grid>
-          </Grid>
+              </div>
+            </div>
+          </div>
 
           <RequiredConfirmation threshold={threshold} owners={ownerLength} />
-        </Paper>
+        </div>
 
         <SpendingLimitsSettings />
 

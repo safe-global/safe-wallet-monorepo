@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
-import { Box, Button, Grid, SvgIcon, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import ArrowIcon from '@/public/images/common/arrow-up-right.svg'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import { Sticky } from '@/components/common/Sticky'
@@ -16,71 +17,35 @@ const NftSendForm = ({ selectedNfts }: NftSendFormProps): ReactElement => {
 
   return (
     <Sticky>
-      <Grid
-        container
-        spacing={1}
-        sx={{
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-        }}
-      >
-        <Grid
-          item
-          sx={{
-            display: ['none', 'block'],
-            flex: '1',
-          }}
-        >
-          <Box
-            sx={{
-              bgcolor: 'secondary.background',
-              py: 0.75,
-              px: 2,
-              flex: 1,
-              borderRadius: 1,
-              mr: 1,
-            }}
-          >
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-              }}
-            >
-              <SvgIcon component={ArrowIcon} inheritViewBox color="border" sx={{ width: 12, height: 12 }} />
+      <div className="flex items-center justify-end gap-2">
+        <div className="hidden flex-1 sm:block">
+          <div className="mr-2 flex-1 rounded-md bg-[var(--color-secondary-background)] px-4 py-1.5">
+            <div className="flex items-center gap-3">
+              <ArrowIcon className="size-3 text-[var(--color-border-main)]" />
 
-              <Typography
-                variant="body2"
-                sx={{
-                  lineHeight: 'inherit',
-                }}
-              >
+              <Typography variant="paragraph-small" className="leading-[inherit]">
                 {`${selectedNfts.length} ${nftsText} selected`}
               </Typography>
-            </Box>
-          </Box>
-        </Grid>
+            </div>
+          </div>
+        </div>
 
-        <Grid item>
+        <div>
           <CheckWallet>
             {(isOk) => (
               <Button
                 data-testid={`nft-send-btn-${!isOk || noSelected}`}
                 type="submit"
-                variant="contained"
-                size="small"
+                size="sm"
                 disabled={!isOk || noSelected}
-                sx={{
-                  minWidth: '10em',
-                }}
+                className="min-w-[10em]"
               >
                 {noSelected ? 'Send' : `Send ${selectedNfts.length} ${nftsText}`}
               </Button>
             )}
           </CheckWallet>
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     </Sticky>
   )
 }

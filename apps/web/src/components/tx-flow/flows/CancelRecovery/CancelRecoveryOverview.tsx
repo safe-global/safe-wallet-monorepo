@@ -1,6 +1,5 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Box, Button, Typography } from '@mui/material'
 import { useContext } from 'react'
 import type { ReactElement } from 'react'
 
@@ -10,6 +9,8 @@ import ReplaceTxIcon from '@/public/images/transactions/replace-tx.svg'
 import { TxModalContext } from '../..'
 import TxCard from '../../common/TxCard'
 import { TxFlowContext } from '../../TxFlowProvider'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
 
 export function CancelRecoveryOverview(): ReactElement {
   const { setTxFlow } = useContext(TxModalContext)
@@ -22,35 +23,29 @@ export function CancelRecoveryOverview(): ReactElement {
 
   return (
     <TxCard>
-      <Box display="flex" flexDirection="column" alignItems="center" p={{ md: 5 }}>
+      <div className="flex flex-col items-center md:p-10">
         {/* TODO: Replace with correct icon when provided */}
         <ReplaceTxIcon />
 
-        <Typography mb={1} variant="h4" mt={5} fontWeight={700} textAlign="center">
+        <Typography variant="h4" align="center" className="mt-10 mb-2">
           Do you want to cancel the Account recovery?
         </Typography>
 
-        <Typography variant="body2" mb={3} textAlign="center">
+        <Typography variant="paragraph-small" align="center" className="mb-6 block">
           If it is an unwanted recovery proposal or you&apos;ve noticed something suspicious, you can cancel it at any
           time.
         </Typography>
 
-        <Box display="flex" columnGap={3} rowGap={1} flexWrap="wrap">
-          <Button variant="outlined" onClick={onClose} className={css.button} size="small">
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <Button variant="outline" onClick={onClose} className={css.button} size="sm">
             Go back
           </Button>
 
-          <Button
-            size="small"
-            data-testid="cancel-proposal-btn"
-            variant="contained"
-            onClick={onNext}
-            className={css.button}
-          >
+          <Button size="sm" data-testid="cancel-proposal-btn" variant="default" onClick={onNext} className={css.button}>
             Yes, cancel proposal
           </Button>
-        </Box>
-      </Box>
+        </div>
+      </div>
     </TxCard>
   )
 }

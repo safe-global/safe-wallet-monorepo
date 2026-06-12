@@ -1,5 +1,4 @@
 import React, { useEffect, type ReactNode, type ReactElement } from 'react'
-import { Box, Paper } from '@mui/material'
 import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { StoreDecorator } from '@/stories/storeDecorator'
@@ -96,7 +95,7 @@ function LayoutWrapper({
 
   switch (layout) {
     case 'paper':
-      return wrapShadcn(<Paper sx={{ p: 2 }}>{children}</Paper>)
+      return wrapShadcn(<div className="bg-card rounded-lg p-4">{children}</div>)
 
     case 'fullPage':
       return wrapShadcn(
@@ -116,15 +115,9 @@ function LayoutWrapper({
     default:
       // Mimic PageLayout's .content main { padding: var(--space-3) } rule
       return wrapShadcn(
-        <Box
-          sx={{
-            backgroundColor: 'background.default',
-            minHeight: '100vh',
-            '& > main': { p: 3 },
-          }}
-        >
+        <div className="bg-background min-h-screen [&>main]:p-6">
           <main>{children}</main>
-        </Box>,
+        </div>,
       )
   }
 }

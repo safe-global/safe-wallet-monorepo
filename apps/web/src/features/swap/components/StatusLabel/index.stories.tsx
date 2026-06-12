@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import StatusLabel from './index'
-import { Paper } from '@mui/material'
 
 const meta = {
   component: StatusLabel,
@@ -11,9 +10,9 @@ const meta = {
   decorators: [
     (Story) => {
       return (
-        <Paper sx={{ padding: 2 }}>
+        <div className="bg-background rounded-lg p-4">
           <Story />
-        </Paper>
+        </div>
       )
     },
   ],

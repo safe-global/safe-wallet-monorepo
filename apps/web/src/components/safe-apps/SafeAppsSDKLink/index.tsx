@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Fab, Typography } from '@mui/material'
-import KeyboardDoubleArrowUpRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowUpRounded'
+import { ChevronsUp } from 'lucide-react'
 import classnames from 'classnames'
 import CodeIcon from '@/public/images/apps/code-icon.svg'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
 import { SAFE_APPS_SDK_DOCS_URL } from '@/config/constants'
 import css from './styles.module.css'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -28,17 +29,17 @@ const SafeAppsSDKLink = () => {
     <div className={classnames(css.container, { [css.mini]: isMini })} tabIndex={0}>
       <CodeIcon />
 
-      <Typography variant="h6" className={css.title}>
+      <Typography variant="h4" className={css.title}>
         How to build on <i>Safe</i>?
       </Typography>
 
-      <ExternalLink href={SAFE_APPS_SDK_DOCS_URL} className={css.link} noIcon variant="body2">
+      <ExternalLink href={SAFE_APPS_SDK_DOCS_URL} className={`${css.link} text-sm`} noIcon>
         <span>Learn more about Safe Apps SDK</span>
       </ExternalLink>
 
-      <Fab className={css.openButton} variant="extended" size="small" color="secondary" tabIndex={-1}>
-        <KeyboardDoubleArrowUpRoundedIcon fontSize="small" />
-      </Fab>
+      <Button variant="secondary" size="sm" className={css.openButton} tabIndex={-1}>
+        <ChevronsUp className="size-4" />
+      </Button>
     </div>
   )
 }

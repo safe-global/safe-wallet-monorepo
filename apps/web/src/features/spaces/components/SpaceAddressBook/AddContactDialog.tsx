@@ -1,7 +1,9 @@
-import { Alert, DialogActions, Button, DialogContent } from '@mui/material'
-import { Button as ShadcnButton } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Plus } from 'lucide-react'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import { useState, type ReactNode } from 'react'
@@ -55,6 +57,7 @@ const AddContactDialog = ({
   const { configs: allNetworks } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const isDarkMode = useDarkMode()
 
   const defaultValues = {
     name: '',
@@ -122,59 +125,61 @@ const AddContactDialog = ({
 
   return (
     <>
-      <ShadcnButton size="lg" className="px-4 py-0" onClick={handleOpen}>
+      <Button size="lg" className="px-4 py-0" onClick={handleOpen}>
         <Plus className="size-4 mr-1 text-green-500" />
         {triggerLabel}
-      </ShadcnButton>
+      </Button>
       <ModalDialog open={open} onClose={handleClose} dialogTitle={dialogTitle} hideChainIndicator>
-        <FormProvider {...methods}>
-          <form onSubmit={onSubmit}>
-            <DialogContent sx={{ py: 2 }}>
-              <div className="flex flex-col gap-6">
-                {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
+        <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+          <FormProvider {...methods}>
+            <form onSubmit={onSubmit}>
+              <div className="px-6 py-4">
+                <div className="flex flex-col gap-6">
+                  {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
 
-                <NameInput name="name" label="Name" required />
-                <AddressInput name="address" label="Address or ENS" required showPrefix={false} />
+                  <NameInput name="name" label="Name" required />
+                  <AddressInput name="address" label="Address or ENS" required showPrefix={false} />
 
-                <div>
-                  <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
-                  <p className="text-muted-foreground mb-2 text-sm">
-                    Add contact on all networks or only on specific ones of your choice.
-                  </p>
-                  <Controller
-                    name="networks"
-                    control={control}
-                    render={({ field }) => (
-                      <NetworkMultiSelectorInput
-                        name="networks"
-                        showSelectAll
-                        value={field.value || []}
-                        error={!!errors.networks}
-                        helperText={errors.networks ? 'Select at least one network' : ''}
-                      />
-                    )}
-                    rules={{ required: true }}
-                  />
+                  <div>
+                    <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
+                    <p className="text-muted-foreground mb-2 text-sm">
+                      Add contact on all networks or only on specific ones of your choice.
+                    </p>
+                    <Controller
+                      name="networks"
+                      control={control}
+                      render={({ field }) => (
+                        <NetworkMultiSelectorInput
+                          name="networks"
+                          showSelectAll
+                          value={field.value || []}
+                          error={!!errors.networks}
+                          helperText={errors.networks ? 'Select at least one network' : ''}
+                        />
+                      )}
+                      rules={{ required: true }}
+                    />
+                  </div>
                 </div>
+
+                {error && (
+                  <Alert variant="destructive" className="mt-4">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
               </div>
 
-              {error && (
-                <Alert severity="error" sx={{ mt: 2 }}>
-                  {error}
-                </Alert>
-              )}
-            </DialogContent>
-
-            <DialogActions>
-              <Button data-testid="cancel-btn" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button type="submit" variant="contained" disabled={!formState.isValid || isSubmitting} disableElevation>
-                {isSubmitting ? <Spinner className="size-5" /> : submitLabel}
-              </Button>
-            </DialogActions>
-          </form>
-        </FormProvider>
+              <div className="flex justify-end gap-2 p-4 pt-0">
+                <Button data-testid="cancel-btn" variant="ghost" onClick={handleClose}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={!formState.isValid || isSubmitting}>
+                  {isSubmitting ? <Spinner className="size-5" /> : submitLabel}
+                </Button>
+              </div>
+            </form>
+          </FormProvider>
+        </div>
       </ModalDialog>
     </>
   )

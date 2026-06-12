@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { Box, CircularProgress, Paper, Grid2 as Grid } from '@mui/material'
+import { Spinner } from '@/components/ui/spinner'
+import { Card } from '@/components/ui/card'
 import { OVERVIEW_EVENTS, SAFE_APPS_EVENTS, trackEvent, trackSafeAppEvent } from '@/services/analytics'
 import { useSafeAppFromBackend } from '@/hooks/safe-apps/useSafeAppFromBackend'
 import { useSafeAppFromManifest } from '@/hooks/safe-apps/useSafeAppFromManifest'
@@ -50,24 +51,19 @@ const SafeAppLanding = ({ appUrl, chain }: Props) => {
 
   if (isLoading || backendAppLoading) {
     return (
-      <Box
-        sx={{
-          py: 4,
-          textAlign: 'center',
-        }}
-      >
-        <CircularProgress size={40} />
-      </Box>
+      <div className="flex justify-center py-8 text-center">
+        <Spinner className="size-10" />
+      </div>
     )
   }
 
   return (
-    <Grid container>
-      <Grid size={{ sm: 12, md: 12, lg: 8, xl: 6 }} offset={{ lg: 2, xl: 3 }}>
-        <Paper sx={{ p: 6 }}>
+    <div className="grid grid-cols-12">
+      <div className="col-span-12 lg:col-span-8 lg:col-start-3 xl:col-span-6 xl:col-start-4">
+        <Card className="p-12">
           <SafeAppDetails app={backendApp || safeApp} showDefaultListWarning={!backendApp} />
-          <Grid container sx={{ mt: 4 }} rowSpacing={{ xs: 2, sm: 2 }}>
-            <Grid size={{ xs: 12, sm: 12, md: showDemo ? 6 : 12 }}>
+          <div className="mt-8 grid grid-cols-12 gap-4">
+            <div className={showDemo ? 'col-span-12 md:col-span-6' : 'col-span-12'}>
               <AppActions
                 appUrl={appUrl}
                 wallet={wallet}
@@ -75,9 +71,9 @@ const SafeAppLanding = ({ appUrl, chain }: Props) => {
                 chain={chain}
                 app={backendApp || safeApp}
               />
-            </Grid>
+            </div>
             {showDemo && (
-              <Grid size={{ xs: 12, sm: 12, md: 6 }}>
+              <div className="col-span-12 md:col-span-6">
                 <TryDemo
                   demoUrl={{
                     pathname: AppRoutes.apps.open,
@@ -85,12 +81,12 @@ const SafeAppLanding = ({ appUrl, chain }: Props) => {
                   }}
                   onClick={handleDemoClick}
                 />
-              </Grid>
+              </div>
             )}
-          </Grid>
-        </Paper>
-      </Grid>
-    </Grid>
+          </div>
+        </Card>
+      </div>
+    </div>
   )
 }
 

@@ -213,14 +213,11 @@ describe('DecodedTx', () => {
       />,
     )
 
-    await waitFor(() => {
-      expect(result.queryByText('Interacted with')).toBeInTheDocument()
-      expect(result.queryAllByText('Data').pop()).toBeInTheDocument()
-    })
-
+    // Details live inside a collapsed accordion (unmounted) until expanded
     fireEvent.click(result.getByText('Transaction details'))
 
     await waitFor(() => {
+      expect(result.queryByText('Interacted with')).toBeInTheDocument()
       expect(result.queryByText('SafeTxGas')).toBeInTheDocument()
       expect(result.queryAllByText('Data').pop()).toBeInTheDocument()
     })

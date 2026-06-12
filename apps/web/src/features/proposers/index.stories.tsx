@@ -1,20 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
-import {
-  Box,
-  Button,
-  Paper,
-  Typography,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-} from '@mui/material'
-import PersonAddIcon from '@mui/icons-material/PersonAdd'
-import EditIcon from '@mui/icons-material/Edit'
-import DeleteIcon from '@mui/icons-material/Delete'
+import { UserPlus, Pencil, Trash2 } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Chip } from '@/components/ui/chip'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Field, FieldLabel, FieldDescription } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
 
 /**
  * Proposers feature allows non-owners to propose transactions for a Safe.
@@ -46,7 +38,10 @@ const mockProposers = [
 
 // Mock TxProposalChip
 const MockTxProposalChip = () => (
-  <Chip label="Proposed" size="small" color="warning" variant="outlined" icon={<PersonAddIcon fontSize="small" />} />
+  <Chip variant="outline" className="gap-1 text-[var(--color-warning-main)]">
+    <UserPlus className="size-3" />
+    Proposed
+  </Chip>
 )
 
 // Mock DeleteProposerDialog
@@ -59,25 +54,31 @@ const MockDeleteDialog = ({
   onClose: () => void
   proposer: { name: string; address: string }
 }) => (
-  <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-    <DialogTitle>Remove Proposer</DialogTitle>
-    <DialogContent>
-      <Typography variant="body2">
-        Are you sure you want to remove <strong>{proposer.name}</strong> as a proposer?
-      </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-        {proposer.address}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-        This will prevent them from creating new transaction proposals.
-      </Typography>
+  <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+    <DialogContent className="max-w-[320px]">
+      <DialogHeader>
+        <DialogTitle>Remove proposer</DialogTitle>
+      </DialogHeader>
+      <div className="flex flex-col gap-2 px-4">
+        <Typography variant="paragraph-small">
+          Are you sure you want to remove <strong>{proposer.name}</strong> as a proposer?
+        </Typography>
+        <Typography variant="paragraph-mini" color="muted">
+          {proposer.address}
+        </Typography>
+        <Typography variant="paragraph-small" color="muted">
+          This will prevent them from creating new transaction proposals.
+        </Typography>
+      </div>
+      <DialogFooter className="flex-row justify-end">
+        <Button variant="ghost" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button variant="destructive" onClick={onClose}>
+          Remove
+        </Button>
+      </DialogFooter>
     </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose}>Cancel</Button>
-      <Button variant="contained" color="error" onClick={onClose}>
-        Remove
-      </Button>
-    </DialogActions>
   </Dialog>
 )
 
@@ -91,25 +92,29 @@ const MockEditDialog = ({
   onClose: () => void
   proposer: { name: string; address: string }
 }) => (
-  <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-    <DialogTitle>Edit Proposer</DialogTitle>
+  <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
     <DialogContent>
-      <TextField label="Name" fullWidth defaultValue={proposer.name} margin="normal" />
-      <TextField
-        label="Address"
-        fullWidth
-        defaultValue={proposer.address}
-        margin="normal"
-        disabled
-        helperText="Address cannot be changed"
-      />
+      <DialogHeader>
+        <DialogTitle>Edit proposer</DialogTitle>
+      </DialogHeader>
+      <div className="flex flex-col gap-4 px-4">
+        <Field>
+          <FieldLabel htmlFor="proposer-name">Name</FieldLabel>
+          <Input id="proposer-name" defaultValue={proposer.name} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="proposer-address">Address</FieldLabel>
+          <Input id="proposer-address" defaultValue={proposer.address} disabled />
+          <FieldDescription>Address cannot be changed</FieldDescription>
+        </Field>
+      </div>
+      <DialogFooter className="flex-row justify-end">
+        <Button variant="ghost" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button onClick={onClose}>Save</Button>
+      </DialogFooter>
     </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose}>Cancel</Button>
-      <Button variant="contained" onClick={onClose}>
-        Save
-      </Button>
-    </DialogActions>
   </Dialog>
 )
 
@@ -121,66 +126,52 @@ export const ProposersList: StoryObj = {
     const [deleteProposer, setDeleteProposer] = useState<(typeof mockProposers)[0] | null>(null)
 
     return (
-      <Paper sx={{ p: 3, maxWidth: 600 }}>
-        <Typography variant="h6" gutterBottom>
+      <div className="bg-background max-w-[600px] rounded-lg p-6">
+        <Typography variant="h4" className="mb-2">
           Proposers
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography variant="paragraph-small" color="muted" className="mb-6">
           Proposers can create transactions but cannot sign them. Owners must approve or reject.
         </Typography>
 
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div className="flex flex-col gap-4">
           {mockProposers.map((proposer, index) => (
-            <Box
-              key={index}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                p: 2,
-                border: 1,
-                borderColor: 'divider',
-                borderRadius: 1,
-              }}
-            >
-              <Box>
-                <Typography variant="body1">{proposer.name}</Typography>
-                <Typography variant="caption" color="text.secondary">
+            <div key={index} className="flex items-center justify-between rounded-md border border-border p-4">
+              <div>
+                <Typography variant="paragraph">{proposer.name}</Typography>
+                <Typography variant="paragraph-mini" color="muted">
                   {proposer.address.slice(0, 10)}...{proposer.address.slice(-8)}
                 </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  size="small"
-                  variant="text"
-                  startIcon={<EditIcon fontSize="small" />}
-                  onClick={() => setEditProposer(proposer)}
-                >
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" variant="ghost" onClick={() => setEditProposer(proposer)}>
+                  <Pencil className="size-4" />
                   Edit
                 </Button>
                 <Button
-                  size="small"
-                  variant="text"
-                  color="error"
-                  startIcon={<DeleteIcon fontSize="small" />}
+                  size="sm"
+                  variant="ghost"
+                  className="text-[var(--color-error-main)]"
                   onClick={() => setDeleteProposer(proposer)}
                 >
+                  <Trash2 className="size-4" />
                   Remove
                 </Button>
-              </Box>
-            </Box>
+              </div>
+            </div>
           ))}
-        </Box>
+        </div>
 
-        <Button variant="contained" sx={{ mt: 3 }} startIcon={<PersonAddIcon />}>
-          Add Proposer
+        <Button className="mt-6">
+          <UserPlus className="size-4" />
+          Add proposer
         </Button>
 
         {editProposer && <MockEditDialog open={true} onClose={() => setEditProposer(null)} proposer={editProposer} />}
         {deleteProposer && (
           <MockDeleteDialog open={true} onClose={() => setDeleteProposer(null)} proposer={deleteProposer} />
         )}
-      </Paper>
+      </div>
     )
   },
   parameters: {
@@ -194,15 +185,15 @@ export const ProposersList: StoryObj = {
 
 export const ProposalChip: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Transaction Proposal Chip
+    <div className="bg-background rounded-lg p-6">
+      <Typography variant="paragraph-small-bold" className="mb-2 block">
+        Transaction proposal chip
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-4">
         This chip appears on transactions created by proposers (non-owners).
       </Typography>
       <MockTxProposalChip />
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -215,31 +206,22 @@ export const ProposalChip: StoryObj = {
 
 export const ProposalChipInContext: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 2, maxWidth: 500 }}>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          p: 1,
-          borderBottom: 1,
-          borderColor: 'divider',
-        }}
-      >
-        <Box>
-          <Typography variant="body2">Send 1.5 ETH</Typography>
-          <Typography variant="caption" color="text.secondary">
+    <div className="bg-background max-w-[500px] rounded-lg p-4">
+      <div className="flex items-center justify-between border-b border-border p-2">
+        <div>
+          <Typography variant="paragraph-small">Send 1.5 ETH</Typography>
+          <Typography variant="paragraph-mini" color="muted">
             To: 0x1234...5678
           </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+        </div>
+        <div className="flex items-center gap-2">
           <MockTxProposalChip />
-          <Typography variant="caption" color="warning.main">
+          <Typography variant="paragraph-mini" className="text-[var(--color-warning-main)]">
             Awaiting confirmation
           </Typography>
-        </Box>
-      </Box>
-    </Paper>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -255,8 +237,8 @@ export const DeleteProposer: StoryObj = {
     const [open, setOpen] = useState(true)
     return (
       <>
-        <Button variant="outlined" color="error" onClick={() => setOpen(true)}>
-          Open Delete Dialog
+        <Button variant="outline" className="text-[var(--color-error-main)]" onClick={() => setOpen(true)}>
+          Open delete dialog
         </Button>
         <MockDeleteDialog open={open} onClose={() => setOpen(false)} proposer={mockProposers[0]} />
       </>
@@ -276,8 +258,8 @@ export const EditProposer: StoryObj = {
     const [open, setOpen] = useState(true)
     return (
       <>
-        <Button variant="outlined" onClick={() => setOpen(true)}>
-          Open Edit Dialog
+        <Button variant="outline" onClick={() => setOpen(true)}>
+          Open edit dialog
         </Button>
         <MockEditDialog open={open} onClose={() => setOpen(false)} proposer={mockProposers[0]} />
       </>
@@ -297,20 +279,20 @@ export const AllDialogs: StoryObj = {
     const [dialog, setDialog] = useState<'edit' | 'delete' | null>(null)
 
     return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start' }}>
-        <Typography variant="h6">Proposer Management Dialogs</Typography>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button variant="outlined" onClick={() => setDialog('edit')}>
-            Edit Proposer
+      <div className="flex flex-col items-start gap-4">
+        <Typography variant="h4">Proposer management dialogs</Typography>
+        <div className="flex gap-4">
+          <Button variant="outline" onClick={() => setDialog('edit')}>
+            Edit proposer
           </Button>
-          <Button variant="outlined" color="error" onClick={() => setDialog('delete')}>
-            Delete Proposer
+          <Button variant="outline" className="text-[var(--color-error-main)]" onClick={() => setDialog('delete')}>
+            Delete proposer
           </Button>
-        </Box>
+        </div>
 
         <MockEditDialog open={dialog === 'edit'} onClose={() => setDialog(null)} proposer={mockProposers[0]} />
         <MockDeleteDialog open={dialog === 'delete'} onClose={() => setDialog(null)} proposer={mockProposers[0]} />
-      </Box>
+      </div>
     )
   },
   parameters: {
@@ -324,21 +306,22 @@ export const AllDialogs: StoryObj = {
 
 export const EmptyProposersList: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 600, textAlign: 'center' }}>
-      <Typography variant="h6" gutterBottom>
+    <div className="bg-background max-w-[600px] rounded-lg p-6 text-center">
+      <Typography variant="h4" className="mb-2">
         Proposers
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-6">
         No proposers have been added yet.
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-6">
         Proposers can create transaction proposals without having signing authority. This is useful for operational
         workflows.
       </Typography>
-      <Button variant="contained" startIcon={<PersonAddIcon />}>
-        Add Proposer
+      <Button>
+        <UserPlus className="size-4" />
+        Add proposer
       </Button>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {

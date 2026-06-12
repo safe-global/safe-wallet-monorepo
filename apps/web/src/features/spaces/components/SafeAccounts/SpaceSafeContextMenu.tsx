@@ -1,13 +1,9 @@
 import { type SafeItem, type MultiChainSafeItem, isMultiChainSafeItem } from '@/hooks/safes'
 import RemoveSafeDialog from './RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import { SvgIcon } from '@mui/material'
-import IconButton from '@mui/material/IconButton'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import MenuItem from '@mui/material/MenuItem'
-import ContextMenu from '@/components/common/ContextMenu'
+import { MoreVertical } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
@@ -25,29 +21,19 @@ enum ModalType {
 const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 
 const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeItem }) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const isAdmin = useIsAdmin()
 
   const allAddressBooks = useAppSelector(selectAllAddressBooks)
   const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
   const name = isMultiChainSafeItem(safeItem) ? safeItem.name : allAddressBooks[safeItem.chainId]?.[safeItem.address]
-
-  const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setAnchorEl(e.currentTarget)
-  }
-
-  const handleCloseContextMenu = (e: Event) => {
-    e.stopPropagation()
-    setAnchorEl(undefined)
-  }
+  const hasName = !!name
 
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
     e.stopPropagation()
     if (type === ModalType.REMOVE) trackEvent({ ...SPACE_EVENTS.DELETE_ACCOUNT_MODAL })
-    setAnchorEl(undefined)
+    setIsMenuOpen(false)
     setOpen((prev) => ({ ...prev, [type]: true }))
   }
 
@@ -57,37 +43,40 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
 
   return (
     <>
-      <span
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-        onMouseDown={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-      >
-        <IconButton edge="end" size="small" onClick={handleOpenContextMenu}>
-          <MoreVertIcon />
-        </IconButton>
-      </span>
-      <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu} autoFocus={false}>
-        <MenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>
-          <ListItemIcon>
-            <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
-          </ListItemIcon>
-          <ListItemText>Rename</ListItemText>
-        </MenuItem>
+      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Safe Account actions"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+            />
+          }
+        >
+          <MoreVertical className="size-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)} onSelect={(e) => e.stopPropagation()}>
+            <EditIcon className="size-4 text-success" />
+            <span>{hasName ? 'Rename' : 'Give name'}</span>
+          </DropdownMenuItem>
 
-        {isAdmin && (
-          <MenuItem onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
-            <ListItemIcon>
-              <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
-            </ListItemIcon>
-            <ListItemText>Remove</ListItemText>
-          </MenuItem>
-        )}
-      </ContextMenu>
+          {isAdmin && (
+            <DropdownMenuItem
+              onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}
+              onSelect={(e) => e.stopPropagation()}
+              variant="destructive"
+            >
+              <DeleteIcon className="size-4" />
+              <span>Remove</span>
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {open[ModalType.RENAME] && (
         <EntryDialog

@@ -1,4 +1,4 @@
-.signerForm :global .MuiOutlinedInput-notchedOutline {
+.signerForm {
   border: 1px solid var(--color-border-light) !important;
 }
 

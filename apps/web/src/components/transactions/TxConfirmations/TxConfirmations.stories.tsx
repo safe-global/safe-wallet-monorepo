@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import TxConfirmations from './index'
 
 const meta: Meta<typeof TxConfirmations> = {
@@ -8,9 +7,9 @@ const meta: Meta<typeof TxConfirmations> = {
   parameters: { layout: 'centered' },
   decorators: [
     (Story) => (
-      <Paper sx={{ padding: 2 }}>
+      <div className="p-4">
         <Story />
-      </Paper>
+      </div>
     ),
   ],
   tags: ['autodocs'],

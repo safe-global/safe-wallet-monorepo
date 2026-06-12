@@ -1,7 +1,8 @@
 import { type ReactElement, useContext, useState, useEffect, useRef } from 'react'
-import { Box, Typography, Stack, IconButton, Collapse, Tooltip, SvgIcon } from '@mui/material'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import LaunchIcon from '@mui/icons-material/Launch'
+import { ChevronDown, ExternalLink as LaunchIcon } from 'lucide-react'
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import UpdateIcon from '@/public/images/safe-shield/update.svg'
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
@@ -155,25 +156,32 @@ export const TenderlySimulation = ({
 
   const isMuted = !highlightedSeverity || (!isHighlihtedSeverityOK && !isHighlihtedSeverityWarn)
 
+  const viewLink = (
+    <Typography
+      variant="paragraph-mini"
+      className="leading-4 text-[var(--color-text-secondary)] underline [letter-spacing:1px]"
+    >
+      View
+    </Typography>
+  )
+
   return (
-    <Box
+    <Collapsible
+      open={simulationExpanded}
       data-testid="tenderly-simulation"
-      sx={{
-        overflow: 'hidden',
+      className="overflow-hidden"
+      style={{
         opacity: isVisible ? 1 : 0,
         maxHeight: isVisible ? 1000 : 0, // Replace 'fit-content' with a large px value for animatable maxHeight
         transition: `opacity 0.3s ease-in-out, max-height 0.3s ease-in-out`,
         transitionDelay: `${delay}ms`,
       }}
     >
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ padding: '12px', cursor: showExpandable ? 'pointer' : 'default' }}
+      <div
+        className={`flex flex-row items-center justify-between p-3 ${showExpandable ? 'cursor-pointer' : 'cursor-default'}`}
         onClick={showExpandable ? handleToggleSimulation : undefined}
       >
-        <Stack direction="row" alignItems="center" gap={1}>
+        <div className="flex flex-row items-center gap-2">
           {isSimulationFinished ? (
             <SeverityIcon
               severity={isSimulationSuccess ? Severity.OK : Severity.WARN}
@@ -182,168 +190,100 @@ export const TenderlySimulation = ({
               height={16}
             />
           ) : (
-            <SvgIcon component={UpdateIcon} inheritViewBox sx={{ fontSize: 16 }} />
+            <UpdateIcon className="size-4" />
           )}
-          <Typography variant="body2" color="primary.light">
+          <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
             {getSimulationHeaderText()}
           </Typography>
           {!isSimulationFinished && !isLoading && (
-            <Tooltip
-              title={
-                <Typography variant="body2" textAlign="center">
-                  Run a simulation to see if the transaction will succeed and get a full report.
-                </Typography>
-              }
-              arrow
-              placement="top"
-            >
-              <SvgIcon component={InfoIcon} inheritViewBox color="border" sx={{ fontSize: 16 }} />
+            <Tooltip>
+              <TooltipTrigger render={<span className="inline-flex" />}>
+                <InfoIcon className="size-4 text-[var(--color-border-main)]" />
+              </TooltipTrigger>
+              <TooltipContent className="text-center">
+                Run a simulation to see if the transaction will succeed and get a full report.
+              </TooltipContent>
             </Tooltip>
           )}
-        </Stack>
+        </div>
 
         {!isSimulationFinished ? (
-          <Box
-            component="button"
+          <button
             data-testid="run-simulation-btn"
             onClick={handleRunSimulation}
             disabled={isLoading}
-            sx={{
-              backgroundColor: 'background.lightGrey',
-              border: 'none',
-              borderRadius: '4px',
-              px: 1,
-              py: 0.25,
-              cursor: isLoading ? 'default' : 'pointer',
-              '&:hover': {
-                backgroundColor: isLoading ? 'background.lightGrey' : 'border.light',
-              },
-            }}
+            className={`rounded-[4px] border-none bg-transparent px-2 py-0.5 hover:bg-[var(--color-border-light)] ${
+              isLoading ? 'cursor-default hover:bg-transparent' : 'cursor-pointer'
+            }`}
           >
-            <Typography
-              color="text.primary"
-              sx={{
-                fontSize: '12px',
-                lineHeight: '2.015',
-                letterSpacing: '0.4px',
-              }}
-            >
+            <Typography variant="paragraph-mini" className="text-[var(--color-text-primary)] [letter-spacing:0.4px]">
               {isLoading ? 'Running...' : 'Run'}
             </Typography>
-          </Box>
+          </button>
         ) : isNested ? (
-          <IconButton
-            size="small"
-            sx={{
-              width: 16,
-              height: 16,
-              padding: 0,
-              transform: simulationExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-              transition: 'transform 0.2s',
-            }}
-          >
-            <KeyboardArrowDownIcon sx={{ width: 16, height: 16, color: 'text.secondary' }} />
-          </IconButton>
+          <ChevronDown
+            className={`size-4 text-[var(--color-text-secondary)] transition-transform ${
+              simulationExpanded ? 'rotate-180' : ''
+            }`}
+          />
         ) : (
           simulation.simulationLink && (
-            <ExternalLink
-              noIcon
-              href={simulation.simulationLink}
-              sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
-            >
-              <Typography
-                sx={{
-                  fontSize: '12px',
-                  lineHeight: '16px',
-                  letterSpacing: '1px',
-                  color: 'text.secondary',
-                  textDecoration: 'underline',
-                }}
-              >
-                View
-              </Typography>
-              <LaunchIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+            <ExternalLink noIcon href={simulation.simulationLink}>
+              <span className="inline-flex items-center gap-1">
+                {viewLink}
+                <LaunchIcon className="size-4 text-[var(--color-text-secondary)]" />
+              </span>
             </ExternalLink>
           )
         )}
-      </Stack>
+      </div>
 
       {/* Show expandable content only for nested simulations */}
-      {showExpandable && (
-        <Collapse in={simulationExpanded}>
-          <Box sx={{ padding: '4px 12px 16px' }}>
-            <Stack gap={2}>
-              <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
-                <Box
-                  sx={{
-                    borderLeft: `4px solid ${mainIsSuccess ? SEVERITY_COLORS.OK.main : SEVERITY_COLORS.CRITICAL.main}`,
-                    padding: '12px',
-                  }}
+      <CollapsibleContent keepMounted>
+        {showExpandable && (
+          <div className="px-3 pt-1 pb-4">
+            <div className="flex flex-col gap-4">
+              <div className="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]">
+                <div
+                  className="border-l-4 p-3"
+                  style={{ borderLeftColor: mainIsSuccess ? SEVERITY_COLORS.OK.main : SEVERITY_COLORS.CRITICAL.main }}
                 >
-                  <Typography variant="body2" color="primary.light" sx={{ mb: 1 }}>
+                  <Typography variant="paragraph-small" className="mb-2 block text-[var(--color-primary-light)]">
                     {mainSimulationResult}
                   </Typography>
                   {simulation.simulationLink && (
-                    <ExternalLink
-                      noIcon
-                      href={simulation.simulationLink}
-                      sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
-                    >
-                      <Typography
-                        sx={{
-                          fontSize: '12px',
-                          lineHeight: '16px',
-                          letterSpacing: '1px',
-                          color: 'text.secondary',
-                          textDecoration: 'underline',
-                        }}
-                      >
-                        View
-                      </Typography>
-                      <LaunchIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <ExternalLink noIcon href={simulation.simulationLink}>
+                      <span className="inline-flex items-center gap-1">
+                        {viewLink}
+                        <LaunchIcon className="size-4 text-[var(--color-text-secondary)]" />
+                      </span>
                     </ExternalLink>
                   )}
-                </Box>
-              </Box>
+                </div>
+              </div>
 
-              <Box bgcolor="background.main" borderRadius="4px" overflow="hidden">
-                <Box
-                  sx={{
-                    borderLeft: `4px solid ${
-                      nestedIsSuccess ? SEVERITY_COLORS.OK.main : SEVERITY_COLORS.CRITICAL.main
-                    }`,
-                    padding: '12px',
-                  }}
+              <div className="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]">
+                <div
+                  className="border-l-4 p-3"
+                  style={{ borderLeftColor: nestedIsSuccess ? SEVERITY_COLORS.OK.main : SEVERITY_COLORS.CRITICAL.main }}
                 >
-                  <Typography variant="body2" color="primary.light" sx={{ mb: 1 }}>
+                  <Typography variant="paragraph-small" className="mb-2 block text-[var(--color-primary-light)]">
                     {nestedSimulationResult}
                   </Typography>
                   {nestedTx.simulation.simulationLink && (
-                    <ExternalLink
-                      noIcon
-                      href={nestedTx.simulation.simulationLink}
-                      sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
-                    >
-                      <Typography
-                        sx={{
-                          fontSize: '12px',
-                          lineHeight: '16px',
-                          letterSpacing: '1px',
-                          color: 'text.secondary',
-                          textDecoration: 'underline',
-                        }}
-                      >
-                        View
-                      </Typography>
-                      <LaunchIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <ExternalLink noIcon href={nestedTx.simulation.simulationLink}>
+                      <span className="inline-flex items-center gap-1">
+                        {viewLink}
+                        <LaunchIcon className="size-4 text-[var(--color-text-secondary)]" />
+                      </span>
                     </ExternalLink>
                   )}
-                </Box>
-              </Box>
-            </Stack>
-          </Box>
-        </Collapse>
-      )}
-    </Box>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </CollapsibleContent>
+    </Collapsible>
   )
 }

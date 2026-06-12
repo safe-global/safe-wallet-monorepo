@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Stack } from '@mui/material'
 import { NativeStakingStatus } from '@safe-global/store/gateway/types'
 import StakingStatus from '@/components/transactions/TxDetails/TxData/Staking/StakingStatus'
 
@@ -73,7 +72,7 @@ export const AllStatuses: Story = {
     status: NativeStakingStatus.NOT_STAKED,
   },
   render: () => (
-    <Stack spacing={2}>
+    <div className="flex flex-col gap-4">
       <StakingStatus status={NativeStakingStatus.NOT_STAKED} />
       <StakingStatus status={NativeStakingStatus.ACTIVATING} />
       <StakingStatus status={NativeStakingStatus.DEPOSIT_IN_PROGRESS} />
@@ -82,6 +81,6 @@ export const AllStatuses: Story = {
       <StakingStatus status={NativeStakingStatus.EXITING} />
       <StakingStatus status={NativeStakingStatus.EXITED} />
       <StakingStatus status={NativeStakingStatus.SLASHED} />
-    </Stack>
+    </div>
   ),
 }

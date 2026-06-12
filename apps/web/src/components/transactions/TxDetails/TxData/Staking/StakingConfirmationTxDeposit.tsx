@@ -1,5 +1,6 @@
 import type { NativeStakingDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Box, Stack, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import ConfirmationOrderHeader from '@/components/tx/ConfirmationOrder/ConfirmationOrderHeader'
 import { formatDurationFromMilliseconds, formatVisualAmount, maybePlural } from '@safe-global/utils/utils/formatters'
@@ -21,11 +22,7 @@ const StakingConfirmationTxDeposit = ({ order, isTxDetails }: StakingOrderConfir
   // the fee is returned in decimal format, so we multiply by 100 to get the percentage
   const fee = (order.fee * 100).toFixed(2)
   return (
-    <Stack
-      sx={{
-        gap: isOrder ? 2 : 1,
-      }}
-    >
+    <div className={cn('flex flex-col', isOrder ? 'gap-4' : 'gap-2')}>
       {isOrder && (
         <ConfirmationOrderHeader
           blocks={[
@@ -63,33 +60,18 @@ const StakingConfirmationTxDeposit = ({ order, isTxDetails }: StakingOrderConfir
       >
         {fee} %
       </FieldsGrid>
-      <Stack
-        {...{ [isOrder ? 'border' : 'borderTop']: '1px solid' }}
-        {...(isOrder ? { p: 2, borderRadius: 1 } : { mt: 1, pt: 2, pb: 1 })}
-        sx={{
-          borderColor: 'border.light',
-          gap: 1,
-        }}
+      <div
+        className={cn(
+          'border-border-light flex flex-col gap-2',
+          isOrder ? 'rounded border p-4' : 'mt-2 border-t pt-4 pb-2',
+        )}
       >
         {isOrder ? (
-          <Typography
-            sx={{
-              fontWeight: 'bold',
-              mb: 2,
-            }}
-          >
+          <Typography className="mb-4 font-bold">
             You will own{' '}
-            <Box
-              component="span"
-              sx={{
-                bgcolor: 'border.background',
-                px: 1,
-                py: 0.5,
-                borderRadius: 1,
-              }}
-            >
+            <span className="bg-[var(--color-border-background)] rounded px-2 py-1">
               {order.numValidators} Ethereum validator{maybePlural(order.numValidators)}
-            </Box>
+            </span>
           </Typography>
         ) : (
           <FieldsGrid title="Validators">{order.numValidators}</FieldsGrid>
@@ -106,19 +88,13 @@ const StakingConfirmationTxDeposit = ({ order, isTxDetails }: StakingOrderConfir
         )}
 
         {isOrder && (
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-              mt: 2,
-            }}
-          >
+          <Typography variant="paragraph-small" className="mt-4 text-muted-foreground">
             Earn ETH rewards with dedicated validators. Rewards must be withdrawn manually, and you can request a
             withdrawal at any time.
           </Typography>
         )}
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   )
 }
 

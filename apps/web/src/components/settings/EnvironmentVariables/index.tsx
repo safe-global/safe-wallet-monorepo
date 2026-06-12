@@ -1,5 +1,6 @@
 import { useForm, FormProvider } from 'react-hook-form'
-import { Paper, Grid, Typography, Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setRpc, setTenderly } from '@/store/settingsSlice'
 import useChainId from '@/hooks/useChainId'
@@ -64,33 +65,14 @@ const EnvironmentVariables = () => {
   const onResetTenderlyToken = () => setValue(EnvVariablesField.tenderlyToken, '')
 
   return (
-    <Paper sx={{ padding: 4 }}>
-      <Grid
-        container
-        direction="row"
-        spacing={3}
-        sx={{
-          justifyContent: 'space-between',
-          mb: 2,
-        }}
-      >
-        <Grid item lg={4} xs={12}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-            }}
-          >
-            Environment variables
-          </Typography>
-        </Grid>
+    <div className="rounded-lg bg-[var(--color-background-paper)] p-8">
+      <div className="mb-4 grid grid-cols-1 justify-between gap-6 lg:grid-cols-[1fr_2fr]">
+        <div>
+          <Typography variant="h4">Environment variables</Typography>
+        </div>
 
-        <Grid item xs>
-          <Typography
-            sx={{
-              mb: 3,
-            }}
-          >
+        <div>
+          <Typography className="mb-6">
             You can override some of our default APIs here in case you need to. Proceed at your own risk.
           </Typography>
 
@@ -105,14 +87,14 @@ const EnvironmentVariables = () => {
                 showResetTokenButton={!!tenderlyToken}
               />
 
-              <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
+              <Button type="submit" className="mt-4">
                 Save
               </Button>
             </form>
           </FormProvider>
-        </Grid>
-      </Grid>
-    </Paper>
+        </div>
+      </div>
+    </div>
   )
 }
 

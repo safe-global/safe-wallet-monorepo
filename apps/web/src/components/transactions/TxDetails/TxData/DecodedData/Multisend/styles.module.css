@@ -1,8 +1,7 @@
 .actionsHeader {
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--border);
   cursor: auto !important;
-  padding-left: var(--space-2);
-  padding-right: 0;
+  padding: var(--space-2);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -10,7 +9,7 @@
 
 .compactHeader {
   border: 0;
-  padding-left: 0;
+  padding: 0 0 var(--space-2);
 }
 
 .actionsHeader button {
@@ -19,27 +18,11 @@
 }
 
 .divider {
-  margin-top: 14px;
-  margin-bottom: 14px;
-  border: 1px solid var(--color-border-light);
+  height: 1rem;
 }
 
 .compact {
   display: flex;
   flex-direction: column;
-}
-
-.compact > div:first-child {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.compact > div ~ div {
-  border-radius: 0;
-  margin-top: -1px !important;
-}
-
-.compact > div:hover,
-.compact > div:global(.Mui-expanded) {
-  border-color: var(--color-border-light);
+  gap: var(--space-2);
 }

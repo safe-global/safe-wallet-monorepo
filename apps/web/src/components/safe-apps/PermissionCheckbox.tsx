@@ -1,4 +1,5 @@
-import { Checkbox, FormControlLabel } from '@mui/material'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Field, FieldLabel } from '@/components/ui/field'
 
 type PermissionsCheckboxProps = {
   label: string
@@ -8,16 +9,17 @@ type PermissionsCheckboxProps = {
 }
 
 const PermissionsCheckbox = ({ label, checked, onChange, name }: PermissionsCheckboxProps): React.ReactElement => (
-  <FormControlLabel
-    sx={({ palette }) => ({
-      flex: 1,
-      '.MuiIconButton-root:not(.Mui-checked)': {
-        color: palette.text.disabled,
-      },
-    })}
-    control={<Checkbox checked={checked} onChange={onChange} name={name} />}
-    label={label}
-  />
+  <Field orientation="horizontal" className="flex-1">
+    <Checkbox
+      id={name}
+      name={name}
+      checked={checked}
+      onCheckedChange={(value) => onChange({} as React.ChangeEvent<HTMLInputElement>, value)}
+    />
+    <FieldLabel htmlFor={name} className="font-normal">
+      {label}
+    </FieldLabel>
+  </Field>
 )
 
 export default PermissionsCheckbox

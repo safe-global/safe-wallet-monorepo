@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
-import { Box, Paper, Typography, IconButton, Badge, Popover, Button, Divider } from '@mui/material'
-import NotificationsIcon from '@mui/icons-material/Notifications'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import InfoIcon from '@mui/icons-material/Info'
-import WarningIcon from '@mui/icons-material/Warning'
-import ErrorIcon from '@mui/icons-material/Error'
+import { Bell, CircleCheck, Info, TriangleAlert, OctagonX } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { cn } from '@/utils/cn'
 
 /**
  * NotificationCenter components handle in-app notifications for transaction
@@ -72,13 +72,13 @@ const mockNotifications: MockNotification[] = [
 const getVariantIcon = (variant: MockNotification['variant']) => {
   switch (variant) {
     case 'success':
-      return <CheckCircleIcon color="success" fontSize="small" />
+      return <CircleCheck className="size-4 text-success" />
     case 'info':
-      return <InfoIcon color="info" fontSize="small" />
+      return <Info className="size-4 text-info" />
     case 'warning':
-      return <WarningIcon color="warning" fontSize="small" />
+      return <TriangleAlert className="size-4 text-warning" />
     case 'error':
-      return <ErrorIcon color="error" fontSize="small" />
+      return <OctagonX className="size-4 text-destructive" />
   }
 }
 
@@ -92,72 +92,69 @@ const formatTimestamp = (timestamp: number) => {
 
 // Mock NotificationCenter Bell
 const MockNotificationBell = ({ notifications }: { notifications: MockNotification[] }) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+  const [open, setOpen] = useState(false)
   const unreadCount = notifications.filter((n) => !n.isRead).length
 
   return (
-    <>
-      <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}>
-        <Badge badgeContent={unreadCount} color="error">
-          <NotificationsIcon />
-        </Badge>
-      </IconButton>
-      <Popover
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        onClose={() => setAnchorEl(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Box sx={{ width: 360, maxHeight: 400, overflow: 'auto' }}>
-          <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h6">Notifications</Typography>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        render={
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="size-4" />
             {unreadCount > 0 && (
-              <Button size="small" color="primary">
+              <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-destructive">
+                <Typography variant="paragraph-mini-bold" className="text-destructive-foreground">
+                  {unreadCount}
+                </Typography>
+              </span>
+            )}
+          </Button>
+        }
+      />
+      <PopoverContent align="end" className="w-90 p-0">
+        <div className="max-h-100 overflow-auto">
+          <div className="flex items-center justify-between p-4">
+            <Typography variant="h4">Notifications</Typography>
+            {unreadCount > 0 && (
+              <Button variant="link" size="sm">
                 Mark all read
               </Button>
             )}
-          </Box>
-          <Divider />
+          </div>
+          <Separator />
           {notifications.length === 0 ? (
-            <Box sx={{ p: 4, textAlign: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
+            <div className="p-8 text-center">
+              <Typography variant="paragraph-small" color="muted">
                 No notifications
               </Typography>
-            </Box>
+            </div>
           ) : (
             notifications.map((notification) => (
-              <Box
+              <div
                 key={notification.id}
-                sx={{
-                  p: 2,
-                  display: 'flex',
-                  gap: 2,
-                  bgcolor: notification.isRead ? 'transparent' : 'action.hover',
-                  borderBottom: 1,
-                  borderColor: 'divider',
-                  cursor: 'pointer',
-                  '&:hover': { bgcolor: 'action.selected' },
-                }}
+                className={cn(
+                  'flex cursor-pointer gap-4 border-b border-border p-4 hover:bg-accent',
+                  !notification.isRead && 'bg-muted',
+                )}
               >
                 {getVariantIcon(notification.variant)}
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2">{notification.message}</Typography>
-                  <Typography variant="caption" color="text.secondary">
+                <div className="flex-1">
+                  <Typography variant="paragraph-small">{notification.message}</Typography>
+                  <Typography variant="paragraph-mini" color="muted" as="span" className="block">
                     {formatTimestamp(notification.timestamp)}
                   </Typography>
                   {notification.link && (
-                    <Typography variant="caption" color="primary" sx={{ display: 'block', mt: 0.5, cursor: 'pointer' }}>
+                    <Typography variant="paragraph-mini" as="span" className="mt-1 block cursor-pointer text-primary">
                       {notification.link.title}
                     </Typography>
                   )}
-                </Box>
-              </Box>
+                </div>
+              </div>
             ))
           )}
-        </Box>
-      </Popover>
-    </>
+        </div>
+      </PopoverContent>
+    </Popover>
   )
 }
 
@@ -165,12 +162,12 @@ const MockNotificationBell = ({ notifications }: { notifications: MockNotificati
 
 export const Default: StoryObj = {
   render: () => (
-    <Box sx={{ p: 4, bgcolor: 'background.paper', borderRadius: 1 }}>
-      <Typography variant="caption" color="text.secondary" display="block" mb={2}>
+    <div className="rounded-lg bg-card p-8">
+      <Typography variant="paragraph-mini" color="muted" as="div" className="mb-4">
         Click the bell icon to open notifications
       </Typography>
       <MockNotificationBell notifications={mockNotifications} />
-    </Box>
+    </div>
   ),
   parameters: {
     docs: {
@@ -183,12 +180,12 @@ export const Default: StoryObj = {
 
 export const Empty: StoryObj = {
   render: () => (
-    <Box sx={{ p: 4, bgcolor: 'background.paper', borderRadius: 1 }}>
-      <Typography variant="caption" color="text.secondary" display="block" mb={2}>
+    <div className="rounded-lg bg-card p-8">
+      <Typography variant="paragraph-mini" color="muted" as="div" className="mb-4">
         No notifications
       </Typography>
       <MockNotificationBell notifications={[]} />
-    </Box>
+    </div>
   ),
   parameters: {
     docs: {
@@ -201,32 +198,25 @@ export const Empty: StoryObj = {
 
 export const NotificationList: StoryObj = {
   render: () => (
-    <Paper sx={{ width: 400, maxHeight: 500, overflow: 'auto' }}>
-      <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-        <Typography variant="h6">Notifications</Typography>
-      </Box>
+    <div className="max-h-125 w-100 overflow-auto rounded-lg bg-card">
+      <div className="border-b border-border p-4">
+        <Typography variant="h4">Notifications</Typography>
+      </div>
       {mockNotifications.map((notification) => (
-        <Box
+        <div
           key={notification.id}
-          sx={{
-            p: 2,
-            display: 'flex',
-            gap: 2,
-            bgcolor: notification.isRead ? 'transparent' : 'action.hover',
-            borderBottom: 1,
-            borderColor: 'divider',
-          }}
+          className={cn('flex gap-4 border-b border-border p-4', !notification.isRead && 'bg-muted')}
         >
           {getVariantIcon(notification.variant)}
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="body2">{notification.message}</Typography>
-            <Typography variant="caption" color="text.secondary">
+          <div className="flex-1">
+            <Typography variant="paragraph-small">{notification.message}</Typography>
+            <Typography variant="paragraph-mini" color="muted" as="span" className="block">
               {formatTimestamp(notification.timestamp)}
             </Typography>
-          </Box>
-        </Box>
+          </div>
+        </div>
       ))}
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -239,59 +229,59 @@ export const NotificationList: StoryObj = {
 
 export const NotificationItems: StoryObj = {
   render: () => (
-    <Paper sx={{ width: 400, p: 2 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Success Notification
+    <div className="w-100 rounded-lg bg-card p-4">
+      <Typography variant="paragraph-small-bold" as="div" className="mb-1">
+        Success notification
       </Typography>
-      <Box sx={{ mb: 2, border: 1, borderColor: 'divider', borderRadius: 1, p: 2, display: 'flex', gap: 2 }}>
-        <CheckCircleIcon color="success" />
-        <Box>
-          <Typography variant="body2">Transaction confirmed</Typography>
-          <Typography variant="caption" color="text.secondary">
+      <div className="mb-4 flex gap-4 rounded-lg border border-border p-4">
+        <CircleCheck className="size-4 text-success" />
+        <div>
+          <Typography variant="paragraph-small">Transaction confirmed</Typography>
+          <Typography variant="paragraph-mini" color="muted" as="span" className="block">
             1m ago
           </Typography>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Typography variant="subtitle2" gutterBottom>
-        Info Notification
+      <Typography variant="paragraph-small-bold" as="div" className="mb-1">
+        Info notification
       </Typography>
-      <Box sx={{ mb: 2, border: 1, borderColor: 'divider', borderRadius: 1, p: 2, display: 'flex', gap: 2 }}>
-        <InfoIcon color="info" />
-        <Box>
-          <Typography variant="body2">New transaction requires your signature</Typography>
-          <Typography variant="caption" color="text.secondary">
+      <div className="mb-4 flex gap-4 rounded-lg border border-border p-4">
+        <Info className="size-4 text-info" />
+        <div>
+          <Typography variant="paragraph-small">New transaction requires your signature</Typography>
+          <Typography variant="paragraph-mini" color="muted" as="span" className="block">
             5m ago
           </Typography>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Typography variant="subtitle2" gutterBottom>
-        Warning Notification
+      <Typography variant="paragraph-small-bold" as="div" className="mb-1">
+        Warning notification
       </Typography>
-      <Box sx={{ mb: 2, border: 1, borderColor: 'divider', borderRadius: 1, p: 2, display: 'flex', gap: 2 }}>
-        <WarningIcon color="warning" />
-        <Box>
-          <Typography variant="body2">Gas prices are high</Typography>
-          <Typography variant="caption" color="text.secondary">
+      <div className="mb-4 flex gap-4 rounded-lg border border-border p-4">
+        <TriangleAlert className="size-4 text-warning" />
+        <div>
+          <Typography variant="paragraph-small">Gas prices are high</Typography>
+          <Typography variant="paragraph-mini" color="muted" as="span" className="block">
             10m ago
           </Typography>
-        </Box>
-      </Box>
+        </div>
+      </div>
 
-      <Typography variant="subtitle2" gutterBottom>
-        Error Notification
+      <Typography variant="paragraph-small-bold" as="div" className="mb-1">
+        Error notification
       </Typography>
-      <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 2, display: 'flex', gap: 2 }}>
-        <ErrorIcon color="error" />
-        <Box>
-          <Typography variant="body2">Transaction failed</Typography>
-          <Typography variant="caption" color="text.secondary">
+      <div className="flex gap-4 rounded-lg border border-border p-4">
+        <OctagonX className="size-4 text-destructive" />
+        <div>
+          <Typography variant="paragraph-small">Transaction failed</Typography>
+          <Typography variant="paragraph-mini" color="muted" as="span" className="block">
             1h ago
           </Typography>
-        </Box>
-      </Box>
-    </Paper>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -313,12 +303,12 @@ export const ManyNotifications: StoryObj = {
     }))
 
     return (
-      <Box sx={{ p: 4, bgcolor: 'background.paper', borderRadius: 1 }}>
-        <Typography variant="caption" color="text.secondary" display="block" mb={2}>
+      <div className="rounded-lg bg-card p-8">
+        <Typography variant="paragraph-mini" color="muted" as="div" className="mb-4">
           With many notifications (3 unread)
         </Typography>
         <MockNotificationBell notifications={manyNotifications} />
-      </Box>
+      </div>
     )
   },
   parameters: {

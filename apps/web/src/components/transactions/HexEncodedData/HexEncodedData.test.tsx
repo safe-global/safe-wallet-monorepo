@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
+import userEvent from '@testing-library/user-event'
 import { HexEncodedData } from '.'
 
 const hexData = '0xed2ad31ed00088fc64d00c49774b2fe3fb7fd7db1c2a714700892607b9f77dc1'
@@ -7,15 +8,18 @@ const longHexData =
   '0xb460af94123400000000000000000000000000000000000000000000000000000000000186a00000000000000000000000009a1148b5d6a2d34ca46111379d0fd1352a0ade4a0000000000000000000000009a1148b5d6a2d34ca46111379d0fd1352a0ade4a'
 
 describe('HexEncodedData', () => {
-  it('should render the default component markup', () => {
+  it('should render the default component markup', async () => {
     const result = render(<HexEncodedData hexData={hexData} title="Data (hex-encoded)" />)
     const showMoreButton = result.getByTestId('show-more')
-    const tooltipComponent = result.getByLabelText(
-      'The first 4 bytes determine the contract method that is being called',
-    )
     expect(showMoreButton).toBeInTheDocument()
     expect(showMoreButton).toHaveTextContent('Show more')
-    expect(tooltipComponent).toBeInTheDocument()
+
+    // The first-bytes tooltip text is now Base UI tooltip content, revealed on hover
+    const firstBytesTrigger = result.container.querySelector('b') as HTMLElement
+    await userEvent.hover(firstBytesTrigger)
+    expect(
+      await screen.findByText('The first 4 bytes determine the contract method that is being called'),
+    ).toBeInTheDocument()
 
     expect(result.container).toMatchSnapshot()
   })

@@ -1,7 +1,8 @@
-import { Button, Tooltip } from '@mui/material'
 import { useContext } from 'react'
 import type { SyntheticEvent, ReactElement } from 'react'
 
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
 import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
@@ -33,30 +34,36 @@ export default function ExecuteRecoveryButton({
   return (
     <CheckWallet allowNonOwner checkNetwork={!isDisabled}>
       {(isOk) => {
-        return (
-          <Tooltip
-            title={
-              !isOk || isDisabled
-                ? isWrongChain
-                  ? `Switch your wallet network to ${chain?.chainName} to execute this transaction`
-                  : isNext
-                    ? 'You can execute the recovery after the specified review window'
-                    : 'Previous recovery proposals must be executed or cancelled first'
-                : null
-            }
+        const tooltipTitle =
+          !isOk || isDisabled
+            ? isWrongChain
+              ? `Switch your wallet network to ${chain?.chainName} to execute this transaction`
+              : isNext
+                ? 'You can execute the recovery after the specified review window'
+                : 'Previous recovery proposals must be executed or cancelled first'
+            : null
+
+        const button = (
+          <Button
+            data-testid="execute-btn"
+            onClick={onClick}
+            variant="default"
+            disabled={!isOk || isDisabled}
+            className="min-w-[106.5px]"
+            size={compact ? 'sm' : 'lg'}
           >
-            <span>
-              <Button
-                data-testid="execute-btn"
-                onClick={onClick}
-                variant="contained"
-                disabled={!isOk || isDisabled}
-                sx={{ minWidth: '106.5px' }}
-                size={compact ? 'small' : 'large'}
-              >
-                Execute
-              </Button>
-            </span>
+            Execute
+          </Button>
+        )
+
+        if (!tooltipTitle) {
+          return button
+        }
+
+        return (
+          <Tooltip>
+            <TooltipTrigger render={<span />}>{button}</TooltipTrigger>
+            <TooltipContent>{tooltipTitle}</TooltipContent>
           </Tooltip>
         )
       }}

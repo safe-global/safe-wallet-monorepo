@@ -1,5 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Skeleton, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 
 import InfoIcon from '@/public/images/notifications/info.svg'
 import type { FeeRow } from '../../hooks/useFeesPreview'
@@ -31,48 +33,49 @@ export const FeeBreakdownRow = ({
 }: FeeBreakdownRowProps): ReactElement => (
   <div className={css.feeRow}>
     <div className={css.feeLabel}>
-      <Typography variant="body2">{label}</Typography>
+      <Typography variant="paragraph-small">{label}</Typography>
       {tooltip && (
-        <Tooltip title={tooltip} placement="top" arrow>
-          <span className={css.tooltipIcon}>
-            <SvgIcon component={InfoIcon} inheritViewBox sx={{ fontSize: '16px' }} color="border" />
-          </span>
+        <Tooltip>
+          <TooltipTrigger render={<span className={css.tooltipIcon} />}>
+            <InfoIcon className="size-4 text-border" />
+          </TooltipTrigger>
+          <TooltipContent>{tooltip}</TooltipContent>
         </Tooltip>
       )}
     </div>
 
     <div className={css.feeValue}>
       {loading ? (
-        <Skeleton variant="text" sx={{ minWidth: '7em' }} />
+        <Skeleton className="h-4 min-w-[7em]" />
       ) : error ? (
-        <Typography variant="body2" color="warning.main">
+        <Typography variant="paragraph-small" className="text-[var(--color-warning-main)]">
           Cannot estimate
         </Typography>
       ) : note ? (
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="paragraph-small" color="muted">
           {note}
         </Typography>
       ) : (
         <>
           <div className={css.feeAmount}>
             {isFree && (
-              <Typography variant="body2" component="span" color="success.main" fontWeight={700}>
+              <Typography variant="paragraph-small-bold" as="span" className="text-[var(--color-success-main)]">
                 FREE
               </Typography>
             )}
             {amount &&
               (isFree && strikeAs === 'del' ? (
-                <Typography variant="body2" component="del" color="text.secondary">
+                <Typography variant="paragraph-small" as="del" color="muted">
                   {amount} {currency}
                 </Typography>
               ) : (
-                <Typography variant="body2" component="span" className={isFree ? css.strikethrough : undefined}>
+                <Typography variant="paragraph-small" as="span" className={isFree ? css.strikethrough : undefined}>
                   {amount} {currency}
                 </Typography>
               ))}
           </div>
           {fiatAmount && (
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="paragraph-mini" color="muted">
               {fiatAmount}
             </Typography>
           )}

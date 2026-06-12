@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box, Paper, Typography, Select, MenuItem, TextField, Button, Alert } from '@mui/material'
-import SwapVertIcon from '@mui/icons-material/SwapVert'
+import { ArrowUpDown } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 /**
  * Bridge feature allows users to transfer assets between different blockchains.
@@ -21,90 +25,110 @@ export default meta
 
 // Mock bridge widget UI
 const MockBridgeWidget = () => (
-  <Box sx={{ p: 3 }}>
-    <Typography variant="h6" gutterBottom>
-      Bridge Assets
+  <div className="p-6">
+    <Typography variant="h4" className="mb-2">
+      Bridge assets
     </Typography>
 
     {/* Source Chain */}
-    <Box sx={{ mb: 3 }}>
-      <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+    <div className="mb-6">
+      <Typography variant="paragraph-mini" color="muted" as="div" className="mb-1">
         From
       </Typography>
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <Select defaultValue="ethereum" size="small" sx={{ minWidth: 150 }}>
-          <MenuItem value="ethereum">Ethereum</MenuItem>
-          <MenuItem value="polygon">Polygon</MenuItem>
-          <MenuItem value="arbitrum">Arbitrum</MenuItem>
+      <div className="flex gap-4">
+        <Select defaultValue="ethereum">
+          <SelectTrigger className="min-w-[150px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ethereum">Ethereum</SelectItem>
+            <SelectItem value="polygon">Polygon</SelectItem>
+            <SelectItem value="arbitrum">Arbitrum</SelectItem>
+          </SelectContent>
         </Select>
-        <TextField size="small" placeholder="0.0" type="number" sx={{ flex: 1 }} />
-        <Select defaultValue="eth" size="small" sx={{ minWidth: 100 }}>
-          <MenuItem value="eth">ETH</MenuItem>
-          <MenuItem value="usdc">USDC</MenuItem>
-          <MenuItem value="usdt">USDT</MenuItem>
+        <Input placeholder="0.0" type="number" className="flex-1" />
+        <Select defaultValue="eth">
+          <SelectTrigger className="min-w-[100px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="eth">ETH</SelectItem>
+            <SelectItem value="usdc">USDC</SelectItem>
+            <SelectItem value="usdt">USDT</SelectItem>
+          </SelectContent>
         </Select>
-      </Box>
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+      </div>
+      <Typography variant="paragraph-mini" color="muted" className="mt-1">
         Balance: 2.5 ETH
       </Typography>
-    </Box>
+    </div>
 
     {/* Swap Direction */}
-    <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-      <SwapVertIcon color="action" />
-    </Box>
+    <div className="my-4 flex justify-center">
+      <ArrowUpDown className="size-5 text-muted-foreground" />
+    </div>
 
     {/* Destination Chain */}
-    <Box sx={{ mb: 3 }}>
-      <Typography variant="caption" color="text.secondary" display="block" mb={1}>
+    <div className="mb-6">
+      <Typography variant="paragraph-mini" color="muted" as="div" className="mb-1">
         To
       </Typography>
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <Select defaultValue="polygon" size="small" sx={{ minWidth: 150 }}>
-          <MenuItem value="ethereum">Ethereum</MenuItem>
-          <MenuItem value="polygon">Polygon</MenuItem>
-          <MenuItem value="arbitrum">Arbitrum</MenuItem>
+      <div className="flex gap-4">
+        <Select defaultValue="polygon">
+          <SelectTrigger className="min-w-[150px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ethereum">Ethereum</SelectItem>
+            <SelectItem value="polygon">Polygon</SelectItem>
+            <SelectItem value="arbitrum">Arbitrum</SelectItem>
+          </SelectContent>
         </Select>
-        <TextField size="small" placeholder="0.0" type="number" disabled sx={{ flex: 1 }} />
-        <Select defaultValue="eth" size="small" sx={{ minWidth: 100 }} disabled>
-          <MenuItem value="eth">ETH</MenuItem>
+        <Input placeholder="0.0" type="number" disabled className="flex-1" />
+        <Select defaultValue="eth" disabled>
+          <SelectTrigger className="min-w-[100px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="eth">ETH</SelectItem>
+          </SelectContent>
         </Select>
-      </Box>
-    </Box>
+      </div>
+    </div>
 
     {/* Fee Info */}
-    <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1, mb: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-        <Typography variant="body2">Bridge Fee</Typography>
-        <Typography variant="body2">~0.001 ETH</Typography>
-      </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Typography variant="body2">Estimated Time</Typography>
-        <Typography variant="body2">~15 minutes</Typography>
-      </Box>
-    </Box>
+    <div className="mb-6 rounded bg-muted p-4">
+      <div className="mb-1 flex justify-between">
+        <Typography variant="paragraph-small">Bridge fee</Typography>
+        <Typography variant="paragraph-small">~0.001 ETH</Typography>
+      </div>
+      <div className="flex justify-between">
+        <Typography variant="paragraph-small">Estimated time</Typography>
+        <Typography variant="paragraph-small">~15 minutes</Typography>
+      </div>
+    </div>
 
-    <Button variant="contained" fullWidth size="large">
-      Bridge Assets
+    <Button size="lg" className="w-full">
+      Bridge assets
     </Button>
-  </Box>
+  </div>
 )
 
 // FULL PAGE FIRST
 export const BridgePage: StoryObj = {
   render: () => (
-    <Box sx={{ maxWidth: 900 }}>
-      <Typography variant="h4" gutterBottom>
+    <div className="max-w-[900px]">
+      <Typography variant="h4" className="mb-2">
         Bridge
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-6">
         Transfer assets securely between blockchains using the Safe bridge.
       </Typography>
 
-      <Paper>
+      <div className="rounded-lg bg-background">
         <MockBridgeWidget />
-      </Paper>
-    </Box>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -117,9 +141,9 @@ export const BridgePage: StoryObj = {
 
 export const BridgeWidget: StoryObj = {
   render: () => (
-    <Paper sx={{ maxWidth: 500 }}>
+    <div className="max-w-[500px] rounded-lg bg-background">
       <MockBridgeWidget />
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -132,14 +156,14 @@ export const BridgeWidget: StoryObj = {
 
 export const BridgeDisabled: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 4, maxWidth: 500, textAlign: 'center' }}>
-      <Typography variant="h6" gutterBottom>
-        Bridge Not Available
+    <div className="max-w-[500px] rounded-lg bg-background p-8 text-center">
+      <Typography variant="h4" className="mb-2">
+        Bridge not available
       </Typography>
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="paragraph-small" color="muted">
         The bridge feature is not available on this chain. Please switch to a supported network.
       </Typography>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -152,28 +176,28 @@ export const BridgeDisabled: StoryObj = {
 
 export const BridgeInProgress: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <Alert severity="info" sx={{ mb: 2 }}>
-        Bridge transaction in progress
+    <div className="max-w-[500px] rounded-lg bg-background p-6">
+      <Alert className="mb-4">
+        <AlertDescription>Bridge transaction in progress</AlertDescription>
       </Alert>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-4">
         Your assets are being bridged from Ethereum to Polygon. This may take 10-20 minutes.
       </Typography>
-      <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="body2">Amount</Typography>
-          <Typography variant="body2">1.0 ETH</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-          <Typography variant="body2">From</Typography>
-          <Typography variant="body2">Ethereum</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography variant="body2">To</Typography>
-          <Typography variant="body2">Polygon</Typography>
-        </Box>
-      </Box>
-    </Paper>
+      <div className="rounded bg-muted p-4">
+        <div className="mb-1 flex justify-between">
+          <Typography variant="paragraph-small">Amount</Typography>
+          <Typography variant="paragraph-small">1.0 ETH</Typography>
+        </div>
+        <div className="mb-1 flex justify-between">
+          <Typography variant="paragraph-small">From</Typography>
+          <Typography variant="paragraph-small">Ethereum</Typography>
+        </div>
+        <div className="flex justify-between">
+          <Typography variant="paragraph-small">To</Typography>
+          <Typography variant="paragraph-small">Polygon</Typography>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -186,52 +210,43 @@ export const BridgeInProgress: StoryObj = {
 
 export const BridgeHistory: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 600 }}>
-      <Typography variant="h6" gutterBottom>
-        Bridge History
+    <div className="max-w-[600px] rounded-lg bg-background p-6">
+      <Typography variant="h4" className="mb-2">
+        Bridge history
       </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="flex flex-col gap-4">
         {[
           { amount: '1.5 ETH', from: 'Ethereum', to: 'Polygon', status: 'Completed', time: '2 hours ago' },
           { amount: '500 USDC', from: 'Arbitrum', to: 'Ethereum', status: 'Completed', time: '1 day ago' },
           { amount: '0.5 ETH', from: 'Polygon', to: 'Ethereum', status: 'Pending', time: '5 min ago' },
         ].map((tx, i) => (
-          <Box
-            key={i}
-            sx={{
-              p: 2,
-              border: 1,
-              borderColor: 'divider',
-              borderRadius: 1,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <Box>
-              <Typography variant="body2" fontWeight="bold">
+          <div key={i} className="flex items-center justify-between rounded border p-4">
+            <div>
+              <Typography variant="paragraph-small-bold" as="div">
                 {tx.amount}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="paragraph-mini" color="muted">
                 {tx.from} → {tx.to}
               </Typography>
-            </Box>
-            <Box sx={{ textAlign: 'right' }}>
+            </div>
+            <div className="text-right">
               <Typography
-                variant="caption"
-                color={tx.status === 'Completed' ? 'success.main' : 'warning.main'}
-                display="block"
+                variant="paragraph-mini"
+                as="div"
+                className={
+                  tx.status === 'Completed' ? 'text-[var(--color-success-main)]' : 'text-[var(--color-warning-main)]'
+                }
               >
                 {tx.status}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="paragraph-mini" color="muted">
                 {tx.time}
               </Typography>
-            </Box>
-          </Box>
+            </div>
+          </div>
         ))}
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {

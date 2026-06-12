@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box, Paper, Typography, Button, IconButton, Card } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
+import { X } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 
 /**
  * Targeted Outreach feature displays promotional popups and messages
@@ -23,46 +25,35 @@ export default meta
 // Popup in context (overlay) - FULL PAGE FIRST
 export const PopupOverlay: StoryObj = {
   render: () => (
-    <Box sx={{ position: 'relative', width: 800, height: 500 }}>
+    <div className="relative h-[500px] w-[800px]">
       {/* Background content */}
-      <Paper sx={{ p: 3, height: '100%', bgcolor: 'background.default' }}>
-        <Typography variant="h5" gutterBottom>
+      <div className="bg-muted h-full rounded-lg p-6">
+        <Typography variant="h3" className="mb-4">
           Dashboard
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="paragraph-small" color="muted">
           Your dashboard content would appear here...
         </Typography>
-      </Paper>
+      </div>
 
       {/* Overlay */}
-      <Box
-        sx={{
-          position: 'absolute',
-          inset: 0,
-          bgcolor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Card sx={{ p: 3, maxWidth: 380 }}>
-          <IconButton size="small" sx={{ position: 'absolute', top: 8, right: 8 }} aria-label="Close">
-            <CloseIcon fontSize="small" />
-          </IconButton>
+      <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+        <Card className="relative max-w-[380px] p-6">
+          <Button variant="ghost" size="icon-sm" className="absolute top-2 right-2" aria-label="Close">
+            <X className="size-4" />
+          </Button>
 
-          <Typography variant="h6" fontWeight="bold" gutterBottom>
+          <Typography variant="h4" className="mb-2">
             Welcome to Safe!
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography variant="paragraph-small" color="muted" className="mb-4">
             Take a quick tour of your new multi-signature wallet.
           </Typography>
 
-          <Button variant="contained" fullWidth>
-            Start tour
-          </Button>
+          <Button className="w-full">Start tour</Button>
         </Card>
-      </Box>
-    </Box>
+      </div>
+    </div>
   ),
   parameters: {
     layout: 'padded',
@@ -77,38 +68,29 @@ export const PopupOverlay: StoryObj = {
 // OutreachPopup mockup
 export const OutreachPopup: StoryObj = {
   render: () => (
-    <Card
-      sx={{
-        p: 3,
-        maxWidth: 400,
-        position: 'relative',
-        boxShadow: 6,
-      }}
-    >
-      <IconButton size="small" sx={{ position: 'absolute', top: 8, right: 8 }} aria-label="Close">
-        <CloseIcon fontSize="small" />
-      </IconButton>
+    <Card className="relative max-w-[400px] p-6 shadow-lg">
+      <Button variant="ghost" size="icon-sm" className="absolute top-2 right-2" aria-label="Close">
+        <X className="size-4" />
+      </Button>
 
-      <Box sx={{ textAlign: 'center', mb: 2 }}>
-        <Typography variant="h3" sx={{ mb: 1 }}>
+      <div className="mb-4 text-center">
+        <Typography variant="h2" className="mb-2">
           🎁
         </Typography>
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
-          New Feature Available!
+        <Typography variant="h4" className="mb-2">
+          New feature available!
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="paragraph-small" color="muted">
           Check out our latest update that makes managing your Safe even easier.
         </Typography>
-      </Box>
+      </div>
 
-      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-        <Button variant="outlined" size="small">
+      <div className="flex justify-center gap-4">
+        <Button variant="outline" size="sm">
           Maybe later
         </Button>
-        <Button variant="contained" size="small">
-          Learn more
-        </Button>
-      </Box>
+        <Button size="sm">Learn more</Button>
+      </div>
     </Card>
   ),
   parameters: {
@@ -123,33 +105,24 @@ export const OutreachPopup: StoryObj = {
 // Survey popup variant
 export const SurveyPopup: StoryObj = {
   render: () => (
-    <Card
-      sx={{
-        p: 3,
-        maxWidth: 400,
-        position: 'relative',
-        boxShadow: 6,
-      }}
-    >
-      <IconButton size="small" sx={{ position: 'absolute', top: 8, right: 8 }} aria-label="Close">
-        <CloseIcon fontSize="small" />
-      </IconButton>
+    <Card className="relative max-w-[400px] p-6 shadow-lg">
+      <Button variant="ghost" size="icon-sm" className="absolute top-2 right-2" aria-label="Close">
+        <X className="size-4" />
+      </Button>
 
-      <Typography variant="h6" fontWeight="bold" gutterBottom>
+      <Typography variant="h4" className="mb-2">
         Help us improve Safe
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-4">
         We would love to hear your feedback! Take our quick 2-minute survey to help shape the future of Safe.
       </Typography>
 
-      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-        <Button variant="text" size="small">
+      <div className="flex justify-end gap-4">
+        <Button variant="ghost" size="sm">
           Not now
         </Button>
-        <Button variant="contained" size="small">
-          Take survey
-        </Button>
-      </Box>
+        <Button size="sm">Take survey</Button>
+      </div>
     </Card>
   ),
   parameters: {
@@ -165,32 +138,25 @@ export const SurveyPopup: StoryObj = {
 export const AnnouncementPopup: StoryObj = {
   render: () => (
     <Card
-      sx={{
-        p: 3,
-        maxWidth: 450,
-        position: 'relative',
-        background: 'linear-gradient(135deg, #12FF80 0%, #00D9FF 100%)',
-        color: 'black',
-      }}
+      className="relative max-w-[450px] p-6 text-black"
+      style={{ background: 'linear-gradient(135deg, #12FF80 0%, #00D9FF 100%)' }}
     >
-      <IconButton size="small" sx={{ position: 'absolute', top: 8, right: 8, color: 'black' }} aria-label="Close">
-        <CloseIcon fontSize="small" />
-      </IconButton>
+      <Button variant="ghost" size="icon-sm" className="absolute top-2 right-2 text-black" aria-label="Close">
+        <X className="size-4" />
+      </Button>
 
-      <Typography variant="overline" fontWeight="bold">
+      <Typography variant="paragraph-mini-bold" className="uppercase">
         Announcement
       </Typography>
-      <Typography variant="h5" fontWeight="bold" gutterBottom>
+      <Typography variant="h4" className="mb-2">
         Safe{'{'}Wallet{'}'} is now live on Base!
       </Typography>
-      <Typography variant="body2" sx={{ mb: 2, opacity: 0.9 }}>
+      <Typography variant="paragraph-small" className="mb-4 opacity-90">
         Manage your assets on Base with full multi-signature security. Create a new Safe or add Base to your existing
         account.
       </Typography>
 
-      <Button variant="contained" sx={{ bgcolor: 'black', color: 'white' }}>
-        Get started on Base
-      </Button>
+      <Button className="bg-black text-white">Get started on Base</Button>
     </Card>
   ),
   parameters: {
@@ -205,14 +171,14 @@ export const AnnouncementPopup: StoryObj = {
 // Dismissed state (nothing shown)
 export const DismissedState: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 4, maxWidth: 400, textAlign: 'center' }}>
-      <Typography variant="body2" color="text.secondary">
+    <div className="bg-background max-w-[400px] rounded-lg p-8 text-center">
+      <Typography variant="paragraph-small" color="muted">
         When user dismisses the popup, it will not appear again (stored in localStorage).
       </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+      <Typography variant="paragraph-mini" color="muted" className="mt-4 block">
         This story shows the concept - actual component renders nothing when dismissed.
       </Typography>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -226,52 +192,32 @@ export const DismissedState: StoryObj = {
 // Popup with image
 export const PopupWithImage: StoryObj = {
   render: () => (
-    <Card
-      sx={{
-        maxWidth: 400,
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      <Box
-        sx={{
-          height: 150,
-          bgcolor: 'primary.main',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Typography variant="h2" sx={{ color: 'white' }}>
+    <Card className="relative max-w-[400px] overflow-hidden p-0">
+      <div className="bg-primary flex h-[150px] items-center justify-center">
+        <Typography variant="h1" className="text-white">
           🔐
         </Typography>
-      </Box>
+      </div>
 
-      <IconButton
-        size="small"
-        sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'rgba(255,255,255,0.8)' }}
-        aria-label="Close"
-      >
-        <CloseIcon fontSize="small" />
-      </IconButton>
+      <Button variant="ghost" size="icon-sm" className="absolute top-2 right-2 bg-white/80" aria-label="Close">
+        <X className="size-4" />
+      </Button>
 
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h6" fontWeight="bold" gutterBottom>
-          Enhanced Security
+      <div className="p-6">
+        <Typography variant="h4" className="mb-2">
+          Enhanced security
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography variant="paragraph-small" color="muted" className="mb-4">
           Enable two-factor authentication for additional protection of your Safe account.
         </Typography>
 
-        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-          <Button variant="text" size="small">
+        <div className="flex justify-end gap-4">
+          <Button variant="ghost" size="sm">
             Skip
           </Button>
-          <Button variant="contained" size="small">
-            Enable 2FA
-          </Button>
-        </Box>
-      </Box>
+          <Button size="sm">Enable 2FA</Button>
+        </div>
+      </div>
     </Card>
   ),
   parameters: {

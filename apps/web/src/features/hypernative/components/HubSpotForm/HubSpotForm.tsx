@@ -1,4 +1,5 @@
-import { Paper, Typography, CircularProgress, Box } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Spinner } from '@/components/ui/spinner'
 import { useEffect, useRef, useState } from 'react'
 import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
 
@@ -120,27 +121,20 @@ const HubSpotForm = ({ portalId, formId, region = 'eu1', onSubmit }: HubSpotForm
   }, [portalId, formId, region])
 
   return (
-    <Paper sx={{ py: 1, backgroundColor: 'var(--color-static-primary)', minHeight: '100%' }}>
-      <Typography variant="h3" fontWeight={700} gutterBottom color="var(--color-static-main)">
+    <div className="min-h-full bg-[var(--color-static-primary)] py-2">
+      <Typography variant="h3" className="mb-2 text-[var(--color-static-main)]">
         Request demo
       </Typography>
-      <Typography variant="body1" sx={{ mb: 4, color: 'var(--color-static-light)' }}>
+      <Typography variant="paragraph" className="mb-8 text-[var(--color-static-light)]">
         Share your details to book a demo call.
       </Typography>
       {isLoading && (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            minHeight: '400px',
-          }}
-        >
-          <CircularProgress sx={{ color: 'var(--color-static-main)' }} />
-        </Box>
+        <div className="flex min-h-[400px] items-center justify-center">
+          <Spinner className="size-10 text-[var(--color-static-main)]" />
+        </div>
       )}
       <div id="hubspot-form-container" ref={formContainerRef} style={{ display: isLoading ? 'none' : 'block' }} />
-    </Paper>
+    </div>
   )
 }
 

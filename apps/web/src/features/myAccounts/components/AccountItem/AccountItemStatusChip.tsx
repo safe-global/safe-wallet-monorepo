@@ -1,8 +1,8 @@
-import { Chip, Typography } from '@mui/material'
-import VisibilityIcon from '@mui/icons-material/Visibility'
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import { Chip } from '@/components/ui/chip'
+import { EyeIcon, CircleAlertIcon } from 'lucide-react'
 import { LoopIcon } from '@/features/counterfactual/components/CounterfactualStatusButton'
 import css from './styles.module.css'
+import { cn } from '@/utils/cn'
 
 export interface AccountItemStatusChipProps {
   isActivating?: boolean
@@ -14,35 +14,28 @@ const ActivationChip = ({ isActivating }: { isActivating: boolean }) => (
   <Chip
     data-testid="pending-activation-chip"
     className={css.chip}
-    sx={{
+    style={{
       backgroundColor: isActivating ? 'var(--color-info-light)' : 'var(--color-warning-background)',
     }}
-    size="small"
-    label={isActivating ? 'Activating' : 'Not activated'}
-    icon={
-      isActivating ? (
-        <LoopIcon fontSize="small" className={css.pendingLoopIcon} sx={{ mr: '-4px', ml: '4px' }} />
-      ) : (
-        <ErrorOutlineIcon fontSize="small" color="warning" />
-      )
-    }
-  />
+  >
+    {isActivating ? (
+      <LoopIcon className={`${css.pendingLoopIcon} ml-1 -mr-1 size-4`} />
+    ) : (
+      <CircleAlertIcon className="size-4 text-[var(--color-warning-main)]" />
+    )}
+    {isActivating ? 'Activating account' : 'Not activated'}
+  </Chip>
 )
 
 const ReadOnlyChip = () => (
   <Chip
     data-testid="read-only-chip"
-    className={css.chip}
-    sx={{ color: 'var(--color-primary-light)', borderColor: 'var(--color-border-light)' }}
-    variant="outlined"
-    size="small"
-    icon={<VisibilityIcon className={css.visibilityIcon} />}
-    label={
-      <Typography variant="caption" display="flex" alignItems="center" gap={0.5}>
-        Read-only
-      </Typography>
-    }
-  />
+    variant="outline"
+    className={cn(css.chip, 'text-[var(--color-primary-light)] border-[var(--color-border-light)]')}
+  >
+    <EyeIcon className={cn('size-4', css.visibilityIcon)} />
+    Read-only
+  </Chip>
 )
 
 /**

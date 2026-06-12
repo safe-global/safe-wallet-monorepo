@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { ManageSigners } from './index'
 import { mockAddOwnerTxInfo, mockRemoveOwnerTxInfo, mockSwapOwnerTxInfo, mockTxData } from './mockData'
@@ -48,9 +47,9 @@ const meta = {
             },
           }}
         >
-          <Paper sx={{ padding: 2 }}>
+          <div className="rounded-lg bg-background p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },

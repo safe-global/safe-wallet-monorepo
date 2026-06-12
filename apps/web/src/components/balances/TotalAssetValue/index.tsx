@@ -1,5 +1,5 @@
-import { Box, Skeleton, Typography, Stack } from '@mui/material'
-import type { SvgIconProps } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 import type { ReactNode } from 'react'
 import FiatValue from '@/components/common/FiatValue'
 import TokenAmount from '@/components/common/TokenAmount'
@@ -13,18 +13,16 @@ const TotalAssetValue = ({
   fiatTotal,
   title = 'Total value',
   tooltipTitle,
-  tooltipColor,
   size = 'md',
   action,
 }: {
   fiatTotal: string | number | undefined
   title?: string
   tooltipTitle?: string
-  tooltipColor?: SvgIconProps['color']
   size?: 'md' | 'lg'
   action?: ReactNode
 }) => {
-  const fontSizeValue = size === 'lg' ? '44px' : '24px'
+  const fontSizeClass = size === 'lg' ? 'text-[44px]' : 'text-[24px]'
   const { safe } = useSafeInfo()
   const { balances } = useVisibleBalances()
   const { showUndeployedNativeValue } = useNativeTokenDisplay()
@@ -34,20 +32,20 @@ const TotalAssetValue = ({
     (balances.items.length === 1 && balances.items[0]?.tokenInfo.type !== TokenType.NATIVE_TOKEN)
 
   return (
-    <Box>
-      <Stack direction="row" alignItems="center" mb={0.5}>
-        <Typography fontWeight={700}>{title}</Typography>
-        {tooltipTitle && <InfoTooltip title={tooltipTitle} color={tooltipColor} />}
-      </Stack>
-      <Stack direction="row" alignItems="flex-end" justifyContent="space-between">
-        <Typography component="div" variant="h1" fontSize={fontSizeValue} lineHeight="1.2" letterSpacing="-0.5px">
+    <div>
+      <Typography variant="paragraph" className="mb-1 font-bold">
+        {title}
+        {tooltipTitle && <InfoTooltip title={tooltipTitle} />}
+      </Typography>
+      <div className="flex flex-row items-end justify-between">
+        <div className={`m-0 font-semibold leading-[1.2] ${fontSizeClass}`}>
           {safe.deployed ? (
             fiatTotal !== undefined ? (
               <>
                 <FiatValue value={fiatTotal} precise />
               </>
             ) : (
-              <Skeleton variant="text" width={60} />
+              <Skeleton className="h-[1.2em] w-[60px]" />
             )
           ) : shouldHideNativeTokenValue ? (
             hasOtherBalances ? (
@@ -62,10 +60,10 @@ const TotalAssetValue = ({
               tokenSymbol={balances.items[0]?.tokenInfo.symbol}
             />
           )}
-        </Typography>
+        </div>
         {action}
-      </Stack>
-    </Box>
+      </div>
+    </div>
   )
 }
 

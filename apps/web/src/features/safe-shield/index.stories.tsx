@@ -1,21 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import {
-  Box,
-  Paper,
-  Typography,
-  Chip,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Alert,
-  LinearProgress,
-} from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import WarningIcon from '@mui/icons-material/Warning'
-import ErrorIcon from '@mui/icons-material/Error'
-import InfoIcon from '@mui/icons-material/Info'
-import SecurityIcon from '@mui/icons-material/Security'
+import type { LucideIcon } from 'lucide-react'
+import { CircleCheck, Info, TriangleAlert, CircleX, ShieldCheck } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Chip } from '@/components/ui/chip'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
+import { Progress, ProgressTrack, ProgressIndicator } from '@/components/ui/progress'
 
 /**
  * Safe Shield provides security analysis for transactions before execution.
@@ -50,30 +40,48 @@ const StateWrapper = ({
   description: string
   children: React.ReactNode
 }) => (
-  <Box sx={{ mb: 8 }}>
-    <Box sx={{ mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-      <Typography variant="h5">{stateName}</Typography>
-      <Typography variant="body2" color="text.secondary">
+  <div className="mb-16">
+    <div className="mb-4 border-b border-border pb-4">
+      <Typography variant="h3">{stateName}</Typography>
+      <Typography variant="paragraph-small" color="muted">
         {description}
       </Typography>
-    </Box>
-    <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2, display: 'flex', justifyContent: 'center' }}>{children}</Box>
-  </Box>
+    </div>
+    <div className="bg-muted flex justify-center rounded-lg p-6">{children}</div>
+  </div>
 )
 
 // Severity config
-const severityConfig = {
-  OK: { icon: CheckCircleIcon, color: 'success.main', bgColor: 'success.light', label: 'Safe' },
-  INFO: { icon: InfoIcon, color: 'info.main', bgColor: 'info.light', label: 'Info' },
-  WARN: { icon: WarningIcon, color: 'warning.main', bgColor: 'warning.light', label: 'Warning' },
-  CRITICAL: { icon: ErrorIcon, color: 'error.main', bgColor: 'error.light', label: 'Critical' },
+const severityConfig: Record<
+  'OK' | 'INFO' | 'WARN' | 'CRITICAL',
+  { icon: LucideIcon; color: string; bgColor: string; label: string }
+> = {
+  OK: {
+    icon: CircleCheck,
+    color: 'text-[var(--color-success-main)]',
+    bgColor: 'bg-[var(--color-success-light)]',
+    label: 'Safe',
+  },
+  INFO: { icon: Info, color: 'text-[var(--color-info-main)]', bgColor: 'bg-[var(--color-info-light)]', label: 'Info' },
+  WARN: {
+    icon: TriangleAlert,
+    color: 'text-[var(--color-warning-main)]',
+    bgColor: 'bg-[var(--color-warning-light)]',
+    label: 'Warning',
+  },
+  CRITICAL: {
+    icon: CircleX,
+    color: 'text-[var(--color-error-main)]',
+    bgColor: 'bg-[var(--color-error-light)]',
+    label: 'Critical',
+  },
 }
 
 // Mock SeverityIcon
 const MockSeverityIcon = ({ severity }: { severity: keyof typeof severityConfig }) => {
   const config = severityConfig[severity]
   const Icon = config.icon
-  return <Icon sx={{ color: config.color }} />
+  return <Icon className={`size-5 ${config.color}`} />
 }
 
 // Mock AnalysisGroupCard
@@ -91,39 +99,34 @@ const MockAnalysisGroupCard = ({
   const config = severityConfig[severity]
 
   return (
-    <Accordion defaultExpanded={expanded}>
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-          <MockSeverityIcon severity={severity} />
-          <Typography variant="body2" sx={{ flex: 1 }}>
-            {title}
-          </Typography>
-          <Chip label={config.label} size="small" sx={{ bgcolor: config.bgColor, color: config.color }} />
-        </Box>
-      </AccordionSummary>
-      <AccordionDetails>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {items.map((item, i) => (
-            <Box
-              key={i}
-              sx={{
-                p: 1.5,
-                borderLeft: 3,
-                borderColor: config.color,
-                bgcolor: 'background.default',
-                borderRadius: 1,
-              }}
-            >
-              <Typography variant="body2">{item.description}</Typography>
-              {item.details && (
-                <Typography variant="caption" color="text.secondary">
-                  {item.details}
+    <Accordion defaultValue={expanded ? [title] : []}>
+      <AccordionItem value={title}>
+        <AccordionTrigger>
+          <div className="flex w-full items-center gap-4">
+            <MockSeverityIcon severity={severity} />
+            <Typography variant="paragraph-small" className="flex-1">
+              {title}
+            </Typography>
+            <Chip className={`${config.bgColor} ${config.color}`}>{config.label}</Chip>
+          </div>
+        </AccordionTrigger>
+        <AccordionContent>
+          <div className="flex flex-col gap-2">
+            {items.map((item, i) => (
+              <div key={i} className={`bg-muted rounded-md border-l-[3px] p-1.5 ${config.color}`}>
+                <Typography variant="paragraph-small" className="text-foreground">
+                  {item.description}
                 </Typography>
-              )}
-            </Box>
-          ))}
-        </Box>
-      </AccordionDetails>
+                {item.details && (
+                  <Typography variant="paragraph-mini" color="muted">
+                    {item.details}
+                  </Typography>
+                )}
+              </div>
+            ))}
+          </div>
+        </AccordionContent>
+      </AccordionItem>
     </Accordion>
   )
 }
@@ -136,59 +139,61 @@ const MockSafeShieldHeader = ({
   status: 'safe' | 'warning' | 'critical' | 'loading'
   message?: string
 }) => {
-  const statusConfig = {
-    safe: { icon: CheckCircleIcon, color: 'success.main', text: 'Transaction looks safe' },
-    warning: { icon: WarningIcon, color: 'warning.main', text: 'Review required' },
-    critical: { icon: ErrorIcon, color: 'error.main', text: 'Potential threat detected' },
-    loading: { icon: SecurityIcon, color: 'text.secondary', text: 'Analyzing transaction...' },
+  const statusConfig: Record<typeof status, { icon: LucideIcon; color: string; text: string }> = {
+    safe: { icon: CircleCheck, color: 'text-[var(--color-success-main)]', text: 'Transaction looks safe' },
+    warning: { icon: TriangleAlert, color: 'text-[var(--color-warning-main)]', text: 'Review required' },
+    critical: { icon: CircleX, color: 'text-[var(--color-error-main)]', text: 'Potential threat detected' },
+    loading: { icon: ShieldCheck, color: 'text-muted-foreground', text: 'Analyzing transaction...' },
   }
   const config = statusConfig[status]
   const Icon = config.icon
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 2, borderBottom: 1, borderColor: 'divider' }}>
-      <Icon sx={{ color: config.color, fontSize: 28 }} />
-      <Box>
-        <Typography variant="subtitle1" fontWeight="bold">
-          {message || config.text}
+    <div className="flex items-center gap-4 border-b border-border p-4">
+      <Icon className={`size-7 ${config.color}`} />
+      <div>
+        <Typography variant="paragraph-bold">{message || config.text}</Typography>
+        <Typography variant="paragraph-mini" color="muted">
+          Safe Shield analysis
         </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Safe Shield Analysis
-        </Typography>
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 
 // All States - Scrollable view of all Safe Shield analysis states
 export const SafeShieldAllStates: StoryObj = {
   render: () => (
-    <Box sx={{ maxWidth: 500 }}>
-      <Box sx={{ mb: 6, pb: 3, borderBottom: '2px solid', borderColor: 'primary.main' }}>
-        <Typography variant="h4">Safe Shield Analysis States</Typography>
-        <Typography variant="body1" color="text.secondary">
+    <div className="max-w-[500px]">
+      <div className="mb-12 border-b-2 border-primary pb-6">
+        <Typography variant="h2">Safe Shield analysis states</Typography>
+        <Typography variant="paragraph" color="muted">
           All possible states of the transaction security analysis. Scroll to view each state.
         </Typography>
-      </Box>
+      </div>
 
       {/* State 1: Loading */}
       <StateWrapper stateName="Loading" description="Analysis in progress while scanning the transaction.">
-        <Paper sx={{ width: 350 }}>
+        <div className="bg-background w-[350px] rounded-lg">
           <MockSafeShieldHeader status="loading" />
-          <Box sx={{ p: 2 }}>
-            <LinearProgress sx={{ mb: 2 }} />
-            <Typography variant="body2" color="text.secondary" textAlign="center">
+          <div className="p-4">
+            <Progress className="mb-4" value={null}>
+              <ProgressTrack>
+                <ProgressIndicator />
+              </ProgressTrack>
+            </Progress>
+            <Typography variant="paragraph-small" color="muted" align="center">
               Analyzing transaction security...
             </Typography>
-          </Box>
-        </Paper>
+          </div>
+        </div>
       </StateWrapper>
 
       {/* State 2: Safe */}
-      <StateWrapper stateName="Safe (All Checks Passed)" description="Transaction passed all security checks.">
-        <Paper sx={{ width: 350 }}>
+      <StateWrapper stateName="Safe (all checks passed)" description="Transaction passed all security checks.">
+        <div className="bg-background w-[350px] rounded-lg">
           <MockSafeShieldHeader status="safe" />
-          <Box sx={{ p: 2 }}>
+          <div className="p-4">
             <MockAnalysisGroupCard
               title="Contract verification"
               severity="OK"
@@ -209,23 +214,23 @@ export const SafeShieldAllStates: StoryObj = {
               severity="OK"
               items={[{ description: 'No threats detected' }]}
             />
-          </Box>
-          <Box sx={{ p: 1, borderTop: 1, borderColor: 'divider', textAlign: 'center' }}>
-            <Typography variant="caption" color="text.secondary">
+          </div>
+          <div className="border-t border-border p-2 text-center">
+            <Typography variant="paragraph-mini" color="muted">
               Powered by Safe Shield
             </Typography>
-          </Box>
-        </Paper>
+          </div>
+        </div>
       </StateWrapper>
 
       {/* State 3: Warning */}
       <StateWrapper
-        stateName="Warning (Review Required)"
+        stateName="Warning (review required)"
         description="Some checks need attention but transaction is not blocked."
       >
-        <Paper sx={{ width: 350 }}>
+        <div className="bg-background w-[350px] rounded-lg">
           <MockSafeShieldHeader status="warning" message="Review before proceeding" />
-          <Box sx={{ p: 2 }}>
+          <div className="p-4">
             <MockAnalysisGroupCard
               title="Contract verification"
               severity="WARN"
@@ -241,21 +246,21 @@ export const SafeShieldAllStates: StoryObj = {
               severity="OK"
               items={[{ description: 'Address has previous transactions' }]}
             />
-          </Box>
-        </Paper>
+          </div>
+        </div>
       </StateWrapper>
 
       {/* State 4: Critical */}
       <StateWrapper
-        stateName="Critical (Threat Detected)"
+        stateName="Critical (threat detected)"
         description="Potential threat detected. User should be cautious."
       >
-        <Paper sx={{ width: 350 }}>
+        <div className="bg-background w-[350px] rounded-lg">
           <MockSafeShieldHeader status="critical" message="Potential threat detected!" />
-          <Alert severity="error" sx={{ m: 2 }}>
-            This transaction may be malicious. Review carefully before proceeding.
+          <Alert variant="destructive" className="m-4">
+            <AlertDescription>This transaction may be malicious. Review carefully before proceeding.</AlertDescription>
           </Alert>
-          <Box sx={{ p: 2 }}>
+          <div className="p-4">
             <MockAnalysisGroupCard
               title="Threat detection"
               severity="CRITICAL"
@@ -270,75 +275,59 @@ export const SafeShieldAllStates: StoryObj = {
                 },
               ]}
             />
-          </Box>
-        </Paper>
+          </div>
+        </div>
       </StateWrapper>
 
       {/* State 5: Balance Changes */}
       <StateWrapper
-        stateName="Balance Changes Preview"
+        stateName="Balance changes preview"
         description="Shows simulated balance changes from the transaction."
       >
-        <Paper sx={{ p: 3, width: 350 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            Simulated Balance Changes
+        <div className="bg-background w-[350px] rounded-lg p-6">
+          <Typography variant="paragraph-small-bold" className="mb-2 block">
+            Simulated balance changes
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                p: 1.5,
-                bgcolor: 'error.light',
-                borderRadius: 1,
-              }}
-            >
-              <Typography variant="body2">ETH</Typography>
-              <Typography variant="body2" color="error.main" fontWeight="bold">
+          <div className="flex flex-col gap-2">
+            <div className="bg-[var(--color-error-light)] flex justify-between rounded-md p-1.5">
+              <Typography variant="paragraph-small">ETH</Typography>
+              <Typography variant="paragraph-small-bold" className="text-[var(--color-error-main)]">
                 -1.5 ETH
               </Typography>
-            </Box>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                p: 1.5,
-                bgcolor: 'success.light',
-                borderRadius: 1,
-              }}
-            >
-              <Typography variant="body2">USDC</Typography>
-              <Typography variant="body2" color="success.main" fontWeight="bold">
+            </div>
+            <div className="bg-[var(--color-success-light)] flex justify-between rounded-md p-1.5">
+              <Typography variant="paragraph-small">USDC</Typography>
+              <Typography variant="paragraph-small-bold" className="text-[var(--color-success-main)]">
                 +2,775 USDC
               </Typography>
-            </Box>
-          </Box>
-        </Paper>
+            </div>
+          </div>
+        </div>
       </StateWrapper>
 
       {/* State 6: Severity Levels Reference */}
-      <StateWrapper stateName="Severity Levels" description="Reference of all severity indicators used in analysis.">
-        <Paper sx={{ p: 3, width: 350 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            Severity Levels
+      <StateWrapper stateName="Severity levels" description="Reference of all severity indicators used in analysis.">
+        <div className="bg-background w-[350px] rounded-lg p-6">
+          <Typography variant="paragraph-small-bold" className="mb-2 block">
+            Severity levels
           </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div className="flex flex-col gap-4">
             {(Object.keys(severityConfig) as Array<keyof typeof severityConfig>).map((severity) => {
               const config = severityConfig[severity]
               return (
-                <Box key={severity} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <div key={severity} className="flex items-center gap-4">
                   <MockSeverityIcon severity={severity} />
-                  <Typography variant="body2" sx={{ flex: 1 }}>
+                  <Typography variant="paragraph-small" className="flex-1">
                     {severity}
                   </Typography>
-                  <Chip label={config.label} size="small" sx={{ bgcolor: config.bgColor, color: config.color }} />
-                </Box>
+                  <Chip className={`${config.bgColor} ${config.color}`}>{config.label}</Chip>
+                </div>
               )
             })}
-          </Box>
-        </Paper>
+          </div>
+        </div>
       </StateWrapper>
-    </Box>
+    </div>
   ),
   parameters: {
     docs: {
@@ -352,9 +341,9 @@ export const SafeShieldAllStates: StoryObj = {
 // Individual state: Full Safe Shield widget
 export const FullSafeShieldWidget: StoryObj = {
   render: () => (
-    <Paper sx={{ width: 350 }}>
+    <div className="bg-background w-[350px] rounded-lg">
       <MockSafeShieldHeader status="safe" />
-      <Box sx={{ p: 2 }}>
+      <div className="p-4">
         <MockAnalysisGroupCard
           title="Contract verification"
           severity="OK"
@@ -373,13 +362,13 @@ export const FullSafeShieldWidget: StoryObj = {
           severity="OK"
           items={[{ description: 'No threats detected' }]}
         />
-      </Box>
-      <Box sx={{ p: 1, borderTop: 1, borderColor: 'divider', textAlign: 'center' }}>
-        <Typography variant="caption" color="text.secondary">
+      </div>
+      <div className="border-t border-border p-2 text-center">
+        <Typography variant="paragraph-mini" color="muted">
           Powered by Safe Shield
         </Typography>
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -393,9 +382,9 @@ export const FullSafeShieldWidget: StoryObj = {
 // Checks Passed
 export const ChecksPassed: StoryObj = {
   render: () => (
-    <Paper sx={{ width: 350 }}>
+    <div className="bg-background w-[350px] rounded-lg">
       <MockSafeShieldHeader status="safe" />
-      <Box sx={{ p: 2 }}>
+      <div className="p-4">
         <MockAnalysisGroupCard
           title="All checks passed"
           severity="OK"
@@ -406,8 +395,8 @@ export const ChecksPassed: StoryObj = {
           ]}
           expanded
         />
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -421,9 +410,9 @@ export const ChecksPassed: StoryObj = {
 // Warning State
 export const WarningState: StoryObj = {
   render: () => (
-    <Paper sx={{ width: 350 }}>
+    <div className="bg-background w-[350px] rounded-lg">
       <MockSafeShieldHeader status="warning" message="Review before proceeding" />
-      <Box sx={{ p: 2 }}>
+      <div className="p-4">
         <MockAnalysisGroupCard
           title="Contract verification"
           severity="WARN"
@@ -440,8 +429,8 @@ export const WarningState: StoryObj = {
           severity="OK"
           items={[{ description: 'Address has previous transactions' }]}
         />
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -455,12 +444,12 @@ export const WarningState: StoryObj = {
 // Critical Threat
 export const CriticalThreat: StoryObj = {
   render: () => (
-    <Paper sx={{ width: 350 }}>
+    <div className="bg-background w-[350px] rounded-lg">
       <MockSafeShieldHeader status="critical" message="Potential threat detected!" />
-      <Alert severity="error" sx={{ m: 2 }}>
-        This transaction may be malicious. Review carefully before proceeding.
+      <Alert variant="destructive" className="m-4">
+        <AlertDescription>This transaction may be malicious. Review carefully before proceeding.</AlertDescription>
       </Alert>
-      <Box sx={{ p: 2 }}>
+      <div className="p-4">
         <MockAnalysisGroupCard
           title="Threat detection"
           severity="CRITICAL"
@@ -476,8 +465,8 @@ export const CriticalThreat: StoryObj = {
           ]}
           expanded
         />
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -491,15 +480,19 @@ export const CriticalThreat: StoryObj = {
 // Loading State
 export const LoadingState: StoryObj = {
   render: () => (
-    <Paper sx={{ width: 350 }}>
+    <div className="bg-background w-[350px] rounded-lg">
       <MockSafeShieldHeader status="loading" />
-      <Box sx={{ p: 2 }}>
-        <LinearProgress sx={{ mb: 2 }} />
-        <Typography variant="body2" color="text.secondary" textAlign="center">
+      <div className="p-4">
+        <Progress className="mb-4" value={null}>
+          <ProgressTrack>
+            <ProgressIndicator />
+          </ProgressTrack>
+        </Progress>
+        <Typography variant="paragraph-small" color="muted" align="center">
           Analyzing transaction security...
         </Typography>
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -513,9 +506,9 @@ export const LoadingState: StoryObj = {
 // Unverified Contract
 export const UnverifiedContract: StoryObj = {
   render: () => (
-    <Paper sx={{ width: 350 }}>
+    <div className="bg-background w-[350px] rounded-lg">
       <MockSafeShieldHeader status="warning" />
-      <Box sx={{ p: 2 }}>
+      <div className="p-4">
         <MockAnalysisGroupCard
           title="Contract verification"
           severity="WARN"
@@ -527,8 +520,8 @@ export const UnverifiedContract: StoryObj = {
           ]}
           expanded
         />
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -542,41 +535,25 @@ export const UnverifiedContract: StoryObj = {
 // Balance Changes
 export const BalanceChanges: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, width: 350 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Simulated Balance Changes
+    <div className="bg-background w-[350px] rounded-lg p-6">
+      <Typography variant="paragraph-small-bold" className="mb-2 block">
+        Simulated balance changes
       </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            p: 1.5,
-            bgcolor: 'error.light',
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="body2">ETH</Typography>
-          <Typography variant="body2" color="error.main" fontWeight="bold">
+      <div className="flex flex-col gap-2">
+        <div className="bg-[var(--color-error-light)] flex justify-between rounded-md p-1.5">
+          <Typography variant="paragraph-small">ETH</Typography>
+          <Typography variant="paragraph-small-bold" className="text-[var(--color-error-main)]">
             -1.5 ETH
           </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            p: 1.5,
-            bgcolor: 'success.light',
-            borderRadius: 1,
-          }}
-        >
-          <Typography variant="body2">USDC</Typography>
-          <Typography variant="body2" color="success.main" fontWeight="bold">
+        </div>
+        <div className="bg-[var(--color-success-light)] flex justify-between rounded-md p-1.5">
+          <Typography variant="paragraph-small">USDC</Typography>
+          <Typography variant="paragraph-small-bold" className="text-[var(--color-success-main)]">
             +2,775 USDC
           </Typography>
-        </Box>
-      </Box>
-    </Paper>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -590,25 +567,25 @@ export const BalanceChanges: StoryObj = {
 // Severity Levels
 export const SeverityLevels: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, width: 350 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Severity Levels
+    <div className="bg-background w-[350px] rounded-lg p-6">
+      <Typography variant="paragraph-small-bold" className="mb-2 block">
+        Severity levels
       </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="flex flex-col gap-4">
         {(Object.keys(severityConfig) as Array<keyof typeof severityConfig>).map((severity) => {
           const config = severityConfig[severity]
           return (
-            <Box key={severity} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <div key={severity} className="flex items-center gap-4">
               <MockSeverityIcon severity={severity} />
-              <Typography variant="body2" sx={{ flex: 1 }}>
+              <Typography variant="paragraph-small" className="flex-1">
                 {severity}
               </Typography>
-              <Chip label={config.label} size="small" sx={{ bgcolor: config.bgColor, color: config.color }} />
-            </Box>
+              <Chip className={`${config.bgColor} ${config.color}`}>{config.label}</Chip>
+            </div>
           )
         })}
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -622,9 +599,9 @@ export const SeverityLevels: StoryObj = {
 // Multiple Issues
 export const MultipleIssues: StoryObj = {
   render: () => (
-    <Paper sx={{ width: 350 }}>
+    <div className="bg-background w-[350px] rounded-lg">
       <MockSafeShieldHeader status="warning" message="Multiple issues found" />
-      <Box sx={{ p: 2 }}>
+      <div className="p-4">
         <MockAnalysisGroupCard
           title="Contract verification"
           severity="WARN"
@@ -640,8 +617,8 @@ export const MultipleIssues: StoryObj = {
           severity="WARN"
           items={[{ description: 'Unusual token approval pattern detected' }]}
         />
-      </Box>
-    </Paper>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -655,9 +632,9 @@ export const MultipleIssues: StoryObj = {
 // Analysis Group Card Expanded
 export const AnalysisGroupCardExpanded: StoryObj = {
   render: () => (
-    <Paper sx={{ width: 350, p: 2 }}>
+    <div className="bg-background w-[350px] rounded-lg p-4">
       <MockAnalysisGroupCard
-        title="Detailed Analysis"
+        title="Detailed analysis"
         severity="INFO"
         items={[
           { description: 'Contract deployed 2 years ago', details: 'Block: 15,234,567' },
@@ -666,7 +643,7 @@ export const AnalysisGroupCardExpanded: StoryObj = {
         ]}
         expanded
       />
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -680,30 +657,30 @@ export const AnalysisGroupCardExpanded: StoryObj = {
 // Address Changes
 export const AddressChanges: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 3, width: 350 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Address Changes Detected
+    <div className="bg-background w-[350px] rounded-lg p-6">
+      <Typography variant="paragraph-small-bold" className="mb-2 block">
+        Address changes detected
       </Typography>
-      <Alert severity="warning" sx={{ mb: 2 }}>
-        This transaction will modify Safe settings
+      <Alert variant="warning" className="mb-4">
+        <AlertDescription>This transaction will modify Safe settings</AlertDescription>
       </Alert>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <Box sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-          <Typography variant="caption" color="text.secondary">
+      <div className="flex flex-col gap-2">
+        <div className="rounded-md border border-border p-4">
+          <Typography variant="paragraph-mini" color="muted">
             Adding owner
           </Typography>
-          <Typography variant="body2" fontFamily="monospace">
+          <Typography variant="paragraph-small" className="font-mono">
             0x1234...5678
           </Typography>
-        </Box>
-        <Box sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
-          <Typography variant="caption" color="text.secondary">
+        </div>
+        <div className="rounded-md border border-border p-4">
+          <Typography variant="paragraph-mini" color="muted">
             New threshold
           </Typography>
-          <Typography variant="body2">2 → 3 confirmations</Typography>
-        </Box>
-      </Box>
-    </Paper>
+          <Typography variant="paragraph-small">2 → 3 confirmations</Typography>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {

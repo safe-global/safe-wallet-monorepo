@@ -1,4 +1,6 @@
-import { Alert, AlertTitle, Box, Button, SvgIcon, Typography } from '@mui/material'
+import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import SpeedUpModal from '../SpeedUpModal'
 import Rocket from '@/public/images/common/rocket.svg'
 import { useCounter } from '@/components/common/Notifications/useCounter'
@@ -49,42 +51,34 @@ const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox' }: SpeedUpM
   }
 
   return (
-    <>
-      <Box>
-        <SpeedUpModal
-          open={openSpeedUpModal}
-          handleClose={() => setOpenSpeedUpModal(false)}
-          pendingTx={pendingTx}
-          gasLimit={pendingTx.gasLimit}
-          txId={txId}
-          txHash={pendingTx.txHash!}
-          signerAddress={pendingTx.signerAddress}
-          signerNonce={pendingTx.signerNonce}
-        />
-        {modalTrigger === 'alertBox' ? (
-          <Alert
-            severity="warning"
-            icon={<SvgIcon component={Rocket} />}
-            action={<Button onClick={onOpen}>{`Speed up >`}</Button>}
-          >
-            <AlertTitle>
-              <Typography
-                sx={{
-                  textAlign: 'left',
-                }}
-              >
-                Taking too long?
-              </Typography>
-            </AlertTitle>
-            Try to speed up with better gas parameters.
-          </Alert>
-        ) : (
-          <Button variant="outlined" size="small" sx={{ py: 0.6 }} onClick={onOpen}>
-            Speed up
-          </Button>
-        )}
-      </Box>
-    </>
+    <div>
+      <SpeedUpModal
+        open={openSpeedUpModal}
+        handleClose={() => setOpenSpeedUpModal(false)}
+        pendingTx={pendingTx}
+        gasLimit={pendingTx.gasLimit}
+        txId={txId}
+        txHash={pendingTx.txHash!}
+        signerAddress={pendingTx.signerAddress}
+        signerNonce={pendingTx.signerNonce}
+      />
+      {modalTrigger === 'alertBox' ? (
+        <Alert variant="warning">
+          <Rocket className="size-4" />
+          <AlertTitle>
+            <Typography align="left">Taking too long?</Typography>
+          </AlertTitle>
+          <AlertDescription>Try to speed up with better gas parameters.</AlertDescription>
+          <AlertAction>
+            <Button variant="ghost" onClick={onOpen}>{`Speed up >`}</Button>
+          </AlertAction>
+        </Alert>
+      ) : (
+        <Button variant="outline" size="sm" onClick={onOpen}>
+          Speed up
+        </Button>
+      )}
+    </div>
   )
 }
 

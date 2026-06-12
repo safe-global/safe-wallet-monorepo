@@ -2,6 +2,8 @@
   position: relative;
   padding: var(--space-2);
   border: 1px solid var(--color-warning-light);
+  border-radius: var(--radius-xl, 1.5rem);
+  background-color: var(--color-background-paper);
   display: grid;
   align-items: center;
   grid-template-columns: minmax(50px, 0.25fr) minmax(150px, 2fr) minmax(150px, 2fr) minmax(200px, 2fr) 1fr minmax(
@@ -42,12 +44,20 @@
 .txItems {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 0;
   margin-top: var(--space-2);
+  padding: 0;
+  border-radius: var(--radius-lg);
+  background-color: var(--muted);
+  overflow: hidden;
 }
 
-.txItems :global(.MuiAccordion-root) {
-  border-color: var(--color-border-light);
+.txItems > div:not(:last-child) {
+  border-bottom: 1px solid var(--border);
+}
+
+.txItems [data-slot='accordion-item'] {
+  border: none;
 }
 
 .txItems > div {

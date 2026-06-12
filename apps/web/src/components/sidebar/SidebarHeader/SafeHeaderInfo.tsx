@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
-import Typography from '@mui/material/Typography'
-import Skeleton from '@mui/material/Skeleton'
+import { Typography } from '@/components/ui/typography'
+import { Skeleton } from '@/components/ui/skeleton'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
@@ -38,7 +38,7 @@ const SafeHeaderInfo = (): ReactElement => {
         {safeAddress ? (
           <SafeIcon address={safeAddress} threshold={threshold} owners={owners?.length} />
         ) : (
-          <Skeleton variant="circular" width={40} height={40} />
+          <Skeleton className="size-10 rounded-full" />
         )}
       </div>
 
@@ -52,13 +52,13 @@ const SafeHeaderInfo = (): ReactElement => {
             badgeTooltip={isHypernativeGuard ? <SafeHeaderHnTooltip /> : undefined}
           />
         ) : (
-          <Typography variant="body2">
-            <Skeleton variant="text" width={86} />
-            <Skeleton variant="text" width={120} />
+          <Typography variant="paragraph-small">
+            <Skeleton className="h-4 w-[86px]" />
+            <Skeleton className="h-4 w-[120px]" />
           </Typography>
         )}
 
-        <Typography data-testid="currency-section" variant="body2" fontWeight={700}>
+        <Typography data-testid="currency-section" variant="paragraph-small-bold">
           {safe.deployed ? (
             balances.fiatTotal ? (
               <>
@@ -66,7 +66,7 @@ const SafeHeaderInfo = (): ReactElement => {
                 {balances.isAllTokensMode && <InfoTooltip title="Total based on default tokens and positions." />}
               </>
             ) : (
-              <Skeleton variant="text" width={60} />
+              <Skeleton className="h-4 w-[60px]" />
             )
           ) : shouldHideNativeTokenValue ? (
             hasOtherBalances ? (

@@ -1,7 +1,5 @@
-import DialogContent from '@mui/material/DialogContent'
-import DialogActions from '@mui/material/DialogActions'
-import Typography from '@mui/material/Typography'
-import Button from '@mui/material/Button'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import type { ReactElement } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'
@@ -47,22 +45,22 @@ const SafeListRemoveDialog = ({
 
   return (
     <ModalDialog open onClose={handleClose} dialogTitle="Delete entry" chainId={chainId}>
-      <DialogContent sx={{ p: '24px !important' }}>
+      <div className="p-6">
         <Typography>
           Are you sure you want to remove the <b>{safe}</b> account?
         </Typography>
-      </DialogContent>
+      </div>
 
-      <DialogActions>
-        <Button data-testid="cancel-btn" onClick={handleClose}>
+      <div className="flex justify-end gap-2 p-4 pt-2">
+        <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
           Cancel
         </Button>
         <Track {...OVERVIEW_EVENTS.DELETED_FROM_WATCHLIST} label={trackingLabel}>
-          <Button data-testid="delete-btn" onClick={handleConfirm} variant="danger" disableElevation>
+          <Button data-testid="delete-btn" onClick={handleConfirm} variant="destructive">
             Delete
           </Button>
         </Track>
-      </DialogActions>
+      </div>
     </ModalDialog>
   )
 }

@@ -19,12 +19,13 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import classnames from 'classnames'
 import { type ReactNode, useState } from 'react'
 import { Card, WidgetBody, WidgetContainer } from '@/components/dashboard/styled'
-import { Box, Button, CircularProgress, FormControlLabel, Grid, Switch, Typography } from '@mui/material'
-import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
-import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded'
-import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
-import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined'
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Typography } from '@/components/ui/typography'
+import { Circle, CircleCheck, CircleCheckBig, Lightbulb } from 'lucide-react'
 import css from './styles.module.css'
+import { ProgressRing } from './ProgressRing'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { BannerType, useBannerVisibility, HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative'
 import { calculateProgress } from './utils'
@@ -47,26 +48,15 @@ const StatusCard = ({
       <div className={css.topBadge}>{badge}</div>
       <div className={css.status}>
         {completed ? (
-          <CheckCircleRoundedIcon color="success" fontSize="medium" />
+          <CircleCheck className="size-6 text-[var(--color-success-main)]" />
         ) : (
-          <CircleOutlinedIcon color="inherit" fontSize="medium" />
+          <Circle className="size-6" />
         )}
       </div>
-      <Typography
-        variant="h4"
-        sx={{
-          fontWeight: 'bold',
-          mb: 2,
-        }}
-      >
+      <Typography variant="h4" className="mb-4 font-bold">
         {title}
       </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          color: 'primary.light',
-        }}
-      >
+      <Typography variant="paragraph-small" className="block text-[var(--color-primary-light)]">
         {content}
       </Typography>
       {children}
@@ -78,10 +68,7 @@ const ActivationStatusWidget = ({ explorerLink }: { explorerLink?: string }) => 
   return (
     <StatusCard
       badge={
-        <Typography
-          variant="body2"
-          sx={{ backgroundColor: 'border.light', borderRadius: '0 0 4px 4px', padding: '4px 8px' }}
-        >
+        <Typography variant="paragraph-small" className="block rounded-b bg-[var(--color-border-light)] px-2 py-1">
           Just submitted
         </Typography>
       }
@@ -90,7 +77,7 @@ const ActivationStatusWidget = ({ explorerLink }: { explorerLink?: string }) => 
       completed={false}
     >
       {explorerLink && (
-        <ExternalLink href={explorerLink} sx={{ mt: 2 }}>
+        <ExternalLink href={explorerLink} className="mt-4">
           View Explorer
         </ExternalLink>
       )}
@@ -102,8 +89,8 @@ const UsefulHintsWidget = () => {
   return (
     <StatusCard
       badge={
-        <Typography variant="body2" className={classnames(css.badgeText, css.badgeTextInfo)}>
-          <LightbulbOutlinedIcon fontSize="small" sx={{ mr: 0.5 }} />
+        <Typography variant="paragraph-small" className={classnames(css.badgeText, css.badgeTextInfo)}>
+          <Lightbulb className="mr-1 size-5" />
           Did you know
         </Typography>
       }
@@ -133,7 +120,7 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
   return (
     <StatusCard
       badge={
-        <Typography variant="body2" className={css.badgeText}>
+        <Typography variant="paragraph-small" className={css.badgeText}>
           First interaction
         </Typography>
       }
@@ -143,92 +130,44 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
     >
       {!completed && (
         <>
-          <Box
-            sx={{
-              mt: 2,
-            }}
-          >
+          <div className="mt-4">
             <Track {...OVERVIEW_EVENTS.ADD_FUNDS}>
-              <Button data-testid="add-funds-btn" onClick={toggleDialog} variant="contained" size="medium">
+              <Button data-testid="add-funds-btn" onClick={toggleDialog}>
                 Add funds
               </Button>
             </Track>
-          </Box>
+          </div>
           <ModalDialog
             open={open}
             onClose={toggleDialog}
             dialogTitle="Add funds to your Safe Account"
             hideChainIndicator
           >
-            <Box
-              sx={{
-                px: 4,
-                pb: 5,
-                pt: 4,
-              }}
-            >
-              <Grid
-                container
-                spacing={2}
-                sx={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mb: 4,
-                }}
-              >
-                <Grid
-                  data-testid="qr-code"
-                  item
-                  sx={{
-                    textAlign: 'center',
-                  }}
-                >
-                  <Box
-                    sx={{
-                      p: 1,
-                      border: 1,
-                      borderRadius: '6px',
-                      borderColor: 'border.light',
-                      display: 'inline-flex',
-                    }}
-                  >
+            <div className="px-8 pb-10 pt-8">
+              <div className="mb-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <div data-testid="qr-code" className="text-center">
+                  <div className="inline-flex rounded-md border border-[var(--color-border-light)] p-2">
                     <QRCode value={qrCode} size={132} />
-                  </Box>
-                  <Box>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          data-testid="qr-code-switch"
-                          checked={settings.shortName.qr}
-                          onChange={(e) => dispatch(setQrShortName(e.target.checked))}
-                        />
-                      }
-                      label={
-                        <>
-                          QR code with chain prefix (<b>{chain?.shortName}:</b>)
-                        </>
-                      }
-                    />
-                  </Box>
-                </Grid>
-                <Grid item xs>
-                  <Typography
-                    sx={{
-                      mb: 2,
-                    }}
-                  >
-                    Copy your address to send tokens from a different account.
-                  </Typography>
+                  </div>
+                  <div>
+                    <Label className="justify-center">
+                      <Switch
+                        data-testid="qr-code-switch"
+                        checked={settings.shortName.qr}
+                        onCheckedChange={(checked) => dispatch(setQrShortName(checked))}
+                      />
+                      <span>
+                        QR code with chain prefix (<b>{chain?.shortName}:</b>)
+                      </span>
+                    </Label>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <Typography className="mb-4">Copy your address to send tokens from a different account.</Typography>
 
-                  <Box
+                  <div
                     data-testid="address-info"
-                    sx={{
-                      bgcolor: 'background.main',
-                      p: 2,
-                      borderRadius: '6px',
-                      alignSelf: 'flex-start',
-                      fontSize: '14px',
-                    }}
+                    className="self-start rounded-md bg-[var(--color-background-main)] p-4 text-sm"
                   >
                     <EthHashInfo
                       address={safeAddress}
@@ -238,10 +177,10 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
                       hasExplorer
                       avatarSize={24}
                     />
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
+                  </div>
+                </div>
+              </div>
+            </div>
           </ModalDialog>
         </>
       )}
@@ -265,7 +204,7 @@ const FirstTransactionWidget = ({
     <>
       <StatusCard
         badge={
-          <Typography variant="body2" className={css.badgeText}>
+          <Typography variant="paragraph-small" className={css.badgeText}>
             First interaction
           </Typography>
         }
@@ -280,9 +219,8 @@ const FirstTransactionWidget = ({
                 <Button
                   data-testid="create-tx-btn"
                   onClick={() => setOpen(true)}
-                  variant="outlined"
-                  size="medium"
-                  sx={{ mt: 2 }}
+                  variant="outline"
+                  className="mt-4"
                   disabled={!isOk}
                 >
                   Create transaction
@@ -315,7 +253,7 @@ const ActivateSafeWidget = ({
     <>
       <StatusCard
         badge={
-          <Typography variant="body2" className={css.badgeText}>
+          <Typography variant="paragraph-small" className={css.badgeText}>
             First interaction
           </Typography>
         }
@@ -323,13 +261,7 @@ const ActivateSafeWidget = ({
         completed={false}
         content={content}
       >
-        <Box
-          sx={{
-            mt: 2,
-          }}
-        >
-          {ActivateAccountButton && <ActivateAccountButton />}
-        </Box>
+        <div className="mt-4">{ActivateAccountButton && <ActivateAccountButton />}</div>
       </StatusCard>
       {FirstTxFlow && <FirstTxFlow open={open} onClose={() => setOpen(false)} />}
     </>
@@ -340,16 +272,9 @@ const AccountReadyWidget = () => {
   return (
     <Card className={classnames(css.card, css.accountReady)}>
       <div className={classnames(css.checkIcon)}>
-        <CheckCircleOutlineRoundedIcon sx={{ width: '60px', height: '60px' }} />
+        <CircleCheckBig className="size-[60px]" />
       </div>
-      <Typography
-        variant="h4"
-        sx={{
-          fontWeight: 'bold',
-          mb: 2,
-          mt: 2,
-        }}
-      >
+      <Typography variant="h4" className="mb-4 mt-4 font-bold">
         Safe Account is ready!
       </Typography>
       <Typography>Continue to improve your account security and unlock more features</Typography>
@@ -386,75 +311,34 @@ const FirstSteps = () => {
   return (
     <WidgetContainer>
       <WidgetBody data-testid="activation-section">
-        <Grid
-          container
-          sx={{
-            gap: 3,
-            mb: 2,
-            flexWrap: 'nowrap',
-            alignItems: 'center',
-          }}
-        >
-          <Grid
-            item
-            sx={{
-              position: 'relative',
-              display: 'inline-flex',
-            }}
-          >
-            <svg className={css.gradient}>
-              <defs>
-                <linearGradient
-                  id="progress_gradient"
-                  x1="21.1648"
-                  y1="8.21591"
-                  x2="-9.95028"
-                  y2="22.621"
-                  gradientUnits="userSpaceOnUse"
-                >
-                  <stop stopColor="#5FDDFF" />
-                  <stop offset="1" stopColor="#12FF80" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <CircularProgress variant="determinate" value={100} className={css.circleBg} size={60} thickness={5} />
-            <CircularProgress
-              variant={isActivating ? 'indeterminate' : 'determinate'}
+        <div className="mb-4 flex flex-row flex-nowrap items-center gap-6">
+          <div className="relative inline-flex">
+            <ProgressRing
+              indeterminate={isActivating}
               value={progress === 0 ? 3 : progress} // Just to give an indication of the progress even at 0%
-              className={css.circleProgress}
-              size={60}
-              thickness={5}
-              sx={{ 'svg circle': { stroke: 'url(#progress_gradient)', strokeLinecap: 'round' } }}
             />
-          </Grid>
-          <Grid item>
-            <Typography
-              component="div"
-              variant="h2"
-              sx={{
-                fontWeight: 700,
-                mb: 1,
-              }}
-            >
+          </div>
+          <div>
+            <Typography variant="h2" className="mb-2">
               {isActivating ? 'Account is being activated...' : 'Activate your Safe Account'}
             </Typography>
 
             {isActivating ? (
-              <Typography variant="body2">
+              <Typography variant="paragraph-small" className="block">
                 <strong>This may take a few minutes.</strong> Once activated, your account will be up and running.
               </Typography>
             ) : (
-              <Typography variant="body2">
+              <Typography variant="paragraph-small" className="block">
                 <strong>
                   {stepsCompleted} of {completedItems.length} steps completed.
                 </strong>{' '}
                 Finish the next steps to start using all Safe Account features:
               </Typography>
             )}
-          </Grid>
-        </Grid>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div>
             {isActivating && chain ? (
               <ActivationStatusWidget
                 explorerLink={
@@ -466,9 +350,9 @@ const FirstSteps = () => {
             ) : (
               <AddFundsWidget completed={hasNonZeroBalance} />
             )}
-          </Grid>
+          </div>
 
-          <Grid item xs={12} md={4}>
+          <div>
             {isActivating ? (
               <UsefulHintsWidget />
             ) : isMultiSig || isReplayedSafe ? (
@@ -480,12 +364,10 @@ const FirstSteps = () => {
             ) : (
               <FirstTransactionWidget completed={hasOutgoingTransactions} FirstTxFlow={FirstTxFlow} />
             )}
-          </Grid>
+          </div>
 
-          <Grid item xs={12} md={4}>
-            {showHnDashboardBanner ? <HnDashboardBannerWithNoBalanceCheck /> : <AccountReadyWidget />}
-          </Grid>
-        </Grid>
+          <div>{showHnDashboardBanner ? <HnDashboardBannerWithNoBalanceCheck /> : <AccountReadyWidget />}</div>
+        </div>
       </WidgetBody>
     </WidgetContainer>
   )

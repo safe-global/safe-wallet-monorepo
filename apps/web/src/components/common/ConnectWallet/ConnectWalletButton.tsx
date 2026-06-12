@@ -1,4 +1,4 @@
-import { Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { cn } from '@/utils/cn'
 
@@ -28,12 +28,9 @@ const ConnectWalletButton = ({
     <Button
       data-testid="connect-wallet-btn"
       onClick={handleConnect}
-      variant={contained ? 'contained' : 'text'}
-      size={small ? 'small' : 'medium'}
-      disableElevation
-      fullWidth={fullWidth}
-      className={cn(className)}
-      sx={{ fontSize: small ? ['12px', '13px'] : '' }}
+      variant={contained ? 'default' : 'ghost'}
+      size={small ? 'sm' : 'default'}
+      className={cn(fullWidth && 'w-full', small && 'text-xs', className)}
     >
       {text || 'Connect'}
     </Button>

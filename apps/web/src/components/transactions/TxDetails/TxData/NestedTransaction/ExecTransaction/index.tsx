@@ -1,6 +1,6 @@
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
-import { Box, Skeleton } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 
 import Link from 'next/link'
@@ -78,7 +78,7 @@ export const ExecTransaction = ({
           {decodedNestedTxDataBlock}
 
           {chain && data && (
-            <Box>
+            <div>
               <Link
                 href={{
                   pathname: AppRoutes.transactions.history,
@@ -89,13 +89,13 @@ export const ExecTransaction = ({
               >
                 <ExternalLink>Open Safe</ExternalLink>
               </Link>
-            </Box>
+            </div>
           )}
         </>
       ) : error ? (
         <ErrorMessage>Could not load details on executed transaction.</ErrorMessage>
       ) : (
-        <Skeleton />
+        <Skeleton className="h-5 w-full" />
       )}
     </NestedTransaction>
   )

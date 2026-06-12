@@ -1,24 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
-import {
-  Box,
-  Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Checkbox,
-  IconButton,
-  Skeleton,
-  Dialog,
-  DialogContent,
-} from '@mui/material'
-import VisibilityIcon from '@mui/icons-material/Visibility'
-import OpenInNewIcon from '@mui/icons-material/OpenInNew'
-import CloseIcon from '@mui/icons-material/Close'
+import { Typography } from '@/components/ui/typography'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Eye, ExternalLink } from 'lucide-react'
 
 /**
  * NFT components display and manage collectibles (NFTs) owned by a Safe account.
@@ -97,170 +85,152 @@ const MockNftGrid = ({
 }) => {
   if (isLoading) {
     return (
-      <TableContainer component={Paper}>
+      <div className="rounded-lg border">
         <Table>
-          <TableHead>
+          <TableHeader>
             <TableRow>
-              <TableCell padding="checkbox">
+              <TableHead>
                 <Checkbox disabled />
-              </TableCell>
-              <TableCell>NFT</TableCell>
-              <TableCell>Collection</TableCell>
-              <TableCell>Token ID</TableCell>
-              <TableCell>Actions</TableCell>
+              </TableHead>
+              <TableHead>NFT</TableHead>
+              <TableHead>Collection</TableHead>
+              <TableHead>Token ID</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
-          </TableHead>
+          </TableHeader>
           <TableBody>
             {[1, 2, 3].map((i) => (
               <TableRow key={i}>
-                <TableCell padding="checkbox">
-                  <Skeleton variant="rectangular" width={20} height={20} />
+                <TableCell>
+                  <Skeleton className="size-5" />
                 </TableCell>
                 <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Skeleton variant="rectangular" width={48} height={48} />
-                    <Skeleton width={120} />
-                  </Box>
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="size-12" />
+                    <Skeleton className="h-4 w-[120px]" />
+                  </div>
                 </TableCell>
                 <TableCell>
-                  <Skeleton width={100} />
+                  <Skeleton className="h-4 w-[100px]" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton width={60} />
+                  <Skeleton className="h-4 w-[60px]" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton width={80} />
+                  <Skeleton className="h-4 w-[80px]" />
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
+      </div>
     )
   }
 
   if (nfts.length === 0) {
     return (
-      <Paper sx={{ p: 4, textAlign: 'center' }}>
-        <Typography variant="body1" color="text.secondary">
+      <div className="rounded-lg bg-card p-8 text-center">
+        <Typography variant="paragraph" color="muted">
           No NFTs found
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        <Typography variant="paragraph-small" color="muted" className="mt-2 block">
           This Safe does not own any collectibles yet.
         </Typography>
-      </Paper>
+      </div>
     )
   }
 
   return (
-    <TableContainer component={Paper}>
+    <div className="rounded-lg border">
       <Table>
-        <TableHead>
+        <TableHeader>
           <TableRow>
-            <TableCell padding="checkbox">
+            <TableHead>
               <Checkbox
                 indeterminate={selectedNfts.length > 0 && selectedNfts.length < nfts.length}
                 checked={selectedNfts.length === nfts.length}
               />
-            </TableCell>
-            <TableCell>NFT</TableCell>
-            <TableCell>Collection</TableCell>
-            <TableCell>Token ID</TableCell>
-            <TableCell>Actions</TableCell>
+            </TableHead>
+            <TableHead>NFT</TableHead>
+            <TableHead>Collection</TableHead>
+            <TableHead>Token ID</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
-        </TableHead>
+        </TableHeader>
         <TableBody>
           {nfts.map((nft) => (
-            <TableRow key={`${nft.address}-${nft.id}`} hover>
-              <TableCell padding="checkbox">
+            <TableRow key={`${nft.address}-${nft.id}`}>
+              <TableCell>
                 <Checkbox
                   checked={selectedNfts.some((s) => s.address === nft.address && s.id === nft.id)}
-                  onChange={() => onSelect(nft)}
+                  onCheckedChange={() => onSelect(nft)}
                 />
               </TableCell>
               <TableCell>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box
-                    sx={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 1,
-                      bgcolor: nft.imageUri ? 'transparent' : 'grey.200',
-                      backgroundImage: nft.imageUri ? `url(${nft.imageUri})` : 'none',
-                      backgroundSize: 'cover',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
+                <div className="flex items-center gap-4">
+                  <div
+                    className="flex size-12 items-center justify-center rounded-lg bg-muted bg-cover"
+                    style={nft.imageUri ? { backgroundImage: `url(${nft.imageUri})` } : undefined}
                   >
                     {!nft.imageUri && (
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="paragraph-mini" color="muted">
                         ?
                       </Typography>
                     )}
-                  </Box>
-                  <Typography variant="body2">{nft.name || `${nft.tokenSymbol} #${nft.id}`}</Typography>
-                </Box>
+                  </div>
+                  <Typography variant="paragraph-small">{nft.name || `${nft.tokenSymbol} #${nft.id}`}</Typography>
+                </div>
               </TableCell>
               <TableCell>
-                <Typography variant="body2">{nft.tokenName}</Typography>
+                <Typography variant="paragraph-small">{nft.tokenName}</Typography>
               </TableCell>
               <TableCell>
-                <Typography variant="body2" fontFamily="monospace">
-                  #{nft.id}
-                </Typography>
+                <Typography variant="code">#{nft.id}</Typography>
               </TableCell>
               <TableCell>
-                <IconButton size="small" onClick={() => onPreview(nft)} title="Preview">
-                  <VisibilityIcon fontSize="small" />
-                </IconButton>
-                <IconButton size="small" title="Open in explorer">
-                  <OpenInNewIcon fontSize="small" />
-                </IconButton>
+                <Button variant="ghost" size="icon-sm" onClick={() => onPreview(nft)} title="Preview">
+                  <Eye />
+                </Button>
+                <Button variant="ghost" size="icon-sm" title="Open in explorer">
+                  <ExternalLink />
+                </Button>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-    </TableContainer>
+    </div>
   )
 }
 
 // Mock Preview Modal
 const MockPreviewModal = ({ nft, onClose }: { nft: MockNft; onClose: () => void }) => (
-  <Dialog open onClose={onClose} maxWidth="sm" fullWidth>
-    <DialogContent sx={{ position: 'relative', p: 0 }}>
-      <IconButton onClick={onClose} sx={{ position: 'absolute', top: 8, right: 8, bgcolor: 'background.paper' }}>
-        <CloseIcon />
-      </IconButton>
-      <Box
-        sx={{
-          height: 300,
-          bgcolor: nft.imageUri ? 'transparent' : 'grey.200',
-          backgroundImage: nft.imageUri ? `url(${nft.imageUri})` : 'none',
-          backgroundSize: 'contain',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+  <Dialog
+    open
+    onOpenChange={(open) => {
+      if (!open) onClose()
+    }}
+  >
+    <DialogContent className="max-w-[600px] p-0">
+      <div
+        className="flex h-[300px] items-center justify-center bg-muted bg-contain bg-center bg-no-repeat"
+        style={nft.imageUri ? { backgroundImage: `url(${nft.imageUri})` } : undefined}
       >
         {!nft.imageUri && (
-          <Typography variant="h6" color="text.secondary">
-            No Preview
+          <Typography variant="h4" color="muted">
+            No preview
           </Typography>
         )}
-      </Box>
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h6">{nft.name || `${nft.tokenSymbol} #${nft.id}`}</Typography>
-        <Typography variant="body2" color="text.secondary">
+      </div>
+      <div className="p-6">
+        <Typography variant="h4">{nft.name || `${nft.tokenSymbol} #${nft.id}`}</Typography>
+        <Typography variant="paragraph-small" color="muted">
           {nft.tokenName}
         </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+        <Typography variant="paragraph-mini" color="muted" className="mt-1 block">
           Contract: {nft.address.slice(0, 10)}...{nft.address.slice(-8)}
         </Typography>
-      </Box>
+      </div>
     </DialogContent>
   </Dialog>
 )
@@ -281,8 +251,8 @@ const NftGridInteractive = ({ nfts = mockNfts, isLoading = false }: { nfts?: Moc
   }
 
   return (
-    <Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+    <div>
+      <Typography variant="paragraph-small" color="muted" className="mb-4 block">
         Selected: {selectedNfts.length} NFT{selectedNfts.length !== 1 ? 's' : ''}
       </Typography>
       <MockNftGrid
@@ -293,22 +263,22 @@ const NftGridInteractive = ({ nfts = mockNfts, isLoading = false }: { nfts?: Moc
         isLoading={isLoading}
       />
       {previewNft && <MockPreviewModal nft={previewNft} onClose={() => setPreviewNft(null)} />}
-    </Box>
+    </div>
   )
 }
 
 // Full NFT page simulation - FULL PAGE FIRST
 export const FullNftPage: StoryObj = {
   render: () => (
-    <Box sx={{ maxWidth: 1000 }}>
-      <Typography variant="h4" gutterBottom>
+    <div className="max-w-[1000px]">
+      <Typography variant="h4" className="mb-2">
         NFTs
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" className="mb-6 block">
         View and manage your collectibles. Select NFTs to transfer them.
       </Typography>
       <NftGridInteractive />
-    </Box>
+    </div>
   ),
   parameters: {
     layout: 'padded',
@@ -369,16 +339,16 @@ export const GridWithSelection: StoryObj = {
     }
 
     return (
-      <Box>
-        <Paper sx={{ p: 2, mb: 2, bgcolor: 'info.light' }}>
-          <Typography variant="body2">
+      <div>
+        <div className="mb-4 rounded-lg border border-border bg-muted p-4">
+          <Typography variant="paragraph-small">
             <strong>Selected NFTs:</strong>{' '}
             {selectedNfts.map((nft) => nft.name || `${nft.tokenSymbol} #${nft.id}`).join(', ') || 'None'}
           </Typography>
-        </Paper>
+        </div>
         <MockNftGrid nfts={mockNfts} selectedNfts={selectedNfts} onSelect={handleSelect} onPreview={setPreviewNft} />
         {previewNft && <MockPreviewModal nft={previewNft} onClose={() => setPreviewNft(null)} />}
-      </Box>
+      </div>
     )
   },
   parameters: {
@@ -395,15 +365,15 @@ export const PreviewModal: StoryObj = {
   render: () => {
     const [open, setOpen] = useState(true)
     return (
-      <Box>
+      <div>
         {open ? (
           <MockPreviewModal nft={mockNfts[0]} onClose={() => setOpen(false)} />
         ) : (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="paragraph-small" color="muted">
             Modal closed. Refresh to see it again.
           </Typography>
         )}
-      </Box>
+      </div>
     )
   },
   parameters: {
@@ -425,41 +395,29 @@ export const Collections: StoryObj = {
     ]
 
     return (
-      <Paper sx={{ p: 2, maxWidth: 600 }}>
-        <Typography variant="h6" gutterBottom>
+      <div className="max-w-[600px] rounded-lg bg-card p-4">
+        <Typography variant="h4" className="mb-4">
           Collections
         </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div className="flex flex-col gap-4">
           {collections.map((collection) => (
-            <Box
+            <div
               key={collection.name}
-              sx={{
-                p: 2,
-                border: 1,
-                borderColor: 'divider',
-                borderRadius: 1,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                cursor: 'pointer',
-                '&:hover': { bgcolor: 'action.hover' },
-              }}
+              className="flex cursor-pointer items-center justify-between rounded-lg border border-border p-4 hover:bg-muted"
             >
-              <Box>
-                <Typography variant="body1" fontWeight="bold">
-                  {collection.name}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
+              <div>
+                <Typography variant="paragraph-bold">{collection.name}</Typography>
+                <Typography variant="paragraph-mini" color="muted">
                   {collection.count} item{collection.count !== 1 ? 's' : ''}
                 </Typography>
-              </Box>
-              <Typography variant="body2" color="text.secondary">
+              </div>
+              <Typography variant="paragraph-small" color="muted">
                 Floor: {collection.floorPrice}
               </Typography>
-            </Box>
+            </div>
           ))}
-        </Box>
-      </Paper>
+        </div>
+      </div>
     )
   },
   parameters: {

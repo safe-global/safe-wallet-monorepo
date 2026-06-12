@@ -1,8 +1,9 @@
 import { Sticky } from '@/components/common/Sticky'
 import Track from '@/components/common/Track'
 import { ASSETS_EVENTS } from '@/services/analytics'
-import { VisibilityOffOutlined } from '@mui/icons-material'
-import { Box, Typography, Button } from '@mui/material'
+import { EyeOff } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 
 import css from './styles.module.css'
 
@@ -24,31 +25,31 @@ const TokenMenu = ({
   }
   return (
     <Sticky>
-      <Box className={css.wrapper}>
-        <Box className={css.hideTokensHeader}>
-          <VisibilityOffOutlined />
-          <Typography variant="body2" lineHeight="inherit">
+      <div className={css.wrapper}>
+        <div className={css.hideTokensHeader}>
+          <EyeOff />
+          <Typography variant="paragraph-small" className="leading-[inherit]">
             {selectedAssetCount} {selectedAssetCount === 1 ? 'token' : 'tokens'} selected
           </Typography>
-        </Box>
-        <Box display="flex" flexDirection="row" gap={1}>
+        </div>
+        <div className="flex flex-row gap-2">
           <Track {...ASSETS_EVENTS.CANCEL_HIDE_DIALOG}>
-            <Button onClick={cancel} className={css.cancelButton} size="small" variant="outlined">
+            <Button onClick={cancel} className={css.cancelButton} size="sm" variant="outline">
               Cancel
             </Button>
           </Track>
           <Track {...ASSETS_EVENTS.DESELECT_ALL_HIDE_DIALOG}>
-            <Button onClick={deselectAll} className={css.cancelButton} size="small" variant="outlined">
+            <Button onClick={deselectAll} className={css.cancelButton} size="sm" variant="outline">
               Deselect all
             </Button>
           </Track>
           <Track {...ASSETS_EVENTS.SAVE_HIDE_DIALOG}>
-            <Button onClick={saveChanges} className={css.applyButton} size="small" variant="contained">
+            <Button onClick={saveChanges} className={css.applyButton} size="sm" variant="default">
               Save
             </Button>
           </Track>
-        </Box>
-      </Box>
+        </div>
+      </div>
     </Sticky>
   )
 }

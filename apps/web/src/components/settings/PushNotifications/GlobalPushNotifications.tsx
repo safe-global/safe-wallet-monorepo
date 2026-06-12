@@ -1,20 +1,10 @@
 import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
 import { selectUndeployedSafes } from '@/features/counterfactual/store'
-import {
-  Box,
-  Grid,
-  Paper,
-  Typography,
-  Checkbox,
-  Button,
-  Divider,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  CircularProgress,
-} from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Spinner } from '@/components/ui/spinner'
 import mapValues from 'lodash/mapValues'
 import difference from 'lodash/difference'
 import pickBy from 'lodash/pickBy'
@@ -381,22 +371,20 @@ export const GlobalPushNotifications = (): ReactElement | null => {
 
   if (totalNotifiableSafes === 0) {
     return (
-      <Typography sx={{ color: ({ palette }) => palette.primary.light }}>
-        {address ? 'No owned Safes' : 'No wallet connected'}
-      </Typography>
+      <Typography className="text-muted-foreground">{address ? 'No owned Safes' : 'No wallet connected'}</Typography>
     )
   }
 
   return (
-    <Grid container>
-      <Grid item xs={12} display="flex" alignItems="center" justifyContent="space-between" mb={1}>
-        <Typography variant="h4" fontWeight={700} display="inline">
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <Typography variant="h4" className="inline">
           My Safes Accounts ({totalNotifiableSafes})
         </Typography>
 
-        <Box display="flex" alignItems="center">
+        <div className="flex items-center">
           {totalSignaturesRequired > 0 && (
-            <Typography display="inline" mr={2} textAlign="right">
+            <Typography className="mr-4 inline text-right">
               We&apos;ll ask you to verify ownership of each Safe Account with your signature per chain{' '}
               {totalSignaturesRequired} time{maybePlural(totalSignaturesRequired)}
             </Typography>
@@ -404,104 +392,112 @@ export const GlobalPushNotifications = (): ReactElement | null => {
 
           <CheckWalletWithPermission permission={Permission.EnablePushNotifications}>
             {(isOk) => (
-              <Button variant="contained" disabled={!canSave || !isOk || isLoading} onClick={onSave}>
-                {isLoading ? <CircularProgress size={20} /> : 'Save'}
+              <Button disabled={!canSave || !isOk || isLoading} onClick={onSave}>
+                {isLoading ? <Spinner className="size-5" /> : 'Save'}
               </Button>
             )}
           </CheckWalletWithPermission>
-        </Box>
-      </Grid>
+        </div>
+      </div>
 
-      <Grid item xs={12}>
-        <Paper sx={{ border: ({ palette }) => `1px solid ${palette.border.light}` }}>
-          <List>
-            <ListItem disablePadding className={css.item}>
-              <ListItemButton onClick={onSelectAll} dense>
-                <ListItemIcon className={css.icon}>
-                  <Checkbox edge="start" checked={isAllSelected} disableRipple />
-                </ListItemIcon>
-                <ListItemText primary="Select all" primaryTypographyProps={{ variant: 'h5' }} />
-              </ListItemButton>
-            </ListItem>
-          </List>
+      <div className="rounded-lg border border-[var(--color-border-light)] bg-[var(--color-background-paper)]">
+        <div
+          role="button"
+          tabIndex={0}
+          className={`${css.item} flex w-full cursor-pointer items-center gap-3 py-2 text-left`}
+          onClick={onSelectAll}
+        >
+          <span className={css.icon}>
+            <Checkbox checked={isAllSelected} aria-hidden tabIndex={-1} className="pointer-events-none" />
+          </span>
+          <Typography variant="paragraph-bold">Select all</Typography>
+        </div>
 
-          <Divider />
+        <Separator />
 
-          {Object.entries(notifiableSafes).map(([chainId, safeAddresses], i, arr) => {
-            if (safeAddresses.length === 0) return
-            const chain = chains.configs?.find((chain) => chain.chainId === chainId)
+        {Object.entries(notifiableSafes).map(([chainId, safeAddresses], i, arr) => {
+          if (safeAddresses.length === 0) return
+          const chain = chains.configs?.find((chain) => chain.chainId === chainId)
 
-            const isChainSelected = safeAddresses.every((address) => {
-              return selectedSafes[chainId]?.includes(address)
+          const isChainSelected = safeAddresses.every((address) => {
+            return selectedSafes[chainId]?.includes(address)
+          })
+
+          const onSelectChain = () => {
+            setSelectedSafes((prev) => {
+              return {
+                ...prev,
+                [chainId]: isChainSelected ? [] : safeAddresses,
+              }
             })
+          }
 
-            const onSelectChain = () => {
-              setSelectedSafes((prev) => {
-                return {
-                  ...prev,
-                  [chainId]: isChainSelected ? [] : safeAddresses,
-                }
-              })
-            }
+          return (
+            <Fragment key={chainId}>
+              <div>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className={`${css.item} flex w-full cursor-pointer items-center gap-3 py-2 text-left`}
+                  onClick={onSelectChain}
+                >
+                  <span className={css.icon}>
+                    <Checkbox checked={isChainSelected} aria-hidden tabIndex={-1} className="pointer-events-none" />
+                  </span>
+                  <Typography variant="paragraph-bold">{`${chain?.chainName} Safe Accounts`}</Typography>
+                </div>
 
-            return (
-              <Fragment key={chainId}>
-                <List>
-                  <ListItem disablePadding className={css.item}>
-                    <ListItemButton onClick={onSelectChain} dense>
-                      <ListItemIcon className={css.icon}>
-                        <Checkbox edge="start" checked={isChainSelected} disableRipple />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={`${chain?.chainName} Safe Accounts`}
-                        primaryTypographyProps={{ variant: 'h5' }}
-                      />
-                    </ListItemButton>
-                  </ListItem>
+                <div className={css.item}>
+                  {safeAddresses.map((safeAddress) => {
+                    const isSafeSelected = selectedSafes[chainId]?.includes(safeAddress) ?? false
 
-                  <List disablePadding className={css.item}>
-                    {safeAddresses.map((safeAddress) => {
-                      const isSafeSelected = selectedSafes[chainId]?.includes(safeAddress) ?? false
+                    const onSelectSafe = () => {
+                      setSelectedSafes((prev) => {
+                        return {
+                          ...prev,
+                          [chainId]: isSafeSelected
+                            ? prev[chainId]?.filter((addr) => !sameAddress(addr, safeAddress))
+                            : [...(prev[chainId] ?? []), safeAddress],
+                        }
+                      })
+                    }
 
-                      const onSelectSafe = () => {
-                        setSelectedSafes((prev) => {
-                          return {
-                            ...prev,
-                            [chainId]: isSafeSelected
-                              ? prev[chainId]?.filter((addr) => !sameAddress(addr, safeAddress))
-                              : [...(prev[chainId] ?? []), safeAddress],
-                          }
-                        })
-                      }
+                    return (
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        key={safeAddress}
+                        className="flex w-full cursor-pointer items-center gap-3 py-0.5 pl-14 text-left"
+                        onClick={onSelectSafe}
+                      >
+                        <span className={css.icon}>
+                          <Checkbox
+                            checked={isSafeSelected}
+                            aria-hidden
+                            tabIndex={-1}
+                            className="pointer-events-none"
+                          />
+                        </span>
+                        <EthHashInfo
+                          avatarSize={36}
+                          prefix={chain?.shortName}
+                          key={safeAddress}
+                          address={safeAddress || ''}
+                          shortAddress={false}
+                          showName={true}
+                          chainId={chainId}
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
 
-                      return (
-                        <ListItem disablePadding key={safeAddress}>
-                          <ListItemButton sx={{ pl: 7, py: 0.5 }} onClick={onSelectSafe} dense>
-                            <ListItemIcon className={css.icon}>
-                              <Checkbox edge="start" checked={isSafeSelected} disableRipple />
-                            </ListItemIcon>
-                            <EthHashInfo
-                              avatarSize={36}
-                              prefix={chain?.shortName}
-                              key={safeAddress}
-                              address={safeAddress || ''}
-                              shortAddress={false}
-                              showName={true}
-                              chainId={chainId}
-                            />
-                          </ListItemButton>
-                        </ListItem>
-                      )
-                    })}
-                  </List>
-                </List>
-
-                {i !== arr.length - 1 ? <Divider /> : null}
-              </Fragment>
-            )
-          })}
-        </Paper>
-      </Grid>
-    </Grid>
+              {i !== arr.length - 1 ? <Separator /> : null}
+            </Fragment>
+          )
+        })}
+      </div>
+    </div>
   )
 }

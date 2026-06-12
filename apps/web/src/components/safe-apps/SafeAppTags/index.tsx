@@ -1,5 +1,4 @@
-import Stack from '@mui/material/Stack'
-import Chip from '@mui/material/Chip'
+import { Chip } from '@/components/ui/chip'
 
 import { filterInternalCategories } from '@/components/safe-apps/utils'
 import css from './styles.module.css'
@@ -14,18 +13,13 @@ const SafeAppTags = ({ tags = [], compact }: SafeAppTagsProps) => {
   const displayedTags = filterInternalCategories(tags)
 
   return (
-    <Stack
-      className={classnames(css.safeAppTagContainer, { [css.compact]: compact })}
-      sx={{
-        flexDirection: 'row',
-        gap: 1,
-        flexWrap: 'wrap',
-      }}
-    >
+    <div className={classnames('flex flex-row flex-wrap gap-2', css.safeAppTagContainer, { [css.compact]: compact })}>
       {displayedTags.map((tag) => (
-        <Chip className={css.safeAppTagLabel} key={tag} label={tag} />
+        <Chip className={css.safeAppTagLabel} key={tag}>
+          {tag}
+        </Chip>
       ))}
-    </Stack>
+    </div>
   )
 }
 

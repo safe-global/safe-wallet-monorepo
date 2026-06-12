@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-color: var(--color-background-main);
+  background-color: transparent;
   z-index: 2;
   width: 100%;
   position: sticky !important;
@@ -23,7 +23,7 @@
 }
 
 .border {
-  border-bottom: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--border);
 }
 
 .pageHeader,
@@ -39,7 +39,7 @@
 }
 
 .actionsWrapper {
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
 @media (max-width: 599.95px) {
@@ -58,7 +58,7 @@
   }
 
   .navWrapper {
-    border-bottom: 1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--border);
     margin-left: calc(var(--space-2) * -1);
     padding-left: var(--space-2);
     margin-right: calc(var(--space-2) * -1);

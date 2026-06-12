@@ -224,7 +224,9 @@ describe('SignerForm', () => {
       </TestSafeTxProvider>,
     )
     expect(result.queryByText('Execute with')).toBeVisible()
-    await waitFor(() => expect(result.queryByText(shortenAddress(mockSafeInfo.safe.owners[1].value))).toBeVisible())
+    await waitFor(() =>
+      expect(result.getByRole('combobox')).toHaveTextContent(shortenAddress(mockSafeInfo.safe.owners[1].value)),
+    )
   })
 
   it('should correctly pre-select the signer if the connected wallet has already signed', async () => {
@@ -259,7 +261,7 @@ describe('SignerForm', () => {
     )
     expect(result.queryByText('Sign with')).toBeVisible()
     await waitFor(() => {
-      expect(result.queryByText(shortenAddress(mockSafeInfo.safe.owners[1].value))).toBeVisible()
+      expect(result.getByRole('combobox')).toHaveTextContent(shortenAddress(mockSafeInfo.safe.owners[1].value))
     })
   })
 

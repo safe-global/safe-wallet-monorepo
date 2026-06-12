@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Paper, Grid, Typography, Button, SvgIcon, Box } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 
 import FileIcon from '@/public/images/settings/data/file.svg'
 import ExportIcon from '@/public/images/common/export.svg'
@@ -76,28 +77,26 @@ const DataManagement = () => {
 
   return (
     <>
-      <Paper sx={{ p: 4, mb: 2 }}>
-        <Grid container spacing={3}>
-          <Grid item sm={4} xs={12}>
-            <Typography variant="h4" fontWeight={700}>
-              Data export
-            </Typography>
-          </Grid>
+      <div className="mb-4 rounded-lg bg-[var(--color-background-paper)] p-8">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_2fr]">
+          <div>
+            <Typography variant="h4">Data export</Typography>
+          </div>
 
-          <Grid data-testid="export-file-section" item container xs>
+          <div data-testid="export-file-section">
             <Typography>Download your local data with your added Safe Accounts, address book and settings.</Typography>
 
             <FileListCard
               avatar={
-                <Box className={css.fileIcon} sx={{ borderRadius: ({ shape }) => `${shape.borderRadius}px` }}>
-                  <SvgIcon component={FileIcon} inheritViewBox fontSize="small" sx={{ fill: 'none' }} />
-                </Box>
+                <div className={`${css.fileIcon} rounded`}>
+                  <FileIcon className="size-4 fill-none" />
+                </div>
               }
               title={<b>{exportFileName}</b>}
               action={
                 <Track {...OVERVIEW_EVENTS.EXPORT_DATA} label={OVERVIEW_LABELS.settings}>
-                  <Button variant="contained" className={css.exportIcon} onClick={exportAppData}>
-                    <SvgIcon component={ExportIcon} inheritViewBox fontSize="small" />
+                  <Button className={css.exportIcon} onClick={exportAppData}>
+                    <ExportIcon className="size-4" />
                   </Button>
                 </Track>
               }
@@ -108,21 +107,19 @@ const DataManagement = () => {
               safeApps={safeApps}
               undeployedSafes={undeployedSafes}
             />
-          </Grid>
-        </Grid>
-      </Paper>
+          </div>
+        </div>
+      </div>
 
-      <Paper sx={{ p: 4, mb: 2 }}>
-        <Grid container spacing={3}>
-          <Grid item sm={4} xs={12}>
-            <Typography variant="h4" fontWeight={700}>
-              Data import
-            </Typography>
-          </Grid>
+      <div className="mb-4 rounded-lg bg-[var(--color-background-paper)] p-8">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_2fr]">
+          <div>
+            <Typography variant="h4">Data import</Typography>
+          </div>
 
-          <Grid item xs>
+          <div>
             <ImportFileUpload setFileName={setImportFileName} setJsonData={setJsonData} />
-          </Grid>
+          </div>
 
           {jsonData && (
             <ImportDialog
@@ -132,22 +129,20 @@ const DataManagement = () => {
               setFileName={setImportFileName}
             />
           )}
-        </Grid>
-      </Paper>
+        </div>
+      </div>
 
-      <Paper sx={{ p: 4 }}>
-        <Grid container spacing={3}>
-          <Grid item sm={4} xs={12}>
-            <Typography variant="h4" fontWeight={700}>
-              Pending transactions
-            </Typography>
-          </Grid>
+      <div className="rounded-lg bg-[var(--color-background-paper)] p-8">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_2fr]">
+          <div>
+            <Typography variant="h4">Pending transactions</Typography>
+          </div>
 
-          <Grid data-testid="clear-pending-tx-section" item container xs>
+          <div data-testid="clear-pending-tx-section">
             <ClearPendingTxs />
-          </Grid>
-        </Grid>
-      </Paper>
+          </div>
+        </div>
+      </div>
     </>
   )
 }

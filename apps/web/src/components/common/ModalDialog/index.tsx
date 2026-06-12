@@ -1,30 +1,54 @@
 import { type ReactElement, type ReactNode } from 'react'
-import { IconButton, type ModalProps } from '@mui/material'
-import {
-  Dialog,
-  DialogTitle,
-  type DialogProps,
-  type DialogTitleProps as MuiDialogTitleProps,
-  useMediaQuery,
-} from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { X } from 'lucide-react'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { cn } from '@/utils/cn'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import CloseIcon from '@mui/icons-material/Close'
 
 import css from './styles.module.css'
 
-interface ModalDialogProps extends DialogProps {
-  dialogTitle?: React.ReactNode
+/** MUI Dialog `maxWidth` breakpoint keys, mapped to pixel widths for the shadcn popup. */
+const MAX_WIDTH_MAP: Record<string, number> = {
+  xs: 444,
+  sm: 600,
+  md: 900,
+  lg: 1200,
+  xl: 1536,
+}
+
+interface ModalDialogProps {
+  open?: boolean
+  onClose?: () => void
+  dialogTitle?: ReactNode
   hideChainIndicator?: boolean
   chainId?: string
+  fullScreen?: boolean
+  children?: ReactNode
+  className?: string
+  /** MUI breakpoint key (e.g. `'sm'`) or a CSS width — applied as the popup's max-width. */
+  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number | string | false
+  /** @deprecated MUI `fullWidth` is a no-op after the shadcn migration; popups are full-width up to `maxWidth`. */
+  fullWidth?: boolean
+  /** Keeps the dialog content mounted while closed (forwarded to the Base UI portal). */
+  keepMounted?: boolean
+  /** @deprecated MUI `sx` is ignored after the shadcn migration; use `className` instead. */
+  sx?: object
+  /** @deprecated MUI `slotProps` is ignored after the shadcn migration; use `className`/`maxWidth` instead. */
+  slotProps?: object
+  /** @deprecated MUI `PaperProps` is ignored after the shadcn migration; only `sx.maxWidth` is honored via the popup style. */
+  PaperProps?: { sx?: { maxWidth?: number | string } }
+  'data-testid'?: string
 }
 
 interface DialogTitleProps {
   children: ReactNode
-  onClose?: ModalProps['onClose']
+  onClose?: () => void
   hideChainIndicator?: boolean
   chainId?: string
-  sx?: MuiDialogTitleProps['sx']
+  className?: string
+  /** @deprecated MUI `sx` is ignored after the shadcn migration; use `className` instead. */
+  sx?: object
 }
 
 export const ModalDialogTitle = ({
@@ -32,66 +56,83 @@ export const ModalDialogTitle = ({
   onClose,
   hideChainIndicator = false,
   chainId,
-  sx = {},
+  className,
+  sx: _sx,
   ...other
 }: DialogTitleProps) => {
   return (
-    <DialogTitle
+    <h2
       data-testid="modal-title"
-      sx={{ m: 0, px: 3, pt: 3, pb: 2, display: 'flex', alignItems: 'center', fontWeight: 'bold', ...sx }}
+      className={cn('text-foreground m-0 flex items-center px-6 pt-6 pb-4 text-lg font-bold', css.title, className)}
       {...other}
     >
       {children}
-      <span style={{ flex: 1 }} />
+      <span className="flex-1" />
       {!hideChainIndicator && <ChainIndicator chainId={chainId} inline />}
       {onClose ? (
-        <IconButton
+        <Button
           data-testid="modal-dialog-close-btn"
           aria-label="close"
-          onClick={(e) => {
-            onClose(e, 'backdropClick')
-          }}
-          size="small"
-          sx={{
-            ml: 2,
-            color: 'border.main',
-          }}
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => onClose()}
+          className="ml-4 text-[var(--color-border-main)]"
         >
-          <CloseIcon />
-        </IconButton>
+          <X />
+        </Button>
       ) : null}
-    </DialogTitle>
+    </h2>
   )
 }
 
 const ModalDialog = ({
+  open,
+  onClose,
   dialogTitle,
   hideChainIndicator,
   children,
   fullScreen = false,
   chainId,
-  ...restProps
+  className,
+  maxWidth,
+  PaperProps,
+  keepMounted,
+  'data-testid': dataTestid = 'modal-view',
 }: ModalDialogProps): ReactElement => {
-  const theme = useTheme()
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'))
+  const isSmallScreen = useIsMobile()
   const isFullScreen = fullScreen || isSmallScreen
+
+  const maxWidthValue = typeof maxWidth === 'string' ? (MAX_WIDTH_MAP[maxWidth] ?? maxWidth) : maxWidth
+  const popupMaxWidth = PaperProps?.sx?.maxWidth ?? (maxWidthValue === false ? undefined : maxWidthValue)
+
+  // fullScreen positioning must beat DialogContent's centered base classes, so apply it inline.
+  const fullScreenStyle = isFullScreen
+    ? { top: 0, left: 0, maxWidth: '100%', width: '100%', height: '100%', maxHeight: '100%', transform: 'none' }
+    : undefined
 
   return (
     <Dialog
-      data-testid="modal-view"
-      {...restProps}
-      fullScreen={isFullScreen}
-      scroll={fullScreen ? 'paper' : 'body'}
-      className={css.dialog}
-      onClick={(e) => e.stopPropagation()}
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) onClose?.()
+      }}
     >
-      {dialogTitle && (
-        <ModalDialogTitle onClose={restProps.onClose} hideChainIndicator={hideChainIndicator} chainId={chainId}>
-          {dialogTitle}
-        </ModalDialogTitle>
-      )}
+      <DialogContent
+        data-testid={dataTestid}
+        showCloseButton={false}
+        keepMounted={keepMounted}
+        className={cn(css.dialog, { [css.fullScreen]: isFullScreen }, className)}
+        style={{ ...(popupMaxWidth != null ? { maxWidth: popupMaxWidth } : {}), ...fullScreenStyle }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {dialogTitle && (
+          <ModalDialogTitle onClose={onClose} hideChainIndicator={hideChainIndicator} chainId={chainId}>
+            {dialogTitle}
+          </ModalDialogTitle>
+        )}
 
-      {children}
+        {children}
+      </DialogContent>
     </Dialog>
   )
 }

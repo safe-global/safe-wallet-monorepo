@@ -1,7 +1,6 @@
 import type { OrderStatuses } from '@safe-global/store/gateway/types'
 import type { Meta, StoryObj } from '@storybook/react'
 import CowOrderConfirmationView from './index'
-import { Paper } from '@mui/material'
 import { swapOrderConfirmationViewBuilder } from '@/features/swap/helpers/swapOrderBuilder'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
@@ -36,9 +35,9 @@ const meta = {
       return (
         <StoreDecorator initialState={{}}>
           <RouterDecorator>
-            <Paper sx={{ padding: 2 }}>
+            <div className="bg-background rounded-lg p-4">
               <Story />
-            </Paper>
+            </div>
           </RouterDecorator>
         </StoreDecorator>
       )

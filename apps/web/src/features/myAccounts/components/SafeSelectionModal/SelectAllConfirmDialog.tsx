@@ -1,16 +1,9 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Alert,
-  Typography,
-  List,
-  ListItem,
-  Box,
-} from '@mui/material'
-import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter, DialogClose } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Typography } from '@/components/ui/typography'
+import { List, ListItem } from '@/components/ui/list'
+import { TriangleAlertIcon } from 'lucide-react'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import type { SelectableItem } from '../../hooks/useSafeSelectionModal.types'
 
@@ -23,58 +16,52 @@ interface SelectAllConfirmDialogProps {
 
 const SelectAllConfirmDialog = ({ open, similarAddresses, onConfirm, onCancel }: SelectAllConfirmDialogProps) => {
   return (
-    <Dialog open={open} onClose={onCancel} maxWidth="sm" fullWidth>
-      <DialogTitle>Similar addresses detected</DialogTitle>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Similar addresses detected</DialogTitle>
+        </DialogHeader>
 
-      <DialogContent>
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          <Typography variant="body2">
-            {similarAddresses.length} Safe{similarAddresses.length === 1 ? '' : 's'} in your list closely resemble other
-            addresses. Review them carefully before continuing.
+        <div className="px-4">
+          <Alert variant="warning" className="mb-4">
+            <AlertDescription>
+              {similarAddresses.length} Safe{similarAddresses.length === 1 ? '' : 's'} in your list closely resemble
+              other addresses. Review them carefully before continuing.
+            </AlertDescription>
+          </Alert>
+
+          <Typography variant="paragraph-small" color="muted" className="mb-4 block">
+            The following addresses have been flagged as similar:
           </Typography>
-        </Alert>
 
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          The following addresses have been flagged as similar:
-        </Typography>
+          <List className="bg-background border-border max-h-[200px] overflow-auto rounded-md border">
+            {similarAddresses.map((item) => (
+              <ListItem key={item.address} className="py-2">
+                <div className="w-full">
+                  <EthHashInfo address={item.address} showCopyButton shortAddress={false} showAvatar avatarSize={24} />
+                  {item.name && (
+                    <Typography variant="paragraph-mini" color="muted">
+                      {item.name}
+                    </Typography>
+                  )}
+                </div>
+              </ListItem>
+            ))}
+          </List>
 
-        <List
-          sx={{
-            bgcolor: 'background.paper',
-            borderRadius: 1,
-            border: '1px solid',
-            borderColor: 'border.light',
-            maxHeight: 200,
-            overflow: 'auto',
-          }}
-        >
-          {similarAddresses.map((item) => (
-            <ListItem key={item.address} sx={{ py: 1 }}>
-              <Box sx={{ width: '100%' }}>
-                <EthHashInfo address={item.address} showCopyButton shortAddress={false} showAvatar avatarSize={24} />
-                {item.name && (
-                  <Typography variant="caption" color="text.secondary">
-                    {item.name}
-                  </Typography>
-                )}
-              </Box>
-            </ListItem>
-          ))}
-        </List>
+          <Typography variant="paragraph-small" color="muted" className="mt-4 block">
+            Do you want to include these addresses in your selection?
+          </Typography>
+        </div>
 
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-          Do you want to include these addresses in your selection?
-        </Typography>
+        <DialogFooter className="flex-row justify-end">
+          <DialogClose render={<Button variant="outline" />}>No, skip similar addresses</DialogClose>
+          <Button onClick={onConfirm}>
+            <TriangleAlertIcon className="size-4" />
+            Yes, include them anyway
+          </Button>
+        </DialogFooter>
       </DialogContent>
-
-      <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button onClick={onCancel} variant="text">
-          No, skip similar addresses
-        </Button>
-        <Button onClick={onConfirm} variant="contained" startIcon={<WarningAmberIcon color="warning" />}>
-          Yes, include them anyway
-        </Button>
-      </DialogActions>
     </Dialog>
   )
 }

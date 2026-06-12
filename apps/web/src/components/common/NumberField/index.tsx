@@ -1,8 +1,10 @@
-import { TextField } from '@mui/material'
-import { forwardRef, useEffect, useRef } from 'react'
-import type { TextFieldProps } from '@mui/material'
-import type { ReactElement } from 'react'
+import { useEffect, useRef, type ReactNode, type ComponentProps, type ChangeEventHandler } from 'react'
 import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
+
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { cn } from '@/utils/cn'
 
 export const _formatNumber = (value: string) => {
   value = value.trim()
@@ -36,15 +38,38 @@ export const _formatNumber = (value: string) => {
   return value
 }
 
-const NumberField = forwardRef<HTMLInputElement, TextFieldProps>(({ onChange, value, ...props }, ref): ReactElement => {
+type NumberFieldProps = Omit<ComponentProps<'input'>, 'onChange'> & {
+  label?: ReactNode
+  /** Marks the field invalid (sets aria-invalid + destructive styling). */
+  error?: boolean
+  helperText?: ReactNode
+  fullWidth?: boolean
+  startAdornment?: ReactNode
+  endAdornment?: ReactNode
+  onChange?: ChangeEventHandler<HTMLInputElement>
+}
+
+const NumberField = ({
+  label,
+  error,
+  helperText,
+  fullWidth,
+  startAdornment,
+  endAdornment,
+  onChange,
+  className,
+  id,
+  ref,
+  ...props
+}: NumberFieldProps) => {
   const innerRef = useRef<HTMLInputElement | null>(null)
 
-  const combinedRef = (node: HTMLInputElement | null) => {
+  const setRef = (node: HTMLInputElement | null) => {
     innerRef.current = node
     if (typeof ref === 'function') {
       ref(node)
-    } else if (ref) {
-      ref.current = node
+    } else if (ref != null) {
+      ;(ref as { current: HTMLInputElement | null }).current = node
     }
   }
 
@@ -55,30 +80,58 @@ const NumberField = forwardRef<HTMLInputElement, TextFieldProps>(({ onChange, va
     }
   })
 
-  return (
-    <TextField
+  const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    event.target.value = _formatNumber(event.target.value)
+    return onChange?.(event)
+  }
+
+  const inputId = id ?? (props.name ? `${props.name}-number-field` : undefined)
+  const hasAdornment = Boolean(startAdornment || endAdornment)
+
+  const control = hasAdornment ? (
+    <InputGroup className={cn(fullWidth && 'w-full')}>
+      {startAdornment && <InputGroupAddon align="inline-start">{startAdornment}</InputGroupAddon>}
+      <InputGroupInput
+        id={inputId}
+        ref={setRef}
+        autoComplete="off"
+        aria-invalid={error || undefined}
+        className={className}
+        onChange={handleChange}
+        {...props}
+      />
+      {endAdornment && <InputGroupAddon align="inline-end">{endAdornment}</InputGroupAddon>}
+    </InputGroup>
+  ) : (
+    <Input
+      id={inputId}
+      ref={setRef}
       autoComplete="off"
-      value={value}
-      onChange={(event) => {
-        event.target.value = _formatNumber(event.target.value)
-        return onChange?.(event)
-      }}
+      aria-invalid={error || undefined}
+      className={cn(fullWidth && 'w-full', className)}
+      onChange={handleChange}
       {...props}
-      inputProps={{
-        ...props.inputProps,
-        ref: combinedRef,
-        // Autocomplete passes `onChange` in `inputProps`
-        onChange: (event) => {
-          // inputProps['onChange'] is generically typed
-          if ('value' in event.target && typeof event.target.value === 'string') {
-            event.target.value = _formatNumber(event.target.value)
-            return props.inputProps?.onChange?.(event)
-          }
-        },
-      }}
     />
   )
-})
+
+  if (label == null && helperText == null) {
+    return control
+  }
+
+  return (
+    <Field data-invalid={error || undefined} className={cn(fullWidth && 'w-full')}>
+      {label != null && (
+        <FieldLabel htmlFor={inputId} className={error ? 'text-destructive' : undefined}>
+          {label}
+        </FieldLabel>
+      )}
+      {control}
+      {helperText != null && (
+        <FieldDescription className={error ? 'text-destructive' : undefined}>{helperText}</FieldDescription>
+      )}
+    </Field>
+  )
+}
 
 NumberField.displayName = 'NumberField'
 

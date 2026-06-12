@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useAppDispatch } from '@/store'
 import { setFormCompleted } from '@/features/hypernative/store/hnStateSlice'
 import useChainId from '@/hooks/useChainId'
@@ -87,9 +87,11 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
       case 1:
         if (!hubSpotConfig) {
           return (
-            <Box p={4}>
-              <Typography color="error">HubSpot configuration is missing or invalid.</Typography>
-            </Box>
+            <div className="p-8">
+              <Typography className="text-[var(--color-error-main)]">
+                HubSpot configuration is missing or invalid.
+              </Typography>
+            </div>
           )
         }
         return (
@@ -105,9 +107,11 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
         const calendlyUrl = calendlyConfig[selectedRegion] || calendlyConfig['AMERICAS']
         if (!calendlyUrl) {
           return (
-            <Box p={4}>
-              <Typography color="error">Calendly configuration is missing for region: {selectedRegion}</Typography>
-            </Box>
+            <div className="p-8">
+              <Typography className="text-[var(--color-error-main)]">
+                Calendly configuration is missing for region: {selectedRegion}
+              </Typography>
+            </div>
           )
         }
         return <HnCalendlyStep calendlyUrl={calendlyUrl} />
@@ -118,7 +122,7 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
 
   return (
     <HnModal open={open} onClose={handleClose}>
-      <Box>{renderStepContent()}</Box>
+      <div>{renderStepContent()}</div>
     </HnModal>
   )
 }

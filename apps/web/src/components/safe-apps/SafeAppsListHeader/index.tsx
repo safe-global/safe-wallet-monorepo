@@ -1,4 +1,4 @@
-import Typography from '@mui/material/Typography'
+import { Typography } from '@/components/ui/typography'
 
 type SafeAppsListHeaderProps = {
   title: string
@@ -8,13 +8,8 @@ type SafeAppsListHeaderProps = {
 const SafeAppsListHeader = ({ title, amount }: SafeAppsListHeaderProps) => {
   return (
     <Typography
-      variant="body2"
-      sx={{
-        color: 'primary.light',
-        fontWeight: 'bold',
-        mt: 3,
-        mb: 2,
-      }}
+      variant="paragraph-small-bold"
+      className="mt-[var(--space-3)] mb-[var(--space-2)] text-[var(--color-primary-light)]"
     >
       {title} ({amount || 0})
     </Typography>

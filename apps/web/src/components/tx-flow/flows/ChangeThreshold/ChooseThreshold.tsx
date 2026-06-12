@@ -1,16 +1,9 @@
 import { Controller, useForm } from 'react-hook-form'
-import {
-  TextField,
-  MenuItem,
-  Button,
-  CardActions,
-  Divider,
-  Typography,
-  Box,
-  Grid,
-  SvgIcon,
-  Tooltip,
-} from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useContext, useEffect } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import TxCard from '@/components/tx-flow/common/TxCard'
@@ -43,37 +36,24 @@ export const ChooseThreshold = () => {
   return (
     <TxCard>
       <div>
-        <Typography
-          variant="h3"
-          sx={{
-            fontWeight: 700,
-          }}
-        >
+        <Typography variant="h3" className="inline-flex items-center gap-1 font-bold">
           Threshold
-          <Tooltip title={TOOLTIP_TITLES.THRESHOLD} arrow placement="top">
-            <span>
-              <SvgIcon
-                component={InfoIcon}
-                inheritViewBox
-                color="border"
-                fontSize="small"
-                sx={{
-                  verticalAlign: 'middle',
-                  ml: 0.5,
-                }}
-              />
-            </span>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <span className="flex text-[var(--color-border-main)]">
+                  <InfoIcon className="size-4" />
+                </span>
+              }
+            />
+            <TooltipContent>{TOOLTIP_TITLES.THRESHOLD}</TooltipContent>
           </Tooltip>
         </Typography>
 
         <Typography>Any transaction will require the confirmation of:</Typography>
       </div>
       <form onSubmit={formMethods.handleSubmit(onNext)}>
-        <Box
-          sx={{
-            mb: 2,
-          }}
-        >
+        <div className="mb-4">
           <Controller
             control={formMethods.control}
             rules={{
@@ -88,44 +68,31 @@ export const ChooseThreshold = () => {
               const isError = !!fieldState.error
 
               return (
-                <Grid
-                  container
-                  direction="row"
-                  sx={{
-                    gap: 2,
-                    alignItems: 'center',
-                  }}
-                >
-                  <Grid item>
-                    <TextField select {...field} error={isError}>
-                      {safe.owners.map((_, idx) => (
-                        <MenuItem data-testid="threshold-item" key={idx + 1} value={idx + 1}>
-                          {idx + 1}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
-                  <Grid item>
+                <div className="flex flex-row flex-wrap items-center gap-4">
+                  <div>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger aria-invalid={isError}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {safe.owners.map((_, idx) => (
+                          <SelectItem data-testid="threshold-item" key={idx + 1} value={idx + 1}>
+                            {idx + 1}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
                     <Typography>
                       out of {safe.owners.length} signer{maybePlural(safe.owners)}
                     </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
+                  </div>
+                  <div className="w-full">
                     {isError ? (
-                      <Typography
-                        color="error"
-                        sx={{
-                          mb: 2,
-                        }}
-                      >
-                        {fieldState.error?.message}
-                      </Typography>
+                      <Typography className="mb-4 text-destructive">{fieldState.error?.message}</Typography>
                     ) : (
-                      <Typography
-                        sx={{
-                          mb: 2,
-                        }}
-                      >
+                      <Typography className="mb-4">
                         {fieldState.isDirty ? 'Previous policy was ' : 'Current policy is '}
                         <b>
                           {safe.threshold} out of {safe.owners.length}
@@ -133,19 +100,18 @@ export const ChooseThreshold = () => {
                         .
                       </Typography>
                     )}
-                  </Grid>
-                </Grid>
+                  </div>
+                </div>
               )
             }}
           />
-        </Box>
+        </div>
 
-        <Divider className={commonCss.nestedDivider} />
+        <Separator className={commonCss.nestedDivider} />
 
-        <CardActions>
+        <div className="flex items-center p-2">
           <Button
             data-testid="threshold-next-btn"
-            variant="contained"
             type="submit"
             disabled={
               !!formMethods.formState.errors[ChangeThresholdFlowFieldNames.threshold] ||
@@ -155,7 +121,7 @@ export const ChooseThreshold = () => {
           >
             Next
           </Button>
-        </CardActions>
+        </div>
       </form>
     </TxCard>
   )

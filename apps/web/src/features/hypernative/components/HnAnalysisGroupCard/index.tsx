@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Stack, Typography, useTheme } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { AnalysisGroupCard, type AnalysisGroupCardProps } from '@/features/safe-shield/components/AnalysisGroupCard'
 import HypernativeLogo from '../HypernativeLogo'
 
@@ -8,14 +8,13 @@ type HnAnalysisGroupCardProps = Omit<AnalysisGroupCardProps, 'footer'> & {
 }
 
 const ByHypernativeFooter = () => {
-  const theme = useTheme()
   return (
-    <Stack direction="row" alignItems="center" alignSelf="flex-end" gap={0.5}>
-      <Typography variant="caption" color="text.secondary">
+    <div className="flex flex-row items-center gap-1 self-end">
+      <Typography variant="paragraph-mini" className="text-[var(--color-text-secondary)]">
         by
       </Typography>
-      <HypernativeLogo fill={theme.palette.text.secondary} sx={{ width: 70, height: 17 }} />
-    </Stack>
+      <HypernativeLogo fill="var(--color-text-secondary)" className="h-[17px] w-[70px]" />
+    </div>
   )
 }
 

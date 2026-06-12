@@ -1,4 +1,5 @@
-import { Typography, Paper, Box, Button, SvgIcon, Chip, Stack } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
 import css from './styles.module.css'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
 import { trackEvent } from '@/services/analytics'
@@ -20,53 +21,39 @@ const AddressBookCard = () => {
 
   return (
     <>
-      <Paper sx={{ p: 3, borderRadius: '24px', height: '100%' }}>
-        <Box position="relative" width={1}>
-          <Box className={classnames(css.iconBG, css.iconBGBlue)}>
-            <SvgIcon component={AddressBookIcon} inheritViewBox color="info" />
-          </Box>
+      <div className="h-full rounded-3xl bg-card p-6">
+        <div className="relative w-full">
+          <div className={classnames(css.iconBG, css.iconBGBlue)}>
+            <AddressBookIcon className="text-[var(--color-info-main)]" />
+          </div>
 
           {addressBookItems.length > 0 ? (
-            <Chip
-              label={
-                <Stack direction="row" gap={0.5}>
-                  <SvgIcon component={CheckIcon} inheritViewBox fontSize="small" />
-                  <Typography variant="caption" fontWeight="bold">
-                    Done
-                  </Typography>
-                </Stack>
-              }
-              sx={{
-                borderRadius: '6px',
-                backgroundColor: 'success.background',
-                color: 'success.main',
-                position: 'absolute',
-                top: 0,
-                right: 0,
-              }}
-            />
+            <span className="absolute right-0 top-0 inline-flex items-center gap-1 rounded-md bg-[var(--color-success-background)] px-2.5 py-1 text-[var(--color-success-main)]">
+              <CheckIcon className="size-4" />
+              <Typography variant="paragraph-mini-bold">Done</Typography>
+            </span>
           ) : (
             <Button
               onClick={handleImport}
-              variant="outlined"
-              size="medium"
-              sx={{ position: 'absolute', top: 0, right: 0 }}
+              variant="outline"
+              size="lg"
+              className="absolute right-0 top-0"
               aria-label="Import address book"
             >
               Import address book
             </Button>
           )}
-        </Box>
-        <Box>
-          <Typography variant="body1" color="text.primary" fontWeight={700} mb={1}>
+        </div>
+        <div>
+          <Typography variant="paragraph-bold" className="mb-2 text-foreground">
             Import address book
           </Typography>
-          <Typography variant="body2" color="primary.light">
+          <Typography variant="paragraph-small" color="muted">
             Simplify managing your funds collaboratively by importing your local address book. It will be available to
             all members of the workspace.
           </Typography>
-        </Box>
-      </Paper>
+        </div>
+      </div>
       {open && <ImportAddressBookDialog handleClose={() => setOpen(false)} />}
     </>
   )

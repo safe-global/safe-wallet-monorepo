@@ -23,22 +23,14 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { addressIsNotCurrentSafe, addressIsNotOwner } from '@safe-global/utils/utils/validation'
 import { isEthSignWallet } from '@/utils/wallets'
-import { Close } from '@mui/icons-material'
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  IconButton,
-  SvgIcon,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { XIcon } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Separator } from '@/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import {
   useDelegatesPostDelegateV1Mutation,
   useDelegatesPostDelegateV2Mutation,
@@ -207,163 +199,162 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
   if (multiSigInitiated) {
     return (
-      <Dialog open onClose={onClose}>
-        <DialogTitle>
-          <Box display="flex" alignItems="center">
-            <Typography variant="h6" fontWeight={700}>
-              Signature collection initiated
+      <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
+        <DialogContent className="p-0" showCloseButton={false}>
+          <DialogHeader className="flex-row items-center justify-between">
+            <DialogTitle>Signature collection initiated</DialogTitle>
+            <Button variant="ghost" size="icon-sm" aria-label="close" onClick={onClose}>
+              <XIcon />
+            </Button>
+          </DialogHeader>
+
+          <Separator />
+
+          <div className="p-4">
+            <Alert variant="default" className="mb-4">
+              <AlertDescription>1 of {parentThreshold} signatures collected</AlertDescription>
+            </Alert>
+
+            <Typography variant="paragraph-small" className="mb-4 block">
+              The delegation request has been created as an off-chain message on your parent Safe. Other owners of the
+              parent Safe need to sign it before the proposer can be added.
             </Typography>
-            <Box flexGrow={1} />
-            <IconButton aria-label="close" onClick={onClose}>
-              <Close />
-            </IconButton>
-          </Box>
-        </DialogTitle>
 
-        <Divider />
+            <Typography variant="paragraph-small" color="muted">
+              The other parent Safe owners can find and sign this pending delegation on the proposer settings page of
+              this Safe.
+            </Typography>
+          </div>
 
-        <DialogContent>
-          <Alert severity="success" sx={{ mb: 2 }}>
-            1 of {parentThreshold} signatures collected
-          </Alert>
+          <Separator />
 
-          <Typography variant="body2" mb={2}>
-            The delegation request has been created as an off-chain message on your parent Safe. Other owners of the
-            parent Safe need to sign it before the proposer can be added.
-          </Typography>
-
-          <Typography variant="body2" color="text.secondary">
-            The other parent Safe owners can find and sign this pending delegation on the proposer settings page of this
-            Safe.
-          </Typography>
+          <DialogFooter className="flex-row p-6">
+            <Button onClick={onClose}>Done</Button>
+          </DialogFooter>
         </DialogContent>
-
-        <Divider />
-
-        <DialogActions sx={{ padding: 3 }}>
-          <Button variant="contained" onClick={onClose}>
-            Done
-          </Button>
-        </DialogActions>
       </Dialog>
     )
   }
 
   return (
-    <Dialog open onClose={onCancel}>
-      <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogTitle>
-            <Box data-testid="untrusted-token-warning" display="flex" alignItems="center">
-              <Typography variant="h6" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {isEditing ? 'Edit' : 'Add'} proposer
-              </Typography>
+    <Dialog open onOpenChange={(isOpen) => !isOpen && onCancel()}>
+      <DialogContent className="p-0" showCloseButton={false}>
+        <FormProvider {...methods}>
+          <form onSubmit={onSubmit}>
+            <DialogHeader className="flex-row items-center justify-between">
+              <DialogTitle data-testid="untrusted-token-warning">{isEditing ? 'Edit' : 'Add'} proposer</DialogTitle>
 
-              <Box flexGrow={1} />
+              <Button variant="ghost" size="icon-sm" aria-label="close" onClick={onCancel}>
+                <XIcon />
+              </Button>
+            </DialogHeader>
 
-              <IconButton aria-label="close" onClick={onCancel} sx={{ marginLeft: 'auto' }}>
-                <Close />
-              </IconButton>
-            </Box>
-          </DialogTitle>
+            <Separator />
 
-          <Divider />
-
-          <DialogContent>
-            {isMultiSigRequired && (
-              <Alert severity="info" sx={{ mb: 2 }}>
-                This requires {parentThreshold} of {parentOwners?.length ?? '?'} parent Safe owner signatures to
-                complete.
-              </Alert>
-            )}
-
-            <Box mb={2}>
-              <Typography variant="body2">
-                You&apos;re about to grant this address the ability to propose transactions. To complete the setup,
-                confirm with a signature from your connected wallet.
-              </Typography>
-            </Box>
-
-            <Alert severity="info">Proposer&apos;s name and address are publicly visible.</Alert>
-
-            <Box my={2}>
-              {isEditing ? (
-                <Box mb={3}>
-                  <EthHashInfo address={proposer?.delegate} showCopyButton hasExplorer shortAddress={false} />
-                </Box>
-              ) : (
-                <AddressBookInput
-                  name="address"
-                  label="Address"
-                  validate={validateAddress}
-                  variant="outlined"
-                  fullWidth
-                  required
-                />
+            <div className="p-4">
+              {isMultiSigRequired && (
+                <Alert variant="default" className="mb-4">
+                  <AlertDescription>
+                    This requires {parentThreshold} of {parentOwners?.length ?? '?'} parent Safe owner signatures to
+                    complete.
+                  </AlertDescription>
+                </Alert>
               )}
-            </Box>
 
-            <Box mb={2}>
-              <NameInput name="name" label="Name" required />
-            </Box>
-
-            {error && (
-              <Box mt={2}>
-                <ErrorMessage error={error}>Error adding proposer</ErrorMessage>
-              </Box>
-            )}
-
-            <NetworkWarning action="sign" />
-
-            {!isEditing && delegatorOptions.length > 1 && (
-              <Box mt={2}>
-                <Typography variant="h5" display="flex" gap={1} alignItems="center" mb={1}>
-                  <SvgIcon component={SignatureIcon} inheritViewBox fontSize="small" />
-                  Delegate as
-                  <Tooltip
-                    title="Your connected wallet controls multiple Safe Accounts that are owners of this Safe. Select which account to create the proposer under."
-                    arrow
-                    placement="top"
-                  >
-                    <SvgIcon component={InfoIcon} inheritViewBox color="border" fontSize="small" />
-                  </Tooltip>
+              <div className="mb-4">
+                <Typography variant="paragraph-small">
+                  You&apos;re about to grant this address the ability to propose transactions. To complete the setup,
+                  confirm with a signature from your connected wallet.
                 </Typography>
+              </div>
 
-                <SignerSelector
-                  options={delegatorOptions}
-                  value={effectiveDelegator}
-                  onChange={setSelectedDelegator}
-                  label="Delegator account"
-                />
-              </Box>
-            )}
-          </DialogContent>
+              <Alert variant="default">
+                <AlertDescription>Proposer&apos;s name and address are publicly visible.</AlertDescription>
+              </Alert>
 
-          <Divider />
+              <div className="my-4">
+                {isEditing ? (
+                  <div className="mb-6">
+                    <EthHashInfo address={proposer?.delegate} showCopyButton hasExplorer shortAddress={false} />
+                  </div>
+                ) : (
+                  <AddressBookInput
+                    name="address"
+                    label="Address"
+                    validate={validateAddress}
+                    variant="outlined"
+                    fullWidth
+                    required
+                  />
+                )}
+              </div>
 
-          <DialogActions sx={{ padding: 3, justifyContent: 'space-between' }}>
-            <Button size="small" variant="text" onClick={onCancel}>
-              Cancel
-            </Button>
+              <div className="mb-4">
+                <NameInput name="name" label="Name" required />
+              </div>
 
-            <CheckWallet checkNetwork={!isLoading} allowProposer={false}>
-              {(isOk) => (
-                <Button
-                  data-testid="submit-proposer-btn"
-                  size="small"
-                  variant="contained"
-                  color="primary"
-                  type="submit"
-                  disabled={!isOk || isLoading || isParentLoading || (isEditing && !canEdit) || !formState.isValid}
-                  sx={{ minWidth: '122px', minHeight: '36px' }}
-                >
-                  {isLoading ? <CircularProgress size={20} /> : 'Continue'}
-                </Button>
+              {error && (
+                <div className="mt-4">
+                  <ErrorMessage error={error}>Error adding proposer</ErrorMessage>
+                </div>
               )}
-            </CheckWallet>
-          </DialogActions>
-        </form>
-      </FormProvider>
+
+              <NetworkWarning action="sign" />
+
+              {!isEditing && delegatorOptions.length > 1 && (
+                <div className="mt-4">
+                  <Typography variant="h4" className="mb-2 flex items-center gap-2">
+                    <SignatureIcon className="size-4" />
+                    Delegate as
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <span tabIndex={0} className="inline-flex">
+                            <InfoIcon className="size-4 text-border" />
+                          </span>
+                        }
+                      />
+                      <TooltipContent>
+                        Your connected wallet controls multiple Safe Accounts that are owners of this Safe. Select which
+                        account to create the proposer under.
+                      </TooltipContent>
+                    </Tooltip>
+                  </Typography>
+
+                  <SignerSelector
+                    options={delegatorOptions}
+                    value={effectiveDelegator}
+                    onChange={setSelectedDelegator}
+                    label="Delegator account"
+                  />
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            <DialogFooter className="flex-row justify-between p-6">
+              <Button size="sm" variant="ghost" onClick={onCancel}>
+                Cancel
+              </Button>
+
+              <CheckWallet checkNetwork={!isLoading} allowProposer={false}>
+                {(isOk) => (
+                  <Button
+                    data-testid="submit-proposer-btn"
+                    size="sm"
+                    type="submit"
+                    disabled={!isOk || isLoading || isParentLoading || (isEditing && !canEdit) || !formState.isValid}
+                    className="min-h-9 min-w-[122px]"
+                  >
+                    {isLoading ? <Spinner className="size-5" /> : 'Continue'}
+                  </Button>
+                )}
+              </CheckWallet>
+            </DialogFooter>
+          </form>
+        </FormProvider>
+      </DialogContent>
     </Dialog>
   )
 }

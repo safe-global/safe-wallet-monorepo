@@ -1,17 +1,9 @@
 import type { ReactElement, SyntheticEvent } from 'react'
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Skeleton,
-  Typography,
-  Link,
-  Grid,
-  SvgIcon,
-  Tooltip,
-} from '@mui/material'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Link } from '@/components/ui/link'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getNativeTokenDisplay, NATIVE_TOKEN_DISPLAY_DEFAULT } from '@safe-global/utils/utils/chains'
@@ -25,14 +17,12 @@ import madProps from '@/utils/mad-props'
 import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 
 const GasDetail = ({ name, value, isLoading }: { name: string; value: string; isLoading: boolean }): ReactElement => {
-  const valueSkeleton = <Skeleton variant="text" sx={{ minWidth: '5em' }} />
+  const valueSkeleton = <Skeleton className="inline-block h-4 min-w-[5em]" />
   return (
-    <Grid container>
-      <Grid item xs>
-        {name}
-      </Grid>
-      <Grid item>{value || (isLoading ? valueSkeleton : '-')}</Grid>
-    </Grid>
+    <div className="flex">
+      <div className="flex-1">{name}</div>
+      <div>{value || (isLoading ? valueSkeleton : '-')}</div>
+    </div>
   )
 }
 
@@ -67,8 +57,8 @@ export const _GasParams = ({
     return <></>
   }
 
-  const onChangeExpand = (_: SyntheticEvent, expanded: boolean) => {
-    trackEvent({ ...MODALS_EVENTS.ESTIMATION, label: expanded ? 'Open' : 'Close' })
+  const onChangeExpand = (value: unknown[]) => {
+    trackEvent({ ...MODALS_EVENTS.ESTIMATION, label: value.length > 0 ? 'Open' : 'Close' })
   }
 
   const isLoading = !gasLimit || !maxFeePerGas
@@ -92,110 +82,94 @@ export const _GasParams = ({
   const EditComponent = (
     <>
       {gasLimitError || !isExecution || (isExecution && !isLoading) ? (
-        <Link
-          component="button"
-          onClick={onEditClick}
-          sx={{
-            fontSize: 'medium',
-            mt: 2,
-          }}
-        >
+        <Link render={<button type="button" />} onClick={onEditClick} className="mt-4 text-base">
           Edit
         </Link>
       ) : (
-        <Skeleton variant="text" sx={{ display: 'inline-block', minWidth: '2em', mt: 2 }} />
+        <Skeleton className="mt-4 inline-block h-4 min-w-[2em]" />
       )}
     </>
   )
 
   return (
     <div className={classnames({ [css.error]: gasLimitError })}>
-      <Accordion
-        elevation={0}
-        onChange={onChangeExpand}
-        className={classnames({ [css.withExecutionMethod]: isExecution })}
-      >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} className={accordionCss.accordion}>
-          {isExecution ? (
-            <Typography
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                width: 1,
-              }}
-            >
-              <span style={{ flex: '1' }}>Estimated fee </span>
-              {gasLimitError ? (
-                <>
-                  <SvgIcon
-                    component={WarningIcon}
-                    inheritViewBox
-                    fontSize="small"
-                    sx={{ color: 'var(--color-error-main)', mr: 'var(--space-1)' }}
-                  />
-                  <span style={{ fontWeight: 'normal' }}>Cannot estimate</span>
-                </>
-              ) : isLoading ? (
-                <Skeleton variant="text" sx={{ display: 'inline-block', minWidth: '7em' }} />
-              ) : (
-                <div className={css.feeContainer}>
-                  {noFeeCampaign?.isEligible ? (
-                    <>
-                      <span className={css.feeAmount}>Free</span>
-                      <Tooltip
-                        title="As a USDe holder, you are eligible for the gas sponsorship program"
-                        arrow
-                        placement="top"
-                      >
-                        <span className={css.noFeeCampaignTag}>Free January Sponsored</span>
-                      </Tooltip>
-                    </>
-                  ) : (
-                    <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>
-                  )}
-                </div>
-              )}
-            </Typography>
-          ) : (
-            <Typography>
-              Signing the transaction with nonce&nbsp;
-              {nonce !== undefined ? (
-                nonce
-              ) : (
-                <Skeleton variant="text" sx={{ display: 'inline-block', minWidth: '2em' }} />
-              )}
-            </Typography>
-          )}
-        </AccordionSummary>
+      <Accordion onValueChange={onChangeExpand}>
+        <AccordionItem
+          value="gas-params"
+          className={classnames('border-b-0', { [css.withExecutionMethod]: isExecution })}
+        >
+          <AccordionTrigger className={classnames(accordionCss.accordion, 'px-4')}>
+            {isExecution ? (
+              <span className="flex w-full items-center text-base font-normal">
+                <span className="flex-1">Estimated fee </span>
+                {gasLimitError ? (
+                  <>
+                    <WarningIcon className="mr-[var(--space-1)] size-4 text-[var(--color-error-main)]" />
+                    <span className="font-normal">Cannot estimate</span>
+                  </>
+                ) : isLoading ? (
+                  <Skeleton className="inline-block h-4 min-w-[7em]" />
+                ) : (
+                  <div className={css.feeContainer}>
+                    {noFeeCampaign?.isEligible ? (
+                      <>
+                        <span className={css.feeAmount}>Free</span>
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={<span className={css.noFeeCampaignTag}>Free January Sponsored</span>}
+                          />
+                          <TooltipContent>
+                            As a USDe holder, you are eligible for the gas sponsorship program
+                          </TooltipContent>
+                        </Tooltip>
+                      </>
+                    ) : (
+                      <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>
+                    )}
+                  </div>
+                )}
+              </span>
+            ) : (
+              <span className="text-base font-normal">
+                Signing the transaction with nonce&nbsp;
+                {nonce !== undefined ? nonce : <Skeleton className="inline-block h-4 min-w-[2em]" />}
+              </span>
+            )}
+          </AccordionTrigger>
 
-        <AccordionDetails>
-          {nonce !== undefined && (
-            <GasDetail isLoading={false} name="Safe Account transaction nonce" value={nonce.toString()} />
-          )}
+          <AccordionContent className="px-4">
+            {nonce !== undefined && (
+              <GasDetail isLoading={false} name="Safe Account transaction nonce" value={nonce.toString()} />
+            )}
 
-          {safeTxGas !== undefined && <GasDetail isLoading={false} name="safeTxGas" value={safeTxGas.toString()} />}
+            {safeTxGas !== undefined && <GasDetail isLoading={false} name="safeTxGas" value={safeTxGas.toString()} />}
 
-          {isExecution && (
-            <>
-              {userNonce !== undefined && (
-                <GasDetail isLoading={false} name="Wallet nonce" value={userNonce.toString()} />
-              )}
+            {isExecution && (
+              <>
+                {userNonce !== undefined && (
+                  <GasDetail isLoading={false} name="Wallet nonce" value={userNonce.toString()} />
+                )}
 
-              <GasDetail isLoading={isLoading} name="Gas limit" value={isError ? 'Cannot estimate' : gasLimitString} />
+                <GasDetail
+                  isLoading={isLoading}
+                  name="Gas limit"
+                  value={isError ? 'Cannot estimate' : gasLimitString}
+                />
 
-              {isEIP1559 ? (
-                <>
-                  <GasDetail isLoading={isLoading} name="Max priority fee (Gwei)" value={maxPrioGasGwei} />
-                  <GasDetail isLoading={isLoading} name="Max fee (Gwei)" value={maxFeePerGasGwei} />
-                </>
-              ) : (
-                <GasDetail isLoading={isLoading} name="Gas price (Gwei)" value={maxFeePerGasGwei} />
-              )}
-            </>
-          )}
+                {isEIP1559 ? (
+                  <>
+                    <GasDetail isLoading={isLoading} name="Max priority fee (Gwei)" value={maxPrioGasGwei} />
+                    <GasDetail isLoading={isLoading} name="Max fee (Gwei)" value={maxFeePerGasGwei} />
+                  </>
+                ) : (
+                  <GasDetail isLoading={isLoading} name="Gas price (Gwei)" value={maxFeePerGasGwei} />
+                )}
+              </>
+            )}
 
-          {onEdit && EditComponent}
-        </AccordionDetails>
+            {onEdit && EditComponent}
+          </AccordionContent>
+        </AccordionItem>
       </Accordion>
     </div>
   )

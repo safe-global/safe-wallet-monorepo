@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react'
-import { useMediaQuery, useTheme } from '@mui/material'
+import { useIsMobile } from '@/hooks/use-mobile'
 import type { SelectableSafe } from '../../hooks/useSafeSelectionModal.types'
 import { useSafeItemData } from '../../hooks/useSafeItemData'
 import { AccountItem } from '../AccountItem'
@@ -18,8 +18,7 @@ interface SafeSelectionItemProps {
  * Allows selecting/deselecting safes including already-pinned ones.
  */
 const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
+  const isMobile = useIsMobile()
 
   // Get rich data (balance, threshold, owners, etc.)
   const { chain, name, safeOverview, isActivating, threshold, owners, undeployedSafe, elementRef } =

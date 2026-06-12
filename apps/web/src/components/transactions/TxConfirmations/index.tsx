@@ -1,6 +1,5 @@
-import { SvgIcon, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
-import CheckIcon from '@mui/icons-material/Check'
+import { Check } from 'lucide-react'
 import OwnersIcon from '@/public/images/common/owners.svg'
 import TxStatusChip from '../TxStatusChip'
 
@@ -15,11 +14,11 @@ const TxConfirmations = ({
 
   return (
     <TxStatusChip color="primary" backgroundColor="background.main">
-      <SvgIcon component={isConfirmed ? CheckIcon : OwnersIcon} inheritViewBox fontSize="small" />
+      {isConfirmed ? <Check className="size-5" /> : <OwnersIcon className="size-5" />}
 
-      <Typography variant="caption" fontWeight="bold" letterSpacing={1}>
+      <span className="text-xs font-bold tracking-[1px]">
         {submittedConfirmations}/{requiredConfirmations}
-      </Typography>
+      </span>
     </TxStatusChip>
   )
 }

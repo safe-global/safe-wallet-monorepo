@@ -1,121 +1,87 @@
-import {
-  Button,
-  Chip,
-  Dialog,
-  DialogContent,
-  Grid2,
-  IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  Stack,
-  SvgIcon,
-  Typography,
-} from '@mui/material'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { List, ListItem } from '@/components/ui/list'
+import { Typography } from '@/components/ui/typography'
 import CheckIcon from '@/public/images/common/check.svg'
-import CloseIcon from '@mui/icons-material/Close'
 import CreateSpaceInfo from '@/public/images/spaces/create_space_info.png'
 import Image from 'next/image'
 import ExternalLink from '@/components/common/ExternalLink'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 const ListIcon = () => (
-  <ListItemIcon
-    sx={{
-      alignSelf: 'flex-start',
-      minWidth: '20px',
-      marginRight: '16px',
-      marginTop: '0',
-      color: 'success.main',
-      '& path:last-child': {
-        fill: 'var(--color-success-main)',
-      },
-      backgroundColor: 'success.light',
-      borderRadius: '50%',
-      width: '20px',
-      height: '20px',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}
-  >
-    <SvgIcon component={CheckIcon} inheritViewBox fontSize="small" sx={{ width: '12px', height: '12px' }} />
-  </ListItemIcon>
+  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center self-start rounded-full bg-[var(--color-success-light)] [&_path:last-child]:fill-[var(--color-success-main)]">
+    <CheckIcon className="size-3 text-[var(--color-success-main)]" />
+  </span>
 )
 
 const SPACE_HELP_ARTICLE_LINK =
   'https://help.safe.global/articles/8240597068-Spaces:-Team-Collaboration-for-Safe-Accounts'
 
 const SpaceInfoModal = ({ showButtons = true, onClose }: { showButtons?: boolean; onClose: () => void }) => {
+  const isDarkMode = useDarkMode()
+
   return (
-    <Dialog open PaperProps={{ style: { width: '870px', maxWidth: '98%', borderRadius: '16px' } }} onClose={onClose}>
-      <DialogContent dividers sx={{ p: 0, border: 0 }}>
-        <Grid2 container>
-          <Grid2 size={{ xs: 12, md: 6 }} p={5} display="flex" flexDirection="column">
-            <Typography component="div" variant="h1" mb={1} position="relative">
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose()
+      }}
+    >
+      <DialogContent className={cn('shadcn-scope w-[870px] max-w-[98%] rounded-2xl p-0', isDarkMode && 'dark')}>
+        <div className="grid grid-cols-1 md:grid-cols-2">
+          <div className="flex flex-col p-10">
+            <Typography variant="h1" className="relative mb-2">
               Introducing workspaces
-              <Chip
-                label="Beta"
-                size="small"
-                sx={{ ml: 1, fontWeight: 'normal', position: 'absolute', top: '0', right: '0' }}
-              />
+              <Badge variant="secondary" className="absolute top-0 right-0 font-normal">
+                Beta
+              </Badge>
             </Typography>
 
-            <Typography mt={2} mb={3}>
+            <Typography className="mt-4 mb-6">
               Collaborate seamlessly with your team and keep your treasury organized.
             </Typography>
 
-            <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <ListItem disablePadding>
+            <List className="flex flex-col gap-4">
+              <ListItem className="items-start gap-4 py-0">
                 <ListIcon />
                 Bring all your Safe Accounts into one shared workspace.
               </ListItem>
 
-              <ListItem disablePadding>
+              <ListItem className="items-start gap-4 py-0">
                 <ListIcon />
                 Invite team members with shared access—whether they’re signers or just viewers.
               </ListItem>
 
-              <ListItem disablePadding>
+              <ListItem className="items-start gap-4 py-0">
                 <ListIcon />
                 Everyone sees the same account names, team members, and data.
               </ListItem>
 
-              <ListItem disablePadding>
+              <ListItem className="items-start gap-4 py-0">
                 <ListIcon />
                 Aggregated balances and actions across multiple accounts are coming soon!
               </ListItem>
             </List>
 
-            <Typography mt={5}>
+            <Typography className="mt-10">
               Read the <ExternalLink href={SPACE_HELP_ARTICLE_LINK}>workspaces help article</ExternalLink>
             </Typography>
 
             {showButtons && (
-              <Stack gap={2} mt={{ xs: 3, md: 'auto' }}>
-                <Button variant="text" color="primary" onClick={onClose}>
+              <div className="mt-6 flex flex-col gap-4 md:mt-auto">
+                <Button variant="ghost" onClick={onClose}>
                   Close
                 </Button>
-              </Stack>
+              </div>
             )}
-          </Grid2>
+          </div>
 
-          <Grid2 size={6} display={{ xs: 'none', md: 'flex' }} justifyContent="center" flex={1} bgcolor="#121312">
+          <div className="hidden flex-1 justify-center bg-[#121312] md:flex">
             <Image src={CreateSpaceInfo} style={{ width: '100%' }} alt="An illustration of multiple safe accounts" />
-          </Grid2>
-        </Grid2>
-
-        <IconButton
-          onClick={onClose}
-          sx={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            p: 1,
-            m: 1,
-            color: '#ffffff',
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )

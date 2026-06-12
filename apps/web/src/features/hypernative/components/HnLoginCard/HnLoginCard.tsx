@@ -1,5 +1,6 @@
-import { Alert, Stack, SvgIcon, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
+import { Alert, AlertAction, AlertDescription } from '@/components/ui/alert'
+import { Typography } from '@/components/ui/typography'
 import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
 import ExternalLink from '@/components/common/ExternalLink'
 import AlertIcon from '@/public/images/common/alert.svg'
@@ -33,36 +34,24 @@ export const HnLoginCard = (): ReactElement | null => {
 
   if (showLoginCard) {
     return (
-      <Alert
-        variant="standard"
-        severity="warning"
-        icon={<SvgIcon component={AlertIcon} fontSize="small" inheritViewBox color="warning" />}
-        sx={{
-          px: 2,
-          py: 0,
-          alignItems: 'center',
-          lineHeight: 'initial',
-          minWidth: '303px',
-          '& .MuiAlert-icon': { mr: 1 },
-          '& .MuiAlert-action': { pt: 0, pl: 1, mr: 0 },
-        }}
-        action={
+      <Alert variant="warning" className="min-w-[303px] items-center px-4 py-0">
+        <AlertIcon className="size-4 text-[var(--color-warning-main)]" />
+        <AlertDescription>Hypernative not connected.</AlertDescription>
+        <AlertAction>
           <ExternalLink href="#" onClick={handleLogin}>
             Log in
           </ExternalLink>
-        }
-      >
-        Hypernative not connected.
+        </AlertAction>
       </Alert>
     )
   }
 
   return (
-    <Stack direction="row" alignItems="center" gap={0.5} pr={2} py={1}>
-      <SvgIcon component={HypernativeIcon} fontSize="small" inheritViewBox color="primary" />
-      <Typography variant="body2" color="text.secondary" letterSpacing={1}>
+    <div className="flex flex-row items-center gap-1 py-2 pr-4">
+      <HypernativeIcon className="size-4 text-[var(--color-primary-main)]" />
+      <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]">
         Logged in to Hypernative
       </Typography>
-    </Stack>
+    </div>
   )
 }

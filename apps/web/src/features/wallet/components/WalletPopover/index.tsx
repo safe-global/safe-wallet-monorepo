@@ -1,10 +1,8 @@
 import type { ReactElement } from 'react'
-import Popover from '@mui/material/Popover'
-import Paper from '@mui/material/Paper'
 
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import WalletInfo from '@/components/common/WalletInfo'
-import walletCss from '@/components/common/ConnectWallet/styles.module.css'
+import { Popover, PopoverContent } from '@/components/ui/popover'
 
 type WalletPopoverProps = {
   wallet: ConnectedWallet
@@ -26,14 +24,11 @@ const WalletPopover = ({
   return (
     <Popover
       open={open}
-      anchorEl={anchorEl}
-      onClose={onClose}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-      sx={{ mt: 1 }}
-      transitionDuration={0}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onClose()
+      }}
     >
-      <Paper className={walletCss.popoverContainer}>
+      <PopoverContent anchor={anchorEl} side="bottom" align="center" sideOffset={8} className="w-[300px]">
         <WalletInfo
           wallet={wallet}
           balance={wallet.balance}
@@ -41,7 +36,7 @@ const WalletPopover = ({
           onSwitch={onWalletSwitch}
           onDisconnect={onWalletDisconnect}
         />
-      </Paper>
+      </PopoverContent>
     </Popover>
   )
 }

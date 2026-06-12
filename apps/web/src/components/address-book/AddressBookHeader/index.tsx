@@ -1,45 +1,23 @@
-import { Button, SvgIcon, Grid, Box, Typography } from '@mui/material'
-import type { ReactElement, ElementType } from 'react'
-import InputAdornment from '@mui/material/InputAdornment'
-import SearchIcon from '@/public/images/common/search.svg'
-import TextField from '@mui/material/TextField'
+import type { ReactElement } from 'react'
+import { Plus } from 'lucide-react'
+import Link from 'next/link'
 
+import AddressBookSearchInput from '@/components/common/AddressBookSearchInput'
 import Track from '@/components/common/Track'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Link as ShadcnLink } from '@/components/ui/link'
 import { ADDRESS_BOOK_EVENTS } from '@/services/analytics/events/addressBook'
-import PageHeader from '@/components/common/PageHeader'
 import { ModalType } from '../AddressBookTable'
 import { useAppSelector } from '@/store'
 import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBookSlice'
 import ImportIcon from '@/public/images/common/import.svg'
 import ExportIcon from '@/public/images/common/export.svg'
-import AddCircleIcon from '@/public/images/common/add-outlined.svg'
 import mapProps from '@/utils/mad-props'
-import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
-import MUILink from '@mui/material/Link'
 import { useCurrentSpaceId, useIsAdmin, useIsQualifiedSafe } from '@/features/spaces'
 import { isAuthenticated } from '@/store/authSlice'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-
-const HeaderButton = ({
-  icon,
-  onClick,
-  disabled,
-  children,
-}: {
-  icon: ElementType
-  onClick: () => void
-  disabled?: boolean
-  children: string
-}): ReactElement => {
-  const svg = <SvgIcon component={icon} inheritViewBox fontSize="small" />
-
-  return (
-    <Button onClick={onClick} disabled={disabled} variant="outlined" color="primary" size="small" startIcon={svg}>
-      {children}
-    </Button>
-  )
-}
 
 const SpaceAddressBookCTA = () => {
   const isQualifiedSafe = useIsQualifiedSafe()
@@ -51,15 +29,13 @@ const SpaceAddressBookCTA = () => {
   if (!isQualifiedSafe || !isAdmin) return null
 
   return (
-    <Box width={1}>
-      <Typography pl={1} mb={2} maxWidth="500px">
-        This data is stored in your local storage. Do you want to manage your <b>{space?.name}</b> workspace address
-        book instead?{' '}
-        <Link href={{ pathname: AppRoutes.spaces.addressBook, query: { spaceId } }} passHref>
-          <MUILink>Click here</MUILink>
-        </Link>
-      </Typography>
-    </Box>
+    <Typography className="max-w-[500px] text-sm">
+      This data is stored in your local storage. Do you want to manage your <b>{space?.name}</b> workspace address book
+      instead?{' '}
+      <ShadcnLink render={<Link href={{ pathname: AppRoutes.spaces.addressBook, query: { spaceId } }} passHref />}>
+        Click here
+      </ShadcnLink>
+    </Typography>
   )
 }
 
@@ -68,6 +44,7 @@ type Props = {
   handleOpenModal: (type: ModalType) => () => void
   searchQuery: string
   onSearchQueryChange: (searchQuery: string) => void
+  hasEntries: boolean
 }
 
 function AddressBookHeader({
@@ -75,75 +52,57 @@ function AddressBookHeader({
   handleOpenModal,
   searchQuery,
   onSearchQueryChange,
+  hasEntries,
 }: Props): ReactElement {
   const canExport = Object.values(allAddressBooks).some((addressBook) => Object.keys(addressBook || {}).length > 0)
 
   return (
-    <PageHeader
-      action={
-        <Grid
-          container
-          spacing={1}
-          sx={{
-            pb: 1,
-          }}
-        >
-          <SpaceAddressBookCTA />
+    <div className="mb-6 flex flex-col gap-6 px-4">
+      <Typography variant="h2" className="font-bold leading-none tracking-tight">
+        Address book
+      </Typography>
 
-          <Grid item xs={12} md={5} xl={4.5}>
-            <TextField
-              placeholder="Search"
-              variant="filled"
-              hiddenLabel
-              value={searchQuery}
-              onChange={(e) => {
-                onSearchQueryChange(e.target.value)
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SvgIcon component={SearchIcon} inheritViewBox color="border" />
-                  </InputAdornment>
-                ),
-                disableUnderline: true,
-              }}
-              fullWidth
-              size="small"
-            />
-          </Grid>
-          <Grid
-            item
-            xs={12}
-            md={7}
-            xl={7.5}
-            sx={{
-              display: 'flex',
-              justifyContent: ['space-between', , 'flex-end'],
-              alignItems: 'flex-end',
-            }}
-            gap={{ md: 1, xs: 0.25 }}
-          >
-            <Track {...ADDRESS_BOOK_EVENTS.IMPORT_BUTTON}>
-              <HeaderButton onClick={handleOpenModal(ModalType.IMPORT)} icon={ImportIcon}>
-                Import
-              </HeaderButton>
-            </Track>
+      <SpaceAddressBookCTA />
 
-            <Track {...ADDRESS_BOOK_EVENTS.DOWNLOAD_BUTTON}>
-              <HeaderButton onClick={handleOpenModal(ModalType.EXPORT)} icon={ExportIcon} disabled={!canExport}>
-                Export
-              </HeaderButton>
-            </Track>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-2">
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Track {...ADDRESS_BOOK_EVENTS.CREATE_ENTRY}>
+            <Button size="lg" className="px-4 py-0" onClick={handleOpenModal(ModalType.ENTRY)}>
+              <Plus className="mr-1 size-4 text-green-500" />
+              New entry
+            </Button>
+          </Track>
 
-            <Track {...ADDRESS_BOOK_EVENTS.CREATE_ENTRY}>
-              <HeaderButton onClick={handleOpenModal(ModalType.ENTRY)} icon={AddCircleIcon}>
-                New entry
-              </HeaderButton>
-            </Track>
-          </Grid>
-        </Grid>
-      }
-    />
+          <Track {...ADDRESS_BOOK_EVENTS.IMPORT_BUTTON}>
+            <Button variant="outline" size="lg" className="px-4 py-0" onClick={handleOpenModal(ModalType.IMPORT)}>
+              <ImportIcon className="size-4" />
+              Import
+            </Button>
+          </Track>
+
+          <Track {...ADDRESS_BOOK_EVENTS.DOWNLOAD_BUTTON}>
+            <Button
+              variant="outline"
+              size="lg"
+              className="px-4 py-0"
+              onClick={handleOpenModal(ModalType.EXPORT)}
+              disabled={!canExport}
+            >
+              <ExportIcon className="size-4" />
+              Export
+            </Button>
+          </Track>
+        </div>
+
+        {hasEntries && (
+          <AddressBookSearchInput
+            value={searchQuery}
+            onChange={onSearchQueryChange}
+            placeholder="Search for contacts"
+          />
+        )}
+      </div>
+    </div>
   )
 }
 

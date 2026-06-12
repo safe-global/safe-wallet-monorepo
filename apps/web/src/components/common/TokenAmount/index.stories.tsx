@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import TokenAmount from './index'
-import { Paper } from '@mui/material'
 
 const meta = {
   component: TokenAmount,
@@ -11,9 +10,9 @@ const meta = {
   decorators: [
     (Story) => {
       return (
-        <Paper sx={{ padding: 2 }}>
+        <div className="rounded-lg bg-card p-4">
           <Story />
-        </Paper>
+        </div>
       )
     },
   ],

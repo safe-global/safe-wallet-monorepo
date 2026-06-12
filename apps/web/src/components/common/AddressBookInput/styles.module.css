@@ -1,3 +1,36 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.options {
+  position: absolute;
+  z-index: var(--z-overlay);
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  list-style: none;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: var(--color-background-paper);
+  border-radius: 6px;
+  box-shadow: var(--box-shadow-md, 0 2px 10px rgba(0, 0, 0, 0.1));
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.option:hover,
+.option[aria-selected='true'] {
+  background-color: var(--color-background-light);
+}
+
 .unknownAddress {
   margin-top: calc(-1 * var(--space-2));
   padding: 20px 12px 4px;

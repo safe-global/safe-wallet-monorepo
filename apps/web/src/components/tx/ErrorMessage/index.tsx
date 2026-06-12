@@ -1,5 +1,4 @@
 import { type ReactElement, type ReactNode, type SyntheticEvent, useState } from 'react'
-import { Link, Typography, SvgIcon, AlertTitle } from '@mui/material'
 import classNames from 'classnames'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -8,9 +7,18 @@ import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
 import ExternalLink from '@/components/common/ExternalLink'
+import { Typography } from '@/components/ui/typography'
+import { Link } from '@/components/ui/link'
+import { cn } from '@/utils/cn'
 import css from './styles.module.css'
 
 const ETHERS_PREFIX = 'could not coalesce error'
+
+const iconColorClass: Record<'error' | 'warning' | 'info', string> = {
+  error: 'text-[var(--color-error-main)]',
+  warning: 'text-[var(--color-warning-main)]',
+  info: 'text-[var(--color-info-main)]',
+}
 
 const ErrorMessage = ({
   children,
@@ -41,34 +49,24 @@ const ErrorMessage = ({
     setShowDetails((prev) => !prev)
   }
 
+  const Icon = level === 'info' ? InfoIcon : WarningIcon
+
   return (
     <div data-testid="error-message" className={classNames(css.container, css[level], className, 'errorMessage')}>
       <div className={css.message}>
-        <SvgIcon
-          component={level === 'info' ? InfoIcon : WarningIcon}
-          inheritViewBox
-          fontSize="medium"
-          sx={{ color: ({ palette }) => `${palette[level].main} !important` }}
-        />
+        <Icon className={cn('size-6 shrink-0 fill-current', iconColorClass[level])} />
 
         <div>
-          <Typography variant="body2" component="span">
+          <Typography variant="paragraph-small">
             {title && (
-              <AlertTitle>
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    fontWeight: 700,
-                  }}
-                >
-                  {title}
-                </Typography>
-              </AlertTitle>
+              <span className="block font-bold">
+                <span className="text-base leading-6 font-bold">{title}</span>
+              </span>
             )}
             {children}
 
             {guardErrorName && (
-              <Typography variant="body2" component="div" sx={{ mt: 1 }}>
+              <span className="mt-2 block text-sm leading-5">
                 <strong>
                   {guardExplorerLink ? (
                     <>
@@ -79,17 +77,14 @@ const ErrorMessage = ({
                     <>Guard reverted the transaction ({guardErrorName})</>
                   )}
                 </strong>
-              </Typography>
+              </span>
             )}
 
             {error && (
               <Link
-                component="button"
+                render={<button type="button" />}
                 onClick={onDetailsToggle}
-                sx={{
-                  display: 'block',
-                  mt: guardErrorName ? 0.5 : 0,
-                }}
+                className={cn('block', guardErrorName && 'mt-1')}
               >
                 Details
               </Link>
@@ -97,7 +92,7 @@ const ErrorMessage = ({
           </Typography>
 
           {error && showDetails && (
-            <Typography variant="body2" className={css.details}>
+            <Typography variant="paragraph-small" className={cn('block', css.details)}>
               {error.message.replace(ETHERS_PREFIX, '').trim().slice(0, 500)}
             </Typography>
           )}

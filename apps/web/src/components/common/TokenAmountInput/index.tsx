@@ -2,7 +2,10 @@ import NumberField from '@/components/common/NumberField'
 import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
-import { Button, Divider, FormControl, InputLabel, MenuItem, TextField, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import classNames from 'classnames'
 import { useCallback, useMemo } from 'react'
 import { get, useFormContext } from 'react-hook-form'
@@ -117,30 +120,37 @@ const TokenAmountInput = ({
     trigger(deps)
   }, [resetField, amountField, trigger, deps, defaultValues, fieldArray])
 
+  const handleTokenChange = useCallback(
+    (value: string) => {
+      setValue(tokenAddressField, value, { shouldValidate: true })
+      onChangeToken()
+    },
+    [setValue, tokenAddressField, onChangeToken],
+  )
+
+  const selectedBalance = balances.find((item) => item.tokenInfo.address === tokenAddress)
+
   return (
     <>
-      <FormControl
+      <div
         data-testid="token-amount-section"
-        className={classNames(css.outline, { [css.error]: isAmountError })}
-        fullWidth
+        className={classNames(css.outline, { [css.error]: isAmountError }, 'w-full')}
       >
-        <InputLabel shrink required className={css.label}>
+        <label className={classNames(css.label, 'block text-xs font-medium')}>
           {get(errors, tokenAddressField)?.message?.toString() ||
             get(errors, amountField)?.message?.toString() ||
             'Amount'}
-        </InputLabel>
+        </label>
         <div className={css.inputs}>
           <NumberField
             data-testid="token-amount-field"
-            variant="standard"
-            InputProps={{
-              disableUnderline: true,
-              endAdornment: maxAmount !== undefined && (
-                <Button data-testid="max-btn" className={css.max} onClick={onMaxAmountClick}>
+            endAdornment={
+              maxAmount !== undefined && (
+                <Button variant="ghost" data-testid="max-btn" className={css.max} onClick={onMaxAmountClick}>
                   Max
                 </Button>
-              ),
-            }}
+              )
+            }
             className={css.amount}
             required
             placeholder="0"
@@ -157,32 +167,33 @@ const TokenAmountInput = ({
               deps,
             })}
           />
-          <Divider orientation="vertical" flexItem />
-          <TextField
-            data-testid="token-selector"
-            select
-            variant="standard"
-            InputProps={{
-              disableUnderline: true,
-            }}
-            className={css.select}
-            {...register(tokenAddressField, {
-              required: true,
-              onChange: onChangeToken,
-            })}
-            value={tokenAddress}
-            required
-          >
-            {balances.map((item) => (
-              <MenuItem data-testid="token-item" key={item.tokenInfo.address} value={item.tokenInfo.address}>
-                <AutocompleteItem {...item} />
-              </MenuItem>
-            ))}
-          </TextField>
+          <Separator orientation="vertical" className="h-auto self-stretch" />
+          <div data-testid="token-selector" className={css.select}>
+            <Select name={tokenAddressField} value={tokenAddress} onValueChange={handleTokenChange} required>
+              <SelectTrigger>
+                <SelectValue>
+                  {selectedBalance && (
+                    <AutocompleteItem tokenInfo={selectedBalance.tokenInfo} balance={selectedBalance.balance} />
+                  )}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {balances.map((item) => (
+                  <SelectItem data-testid="token-item" key={item.tokenInfo.address} value={item.tokenInfo.address}>
+                    <AutocompleteItem {...item} />
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-      </FormControl>
+      </div>
       {fiatValue != null && (
-        <Typography data-testid="fiat-display" variant="caption" color="text.secondary" className={css.fiatDisplay}>
+        <Typography
+          data-testid="fiat-display"
+          variant="paragraph-mini"
+          className={classNames(css.fiatDisplay, 'text-muted-foreground')}
+        >
           <FiatValue value={fiatValue} precise />
         </Typography>
       )}

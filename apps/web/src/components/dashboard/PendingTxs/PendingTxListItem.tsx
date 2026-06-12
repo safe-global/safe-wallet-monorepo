@@ -2,7 +2,7 @@ import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/tran
 import NextLink from 'next/link'
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
-import { Box, Stack, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import TxInfo from '@/components/transactions/TxInfo'
 import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
@@ -33,31 +33,31 @@ const PendingTx = ({ transaction }: PendingTxType): ReactElement => {
 
   return (
     <NextLink data-testid="tx-pending-item" href={url} passHref>
-      <Box className={css.container}>
-        <Stack direction="row" gap={1.5} alignItems="center">
-          <Box className={css.iconWrapper}>
+      <div className={css.container}>
+        <div className="flex flex-row items-center gap-3">
+          <div className={css.iconWrapper}>
             <TxTypeIcon tx={transaction} />
-          </Box>
-          <Box>
+          </div>
+          <div>
             <Typography className={css.txDescription}>
               <TxTypeText tx={transaction} />
               <TxInfo info={transaction.txInfo} />
             </Typography>
-            <Typography variant="body2" color="primary.light">
+            <Typography variant="paragraph-small" className="block text-[var(--color-primary-light)]">
               <DateTime value={transaction.timestamp} showDateTime={false} showTime={false} />
             </Typography>
-          </Box>
-        </Stack>
+          </div>
+        </div>
 
-        <Box className={css.confirmations}>
+        <div className={css.confirmations}>
           {isMultisigExecutionInfo(transaction.executionInfo) && (
             <TxConfirmations
               submittedConfirmations={transaction.executionInfo.confirmationsSubmitted}
               requiredConfirmations={transaction.executionInfo.confirmationsRequired}
             />
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
     </NextLink>
   )
 }

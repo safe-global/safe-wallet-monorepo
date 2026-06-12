@@ -1,8 +1,8 @@
 import { useRouter } from 'next/router'
 import { type ReactNode, useCallback, type MouseEvent } from 'react'
-import { Chip, Typography, SvgIcon } from '@mui/material'
-import CheckIcon from '@mui/icons-material/Check'
+import { CheckIcon } from 'lucide-react'
 import TransactionsIcon from '@/public/images/transactions/transactions.svg'
+import { Chip } from '@/components/ui/chip'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { AppRoutes } from '@/config/routes'
@@ -16,22 +16,9 @@ export interface AccountItemQueueActionsProps {
 }
 
 const ChipLink = ({ children, color }: { children: ReactNode; color?: string }) => (
-  <Chip
-    size="small"
-    sx={{ backgroundColor: `${color}.background` }}
-    label={
-      <Typography
-        variant="caption"
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.5,
-        }}
-      >
-        {children}
-      </Typography>
-    }
-  />
+  <Chip style={color ? { backgroundColor: `var(--color-${color}-background)` } : undefined}>
+    <span className="flex items-center gap-1">{children}</span>
+  </Chip>
 )
 
 /**
@@ -67,14 +54,14 @@ function AccountItemQueueActions({
       <button onClick={onQueueClick} className={css.queueButton}>
         {queued > 0 && (
           <ChipLink>
-            <SvgIcon component={TransactionsIcon} inheritViewBox sx={{ fontSize: 'small' }} />
+            <TransactionsIcon className="size-4" />
             {queued} pending
           </ChipLink>
         )}
 
         {awaitingConfirmation > 0 && (
           <ChipLink color="warning">
-            <SvgIcon component={CheckIcon} inheritViewBox sx={{ fontSize: 'small', color: 'warning' }} />
+            <CheckIcon className="size-4 text-[var(--color-warning-main)]" />
             {awaitingConfirmation} to confirm
           </ChipLink>
         )}

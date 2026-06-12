@@ -1,27 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState } from 'react'
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  TextField,
-  Stepper,
-  Step,
-  StepLabel,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  IconButton,
-  Chip,
-  Alert,
-  Divider,
-} from '@mui/material'
-import DeleteIcon from '@mui/icons-material/Delete'
-import AddIcon from '@mui/icons-material/Add'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
+import { Trash2, Plus, CircleCheck, Wallet } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Field, FieldLabel } from '@/components/ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 
 /**
  * New Safe components handle the creation and loading of Safe accounts.
@@ -52,6 +39,39 @@ const mockOwners = [
   { name: 'Hardware Wallet', address: '0xABCDEF0123456789ABCDEF0123456789ABCDEF01' },
 ]
 
+// Mock stepper indicator
+const MockStepper = ({ steps, activeStep }: { steps: string[]; activeStep: number }) => (
+  <div className="mb-8 flex items-center gap-2">
+    {steps.map((label, index) => (
+      <div key={label} className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+          <span
+            className={
+              index <= activeStep
+                ? 'flex size-6 items-center justify-center rounded-full bg-primary'
+                : 'flex size-6 items-center justify-center rounded-full bg-muted'
+            }
+          >
+            <Typography
+              variant="paragraph-mini-bold"
+              className={index <= activeStep ? 'text-primary-foreground' : 'text-muted-foreground'}
+            >
+              {index + 1}
+            </Typography>
+          </span>
+          <Typography
+            variant="paragraph-small"
+            className={index <= activeStep ? 'text-foreground' : 'text-muted-foreground'}
+          >
+            {label}
+          </Typography>
+        </div>
+        {index < steps.length - 1 && <span className="h-px w-8 bg-border" />}
+      </div>
+    ))}
+  </div>
+)
+
 // Mock OwnerRow component
 const MockOwnerRow = ({
   owner,
@@ -64,51 +84,41 @@ const MockOwnerRow = ({
   onRemove?: () => void
   readOnly?: boolean
 }) => (
-  <Box
-    sx={{
-      display: 'flex',
-      gap: 2,
-      alignItems: 'flex-start',
-      p: 2,
-      bgcolor: 'background.default',
-      borderRadius: 1,
-      mb: 1,
-    }}
-  >
-    <Typography variant="body2" color="text.secondary" sx={{ width: 24 }}>
+  <div className="mb-2 flex items-start gap-4 rounded bg-background p-4">
+    <Typography variant="paragraph-small" color="muted" as="div" className="w-6">
       {index + 1}.
     </Typography>
-    <Box sx={{ flex: 1 }}>
+    <div className="flex-1">
       {readOnly ? (
         <>
-          <Typography variant="body2">{owner.name || 'Owner'}</Typography>
-          <Typography variant="caption" fontFamily="monospace" color="text.secondary">
+          <Typography variant="paragraph-small">{owner.name || 'Owner'}</Typography>
+          <Typography variant="paragraph-mini" color="muted" as="div" className="font-mono">
             {owner.address}
           </Typography>
         </>
       ) : (
         <>
-          <TextField size="small" fullWidth defaultValue={owner.name} placeholder="Owner name" sx={{ mb: 1 }} />
-          <TextField size="small" fullWidth defaultValue={owner.address} placeholder="Owner address" />
+          <Input className="mb-2" defaultValue={owner.name} placeholder="Owner name" />
+          <Input defaultValue={owner.address} placeholder="Owner address" />
         </>
       )}
-    </Box>
+    </div>
     {!readOnly && onRemove && index > 0 && (
-      <IconButton size="small" onClick={onRemove}>
-        <DeleteIcon fontSize="small" />
-      </IconButton>
+      <Button variant="ghost" size="icon-sm" onClick={onRemove}>
+        <Trash2 className="size-4" />
+      </Button>
     )}
-  </Box>
+  </div>
 )
 
 // Mock ReviewRow component
 const MockReviewRow = ({ name, value }: { name: string; value: React.ReactNode }) => (
-  <Box sx={{ display: 'flex', py: 1.5, borderBottom: 1, borderColor: 'divider' }}>
-    <Typography variant="body2" color="text.secondary" sx={{ width: 150 }}>
+  <div className="flex border-b border-border py-3">
+    <Typography variant="paragraph-small" color="muted" as="div" className="w-[150px]">
       {name}
     </Typography>
-    <Box sx={{ flex: 1 }}>{value}</Box>
-  </Box>
+    <div className="flex-1">{value}</div>
+  </div>
 )
 
 // Docs-style wrapper for each step
@@ -123,18 +133,18 @@ const StepWrapper = ({
   description: string
   children: React.ReactNode
 }) => (
-  <Box sx={{ mb: 8 }}>
-    <Box sx={{ mb: 2, pb: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-      <Typography variant="overline" color="text.secondary">
+  <div className="mb-16">
+    <div className="mb-4 border-b border-border pb-4">
+      <Typography variant="paragraph-mini" color="muted" as="div">
         Step {stepNumber}
       </Typography>
-      <Typography variant="h5">{stepName}</Typography>
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="h4">{stepName}</Typography>
+      <Typography variant="paragraph-small" color="muted" as="div">
         {description}
       </Typography>
-    </Box>
-    <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 2 }}>{children}</Box>
-  </Box>
+    </div>
+    <div className="rounded-lg bg-muted p-6">{children}</div>
+  </div>
 )
 
 // All Steps - Scrollable view of entire Create Safe flow with full UI at each step
@@ -143,185 +153,181 @@ export const CreateSafeAllSteps: StoryObj = {
     const steps = ['Name', 'Owners', 'Review']
 
     return (
-      <Box sx={{ maxWidth: 700 }}>
-        <Box sx={{ mb: 6, pb: 3, borderBottom: '2px solid', borderColor: 'primary.main' }}>
-          <Typography variant="h4">Create Safe Flow</Typography>
-          <Typography variant="body1" color="text.secondary">
+      <div className="max-w-[700px]">
+        <div className="mb-12 border-b-2 border-primary pb-6">
+          <Typography variant="h3">Create Safe flow</Typography>
+          <Typography variant="paragraph" color="muted" as="div">
             Complete walkthrough of the Safe creation process. Scroll to view each step.
           </Typography>
-        </Box>
+        </div>
 
         {/* Step 1: Name */}
         <StepWrapper
           stepNumber={1}
-          stepName="Name & Network"
+          stepName="Name & network"
           description="User enters a name for their Safe and selects the network to deploy on."
         >
-          <Box sx={{ maxWidth: 600 }}>
-            <Typography variant="h4" gutterBottom>
+          <div className="max-w-[600px]">
+            <Typography variant="h4" as="div" className="mb-2">
               Create new Safe
             </Typography>
-            <Stepper activeStep={0} sx={{ mb: 4 }}>
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+            <MockStepper steps={steps} activeStep={0} />
+            <div className="rounded-lg bg-card p-6">
+              <Typography variant="h4" as="div" className="mb-2">
                 Name your Safe
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              <Typography variant="paragraph-small" color="muted" as="div" className="mb-6">
                 Choose a name for your Safe. This is stored locally.
               </Typography>
-              <TextField
-                fullWidth
-                label="Safe name"
-                placeholder="My Safe"
-                defaultValue="Team Treasury"
-                sx={{ mb: 3 }}
-              />
-              <FormControl fullWidth sx={{ mb: 3 }}>
-                <InputLabel>Network</InputLabel>
-                <Select defaultValue="1" label="Network">
-                  <MenuItem value="1">Ethereum</MenuItem>
-                  <MenuItem value="137">Polygon</MenuItem>
-                  <MenuItem value="42161">Arbitrum</MenuItem>
-                  <MenuItem value="10">Optimism</MenuItem>
+              <Field className="mb-6">
+                <FieldLabel htmlFor="safe-name">Safe name</FieldLabel>
+                <Input id="safe-name" placeholder="My Safe" defaultValue="Team Treasury" />
+              </Field>
+              <Field className="mb-6">
+                <FieldLabel>Network</FieldLabel>
+                <Select defaultValue="1">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Ethereum</SelectItem>
+                    <SelectItem value="137">Polygon</SelectItem>
+                    <SelectItem value="42161">Arbitrum</SelectItem>
+                    <SelectItem value="10">Optimism</SelectItem>
+                  </SelectContent>
                 </Select>
-              </FormControl>
-              <Alert severity="info" sx={{ mb: 3 }}>
-                Your Safe will be created on the selected network. Make sure you have funds for deployment.
+              </Field>
+              <Alert className="mb-6">
+                <AlertDescription>
+                  Your Safe will be created on the selected network. Make sure you have funds for deployment.
+                </AlertDescription>
               </Alert>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant="contained">Next</Button>
-              </Box>
-            </Paper>
-          </Box>
+              <div className="flex justify-end">
+                <Button>Next</Button>
+              </div>
+            </div>
+          </div>
         </StepWrapper>
 
         {/* Step 2: Owners */}
         <StepWrapper
           stepNumber={2}
-          stepName="Owners & Threshold"
+          stepName="Owners & threshold"
           description="User configures the Safe owners and sets the required number of confirmations."
         >
-          <Box sx={{ maxWidth: 600 }}>
-            <Typography variant="h4" gutterBottom>
+          <div className="max-w-[600px]">
+            <Typography variant="h4" as="div" className="mb-2">
               Create new Safe
             </Typography>
-            <Stepper activeStep={1} sx={{ mb: 4 }}>
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+            <MockStepper steps={steps} activeStep={1} />
+            <div className="rounded-lg bg-card p-6">
+              <Typography variant="h4" as="div" className="mb-2">
                 Owners and confirmations
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              <Typography variant="paragraph-small" color="muted" as="div" className="mb-6">
                 Add the addresses that will own this Safe and set the number of required confirmations.
               </Typography>
               {mockOwners.map((owner, index) => (
                 <MockOwnerRow key={index} owner={owner} index={index} onRemove={() => {}} />
               ))}
-              <Button startIcon={<AddIcon />} sx={{ mb: 3 }}>
+              <Button variant="ghost" className="mb-6">
+                <Plus className="size-4" />
                 Add owner
               </Button>
-              <Divider sx={{ my: 2 }} />
-              <Typography variant="subtitle2" gutterBottom>
+              <Separator className="my-4" />
+              <Typography variant="paragraph-small-bold" as="div" className="mb-2">
                 Required confirmations
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                <Select defaultValue={2} size="small">
-                  <MenuItem value={1}>1</MenuItem>
-                  <MenuItem value={2}>2</MenuItem>
+              <div className="mb-6 flex items-center gap-4">
+                <Select defaultValue="2">
+                  <SelectTrigger size="sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1</SelectItem>
+                    <SelectItem value="2">2</SelectItem>
+                  </SelectContent>
                 </Select>
-                <Typography variant="body2">out of 2 owner(s)</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Button>Back</Button>
-                <Button variant="contained">Next</Button>
-              </Box>
-            </Paper>
-          </Box>
+                <Typography variant="paragraph-small">out of 2 owner(s)</Typography>
+              </div>
+              <div className="flex justify-between">
+                <Button variant="ghost">Back</Button>
+                <Button>Next</Button>
+              </div>
+            </div>
+          </div>
         </StepWrapper>
 
         {/* Step 3: Review */}
         <StepWrapper stepNumber={3} stepName="Review" description="User reviews all settings before creating the Safe.">
-          <Box sx={{ maxWidth: 600 }}>
-            <Typography variant="h4" gutterBottom>
+          <div className="max-w-[600px]">
+            <Typography variant="h4" as="div" className="mb-2">
               Create new Safe
             </Typography>
-            <Stepper activeStep={2} sx={{ mb: 4 }}>
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+            <MockStepper steps={steps} activeStep={2} />
+            <div className="rounded-lg bg-card p-6">
+              <Typography variant="h4" as="div" className="mb-2">
                 Review
               </Typography>
-              <MockReviewRow name="Safe name" value={<Typography variant="body2">Team Treasury</Typography>} />
-              <MockReviewRow name="Network" value={<Chip label="Ethereum" size="small" />} />
+              <MockReviewRow
+                name="Safe name"
+                value={<Typography variant="paragraph-small">Team Treasury</Typography>}
+              />
+              <MockReviewRow name="Network" value={<Badge>Ethereum</Badge>} />
               <MockReviewRow
                 name="Owners"
                 value={
-                  <Box>
+                  <div>
                     {mockOwners.map((owner, i) => (
-                      <Box key={i} sx={{ mb: 1 }}>
-                        <Typography variant="body2">{owner.name}</Typography>
-                        <Typography variant="caption" fontFamily="monospace" color="text.secondary">
+                      <div key={i} className="mb-2">
+                        <Typography variant="paragraph-small">{owner.name}</Typography>
+                        <Typography variant="paragraph-mini" color="muted" as="div" className="font-mono">
                           {owner.address}
                         </Typography>
-                      </Box>
+                      </div>
                     ))}
-                  </Box>
+                  </div>
                 }
               />
-              <MockReviewRow name="Threshold" value={<Typography variant="body2">2 out of 2</Typography>} />
-              <Alert severity="warning" sx={{ mt: 3, mb: 3 }}>
-                You will need to pay network fees to deploy this Safe.
+              <MockReviewRow name="Threshold" value={<Typography variant="paragraph-small">2 out of 2</Typography>} />
+              <Alert variant="warning" className="my-6">
+                <AlertDescription>You will need to pay network fees to deploy this Safe.</AlertDescription>
               </Alert>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Button>Back</Button>
-                <Button variant="contained">Create Safe</Button>
-              </Box>
-            </Paper>
-          </Box>
+              <div className="flex justify-between">
+                <Button variant="ghost">Back</Button>
+                <Button>Create Safe</Button>
+              </div>
+            </div>
+          </div>
         </StepWrapper>
 
         {/* Step 4: Success */}
         <StepWrapper stepNumber={4} stepName="Success" description="Confirmation screen shown after Safe is created.">
-          <Box sx={{ maxWidth: 600 }}>
-            <Paper sx={{ p: 4, textAlign: 'center' }}>
-              <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-              <Typography variant="h5" gutterBottom>
+          <div className="max-w-[600px]">
+            <div className="rounded-lg bg-card p-8 text-center">
+              <CircleCheck className="mx-auto mb-4 size-16 text-success" />
+              <Typography variant="h4" as="div" className="mb-2">
                 Safe created successfully!
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              <Typography variant="paragraph-small" color="muted" as="div" className="mb-6">
                 Your new Safe is ready to use.
               </Typography>
-              <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1, mb: 3 }}>
-                <Typography variant="body2" color="text.secondary">
+              <div className="mb-6 rounded bg-background p-4">
+                <Typography variant="paragraph-small" color="muted" as="div">
                   Safe address
                 </Typography>
-                <Typography variant="body2" fontFamily="monospace">
+                <Typography variant="paragraph-small" as="div" className="font-mono">
                   0x1234567890123456789012345678901234567890
                 </Typography>
-              </Box>
-              <Button variant="contained" startIcon={<AccountBalanceWalletIcon />}>
+              </div>
+              <Button>
+                <Wallet className="size-4" />
                 Open Safe
               </Button>
-            </Paper>
-          </Box>
+            </div>
+          </div>
         </StepWrapper>
-      </Box>
+      </div>
     )
   },
   parameters: {
@@ -339,7 +345,7 @@ export const CreateSafeInteractive: StoryObj = {
   render: () => {
     const [step, setStep] = useState(0)
     const [owners, setOwners] = useState(mockOwners)
-    const [threshold, setThreshold] = useState(2)
+    const [threshold, setThreshold] = useState('2')
 
     const steps = ['Name', 'Owners', 'Review']
 
@@ -352,55 +358,57 @@ export const CreateSafeInteractive: StoryObj = {
     }
 
     return (
-      <Box sx={{ maxWidth: 600 }}>
-        <Typography variant="h4" gutterBottom>
+      <div className="max-w-[600px]">
+        <Typography variant="h4" as="div" className="mb-2">
           Create new Safe
         </Typography>
 
-        <Stepper activeStep={step} sx={{ mb: 4 }}>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
+        <MockStepper steps={steps} activeStep={step} />
 
-        <Paper sx={{ p: 3 }}>
+        <div className="rounded-lg bg-card p-6">
           {step === 0 && (
             <>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h4" as="div" className="mb-2">
                 Name your Safe
               </Typography>
-              <TextField fullWidth label="Safe name" placeholder="My Safe" sx={{ mb: 3 }} />
+              <Field className="mb-6">
+                <FieldLabel htmlFor="interactive-safe-name">Safe name</FieldLabel>
+                <Input id="interactive-safe-name" placeholder="My Safe" />
+              </Field>
 
-              <FormControl fullWidth sx={{ mb: 3 }}>
-                <InputLabel>Network</InputLabel>
-                <Select defaultValue="1" label="Network">
-                  <MenuItem value="1">Ethereum</MenuItem>
-                  <MenuItem value="137">Polygon</MenuItem>
-                  <MenuItem value="42161">Arbitrum</MenuItem>
-                  <MenuItem value="10">Optimism</MenuItem>
+              <Field className="mb-6">
+                <FieldLabel>Network</FieldLabel>
+                <Select defaultValue="1">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">Ethereum</SelectItem>
+                    <SelectItem value="137">Polygon</SelectItem>
+                    <SelectItem value="42161">Arbitrum</SelectItem>
+                    <SelectItem value="10">Optimism</SelectItem>
+                  </SelectContent>
                 </Select>
-              </FormControl>
+              </Field>
 
-              <Alert severity="info" sx={{ mb: 3 }}>
-                Your Safe will be created on the selected network. Make sure you have funds for deployment.
+              <Alert className="mb-6">
+                <AlertDescription>
+                  Your Safe will be created on the selected network. Make sure you have funds for deployment.
+                </AlertDescription>
               </Alert>
 
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button variant="contained" onClick={() => setStep(1)}>
-                  Next
-                </Button>
-              </Box>
+              <div className="flex justify-end">
+                <Button onClick={() => setStep(1)}>Next</Button>
+              </div>
             </>
           )}
 
           {step === 1 && (
             <>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h4" as="div" className="mb-2">
                 Owners and confirmations
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              <Typography variant="paragraph-small" color="muted" as="div" className="mb-6">
                 Add the addresses that will own this Safe and set the number of required confirmations.
               </Typography>
 
@@ -408,76 +416,84 @@ export const CreateSafeInteractive: StoryObj = {
                 <MockOwnerRow key={index} owner={owner} index={index} onRemove={() => removeOwner(index)} />
               ))}
 
-              <Button startIcon={<AddIcon />} onClick={addOwner} sx={{ mb: 3 }}>
+              <Button variant="ghost" onClick={addOwner} className="mb-6">
+                <Plus className="size-4" />
                 Add owner
               </Button>
 
-              <Divider sx={{ my: 3 }} />
+              <Separator className="my-6" />
 
-              <Typography variant="subtitle2" gutterBottom>
+              <Typography variant="paragraph-small-bold" as="div" className="mb-2">
                 Required confirmations
               </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                <Select value={threshold} onChange={(e) => setThreshold(Number(e.target.value))} size="small">
-                  {owners.map((_, i) => (
-                    <MenuItem key={i + 1} value={i + 1}>
-                      {i + 1}
-                    </MenuItem>
-                  ))}
+              <div className="mb-6 flex items-center gap-4">
+                <Select value={threshold} onValueChange={(value) => setThreshold(value ?? '')}>
+                  <SelectTrigger size="sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {owners.map((_, i) => (
+                      <SelectItem key={i + 1} value={String(i + 1)}>
+                        {i + 1}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
-                <Typography variant="body2">out of {owners.length} owner(s)</Typography>
-              </Box>
+                <Typography variant="paragraph-small">out of {owners.length} owner(s)</Typography>
+              </div>
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Button onClick={() => setStep(0)}>Back</Button>
-                <Button variant="contained" onClick={() => setStep(2)}>
-                  Next
+              <div className="flex justify-between">
+                <Button variant="ghost" onClick={() => setStep(0)}>
+                  Back
                 </Button>
-              </Box>
+                <Button onClick={() => setStep(2)}>Next</Button>
+              </div>
             </>
           )}
 
           {step === 2 && (
             <>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h4" as="div" className="mb-2">
                 Review
               </Typography>
 
-              <MockReviewRow name="Safe name" value={<Typography variant="body2">My Safe</Typography>} />
-              <MockReviewRow name="Network" value={<Chip label="Ethereum" size="small" />} />
+              <MockReviewRow name="Safe name" value={<Typography variant="paragraph-small">My Safe</Typography>} />
+              <MockReviewRow name="Network" value={<Badge>Ethereum</Badge>} />
               <MockReviewRow
                 name="Owners"
                 value={
-                  <Box>
+                  <div>
                     {owners.map((owner, i) => (
-                      <Typography key={i} variant="body2" fontFamily="monospace">
+                      <Typography key={i} variant="paragraph-small" as="div" className="font-mono">
                         {owner.address.slice(0, 10)}...{owner.address.slice(-8)}
                       </Typography>
                     ))}
-                  </Box>
+                  </div>
                 }
               />
               <MockReviewRow
                 name="Threshold"
                 value={
-                  <Typography variant="body2">
+                  <Typography variant="paragraph-small">
                     {threshold} out of {owners.length}
                   </Typography>
                 }
               />
 
-              <Alert severity="warning" sx={{ mt: 3, mb: 3 }}>
-                You will need to pay network fees to deploy this Safe.
+              <Alert variant="warning" className="my-6">
+                <AlertDescription>You will need to pay network fees to deploy this Safe.</AlertDescription>
               </Alert>
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Button onClick={() => setStep(1)}>Back</Button>
-                <Button variant="contained">Create Safe</Button>
-              </Box>
+              <div className="flex justify-between">
+                <Button variant="ghost" onClick={() => setStep(1)}>
+                  Back
+                </Button>
+                <Button>Create Safe</Button>
+              </div>
             </>
           )}
-        </Paper>
-      </Box>
+        </div>
+      </div>
     )
   },
   parameters: {
@@ -493,35 +509,43 @@ export const CreateSafeInteractive: StoryObj = {
 export const LoadSafeFlow: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <Box sx={{ maxWidth: 600 }}>
-      <Typography variant="h4" gutterBottom>
+    <div className="max-w-[600px]">
+      <Typography variant="h4" as="div" className="mb-2">
         Add existing Safe
       </Typography>
 
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
+      <div className="rounded-lg bg-card p-6">
+        <Typography variant="h4" as="div" className="mb-2">
           Enter Safe address
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography variant="paragraph-small" color="muted" as="div" className="mb-6">
           Paste the address of an existing Safe you want to add to your account.
         </Typography>
 
-        <FormControl fullWidth sx={{ mb: 3 }}>
-          <InputLabel>Network</InputLabel>
-          <Select defaultValue="1" label="Network">
-            <MenuItem value="1">Ethereum</MenuItem>
-            <MenuItem value="137">Polygon</MenuItem>
-            <MenuItem value="42161">Arbitrum</MenuItem>
+        <Field className="mb-6">
+          <FieldLabel>Network</FieldLabel>
+          <Select defaultValue="1">
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">Ethereum</SelectItem>
+              <SelectItem value="137">Polygon</SelectItem>
+              <SelectItem value="42161">Arbitrum</SelectItem>
+            </SelectContent>
           </Select>
-        </FormControl>
+        </Field>
 
-        <TextField fullWidth label="Safe address" placeholder="0x..." sx={{ mb: 3 }} />
+        <Field className="mb-6">
+          <FieldLabel htmlFor="safe-address">Safe address</FieldLabel>
+          <Input id="safe-address" placeholder="0x..." />
+        </Field>
 
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button variant="contained">Add Safe</Button>
-        </Box>
-      </Paper>
-    </Box>
+        <div className="flex justify-end">
+          <Button>Add Safe</Button>
+        </div>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -536,25 +560,33 @@ export const LoadSafeFlow: StoryObj = {
 export const SetNameStep: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <Typography variant="h6" gutterBottom>
+    <div className="max-w-[500px] rounded-lg bg-card p-6">
+      <Typography variant="h4" as="div" className="mb-2">
         Name your Safe
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" as="div" className="mb-6">
         Choose a name for your Safe. This is stored locally.
       </Typography>
 
-      <TextField fullWidth label="Safe name" placeholder="My Safe" defaultValue="Team Treasury" sx={{ mb: 3 }} />
+      <Field className="mb-6">
+        <FieldLabel htmlFor="set-name-safe-name">Safe name</FieldLabel>
+        <Input id="set-name-safe-name" placeholder="My Safe" defaultValue="Team Treasury" />
+      </Field>
 
-      <FormControl fullWidth>
-        <InputLabel>Network</InputLabel>
-        <Select defaultValue="1" label="Network">
-          <MenuItem value="1">Ethereum</MenuItem>
-          <MenuItem value="137">Polygon</MenuItem>
-          <MenuItem value="42161">Arbitrum</MenuItem>
+      <Field>
+        <FieldLabel>Network</FieldLabel>
+        <Select defaultValue="1">
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1">Ethereum</SelectItem>
+            <SelectItem value="137">Polygon</SelectItem>
+            <SelectItem value="42161">Arbitrum</SelectItem>
+          </SelectContent>
         </Select>
-      </FormControl>
-    </Paper>
+      </Field>
+    </div>
   ),
   parameters: {
     docs: {
@@ -569,11 +601,11 @@ export const SetNameStep: StoryObj = {
 export const OwnerPolicyStep: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <Typography variant="h6" gutterBottom>
+    <div className="max-w-[500px] rounded-lg bg-card p-6">
+      <Typography variant="h4" as="div" className="mb-2">
         Owners
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" as="div" className="mb-6">
         Add owners and set the required confirmations.
       </Typography>
 
@@ -581,23 +613,29 @@ export const OwnerPolicyStep: StoryObj = {
         <MockOwnerRow key={index} owner={owner} index={index} onRemove={() => {}} />
       ))}
 
-      <Button startIcon={<AddIcon />} sx={{ mb: 3 }}>
+      <Button variant="ghost" className="mb-6">
+        <Plus className="size-4" />
         Add owner
       </Button>
 
-      <Divider sx={{ my: 2 }} />
+      <Separator className="my-4" />
 
-      <Typography variant="subtitle2" gutterBottom>
+      <Typography variant="paragraph-small-bold" as="div" className="mb-2">
         Required confirmations
       </Typography>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Select defaultValue={2} size="small">
-          <MenuItem value={1}>1</MenuItem>
-          <MenuItem value={2}>2</MenuItem>
+      <div className="flex items-center gap-4">
+        <Select defaultValue="2">
+          <SelectTrigger size="sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1">1</SelectItem>
+            <SelectItem value="2">2</SelectItem>
+          </SelectContent>
         </Select>
-        <Typography variant="body2">out of 2 owner(s)</Typography>
-      </Box>
-    </Paper>
+        <Typography variant="paragraph-small">out of 2 owner(s)</Typography>
+      </div>
+    </div>
   ),
   parameters: {
     docs: {
@@ -612,34 +650,34 @@ export const OwnerPolicyStep: StoryObj = {
 export const ReviewStep: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <Typography variant="h6" gutterBottom>
+    <div className="max-w-[500px] rounded-lg bg-card p-6">
+      <Typography variant="h4" as="div" className="mb-2">
         Review Safe configuration
       </Typography>
 
-      <MockReviewRow name="Safe name" value={<Typography variant="body2">Team Treasury</Typography>} />
-      <MockReviewRow name="Network" value={<Chip label="Ethereum" size="small" />} />
+      <MockReviewRow name="Safe name" value={<Typography variant="paragraph-small">Team Treasury</Typography>} />
+      <MockReviewRow name="Network" value={<Badge>Ethereum</Badge>} />
       <MockReviewRow
         name="Owners"
         value={
-          <Box>
+          <div>
             {mockOwners.map((owner, i) => (
-              <Box key={i} sx={{ mb: 1 }}>
-                <Typography variant="body2">{owner.name}</Typography>
-                <Typography variant="caption" fontFamily="monospace" color="text.secondary">
+              <div key={i} className="mb-2">
+                <Typography variant="paragraph-small">{owner.name}</Typography>
+                <Typography variant="paragraph-mini" color="muted" as="div" className="font-mono">
                   {owner.address}
                 </Typography>
-              </Box>
+              </div>
             ))}
-          </Box>
+          </div>
         }
       />
-      <MockReviewRow name="Threshold" value={<Typography variant="body2">2 out of 2</Typography>} />
+      <MockReviewRow name="Threshold" value={<Typography variant="paragraph-small">2 out of 2</Typography>} />
 
-      <Alert severity="info" sx={{ mt: 3 }}>
-        Estimated network fee: ~0.01 ETH
+      <Alert className="mt-6">
+        <AlertDescription>Estimated network fee: ~0.01 ETH</AlertDescription>
       </Alert>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -654,17 +692,17 @@ export const ReviewStep: StoryObj = {
 export const OwnerRowVariants: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <Typography variant="subtitle2" gutterBottom>
-        Editable Owner Row
+    <div className="max-w-[500px] rounded-lg bg-card p-6">
+      <Typography variant="paragraph-small-bold" as="div" className="mb-2">
+        Editable owner row
       </Typography>
       <MockOwnerRow owner={mockOwners[0]} index={0} onRemove={() => {}} />
 
-      <Typography variant="subtitle2" gutterBottom sx={{ mt: 3 }}>
-        Read-only Owner Row
+      <Typography variant="paragraph-small-bold" as="div" className="mb-2 mt-6">
+        Read-only owner row
       </Typography>
       <MockOwnerRow owner={mockOwners[0]} index={0} readOnly />
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -679,11 +717,11 @@ export const OwnerRowVariants: StoryObj = {
 export const ReviewRowComponent: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <Paper sx={{ p: 3, maxWidth: 500 }}>
-      <MockReviewRow name="Safe name" value={<Typography variant="body2">My Safe</Typography>} />
-      <MockReviewRow name="Network" value={<Chip label="Ethereum" size="small" />} />
-      <MockReviewRow name="Balance" value={<Typography variant="body2">$125,000</Typography>} />
-    </Paper>
+    <div className="max-w-[500px] rounded-lg bg-card p-6">
+      <MockReviewRow name="Safe name" value={<Typography variant="paragraph-small">My Safe</Typography>} />
+      <MockReviewRow name="Network" value={<Badge>Ethereum</Badge>} />
+      <MockReviewRow name="Balance" value={<Typography variant="paragraph-small">$125,000</Typography>} />
+    </div>
   ),
   parameters: {
     docs: {
@@ -697,28 +735,29 @@ export const ReviewRowComponent: StoryObj = {
 // Creation success
 export const CreationSuccess: StoryObj = {
   render: () => (
-    <Paper sx={{ p: 4, maxWidth: 500, textAlign: 'center' }}>
-      <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-      <Typography variant="h5" gutterBottom>
+    <div className="max-w-[500px] rounded-lg bg-card p-8 text-center">
+      <CircleCheck className="mx-auto mb-4 size-16 text-success" />
+      <Typography variant="h4" as="div" className="mb-2">
         Safe created successfully!
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="paragraph-small" color="muted" as="div" className="mb-6">
         Your new Safe is ready to use.
       </Typography>
 
-      <Box sx={{ p: 2, bgcolor: 'background.default', borderRadius: 1, mb: 3 }}>
-        <Typography variant="body2" color="text.secondary">
+      <div className="mb-6 rounded bg-background p-4">
+        <Typography variant="paragraph-small" color="muted" as="div">
           Safe address
         </Typography>
-        <Typography variant="body2" fontFamily="monospace">
+        <Typography variant="paragraph-small" as="div" className="font-mono">
           0x1234567890123456789012345678901234567890
         </Typography>
-      </Box>
+      </div>
 
-      <Button variant="contained" startIcon={<AccountBalanceWalletIcon />}>
+      <Button>
+        <Wallet className="size-4" />
         Open Safe
       </Button>
-    </Paper>
+    </div>
   ),
   parameters: {
     docs: {
@@ -733,19 +772,9 @@ export const CreationSuccess: StoryObj = {
 export const CardStepper: StoryObj = {
   tags: ['!chromatic'],
   render: () => (
-    <Box sx={{ maxWidth: 600 }}>
-      <Stepper activeStep={1}>
-        <Step>
-          <StepLabel>Name</StepLabel>
-        </Step>
-        <Step>
-          <StepLabel>Owners</StepLabel>
-        </Step>
-        <Step>
-          <StepLabel>Review</StepLabel>
-        </Step>
-      </Stepper>
-    </Box>
+    <div className="max-w-[600px]">
+      <MockStepper steps={['Name', 'Owners', 'Review']} activeStep={1} />
+    </div>
   ),
   parameters: {
     docs: {

@@ -1,5 +1,8 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Alert, Typography, Box } from '@mui/material'
-import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogFooter, DialogClose } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Typography } from '@/components/ui/typography'
+import { TriangleAlertIcon } from 'lucide-react'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import type { SelectableItem } from '../../hooks/useSafeSelectionModal.types'
 
@@ -16,51 +19,45 @@ interface SimilarityConfirmDialogProps {
  */
 const SimilarityConfirmDialog = ({ open, safe, onConfirm, onCancel }: SimilarityConfirmDialogProps) => {
   return (
-    <Dialog open={open} onClose={onCancel} maxWidth="sm" fullWidth>
-      <DialogTitle>Similar address detected</DialogTitle>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Similar address detected</DialogTitle>
+        </DialogHeader>
 
-      <DialogContent>
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          <Typography variant="body2">
-            This address is similar to another safe in your list. This could indicate an address poisoning attack.
+        <div className="px-4">
+          <Alert variant="warning" className="mb-4">
+            <AlertDescription>
+              This address is similar to another safe in your list. This could indicate an address poisoning attack.
+            </AlertDescription>
+          </Alert>
+
+          <div className="mb-4">
+            <Typography variant="paragraph-small" color="muted" className="mb-2 block">
+              Selected safe
+            </Typography>
+            <div className="bg-background border-border rounded-md border p-4">
+              <EthHashInfo address={safe.address} showCopyButton shortAddress={false} showAvatar avatarSize={32} />
+              {safe.name && (
+                <Typography variant="paragraph-small" className="mt-2 block">
+                  Name: {safe.name}
+                </Typography>
+              )}
+            </div>
+          </div>
+
+          <Typography variant="paragraph-small" color="muted">
+            Verify the full address carefully. Continue only if you recognize this Safe.
           </Typography>
-        </Alert>
+        </div>
 
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            Selected safe
-          </Typography>
-          <Box
-            sx={{
-              p: 2,
-              bgcolor: 'background.paper',
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'border.light',
-            }}
-          >
-            <EthHashInfo address={safe.address} showCopyButton shortAddress={false} showAvatar avatarSize={32} />
-            {safe.name && (
-              <Typography variant="body2" color="text.primary" sx={{ mt: 1 }}>
-                Name: {safe.name}
-              </Typography>
-            )}
-          </Box>
-        </Box>
-
-        <Typography variant="body2" color="text.secondary">
-          Verify the full address carefully. Continue only if you recognize this Safe.
-        </Typography>
+        <DialogFooter className="flex-row justify-end">
+          <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
+          <Button onClick={onConfirm}>
+            <TriangleAlertIcon className="size-4" />I understand, continue anyway
+          </Button>
+        </DialogFooter>
       </DialogContent>
-
-      <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button onClick={onCancel} variant="text">
-          Cancel
-        </Button>
-        <Button onClick={onConfirm} variant="contained" startIcon={<WarningAmberIcon color="warning" />}>
-          I understand, continue anyway
-        </Button>
-      </DialogActions>
     </Dialog>
   )
 }

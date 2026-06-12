@@ -3,8 +3,10 @@ import { safeCreationPendingStatuses } from '../../hooks/safeCreationPendingStat
 import { SafeCreationEvent, safeCreationSubscribe } from '../../services/safeCreationEvents'
 import { useChain, useCurrentChain } from '@/hooks/useChains'
 import { useEffect, useState } from 'react'
-import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material'
-import CheckRoundedIcon from '@mui/icons-material/CheckRounded'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { Check } from 'lucide-react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
@@ -57,75 +59,33 @@ const CounterfactualSuccessScreen = () => {
 
   return (
     <Dialog open={open}>
-      <DialogContent
-        sx={{
-          py: 10,
-          px: 6,
-          display: 'flex',
-          justifyContent: 'center',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 3,
-        }}
-      >
-        <Box
-          sx={{
-            backgroundColor: ({ palette }) => palette.success.background,
-            padding: 3,
-            borderRadius: '50%',
-            display: 'inline-flex',
-          }}
-        >
-          <CheckRoundedIcon sx={{ width: 50, height: 50 }} color="success" />
-        </Box>
+      <DialogContent showCloseButton={false} className="flex flex-col items-center justify-center gap-6 px-12 py-20">
+        <div className="inline-flex rounded-full bg-[var(--color-success-background)] p-6">
+          <Check className="size-[50px] text-[var(--color-success-main)]" />
+        </div>
 
-        <Box
-          data-testid="safe-activation-message"
-          sx={{
-            textAlign: 'center',
-          }}
-        >
-          <Typography
-            data-testid="account-success-message"
-            variant="h3"
-            sx={{
-              fontWeight: 'bold',
-              mb: 1,
-            }}
-          >
+        <div data-testid="safe-activation-message" className="text-center">
+          <Typography data-testid="account-success-message" variant="h3" className="mb-2 font-bold">
             {isCFCreation ? 'Your account is almost set!' : 'Your account is all set!'}
           </Typography>
-          <Typography variant="body2">
+          <Typography variant="paragraph-small">
             {isCFCreation
               ? `Activate the account ${isMultiChain ? 'per network' : ''} to unlock all features of your smart wallet.`
               : 'Start your journey to the smart account security now.'}
           </Typography>
-          <Typography variant="body2">
+          <Typography variant="paragraph-small">
             {isCFCreation && isMultiChain
               ? `You can use the address below to receive funds on the selected ${
                   isMultiChain ? 'networks' : 'network'
                 }.`
               : `Use your address to receive funds ${chainName ? `on ${chainName}` : ''}`}
           </Typography>
-        </Box>
+        </div>
 
         {safeAddress && (
-          <Box
-            data-testid="safe-info"
-            sx={{
-              p: 2,
-              bgcolor: 'background.main',
-              borderRadius: 1,
-              fontSize: 14,
-            }}
-          >
+          <div data-testid="safe-info" className="rounded bg-[var(--color-background-main)] p-4 text-sm">
             <NetworkLogosList networks={networks.length > 0 ? networks : chain ? [chain] : []} />
-            <Typography
-              variant="h5"
-              sx={{
-                mt: 2,
-              }}
-            >
+            <Typography variant="h4" className="mt-4">
               {safeName}
             </Typography>
             <EthHashInfo
@@ -136,10 +96,10 @@ const CounterfactualSuccessScreen = () => {
               showName={false}
               showPrefix={false}
             />
-          </Box>
+          </div>
         )}
 
-        <Button variant="contained" onClick={onClose} data-testid="cf-creation-lets-go-btn">
+        <Button onClick={onClose} data-testid="cf-creation-lets-go-btn">
           Let&apos;s go
         </Button>
       </DialogContent>

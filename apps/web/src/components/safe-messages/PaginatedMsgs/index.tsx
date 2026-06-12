@@ -1,5 +1,5 @@
-import { Box } from '@mui/material'
-import { Typography, Link, SvgIcon } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Link } from '@/components/ui/link'
 import { useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -19,29 +19,14 @@ const NoMessages = (): ReactElement => {
     <PagePlaceholder
       img={<NoMessagesIcon />}
       text={
-        <Typography
-          variant="body1"
-          sx={{
-            color: 'primary.light',
-            m: 2,
-            maxWidth: '600px',
-          }}
-        >
+        <Typography variant="paragraph" className="m-4 max-w-[600px] text-[var(--color-primary-light)]">
           Some applications allow you to interact with them via off-chain contract signatures (&ldquo;messages&ldquo;)
           that you can generate with your Safe Account.
         </Typography>
       }
     >
-      <Link
-        rel="noopener noreferrer"
-        target="_blank"
-        href={HelpCenterArticle.SIGNED_MESSAGES}
-        sx={{
-          fontWeight: 700,
-        }}
-      >
-        Learn more about off-chain messages{' '}
-        <SvgIcon component={LinkIcon} inheritViewBox fontSize="small" sx={{ verticalAlign: 'middle', ml: 0.5 }} />
+      <Link rel="noopener noreferrer" target="_blank" href={HelpCenterArticle.SIGNED_MESSAGES} className="font-bold">
+        Learn more about off-chain messages <LinkIcon className="ml-1 inline size-5 align-middle" />
       </Link>
     </PagePlaceholder>
   )
@@ -63,14 +48,9 @@ const MsgPage = ({
       {error && <ErrorMessage>Error loading messages</ErrorMessage>}
       {loading && <SkeletonTxList />}
       {page?.next && onNextPage && (
-        <Box
-          sx={{
-            my: 4,
-            textAlign: 'center',
-          }}
-        >
+        <div className="my-8 text-center">
           <InfiniteScroll onLoadMore={() => onNextPage(page.next!)} />
-        </Box>
+        </div>
       )}
     </>
   )
@@ -91,16 +71,11 @@ const PaginatedMsgs = (): ReactElement => {
   }, [safe.chainId, safeAddress])
 
   return (
-    <Box
-      sx={{
-        mb: 4,
-        position: 'relative',
-      }}
-    >
+    <div className="relative mb-8">
       {pages.map((pageUrl, index) => (
         <MsgPage key={pageUrl} pageUrl={pageUrl} onNextPage={index === pages.length - 1 ? onNextPage : undefined} />
       ))}
-    </Box>
+    </div>
   )
 }
 

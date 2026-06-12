@@ -5,7 +5,8 @@ import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { openCookieBanner } from '@/store/popupSlice'
 import BeamerIcon from '@/public/images/sidebar/whats-new.svg'
 import HelpCenterIcon from '@/public/images/sidebar/help-center.svg'
-import { Divider, IconButton, ListItem, Stack, SvgIcon, Box } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 import DebugToggle from '../DebugToggle'
 import { IS_PRODUCTION } from '@/config/constants'
 import Track from '@/components/common/Track'
@@ -37,37 +38,50 @@ const SidebarFooter = (): ReactElement => {
     <>
       {!IS_PRODUCTION && (
         <>
-          <ListItem disablePadding>
+          <div className="flex w-full">
             <DebugToggle />
-          </ListItem>
+          </div>
 
-          <Divider flexItem sx={{ borderColor: 'background.main' }} />
+          <Separator className="bg-[var(--color-background-main)]" />
         </>
       )}
 
-      <Stack direction="row" alignItems="center" spacing={1} my={0.5} mx={1}>
+      <div className="mx-2 my-1 flex flex-row items-center gap-2">
         <IndexingStatus />
 
-        <Box ml="auto !important">
+        <div className="ml-auto">
           <Track
             {...OVERVIEW_EVENTS.WHATS_NEW}
             mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: "What's New" }}
           >
-            <IconButton onClick={handleBeamer} id={BEAMER_SELECTOR} data-testid="list-item-whats-new" color="primary">
-              <SvgIcon component={BeamerIcon} inheritViewBox fontSize="small" />
-            </IconButton>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleBeamer}
+              id={BEAMER_SELECTOR}
+              data-testid="list-item-whats-new"
+              className="text-[var(--color-primary-main)]"
+            >
+              <BeamerIcon className="size-4" />
+            </Button>
           </Track>
-        </Box>
+        </div>
 
         <Track
           {...OVERVIEW_EVENTS.HELP_CENTER}
           mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Help Center' }}
         >
-          <IconButton href={HELP_CENTER_URL} target="_blank" data-testid="list-item-need-help" color="primary">
-            <SvgIcon component={HelpCenterIcon} inheritViewBox fontSize="small" />
-          </IconButton>
+          <Button
+            variant="ghost"
+            size="icon"
+            render={<a href={HELP_CENTER_URL} target="_blank" rel="noopener noreferrer" />}
+            data-testid="list-item-need-help"
+            className="text-[var(--color-primary-main)]"
+          >
+            <HelpCenterIcon className="size-4" />
+          </Button>
         </Track>
-      </Stack>
+      </div>
     </>
   )
 }

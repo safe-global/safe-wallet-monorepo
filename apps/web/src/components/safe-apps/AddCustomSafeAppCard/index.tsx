@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import Card from '@mui/material/Card'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import AddCustomAppIcon from '@/public/images/apps/add-custom-app.svg'
 import { AddCustomAppModal } from '@/components/safe-apps/AddCustomAppModal'
 
@@ -14,23 +13,16 @@ const AddCustomSafeAppCard = ({ onSave, safeAppList }: Props) => {
 
   return (
     <>
-      <Card>
-        <Box p="48px 12px" display="flex" flexDirection="column" alignItems="center">
+      <Card className="border-0 py-0 shadow-none">
+        <div className="flex flex-col items-center px-3 py-12">
           {/* Add Custom Safe App Icon */}
           <AddCustomAppIcon alt="Add Custom Safe App card" />
 
           {/*  Add Custom Safe App Button */}
-          <Button
-            variant="contained"
-            size="small"
-            onClick={() => setAddCustomAppModalOpen(true)}
-            sx={{
-              mt: 3,
-            }}
-          >
+          <Button size="sm" onClick={() => setAddCustomAppModalOpen(true)} className="mt-6">
             Add custom Safe App
           </Button>
-        </Box>
+        </div>
       </Card>
 
       {/*  Add Custom Safe App Modal */}

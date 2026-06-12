@@ -1,4 +1,7 @@
-import { Alert, DialogActions, Stack, Button, DialogContent, Typography, CircularProgress, Box } from '@mui/material'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import { useState, useMemo } from 'react'
@@ -16,6 +19,8 @@ import {
 import { showNotification } from '@/store/notificationsSlice'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { useAppDispatch } from '@/store'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 type EditContactDialogProps = {
   entry: SpaceAddressBookItemDto
@@ -28,6 +33,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   const { configs } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const isDarkMode = useDarkMode()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const defaultNetworks = entry.chainIds
@@ -115,63 +121,58 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
 
   return (
     <ModalDialog open={true} onClose={handleClose} dialogTitle="Edit contact" hideChainIndicator>
-      <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogContent sx={{ py: 2 }}>
-            <Typography mb={2}>Edit contact details. Anyone in the workspace can see it.</Typography>
-            <Stack spacing={3}>
-              <Box pt={1}>
-                <AddressInputReadOnly address={entry.address} chainId={entry.chainIds[0]} />
-              </Box>
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <FormProvider {...methods}>
+          <form onSubmit={onSubmit}>
+            <div className="px-6 py-4">
+              <Typography className="mb-4">Edit contact details. Anyone in the workspace can see it.</Typography>
+              <div className="flex flex-col gap-6">
+                <div className="pt-2">
+                  <AddressInputReadOnly address={entry.address} chainId={entry.chainIds[0]} />
+                </div>
 
-              <NameInput name="name" label="Name" required />
+                <NameInput name="name" label="Name" required />
 
-              <Box>
-                <Typography variant="h5" fontWeight={700} display="inline-flex" alignItems="center" gap={1} mt={2}>
-                  Select networks
-                </Typography>
-                <Typography variant="body2" mb={1}>
-                  Add contact on all networks or only on specific ones of your choice.
-                </Typography>
-                <Controller
-                  name="networks"
-                  control={control}
-                  render={({ field }) => (
-                    <NetworkMultiSelectorInput
-                      name="networks"
-                      showSelectAll
-                      value={field.value || []}
-                      error={!!errors.networks}
-                      helperText={errors.networks ? 'Select at least one network' : ''}
-                    />
-                  )}
-                  rules={{ required: true }}
-                />
-              </Box>
-            </Stack>
+                <div>
+                  <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
+                  <p className="text-muted-foreground mb-2 text-sm">
+                    Add contact on all networks or only on specific ones of your choice.
+                  </p>
+                  <Controller
+                    name="networks"
+                    control={control}
+                    render={({ field }) => (
+                      <NetworkMultiSelectorInput
+                        name="networks"
+                        showSelectAll
+                        value={field.value || []}
+                        error={!!errors.networks}
+                        helperText={errors.networks ? 'Select at least one network' : ''}
+                      />
+                    )}
+                    rules={{ required: true }}
+                  />
+                </div>
+              </div>
 
-            {error && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {error}
-              </Alert>
-            )}
-          </DialogContent>
+              {error && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
 
-          <DialogActions>
-            <Button data-testid="cancel-btn" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={!formState.isValid || !hasChanges || isSubmitting}
-              disableElevation
-            >
-              {isSubmitting ? <CircularProgress size={20} /> : 'Save'}
-            </Button>
-          </DialogActions>
-        </form>
-      </FormProvider>
+            <div className="flex justify-end gap-2 p-4 pt-0">
+              <Button data-testid="cancel-btn" variant="ghost" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!formState.isValid || !hasChanges || isSubmitting}>
+                {isSubmitting ? <Spinner className="size-5" /> : 'Save'}
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
+      </div>
     </ModalDialog>
   )
 }

@@ -99,7 +99,7 @@ function Input({
         data-slot="input"
         aria-invalid={hasScriptInjection || !!error || props['aria-invalid'] || undefined}
         className={cn(
-          'dark:bg-input/30 border-gray-100 border shadow-none focus-visible:ring-0 focus-visible:border-gray-100 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 h-9 rounded-md bg-transparent px-2.5 py-1 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+          'dark:bg-input/30 border-gray-100 border shadow-none focus-visible:ring-0 focus-visible:border-gray-100 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 h-9 rounded-md bg-transparent px-3 py-1.5 text-base transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
 
           className,
         )}

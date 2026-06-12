@@ -12,7 +12,7 @@ import { Errors, logError } from '@/services/exceptions'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
 import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
 import { TxCardActions } from '../../common/TxCard'
-import { Box, Divider } from '@mui/material'
+import { Separator } from '@/components/ui/separator'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { SafeAppsName } from '@/config/constants'
@@ -65,8 +65,8 @@ const Batching = ({
   }
 
   return (
-    <Box>
-      <Divider className={commonCss.nestedDivider} />
+    <div>
+      <Separator className={commonCss.nestedDivider} />
 
       <TxCardActions>
         <SplitMenuButton
@@ -78,7 +78,7 @@ const Batching = ({
           loading={isSubmitLoading}
         />
       </TxCardActions>
-    </Box>
+    </div>
   )
 }
 

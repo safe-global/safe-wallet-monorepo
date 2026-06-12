@@ -1,7 +1,9 @@
 import { useCallback, useContext, useMemo } from 'react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
-import { Button, CardActions, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
-import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { parseUnits, AbiCoder } from 'ethers'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
@@ -9,7 +11,6 @@ import useChainId from '@/hooks/useChainId'
 import { getResetTimeOptions } from '../../constants'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import TxCard from '@/components/tx-flow/common/TxCard'
-import css from '@/components/tx/ExecuteCheckbox/styles.module.css'
 import TokenAmountInput from '@/components/common/TokenAmountInput'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -59,55 +60,50 @@ const CreateSpendingLimit = () => {
     <TxCard>
       <FormProvider {...formMethods}>
         <form onSubmit={handleSubmit(onNext)}>
-          <FormControl fullWidth sx={{ mb: 3 }}>
+          <div className="mb-6 w-full">
             <AddressBookInput
               data-testid="beneficiary-section"
               name={SpendingLimitFields.beneficiary}
               label="Beneficiary"
             />
-          </FormControl>
+          </div>
 
           <TokenAmountInput balances={balances.items} selectedToken={selectedToken} validate={validateSpendingLimit} />
 
-          <Typography variant="h4" fontWeight={700} mt={3}>
+          <Typography variant="h4" className="mt-6 font-bold">
             Reset Timer
           </Typography>
           <Typography>
             Set a reset time so the allowance automatically refills after the defined time period.
           </Typography>
-          <FormControl fullWidth className={css.select}>
-            <InputLabel shrink={false}>Time Period</InputLabel>
+          <div className="mt-2 flex w-full items-center justify-between gap-2">
+            <Label>Time Period</Label>
             <Controller
               rules={{ required: true }}
               control={control}
               name={SpendingLimitFields.resetTime}
               render={({ field }) => (
-                <Select
-                  data-testid="time-period-section"
-                  {...field}
-                  sx={{ textAlign: 'right', fontWeight: 700 }}
-                  IconComponent={ExpandMoreRoundedIcon}
-                >
-                  {resetTimeOptions.map((resetTime) => (
-                    <MenuItem
-                      data-testid="time-period-item"
-                      key={resetTime.value}
-                      value={resetTime.value}
-                      sx={{ overflow: 'hidden' }}
-                    >
-                      {resetTime.label}
-                    </MenuItem>
-                  ))}
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger data-testid="time-period-section" className="font-bold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {resetTimeOptions.map((resetTime) => (
+                      <SelectItem data-testid="time-period-item" key={resetTime.value} value={resetTime.value}>
+                        {resetTime.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               )}
             />
-          </FormControl>
+          </div>
 
-          <CardActions>
-            <Button data-testid="next-btn" variant="contained" type="submit">
+          <div className="flex p-2">
+            <Button data-testid="next-btn" type="submit">
               Next
             </Button>
-          </CardActions>
+          </div>
         </form>
       </FormProvider>
     </TxCard>

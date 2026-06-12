@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import css from './styles.module.css'
 import WelcomeLogin from './WelcomeLogin'
 import SafeLabsLogo from '@/public/images/logo-safe-labs.svg'
@@ -21,8 +21,12 @@ const NewSafe = () => {
 
       <div className={css.rightSide}>
         <div className={css.rightContent}>
-          <Typography className={css.label}>FOR ORGANIZATIONS AND POWER USERS</Typography>
-          <Typography className={css.mainTitle}>Own your assets onchain securely</Typography>
+          <Typography variant="paragraph-mini-bold" className={css.label}>
+            FOR ORGANIZATIONS AND POWER USERS
+          </Typography>
+          <Typography variant="h2" className={css.mainTitle}>
+            Own your assets onchain securely
+          </Typography>
         </div>
         <div className={css.mockupImageContainer}>
           <img src="/images/welcome/safe-mockup.png" alt="Safe interface mockup" className={css.mockupImage} />

@@ -3,10 +3,10 @@ import Head from 'next/head'
 import useTxHistory from '@/hooks/useTxHistory'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
 import TxHeader from '@/components/transactions/TxHeader'
-import { Badge, Box, Popover } from '@mui/material'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
 import { useState } from 'react'
-import Button from '@mui/material/Button'
-import FilterIcon from '@mui/icons-material/FilterAlt'
+import { ListFilter } from 'lucide-react'
 import TxFilterForm from '@/components/transactions/TxFilterForm'
 import TrustedToggle from '@/components/transactions/TrustedToggle'
 import { useTxFilter } from '@/utils/tx-history-filter'
@@ -19,15 +19,10 @@ const History: NextPage = () => {
   const [filter] = useTxFilter()
   const isCsvExportEnabled = useHasFeature(FEATURES.CSV_TX_EXPORT)
 
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
-  const open = Boolean(anchorEl)
-
-  const handleFilterClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
+  const [open, setOpen] = useState(false)
 
   const handleFilterClose = () => {
-    setAnchorEl(null)
+    setOpen(false)
   }
 
   return (
@@ -39,57 +34,36 @@ const History: NextPage = () => {
       <TxHeader>
         <TrustedToggle />
 
-        <Badge
-          variant="dot"
-          color="success"
-          invisible={!filter}
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'left',
-          }}
-          sx={{
-            '& .MuiBadge-badge': {
-              left: 38,
-              top: 10,
-            },
-          }}
-        >
-          <Button variant="outlined" onClick={handleFilterClick} size="small" startIcon={<FilterIcon />}>
-            {filter?.type ?? 'Filter'}
-          </Button>
-        </Badge>
+        <Popover open={open} onOpenChange={setOpen}>
+          <div className="relative inline-flex">
+            <PopoverTrigger
+              render={
+                <Button variant="outline">
+                  <ListFilter />
+                  {filter?.type ?? 'Filter'}
+                </Button>
+              }
+            />
+            {filter && (
+              <span className="absolute -top-0.5 -left-0.5 size-2 rounded-full bg-[var(--color-success-main)]" />
+            )}
+          </div>
+
+          <PopoverContent
+            align="end"
+            className="mt-1 w-[min(720px,calc(100vw-2rem))] max-w-[90vw] overflow-visible rounded-xl border border-border bg-card p-0 shadow-md ring-0"
+          >
+            <TxFilterForm onClose={handleFilterClose} />
+          </PopoverContent>
+        </Popover>
+
         {isCsvExportEnabled && <CsvTxExportButton hasActiveFilter={!!filter} />}
       </TxHeader>
 
       <main>
-        <Popover
-          open={open}
-          anchorEl={anchorEl}
-          onClose={handleFilterClose}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          slotProps={{
-            paper: {
-              sx: {
-                mt: 1,
-                maxWidth: '90vw',
-                width: { xs: '100%', sm: '80%' },
-              },
-            },
-          }}
-        >
-          <TxFilterForm onClose={handleFilterClose} />
-        </Popover>
-
-        <Box mb={4}>
+        <div className="mb-8">
           <PaginatedTxns useTxns={useTxHistory} />
-        </Box>
+        </div>
       </main>
     </>
   )

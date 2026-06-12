@@ -1,5 +1,5 @@
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
-import { Container, Typography, Grid } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useRouter } from 'next/router'
 
 import useWallet from '@/hooks/wallets/useWallet'
@@ -107,33 +107,14 @@ const AdvancedCreateSafe = () => {
   }
 
   return (
-    <Container>
-      <Grid
-        container
-        columnSpacing={3}
-        sx={{
-          justifyContent: 'center',
-          mt: [2, null, 7],
-        }}
-      >
-        <Grid item xs={12}>
-          <Typography
-            variant="h2"
-            sx={{
-              pb: 2,
-            }}
-          >
+    <div className="mx-auto w-full max-w-[1200px] px-4">
+      <div className="mt-4 grid grid-cols-12 justify-center gap-x-6 md:mt-14">
+        <div className="col-span-12">
+          <Typography variant="h2" className="pb-4">
             Create new Safe Account
           </Typography>
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          md={8}
-          sx={{
-            order: [1, null, 0],
-          }}
-        >
+        </div>
+        <div className="order-1 col-span-12 md:order-0 md:col-span-8">
           <CardStepper
             initialData={initialData}
             initialStep={initialStep}
@@ -142,24 +123,16 @@ const AdvancedCreateSafe = () => {
             eventCategory={CREATE_SAFE_CATEGORY}
             setWidgetStep={setActiveStep}
           />
-        </Grid>
+        </div>
 
-        <Grid
-          item
-          xs={12}
-          md={4}
-          sx={{
-            mb: [3, null, 0],
-            order: [0, null, 1],
-          }}
-        >
-          <Grid container spacing={3}>
+        <div className="order-0 col-span-12 mb-6 md:order-1 md:col-span-4 md:mb-0">
+          <div className="grid grid-cols-12 gap-6">
             {activeStep < 2 && <OverviewWidget safeName={safeName} networks={[]} />}
             {wallet?.address && <CreateSafeInfos dynamicHint={dynamicHint} />}
-          </Grid>
-        </Grid>
-      </Grid>
-    </Container>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

@@ -1,5 +1,7 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { Avatar, Box, Button, Stack, Typography } from '@mui/material'
+import { Avatar, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AppInfo } from '@/services/safe-wallet-provider'
 import { useLoadFeature } from '@/features/__core__'
@@ -36,43 +38,45 @@ const WcChainSwitchModal = ({ appInfo, chain, safes, onSelectSafe, onCancel }: W
   const hasSafes = safes.length > 0
 
   return (
-    <Stack spacing={3} sx={{ minWidth: { xs: 'auto', sm: 390 } }}>
-      <Stack direction="row" spacing={2} alignItems="center">
-        {appInfo.iconUrl ? <Avatar src={appInfo.iconUrl} alt={appInfo.name} sx={{ width: 48, height: 48 }} /> : null}
-        <Box>
-          <Typography variant="h5">{appInfo.name}</Typography>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="body2">wants to switch to</Typography>
+    <div className="flex min-w-auto flex-col gap-6 sm:min-w-[390px]">
+      <div className="flex flex-row items-center gap-4">
+        {appInfo.iconUrl ? (
+          <Avatar className="size-12">
+            <AvatarImage src={appInfo.iconUrl} alt={appInfo.name} />
+          </Avatar>
+        ) : null}
+        <div>
+          <Typography variant="h4">{appInfo.name}</Typography>
+          <div className="flex flex-row items-center gap-2">
+            <Typography variant="paragraph-small">wants to switch to</Typography>
             <ChainIndicator chainId={chain.chainId} onlyLogo />
-            <Typography variant="body2" fontWeight="bold">
-              {chain.chainName}
-            </Typography>
-          </Stack>
-        </Box>
-      </Stack>
+            <Typography variant="paragraph-small-bold">{chain.chainName}</Typography>
+          </div>
+        </div>
+      </div>
 
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="paragraph-small" className="text-muted-foreground">
         {hasSafes
           ? `Select one of your Safes on ${chain.chainName} to continue.`
           : `Connected dapp wants to switch to chain ${chain.chainName} but you don't have Safe Accounts deployed on that chain.`}
       </Typography>
 
       {hasSafes ? (
-        <Box sx={{ maxHeight: 440, overflowY: 'auto' }}>
+        <div className="max-h-[440px] overflow-y-auto">
           {safes.map((safe) => (
             <WcSafeItem key={`${safe.chainId}-${safe.address}`} safeItem={safe} onSelect={() => onSelectSafe(safe)} />
           ))}
-        </Box>
+        </div>
       ) : (
-        <Box p={2} sx={{ borderRadius: 2, border: '1px solid var(--color-border-light)' }}>
-          <Typography variant="body2">You can load or create a Safe on this network to continue.</Typography>
-        </Box>
+        <div className="rounded-lg border border-[var(--color-border-light)] p-4">
+          <Typography variant="paragraph-small">You can load or create a Safe on this network to continue.</Typography>
+        </div>
       )}
 
-      <Button variant="outlined" onClick={onCancel} sx={{ alignSelf: 'flex-start' }}>
+      <Button variant="outline" onClick={onCancel} className="self-start">
         Cancel
       </Button>
-    </Stack>
+    </div>
   )
 }
 

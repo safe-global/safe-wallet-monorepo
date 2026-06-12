@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import EthHashInfo from './index'
-import { Paper } from '@mui/material'
 
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
@@ -16,9 +15,9 @@ const meta = {
       return (
         <StoreDecorator initialState={{}}>
           <RouterDecorator>
-            <Paper sx={{ padding: 2 }}>
+            <div className="rounded-lg bg-[var(--color-background-paper)] p-4">
               <Story />
-            </Paper>
+            </div>
           </RouterDecorator>
         </StoreDecorator>
       )

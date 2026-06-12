@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box } from '@mui/material'
 import PositionsSkeleton from './index'
 
 const meta = {
@@ -9,9 +8,9 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <Box sx={{ maxWidth: 800 }}>
+      <div className="max-w-[800px]">
         <Story />
-      </Box>
+      </div>
     ),
   ],
   tags: ['autodocs'],

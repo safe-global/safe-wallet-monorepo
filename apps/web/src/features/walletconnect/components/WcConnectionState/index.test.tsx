@@ -73,7 +73,8 @@ describe('WcConnectionState component tests', () => {
     render(<WcConnectionState metadata={mockMetadata} isDelete={false} />)
 
     const message = screen.getByText(SUCCESS_MESSAGE)
-    expect(message).toHaveClass('MuiTypography-h5')
-    expect(message).toHaveStyle({ marginTop: '24px' })
+    expect(message.tagName).toBe('H4')
+    expect(message).toHaveAttribute('data-variant', 'h4')
+    expect(message).toHaveClass('mt-6')
   })
 })

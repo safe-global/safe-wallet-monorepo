@@ -175,17 +175,22 @@ describe('AccountsWidget', () => {
     expect(screen.queryByText('Failed to load accounts')).not.toBeInTheDocument()
   })
 
-  it('renders AccountItem.Balance with fiatTotal', () => {
+  it('renders AccountItem.Balance with fiatTotal', async () => {
     render(<AccountsWidget accounts={[mockAccounts[0]]} />)
 
-    expect(screen.getByLabelText('$ 39,950,000.00')).toBeInTheDocument()
+    // Abbreviated value is shown inline; the precise value lives in a hover tooltip
+    const balanceTrigger = screen.getByText('$ 39.95M')
+    await userEvent.hover(balanceTrigger)
+
+    expect(await screen.findByText('$ 39,950,000.00')).toBeInTheDocument()
   })
 
   it('does not render balance when fiatTotal is undefined', () => {
     const accountWithoutBalance: Account[] = [{ ...mockAccounts[0], fiatTotal: undefined }]
     render(<AccountsWidget accounts={accountWithoutBalance} />)
 
-    expect(screen.queryByLabelText(/39,950,000/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/39,950,000/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/39\.95M/)).not.toBeInTheDocument()
   })
 
   it('renders the Not activated badge instead of the balance for an undeployed single-chain account', () => {

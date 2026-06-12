@@ -1,36 +1,31 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { Accordion, AccordionDetails, AccordionSummary, Box } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import type { ReactElement } from 'react'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 
 import MsgDetails from '@/components/safe-messages/MsgDetails'
 import MsgSummary from '@/components/safe-messages/MsgSummary'
 
-import txListItemCss from '@/components/transactions/TxListItem/styles.module.css'
+const ITEM_VALUE = 'message'
 
 const ExpandableMsgItem = ({ msg, expanded = false }: { msg: MessageItem; expanded?: boolean }): ReactElement => {
   return (
-    <Accordion
-      defaultExpanded={expanded}
-      disableGutters
-      elevation={0}
-      className={txListItemCss.accordion}
-      sx={{ border: 'none', '&:before': { display: 'none' } }}
-    >
-      <AccordionSummary
-        data-testid="message-item"
-        expandIcon={<ExpandMoreIcon />}
-        sx={{ justifyContent: 'flex-start', overflowX: 'auto' }}
-      >
-        <MsgSummary msg={msg} />
-      </AccordionSummary>
+    <Accordion defaultValue={expanded ? [ITEM_VALUE] : []}>
+      <AccordionItem value={ITEM_VALUE} className="border-b-0">
+        <AccordionTrigger
+          render={<div role="button" tabIndex={0} />}
+          data-testid="message-item"
+          className="cursor-pointer justify-start overflow-x-auto py-2 hover:no-underline"
+        >
+          <MsgSummary msg={msg} />
+        </AccordionTrigger>
 
-      <AccordionDetails sx={{ padding: 0 }}>
-        <ObservabilityErrorBoundary fallback={<Box sx={{ p: 2 }}>Failed to render message details</Box>}>
-          <MsgDetails msg={msg} />
-        </ObservabilityErrorBoundary>
-      </AccordionDetails>
+        <AccordionContent className="p-0">
+          <ObservabilityErrorBoundary fallback={<div className="p-4">Failed to render message details</div>}>
+            <MsgDetails msg={msg} />
+          </ObservabilityErrorBoundary>
+        </AccordionContent>
+      </AccordionItem>
     </Accordion>
   )
 }

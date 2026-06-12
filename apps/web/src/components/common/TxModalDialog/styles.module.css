@@ -1,7 +1,13 @@
 .dialog {
+  position: fixed;
   top: var(--topbar-height);
   left: 230px;
+  right: 0;
+  bottom: 0;
   z-index: 3;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   transition: left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
 }
 
@@ -36,6 +42,12 @@
 }
 
 .close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  border-radius: 50%;
   color: var(--color-border-main);
   padding: var(--space-1);
   background-color: var(--color-border-light);
@@ -43,15 +55,15 @@
 
 .paper {
   padding-bottom: var(--space-8);
-  background-color: var(--color-border-background);
+  background-color: var(--background);
 }
 
-.dialog :global .MuiDialogContent-root {
+.content {
   overflow: visible;
 }
 
 @media (min-width: 600px) {
-  .dialog :global .MuiDialog-paper {
+  .paper {
     min-width: 600px;
     margin: 0;
   }

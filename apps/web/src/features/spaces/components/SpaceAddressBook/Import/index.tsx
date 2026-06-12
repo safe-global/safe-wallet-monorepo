@@ -1,5 +1,4 @@
 import ImportIcon from '@/public/images/common/import.svg'
-import { SvgIcon } from '@mui/material'
 import { useMemo, useState } from 'react'
 import ImportAddressBookDialog from './ImportAddressBookDialog'
 import { Button } from '@/components/ui/button'
@@ -23,7 +22,7 @@ const ImportAddressBook = () => {
             disabled={!hasContacts}
             onClick={() => setOpen(true)}
           >
-            <SvgIcon component={ImportIcon} inheritViewBox fontSize="small" />
+            <ImportIcon className="size-4" />
             Import
           </Button>
         </TooltipTrigger>

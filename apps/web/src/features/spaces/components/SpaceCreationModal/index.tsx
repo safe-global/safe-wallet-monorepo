@@ -1,7 +1,6 @@
 import { useSpacesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useRouter } from 'next/router'
 import { type ReactElement, useState } from 'react'
-import { Alert, Box, Button, CircularProgress, DialogActions, DialogContent, SvgIcon, Typography } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 import SpaceIcon from '@/public/images/spaces/space.svg'
 import ModalDialog from '@/components/common/ModalDialog'
@@ -13,12 +12,19 @@ import { showNotification } from '@/store/notificationsSlice'
 import { setLastUsedSpace } from '@/store/authSlice'
 import { useAppDispatch } from '@/store'
 import ExternalLink from '@/components/common/ExternalLink'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const isDarkMode = useDarkMode()
   const methods = useForm<{ name: string }>({ mode: 'onChange' })
   const [createSpaceWithUser] = useSpacesCreateV1Mutation()
   const { handleSubmit, formState } = methods
@@ -64,46 +70,46 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       onClose={onClose}
       dialogTitle={
         <>
-          <SvgIcon component={SpaceIcon} inheritViewBox sx={{ fill: 'none', mr: 1 }} />
+          <SpaceIcon className="mr-2 size-6 fill-none" />
           Create workspace
         </>
       }
       hideChainIndicator
     >
-      <FormProvider {...methods}>
-        <form onSubmit={onSubmit}>
-          <DialogContent sx={{ py: 2 }}>
-            <Box mb={2}>
-              <NameInput data-testid="space-name-input" label="Name" autoFocus name="name" required />
-            </Box>
-            <Typography variant="body2" color="text.secondary">
-              How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
-            </Typography>
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <FormProvider {...methods}>
+          <form onSubmit={onSubmit}>
+            <div className="px-6 py-4">
+              <div className="mb-4">
+                <NameInput data-testid="space-name-input" label="Name" autoFocus name="name" required />
+              </div>
+              <Typography variant="paragraph-small" color="muted">
+                How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
+              </Typography>
 
-            {error && (
-              <Alert severity="error" sx={{ mt: 2 }}>
-                {error}
-              </Alert>
-            )}
-          </DialogContent>
+              {error && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </div>
 
-          <DialogActions>
-            <Button data-testid="cancel-btn" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              data-testid="create-space-modal-button"
-              type="submit"
-              variant="contained"
-              disabled={!formState.isValid || isSubmitting}
-              disableElevation
-              sx={{ minWidth: '200px' }}
-            >
-              {isSubmitting ? <CircularProgress size={20} /> : 'Create workspace'}
-            </Button>
-          </DialogActions>
-        </form>
-      </FormProvider>
+            <div className="flex justify-end gap-2 p-4 pt-0">
+              <Button data-testid="cancel-btn" variant="ghost" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                data-testid="create-space-modal-button"
+                type="submit"
+                className="min-w-[200px]"
+                disabled={!formState.isValid || isSubmitting}
+              >
+                {isSubmitting ? <Spinner className="size-5" /> : 'Create workspace'}
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
+      </div>
     </ModalDialog>
   )
 }

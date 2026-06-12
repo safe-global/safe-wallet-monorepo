@@ -1,8 +1,8 @@
-import { Typography, Paper, Box, Stack } from '@mui/material'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import css from './styles.module.css'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { isAuthenticated } from '@/store/authSlice'
 import { useAppSelector } from '@/store'
@@ -26,28 +26,29 @@ const PreviewInvite = () => {
   if (!space) return null
 
   return (
-    <Paper sx={{ p: 2, mb: 4, backgroundColor: isDarkMode ? 'info.background' : 'info.light' }}>
-      <Box className={css.previewInviteContent}>
+    <div
+      className={cn(
+        'mb-8 rounded-xl p-4',
+        isDarkMode ? 'bg-[var(--color-info-background)]' : 'bg-[var(--color-info-light)]',
+      )}
+    >
+      <div className="flex flex-row gap-4 max-[600px]:flex-col max-[600px]:gap-2">
         <InitialsAvatar name={space.name} size="medium" />
-        <Stack direction="row" alignItems="center" flexWrap="wrap" rowGap={0.5} columnGap={0.5} flexGrow={1}>
-          <Typography variant="body1" color="text.primary">
-            You were invited to join
-          </Typography>
-          <Typography variant="body1" color="text.primary" fontWeight={700}>
-            {space.name}
-          </Typography>
-          <Inviter invitedByName={invitedByName} variant="body1" avatarSize={20} />
-        </Stack>
-        <Stack direction="row" spacing={1}>
+        <div className="flex flex-grow flex-row flex-wrap items-center gap-x-1 gap-y-1">
+          <Typography variant="paragraph">You were invited to join</Typography>
+          <Typography variant="paragraph-bold">{space.name}</Typography>
+          <Inviter invitedByName={invitedByName} variant="paragraph" avatarSize={20} />
+        </div>
+        <div className="flex flex-row gap-2">
           <Track {...SPACE_EVENTS.ACCEPT_INVITE} label={SPACE_LABELS.preview_banner}>
             <AcceptButton space={space} />
           </Track>
           <Track {...SPACE_EVENTS.DECLINE_INVITE} label={SPACE_LABELS.preview_banner}>
             <DeclineButton space={space} />
           </Track>
-        </Stack>
-      </Box>
-    </Paper>
+        </div>
+      </div>
+    </div>
   )
 }
 

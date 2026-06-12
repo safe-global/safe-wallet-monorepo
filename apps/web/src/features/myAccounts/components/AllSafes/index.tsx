@@ -6,8 +6,9 @@ import type { AllSafeItems } from '@/hooks/safes'
 import css from '../../styles.module.css'
 import useWallet from '@/hooks/wallets/useWallet'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { Accordion, AccordionDetails, AccordionSummary, Box, Typography } from '@mui/material'
+import { ChevronDownIcon } from 'lucide-react'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Typography } from '@/components/ui/typography'
 import { useRouter } from 'next/router'
 
 const AllSafes = ({
@@ -26,47 +27,45 @@ const AllSafes = ({
   const trackingLabel = isLoginPage ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
 
   return (
-    <Accordion sx={{ border: 'none' }} defaultExpanded={!isSidebar} slotProps={{ transition: { unmountOnExit: true } }}>
-      <AccordionSummary
-        data-testid="expand-safes-list"
-        expandIcon={<ExpandMoreIcon sx={{ '& path': { fill: 'var(--color-text-secondary)' } }} />}
-        sx={{
-          padding: 0,
-          '& .MuiAccordionSummary-content': { margin: '0 !important', mb: 1, flexGrow: 0 },
-        }}
-        component="div"
+    <Collapsible defaultOpen={!isSidebar}>
+      <CollapsibleTrigger
+        render={
+          <button
+            type="button"
+            data-testid="expand-safes-list"
+            className="group/all-safes flex w-full cursor-pointer items-center gap-1 text-left"
+          />
+        }
       >
         <div className={css.listHeader}>
-          <Typography variant="h5" fontWeight={700}>
+          <Typography variant="h4">
             Accounts
             {allSafes && allSafes.length > 0 && (
-              <Typography component="span" color="text.secondary" fontSize="inherit" fontWeight="normal" mr={1}>
+              <Typography variant="paragraph-small" color="muted" className="mr-2 font-normal">
                 {' '}
                 ({allSafes.length})
               </Typography>
             )}
           </Typography>
         </div>
-      </AccordionSummary>
-      <AccordionDetails data-testid="accounts-list" sx={{ padding: 0 }}>
+        <ChevronDownIcon className="text-muted-foreground ml-auto size-5 transition-transform group-aria-expanded/all-safes:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent data-testid="accounts-list">
         {allSafes.length > 0 ? (
-          <Box mt={1}>
+          <div className="mt-2">
             <SafesList safes={allSafes} onLinkClick={onLinkClick} />
-          </Box>
+          </div>
         ) : (
           <Typography
             data-testid="empty-account-list"
-            component="div"
-            variant="body2"
-            color="text.secondary"
-            textAlign="center"
-            py={3}
-            mx="auto"
-            width={250}
+            variant="paragraph-small"
+            color="muted"
+            align="center"
+            className="mx-auto block w-[250px] py-6"
           >
             {!wallet ? (
               <>
-                <Box mb={2}>Connect a wallet to view your Safe Accounts or to create a new one</Box>
+                <span className="mb-4 block">Connect a wallet to view your Safe Accounts or to create a new one</span>
                 <Track {...OVERVIEW_EVENTS.OPEN_ONBOARD} label={trackingLabel}>
                   <ConnectWalletButton text="Connect a wallet" contained />
                 </Track>
@@ -76,8 +75,8 @@ const AllSafes = ({
             )}
           </Typography>
         )}
-      </AccordionDetails>
-    </Accordion>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }
 

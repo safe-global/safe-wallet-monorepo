@@ -1,9 +1,7 @@
-import CardHeader from '@mui/material/CardHeader'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import { Button, Paper, Stack } from '@mui/material'
 import SafeAppIconCard from '../SafeAppIconCard'
-import css from './styles.module.css'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import Track from '@/components/common/Track'
 import Link from 'next/link'
@@ -11,6 +9,7 @@ import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { useIsSwapFeatureEnabled } from '@/features/swap'
+import { cn } from '@/utils/cn'
 
 const SWAPS_APP_CARD_STORAGE_KEY = 'showSwapsAppCard'
 
@@ -21,50 +20,34 @@ const NativeSwapsCard = () => {
   if (!isSwapFeatureEnabled || !isSwapsCardVisible) return null
 
   return (
-    <Paper className={css.container}>
-      <CardHeader
-        className={css.header}
-        avatar={
-          <div className={css.iconContainer}>
-            <SafeAppIconCard src="/images/common/swap.svg" alt="Swap Icon" width={24} height={24} />
-          </div>
-        }
-      />
-      <CardContent className={css.content}>
-        <Typography className={css.title} variant="h5">
+    <Card className={cn('h-full gap-0 border-0 py-0 shadow-none transition-colors hover:bg-muted')}>
+      <div className="flex items-start justify-between px-4 pt-4 pb-2">
+        <div className="rounded-full bg-[var(--color-secondary-light)] p-2">
+          <SafeAppIconCard src="/images/common/swap.svg" alt="Swap Icon" width={24} height={24} />
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col px-4 pb-4">
+        <Typography variant="paragraph-bold" className="mb-2 truncate">
           Native swaps are here!
         </Typography>
 
-        <Typography
-          className={css.description}
-          variant="body2"
-          sx={{
-            color: 'text.secondary',
-          }}
-        >
+        <Typography variant="paragraph-small" className="mb-4 line-clamp-3 text-[var(--color-text-secondary)]">
           Experience seamless trading with better decoding and security in native swaps.
         </Typography>
 
-        <Stack
-          direction="row"
-          className={css.buttons}
-          sx={{
-            gap: 2,
-          }}
-        >
+        <div className="mt-auto flex flex-row flex-wrap gap-2 pt-2">
           <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.safeAppsPromoWidget}>
-            <Link href={{ pathname: AppRoutes.swap, query: { safe: router.query.safe } }} passHref legacyBehavior>
-              <Button variant="contained" size="small">
-                Try now
-              </Button>
-            </Link>
+            <Button size="sm" render={<Link href={{ pathname: AppRoutes.swap, query: { safe: router.query.safe } }} />}>
+              Try now
+            </Button>
           </Track>
-          <Button onClick={() => setIsSwapsCardVisible(false)} size="small" variant="text" sx={{ px: '16px' }}>
+          <Button onClick={() => setIsSwapsCardVisible(false)} size="sm" variant="ghost">
             Don&apos;t show
           </Button>
-        </Stack>
-      </CardContent>
-    </Paper>
+        </div>
+      </div>
+    </Card>
   )
 }
 
