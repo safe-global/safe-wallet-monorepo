@@ -106,6 +106,12 @@ describe('routeSessionRequest', () => {
     expect((res as { error: { code: number } }).error.code).toBe(-32602)
   })
 
+  it('accepts a wallet_sendCalls bundle whose from differs only in casing', async () => {
+    const params = [{ chainId: '0x1', from: SAFE_ADDRESS.toUpperCase().replace('0X', '0x'), calls: [{ to: '0xabc' }] }]
+    const res = await routeSessionRequest(makeCtx(makeRequest('wallet_sendCalls', params)))
+    expect(isDeferredResponse(res)).toBe(true)
+  })
+
   it('rejects a wallet_sendCalls bundle from a mismatched address', async () => {
     const params = [{ chainId: '0x1', from: '0x2222222222222222222222222222222222222222', calls: [] }]
     const res = await routeSessionRequest(makeCtx(makeRequest('wallet_sendCalls', params)))
