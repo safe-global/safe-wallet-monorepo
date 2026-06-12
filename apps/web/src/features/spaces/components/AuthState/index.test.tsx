@@ -1,12 +1,18 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import AuthState from './index'
+import { AppRoutes } from '@/config/routes'
 
 const mockUseSpacesGetOneV1Query = jest.fn()
 const mockUseUsersGetWithWalletsV1Query = jest.fn()
 const mockUseHasFeature = jest.fn()
 const mockDispatch = jest.fn()
+const mockRouterReplace = jest.fn()
 let mockIsAuthenticated = true
 let mockIsOidcLoginPending = false
+
+jest.mock('next/router', () => ({
+  useRouter: () => ({ replace: mockRouterReplace }),
+}))
 
 jest.mock('@/store', () => ({
   useAppSelector: (selector: string) => {
@@ -55,7 +61,7 @@ jest.mock('@/features/spaces/utils', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  MemberStatus: { DECLINED: 'DECLINED' },
+  MemberStatus: { ACTIVE: 'ACTIVE' },
 }))
 
 describe('AuthState', () => {
@@ -68,6 +74,7 @@ describe('AuthState', () => {
       currentData: { id: 1, members: [] },
       error: undefined,
       isLoading: false,
+      isFetching: false,
     })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 'u1' } })
   })
@@ -126,5 +133,102 @@ describe('AuthState', () => {
       { id: '11111111-1111-1111-1111-111111111111' },
       { skip: false },
     )
+  })
+
+  it('renders the children for an active member', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'ACTIVE' }] },
+      error: undefined,
+      isLoading: false,
+      isFetching: false,
+    })
+
+    render(
+      <AuthState spaceId="7">
+        <div data-testid="space-content" />
+      </AuthState>,
+    )
+
+    expect(screen.getByTestId('space-content')).toBeInTheDocument()
+    expect(mockRouterReplace).not.toHaveBeenCalled()
+  })
+
+  it('redirects an invited (pending) member to the workspace list instead of rendering the space', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'INVITED' }] },
+      error: undefined,
+      isLoading: false,
+      isFetching: false,
+    })
+
+    render(
+      <AuthState spaceId="7">
+        <div data-testid="space-content" />
+      </AuthState>,
+    )
+
+    expect(screen.queryByTestId('space-content')).not.toBeInTheDocument()
+    expect(screen.getByTestId('loading')).toBeInTheDocument()
+    expect(mockRouterReplace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.spaces })
+  })
+
+  // Accepting an invite invalidates the 'spaces' tag — while the stale cache
+  // entry (status INVITED) refetches, the member must not be bounced back to
+  // the workspace list they just accepted from.
+  it('does not redirect an invited member while the space query is refetching', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'INVITED' }] },
+      error: undefined,
+      isLoading: false,
+      isFetching: true,
+    })
+
+    render(
+      <AuthState spaceId="7">
+        <div data-testid="space-content" />
+      </AuthState>,
+    )
+
+    expect(mockRouterReplace).not.toHaveBeenCalled()
+    // The stale INVITED data must not flash the space content either
+    expect(screen.queryByTestId('space-content')).not.toBeInTheDocument()
+    expect(screen.getByTestId('loading')).toBeInTheDocument()
+  })
+
+  it('redirects a declined member to the workspace list instead of rendering the space', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'DECLINED' }] },
+      error: undefined,
+      isLoading: false,
+      isFetching: false,
+    })
+
+    render(
+      <AuthState spaceId="7">
+        <div data-testid="space-content" />
+      </AuthState>,
+    )
+
+    expect(screen.queryByTestId('space-content')).not.toBeInTheDocument()
+    expect(screen.getByTestId('loading')).toBeInTheDocument()
+    expect(mockRouterReplace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.spaces })
+  })
+
+  it('does not redirect while the current user is still loading', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'ACTIVE' }] },
+      error: undefined,
+      isLoading: false,
+      isFetching: false,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
+
+    render(
+      <AuthState spaceId="7">
+        <div data-testid="space-content" />
+      </AuthState>,
+    )
+
+    expect(mockRouterReplace).not.toHaveBeenCalled()
   })
 })
