@@ -1,5 +1,5 @@
 import { act } from 'react'
-import { fireEvent, render, waitFor } from '@/tests/test-utils'
+import { fireEvent, render, waitFor, within } from '@/tests/test-utils'
 import { FormProvider, useForm } from 'react-hook-form'
 import AddressBookInput from '.'
 import { AddressBookSourceProvider } from '../AddressBookSourceProvider'
@@ -336,7 +336,7 @@ describe('AddressBookInput', () => {
 
   it('should group a local contact under the local contacts header with device provenance', async () => {
     const { input, utils } = setup('', {
-      [checksumAddress(faker.finance.ethereumAddress())]: 'Local Contact',
+      [checksumAddress(faker.finance.ethereumAddress())]: 'My Local Wallet',
     })
 
     act(() => {
@@ -344,18 +344,21 @@ describe('AddressBookInput', () => {
       fireEvent.mouseUp(input)
     })
 
-    await waitFor(() => expect(utils.getByText('Local Contact', { exact: false })).toBeDefined())
+    await waitFor(() => expect(utils.getByText('My Local Wallet', { exact: false })).toBeDefined())
     expect(utils.getByText('Local contacts')).toBeInTheDocument()
-    expect(utils.getByText('Saved on this device')).toBeInTheDocument()
+
+    const row = utils.getByText('My Local Wallet').closest('li')
+    expect(row).not.toBeNull()
+    expect(within(row as HTMLElement).getByText('Saved on this device')).toBeInTheDocument()
     expect(utils.queryByText('Private contacts')).not.toBeInTheDocument()
   })
 
   it('should group workspace and local contacts under separate headers', async () => {
-    const spaceContact = privateContactBuilder({ name: 'Workspace Contact', createdBy: 'dasha@acme.com' })
+    const spaceContact = privateContactBuilder({ name: 'Treasury Safe', createdBy: 'dasha@acme.com' })
     mockUseGetSpaceAddressBook.mockReturnValue([spaceContact])
 
     const { input, utils } = setup('', {
-      [checksumAddress(faker.finance.ethereumAddress())]: 'Local Contact',
+      [checksumAddress(faker.finance.ethereumAddress())]: 'My Local Wallet',
     })
 
     act(() => {
@@ -363,7 +366,7 @@ describe('AddressBookInput', () => {
       fireEvent.mouseUp(input)
     })
 
-    await waitFor(() => expect(utils.getByText('Workspace Contact', { exact: false })).toBeDefined())
+    await waitFor(() => expect(utils.getByText('Treasury Safe', { exact: false })).toBeDefined())
 
     const headers = utils.getAllByTestId('contact-group-header')
     expect(headers).toHaveLength(2)
