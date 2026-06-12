@@ -16,7 +16,10 @@ const SectionEntry = ({ item, query }: { item: SectionItem; query: string }) => 
 
   if (!isActive) return null
 
-  return <>{item.renderItem({ query, label: item.label })}</>
+  // Render as a component (not a function call) so the section's hooks are
+  // not registered against SectionEntry, which returns early when inactive
+  const SectionContent = item.renderItem
+  return <SectionContent query={query} label={item.label} />
 }
 
 const SearchSectionContent = ({ query }: SearchSectionProps) => {
