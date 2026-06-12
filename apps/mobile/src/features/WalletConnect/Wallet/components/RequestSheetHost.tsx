@@ -59,7 +59,10 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
 
   const proposal = current?.kind === 'proposal' ? current : null
   const request = current?.kind === 'request' ? current : null
-  const variant = proposal ? verifyStatusToVariant(proposal.proposal.verifyContext?.verified) : 'unverified'
+  // Both sheet kinds carry WC's domain verification — the panel renders the same for either.
+  const variant = verifyStatusToVariant(
+    proposal ? proposal.proposal.verifyContext?.verified : request?.verifyContext?.verified,
+  )
 
   // Review/Reject for the transaction-request sheet. Review composes a draft and navigates to
   // the confirm flow; the dApp is answered later by the propose-success listener.
@@ -138,25 +141,32 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
       if (!walletKit) {
         return null
       }
+      // The permissions panel replaces the active view for either kind; its "Got it" CTA
+      // returns to that view without responding to the dApp.
+      if ((proposal || request) && permissionsOpen) {
+        return (
+          <BottomSheetFooter {...footerProps} bottomInset={insets.bottom}>
+            <YStack paddingHorizontal="$4" paddingTop="$2" paddingBottom="$2">
+              <SafeButton primary onPress={closePermissions} testID="wc-permissions-dismiss">
+                Got it
+              </SafeButton>
+            </YStack>
+          </BottomSheetFooter>
+        )
+      }
       if (proposal) {
         return (
           <BottomSheetFooter {...footerProps} bottomInset={insets.bottom}>
             <YStack paddingHorizontal="$4" paddingTop="$2" paddingBottom="$2">
-              {permissionsOpen ? (
-                <SafeButton primary onPress={closePermissions} testID="wc-proposal-permissions-dismiss">
-                  Got it
-                </SafeButton>
-              ) : (
-                <SafeButton
-                  primary
-                  onPress={() => approve(proposal)}
-                  loading={busy}
-                  loadingText="Connecting…"
-                  testID="wc-proposal-connect"
-                >
-                  Connect
-                </SafeButton>
-              )}
+              <SafeButton
+                primary
+                onPress={() => approve(proposal)}
+                loading={busy}
+                loadingText="Connecting…"
+                testID="wc-proposal-connect"
+              >
+                Connect
+              </SafeButton>
             </YStack>
           </BottomSheetFooter>
         )
@@ -220,8 +230,10 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
         {walletKit && proposal && !permissionsOpen && (
           <SessionProposalSheet pending={proposal} onOpenPermissions={openPermissions} />
         )}
-        {walletKit && proposal && permissionsOpen && <ConnectionPermissionsPanel variant={variant} />}
-        {walletKit && request && <SendTransactionSheet pending={request} />}
+        {walletKit && request && !permissionsOpen && (
+          <SendTransactionSheet pending={request} onOpenPermissions={openPermissions} />
+        )}
+        {walletKit && (proposal || request) && permissionsOpen && <ConnectionPermissionsPanel variant={variant} />}
       </BottomSheetScrollView>
     </BottomSheetModal>
   )

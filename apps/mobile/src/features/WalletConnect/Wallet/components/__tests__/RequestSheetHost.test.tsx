@@ -203,13 +203,13 @@ describe('RequestSheetHost', () => {
     // Tapping the domain pill swaps in the permissions panel + the "Got it" footer.
     fireEvent.press(getByTestId('wc-proposal-domain'))
     expect(getByText('This domain has been verified.')).toBeTruthy()
-    expect(getByTestId('wc-proposal-permissions-dismiss')).toBeTruthy()
+    expect(getByTestId('wc-permissions-dismiss')).toBeTruthy()
     expect(queryByTestId('wc-proposal-connect')).toBeNull()
 
     // "Got it" returns to the proposal view.
-    fireEvent.press(getByTestId('wc-proposal-permissions-dismiss'))
+    fireEvent.press(getByTestId('wc-permissions-dismiss'))
     expect(getByTestId('wc-proposal-connect')).toBeTruthy()
-    expect(queryByTestId('wc-proposal-permissions-dismiss')).toBeNull()
+    expect(queryByTestId('wc-permissions-dismiss')).toBeNull()
   })
 
   it('rejects the proposal with USER_REJECTED when the sheet is dismissed', async () => {
@@ -292,5 +292,45 @@ describe('RequestSheetHost', () => {
       }),
     )
     await waitFor(() => expect(getPending(store)).toHaveLength(0))
+  })
+
+  it('opens the permissions panel from the tx-request domain pill and restores Reject/Review on "Got it"', () => {
+    const store = createTestStore({
+      activeSafe: { address: safeAddress, chainId: '1' },
+      [walletKitSliceName]: {
+        sessions: { 'topic-1': { peer: { metadata: { name: 'Uniswap', url: 'https://uniswap.org' } } } },
+        pending: [
+          {
+            kind: 'request',
+            id: 6,
+            topic: 'topic-1',
+            chainId: 'eip155:1',
+            method: 'eth_sendTransaction',
+            params: {},
+            verifyContext: { verified: { validation: 'VALID' } },
+          },
+        ],
+        outstandingRequests: {},
+      },
+    } as never)
+    const { getByTestId, queryByTestId, getByText } = renderWithStore(
+      <RequestSheetHost walletKit={fakeWalletKit} />,
+      store,
+    )
+
+    // Request view: Reject/Review in the footer.
+    expect(getByTestId('wc-tx-review')).toBeTruthy()
+
+    // Tapping the domain pill swaps in the permissions panel + the "Got it" footer.
+    fireEvent.press(getByTestId('wc-tx-domain'))
+    expect(getByText('This domain has been verified.')).toBeTruthy()
+    expect(getByTestId('wc-permissions-dismiss')).toBeTruthy()
+    expect(queryByTestId('wc-tx-review')).toBeNull()
+
+    // "Got it" returns to the request view without responding to the dApp.
+    fireEvent.press(getByTestId('wc-permissions-dismiss'))
+    expect(getByTestId('wc-tx-review')).toBeTruthy()
+    expect(mockRespondSessionRequest).not.toHaveBeenCalled()
+    expect(getPending(store)).toHaveLength(1)
   })
 })

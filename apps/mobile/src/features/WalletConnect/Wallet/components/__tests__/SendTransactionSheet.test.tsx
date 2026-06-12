@@ -1,4 +1,5 @@
 import React from 'react'
+import { fireEvent } from '@testing-library/react-native'
 import { renderWithStore, createTestStore } from '@/src/tests/test-utils'
 import { SendTransactionSheet } from '../SendTransactionSheet'
 import { walletKitSliceName, type PendingSessionRequest } from '../../store/walletKitSlice'
@@ -38,5 +39,16 @@ describe('SendTransactionSheet', () => {
     const { getByText, queryByTestId } = renderWithStore(<SendTransactionSheet pending={makePending()} />, store)
     expect(getByText('Uniswap')).toBeTruthy()
     expect(queryByTestId('wc-tx-domain')).toBeNull()
+  })
+
+  it('asks the host to open the permissions panel when the domain pill is pressed', () => {
+    const onOpenPermissions = jest.fn()
+    const store = storeWith({ name: 'Uniswap', url: 'https://uniswap.org/', icons: [] })
+    const { getByTestId } = renderWithStore(
+      <SendTransactionSheet pending={makePending()} onOpenPermissions={onOpenPermissions} />,
+      store,
+    )
+    fireEvent.press(getByTestId('wc-tx-domain'))
+    expect(onOpenPermissions).toHaveBeenCalledTimes(1)
   })
 })
