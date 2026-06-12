@@ -21,8 +21,11 @@ type Props = {
 const isSvgUrl = (url?: string): boolean => !!url && /\.svg($|\?|#)/i.test(url)
 
 export const DappIcon: React.FC<Props> = ({ url, size = 64, circle = false, badgeContent, badgeThemeName }) => {
-  const [failed, setFailed] = useState(false)
-  const showPlaceholder = !url || failed
+  // Track WHICH url failed rather than a boolean latch: the request-sheet host re-renders
+  // this component in place when the FIFO head changes, so a failure for one dApp's icon
+  // must not blank the next dApp's perfectly valid one.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null)
+  const showPlaceholder = !url || failedUrl === url
 
   const image = showPlaceholder ? (
     <YStack
@@ -33,13 +36,13 @@ export const DappIcon: React.FC<Props> = ({ url, size = 64, circle = false, badg
       testID="dapp-icon-placeholder"
     />
   ) : isSvgUrl(url) ? (
-    <SvgUri uri={url} width={size} height={size} onError={() => setFailed(true)} />
+    <SvgUri uri={url} width={size} height={size} onError={() => setFailedUrl(url)} />
   ) : (
     <Image
       source={url}
       style={{ width: size, height: size }}
       contentFit="contain"
-      onError={() => setFailed(true)}
+      onError={() => setFailedUrl(url)}
       testID="dapp-icon-image"
     />
   )
