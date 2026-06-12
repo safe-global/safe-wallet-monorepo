@@ -83,7 +83,8 @@ function SpaceSafeBar() {
   const router = useRouter()
   const urlSafeAddress = useSafeAddressFromUrl()
   const isQualifiedSafe = useIsQualifiedSafe()
-  const { items, selectedItemId, handleItemSelect, isLoading, isError, refetch } = useSpaceSafeSelectorItems()
+  const { items, selectedItemId, handleItemSelect, isLoading, isError, refetch, isInSpaceContext } =
+    useSpaceSafeSelectorItems()
   const { space, handleBackToSpace } = useSpaceBackLink()
   const [accountsModalOpen, setAccountsModalOpen] = useState(false)
   const addedSafes = useAppSelector(selectAllAddedSafes)
@@ -102,7 +103,9 @@ function SpaceSafeBar() {
     setAccountsModalOpen(true)
   }
 
-  const dropdownHeader = isQualifiedSafe ? (
+  // Match the header to the list shown: useSafeBarSafes renders workspace safes in any space
+  // context, not just for a qualified safe — so the label must track isInSpaceContext too.
+  const dropdownHeader = isInSpaceContext ? (
     <DropdownHeader label="Safes in this workspace" testId="workspace-header" />
   ) : (
     <DropdownHeader label="Trusted Safes" />

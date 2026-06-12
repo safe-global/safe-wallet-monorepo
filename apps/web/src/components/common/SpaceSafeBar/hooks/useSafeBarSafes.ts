@@ -86,5 +86,7 @@ export function useSafeBarSafes() {
   return {
     dropdownSafes: isInSpaceContext ? spaceSafes : dropdownSafes,
     chainSelectorSafes: isInSpaceContext ? spaceSafes : chainSelectorSafes,
+    // Expose so the header label stays in sync with which list is shown
+    isInSpaceContext,
   }
 }

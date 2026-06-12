@@ -133,7 +133,7 @@ function buildSingleChainItem(
 }
 
 export function useSpaceSafeSelectorItems() {
-  const { dropdownSafes: allSafes } = useSafeBarSafes()
+  const { dropdownSafes: allSafes, isInSpaceContext } = useSafeBarSafes()
   const { safe, safeAddress: reduxSafeAddress } = useSafeInfo()
   const urlSafeAddress = useSafeAddressFromUrl()
   const effectiveSafeAddress = urlSafeAddress || reduxSafeAddress
@@ -207,5 +207,6 @@ export function useSpaceSafeSelectorItems() {
     isLoading: overviewsLoading || itemsNotReady,
     isError: overviewsError,
     refetch: refetchOverviews,
+    isInSpaceContext,
   }
 }
