@@ -47,13 +47,35 @@ const noActiveChainError = (id: number) => formatJsonRpcError(id, { code: -32603
 //   - no-to + only data → contract deployment (allowed; composeSafeTxDraft routes via CreateCall)
 //   - no-to + (value or no-data) → invalid
 const isValidDappCall = (call: { to?: string; value?: string; data?: string } | undefined): boolean => {
-  if (!call) {
+  if (!call || typeof call !== 'object') {
     return false
   }
   if (call.to) {
     return true
   }
   return !call.value && !!call.data
+}
+
+/**
+ * Structural validation of a tx request's params — everything extractCalls /
+ * composeSafeTxDraft rely on downstream. Used by the live routing path below AND by
+ * WalletKitProvider when seeding requests restored after a restart, which never pass
+ * through routeSessionRequest (so a malformed bundle would otherwise only blow up
+ * inside compose with an unactionable toast).
+ */
+export const isValidTxRequestParams = (
+  method: 'eth_sendTransaction' | 'wallet_sendCalls',
+  params: unknown,
+): boolean => {
+  if (!Array.isArray(params)) {
+    return false
+  }
+  if (method === 'eth_sendTransaction') {
+    const [tx] = params as [{ to?: string; value?: string; data?: string } | undefined]
+    return isValidDappCall(tx)
+  }
+  const [bundle] = params as [{ calls?: { to?: string; value?: string; data?: string }[] } | undefined]
+  return !!bundle?.calls?.length && Array.isArray(bundle.calls) && bundle.calls.every(isValidDappCall)
 }
 
 // Scope (WA-2321): the transaction-request flow only. Read-only RPC passthrough and the
@@ -123,24 +145,12 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     // Validate the call shape(s) up front (mirrors apps/web/.../safe-wallet-provider/index.ts
     // wallet_sendCalls). Malformed requests fail synchronously with -32602 rather than
     // burning a sheet + compose pass that can only end in an opaque toast.
-    if (method === 'eth_sendTransaction') {
-      const [tx] = rpcParams as [{ to?: string; value?: string; data?: string } | undefined]
-      if (!isValidDappCall(tx)) {
-        return invalidParamsError(id)
-      }
+    if (!isValidTxRequestParams(method, rpcParams)) {
+      return invalidParamsError(id)
     }
+    // wallet_sendCalls additionally binds the bundle to the active context.
     if (method === 'wallet_sendCalls') {
-      const [bundle] = rpcParams as [
-        | {
-            chainId?: `0x${string}`
-            from?: `0x${string}`
-            calls?: { to?: string; value?: string; data?: string }[]
-          }
-        | undefined,
-      ]
-      if (!bundle) {
-        return invalidParamsError(id)
-      }
+      const [bundle] = rpcParams as [{ chainId?: `0x${string}`; from?: `0x${string}` }]
       const expectedChainHex = chainIdToHex(activeChain.chainId)
       if (bundle.chainId !== expectedChainHex) {
         return formatJsonRpcError(id, {
@@ -151,10 +161,6 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
       // Case-insensitive: dApps don't reliably checksum `from`, while CGW's address is checksummed.
       if (!sameAddress(bundle.from, activeSafeAddress)) {
         return formatJsonRpcError(id, { code: -32602, message: 'Invalid from address' })
-      }
-      // An empty bundle would only throw later inside composeSafeTxDraft — reject it here.
-      if (!bundle.calls?.length || !bundle.calls.every(isValidDappCall)) {
-        return invalidParamsError(id)
       }
     }
     return { id, jsonrpc: '2.0', result: DEFERRED_RESULT } as unknown as RoutedResponse

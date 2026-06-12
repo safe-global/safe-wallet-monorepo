@@ -2,7 +2,13 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getSdkError } from '@walletconnect/utils'
 import { getAddress } from 'ethers'
-import { routeSessionRequest, isDeferredResponse, NO_SIGNER_ERROR_CODE, type RouteContext } from '../methodRouter'
+import {
+  routeSessionRequest,
+  isDeferredResponse,
+  isValidTxRequestParams,
+  NO_SIGNER_ERROR_CODE,
+  type RouteContext,
+} from '../methodRouter'
 
 // Contains hex letters so casing-sensitivity tests actually exercise a different string.
 const SAFE_ADDRESS = '0xAbCd111111111111111111111111111111111111'
@@ -112,7 +118,7 @@ describe('routeSessionRequest', () => {
   })
 
   it('rejects a wallet_sendCalls bundle on a mismatched chainId', async () => {
-    const params = [{ chainId: '0x89', from: SAFE_ADDRESS, calls: [] }]
+    const params = [{ chainId: '0x89', from: SAFE_ADDRESS, calls: [{ to: '0xabc' }] }]
     const res = await routeSessionRequest(makeCtx(makeRequest('wallet_sendCalls', params)))
     expect((res as { error: { code: number } }).error.code).toBe(-32602)
   })
@@ -150,7 +156,7 @@ describe('routeSessionRequest', () => {
   })
 
   it('rejects a wallet_sendCalls bundle from a mismatched address', async () => {
-    const params = [{ chainId: '0x1', from: '0x2222222222222222222222222222222222222222', calls: [] }]
+    const params = [{ chainId: '0x1', from: '0x2222222222222222222222222222222222222222', calls: [{ to: '0xabc' }] }]
     const res = await routeSessionRequest(makeCtx(makeRequest('wallet_sendCalls', params)))
     expect((res as { error: { code: number } }).error.code).toBe(-32602)
     expect(isDeferredResponse(res)).toBe(false)
@@ -171,5 +177,31 @@ describe('routeSessionRequest', () => {
   it('returns UNSUPPORTED_METHODS for unknown methods', async () => {
     const res = await routeSessionRequest(makeCtx(makeRequest('eth_unknownMethod')))
     expect((res as { error: { message: string } }).error.message).toBe(getSdkError('UNSUPPORTED_METHODS').message)
+  })
+})
+
+// Also consumed by WalletKitProvider when seeding requests restored after a restart, which
+// bypass routeSessionRequest entirely.
+describe('isValidTxRequestParams', () => {
+  it('accepts a valid eth_sendTransaction call and a deployment', () => {
+    expect(isValidTxRequestParams('eth_sendTransaction', [{ to: '0xabc', value: '0x0', data: '0x' }])).toBe(true)
+    expect(isValidTxRequestParams('eth_sendTransaction', [{ data: '0xdeadbeef' }])).toBe(true)
+  })
+
+  it('rejects non-array, empty, and malformed eth_sendTransaction params', () => {
+    expect(isValidTxRequestParams('eth_sendTransaction', undefined)).toBe(false)
+    expect(isValidTxRequestParams('eth_sendTransaction', [])).toBe(false)
+    expect(isValidTxRequestParams('eth_sendTransaction', [{ value: '0x1' }])).toBe(false)
+  })
+
+  it('accepts a valid wallet_sendCalls bundle', () => {
+    expect(isValidTxRequestParams('wallet_sendCalls', [{ calls: [{ to: '0xabc' }, { data: '0xfeed' }] }])).toBe(true)
+  })
+
+  it('rejects empty or malformed wallet_sendCalls bundles', () => {
+    expect(isValidTxRequestParams('wallet_sendCalls', [])).toBe(false)
+    expect(isValidTxRequestParams('wallet_sendCalls', [{}])).toBe(false)
+    expect(isValidTxRequestParams('wallet_sendCalls', [{ calls: [] }])).toBe(false)
+    expect(isValidTxRequestParams('wallet_sendCalls', [{ calls: [{ value: '0x1' }] }])).toBe(false)
   })
 })

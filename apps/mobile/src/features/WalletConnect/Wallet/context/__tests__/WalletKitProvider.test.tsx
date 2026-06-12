@@ -34,6 +34,7 @@ const mockWalletKit = {
   off: jest.fn(),
   pair: jest.fn().mockResolvedValue(undefined),
   rejectSessionAuthenticate: jest.fn().mockResolvedValue(undefined),
+  respondSessionRequest: jest.fn().mockResolvedValue(undefined),
 } as unknown as IWalletKit & Record<string, jest.Mock>
 
 jest.mock('../../walletKit', () => ({ getWalletKit: jest.fn(() => Promise.resolve(mockWalletKit)) }))
@@ -69,6 +70,31 @@ describe('WalletKitProvider', () => {
     await waitFor(() => {
       expect(store.getState()[walletKitSliceName].sessions['seeded-topic']).toEqual(session)
     })
+  })
+
+  it('rejects restored tx requests with malformed params instead of seeding them', async () => {
+    ;(mockWalletKit.getPendingSessionRequests as jest.Mock).mockReturnValueOnce([
+      // Malformed: empty calls bundle — would crash extractCalls / compose downstream.
+      {
+        id: 11,
+        topic: 'topic-bad',
+        params: { chainId: 'eip155:1', request: { method: 'wallet_sendCalls', params: [{ calls: [] }] } },
+      },
+      // Valid: must still be seeded.
+      {
+        id: 12,
+        topic: 'topic-ok',
+        params: { chainId: 'eip155:1', request: { method: 'eth_sendTransaction', params: [{ to: '0xabc' }] } },
+      },
+    ])
+    const { store } = renderProvider()
+    await waitFor(() => {
+      expect(store.getState()[walletKitSliceName].pending).toHaveLength(1)
+    })
+    expect(store.getState()[walletKitSliceName].pending[0]).toMatchObject({ id: 12, topic: 'topic-ok' })
+    expect(mockWalletKit.respondSessionRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ topic: 'topic-bad', response: expect.objectContaining({ error: expect.anything() }) }),
+    )
   })
 
   it('subscribes to all six session events', async () => {
