@@ -25,6 +25,7 @@ import {
   removePending,
   isDeferredTxMethod,
   clearOutstandingRequest,
+  setOutstandingProposing,
   selectOutstandingRequestByHash,
   selectOutstandingRequests,
   selectPending,
@@ -128,36 +129,61 @@ export const WalletKitProvider: React.FC = () => {
   // Respond to the dApp once the user has actually signed. The existing confirm flow calls
   // transactionsProposeTransactionV1 after signing; match its fulfilled action against any
   // outstanding tx request keyed by safeTxHash and reply with the hash (or { id } for 5792).
+  // The pending/rejected matchers maintain the `proposing` flag so WcRejectOnBack can't
+  // race the success response with a USER_REJECTED while /propose is in flight.
   useEffect(() => {
     if (!walletKit) {
       return
     }
-    const unsubscribe = startAppListening({
-      matcher: cgwApi.endpoints.transactionsProposeTransactionV1.matchFulfilled,
-      effect: async (action, api) => {
-        const arg = action.meta.arg.originalArgs as { proposeTransactionDto?: { safeTxHash?: string } }
-        const safeTxHash = arg.proposeTransactionDto?.safeTxHash
-        if (!safeTxHash) {
-          return
-        }
-        const outstanding = selectOutstandingRequestByHash(api.getState(), safeTxHash)
-        if (!outstanding) {
-          return
-        }
-        const result = outstanding.method === 'wallet_sendCalls' ? { id: safeTxHash } : safeTxHash
-        try {
-          await walletKit.respondSessionRequest({
-            topic: outstanding.topic,
-            response: formatJsonRpcResult(outstanding.id, result),
-          })
-        } catch (e) {
-          logWalletKitError('respondSessionRequest after propose failed', e)
-        }
-        api.dispatch(clearOutstandingRequest(safeTxHash))
-      },
-    })
+    const safeTxHashOf = (action: { meta: { arg: { originalArgs: unknown } } }) =>
+      (action.meta.arg.originalArgs as { proposeTransactionDto?: { safeTxHash?: string } }).proposeTransactionDto
+        ?.safeTxHash
+    const unsubscribers = [
+      startAppListening({
+        matcher: cgwApi.endpoints.transactionsProposeTransactionV1.matchPending,
+        effect: async (action, api) => {
+          const safeTxHash = safeTxHashOf(action)
+          if (safeTxHash) {
+            api.dispatch(setOutstandingProposing({ safeTxHash, proposing: true }))
+          }
+        },
+      }),
+      startAppListening({
+        // A failed /propose keeps the draft (AC) — re-enable reject-on-back for it.
+        matcher: cgwApi.endpoints.transactionsProposeTransactionV1.matchRejected,
+        effect: async (action, api) => {
+          const safeTxHash = safeTxHashOf(action)
+          if (safeTxHash) {
+            api.dispatch(setOutstandingProposing({ safeTxHash, proposing: false }))
+          }
+        },
+      }),
+      startAppListening({
+        matcher: cgwApi.endpoints.transactionsProposeTransactionV1.matchFulfilled,
+        effect: async (action, api) => {
+          const safeTxHash = safeTxHashOf(action)
+          if (!safeTxHash) {
+            return
+          }
+          const outstanding = selectOutstandingRequestByHash(api.getState(), safeTxHash)
+          if (!outstanding) {
+            return
+          }
+          const result = outstanding.method === 'wallet_sendCalls' ? { id: safeTxHash } : safeTxHash
+          try {
+            await walletKit.respondSessionRequest({
+              topic: outstanding.topic,
+              response: formatJsonRpcResult(outstanding.id, result),
+            })
+          } catch (e) {
+            logWalletKitError('respondSessionRequest after propose failed', e)
+          }
+          api.dispatch(clearOutstandingRequest(safeTxHash))
+        },
+      }),
+    ]
     return () => {
-      unsubscribe()
+      unsubscribers.forEach((unsubscribe) => unsubscribe())
     }
   }, [walletKit])
 
