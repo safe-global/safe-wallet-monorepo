@@ -108,19 +108,11 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/** Full feed with the filter bar (the Activity page surface). */
-export const Populated: Story = {
-  args: { showFilters: true },
-}
-
-/** Scoped to address-book events without filters (the address book tab surface). */
-export const AddressBookScoped: Story = {
-  args: { eventTypes: ['ADDRESS_BOOK_UPSERTED', 'ADDRESS_BOOK_DELETED'] },
-}
+/** Full feed with the filter bar. */
+export const Populated: Story = {}
 
 /** Nothing recorded yet. */
 export const Empty: Story = {
-  args: { showFilters: true },
   parameters: {
     ...createMockStory(
       storyConfig([
@@ -133,7 +125,6 @@ export const Empty: Story = {
 
 /** More events than one page — the Load more button is visible. */
 export const Paginated: Story = {
-  args: { showFilters: true },
   parameters: {
     ...createMockStory(
       storyConfig([
@@ -157,7 +148,6 @@ export const Paginated: Story = {
 
 /** Backend unreachable — flat error copy, no retry storm. */
 export const Error: Story = {
-  args: { showFilters: true },
   parameters: {
     ...createMockStory(
       storyConfig([

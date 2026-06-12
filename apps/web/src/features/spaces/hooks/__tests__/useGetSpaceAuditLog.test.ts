@@ -43,16 +43,4 @@ describe('useGetSpaceAuditLog / useGetSpaceAuditLogActors skip behavior', () => 
     expect(mockAuditQuery).toHaveBeenCalledWith(expect.anything(), { skip: expectedSkip })
     expect(mockActorsQuery).toHaveBeenCalledWith(expect.anything(), { skip: expectedSkip })
   })
-
-  it('joins event types into the single comma-separated event_type param', () => {
-    mockUseAppSelector.mockReturnValue(true)
-    mockUseCurrentSpaceId.mockReturnValue('space-1')
-
-    renderHook(() => useGetSpaceAuditLog({ eventTypes: ['ADDRESS_BOOK_UPSERTED', 'ADDRESS_BOOK_DELETED'] }))
-
-    expect(mockAuditQuery).toHaveBeenCalledWith(
-      expect.objectContaining({ eventType: 'ADDRESS_BOOK_UPSERTED,ADDRESS_BOOK_DELETED' }),
-      expect.anything(),
-    )
-  })
 })

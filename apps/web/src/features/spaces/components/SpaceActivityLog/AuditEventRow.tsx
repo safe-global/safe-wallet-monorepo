@@ -10,7 +10,7 @@ import { getAuditEventDescription, getDefaultTargetDisplay, getTargetUserId } fr
 // People resolve as: space member name → wallet address → server label.
 // Shared address-book names are member-editable and are deliberately not
 // used here.
-export function ActorAvatar({ actor, memberName }: { actor: string; memberName?: string }) {
+function ActorAvatar({ actor, memberName }: { actor: string; memberName?: string }) {
   if (memberName) {
     return <InitialsAvatar name={memberName} size="medium" rounded />
   }
@@ -21,7 +21,7 @@ export function ActorAvatar({ actor, memberName }: { actor: string; memberName?:
   )
 }
 
-export function ActorName({ actor, memberName }: { actor: string; memberName?: string }) {
+function ActorName({ actor, memberName }: { actor: string; memberName?: string }) {
   if (memberName) {
     return <span className="min-w-0 font-bold break-all">{memberName}</span>
   }

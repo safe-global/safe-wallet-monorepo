@@ -10,15 +10,12 @@ export default function SpaceActivityLogPage({ spaceId }: { spaceId: string }) {
   return (
     <AuthState spaceId={spaceId}>
       <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-        <div className="mb-6 flex flex-col gap-2">
+        <div className="mb-6 flex flex-col gap-6">
           <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
             Activity
           </Typography>
-          <p className="text-muted-foreground text-sm">
-            Everything that happened in this space — who did what, and when.
-          </p>
         </div>
-        <SpaceActivityLog showFilters />
+        <SpaceActivityLog />
       </div>
     </AuthState>
   )

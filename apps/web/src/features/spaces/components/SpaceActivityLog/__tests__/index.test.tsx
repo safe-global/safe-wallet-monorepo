@@ -82,7 +82,8 @@ describe('SpaceActivityLog', () => {
     render(<SpaceActivityLog />)
 
     expect(screen.getByText('Could not load activity.')).toBeInTheDocument()
-    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /retry/i })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('activity-log-load-more')).not.toBeInTheDocument()
   })
 
   it('renders the empty state', () => {
@@ -157,16 +158,6 @@ describe('SpaceActivityLog', () => {
     expect(button).toHaveTextContent('Loading…')
   })
 
-  it('shows the filter bar only when showFilters is set', () => {
-    mockPages({ '': { results: [], next: null, previous: null, count: 0 } })
-
-    const { rerender } = render(<SpaceActivityLog />)
-    expect(screen.queryByTestId('set-actor-filter')).not.toBeInTheDocument()
-
-    rerender(<SpaceActivityLog showFilters />)
-    expect(screen.getByTestId('set-actor-filter')).toBeInTheDocument()
-  })
-
   it('passes filters into the query and resets pagination when they change', () => {
     mockPages({
       '': {
@@ -178,7 +169,7 @@ describe('SpaceActivityLog', () => {
       'limit=1&offset=1': { results: [buildEvent('0')], next: null, previous: null, count: 2 },
     })
 
-    render(<SpaceActivityLog showFilters />)
+    render(<SpaceActivityLog />)
     fireEvent.click(screen.getByTestId('activity-log-load-more'))
     expect(screen.getByText('actor-0')).toBeInTheDocument()
 
@@ -211,20 +202,10 @@ describe('SpaceActivityLog', () => {
     expect(screen.queryByText('actor-0')).not.toBeInTheDocument()
   })
 
-  it('scopes the query to the given event types', () => {
-    mockPages({ '': { results: [], next: null, previous: null, count: 0 } })
-
-    render(<SpaceActivityLog eventTypes={['ADDRESS_BOOK_UPSERTED', 'ADDRESS_BOOK_DELETED']} />)
-
-    expect(mockUseGetSpaceAuditLog).toHaveBeenCalledWith(
-      expect.objectContaining({ eventTypes: ['ADDRESS_BOOK_UPSERTED', 'ADDRESS_BOOK_DELETED'] }),
-    )
-  })
-
   it('shows "No results" instead of the generic empty state when filtered', () => {
     mockPages({ '': { results: [], next: null, previous: null, count: 0 } })
 
-    render(<SpaceActivityLog showFilters />)
+    render(<SpaceActivityLog />)
     fireEvent.click(screen.getByTestId('set-actor-filter'))
 
     expect(screen.getByText('No results')).toBeInTheDocument()

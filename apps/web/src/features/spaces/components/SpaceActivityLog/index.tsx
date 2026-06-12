@@ -9,13 +9,6 @@ import type { SpaceAuditLogEntryDto, SpaceAuditLogPage } from '@safe-global/stor
 import AuditEventRow from './AuditEventRow'
 import ActivityLogFilters, { type ActivityLogFilterState, EMPTY_FILTERS } from './ActivityLogFilters'
 
-export type SpaceActivityLogProps = {
-  /** Server-side scoping to a subset of event types (e.g. the address book tab) */
-  eventTypes?: SpaceAuditLogEntryDto['eventType'][]
-  /** Show the actor/date/sort filter bar (Activity page on, address book tab off) */
-  showFilters?: boolean
-}
-
 function getCursor(pageUrl: string | null | undefined): string | undefined {
   if (!pageUrl) return undefined
   try {
@@ -63,7 +56,7 @@ function LoadingSkeleton() {
   )
 }
 
-function SpaceActivityLog({ eventTypes, showFilters = false }: SpaceActivityLogProps) {
+function SpaceActivityLog() {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const [filters, setFilters] = useState<ActivityLogFilterState>(EMPTY_FILTERS)
@@ -73,13 +66,12 @@ function SpaceActivityLog({ eventTypes, showFilters = false }: SpaceActivityLogP
 
   const queryArgs = useMemo(
     (): SpaceAuditLogQueryArgs => ({
-      eventTypes,
       actorUserId: filters.actorUserId,
       createdAtGte: filters.createdAtGte,
       createdAtLte: filters.createdAtLte,
       sortDirection: filters.sortDirection,
     }),
-    [eventTypes, filters],
+    [filters],
   )
 
   // Reset pagination whenever the query scope changes.
@@ -124,7 +116,7 @@ function SpaceActivityLog({ eventTypes, showFilters = false }: SpaceActivityLogP
 
   return (
     <div data-testid="space-activity-log">
-      {showFilters && <ActivityLogFilters filters={filters} onFiltersChange={setFilters} />}
+      <ActivityLogFilters filters={filters} onFiltersChange={setFilters} />
 
       {extraCursors.map((cursor, index) => (
         <AuditLogPageFetcher
