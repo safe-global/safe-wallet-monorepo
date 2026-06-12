@@ -96,6 +96,11 @@ const SimilarityGroupContainer = ({
 const TrustedSafesList = ({ items, isLoading, searchQuery, onSearchChange, onToggle }: TrustedSafesListProps) => {
   const { groups, ungroupedItems } = useMemo(() => groupItemsBySimilarity(items), [items])
 
+  const sortedUngroupedItems = useMemo(
+    () => [...ungroupedItems].sort((a, b) => Number(b.isSelected) - Number(a.isSelected)),
+    [ungroupedItems],
+  )
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
@@ -137,7 +142,7 @@ const TrustedSafesList = ({ items, isLoading, searchQuery, onSearchChange, onTog
             ))}
 
             {/* Render ungrouped items */}
-            {ungroupedItems.map((item) => (
+            {sortedUngroupedItems.map((item) => (
               <div key={item.address} className="my-0.5">
                 <SelectionItem item={item} onToggle={onToggle} />
               </div>

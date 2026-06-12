@@ -158,11 +158,11 @@ describe('TrustedSafesModal', () => {
   it('should call toggleSelection when clicking safe item', () => {
     render(<TrustedSafesModal modal={mockModal} />)
 
-    // Click on the first safe item (AccountItem.Button has data-testid="safe-list-item")
+    // Selected safes float to the top, so the first rendered item is the selected one
     const safeItems = screen.getAllByTestId('safe-list-item')
     fireEvent.click(safeItems[0])
 
-    expect(mockModal.toggleSelection).toHaveBeenCalledWith('0x1234567890abcdef1234567890abcdef12345678')
+    expect(mockModal.toggleSelection).toHaveBeenCalledWith('0xabcdef1234567890abcdef1234567890abcdef12')
   })
 
   it('should show similarity confirmation dialog when pendingConfirmation is set', () => {
