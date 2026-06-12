@@ -6,6 +6,7 @@ import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
 import { useAppDispatch } from '@/src/store/hooks'
 import { getWalletKit } from '../walletKit'
 import { useActiveSafeBinding } from '../hooks/useActiveSafeBinding'
+import { useSessionProposalHandler } from '../hooks/useSessionProposalHandler'
 import { setSessions, removeSession, pushPending, isDeferredTxMethod } from '../store/walletKitSlice'
 import { RequestSheetHost } from '../components/RequestSheetHost'
 import { logWalletKitError } from '../utils/errors'
@@ -49,19 +50,15 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [dispatch])
 
-  // Subscribe to all six session events. Proposal/request handling is wired up in tickets
-  // WA-2318–2322; here they are logging stubs. delete/expire/update keep the slice's session
-  // mirror in sync; authenticate is rejected (out of scope).
+  // Subscribe to session events. session_proposal is handled by useSessionProposalHandler
+  // (WA-2318). session_request handling is wired in WA-2321/2322. delete/expire/update keep
+  // the slice's session mirror in sync; authenticate is rejected (out of scope).
   useEffect(() => {
     if (!walletKit) {
       return
     }
     const refreshSessions = () => dispatch(setSessions(walletKit.getActiveSessions()))
 
-    const onProposal = (p: WalletKitTypes.SessionProposal) => {
-      // TODO(WA-2318): build namespaces + render SessionProposalSheet.
-      console.log('[walletKit] session_proposal (stub)', p.id)
-    }
     const onRequest = (r: WalletKitTypes.SessionRequest) => {
       // TODO(WA-2321 / WA-2322): route + render request sheets.
       console.log('[walletKit] session_request (stub)', r.id)
@@ -80,7 +77,6 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       }
     }
 
-    walletKit.on('session_proposal', onProposal)
     walletKit.on('session_request', onRequest)
     walletKit.on('session_delete', onDelete)
     walletKit.on('proposal_expire', onProposalExpire)
@@ -88,7 +84,6 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     walletKit.on('session_authenticate', onAuthenticate)
 
     return () => {
-      walletKit.off('session_proposal', onProposal)
       walletKit.off('session_request', onRequest)
       walletKit.off('session_delete', onDelete)
       walletKit.off('proposal_expire', onProposalExpire)
@@ -128,6 +123,7 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [walletKit])
 
+  useSessionProposalHandler(walletKit)
   useActiveSafeBinding(walletKit)
 
   return (
