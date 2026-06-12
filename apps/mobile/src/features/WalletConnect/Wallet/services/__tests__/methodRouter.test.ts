@@ -1,6 +1,5 @@
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { getSdkError } from '@walletconnect/utils'
 import { routeSessionRequest, isDeferredResponse, NO_SIGNER_ERROR_CODE, type RouteContext } from '../methodRouter'
 
@@ -8,7 +7,6 @@ const SAFE_ADDRESS = '0x1111111111111111111111111111111111111111'
 const CHAIN_ID = '1'
 
 const chain = { chainId: CHAIN_ID } as unknown as Chain
-const safe = { address: { value: SAFE_ADDRESS } } as unknown as SafeState
 
 const makeRequest = (method: string, params: unknown[] = [], chainId = 'eip155:1'): WalletKitTypes.SessionRequest =>
   ({
@@ -23,7 +21,7 @@ const makeCtx = (request: WalletKitTypes.SessionRequest, overrides: Partial<Rout
     dispatch: jest.fn(),
     getState: jest.fn(),
     activeChain: chain,
-    activeSafe: safe,
+    activeSafeAddress: SAFE_ADDRESS,
     hasSigner: true,
     ...overrides,
   }) as unknown as RouteContext
@@ -49,7 +47,7 @@ describe('routeSessionRequest', () => {
   })
 
   it('answers eth_accounts with [] when no active Safe', async () => {
-    const res = await routeSessionRequest(makeCtx(makeRequest('eth_accounts'), { activeSafe: null }))
+    const res = await routeSessionRequest(makeCtx(makeRequest('eth_accounts'), { activeSafeAddress: null }))
     expect((res as { result: string[] }).result).toEqual([])
   })
 
@@ -75,7 +73,7 @@ describe('routeSessionRequest', () => {
 
   it('rejects tx requests with no active Safe', async () => {
     const res = await routeSessionRequest(
-      makeCtx(makeRequest('eth_sendTransaction', sendTxParams), { activeSafe: null }),
+      makeCtx(makeRequest('eth_sendTransaction', sendTxParams), { activeSafeAddress: null }),
     )
     expect((res as { error: { code: number } }).error.code).toBe(-32603)
     expect(isDeferredResponse(res)).toBe(false)

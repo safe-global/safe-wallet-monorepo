@@ -3,7 +3,6 @@ import { getSdkError } from '@walletconnect/utils'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { AppDispatch, RootState } from '@/src/store'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { chainIdToHex } from '@safe-global/utils/features/walletconnect/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { REJECTED_SIGNING_METHODS, SUPPORTED_NAMESPACE } from './constants'
@@ -15,10 +14,11 @@ export type RouteContext = {
   dispatch: AppDispatch
   getState: () => RootState
   // Active context resolved by the caller — null when no Safe is selected or its chain
-  // config hasn't loaded. The router answers account/chain queries regardless and defers
-  // the tx methods only when the active context is complete.
+  // config hasn't loaded. The address comes from the local activeSafe slice (not the CGW
+  // Safe query) so requests arriving during a cold start aren't spuriously rejected while
+  // the fetch is still in flight; the compose path loads the full SafeState itself.
   activeChain: Chain | null
-  activeSafe: SafeState | null
+  activeSafeAddress: string | null
   hasSigner: boolean
 }
 
@@ -57,7 +57,7 @@ const isValidDappCall = (call: { to?: string; value?: string; data?: string } | 
 // wallet_switchEthereumChain) are wired in WA-2322 — they slot in as extra branches here
 // without reworking this router or its RouteContext.
 export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResponse> => {
-  const { request, activeChain, activeSafe, hasSigner } = ctx
+  const { request, activeChain, activeSafeAddress, hasSigner } = ctx
   const { id, params } = request
   const { request: rpc, chainId } = params
   const { method } = rpc
@@ -77,7 +77,7 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
   // Local-answerable methods — a dApp needs these to establish the session before it can
   // send a transaction.
   if (method === 'eth_accounts') {
-    return formatJsonRpcResult(id, activeSafe ? [activeSafe.address.value] : [])
+    return formatJsonRpcResult(id, activeSafeAddress ? [activeSafeAddress] : [])
   }
   if (method === 'eth_chainId') {
     return formatJsonRpcResult(id, activeChain ? chainIdToHex(activeChain.chainId) : '0x0')
@@ -89,7 +89,7 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
   // Transaction methods — the handler pushes the request to the slice so RequestSheetHost
   // renders the sheet. The sheet sends the response when the user reviews+signs or rejects.
   if (method === 'eth_sendTransaction' || method === 'wallet_sendCalls') {
-    if (!activeSafe) {
+    if (!activeSafeAddress) {
       return formatJsonRpcError(id, { code: -32603, message: 'No active Safe' })
     }
     if (!hasSigner) {
@@ -139,7 +139,7 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
         })
       }
       // Case-insensitive: dApps don't reliably checksum `from`, while CGW's address is checksummed.
-      if (!sameAddress(bundle.from, activeSafe.address.value)) {
+      if (!sameAddress(bundle.from, activeSafeAddress)) {
         return formatJsonRpcError(id, { code: -32602, message: 'Invalid from address' })
       }
       // An empty bundle would only throw later inside composeSafeTxDraft — reject it here.

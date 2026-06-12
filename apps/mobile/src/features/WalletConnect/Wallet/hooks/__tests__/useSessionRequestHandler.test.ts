@@ -1,7 +1,6 @@
 import { getSdkError } from '@walletconnect/utils'
 import type { WalletKitTypes, IWalletKit } from '@reown/walletkit'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { renderHookWithStore, createTestStore, waitFor } from '@/src/tests/test-utils'
 import { useSessionRequestHandler, type SessionRequestHandlerDeps } from '../useSessionRequestHandler'
 import { selectPending } from '../../store/walletKitSlice'
@@ -12,9 +11,8 @@ jest.mock('@tamagui/toast', () => ({ useToastController: () => ({ show: mockToas
 const SAFE_ADDRESS = '0x1111111111111111111111111111111111111111'
 
 const chain = { chainId: '1', chainName: 'Ethereum' } as unknown as Chain
-const safe = { address: { value: SAFE_ADDRESS } } as unknown as SafeState
 
-const baseDeps: SessionRequestHandlerDeps = { activeChain: chain, activeSafe: safe, hasSigner: true }
+const baseDeps: SessionRequestHandlerDeps = { activeChain: chain, activeSafeAddress: SAFE_ADDRESS, hasSigner: true }
 
 // Capture the registered session_request listener so tests can invoke it directly.
 const makeWalletKit = () => {
