@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useSafesGetSafeOverviewV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { useSafesGetOverviewForManyQuery } from '@safe-global/store/gateway/safes'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -18,16 +18,16 @@ export const useSpaceSafesWithQueue = () => {
     { skip: !isUserSignedIn || !spaceId },
   )
 
-  const safesParam = useMemo(() => {
-    if (!spaceSafes?.safes) return ''
-    return Object.entries(spaceSafes.safes)
-      .flatMap(([chainId, addresses]: [string, string[]]) => addresses.map((address) => `${chainId}:${address}`))
-      .join(',')
+  const safeIds = useMemo(() => {
+    if (!spaceSafes?.safes) return []
+    return Object.entries(spaceSafes.safes).flatMap(([chainId, addresses]: [string, string[]]) =>
+      addresses.map((address) => `${chainId}:${address}`),
+    )
   }, [spaceSafes?.safes])
 
-  const { currentData: overviews, isLoading: isLoadingOverviews } = useSafesGetSafeOverviewV1Query(
-    { currency, safes: safesParam, trusted: true, excludeSpam: true },
-    { skip: !safesParam },
+  const { currentData: overviews, isLoading: isLoadingOverviews } = useSafesGetOverviewForManyQuery(
+    { currency, safes: safeIds, trusted: true },
+    { skip: safeIds.length === 0 },
   )
 
   const safesWithQueue = useMemo(() => {

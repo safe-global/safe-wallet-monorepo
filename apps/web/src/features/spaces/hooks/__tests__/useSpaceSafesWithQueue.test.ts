@@ -38,9 +38,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpaceSafesGetV1Query: (...args: unknown[]) => mockUseSpaceSafesGetV1Query(...args),
 }))
 
-const mockUseSafesGetSafeOverviewV1Query = jest.fn()
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/safes', () => ({
-  useSafesGetSafeOverviewV1Query: (...args: unknown[]) => mockUseSafesGetSafeOverviewV1Query(...args),
+const mockUseSafesGetOverviewForManyQuery = jest.fn()
+jest.mock('@safe-global/store/gateway/safes', () => ({
+  useSafesGetOverviewForManyQuery: (...args: unknown[]) => mockUseSafesGetOverviewForManyQuery(...args),
 }))
 
 // ---------------------------------------------------------------------------
@@ -84,7 +84,7 @@ const setupDefaults = ({
     currentData: spaceSafes,
     isFetching: isLoadingSafes,
   })
-  mockUseSafesGetSafeOverviewV1Query.mockReturnValue({
+  mockUseSafesGetOverviewForManyQuery.mockReturnValue({
     currentData: overviews,
     isLoading: isLoadingOverviews,
   })
@@ -132,7 +132,7 @@ describe('useSpaceSafesWithQueue', () => {
     expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID }, { skip: false })
   })
 
-  it('should build safes param from space safes response', () => {
+  it('should build safe ids from space safes response', () => {
     setupDefaults({
       spaceSafes: {
         safes: {
@@ -144,30 +144,29 @@ describe('useSpaceSafesWithQueue', () => {
 
     renderHook(() => useSpaceSafesWithQueue())
 
-    const overviewCallArgs = mockUseSafesGetSafeOverviewV1Query.mock.calls[0]
-    expect(overviewCallArgs[0].safes).toBe(`1:${ADDR_1},1:${ADDR_2},137:${ADDR_3}`)
+    const overviewCallArgs = mockUseSafesGetOverviewForManyQuery.mock.calls[0]
+    expect(overviewCallArgs[0].safes).toEqual([`1:${ADDR_1}`, `1:${ADDR_2}`, `137:${ADDR_3}`])
     expect(overviewCallArgs[0].currency).toBe('usd')
     expect(overviewCallArgs[0].trusted).toBe(true)
-    expect(overviewCallArgs[0].excludeSpam).toBe(true)
   })
 
-  it('should skip overview query when safes param is empty', () => {
+  it('should skip overview query when there are no safes', () => {
     setupDefaults()
 
     renderHook(() => useSpaceSafesWithQueue())
 
-    const overviewCallArgs = mockUseSafesGetSafeOverviewV1Query.mock.calls[0]
+    const overviewCallArgs = mockUseSafesGetOverviewForManyQuery.mock.calls[0]
     expect(overviewCallArgs[1]).toEqual({ skip: true })
   })
 
-  it('should not skip overview query when safes param is populated', () => {
+  it('should not skip overview query when there are safes', () => {
     setupDefaults({
       spaceSafes: { safes: { '1': [ADDR_1] } },
     })
 
     renderHook(() => useSpaceSafesWithQueue())
 
-    const overviewCallArgs = mockUseSafesGetSafeOverviewV1Query.mock.calls[0]
+    const overviewCallArgs = mockUseSafesGetOverviewForManyQuery.mock.calls[0]
     expect(overviewCallArgs[1]).toEqual({ skip: false })
   })
 
@@ -242,8 +241,8 @@ describe('useSpaceSafesWithQueue', () => {
 
     renderHook(() => useSpaceSafesWithQueue())
 
-    const overviewCallArgs = mockUseSafesGetSafeOverviewV1Query.mock.calls[0]
-    expect(overviewCallArgs[0].safes).toBe('')
+    const overviewCallArgs = mockUseSafesGetOverviewForManyQuery.mock.calls[0]
+    expect(overviewCallArgs[0].safes).toEqual([])
     expect(overviewCallArgs[1]).toEqual({ skip: true })
   })
 })
