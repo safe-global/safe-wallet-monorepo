@@ -13,7 +13,7 @@
 
 .tableBody tr:last-child td {
   border-bottom: none;
-  padding-bottom: var(--space-1);
+  padding-bottom: var(--space-2);
 }
 
 .actions {

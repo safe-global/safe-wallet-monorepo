@@ -156,12 +156,16 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
   }
 
   const orderedRows = orderBy ? rows.slice().sort(getComparator(order, orderBy)) : rows
-  const pagedRows = orderedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  // Clamp the page so a shrinking `rows` (e.g. a search filter) can't leave us on an out-of-range page
+  // showing an empty body. Derived in render rather than via an effect so it's correct on the first paint.
+  const lastPage = Math.max(0, Math.ceil(rows.length / rowsPerPage) - 1)
+  const safePage = Math.min(page, lastPage)
+  const pagedRows = orderedRows.slice(safePage * rowsPerPage, safePage * rowsPerPage + rowsPerPage)
   const showPagination = rows.length > pageSizes[0] || rowsPerPage !== pageSizes[1]
 
-  const from = rows.length === 0 ? 0 : page * rowsPerPage + 1
-  const to = Math.min(rows.length, page * rowsPerPage + rowsPerPage)
-  const isFirstPage = page === 0
+  const from = rows.length === 0 ? 0 : safePage * rowsPerPage + 1
+  const to = Math.min(rows.length, safePage * rowsPerPage + rowsPerPage)
+  const isFirstPage = safePage === 0
   const isLastPage = to >= rows.length
 
   return (
@@ -256,7 +260,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
                 size="icon"
                 aria-label="Go to previous page"
                 disabled={isFirstPage}
-                onClick={() => handleChangePage(page - 1)}
+                onClick={() => handleChangePage(safePage - 1)}
               >
                 <ChevronLeft className="size-5" />
               </Button>
@@ -265,7 +269,7 @@ function EnhancedTable({ rows, headCells, mobileVariant, compact, fixedLayout, f
                 size="icon"
                 aria-label="Go to next page"
                 disabled={isLastPage}
-                onClick={() => handleChangePage(page + 1)}
+                onClick={() => handleChangePage(safePage + 1)}
               >
                 <ChevronRight className="size-5" />
               </Button>
