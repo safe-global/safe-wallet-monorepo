@@ -51,6 +51,10 @@ export const WcRejectOnBack: React.FC<Props> = ({ safeTxHash }) => {
       // The /propose mutation is in flight — the draft still exists, but a reject here
       // would race the propose-fulfilled success response. The flag is cleared again if
       // the propose fails (draft retained), so a later back-out still rejects.
+      // Known limitation: if the user backs out DURING the in-flight window and the
+      // propose then fails, beforeRemove has already fired and won't again — the dApp
+      // only resolves via the WC request timeout. Accepted: the alternative (rejecting
+      // here) would race a successful propose far more often than this edge occurs.
       if (outstanding.proposing) {
         return
       }
