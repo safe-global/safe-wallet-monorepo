@@ -188,7 +188,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ overflow: 'visible', py: 2 }}>
-            <Typography mb={2}>Invite a member by email, wallet address or ENS name.</Typography>
+            <Typography mb={2}>Invite a member by email or wallet address.</Typography>
 
             <Stack spacing={3}>
               <MemberInfoForm />
