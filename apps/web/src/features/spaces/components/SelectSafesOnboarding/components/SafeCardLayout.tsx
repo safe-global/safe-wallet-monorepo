@@ -1,7 +1,7 @@
 import type { SafeItem } from '@/hooks/safes'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Checkbox } from '@/components/ui/checkbox'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
+import { AccountItem } from '@/features/myAccounts'
 import Identicon from '@/components/common/Identicon'
 import { Badge } from '@/components/ui/badge'
 import { TriangleAlert } from 'lucide-react'

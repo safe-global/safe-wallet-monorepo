@@ -1,9 +1,9 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import { FormProvider, useForm } from 'react-hook-form'
 import type { AllSafeItems, MultiChainSafeItem, SafeItem } from '@/hooks/safes'
-import SelectAllToggle from '@/features/spaces/components/SelectAllToggle/SelectAllToggle'
-import { useSelectAll } from '@/features/spaces/hooks/useSelectAll'
-import type { AddAccountsFormValues } from '@/features/spaces/hooks/useSelectAll.types'
+import SelectAllToggle from '../../SelectAllToggle/SelectAllToggle'
+import { useSelectAll } from '../../../hooks/useSelectAll'
+import type { AddAccountsFormValues } from '../../../hooks/useSelectAll.types'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 
 jest.mock('@/features/spaces/constants', () => ({

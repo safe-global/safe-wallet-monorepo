@@ -30,7 +30,7 @@ import { useUpdateBatch } from '@/features/batching'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useLoadFeature } from '@/features/__core__'
 import { GTFFeature } from '@/features/gtf'
-import { mergeGtfFeeParams } from '@/features/gtf/services/mergeGtfFeeParams'
+import { mergeGtfFeeParams } from '@/features/gtf/services'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useAppDispatch } from '@/store'
 

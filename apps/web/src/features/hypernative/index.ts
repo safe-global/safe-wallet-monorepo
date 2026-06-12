@@ -52,7 +52,10 @@ export { useIsHypernativeGuard } from './hooks/useIsHypernativeGuard'
 export type { HypernativeGuardCheckResult } from './hooks/useIsHypernativeGuard'
 
 // Feature flag hooks
-export { useIsHypernativeFeature as useIsHypernativeFeatureEnabled } from './hooks/useIsHypernativeFeature'
+export {
+  useIsHypernativeFeature,
+  useIsHypernativeFeature as useIsHypernativeFeatureEnabled,
+} from './hooks/useIsHypernativeFeature'
 export { useIsHypernativeQueueScanFeature } from './hooks/useIsHypernativeQueueScanFeature'
 
 // Assessment-related hooks
@@ -76,6 +79,15 @@ export { HnDashboardBannerWithNoBalanceCheck } from './components/HnDashboardBan
 // Queue assessment components (used by TxSummary, queue page)
 export { HnQueueAssessment } from './components/HnQueueAssessment'
 export { HnQueueAssessmentProvider } from './components/HnQueueAssessmentProvider'
+
+// Header tooltip component (used by sidebar)
+export { SafeHeaderHnTooltip } from './components/SafeHeaderHnTooltip'
+
+// Analysis overflow row (used by safe-shield ThreatAnalysis)
+export { HnViewMoreOnHypernativeRow } from './components/HnViewMoreOnHypernativeRow'
+
+// Signup flow component (used by spaces SecurityHub)
+export { HnSignupFlow } from './components/HnSignupFlow'
 
 // OAuth config (used by oauth-callback page)
 export { HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from './config/oauth'

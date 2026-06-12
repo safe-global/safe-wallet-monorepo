@@ -6,7 +6,7 @@ import SpaceChainSelector from './SpaceChainSelector'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import type { ChainSelectorBlockProps } from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
+import type { ChainSelectorBlockProps } from '@/features/spaces'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),

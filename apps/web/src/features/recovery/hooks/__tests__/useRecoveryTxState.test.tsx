@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 
 import { useRecoveryTxState } from '../useRecoveryTxState'
 import { renderHook } from '@/tests/test-utils'
-import store from '@/features/recovery/components/RecoveryContext'
+import store from '../../components/RecoveryContext'
 
 describe('useRecoveryTxState', () => {
   beforeEach(() => {
