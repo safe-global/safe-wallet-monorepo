@@ -1,11 +1,9 @@
 import { useState, type MouseEvent } from 'react'
 import classnames from 'classnames'
 import type { SelectableMultiChainSafe } from './useTrustedSafesModal.types'
-import { useMultiAccountItemData } from '@/features/myAccounts/hooks/useMultiAccountItemData'
-import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
+import { useMultiAccountItemData, useSafeItemData, AccountItem } from '@/features/myAccounts'
 import SimilarityWarning from './SimilarityWarning'
-import css from '@/features/myAccounts/components/AccountItems/styles.module.css'
+import css from './styles.module.css'
 
 interface MultiChainSelectionItemProps {
   multiSafe: SelectableMultiChainSafe

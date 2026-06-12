@@ -1,7 +1,6 @@
 import type { MouseEvent } from 'react'
 import type { SelectableSafe } from './useTrustedSafesModal.types'
-import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
+import { useSafeItemData, AccountItem } from '@/features/myAccounts'
 import SimilarityWarning from './SimilarityWarning'
 
 interface TrustedSafesItemProps {
