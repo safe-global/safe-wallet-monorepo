@@ -259,7 +259,8 @@ describe('AddressBookInput', () => {
 
     // should display name of address as well as address
     await waitFor(() => expect(utils.getByText('ValidAddress', { exact: false })).toBeDefined())
-    await waitFor(() => expect(utils.getByText(validAddress, { exact: false })).toBeDefined())
+    // The address is split across elements by the bold 4-byte highlighting
+    await waitFor(() => expect(utils.getByTestId('address-book-recipient')).toHaveTextContent(validAddress))
   })
 
   it('should offer to add unknown addresses if canAdd is true', async () => {

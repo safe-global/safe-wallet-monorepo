@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles'
 import { HardDrive } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import HighlightedAddress from '@/components/common/HighlightedAddress'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 import { formatExactTime, formatRelativeTime, getProvenanceLine, type RecipientContact } from './provenance'
@@ -40,16 +40,7 @@ const RecipientOption = ({
         <Tooltip title={isSmallScreen ? contact.address : ''} placement="top">
           <Typography variant="caption" component="div" className={css.optionAddress}>
             {prefix ? <b>{prefix}:</b> : null}
-            {isSmallScreen ? (
-              shortenAddress(contact.address)
-            ) : (
-              <>
-                {contact.address.slice(0, 2)}
-                <b>{contact.address.slice(2, 6)}</b>
-                {contact.address.slice(6, -4)}
-                <b>{contact.address.slice(-4)}</b>
-              </>
-            )}
+            <HighlightedAddress address={contact.address} shorten={isSmallScreen} />
           </Typography>
         </Tooltip>
 

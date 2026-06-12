@@ -23,6 +23,7 @@ const AddressInputReadOnly = ({
             chainId={chainId}
             showPrefix={showPrefix}
             avatarSize={32}
+            highlight4bytes
           />
         </Typography>
       </InputAdornment>

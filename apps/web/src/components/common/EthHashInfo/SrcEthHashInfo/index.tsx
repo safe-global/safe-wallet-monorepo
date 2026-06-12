@@ -10,6 +10,7 @@ import CopyAddressButton from '../../CopyAddressButton'
 import ExplorerButton, { type ExplorerButtonProps } from '../../ExplorerButton'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import ImageFallback from '../../ImageFallback'
+import HighlightedAddress from '../../HighlightedAddress'
 import css from './styles.module.css'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 
@@ -74,21 +75,19 @@ const SrcEthHashInfo = ({
       }
     : undefined
 
-  const highlightedAddress = highlight4bytes ? (
-    <>
-      {address.slice(0, 2)}
-      <b>{address.slice(2, 6)}</b>
-      {address.slice(6, -4)}
-      <b>{address.slice(-4)}</b>
-    </>
-  ) : (
-    address
-  )
-
+  const isShortened = shortAddress || isMobile
   const addressElement = (
     <>
       {showPrefix && shouldPrefix && prefix && <b>{prefix}:</b>}
-      <span>{shortAddress || isMobile ? shortenAddress(address) : highlightedAddress}</span>
+      <span>
+        {highlight4bytes ? (
+          <HighlightedAddress address={address} shorten={isShortened} />
+        ) : isShortened ? (
+          shortenAddress(address)
+        ) : (
+          address
+        )}
+      </span>
     </>
   )
 

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useMediaQuery } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
@@ -28,7 +27,8 @@ export type AddressBookEntry = SpaceAddressBookItemDto & {
 function AddedBy({ createdBy, memberName }: { createdBy: string; memberName?: string }) {
   if (memberName) {
     return (
-      <span className="inline-flex items-center gap-1.5">
+      // `flex` (not `inline-flex`) so the row is capped at the cell width and the name can truncate
+      <span className="flex min-w-0 items-center gap-1.5" title={memberName}>
         <InitialsAvatar name={memberName} size="xsmall" rounded />
         <span className="min-w-0 truncate text-sm">{memberName}</span>
       </span>
@@ -61,8 +61,8 @@ function SpaceAddressBookTable({
 }: SpaceAddressBookTableProps) {
   const [page, setPage] = useState(0)
   const resolveMemberName = useMemberNameResolver()
-  const theme = useTheme()
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'))
+  // Shorten addresses well before the full hash starts getting CSS-ellipsized by the fixed column
+  const shortenAddresses = useMediaQuery('(max-width: 1600px)')
 
   useEffect(() => {
     setPage(0)
@@ -110,7 +110,7 @@ function SpaceAddressBookTable({
                 <div className="text-[0.8em] font-mono">
                   <EthHashInfo
                     address={entry.address}
-                    shortAddress={isSmallScreen}
+                    shortAddress={shortenAddresses}
                     showPrefix={false}
                     showName={false}
                     highlight4bytes
