@@ -141,7 +141,7 @@ yarn workspace @safe-global/web dev              # local dev server (or set PLAY
 yarn workspace @safe-global/web pw:oneshot:record
 ```
 
-CI records the clickthrough against the PR preview and posts the GIF as a PR comment automatically — do NOT attach a video or paste a URL into the PR. The suite is temporary (pruned, or promoted to `e2e/tests/regression/` once stable). See [e2e/docs/README.md](e2e/docs/README.md#one-shot-clickthroughs).
+CI records **only the one-shot specs the PR adds or modifies** against the PR preview and posts the GIF as a PR comment automatically — do NOT attach a video or paste a URL into the PR. The suite is temporary (pruned, or promoted to `e2e/tests/regression/` once stable). See [e2e/docs/README.md](e2e/docs/README.md#one-shot-clickthroughs).
 
 One-shots can also drive a connected wallet + SiWE via the `walletPage`/`credentials` fixtures (see [e2e/docs/README.md](e2e/docs/README.md#wallet-connected-one-shots)).
 
