@@ -386,4 +386,26 @@ describe('AddressBookInput', () => {
     expect(utils.getByText('Saved on this device')).toBeInTheDocument()
     expect(utils.queryByText('Contacts of', { exact: false })).not.toBeInTheDocument()
   })
+
+  it('should show local and space contacts under separate group headers with their counts', async () => {
+    const spaceContact = spaceContactBuilder({ name: 'Server Contact' })
+    mockUseGetSpaceAddressBook.mockReturnValue([spaceContact])
+
+    const { input, utils } = setup('', {
+      [checksumAddress(faker.finance.ethereumAddress())]: 'Browser Contact',
+    })
+
+    act(() => {
+      fireEvent.mouseDown(input)
+      fireEvent.mouseUp(input)
+    })
+
+    await waitFor(() => expect(utils.getAllByTestId('contact-group-header')).toHaveLength(2))
+
+    const headers = utils.getAllByTestId('contact-group-header').map((header) => header.textContent)
+    expect(headers.find((text) => text?.includes('Local contacts'))).toContain('1')
+    expect(headers.find((text) => text?.includes('Contacts of'))).toContain('1')
+    expect(utils.getByText('Browser Contact')).toBeInTheDocument()
+    expect(utils.getByText('Server Contact')).toBeInTheDocument()
+  })
 })
