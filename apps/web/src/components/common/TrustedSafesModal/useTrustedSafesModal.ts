@@ -9,9 +9,7 @@ import useAllSafes from '@/hooks/safes/useAllSafes'
 import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
 import type { SelectableSafe, SelectableMultiChainSafe, SelectableItem } from './useTrustedSafesModal.types'
 
-/**
- * Collect all pinned addresses from addedSafes state (normalized to lowercase)
- */
+// Pinned addresses across all chains, normalized to lowercase
 const collectPinnedAddresses = (addedSafes: Record<string, Record<string, unknown>>): Set<string> => {
   const pinnedAddresses = new Set<string>()
   for (const chainSafes of Object.values(addedSafes)) {
@@ -22,9 +20,6 @@ const collectPinnedAddresses = (addedSafes: Record<string, Record<string, unknow
   return pinnedAddresses
 }
 
-/**
- * Build the notification payload based on pin/unpin counts
- */
 const getSubmitNotification = (
   pinnedCount: number,
   unpinnedCount: number,
@@ -90,15 +85,6 @@ export interface UseTrustedSafesModalReturn {
   setSearchQuery: (query: string) => void
 }
 
-/**
- * Hook for managing the safe selection modal state
- *
- * Handles:
- * - Opening/closing modal
- * - Selecting/deselecting safes
- * - Similarity detection and confirmation flow
- * - Submitting selection to pin safes
- */
 const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
   const dispatch = useAppDispatch()
   const [isOpen, setIsOpen] = useState(false)
@@ -107,34 +93,27 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
   const [pendingSelectAllConfirmation, setPendingSelectAllConfirmation] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Get all safes user can access (flat list for submit logic)
   const allSafes = useAllSafes()
-  // Get safes grouped by address (for display)
   const { allMultiChainSafes, allSingleSafes } = useAllSafesGrouped()
   const addedSafes = useAppSelector(selectAllAddedSafes)
 
-  // Get addresses for similarity detection
   const addresses = useMemo(() => {
     return allSafes?.map((safe) => safe.address) ?? []
   }, [allSafes])
 
-  // Run similarity detection - flags all addresses that look similar to each other
   const similarityResult = useMemo(() => detectSimilarAddresses(addresses), [addresses])
 
-  // Build selectable items list (multichain groups + single safes)
   const availableItems = useMemo<SelectableItem[]>(() => {
     if (!allMultiChainSafes || !allSingleSafes) return []
 
     const items: SelectableItem[] = []
 
-    // Helper to check if address matches search
     const matchesSearch = (address: string, name?: string): boolean => {
       if (!searchQuery) return true
       const query = searchQuery.toLowerCase()
       return address.toLowerCase().includes(query) || (name ? name.toLowerCase().includes(query) : false)
     }
 
-    // Add multichain safes (grouped by address)
     for (const multiSafe of allMultiChainSafes) {
       if (!matchesSearch(multiSafe.address, multiSafe.name)) continue
 
@@ -142,7 +121,6 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
       const normalizedAddress = multiSafe.address.toLowerCase()
       const isSelected = selectedAddresses.has(normalizedAddress)
 
-      // Build child safes with selection state
       const selectableSafes: SelectableSafe[] = multiSafe.safes.map((safe) => ({
         ...safe,
         isPinned: Boolean(addedSafes[safe.chainId]?.[safe.address]),
@@ -150,7 +128,6 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
         similarityGroup: group?.bucketKey,
       }))
 
-      // Check if any child is pinned
       const isPinned = selectableSafes.some((s) => s.isPinned)
 
       items.push({
@@ -165,7 +142,6 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
       } as SelectableMultiChainSafe)
     }
 
-    // Add single-chain safes
     for (const safe of allSingleSafes) {
       if (!matchesSearch(safe.address, safe.name)) continue
 
@@ -195,42 +171,36 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     })
   }, [allSafes, selectedAddresses, addedSafes])
 
-  // Get items with similarity warnings that would be selected by "Select All"
   const similarAddressesForSelectAll = useMemo(() => {
     return availableItems.filter((item) => item.similarityGroup)
   }, [availableItems])
 
-  // Addresses of the currently visible (search-filtered) items, normalized to lowercase
+  // Addresses of the currently visible (search-filtered) items; selection itself stays full-list
   const visibleAddresses = useMemo(() => {
     return availableItems.map((item) => item.address.toLowerCase())
   }, [availableItems])
 
-  // Number of currently visible (search-filtered) safes, for counter display
   const totalSafesCount = visibleAddresses.length
 
-  // Number of visible safes that are currently selected
   const selectedCount = useMemo(() => {
     return visibleAddresses.filter((address) => selectedAddresses.has(address)).length
   }, [visibleAddresses, selectedAddresses])
 
-  // All visible safes are selected
   const allSelected = totalSafesCount > 0 && selectedCount === totalSafesCount
 
-  // Toggle selection for an address
-  // Uses functional state update to check current selection state without dependency on selectedAddresses
   const toggleSelection = useCallback(
     (address: string) => {
       const normalizedAddress = address.toLowerCase()
       const isFlagged = similarityResult.isFlagged(address)
 
-      // Use functional update to read current state without adding dependency
+      // Functional update so the callback doesn't depend on selectedAddresses
       setSelectedAddresses((prev) => {
         const isCurrentlySelected = prev.has(normalizedAddress)
 
-        // If trying to select a flagged address, require confirmation
+        // Selecting a flagged address needs explicit confirmation first
         if (!isCurrentlySelected && isFlagged) {
           setPendingConfirmation(normalizedAddress)
-          return prev // No change yet
+          return prev
         }
 
         const next = new Set(prev)
@@ -245,7 +215,6 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     [similarityResult],
   )
 
-  // Confirm selection of a similar address
   const confirmSimilarAddress = useCallback(() => {
     if (pendingConfirmation) {
       setSelectedAddresses((prev) => new Set([...prev, pendingConfirmation]))
@@ -254,17 +223,14 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     }
   }, [pendingConfirmation])
 
-  // Cancel selection of a similar address
   const cancelSimilarAddress = useCallback(() => {
     setPendingConfirmation(null)
   }, [])
 
-  // Select all currently visible (search-filtered) safes
-  // (prompts for confirmation if any visible item has a similarity warning)
+  // Select All acts on the visible (search-filtered) safes only; flagged ones are deferred
+  // to a confirmation dialog rather than selected directly.
   const selectAll = useCallback(() => {
-    // Check if there are any similar addresses that would be selected
     if (similarAddressesForSelectAll.length > 0) {
-      // First add only the visible non-similar addresses to the current selection
       setSelectedAddresses((prev) => {
         const next = new Set(prev)
         for (const item of availableItems) {
@@ -272,28 +238,24 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
         }
         return next
       })
-      // Then show confirmation dialog for similar addresses
       setPendingSelectAllConfirmation(true)
       return
     }
 
-    // No similar addresses, select all visible directly
     setSelectedAddresses((prev) => new Set([...prev, ...visibleAddresses]))
   }, [availableItems, similarAddressesForSelectAll, similarityResult, visibleAddresses])
 
-  // Confirm selecting all visible safes including similar addresses
   const confirmSelectAll = useCallback(() => {
     setSelectedAddresses((prev) => new Set([...prev, ...visibleAddresses]))
     setPendingSelectAllConfirmation(false)
     trackEvent({ ...OVERVIEW_EVENTS.TRUSTED_SAFES_SIMILAR_ADDRESS_CONFIRM, label: 'select_all' })
   }, [visibleAddresses])
 
-  // Cancel selecting similar addresses (keeps only non-similar selected)
   const cancelSelectAll = useCallback(() => {
     setPendingSelectAllConfirmation(false)
   }, [])
 
-  // Deselect all currently visible (search-filtered) safes
+  // Deselect acts on the visible safes only, leaving selections outside the current filter intact
   const deselectAll = useCallback(() => {
     setSelectedAddresses((prev) => {
       const next = new Set(prev)
@@ -302,7 +264,6 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     })
   }, [visibleAddresses])
 
-  // Submit the selection to pin/unpin safes
   const submitSelection = useCallback(() => {
     if (!allSafes) return
 
@@ -357,14 +318,13 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     setSearchQuery('')
   }, [allSafes, selectedAddresses, addedSafes, dispatch])
 
-  // Open modal - pre-selects only already pinned safes
+  // Pre-selects the already-pinned safes so the modal opens reflecting current state
   const open = useCallback(() => {
     setSelectedAddresses(collectPinnedAddresses(addedSafes))
     setIsOpen(true)
     trackEvent(OVERVIEW_EVENTS.OPEN_TRUSTED_SAFES_MODAL)
   }, [addedSafes])
 
-  // Close modal and reset state
   const close = useCallback(() => {
     setIsOpen(false)
     setPendingConfirmation(null)

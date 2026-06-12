@@ -69,7 +69,6 @@ const AccountsList = ({
         </Typography>
       )}
 
-      {/* Safe selection modal - only way to manage safes */}
       <TrustedSafesModal modal={modal} />
     </>
   )
