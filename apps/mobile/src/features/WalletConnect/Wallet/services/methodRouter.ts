@@ -36,6 +36,22 @@ const crossNamespaceError = (id: number) => formatJsonRpcError(id, getSdkError('
 
 const unsupportedError = (id: number) => formatJsonRpcError(id, getSdkError('UNSUPPORTED_METHODS').message)
 
+const invalidParamsError = (id: number) => formatJsonRpcError(id, { code: -32602, message: 'Invalid call parameters.' })
+
+// Per-call shape (web's mapping rules), shared by eth_sendTransaction and wallet_sendCalls:
+//   - missing / all-fields-empty → invalid
+//   - no-to + only data → contract deployment (allowed; composeSafeTxDraft routes via CreateCall)
+//   - no-to + (value or no-data) → invalid
+const isValidDappCall = (call: { to?: string; value?: string; data?: string } | undefined): boolean => {
+  if (!call) {
+    return false
+  }
+  if (call.to) {
+    return true
+  }
+  return !call.value && !!call.data
+}
+
 // Scope (WA-2321): the transaction-request flow only. Read-only RPC passthrough and the
 // EIP-5792 capabilities / getCallsStatus / showCallsStatus surface (plus
 // wallet_switchEthereumChain) are wired in WA-2322 — they slot in as extra branches here
@@ -94,9 +110,15 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     if (chainId !== `${NS}${activeChain.chainId}`) {
       return formatJsonRpcError(id, getSdkError('UNSUPPORTED_CHAINS'))
     }
-    // wallet_sendCalls — validate the bundle envelope up front (mirrors apps/web/.../
-    // safe-wallet-provider/index.ts wallet_sendCalls). chainId / from mismatches and
-    // malformed calls fail synchronously rather than burning a sheet + compose pass.
+    // Validate the call shape(s) up front (mirrors apps/web/.../safe-wallet-provider/index.ts
+    // wallet_sendCalls). Malformed requests fail synchronously with -32602 rather than
+    // burning a sheet + compose pass that can only end in an opaque toast.
+    if (method === 'eth_sendTransaction') {
+      const [tx] = rpcParams as [{ to?: string; value?: string; data?: string } | undefined]
+      if (!isValidDappCall(tx)) {
+        return invalidParamsError(id)
+      }
+    }
     if (method === 'wallet_sendCalls') {
       const [bundle] = rpcParams as [
         | {
@@ -107,7 +129,7 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
         | undefined,
       ]
       if (!bundle) {
-        return formatJsonRpcError(id, { code: -32602, message: 'Invalid call parameters.' })
+        return invalidParamsError(id)
       }
       const expectedChainHex = chainIdToHex(activeChain.chainId)
       if (bundle.chainId !== expectedChainHex) {
@@ -120,17 +142,9 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
       if (!sameAddress(bundle.from, activeSafe.address.value)) {
         return formatJsonRpcError(id, { code: -32602, message: 'Invalid from address' })
       }
-      // Per-call shape (web's mapping rules):
-      //   - all-fields-empty → invalid
-      //   - no-to + only data → contract deployment (allowed; composeSafeTxDraft routes via CreateCall)
-      //   - no-to + (value or no-data) → invalid
-      for (const call of bundle.calls ?? []) {
-        if (!call.to) {
-          const isDeployment = !call.value && !!call.data
-          if (!isDeployment) {
-            return formatJsonRpcError(id, { code: -32602, message: 'Invalid call parameters.' })
-          }
-        }
+      // An empty bundle would only throw later inside composeSafeTxDraft — reject it here.
+      if (!bundle.calls?.length || !bundle.calls.every(isValidDappCall)) {
+        return invalidParamsError(id)
       }
     }
     return { id, jsonrpc: '2.0', result: DEFERRED_RESULT } as unknown as RoutedResponse
