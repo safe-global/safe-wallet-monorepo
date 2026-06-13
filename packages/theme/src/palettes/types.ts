@@ -67,17 +67,6 @@ export interface ColorPalette {
     main: string
     background: string
   }
-  /**
-   * SecurityHub score ramp colours that have no semantic equivalent in the base palette.
-   * `review` (yellow) and `good` (lime) each pair a vivid fill with a readable `*Text` shade.
-   * The ramp's other tiers reuse `success` (green), `warning` (orange) and `error` (red).
-   */
-  score: {
-    good: string
-    goodText: string
-    review: string
-    reviewText: string
-  }
   background: {
     default: string
     main: string

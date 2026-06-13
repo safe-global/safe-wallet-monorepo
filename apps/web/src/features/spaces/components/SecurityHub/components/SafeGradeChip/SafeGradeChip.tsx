@@ -18,7 +18,7 @@ export const SAFE_GRADE_LABEL: Record<SafeGrade, string> = {
  * the soft `error-background` accent, so Critical labels read the same red everywhere in
  * the Security Hub.
  */
-export const GRADE_CHIP_STYLES: Record<SafeGrade, { pill: string; dot: string }> = {
+const GRADE_CHIP_STYLES: Record<SafeGrade, { pill: string; dot: string }> = {
   critical: {
     pill: 'bg-[var(--color-error-background)] text-[var(--color-error-main)]',
     dot: 'bg-[var(--color-error-main)]',
