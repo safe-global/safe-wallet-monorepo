@@ -10,7 +10,7 @@ import { cn } from '@/utils/cn'
 import StatusCell from '../StatusCell/StatusCell'
 import { BalanceCell, ScoreCell } from './cells'
 import { CARD_ROW_CLASS, CELL_BASE, GRID_COLS, HIDE_BALANCE, ROW_VARIANTS } from './constants'
-import { getNonPassingCount, type GetSafeSecurityHref, type RowSecurity } from './utils'
+import { countChecks, getStatusCount, type GetSafeSecurityHref, type RowSecurity } from './utils'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
 
 export type SingleSafeRowProps = {
@@ -45,7 +45,7 @@ const SingleSafeRow = ({
   const results = scanResults[key]
   const summary = results ? computeSummary(results) : null
   const grade = results ? getSafeGrade(results) : null
-  const statusCount = getNonPassingCount(results)
+  const statusCount = getStatusCount(grade, countChecks(results))
   const isSelected = selectedSafe?.address === safe.address && selectedSafe?.chainId === safe.chainId
   const isScanning = scanningKeys?.has(key)
   const safeHref = getSafeSecurityHref(safe.address, safe.chainId)

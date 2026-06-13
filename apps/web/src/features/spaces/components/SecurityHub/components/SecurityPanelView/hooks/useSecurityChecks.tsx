@@ -13,7 +13,7 @@ import {
   sortBySeverity,
   type SectionRow,
 } from '../primitives'
-import { GRADE_TONE, resolveStatusTone, SeverityIcon, type SeverityTone } from '../../SeverityIcon/SeverityIcon'
+import { resolveStatusTone, SeverityIcon, type SeverityTone } from '../../SeverityIcon/SeverityIcon'
 import { VULNERABLE_MODULE_INTRO, ZODIAC_VULNERABILITY_CTA, getModuleRowContent } from '../utils'
 
 export type FailingRow = { key: string; node: ReactNode; grade: SafeGrade }
@@ -32,26 +32,22 @@ const SEVERITY_TO_SAFE_GRADE: Record<SecurityGrade, SafeGrade> = {
   Low: 'needs_attention',
 }
 
-/** Accent-bar + icon colour per grade, matching the SafeGrade chip's text colour. */
+/** Accent-bar + icon colour per grade, matching the SafeGrade chip's dot. */
 const GRADE_ROW_COLOR: Record<SafeGrade, string> = {
   critical: 'error.main',
   at_risk: 'warning.main',
-  needs_attention: 'review.main',
+  needs_attention: 'score.review',
   passing: 'success.main',
 }
 
 /**
  * Tone for a check row's accent bar + leading icon. Failing rows take their grade group's
  * colour (so the bar/icon match the section chip); passing / N-A / inconclusive rows keep
- * their neutral status tone. `needs_attention` rows also swap their per-status glyph for
- * the grade's info icon — so a partial Medium check reads as info, not a warning triangle.
+ * their neutral status tone. The glyph shape always comes from the status tone.
  */
 const rowTone = (status: ScanResult['status'], severity: SecurityGrade): SeverityTone => {
   const base = resolveStatusTone(status, severity)
-  if (isPassingStatus(status)) return base
-  const grade = SEVERITY_TO_SAFE_GRADE[severity]
-  const Icon = grade === 'needs_attention' ? GRADE_TONE.needs_attention.Icon : base.Icon
-  return { Icon, color: GRADE_ROW_COLOR[grade] }
+  return isPassingStatus(status) ? base : { ...base, color: GRADE_ROW_COLOR[SEVERITY_TO_SAFE_GRADE[severity]] }
 }
 
 /**

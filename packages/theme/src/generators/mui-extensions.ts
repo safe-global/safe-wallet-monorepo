@@ -12,7 +12,7 @@ declare module '@mui/material/styles' {
     logo: Palette['primary']
     backdrop: Palette['primary']
     static: Palette['primary']
-    review: { main: string; background: string }
+    score: { good: string; goodText: string; review: string; reviewText: string }
   }
 
   interface PaletteOptions {
@@ -20,7 +20,7 @@ declare module '@mui/material/styles' {
     logo: PaletteOptions['primary']
     backdrop: PaletteOptions['primary']
     static: PaletteOptions['primary']
-    review?: { main: string; background: string }
+    score?: { good: string; goodText: string; review: string; reviewText: string }
   }
 
   interface TypeBackground {

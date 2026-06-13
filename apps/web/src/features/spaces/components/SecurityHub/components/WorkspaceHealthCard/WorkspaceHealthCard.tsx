@@ -1,6 +1,5 @@
 import { type ReactElement, useMemo } from 'react'
 import { RefreshCw } from 'lucide-react'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
@@ -142,10 +141,7 @@ const WorkspaceHealthCard = ({
 
       <div className="flex min-w-0 flex-1 justify-between">
         <div className="flex flex-col gap-2">
-          <Typography variant="h4">Your security score</Typography>
-          <Typography variant="paragraph-small" color="muted">
-            Overview of security checks across your accounts
-          </Typography>
+          <Typography variant="h4">{band.label}</Typography>
 
           <div className="flex flex-wrap gap-2">
             {FILTER_GRADES.filter((grade) => gradeCounts[grade] > 0).map((grade) => (
@@ -153,7 +149,7 @@ const WorkspaceHealthCard = ({
                 key={grade}
                 grade={grade}
                 active={activeFilter === grade}
-                label={`${SAFE_GRADE_LABEL[grade]} · ${gradeCounts[grade]} account${maybePlural(gradeCounts[grade])}`}
+                label={`${gradeCounts[grade]} ${SAFE_GRADE_LABEL[grade]}`}
                 onClick={() => onFilterChange(grade)}
               />
             ))}
@@ -175,7 +171,7 @@ const WorkspaceHealthCard = ({
               </Button>
 
               <Typography variant="paragraph-mini" color="muted">
-                Last scanned: {security.$isReady ? security.formatTimestamp(lastScannedAt) : ''}
+                Last scanned {security.$isReady ? security.formatTimestamp(lastScannedAt) : ''}
               </Typography>
             </div>
           )}
