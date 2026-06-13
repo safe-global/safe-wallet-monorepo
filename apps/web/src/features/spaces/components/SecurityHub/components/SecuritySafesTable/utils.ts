@@ -25,32 +25,57 @@ export type GetSafeSecurityHref = (
   chainId: string,
 ) => { pathname: string; query: { safe: string } } | undefined
 
+/** Tally of non-passing checks for the Checks column. */
+export type CheckCounts = { failed: number; warnings: number }
+
 /**
- * Total non-passing applicable checks for a single Safe's scan results — the same
- * count the panel header uses (`applicableCount − passing`), so the column and panel
- * reconcile by construction. Excludes `not_applicable` and `inconclusive` checks.
+ * Count failed (`issue`) and warning (`partial`) checks in a single Safe's scan
+ * results. Mirrors the status→severity mapping used by WorkspaceHealthCard so the
+ * column stays consistent with the header badges.
  */
-export const getNonPassingCount = (results: Record<string, ScanResult> | undefined): number => {
-  if (!results) return 0
-  let count = 0
-  for (const result of Object.values(results)) {
-    if (result.status === 'not_applicable' || result.status === 'inconclusive') continue
-    if (result.status !== 'clear') count++
+export const countChecks = (results: Record<string, ScanResult> | undefined): CheckCounts => {
+  let failed = 0
+  let warnings = 0
+  if (results) {
+    for (const result of Object.values(results)) {
+      if (result.status === 'issue') failed++
+      else if (result.status === 'partial') warnings++
+    }
   }
-  return count
+  return { failed, warnings }
 }
 
-/** Sum non-passing checks across all of a multichain Safe's chain entries. */
-export const getAggregateNonPassingCount = (
+/** Sum the failed/warning checks across all of a multichain Safe's chain entries. */
+export const getAggregateCheckCounts = (
   safe: SpaceSafeEntry,
   scanResults: Record<string, Record<string, ScanResult>>,
   scanKey: SecurityContract['scanKey'],
-): number => {
-  let total = 0
+): CheckCounts => {
+  let failed = 0
+  let warnings = 0
   for (const chain of safe.chainEntries) {
-    total += getNonPassingCount(scanResults[scanKey(safe.address, chain.chainId)])
+    const counts = countChecks(scanResults[scanKey(safe.address, chain.chainId)])
+    failed += counts.failed
+    warnings += counts.warnings
   }
-  return total
+  return { failed, warnings }
+}
+
+/**
+ * Number of checks driving a Safe's grade — shown beside the grade in the Status column.
+ * `at_risk`/`critical` count failing checks, `needs_attention` counts warnings, and
+ * `passing` has no count (the chip just reads "Healthy").
+ */
+export const getStatusCount = (grade: SafeGrade | null, counts: CheckCounts): number | undefined => {
+  switch (grade) {
+    case 'critical':
+    case 'at_risk':
+      return counts.failed
+    case 'needs_attention':
+      return counts.warnings
+    default:
+      return undefined
+  }
 }
 
 /**

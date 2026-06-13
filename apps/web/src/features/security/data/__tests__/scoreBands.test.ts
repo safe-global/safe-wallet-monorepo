@@ -5,7 +5,8 @@ describe('scoreBands', () => {
     it('maps each score range to its band', () => {
       expect(getScoreBand(100).band).toBe('healthy')
       expect(getScoreBand(90).band).toBe('healthy')
-      expect(getScoreBand(85).band).toBe('healthy')
+      expect(getScoreBand(89).band).toBe('good')
+      expect(getScoreBand(85).band).toBe('good')
       expect(getScoreBand(84).band).toBe('review')
       expect(getScoreBand(60).band).toBe('review')
       expect(getScoreBand(59).band).toBe('at_risk')
@@ -18,16 +19,16 @@ describe('scoreBands', () => {
       expect(getScoreBand(-10).band).toBe('critical')
     })
 
-    it('returns the chip-aligned ramp colour for the matched band', () => {
+    it('returns the ramp colour for the matched band', () => {
       expect(getScoreBand(95).color).toBe('success.main')
-      expect(getScoreBand(87).color).toBe('success.main')
-      expect(getScoreBand(70).color).toBe('review.main')
+      expect(getScoreBand(87).color).toBe('score.good')
+      expect(getScoreBand(70).color).toBe('score.review')
       expect(getScoreBand(50).color).toBe('warning.main')
       expect(getScoreBand(10).color).toBe('error.main')
     })
 
     describe('hasCriticalIssue clamp', () => {
-      it('caps healthy/review scores at "At risk"', () => {
+      it('caps healthy/good/review scores at "At risk"', () => {
         expect(getScoreBand(100, true).band).toBe('at_risk')
         expect(getScoreBand(87, true).band).toBe('at_risk')
         expect(getScoreBand(70, true).band).toBe('at_risk')

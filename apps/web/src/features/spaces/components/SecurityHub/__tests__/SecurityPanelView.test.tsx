@@ -3,7 +3,7 @@ import { render, screen, fireEvent, within } from '@testing-library/react'
 import { AppRoutes } from '@/config/routes'
 import { createMockContext } from '@/features/security/testing'
 import type { ScanResult } from '@/features/security/types'
-import SecurityChecksSection from '../components/SecurityPanelView/SecurityChecksSection'
+import SecurityPanelView from '../components/SecurityPanelView/SecurityPanelView'
 
 // next/link isn't meaningful in a jsdom render; pass through to a plain anchor.
 jest.mock('next/link', () => {
@@ -64,24 +64,55 @@ const allClearResults: Record<string, ScanResult> = {
 const SAFE_QUERY_PARAM = 'eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'
 
 /**
- * Renders SecurityChecksSection with sensible defaults. Explicitly setting a key
+ * Renders SecurityPanelView with sensible defaults. Explicitly setting a key
  * to `undefined` DOES override the default — use this to test missing-prop cases.
  */
-const renderPanel = (overrides: Partial<React.ComponentProps<typeof SecurityChecksSection>> = {}) => {
-  const defaults: React.ComponentProps<typeof SecurityChecksSection> = {
+const renderPanel = (overrides: Partial<React.ComponentProps<typeof SecurityPanelView>> = {}) => {
+  const defaults: React.ComponentProps<typeof SecurityPanelView> = {
     scanContext: createMockContext(),
     results: allClearResults,
+    isComplete: true,
     safeQueryParam: SAFE_QUERY_PARAM,
   }
-  return render(<SecurityChecksSection {...defaults} {...overrides} />)
+  return render(<SecurityPanelView {...defaults} {...overrides} />)
 }
 
-/** Find the collapsible "Healthy · N" passing-group chip. */
+/** Find the collapsible "Healthy · N" passing-group chip (distinct from the header's "All checks passing."). */
 const getChecksAccordion = () => screen.getByText(/^Healthy · \d+$/)
 
 // ─── tests ────────────────────────────────────────────────────────────────────
 
-describe('SecurityChecksSection', () => {
+describe('SecurityPanelView', () => {
+  describe('loading / empty states', () => {
+    it('renders skeletons when scanContext is null', () => {
+      const { container } = renderPanel({ scanContext: null, results: {}, isComplete: false })
+      expect(container.querySelectorAll('.MuiSkeleton-root').length).toBeGreaterThan(0)
+    })
+
+    it('renders skeletons when no results have arrived and scan is still running', () => {
+      const { container } = renderPanel({ results: {}, isComplete: false })
+      expect(container.querySelectorAll('.MuiSkeleton-root').length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('header', () => {
+    it('renders the score band and "all checks passing" copy when everything clears', () => {
+      renderPanel()
+      expect(screen.getByText('Healthy')).toBeInTheDocument()
+      expect(screen.getByText('All checks passing.')).toBeInTheDocument()
+    })
+
+    it('renders a failure count when checks fail', () => {
+      renderPanel({
+        results: {
+          ...allClearResults,
+          contract_version: mkResult({ status: 'issue', severity: 'High', remediation: 'Update.' }),
+        },
+      })
+      expect(screen.getByText(/\d+ issues? need attention/)).toBeInTheDocument()
+    })
+  })
+
   describe('Security checks bucketing', () => {
     it('surfaces failing checks at the top and shows a passing-accordion summary', () => {
       renderPanel({
