@@ -1,8 +1,9 @@
 import type { ReactElement } from 'react'
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
-import DangerousRoundedIcon from '@mui/icons-material/DangerousRounded'
 import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded'
+import ErrorRoundedIcon from '@mui/icons-material/ErrorRounded'
 import HelpOutlineRoundedIcon from '@mui/icons-material/HelpOutlineRounded'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import RemoveCircleOutlineRoundedIcon from '@mui/icons-material/RemoveCircleOutlineRounded'
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
 import type { SvgIconComponent } from '@mui/icons-material'
@@ -16,10 +17,11 @@ import type { SafeGrade, ScanResult, SecurityGrade } from '@/features/security/t
 export type SeverityTone = { Icon: SvgIconComponent; color: string }
 
 /**
- * The most-severe tone — a filled "dangerous" octagon in the darker error shade. Shared by
- * the `critical` SafeGrade chip and any Critical-severity failing check in the report drawer.
+ * The most-severe tone — a filled rounded error circle (`!`) in the darker error shade.
+ * Shared by the `critical` SafeGrade chip and any Critical-severity failing check in the
+ * report drawer. The filled circle distinguishes Critical from At risk (outlined variant).
  */
-export const CRITICAL_TONE: SeverityTone = { Icon: DangerousRoundedIcon, color: 'error.dark' }
+export const CRITICAL_TONE: SeverityTone = { Icon: ErrorRoundedIcon, color: 'error.dark' }
 
 /** Per-check status tones — drives the leading icon on each row inside the report drawer. */
 export const STATUS_TONE: Record<ScanResult['status'], SeverityTone> = {
@@ -38,13 +40,14 @@ export const resolveStatusTone = (status: ScanResult['status'], severity?: Secur
   status === 'issue' && severity === 'Critical' ? CRITICAL_TONE : STATUS_TONE[status]
 
 /**
- * Per-Safe grade tones — drives the SafeGrade chip icon. Reuses the report drawer's glyphs:
- * passing→clear, needs_attention→partial, at_risk→issue. `critical` gets the shared
- * `CRITICAL_TONE` "dangerous" glyph so it reads as the most severe.
+ * Per-Safe grade tones — drives the SafeGrade chip icon (in stories) and overrides per-check
+ * row icons where the row's grade should dictate the shape (e.g. `needs_attention` rows
+ * always show the rounded info icon, not the per-status triangle). `critical` gets the
+ * shared `CRITICAL_TONE` "dangerous" glyph so it reads as the most severe.
  */
 export const GRADE_TONE: Record<SafeGrade, SeverityTone> = {
   passing: { Icon: CheckCircleOutlineRoundedIcon, color: 'success.main' },
-  needs_attention: { Icon: WarningAmberRoundedIcon, color: 'score.reviewText' },
+  needs_attention: { Icon: InfoOutlinedIcon, color: 'review.main' },
   at_risk: { Icon: ErrorOutlineRoundedIcon, color: 'warning.main' },
   critical: CRITICAL_TONE,
 }

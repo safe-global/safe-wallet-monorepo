@@ -9,7 +9,6 @@ import { useLoadFeature } from '@/features/__core__'
 import { usePanelHeader } from '../../SecurityPanelView/hooks/usePanelHeader'
 import SecurityChecksSection from '../../SecurityPanelView/SecurityChecksSection'
 import { ScoreGauge } from '../../WorkspaceHealthCard/WorkspaceGauge'
-import SafeGradeChip from '../../SafeGradeChip/SafeGradeChip'
 
 type SecurityDrawerChecksProps = {
   scanContext: ScanContext | null
@@ -22,8 +21,8 @@ type SecurityDrawerChecksProps = {
 }
 
 /**
- * "Checks" tab — a score summary card (gauge + grade + scan time + issue count)
- * followed by the existing per-check rows.
+ * "Checks" tab — a score summary card (gauge + issue count + scan time) followed by the
+ * existing per-check rows.
  */
 const SecurityDrawerChecks = ({
   scanContext,
@@ -47,8 +46,8 @@ const SecurityDrawerChecks = ({
   }
 
   const summary = security.computeSummary(results)
-  const grade = security.getSafeGrade(results)
   const issueCount = summary ? summary.applicableCount - summary.passing : 0
+  const title = issueCount === 0 ? 'Healthy' : `${issueCount} issue${maybePlural(issueCount)} found`
 
   return (
     <div className="flex flex-col gap-6">
@@ -57,14 +56,9 @@ const SecurityDrawerChecks = ({
           <ScoreGauge scorePct={header.score} color={header.band.color} size="small" />
 
           <div className="flex min-w-0 flex-col gap-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <SafeGradeChip grade={grade} />
-              <Typography variant="paragraph-mini" color="muted">
-                Scanned {security.formatTimestamp(lastScannedAt ?? undefined)}
-              </Typography>
-            </div>
-            <Typography variant="paragraph-mini">
-              {issueCount === 0 ? 'No issues found' : `${issueCount} issue${maybePlural(issueCount)} found`}
+            <Typography variant="paragraph-bold">{title}</Typography>
+            <Typography variant="paragraph-mini" color="muted">
+              Scanned {security.formatTimestamp(lastScannedAt ?? undefined)}
             </Typography>
           </div>
         </Card>

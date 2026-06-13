@@ -26,7 +26,7 @@ describe('securityScoring', () => {
   describe('getGradeColor', () => {
     it('returns color for each grade', () => {
       expect(getGradeColor('Low')).toBe('success.main')
-      expect(getGradeColor('Medium')).toBe('score.review')
+      expect(getGradeColor('Medium')).toBe('review.main')
       expect(getGradeColor('High')).toBe('warning.main')
       expect(getGradeColor('Critical')).toBe('error.main')
     })

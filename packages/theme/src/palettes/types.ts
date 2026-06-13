@@ -59,6 +59,15 @@ export interface ColorPalette {
     contrastText: string
   }
   /**
+   * "Needs review" tier — yellow-amber chip + per-check accent colour. Used by the Security
+   * Hub `needs_attention` SafeGrade. `main` is the vivid fill (icon/dot/text); `background`
+   * is the soft tint behind chip pills.
+   */
+  review: {
+    main: string
+    background: string
+  }
+  /**
    * SecurityHub score ramp colours that have no semantic equivalent in the base palette.
    * `review` (yellow) and `good` (lime) each pair a vivid fill with a readable `*Text` shade.
    * The ramp's other tiers reuse `success` (green), `warning` (orange) and `error` (red).
