@@ -39,12 +39,16 @@ describe('StatusCell', () => {
       expect(screen.getByText('At risk · 1 issue found')).toBeInTheDocument()
     })
 
-    it('falls back to the Healthy chip if count is 0 even with a non-passing grade (defensive)', () => {
+    it('falls back to the Healthy chip if count is 0 even with a non-passing grade (defensive) and warns in dev', () => {
       // Should never happen in production (computeSummary and getSafeGrade agree), but the
       // guard prevents a nonsense "At risk · 0 issues found" reading if they ever desync.
+      // The dev-only console.warn surfaces the underlying bug instead of silently degrading.
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => {})
       render(<StatusCell grade="at_risk" count={0} />)
       expect(screen.getByLabelText('Healthy')).toBeInTheDocument()
       expect(screen.queryByText(/At risk/)).not.toBeInTheDocument()
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('grade=at_risk but count=0'))
+      warn.mockRestore()
     })
   })
 })

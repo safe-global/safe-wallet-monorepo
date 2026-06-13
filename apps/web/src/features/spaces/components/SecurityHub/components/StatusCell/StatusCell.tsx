@@ -1,4 +1,5 @@
 import { Skeleton, Typography } from '@mui/material'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { SafeGrade } from '@/features/security/types'
 import SafeGradeChip, { SAFE_GRADE_LABEL } from '../SafeGradeChip/SafeGradeChip'
 
@@ -12,7 +13,7 @@ export type StatusCellProps = {
 }
 
 const formatNonPassingLabel = (grade: SafeGrade, count: number): string =>
-  `${SAFE_GRADE_LABEL[grade]} · ${count} issue${count === 1 ? '' : 's'} found`
+  `${SAFE_GRADE_LABEL[grade]} · ${count} issue${maybePlural(count)} found`
 
 const StatusCell = ({ grade, count, isScanning }: StatusCellProps) => {
   if (!grade) {
@@ -29,8 +30,14 @@ const StatusCell = ({ grade, count, isScanning }: StatusCellProps) => {
   // sidebar per-group chips (all lead with the same "Grade · …" template).
   // Defensive: if count is 0 the grade should always be `passing` (computeSummary and
   // getSafeGrade agree). Fall back to the Healthy chip so a desynced caller never produces
-  // a nonsense "Needs review · 0 issues found" reading.
+  // a nonsense "Needs review · 0 issues found" reading — and warn in dev so the underlying
+  // bug surfaces instead of silently degrading.
   const safeCount = count ?? 0
+  if (grade !== 'passing' && safeCount === 0 && process.env.NODE_ENV !== 'production') {
+    console.warn(
+      `StatusCell: grade=${grade} but count=0 — getSafeGrade and the count source disagree. Falling back to Healthy.`,
+    )
+  }
   if (grade === 'passing' || safeCount === 0) {
     return <SafeGradeChip grade="passing" ariaLabel={SAFE_GRADE_LABEL.passing} />
   }

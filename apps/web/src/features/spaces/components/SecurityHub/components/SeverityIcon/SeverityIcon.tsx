@@ -21,7 +21,7 @@ export type SeverityTone = { Icon: SvgIconComponent; color: string }
  * Shared by the `critical` SafeGrade chip and any Critical-severity failing check in the
  * report drawer. The filled circle distinguishes Critical from At risk (outlined variant).
  */
-export const CRITICAL_TONE: SeverityTone = { Icon: ErrorRoundedIcon, color: 'error.dark' }
+export const CRITICAL_TONE: SeverityTone = { Icon: ErrorRoundedIcon, color: 'error.main' }
 
 /** Per-check status tones — drives the leading icon on each row inside the report drawer. */
 export const STATUS_TONE: Record<ScanResult['status'], SeverityTone> = {

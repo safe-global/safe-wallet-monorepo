@@ -10,7 +10,7 @@ exports[`./SeverityIcon.stories AllGrades 1`] = `
     <svg
       aria-hidden="true"
       aria-label="Critical"
-      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-ia47z7-MuiSvgIcon-root"
+      class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-bby4eh-MuiSvgIcon-root"
       data-testid="ErrorRoundedIcon"
       focusable="false"
       role="img"
@@ -88,7 +88,7 @@ exports[`./SeverityIcon.stories CriticalIssue 1`] = `
 >
   <svg
     aria-hidden="true"
-    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-ia47z7-MuiSvgIcon-root"
+    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium mui-style-bby4eh-MuiSvgIcon-root"
     data-testid="ErrorRoundedIcon"
     focusable="false"
     role="img"

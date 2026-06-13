@@ -6,8 +6,8 @@ import { Typography } from '@/components/ui/typography'
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
-import { usePanelHeader } from '../../SecurityPanelView/hooks/usePanelHeader'
-import SecurityChecksSection from '../../SecurityPanelView/SecurityChecksSection'
+import { usePanelHeader } from '../../SecurityChecks/hooks/usePanelHeader'
+import SecurityChecksSection from '../../SecurityChecks/SecurityChecksSection'
 import { ScoreGauge } from '../../WorkspaceHealthCard/WorkspaceGauge'
 
 type SecurityDrawerChecksProps = {
