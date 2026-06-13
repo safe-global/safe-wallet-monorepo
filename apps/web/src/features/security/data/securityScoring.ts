@@ -16,10 +16,12 @@ const matchThreshold = (clearRatio: number) =>
 
 export const getGrade = (clearRatio: number): SecurityGrade => matchThreshold(clearRatio).grade
 
-// Colours follow the SecurityHub score ramp: green → yellow → orange → red.
+// Colours follow the SecurityHub score ramp: green → amber → orange → red.
+// Aligned with the SafeGrade chip palette so the gauge, chips and per-check rows speak
+// one colour language.
 const GRADE_COLORS: Record<SecurityGrade, string> = {
   Low: 'success.main',
-  Medium: 'score.review',
+  Medium: 'review.main',
   High: 'warning.main',
   Critical: 'error.main',
 }

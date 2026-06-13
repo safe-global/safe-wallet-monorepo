@@ -4,7 +4,7 @@
  * panel header and per-Safe score dot, so they all speak one colour language.
  */
 
-export type ScoreBand = 'healthy' | 'good' | 'review' | 'at_risk' | 'critical'
+export type ScoreBand = 'healthy' | 'review' | 'at_risk' | 'critical'
 
 export type ScoreBandDef = {
   band: ScoreBand
@@ -20,30 +20,27 @@ export type ScoreBandDef = {
   description: string
 }
 
-/** Ordered best → worst. Each tier's `min` is inclusive; the ranges are contiguous over 0–100. */
+/**
+ * Ordered best → worst. Each tier's `min` is inclusive; the ranges are contiguous over 0–100.
+ * Colours come from the same palette tokens the SafeGrade chip uses, so the gauge and the
+ * status chips read the same colour language. There's no separate "good" tier — anything at
+ * or above 85 reads as healthy.
+ */
 export const GRADE_RAMP: ScoreBandDef[] = [
   {
     band: 'healthy',
     label: 'Healthy',
-    min: 90,
+    min: 85,
     color: 'success.main',
     background: 'success.background',
     description: 'Your account is well configured.',
   },
   {
-    band: 'good',
-    label: 'Good',
-    min: 85,
-    color: 'score.good',
-    background: 'color-mix(in srgb, var(--color-score-good) 12%, transparent)',
-    description: 'Your account is in good shape, with only minor improvements left.',
-  },
-  {
     band: 'review',
     label: 'Review',
     min: 60,
-    color: 'score.review',
-    background: 'color-mix(in srgb, var(--color-score-review) 12%, transparent)',
+    color: 'review.main',
+    background: 'review.background',
     description: 'Your account has room for improvement.',
   },
   {

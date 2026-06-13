@@ -60,6 +60,10 @@ const lightPalette: ColorPalette = {
     text: '#6C2D19',
     contrastText: '#FF8C00',
   },
+  review: {
+    main: '#d6a100',
+    background: '#FEF3C7',
+  },
   score: {
     good: '#65A30D',
     goodText: '#4D7C0F',

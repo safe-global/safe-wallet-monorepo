@@ -60,6 +60,10 @@ const darkPalette: ColorPalette = {
     text: '#FFE4CB',
     contrastText: '#FF8C00',
   },
+  review: {
+    main: '#d6a100',
+    background: '#2F2A18',
+  },
   score: {
     good: '#A3E635',
     goodText: '#BEF264',

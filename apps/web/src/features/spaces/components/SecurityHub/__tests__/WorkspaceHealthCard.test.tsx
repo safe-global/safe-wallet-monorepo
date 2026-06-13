@@ -118,10 +118,10 @@ describe('WorkspaceHealthCard', () => {
         isScanning={false}
       />,
     )
-    expect(screen.getByText('1 At risk')).toBeInTheDocument()
+    expect(screen.getByText('At risk · 1 account')).toBeInTheDocument()
   })
 
-  it('shows the Healthy band label when every account passes', () => {
+  it('shows a Healthy filter chip with the all-clear safe count when every account passes', () => {
     render(
       <WorkspaceHealthCard
         {...baseProps}
@@ -133,7 +133,7 @@ describe('WorkspaceHealthCard', () => {
         isScanning={false}
       />,
     )
-    expect(screen.getByText('Healthy')).toBeInTheDocument()
+    expect(screen.getByText('Healthy · 2 accounts')).toBeInTheDocument()
   })
 
   it('shows an incomplete-scan note when the last scan was partial and not running', () => {
