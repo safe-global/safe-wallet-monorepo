@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { cn } from '@/utils/cn'
 
 export type DataTableColumn = {
   /** Stable identifier used as the React key for the header cell */
@@ -46,7 +47,7 @@ function PaginatedDataTable<T>({
         <TableHeader>
           <TableRow>
             {columns.map((column) => (
-              <TableHead key={column.id} className={column.className}>
+              <TableHead key={column.id} className={cn('text-muted-foreground', column.className)}>
                 {column.header}
               </TableHead>
             ))}
