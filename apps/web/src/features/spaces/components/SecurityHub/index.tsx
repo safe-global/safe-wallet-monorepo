@@ -36,7 +36,14 @@ const SecurityHub = (): ReactElement => {
   return (
     <Box data-testid="security-hub">
       <Box mb={3} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-        <Typography variant="h1">Security</Typography>
+        <Box>
+          <Typography variant="h1" mb={0.5}>
+            Security
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Overview of security checks across your accounts.
+          </Typography>
+        </Box>
 
         <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
           <SvgIcon
