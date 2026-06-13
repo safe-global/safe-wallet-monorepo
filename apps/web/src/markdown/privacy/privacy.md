@@ -118,7 +118,7 @@ When visiting our Website or using Safe Interfaces, we will collect and process 
 
 2. We also allow you to log-in and to the Safe{Wallet} app via Single-Sign On. For this purpose we process:
 
-   1. Email address (not stored by SafeLabs. See Section 5 for more details), and  
+   1. Email address (not stored by Safe Labs. See Section 5 for more details), and  
    2. User ID linked to the email address.
 
 3. We process personal data when you fill out forms to register for a demo or request more information about new product integrations. Personal data processed include:
