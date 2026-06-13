@@ -1,9 +1,10 @@
-import { Box, Chip, IconButton, Stack, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Box, IconButton, SvgIcon, Tooltip as MuiTooltip } from '@mui/material'
 import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
-import EnhancedTable from '@/components/common/EnhancedTable'
-import tableCss from '@/components/common/EnhancedTable/styles.module.css'
+import { TableCell } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import RenewInviteButton from './RenewInviteButton'
@@ -19,29 +20,13 @@ import {
 import EditMemberDialog from './EditMemberDialog'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
+import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
 
-const headCells = [
-  {
-    id: 'name',
-    label: 'Name',
-    width: '40%',
-  },
-  {
-    id: 'email',
-    label: 'Email',
-    width: '30%',
-  },
-  {
-    id: 'role',
-    label: 'Role',
-    width: '15%',
-  },
-  {
-    id: 'actions',
-    label: '',
-    width: '15%',
-    sticky: true,
-  },
+const columns: DataTableColumn[] = [
+  { id: 'name', header: 'Name', className: 'w-[40%]' },
+  { id: 'email', header: 'Email', className: 'w-[30%]' },
+  { id: 'role', header: 'Role', className: 'w-[15%]' },
+  { id: 'actions', className: 'w-[15%]' },
 ]
 
 const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean }) => {
@@ -49,13 +34,13 @@ const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean
 
   return (
     <>
-      <Tooltip title={disabled ? 'Cannot edit role of last admin' : 'Edit member'} placement="top">
+      <MuiTooltip title={disabled ? 'Cannot edit role of last admin' : 'Edit member'} placement="top">
         <Box component="span">
           <IconButton onClick={() => setOpen(true)} size="small" disabled={disabled}>
             <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
           </IconButton>
         </Box>
-      </Tooltip>
+      </MuiTooltip>
       {open && <EditMemberDialog member={member} handleClose={() => setOpen(false)} />}
     </>
   )
@@ -74,7 +59,7 @@ export const RemoveMemberButton = ({
 
   return (
     <>
-      <Tooltip
+      <MuiTooltip
         title={disabled ? 'Cannot remove last admin' : `Remove ${isInvite ? 'invitation' : 'member'}`}
         placement="top"
       >
@@ -88,7 +73,7 @@ export const RemoveMemberButton = ({
             </IconButton>
           </Track>
         </Box>
-      </Tooltip>
+      </MuiTooltip>
       {openRemoveMemberDialog && (
         <RemoveMemberDialog
           userId={member.user.id}
@@ -105,82 +90,64 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
   const isAdmin = useIsAdmin()
   const adminCount = useAdminCount(members)
 
-  const rows = members.map((member) => {
-    const isLastAdmin = adminCount === 1 && isActiveAdmin(member)
-    const isPendingInvite = member.status === MemberStatus.INVITED
-    const isDeclined = member.status === MemberStatus.DECLINED
-    const isInvite = isPendingInvite || isDeclined
-    const isExpired = isInviteExpired(member)
-    const isDisabled = isAdmin && isLastAdmin && !isInvite
-    const memberEmail = member.user.email
-    // Contract: Email invites can always be renewed (resending the email);
-    // wallet invites are only renewed once they have expired.
-    const canRenew = isPendingInvite && (Boolean(memberEmail) || isExpired)
-
-    return {
-      cells: {
-        name: {
-          rawValue: member.name,
-          content: (
-            <Stack direction="row" alignItems="center" justifyContent="left" gap={1}>
-              <MemberName member={member} />
-              {isDeclined && (
-                <Chip
-                  label="Declined"
-                  size="small"
-                  sx={{ backgroundColor: 'error.light', color: 'static.main', borderRadius: 0.5 }}
-                />
-              )}
-              {isExpired && (
-                <Chip
-                  label="Expired"
-                  size="small"
-                  sx={{ backgroundColor: 'warning.main', color: 'static.main', borderRadius: 0.5 }}
-                />
-              )}
-            </Stack>
-          ),
-        },
-        email: {
-          rawValue: memberEmail,
-          content: memberEmail ? (
-            <Tooltip title={memberEmail} placement="top">
-              <Typography variant="body2" noWrap sx={{ display: 'inline-block', maxWidth: '100%' }}>
-                {memberEmail}
-              </Typography>
-            </Tooltip>
-          ) : null,
-        },
-        role: {
-          rawValue: member.role,
-          content: (
-            <Chip
-              size="small"
-              label={checkIsAdmin(member) ? 'Admin' : 'Member'}
-              sx={{ backgroundColor: 'background.lightgrey', borderRadius: 0.5 }}
-            />
-          ),
-        },
-        actions: {
-          rawValue: '',
-          sticky: true,
-          content: isAdmin ? (
-            <div className={tableCss.actions}>
-              {!isInvite && <EditButton member={member} disabled={isDisabled} />}
-              {canRenew && <RenewInviteButton member={member} />}
-              <RemoveMemberButton member={member} disabled={isDisabled} isInvite={isInvite} />
-            </div>
-          ) : null,
-        },
-      },
-    }
-  })
-
-  if (!rows.length) {
+  if (!members.length) {
     return null
   }
 
-  return <EnhancedTable rows={rows} headCells={headCells} fixedLayout />
+  return (
+    <PaginatedDataTable
+      columns={columns}
+      rows={members}
+      getRowKey={(member) => String(member.id)}
+      renderRow={(member) => {
+        const isLastAdmin = adminCount === 1 && isActiveAdmin(member)
+        const isPendingInvite = member.status === MemberStatus.INVITED
+        const isDeclined = member.status === MemberStatus.DECLINED
+        const isInvite = isPendingInvite || isDeclined
+        const isExpired = isInviteExpired(member)
+        const isDisabled = isAdmin && isLastAdmin && !isInvite
+        const memberEmail = member.user.email
+        // Contract: Email invites can always be renewed (resending the email);
+        // wallet invites are only renewed once they have expired.
+        const canRenew = isPendingInvite && (Boolean(memberEmail) || isExpired)
+
+        return (
+          <>
+            <TableCell data-testid="table-cell-name">
+              <div className="flex items-center gap-2">
+                <MemberName member={member} />
+                {isDeclined && <Badge variant="destructive">Declined</Badge>}
+                {isExpired && <Badge variant="warning">Expired</Badge>}
+              </div>
+            </TableCell>
+
+            <TableCell data-testid="table-cell-email">
+              {memberEmail ? (
+                <Tooltip>
+                  <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{memberEmail}</TooltipTrigger>
+                  <TooltipContent>{memberEmail}</TooltipContent>
+                </Tooltip>
+              ) : null}
+            </TableCell>
+
+            <TableCell data-testid="table-cell-role">
+              <Badge variant="secondary">{checkIsAdmin(member) ? 'Admin' : 'Member'}</Badge>
+            </TableCell>
+
+            <TableCell className="text-right" data-testid="table-cell-actions">
+              {isAdmin ? (
+                <span className="inline-flex items-center justify-end gap-1">
+                  {!isInvite && <EditButton member={member} disabled={isDisabled} />}
+                  {canRenew && <RenewInviteButton member={member} />}
+                  <RemoveMemberButton member={member} disabled={isDisabled} isInvite={isInvite} />
+                </span>
+              ) : null}
+            </TableCell>
+          </>
+        )
+      }}
+    />
+  )
 }
 
 export default MembersList

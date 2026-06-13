@@ -178,7 +178,7 @@ const SpaceAddressBook = () => {
             </div>
           )}
 
-          <div className="bg-card rounded-lg border p-4">
+          <div className="bg-card rounded-lg p-4">
             <TabsContent value="workspace">
               {searchQuery && filteredAll.length === 0 ? (
                 <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>

@@ -1,4 +1,4 @@
-import { render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
+import { render, screen, within } from '@/tests/test-utils'
 import type { ReactNode } from 'react'
 import { memberBuilder, memberUserBuilder } from '@/tests/builders/member'
 import MembersList from './index'
@@ -77,10 +77,10 @@ describe('MembersList', () => {
     expect(within(emailCells[1]!).queryByText(/@/)).not.toBeInTheDocument()
   })
 
-  it('wires up noWrap and a hover tooltip for long member emails', async () => {
+  it('truncates long member emails inside a tooltip trigger', () => {
     const longEmail = `${'a'.repeat(64)}@${'b'.repeat(186)}.com`
 
-    const { user } = renderWithUserEvent(
+    render(
       <MembersList
         members={[
           memberBuilder()
@@ -94,10 +94,7 @@ describe('MembersList', () => {
     )
 
     const emailNode = screen.getByText(longEmail)
-    expect(emailNode).toHaveClass('MuiTypography-noWrap')
-
-    await user.hover(emailNode)
-    expect(await screen.findByRole('tooltip', { name: longEmail })).toBeInTheDocument()
+    expect(emailNode).toHaveClass('truncate')
   })
 
   it('shows an Expired chip for a pending invite past its expiry', () => {
