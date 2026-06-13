@@ -16,7 +16,8 @@ const formatNonPassingLabel = (grade: SafeGrade, count: number): string =>
 
 const StatusCell = ({ grade, count, isScanning }: StatusCellProps) => {
   if (!grade) {
-    if (isScanning) return <Skeleton variant="rounded" width={110} height={20} />
+    // Width chosen to comfortably fit the longest expected label ("Needs review · 99 issues found").
+    if (isScanning) return <Skeleton variant="rounded" width={160} height={20} />
     return (
       <Typography variant="body2" color="text.secondary">
         {DASH}
@@ -26,10 +27,14 @@ const StatusCell = ({ grade, count, isScanning }: StatusCellProps) => {
   // Passing Safes read as a bare "Healthy" chip — no count suffix. Other grades carry the
   // grade word in the label too so the chip reconciles with the panel header copy and the
   // sidebar per-group chips (all lead with the same "Grade · …" template).
-  if (grade === 'passing') {
-    return <SafeGradeChip grade={grade} ariaLabel={SAFE_GRADE_LABEL.passing} />
+  // Defensive: if count is 0 the grade should always be `passing` (computeSummary and
+  // getSafeGrade agree). Fall back to the Healthy chip so a desynced caller never produces
+  // a nonsense "Needs review · 0 issues found" reading.
+  const safeCount = count ?? 0
+  if (grade === 'passing' || safeCount === 0) {
+    return <SafeGradeChip grade="passing" ariaLabel={SAFE_GRADE_LABEL.passing} />
   }
-  const label = formatNonPassingLabel(grade, count ?? 0)
+  const label = formatNonPassingLabel(grade, safeCount)
   return <SafeGradeChip grade={grade} label={label} ariaLabel={label} />
 }
 
