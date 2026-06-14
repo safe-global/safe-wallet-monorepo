@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import AddMemberModal from 'src/features/spaces/components/AddMemberModal'
 import { useState } from 'react'
 import MembersList from '../MembersList'
+import TableCard from '@/components/common/TableCard'
 import { useIsInvited, useSpaceMembersByStatus, useIsAdmin } from '@/features/spaces'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS } from '@/services/analytics/events/spaces'
@@ -40,7 +41,7 @@ const SpaceMembers = () => {
       </div>
 
       <Tabs defaultValue="members">
-        <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
+        <TabsList variant="line" className="flex-wrap h-auto mb-4">
           <TabsTrigger value="members" className="cursor-pointer" data-testid="members-tab">
             Members ({activeMembers.length})
           </TabsTrigger>
@@ -55,9 +56,9 @@ const SpaceMembers = () => {
 
         <TabsContent value="pending">
           {invitedMembers.length === 0 ? (
-            <div className="bg-card rounded-lg border p-4">
+            <TableCard>
               <p className="text-muted-foreground text-sm">No pending members.</p>
-            </div>
+            </TableCard>
           ) : (
             <MembersList members={invitedMembers} />
           )}

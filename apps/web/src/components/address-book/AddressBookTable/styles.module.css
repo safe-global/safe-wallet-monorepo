@@ -1,54 +1,5 @@
-/* Desktop table - padding on cells instead of wrapper */
-.container tbody td:first-child {
-  padding-left: 16px !important;
-}
-
-.container tbody td:last-child {
-  padding-right: 16px !important;
-}
-
-.container thead th:first-child {
-  padding-left: 16px !important;
-}
-
-.container thead th:last-child {
-  padding-right: 16px !important;
-}
-
-.container tbody tr {
-  transition: background-color 100ms linear;
-}
-
-.container tbody tr:hover {
-  background-color: var(--muted);
-}
-
-.container td:last-of-type button {
-  opacity: 1;
-  transition: opacity 200ms 100ms ease-in-out;
-}
-
-.container tr:hover td:last-of-type button {
-  opacity: 1;
-}
-
-/* Header styling - no bottom border */
-.container thead th {
-  border-bottom: none !important;
-  background-color: transparent;
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-}
-
-.container thead th span {
-  font-size: 14px;
-  color: var(--color-text-primary);
-}
-
-/* Last row - transparent border */
-.container tr:last-of-type {
-  border-bottom-color: transparent;
-}
+/* Desktop in-card table polish is provided by the shared <TableCard>
+   (@/components/common/TableCard). This module only holds the mobile-card layout. */
 
 .mobileContainer {
   display: none;
@@ -107,10 +58,6 @@
 }
 
 @media (max-width: 599.95px) {
-  .container {
-    display: none;
-  }
-
   .mobileContainer {
     display: flex;
   }

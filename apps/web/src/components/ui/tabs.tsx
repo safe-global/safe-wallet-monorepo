@@ -48,6 +48,9 @@ const tabsListVariants = cva(
       variant: {
         default: 'bg-muted',
         line: 'h-auto gap-1 rounded-none bg-transparent p-0',
+        // Top-level page navigation (Assets, Settings, Transactions…): wider gap,
+        // brand-coloured triggers with a flush underline. See TabsTrigger below.
+        nav: 'h-auto gap-6 rounded-none bg-transparent p-0',
       },
     },
     defaultVariants: {
@@ -79,7 +82,15 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
         "gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium [&_svg:not([class*='size-'])]:size-4 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-foreground/60 hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center whitespace-nowrap transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
         'group-data-[variant=default]/tabs-list:data-active:bg-background group-data-[variant=default]/tabs-list:data-active:text-foreground group-data-[variant=default]/tabs-list:data-active:shadow-sm dark:group-data-[variant=default]/tabs-list:data-active:border-input dark:group-data-[variant=default]/tabs-list:data-active:bg-input/30 dark:group-data-[variant=default]/tabs-list:data-active:text-foreground',
         'group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent group-data-[variant=line]/tabs-list:data-active:shadow-none dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:text-foreground group-data-[variant=line]/tabs-list:data-active:text-foreground',
-        'after:bg-foreground after:absolute after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100',
+        // nav variant: compact brand-coloured triggers (primary idle/active), transparent bg
+        'group-data-[variant=nav]/tabs-list:h-auto group-data-[variant=nav]/tabs-list:flex-none group-data-[variant=nav]/tabs-list:px-0 group-data-[variant=nav]/tabs-list:pb-2 group-data-[variant=nav]/tabs-list:font-bold group-data-[variant=nav]/tabs-list:bg-transparent',
+        'group-data-[variant=nav]/tabs-list:text-[var(--color-primary-light)] group-data-[variant=nav]/tabs-list:hover:text-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:text-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:bg-transparent group-data-[variant=nav]/tabs-list:data-active:shadow-none',
+        // Underline: shared pseudo-element. line sits 5px below the trigger; nav sits flush
+        // to the bottom (bottom-0) so it isn't clipped inside an overflow scroll container,
+        // and uses the brand primary colour.
+        'after:bg-foreground after:absolute after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5',
+        'group-data-[variant=line]/tabs-list:after:bottom-[-5px] group-data-[variant=line]/tabs-list:data-active:after:opacity-100',
+        'group-data-[variant=nav]/tabs-list:after:bottom-0 group-data-[variant=nav]/tabs-list:after:bg-[var(--color-primary-main)] group-data-[variant=nav]/tabs-list:data-active:after:opacity-100',
         className,
       )}
       {...props}

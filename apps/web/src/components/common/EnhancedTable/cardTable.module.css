@@ -1,0 +1,54 @@
+/* Shared styling for an EnhancedTable rendered inside a rounded card
+   (bg-card rounded-lg p-4): padded row/header edges, no header divider,
+   hover-highlighted rows, and a borderless last row. Used by the Address
+   Book and the Spaces Team/Members tables so they share one look. */
+.container tbody td:first-child {
+  padding-left: 16px !important;
+}
+
+.container tbody td:last-child {
+  padding-right: 16px !important;
+}
+
+.container thead th:first-child {
+  padding-left: 16px !important;
+}
+
+.container thead th:last-child {
+  padding-right: 16px !important;
+}
+
+.container tbody tr {
+  transition: background-color 100ms linear;
+}
+
+.container tbody tr:hover {
+  background-color: var(--muted);
+}
+
+.container td:last-of-type button {
+  opacity: 1;
+  transition: opacity 200ms 100ms ease-in-out;
+}
+
+.container tr:hover td:last-of-type button {
+  opacity: 1;
+}
+
+/* Header styling - no bottom border */
+.container thead th {
+  border-bottom: none !important;
+  background-color: transparent;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+.container thead th span {
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+/* Last row - transparent border */
+.container tr:last-of-type {
+  border-bottom-color: transparent;
+}

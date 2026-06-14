@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Typography } from '@/components/ui/typography'
+import TableCard from '@/components/common/TableCard'
 import {
   useIsInvited,
   useIsAdmin,
@@ -130,7 +131,7 @@ const SpaceAddressBook = () => {
             setActiveTab(val)
           }}
         >
-          <TabsList variant="line" className="flex-wrap h-auto mb-4 sm:mb-0">
+          <TabsList variant="line" className="flex-wrap h-auto mb-4">
             <TabsTrigger value="workspace" className="cursor-pointer">
               Workspace contacts ({addressBookItems.length})
             </TabsTrigger>
@@ -168,7 +169,7 @@ const SpaceAddressBook = () => {
             </div>
           )}
 
-          <div className="bg-card rounded-lg border p-4">
+          <TableCard>
             <TabsContent value="workspace">
               {searchQuery && filteredAll.length === 0 ? (
                 <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
@@ -235,7 +236,7 @@ const SpaceAddressBook = () => {
             <TabsContent value="activity">
               <ActivityLog entries={filteredAll} />
             </TabsContent>
-          </div>
+          </TableCard>
         </Tabs>
       </div>
     </>

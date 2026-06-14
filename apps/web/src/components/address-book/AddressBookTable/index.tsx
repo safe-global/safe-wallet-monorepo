@@ -24,6 +24,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
 import css from './styles.module.css'
+import TableCard from '@/components/common/TableCard'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
@@ -183,7 +184,7 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
 
       <main>
         {filteredEntries.length > 0 ? (
-          <div className="bg-card mb-4 rounded-lg border p-4">
+          <TableCard className="mb-4">
             <div className={css.mobileCard}>
               <div className={css.mobileContainer}>
                 <div className={css.mobileHeader}>
@@ -205,17 +206,17 @@ function AddressBookTable({ chain, setTxFlow }: AddressBookTableProps) {
               </div>
             </div>
 
-            <div className={`${css.desktopCard} ${css.container}`}>
+            <div className={css.desktopCard}>
               <EnhancedTable rows={rows} headCells={headCells} />
             </div>
-          </div>
+          </TableCard>
         ) : (
-          <div className="bg-card rounded-lg border p-4">
+          <TableCard>
             <PagePlaceholder
               img={<NoEntriesIcon />}
               text={`No entries found${chain ? ` on ${chain.chainName}` : ''}`}
             />
-          </div>
+          </TableCard>
         )}
       </main>
 

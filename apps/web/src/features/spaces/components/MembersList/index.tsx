@@ -2,6 +2,7 @@ import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EnhancedTable from '@/components/common/EnhancedTable'
+import TableCard from '@/components/common/TableCard'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import { Button } from '@/components/ui/button'
 import { Chip } from '@/components/ui/chip'
@@ -161,7 +162,11 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     return null
   }
 
-  return <EnhancedTable rows={rows} headCells={headCells} />
+  return (
+    <TableCard>
+      <EnhancedTable rows={rows} headCells={headCells} />
+    </TableCard>
+  )
 }
 
 export default MembersList
