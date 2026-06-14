@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
+import useWallet from '@/hooks/wallets/useWallet'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import type { SafeItemData } from '../types'
@@ -78,6 +79,7 @@ const SafeDropdownContainer = ({
   const [search, setSearch] = useState('')
   const query = search.trim().toLowerCase()
   const resolveName = useSafeNameResolver()
+  const wallet = useWallet()
 
   // Multi-chain items stay visible even when currently selected so the user can expand and switch chains.
   const structuralItems = items.filter((item) => item.chains.length > 1 || item.id !== selectedItemId)
@@ -104,7 +106,11 @@ const SafeDropdownContainer = ({
     if (filteredItems.length === 0) {
       return (
         <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">
-          {query ? 'No safes match your search' : 'No safes yet'}
+          {query
+            ? 'No safes match your search'
+            : wallet
+              ? 'No safes yet'
+              : 'Connect a wallet to find your Safe Accounts'}
         </p>
       )
     }
