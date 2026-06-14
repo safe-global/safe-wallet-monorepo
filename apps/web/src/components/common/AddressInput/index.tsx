@@ -70,11 +70,8 @@ const AddressInput = ({
   placeholder,
   className,
   InputProps,
-  // eslint-disable-next-line unused-imports/no-unused-vars
   InputLabelProps,
-  // eslint-disable-next-line unused-imports/no-unused-vars
   fullWidth,
-  // eslint-disable-next-line unused-imports/no-unused-vars
   variant,
   ...props
 }: AddressInputProps): ReactElement => {

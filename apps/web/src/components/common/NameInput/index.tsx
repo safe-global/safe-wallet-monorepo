@@ -35,7 +35,6 @@ const NameInput = ({
   className,
   helperText,
   InputProps,
-  // eslint-disable-next-line unused-imports/no-unused-vars
   InputLabelProps,
   ...props
 }: NameInputProps) => {
