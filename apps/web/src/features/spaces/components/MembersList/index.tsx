@@ -1,10 +1,11 @@
-import { Box, IconButton, SvgIcon, Tooltip as MuiTooltip } from '@mui/material'
 import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { TableCell } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { cn } from '@/utils/cn'
 import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import RenewInviteButton from './RenewInviteButton'
@@ -34,13 +35,14 @@ const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean
 
   return (
     <>
-      <MuiTooltip title={disabled ? 'Cannot edit role of last admin' : 'Edit member'} placement="top">
-        <Box component="span">
-          <IconButton onClick={() => setOpen(true)} size="small" disabled={disabled}>
-            <SvgIcon component={EditIcon} inheritViewBox color="border" fontSize="small" />
-          </IconButton>
-        </Box>
-      </MuiTooltip>
+      <Tooltip>
+        <TooltipTrigger render={<span className="inline-flex" />}>
+          <Button variant="ghost" size="icon-sm" onClick={() => setOpen(true)} disabled={disabled}>
+            <EditIcon className="text-muted-foreground size-4 fill-current" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{disabled ? 'Cannot edit role of last admin' : 'Edit member'}</TooltipContent>
+      </Tooltip>
       {open && <EditMemberDialog member={member} handleClose={() => setOpen(false)} />}
     </>
   )
@@ -59,21 +61,23 @@ export const RemoveMemberButton = ({
 
   return (
     <>
-      <MuiTooltip
-        title={disabled ? 'Cannot remove last admin' : `Remove ${isInvite ? 'invitation' : 'member'}`}
-        placement="top"
-      >
-        <Box component="span">
+      <Tooltip>
+        <TooltipTrigger render={<span className="inline-flex" />}>
           <Track
             {...SPACE_EVENTS.REMOVE_MEMBER_MODAL}
             label={isInvite ? SPACE_LABELS.invite_list : SPACE_LABELS.member_list}
           >
-            <IconButton disabled={disabled} onClick={() => setOpenRemoveMemberDialog(true)} size="small">
-              <SvgIcon component={DeleteIcon} inheritViewBox color={disabled ? 'disabled' : 'error'} fontSize="small" />
-            </IconButton>
+            <Button variant="ghost" size="icon-sm" disabled={disabled} onClick={() => setOpenRemoveMemberDialog(true)}>
+              <DeleteIcon
+                className={cn('size-4 fill-current', disabled ? 'text-muted-foreground' : 'text-destructive')}
+              />
+            </Button>
           </Track>
-        </Box>
-      </MuiTooltip>
+        </TooltipTrigger>
+        <TooltipContent>
+          {disabled ? 'Cannot remove last admin' : `Remove ${isInvite ? 'invitation' : 'member'}`}
+        </TooltipContent>
+      </Tooltip>
       {openRemoveMemberDialog && (
         <RemoveMemberDialog
           userId={member.user.id}
