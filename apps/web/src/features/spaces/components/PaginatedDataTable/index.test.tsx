@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import PaginatedDataTable, { type DataTableColumn } from './index'
 
-const columns: DataTableColumn[] = [{ id: 'value', header: 'Value' }]
+const columns: DataTableColumn<string>[] = [{ id: 'value', header: 'Value' }]
 
 const tableElement = (rows: string[], pageSize?: number) => (
   <PaginatedDataTable
@@ -61,5 +61,46 @@ describe('PaginatedDataTable', () => {
 
     expect(screen.getByText('x')).toBeInTheDocument()
     expect(screen.queryByText('z')).not.toBeInTheDocument()
+  })
+
+  describe('sorting', () => {
+    const sortableColumns: DataTableColumn<{ name: string }>[] = [
+      { id: 'name', header: 'Name', sortValue: (row) => row.name },
+    ]
+
+    const renderSortable = () =>
+      render(
+        <PaginatedDataTable
+          columns={sortableColumns}
+          rows={[{ name: 'Charlie' }, { name: 'Alice' }, { name: 'Bob' }]}
+          getRowKey={(row) => row.name}
+          renderRow={(row) => <td>{row.name}</td>}
+        />,
+      )
+
+    const cellTexts = () => screen.getAllByRole('cell').map((cell) => cell.textContent)
+
+    it('does not render a header button for non-sortable columns', () => {
+      render(tableElement(['a', 'b']))
+
+      expect(screen.queryByRole('button', { name: /Value/ })).not.toBeInTheDocument()
+    })
+
+    it('cycles ascending → descending → unsorted on repeated clicks', () => {
+      renderSortable()
+
+      const header = screen.getByRole('button', { name: /Name/ })
+
+      expect(cellTexts()).toEqual(['Charlie', 'Alice', 'Bob'])
+
+      fireEvent.click(header)
+      expect(cellTexts()).toEqual(['Alice', 'Bob', 'Charlie'])
+
+      fireEvent.click(header)
+      expect(cellTexts()).toEqual(['Charlie', 'Bob', 'Alice'])
+
+      fireEvent.click(header)
+      expect(cellTexts()).toEqual(['Charlie', 'Alice', 'Bob'])
+    })
   })
 })

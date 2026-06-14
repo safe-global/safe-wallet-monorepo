@@ -23,10 +23,10 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
 
-const columns: DataTableColumn[] = [
-  { id: 'name', header: 'Name', className: 'w-[40%]' },
-  { id: 'email', header: 'Email', className: 'w-[30%]' },
-  { id: 'role', header: 'Role', className: 'w-[15%]' },
+const columns: DataTableColumn<MemberDto>[] = [
+  { id: 'name', header: 'Name', className: 'w-[40%]', sortValue: (member) => member.name },
+  { id: 'email', header: 'Email', className: 'w-[30%]', sortValue: (member) => member.user.email },
+  { id: 'role', header: 'Role', className: 'w-[15%]', sortValue: (member) => member.role },
   { id: 'actions', className: 'w-[15%]' },
 ]
 

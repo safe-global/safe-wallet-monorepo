@@ -33,7 +33,7 @@ function SpaceAddressBookTable({
 }: SpaceAddressBookTableProps) {
   const hasMiddleColumn = showAddedBy || showLastUpdated
 
-  const columns: DataTableColumn[] = [
+  const columns: DataTableColumn<AddressBookEntry>[] = [
     { id: 'name', header: 'Name', className: 'w-[20%]' },
     { id: 'address', header: 'Address', className: 'w-[30%]' },
     { id: 'chains', header: 'Chains', className: 'w-[15%]' },
