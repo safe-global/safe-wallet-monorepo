@@ -52,3 +52,18 @@
 .container tr:last-of-type {
   border-bottom-color: transparent;
 }
+
+/* EnhancedTable ships its own standalone "card" chrome: a rounded bottom (only
+   when not paginated), a rounded pagination footer, and an outer bottom margin.
+   Inside a TableCard that makes the last row's rounding and the bottom spacing
+   depend on row count, so two tables with different numbers of rows look
+   different (e.g. a short Team list vs. a paginated Address Book). Flatten it
+   here so every TableCard table is square and sits flush, paginated or not. */
+.container [data-testid='table-container'],
+.container [data-testid='table-container'] ~ * {
+  border-radius: 0;
+}
+
+.container div:has(> [data-testid='table-container']) {
+  margin-bottom: 0;
+}
