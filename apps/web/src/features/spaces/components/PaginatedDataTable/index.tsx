@@ -43,6 +43,15 @@ const compareNullable = (
   return 0
 }
 
+const ariaSortValue = (direction?: SortDirection): 'ascending' | 'descending' | 'none' =>
+  direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : 'none'
+
+const SortIcon = ({ direction }: { direction?: SortDirection }) => {
+  if (direction === 'asc') return <ArrowUp className="size-3.5" />
+  if (direction === 'desc') return <ArrowDown className="size-3.5" />
+  return <ArrowUpDown className="size-3.5 opacity-50" />
+}
+
 function PaginatedDataTable<T>({
   columns,
   rows,
@@ -54,6 +63,7 @@ function PaginatedDataTable<T>({
   const [page, setPage] = useState(0)
   const [sort, setSort] = useState<SortState | null>(null)
 
+  // Jump back to the first page when the data set changes (e.g. a new search/filter)
   useEffect(() => {
     setPage(0)
   }, [rows])
@@ -76,8 +86,10 @@ function PaginatedDataTable<T>({
     return [...rows].sort((a, b) => compareNullable(sortValue(a), sortValue(b), factor))
   }, [rows, sort, columns])
 
-  const totalPages = Math.ceil(sortedRows.length / pageSize)
-  const paginatedRows = sortedRows.slice(page * pageSize, (page + 1) * pageSize)
+  const totalPages = Math.max(1, Math.ceil(sortedRows.length / pageSize))
+  // Clamp so a shrinking data set can never strand the user on an empty page
+  const currentPage = Math.min(page, totalPages - 1)
+  const paginatedRows = sortedRows.slice(currentPage * pageSize, (currentPage + 1) * pageSize)
 
   return (
     <>
@@ -85,19 +97,12 @@ function PaginatedDataTable<T>({
         <TableHeader>
           <TableRow>
             {columns.map((column) => {
-              const activeDirection = sort?.id === column.id ? sort.direction : undefined
-              const ariaSort = column.sortValue
-                ? activeDirection === 'asc'
-                  ? 'ascending'
-                  : activeDirection === 'desc'
-                    ? 'descending'
-                    : 'none'
-                : undefined
+              const direction = sort?.id === column.id ? sort.direction : undefined
 
               return (
                 <TableHead
                   key={column.id}
-                  aria-sort={ariaSort}
+                  aria-sort={column.sortValue ? ariaSortValue(direction) : undefined}
                   className={cn('text-muted-foreground', column.className)}
                 >
                   {column.sortValue ? (
@@ -107,13 +112,7 @@ function PaginatedDataTable<T>({
                       className="hover:text-foreground inline-flex cursor-pointer items-center gap-1 font-medium"
                     >
                       {column.header}
-                      {activeDirection === 'asc' ? (
-                        <ArrowUp className="size-3.5" />
-                      ) : activeDirection === 'desc' ? (
-                        <ArrowDown className="size-3.5" />
-                      ) : (
-                        <ArrowUpDown className="size-3.5 opacity-50" />
-                      )}
+                      <SortIcon direction={direction} />
                     </button>
                   ) : (
                     column.header
@@ -136,17 +135,23 @@ function PaginatedDataTable<T>({
       {totalPages > 1 && (
         <div className="flex items-center justify-between pt-4 pr-16">
           <p className="text-muted-foreground text-sm">
-            {page * pageSize + 1}&ndash;{Math.min((page + 1) * pageSize, sortedRows.length)} of {sortedRows.length}
+            {currentPage * pageSize + 1}&ndash;{Math.min((currentPage + 1) * pageSize, sortedRows.length)} of{' '}
+            {sortedRows.length}
           </p>
           <div className="flex gap-1">
-            <Button variant="outline" size="icon-sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
+            <Button
+              variant="outline"
+              size="icon-sm"
+              disabled={currentPage === 0}
+              onClick={() => setPage(currentPage - 1)}
+            >
               <ChevronLeftIcon />
             </Button>
             <Button
               variant="outline"
               size="icon-sm"
-              disabled={page >= totalPages - 1}
-              onClick={() => setPage((p) => p + 1)}
+              disabled={currentPage >= totalPages - 1}
+              onClick={() => setPage(currentPage + 1)}
             >
               <ChevronRightIcon />
             </Button>

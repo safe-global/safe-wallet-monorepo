@@ -3,11 +3,15 @@ import {
   useMembersGetUsersV1Query,
   type MemberDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useMemo } from 'react'
 import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+
+// Stable reference so consumers relying on identity don't re-run on every render
+const EMPTY_MEMBERS: MemberDto[] = []
 
 export enum MemberStatus {
   INVITED = 'INVITED',
@@ -40,18 +44,20 @@ const useAllMembers = (spaceId?: string) => {
     { spaceId: actualSpaceId ?? '' },
     { skip: !isUserSignedIn || !actualSpaceId },
   )
-  return currentData?.members || []
+  return currentData?.members ?? EMPTY_MEMBERS
 }
 
 export const useSpaceMembersByStatus = () => {
   const allMembers = useAllMembers()
 
-  const invitedMembers = allMembers.filter(
-    (member) => member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED,
-  )
-  const activeMembers = allMembers.filter((member) => member.status === MemberStatus.ACTIVE)
+  return useMemo(() => {
+    const invitedMembers = allMembers.filter(
+      (member) => member.status === MemberStatus.INVITED || member.status === MemberStatus.DECLINED,
+    )
+    const activeMembers = allMembers.filter((member) => member.status === MemberStatus.ACTIVE)
 
-  return { activeMembers, invitedMembers }
+    return { activeMembers, invitedMembers }
+  }, [allMembers])
 }
 
 export const useCurrentMembership = (spaceId?: string) => {

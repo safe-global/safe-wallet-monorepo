@@ -90,6 +90,54 @@ export const RemoveMemberButton = ({
   )
 }
 
+const MemberRow = ({ member, isAdmin, adminCount }: { member: MemberDto; isAdmin: boolean; adminCount: number }) => {
+  const isLastAdmin = adminCount === 1 && isActiveAdmin(member)
+  const isPendingInvite = member.status === MemberStatus.INVITED
+  const isDeclined = member.status === MemberStatus.DECLINED
+  const isInvite = isPendingInvite || isDeclined
+  const isExpired = isInviteExpired(member)
+  const isDisabled = isAdmin && isLastAdmin && !isInvite
+  const memberEmail = member.user.email
+  // Contract: Email invites can always be renewed (resending the email);
+  // wallet invites are only renewed once they have expired.
+  const canRenew = isPendingInvite && (Boolean(memberEmail) || isExpired)
+
+  return (
+    <>
+      <TableCell data-testid="table-cell-name">
+        <div className="flex items-center gap-2">
+          <MemberName member={member} />
+          {isDeclined && <Badge variant="destructive">Declined</Badge>}
+          {isExpired && <Badge variant="warning">Expired</Badge>}
+        </div>
+      </TableCell>
+
+      <TableCell data-testid="table-cell-email">
+        {memberEmail ? (
+          <Tooltip>
+            <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{memberEmail}</TooltipTrigger>
+            <TooltipContent>{memberEmail}</TooltipContent>
+          </Tooltip>
+        ) : null}
+      </TableCell>
+
+      <TableCell data-testid="table-cell-role">
+        <Badge variant="secondary">{checkIsAdmin(member) ? 'Admin' : 'Member'}</Badge>
+      </TableCell>
+
+      <TableCell className="text-right" data-testid="table-cell-actions">
+        {isAdmin ? (
+          <span className="inline-flex items-center justify-end gap-1">
+            {!isInvite && <EditButton member={member} disabled={isDisabled} />}
+            {canRenew && <RenewInviteButton member={member} />}
+            <RemoveMemberButton member={member} disabled={isDisabled} isInvite={isInvite} />
+          </span>
+        ) : null}
+      </TableCell>
+    </>
+  )
+}
+
 const MembersList = ({ members }: { members: MemberDto[] }) => {
   const isAdmin = useIsAdmin()
   const adminCount = useAdminCount(members)
@@ -103,53 +151,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
       columns={columns}
       rows={members}
       getRowKey={(member) => String(member.id)}
-      renderRow={(member) => {
-        const isLastAdmin = adminCount === 1 && isActiveAdmin(member)
-        const isPendingInvite = member.status === MemberStatus.INVITED
-        const isDeclined = member.status === MemberStatus.DECLINED
-        const isInvite = isPendingInvite || isDeclined
-        const isExpired = isInviteExpired(member)
-        const isDisabled = isAdmin && isLastAdmin && !isInvite
-        const memberEmail = member.user.email
-        // Contract: Email invites can always be renewed (resending the email);
-        // wallet invites are only renewed once they have expired.
-        const canRenew = isPendingInvite && (Boolean(memberEmail) || isExpired)
-
-        return (
-          <>
-            <TableCell data-testid="table-cell-name">
-              <div className="flex items-center gap-2">
-                <MemberName member={member} />
-                {isDeclined && <Badge variant="destructive">Declined</Badge>}
-                {isExpired && <Badge variant="warning">Expired</Badge>}
-              </div>
-            </TableCell>
-
-            <TableCell data-testid="table-cell-email">
-              {memberEmail ? (
-                <Tooltip>
-                  <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{memberEmail}</TooltipTrigger>
-                  <TooltipContent>{memberEmail}</TooltipContent>
-                </Tooltip>
-              ) : null}
-            </TableCell>
-
-            <TableCell data-testid="table-cell-role">
-              <Badge variant="secondary">{checkIsAdmin(member) ? 'Admin' : 'Member'}</Badge>
-            </TableCell>
-
-            <TableCell className="text-right" data-testid="table-cell-actions">
-              {isAdmin ? (
-                <span className="inline-flex items-center justify-end gap-1">
-                  {!isInvite && <EditButton member={member} disabled={isDisabled} />}
-                  {canRenew && <RenewInviteButton member={member} />}
-                  <RemoveMemberButton member={member} disabled={isDisabled} isInvite={isInvite} />
-                </span>
-              ) : null}
-            </TableCell>
-          </>
-        )
-      }}
+      renderRow={(member) => <MemberRow member={member} isAdmin={isAdmin} adminCount={adminCount} />}
     />
   )
 }
