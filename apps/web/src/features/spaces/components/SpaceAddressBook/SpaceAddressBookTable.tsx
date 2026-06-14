@@ -34,11 +34,19 @@ function SpaceAddressBookTable({
   const hasMiddleColumn = showAddedBy || showLastUpdated
 
   const columns: DataTableColumn<AddressBookEntry>[] = [
-    { id: 'name', header: 'Name', className: 'w-[20%]' },
-    { id: 'address', header: 'Address', className: 'w-[30%]' },
-    { id: 'chains', header: 'Chains', className: 'w-[15%]' },
+    { id: 'name', header: 'Name', className: 'w-[20%]', sortValue: (entry) => entry.name },
+    { id: 'address', header: 'Address', className: 'w-[30%]', sortValue: (entry) => entry.address },
+    { id: 'chains', header: 'Chains', className: 'w-[15%]', sortValue: (entry) => entry.chainIds.length },
     ...(hasMiddleColumn
-      ? [{ id: 'middle', header: showAddedBy ? 'Added by' : 'Last updated', className: 'w-[20%]' }]
+      ? [
+          {
+            id: 'middle',
+            header: showAddedBy ? 'Added by' : 'Last updated',
+            className: 'w-[20%]',
+            sortValue: (entry: AddressBookEntry) =>
+              showAddedBy ? entry.createdBy : entry.updatedAt || entry.createdAt,
+          },
+        ]
       : []),
     { id: 'actions', className: hasMiddleColumn ? 'w-[15%]' : 'w-[35%]' },
   ]
@@ -53,19 +61,10 @@ function SpaceAddressBookTable({
         <>
           {/* Name */}
           <TableCell className="font-bold">
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <div
-                    className={cn('flex items-center gap-1.5 overflow-hidden', entry.isDuplicate && 'line-through')}
-                  />
-                }
-              >
-                {entry.isLocal && <BookUser className="text-muted-foreground size-4 flex-shrink-0" />}
-                <span className="min-w-0 truncate">{entry.name}</span>
-              </TooltipTrigger>
-              <TooltipContent>{entry.name}</TooltipContent>
-            </Tooltip>
+            <div className={cn('flex items-center gap-1.5 overflow-hidden', entry.isDuplicate && 'line-through')}>
+              {entry.isLocal && <BookUser className="text-muted-foreground size-4 flex-shrink-0" />}
+              <span className="min-w-0 truncate">{entry.name}</span>
+            </div>
           </TableCell>
 
           {/* Address */}
