@@ -332,6 +332,18 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(screen.getAllByTestId('create-space-button')).toHaveLength(1)
   })
 
+  it('renders the AccountInfo sign-out menu on the require-login workspace header when the user is signed in with no spaces', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByText(/no workspaces found/i)).toBeInTheDocument()
+    expect(screen.getByTestId('account-info')).toBeInTheDocument()
+  })
+
   it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {
     // The Create workspace button lives in the require-login-ON workspace header.
     mockUseIsRequireLoginEnabled.mockReturnValue(true)
