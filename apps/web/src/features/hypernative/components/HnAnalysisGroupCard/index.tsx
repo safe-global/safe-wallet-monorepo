@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import { Typography } from '@/components/ui/typography'
-import { AnalysisGroupCard, type AnalysisGroupCardProps } from '@/features/safe-shield/components/AnalysisGroupCard'
+import { AnalysisGroupCard, type AnalysisGroupCardProps } from '@/features/safe-shield'
 import HypernativeLogo from '../HypernativeLogo'
 
 type HnAnalysisGroupCardProps = Omit<AnalysisGroupCardProps, 'footer'> & {
@@ -24,7 +24,7 @@ const ByHypernativeFooter = () => {
  * Strips requestId to hide the "Report false result" link (Blockaid-only).
  */
 export const HnAnalysisGroupCard = ({
-  requestId: _requestId, // eslint-disable-line unused-imports/no-unused-vars
+  requestId: _requestId,
   overflowRow,
   ...props
 }: HnAnalysisGroupCardProps): ReactElement | null => {

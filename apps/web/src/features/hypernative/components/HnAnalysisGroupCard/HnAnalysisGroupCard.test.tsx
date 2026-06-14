@@ -1,7 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import { HnAnalysisGroupCard } from './index'
-import type { AnalysisGroupCardProps } from '@/features/safe-shield/components/AnalysisGroupCard'
-import { AnalysisGroupCard } from '@/features/safe-shield/components/AnalysisGroupCard'
+import type { AnalysisGroupCardProps } from '@/features/safe-shield'
+import { AnalysisGroupCard } from '@/features/safe-shield'
 import React from 'react'
 
 jest.mock('@/features/safe-shield/components/AnalysisGroupCard', () => ({

@@ -1,5 +1,5 @@
 import type { TransactionDetails, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Fragment, useMemo, type ElementType, type ReactElement, type ReactNode } from 'react'
+import { Fragment, useContext, useMemo, type ElementType, type ReactElement, type ReactNode } from 'react'
 import { Check } from 'lucide-react'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
@@ -8,6 +8,11 @@ import { PaperViewToggle } from '../../common/PaperViewToggle'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { Operation } from '@safe-global/store/gateway/types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
+import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { useGtfFeePreview } from '@/features/gtf'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import {
   useDomainHash,
   useMessageHash,
@@ -38,9 +43,10 @@ const DataStack = ({ children }: { children: ReactNode }) => (
 )
 
 export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSignatures = false }: ReceiptProps) => {
-  const safeTxHash = useSafeTxHash({ safeTxData })
-  const domainHash = useDomainHash()
-  const messageHash = useMessageHash({ safeTxData })
+  const chain = useCurrentChain()
+  const { safe, safeAddress } = useSafeInfo()
+  const { safeTx, gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
   const operation = Number(safeTxData.operation) as Operation
 
   const ToWrapper: ElementType = grid ? 'div' : Fragment
@@ -49,6 +55,43 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
     const detailedExecutionInfo = txDetails?.detailedExecutionInfo
     return isMultisigDetailedExecutionInfo(detailedExecutionInfo) ? detailedExecutionInfo.confirmations : []
   }, [txDetails?.detailedExecutionInfo])
+
+  const shouldPreviewGtf =
+    isGtfChain && (!safeTx || safeTx.signatures.size === 0) && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken
+  const displayGasToken = shouldPreviewGtf ? gtfSelectedGasToken : safeTxData.gasToken
+
+  const { data: previewData } = useGtfFeePreview({
+    enabled: shouldPreviewGtf,
+    safeTx,
+    chainId: chain?.chainId,
+    safeAddress,
+    gasToken: gtfSelectedGasToken,
+    numberSignatures: safe.threshold,
+  })
+
+  const previewTxData = shouldPreviewGtf ? previewData?.txData : undefined
+  const displayRefundReceiver = previewTxData?.refundReceiver ?? safeTxData.refundReceiver
+  const displaySafeTxGas = previewTxData?.safeTxGas ?? safeTxData.safeTxGas
+  const displayBaseGas = previewTxData?.baseGas ?? safeTxData.baseGas
+  const displayGasPrice = previewTxData?.gasPrice ?? safeTxData.gasPrice
+
+  // The payload actually signed in Safe-pays carries the merged GTF fee fields. Build it once so the
+  // Data/JSON/Hashes tabs all reflect what the wallet will sign and not the bare pre-merge safeTx.
+  const displaySafeTxData = useMemo(
+    () => ({
+      ...safeTxData,
+      safeTxGas: displaySafeTxGas,
+      baseGas: displayBaseGas,
+      gasPrice: displayGasPrice,
+      gasToken: displayGasToken,
+      refundReceiver: displayRefundReceiver,
+    }),
+    [safeTxData, displaySafeTxGas, displayBaseGas, displayGasPrice, displayGasToken, displayRefundReceiver],
+  )
+
+  const safeTxHash = useSafeTxHash({ safeTxData: displaySafeTxData })
+  const domainHash = useDomainHash()
+  const messageHash = useMessageHash({ safeTxData: displaySafeTxData })
 
   return (
     <PaperViewToggle activeView={0} leftAlign={grid}>
@@ -101,21 +144,21 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
                 </TxDetailsRow>
 
                 <TxDetailsRow label="SafeTxGas" grid={grid}>
-                  {safeTxData.safeTxGas}
+                  {displaySafeTxGas}
                 </TxDetailsRow>
 
                 <TxDetailsRow label="BaseGas" grid={grid}>
-                  {safeTxData.baseGas}
+                  {displayBaseGas}
                 </TxDetailsRow>
 
                 <TxDetailsRow label="GasPrice" grid={grid}>
-                  {safeTxData.gasPrice}
+                  {displayGasPrice}
                 </TxDetailsRow>
 
                 <TxDetailsRow label="GasToken" grid={grid}>
                   <Typography variant="paragraph-small">
                     <EthHashInfo
-                      address={safeTxData.gasToken}
+                      address={displayGasToken}
                       avatarSize={20}
                       showPrefix={false}
                       showName={false}
@@ -128,7 +171,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
                 <TxDetailsRow label="RefundReceiver" grid={grid}>
                   <Typography variant="paragraph-small">
                     <EthHashInfo
-                      address={safeTxData.refundReceiver}
+                      address={displayRefundReceiver}
                       avatarSize={20}
                       showPrefix={false}
                       shortAddress
@@ -198,7 +241,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
           title: 'JSON',
           content: (
             <ScrollWrapper>
-              <JsonView data={safeTxData} />
+              <JsonView data={displaySafeTxData} />
             </ScrollWrapper>
           ),
         },

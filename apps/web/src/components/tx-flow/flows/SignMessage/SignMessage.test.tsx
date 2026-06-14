@@ -30,7 +30,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 
 import * as useIsPinnedSafeHook from '@/hooks/useIsPinnedSafe'
-import * as useTrustSafeHook from '@/features/myAccounts/hooks/useTrustSafe'
+import * as useTrustSafeHook from '@/features/myAccounts'
 
 const renderWithSafeShield = (ui: ReactElement) => {
   return render(<SafeShieldProvider>{ui}</SafeShieldProvider>)

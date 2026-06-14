@@ -99,7 +99,7 @@ export default [
       //
       // See apps/web/docs/feature-architecture.md for details
       'no-restricted-imports': [
-        'warn',
+        'error',
         {
           patterns: [
             // Block deep imports into feature components (defeats lazy loading)

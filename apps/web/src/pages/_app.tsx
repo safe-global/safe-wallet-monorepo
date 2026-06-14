@@ -13,6 +13,7 @@ import '@/styles/shadcn.css'
 import { BRAND_NAME } from '@/config/constants'
 import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
+import LaunchScreen from '@/components/common/LaunchScreen'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import useTxNotifications from '@/hooks/useTxNotifications'
@@ -35,8 +36,7 @@ import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
 import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
-import { CounterfactualFeature } from '@/features/counterfactual'
-import useCounterfactualSafeSync from '@/features/counterfactual/hooks/useCounterfactualSafeSync'
+import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -181,6 +181,8 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
           <InitApp />
 
           <LazyWeb3Init />
+
+          <LaunchScreen />
 
           <PageLayout pathname={router.pathname}>
             <Component {...pageProps} key={safeKey} />

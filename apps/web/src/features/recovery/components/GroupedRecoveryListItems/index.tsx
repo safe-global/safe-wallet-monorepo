@@ -2,7 +2,7 @@ import Track from '@/components/common/Track'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
 import { Typography } from '@/components/ui/typography'
 import partition from 'lodash/partition'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 import type { ReactElement } from 'react'
 import type { AnyTransactionItem } from '@/utils/tx-list'
 

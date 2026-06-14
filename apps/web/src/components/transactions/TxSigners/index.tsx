@@ -5,7 +5,7 @@ import { Alert } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
-import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
+import { AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
@@ -16,6 +16,7 @@ import {
   isMultisigDetailedExecutionInfo,
 } from '@/utils/transaction-guards'
 import ExplorerFallbackIcon from '@/public/images/common/link.svg'
+import HashIcon from '@/public/images/common/hash.svg'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useTransactionStatus from '@/hooks/useTransactionStatus'
@@ -44,14 +45,55 @@ type TxSignersProps = {
   isExpired?: boolean
 }
 
+const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
+  const [copied, handleCopy] = useCopyToClipboard(txHash)
+
+  if (!txHash) {
+    return (
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button variant="ghost" size="icon-sm" className="text-inherit" disabled>
+              <HashIcon className="size-5" />
+            </Button>
+          }
+        />
+        <TooltipContent side="top">Available after execution</TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            data-testid="copy-tx-hash-btn"
+            variant="ghost"
+            size="icon-sm"
+            className="text-inherit"
+            onClick={handleCopy}
+          >
+            <HashIcon className="size-5" />
+          </Button>
+        }
+      />
+      <TooltipContent side="top">{copied ? 'Copied' : 'Copy transaction hash'}</TooltipContent>
+    </Tooltip>
+  )
+}
+
 const TxAuditLogActions = ({
   txId,
+  txHash,
   explorerLink,
 }: {
   txId: string
+  txHash?: string | null
   explorerLink?: { title: string; href: string }
 }) => (
   <>
+    <CopyTxHashButton txHash={txHash} />
     <TxShareLinkWrapper id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
       <Tooltip>
         <TooltipTrigger
@@ -119,7 +161,9 @@ const TxSigners = ({
 
     return (
       <div data-testid="transaction-actions-list">
-        <AuditLogHeader actions={<TxAuditLogActions txId={txId} explorerLink={explorerLink} />} />
+        <AuditLogHeader
+          actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
+        />
         <AuditRow
           label="Executed"
           actionType="executed"
@@ -140,7 +184,9 @@ const TxSigners = ({
 
     return (
       <div data-testid="transaction-actions-list">
-        <AuditLogHeader actions={<TxAuditLogActions txId={txId} explorerLink={explorerLink} />} />
+        <AuditLogHeader
+          actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
+        />
 
         <AuditRow
           label="Created"
@@ -193,7 +239,7 @@ const TxSigners = ({
             requiredConfirmations={confirmationsRequired}
           />
         }
-        actions={<TxAuditLogActions txId={txId} explorerLink={explorerLink} />}
+        actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
       />
 
       <AuditRow

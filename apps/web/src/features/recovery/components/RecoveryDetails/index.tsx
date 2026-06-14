@@ -7,7 +7,7 @@ import { dateString } from '@safe-global/utils/utils/formatters'
 import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import RecoverySigners from '../RecoverySigners'
 import RecoveryDescription from '../RecoveryDescription'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 import txDetailsCss from '@/components/transactions/TxDetails/styles.module.css'
 

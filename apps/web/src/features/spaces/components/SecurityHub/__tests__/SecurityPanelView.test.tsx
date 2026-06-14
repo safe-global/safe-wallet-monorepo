@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { render, screen, fireEvent, within } from '@testing-library/react'
+import { AppRoutes } from '@/config/routes'
 import { createMockContext } from '@/features/security/testing'
 import type { ScanResult } from '@/features/security/types'
 import SecurityPanelView from '../components/SecurityPanelView/SecurityPanelView'
@@ -168,6 +169,7 @@ describe('SecurityPanelView', () => {
       // Expand the failing row
       fireEvent.click(screen.getByText('Contract version is outdated'))
       const link = screen.getByRole('link', { name: /update/i })
+      expect(link).toHaveAttribute('href', expect.stringContaining(AppRoutes.settings.setup))
       expect(link).toHaveAttribute('href', expect.stringContaining('safe='))
     })
 

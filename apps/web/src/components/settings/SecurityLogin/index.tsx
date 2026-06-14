@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic'
-import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
+import { useIsRecoverySupported } from '@/features/recovery'
 import SecuritySettings from '../SecuritySettings'
 import { useRouter } from 'next/router'
 import { HnBannerForSettings, HypernativeFeature } from '@/features/hypernative'

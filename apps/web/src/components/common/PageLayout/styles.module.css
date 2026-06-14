@@ -13,8 +13,15 @@
   left: 0;
 }
 
+/* Elevated above a modal backdrop (e.g. tx flow). Raised above page sub-headers
+   and pinned to the viewport top so it fills the strip the tx dialog leaves
+   uncovered (top: var(--topbar-height)) even when the page was scrolled before
+   the modal opened — e.g. spending limits in Settings → Setup, where the pinned
+   settings tabs showed through instead (WA-2552). Sticky keeps its flow space,
+   so nothing shifts when the class toggles on open/close. */
 .topbarElevated {
-  position: fixed;
+  position: sticky;
+  top: 0;
   z-index: 99;
   left: 0;
   width: 100%;

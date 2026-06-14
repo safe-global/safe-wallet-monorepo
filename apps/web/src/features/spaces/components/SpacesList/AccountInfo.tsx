@@ -1,8 +1,8 @@
 import { User } from 'lucide-react'
 import { Popover, PopoverTrigger } from '@/components/ui/popover'
 import useLogout from '@/hooks/useLogout'
-import { ProfilePopoverContent } from '@/features/spaces/components/Sidebar/ProfilePopoverContent'
-import css from '@/features/spaces/components/Sidebar/styles.module.css'
+import { ProfilePopoverContent } from '../Sidebar/ProfilePopoverContent'
+import css from '../Sidebar/styles.module.css'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 

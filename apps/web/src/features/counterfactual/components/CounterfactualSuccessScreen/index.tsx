@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { Check } from 'lucide-react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import NetworkLogosList from '@/features/multichain/components/NetworkLogosList'
+import { NetworkLogosList } from '@/features/multichain'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 
 const CounterfactualSuccessScreen = () => {

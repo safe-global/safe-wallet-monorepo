@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Typography } from '@/components/ui/typography'
 import ExternalLink from '@/components/common/ExternalLink'
 import { DelayModifierRow } from './DelayModifierRow'
-import useRecovery from '@/features/recovery/hooks/useRecovery'
+import useRecovery from '../../hooks/useRecovery'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import InfoIcon from '@/public/images/notifications/info.svg'

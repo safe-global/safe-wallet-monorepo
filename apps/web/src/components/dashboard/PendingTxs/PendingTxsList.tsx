@@ -14,9 +14,9 @@ import css from './styles.module.css'
 import { isSignableBy, isExecutable } from '@/utils/transaction-guards'
 import useWallet from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
+import { useRecoveryQueue } from '@/features/recovery'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '@/features/recovery'
 import { SidebarListItemCounter } from '@/components/sidebar/SidebarList'
 
 const PendingRecoveryListItem = dynamic(() => import('./PendingRecoveryListItem'))

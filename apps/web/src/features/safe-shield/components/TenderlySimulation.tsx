@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Typography } from '@/components/ui/typography'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import UpdateIcon from '@/public/images/safe-shield/update.svg'
-import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
+import { SeverityIcon } from './SeverityIcon'
 import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
 import { useCurrentChain } from '@/hooks/useChains'
 import {
@@ -20,7 +20,7 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
-import { useNestedTransaction } from '@/features/safe-shield/components/useNestedTransaction'
+import { useNestedTransaction } from './useNestedTransaction'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { trackEvent, SAFE_SHIELD_EVENTS, MixpanelEventParams } from '@/services/analytics'
 

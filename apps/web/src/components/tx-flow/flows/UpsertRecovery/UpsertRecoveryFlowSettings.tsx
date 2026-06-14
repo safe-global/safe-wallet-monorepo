@@ -17,7 +17,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { BRAND_NAME } from '@/config/constants'
 import { TOOLTIP_TITLES } from '../../common/constants'
 import Track from '@/components/common/Track'
-import type { RecoveryStateItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryStateItem } from '@/features/recovery'
 
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import css from './styles.module.css'

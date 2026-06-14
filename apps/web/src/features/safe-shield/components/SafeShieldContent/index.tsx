@@ -15,15 +15,11 @@ import UntrustedSafeWarning from '../UntrustedSafeWarning'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import {
-  analysisVisibilityDelay,
-  calculateAnalysisDelays,
-  useDelayedLoading,
-} from '@/features/safe-shield/hooks/useDelayedLoading'
+import { analysisVisibilityDelay, calculateAnalysisDelays, useDelayedLoading } from '../../hooks/useDelayedLoading'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
-import { ThreatAnalysis } from '@/features/safe-shield/components/ThreatAnalysis'
+import { ThreatAnalysis } from '../ThreatAnalysis'
 
 export const SafeShieldContent = ({
   recipient,

@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Typography } from '@/components/ui/typography'
 import ModalDialog from '@/components/common/ModalDialog'
-import { useReportFalseResult } from '@/features/safe-shield/hooks/useReportFalseResult'
+import { useReportFalseResult } from '../../hooks/useReportFalseResult'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
 

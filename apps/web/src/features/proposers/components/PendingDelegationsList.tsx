@@ -5,7 +5,7 @@ import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import PendingDelegation from './PendingDelegation'
 import DelegationErrorBoundary from './DelegationErrorBoundary'
-import { usePendingDelegations } from '@/features/proposers/hooks/usePendingDelegations'
+import { usePendingDelegations } from '../hooks/usePendingDelegations'
 
 function PendingDelegationsList(): ReactElement | null {
   const { pendingDelegations, isLoading, refetch } = usePendingDelegations()

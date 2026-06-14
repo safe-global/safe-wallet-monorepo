@@ -1,7 +1,7 @@
 import { type SyntheticEvent, useContext, useCallback, useEffect } from 'react'
 import CheckWallet from '@/components/common/CheckWallet'
 import { Errors, trackError } from '@/services/exceptions'
-import { dispatchRecoveryExecution } from '@/features/recovery/services/recovery-sender'
+import { dispatchRecoveryExecution } from '@/features/recovery/services'
 import useWallet from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import ErrorMessage from '@/components/tx/ErrorMessage'

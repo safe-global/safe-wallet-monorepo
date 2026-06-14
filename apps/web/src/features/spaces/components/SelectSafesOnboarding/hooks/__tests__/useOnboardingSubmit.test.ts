@@ -36,11 +36,16 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 }))
 
 jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
 }))
 
 jest.mock('@/services/analytics/events/spaces', () => ({
-  SPACE_EVENTS: { ADD_ACCOUNTS: { action: 'add_accounts', category: 'spaces' } },
+  ...jest.requireActual('@/services/analytics/events/spaces'),
+  SPACE_EVENTS: {
+    ...jest.requireActual('@/services/analytics/events/spaces').SPACE_EVENTS,
+    ADD_ACCOUNTS: { action: 'add_accounts', category: 'spaces' },
+  },
 }))
 
 jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({

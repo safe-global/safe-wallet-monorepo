@@ -28,7 +28,7 @@ import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useMixpanelUserProperties } from './useMixpanelUserProperties'
 import { useChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces'
 import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 
 const useMixpanel = () => {

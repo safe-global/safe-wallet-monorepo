@@ -31,8 +31,8 @@ import {
   SafeAppMockup,
   deriveSidePanelAccountsFromSpace,
   useSafeNameLookup,
-} from '@/features/spaces/components/OnboardingLayout'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+} from '../OnboardingLayout'
+import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { flattenSafeItems } from '@/hooks/safes'
 import SurveyOptionCard from './SurveyOptionCard'
 

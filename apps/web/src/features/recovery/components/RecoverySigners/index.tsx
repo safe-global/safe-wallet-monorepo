@@ -6,9 +6,9 @@ import { AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 import { Countdown } from '@/components/common/Countdown'
 import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
 import CancelRecoveryButton from '../CancelRecoveryButton'
-import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
+import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import { formatAuditDateTime } from '@/components/common/AuditLog'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 import useAddressBook from '@/hooks/useAddressBook'
 
 export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): ReactElement {

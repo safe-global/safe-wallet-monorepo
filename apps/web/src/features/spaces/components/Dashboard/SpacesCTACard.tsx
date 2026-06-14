@@ -42,7 +42,7 @@ const SpacesCTACard = () => {
           </Typography>
         </div>
       </div>
-      {isInfoOpen && <SpaceInfoModal showButtons={false} onClose={() => setIsInfoOpen(false)} />}
+      {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} />}
     </>
   )
 }
