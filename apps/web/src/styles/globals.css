@@ -25,6 +25,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--color-background-paper);
+  /* Restores MUI CssBaseline's default body text color (removed in the shadcn migration).
+     Typography's default color variant sets no class, so text without an explicit color
+     inherits this. Without it, dark mode fell back to the browser-default black → text
+     was invisible on dark backgrounds. */
+  color: var(--color-text-primary);
 }
 
 main {
