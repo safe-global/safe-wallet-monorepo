@@ -58,6 +58,7 @@ export {
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
 export { default as useFeatureRedirect } from './hooks/useFeatureRedirect'
 export { default as useGetSpaceAddressBook } from './hooks/useGetSpaceAddressBook'
+export { useMemberNameResolver } from './hooks/useMemberNameResolver'
 export { default as useGetSpaceAuditLog } from './hooks/useGetSpaceAuditLog'
 export { default as useGetSpaceAuditLogActors } from './hooks/useGetSpaceAuditLogActors'
 export { default as useGetAddressBookRequests } from './hooks/useGetAddressBookRequests'
