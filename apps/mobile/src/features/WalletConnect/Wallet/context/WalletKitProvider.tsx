@@ -297,6 +297,8 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     async (caip2) => {
       const chainId = stripEip155Prefix(caip2)
       const state = store.getState()
+      // Two gates, both surfaced as NOT_DEPLOYED: the chain config must be loaded (we can't
+      // operate on a chain we have no config for), and the active Safe must be deployed there.
       if (!selectChainById(state, chainId)) {
         return { ok: false, reason: 'NOT_DEPLOYED' }
       }
@@ -313,7 +315,8 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // wallet_getCallsStatus — local Safe-tx status enriched with the on-chain receipt (mirrors
   // apps/web/.../safe-wallet-provider/index.ts). Throws 'Transaction not found' for an unknown
-  // id; the router converts that to a JSON-RPC error.
+  // id; the router converts that to a JSON-RPC error. `chainId` is the WC envelope's session
+  // chain — correct here because wallet_sendCalls is bound to the active chain at send time.
   const getCallsStatus: SessionRequestHandlerDeps['getCallsStatus'] = useCallback(
     async (chainId, id) => {
       const numericChainId = stripEip155Prefix(chainId)
@@ -346,6 +349,9 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     [dispatch, store],
   )
 
+  // wallet_showCallsStatus — open the pending-transactions queue. The screen doesn't yet read
+  // the chainId / txId params, so this lands on the queue rather than the specific tx detail;
+  // deep-linking to the exact entry is a follow-up.
   const navigateToCallsStatus: SessionRequestHandlerDeps['navigateToCallsStatus'] = useCallback((chainId, id) => {
     router.push({ pathname: '/pending-transactions', params: { chainId, txId: id } })
   }, [])
