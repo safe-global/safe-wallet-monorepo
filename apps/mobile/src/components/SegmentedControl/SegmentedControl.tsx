@@ -14,9 +14,19 @@ type SegmentedControlProps<T extends string> = {
   testID?: string
 }
 
+// iOS-style segmented control: a recessed track with a raised "thumb" on the selected segment.
+// Sizes to its content and centres itself. Colours follow the active theme (it is not forced dark)
+// so the thumb is the elevated base background in both light and dark mode.
 export function SegmentedControl<T extends string>({ options, value, onChange, testID }: SegmentedControlProps<T>) {
   return (
-    <XStack backgroundColor="$backgroundSecondary" borderRadius={12} padding="$1" gap="$1" testID={testID}>
+    <XStack
+      alignSelf="center"
+      backgroundColor="$backgroundSecondary"
+      borderRadius={10}
+      padding={3}
+      gap={2}
+      testID={testID}
+    >
       {options.map((option) => {
         const selected = option.value === value
         return (
@@ -26,18 +36,21 @@ export function SegmentedControl<T extends string>({ options, value, onChange, t
             accessibilityRole="button"
             accessibilityState={{ selected }}
             accessibilityLabel={option.label}
-            style={{ flex: 1 }}
             testID={testID ? `${testID}-${option.value}` : undefined}
           >
             <XStack
-              flex={1}
               justifyContent="center"
               alignItems="center"
-              paddingVertical="$3"
+              paddingVertical="$2"
+              paddingHorizontal="$4"
               borderRadius={8}
               backgroundColor={selected ? '$background' : 'transparent'}
+              shadowColor="#000"
+              shadowOpacity={selected ? 0.15 : 0}
+              shadowRadius={2}
+              shadowOffset={{ width: 0, height: 1 }}
             >
-              <Text fontWeight={selected ? '600' : '400'} color={selected ? '$color' : '$colorSecondary'}>
+              <Text fontSize={14} fontWeight={selected ? '600' : '400'} color={selected ? '$color' : '$colorSecondary'}>
                 {option.label}
               </Text>
             </XStack>
