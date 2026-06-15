@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberRole } from '../../../hooks/useSpaceMembers'
 import useInviteForm, { toInviteName } from './useInviteForm'
 
 const mockSpaceId = '11111111-1111-1111-1111-111111111111'
@@ -23,7 +23,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useMembersInviteUserV1Mutation: () => [mockInviteMembers],
 }))
 
-jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+jest.mock('../../../hooks/useSpaceMembers', () => ({
   MemberRole: { MEMBER: 'MEMBER', ADMIN: 'ADMIN' },
 }))
 

@@ -1,34 +1,23 @@
 import { useMemo } from 'react'
-import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useSafesGetSafeOverviewV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
+import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { selectCurrency } from '@/store/settingsSlice'
+import { flattenSafeItems } from '@/hooks/safes'
+import { useSpaceSafes } from './useSpaceSafes'
 
 type SafePair = { chainId: string; address: string }
 
 export const useSpaceSafesWithQueue = () => {
-  const spaceId = useCurrentSpaceId()
-  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { allSafes, isLoading: isLoadingSafes } = useSpaceSafes()
   const currency = useAppSelector(selectCurrency)
 
-  const { currentData: spaceSafes, isFetching: isLoadingSafes } = useSpaceSafesGetV1Query(
-    { spaceId: spaceId ?? '' },
-    { skip: !isUserSignedIn || !spaceId },
-  )
-
-  const safesParam = useMemo(() => {
-    if (!spaceSafes?.safes) return ''
-    return Object.entries(spaceSafes.safes)
-      .flatMap(([chainId, addresses]: [string, string[]]) => addresses.map((address) => `${chainId}:${address}`))
-      .join(',')
-  }, [spaceSafes?.safes])
-
-  const { currentData: overviews, isLoading: isLoadingOverviews } = useSafesGetSafeOverviewV1Query(
-    { currency, safes: safesParam, trusted: true, excludeSpam: true },
-    { skip: !safesParam },
-  )
+  // Same args as AggregatedBalance so both subscribe to the same cache entry —
+  // the dashboard then only fetches overviews once.
+  const safeItems = useMemo(() => flattenSafeItems(allSafes), [allSafes])
+  const { data: overviews, isLoading: isLoadingOverviews } = useGetMultipleSafeOverviewsQuery({
+    safes: safeItems,
+    currency,
+  })
 
   const safesWithQueue = useMemo(() => {
     if (!overviews) return []

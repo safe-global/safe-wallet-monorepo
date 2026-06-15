@@ -1,7 +1,7 @@
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
 import type { PendingRecoveryTransactions } from './useRecoveryPendingTxs'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { RecoveryState } from '@/features/recovery/services/recovery-state'
+import type { RecoveryState } from '../../services/recovery-state'
 
 export type RecoveryContextType = {
   state: AsyncResult<RecoveryState>

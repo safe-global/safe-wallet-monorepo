@@ -233,9 +233,13 @@ const SpacesList = () => {
               <SafeLogo alt="Safe logo" width={24} height={24} />
             </div>
 
-            {isUserSignedIn && activeSpaces.length > 0 && (
+            {isUserSignedIn && (
               <div className="flex gap-4 flex-1 justify-between">
-                <AddSpaceButton disabled={isAtSpacesLimit} onClick={onAddSpaceBtnClick} />
+                {activeSpaces.length > 0 ? (
+                  <AddSpaceButton disabled={isAtSpacesLimit} onClick={onAddSpaceBtnClick} />
+                ) : (
+                  <div />
+                )}
 
                 {isLoading ? (
                   <Pulse className="h-12 w-12 rounded-full group-data-[collapsible=icon]:w-9" />

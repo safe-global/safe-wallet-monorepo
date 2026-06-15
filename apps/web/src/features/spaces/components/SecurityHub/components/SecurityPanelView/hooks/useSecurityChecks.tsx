@@ -357,7 +357,9 @@ export const useSecurityChecks = (
           // Identify which module each row is so multiple flagged modules aren't indistinguishable.
           const title = vulnerable
             ? `Vulnerable module · ${mod.name || shortenAddress(mod.value)}`
-            : 'Unrecognized module detected'
+            : trusted
+              ? `Recognized module · ${mod.name || shortenAddress(mod.value)}`
+              : 'Unrecognized module detected'
           const perModuleEvidence: EvidenceItem[] = [
             { label: 'Address', value: mod.value },
             ...(mod.name ? [{ label: 'Name', value: mod.name }] : []),

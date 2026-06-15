@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import { WalletCards } from 'lucide-react'
-import SafeWidget from '@/features/spaces/components/SafeWidget'
+import { SafeWidget } from '@/features/spaces'
 import { AccountWidgetItem } from './AccountWidgetItem'
 import { ExpandableAccountItem } from './ExpandableAccountItem'
 import type { Account } from './types'

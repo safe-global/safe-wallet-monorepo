@@ -8,7 +8,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
-import { useCurrentMemberProfile } from '@/features/spaces/hooks/useSpaceMembers'
+import { useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
 
 const RemoveMemberDialog = ({
   userId,

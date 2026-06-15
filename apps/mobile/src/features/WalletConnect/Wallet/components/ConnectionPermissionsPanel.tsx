@@ -1,0 +1,89 @@
+import React from 'react'
+import { Text, YStack, XStack } from 'tamagui'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import type { IconName } from '@/src/types/iconTypes'
+import type { VerifyVariant } from '../utils/verifyStatus'
+import { VerifyStatusIcon } from './VerifyStatusIcon'
+
+type Props = {
+  variant: VerifyVariant
+}
+
+const CAN = ['View your balance and activity', 'Request transactions approval'] as const
+
+const CANNOT = ['Move funds without permission'] as const
+
+// Three copy variants over a binary colour: verified is green, unverified/malicious share
+// the red error treatment (the linked Figma has no distinct malicious colour). Malicious
+// copy mirrors the web wallet's ProposalVerification scam message.
+const BANNER_COPY: Record<VerifyVariant, string> = {
+  verified: 'This domain has been verified.',
+  unverified: 'This domain could not be verified.',
+  malicious: 'This domain is flagged as a known scam.',
+}
+
+const Row: React.FC<{ allowed: boolean; text: string }> = ({ allowed, text }) => {
+  const icon: IconName = allowed ? 'check' : 'close'
+  return (
+    <XStack gap={10} paddingHorizontal="$2" alignItems="center">
+      <SafeFontIcon name={icon} size={16} color={allowed ? '$success' : '$error'} />
+      <Text flex={1} fontSize={16} lineHeight={22}>
+        {text}
+      </Text>
+    </XStack>
+  )
+}
+
+// Content only — the "Got it" CTA is rendered by RequestSheetHost as a pinned BottomSheetFooter.
+export const ConnectionPermissionsPanel: React.FC<Props> = ({ variant }) => {
+  const isVerified = variant === 'verified'
+
+  return (
+    <YStack paddingHorizontal="$4" paddingTop="$2">
+      <Text fontSize={20} fontWeight="600" letterSpacing={-0.2} marginBottom="$6" textAlign="center">
+        Connection request
+      </Text>
+
+      <YStack gap="$6">
+        <XStack
+          gap="$3"
+          paddingHorizontal="$3"
+          paddingVertical="$4"
+          borderRadius="$4"
+          alignItems="center"
+          testID="wc-permissions-banner"
+          backgroundColor={isVerified ? '$backgroundSuccess' : '$backgroundError'}
+        >
+          <VerifyStatusIcon variant={variant} size={24} />
+          <Text flex={1} fontSize={16} fontWeight="700" lineHeight={22}>
+            {BANNER_COPY[variant]}
+          </Text>
+        </XStack>
+
+        <YStack gap="$2">
+          <Text paddingHorizontal="$2" fontSize={16} lineHeight={22} color="$colorSecondary">
+            This website will be able to:
+          </Text>
+          {CAN.map((text) => (
+            <Row key={text} text={text} allowed={true} />
+          ))}
+        </YStack>
+
+        <YStack gap="$2">
+          <Text paddingHorizontal="$2" fontSize={16} lineHeight={22} color="$colorSecondary">
+            This website won't be able to:
+          </Text>
+          {CANNOT.map((text) => (
+            <Row key={text} text={text} allowed={false} />
+          ))}
+        </YStack>
+
+        {!isVerified && (
+          <Text paddingHorizontal="$2" fontSize={16} fontWeight="700" lineHeight={22}>
+            Only continue if you trust the source.
+          </Text>
+        )}
+      </YStack>
+    </YStack>
+  )
+}
