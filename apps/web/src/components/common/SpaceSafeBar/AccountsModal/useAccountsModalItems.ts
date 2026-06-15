@@ -36,7 +36,7 @@ const EMPTY_SAFES: SafeItems = []
  *   useAllSafesGrouped()                              otherSafes → useAllSafesGrouped()
  *     ▼                                                 ▼
  *   allItems  (merge, sort by order               otherSafeItems  (merge, sort by order
- *     ▼  preference — Name or Most recent)           ▼  preference — Name or Most recent)
+ *     ▼  preference — Name or Last visited)          ▼  preference — Name or Last visited)
  *     ▼  search + isPinned                            ▼  search + !isPinned
  *   trustedItems                                    otherItems
  *
