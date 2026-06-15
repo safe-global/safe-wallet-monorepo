@@ -10,8 +10,7 @@ import Identicon from '@/components/common/Identicon'
 import { cn } from '@/utils/cn'
 import css from './styles.module.css'
 
-const SPACE_HELP_ARTICLE_LINK =
-  'https://help.safe.global/articles/8240597068-Spaces:-Team-Collaboration-for-Safe-Accounts'
+const SPACE_HELP_ARTICLE_LINK = 'https://help.safe.global/collections/1628654831-workspace?lang=en'
 
 const TOTAL_TREASURY = 47829104
 
