@@ -11,7 +11,7 @@ const UNRECOGNISED_MESSAGE = 'Unrecognised QR code'
 
 export type ScanStatus = 'scanning' | 'connecting' | 'error'
 
-export const useWalletConnectScan = () => {
+export const useWalletConnectScan = ({ isActive = true }: { isActive?: boolean } = {}) => {
   const router = useRouter()
   const { permission, requestPermission, openSettings } = useCameraPermissionFlow()
   const [status, setStatus] = useState<ScanStatus>('scanning')
@@ -56,6 +56,19 @@ export const useWalletConnectScan = () => {
       }
     }, [permission, clearTimer]),
   )
+
+  // When the scanner shares a screen with another tab (the ScanConnect sheet), pause the camera
+  // while the tab is hidden and resume on return. We only toggle `isCameraActive` here — `status`
+  // and any error message are left intact so an in-progress scan/error survives the switch.
+  useEffect(() => {
+    if (!isActive) {
+      setIsCameraActive(false)
+      return
+    }
+    if (permission === 'granted' && statusRef.current === 'scanning') {
+      setIsCameraActive(true)
+    }
+  }, [isActive, permission])
 
   const startPair = useCallback(
     async (uri: string) => {
