@@ -1,8 +1,17 @@
 import { useState } from 'react'
-import { Alert, Button as MuiButton, DialogActions, DialogContent, Tooltip } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Button as MuiButton,
+  CircularProgress,
+  DialogActions,
+  DialogContent,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Spinner } from '@/components/ui/spinner'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -103,56 +112,54 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
 
       <ModalDialog open={open} onClose={() => setOpen(false)} dialogTitle="Request to add contact" hideChainIndicator>
         <DialogContent sx={{ py: 2 }}>
-          <div className="flex flex-col gap-4">
-            <p className="text-muted-foreground text-sm">
+          <Stack spacing={2}>
+            <Typography variant="body2" color="text.secondary">
               An admin has to approve the request before the contact appears in the workspace address book.
-            </p>
+            </Typography>
 
-            <div>
-              <p className="text-sm font-bold">Name</p>
-              <p className="text-sm">{name}</p>
-            </div>
+            <Box>
+              <Typography variant="body2" color="text.secondary" mb={0.5}>
+                Name
+              </Typography>
+              <Typography variant="body1">{name}</Typography>
+            </Box>
 
-            <div>
-              <p className="mb-1 text-sm font-bold">Address</p>
-              <div className="text-[0.8em]">
-                <EthHashInfo
-                  address={address}
-                  shortAddress={false}
-                  showPrefix={false}
-                  showName={false}
-                  avatarSize={24}
-                />
-              </div>
-            </div>
+            <Box>
+              <Typography variant="body2" color="text.secondary" mb={0.5}>
+                Address
+              </Typography>
+              <EthHashInfo address={address} shortAddress={false} showPrefix={false} showName={false} avatarSize={24} />
+            </Box>
 
-            <div>
-              <p className="mb-1 text-sm font-bold">Networks</p>
+            <Box>
+              <Typography variant="body2" color="text.secondary" mb={1}>
+                Networks
+              </Typography>
               {chains.configs.length === chainIds.length ? (
-                <p className="text-sm">All networks</p>
+                <Typography variant="body1">All networks</Typography>
               ) : (
                 <Tooltip
                   title={
-                    <div className="flex flex-col gap-1">
+                    <Stack spacing={0.5}>
                       {chainIds.map((chainId) => (
                         <ChainIndicator key={chainId} chainId={chainId} />
                       ))}
-                    </div>
+                    </Stack>
                   }
                   placement="top"
                   arrow
                 >
-                  <span className="inline-flex">
+                  <Box display="inline-flex">
                     <NetworkLogosList networks={chainIds.map((chainId) => ({ chainId }))} showHasMore maxVisible={6} />
-                  </span>
+                  </Box>
                 </Tooltip>
               )}
-            </div>
+            </Box>
 
             {nameError && (
               <Alert severity="warning">Rename this contact to share it with the workspace. {nameError}.</Alert>
             )}
-          </div>
+          </Stack>
         </DialogContent>
 
         <DialogActions>
@@ -167,7 +174,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
             disabled={!!nameError || isSubmitting}
             disableElevation
           >
-            {isSubmitting ? <Spinner className="size-5" /> : 'Request to add'}
+            {isSubmitting ? <CircularProgress size={20} /> : 'Request to add'}
           </MuiButton>
         </DialogActions>
       </ModalDialog>
