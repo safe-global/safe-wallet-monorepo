@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import useGetSpaceAuditLogActors from '../../hooks/useGetSpaceAuditLogActors'
+import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
 
 export type ActivityLogFilterState = {
   actorUserId?: number
@@ -44,6 +45,11 @@ function ActivityLogFilters({
 }) {
   // Includes former and deleted members — their events stay filterable.
   const actors = useGetSpaceAuditLogActors()
+  const resolveMemberName = useMemberNameResolver()
+
+  // Prefer the Team-page display name; fall back to the server label (a raw
+  // address for wallet members, an email otherwise) for non-members.
+  const getActorLabel = (actorUserId: number, fallback: string) => resolveMemberName(actorUserId) ?? fallback
 
   const selectedActor = actors.find((actor) => actor.actorUserId === filters.actorUserId)
   const sortDirection = filters.sortDirection ?? 'desc'
@@ -62,14 +68,16 @@ function ActivityLogFilters({
         >
           <SelectTrigger id="activity-actor-filter" className="bg-card w-48 cursor-pointer rounded-lg">
             <SelectValue placeholder={ALL_ACTORS_LABEL}>
-              <span className="truncate">{selectedActor ? selectedActor.actor : ALL_ACTORS_LABEL}</span>
+              <span className="truncate">
+                {selectedActor ? getActorLabel(selectedActor.actorUserId, selectedActor.actor) : ALL_ACTORS_LABEL}
+              </span>
             </SelectValue>
           </SelectTrigger>
           <SelectContent alignItemWithTrigger={false} align="start">
             <SelectItem value={ALL_ACTORS}>{ALL_ACTORS_LABEL}</SelectItem>
             {actors.map((actor) => (
               <SelectItem key={actor.actorUserId} value={String(actor.actorUserId)}>
-                {actor.actor}
+                {getActorLabel(actor.actorUserId, actor.actor)}
               </SelectItem>
             ))}
           </SelectContent>
