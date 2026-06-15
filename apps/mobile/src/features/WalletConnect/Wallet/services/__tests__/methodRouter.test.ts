@@ -247,6 +247,16 @@ describe('routeSessionRequest — WA-2322 read-only + wallet-control branches', 
       const result = (res as { result: Record<string, unknown> }).result
       expect(Object.keys(result)).toEqual(['0x1'])
     })
+
+    it('tolerates malformed (non-string) chainIds and falls back to the envelope chain', async () => {
+      // A malformed dApp request must not throw out of the router (which would leave the dApp
+      // without any response); non-string entries are dropped.
+      const res = await routeSessionRequest(
+        makeCtx(makeRequest('wallet_getCapabilities', [SAFE_ADDRESS, [1, 137] as unknown as string[]])),
+      )
+      const result = (res as { result: Record<string, unknown> }).result
+      expect(Object.keys(result)).toEqual(['0x1'])
+    })
   })
 
   describe('wallet_getCallsStatus', () => {

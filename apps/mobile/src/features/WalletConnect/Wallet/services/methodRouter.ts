@@ -162,14 +162,15 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
   // keys against the chain THEY operate on, so key off the requested chains (falling back to
   // the envelope's session chain), not the wallet's active chain.
   if (method === 'wallet_getCapabilities') {
-    const [, requestedChainIds] = rpcParams as [string, string[] | undefined]
+    const [, requestedChainIds] = rpcParams as [string, unknown]
+    // Filter to strings before lowercasing — a dApp can send malformed chainIds (e.g. numbers),
+    // and an uncaught throw here would reject the whole request so the dApp never gets a reply.
+    const normalizedRequested = Array.isArray(requestedChainIds)
+      ? requestedChainIds.filter((c): c is string => typeof c === 'string').map((c) => c.toLowerCase())
+      : []
     const envelopeChainHex = chainId.startsWith(NS) ? chainIdToHex(stripEip155Prefix(chainId)) : null
     const chainsToReport: string[] =
-      requestedChainIds && requestedChainIds.length > 0
-        ? requestedChainIds.map((c) => c.toLowerCase())
-        : envelopeChainHex
-          ? [envelopeChainHex]
-          : []
+      normalizedRequested.length > 0 ? normalizedRequested : envelopeChainHex ? [envelopeChainHex] : []
     if (chainsToReport.length === 0) {
       return formatJsonRpcResult(id, {})
     }
