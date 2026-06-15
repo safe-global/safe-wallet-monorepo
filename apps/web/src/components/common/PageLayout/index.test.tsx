@@ -8,12 +8,6 @@ jest.mock('@/components/common/Header/Topbar', () => {
   return { __esModule: true, default: MockTopbar }
 })
 
-jest.mock('@/components/common/ClassicViewToast', () => {
-  const MockClassicViewToast = () => null
-  MockClassicViewToast.displayName = 'ClassicViewToast'
-  return { __esModule: true, default: MockClassicViewToast }
-})
-
 jest.mock('@/components/common/SafeLogo', () => {
   const MockSafeLogo = ({ href }: { href?: string }) => <a data-testid="safe-logo" href={href} />
   MockSafeLogo.displayName = 'SafeLogo'

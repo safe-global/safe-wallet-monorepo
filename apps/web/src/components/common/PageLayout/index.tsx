@@ -23,7 +23,6 @@ import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import { isAlwaysPublic } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
-import ClassicViewToast from '@/components/common/ClassicViewToast'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -96,8 +95,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      <ClassicViewToast />
-
       {isStaticPage && (
         <div className="px-6 py-4">
           <SafeLogo />
