@@ -116,7 +116,7 @@ When visiting our Website or using Safe Interfaces, we will collect and process 
 
 2. We also allow you to log-in and to the Safe{Wallet} app via Single-Sign On. For this purpose we process:
 
-   1. Email address (not stored by Safe Labs. See Section 5 for more details), and  
+   1. Email address, and  
    2. User ID linked to the email address.
 
 3. We process personal data when you fill out forms to register for a demo or request more information about new product integrations. Personal data processed include:
@@ -133,7 +133,13 @@ We rely on the user consent (Art. 6.1a GDPR) to process this information, as use
   
 Please note that Hypernative will also be collecting the same data when you fill out the form, and processing it in accordance with the terms stipulated in their Privacy Policy.
 
-4. When you create a new Safe Account we process the following personal data to compose a Transaction based on your entered data to be approved by your Wallet:
+4. When you log in to a Safe{Wallet} Workspace using your email address — via a one-time code or via Google — authentication is handled by our identity provider Auth0 by Okta (see Section 5.12); our web application does not log or retain your email during sign-in. Once verified, we store your email address on our server to link it to your Workspace membership and to display it to you and to other members of your Workspace. For this purpose we process your email address, user identifier, Workspace ID, and session data.
+
+Your email is visible only to members of the Workspace(s) you belong to. When an administrator invites a new member, we process the invited person's email to send and validate the invitation; the invitation grants no access on its own and expires automatically.
+
+The legal basis is performance of our contract with you (GDPR Art. 6.1b), and for invitations, our legitimate interest (GDPR Art. 6.1f) in enabling administrators to manage their teams.
+
+5. When you create a new Safe Account we process the following personal data to compose a Transaction based on your entered data to be approved by your Wallet:
 
    1. your public Wallet address,  
    2. account balance,  
@@ -141,51 +147,51 @@ Please note that Hypernative will also be collecting the same data when you fill
    4. addresses of externally owned accounts, and  
    5. user activity.
 
-5. When you create a Profile for a new Safe Account we process the following personal data for the purpose of enabling you to view your Safe Account after creation as well as enabling you to view all co-owned Safes Accounts:
+6. When you create a Profile for a new Safe Account we process the following personal data for the purpose of enabling you to view your Safe Account after creation as well as enabling you to view all co-owned Safes Accounts:
 
    1. your public Wallet address, and  
    2. account balance.
 
-6. When you create a Profile for an existing Safe Account for the purpose of allowing you to view and use them in the Safe Interface, we process your
+7. When you create a Profile for an existing Safe Account for the purpose of allowing you to view and use them in the Safe Interface, we process your
 
    1. public Wallet address,  
    2. Safe Account balance,  
    3. smart contract address of the Safe Account, and  
    4. Safe Account owner's public Wallet addresses.
 
-7. When you initiate a Safe Account Transaction we process the following personal data to compose the Transaction for you based on your entered personal data:
+8. When you initiate a Safe Account Transaction we process the following personal data to compose the Transaction for you based on your entered personal data:
 
    1. your public Wallet address, and  
    2. smart contract address of Safe Account.
 
-8. When you sign a Safe Account Transaction we process the following personal data to enable you to sign the Transaction using your Wallet:
+9. When you sign a Safe Account Transaction we process the following personal data to enable you to sign the Transaction using your Wallet:
 
    1. Safe Account balance,  
    2. smart contract address of Safe Account, and  
    3. Safe Account owner's public Wallet addresses.
 
-9. To enable you to execute the Transaction on the Blockchain we process:
+10. To enable you to execute the Transaction on the Blockchain we process:
 
-   1. your public Wallet address,  
-   2. Safe Account balance,  
-   3. smart contract address of Safe Account,  
-   4. Safe Account owner's public Wallet addresses, and  
-   5. Transactions signed by all Safe Account owners.
+    1. your public Wallet address,  
+    2. Safe Account balance,  
+    3. smart contract address of Safe Account,  
+    4. Safe Account owner's public Wallet addresses, and  
+    5. Transactions signed by all Safe Account owners.
 
-10. When we collect relevant personal data from the Blockchain to display context information in the Safe Interface we process:
+11. When we collect relevant personal data from the Blockchain to display context information in the Safe Interface we process:
 
     1. your public Wallet address,  
     2. account balance,  
     3. account activity, and  
     4. Safe Account owner's Public wallet addresses.
 
-11. When we decode Transactions from the Blockchain for the purpose of providing Transaction information in a conveniently readable format, we process:
+12. When we decode Transactions from the Blockchain for the purpose of providing Transaction information in a conveniently readable format, we process:
 
     1. your public Wallet address,  
     2. account balance, and  
     3. account activity.
 
-12. When we maintain a user profile to provide you with a good user experience through Profiles and an address book we process:
+13. When we maintain a user profile to provide you with a good user experience through Profiles and an address book we process:
 
     1. your public Wallet address,  
     2. label,  
@@ -450,7 +456,7 @@ This tool enables the processing in sections 3.5.7 and 3.5.8.
 
 ## 5.12. Auth0 by Okta {#auth0-by-okta}
 
-This tool enables the login via Single Sign-On as described in section (3.1.2). Email addresses are not stored by Safe Labs but by Auth0. SafeLabs only processes the User ID generated by Auth0 tied to the user email.
+This tool enables the login via Single Sign-On as described in section (3.1.2).
 
 # 6. Personal data transfers to third countries {#personal-data-transfers-to-third-countries}
 
