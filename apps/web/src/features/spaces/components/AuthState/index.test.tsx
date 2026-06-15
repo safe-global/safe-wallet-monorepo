@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import AuthState from './index'
 import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
 
@@ -66,7 +66,7 @@ jest.mock('@/config/routes', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  MemberStatus: { DECLINED: 'DECLINED' },
+  MemberStatus: { ACTIVE: 'ACTIVE' },
 }))
 
 describe('AuthState', () => {
@@ -77,9 +77,10 @@ describe('AuthState', () => {
     mockIsUnauthorized.mockReturnValue(false)
     mockUseHasFeature.mockReturnValue(true)
     mockUseSpacesGetOneV1Query.mockReturnValue({
-      currentData: { id: 1, members: [] },
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'ACTIVE' }] },
       error: undefined,
       isLoading: false,
+      isFetching: false,
     })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 'u1' } })
   })
@@ -140,6 +141,17 @@ describe('AuthState', () => {
     )
   })
 
+  it('renders the children for an active member', () => {
+    render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(screen.getByTestId('children')).toBeInTheDocument()
+    expect(mockReplace).not.toHaveBeenCalled()
+  })
+
   it('redirects to the spaces overview when the space query is unauthorized', () => {
     mockIsUnauthorized.mockReturnValue(true)
     mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, error: { status: 404 }, isLoading: false })
@@ -155,12 +167,70 @@ describe('AuthState', () => {
     expect(queryByTestId('unauthorized')).not.toBeNull()
   })
 
+  it('redirects an invited (pending) member to the workspace list without showing the red error state', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'INVITED' }] },
+      error: undefined,
+      isLoading: false,
+      isFetching: false,
+    })
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).toHaveBeenCalledWith('/welcome/spaces')
+    expect(queryByTestId('children')).toBeNull()
+    // Inactive members get the neutral loading state, not the red UnauthorizedState
+    expect(queryByTestId('loading')).not.toBeNull()
+    expect(queryByTestId('unauthorized')).toBeNull()
+  })
+
+  // Accepting an invite invalidates the 'spaces' tag — while the stale cache
+  // entry (status INVITED) refetches, the member must not be bounced back to
+  // the workspace list they just accepted from.
+  it('does not redirect an invited member while the space query is refetching', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'INVITED' }] },
+      error: undefined,
+      isLoading: false,
+      isFetching: true,
+    })
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).not.toHaveBeenCalled()
+    // The stale INVITED data must not flash the space content either
+    expect(queryByTestId('children')).toBeNull()
+    expect(queryByTestId('loading')).not.toBeNull()
+  })
+
   it('redirects to the spaces overview when the current user has declined membership', () => {
     mockUseSpacesGetOneV1Query.mockReturnValue({
       currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'DECLINED' }] },
       error: undefined,
       isLoading: false,
+      isFetching: false,
     })
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).toHaveBeenCalledWith('/welcome/spaces')
+    expect(queryByTestId('children')).toBeNull()
+  })
+
+  it('does not redirect while the current user is still loading', () => {
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
 
     render(
       <AuthState spaceId="7">
@@ -168,7 +238,7 @@ describe('AuthState', () => {
       </AuthState>,
     )
 
-    expect(mockReplace).toHaveBeenCalledWith('/welcome/spaces')
+    expect(mockReplace).not.toHaveBeenCalled()
   })
 
   it('does not redirect while the space query is still loading', () => {
