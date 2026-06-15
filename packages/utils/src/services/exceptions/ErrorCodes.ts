@@ -76,6 +76,7 @@ enum ErrorCodes {
   _819 = '819: Error adding a transaction to the batch',
   _820 = '820: Error signing or submitting delegation',
   _821 = '821: Untrusted gas-fee refundReceiver returned by CGW',
+  _822 = '822: Error submitting nested Safe approval confirmation',
 
   _900 = '900: Error loading Safe App',
   _901 = '901: Error processing Safe Apps SDK request',

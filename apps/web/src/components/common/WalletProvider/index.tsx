@@ -7,12 +7,15 @@ import { useRouter } from 'next/router'
 import { type Eip1193Provider } from 'ethers'
 import { getNestedWallet } from '@/utils/nested-safe-wallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 export type SignerWallet = {
   provider: Eip1193Provider | null
   address: string
   chainId: string
   isSafe?: boolean
+  // Present only for nested signers (a parent Safe): the parent's full state. See NestedWallet.
+  safeInfo?: SafeState
 }
 
 export type WalletContextType = {

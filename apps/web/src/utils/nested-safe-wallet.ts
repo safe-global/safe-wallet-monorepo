@@ -19,6 +19,9 @@ export type NestedWallet = {
   chainId: string
   provider: Eip1193Provider | null
   isSafe: true
+  // The parent Safe's full state, reused from the query WalletProvider already ran so the nested
+  // signing flow can build/relay the parent's approveHash without re-fetching it.
+  safeInfo: SafeState
 }
 
 export const getNestedWallet = (
@@ -162,5 +165,6 @@ export const getNestedWallet = (
     address: safeInfo.address.value,
     chainId: safeInfo.chainId,
     isSafe: true,
+    safeInfo,
   }
 }
