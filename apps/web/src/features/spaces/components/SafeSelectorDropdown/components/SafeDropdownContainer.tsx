@@ -8,6 +8,7 @@ import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
+import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import type { SafeItemData } from '../types'
 
 const matchesSearch = (item: SafeItemData, displayName: string, query: string): boolean => {
@@ -144,8 +145,8 @@ const SafeDropdownContainer = ({
           <div className="shrink-0 bg-card">
             {header}
             {showSearch && (
-              <div className="px-3 pb-2 pt-1">
-                <InputGroup className="rounded-md border-gray-100 shadow-none">
+              <div className="flex items-center gap-2 px-3 pb-2 pt-1">
+                <InputGroup className="flex-1 rounded-md border-gray-100 shadow-none">
                   <InputGroupAddon>
                     <Search className="size-4" />
                   </InputGroupAddon>
@@ -162,6 +163,7 @@ const SafeDropdownContainer = ({
                     data-testid="safe-dropdown-search-input"
                   />
                 </InputGroup>
+                <SafeListSortToggle />
               </div>
             )}
           </div>

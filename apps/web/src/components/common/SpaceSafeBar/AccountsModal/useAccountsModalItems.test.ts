@@ -33,9 +33,11 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/owners', () => ({
   useOwnersGetAllSafesByOwnerV2Query: jest.fn(() => ({ error: undefined, refetch: jest.fn() })),
 }))
 
+// Plain let (not jest.fn) so jest.resetAllMocks() doesn't wipe it; controls the order preference.
+let mockOrderBy = 'name'
 jest.mock('@/store', () => ({
   useAppDispatch: jest.fn(),
-  useAppSelector: () => ({}),
+  useAppSelector: () => ({ orderBy: mockOrderBy }),
 }))
 
 const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
@@ -60,6 +62,7 @@ const ADDR_B = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
 describe('useAccountsModalItems', () => {
   beforeEach(() => {
     jest.resetAllMocks()
+    mockOrderBy = 'name'
     mockUseSpaceSafes.mockReturnValue({ allSafes: [] })
     mockUseIsQualifiedSafe.mockReturnValue(false)
     mockUseOwnersQuery.mockReturnValue({ error: undefined, refetch: jest.fn() })
@@ -203,5 +206,29 @@ describe('useAccountsModalItems', () => {
 
     rerender({ search: 'nope' })
     expect(result.current.otherItems).toHaveLength(0)
+  })
+
+  it('sorts within the trusted section A→Z when ordering by Name', () => {
+    mockOrderBy = 'name'
+    mockUseAllSafes.mockReturnValue([
+      safeItem('1', ADDR_A, { isPinned: true, name: 'Zeta' }),
+      safeItem('1', ADDR_B, { isPinned: true, name: 'Alpha' }),
+    ])
+
+    const { result } = renderHook(() => useAccountsModalItems({ search: '', open: true }))
+
+    expect(result.current.trustedItems.map((s) => (s as SafeItem).name)).toEqual(['Alpha', 'Zeta'])
+  })
+
+  it('sorts within the trusted section by most-recent when ordering by Last visited', () => {
+    mockOrderBy = 'lastVisited'
+    mockUseAllSafes.mockReturnValue([
+      safeItem('1', ADDR_A, { isPinned: true, name: 'Older', lastVisited: 100 }),
+      safeItem('1', ADDR_B, { isPinned: true, name: 'Newer', lastVisited: 200 }),
+    ])
+
+    const { result } = renderHook(() => useAccountsModalItems({ search: '', open: true }))
+
+    expect(result.current.trustedItems.map((s) => (s as SafeItem).name)).toEqual(['Newer', 'Older'])
   })
 })

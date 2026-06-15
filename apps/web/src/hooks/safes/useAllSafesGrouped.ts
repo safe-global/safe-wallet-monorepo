@@ -4,6 +4,7 @@ import useAllSafes, { type SafeItem, type SafeItems } from './useAllSafes'
 import { useMemo } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBookSlice'
+import type { VisitedSafesState } from '@/store/slices'
 import useWallet from '@/hooks/wallets/useWallet'
 import useAllOwnedSafes from './useAllOwnedSafes'
 import { useAppSelector } from '@/store'
@@ -45,6 +46,7 @@ export function _buildSafeItems(
   safes: Record<string, string[] | null>,
   allSafeNames: AddressBookState,
   allOwned?: AllOwnedSafes,
+  allVisitedSafes?: VisitedSafesState,
 ): SafeItem[] {
   const result: SafeItem[] = []
 
@@ -54,13 +56,14 @@ export function _buildSafeItems(
     addresses?.forEach((address) => {
       const isReadOnly = !!allOwned && !(allOwned[chainId] || []).includes(address)
       const name = allSafeNames[chainId]?.[address]
+      const lastVisited = allVisitedSafes?.[chainId]?.[address]?.lastVisited || 0
 
       result.push({
         chainId,
         address,
         isReadOnly,
         isPinned: false,
-        lastVisited: 0,
+        lastVisited,
         name,
       })
     })

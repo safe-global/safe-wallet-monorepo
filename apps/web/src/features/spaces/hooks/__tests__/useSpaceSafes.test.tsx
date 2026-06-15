@@ -9,6 +9,7 @@ const mockUseWallet = jest.fn()
 const mockUseAllOwnedSafes = jest.fn()
 const mockUseAllSafesGrouped = jest.fn()
 let mockIsAuthenticated = true
+let mockLocalAddressBook: Record<string, Record<string, string>> = {}
 
 jest.mock('../useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
@@ -23,6 +24,8 @@ jest.mock('@/store', () => ({
   useAppSelector: (selector: string) => {
     if (selector === 'isAuthenticated') return mockIsAuthenticated
     if (selector === 'selectOrderByPreference') return { orderBy: 'name' }
+    if (selector === 'selectAllAddressBooks') return mockLocalAddressBook
+    if (selector === 'selectAllVisitedSafes') return {}
     return undefined
   },
 }))
@@ -33,6 +36,11 @@ jest.mock('@/store/authSlice', () => ({
 
 jest.mock('@/store/orderByPreferenceSlice', () => ({
   selectOrderByPreference: 'selectOrderByPreference',
+}))
+
+jest.mock('@/store/slices', () => ({
+  selectAllAddressBooks: 'selectAllAddressBooks',
+  selectAllVisitedSafes: 'selectAllVisitedSafes',
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
@@ -59,6 +67,7 @@ describe('useSpaceSafes', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockIsAuthenticated = true
+    mockLocalAddressBook = {}
     mockUseGetSpaceAddressBook.mockReturnValue([])
     mockUseWallet.mockReturnValue({ address: '0xabc' })
     mockUseAllOwnedSafes.mockReturnValue([{}])
@@ -95,5 +104,30 @@ describe('useSpaceSafes', () => {
     renderHook(() => useSpaceSafes())
 
     expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID }, { skip: false })
+  })
+
+  // Regression: address-book-named safes must sort by their displayed name. Without folding the
+  // user's address book into the name source, `name` is empty here and "Name" sorting no-ops.
+  it('merges the local address book under space contacts when building safe items', () => {
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
+    mockUseSpaceSafesGetV1Query.mockReturnValue({
+      currentData: { safes: { '1': ['0xA'] } },
+      isLoading: false,
+      isError: false,
+      error: undefined,
+      refetch: jest.fn(),
+    })
+    mockLocalAddressBook = { '1': { '0xA': 'Local Name' } }
+    mockUseGetSpaceAddressBook.mockReturnValue([]) // no space contact for 0xA
+
+    renderHook(() => useSpaceSafes())
+
+    const { _buildSafeItems } = jest.requireMock('@/hooks/safes') as { _buildSafeItems: jest.Mock }
+    expect(_buildSafeItems).toHaveBeenCalledWith(
+      { '1': ['0xA'] },
+      expect.objectContaining({ '1': { '0xA': 'Local Name' } }),
+      expect.anything(),
+      expect.anything(),
+    )
   })
 })

@@ -49,6 +49,12 @@ jest.mock('../MultiChainSafeItemRow', () => ({
   default: ({ item }: { item: SafeItemData }) => <div data-testid="multi-chain-row">{item.name}</div>,
 }))
 
+// Redux-backed; stubbed here so the container test doesn't need a store.
+jest.mock('@/components/common/SafeListSortToggle', () => ({
+  __esModule: true,
+  default: () => <div data-testid="safe-list-sort-toggle" />,
+}))
+
 const createItem = (overrides: Partial<SafeItemData> = {}): SafeItemData => ({
   id: '1:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
   name: 'Safe A',
