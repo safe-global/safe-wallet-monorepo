@@ -34,16 +34,23 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
   const hasLostAccess = isUserSignedIn && !isLoadingState && isUnauthorized(error)
   const isInactiveMember = isUserSignedIn && !isLoadingState && hasMembershipLoaded && !isCurrentUserActive
 
-  useEffect(() => {
-    dispatch(setLastUsedSpace(spaceId))
-  }, [dispatch, spaceId])
-
   // !isFetching: accepting an invite refetches the space — don't redirect on the stale INVITED entry
+  const isRedirecting = hasLostAccess || (isInactiveMember && !isFetching)
+
   useEffect(() => {
-    if (hasLostAccess || (isInactiveMember && !isFetching)) {
+    // Don't persist an id we're redirecting away from — it would re-trigger the failure next visit
+    if (!isRedirecting) {
+      dispatch(setLastUsedSpace(spaceId))
+    }
+  }, [dispatch, spaceId, isRedirecting])
+
+  useEffect(() => {
+    if (isRedirecting) {
+      // Clear the stale id so a no-longer-valid (e.g. legacy numeric) space doesn't fail again
+      dispatch(setLastUsedSpace(null))
       router.replace(AppRoutes.welcome.spaces)
     }
-  }, [hasLostAccess, isInactiveMember, isFetching, router])
+  }, [dispatch, isRedirecting, router])
 
   if (!isSpacesFeatureEnabled) return null
 

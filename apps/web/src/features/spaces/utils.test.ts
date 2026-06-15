@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { getInvitedByName } from './utils'
+import { getInvitedByName, isUnauthorized } from './utils'
 import { spaceBuilder, spaceMemberBuilder } from '@/tests/builders/space'
 
 const CURRENT_USER_ID = 1
@@ -14,6 +14,28 @@ const buildSpaceWithMember = (invitedByName?: string) =>
       ],
     })
     .build()
+
+describe('isUnauthorized', () => {
+  it('treats a 400 (legacy numeric space id rejected by the backend) as unauthorized', () => {
+    expect(isUnauthorized({ status: 400, data: undefined })).toBe(true)
+  })
+
+  it('treats a 401 as unauthorized', () => {
+    expect(isUnauthorized({ status: 401, data: undefined })).toBe(true)
+  })
+
+  it('treats a 404 as unauthorized', () => {
+    expect(isUnauthorized({ status: 404, data: undefined })).toBe(true)
+  })
+
+  it('does not treat a 500 as unauthorized', () => {
+    expect(isUnauthorized({ status: 500, data: undefined })).toBe(false)
+  })
+
+  it('returns falsy when there is no error', () => {
+    expect(isUnauthorized(undefined)).toBeFalsy()
+  })
+})
 
 describe('getInvitedByName', () => {
   it('returns undefined when no space is provided', () => {

@@ -9,9 +9,11 @@ import type {
 import { MemberStatus, MemberRole } from './hooks/useSpaceMembers'
 import type { AddressBookState } from '@/store/addressBookSlice'
 
-// TODO: Currently also checks for 404 because the /v1/spaces/<orgId> endpoint does not return 401
+// 400: an invalid space identifier (the GetOne endpoint's only 400 — e.g. a legacy numeric id
+// the backend no longer accepts). 404: the /v1/spaces/<id> endpoint does not return 401.
+// All three mean the current user cannot view this space.
 export const isUnauthorized = (error: FetchBaseQueryError | SerializedError | undefined) => {
-  return error && 'status' in error && (error.status === 401 || error.status === 404)
+  return error && 'status' in error && (error.status === 400 || error.status === 401 || error.status === 404)
 }
 
 export const filterSpacesByStatus = (

@@ -167,6 +167,51 @@ describe('AuthState', () => {
     expect(queryByTestId('unauthorized')).not.toBeNull()
   })
 
+  it('clears the persisted space id and does not re-persist it when access is lost', () => {
+    mockIsUnauthorized.mockReturnValue(true)
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, error: { status: 400 }, isLoading: false })
+
+    render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'setLastUsedSpace', payload: null })
+    expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'setLastUsedSpace', payload: '7' })
+  })
+
+  it('persists the space id when the user still has access', () => {
+    render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div />
+      </AuthState>,
+    )
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'setLastUsedSpace',
+      payload: '11111111-1111-1111-1111-111111111111',
+    })
+  })
+
+  it('clears the persisted space id and does not re-persist it when redirecting an inactive member', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'DECLINED' }] },
+      error: undefined,
+      isLoading: false,
+      isFetching: false,
+    })
+
+    render(
+      <AuthState spaceId="7">
+        <div />
+      </AuthState>,
+    )
+
+    expect(mockDispatch).toHaveBeenCalledWith({ type: 'setLastUsedSpace', payload: null })
+    expect(mockDispatch).not.toHaveBeenCalledWith({ type: 'setLastUsedSpace', payload: '7' })
+  })
+
   it('redirects an invited (pending) member to the workspace list without showing the red error state', () => {
     mockUseSpacesGetOneV1Query.mockReturnValue({
       currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'INVITED' }] },
