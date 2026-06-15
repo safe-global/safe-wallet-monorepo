@@ -1,12 +1,18 @@
 import type { JsonRpcProvider } from 'ethers'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { createWeb3ReadOnly } from '@/src/services/web3'
+import { createWeb3ReadOnly, getRpcServiceUrl } from '@/src/services/web3'
 import { READ_ONLY_RPC_ALLOW_LIST } from './constants'
 
 const providerCache = new Map<string, JsonRpcProvider>()
 
 const getProviderForChain = (chain: Chain): JsonRpcProvider => {
-  const cached = providerCache.get(chain.chainId)
+  const url = getRpcServiceUrl(chain.rpcUri)
+  if (!url) {
+    throw new Error(`No RPC URL configured for chainId=${chain.chainId}`)
+  }
+  // Key by url as well as chainId so a changed RPC endpoint isn't served by a stale provider.
+  const cacheKey = `${chain.chainId}|${url}`
+  const cached = providerCache.get(cacheKey)
   if (cached) {
     return cached
   }
@@ -14,7 +20,7 @@ const getProviderForChain = (chain: Chain): JsonRpcProvider => {
   if (!provider) {
     throw new Error(`No RPC URL configured for chainId=${chain.chainId}`)
   }
-  providerCache.set(chain.chainId, provider)
+  providerCache.set(cacheKey, provider)
   return provider
 }
 

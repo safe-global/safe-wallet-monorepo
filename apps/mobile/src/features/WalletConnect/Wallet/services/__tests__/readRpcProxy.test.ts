@@ -2,10 +2,15 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { createWeb3ReadOnly } from '@/src/services/web3'
 import { isReadOnlyMethod, proxyReadOnlyCall } from '../readRpcProxy'
 
-jest.mock('@/src/services/web3', () => ({ createWeb3ReadOnly: jest.fn() }))
+jest.mock('@/src/services/web3', () => ({
+  createWeb3ReadOnly: jest.fn(),
+  // The proxy keys its cache by the resolved url, so the mock derives it from rpcUri.value.
+  getRpcServiceUrl: jest.fn((rpcUri?: { value?: string }) => rpcUri?.value ?? ''),
+}))
 const mockCreateWeb3ReadOnly = createWeb3ReadOnly as jest.Mock
 
-const makeChain = (chainId: string): Chain => ({ chainId }) as unknown as Chain
+const makeChain = (chainId: string, url = `https://rpc.test/${chainId}`): Chain =>
+  ({ chainId, rpcUri: { authentication: 'NO_AUTHENTICATION', value: url } }) as unknown as Chain
 
 describe('isReadOnlyMethod', () => {
   it('accepts allow-listed read-only methods', () => {
@@ -49,18 +54,26 @@ describe('proxyReadOnlyCall', () => {
   })
 
   it('throws when no RPC URL is configured for the chain', async () => {
-    mockCreateWeb3ReadOnly.mockReturnValue(undefined)
-    await expect(proxyReadOnlyCall(makeChain('103'), 'eth_call', [{}])).rejects.toThrow(
+    await expect(proxyReadOnlyCall(makeChain('103', ''), 'eth_call', [{}])).rejects.toThrow(
       'No RPC URL configured for chainId=103',
     )
+    expect(mockCreateWeb3ReadOnly).not.toHaveBeenCalled()
   })
 
-  it('caches one provider per chain across calls', async () => {
+  it('caches one provider per chain+url across calls', async () => {
     const send = jest.fn().mockResolvedValue('0x1')
     mockCreateWeb3ReadOnly.mockReturnValue({ send })
     const chain = makeChain('104')
     await proxyReadOnlyCall(chain, 'eth_blockNumber', [])
     await proxyReadOnlyCall(chain, 'eth_gasPrice', [])
     expect(mockCreateWeb3ReadOnly).toHaveBeenCalledTimes(1)
+  })
+
+  it('rebuilds the provider when the same chain reports a new RPC url', async () => {
+    const send = jest.fn().mockResolvedValue('0x1')
+    mockCreateWeb3ReadOnly.mockReturnValue({ send })
+    await proxyReadOnlyCall(makeChain('105', 'https://rpc.old/105'), 'eth_blockNumber', [])
+    await proxyReadOnlyCall(makeChain('105', 'https://rpc.new/105'), 'eth_blockNumber', [])
+    expect(mockCreateWeb3ReadOnly).toHaveBeenCalledTimes(2)
   })
 })
