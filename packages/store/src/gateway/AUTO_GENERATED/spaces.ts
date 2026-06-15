@@ -523,7 +523,7 @@ export type SpaceAuditLogEntryDto = {
   /** Resolved (and masked) display string of the acting user. */
   actor: string
   /** Resolved (and masked) display string of the affected user, when the event has one. */
-  targetUser?: string | null
+  targetUser: string | null
   /** Event-specific payload, allowlisted per event type. Clients must treat every field as optional. */
   payload: object
   createdAt: string
