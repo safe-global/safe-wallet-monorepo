@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import MultiChainSafeItemRow from '../MultiChainSafeItemRow'
-import type { SafeItemData } from '../../types'
+import type { SafeItemData, SafeItemDataChain } from '../../types'
 
 jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
@@ -34,21 +35,22 @@ jest.mock('@/components/ui/select', () => ({
   SelectItem: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
 }))
 
-const makeChain = (chainId: string) => ({
+const makeChain = (chainId: string, overrides: Partial<SafeItemDataChain> = {}): SafeItemDataChain => ({
   chainId,
   chainName: `Chain ${chainId}`,
   chainLogoUri: null,
   shortName: `c${chainId}`,
+  ...overrides,
 })
 
-const createItem = (chainIds: string[], overrides: Partial<SafeItemData> = {}): SafeItemData => ({
+const createItem = (chains: (string | SafeItemDataChain)[], overrides: Partial<SafeItemData> = {}): SafeItemData => ({
   id: `1:0xaaa`,
   name: 'Test Safe',
   address: '0xaaa',
   threshold: 1,
   owners: 2,
   balance: '0',
-  chains: chainIds.map(makeChain),
+  chains: chains.map((chain) => (typeof chain === 'string' ? makeChain(chain) : chain)),
   ...overrides,
 })
 
@@ -75,5 +77,53 @@ describe('MultiChainSafeItemRow chain icon overflow badge', () => {
     render(<MultiChainSafeItemRow item={createItem(['1', '137', '10', '42161', '8453', '100'])} />)
 
     expect(screen.getByText('+3')).toBeInTheDocument()
+  })
+})
+
+describe('MultiChainSafeItemRow undeployed status badge', () => {
+  const expandRow = async () => {
+    await userEvent.click(screen.getByRole('button'))
+  }
+
+  it('shows the Inactive badge for an undeployed chain when other chains are deployed', async () => {
+    render(<MultiChainSafeItemRow item={createItem([makeChain('1', { isUndeployed: true }), makeChain('137')])} />)
+    await expandRow()
+
+    const badge = screen.getByTestId('not-activated-badge')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveAttribute('aria-label', 'Inactive')
+  })
+
+  it('shows one Inactive badge per undeployed chain in a partially deployed safe', async () => {
+    render(
+      <MultiChainSafeItemRow
+        item={createItem([
+          makeChain('1', { isUndeployed: true }),
+          makeChain('137'),
+          makeChain('10', { isUndeployed: true }),
+        ])}
+      />,
+    )
+    await expandRow()
+
+    expect(screen.getAllByTestId('not-activated-badge')).toHaveLength(2)
+  })
+
+  it('shows the Activating badge for an activating chain', async () => {
+    render(
+      <MultiChainSafeItemRow
+        item={createItem([makeChain('1', { isUndeployed: true, isActivating: true }), makeChain('137')])}
+      />,
+    )
+    await expandRow()
+
+    expect(screen.getByTestId('not-activated-badge')).toHaveAttribute('aria-label', 'Activating')
+  })
+
+  it('shows no status badge when every chain is deployed', async () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+    await expandRow()
+
+    expect(screen.queryByTestId('not-activated-badge')).not.toBeInTheDocument()
   })
 })

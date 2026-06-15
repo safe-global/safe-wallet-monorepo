@@ -1,5 +1,5 @@
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { getDeterministicColor } from '@/features/spaces/components/InitialsAvatar'
+import { getDeterministicColor } from '@/utils/colors'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 const SafeAvatar = ({ name, address }: { name: string | undefined; address: string }) => {

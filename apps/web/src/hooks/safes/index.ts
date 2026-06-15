@@ -8,6 +8,7 @@
 // Core hooks
 export { default as useAllOwnedSafes } from './useAllOwnedSafes'
 export { default as useAllSafes, _buildSafeItem, _prepareAddresses } from './useAllSafes'
+export { default as useSafeItemBuilder, type SafeItemBuilder } from './useSafeItemBuilder'
 export {
   useAllSafesGrouped,
   useOwnedSafesGrouped,

@@ -85,11 +85,16 @@ const useOnboardingSafes = () => {
   const filteredTrusted = useSafesSearch(trustedGrouped, searchQuery)
   const filteredOwned = useSafesSearch(ownedGrouped, searchQuery)
 
+  // True only when the user has no safes at all — independent of the search query
+  // so a "no matches" filter doesn't masquerade as an empty account.
+  const hasNoSafes = trustedSafeItems.length === 0 && ownedSafeItems.length === 0
+
   return {
     trustedSafes: searchQuery ? filteredTrusted : trustedGrouped,
     ownedSafes: searchQuery ? filteredOwned : ownedGrouped,
     similarAddresses,
     handleSearch,
+    hasNoSafes,
   }
 }
 

@@ -27,11 +27,11 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
-export type RelayRelayV1ApiResponse = /** status 200 Transaction relayed successfully with transaction hash */ Relay
+export type RelayRelayV1ApiResponse = /** status 200 Transaction relayed successfully */ Relay
 export type RelayRelayV1ApiArg = {
   /** Chain ID where the Safe transaction will be executed */
   chainId: string
-  /** Transaction data to relay including Safe address, transaction details, and signatures */
+  /** Transaction data to relay. safeTxHash is required on relay-fee chains and must correspond to the to + data fields. Set acceptUnverifiedSimulation=true to retry a relay skipping the simulation which previously returned INDETERMINATE_SIMULATION. */
   relayDto: RelayDto
 }
 export type RelayGetTaskStatusV1ApiResponse = /** status 200 Task status retrieved successfully */ RelayTaskStatus
@@ -48,11 +48,18 @@ export type RelayGetRelaysRemainingV1ApiArg = {
   chainId: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
-  /** Safe transaction hash (0x prefixed hex string). Required for chains enabled for relay-fee relayer */
+  /** Safe transaction hash (0x prefixed hex string). Required on relay-fee chains to check per-transaction eligibility with the fee service. Optional on daily-limit and no-fee-campaign chains. */
   safeTxHash?: string
 }
 export type Relay = {
   taskId: string
+}
+export type RelayErrorResponse = {
+  /** Stable identifier of the error condition. The frontend MUST branch on this value (not on `message`, which is informational and may change). */
+  code: 'SIMULATION_FAILED' | 'INDETERMINATE_SIMULATION'
+  /** Human-readable description of the error. Informational only; do not parse. */
+  message: string
+  statusCode: number
 }
 export type RelayDto = {
   version: string
@@ -62,6 +69,8 @@ export type RelayDto = {
   gasLimit?: string | null
   /** Safe transaction hash for relay-fee eligibility check */
   safeTxHash?: string
+  /** Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk. */
+  acceptUnverifiedSimulation?: boolean
 }
 export type RelayTaskStatusReceipt = {
   transactionHash: string

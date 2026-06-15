@@ -4,10 +4,11 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import LaunchIcon from '@mui/icons-material/Launch'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import UpdateIcon from '@/public/images/safe-shield/update.svg'
-import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
+import { SeverityIcon } from './SeverityIcon'
 import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
 import { useCurrentChain } from '@/hooks/useChains'
 import {
+  getSimulationOutcome,
   isTxSimulationEnabled,
   type SimulationTxParams,
 } from '@safe-global/utils/components/tx/security/tenderly/utils'
@@ -18,7 +19,7 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
-import { useNestedTransaction } from '@/features/safe-shield/components/useNestedTransaction'
+import { useNestedTransaction } from './useNestedTransaction'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { trackEvent, SAFE_SHIELD_EVENTS, MixpanelEventParams } from '@/services/analytics'
 
@@ -95,15 +96,11 @@ export const TenderlySimulation = ({
     setSimulationExpanded(true)
   }
 
-  const mainIsFinished = status.isFinished
-  const nestedIsFinished = isNested ? nestedTx.status.isFinished : true
-  const isSimulationFinished = mainIsFinished && nestedIsFinished
-
-  const mainIsSuccess = status.isSuccess && !status.isError
-  const nestedIsSuccess = isNested ? nestedTx.status.isSuccess && !nestedTx.status.isError : true
-  const isSimulationSuccess = mainIsSuccess && nestedIsSuccess
-
-  const isLoading = status.isLoading || (isNested && nestedTx.status.isLoading)
+  const { mainIsSuccess, nestedIsSuccess, isSimulationSuccess, isSimulationFinished, isLoading } = getSimulationOutcome(
+    status,
+    nestedTx,
+    isNested,
+  )
 
   const mainSimulationResult = isSimulationFinished
     ? mainIsSuccess

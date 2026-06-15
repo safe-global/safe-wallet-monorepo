@@ -1,5 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { useSpaceMembersByStatus, useCurrentMembership } from '../useSpaceMembers'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
+const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
 
 const mockUseCurrentSpaceId = jest.fn()
 const mockUseMembersGetUsersV1Query = jest.fn()
@@ -39,14 +41,14 @@ describe('useAllMembers (via useSpaceMembersByStatus / useCurrentMembership)', (
 
   it('skips the members query when the user is not authenticated', () => {
     mockIsAuthenticated = false
-    mockUseCurrentSpaceId.mockReturnValue('3')
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
 
     renderHook(() => useSpaceMembersByStatus())
 
     expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
   })
 
-  it('skips the members query when there is no current spaceId (Number(null) is 0 — must not request /v1/spaces/0)', () => {
+  it('skips the members query when there is no current spaceId', () => {
     mockUseCurrentSpaceId.mockReturnValue(null)
 
     renderHook(() => useSpaceMembersByStatus())
@@ -54,19 +56,19 @@ describe('useAllMembers (via useSpaceMembersByStatus / useCurrentMembership)', (
     expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
   })
 
-  it('fires the members query with the numeric spaceId when authenticated and spaceId is set', () => {
-    mockUseCurrentSpaceId.mockReturnValue('9')
+  it('fires the members query with the spaceId when authenticated and spaceId is set', () => {
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
 
     renderHook(() => useSpaceMembersByStatus())
 
-    expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith({ spaceId: 9 }, { skip: false })
+    expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID }, { skip: false })
   })
 
   it('prefers the explicit spaceId arg over the current spaceId', () => {
-    mockUseCurrentSpaceId.mockReturnValue('9')
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
 
-    renderHook(() => useCurrentMembership(2))
+    renderHook(() => useCurrentMembership(MOCK_SPACE_UUID_ALT))
 
-    expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith({ spaceId: 2 }, { skip: false })
+    expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID_ALT }, { skip: false })
   })
 })

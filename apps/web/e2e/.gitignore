@@ -1,0 +1,11 @@
+# Test artifacts
+test-results/
+!test-results/.gitkeep
+reports/
+!reports/.gitkeep
+
+# Dependencies
+node_modules/
+
+# Build
+dist/

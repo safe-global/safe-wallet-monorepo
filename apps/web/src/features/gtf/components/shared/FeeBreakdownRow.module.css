@@ -1,0 +1,33 @@
+.feeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 40px;
+}
+
+.feeLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tooltipIcon {
+  display: inline-flex;
+}
+
+.feeValue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.feeAmount {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.strikethrough {
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+}

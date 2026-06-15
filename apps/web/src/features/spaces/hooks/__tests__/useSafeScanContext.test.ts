@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import useSafeScanContext from '../useSafeScanContext'
-import type { SelectedSafe, SpaceSafeEntry } from '@/features/spaces/components/SecurityHub'
+import type { SelectedSafe, SpaceSafeEntry } from '../../components/SecurityHub'
 
 // ── mocks ──────────────────────────────────────────────────────────────
 
@@ -71,18 +71,25 @@ const defaultEntry: SpaceSafeEntry = {
 function setupDefaults() {
   ;(useSafesGetSafeV1Query as jest.Mock).mockReturnValue({
     currentData: mockSafeInfo,
-    isLoading: false,
+    isFetching: false,
   })
-  ;(useChainsGetMasterCopiesV1Query as jest.Mock).mockReturnValue({ currentData: [], isLoading: false })
+  ;(useChainsGetMasterCopiesV1Query as jest.Mock).mockReturnValue({
+    currentData: [],
+    isFetching: false,
+    isError: false,
+  })
+  // Default creation tx to "errored" so the gate accepts a null creationInfo.
+  // Tests that want creation data populated override `currentData` explicitly.
   ;(useTransactionsGetCreationTransactionV1Query as jest.Mock).mockReturnValue({
     currentData: undefined,
-    isLoading: false,
+    isFetching: false,
+    isError: true,
   })
   ;(useGetSafeOverviewQuery as jest.Mock).mockReturnValue({
     currentData: { fiatTotal: '1000', queued: 2 },
-    isLoading: false,
+    isFetching: false,
   })
-  ;(useGetMultipleSafeOverviewsQuery as jest.Mock).mockReturnValue({ currentData: undefined, isLoading: false })
+  ;(useGetMultipleSafeOverviewsQuery as jest.Mock).mockReturnValue({ currentData: undefined, isFetching: false })
   ;(useChain as jest.Mock).mockReturnValue({ chainId: CHAIN_ID, features: [] })
   ;(useChains as jest.Mock).mockReturnValue({ configs: [] })
   ;(useAppSelector as jest.Mock).mockReturnValue({})
@@ -117,7 +124,7 @@ describe('useSafeScanContext', () => {
   it('returns null when Safe data is still loading', () => {
     ;(useSafesGetSafeV1Query as jest.Mock).mockReturnValue({
       currentData: undefined,
-      isLoading: true,
+      isFetching: true,
     })
     const { result } = renderHook(() => useSafeScanContext(defaultSelected, defaultEntry))
     expect(result.current).toBeNull()
@@ -131,7 +138,7 @@ describe('useSafeScanContext', () => {
     // useSafesGetSafeV1Query will skip and return no data
     ;(useSafesGetSafeV1Query as jest.Mock).mockReturnValue({
       currentData: undefined,
-      isLoading: false,
+      isFetching: false,
     })
     const { result } = renderHook(() => useSafeScanContext(defaultSelected, undeployedEntry))
     expect(result.current).toBeNull()
@@ -140,7 +147,7 @@ describe('useSafeScanContext', () => {
   it('includes correct balanceUsd from safeOverview.fiatTotal', () => {
     ;(useGetSafeOverviewQuery as jest.Mock).mockReturnValue({
       currentData: { fiatTotal: '50000.5', queued: 0 },
-      isLoading: false,
+      isFetching: false,
     })
     const { result } = renderHook(() => useSafeScanContext(defaultSelected, defaultEntry))
     expect(result.current?.balanceUsd).toBe(50000.5)
@@ -149,7 +156,7 @@ describe('useSafeScanContext', () => {
   it('includes correct queuedTxCount from safeOverview.queued', () => {
     ;(useGetSafeOverviewQuery as jest.Mock).mockReturnValue({
       currentData: { fiatTotal: '0', queued: 7 },
-      isLoading: false,
+      isFetching: false,
     })
     const { result } = renderHook(() => useSafeScanContext(defaultSelected, defaultEntry))
     expect(result.current?.queuedTxCount).toBe(7)
@@ -164,6 +171,13 @@ describe('useSafeScanContext', () => {
         { chainId: '137', isDeployed: true },
       ],
     }
+    // Multichain path also requires safeOverviews to settle so signer-integrity can
+    // compare setups across chains. Provide a settled (but empty) response so the
+    // gate proceeds.
+    ;(useGetMultipleSafeOverviewsQuery as jest.Mock).mockReturnValue({
+      currentData: [],
+      isFetching: false,
+    })
     const { result } = renderHook(() => useSafeScanContext(defaultSelected, multichainEntry))
     expect(result.current?.isMultichain).toBe(true)
   })
@@ -195,7 +209,7 @@ describe('useSafeScanContext', () => {
     // Override the query mock to return different values — these should be ignored
     ;(useGetSafeOverviewQuery as jest.Mock).mockReturnValue({
       currentData: { fiatTotal: '999999', queued: 99 },
-      isLoading: false,
+      isFetching: false,
     })
     const overviewData = { balanceUsd: 42000, queuedTxCount: 3 }
     const { result } = renderHook(() => useSafeScanContext(defaultSelected, defaultEntry, overviewData))
@@ -203,15 +217,72 @@ describe('useSafeScanContext', () => {
     expect(result.current?.queuedTxCount).toBe(3)
   })
 
+  it('waits for the creation transaction query to settle before building context', () => {
+    // RTK Query can report isLoading=false while currentData is still undefined
+    // (uninitialized → pending transition window). The OLD gate trusted isLoading
+    // alone and would let the scan run with creationInfo=null, producing the
+    // misleading "creation data not yet available" result that flips on rescan.
+    // The new gate also requires either data presence or a definitive error.
+    ;(useTransactionsGetCreationTransactionV1Query as jest.Mock).mockReturnValue({
+      currentData: undefined,
+      isFetching: false,
+      isError: false,
+    })
+    const { result } = renderHook(() => useSafeScanContext(defaultSelected, defaultEntry))
+    expect(result.current).toBeNull()
+  })
+
+  it('accepts a null creationInfo when the creation transaction query has errored', () => {
+    // If the gateway definitively cannot provide the creation tx (404/error), we
+    // proceed and let the scanner emit `inconclusive`. Otherwise users would be
+    // stuck in a permanent "loading" state for Safes whose creation isn't indexed.
+    ;(useTransactionsGetCreationTransactionV1Query as jest.Mock).mockReturnValue({
+      currentData: undefined,
+      isFetching: false,
+      isError: true,
+    })
+    const { result } = renderHook(() => useSafeScanContext(defaultSelected, defaultEntry))
+    expect(result.current).not.toBeNull()
+    expect(result.current?.creationInfo).toBeNull()
+  })
+
   it('skips overview loading guard when overviewData is provided', () => {
     // Simulate the overview query still loading — should NOT block context creation
     ;(useGetSafeOverviewQuery as jest.Mock).mockReturnValue({
       currentData: undefined,
-      isLoading: true,
+      isFetching: true,
     })
     const overviewData = { balanceUsd: 500, queuedTxCount: 1 }
     const { result } = renderHook(() => useSafeScanContext(defaultSelected, defaultEntry, overviewData))
     expect(result.current).not.toBeNull()
     expect(result.current?.balanceUsd).toBe(500)
+  })
+
+  it('does not force a refetch by default (uses cached data)', () => {
+    renderHook(() => useSafeScanContext(defaultSelected, defaultEntry))
+    for (const query of [
+      useSafesGetSafeV1Query,
+      useChainsGetMasterCopiesV1Query,
+      useTransactionsGetCreationTransactionV1Query,
+    ]) {
+      expect(query).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ refetchOnMountOrArgChange: false }),
+      )
+    }
+  })
+
+  it('forces the scan data queries to refetch when forceRefetch is true', () => {
+    renderHook(() => useSafeScanContext(defaultSelected, defaultEntry, undefined, true))
+    for (const query of [
+      useSafesGetSafeV1Query,
+      useChainsGetMasterCopiesV1Query,
+      useTransactionsGetCreationTransactionV1Query,
+    ]) {
+      expect(query).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ refetchOnMountOrArgChange: true }),
+      )
+    }
   })
 })

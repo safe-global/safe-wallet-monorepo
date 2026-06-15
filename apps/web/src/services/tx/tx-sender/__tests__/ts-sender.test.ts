@@ -12,6 +12,7 @@ import {
   dispatchTxProposal,
   dispatchTxSigning,
   dispatchBatchExecutionRelay,
+  dispatchTxRelay,
 } from '..'
 import {
   BrowserProvider,
@@ -528,6 +529,40 @@ describe('txSender', () => {
         chainId: '1',
         safeAddress: '0x123',
       })
+    })
+  })
+
+  describe('dispatchTxRelay', () => {
+    it('passes the computed safeTxHash to the relay endpoint', async () => {
+      const safeAddress = toBeHex('0x789', 20)
+      const safeTx = createMockSafeTransaction({
+        to: safeAddress,
+        data: '0x',
+        value: '0',
+        operation: 0,
+      })
+      const safe = {
+        address: { value: safeAddress },
+        chainId: '5',
+        version: '1.3.0',
+      } as unknown as Parameters<typeof dispatchTxRelay>[1]
+      const chain = {} as unknown as Parameters<typeof dispatchTxRelay>[3]
+
+      jest.spyOn(safeContracts, 'getReadOnlyCurrentGnosisSafeContract').mockResolvedValue({
+        encode: jest.fn(() => '0xabcd'),
+      } as any)
+
+      let receivedBody: any
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/5/relay`, async ({ request }) => {
+          receivedBody = await request.json()
+          return HttpResponse.json({ taskId: '0xtask' })
+        }),
+      )
+
+      await dispatchTxRelay(safeTx, safe, 'multisig_0x1', chain)
+
+      expect(receivedBody.safeTxHash).toBe('0x1234567890')
     })
   })
 

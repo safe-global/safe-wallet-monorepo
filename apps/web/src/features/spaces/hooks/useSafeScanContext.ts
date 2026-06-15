@@ -11,7 +11,7 @@ import { useAppSelector } from '@/store'
 import { selectCurrency, selectUndeployedSafes } from '@/store/slices'
 import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/multichain/utils'
 import type { ScanContext } from '@/features/security/types'
-import type { SpaceSafeEntry, SelectedSafe } from '@/features/spaces/components/SecurityHub'
+import type { SpaceSafeEntry, SelectedSafe } from '../components/SecurityHub'
 
 export type OverviewData = {
   balanceUsd: number
@@ -22,6 +22,9 @@ const useSafeScanContext = (
   selected: SelectedSafe | null,
   entry: SpaceSafeEntry | undefined,
   overviewData?: OverviewData,
+  // When true (a user-triggered re-scan), bypass the cache and refetch the scan's
+  // data queries from the backend so the new scan reflects current state.
+  forceRefetch = false,
 ): ScanContext | null => {
   const chainId = selected?.chainId ?? ''
   const address = selected?.address ?? ''
@@ -30,21 +33,29 @@ const useSafeScanContext = (
   const isDeployed = selectedChainEntry?.isDeployed ?? false
 
   // Fetch SafeState for the selected chain — skip if not deployed
-  const { currentData: safeInfo, isLoading: isSafeLoading } = useSafesGetSafeV1Query(
+  const { currentData: safeInfo, isFetching: isSafeFetching } = useSafesGetSafeV1Query(
     { chainId, safeAddress: address },
-    { skip: !selected || !isDeployed },
+    { skip: !selected || !isDeployed, refetchOnMountOrArgChange: forceRefetch },
   )
 
   // Fetch master copies for deployer resolution
-  const { currentData: masterCopies, isLoading: isMasterCopiesLoading } = useChainsGetMasterCopiesV1Query(
+  const {
+    currentData: masterCopies,
+    isFetching: isMasterCopiesFetching,
+    isError: isMasterCopiesError,
+  } = useChainsGetMasterCopiesV1Query(
     { chainId },
-    { skip: !selected || !isDeployed },
+    { skip: !selected || !isDeployed, refetchOnMountOrArgChange: forceRefetch },
   )
 
   // Fetch creation transaction for factory/deployment validation
-  const { currentData: creationTx, isLoading: isCreationLoading } = useTransactionsGetCreationTransactionV1Query(
+  const {
+    currentData: creationTx,
+    isFetching: isCreationFetching,
+    isError: isCreationError,
+  } = useTransactionsGetCreationTransactionV1Query(
     { chainId, safeAddress: address },
-    { skip: !selected || !isDeployed },
+    { skip: !selected || !isDeployed, refetchOnMountOrArgChange: forceRefetch },
   )
 
   // For multichain: fetch overviews for all chains to compare signer setup
@@ -68,17 +79,17 @@ const useSafeScanContext = (
   )
   // Use `currentData` (not `data`) — `data` can briefly return the PREVIOUS Safe's overview
   // when useAutoScan advances from one Safe to the next, before RTK Query resolves the new args.
-  const { currentData: safeOverviews, isLoading: isOverviewsLoading } = useGetMultipleSafeOverviewsQuery(
+  const { currentData: safeOverviews, isFetching: isOverviewsFetching } = useGetMultipleSafeOverviewsQuery(
     { safes: multichainSafeItems, currency },
-    { skip: !isMultichain || multichainSafeItems.length === 0 },
+    { skip: !isMultichain || multichainSafeItems.length === 0, refetchOnMountOrArgChange: forceRefetch },
   )
 
   // Fetch overview for balance data (fiatTotal) on the selected chain.
   // Skip when pre-fetched overviewData is provided (e.g. from the batch query in SecurityHub)
   // to avoid redundant per-Safe API requests during auto-scan.
-  const { currentData: safeOverview, isLoading: isOverviewLoading } = useGetSafeOverviewQuery(
+  const { currentData: safeOverview, isFetching: isOverviewFetching } = useGetSafeOverviewQuery(
     { chainId, safeAddress: address },
-    { skip: !selected || !isDeployed || !!overviewData },
+    { skip: !selected || !isDeployed || !!overviewData, refetchOnMountOrArgChange: forceRefetch },
   )
 
   const chain = useChain(chainId)
@@ -86,12 +97,22 @@ const useSafeScanContext = (
   const { configs: allChains } = useChains()
 
   return useMemo(() => {
-    // Wait for ALL dependent queries — not just safeInfo. Returning a context before
-    // overview/masterCopies/creationTx resolve causes scanners to run with defaults
-    // (balanceUsd=0, deployer=null, creationInfo=null) producing incorrect scores.
-    if (!selected || !entry || !safeInfo || isSafeLoading) return null
-    if ((!overviewData && isOverviewLoading) || isMasterCopiesLoading || isCreationLoading) return null
-    if (isMultichain && isOverviewsLoading) return null
+    // Wait for ALL dependent queries to FULLY settle — not just stop initial loading.
+    // `isLoading` is only true on the very first fetch and there are windows
+    // (uninitialized → pending transition, errored args, re-fetches) where
+    // `isLoading=false` while `currentData` is still undefined. Scanners launched in
+    // one of those windows run with `creationInfo=null` and produce the misleading
+    // "creation data not yet available" result, then flip on the next rescan when
+    // the underlying query has finally populated data. Using `isFetching` catches
+    // both initial fetches and refetches; we additionally require data to be
+    // present unless the query has definitively errored (in which case the scanner
+    // handles missing data with `inconclusive`).
+    if (!selected || !entry) return null
+    if (isSafeFetching || !safeInfo) return null
+    if (!overviewData && isOverviewFetching) return null
+    if (isMasterCopiesFetching || (!masterCopies && !isMasterCopiesError)) return null
+    if (isCreationFetching || (!creationTx && !isCreationError)) return null
+    if (isMultichain && (isOverviewsFetching || !safeOverviews)) return null
     // Chain config must be loaded — otherwise feature flags (recovery, hypernative,
     // transaction scanning) all default to false, producing wrong scanner results.
     if (!chain) return null
@@ -156,12 +177,14 @@ const useSafeScanContext = (
     selected,
     entry,
     safeInfo,
-    isSafeLoading,
+    isSafeFetching,
     overviewData,
-    isOverviewLoading,
-    isMasterCopiesLoading,
-    isCreationLoading,
-    isOverviewsLoading,
+    isOverviewFetching,
+    isMasterCopiesFetching,
+    isMasterCopiesError,
+    isCreationFetching,
+    isCreationError,
+    isOverviewsFetching,
     chain,
     masterCopies,
     latestVersion,

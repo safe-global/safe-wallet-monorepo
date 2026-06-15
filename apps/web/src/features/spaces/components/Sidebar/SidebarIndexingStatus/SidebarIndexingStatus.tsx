@@ -24,7 +24,7 @@ const getStatus = (synced: boolean, lastSync: number): Status => {
   return 'outOfSync'
 }
 
-export const SidebarIndexingStatus = (): ReactElement | null => {
+export const SidebarIndexingStatus = ({ isSafeSidebar = true }: { isSafeSidebar?: boolean }): ReactElement | null => {
   const chainId = useChainId()
   const { data, isLoading, isError } = useChainsGetIndexingStatusV1Query(
     { chainId },
@@ -37,6 +37,9 @@ export const SidebarIndexingStatus = (): ReactElement | null => {
 
   const status = getStatus(data.synced, data.lastSync)
   const time = formatDistanceToNow(data.lastSync, { addSuffix: true })
+  const tooltipText = isSafeSidebar
+    ? `Last synced with the blockchain ${time}`
+    : 'Blockchain sync status across networks'
 
   return (
     <Tooltip>
@@ -55,7 +58,7 @@ export const SidebarIndexingStatus = (): ReactElement | null => {
       >
         <StatusIcon className={css.indexingStatusIcon} />
       </TooltipTrigger>
-      <TooltipContent side="top">{`Last synced with the blockchain ${time}`}</TooltipContent>
+      <TooltipContent side="top">{tooltipText}</TooltipContent>
     </Tooltip>
   )
 }

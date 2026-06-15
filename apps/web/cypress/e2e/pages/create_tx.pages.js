@@ -75,8 +75,7 @@ export const altImgUsdt = 'iframe[title="USDT"]'
 export const altImgSwaps = 'svg[alt="Swap order"]'
 export const altImgLimitOrder = 'svg[alt="Limit order"]'
 export const altImgTwapOrder = 'svg[alt="Twap Order"]'
-export const txShareBlock = '[data-testid="share-block"]'
-const copyLinkBtn = '[data-testid="copy-link-btn"]'
+export const txShareLinkBtn = '[data-testid="share-tx-link-btn"]'
 export const noteTextField = '[data-testid="tx-note-textfield"]'
 const noteAlert = "[data-testid='tx-note-alert']"
 const recoredTxNote = '[data-testid="tx-note"]'
@@ -288,8 +287,8 @@ export function checkNoteRecordedNoteReadOnly() {
   })
 }
 
-export function clickOnCopyLinkBtn() {
-  cy.get(copyLinkBtn).click()
+export function clickOnShareLinkBtn() {
+  cy.get(txShareLinkBtn).click()
 }
 
 export function verifyCopiedURL() {
@@ -298,15 +297,9 @@ export function verifyCopiedURL() {
   })
 
   cy.url().then((currentUrl) => {
-    clickOnCopyLinkBtn()
+    clickOnShareLinkBtn()
 
     cy.get('@clipboardWrite').should('have.been.calledWith', currentUrl)
-  })
-}
-
-export function checkCopyBtnExistsInShareblock() {
-  cy.get(txShareBlock).within(() => {
-    cy.get(copyLinkBtn).should('exist')
   })
 }
 

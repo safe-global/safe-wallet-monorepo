@@ -7,7 +7,7 @@ import { useIsAdmin } from '@/features/spaces'
 
 const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const { handleUpdate, error } = useUpdateSpace(space)
-  const isAdmin = useIsAdmin(space?.id)
+  const isAdmin = useIsAdmin(space?.uuid)
 
   const formMethods = useForm<UpdateSpaceFormData>({
     mode: 'onChange',
@@ -33,7 +33,7 @@ const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => 
           render={({ field }) => (
             <TextField
               {...field}
-              label="Space name"
+              label="Workspace name"
               fullWidth
               value={field.value || ''}
               slotProps={{ inputLabel: { shrink: true } }}

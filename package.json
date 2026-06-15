@@ -47,7 +47,7 @@
     "msw": "^2.7.3",
     "prettier": "^3.6.2",
     "storybook": "^10.2.7",
-    "turbo": "^2.9.6"
+    "turbo": "^2.9.14"
   },
   "dependenciesMeta": {
     "cypress": {

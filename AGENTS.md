@@ -9,7 +9,8 @@ This monorepo uses nested AGENTS.md files. Agents working in a subtree automatic
 | Subtree                | File                                                           | Covers                                                     |
 | ---------------------- | -------------------------------------------------------------- | ---------------------------------------------------------- |
 | `apps/web/`            | [apps/web/AGENTS.md](apps/web/AGENTS.md)                       | Feature architecture, Storybook, web testing, web pitfalls |
-| `apps/web/cypress/`    | [apps/web/cypress/AGENTS.md](apps/web/cypress/AGENTS.md)       | Cypress E2E patterns                                       |
+| `apps/web/cypress/`    | [apps/web/cypress/AGENTS.md](apps/web/cypress/AGENTS.md)       | Cypress E2E patterns (legacy — no new tests)               |
+| `apps/web/e2e/`        | [apps/web/e2e/docs/README.md](apps/web/e2e/docs/README.md)     | **Playwright E2E — all new tests go here**                 |
 | `apps/web/.storybook/` | [apps/web/.storybook/AGENTS.md](apps/web/.storybook/AGENTS.md) | Storybook fixtures and provider patterns                   |
 | `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 | Expo + Tamagui                                             |
 | `packages/`            | [packages/AGENTS.md](packages/AGENTS.md)                       | Shared packages, dual env vars                             |
@@ -211,9 +212,16 @@ Every code change must include tests. See [`apps/web/docs/TESTING.md`](apps/web/
 
 ### Fast Feedback Loop
 
-The repo provides automated verification:
+The repo provides automated verification via **shared Claude Code `Stop` hooks** checked into `.claude/settings.json` (so every contributor's Claude Code runs them automatically):
 
-1. **Automatic**: A Claude Code `Stop` hook runs `verify:changed` once at the end of each agent turn. It early-exits (no-op) when no `.ts/.tsx/.js/.jsx` files have been modified. When it does run, type-check runs on the full project (TSC requires this), while lint, prettier, and tests are scoped to changed files only. The workspace (web/mobile) is auto-detected from the changed file paths. Set `SKIP_VERIFY=1` to disable. Fix any errors before moving on.
+1. **Automatic verification**: A `Stop` hook runs `verify:changed` once at the end of each agent turn. It early-exits (no-op) when no `.ts/.tsx/.js/.jsx` files have been modified. When it does run, type-check runs on the full project (TSC requires this), while lint, prettier, and tests are scoped to changed files only. The workspace (web/mobile) is auto-detected from the changed file paths. Set `SKIP_VERIFY=1` to disable. Fix any errors before moving on.
+
+1b. **Automatic test reminders** (advisory — never blocks): the `Stop` hook `.claude/hooks/check-tests.mjs` inspects the branch's changed files and nudges, at most once per new set of changes, when:
+
+- web app code (`apps/web/src/**`) changed but no Playwright **one-shot** clickthrough (`apps/web/e2e/tests/one-shots/**`) was added — see [One-shot clickthroughs](apps/web/e2e/docs/README.md#one-shot-clickthroughs);
+- significant source (`apps/web/src`, `apps/mobile/src`, `packages/*/src`) changed but no colocated **unit test** (`*.test.ts(x)`) was added/updated.
+
+These are reminders, not gates: add the test, or note in the PR why one genuinely doesn't apply. Set `SKIP_TEST_REMINDERS=1` to disable.
 
 2. **Manual**: Run `yarn verify:changed:web` anytime to check your work. Run `yarn verify:web` for a full check before committing.
 
@@ -385,8 +393,36 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 
 ### Platform-specific testing
 
-- **Web** (Cypress E2E, test-coverage commands, test decision matrix, what NOT to test): see [apps/web/AGENTS.md](apps/web/AGENTS.md#web-testing).
+- **Web — Cypress** (legacy, no new tests): see [apps/web/AGENTS.md](apps/web/AGENTS.md#web-testing).
+- **Web — Playwright** (all new E2E tests): see [apps/web/e2e/docs/README.md](apps/web/e2e/docs/README.md).
 - **Mobile** (E2E guidelines, mobile test commands): see [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md#mobile-specific-testing).
+
+### Playwright E2E Framework
+
+All new E2E tests must be written in Playwright (`apps/web/e2e/`). Cypress is legacy — no new Cypress tests.
+
+| Command              | Purpose                      |
+| -------------------- | ---------------------------- |
+| `yarn pw:test`       | Run all Playwright tests     |
+| `yarn pw:test:smoke` | Run `@smoke` tests only      |
+| `yarn pw:test:api`   | Run `@api` tests only        |
+| `yarn pw:ci`         | CI mode — smoke with retries |
+
+**Before writing any Playwright test, AI agents must follow the [12-step AI Test Output Format](apps/web/e2e/docs/AI_TEST_OUTPUT_FORMAT.md).** Code is step 11 of 12.
+
+For Cypress → Playwright migration, follow the [Cypress Migration Guide](apps/web/e2e/docs/CYPRESS_MIGRATION_GUIDE.md).
+
+### Developer-Owned Tests Rule
+
+AI agents must always consider what developers should test before QA automation. For every changed feature, AI should suggest developer-owned tests first:
+
+- **Unit tests** — pure functions, parsers, validators, formatters, hooks
+- **Component tests** — React components render correctly with props
+- **Integration tests** — hooks + stores + API mocks wired together
+
+If a feature lacks unit and component coverage, the correct response is to flag missing developer tests — not to write a Playwright test that compensates for them. Playwright tests are the top of the pyramid, not the foundation.
+
+See [Developer Testability Contract](apps/web/e2e/docs/developer-testability-contract.md) for the full QA-developer agreement.
 
 ## Security & Safe Wallet Patterns
 

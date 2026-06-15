@@ -1,4 +1,6 @@
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/utils/cn'
@@ -6,10 +8,36 @@ import SafeSelectorTriggerContent from './components/SafeSelectorTriggerContent'
 import SafeDropdownContainer from './components/SafeDropdownContainer'
 import InlineRetryError from '@/components/common/InlineRetryError'
 import { useSafeSelectorState } from './hooks/useSafeSelectorState'
+import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
+import useChains from '@/hooks/useChains'
 import { getSafeSelectorClassVariants } from './utils/classVariants'
-import type { SafeSelectorDropdownProps } from './types'
-import { TxModalContext } from '@/components/tx-flow'
+import type { SafeItemData, SafeSelectorDropdownProps } from './types'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+
+// Keeps the dropdown trigger renderable when the current safe isn't in `items`.
+function buildFallbackSafeItem(selectedItemId: string | undefined, chainConfigs: Chain[]): SafeItemData | null {
+  if (!selectedItemId) return null
+  const { prefix: chainId, address } = parsePrefixedAddress(selectedItemId)
+  if (!chainId || !address) return null
+  const chain = chainConfigs.find((c) => c.chainId === chainId)
+  return {
+    id: selectedItemId,
+    name: '',
+    address,
+    threshold: 0,
+    owners: 0,
+    balance: '',
+    isLoading: true,
+    chains: [
+      {
+        chainId,
+        chainName: chain?.chainName ?? '',
+        chainLogoUri: chain?.chainLogoUri ?? null,
+        shortName: chain?.shortName ?? '',
+      },
+    ],
+  }
+}
 
 function SafeSelectorDropdownSkeleton() {
   return (
@@ -38,8 +66,10 @@ function SafeSelectorDropdown({
   footer,
 }: SafeSelectorDropdownProps) {
   const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
-  const { txFlow } = useContext(TxModalContext)
-  const isDisabled = !!txFlow
+  // Force-openable so `isSingleSafe` can't hide the chevron when only one other safe exists.
+  const willUseFallbackTrigger =
+    items.length > 0 && Boolean(selectedItemId) && !items.some((item) => item.id === selectedItemId)
+  const isDisabled = useIsSafeBarControlDisabled()
   const {
     dropdownOpen,
     selectedChainId,
@@ -48,7 +78,12 @@ function SafeSelectorDropdown({
     handleOpenChange,
     handleSafeChange,
     closeDropdown,
-  } = useSafeSelectorState({ items, selectedItemId, onItemSelect, forceOpenable: hasDropdownContent })
+  } = useSafeSelectorState({
+    items,
+    selectedItemId,
+    onItemSelect,
+    forceOpenable: hasDropdownContent || willUseFallbackTrigger,
+  })
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
@@ -56,12 +91,20 @@ function SafeSelectorDropdown({
   const safeSelectValue = selectedItemId ?? selectedItem?.id
   const safeItemSelect = onItemSelect ?? (() => {})
 
-  if (!selectedItem || !mounted) {
+  const { configs: chainConfigs } = useChains()
+  const fallbackSelectedItem = useMemo(
+    () => (selectedItem ? null : buildFallbackSafeItem(selectedItemId, chainConfigs)),
+    [selectedItem, selectedItemId, chainConfigs],
+  )
+  const triggerItem = selectedItem ?? fallbackSelectedItem
+
+  if (!mounted || !triggerItem) {
     if (isError && mounted) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
-    // Mismatch (loaded, but no item for selectedItemId). No retry: refetch can't fix it.
-    if (mounted && !isLoading && items.length > 0) {
-      return <InlineRetryError message="This Safe is not available on the selected network" />
-    }
+    return <SafeSelectorDropdownSkeleton />
+  }
+
+  if (items.length === 0) {
+    if (isError) return <InlineRetryError message="Failed to load Safe data" onRetry={onRetry} />
     return <SafeSelectorDropdownSkeleton />
   }
 
@@ -75,7 +118,9 @@ function SafeSelectorDropdown({
     >
       <SelectTrigger
         className={cn(
-          '-m-4 flex-1 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-6 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent [&_[data-slot=select-value]]:pr-0 relative',
+          // The wrapper's overflow-hidden clips this focus-visible ring into stray top/bottom bars,
+          // so suppress it — the card shows no focus ring by design (wrapper sets focus:ring-0).
+          '-m-4 flex-1 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-6 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent focus-visible:ring-0 focus-visible:border-0 [&_[data-slot=select-value]]:pr-0 relative',
           variants.triggerClass,
           isDisabled && 'cursor-not-allowed opacity-50',
         )}
@@ -84,7 +129,7 @@ function SafeSelectorDropdown({
         data-testid="open-safes-icon"
       >
         <SelectValue>
-          <SafeSelectorTriggerContent selectedItem={selectedItem} selectedChainId={selectedChainId} />
+          <SafeSelectorTriggerContent selectedItem={triggerItem} selectedChainId={selectedChainId} />
         </SelectValue>
       </SelectTrigger>
 

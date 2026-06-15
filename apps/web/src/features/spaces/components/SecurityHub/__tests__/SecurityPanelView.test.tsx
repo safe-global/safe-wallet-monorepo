@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { render, screen, fireEvent, within } from '@testing-library/react'
+import { AppRoutes } from '@/config/routes'
 import { createMockContext } from '@/features/security/testing'
 import type { ScanResult } from '@/features/security/types'
 import SecurityPanelView from '../components/SecurityPanelView/SecurityPanelView'
@@ -58,7 +59,6 @@ const allClearResults: Record<string, ScanResult> = {
   transaction_scanning: mkResult({ status: 'clear', severity: 'Low' }),
   pending_tx: mkResult({ status: 'clear', severity: 'Low' }),
   multichain_setup: mkResult({ status: 'not_applicable', severity: 'Low' }),
-  signer_integrity: mkResult({ status: 'clear', severity: 'Low' }),
 }
 
 const SAFE_QUERY_PARAM = 'eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'
@@ -77,9 +77,8 @@ const renderPanel = (overrides: Partial<React.ComponentProps<typeof SecurityPane
   return render(<SecurityPanelView {...defaults} {...overrides} />)
 }
 
-/** Find the "N checks passing" accordion summary (distinct from the header's "All checks passing."). */
-const getChecksAccordion = () => screen.getByText(/^\d+ checks? passing$/)
-const getSignersAccordion = () => screen.getByText(/signers? not blocklisted$/)
+/** Find the collapsible "Healthy · N" passing-group chip (distinct from the header's "All checks passing."). */
+const getChecksAccordion = () => screen.getByText(/^Healthy · \d+$/)
 
 // ─── tests ────────────────────────────────────────────────────────────────────
 
@@ -97,9 +96,9 @@ describe('SecurityPanelView', () => {
   })
 
   describe('header', () => {
-    it('renders strength level and "all checks passing" copy when everything clears', () => {
+    it('renders the score band and "all checks passing" copy when everything clears', () => {
       renderPanel()
-      expect(screen.getByText('Strong')).toBeInTheDocument()
+      expect(screen.getByText('Healthy')).toBeInTheDocument()
       expect(screen.getByText('All checks passing.')).toBeInTheDocument()
     })
 
@@ -170,6 +169,7 @@ describe('SecurityPanelView', () => {
       // Expand the failing row
       fireEvent.click(screen.getByText('Contract version is outdated'))
       const link = screen.getByRole('link', { name: /update/i })
+      expect(link).toHaveAttribute('href', expect.stringContaining(AppRoutes.settings.setup))
       expect(link).toHaveAttribute('href', expect.stringContaining('safe='))
     })
 
@@ -202,44 +202,6 @@ describe('SecurityPanelView', () => {
     })
   })
 
-  describe('signers section', () => {
-    it('renders one row per owner (visible after opening the signers accordion)', () => {
-      renderPanel({
-        scanContext: createMockContext({
-          owners: [
-            { value: '0x1111111111111111111111111111111111111111', name: 'Alice' },
-            { value: '0x2222222222222222222222222222222222222222' },
-          ],
-        }),
-      })
-      fireEvent.click(getSignersAccordion())
-      expect(screen.getByText('Alice')).toBeInTheDocument()
-      expect(screen.getByText('0x2222...2222')).toBeInTheDocument()
-    })
-
-    it('shows "N signers not blocklisted" accordion for passing signers', () => {
-      renderPanel({
-        scanContext: createMockContext({
-          owners: [
-            { value: '0x1111111111111111111111111111111111111111' },
-            { value: '0x2222222222222222222222222222222222222222' },
-            { value: '0x3333333333333333333333333333333333333333' },
-          ],
-        }),
-      })
-      expect(screen.getByText(/3 signers not blocklisted/)).toBeInTheDocument()
-    })
-
-    it('uses the singular label for a single owner', () => {
-      renderPanel({
-        scanContext: createMockContext({
-          owners: [{ value: '0x1111111111111111111111111111111111111111' }],
-        }),
-      })
-      expect(screen.getByText(/1 signer not blocklisted/)).toBeInTheDocument()
-    })
-  })
-
   describe('multichain row', () => {
     it('promotes a failing multichain check into the top "needs attention" area', () => {
       renderPanel({
@@ -251,11 +213,19 @@ describe('SecurityPanelView', () => {
       expect(screen.getByText('Signers differ across networks')).toBeInTheDocument()
     })
 
-    it('renders a passing multichain row as a visible footer outside the signers accordion', () => {
+    it('shows a passing multichain row inside the passing-checks accordion', () => {
       renderPanel({
         results: { ...allClearResults, multichain_setup: mkResult({ status: 'clear', severity: 'Low' }) },
       })
+      fireEvent.click(getChecksAccordion())
       expect(screen.getByText('Signers are consistent across networks')).toBeInTheDocument()
+    })
+
+    it('hides the multichain row entirely when not applicable (single-chain Safe)', () => {
+      renderPanel()
+      fireEvent.click(getChecksAccordion())
+      expect(screen.queryByText('Signers are consistent across networks')).not.toBeInTheDocument()
+      expect(screen.queryByText('Signers differ across networks')).not.toBeInTheDocument()
     })
   })
 
@@ -290,10 +260,84 @@ describe('SecurityPanelView', () => {
           modules: [{ value: '0xbbbb000000000000000000000000000000000002', name: 'Mystery Module' }],
         }),
       })
-      // Unrecognized module → failing → visible at top. Title + evidence both render the name;
-      // assert at least one match exists and that it's a body2 title element.
-      const matches = screen.getAllByText('Mystery Module')
-      expect(matches.length).toBeGreaterThanOrEqual(1)
+      // Unrecognized module → failing → visible at top under its grade group, without expanding
+      // the passing accordion. The row title flags it; the module name lives in the expanded evidence.
+      expect(screen.getByText('Unrecognized module detected')).toBeInTheDocument()
+    })
+
+    it('labels a recognized module by name and routes it to the passing rows', () => {
+      renderPanel({
+        scanContext: createMockContext({
+          modules: [{ value: '0xaaaa000000000000000000000000000000000001', name: 'Delay Modifier' }],
+        }),
+      })
+      // Recognized module → passing → hidden until the "Healthy" accordion is expanded.
+      fireEvent.click(getChecksAccordion())
+      expect(screen.getByText('Recognized module · Delay Modifier')).toBeInTheDocument()
+      expect(screen.queryByText('Unrecognized module detected')).not.toBeInTheDocument()
+    })
+
+    describe('vulnerable Zodiac modules', () => {
+      const DELAY = '0xcccc000000000000000000000000000000000001'
+
+      it('flags a vulnerable module as Critical with a working remove CTA', () => {
+        const onRemoveModule = jest.fn()
+        renderPanel({
+          scanContext: createMockContext({ modules: [{ value: DELAY, name: 'Delay Modifier' }] }),
+          results: {
+            ...allClearResults,
+            modules: mkResult({
+              status: 'issue',
+              severity: 'Critical',
+              remediation: 'Remove it.',
+              vulnerableModules: [DELAY],
+              ctaLabelOverride: 'Remove unsupported module',
+            }),
+          },
+          onRemoveModule,
+        })
+
+        const row = screen.getByText('Vulnerable module · Delay Modifier')
+        fireEvent.click(row)
+        const button = screen.getByRole('button', { name: /remove unsupported module/i })
+        fireEvent.click(button)
+        expect(onRemoveModule).toHaveBeenCalledWith(DELAY)
+      })
+
+      it('falls back to an external link when no remove handler is provided', () => {
+        renderPanel({
+          scanContext: createMockContext({ modules: [{ value: DELAY, name: 'Delay Modifier' }] }),
+          results: {
+            ...allClearResults,
+            modules: mkResult({
+              status: 'issue',
+              severity: 'Critical',
+              vulnerableModules: [DELAY],
+              ctaLabelOverride: 'Remove unsupported module',
+            }),
+          },
+        })
+
+        fireEvent.click(screen.getByText('Vulnerable module · Delay Modifier'))
+        expect(screen.getByRole('link', { name: /check affected safes/i })).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: /remove unsupported module/i })).not.toBeInTheDocument()
+      })
+
+      it('renders a Critical warning without a remove button for the nested (no removable module) case', () => {
+        const onRemoveModule = jest.fn()
+        renderPanel({
+          scanContext: createMockContext({ modules: [{ value: DELAY, name: 'Mystery Module' }] }),
+          results: {
+            ...allClearResults,
+            modules: mkResult({ status: 'issue', severity: 'Critical', vulnerableModules: [] }),
+          },
+          onRemoveModule,
+        })
+
+        // Affected, but no module matched as removable → a single warning row, no remove button.
+        expect(screen.getByText('Vulnerable module detected')).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: /remove unsupported module/i })).not.toBeInTheDocument()
+      })
     })
   })
 
@@ -316,9 +360,9 @@ describe('SecurityPanelView', () => {
       })
       const row = screen.getByText('Single signer controls this Safe')
       fireEvent.click(row)
-      const paper = row.closest('.MuiPaper-root')!
-      expect(within(paper as HTMLElement).getByText('Raise the threshold.')).toBeInTheDocument()
-      expect(within(paper as HTMLElement).getByText('1 of 3')).toBeInTheDocument()
+      const panel = row.closest('.rounded-lg')!
+      expect(within(panel as HTMLElement).getByText('Raise the threshold.')).toBeInTheDocument()
+      expect(within(panel as HTMLElement).getByText('1 of 3')).toBeInTheDocument()
     })
   })
 })

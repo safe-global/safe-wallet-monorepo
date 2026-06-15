@@ -42,7 +42,7 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
 
     try {
       const { error } = await editMember({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         userId: member.user.id,
         updateRoleDto: {
           role: data.role,

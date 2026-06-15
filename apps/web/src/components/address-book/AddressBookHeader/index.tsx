@@ -46,15 +46,15 @@ const SpaceAddressBookCTA = () => {
   const isAdmin = useIsAdmin()
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
+  const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isUserSignedIn || !spaceId })
 
   if (!isQualifiedSafe || !isAdmin) return null
 
   return (
     <Box width={1}>
       <Typography pl={1} mb={2} maxWidth="500px">
-        This data is stored in your local storage. Do you want to manage your <b>{space?.name}</b> space address book
-        instead?{' '}
+        This data is stored in your local storage. Do you want to manage your <b>{space?.name}</b> workspace address
+        book instead?{' '}
         <Link href={{ pathname: AppRoutes.spaces.addressBook, query: { spaceId } }} passHref>
           <MUILink>Click here</MUILink>
         </Link>

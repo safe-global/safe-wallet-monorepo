@@ -90,6 +90,21 @@ describe('guardScanner', () => {
       expect(result.status).toBe('clear')
       expect(result.partner).toBeUndefined()
     })
+
+    // Regression: WA-2369 — small non-zero balances must not trigger the recommendation.
+    it.each([2, 20, 999, 999_999])(
+      'returns clear for low non-zero balance ($%i) on supported chain',
+      async (balanceUsd) => {
+        const ctx = createMockContext({
+          guard: null,
+          chainSupportsHypernative: true,
+          balanceUsd,
+        })
+        const result = await guardScanner.scan(ctx)
+        expect(result.status).toBe('clear')
+        expect(result.partner).toBeUndefined()
+      },
+    )
   })
 
   describe('Tier 4: no guard needed', () => {

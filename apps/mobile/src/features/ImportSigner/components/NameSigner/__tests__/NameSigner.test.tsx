@@ -30,7 +30,7 @@ jest.mock('@/src/store/hooks', () => ({
 
 const mockUseWalletConnectContext = jest.fn()
 
-jest.mock('@/src/features/WalletConnect/context/WalletConnectContext', () => ({
+jest.mock('@/src/features/WalletConnect/Signer/context/WalletConnectContext', () => ({
   useWalletConnectContext: () => mockUseWalletConnectContext(),
 }))
 

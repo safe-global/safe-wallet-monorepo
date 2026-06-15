@@ -1,9 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import SpaceBackLink from './SpaceBackLink'
-import { getDeterministicColor } from '@/features/spaces'
+import { getDeterministicColor } from '@/utils/colors'
 
-jest.mock('@/features/spaces', () => ({
-  ...jest.requireActual('@/features/spaces'),
+jest.mock('@/utils/colors', () => ({
   getDeterministicColor: jest.fn((name: string) => `#${name.length.toString(16).padStart(6, '0')}`),
 }))
 

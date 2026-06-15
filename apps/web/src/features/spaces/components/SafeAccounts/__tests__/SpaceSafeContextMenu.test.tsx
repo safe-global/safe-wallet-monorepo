@@ -84,7 +84,7 @@ describe('SpaceSafeContextMenu', () => {
     })
   })
 
-  it('shows "Give name" when safe has no name', async () => {
+  it('shows "Rename" when safe has no name', async () => {
     ;(useAppSelector as jest.Mock).mockReturnValue({})
 
     render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
@@ -93,7 +93,7 @@ describe('SpaceSafeContextMenu', () => {
     fireEvent.click(menuButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Give name')).toBeInTheDocument()
+      expect(screen.getByText('Rename')).toBeInTheDocument()
     })
   })
 

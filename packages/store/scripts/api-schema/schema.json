@@ -1859,10 +1859,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to get address book for",
+            "description": "Space UUID to get address book for (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -1900,10 +1900,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to update address book for",
+            "description": "Space UUID to update address book for",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -1957,10 +1957,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID containing the address book",
+            "description": "Space UUID containing the address book",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -1999,10 +1999,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2037,10 +2037,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2070,7 +2070,7 @@
             "description": "Authentication required"
           },
           "403": {
-            "description": "User is not a member of this space or wallet authentication required"
+            "description": "User is not a member of this space"
           }
         },
         "summary": "Upsert private address book entries",
@@ -2088,10 +2088,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -2109,7 +2109,7 @@
             "description": "Private address book entry deleted successfully"
           },
           "403": {
-            "description": "User is not a member or wallet authentication required"
+            "description": "User is not a member of this space"
           },
           "404": {
             "description": "Entry not found"
@@ -2130,10 +2130,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2168,10 +2168,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2198,7 +2198,7 @@
             }
           },
           "403": {
-            "description": "User is not a member or wallet authentication required"
+            "description": "User is not a member of this space"
           },
           "404": {
             "description": "Private contact not found"
@@ -2219,10 +2219,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -2243,7 +2243,7 @@
             "description": "Only pending requests can be approved"
           },
           "403": {
-            "description": "User is not an admin or wallet authentication required"
+            "description": "User is not an admin of this space"
           },
           "404": {
             "description": "Request not found"
@@ -2264,10 +2264,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -2288,7 +2288,7 @@
             "description": "Only pending requests can be rejected"
           },
           "403": {
-            "description": "User is not an admin or wallet authentication required"
+            "description": "User is not an admin of this space"
           },
           "404": {
             "description": "Request not found"
@@ -2420,10 +2420,10 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2461,10 +2461,10 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Space ID to update",
+            "description": "Space UUID to update",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2513,10 +2513,10 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Space ID to delete",
+            "description": "Space UUID to delete",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2549,10 +2549,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to add Safes to",
+            "description": "Space UUID to add Safes to",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2594,10 +2594,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to get Safes for",
+            "description": "Space UUID to get Safes for (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2635,10 +2635,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to remove Safes from",
+            "description": "Space UUID to remove Safes from",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2682,10 +2682,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to invite users to",
+            "description": "Space UUID to invite users to",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2739,10 +2739,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to accept invitation for",
+            "description": "Space UUID to accept invitation for",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2786,10 +2786,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to decline invitation for",
+            "description": "Space UUID to decline invitation for",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2813,6 +2813,59 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/members/{userId}/invite/renew": {
+      "post": {
+        "description": "Renews a pending invitation to a space, refreshing its expiry. Only space admins can renew, and only pending invitations can be renewed.Note: renewal for email invites also resends the invitation email.",
+        "operationId": "membersRenewInviteV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID containing the invitation (numeric ID accepted for legacy clients, deprecated)",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "User ID of the invited member",
+            "schema": {
+              "example": 123,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invitation renewed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Invitation"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access forbidden - user is not an active admin of this space"
+          },
+          "404": {
+            "description": "User, space, or member not found"
+          },
+          "409": {
+            "description": "Invitation is not in a pending state"
+          }
+        },
+        "summary": "Renew space invitation",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/members": {
       "get": {
         "description": "Retrieves all members of a space including their roles, status, and membership information.",
@@ -2822,10 +2875,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to get members for",
+            "description": "Space UUID to get members for (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2860,8 +2913,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space UUID to remove own membership from",
             "schema": {
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2897,10 +2952,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to fetch the caller's membership for",
+            "description": "Space UUID to fetch the caller's membership for (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -2937,10 +2992,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID containing the member",
+            "description": "Space UUID containing the member",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -2997,8 +3052,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
+            "description": "Space UUID to update own member alias in",
             "schema": {
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -3038,10 +3095,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID to remove member from",
+            "description": "Space UUID to remove member from",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           },
           {
@@ -3171,10 +3228,10 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space ID",
+            "description": "Space UUID (numeric ID accepted for legacy clients, deprecated)",
             "schema": {
-              "example": 1,
-              "type": "number"
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
             }
           }
         ],
@@ -3199,6 +3256,123 @@
         "summary": "Get counterfactual Safes in a space",
         "tags": [
           "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/surveys/{slug}/state": {
+      "get": {
+        "description": "Returns the active survey definition and this space's response (if any) in a single round trip. Only active admins of the space can read survey state.",
+        "operationId": "surveysGetStateV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID to get survey state for (numeric ID accepted for legacy clients, deprecated)",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "onboarding",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveyStateDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "User is not an active admin of this space"
+          },
+          "404": {
+            "description": "No active survey for this slug"
+          }
+        },
+        "summary": "Get survey state for a space",
+        "tags": [
+          "surveys"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/surveys/{slug}/responses": {
+      "post": {
+        "description": "Submits or updates the space's response to the active survey for the given slug. Only active admins of the space can submit. Idempotent: repeat submissions overwrite the previous response.",
+        "operationId": "surveysSubmitResponseV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID to submit a survey response for",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "onboarding",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitSurveyResponseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveyResponseResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Empty selections or unknown option keys"
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "403": {
+            "description": "User is not an active admin of this space"
+          },
+          "404": {
+            "description": "No active survey for this slug"
+          }
+        },
+        "summary": "Submit a survey response for a space",
+        "tags": [
+          "surveys"
         ]
       }
     },
@@ -3341,7 +3515,7 @@
     },
     "/v1/chains/{chainId}/relay": {
       "post": {
-        "description": "Relays a Safe transaction using the relay service, which pays for gas fees. The transaction must meet certain criteria and the Safe must have remaining relay quota.",
+        "description": "Relays a Safe transaction or Safe creation transaction using the relay service, which pays for gas fees. Supports execTransaction (Safe tx) and createProxyWithNonce (Safe creation) calldata. On relay-fee chains, safeTxHash is required and must match the hash derived on-chain from the submitted calldata. On chains where pre-relay Tenderly simulation is enabled, an execTransaction is simulated before being submitted: a confirmed revert returns SIMULATION_FAILED, and an unreachable simulator returns INDETERMINATE_SIMULATION (retry with acceptUnverifiedSimulation=true to proceed anyway when the simulator is unreachable).",
         "operationId": "relayRelayV1",
         "parameters": [
           {
@@ -3357,7 +3531,7 @@
         ],
         "requestBody": {
           "required": true,
-          "description": "Transaction data to relay including Safe address, transaction details, and signatures",
+          "description": "Transaction data to relay. safeTxHash is required on relay-fee chains and must correspond to the to + data fields. Set acceptUnverifiedSimulation=true to retry a relay skipping the simulation which previously returned INDETERMINATE_SIMULATION.",
           "content": {
             "application/json": {
               "schema": {
@@ -3368,7 +3542,7 @@
         },
         "responses": {
           "200": {
-            "description": "Transaction relayed successfully with transaction hash",
+            "description": "Transaction relayed successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -3378,7 +3552,47 @@
             }
           },
           "400": {
-            "description": "Invalid transaction data, unofficial contracts, or unsupported operation"
+            "description": "Request body failed schema validation"
+          },
+          "403": {
+            "description": "Relay denied: safeTxHash missing, fee service rejected, or unofficial proxy factory"
+          },
+          "422": {
+            "description": "Relay rejected. The consumers MUST branch on the `code` field; `message` is informational. Possible cases: safeTxHash does not match the transaction data, unrecognised transaction type, SIMULATION_FAILED (Tenderly confirmed revert), or INDETERMINATE_SIMULATION (simulator unreachable; retry with `acceptUnverifiedSimulation=true` to proceed anyway).",
+            "schema": {
+              "examples": {
+                "simulationFailed": {
+                  "summary": "SIMULATION_FAILED",
+                  "value": {
+                    "code": "SIMULATION_FAILED",
+                    "message": "Relay denied: transaction simulation failed: Reverted with reason string: 'GS013'",
+                    "statusCode": 422
+                  }
+                },
+                "indeterminateSimulation": {
+                  "summary": "INDETERMINATE_SIMULATION",
+                  "value": {
+                    "code": "INDETERMINATE_SIMULATION",
+                    "message": "Relay simulation could not be completed.",
+                    "statusCode": 422
+                  }
+                },
+                "safeTxHashMismatch": {
+                  "summary": "safeTxHash mismatch (no `code`)",
+                  "value": {
+                    "message": "Safe transaction hash mismatch: provided hash 0x... does not match the transaction data",
+                    "statusCode": 422
+                  }
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelayErrorResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Relay limit reached for this Safe"
@@ -3438,7 +3652,7 @@
     },
     "/v1/chains/{chainId}/relay/{safeAddress}": {
       "get": {
-        "description": "Retrieves the number of remaining relay transactions available for a specific Safe on the given chain.",
+        "description": "Retrieves the number of remaining relay transactions available for a specific Safe on the given chain. On relay-fee chains, safeTxHash is forwarded to the fee service to determine per-transaction eligibility (returns remaining=1 when eligible, 0 when not). On daily-limit and no-fee-campaign chains, a count-based quota is returned.",
         "operationId": "relayGetRelaysRemainingV1",
         "parameters": [
           {
@@ -3464,7 +3678,7 @@
             "name": "safeTxHash",
             "required": false,
             "in": "query",
-            "description": "Safe transaction hash (0x prefixed hex string). Required for chains enabled for relay-fee relayer",
+            "description": "Safe transaction hash (0x prefixed hex string). Required on relay-fee chains to check per-transaction eligibility with the fee service. Optional on daily-limit and no-fee-campaign chains.",
             "schema": {
               "type": "string"
             }
@@ -8064,9 +8278,9 @@
         "type": "object",
         "properties": {
           "chainId": {
-            "type": "number",
+            "type": "string",
             "description": "Chain ID",
-            "example": 1
+            "example": "1"
           },
           "safeAddress": {
             "type": "string",
@@ -8658,7 +8872,13 @@
         "type": "object",
         "properties": {
           "spaceId": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
           },
           "data": {
             "type": "array",
@@ -8669,6 +8889,7 @@
         },
         "required": [
           "spaceId",
+          "spaceUuid",
           "data"
         ]
       },
@@ -8724,7 +8945,12 @@
             }
           },
           "createdBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Email or wallet address of the creator, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "createdByUserId": {
+            "type": "number",
+            "description": "User ID of the creator"
           },
           "createdAt": {
             "type": "object"
@@ -8738,6 +8964,7 @@
           "address",
           "chainIds",
           "createdBy",
+          "createdByUserId",
           "createdAt",
           "updatedAt"
         ]
@@ -8746,7 +8973,13 @@
         "type": "object",
         "properties": {
           "spaceId": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
           },
           "data": {
             "type": "array",
@@ -8757,6 +8990,7 @@
         },
         "required": [
           "spaceId",
+          "spaceUuid",
           "data"
         ]
       },
@@ -8779,7 +9013,22 @@
             }
           },
           "requestedBy": {
-            "type": "string"
+            "type": "string",
+            "description": "Email or wallet address of the requester, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
+          },
+          "requestedByUserId": {
+            "type": "number",
+            "description": "User ID of the requester"
+          },
+          "reviewedBy": {
+            "type": "string",
+            "nullable": true,
+            "description": "Email or wallet address of the reviewing admin, \"Unknown user\", \"Deleted user\", or null when still PENDING"
+          },
+          "reviewedByUserId": {
+            "type": "number",
+            "nullable": true,
+            "description": "User ID of the reviewing admin, null when still PENDING"
           },
           "status": {
             "type": "string",
@@ -8804,6 +9053,9 @@
           "address",
           "chainIds",
           "requestedBy",
+          "requestedByUserId",
+          "reviewedBy",
+          "reviewedByUserId",
           "status",
           "createdAt",
           "updatedAt"
@@ -8813,7 +9065,13 @@
         "type": "object",
         "properties": {
           "spaceId": {
-            "type": "string"
+            "type": "string",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
           },
           "data": {
             "type": "array",
@@ -8824,6 +9082,7 @@
         },
         "required": [
           "spaceId",
+          "spaceUuid",
           "data"
         ]
       },
@@ -8857,12 +9116,19 @@
             "type": "string"
           },
           "id": {
-            "type": "number"
+            "type": "number",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use uuid). Kept for FE fallback"
+          },
+          "uuid": {
+            "type": "string",
+            "description": "Space UUID"
           }
         },
         "required": [
           "name",
-          "id"
+          "id",
+          "uuid"
         ]
       },
       "UserDto": {
@@ -8890,6 +9156,15 @@
             "type": "string"
           },
           "invitedBy": {
+            "type": "number",
+            "nullable": true
+          },
+          "inviteExpiresAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "invitedByName": {
             "type": "string"
           },
           "status": {
@@ -8908,6 +9183,7 @@
           "role",
           "name",
           "invitedBy",
+          "inviteExpiresAt",
           "status",
           "user"
         ]
@@ -8916,7 +9192,13 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "number"
+            "type": "number",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use uuid). Kept for FE fallback"
+          },
+          "uuid": {
+            "type": "string",
+            "description": "Space UUID"
           },
           "name": {
             "type": "string"
@@ -8935,6 +9217,7 @@
         },
         "required": [
           "id",
+          "uuid",
           "name",
           "members",
           "safeCount"
@@ -8958,11 +9241,18 @@
         "type": "object",
         "properties": {
           "id": {
-            "type": "number"
+            "type": "number",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use uuid). Kept for FE fallback"
+          },
+          "uuid": {
+            "type": "string",
+            "description": "Space UUID"
           }
         },
         "required": [
-          "id"
+          "id",
+          "uuid"
         ]
       },
       "SpaceSafeDto": {
@@ -9030,16 +9320,17 @@
           "safes"
         ]
       },
-      "InviteUserDto": {
+      "WalletInviteUserDto": {
         "type": "object",
         "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "wallet"
+            ]
+          },
           "address": {
             "type": "string"
-          },
-          "name": {
-            "type": "string",
-            "minLength": 3,
-            "maxLength": 30
           },
           "role": {
             "type": "string",
@@ -9047,12 +9338,50 @@
               "ADMIN",
               "MEMBER"
             ]
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
           }
         },
         "required": [
+          "type",
           "address",
-          "name",
-          "role"
+          "role",
+          "name"
+        ]
+      },
+      "EmailInviteUserDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "email"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 255
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "MEMBER"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "type",
+          "email",
+          "role",
+          "name"
         ]
       },
       "InviteUsersDto": {
@@ -9061,7 +9390,14 @@
           "users": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/InviteUserDto"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/WalletInviteUserDto"
+                },
+                {
+                  "$ref": "#/components/schemas/EmailInviteUserDto"
+                }
+              ]
             }
           }
         },
@@ -9079,7 +9415,13 @@
             "type": "string"
           },
           "spaceId": {
-            "type": "number"
+            "type": "number",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
           },
           "role": {
             "type": "string",
@@ -9097,7 +9439,7 @@
             ]
           },
           "invitedBy": {
-            "type": "string",
+            "type": "number",
             "nullable": true
           }
         },
@@ -9105,8 +9447,10 @@
           "userId",
           "name",
           "spaceId",
+          "spaceUuid",
           "role",
-          "status"
+          "status",
+          "invitedBy"
         ]
       },
       "AcceptInviteDto": {
@@ -9114,8 +9458,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "minLength": 3,
-            "maxLength": 30
+            "maxLength": 255
           }
         },
         "required": [
@@ -9175,6 +9518,11 @@
             "nullable": true
           },
           "invitedBy": {
+            "type": "number",
+            "nullable": true
+          },
+          "inviteExpiresAt": {
+            "format": "date-time",
             "type": "string",
             "nullable": true
           },
@@ -9195,6 +9543,7 @@
           "role",
           "status",
           "name",
+          "invitedBy",
           "createdAt",
           "updatedAt",
           "user"
@@ -9455,6 +9804,241 @@
           "safes"
         ]
       },
+      "SurveyOptionDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label"
+        ]
+      },
+      "SurveyPageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "multiSelect": {
+            "type": "boolean"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SurveyOptionDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "subtitle",
+          "multiSelect",
+          "options"
+        ]
+      },
+      "SurveyContentDto": {
+        "type": "object",
+        "properties": {
+          "pages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SurveyPageDto"
+            }
+          }
+        },
+        "required": [
+          "pages"
+        ]
+      },
+      "SurveyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "surveyContent": {
+            "$ref": "#/components/schemas/SurveyContentDto"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "version",
+          "title",
+          "subtitle",
+          "surveyContent"
+        ]
+      },
+      "SpaceSurveyResponseDto": {
+        "type": "object",
+        "properties": {
+          "surveyVersion": {
+            "type": "number"
+          },
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Map from page id → selected option keys"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "answeredByUserId": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "surveyVersion",
+          "selections",
+          "submittedAt",
+          "updatedAt",
+          "answeredByUserId"
+        ]
+      },
+      "SurveyStateDto": {
+        "type": "object",
+        "properties": {
+          "survey": {
+            "$ref": "#/components/schemas/SurveyDto"
+          },
+          "surveyResponse": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpaceSurveyResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "survey",
+          "surveyResponse"
+        ]
+      },
+      "SubmitSurveyResponseDto": {
+        "type": "object",
+        "properties": {
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Map from page id → selected option keys",
+            "example": {
+              "use_cases": [
+                "run_payments",
+                "hold_assets"
+              ]
+            }
+          }
+        },
+        "required": [
+          "selections"
+        ]
+      },
+      "SurveyResponseResultDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "spaceId": {
+            "type": "number",
+            "deprecated": true,
+            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
+          },
+          "surveySlug": {
+            "type": "string"
+          },
+          "surveyVersion": {
+            "type": "number"
+          },
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "answeredByUserId": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "spaceId",
+          "spaceUuid",
+          "surveySlug",
+          "surveyVersion",
+          "selections",
+          "submittedAt",
+          "updatedAt",
+          "answeredByUserId"
+        ]
+      },
       "SafeList": {
         "type": "object",
         "properties": {
@@ -9489,6 +10073,10 @@
           "safeTxHash": {
             "type": "string",
             "description": "Safe transaction hash for relay-fee eligibility check"
+          },
+          "acceptUnverifiedSimulation": {
+            "type": "boolean",
+            "description": "Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk."
           }
         },
         "required": [
@@ -9506,6 +10094,32 @@
         },
         "required": [
           "taskId"
+        ]
+      },
+      "RelayErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "SIMULATION_FAILED",
+              "INDETERMINATE_SIMULATION"
+            ],
+            "description": "Stable identifier of the error condition. The frontend MUST branch on this value (not on `message`, which is informational and may change)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the error. Informational only; do not parse."
+          },
+          "statusCode": {
+            "type": "number",
+            "example": 422
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "statusCode"
         ]
       },
       "RelayTaskStatusReceipt": {
@@ -9645,6 +10259,7 @@
           },
           "provider": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SafeAppProvider"
@@ -9726,6 +10341,7 @@
           },
           "fallbackHandler": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddressInfo"
@@ -9734,6 +10350,7 @@
           },
           "guard": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddressInfo"
@@ -10975,6 +11592,7 @@
           },
           "implementation": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddressInfo"
@@ -11633,6 +12251,7 @@
           },
           "fees": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/BridgeFee"
@@ -11647,6 +12266,7 @@
           },
           "toToken": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/TokenInfo"
@@ -11820,6 +12440,7 @@
           },
           "fees": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/BridgeFee"
@@ -12605,6 +13226,7 @@
           },
           "dataDecoded": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/DataDecoded"
@@ -12720,6 +13342,7 @@
           },
           "executor": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddressInfo"
@@ -12748,6 +13371,7 @@
             }
           },
           "gasTokenInfo": {
+            "type": "object",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/NativeToken"
@@ -12766,6 +13390,7 @@
           },
           "proposer": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddressInfo"
@@ -12774,6 +13399,7 @@
           },
           "proposedByDelegate": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/AddressInfo"
@@ -12916,6 +13542,7 @@
           },
           "txData": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/TransactionData"
@@ -12923,6 +13550,7 @@
             ]
           },
           "detailedExecutionInfo": {
+            "type": "object",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/MultisigExecutionDetails"
@@ -12939,6 +13567,7 @@
           },
           "safeAppInfo": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SafeAppInfo"
@@ -13249,6 +13878,7 @@
             ]
           },
           "executionInfo": {
+            "type": "object",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/MultisigExecutionInfo"
@@ -13261,6 +13891,7 @@
           },
           "safeAppInfo": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SafeAppInfo"
@@ -13805,6 +14436,7 @@
           },
           "dataDecoded": {
             "nullable": true,
+            "type": "object",
             "allOf": [
               {
                 "$ref": "#/components/schemas/DataDecoded"

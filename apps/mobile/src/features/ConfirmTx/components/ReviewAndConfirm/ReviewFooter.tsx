@@ -5,7 +5,7 @@ import { SelectSigner } from '@/src/components/SelectSigner'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Address } from '@/src/types/address'
 import type { Signer } from '@/src/store/signersSlice'
-import { WalletConnectGate } from '@/src/features/WalletConnect/components/WalletConnectGate'
+import { WalletConnectGate } from '@/src/features/WalletConnect/Signer/components/WalletConnectGate'
 
 interface ReviewFooterProps {
   txId: string

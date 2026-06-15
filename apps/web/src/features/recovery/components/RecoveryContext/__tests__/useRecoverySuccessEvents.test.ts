@@ -2,10 +2,10 @@ import { faker } from '@faker-js/faker'
 
 import { renderHook } from '@/tests/test-utils'
 import { useRecoverySuccessEvents } from '../useRecoverySuccessEvents'
-import { recoveryDispatch, RecoveryEvent, RecoveryTxType } from '@/features/recovery/services/recoveryEvents'
+import { recoveryDispatch, RecoveryEvent, RecoveryTxType } from '../../../services/recoveryEvents'
 
-jest.mock('@/features/recovery/services/recoveryEvents', () => ({
-  ...jest.requireActual('@/features/recovery/services/recoveryEvents'),
+jest.mock('../../../services/recoveryEvents', () => ({
+  ...jest.requireActual('../../../services/recoveryEvents'),
   recoveryDispatch: jest.fn(),
 }))
 

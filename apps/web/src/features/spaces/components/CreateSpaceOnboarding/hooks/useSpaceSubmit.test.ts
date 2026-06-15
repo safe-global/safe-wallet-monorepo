@@ -39,10 +39,6 @@ jest.mock('@/store/authSlice', () => ({
   setLastUsedSpace: (id: string) => ({ type: 'auth/setLastUsedSpace', payload: id }),
 }))
 
-jest.mock('@/store/notificationsSlice', () => ({
-  showNotification: (payload: unknown) => ({ type: 'notifications/show', payload }),
-}))
-
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesCreateV1Mutation: () => [mockCreateSpaceWithUser],
   useSpacesUpdateV1Mutation: () => [mockUpdateSpace],
@@ -70,7 +66,9 @@ describe('useSpaceSubmit tracking', () => {
   }
 
   it('tracks WORKSPACE_CREATED with spaceId sent to both GA (label) and Mixpanel (additionalParameters) after successful creation', async () => {
-    mockCreateSpaceWithUser.mockResolvedValue({ data: { id: 42, name: 'My Space' } })
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 42, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
 
     const result = setupHook(undefined, false)
 
@@ -78,7 +76,10 @@ describe('useSpaceSubmit tracking', () => {
       await result.current.onSubmit()
     })
 
-    expect(trackEvent).toHaveBeenCalledWith({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: '42' }, { workspace_id: '42' })
+    expect(trackEvent).toHaveBeenCalledWith(
+      { ...SPACE_EVENTS.WORKSPACE_CREATED, label: '11111111-1111-1111-1111-111111111111' },
+      { workspace_id: '11111111-1111-1111-1111-111111111111' },
+    )
   })
 
   it('does not track WORKSPACE_CREATED when the API returns an error', async () => {
@@ -110,20 +111,9 @@ describe('useSpaceSubmit routing', () => {
   }
 
   it('navigates to selectSafes without ?safe= when not in URL after creating a space', async () => {
-    mockCreateSpaceWithUser.mockResolvedValue({ data: { id: 7, name: 'My Space' } })
-
-    const result = setupHook()
-
-    await act(async () => {
-      await result.current.onSubmit()
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
     })
-
-    expect(mockPush).toHaveBeenCalledWith({ pathname: '/welcome', query: { spaceId: '7' } })
-  })
-
-  it('forwards ?safe= to selectSafes route after creating a space', async () => {
-    mockRouterQuery = { safe: '1:0xdeadbeef' }
-    mockCreateSpaceWithUser.mockResolvedValue({ data: { id: 7, name: 'My Space' } })
 
     const result = setupHook()
 
@@ -133,27 +123,32 @@ describe('useSpaceSubmit routing', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/welcome',
-      query: { spaceId: '7', safe: '1:0xdeadbeef' },
+      query: { spaceId: '11111111-1111-1111-1111-111111111111' },
+    })
+  })
+
+  it('forwards ?safe= to selectSafes route after creating a space', async () => {
+    mockRouterQuery = { safe: '1:0xdeadbeef' }
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
+
+    const result = setupHook()
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/welcome',
+      query: { spaceId: '11111111-1111-1111-1111-111111111111', safe: '1:0xdeadbeef' },
     })
   })
 
   it('navigates to selectSafes without ?safe= when not in URL after editing a space', async () => {
     mockUpdateSpace.mockResolvedValue({ data: {} })
 
-    const result = setupHook('42', true)
-
-    await act(async () => {
-      await result.current.onSubmit()
-    })
-
-    expect(mockPush).toHaveBeenCalledWith({ pathname: '/welcome', query: { spaceId: '42' } })
-  })
-
-  it('forwards ?safe= to selectSafes route after editing a space', async () => {
-    mockRouterQuery = { safe: '5:0xcafe' }
-    mockUpdateSpace.mockResolvedValue({ data: {} })
-
-    const result = setupHook('42', true)
+    const result = setupHook('11111111-1111-1111-1111-111111111111', true)
 
     await act(async () => {
       await result.current.onSubmit()
@@ -161,7 +156,59 @@ describe('useSpaceSubmit routing', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/welcome',
-      query: { spaceId: '42', safe: '5:0xcafe' },
+      query: { spaceId: '11111111-1111-1111-1111-111111111111' },
+    })
+  })
+
+  it('forwards ?safe= to selectSafes route after editing a space', async () => {
+    mockRouterQuery = { safe: '5:0xcafe' }
+    mockUpdateSpace.mockResolvedValue({ data: {} })
+
+    const result = setupHook('11111111-1111-1111-1111-111111111111', true)
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/welcome',
+      query: { spaceId: '11111111-1111-1111-1111-111111111111', safe: '5:0xcafe' },
+    })
+  })
+
+  it('forwards a sanitised ?next= to selectSafes after creating a space', async () => {
+    mockRouterQuery = { next: '/balances' }
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
+
+    const result = setupHook()
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/welcome',
+      query: { spaceId: '11111111-1111-1111-1111-111111111111', next: '/balances' },
+    })
+  })
+
+  it('drops an unsafe (protocol-relative) ?next= after creating a space', async () => {
+    mockRouterQuery = { next: '//evil.com/x' }
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
+
+    const result = setupHook()
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/welcome',
+      query: { spaceId: '11111111-1111-1111-1111-111111111111' },
     })
   })
 })

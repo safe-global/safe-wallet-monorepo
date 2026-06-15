@@ -15,7 +15,9 @@ export interface SafeSidebarWorkspaceHeaderProps {
   workspaceHeader: SafeWorkspaceHeaderProps
 }
 
-export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorkspaceHeaderProps): ReactElement => {
+export const SafeSidebarWorkspaceHeader = ({
+  workspaceHeader,
+}: SafeSidebarWorkspaceHeaderProps): ReactElement | null => {
   const spaceId = useCurrentSpaceId()
 
   const handleAddSafeClick = () => {
@@ -30,7 +32,8 @@ export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorks
       return <BackToSpaceButton {...workspaceHeader} />
 
     case 'addToWorkspace': {
-      const hasSpaces = (workspaceHeader.spaces?.length ?? 0) > 0
+      const spaces = workspaceHeader.spaces ?? []
+      const hasSpaces = spaces.length > 0
       if (hasSpaces) {
         return (
           <SpaceSelectorDropdown
@@ -50,7 +53,7 @@ export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorks
                 size="lg"
                 className={css.addSafeToWorkspaceTrigger}
                 data-testid="add-safe-to-workspace-button"
-                aria-label="Add Safe to space"
+                aria-label="Add Safe to workspace"
                 aria-haspopup="dialog"
               />
             }
@@ -58,7 +61,7 @@ export const SafeSidebarWorkspaceHeader = ({ workspaceHeader }: SafeSidebarWorks
             <span className={css.addSafeToWorkspaceRing}>
               <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} strokeWidth={2.5} />
             </span>
-            <span className={css.addSafeToWorkspaceLabel}>Add Safe to space</span>
+            <span className={css.addSafeToWorkspaceLabel}>Add Safe to workspace</span>
           </DialogTrigger>
           <DialogContent className="max-w-[420px] p-0" showCloseButton={false}>
             <AddToSpacePopupModal />

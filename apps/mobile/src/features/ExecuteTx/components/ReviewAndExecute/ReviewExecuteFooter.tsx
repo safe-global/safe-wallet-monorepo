@@ -12,7 +12,7 @@ import { getSubmitButtonText } from './helpers'
 import { Alert } from '@/src/components/Alert'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Signer } from '@/src/store/signersSlice'
-import { WalletConnectGate } from '@/src/features/WalletConnect/components/WalletConnectGate'
+import { WalletConnectGate } from '@/src/features/WalletConnect/Signer/components/WalletConnectGate'
 
 interface ReviewExecuteFooterProps {
   txId: string

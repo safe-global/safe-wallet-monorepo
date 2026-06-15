@@ -9,9 +9,9 @@ jest.mock('next/link', () => {
 })
 
 describe('SafeLogo', () => {
-  it('renders a link to /welcome/accounts by default', () => {
+  it('renders a link to /welcome/spaces by default', () => {
     render(<SafeLogo />)
-    expect(screen.getByRole('link')).toHaveAttribute('href', AppRoutes.welcome.accounts)
+    expect(screen.getByRole('link')).toHaveAttribute('href', AppRoutes.welcome.spaces)
   })
 
   it('renders a link to the provided href', () => {

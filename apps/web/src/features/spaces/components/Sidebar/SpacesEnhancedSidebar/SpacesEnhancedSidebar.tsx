@@ -4,7 +4,7 @@ import { SidebarProvider, useSidebar } from '@/components/ui/sidebar'
 import { EnhancedSidebar } from '../index'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { getNonDeclinedSpaces } from '@/features/spaces/utils'
@@ -12,7 +12,7 @@ import type { SpaceItem } from '../types'
 import { getQuerySpaceId } from '../utils'
 import { useSidebarHydrated } from '../hooks/useSidebarHydrated'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
-import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
+import useIsQualifiedSafe from '../../../hooks/useIsQualifiedSafe'
 import { SidebarSkeleton } from '../SidebarSkeleton'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -85,15 +85,12 @@ const HydratedSidebar = ({ contained = false }: { contained?: boolean }): ReactE
   const spaceIdForSidebarSelection = isSpaceRoute ? resolvedSpaceId : getQuerySpaceId(router.query)
 
   const selectedSpace =
-    spaceIdForSidebarSelection != null
-      ? spaces?.find((space) => space.id === Number(spaceIdForSidebarSelection))
-      : undefined
+    spaceIdForSidebarSelection != null ? spaces?.find((space) => space.uuid === spaceIdForSidebarSelection) : undefined
 
   const nonDeclinedSpaces = getNonDeclinedSpaces(currentUser, spaces ?? [])
 
   const qualifiedSpaceId = isQualifiedSafe ? resolvedSpaceId : null
-  const qualifiedSpace =
-    qualifiedSpaceId != null ? spaces?.find((space) => space.id === Number(qualifiedSpaceId)) : undefined
+  const qualifiedSpace = qualifiedSpaceId != null ? spaces?.find((space) => space.uuid === qualifiedSpaceId) : undefined
 
   const effectiveSelectedSpace = selectedSpace ?? addedToSpace ?? qualifiedSpace
 

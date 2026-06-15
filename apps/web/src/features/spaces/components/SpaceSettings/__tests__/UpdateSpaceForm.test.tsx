@@ -3,11 +3,12 @@ import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
 import UpdateSpaceForm from '../UpdateSpaceForm'
 
-// Import the real type
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { spaceBuilder } from '@/tests/builders/space'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
-// Mock the hooks
-const mockUpdateSpace = jest.fn()
+const mockUnwrap = jest.fn()
+const mockUpdateSpace = jest.fn(() => ({ unwrap: mockUnwrap }))
 const mockUseIsAdmin = jest.fn()
 
 jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
@@ -28,12 +29,7 @@ const renderWithStore = (ui: React.ReactElement) => {
 }
 
 describe('UpdateSpaceForm', () => {
-  const mockSpace: GetSpaceResponse = {
-    id: 123,
-    name: 'Test Space',
-    members: [],
-    safeCount: 0,
-  }
+  const mockSpace = spaceBuilder().with({ id: 123, uuid: MOCK_SPACE_UUID, name: 'Test Space', members: [] }).build()
 
   // Helper functions to reduce code duplication
   const setupForm = (space: GetSpaceResponse | undefined, isAdmin: boolean) => {
@@ -42,7 +38,7 @@ describe('UpdateSpaceForm', () => {
   }
 
   const getFormElements = () => ({
-    input: screen.getByLabelText('Space name') as HTMLInputElement,
+    input: screen.getByLabelText('Workspace name') as HTMLInputElement,
     saveButton: screen.getByTestId('space-save-button'),
   })
 
@@ -53,7 +49,7 @@ describe('UpdateSpaceForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUpdateSpace.mockReset()
+    mockUnwrap.mockReset()
     mockUseIsAdmin.mockReset()
   })
 
@@ -110,7 +106,7 @@ describe('UpdateSpaceForm', () => {
   })
 
   it('should call updateSpace mutation on submit', async () => {
-    mockUpdateSpace.mockResolvedValue({})
+    mockUnwrap.mockResolvedValue({})
     setupForm(mockSpace, true)
 
     changeSpaceName('New Space Name')
@@ -120,14 +116,14 @@ describe('UpdateSpaceForm', () => {
 
     await waitFor(() => {
       expect(mockUpdateSpace).toHaveBeenCalledWith({
-        id: 123,
+        id: MOCK_SPACE_UUID,
         updateSpaceDto: { name: 'New Space Name' },
       })
     })
   })
 
   it('should show success notification on successful update', async () => {
-    mockUpdateSpace.mockResolvedValue({})
+    mockUnwrap.mockResolvedValue({})
     const { store } = setupForm(mockSpace, true)
 
     changeSpaceName('New Space Name')
@@ -140,14 +136,14 @@ describe('UpdateSpaceForm', () => {
       const notifications = state.notifications
       expect(notifications.length).toBeGreaterThan(0)
       const lastNotification = notifications[notifications.length - 1]
-      expect(lastNotification.message).toBe('Updated space name')
+      expect(lastNotification.message).toBe('Updated workspace name')
       expect(lastNotification.variant).toBe('success')
       expect(lastNotification.groupKey).toBe('space-update-name')
     })
   })
 
   it('should display error message when update fails', async () => {
-    mockUpdateSpace.mockRejectedValue(new Error('Network error'))
+    mockUnwrap.mockRejectedValue(new Error('Network error'))
     setupForm(mockSpace, true)
 
     changeSpaceName('New Space Name')
@@ -156,7 +152,7 @@ describe('UpdateSpaceForm', () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Error updating the space. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Error updating the workspace. Please try again.')).toBeInTheDocument()
     })
   })
 
@@ -174,7 +170,7 @@ describe('UpdateSpaceForm', () => {
   })
 
   it('should clear error message when user retries after error', async () => {
-    mockUpdateSpace.mockRejectedValueOnce(new Error('Network error')).mockResolvedValueOnce({})
+    mockUnwrap.mockRejectedValueOnce(new Error('Network error')).mockResolvedValueOnce({})
     setupForm(mockSpace, true)
 
     // First attempt fails
@@ -183,7 +179,7 @@ describe('UpdateSpaceForm', () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Error updating the space. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Error updating the workspace. Please try again.')).toBeInTheDocument()
     })
 
     // Second attempt succeeds
@@ -191,7 +187,7 @@ describe('UpdateSpaceForm', () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Error updating the space. Please try again.')).not.toBeInTheDocument()
+      expect(screen.queryByText('Error updating the workspace. Please try again.')).not.toBeInTheDocument()
     })
   })
 })

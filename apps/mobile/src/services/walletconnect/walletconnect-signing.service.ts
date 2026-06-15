@@ -1,5 +1,5 @@
 import type { Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { SafeVersion } from '@safe-global/types-kit'
+import type { SafeTransaction, SafeVersion } from '@safe-global/types-kit'
 import { generateTypedData } from '@safe-global/protocol-kit'
 import { SigningMethod } from '@safe-global/types-kit'
 import { TypedDataEncoder } from 'ethers'
@@ -17,6 +17,12 @@ export interface WalletConnectSigningParams {
   signerAddress: string
   safeVersion: SafeVersion
   provider: Provider
+  /**
+   * Pre-built SafeTransaction for un-proposed (draft) transactions. When
+   * supplied, the service signs this transaction directly instead of
+   * fetching its data from CGW by `txId`.
+   */
+  prebuiltSafeTx?: SafeTransaction
 }
 
 export interface SigningResponse {
@@ -25,11 +31,16 @@ export interface SigningResponse {
 }
 
 export const signWithWalletConnect = async (params: WalletConnectSigningParams): Promise<SigningResponse> => {
-  const { chain, activeSafe, txId, signerAddress, safeVersion, provider } = params
+  const { chain, activeSafe, txId, signerAddress, safeVersion, provider, prebuiltSafeTx } = params
 
-  const txDetails = await fetchTransactionDetails(activeSafe.chainId, txId)
-  const { txParams, signatures } = extractTxInfo(txDetails, activeSafe.address)
-  const safeTx = await createExistingTx(txParams, signatures)
+  let safeTx: SafeTransaction
+  if (prebuiltSafeTx) {
+    safeTx = prebuiltSafeTx
+  } else {
+    const txDetails = await fetchTransactionDetails(activeSafe.chainId, txId)
+    const { txParams, signatures } = extractTxInfo(txDetails, activeSafe.address)
+    safeTx = await createExistingTx(txParams, signatures)
+  }
 
   const typedData = generateTypedData({
     safeAddress: activeSafe.address,
@@ -63,7 +74,7 @@ export const signWithWalletConnect = async (params: WalletConnectSigningParams):
   logger.info('Successfully signed transaction via WalletConnect', {
     signerAddress,
     safeTransactionHash,
-    txId,
+    ...(prebuiltSafeTx ? {} : { txId }),
   })
 
   return {

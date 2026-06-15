@@ -23,7 +23,7 @@ const ConfirmTxFlow = ({ txSummary }: { txSummary: Transaction }) => {
 
   return (
     <TxFlow
-      icon={isSwapOrder && SwapIcon}
+      icon={isSwapOrder ? SwapIcon : undefined}
       subtitle={<>{text}&nbsp;</>}
       txId={txId}
       isExecutable={canExecute}

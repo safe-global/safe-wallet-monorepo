@@ -1,7 +1,7 @@
 import { mapVisibleAnalysisResults } from '../mapVisibleAnalysisResults'
-import type { RecipientAnalysisResults } from '../../types'
+import type { RecipientAnalysisResults, ThreatAnalysisResult } from '../../types'
 import { faker } from '@faker-js/faker'
-import { Severity, StatusGroup, RecipientStatus } from '../../types'
+import { Severity, StatusGroup, RecipientStatus, ThreatStatus } from '../../types'
 import { RecipientAnalysisResultBuilder } from '../../builders'
 
 describe('mapVisibleAnalysisResults', () => {
@@ -220,5 +220,56 @@ describe('mapVisibleAnalysisResults', () => {
 
       expect(result).toEqual([])
     })
+  })
+})
+
+describe('mapVisibleAnalysisResults with expandedGroups', () => {
+  const threat = (title: string, severity: Severity) => ({
+    severity,
+    type: ThreatStatus.MODERATE as const,
+    title,
+    description: `desc ${title}`,
+  })
+
+  it('still collapses to primary when expandedGroups is empty (default)', () => {
+    const address = faker.finance.ethereumAddress()
+    const input: RecipientAnalysisResults = {
+      [address]: {
+        [StatusGroup.THREAT]: [
+          threat('a', Severity.WARN),
+          threat('b', Severity.WARN),
+          threat('c', Severity.INFO),
+        ] as ThreatAnalysisResult[],
+      },
+    }
+    const result = mapVisibleAnalysisResults(input)
+    expect(result.map((r) => r.title)).toEqual(['a'])
+  })
+
+  it('returns all sorted items for listed groups', () => {
+    const address = faker.finance.ethereumAddress()
+    const input: RecipientAnalysisResults = {
+      [address]: {
+        [StatusGroup.THREAT]: [threat('low', Severity.INFO), threat('high', Severity.WARN)] as ThreatAnalysisResult[],
+      },
+    }
+    const result = mapVisibleAnalysisResults(input, [StatusGroup.THREAT])
+    expect(result.map((r) => r.title)).toEqual(['high', 'low'])
+  })
+
+  it('expands only the listed groups; unlisted ones still collapse to primary', () => {
+    const address = faker.finance.ethereumAddress()
+    const input: RecipientAnalysisResults = {
+      [address]: {
+        [StatusGroup.THREAT]: [threat('t1', Severity.WARN), threat('t2', Severity.WARN)] as ThreatAnalysisResult[],
+        [StatusGroup.CUSTOM_CHECKS]: [
+          threat('c1', Severity.WARN),
+          threat('c2', Severity.WARN),
+        ] as ThreatAnalysisResult[],
+      },
+    }
+    const result = mapVisibleAnalysisResults(input, [StatusGroup.THREAT])
+    const titles = result.map((r) => r.title).sort()
+    expect(titles).toEqual(['c1', 't1', 't2'])
   })
 })

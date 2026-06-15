@@ -25,7 +25,6 @@ const allPassing: Record<string, ScanResult> = {
   transaction_scanning: mkResult(),
   recovery: mkResult({ status: 'not_applicable' }),
   multichain_setup: mkResult({ status: 'not_applicable' }),
-  signer_integrity: mkResult(),
 }
 
 const withIssues: Record<string, ScanResult> = {

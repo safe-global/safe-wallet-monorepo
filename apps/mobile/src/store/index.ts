@@ -49,6 +49,8 @@ import pendingTxsListeners from '@/src/store/middleware/pendingTxs'
 import signingState from './signingStateSlice'
 import signerImportFlow from './signerImportFlowSlice'
 import executingState from './executingStateSlice'
+import draftTx from './draftTxSlice'
+import walletKit, { walletKitSliceName } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
 import { withE2EReset } from './resetE2EState'
 
 setBaseUrl(GATEWAY_URL)
@@ -98,6 +100,8 @@ export const persistBlacklist = [
   'signingState',
   'signerImportFlow',
   'executingState',
+  'draftTx',
+  walletKitSliceName,
 ]
 
 export const persistTransforms = [cgwClientFilter, sanitizePendingQueriesTransform]
@@ -131,6 +135,8 @@ const combinedReducer = combineReducers({
   signingState,
   signerImportFlow,
   executingState,
+  draftTx,
+  walletKit,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,

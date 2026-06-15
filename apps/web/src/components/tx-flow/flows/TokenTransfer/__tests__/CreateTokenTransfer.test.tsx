@@ -11,9 +11,12 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { TokenType } from '@safe-global/store/gateway/types'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
-import * as useRecipientAnalysis from '@/features/safe-shield/hooks/useRecipientAnalysis'
+import * as useRecipientAnalysis from '@/features/safe-shield'
 import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
+import * as chainHooks from '@/hooks/useChains'
+import * as gtfHooks from '@/features/gtf'
+import { fireEvent, waitFor } from '@testing-library/react'
 
 // Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
 jest.mock('@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow', () => ({
@@ -347,5 +350,105 @@ describe('CreateTokenTransfer', () => {
 
     // USDC should be preselected (not ETH which is balancesItems[0])
     expect(input?.value).toBe(USDC_ADDRESS)
+  })
+
+  describe('GTF fee banner', () => {
+    const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
+    const useResolvedGasTokenSpy = jest.spyOn(gtfHooks, 'useResolvedGasToken')
+
+    const mockResolvedToSentToken = () =>
+      useResolvedGasTokenSpy.mockImplementation(
+        (sent?: string) => ({ status: 'resolved', address: sent ?? ZERO_ADDRESS }) as never,
+      )
+
+    const mockBalancesForGtf = () => {
+      const balances = {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: '1000000000000000000',
+            tokenInfo: {
+              address: ZERO_ADDRESS,
+              decimals: 18,
+              logoUri: '',
+              name: 'Ether',
+              symbol: 'ETH',
+              type: TokenType.NATIVE_TOKEN,
+            },
+            fiatBalance: '1000',
+            fiatConversion: '1000',
+          },
+        ],
+      }
+
+      jest.spyOn(useTrustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balances, undefined, false])
+      jest.spyOn(useBalances, 'default').mockReturnValue({
+        balances,
+        loaded: true,
+        loading: false,
+        error: undefined,
+      })
+    }
+
+    it('shows fee banner after MAX click when resolved gas token equals sent token', async () => {
+      useHasFeatureSpy.mockImplementation(() => true)
+      mockBalancesForGtf()
+      mockResolvedToSentToken()
+
+      const { getByTestId, queryByTestId } = renderCreateTokenTransfer()
+
+      expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+
+      fireEvent.click(getByTestId('max-btn'))
+
+      await waitFor(() => {
+        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+      })
+    })
+
+    it('does not show fee banner when GTF is disabled', () => {
+      useHasFeatureSpy.mockImplementation(() => false)
+      mockBalancesForGtf()
+
+      const { getByTestId, queryByTestId } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('max-btn'))
+
+      expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+    })
+
+    it('does not show fee banner when resolved gas token differs from sent token', () => {
+      useHasFeatureSpy.mockImplementation(() => true)
+      mockBalancesForGtf()
+      // Resolve to a different address → sent ≠ fee → banner should stay hidden even after MAX
+      useResolvedGasTokenSpy.mockReturnValue({
+        status: 'resolved',
+        address: '0x1111111111111111111111111111111111111111',
+      } as never)
+
+      const { getByTestId, queryByTestId } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('max-btn'))
+
+      expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+    })
+
+    it('dismisses fee banner on close button click', async () => {
+      useHasFeatureSpy.mockImplementation(() => true)
+      mockBalancesForGtf()
+      mockResolvedToSentToken()
+
+      const { getByTestId, queryByTestId, getByLabelText } = renderCreateTokenTransfer()
+
+      fireEvent.click(getByTestId('max-btn'))
+
+      await waitFor(() => {
+        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+      })
+
+      fireEvent.click(getByLabelText('Dismiss fee banner'))
+
+      expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+    })
   })
 })

@@ -9,6 +9,7 @@ import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
 import { useAssessmentUrl } from '../../hooks/useAssessmentUrl'
 import { useHnAssessmentSeverity } from '../../hooks/useHnAssessmentSeverity'
 import LockIcon from '@/public/images/common/lock-small.svg'
+// eslint-disable-next-line no-restricted-imports -- routing SeverityIcon through the safe-shield barrel closes a hypernative<->safe-shield module-init cycle (TDZ)
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'

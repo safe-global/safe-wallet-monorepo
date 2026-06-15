@@ -1,4 +1,5 @@
 import type { SecurityScanner } from './types'
+import { getSeverityFromScore } from './constants'
 
 export const transactionScanningScanner: SecurityScanner = {
   id: 'transaction_scanning',
@@ -7,20 +8,22 @@ export const transactionScanningScanner: SecurityScanner = {
     const now = new Date().toISOString()
 
     if (chainSupportsTransactionScanning) {
+      const score = 100
       return {
         status: 'clear',
-        severity: 'Low',
-        score: 100,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [{ label: 'Status', value: 'Transactions are scanned before execution' }],
         remediation: '',
         lastChecked: now,
       }
     }
 
+    const score = 70
     return {
       status: 'not_applicable',
-      severity: 'Low',
-      score: 70,
+      severity: getSeverityFromScore(score, { excluded: true }),
+      score,
       evidence: [{ label: 'Status', value: 'Transaction scanning not available on this network' }],
       remediation: '',
       lastChecked: now,

@@ -2,61 +2,39 @@ import { Card, Box, Typography, Link as MUILink, Stack } from '@mui/material'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SpaceSummary } from '../SpaceCard'
 import { MemberStatus } from '@/features/spaces'
-import InitialsAvatar from '../InitialsAvatar'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import css from './styles.module.css'
-import EthHashInfo from '@/components/common/EthHashInfo'
-import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import AcceptButton from './AcceptButton'
 import DeclineButton from './DeclineButton'
 import { trackEvent } from '@/services/analytics'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
+import Inviter from './Inviter'
 
 type SpaceListInvite = {
   space: GetSpaceResponse
+  invitedByName: string | undefined
 }
 
-const SpaceListInvite = ({ space }: SpaceListInvite) => {
-  const { id, name, members, safeCount } = space
-  const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
+const SpaceListInvite = ({ space, invitedByName }: SpaceListInvite) => {
+  const { uuid, name, members, safeCount } = space
   const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
 
-  const invitedBy = space.members.find((member) => member.user.id === currentUser?.id)?.invitedBy
-
   return (
-    <Card sx={{ p: 2, mb: 2 }}>
-      <Typography variant="h4" fontWeight={700} mb={2} color="primary.light">
-        You were invited to join{' '}
-        <Typography component="span" variant="h4" fontWeight={700} color="primary.main">
+    <Card sx={{ p: 2, mb: 2 }} data-testid="space-invite-banner">
+      <Stack direction="row" alignItems="center" flexWrap="wrap" rowGap={0.5} columnGap={0.5} mb={2}>
+        <Typography variant="h4" fontWeight={700} color="primary.light">
+          You were invited to join
+        </Typography>
+        <Typography variant="h4" fontWeight={700} color="primary.main">
           {name}
         </Typography>
-        {invitedBy && (
-          <>
-            {' '}
-            by
-            <Typography
-              component="span"
-              variant="h4"
-              fontWeight={700}
-              color="primary.main"
-              position="relative"
-              top="4px"
-              ml="6px"
-              display="inline-block"
-              sx={{ '> div': { gap: '4px' } }}
-            >
-              <EthHashInfo address={invitedBy} avatarSize={24} showName={false} showPrefix={false} copyPrefix={false} />
-            </Typography>
-          </>
-        )}
-      </Typography>
+        <Inviter invitedByName={invitedByName} variant="h4" avatarSize={24} />
+      </Stack>
 
-      <Link href={{ pathname: AppRoutes.spaces.index, query: { spaceId: id } }} passHref legacyBehavior>
+      <Link href={{ pathname: AppRoutes.spaces.index, query: { spaceId: uuid } }} passHref legacyBehavior>
         <MUILink
           underline="none"
           sx={{ display: 'block' }}

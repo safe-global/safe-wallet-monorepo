@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { SidebarMenuButton } from '@/components/ui/sidebar'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { getDeterministicColor } from '@/features/spaces'
+import { getDeterministicColor } from '@/utils/colors'
 import { AppRoutes } from '@/config/routes'
 import { icons } from '../config'
 import css from '../styles.module.css'
@@ -31,7 +31,7 @@ export const BackToSpaceButton = ({
   return (
     <SidebarMenuButton
       size="lg"
-      tooltip="Back to Space"
+      tooltip="Back to workspace"
       data-testid="back-to-space-button"
       className={css.backToSpace}
       onClick={handleClick}
@@ -47,7 +47,7 @@ export const BackToSpaceButton = ({
       </Avatar>
       <div className={css.spaceSelectorText}>
         <span className={css.spaceSelectorName}>{spaceName}</span>
-        <span className={css.spaceSelectorSubtitle}>Space</span>
+        <span className={css.spaceSelectorSubtitle}>Workspace</span>
       </div>
     </SidebarMenuButton>
   )

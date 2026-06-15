@@ -9,6 +9,7 @@ import {
   determineExecutionPath,
   getErrorMessage,
 } from './helpers'
+import { BIOMETRY_ROTATION_DESCRIPTION, BiometryInvalidationError } from '@/src/services/key-storage'
 
 // Mock chain with relay feature enabled
 const mockChainWithRelay = {
@@ -210,6 +211,16 @@ describe('helpers', () => {
       expect(getErrorMessage({ foo: 'bar' })).toBe('Failed to execute transaction')
       expect(getErrorMessage(null)).toBe('Failed to execute transaction')
       expect(getErrorMessage(undefined)).toBe('Failed to execute transaction')
+    })
+
+    it('should use the provided fallback for non-Error throwables', () => {
+      expect(getErrorMessage('string error', 'Failed to sign transaction')).toBe('Failed to sign transaction')
+      expect(getErrorMessage(null, 'Failed to sign transaction')).toBe('Failed to sign transaction')
+    })
+
+    it('should map BiometryInvalidationError to the shared re-import copy', () => {
+      const err = new BiometryInvalidationError(new Error('SE invalidated'))
+      expect(getErrorMessage(err, 'Failed to sign transaction')).toBe(BIOMETRY_ROTATION_DESCRIPTION)
     })
   })
 })

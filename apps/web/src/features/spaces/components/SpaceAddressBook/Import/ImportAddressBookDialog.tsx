@@ -1,50 +1,47 @@
 import { FormProvider, useForm } from 'react-hook-form'
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CircularProgress,
-  Container,
-  DialogActions,
-  DialogContent,
-  InputAdornment,
-  SvgIcon,
-  TextField,
-  Typography,
-} from '@mui/material'
-
-import ModalDialog from '@/components/common/ModalDialog'
-import ContactsList from './ContactsList'
-import React, { useCallback, useMemo, useState } from 'react'
-import useAllAddressBooks from '@/hooks/useAllAddressBooks'
-import css from '../../AddAccounts/styles.module.css'
-import SearchIcon from '@/public/images/common/search.svg'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { debounce } from 'lodash'
+
+import { Alert } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Input } from '@/components/ui/input'
+import { Spinner } from '@/components/ui/spinner'
+
+import ContactsList from './ContactsList'
+import useAllAddressBooks from '@/hooks/useAllAddressBooks'
+import SearchIcon from '@/public/images/common/search.svg'
 import { useContactSearch } from '../useContactSearch'
 import { createContactItems, flattenAddressBook } from '../utils'
 import useChains from '@/hooks/useChains'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useGetSpaceAddressBook } from '@/features/spaces'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 export type ImportContactsFormValues = {
-  contacts: Record<string, string | undefined> // e.g. "1:0x123": "Alice"
+  contacts: Record<string, string | undefined>
 }
+
+const SUCCESS_CLOSE_DELAY_MS = 500
 
 const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) => {
   const [error, setError] = useState<string>()
   const [searchQuery, setSearchQuery] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
+  const handleCloseRef = useRef(handleClose)
   const { configs } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const allAddressBooks = useAllAddressBooks()
+  const spaceContacts = useGetSpaceAddressBook()
   const allContactItems = useMemo(
     () =>
       flattenAddressBook(allAddressBooks).filter((contactItem) =>
@@ -53,21 +50,33 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
     [allAddressBooks, configs],
   )
 
+  const hasNoImportableContacts = useMemo(
+    () =>
+      allContactItems.length === 0 ||
+      allContactItems.every((contactItem) =>
+        spaceContacts.some((spaceContact) => sameAddress(spaceContact.address, contactItem.address)),
+      ),
+    [allContactItems, spaceContacts],
+  )
+
+  useEffect(() => {
+    handleCloseRef.current = handleClose
+  })
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
+
+  useEffect(() => () => handleSearch.cancel(), [handleSearch])
   const filteredEntries = useContactSearch(allContactItems, searchQuery)
 
   const formMethods = useForm<ImportContactsFormValues>({
-    mode: 'onChange',
-    defaultValues: {
-      contacts: {},
-    },
+    defaultValues: { contacts: {} },
   })
 
-  const { handleSubmit, formState, watch } = formMethods
+  const { handleSubmit, watch } = formMethods
 
   const selectedContacts = watch('contacts')
-  const selectedContactsLength = Object.values(selectedContacts).filter(Boolean)
+  const selectedCount = Object.values(selectedContacts).filter(Boolean).length
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
@@ -77,12 +86,19 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
       setIsSubmitting(true)
 
       const result = await upsertAddressBook({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         upsertAddressBookItemsDto: { items: contactItems },
       })
 
       if (result.error) {
         setError('Something went wrong. Please try again.')
+        dispatch(
+          showNotification({
+            message: 'Failed to import contacts. Please try again.',
+            variant: 'error',
+            groupKey: 'import-contacts-error',
+          }),
+        )
         return
       }
 
@@ -96,98 +112,72 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
 
       trackEvent(SPACE_EVENTS.IMPORT_ADDRESS_BOOK_SUBMIT)
 
-      handleClose()
+      setIsSuccess(true)
     } catch (e) {
       setError('Something went wrong. Please try again.')
+      dispatch(
+        showNotification({
+          message: 'Failed to import contacts. Please try again.',
+          variant: 'error',
+          groupKey: 'import-contacts-error',
+        }),
+      )
     } finally {
       setIsSubmitting(false)
     }
   })
 
+  useEffect(() => {
+    if (!isSuccess) return
+    const timer = setTimeout(() => handleCloseRef.current(), SUCCESS_CLOSE_DELAY_MS)
+    return () => clearTimeout(timer)
+  }, [isSuccess])
+
   return (
-    <ModalDialog
-      open
-      onClose={handleClose}
-      hideChainIndicator
-      fullScreen
-      PaperProps={{ sx: { backgroundColor: 'border.background' } }}
-    >
-      <DialogContent sx={{ display: 'flex', alignItems: 'center' }}>
-        <Container fixed maxWidth="sm" disableGutters>
-          <Typography component="div" variant="h1" mb={3}>
-            Import address book
-          </Typography>
-          <Card sx={{ border: '0' }}>
-            <FormProvider {...formMethods}>
-              <form onSubmit={onSubmit}>
-                <Box px={2} pt={2} mb={2}>
-                  <TextField
-                    id="search-by-name"
-                    placeholder="Search"
-                    aria-label="Search contact list by name or address"
-                    variant="filled"
-                    hiddenLabel
-                    onChange={(e) => {
-                      handleSearch(e.target.value)
-                    }}
-                    className={css.search}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SvgIcon
-                            component={SearchIcon}
-                            inheritViewBox
-                            fontWeight="bold"
-                            fontSize="small"
-                            sx={{
-                              color: 'var(--color-border-main)',
-                              '.MuiInputBase-root.Mui-focused &': { color: 'var(--color-text-primary)' },
-                            }}
-                          />
-                        </InputAdornment>
-                      ),
-                      disableUnderline: true,
-                    }}
-                    fullWidth
-                    size="small"
-                  />
-                </Box>
+    <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
+      <DialogContent className="p-0">
+        <DialogHeader className="border-b">
+          <DialogTitle className="font-bold text-xl">Import address book</DialogTitle>
+        </DialogHeader>
 
-                {searchQuery ? (
-                  <ContactsList contactItems={filteredEntries} />
-                ) : (
-                  <ContactsList contactItems={allContactItems} />
-                )}
+        <FormProvider {...formMethods}>
+          <form onSubmit={onSubmit}>
+            <div className="relative px-4 pt-4 mb-2">
+              <SearchIcon className="absolute left-6 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+              <Input
+                id="search-by-name"
+                placeholder="Search"
+                aria-label="Search contact list by name or address"
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
 
-                {error && (
-                  <Alert severity="error" sx={{ mt: 2 }}>
-                    {error}
-                  </Alert>
-                )}
+            <ContactsList contactItems={searchQuery ? filteredEntries : allContactItems} />
 
-                <DialogActions>
-                  <Button data-testid="cancel-btn" onClick={handleClose}>
-                    Cancel
+            {error && (
+              <Alert variant="destructive" className="mt-2 mx-4">
+                {error}
+              </Alert>
+            )}
+
+            <DialogFooter className="flex-row justify-end gap-2 p-4 border-t">
+              <Button variant="ghost" data-testid="cancel-btn" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Tooltip>
+                <TooltipTrigger render={<div className="inline-flex" />}>
+                  <Button type="submit" disabled={selectedCount === 0 || isSubmitting || isSuccess}>
+                    {isSubmitting ? <Spinner className="size-4" /> : `Import contacts (${selectedCount})`}
                   </Button>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={!formState.isValid || isSubmitting}
-                    disableElevation
-                  >
-                    {isSubmitting ? (
-                      <CircularProgress size={20} />
-                    ) : (
-                      `Import contacts (${selectedContactsLength.length})`
-                    )}
-                  </Button>
-                </DialogActions>
-              </form>
-            </FormProvider>
-          </Card>
-        </Container>
+                </TooltipTrigger>
+                {hasNoImportableContacts && <TooltipContent>You have no new contacts to import.</TooltipContent>}
+              </Tooltip>
+            </DialogFooter>
+          </form>
+        </FormProvider>
       </DialogContent>
-    </ModalDialog>
+    </Dialog>
   )
 }
 

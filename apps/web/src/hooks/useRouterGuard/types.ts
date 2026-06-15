@@ -19,10 +19,14 @@ export interface GuardContext {
   isPublicRoute: boolean
   isOnboardingRoute: boolean
   isSpacesPath: boolean
+  isLoginPath: boolean
+  isStoreHydrated: boolean
   isWalletReady: boolean
   isSiweAuthenticated: boolean
   hasSpaces: boolean
   isPartOfSpaceUrl: boolean
+  isRequireLoginEnabled: boolean | undefined
+  currentUrl: string
 }
 
 // ---------------------------------------------------------------------------

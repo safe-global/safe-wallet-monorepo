@@ -41,11 +41,27 @@ jest.mock('@/components/ui/tooltip', () => ({
   TooltipTrigger: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
   ),
-  TooltipContent: ({ children }: { children: ReactNode }) => <div role="tooltip">{children}</div>,
+  TooltipContent: ({ children, hidden }: { children: ReactNode; hidden?: boolean }) =>
+    hidden ? null : <div role="tooltip">{children}</div>,
 }))
+
+// Controls the mocked sidebar collapse state per test.
+const mockSetOpenMobile = jest.fn()
+const mockSidebarState: {
+  state: 'expanded' | 'collapsed'
+  isMobile: boolean
+  isTablet: boolean
+  setOpenMobile: jest.Mock
+} = {
+  state: 'expanded',
+  isMobile: false,
+  isTablet: false,
+  setOpenMobile: mockSetOpenMobile,
+}
 
 // Mock sidebar UI components
 jest.mock('@/components/ui/sidebar', () => ({
+  useSidebar: () => mockSidebarState,
   SidebarMenuItem: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
   ),
@@ -97,6 +113,9 @@ describe('NavItem', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockSidebarState.state = 'expanded'
+    mockSidebarState.isMobile = false
+    mockSidebarState.isTablet = false
   })
 
   it('renders with icon and label', () => {
@@ -126,6 +145,63 @@ describe('NavItem', () => {
     render(<NavItem item={disabledItem} />)
 
     expect(screen.getByText('You need to activate your Safe first.')).toBeInTheDocument()
+  })
+
+  it('does not show the label tooltip when the sidebar is expanded', () => {
+    render(<NavItem item={baseItem} />)
+
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
+  })
+
+  it('shows the label tooltip when the sidebar is collapsed to icons', () => {
+    mockSidebarState.state = 'collapsed'
+    render(<NavItem item={baseItem} />)
+
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Home')
+  })
+
+  it('does not show the label tooltip when collapsed on mobile', () => {
+    mockSidebarState.state = 'collapsed'
+    mockSidebarState.isMobile = true
+    render(<NavItem item={baseItem} />)
+
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
+  })
+
+  it('shows the activation tooltip for a disabled item even when expanded', () => {
+    render(<NavItem item={{ ...baseItem, disabled: true }} />)
+
+    expect(screen.getByText('You need to activate your Safe first.')).toBeInTheDocument()
+  })
+
+  it('applies the active icon style when active', () => {
+    const { container } = render(<NavItem item={{ ...baseItem, isActive: true }} />)
+
+    expect(container.querySelector('.activeIcon')).toBeInTheDocument()
+  })
+
+  it('does not apply the active icon style when inactive', () => {
+    const { container } = render(<NavItem item={baseItem} />)
+
+    expect(container.querySelector('.activeIcon')).not.toBeInTheDocument()
+  })
+
+  it('renders an indicator dot on the icon when item.indicator is set', () => {
+    const { container } = render(<NavItem item={{ ...baseItem, indicator: true }} />)
+
+    expect(container.querySelector('.outdatedDot')).toBeInTheDocument()
+  })
+
+  it('does not render an indicator dot by default', () => {
+    const { container } = render(<NavItem item={baseItem} />)
+
+    expect(container.querySelector('.outdatedDot')).not.toBeInTheDocument()
+  })
+
+  it('uses item.testId as the data-testid when provided', () => {
+    render(<NavItem item={{ ...baseItem, testId: 'sidebar-settings-item' }} />)
+
+    expect(screen.getByTestId('sidebar-settings-item')).toBeInTheDocument()
   })
 
   it('uses per-label test id when isSpacesVariant', () => {
@@ -203,6 +279,39 @@ describe('NavItem', () => {
 
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', '/transactions')
+  })
+
+  describe('mobile sidebar', () => {
+    it('closes the mobile sidebar when a nav link is clicked', () => {
+      mockSidebarState.isMobile = true
+      render(<NavItem item={baseItem} />)
+      fireEvent.click(screen.getByRole('link'))
+
+      expect(mockSetOpenMobile).toHaveBeenCalledWith(false)
+    })
+
+    it('closes the drawer when a nav link is clicked on tablet', () => {
+      mockSidebarState.isTablet = true
+      render(<NavItem item={baseItem} />)
+      fireEvent.click(screen.getByRole('link'))
+
+      expect(mockSetOpenMobile).toHaveBeenCalledWith(false)
+    })
+
+    it('does not touch the mobile sidebar state on desktop', () => {
+      render(<NavItem item={baseItem} />)
+      fireEvent.click(screen.getByRole('link'))
+
+      expect(mockSetOpenMobile).not.toHaveBeenCalled()
+    })
+
+    it('does not close the mobile sidebar when a disabled item is clicked', () => {
+      mockSidebarState.isMobile = true
+      render(<NavItem item={{ ...baseItem, disabled: true }} />)
+      fireEvent.click(screen.getByRole('button'))
+
+      expect(mockSetOpenMobile).not.toHaveBeenCalled()
+    })
   })
 
   describe('tracking events', () => {

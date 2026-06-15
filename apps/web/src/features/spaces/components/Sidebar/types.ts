@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
+import type { SpaceMemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 export interface SidebarItemConfig {
   icon: LucideIcon
@@ -17,6 +18,10 @@ export interface SidebarGroupConfig {
 export interface ResolvedSidebarItem extends Omit<SidebarItemConfig, 'isActive' | 'activeMemberOnly'> {
   isActive: boolean
   disabled: boolean
+  /** Renders a warning dot on the icon (e.g. Settings when the Safe is outdated). */
+  indicator?: boolean
+  /** Overrides the default data-testid (used by items rendered outside the config-driven list). */
+  testId?: string
   link: { pathname: string; query: { spaceId?: string | null; safe?: string } }
 }
 
@@ -26,9 +31,11 @@ export interface ResolvedSidebarGroup {
 }
 
 export interface SpaceItem {
-  id: number
+  uuid: string
   name: string
   safeCount: number
+  // Optional only for fixtures; always present from the API.
+  members?: SpaceMemberDto[]
 }
 
 export interface SpaceSelectorProps {
