@@ -151,7 +151,7 @@ const SafeDropdownContainer = ({
                     <Search className="size-4" />
                   </InputGroupAddon>
                   <InputGroupInput
-                    placeholder="Search by name, address or network"
+                    placeholder="by name, address or network"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     // Stop keystrokes reaching base-ui Select's typeahead, which would hijack typing.
