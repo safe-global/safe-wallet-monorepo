@@ -34,6 +34,7 @@ const ONBOARDING_ROUTES = [
 const STATIC_PAGE_ROUTES = [AppRoutes.terms, AppRoutes.privacy, AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
 
 const NO_HEADER_ROUTES = [
+  AppRoutes.login,
   AppRoutes.welcome.index,
   AppRoutes.welcome.createSpace,
   AppRoutes.welcome.selectSafes,

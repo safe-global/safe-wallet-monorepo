@@ -35,6 +35,7 @@ const ALWAYS_PUBLIC_ROUTES = [
   AppRoutes.imprint,
   AppRoutes.licenses,
   AppRoutes.hypernative.oauthCallback,
+  AppRoutes.login,
 ]
 
 export const isAlwaysPublic = (pathname: string): boolean => {
