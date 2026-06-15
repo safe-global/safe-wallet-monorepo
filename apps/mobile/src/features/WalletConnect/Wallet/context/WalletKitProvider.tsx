@@ -1,13 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import * as Linking from 'expo-linking'
 import { router } from 'expo-router'
-import type { TransactionReceipt } from 'ethers'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { getSdkError } from '@walletconnect/utils'
 import { formatJsonRpcError, formatJsonRpcResult } from '@walletconnect/jsonrpc-utils'
 import { isAnyOf } from '@reduxjs/toolkit'
 import { useStore } from 'react-redux'
-import { chainIdToHex, isPairingUri, stripEip155Prefix } from '@safe-global/utils/features/walletconnect/utils'
+import { isPairingUri, stripEip155Prefix } from '@safe-global/utils/features/walletconnect/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
@@ -21,6 +20,7 @@ import { useSessionProposalHandler } from '../hooks/useSessionProposalHandler'
 import { useSessionRequestHandler, type SessionRequestHandlerDeps } from '../hooks/useSessionRequestHandler'
 import { isValidTxRequestParams } from '../services/methodRouter'
 import { proxyReadOnlyCall } from '../services/readRpcProxy'
+import { buildGetCallsResult, type RawTxReceipt } from '../services/getCallsStatus'
 import {
   setSessions,
   removeSession,
@@ -317,7 +317,6 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const getCallsStatus: SessionRequestHandlerDeps['getCallsStatus'] = useCallback(
     async (chainId, id) => {
       const numericChainId = stripEip155Prefix(chainId)
-      const chainIdHex = chainIdToHex(numericChainId) as `0x${string}`
 
       let tx
       try {
@@ -328,50 +327,21 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         throw new Error('Transaction not found')
       }
 
-      // BundleTxStatuses (verbatim from web):
-      //   AWAITING_CONFIRMATIONS / AWAITING_EXECUTION → 100 PENDING
-      //   SUCCESS → 200 CONFIRMED | CANCELLED → 400 OFFCHAIN_FAILURE | FAILED → 500 REVERTED
-      const status =
-        tx.txStatus === 'SUCCESS' ? 200 : tx.txStatus === 'CANCELLED' ? 400 : tx.txStatus === 'FAILED' ? 500 : 100
-
-      const envelope = { version: '2.0.0' as const, id, chainId: chainIdHex, status, atomic: true as const }
-
-      if (!tx.txHash) {
-        return envelope
-      }
-      const chain = selectChainById(store.getState(), numericChainId)
-      if (!chain) {
-        return envelope
+      // Fetch the on-chain receipt only once there's a tx hash to look up and the chain config
+      // is available; buildGetCallsResult tolerates a null receipt (a pending bundle).
+      let receipt: RawTxReceipt | null = null
+      if (tx.txHash) {
+        const chain = selectChainById(store.getState(), numericChainId)
+        if (chain) {
+          try {
+            receipt = (await proxyReadOnlyCall(chain, 'eth_getTransactionReceipt', [tx.txHash])) as RawTxReceipt | null
+          } catch {
+            receipt = null
+          }
+        }
       }
 
-      let receipt: TransactionReceipt | null = null
-      try {
-        receipt = (await proxyReadOnlyCall(chain, 'eth_getTransactionReceipt', [
-          tx.txHash,
-        ])) as TransactionReceipt | null
-      } catch {
-        return envelope
-      }
-      if (!receipt) {
-        return envelope
-      }
-
-      // Web replicates the same receipt for each underlying call in the bundle.
-      const valueDecoded = tx.txData?.dataDecoded?.parameters?.[0]?.valueDecoded
-      const callsCount = Array.isArray(valueDecoded) && valueDecoded.length > 0 ? valueDecoded.length : 1
-      const onChainStatusHex = (tx.txStatus === 'SUCCESS' ? '0x1' : '0x0') as `0x${string}`
-
-      return {
-        ...envelope,
-        receipts: Array.from({ length: callsCount }, () => ({
-          logs: receipt.logs as unknown[],
-          status: onChainStatusHex,
-          blockHash: receipt.blockHash as `0x${string}`,
-          blockNumber: `0x${Number(receipt.blockNumber).toString(16)}` as `0x${string}`,
-          gasUsed: `0x${Number(receipt.gasUsed).toString(16)}` as `0x${string}`,
-          transactionHash: tx.txHash as `0x${string}`,
-        })),
-      }
+      return buildGetCallsResult(id, numericChainId, tx, receipt)
     },
     [dispatch, store],
   )

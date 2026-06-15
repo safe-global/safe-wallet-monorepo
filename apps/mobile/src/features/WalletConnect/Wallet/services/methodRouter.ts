@@ -9,26 +9,9 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { buildAtomicCapabilities } from '@safe-global/utils/features/walletconnect/eip5792'
 import { REJECTED_SIGNING_METHODS, SUPPORTED_NAMESPACE } from './constants'
 import { isReadOnlyMethod, proxyReadOnlyCall } from './readRpcProxy'
+import type { GetCallsResult } from './getCallsStatus'
 
 export type RoutedResponse = ReturnType<typeof formatJsonRpcResult> | ReturnType<typeof formatJsonRpcError>
-
-// EIP-5792 GetCallsResult envelope (mirrors apps/web/.../safe-wallet-provider/index.ts).
-// status codes: 100 PENDING | 200 CONFIRMED | 400 OFFCHAIN_FAILURE | 500 REVERTED.
-export type GetCallsResult = {
-  version: '2.0.0'
-  id: string
-  chainId: `0x${string}`
-  status: number
-  atomic: true
-  receipts?: {
-    logs: unknown[]
-    status: `0x${string}`
-    blockHash: `0x${string}`
-    blockNumber: `0x${string}`
-    gasUsed: `0x${string}`
-    transactionHash: `0x${string}`
-  }[]
-}
 
 export type RouteContext = {
   request: WalletKitTypes.SessionRequest
