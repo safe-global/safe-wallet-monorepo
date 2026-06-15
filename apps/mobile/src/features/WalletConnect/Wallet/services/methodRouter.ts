@@ -155,9 +155,9 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     const normalizedRequested = Array.isArray(requestedChainIds)
       ? requestedChainIds.filter((c): c is string => typeof c === 'string').map((c) => c.toLowerCase())
       : []
-    const envelopeChainHex = chainId.startsWith(NS) ? chainIdToHex(stripEip155Prefix(chainId)) : null
-    const candidateChains =
-      normalizedRequested.length > 0 ? normalizedRequested : envelopeChainHex ? [envelopeChainHex] : []
+    // chainId is guaranteed to be in the eip155 namespace here (cross-namespace was rejected above).
+    const envelopeChainHex = chainIdToHex(stripEip155Prefix(chainId))
+    const candidateChains = normalizedRequested.length > 0 ? normalizedRequested : [envelopeChainHex]
     const deployedChainsHex = new Set(ctx.deployedChainIds.map((c) => chainIdToHex(c)))
     const chainsToReport = candidateChains.filter((c) => deployedChainsHex.has(c))
     if (chainsToReport.length === 0) {
@@ -174,7 +174,9 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
       return formatJsonRpcResult(id, result)
     } catch (e) {
       // Web maps an unknown id to a JSON-RPC error (not {status:100}) — viem/wagmi treat
-      // "missing" and "pending" as distinct outcomes.
+      // "missing" and "pending" as distinct outcomes. jsonrpc-utils overrides the message for
+      // the reserved -32603 code (the dApp sees "Internal error"), so the message we pass is
+      // only a developer-facing hint, not what reaches the wire.
       return formatJsonRpcError(id, { code: -32603, message: e instanceof Error ? e.message : 'Transaction not found' })
     }
   }
