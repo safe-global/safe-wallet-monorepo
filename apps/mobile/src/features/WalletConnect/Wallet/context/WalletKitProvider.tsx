@@ -346,6 +346,13 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             logWalletKitError('getCallsStatus receipt fetch failed', e)
             receipt = null
           }
+        } else {
+          // A mined tx on a chain we have no config for is anomalous — log it too, rather than
+          // silently dropping to the receipt-less envelope (symmetry with the fetch-error path).
+          logWalletKitError(
+            'getCallsStatus: no chain config for receipt lookup',
+            new Error(`chainId=${numericChainId}`),
+          )
         }
       }
 
@@ -356,7 +363,8 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // wallet_showCallsStatus — open the pending-transactions queue. The screen doesn't yet read
   // the chainId / txId params, so this lands on the queue rather than the specific tx detail;
-  // deep-linking to the exact entry is a follow-up.
+  // deep-linking to the exact entry is a follow-up. Note: chainId here is the CAIP-2 envelope
+  // value (e.g. 'eip155:1') — a future consumer must stripEip155Prefix before using it numerically.
   const navigateToCallsStatus: SessionRequestHandlerDeps['navigateToCallsStatus'] = useCallback((chainId, id) => {
     router.push({ pathname: '/pending-transactions', params: { chainId, txId: id } })
   }, [])
