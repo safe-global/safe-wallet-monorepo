@@ -9,6 +9,14 @@ import {
   NO_SIGNER_ERROR_CODE,
   type RouteContext,
 } from '../methodRouter'
+import { proxyReadOnlyCall } from '../readRpcProxy'
+
+// Keep the real allow-list guard (isReadOnlyMethod) but stub the network call.
+jest.mock('../readRpcProxy', () => ({
+  ...jest.requireActual('../readRpcProxy'),
+  proxyReadOnlyCall: jest.fn(),
+}))
+const mockProxyReadOnlyCall = proxyReadOnlyCall as jest.Mock
 
 // Contains hex letters so casing-sensitivity tests actually exercise a different string.
 const SAFE_ADDRESS = '0xAbCd111111111111111111111111111111111111'
@@ -31,6 +39,9 @@ const makeCtx = (request: WalletKitTypes.SessionRequest, overrides: Partial<Rout
     activeChain: chain,
     activeSafeAddress: SAFE_ADDRESS,
     hasSigner: true,
+    switchActiveChainByCaip2: jest.fn().mockResolvedValue({ ok: true }),
+    getCallsStatus: jest.fn(),
+    navigateToCallsStatus: jest.fn(),
     ...overrides,
   }) as unknown as RouteContext
 
@@ -190,6 +201,105 @@ describe('routeSessionRequest', () => {
   it('returns UNSUPPORTED_METHODS for unknown methods', async () => {
     const res = await routeSessionRequest(makeCtx(makeRequest('eth_unknownMethod')))
     expect((res as { error: { message: string } }).error.message).toBe(getSdkError('UNSUPPORTED_METHODS').message)
+  })
+})
+
+describe('routeSessionRequest — WA-2322 read-only + wallet-control branches', () => {
+  beforeEach(() => {
+    mockProxyReadOnlyCall.mockReset()
+  })
+
+  describe('wallet_switchEthereumChain', () => {
+    it('switches to a deployed chain and responds null', async () => {
+      const switchActiveChainByCaip2 = jest.fn().mockResolvedValue({ ok: true })
+      const res = await routeSessionRequest(
+        makeCtx(makeRequest('wallet_switchEthereumChain', [{ chainId: '0x89' }]), { switchActiveChainByCaip2 }),
+      )
+      expect(switchActiveChainByCaip2).toHaveBeenCalledWith('eip155:137')
+      expect((res as { result: null }).result).toBeNull()
+    })
+
+    it('responds 4901 for a non-deployed chain', async () => {
+      const switchActiveChainByCaip2 = jest.fn().mockResolvedValue({ ok: false, reason: 'NOT_DEPLOYED' })
+      const res = await routeSessionRequest(
+        makeCtx(makeRequest('wallet_switchEthereumChain', [{ chainId: '0x89' }]), { switchActiveChainByCaip2 }),
+      )
+      expect((res as { error: { code: number } }).error.code).toBe(4901)
+    })
+
+    it('responds -32602 when the target chainId is missing', async () => {
+      const res = await routeSessionRequest(makeCtx(makeRequest('wallet_switchEthereumChain', [{}])))
+      expect((res as { error: { code: number } }).error.code).toBe(-32602)
+    })
+  })
+
+  describe('wallet_getCapabilities', () => {
+    it('reports atomic capability for explicitly requested chains', async () => {
+      const res = await routeSessionRequest(
+        makeCtx(makeRequest('wallet_getCapabilities', [SAFE_ADDRESS, ['0x1', '0x89']])),
+      )
+      const result = (res as { result: Record<string, unknown> }).result
+      expect(Object.keys(result)).toEqual(['0x1', '0x89'])
+    })
+
+    it('falls back to the envelope session chain when no chains are requested', async () => {
+      const res = await routeSessionRequest(makeCtx(makeRequest('wallet_getCapabilities', [SAFE_ADDRESS])))
+      const result = (res as { result: Record<string, unknown> }).result
+      expect(Object.keys(result)).toEqual(['0x1'])
+    })
+  })
+
+  describe('wallet_getCallsStatus', () => {
+    it('returns the status envelope from getCallsStatus', async () => {
+      const envelope = { version: '2.0.0', id: '0xhash', chainId: '0x1', status: 200, atomic: true }
+      const getCallsStatus = jest.fn().mockResolvedValue(envelope)
+      const res = await routeSessionRequest(
+        makeCtx(makeRequest('wallet_getCallsStatus', ['0xhash']), { getCallsStatus }),
+      )
+      expect(getCallsStatus).toHaveBeenCalledWith('eip155:1', '0xhash')
+      expect((res as { result: unknown }).result).toEqual(envelope)
+    })
+
+    it('maps a thrown lookup to -32603', async () => {
+      const getCallsStatus = jest.fn().mockRejectedValue(new Error('Transaction not found'))
+      const res = await routeSessionRequest(
+        makeCtx(makeRequest('wallet_getCallsStatus', ['0xunknown']), { getCallsStatus }),
+      )
+      // jsonrpc-utils normalizes the message for the reserved -32603 code, so assert the code.
+      expect((res as { error: { code: number } }).error.code).toBe(-32603)
+    })
+  })
+
+  describe('wallet_showCallsStatus', () => {
+    it('navigates and responds null', async () => {
+      const navigateToCallsStatus = jest.fn()
+      const res = await routeSessionRequest(
+        makeCtx(makeRequest('wallet_showCallsStatus', ['0xhash']), { navigateToCallsStatus }),
+      )
+      expect(navigateToCallsStatus).toHaveBeenCalledWith('eip155:1', '0xhash')
+      expect((res as { result: null }).result).toBeNull()
+    })
+  })
+
+  describe('read-only RPC passthrough', () => {
+    it('proxies an allow-listed method to the active chain', async () => {
+      mockProxyReadOnlyCall.mockResolvedValue('0x10')
+      const res = await routeSessionRequest(makeCtx(makeRequest('eth_blockNumber', [])))
+      expect(mockProxyReadOnlyCall).toHaveBeenCalledWith(chain, 'eth_blockNumber', [])
+      expect((res as { result: string }).result).toBe('0x10')
+    })
+
+    it('responds -32603 when no active chain is resolved', async () => {
+      const res = await routeSessionRequest(makeCtx(makeRequest('eth_call', [{}]), { activeChain: null }))
+      expect((res as { error: { code: number } }).error.code).toBe(-32603)
+      expect(mockProxyReadOnlyCall).not.toHaveBeenCalled()
+    })
+
+    it('maps a proxy failure to -32603', async () => {
+      mockProxyReadOnlyCall.mockRejectedValue(new Error('RPC down'))
+      const res = await routeSessionRequest(makeCtx(makeRequest('eth_getBalance', [SAFE_ADDRESS, 'latest'])))
+      expect((res as { error: { code: number } }).error.code).toBe(-32603)
+    })
   })
 })
 

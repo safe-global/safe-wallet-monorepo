@@ -12,7 +12,14 @@ const SAFE_ADDRESS = '0x1111111111111111111111111111111111111111'
 
 const chain = { chainId: '1', chainName: 'Ethereum' } as unknown as Chain
 
-const baseDeps: SessionRequestHandlerDeps = { activeChain: chain, activeSafeAddress: SAFE_ADDRESS, hasSigner: true }
+const baseDeps: SessionRequestHandlerDeps = {
+  activeChain: chain,
+  activeSafeAddress: SAFE_ADDRESS,
+  hasSigner: true,
+  switchActiveChainByCaip2: jest.fn().mockResolvedValue({ ok: true }),
+  getCallsStatus: jest.fn(),
+  navigateToCallsStatus: jest.fn(),
+}
 
 // Capture the registered session_request listener so tests can invoke it directly.
 const makeWalletKit = () => {
