@@ -1,14 +1,15 @@
 import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
-import { TableCell } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/utils/cn'
 import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import RenewInviteButton from './RenewInviteButton'
+import MemberRowActionsMenu from './MemberRowActionsMenu'
 import { useState } from 'react'
 import {
   useIsAdmin,
@@ -24,10 +25,39 @@ import Track from '@/components/common/Track'
 import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
 
 const columns: DataTableColumn<MemberDto>[] = [
-  { id: 'name', header: 'Name', className: 'w-[40%]', sortValue: (member) => member.name },
-  { id: 'email', header: 'Email', className: 'w-[30%]', sortValue: (member) => member.user.email },
-  { id: 'role', header: 'Role', className: 'w-[15%]', sortValue: (member) => member.role },
-  { id: 'actions', className: 'w-[15%]' },
+  {
+    id: 'name',
+    header: 'Name',
+    className: 'md:w-[40%]',
+    sticky: true,
+    minWidth: 200,
+    cellTestId: 'table-cell-name',
+    sortValue: (m) => m.name,
+  },
+  {
+    id: 'email',
+    header: 'Email',
+    className: 'md:w-[30%]',
+    priority: 'secondary',
+    minWidth: 180,
+    cellTestId: 'table-cell-email',
+    sortValue: (m) => m.user.email,
+  },
+  {
+    id: 'role',
+    header: 'Role',
+    className: 'md:w-[15%]',
+    minWidth: 90,
+    cellTestId: 'table-cell-role',
+    sortValue: (m) => m.role,
+  },
+  {
+    id: 'actions',
+    className: 'md:w-[15%]',
+    cellClassName: 'text-right',
+    cellTestId: 'table-cell-actions',
+    minWidth: 80,
+  },
 ]
 
 const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean }) => {
@@ -90,60 +120,69 @@ export const RemoveMemberButton = ({
   )
 }
 
-const MemberRow = ({ member, isAdmin, adminCount }: { member: MemberDto; isAdmin: boolean; adminCount: number }) => {
-  const isLastAdmin = adminCount === 1 && isActiveAdmin(member)
-  const isPendingInvite = member.status === MemberStatus.INVITED
-  const isDeclined = member.status === MemberStatus.DECLINED
-  const isInvite = isPendingInvite || isDeclined
-  const isExpired = isInviteExpired(member)
-  const isDisabled = isAdmin && isLastAdmin && !isInvite
-  const memberEmail = member.user.email
-  // Contract: Email invites can always be renewed (resending the email);
-  // wallet invites are only renewed once they have expired.
-  const canRenew = isPendingInvite && (Boolean(memberEmail) || isExpired)
+const MembersList = ({ members }: { members: MemberDto[] }) => {
+  const isAdmin = useIsAdmin()
+  const adminCount = useAdminCount(members)
+  const isMobile = useIsMobile()
 
-  return (
-    <>
-      <TableCell data-testid="table-cell-name">
-        <div className="flex items-center gap-2">
-          <MemberName member={member} />
-          {isDeclined && <Badge variant="destructive">Declined</Badge>}
-          {isExpired && <Badge variant="warning">Expired</Badge>}
-        </div>
-      </TableCell>
+  if (!members.length) {
+    return null
+  }
 
-      <TableCell data-testid="table-cell-email">
-        {memberEmail ? (
+  const renderCell = (member: MemberDto, column: DataTableColumn<MemberDto>) => {
+    const isLastAdmin = adminCount === 1 && isActiveAdmin(member)
+    const isPendingInvite = member.status === MemberStatus.INVITED
+    const isDeclined = member.status === MemberStatus.DECLINED
+    const isInvite = isPendingInvite || isDeclined
+    const isExpired = isInviteExpired(member)
+    const isDisabled = isAdmin && isLastAdmin && !isInvite
+    const memberEmail = member.user.email
+    // Contract: Email invites can always be renewed (resending the email);
+    // wallet invites are only renewed once they have expired.
+    const canRenew = isPendingInvite && (Boolean(memberEmail) || isExpired)
+
+    switch (column.id) {
+      case 'name':
+        return (
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-center gap-2">
+              <MemberName member={member} />
+              {isDeclined && <Badge variant="destructive">Declined</Badge>}
+              {isExpired && <Badge variant="warning">Expired</Badge>}
+            </div>
+            {/* The email column is hidden on mobile — surface it under the name instead */}
+            {isMobile && memberEmail && (
+              <span className="text-muted-foreground truncate pl-9 text-xs">{memberEmail}</span>
+            )}
+          </div>
+        )
+
+      case 'email':
+        return memberEmail ? (
           <Tooltip>
             <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{memberEmail}</TooltipTrigger>
             <TooltipContent>{memberEmail}</TooltipContent>
           </Tooltip>
-        ) : null}
-      </TableCell>
+        ) : null
 
-      <TableCell data-testid="table-cell-role">
-        <Badge variant="secondary">{checkIsAdmin(member) ? 'Admin' : 'Member'}</Badge>
-      </TableCell>
+      case 'role':
+        return <Badge variant="secondary">{checkIsAdmin(member) ? 'Admin' : 'Member'}</Badge>
 
-      <TableCell className="text-right" data-testid="table-cell-actions">
-        {isAdmin ? (
+      case 'actions':
+        if (!isAdmin) return null
+        return isMobile ? (
+          <MemberRowActionsMenu member={member} disabled={isDisabled} isInvite={isInvite} canRenew={canRenew} />
+        ) : (
           <span className="inline-flex items-center justify-end gap-1">
             {!isInvite && <EditButton member={member} disabled={isDisabled} />}
             {canRenew && <RenewInviteButton member={member} />}
             <RemoveMemberButton member={member} disabled={isDisabled} isInvite={isInvite} />
           </span>
-        ) : null}
-      </TableCell>
-    </>
-  )
-}
+        )
 
-const MembersList = ({ members }: { members: MemberDto[] }) => {
-  const isAdmin = useIsAdmin()
-  const adminCount = useAdminCount(members)
-
-  if (!members.length) {
-    return null
+      default:
+        return null
+    }
   }
 
   return (
@@ -151,7 +190,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
       columns={columns}
       rows={members}
       getRowKey={(member) => String(member.id)}
-      renderRow={(member) => <MemberRow member={member} isAdmin={isAdmin} adminCount={adminCount} />}
+      renderCell={renderCell}
     />
   )
 }

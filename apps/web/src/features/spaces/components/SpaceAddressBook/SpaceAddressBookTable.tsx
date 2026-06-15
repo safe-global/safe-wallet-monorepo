@@ -1,4 +1,3 @@
-import { TableCell } from '@/components/ui/table'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -8,6 +7,7 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import { BookUser } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from './SpaceAddressBookActions'
+import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/utils/cn'
 import { formatDate } from './ActivityLog'
 import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
@@ -31,25 +31,142 @@ function SpaceAddressBookTable({
   showLastUpdated = false,
   renderExtraAction,
 }: SpaceAddressBookTableProps) {
+  const isMobile = useIsMobile()
   const hasMiddleColumn = showAddedBy || showLastUpdated
 
   const columns: DataTableColumn<AddressBookEntry>[] = [
-    { id: 'name', header: 'Name', className: 'w-[20%]', sortValue: (entry) => entry.name },
-    { id: 'address', header: 'Address', className: 'w-[30%]', sortValue: (entry) => entry.address },
-    { id: 'chains', header: 'Chains', className: 'w-[15%]', sortValue: (entry) => entry.chainIds.length },
+    {
+      id: 'name',
+      header: 'Name',
+      className: 'md:w-[20%]',
+      sticky: true,
+      minWidth: 140,
+      cellClassName: 'font-bold',
+      sortValue: (e) => e.name,
+    },
+    { id: 'address', header: 'Address', className: 'md:w-[30%]', minWidth: 200, sortValue: (e) => e.address },
+    {
+      id: 'chains',
+      header: 'Chains',
+      className: 'md:w-[15%]',
+      priority: 'secondary',
+      minWidth: 100,
+      sortValue: (e) => e.chainIds.length,
+    },
     ...(hasMiddleColumn
       ? [
           {
             id: 'middle',
             header: showAddedBy ? 'Added by' : 'Last updated',
-            className: 'w-[20%]',
-            sortValue: (entry: AddressBookEntry) =>
-              showAddedBy ? entry.createdBy : entry.updatedAt || entry.createdAt,
+            className: 'md:w-[20%]',
+            priority: 'secondary' as const,
+            minWidth: 140,
+            sortValue: (e: AddressBookEntry) => (showAddedBy ? e.createdBy : e.updatedAt || e.createdAt),
           },
         ]
       : []),
-    { id: 'actions', className: hasMiddleColumn ? 'w-[15%]' : 'w-[35%]' },
+    {
+      id: 'actions',
+      className: hasMiddleColumn ? 'md:w-[15%]' : 'md:w-[35%]',
+      cellClassName: 'text-right',
+      minWidth: 80,
+    },
   ]
+
+  // Chain logo cluster — used in the desktop "Chains" cell
+  const renderChains = (entry: AddressBookEntry) => (
+    <Tooltip>
+      <TooltipTrigger>
+        <span className="inline-flex origin-left scale-85">
+          <NetworkLogosList networks={entry.chainIds.map((chainId) => ({ chainId }))} showHasMore maxVisible={3} />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>
+        <div className="flex flex-col gap-1">
+          {entry.chainIds.map((chainId) => (
+            <ChainIndicator key={chainId} chainId={chainId} />
+          ))}
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  )
+
+  // Added-by / Last-updated content — used in the desktop column and the mobile detail row
+  const renderAddedBy = (entry: AddressBookEntry) =>
+    showAddedBy && entry.createdBy ? (
+      isAddress(entry.createdBy) ? (
+        <EthHashInfo address={entry.createdBy} avatarSize={20} onlyName showPrefix={false} showCopyButton={false} />
+      ) : (
+        <EmailInfo email={entry.createdBy} size="xsmall" />
+      )
+    ) : showLastUpdated ? (
+      <span className="text-muted-foreground text-xs">{formatDate(entry.updatedAt || entry.createdAt)}</span>
+    ) : null
+
+  const renderCell = (entry: AddressBookEntry, column: DataTableColumn<AddressBookEntry>) => {
+    switch (column.id) {
+      case 'name':
+        return (
+          <div className={cn('flex items-center gap-1.5 overflow-hidden', entry.isDuplicate && 'line-through')}>
+            {entry.isLocal && <BookUser className="text-muted-foreground size-4 flex-shrink-0" />}
+            <span className="min-w-0 truncate">{entry.name}</span>
+          </div>
+        )
+
+      case 'address':
+        return (
+          <div className="text-[0.8em]">
+            <EthHashInfo
+              address={entry.address}
+              shortAddress={isMobile}
+              showPrefix={false}
+              showName={false}
+              highlight4bytes
+              hasExplorer
+              showCopyButton
+              avatarSize={24}
+            />
+          </div>
+        )
+
+      case 'chains':
+        return renderChains(entry)
+
+      case 'middle':
+        return renderAddedBy(entry)
+
+      case 'actions':
+        return (
+          <span className="inline-flex items-center justify-end gap-1">
+            {renderExtraAction?.(entry)}
+            {!entry.isLocal && !entry.isPrivate && <SpaceAddressBookActions entry={entry} />}
+          </span>
+        )
+
+      default:
+        return null
+    }
+  }
+
+  // Surfaces the columns hidden on mobile (chains, added-by / last-updated)
+  const renderRowDetail = (entry: AddressBookEntry) => (
+    <div className="flex flex-col gap-2 text-sm">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-muted-foreground w-20 shrink-0">Chains</span>
+        <div className="flex flex-wrap gap-1">
+          {entry.chainIds.map((chainId) => (
+            <ChainIndicator key={chainId} chainId={chainId} />
+          ))}
+        </div>
+      </div>
+      {hasMiddleColumn && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-muted-foreground w-20 shrink-0">{showAddedBy ? 'Added by' : 'Last updated'}</span>
+          {renderAddedBy(entry)}
+        </div>
+      )}
+    </div>
+  )
 
   return (
     <PaginatedDataTable
@@ -57,84 +174,8 @@ function SpaceAddressBookTable({
       rows={entries}
       getRowKey={(entry) => entry.address}
       getRowClassName={(entry) => (entry.isDuplicate ? 'opacity-50' : '')}
-      renderRow={(entry) => (
-        <>
-          {/* Name */}
-          <TableCell className="font-bold">
-            <div className={cn('flex items-center gap-1.5 overflow-hidden', entry.isDuplicate && 'line-through')}>
-              {entry.isLocal && <BookUser className="text-muted-foreground size-4 flex-shrink-0" />}
-              <span className="min-w-0 truncate">{entry.name}</span>
-            </div>
-          </TableCell>
-
-          {/* Address */}
-          <TableCell>
-            <div className="text-[0.8em]">
-              <EthHashInfo
-                address={entry.address}
-                shortAddress={false}
-                showPrefix={false}
-                showName={false}
-                highlight4bytes
-                hasExplorer
-                showCopyButton
-                avatarSize={24}
-              />
-            </div>
-          </TableCell>
-
-          {/* Chains */}
-          <TableCell>
-            <Tooltip>
-              <TooltipTrigger>
-                <span className="inline-flex origin-left scale-85">
-                  <NetworkLogosList
-                    networks={entry.chainIds.map((chainId) => ({ chainId }))}
-                    showHasMore
-                    maxVisible={3}
-                  />
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="flex flex-col gap-1">
-                  {entry.chainIds.map((chainId) => (
-                    <ChainIndicator key={chainId} chainId={chainId} />
-                  ))}
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TableCell>
-
-          {/* Added by / Last updated (only if applicable) */}
-          {hasMiddleColumn && (
-            <TableCell>
-              {showAddedBy && entry.createdBy ? (
-                isAddress(entry.createdBy) ? (
-                  <EthHashInfo
-                    address={entry.createdBy}
-                    avatarSize={20}
-                    onlyName
-                    showPrefix={false}
-                    showCopyButton={false}
-                  />
-                ) : (
-                  <EmailInfo email={entry.createdBy} size="xsmall" />
-                )
-              ) : showLastUpdated ? (
-                <span className="text-muted-foreground text-xs">{formatDate(entry.updatedAt || entry.createdAt)}</span>
-              ) : null}
-            </TableCell>
-          )}
-
-          {/* Actions */}
-          <TableCell className="text-right">
-            <span className="inline-flex items-center gap-1">
-              {renderExtraAction?.(entry)}
-              {!entry.isLocal && !entry.isPrivate && <SpaceAddressBookActions entry={entry} />}
-            </span>
-          </TableCell>
-        </>
-      )}
+      renderCell={renderCell}
+      renderRowDetail={renderRowDetail}
     />
   )
 }

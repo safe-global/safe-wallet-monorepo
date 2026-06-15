@@ -23,6 +23,14 @@ jest.mock('./RenewInviteButton', () => ({
   default: () => <button>Renew invitation</button>,
 }))
 
+jest.mock('./MemberRowActionsMenu', () => ({
+  __esModule: true,
+  default: () => <button>Member actions</button>,
+}))
+
+const mockUseIsMobile = jest.fn(() => false)
+jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+
 jest.mock('@/components/common/Track', () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -45,6 +53,10 @@ jest.mock('@/features/spaces', () => ({
 }))
 
 describe('MembersList', () => {
+  beforeEach(() => {
+    mockUseIsMobile.mockReturnValue(false)
+  })
+
   it('renders member email and leaves empty email cells blank', () => {
     render(
       <MembersList
@@ -166,5 +178,45 @@ describe('MembersList', () => {
     )
 
     expect(screen.queryByRole('button', { name: 'Renew invitation' })).not.toBeInTheDocument()
+  })
+
+  it('collapses row actions into a kebab menu on mobile', () => {
+    mockUseIsMobile.mockReturnValue(true)
+
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({
+              id: 2,
+              status: 'INVITED',
+              name: 'Bob',
+              user: memberUserBuilder().with({ email: 'bob@x.io' }).build(),
+            })
+            .build(),
+        ]}
+      />,
+    )
+
+    // The kebab replaces the inline edit / renew / remove cluster
+    expect(screen.getByRole('button', { name: 'Member actions' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Renew invitation' })).not.toBeInTheDocument()
+  })
+
+  it('surfaces the email under the member name on mobile', () => {
+    mockUseIsMobile.mockReturnValue(true)
+
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({ name: 'Alice', user: memberUserBuilder().with({ email: 'alice@example.com' }).build() })
+            .build(),
+        ]}
+      />,
+    )
+
+    const nameCell = screen.getByTestId('table-cell-name')
+    expect(within(nameCell).getByText('alice@example.com')).toBeInTheDocument()
   })
 })
