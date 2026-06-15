@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
@@ -59,6 +61,8 @@ function SpaceAddressBookTable({
 }: SpaceAddressBookTableProps) {
   const [page, setPage] = useState(0)
   const resolveMemberName = useMemberNameResolver()
+  const theme = useTheme()
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'))
 
   useEffect(() => {
     setPage(0)
@@ -103,10 +107,10 @@ function SpaceAddressBookTable({
 
               {/* Address */}
               <TableCell>
-                <div className="text-[0.8em]">
+                <div className="text-[0.8em] font-mono">
                   <EthHashInfo
                     address={entry.address}
-                    shortAddress={false}
+                    shortAddress={isSmallScreen}
                     showPrefix={false}
                     showName={false}
                     highlight4bytes

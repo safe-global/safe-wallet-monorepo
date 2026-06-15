@@ -1,5 +1,5 @@
 import { act } from 'react'
-import { fireEvent, render, waitFor } from '@/tests/test-utils'
+import { fireEvent, render, waitFor, within } from '@/tests/test-utils'
 import { FormProvider, useForm } from 'react-hook-form'
 import AddressBookInput from '.'
 import { AddressBookSourceProvider } from '../AddressBookSourceProvider'
@@ -297,7 +297,7 @@ describe('AddressBookInput', () => {
     await waitFor(() => expect(utils.queryByText('add it to your address book', { exact: false })).toBeNull())
   })
 
-  it('should show a cloud icon for a server-stored (space) contact in a spaceOnly context', async () => {
+  it('should group a server-stored (space) contact under the workspace header with the workspace icon', async () => {
     const spaceContact = spaceContactBuilder({ name: 'Server Contact' })
     mockUseGetSpaceAddressBook.mockReturnValue([spaceContact])
 
@@ -323,11 +323,20 @@ describe('AddressBookInput', () => {
       fireEvent.mouseUp(input)
     })
 
-    await waitFor(() => expect(utils.getByText('Server Contact', { exact: false })).toBeDefined())
-    expect(utils.getByTestId('CloudOutlinedIcon')).toBeInTheDocument()
+    // Scope to the space contact's own group. Persisted local contacts from other
+    // tests can leak into the listbox via localStorage, so assert on this group.
+    const option = await waitFor(() => utils.getByText('Server Contact', { exact: false }))
+    const groupEl = option.closest('.groupList')!.closest('li') as HTMLElement
+    const group = within(groupEl)
+
+    // Workspace source: "Contacts of …" header with the building (workspace) icon,
+    // not the local hard-drive icon.
+    expect(group.getByText('Contacts of', { exact: false })).toBeInTheDocument()
+    expect(groupEl.querySelector('.lucide-building-2')).toBeInTheDocument()
+    expect(groupEl.querySelector('.lucide-hard-drive')).not.toBeInTheDocument()
   })
 
-  it('should not show a cloud icon for a local contact', async () => {
+  it('should group a local contact under the local contacts header with the local icon', async () => {
     const { input, utils } = setup('', {
       [checksumAddress(faker.finance.ethereumAddress())]: 'Local Contact',
     })
@@ -337,7 +346,15 @@ describe('AddressBookInput', () => {
       fireEvent.mouseUp(input)
     })
 
-    await waitFor(() => expect(utils.getByText('Local Contact', { exact: false })).toBeDefined())
-    expect(utils.queryByTestId('CloudOutlinedIcon')).not.toBeInTheDocument()
+    // Scope to the contact's own group (see note above).
+    const option = await waitFor(() => utils.getByText('Local Contact', { exact: true }))
+    const groupEl = option.closest('.groupList')!.closest('li') as HTMLElement
+    const group = within(groupEl)
+
+    // Local source: "Local contacts" header with the hard-drive icon, not the
+    // building (workspace) icon.
+    expect(group.getByText('Local contacts')).toBeInTheDocument()
+    expect(groupEl.querySelector('.lucide-hard-drive')).toBeInTheDocument()
+    expect(groupEl.querySelector('.lucide-building-2')).not.toBeInTheDocument()
   })
 })
