@@ -6,8 +6,14 @@ const mockUseSpacesGetOneV1Query = jest.fn()
 const mockUseUsersGetWithWalletsV1Query = jest.fn()
 const mockUseHasFeature = jest.fn()
 const mockDispatch = jest.fn()
+const mockReplace = jest.fn()
+const mockIsUnauthorized = jest.fn()
 let mockIsAuthenticated = true
 let mockIsOidcLoginPending = false
+
+jest.mock('next/router', () => ({
+  useRouter: () => ({ replace: mockReplace }),
+}))
 
 jest.mock('@/store', () => ({
   useAppSelector: (selector: string) => {
@@ -52,7 +58,11 @@ jest.mock('../LoadingState', () => ({
 }))
 
 jest.mock('@/features/spaces/utils', () => ({
-  isUnauthorized: () => false,
+  isUnauthorized: (...args: unknown[]) => mockIsUnauthorized(...args),
+}))
+
+jest.mock('@/config/routes', () => ({
+  AppRoutes: { welcome: { spaces: '/welcome/spaces' } },
 }))
 
 jest.mock('@/features/spaces', () => ({
@@ -64,6 +74,7 @@ describe('AuthState', () => {
     jest.clearAllMocks()
     mockIsAuthenticated = true
     mockIsOidcLoginPending = false
+    mockIsUnauthorized.mockReturnValue(false)
     mockUseHasFeature.mockReturnValue(true)
     mockUseSpacesGetOneV1Query.mockReturnValue({
       currentData: { id: 1, members: [] },
@@ -127,5 +138,75 @@ describe('AuthState', () => {
       { id: '11111111-1111-1111-1111-111111111111' },
       { skip: false, ...SPACE_REFRESH_OPTIONS },
     )
+  })
+
+  it('redirects to the spaces overview when the space query is unauthorized', () => {
+    mockIsUnauthorized.mockReturnValue(true)
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, error: { status: 404 }, isLoading: false })
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).toHaveBeenCalledWith('/welcome/spaces')
+    expect(queryByTestId('children')).toBeNull()
+    expect(queryByTestId('unauthorized')).not.toBeNull()
+  })
+
+  it('redirects to the spaces overview when the current user has declined membership', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'DECLINED' }] },
+      error: undefined,
+      isLoading: false,
+    })
+
+    render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).toHaveBeenCalledWith('/welcome/spaces')
+  })
+
+  it('does not redirect while the space query is still loading', () => {
+    mockIsUnauthorized.mockReturnValue(true)
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, error: undefined, isLoading: true })
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).not.toHaveBeenCalled()
+    expect(queryByTestId('loading')).not.toBeNull()
+  })
+
+  it('does not redirect when the user is signed out', () => {
+    mockIsAuthenticated = false
+    mockIsUnauthorized.mockReturnValue(true)
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).not.toHaveBeenCalled()
+    expect(queryByTestId('signed-out')).not.toBeNull()
+  })
+
+  it('does not redirect when the user is still authorized', () => {
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).not.toHaveBeenCalled()
+    expect(queryByTestId('children')).not.toBeNull()
   })
 })

@@ -7,7 +7,7 @@ jest.mock('@/utils/colors', () => ({
 }))
 
 describe('SpaceBackLink', () => {
-  const mockSpace = { id: 42, name: 'Acme Corp' }
+  const mockSpace = { name: 'Acme Corp' }
 
   it('renders the first letter of the space name uppercased', () => {
     render(<SpaceBackLink space={mockSpace} onClick={jest.fn()} />)
@@ -30,13 +30,13 @@ describe('SpaceBackLink', () => {
   })
 
   it('handles single-character space name', () => {
-    render(<SpaceBackLink space={{ id: 1, name: 'X' }} onClick={jest.fn()} />)
+    render(<SpaceBackLink space={{ name: 'X' }} onClick={jest.fn()} />)
 
     expect(screen.getByText('X')).toBeInTheDocument()
   })
 
   it('handles lowercase space name by uppercasing the initial', () => {
-    render(<SpaceBackLink space={{ id: 1, name: 'hello' }} onClick={jest.fn()} />)
+    render(<SpaceBackLink space={{ name: 'hello' }} onClick={jest.fn()} />)
 
     expect(screen.getByText('H')).toBeInTheDocument()
   })
