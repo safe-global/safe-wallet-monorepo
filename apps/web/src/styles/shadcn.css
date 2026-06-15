@@ -23,6 +23,7 @@
   --popover: #ffffff;
   --popover-foreground: #0a0a0a;
   --dialog: #ffffff;
+  --backdrop: rgba(99, 102, 105, 0.75);
   --primary: #171717;
   --primary-foreground: #fafafa;
   --secondary: #f5f5f5;
@@ -66,6 +67,7 @@
   --popover: #171717;
   --popover-foreground: #f5f5f5;
   --dialog: #1c1c1c;
+  --backdrop: rgba(99, 102, 105, 0.75);
   --primary: #12ff80;
   --primary-foreground: #0a0a0a;
   --secondary: #262626;
@@ -108,6 +110,7 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-dialog: var(--dialog);
+  --color-backdrop: var(--backdrop);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
