@@ -1,0 +1,54 @@
+import React from 'react'
+import { act, fireEvent, render, waitFor } from '@/src/tests/test-utils'
+import { WalletConnectManualEntryContainer } from '../WalletConnectManualEntry.container'
+
+const VALID_URI = 'wc:7f6e9a3c@2?relay-protocol=irn&symKey=abc'
+const mockDismiss = jest.fn()
+const mockPair = jest.fn()
+
+jest.mock('expo-router', () => ({ useRouter: () => ({ dismiss: mockDismiss }) }))
+jest.mock('../../walletKit', () => ({ getWalletKit: () => Promise.resolve({ pair: mockPair }) }))
+
+describe('WalletConnectManualEntryContainer', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockPair.mockResolvedValue(undefined)
+  })
+
+  it('pairs the entered URI and dismisses both the manual entry and the scanner on success', async () => {
+    const { getByPlaceholderText, getByTestId } = render(<WalletConnectManualEntryContainer />)
+    fireEvent.changeText(getByPlaceholderText('wc:…'), VALID_URI)
+    fireEvent.press(getByTestId('wc-manual-pair'))
+    await waitFor(() => expect(mockPair).toHaveBeenCalledWith({ uri: VALID_URI }))
+    await waitFor(() => expect(mockDismiss).toHaveBeenCalledWith(2))
+  })
+
+  it('shows a friendly pairing error and does not navigate on failure', async () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(jest.fn())
+    mockPair.mockRejectedValueOnce(new Error("No matching key. session topic doesn't exist"))
+    const { getByPlaceholderText, getByTestId, getByText } = render(<WalletConnectManualEntryContainer />)
+    fireEvent.changeText(getByPlaceholderText('wc:…'), VALID_URI)
+    fireEvent.press(getByTestId('wc-manual-pair'))
+    await waitFor(() => expect(getByText('Failed to pair. Please try again.')).toBeTruthy())
+    expect(mockDismiss).not.toHaveBeenCalled()
+    errorSpy.mockRestore()
+  })
+
+  it('shows a timeout error and does not navigate when pairing does not resolve in time', async () => {
+    jest.useFakeTimers()
+    mockPair.mockImplementationOnce(() => new Promise<void>(() => undefined)) // never resolves
+    const { getByPlaceholderText, getByTestId, getByText } = render(<WalletConnectManualEntryContainer />)
+    fireEvent.changeText(getByPlaceholderText('wc:…'), VALID_URI)
+    await act(async () => {
+      fireEvent.press(getByTestId('wc-manual-pair'))
+    })
+
+    act(() => {
+      jest.advanceTimersByTime(10_000)
+    })
+
+    expect(getByText('Connection timed out. Try again.')).toBeTruthy()
+    expect(mockDismiss).not.toHaveBeenCalled()
+    jest.useRealTimers()
+  })
+})

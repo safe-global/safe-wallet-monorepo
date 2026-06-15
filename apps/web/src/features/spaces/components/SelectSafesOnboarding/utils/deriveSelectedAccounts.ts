@@ -1,6 +1,6 @@
 import { flattenSafeItems, isMultiChainSafeItem, type AllSafeItems, type SafeItem } from '@/hooks/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { SafeAppMockupAccount } from '@/features/spaces/components/OnboardingLayout/mockup/types'
+import type { SafeAppMockupAccount } from '../../OnboardingLayout/mockup/types'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 
 // Dedupes by address: a Safe deployed on multiple chains appears once.

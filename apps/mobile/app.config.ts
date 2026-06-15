@@ -31,7 +31,7 @@ const config: ExpoConfig = {
   name: name,
   slug: 'safe-mobileapp',
   owner: 'safeglobal',
-  version: '1.0.13',
+  version: '1.0.14',
   extra: {
     storybookEnabled: process.env.STORYBOOK_ENABLED,
     eas: {
@@ -40,7 +40,7 @@ const config: ExpoConfig = {
   },
   orientation: 'portrait',
   icon: './assets/images/icon.png',
-  scheme: ['myapp', 'wc'],
+  scheme: ['wc'],
   userInterfaceStyle: 'automatic',
   ios: {
     config: {

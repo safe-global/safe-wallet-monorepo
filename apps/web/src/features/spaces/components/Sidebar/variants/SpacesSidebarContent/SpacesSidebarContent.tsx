@@ -1,6 +1,6 @@
 import { type ReactElement, useMemo } from 'react'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import { useIsActiveMember } from '@/features/spaces/hooks/useSpaceMembers'
+import { useCurrentSpaceId } from '../../../../hooks/useCurrentSpaceId'
+import { useIsActiveMember } from '../../../../hooks/useSpaceMembers'
 import { spacesMainNavigation, spacesSetupGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
 import type { SidebarItemConfig, SidebarVariantContentProps } from '../../types'

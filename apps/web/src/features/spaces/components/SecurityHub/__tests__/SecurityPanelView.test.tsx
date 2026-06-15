@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { render, screen, fireEvent, within } from '@testing-library/react'
+import { AppRoutes } from '@/config/routes'
 import { createMockContext } from '@/features/security/testing'
 import type { ScanResult } from '@/features/security/types'
 import SecurityPanelView from '../components/SecurityPanelView/SecurityPanelView'
@@ -168,6 +169,7 @@ describe('SecurityPanelView', () => {
       // Expand the failing row
       fireEvent.click(screen.getByText('Contract version is outdated'))
       const link = screen.getByRole('link', { name: /update/i })
+      expect(link).toHaveAttribute('href', expect.stringContaining(AppRoutes.settings.setup))
       expect(link).toHaveAttribute('href', expect.stringContaining('safe='))
     })
 
@@ -261,6 +263,18 @@ describe('SecurityPanelView', () => {
       // Unrecognized module → failing → visible at top under its grade group, without expanding
       // the passing accordion. The row title flags it; the module name lives in the expanded evidence.
       expect(screen.getByText('Unrecognized module detected')).toBeInTheDocument()
+    })
+
+    it('labels a recognized module by name and routes it to the passing rows', () => {
+      renderPanel({
+        scanContext: createMockContext({
+          modules: [{ value: '0xaaaa000000000000000000000000000000000001', name: 'Delay Modifier' }],
+        }),
+      })
+      // Recognized module → passing → hidden until the "Healthy" accordion is expanded.
+      fireEvent.click(getChecksAccordion())
+      expect(screen.getByText('Recognized module · Delay Modifier')).toBeInTheDocument()
+      expect(screen.queryByText('Unrecognized module detected')).not.toBeInTheDocument()
     })
 
     describe('vulnerable Zodiac modules', () => {

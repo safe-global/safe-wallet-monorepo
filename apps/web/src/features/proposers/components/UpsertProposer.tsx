@@ -10,8 +10,8 @@ import {
   signProposerTypedData,
   signProposerTypedDataForSafe,
 } from '@/features/proposers/utils/utils'
-import { useDelegatorSelection } from '@/features/proposers/hooks/useDelegatorSelection'
-import { buildDelegationOrigin, createDelegationMessage } from '@/features/proposers/services/delegationMessages'
+import { useDelegatorSelection } from '../hooks/useDelegatorSelection'
+import { buildDelegationOrigin, createDelegationMessage } from '../services/delegationMessages'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
