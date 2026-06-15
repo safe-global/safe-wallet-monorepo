@@ -120,6 +120,46 @@ describe('AccountsModal', () => {
     expect(screen.getByTestId('empty-pinned-list')).toBeInTheDocument()
   })
 
+  it('renders the Manage trusted Safes action in the Trusted Safes section', () => {
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ trustedItems: [safeItem('1', ADDR_A)] }))
+
+    render(<AccountsModal open onClose={jest.fn()} onManageTrustedSafes={jest.fn()} />)
+
+    expect(screen.getByTestId('manage-trusted-safes-link')).toBeInTheDocument()
+  })
+
+  it('keeps the Trusted Safes section and action visible when there are no trusted safes', () => {
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ trustedItems: [], otherItems: [] }))
+
+    render(<AccountsModal open onClose={jest.fn()} onManageTrustedSafes={jest.fn()} />)
+
+    expect(screen.getByTestId('pinned-accounts')).toBeInTheDocument()
+    expect(screen.getByTestId('manage-trusted-safes-link')).toBeInTheDocument()
+    expect(screen.getByText('No trusted Safes yet')).toBeInTheDocument()
+    expect(screen.queryByTestId('empty-pinned-list')).not.toBeInTheDocument()
+  })
+
+  it('closes the modal and opens the trusted-safes modal when Manage is clicked', () => {
+    const onClose = jest.fn()
+    const onManageTrustedSafes = jest.fn()
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ trustedItems: [], otherItems: [] }))
+
+    render(<AccountsModal open onClose={onClose} onManageTrustedSafes={onManageTrustedSafes} />)
+
+    fireEvent.click(screen.getByTestId('manage-trusted-safes-link'))
+
+    expect(onClose).toHaveBeenCalled()
+    expect(onManageTrustedSafes).toHaveBeenCalled()
+  })
+
+  it('does not render the Manage action when onManageTrustedSafes is not provided', () => {
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ trustedItems: [safeItem('1', ADDR_A)] }))
+
+    render(<AccountsModal open onClose={jest.fn()} />)
+
+    expect(screen.queryByTestId('manage-trusted-safes-link')).not.toBeInTheDocument()
+  })
+
   it('renders the loading skeleton while isLoading is true', () => {
     mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ trustedItems: [], otherItems: [], isLoading: true }))
 

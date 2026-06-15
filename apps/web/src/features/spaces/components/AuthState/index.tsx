@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import SignedOutState from '../SignedOutState'
 import { isUnauthorized } from '@/features/spaces/utils'
 import UnauthorizedState from '../UnauthorizedState'
@@ -11,33 +12,48 @@ import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
 import { MemberStatus } from '@/features/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { AppRoutes } from '@/config/routes'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {
+  const router = useRouter()
   const dispatch = useAppDispatch()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const { currentData, error, isLoading } = useSpacesGetOneV1Query(
+  const { currentData, error, isLoading, isFetching } = useSpacesGetOneV1Query(
     { id: spaceId },
     { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
   )
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isOidcLoginPending = useAppSelector(selectIsOidcLoginPending)
 
-  const isCurrentUserDeclined = currentData?.members.some(
-    (member) => member.user.id === currentUser?.id && member.status === MemberStatus.DECLINED,
-  )
+  const currentMembership = currentData?.members.find((member) => member.user.id === currentUser?.id)
+  const hasMembershipLoaded = !!currentData && !!currentUser
+  const isCurrentUserActive = currentMembership?.status === MemberStatus.ACTIVE
+
+  const isLoadingState = isLoading || isOidcLoginPending
+  const hasLostAccess = isUserSignedIn && !isLoadingState && isUnauthorized(error)
+  const isInactiveMember = isUserSignedIn && !isLoadingState && hasMembershipLoaded && !isCurrentUserActive
 
   useEffect(() => {
     dispatch(setLastUsedSpace(spaceId))
   }, [dispatch, spaceId])
 
+  // !isFetching: accepting an invite refetches the space — don't redirect on the stale INVITED entry
+  useEffect(() => {
+    if (hasLostAccess || (isInactiveMember && !isFetching)) {
+      router.replace(AppRoutes.welcome.spaces)
+    }
+  }, [hasLostAccess, isInactiveMember, isFetching, router])
+
   if (!isSpacesFeatureEnabled) return null
 
-  if (isLoading || isOidcLoginPending) return <LoadingState />
+  if (isLoadingState) return <LoadingState />
 
   if (!isUserSignedIn) return <SignedOutState />
 
-  if (isUnauthorized(error) || isCurrentUserDeclined) return <UnauthorizedState />
+  if (hasLostAccess) return <UnauthorizedState />
+
+  if (isInactiveMember) return <LoadingState />
 
   return children
 }

@@ -5,6 +5,8 @@ import { TxModalContext } from '@/components/tx-flow'
 import { ChevronRight, Wallet } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { useIsQualifiedSafe, SafeSelectorDropdown } from '@/features/spaces'
+import TrustedSafesModal from '@/components/common/TrustedSafesModal'
+import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import { Button } from '@/components/ui/button'
 import { useAppSelector } from '@/store'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
@@ -80,13 +82,15 @@ function SpaceSafeBar() {
   const router = useRouter()
   const urlSafeAddress = useSafeAddressFromUrl()
   const isQualifiedSafe = useIsQualifiedSafe()
-  const { items, selectedItemId, handleItemSelect, isLoading, isError, refetch } = useSpaceSafeSelectorItems()
+  const { items, selectedItemId, handleItemSelect, isLoading, isError, refetch, isInSpaceContext } =
+    useSpaceSafeSelectorItems()
   const { space, handleBackToSpace } = useSpaceBackLink()
   const [accountsModalOpen, setAccountsModalOpen] = useState(false)
   const addedSafes = useAppSelector(selectAllAddedSafes)
   const wallet = useWallet()
   const connectWallet = useConnectWallet()
   const { txFlow } = useContext(TxModalContext)
+  const trustedSafesModal = useTrustedSafesModal()
 
   // Use the matched Next.js route, not `usePathname`: error pages (404/403) render
   // under the original unmatched URL (e.g. `/hom`), where `usePathname` wouldn't match.
@@ -98,7 +102,9 @@ function SpaceSafeBar() {
     setAccountsModalOpen(true)
   }
 
-  const dropdownHeader = isQualifiedSafe ? (
+  // Match the header to the list shown: useSafeBarSafes renders workspace safes in any space
+  // context, not just for a qualified safe — so the label must track isInSpaceContext too.
+  const dropdownHeader = isInSpaceContext ? (
     <DropdownHeader label="Safes in this workspace" testId="workspace-header" />
   ) : (
     <DropdownHeader label="Trusted Safes" />
@@ -142,7 +148,12 @@ function SpaceSafeBar() {
       </div>
       <SpaceNestedSafesButton />
       <SpaceChainSelector isLoading={isLoading} />
-      <AccountsModal open={accountsModalOpen} onClose={() => setAccountsModalOpen(false)} />
+      <AccountsModal
+        open={accountsModalOpen}
+        onClose={() => setAccountsModalOpen(false)}
+        onManageTrustedSafes={trustedSafesModal.open}
+      />
+      <TrustedSafesModal modal={trustedSafesModal} />
     </div>
   )
 }

@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/preview'
-import SafeSelectionModal from './index'
-import type { UseSafeSelectionModalReturn } from '../../hooks/useSafeSelectionModal'
+import TrustedSafesModal from './index'
+import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 
-const baseMockModal: UseSafeSelectionModalReturn = {
+const baseMockModal: UseTrustedSafesModalReturn = {
   isOpen: true,
   availableItems: [
     {
@@ -45,6 +45,8 @@ const baseMockModal: UseSafeSelectionModalReturn = {
   isLoading: false,
   hasChanges: false,
   totalSafesCount: 3,
+  selectedCount: 1,
+  allSelected: false,
   open: () => {},
   close: () => {},
   toggleSelection: () => {},
@@ -53,20 +55,21 @@ const baseMockModal: UseSafeSelectionModalReturn = {
   confirmSimilarAddress: () => {},
   cancelSimilarAddress: () => {},
   confirmSelectAll: () => {},
+  skipSimilarSelectAll: () => {},
   cancelSelectAll: () => {},
   submitSelection: () => {},
   setSearchQuery: () => {},
 }
 
 const meta = {
-  title: 'Features/MyAccounts/SafeSelectionModal',
-  component: SafeSelectionModal,
+  title: 'Common/TrustedSafesModal',
+  component: TrustedSafesModal,
   decorators: [withMockProvider()],
   parameters: {
     layout: 'centered',
   },
   tags: ['autodocs'],
-} satisfies Meta<typeof SafeSelectionModal>
+} satisfies Meta<typeof TrustedSafesModal>
 
 export default meta
 type Story = StoryObj<typeof meta>

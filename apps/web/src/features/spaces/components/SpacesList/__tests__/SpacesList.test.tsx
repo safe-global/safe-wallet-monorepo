@@ -66,8 +66,9 @@ jest.mock('../AccountInfo', () => ({
 }))
 
 jest.mock('@/features/spaces/utils', () => ({
-  filterSpacesByStatus: (_user: unknown, spaces: unknown[], status: string) =>
-    status === 'INVITED' ? [] : ((spaces as Array<{ name: string; status?: string }>) ?? []),
+  filterSpacesByStatus: (_user: unknown, spaces: Array<{ memberStatus?: string }>, status: string) =>
+    (spaces ?? []).filter((space) => (space.memberStatus ?? 'ACTIVE') === status),
+  getInvitedByName: () => undefined,
 }))
 
 jest.mock('../../SignInOptions', () => ({
@@ -231,6 +232,24 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ singleSpaceId: 'uuid-1' }))
   })
 
+  // A pending invite must not auto-redirect the user into the space — they have
+  // no access until they accept, so they stay on the list with the invite banner.
+  it('passes singleSpaceId=null and shows the invite banner when the only space is a pending invite', () => {
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({
+      currentData: [{ uuid: 'uuid-1', name: 'Pending Space', memberStatus: 'INVITED' }],
+      isFetching: false,
+      error: undefined,
+    })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(mockUseSignInRedirect).toHaveBeenCalledWith(expect.objectContaining({ singleSpaceId: null }))
+    expect(screen.getByTestId('invite-banner')).toBeInTheDocument()
+    expect(screen.queryByTestId('space-card')).not.toBeInTheDocument()
+  })
+
   it('passes singleSpaceId=null to useSignInRedirect when the user has multiple spaces', () => {
     mockUseAppSelector.mockReturnValue(true)
     mockUseSpacesGetV1Query.mockReturnValue({
@@ -330,6 +349,18 @@ describe('SpacesList — auth/expiry state rendering', () => {
     // No-workspaces card renders (it lives outside the spacesHeader).
     expect(screen.getByText(/no workspaces found/i)).toBeInTheDocument()
     expect(screen.getAllByTestId('create-space-button')).toHaveLength(1)
+  })
+
+  it('renders the AccountInfo sign-out menu on the require-login workspace header when the user is signed in with no spaces', () => {
+    mockUseIsRequireLoginEnabled.mockReturnValue(true)
+    mockUseAppSelector.mockReturnValue(true)
+    mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
+
+    render(<SpacesList />)
+
+    expect(screen.getByText(/no workspaces found/i)).toBeInTheDocument()
+    expect(screen.getByTestId('account-info')).toBeInTheDocument()
   })
 
   it('disables the Create space button and shows a tooltip when the user has reached the 10-space limit', async () => {
