@@ -1,12 +1,9 @@
 import type { MouseEvent } from 'react'
-import { useMediaQuery, useTheme } from '@mui/material'
-import type { SelectableSafe } from '../../hooks/useSafeSelectionModal.types'
-import { useSafeItemData } from '../../hooks/useSafeItemData'
-import { AccountItem } from '../AccountItem'
+import type { SelectableSafe } from './useTrustedSafesModal.types'
+import { useSafeItemData, AccountItem } from '@/features/myAccounts'
 import SimilarityWarning from './SimilarityWarning'
-import css from '../AccountItems/styles.module.css'
 
-interface SafeSelectionItemProps {
+interface TrustedSafesItemProps {
   safe: SelectableSafe
   onToggle: (address: string) => void
 }
@@ -17,10 +14,7 @@ interface SafeSelectionItemProps {
  * Includes balance, signers, status chips, queue actions, and rename menu.
  * Allows selecting/deselecting safes including already-pinned ones.
  */
-const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-
+const TrustedSafesItem = ({ safe, onToggle }: TrustedSafesItemProps) => {
   // Get rich data (balance, threshold, owners, etc.)
   const { chain, name, safeOverview, isActivating, threshold, owners, undeployedSafe, elementRef } =
     useSafeItemData(safe)
@@ -66,7 +60,7 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
         hasExplorer
         highlight4bytes={!!safe.similarityGroup}
       >
-        {!isMobile && statusChips}
+        {statusChips}
       </AccountItem.Info>
       <AccountItem.ChainBadge chainId={safe.chainId} />
       <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
@@ -78,9 +72,8 @@ const SafeSelectionItem = ({ safe, onToggle }: SafeSelectionItemProps) => {
         undeployedSafe={!!undeployedSafe}
         hideNestedSafes
       />
-      {isMobile && <div className={css.accountItemChips}>{statusChips}</div>}
     </AccountItem.Button>
   )
 }
 
-export default SafeSelectionItem
+export default TrustedSafesItem

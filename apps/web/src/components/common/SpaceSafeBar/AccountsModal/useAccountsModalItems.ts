@@ -31,31 +31,31 @@ const EMPTY_SAFES: SafeItems = []
  * Pipeline:
  *
  *   useAllSafes()              → flat SafeItems (per chain)
- *     │
- *     ▼  exclude safes already in current space (when isQualifiedSafe)
- *   filteredFlat
- *     │
- *     ▼  useAllSafesGrouped()  → multi + single
- *   allItems  (merge, sort by order preference — Name or Most recent)
- *     │
- *     ▼  apply search (name or address substring)
- *   filtered
- *     │
- *     ▼  split by isPinned
- *   { trustedItems, otherItems }
+ *     ├───────────────────────────────────────────────┐
+ *     ▼                                                 ▼  exclude space members (when isQualifiedSafe)
+ *   useAllSafesGrouped()                              otherSafes → useAllSafesGrouped()
+ *     ▼                                                 ▼
+ *   allItems  (merge, sort by order               otherSafeItems  (merge, sort by order
+ *     ▼  preference — Name or Most recent)           ▼  preference — Name or Most recent)
+ *     ▼  search + isPinned                            ▼  search + !isPinned
+ *   trustedItems                                    otherItems
  *
  * Non-obvious design choices:
  *
- *  • Filter BEFORE grouping. A multi-chain safe whose chains straddle
- *    the space boundary gracefully degrades to single-chain via re-
- *    grouping; if we filtered after, we'd have to mutate the grouped
- *    item ourselves.
+ *  • Exclusion is scoped to "Other" only. Trusted items derive from the
+ *    UNFILTERED list so a pinned safe that's also a space member still
+ *    appears under Trusted — matching the Manage trusted Safes modal.
+ *
+ *  • Exclude BEFORE grouping (for "Other"). A multi-chain safe whose
+ *    chains straddle the space boundary gracefully degrades to single-
+ *    chain via re-grouping; if we filtered after, we'd have to mutate
+ *    the grouped item ourselves.
  *
  *  • "Trusted" = locally pinned in addedSafesSlice, NOT space
  *    membership. A user in a space who never pinned anything sees an
  *    empty Trusted section.
  *
- *  • Similarity is computed on the FILTERED set. A non-space safe
+ *  • Similarity is computed on the FULL set. A non-space safe
  *    that resembles a space safe will not be flagged here — known v1
  *    limitation. Revisit if poisoning attacks against space members
  *    surface in production.
@@ -94,33 +94,49 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
     )
   }, [open, ownedSafesError, refetchOwnedSafes, dispatch])
 
-  const filteredAllSafes = useMemo(() => {
+  // Workspace exclusion is scoped to "Other Safes" only. A trusted (pinned) safe is an explicit
+  // user choice and must stay visible in the Trusted section even when it's a workspace member —
+  // otherwise this section silently disagrees with the Manage trusted Safes modal.
+  const otherSafes = useMemo(() => {
     if (!allSafes || !isQualifiedSafe) return allSafes
     return allSafes.filter((s) => !spaceExclusionKey?.has(`${s.chainId}:${s.address.toLowerCase()}`))
   }, [allSafes, isQualifiedSafe, spaceExclusionKey])
 
-  const { allSingleSafes, allMultiChainSafes } = useAllSafesGrouped(filteredAllSafes ?? EMPTY_SAFES)
+  const { allSingleSafes, allMultiChainSafes } = useAllSafesGrouped(allSafes ?? EMPTY_SAFES)
+  const { allSingleSafes: otherSingleSafes, allMultiChainSafes: otherMultiChainSafes } = useAllSafesGrouped(
+    otherSafes ?? EMPTY_SAFES,
+  )
 
-  const allItems = useMemo<AllSafeItems>(() => {
-    const multi = allMultiChainSafes ?? []
-    const single = allSingleSafes ?? []
-    return [...multi, ...single].sort(comparator)
-  }, [allMultiChainSafes, allSingleSafes, comparator])
+  const groupedToItems = (multi: MultiChainSafeItem[] | undefined, single: SafeItems | undefined): AllSafeItems =>
+    [...(multi ?? []), ...(single ?? [])].sort(comparator)
+
+  const allItems = useMemo<AllSafeItems>(
+    () => groupedToItems(allMultiChainSafes, allSingleSafes),
+    [allMultiChainSafes, allSingleSafes, comparator],
+  )
+
+  const otherSafeItems = useMemo<AllSafeItems>(
+    () => groupedToItems(otherMultiChainSafes, otherSingleSafes),
+    [otherMultiChainSafes, otherSingleSafes, comparator],
+  )
 
   const similarAddresses = useMemo(() => getFlaggedSimilarAddressSet(allItems.map((item) => item.address)), [allItems])
 
-  const filteredItems = useMemo<AllSafeItems>(() => {
-    if (!search.trim()) return allItems
-    const query = search.toLowerCase()
-    return allItems.filter((item: SafeItem | MultiChainSafeItem) => {
-      const name = item.name?.toLowerCase() ?? ''
-      const address = item.address.toLowerCase()
-      return name.includes(query) || address.includes(query)
-    })
+  const matchesSearch = (item: SafeItem | MultiChainSafeItem, query: string): boolean => {
+    const name = item.name?.toLowerCase() ?? ''
+    const address = item.address.toLowerCase()
+    return name.includes(query) || address.includes(query)
+  }
+
+  const trustedItems = useMemo<AllSafeItems>(() => {
+    const query = search.trim().toLowerCase()
+    return allItems.filter((item) => item.isPinned && (!query || matchesSearch(item, query)))
   }, [allItems, search])
 
-  const trustedItems = useMemo<AllSafeItems>(() => filteredItems.filter((item) => item.isPinned), [filteredItems])
-  const otherItems = useMemo<AllSafeItems>(() => filteredItems.filter((item) => !item.isPinned), [filteredItems])
+  const otherItems = useMemo<AllSafeItems>(() => {
+    const query = search.trim().toLowerCase()
+    return otherSafeItems.filter((item) => !item.isPinned && (!query || matchesSearch(item, query)))
+  }, [otherSafeItems, search])
 
   // Fire SEARCH analytics once per from-empty search session — re-arms when
   // the user clears the input. Intentional: avoids spamming the endpoint on

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/preview'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
-import type { SelectableSafe } from '../../hooks/useSafeSelectionModal.types'
+import type { SelectableSafe } from './useTrustedSafesModal.types'
 
 const baseSafe: SelectableSafe = {
   chainId: '1',
@@ -15,7 +15,7 @@ const baseSafe: SelectableSafe = {
 }
 
 const meta = {
-  title: 'Features/MyAccounts/SimilarityConfirmDialog',
+  title: 'Common/SimilarityConfirmDialog',
   component: SimilarityConfirmDialog,
   decorators: [withMockProvider()],
   parameters: {

@@ -1,13 +1,21 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
-import SafeSelectionModal from './index'
-import type { UseSafeSelectionModalReturn } from '../../hooks/useSafeSelectionModal'
+import TrustedSafesModal from './index'
+import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 import { useRouter } from 'next/router'
+import { useIsQualifiedSafe } from '@/features/spaces'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('../../hooks/useSafeItemData', () => ({
+jest.mock('@/features/spaces/hooks/useIsQualifiedSafe', () => ({
+  __esModule: true,
+  default: jest.fn(() => false),
+}))
+
+const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
+
+jest.mock('@/features/myAccounts/hooks/useSafeItemData', () => ({
   useSafeItemData: () => ({
     chain: { chainId: '1', shortName: 'eth' },
     name: undefined,
@@ -33,7 +41,7 @@ const mockRouter = {
   push: jest.fn(),
 }
 
-const mockModal: UseSafeSelectionModalReturn = {
+const mockModal: UseTrustedSafesModalReturn = {
   isOpen: true,
   availableItems: [
     {
@@ -65,6 +73,8 @@ const mockModal: UseSafeSelectionModalReturn = {
   isLoading: false,
   hasChanges: false,
   totalSafesCount: 2,
+  selectedCount: 1,
+  allSelected: false,
   open: jest.fn(),
   close: jest.fn(),
   toggleSelection: jest.fn(),
@@ -73,55 +83,111 @@ const mockModal: UseSafeSelectionModalReturn = {
   confirmSimilarAddress: jest.fn(),
   cancelSimilarAddress: jest.fn(),
   confirmSelectAll: jest.fn(),
+  skipSimilarSelectAll: jest.fn(),
   cancelSelectAll: jest.fn(),
   submitSelection: jest.fn(),
   setSearchQuery: jest.fn(),
 }
 
-describe('SafeSelectionModal', () => {
+describe('TrustedSafesModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
+    mockUseIsQualifiedSafe.mockReturnValue(false)
   })
 
   it('should render modal when open', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     expect(screen.getByText('Manage trusted Safes')).toBeInTheDocument()
     expect(screen.getByText('Verify before you trust')).toBeInTheDocument()
   })
 
+  it('shows the workspace notice when in a space', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(true)
+
+    render(<TrustedSafesModal modal={mockModal} />)
+
+    expect(screen.getByTestId('space-notice')).toBeInTheDocument()
+  })
+
+  it('hides the workspace notice when not in a space', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(false)
+
+    render(<TrustedSafesModal modal={mockModal} />)
+
+    expect(screen.queryByTestId('space-notice')).not.toBeInTheDocument()
+  })
+
   it('should render safe items', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     // AccountItem uses checkbox data-testid format: safe-item-checkbox-{address}
     expect(screen.getByTestId('safe-item-checkbox-0x1234567890abcdef1234567890abcdef12345678')).toBeInTheDocument()
     expect(screen.getByTestId('safe-item-checkbox-0xabcdef1234567890abcdef1234567890abcdef12')).toBeInTheDocument()
   })
 
+  it('should render the search bar when there are items', () => {
+    render(<TrustedSafesModal modal={mockModal} />)
+
+    expect(screen.getByPlaceholderText('Search by name or full address')).toBeInTheDocument()
+  })
+
+  it('should hide the search bar when there are no items and no query', () => {
+    const emptyModal = { ...mockModal, availableItems: [], searchQuery: '' }
+    render(<TrustedSafesModal modal={emptyModal} />)
+
+    expect(screen.queryByPlaceholderText('Search by name or full address')).not.toBeInTheDocument()
+  })
+
+  it('should keep the search bar when a query matches nothing', () => {
+    const noMatchModal = { ...mockModal, availableItems: [], searchQuery: 'nope' }
+    render(<TrustedSafesModal modal={noMatchModal} />)
+
+    expect(screen.getByPlaceholderText('Search by name or full address')).toBeInTheDocument()
+  })
+
   it('should call close when cancel clicked', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     fireEvent.click(screen.getByText('Cancel'))
 
     expect(mockModal.close).toHaveBeenCalled()
   })
 
+  it('should disable Save when there are no changes', () => {
+    render(<TrustedSafesModal modal={mockModal} />)
+
+    expect(screen.getByText('Save').closest('button')).toBeDisabled()
+  })
+
+  it('should enable Save and call submitSelection when there are changes', () => {
+    const modalWithChanges = { ...mockModal, hasChanges: true }
+    render(<TrustedSafesModal modal={modalWithChanges} />)
+
+    const saveButton = screen.getByText('Save').closest('button')
+    expect(saveButton).not.toBeDisabled()
+
+    fireEvent.click(screen.getByText('Save'))
+
+    expect(modalWithChanges.submitSelection).toHaveBeenCalled()
+  })
+
   it('should not render when closed', () => {
     const closedModal = { ...mockModal, isOpen: false }
-    const { container } = render(<SafeSelectionModal modal={closedModal} />)
+    const { container } = render(<TrustedSafesModal modal={closedModal} />)
 
     expect(container.querySelector('[role="dialog"]')).not.toBeInTheDocument()
   })
 
   it('should call toggleSelection when clicking safe item', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
-    // Click on the first safe item (AccountItem.Button has data-testid="safe-list-item")
+    // Selected safes float to the top, so the first rendered item is the selected one
     const safeItems = screen.getAllByTestId('safe-list-item')
     fireEvent.click(safeItems[0])
 
-    expect(mockModal.toggleSelection).toHaveBeenCalledWith('0x1234567890abcdef1234567890abcdef12345678')
+    expect(mockModal.toggleSelection).toHaveBeenCalledWith('0xabcdef1234567890abcdef1234567890abcdef12')
   })
 
   it('should show similarity confirmation dialog when pendingConfirmation is set', () => {
@@ -136,20 +202,20 @@ describe('SafeSelectionModal', () => {
       ],
     }
 
-    render(<SafeSelectionModal modal={modalWithPending} />)
+    render(<TrustedSafesModal modal={modalWithPending} />)
 
     expect(screen.getByText('Similar address detected')).toBeInTheDocument()
   })
 
   it('should display Select All and Deselect All buttons', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     expect(screen.getByText('Select All')).toBeInTheDocument()
     expect(screen.getByText('Deselect All')).toBeInTheDocument()
   })
 
   it('should call selectAll when Select All clicked', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     fireEvent.click(screen.getByText('Select All'))
 
@@ -157,7 +223,7 @@ describe('SafeSelectionModal', () => {
   })
 
   it('should call deselectAll when Deselect All clicked', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     fireEvent.click(screen.getByText('Deselect All'))
 
@@ -165,7 +231,7 @@ describe('SafeSelectionModal', () => {
   })
 
   it('should show selection count', () => {
-    render(<SafeSelectionModal modal={mockModal} />)
+    render(<TrustedSafesModal modal={mockModal} />)
 
     expect(screen.getByText('1 of 2 selected')).toBeInTheDocument()
   })
@@ -188,7 +254,7 @@ describe('SafeSelectionModal', () => {
       ],
     }
 
-    render(<SafeSelectionModal modal={modalWithSelectAllConfirmation} />)
+    render(<TrustedSafesModal modal={modalWithSelectAllConfirmation} />)
 
     expect(screen.getByText('Similar addresses detected')).toBeInTheDocument()
     expect(screen.getByText('No, skip similar addresses')).toBeInTheDocument()
@@ -213,14 +279,14 @@ describe('SafeSelectionModal', () => {
       ],
     }
 
-    render(<SafeSelectionModal modal={modalWithSelectAllConfirmation} />)
+    render(<TrustedSafesModal modal={modalWithSelectAllConfirmation} />)
 
     fireEvent.click(screen.getByText('Yes, include them anyway'))
 
     expect(mockModal.confirmSelectAll).toHaveBeenCalled()
   })
 
-  it('should call cancelSelectAll when cancel clicked in select all dialog', () => {
+  it('should call skipSimilarSelectAll when skip clicked in select all dialog', () => {
     const modalWithSelectAllConfirmation = {
       ...mockModal,
       pendingSelectAllConfirmation: true,
@@ -238,10 +304,10 @@ describe('SafeSelectionModal', () => {
       ],
     }
 
-    render(<SafeSelectionModal modal={modalWithSelectAllConfirmation} />)
+    render(<TrustedSafesModal modal={modalWithSelectAllConfirmation} />)
 
     fireEvent.click(screen.getByText('No, skip similar addresses'))
 
-    expect(mockModal.cancelSelectAll).toHaveBeenCalled()
+    expect(mockModal.skipSimilarSelectAll).toHaveBeenCalled()
   })
 })

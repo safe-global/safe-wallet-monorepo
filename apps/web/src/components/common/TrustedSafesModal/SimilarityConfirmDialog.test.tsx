@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
-import type { SelectableSafe } from '../../hooks/useSafeSelectionModal.types'
+import type { SelectableSafe } from './useTrustedSafesModal.types'
 
 const mockSafe: SelectableSafe = {
   chainId: '1',

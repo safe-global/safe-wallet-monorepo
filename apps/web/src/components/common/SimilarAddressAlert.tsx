@@ -7,7 +7,11 @@ import { CircleAlert } from 'lucide-react'
  * before the per-card "High similarity" pill is noticed.
  */
 const SimilarAddressAlert = () => (
-  <Alert variant="warning" data-testid="similar-address-alert">
+  <Alert
+    variant="warning"
+    className="dark:bg-[var(--color-warning-background)] dark:text-[var(--color-warning1-contrast-text)] dark:*:data-[slot=alert-description]:text-current"
+    data-testid="similar-address-alert"
+  >
     <CircleAlert />
     <AlertTitle>Similar addresses detected</AlertTitle>
     <AlertDescription>

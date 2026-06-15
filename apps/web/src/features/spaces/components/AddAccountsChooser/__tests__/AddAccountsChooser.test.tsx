@@ -32,10 +32,29 @@ jest.mock('@/features/spaces/components/AddAccounts', () => ({
 const mockAccountsModalMount = jest.fn()
 jest.mock('@/components/common/SpaceSafeBar/AccountsModal', () => ({
   __esModule: true,
-  default: ({ open, trackingLabel }: { open: boolean; trackingLabel?: string }) => {
-    mockAccountsModalMount({ trackingLabel })
+  default: ({
+    open,
+    trackingLabel,
+    onManageTrustedSafes,
+  }: {
+    open: boolean
+    trackingLabel?: string
+    onManageTrustedSafes?: () => void
+  }) => {
+    mockAccountsModalMount({ trackingLabel, onManageTrustedSafes })
     return open ? <div data-testid="accounts-modal-mock" data-tracking-label={trackingLabel} /> : null
   },
+}))
+
+jest.mock('@/components/common/TrustedSafesModal', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+
+const mockTrustedSafesModalOpen = jest.fn()
+jest.mock('@/components/common/TrustedSafesModal/useTrustedSafesModal', () => ({
+  __esModule: true,
+  default: () => ({ open: mockTrustedSafesModalOpen, close: jest.fn(), isOpen: false }),
 }))
 
 describe('AddAccountsChooser', () => {
@@ -46,6 +65,7 @@ describe('AddAccountsChooser', () => {
     mockPush.mockClear()
     mockAddAccountsMount.mockClear()
     mockAccountsModalMount.mockClear()
+    mockTrustedSafesModalOpen.mockClear()
   })
 
   it('renders the trigger button with the default label', () => {
@@ -89,6 +109,16 @@ describe('AddAccountsChooser', () => {
     const modal = screen.getByTestId('accounts-modal-mock')
     expect(modal).toBeInTheDocument()
     expect(modal).toHaveAttribute('data-tracking-label', 'owned_safes_modal')
+  })
+
+  it('wires the Manage trusted Safes action to the trusted-safes modal in "See all Safe accounts"', () => {
+    render(<AddAccountsChooser entryPoint="dashboard" />)
+
+    fireEvent.click(screen.getByTestId('add-space-account-button'))
+    fireEvent.click(screen.getByText('See all Safe accounts'))
+
+    const { onManageTrustedSafes } = mockAccountsModalMount.mock.calls.at(-1)![0]
+    expect(onManageTrustedSafes).toBe(mockTrustedSafesModalOpen)
   })
 
   it('opens AddAccounts picker when admin clicks "Add Safe accounts to this workspace"', () => {

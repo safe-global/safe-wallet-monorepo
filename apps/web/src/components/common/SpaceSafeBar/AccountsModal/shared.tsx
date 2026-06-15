@@ -248,7 +248,7 @@ export function NotActivatedBadge({ isActivating }: { isActivating: boolean }) {
 /** "High similarity" warning badge */
 export function SimilarityBadge() {
   return (
-    <span className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full bg-amber-50 px-1.5 py-px text-[11px] leading-none text-amber-700">
+    <span className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full bg-amber-50 px-1.5 py-px text-[11px] leading-none text-amber-700 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-warning1-contrast-text)]">
       <TriangleAlert className="size-3 shrink-0" />
       High similarity
     </span>

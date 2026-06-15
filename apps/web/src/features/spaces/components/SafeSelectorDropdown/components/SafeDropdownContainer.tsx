@@ -90,7 +90,8 @@ const SafeDropdownContainer = ({
       )
     : structuralItems
 
-  const showSearch = !isError && items.length > 0
+  // Key the search bar to displayable rows, so it's hidden when there's nothing to filter.
+  const showSearch = !isError && structuralItems.length > 0
 
   // Bottom-fade scroll hint, shown only while more rows lie below the fold.
   const { setScrollNode, showFade: showScrollHint } = useBottomScrollFade([filteredItems.length, isLoading, isError])
