@@ -1,11 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import * as Linking from 'expo-linking'
+import { router } from 'expo-router'
+import type { TransactionReceipt } from 'ethers'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { getSdkError } from '@walletconnect/utils'
 import { formatJsonRpcError, formatJsonRpcResult } from '@walletconnect/jsonrpc-utils'
 import { isAnyOf } from '@reduxjs/toolkit'
 import { useStore } from 'react-redux'
-import { isPairingUri, stripEip155Prefix } from '@safe-global/utils/features/walletconnect/utils'
+import { chainIdToHex, isPairingUri, stripEip155Prefix } from '@safe-global/utils/features/walletconnect/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
@@ -18,6 +20,7 @@ import { useActiveSafeBinding } from '../hooks/useActiveSafeBinding'
 import { useSessionProposalHandler } from '../hooks/useSessionProposalHandler'
 import { useSessionRequestHandler, type SessionRequestHandlerDeps } from '../hooks/useSessionRequestHandler'
 import { isValidTxRequestParams } from '../services/methodRouter'
+import { proxyReadOnlyCall } from '../services/readRpcProxy'
 import {
   setSessions,
   removeSession,
@@ -286,13 +289,107 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const activeChain = useAppSelector((s) => (activeSafe ? (selectChainById(s, activeSafe.chainId) ?? null) : null))
   const activeSigner = useAppSelector((s) => (activeSafe ? selectActiveSigner(s, activeSafe.address) : undefined))
 
+  // wallet_switchEthereumChain — only allow chains the active Safe is deployed on (derived
+  // from the safes slice, the same source the proposal handler uses). useActiveSafeBinding
+  // re-syncs the WC sessions off the resulting switchActiveChain dispatch, so no explicit
+  // walletKit.updateSession is needed here.
+  const switchActiveChainByCaip2: SessionRequestHandlerDeps['switchActiveChainByCaip2'] = useCallback(
+    async (caip2) => {
+      const chainId = stripEip155Prefix(caip2)
+      const state = store.getState()
+      if (!selectChainById(state, chainId)) {
+        return { ok: false, reason: 'NOT_DEPLOYED' }
+      }
+      const safeAddress = selectActiveSafe(state)?.address
+      const safeChains = safeAddress ? Object.keys(state.safes[safeAddress] ?? {}) : []
+      if (!safeChains.includes(chainId)) {
+        return { ok: false, reason: 'NOT_DEPLOYED' }
+      }
+      dispatch(switchActiveChain({ chainId }))
+      return { ok: true }
+    },
+    [store, dispatch],
+  )
+
+  // wallet_getCallsStatus — local Safe-tx status enriched with the on-chain receipt (mirrors
+  // apps/web/.../safe-wallet-provider/index.ts). Throws 'Transaction not found' for an unknown
+  // id; the router converts that to a JSON-RPC error.
+  const getCallsStatus: SessionRequestHandlerDeps['getCallsStatus'] = useCallback(
+    async (chainId, id) => {
+      const numericChainId = stripEip155Prefix(chainId)
+      const chainIdHex = chainIdToHex(numericChainId) as `0x${string}`
+
+      let tx
+      try {
+        tx = await dispatch(
+          cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate({ chainId: numericChainId, id }),
+        ).unwrap()
+      } catch {
+        throw new Error('Transaction not found')
+      }
+
+      // BundleTxStatuses (verbatim from web):
+      //   AWAITING_CONFIRMATIONS / AWAITING_EXECUTION → 100 PENDING
+      //   SUCCESS → 200 CONFIRMED | CANCELLED → 400 OFFCHAIN_FAILURE | FAILED → 500 REVERTED
+      const status =
+        tx.txStatus === 'SUCCESS' ? 200 : tx.txStatus === 'CANCELLED' ? 400 : tx.txStatus === 'FAILED' ? 500 : 100
+
+      const envelope = { version: '2.0.0' as const, id, chainId: chainIdHex, status, atomic: true as const }
+
+      if (!tx.txHash) {
+        return envelope
+      }
+      const chain = selectChainById(store.getState(), numericChainId)
+      if (!chain) {
+        return envelope
+      }
+
+      let receipt: TransactionReceipt | null = null
+      try {
+        receipt = (await proxyReadOnlyCall(chain, 'eth_getTransactionReceipt', [
+          tx.txHash,
+        ])) as TransactionReceipt | null
+      } catch {
+        return envelope
+      }
+      if (!receipt) {
+        return envelope
+      }
+
+      // Web replicates the same receipt for each underlying call in the bundle.
+      const valueDecoded = tx.txData?.dataDecoded?.parameters?.[0]?.valueDecoded
+      const callsCount = Array.isArray(valueDecoded) && valueDecoded.length > 0 ? valueDecoded.length : 1
+      const onChainStatusHex = (tx.txStatus === 'SUCCESS' ? '0x1' : '0x0') as `0x${string}`
+
+      return {
+        ...envelope,
+        receipts: Array.from({ length: callsCount }, () => ({
+          logs: receipt.logs as unknown[],
+          status: onChainStatusHex,
+          blockHash: receipt.blockHash as `0x${string}`,
+          blockNumber: `0x${Number(receipt.blockNumber).toString(16)}` as `0x${string}`,
+          gasUsed: `0x${Number(receipt.gasUsed).toString(16)}` as `0x${string}`,
+          transactionHash: tx.txHash as `0x${string}`,
+        })),
+      }
+    },
+    [dispatch, store],
+  )
+
+  const navigateToCallsStatus: SessionRequestHandlerDeps['navigateToCallsStatus'] = useCallback((chainId, id) => {
+    router.push({ pathname: '/pending-transactions', params: { chainId, txId: id } })
+  }, [])
+
   const deps: SessionRequestHandlerDeps = useMemo(
     () => ({
       activeChain: activeChain ?? null,
       activeSafeAddress: activeSafe?.address ?? null,
       hasSigner: !!activeSigner,
+      switchActiveChainByCaip2,
+      getCallsStatus,
+      navigateToCallsStatus,
     }),
-    [activeChain, activeSafe?.address, activeSigner],
+    [activeChain, activeSafe?.address, activeSigner, switchActiveChainByCaip2, getCallsStatus, navigateToCallsStatus],
   )
 
   useSessionProposalHandler(walletKit)

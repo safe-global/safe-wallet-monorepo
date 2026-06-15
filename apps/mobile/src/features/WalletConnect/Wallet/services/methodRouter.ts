@@ -4,11 +4,31 @@ import { getAddress } from 'ethers'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { AppDispatch, RootState } from '@/src/store'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { chainIdToHex } from '@safe-global/utils/features/walletconnect/utils'
+import { chainIdToHex, getEip155ChainId, stripEip155Prefix } from '@safe-global/utils/features/walletconnect/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { buildAtomicCapabilities } from '@safe-global/utils/features/walletconnect/eip5792'
 import { REJECTED_SIGNING_METHODS, SUPPORTED_NAMESPACE } from './constants'
+import { isReadOnlyMethod, proxyReadOnlyCall } from './readRpcProxy'
 
 export type RoutedResponse = ReturnType<typeof formatJsonRpcResult> | ReturnType<typeof formatJsonRpcError>
+
+// EIP-5792 GetCallsResult envelope (mirrors apps/web/.../safe-wallet-provider/index.ts).
+// status codes: 100 PENDING | 200 CONFIRMED | 400 OFFCHAIN_FAILURE | 500 REVERTED.
+export type GetCallsResult = {
+  version: '2.0.0'
+  id: string
+  chainId: `0x${string}`
+  status: number
+  atomic: true
+  receipts?: {
+    logs: unknown[]
+    status: `0x${string}`
+    blockHash: `0x${string}`
+    blockNumber: `0x${string}`
+    gasUsed: `0x${string}`
+    transactionHash: `0x${string}`
+  }[]
+}
 
 export type RouteContext = {
   request: WalletKitTypes.SessionRequest
@@ -21,6 +41,14 @@ export type RouteContext = {
   activeChain: Chain | null
   activeSafeAddress: string | null
   hasSigner: boolean
+  // Switch the active chain to a CAIP-2 target (resolves once the state is committed).
+  // Rejects NOT_DEPLOYED when the Safe isn't deployed on that chain.
+  switchActiveChainByCaip2: (caip2: string) => Promise<{ ok: true } | { ok: false; reason: 'NOT_DEPLOYED' }>
+  // Local Safe-tx status lookup for a wallet_sendCalls id (a safeTxHash). Throws
+  // 'Transaction not found' when the id is unknown — the router wraps it in a JSON-RPC error.
+  getCallsStatus: (chainId: string, id: string) => Promise<GetCallsResult>
+  // Navigate to the queue / tx-detail screen for wallet_showCallsStatus.
+  navigateToCallsStatus: (chainId: string, id: string) => void
 }
 
 const NS = SUPPORTED_NAMESPACE + ':'
@@ -78,10 +106,6 @@ export const isValidTxRequestParams = (
   return !!bundle?.calls?.length && Array.isArray(bundle.calls) && bundle.calls.every(isValidDappCall)
 }
 
-// Scope (WA-2321): the transaction-request flow only. Read-only RPC passthrough and the
-// EIP-5792 capabilities / getCallsStatus / showCallsStatus surface (plus
-// wallet_switchEthereumChain) are wired in WA-2322 — they slot in as extra branches here
-// without reworking this router or its RouteContext.
 export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResponse> => {
   const { request, activeChain, activeSafeAddress, hasSigner } = ctx
   const { id, params } = request
@@ -116,6 +140,73 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
       return noActiveChainError(id)
     }
     return formatJsonRpcResult(id, method === 'eth_chainId' ? chainIdToHex(activeChain.chainId) : activeChain.chainId)
+  }
+
+  // Chain switch — the target chain lives in rpc.params[0].chainId as a hex string (EIP-3326).
+  // `chainId` on the WC envelope is the *current* session chain, so don't read it here.
+  if (method === 'wallet_switchEthereumChain') {
+    const [target] = rpcParams as [{ chainId?: string } | undefined]
+    if (!target?.chainId) {
+      return formatJsonRpcError(id, { code: -32602, message: 'Missing target chainId' })
+    }
+    const targetDecimal = String(parseInt(target.chainId, 16))
+    const result = await ctx.switchActiveChainByCaip2(getEip155ChainId(targetDecimal))
+    if (!result.ok) {
+      return formatJsonRpcError(id, { code: 4901, message: 'Safe is not deployed on this chain' })
+    }
+    return formatJsonRpcResult(id, null)
+  }
+
+  // Capabilities (EIP-5792) — response is keyed by hex chain id, not CAIP-2.
+  // Request shape: wallet_getCapabilities(address, chainIds?). dApps compare the response
+  // keys against the chain THEY operate on, so key off the requested chains (falling back to
+  // the envelope's session chain), not the wallet's active chain.
+  if (method === 'wallet_getCapabilities') {
+    const [, requestedChainIds] = rpcParams as [string, string[] | undefined]
+    const envelopeChainHex = chainId.startsWith(NS) ? chainIdToHex(stripEip155Prefix(chainId)) : null
+    const chainsToReport: string[] =
+      requestedChainIds && requestedChainIds.length > 0
+        ? requestedChainIds.map((c) => c.toLowerCase())
+        : envelopeChainHex
+          ? [envelopeChainHex]
+          : []
+    if (chainsToReport.length === 0) {
+      return formatJsonRpcResult(id, {})
+    }
+    return formatJsonRpcResult(id, buildAtomicCapabilities(chainsToReport))
+  }
+
+  // Calls status — local Safe-tx lookup for a wallet_sendCalls id (a safeTxHash).
+  if (method === 'wallet_getCallsStatus') {
+    const [callsId] = rpcParams as [string]
+    try {
+      const result = await ctx.getCallsStatus(chainId, callsId)
+      return formatJsonRpcResult(id, result)
+    } catch (e) {
+      // Web maps an unknown id to a JSON-RPC error (not {status:100}) — viem/wagmi treat
+      // "missing" and "pending" as distinct outcomes.
+      return formatJsonRpcError(id, { code: -32603, message: e instanceof Error ? e.message : 'Transaction not found' })
+    }
+  }
+  if (method === 'wallet_showCallsStatus') {
+    const [callsId] = rpcParams as [string]
+    ctx.navigateToCallsStatus(chainId, callsId)
+    return formatJsonRpcResult(id, null)
+  }
+
+  // Read-only RPC passthrough — proxied to the active chain's JSON-RPC. A multichain session
+  // requesting a non-active (but approved) chain still hits the active chain (WA-2322 decision,
+  // matching the POC).
+  if (isReadOnlyMethod(method)) {
+    if (!activeChain) {
+      return noActiveChainError(id)
+    }
+    try {
+      const result = await proxyReadOnlyCall(activeChain, method, rpcParams)
+      return formatJsonRpcResult(id, result)
+    } catch (e) {
+      return formatJsonRpcError(id, { code: -32603, message: e instanceof Error ? e.message : 'RPC proxy failed' })
+    }
   }
 
   // Transaction methods — the handler pushes the request to the slice so RequestSheetHost
