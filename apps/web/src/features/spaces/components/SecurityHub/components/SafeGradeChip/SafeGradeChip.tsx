@@ -13,11 +13,14 @@ export const SAFE_GRADE_LABEL: Record<SafeGrade, string> = {
 
 /**
  * Per-grade chip styling on the score ramp: a soft tinted pill (`pill`) with the label in
- * the grade's readable text shade, plus a vivid filled `dot` in the grade's fill colour.
+ * the grade's readable text shade, plus a filled `dot` in the grade's fill colour. Critical
+ * uses `error-main` (#FF5F72) — matching the red seen on per-check Critical rows — over
+ * the soft `error-background` accent, so Critical labels read the same red everywhere in
+ * the Security Hub.
  */
 const GRADE_CHIP_STYLES: Record<SafeGrade, { pill: string; dot: string }> = {
   critical: {
-    pill: 'bg-[var(--color-error-background)] text-[var(--color-error-dark)]',
+    pill: 'bg-[var(--color-error-background)] text-[var(--color-error-main)]',
     dot: 'bg-[var(--color-error-main)]',
   },
   at_risk: {
@@ -25,8 +28,8 @@ const GRADE_CHIP_STYLES: Record<SafeGrade, { pill: string; dot: string }> = {
     dot: 'bg-[var(--color-warning-main)]',
   },
   needs_attention: {
-    pill: 'bg-[var(--color-score-review)]/10 text-[var(--color-score-review-text)]',
-    dot: 'bg-[var(--color-score-review)]',
+    pill: 'bg-[var(--color-review-background)] text-[var(--color-review-main)]',
+    dot: 'bg-[var(--color-review-main)]',
   },
   passing: {
     pill: 'bg-[var(--color-success-background)] text-[var(--color-success-main)]',
@@ -41,22 +44,32 @@ export type SafeGradeChipProps = {
   active?: boolean
   /** Chip text — e.g. "3 critical". Defaults to the grade's label. */
   label?: string
+  /** Accessible label — overrides the visible text for screen readers. */
+  ariaLabel?: string
   onClick?: MouseEventHandler<HTMLSpanElement>
   className?: string
 }
 
 /**
  * Single visual primitive for SafeGrade chips: a soft tinted pill with a colored status dot
- * plus a label, both following the score ramp. Used as a static status indicator (StatusCell)
- * and as an interactive filter chip (WorkspaceHealthCard).
+ * plus a label, both following the score ramp. Used as a static status indicator
+ * (StatusCell) and as an interactive filter chip (WorkspaceHealthCard).
  */
-const SafeGradeChip = ({ grade, active = false, label, onClick, className }: SafeGradeChipProps): ReactElement => {
+const SafeGradeChip = ({
+  grade,
+  active = false,
+  label,
+  ariaLabel,
+  onClick,
+  className,
+}: SafeGradeChipProps): ReactElement => {
   const styles = GRADE_CHIP_STYLES[grade]
   return (
     <Badge
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
+      aria-label={ariaLabel}
       className={cn(
         'h-auto gap-1.5 rounded-full border-transparent px-2.5 py-1 text-xs font-medium',
         styles.pill,
