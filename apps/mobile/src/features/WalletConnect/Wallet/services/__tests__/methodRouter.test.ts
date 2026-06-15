@@ -275,6 +275,16 @@ describe('routeSessionRequest — WA-2322 read-only + wallet-control branches', 
       )
       expect((res as { result: Record<string, unknown> }).result).toEqual({})
     })
+
+    it('skips a non-numeric deployed chain id instead of throwing (BigInt safety)', async () => {
+      const res = await routeSessionRequest(
+        makeCtx(makeRequest('wallet_getCapabilities', [SAFE_ADDRESS, ['0x1']]), {
+          deployedChainIds: ['1', 'not-a-chain'],
+        }),
+      )
+      const result = (res as { result: Record<string, unknown> }).result
+      expect(Object.keys(result)).toEqual(['0x1'])
+    })
   })
 
   describe('wallet_getCallsStatus', () => {

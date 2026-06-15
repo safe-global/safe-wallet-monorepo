@@ -56,6 +56,17 @@ const invalidParamsError = (id: number) => formatJsonRpcError(id, { code: -32602
 // The active chain config hasn't resolved (yet) — the dApp can retry.
 const noActiveChainError = (id: number) => formatJsonRpcError(id, { code: -32603, message: 'No active chain' })
 
+// chainIdToHex is BigInt-based and throws on a non-integer id. wallet_getCapabilities converts
+// chain ids we don't fully control (the dApp's envelope chain, the Safe's deployed-chain keys),
+// so convert defensively and drop anything malformed rather than throwing the whole request.
+const toChainHexOrNull = (chainId: string): string | null => {
+  try {
+    return chainIdToHex(chainId)
+  } catch {
+    return null
+  }
+}
+
 // Per-call shape (web's mapping rules), shared by eth_sendTransaction and wallet_sendCalls:
 //   - missing / all-fields-empty → invalid
 //   - no-to + only data → contract deployment (allowed; composeSafeTxDraft routes via CreateCall)
@@ -155,10 +166,12 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     const normalizedRequested = Array.isArray(requestedChainIds)
       ? requestedChainIds.filter((c): c is string => typeof c === 'string').map((c) => c.toLowerCase())
       : []
-    // chainId is guaranteed to be in the eip155 namespace here (cross-namespace was rejected above).
-    const envelopeChainHex = chainIdToHex(stripEip155Prefix(chainId))
-    const candidateChains = normalizedRequested.length > 0 ? normalizedRequested : [envelopeChainHex]
-    const deployedChainsHex = new Set(ctx.deployedChainIds.map((c) => chainIdToHex(c)))
+    // chainId is in the eip155 namespace here (cross-namespace was rejected above), but the
+    // suffix could still be non-numeric — toChainHexOrNull skips it rather than throwing.
+    const envelopeChainHex = toChainHexOrNull(stripEip155Prefix(chainId))
+    const candidateChains =
+      normalizedRequested.length > 0 ? normalizedRequested : envelopeChainHex ? [envelopeChainHex] : []
+    const deployedChainsHex = new Set(ctx.deployedChainIds.map(toChainHexOrNull).filter((c): c is string => c !== null))
     const chainsToReport = candidateChains.filter((c) => deployedChainsHex.has(c))
     if (chainsToReport.length === 0) {
       return formatJsonRpcResult(id, {})
