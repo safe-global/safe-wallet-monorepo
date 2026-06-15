@@ -24,6 +24,9 @@ export type RouteContext = {
   activeChain: Chain | null
   activeSafeAddress: string | null
   hasSigner: boolean
+  // Decimal chain ids the active Safe is deployed on. Used to scope wallet_getCapabilities to
+  // chains we can actually batch on (mirrors web, which only reports the Safe's own chain).
+  deployedChainIds: string[]
   // Switch the active chain to a CAIP-2 target (resolves once the state is committed).
   // Rejects NOT_DEPLOYED when the Safe isn't deployed on that chain.
   switchActiveChainByCaip2: (caip2: string) => Promise<{ ok: true } | { ok: false; reason: 'NOT_DEPLOYED' }>
@@ -141,9 +144,10 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
   }
 
   // Capabilities (EIP-5792) — response is keyed by hex chain id, not CAIP-2.
-  // Request shape: wallet_getCapabilities(address, chainIds?). dApps compare the response
-  // keys against the chain THEY operate on, so key off the requested chains (falling back to
-  // the envelope's session chain), not the wallet's active chain.
+  // Request shape: wallet_getCapabilities(address, chainIds?). dApps compare the response keys
+  // against the chain THEY operate on, so key off the requested chains (falling back to the
+  // envelope's session chain). Only advertise atomic batching for chains the Safe is actually
+  // deployed on, so we never claim support for a chain a later wallet_sendCalls would reject.
   if (method === 'wallet_getCapabilities') {
     const [, requestedChainIds] = rpcParams as [string, unknown]
     // Filter to strings before lowercasing — a dApp can send malformed chainIds (e.g. numbers),
@@ -152,8 +156,10 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
       ? requestedChainIds.filter((c): c is string => typeof c === 'string').map((c) => c.toLowerCase())
       : []
     const envelopeChainHex = chainId.startsWith(NS) ? chainIdToHex(stripEip155Prefix(chainId)) : null
-    const chainsToReport: string[] =
+    const candidateChains =
       normalizedRequested.length > 0 ? normalizedRequested : envelopeChainHex ? [envelopeChainHex] : []
+    const deployedChainsHex = new Set(ctx.deployedChainIds.map((c) => chainIdToHex(c)))
+    const chainsToReport = candidateChains.filter((c) => deployedChainsHex.has(c))
     if (chainsToReport.length === 0) {
       return formatJsonRpcResult(id, {})
     }

@@ -288,6 +288,9 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const activeSafe = useAppSelector(selectActiveSafe)
   const activeChain = useAppSelector((s) => (activeSafe ? (selectChainById(s, activeSafe.chainId) ?? null) : null))
   const activeSigner = useAppSelector((s) => (activeSafe ? selectActiveSigner(s, activeSafe.address) : undefined))
+  // Per-Safe deployment record (stable ref unless the safes slice changes); the deps memo
+  // derives the deployed chain ids from it to scope wallet_getCapabilities.
+  const activeSafeChains = useAppSelector((s) => (activeSafe ? s.safes[activeSafe.address] : undefined))
 
   // wallet_switchEthereumChain — only allow chains the active Safe is deployed on (derived
   // from the safes slice, the same source the proposal handler uses). useActiveSafeBinding
@@ -361,11 +364,20 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       activeChain: activeChain ?? null,
       activeSafeAddress: activeSafe?.address ?? null,
       hasSigner: !!activeSigner,
+      deployedChainIds: activeSafeChains ? Object.keys(activeSafeChains) : [],
       switchActiveChainByCaip2,
       getCallsStatus,
       navigateToCallsStatus,
     }),
-    [activeChain, activeSafe?.address, activeSigner, switchActiveChainByCaip2, getCallsStatus, navigateToCallsStatus],
+    [
+      activeChain,
+      activeSafe?.address,
+      activeSigner,
+      activeSafeChains,
+      switchActiveChainByCaip2,
+      getCallsStatus,
+      navigateToCallsStatus,
+    ],
   )
 
   useSessionProposalHandler(walletKit)

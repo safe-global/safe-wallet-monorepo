@@ -16,6 +16,7 @@ const baseDeps: SessionRequestHandlerDeps = {
   activeChain: chain,
   activeSafeAddress: SAFE_ADDRESS,
   hasSigner: true,
+  deployedChainIds: ['1'],
   switchActiveChainByCaip2: jest.fn().mockResolvedValue({ ok: true }),
   getCallsStatus: jest.fn(),
   navigateToCallsStatus: jest.fn(),

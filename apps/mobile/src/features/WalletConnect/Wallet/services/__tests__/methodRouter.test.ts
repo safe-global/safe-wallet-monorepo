@@ -39,6 +39,7 @@ const makeCtx = (request: WalletKitTypes.SessionRequest, overrides: Partial<Rout
     activeChain: chain,
     activeSafeAddress: SAFE_ADDRESS,
     hasSigner: true,
+    deployedChainIds: ['1', '137'],
     switchActiveChainByCaip2: jest.fn().mockResolvedValue({ ok: true }),
     getCallsStatus: jest.fn(),
     navigateToCallsStatus: jest.fn(),
@@ -256,6 +257,23 @@ describe('routeSessionRequest — WA-2322 read-only + wallet-control branches', 
       )
       const result = (res as { result: Record<string, unknown> }).result
       expect(Object.keys(result)).toEqual(['0x1'])
+    })
+
+    it('omits requested chains the Safe is not deployed on', async () => {
+      const res = await routeSessionRequest(
+        makeCtx(makeRequest('wallet_getCapabilities', [SAFE_ADDRESS, ['0x1', '0x89']]), {
+          deployedChainIds: ['1'],
+        }),
+      )
+      const result = (res as { result: Record<string, unknown> }).result
+      expect(Object.keys(result)).toEqual(['0x1'])
+    })
+
+    it('returns {} when no requested chain is deployed', async () => {
+      const res = await routeSessionRequest(
+        makeCtx(makeRequest('wallet_getCapabilities', [SAFE_ADDRESS, ['0x89']]), { deployedChainIds: ['1'] }),
+      )
+      expect((res as { result: Record<string, unknown> }).result).toEqual({})
     })
   })
 
