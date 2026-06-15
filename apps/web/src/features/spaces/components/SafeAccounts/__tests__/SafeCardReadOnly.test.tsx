@@ -52,7 +52,6 @@ jest.mock('@/features/__core__', () => ({
 jest.mock('@/features/spaces', () => ({
   SpacesFeature: {},
   useGetSpaceAddressBook: () => [],
-  useGetPrivateAddressBook: () => [],
   useCurrentSpaceId: () => undefined,
 }))
 

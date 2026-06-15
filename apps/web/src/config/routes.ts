@@ -65,6 +65,7 @@ export const AppRoutes = {
     createSpace: '/spaces/create-space',
     transactions: '/spaces/transactions',
     security: '/spaces/security',
+    activity: '/spaces/activity',
   },
   transactions: {
     tx: '/transactions/tx',

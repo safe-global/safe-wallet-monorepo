@@ -44,3 +44,20 @@ export const getSelectedAddresses = (contacts: ImportContactsFormValues['contact
 export const getContactId = (contact: ContactItem) => {
   return `${contact.chainId}:${contact.address}`
 }
+
+// Mirrors the CGW name schema for space address book entries (makeNameSchema,
+// ADDRESS_BOOK_NAME_MAX_LENGTH). Local contacts are unrestricted, so names are
+// validated before they are proposed to the workspace.
+const CONTACT_NAME_REGEX = /^[a-zA-Z0-9]+(?:[ ._-][a-zA-Z0-9]+)*$/
+const CONTACT_NAME_MIN_LENGTH = 3
+const CONTACT_NAME_MAX_LENGTH = 50
+
+export const validateContactName = (name: string): string | undefined => {
+  const trimmed = name.trim()
+  if (trimmed.length < CONTACT_NAME_MIN_LENGTH || trimmed.length > CONTACT_NAME_MAX_LENGTH) {
+    return `Names must be ${CONTACT_NAME_MIN_LENGTH} to ${CONTACT_NAME_MAX_LENGTH} characters long`
+  }
+  if (!CONTACT_NAME_REGEX.test(trimmed)) {
+    return 'Names must start with a letter or number and can contain alphanumeric characters, spaces, periods, underscores, or hyphens'
+  }
+}
