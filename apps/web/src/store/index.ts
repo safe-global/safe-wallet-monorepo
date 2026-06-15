@@ -143,6 +143,16 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
       nextState[slices.batchSlice.name] = migrateBatchTxs(nextState[slices.batchSlice.name])
     }
 
+    // One-time reset to the new default order (WA-2567 made "Name" / A→Z the default).
+    // Guarded on the slice being present so it only touches a real store, not synthetic state.
+    const orderByState = nextState[slices.orderByPreferenceSlice.name]
+    if (orderByState && orderByState.resetVersion !== slices.ORDER_BY_RESET_VERSION) {
+      nextState[slices.orderByPreferenceSlice.name] = {
+        orderBy: slices.OrderByOption.NAME,
+        resetVersion: slices.ORDER_BY_RESET_VERSION,
+      }
+    }
+
     // Mark the store as hydrated so guards wait for persisted auth state.
     // Reset cfSafeSynced so consumers wait for a fresh backend sync each page load.
     // Reset isOidcLoginPending to avoid stale state from a previous session.

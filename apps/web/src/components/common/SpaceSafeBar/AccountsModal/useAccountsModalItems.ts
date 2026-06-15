@@ -3,6 +3,7 @@ import {
   useAllSafes,
   useAllSafesGrouped,
   flattenSafeItems,
+  getComparator,
   type AllSafeItems,
   type MultiChainSafeItem,
   type SafeItem,
@@ -11,7 +12,8 @@ import {
 import { useIsQualifiedSafe, useSpaceSafes } from '@/features/spaces'
 import { useOwnersGetAllSafesByOwnerV2Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useAppDispatch } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { trackEvent } from '@/services/analytics'
@@ -33,9 +35,10 @@ const EMPTY_SAFES: SafeItems = []
  *     ▼                                                 ▼  exclude space members (when isQualifiedSafe)
  *   useAllSafesGrouped()                              otherSafes → useAllSafesGrouped()
  *     ▼                                                 ▼
- *   allItems  (merge, sort by lastVisited)            otherSafeItems  (merge, sort)
- *     ▼  search + isPinned                              ▼  search + !isPinned
- *   trustedItems                                      otherItems
+ *   allItems  (merge, sort by order               otherSafeItems  (merge, sort by order
+ *     ▼  preference — Name or Most recent)           ▼  preference — Name or Most recent)
+ *     ▼  search + isPinned                            ▼  search + !isPinned
+ *   trustedItems                                    otherItems
  *
  * Non-obvious design choices:
  *
@@ -63,6 +66,8 @@ const EMPTY_SAFES: SafeItems = []
 export function useAccountsModalItems({ search, open }: { search: string; open: boolean }) {
   const dispatch = useAppDispatch()
   const allSafes = useAllSafes()
+  const { orderBy } = useAppSelector(selectOrderByPreference)
+  const comparator = useMemo(() => getComparator(orderBy), [orderBy])
   const { address: walletAddress = '' } = useWallet() || {}
   const { error: ownedSafesError, refetch: refetchOwnedSafes } = useOwnersGetAllSafesByOwnerV2Query(
     { ownerAddress: walletAddress },
@@ -103,16 +108,16 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
   )
 
   const groupedToItems = (multi: MultiChainSafeItem[] | undefined, single: SafeItems | undefined): AllSafeItems =>
-    [...(multi ?? []), ...(single ?? [])].sort((a, b) => (b.lastVisited ?? 0) - (a.lastVisited ?? 0))
+    [...(multi ?? []), ...(single ?? [])].sort(comparator)
 
   const allItems = useMemo<AllSafeItems>(
     () => groupedToItems(allMultiChainSafes, allSingleSafes),
-    [allMultiChainSafes, allSingleSafes],
+    [allMultiChainSafes, allSingleSafes, comparator],
   )
 
   const otherSafeItems = useMemo<AllSafeItems>(
     () => groupedToItems(otherMultiChainSafes, otherSingleSafes),
-    [otherMultiChainSafes, otherSingleSafes],
+    [otherMultiChainSafes, otherSingleSafes, comparator],
   )
 
   const similarAddresses = useMemo(() => getFlaggedSimilarAddressSet(allItems.map((item) => item.address)), [allItems])

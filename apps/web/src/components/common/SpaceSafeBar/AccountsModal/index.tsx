@@ -21,6 +21,7 @@ import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet
 import SafeItemCard from './SafeItemCard'
 import MultiSafeItemCard from './MultiSafeItemCard'
 import { useAccountsModalItems } from './useAccountsModalItems'
+import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import type { AllSafeItems } from '@/hooks/safes'
 
 interface AccountsModalProps {
@@ -141,8 +142,8 @@ const AccountsModal = ({
           <DialogTitle>{isQualifiedSafe ? 'Explore other Safes' : 'All Accounts'}</DialogTitle>
         </DialogHeader>
 
-        <div className="shrink-0 px-4 py-3">
-          <InputGroup className="rounded-md border-gray-100 shadow-none">
+        <div className="flex shrink-0 items-center gap-2 px-4 py-3">
+          <InputGroup className="flex-1 rounded-md border-gray-100 shadow-none">
             <InputGroupAddon>
               <Search className="size-4" />
             </InputGroupAddon>
@@ -154,6 +155,7 @@ const AccountsModal = ({
               data-testid="accounts-search-input"
             />
           </InputGroup>
+          <SafeListSortToggle />
         </div>
 
         <div

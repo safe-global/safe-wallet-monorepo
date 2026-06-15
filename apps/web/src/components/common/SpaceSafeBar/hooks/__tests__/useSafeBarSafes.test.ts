@@ -41,6 +41,14 @@ const mockGrouped = jest.fn<{ allMultiChainSafes: MultiChainSafeItem[]; allSingl
 jest.mock('@/hooks/safes', () => ({
   useAllSafes: () => mockAllSafes(),
   useAllSafesGrouped: (items: SafeItem[]) => mockGrouped(items),
+  // Real comparator so ordering is exercised; types are erased at runtime.
+  getComparator: jest.requireActual('@/hooks/safes/comparators').getComparator,
+}))
+
+const mockOrderBy = jest.fn(() => 'name')
+jest.mock('@/store', () => ({
+  useAppSelector: (selector: (state: unknown) => unknown) =>
+    selector({ orderByPreference: { orderBy: mockOrderBy() } }),
 }))
 
 const mockIsSpaceRoute = jest.fn(() => false)
@@ -69,6 +77,7 @@ describe('useSafeBarSafes', () => {
     mockSafeAddress.mockReturnValue('0xCurrentSafe')
     mockReduxSafeAddress.mockReturnValue('')
     mockChainId.mockReturnValue('1')
+    mockOrderBy.mockReturnValue('name')
     mockAllSafes.mockReturnValue(undefined)
     // Default: pass-through. Tests needing multi-chain grouping override per-case.
     mockGrouped.mockImplementation((items: SafeItem[]) => ({
@@ -318,5 +327,33 @@ describe('useSafeBarSafes', () => {
     expect(current.address).toBe('0xMultiSafe')
     expect(current.safes).toHaveLength(2)
     expect(result.current.dropdownSafes[1].address).toBe('0xOtherPinned')
+  })
+
+  it('sorts the non-current safes alphabetically when ordering by Name', () => {
+    mockOrderBy.mockReturnValue('name')
+    const current = createSafe('0xCurrent', false)
+    const zeta = { ...createSafe('0xZeta', true), name: 'Zeta' }
+    const alpha = { ...createSafe('0xAlpha', true), name: 'Alpha' }
+    mockAllSafes.mockReturnValue([current, zeta, alpha])
+    mockSafeAddress.mockReturnValue('0xCurrent')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    // Current first, then the rest A→Z.
+    expect(result.current.dropdownSafes.map((s) => s.address)).toEqual(['0xCurrent', '0xAlpha', '0xZeta'])
+  })
+
+  it('sorts the non-current safes by most-recent when ordering by Last visited', () => {
+    mockOrderBy.mockReturnValue('lastVisited')
+    const current = createSafe('0xCurrent', false)
+    const older = { ...createSafe('0xOlder', true), lastVisited: 100 }
+    const newer = { ...createSafe('0xNewer', true), lastVisited: 200 }
+    mockAllSafes.mockReturnValue([current, older, newer])
+    mockSafeAddress.mockReturnValue('0xCurrent')
+
+    const { result } = renderHook(() => useSafeBarSafes())
+
+    // Current first, then most-recently-visited first.
+    expect(result.current.dropdownSafes.map((s) => s.address)).toEqual(['0xCurrent', '0xNewer', '0xOlder'])
   })
 })
