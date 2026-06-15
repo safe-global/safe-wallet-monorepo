@@ -341,7 +341,9 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (chain) {
           try {
             receipt = (await proxyReadOnlyCall(chain, 'eth_getTransactionReceipt', [tx.txHash])) as RawTxReceipt | null
-          } catch {
+          } catch (e) {
+            // Non-fatal: fall back to the receipt-less status envelope, but leave a breadcrumb.
+            logWalletKitError('getCallsStatus receipt fetch failed', e)
             receipt = null
           }
         }
