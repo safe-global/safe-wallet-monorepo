@@ -2,6 +2,7 @@ import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERAT
 import { _buildSafeItems, type AllSafeItems, useAllSafesGrouped, useAllOwnedSafes, getComparator } from '@/hooks/safes'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import useGetSpaceAddressBook from './useGetSpaceAddressBook'
+import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 import { mapSpaceContactsToAddressBookState } from '../utils'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
@@ -18,7 +19,10 @@ export const useSpaceSafes = () => {
     isError: isSpaceSafesError,
     error: spaceSafesError,
     refetch: refetchSpaceSafes,
-  } = useSpaceSafesGetV1Query({ spaceId: spaceId ?? '' }, { skip: !isUserSignedIn || !spaceId })
+  } = useSpaceSafesGetV1Query(
+    { spaceId: spaceId ?? '' },
+    { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
+  )
   const spaceContacts = useGetSpaceAddressBook()
 
   // We are doing this in order to reuse the _buildSafeItems function but only take space contacts into account
