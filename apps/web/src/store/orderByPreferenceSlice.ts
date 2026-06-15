@@ -7,9 +7,13 @@ export enum OrderByOption {
   LAST_VISITED = 'lastVisited',
 }
 
-export type OrderByPreferenceState = { orderBy: OrderByOption }
+// Bump to force every user back to the default order once (see _hydrationReducer).
+// WA-2567 set the default to A→Z; this resets users still on the previous default.
+export const ORDER_BY_RESET_VERSION = 1
 
-const initialState: OrderByPreferenceState = { orderBy: OrderByOption.LAST_VISITED }
+export type OrderByPreferenceState = { orderBy: OrderByOption; resetVersion?: number }
+
+const initialState: OrderByPreferenceState = { orderBy: OrderByOption.NAME }
 
 export const orderByPreferenceSlice = createSlice({
   name: 'orderByPreference',
