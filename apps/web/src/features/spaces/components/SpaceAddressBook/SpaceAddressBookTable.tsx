@@ -10,6 +10,7 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import { BookUser, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from './SpaceAddressBookActions'
+import LocalContactActions from './LocalContactActions'
 import { cn } from '@/utils/cn'
 import { formatDate } from '@/features/spaces/utils'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
@@ -17,7 +18,6 @@ import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
   isLocal: boolean
-  isPrivate?: boolean
   isDuplicate?: boolean
 }
 
@@ -156,7 +156,7 @@ function SpaceAddressBookTable({
               <TableCell className="text-right">
                 <span className="inline-flex items-center gap-1">
                   {renderExtraAction?.(entry)}
-                  {!entry.isLocal && !entry.isPrivate && <SpaceAddressBookActions entry={entry} />}
+                  {entry.isLocal ? <LocalContactActions entry={entry} /> : <SpaceAddressBookActions entry={entry} />}
                 </span>
               </TableCell>
             </TableRow>

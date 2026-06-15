@@ -43,6 +43,10 @@ jest.mock('../SpaceAddressBookActions', () => {
   const SpaceAddressBookActions = () => <div data-testid="actions" />
   return SpaceAddressBookActions
 })
+jest.mock('../LocalContactActions', () => {
+  const LocalContactActions = () => <div data-testid="local-actions" />
+  return LocalContactActions
+})
 
 const mockResolveMemberName = jest.fn()
 jest.mock('../../../hooks/useMemberNameResolver', () => ({
@@ -86,10 +90,11 @@ describe('SpaceAddressBookTable', () => {
     expect(screen.getByTestId('actions')).toBeInTheDocument()
   })
 
-  it('does not render actions for local entries', () => {
+  it('renders local actions instead of space actions for local entries', () => {
     render(<SpaceAddressBookTable entries={[entryBuilder().with({ isLocal: true }).build()]} />)
 
     expect(screen.queryByTestId('actions')).not.toBeInTheDocument()
+    expect(screen.getByTestId('local-actions')).toBeInTheDocument()
   })
 
   it('renders NetworkLogosList with showHasMore and maxVisible=3 for chain logos', () => {
