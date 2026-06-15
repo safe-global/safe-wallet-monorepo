@@ -61,10 +61,10 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
 
   const signer = useMemo(() => {
     if (wallet && nestedSafeInfo && web3ReadOnly) {
-      return getNestedWallet(wallet, nestedSafeInfo, web3ReadOnly, router)
+      return getNestedWallet(wallet, nestedSafeInfo, web3ReadOnly, router, currentChain)
     }
     return wallet
-  }, [wallet, nestedSafeInfo, web3ReadOnly, router])
+  }, [wallet, nestedSafeInfo, web3ReadOnly, router, currentChain])
 
   return (
     <WalletContext.Provider

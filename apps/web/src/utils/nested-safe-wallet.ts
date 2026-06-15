@@ -3,6 +3,8 @@ import { getAddress } from 'viem'
 import { SafeWalletProvider, type WalletSDK } from '@/services/safe-wallet-provider'
 import { getTransactionDetails } from '@/utils/tx-details'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { hasFeature, FEATURES } from '@safe-global/utils/utils/chains'
 import { type NextRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import proposeTx from '@/services/tx/proposeTransaction'
@@ -29,6 +31,7 @@ export const getNestedWallet = (
   safeInfo: SafeState,
   web3ReadOnly: JsonRpcProvider,
   router: NextRouter,
+  chain: Chain | undefined,
 ): NestedWallet => {
   let requestId = 0
   const nestedSafeSdk: WalletSDK = {
@@ -84,6 +87,11 @@ export const getNestedWallet = (
 
       let result: TransactionResult | null = null
 
+      // When relaying is enabled, signing and execution are split: the EOA only signs + proposes and
+      // never executes (the parent's approveHash is relayed separately, no EOA gas). On chains without
+      // relaying we keep the original behavior (immediate EOA execution for threshold 1).
+      const splitSigningAndExecution = !!chain && hasFeature(chain, FEATURES.RELAYING)
+
       try {
         if (await isSmartContractWallet(safeInfo.chainId, actualWallet.address)) {
           // With the unchecked signer, the contract call resolves once the tx
@@ -92,18 +100,15 @@ export const getNestedWallet = (
           // First we propose so the backend will pick it up
           await proposeTx(safeInfo.chainId, safeInfo.address.value, actualWallet.address, safeTx, safeTxHash)
           result = await connectedSDK.approveTransactionHash(safeTxHash)
+        } else if (!splitSigningAndExecution && safeInfo.threshold === 1) {
+          // Relaying disabled: keep the original flow — propose then execute directly from the EOA
+          await proposeTx(safeInfo.chainId, safeInfo.address.value, actualWallet.address, safeTx, safeTxHash)
+          result = await connectedSDK.executeTransaction(safeTx)
         } else {
-          // Sign off-chain
-          if (safeInfo.threshold === 1) {
-            // Always propose the tx so the resulting link to the parentTx does not error out
-            await proposeTx(safeInfo.chainId, safeInfo.address.value, actualWallet.address, safeTx, safeTxHash)
-
-            // Directly execute the tx
-            result = await connectedSDK.executeTransaction(safeTx)
-          } else {
-            const signedTx = await tryOffChainTxSigning(safeTx, connectedSDK)
-            await proposeTx(safeInfo.chainId, safeInfo.address.value, actualWallet.address, signedTx, safeTxHash)
-          }
+          // Sign off-chain and propose (no EOA execution). This is the split-flow path, and also the
+          // original threshold > 1 path.
+          const signedTx = await tryOffChainTxSigning(safeTx, connectedSDK)
+          await proposeTx(safeInfo.chainId, safeInfo.address.value, actualWallet.address, signedTx, safeTxHash)
         }
       } catch (err) {
         logError(ErrorCodes._817, err)

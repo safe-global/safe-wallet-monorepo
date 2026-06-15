@@ -8,6 +8,12 @@ import * as wallet from '@/hooks/wallets/useWallet'
 import * as walletHooks from '@/utils/wallets'
 import * as pending from '@/hooks/usePendingTxs'
 import * as txSender from '@/services/tx/tx-sender/dispatch'
+import * as nestedSafeTx from '@/services/tx/tx-sender/nestedSafeTx'
+import * as proposeTxModule from '@/services/tx/proposeTransaction'
+import * as confirmNestedApproval from '@/services/tx/confirmNestedApproval'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
+import * as sdk from '@/services/tx/tx-sender/sdk'
+import * as txEvents from '@/services/tx/txEvents'
 import * as onboardHooks from '@/hooks/wallets/useOnboard'
 import { type OnboardAPI } from '@web3-onboard/core'
 import { createElement } from 'react'
@@ -325,6 +331,132 @@ describe('SignOrExecute hooks', () => {
       expect(id).toBe('456')
     })
 
+    it('should sign + propose the parent approveHash (TX_P) for a nested signer on a relay chain, without executing or relaying', async () => {
+      const parentSafe = safeInfoBuilder()
+        .with({ address: { value: zeroPadValue('0x0aaa', 20) }, chainId: '1' })
+        .build()
+
+      // Nested signer = parent Safe P carrying its full state
+      jest.spyOn(wallet, 'useSigner').mockReturnValue({
+        chainId: '1',
+        address: zeroPadValue('0x0aaa', 20),
+        provider: MockEip1193Provider,
+        isSafe: true,
+        safeInfo: parentSafe,
+      } as unknown as NestedWallet)
+      // Connected EOA
+      jest.spyOn(wallet, 'default').mockReturnValue({
+        chainId: '1',
+        address: zeroPadValue('0x0eee', 20),
+        provider: MockEip1193Provider,
+      } as unknown as ConnectedWallet)
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
+        chainBuilder()
+          .with({ chainId: '1', features: [FEATURES.RELAYING] })
+          .build(),
+      )
+      jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue({} as never)
+
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version: '1.4.1',
+          address: { value: zeroPadValue('0x0ccc', 20) },
+          chainId: '1',
+        },
+        safeAddress: zeroPadValue('0x0ccc', 20),
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+
+      jest
+        .spyOn(sdk, 'getAndValidateSafeSDK')
+        .mockReturnValue({ getTransactionHash: () => Promise.resolve('0xchildhash') } as never)
+      const proposeChildSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() =>
+          Promise.resolve({ txId: 'child_tx' })) as unknown as typeof txSender.dispatchTxProposal)
+      const prepareSpy = jest.spyOn(nestedSafeTx, 'prepareNestedApproveHashTx').mockResolvedValue({
+        parentSafeTx: createSafeTx(),
+        parentSafeTxHash: '0xparenthash',
+      })
+      const proposeParentSpy = jest.spyOn(proposeTxModule, 'default').mockResolvedValue({ txId: 'parent_tx' } as never)
+      const eventSpy = jest.spyOn(txEvents, 'txDispatch')
+
+      const onchainSignSpy = jest.spyOn(txSender, 'dispatchOnChainSigning').mockImplementation(() => Promise.resolve())
+      const relaySpy = jest.spyOn(txSender, 'dispatchTxRelay').mockImplementation(() => Promise.resolve(undefined))
+
+      const { result } = renderHook(() => useTxActions())
+      const id = await result.current.signTx(createSafeTx(), 'child_tx')
+
+      // Child tx already had an id, so no re-propose; parent approveHash is built + proposed
+      expect(prepareSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          parentSafe,
+          childSafeAddress: zeroPadValue('0x0ccc', 20),
+          childSafeTxHash: '0xchildhash',
+        }),
+      )
+      expect(proposeParentSpy).toHaveBeenCalledWith(
+        parentSafe.chainId,
+        parentSafe.address.value,
+        zeroPadValue('0x0eee', 20),
+        expect.anything(),
+        '0xparenthash',
+        undefined,
+      )
+      expect(eventSpy).toHaveBeenCalledWith(
+        txEvents.TxEvent.NESTED_SAFE_TX_CREATED,
+        expect.objectContaining({ txId: 'child_tx' }),
+      )
+
+      // The sign step must NOT execute on-chain, relay, or send a tx from the EOA
+      expect(onchainSignSpy).not.toHaveBeenCalled()
+      expect(relaySpy).not.toHaveBeenCalled()
+      expect(proposeChildSpy).not.toHaveBeenCalled() // child already had an id
+      expect(id).toBe('child_tx')
+    })
+
+    it('falls back to on-chain signing for a nested signer on a non-relay chain', async () => {
+      const parentSafe = safeInfoBuilder().with({ chainId: '1' }).build()
+
+      jest.spyOn(wallet, 'useSigner').mockReturnValue({
+        chainId: '1',
+        address: zeroPadValue('0x0aaa', 20),
+        provider: MockEip1193Provider,
+        isSafe: true,
+        safeInfo: parentSafe,
+      } as unknown as NestedWallet)
+      // Chain WITHOUT the relaying feature
+      jest
+        .spyOn(useChains, 'useCurrentChain')
+        .mockReturnValue(chainBuilder().with({ chainId: '1', features: [] }).build())
+      jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue({} as never)
+
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: { ...extendedSafeInfo, version: '1.4.1', address: { value: zeroPadValue('0x0ccc', 20) }, chainId: '1' },
+        safeAddress: zeroPadValue('0x0ccc', 20),
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+
+      jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() =>
+          Promise.resolve({ txId: 'child_tx' })) as unknown as typeof txSender.dispatchTxProposal)
+      const prepareSpy = jest.spyOn(nestedSafeTx, 'prepareNestedApproveHashTx')
+      const onchainSignSpy = jest.spyOn(txSender, 'dispatchOnChainSigning').mockImplementation(() => Promise.resolve())
+
+      const { result } = renderHook(() => useTxActions())
+      const id = await result.current.signTx(createSafeTx(), 'child_tx')
+
+      expect(onchainSignSpy).toHaveBeenCalled()
+      expect(prepareSpy).not.toHaveBeenCalled()
+      expect(id).toBe('child_tx')
+    })
+
     it('should execute a tx without a txId (immediate execution)', async () => {
       jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
         safe: {
@@ -455,6 +587,45 @@ describe('SignOrExecute hooks', () => {
       expect(proposeSpy).not.toHaveBeenCalled()
       expect(relaySpy).toHaveBeenCalled()
       expect(id).toEqual('123')
+    })
+
+    it('registers the nested-approval confirmation watcher when relaying', async () => {
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          ...extendedSafeInfoBuilder().build(),
+          version: '1.3.0',
+          address: { value: zeroPadValue('0x0aaa', 20) },
+          nonce: 100,
+          threshold: 1,
+          owners: [{ value: zeroPadValue('0x0123', 20) }],
+          chainId: '1',
+        },
+        safeAddress: zeroPadValue('0x0aaa', 20),
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+
+      jest.spyOn(txSender, 'dispatchTxRelay').mockImplementation(() => Promise.resolve(undefined))
+      const confirmSpy = jest
+        .spyOn(confirmNestedApproval, 'confirmNestedApprovalOnExecution')
+        .mockImplementation(() => {})
+
+      const { result } = renderHook(() => useTxActions())
+      const tx = createSafeTx()
+      tx.addSignature({
+        signer: '0x123',
+        data: '0x0001',
+        staticPart: () => '',
+        dynamicPart: () => '',
+        isContractSignature: false,
+      })
+
+      await result.current.executeTx({ gasPrice: 1 }, tx, '123', 'origin.com', true)
+
+      // The watcher is registered for the executed (parent) txId; it self-no-ops for non-approveHash txs
+      expect(confirmSpy).toHaveBeenCalledWith('123', zeroPadValue('0x0aaa', 20), '1', tx)
     })
 
     it('should sign a not fully signed tx when relaying', async () => {
