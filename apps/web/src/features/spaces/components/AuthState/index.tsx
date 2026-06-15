@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated, selectIsOidcLoginPending, setLastUsedSpace } from '@/store/authSlice'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
 import { MemberStatus } from '@/features/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -17,7 +18,7 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData, error, isLoading } = useSpacesGetOneV1Query(
     { id: spaceId },
-    { skip: !isUserSignedIn || !spaceId },
+    { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
   )
   const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isOidcLoginPending = useAppSelector(selectIsOidcLoginPending)
