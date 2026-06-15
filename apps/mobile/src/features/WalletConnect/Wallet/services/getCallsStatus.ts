@@ -75,8 +75,10 @@ export const buildGetCallsResult = (
       logs: receipt.logs,
       status: onChainStatusHex,
       blockHash: receipt.blockHash,
-      blockNumber: `0x${Number(receipt.blockNumber).toString(16)}` as `0x${string}`,
-      gasUsed: `0x${Number(receipt.gasUsed).toString(16)}` as `0x${string}`,
+      // chainIdToHex is a BigInt-based int→hex quantity converter — safe for block numbers /
+      // gas that can exceed 2^53 and normalizes any zero-padding from the RPC.
+      blockNumber: chainIdToHex(receipt.blockNumber) as `0x${string}`,
+      gasUsed: chainIdToHex(receipt.gasUsed) as `0x${string}`,
       transactionHash: (tx.txHash ?? receipt.transactionHash) as `0x${string}`,
     })),
   }
