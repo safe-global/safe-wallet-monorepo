@@ -68,6 +68,10 @@ const AddressInput = ({
 
   const addressBook = useAddressBook()
 
+  // A disabled field is a read-only display, so render the readable EthHashInfo instead of the
+  // greyed-out input — even when the address isn't in the (source-scoped) address book.
+  const isReadOnly = Boolean(addressBook[watchedValue]) || Boolean(props.disabled)
+
   // Fetch an ENS resolution for the current address
   const isDomainLookupEnabled = !!currentChain && hasFeature(currentChain, FEATURES.DOMAIN_LOOKUP)
   const { address, resolverError, resolving } = useNameResolver(isDomainLookupEnabled ? watchedValue : '')
@@ -170,9 +174,9 @@ const AddressInput = ({
         spellCheck={false}
         InputProps={{
           ...(props.InputProps || {}),
-          className: addressBook[watchedValue] ? css.readOnly : undefined,
+          className: isReadOnly ? css.readOnly : undefined,
 
-          startAdornment: addressBook[watchedValue] ? (
+          startAdornment: isReadOnly ? (
             <AddressInputReadOnly address={watchedValue} showPrefix={showPrefix} chainId={chain?.chainId} />
           ) : (
             // Display the current short name in the adornment, unless the value contains the same prefix
