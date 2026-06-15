@@ -9,7 +9,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import EmailInfo from '@/components/common/EmailInfo'
 import { NetworkLogosList } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { BookUser, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { HardDrive, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from './SpaceAddressBookActions'
 import LocalContactActions from './LocalContactActions'
@@ -98,7 +98,7 @@ function SpaceAddressBookTable({
                       />
                     }
                   >
-                    {entry.isLocal && <BookUser className="text-muted-foreground size-4 flex-shrink-0" />}
+                    {entry.isLocal && <HardDrive className="text-muted-foreground size-4 flex-shrink-0" />}
                     <span className="min-w-0 truncate">{entry.name}</span>
                   </TooltipTrigger>
                   <TooltipContent>{entry.name}</TooltipContent>
