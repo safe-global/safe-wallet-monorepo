@@ -11,22 +11,16 @@ import { FEATURES } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { AddressBook } from '@/store/addressBookSlice'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useGetPrivateAddressBook, useGetSpaceAddressBook } from '@/features/spaces'
-
-jest.mock('@/features/spaces/hooks/useGetPrivateAddressBook', () => ({
-  __esModule: true,
-  default: jest.fn((): SpaceAddressBookItemDto[] => []),
-}))
+import { useGetSpaceAddressBook } from '@/features/spaces'
 
 jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
   __esModule: true,
   default: jest.fn((): SpaceAddressBookItemDto[] => []),
 }))
 
-const mockUseGetPrivateAddressBook = useGetPrivateAddressBook as jest.MockedFunction<typeof useGetPrivateAddressBook>
 const mockUseGetSpaceAddressBook = useGetSpaceAddressBook as jest.MockedFunction<typeof useGetSpaceAddressBook>
 
-const privateContactBuilder = (overrides: Partial<SpaceAddressBookItemDto> = {}): SpaceAddressBookItemDto => ({
+const spaceContactBuilder = (overrides: Partial<SpaceAddressBookItemDto> = {}): SpaceAddressBookItemDto => ({
   name: 'Server Contact',
   address: checksumAddress(faker.finance.ethereumAddress()),
   chainIds: ['4'],
@@ -125,7 +119,6 @@ describe('AddressBookInput', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseGetPrivateAddressBook.mockReturnValue([])
     mockUseGetSpaceAddressBook.mockReturnValue([])
     jest.spyOn(useChains, 'default').mockImplementation(() => ({
       configs: [mockChain],
@@ -304,9 +297,9 @@ describe('AddressBookInput', () => {
     await waitFor(() => expect(utils.queryByText('add it to your address book', { exact: false })).toBeNull())
   })
 
-  it('should show a cloud icon for a server-stored (private) contact even in a spaceOnly context', async () => {
-    const privateContact = privateContactBuilder({ name: 'Server Contact' })
-    mockUseGetPrivateAddressBook.mockReturnValue([privateContact])
+  it('should show a cloud icon for a server-stored (space) contact in a spaceOnly context', async () => {
+    const spaceContact = spaceContactBuilder({ name: 'Server Contact' })
+    mockUseGetSpaceAddressBook.mockReturnValue([spaceContact])
 
     const name = 'recipient'
     const SpaceForm = () => {
