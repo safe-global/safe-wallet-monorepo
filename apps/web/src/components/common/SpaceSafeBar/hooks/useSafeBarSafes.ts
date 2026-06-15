@@ -1,12 +1,32 @@
 import { useMemo } from 'react'
 import { useIsQualifiedSafe, useSpaceSafes } from '@/features/spaces'
-import { useAllSafes, useAllSafesGrouped, type AllSafeItems } from '@/hooks/safes'
-import type { SafeItem } from '@/hooks/safes'
+import { useAllSafes, useAllSafesGrouped, getComparator, type AllSafeItems } from '@/hooks/safes'
+import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
+import { useAppSelector } from '@/store'
+import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+
+/**
+ * Orders a dropdown list consistently across space / non-space contexts:
+ * the current safe is pinned to the front (a multi-chain current safe renders on top;
+ * a single-chain current safe is hidden from the list by SafeDropdownContainer and
+ * only shown in the trigger), and every other account is sorted by the chosen comparator.
+ */
+const orderDropdownSafes = (
+  items: AllSafeItems,
+  safeAddress: string,
+  comparator: ReturnType<typeof getComparator>,
+  current: SafeItem | MultiChainSafeItem | undefined,
+): AllSafeItems => {
+  const rest = (safeAddress ? items.filter((s) => !sameAddress(s.address, safeAddress)) : items)
+    .slice()
+    .sort(comparator)
+  return safeAddress && current ? [current, ...rest] : rest
+}
 
 /**
  * Returns appropriate safe lists for the SafeBar based on context.
@@ -29,6 +49,9 @@ export function useSafeBarSafes() {
   const currentChainId = useChainId()
 
   const allSafeItems = useAllSafes()
+
+  const { orderBy } = useAppSelector(selectOrderByPreference)
+  const comparator = useMemo(() => getComparator(orderBy), [orderBy])
 
   const pinnedItems = useMemo(() => allSafeItems?.filter((s) => s.isPinned) ?? [], [allSafeItems])
 
@@ -67,12 +90,19 @@ export function useSafeBarSafes() {
   // deployed on (pinned, owned, or counterfactual); other safes stay pinned-only.
   // Pin state stays decoupled — bookmark drives it, navigating doesn't auto-pin.
   const dropdownSafes = useMemo<AllSafeItems>(() => {
-    if (!safeAddress) return pinnedSafes
-    const current = allKnownSafes.find((s) => sameAddress(s.address, safeAddress)) ?? fallbackCurrentSafe
-    if (!current) return pinnedSafes
-    const otherPinned = pinnedSafes.filter((s) => !sameAddress(s.address, safeAddress))
-    return [current, ...otherPinned]
-  }, [pinnedSafes, allKnownSafes, safeAddress, fallbackCurrentSafe])
+    const current = safeAddress
+      ? (allKnownSafes.find((s) => sameAddress(s.address, safeAddress)) ?? fallbackCurrentSafe)
+      : undefined
+    return orderDropdownSafes(pinnedSafes, safeAddress, comparator, current)
+  }, [pinnedSafes, allKnownSafes, safeAddress, fallbackCurrentSafe, comparator])
+
+  // Space context: same ordering rule, applied to the space's safes.
+  const spaceDropdownSafes = useMemo<AllSafeItems>(() => {
+    const current = safeAddress
+      ? (spaceSafes.find((s) => sameAddress(s.address, safeAddress)) ?? fallbackCurrentSafe)
+      : undefined
+    return orderDropdownSafes(spaceSafes, safeAddress, comparator, current)
+  }, [spaceSafes, safeAddress, fallbackCurrentSafe, comparator])
 
   // Same for chain selector.
   const chainSelectorSafes = useMemo<AllSafeItems>(() => {
@@ -84,7 +114,7 @@ export function useSafeBarSafes() {
   }, [allKnownSafes, safeAddress, fallbackCurrentSafe])
 
   return {
-    dropdownSafes: isInSpaceContext ? spaceSafes : dropdownSafes,
+    dropdownSafes: isInSpaceContext ? spaceDropdownSafes : dropdownSafes,
     chainSelectorSafes: isInSpaceContext ? spaceSafes : chainSelectorSafes,
   }
 }
