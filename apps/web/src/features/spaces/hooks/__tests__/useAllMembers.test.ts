@@ -84,4 +84,31 @@ describe('useAllMembers (via useSpaceMembersByStatus / useCurrentMembership)', (
       { skip: false, ...SPACE_REFRESH_OPTIONS },
     )
   })
+
+  describe('revoked membership (failed refetch)', () => {
+    const staleMembers = [
+      { status: 'ACTIVE', user: { id: 'u1' } },
+      { status: 'INVITED', user: { id: 'u2' } },
+    ]
+
+    it.each([403, 404])('drops access when the refetch returns %i, ignoring stale data', (status) => {
+      mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
+      mockUseMembersGetUsersV1Query.mockReturnValue({ data: { members: staleMembers }, error: { status } })
+
+      const { result } = renderHook(() => useSpaceMembersByStatus())
+
+      expect(result.current.activeMembers).toEqual([])
+      expect(result.current.invitedMembers).toEqual([])
+    })
+
+    it('keeps the stale member list on a transient error so a blip does not drop access', () => {
+      mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
+      mockUseMembersGetUsersV1Query.mockReturnValue({ data: { members: staleMembers }, error: { status: 500 } })
+
+      const { result } = renderHook(() => useSpaceMembersByStatus())
+
+      expect(result.current.activeMembers).toHaveLength(1)
+      expect(result.current.invitedMembers).toHaveLength(1)
+    })
+  })
 })
