@@ -4,11 +4,17 @@ import useGetSpaceAuditLogActors from '../../../hooks/useGetSpaceAuditLogActors'
 
 jest.mock('../../../hooks/useGetSpaceAuditLogActors')
 
+const mockResolveMemberName = jest.fn()
+jest.mock('../../../hooks/useMemberNameResolver', () => ({
+  useMemberNameResolver: () => mockResolveMemberName,
+}))
+
 const mockUseActors = useGetSpaceAuditLogActors as jest.MockedFunction<typeof useGetSpaceAuditLogActors>
 
 describe('ActivityLogFilters', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockResolveMemberName.mockReturnValue(undefined)
     // Includes a former/deleted member — the dropdown is fed from the audit
     // log itself, not from current members.
     mockUseActors.mockReturnValue([
@@ -64,5 +70,20 @@ describe('ActivityLogFilters', () => {
     expect(mockUseActors).toHaveBeenCalled()
     expect(screen.getByLabelText('Member')).toBeInTheDocument()
     expect(screen.getByLabelText('Sort')).toBeInTheDocument()
+  })
+
+  it('shows the Team-page display name for a wallet member instead of the address', () => {
+    mockResolveMemberName.mockImplementation((userId) => (userId === 1 ? 'Liliya (wallet)' : undefined))
+
+    render(<ActivityLogFilters filters={{ actorUserId: 1 }} onFiltersChange={jest.fn()} />)
+
+    expect(screen.getByText('Liliya (wallet)')).toBeInTheDocument()
+    expect(screen.queryByText('0x1234567890abcdef1234567890abcdef12345678')).not.toBeInTheDocument()
+  })
+
+  it('falls back to the server label when no member name resolves', () => {
+    render(<ActivityLogFilters filters={{ actorUserId: 2 }} onFiltersChange={jest.fn()} />)
+
+    expect(screen.getByText('Former member')).toBeInTheDocument()
   })
 })
