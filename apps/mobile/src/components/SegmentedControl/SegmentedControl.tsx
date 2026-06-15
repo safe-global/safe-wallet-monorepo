@@ -15,8 +15,8 @@ type SegmentedControlProps<T extends string> = {
 }
 
 // iOS-style segmented control: a recessed track with a raised "thumb" on the selected segment.
-// Sizes to its content and centres itself. Colours follow the active theme (it is not forced dark)
-// so the thumb is the elevated base background in both light and dark mode.
+// Sizes to its content and centres itself. Colours follow the active theme — wrap it in a dark
+// Theme to get the Figma sheet control (dark track, white thumb, dark selected text).
 export function SegmentedControl<T extends string>({ options, value, onChange, testID }: SegmentedControlProps<T>) {
   return (
     <XStack
@@ -44,13 +44,17 @@ export function SegmentedControl<T extends string>({ options, value, onChange, t
               paddingVertical="$2"
               paddingHorizontal="$4"
               borderRadius={8}
-              backgroundColor={selected ? '$background' : 'transparent'}
+              backgroundColor={selected ? '$color' : 'transparent'}
               shadowColor="#000"
               shadowOpacity={selected ? 0.15 : 0}
               shadowRadius={2}
               shadowOffset={{ width: 0, height: 1 }}
             >
-              <Text fontSize={14} fontWeight={selected ? '600' : '400'} color={selected ? '$color' : '$colorSecondary'}>
+              <Text
+                fontSize={14}
+                fontWeight={selected ? '600' : '400'}
+                color={selected ? '$background' : '$colorSecondary'}
+              >
                 {option.label}
               </Text>
             </XStack>
