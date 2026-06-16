@@ -245,7 +245,9 @@ export const ExecuteForm = ({
   return (
     <>
       <form onSubmit={handleSubmit}>
-        {!requiresRelay && (
+        {/* For a nested approveHash we keep requiresRelay (relay is sponsored) but still show the
+            options block so the user can pick relay (default) or pay gas from the EOA. */}
+        {(!requiresRelay || isNestedApproveHash) && (
           <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: canRelay })}>
             <AdvancedParams
               willExecute
