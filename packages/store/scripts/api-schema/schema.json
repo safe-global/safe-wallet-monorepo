@@ -1435,6 +1435,49 @@
         ]
       }
     },
+    "/v1/chains/{chainId}/fees/gas-tokens": {
+      "get": {
+        "description": "Retrieves a paginated list of gas tokens supported for Pay with Safe on the given chain, ordered by selection priority.",
+        "operationId": "feesGetGasTokensV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of supported gas tokens, ordered by priority",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GasTokenPage"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get supported gas tokens",
+        "tags": [
+          "fees"
+        ]
+      }
+    },
     "/v1/chains/{chainId}/fees/{safeAddress}/preview": {
       "post": {
         "description": "Calculates the estimated fees for executing a transaction via Pay with Safe, including gas costs, relay fees, and total costs in USD.",
@@ -2882,7 +2925,7 @@
     },
     "/v1/spaces/{spaceId}/members": {
       "get": {
-        "description": "Retrieves all members of a space including their roles, status, and membership information.",
+        "description": "Retrieves all members of a space including their roles, status, and membership information. A pending (INVITED) member only sees their own membership state, not the other members.",
         "operationId": "membersGetUsersV1",
         "parameters": [
           {
@@ -8240,6 +8283,51 @@
           "currentNonce",
           "recommendedNonce",
           "safeTxGas"
+        ]
+      },
+      "GasToken": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Gas token contract address",
+            "example": "0x0000000000000000000000000000000000000000"
+          },
+          "symbol": {
+            "type": "string",
+            "description": "The token's ticker symbol",
+            "example": "USDC"
+          }
+        },
+        "required": [
+          "address",
+          "symbol"
+        ]
+      },
+      "GasTokenPage": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "nullable": true
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GasToken"
+            }
+          }
+        },
+        "required": [
+          "results"
         ]
       },
       "FeePreviewTransactionDto": {

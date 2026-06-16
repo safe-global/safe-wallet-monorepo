@@ -12,7 +12,7 @@ type OrderByButtonProps = {
 }
 
 const orderByLabels = {
-  [OrderByOption.LAST_VISITED]: 'Most recent',
+  [OrderByOption.LAST_VISITED]: 'Last visited',
   [OrderByOption.NAME]: 'Name',
 }
 
