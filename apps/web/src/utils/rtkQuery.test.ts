@@ -1,21 +1,16 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
-import { getRtkQueryErrorMessage } from './rtkQuery'
-
-const NETWORK_MESSAGE = "Couldn't connect to the server. Please check your connection and try again."
-const TIMEOUT_MESSAGE = 'The request timed out. Please try again.'
-const RATE_LIMIT_MESSAGE = 'Too many requests. Please wait a moment and try again.'
-const GENERIC_MESSAGE = 'Something went wrong. Please try again.'
+import { getRtkQueryErrorMessage, RTK_QUERY_ERROR_MESSAGES } from './rtkQuery'
 
 describe('getRtkQueryErrorMessage', () => {
   it('returns a friendly message for a network failure instead of the raw JS error', () => {
     const error: FetchBaseQueryError = { status: 'FETCH_ERROR', error: 'TypeError: Failed to fetch' }
-    expect(getRtkQueryErrorMessage(error)).toBe(NETWORK_MESSAGE)
+    expect(getRtkQueryErrorMessage(error)).toBe(RTK_QUERY_ERROR_MESSAGES.network)
   })
 
   it('returns a friendly message for a timeout', () => {
     const error: FetchBaseQueryError = { status: 'TIMEOUT_ERROR', error: 'AbortError: timeout' }
-    expect(getRtkQueryErrorMessage(error)).toBe(TIMEOUT_MESSAGE)
+    expect(getRtkQueryErrorMessage(error)).toBe(RTK_QUERY_ERROR_MESSAGES.timeout)
   })
 
   it('maps a non-JSON 429 body to a rate-limit message instead of the SyntaxError', () => {
@@ -25,7 +20,7 @@ describe('getRtkQueryErrorMessage', () => {
       data: 'Rate limit reached',
       error: 'SyntaxError: Unexpected token \'R\', "Rate limit reached" is not valid JSON',
     }
-    expect(getRtkQueryErrorMessage(error)).toBe(RATE_LIMIT_MESSAGE)
+    expect(getRtkQueryErrorMessage(error)).toBe(RTK_QUERY_ERROR_MESSAGES.rateLimit)
   })
 
   it('returns a generic message for a non-429 parsing error', () => {
@@ -35,12 +30,12 @@ describe('getRtkQueryErrorMessage', () => {
       data: 'Internal Server Error',
       error: 'SyntaxError: Unexpected token I',
     }
-    expect(getRtkQueryErrorMessage(error)).toBe(GENERIC_MESSAGE)
+    expect(getRtkQueryErrorMessage(error)).toBe(RTK_QUERY_ERROR_MESSAGES.generic)
   })
 
   it('maps a numeric 429 status to a rate-limit message', () => {
     const error: FetchBaseQueryError = { status: 429, data: {} }
-    expect(getRtkQueryErrorMessage(error)).toBe(RATE_LIMIT_MESSAGE)
+    expect(getRtkQueryErrorMessage(error)).toBe(RTK_QUERY_ERROR_MESSAGES.rateLimit)
   })
 
   it('surfaces the backend message for an HTTP error response', () => {
