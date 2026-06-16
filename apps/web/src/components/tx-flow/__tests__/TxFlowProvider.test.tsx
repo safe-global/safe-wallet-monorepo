@@ -9,7 +9,12 @@ import * as chainHooks from '@/hooks/useChains'
 import * as sharedHooks from '@/components/tx/shared/hooks'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { type NestedWallet } from '@/utils/nested-safe-wallet'
-import * as useRecipientAnalysis from '@/features/safe-shield/hooks/useRecipientAnalysis'
+
+// Stub the recipient analysis so SafeShieldProvider doesn't make real calls during render.
+// Mocked via jest.mock (not a direct import) to respect the feature-barrel import rule.
+jest.mock('@/features/safe-shield/hooks/useRecipientAnalysis', () => ({
+  useRecipientAnalysis: () => [undefined, undefined, false],
+}))
 
 const CanExecuteProbe = () => {
   const { canExecute } = useContext(TxFlowContext)
@@ -19,7 +24,6 @@ const CanExecuteProbe = () => {
 describe('TxFlowProvider — nested signer execution gating', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.spyOn(useRecipientAnalysis, 'useRecipientAnalysis').mockReturnValue([undefined, undefined, false])
     // Immediately-executable child tx with a valid nonce → would normally enable Execute
     jest.spyOn(sharedHooks, 'useImmediatelyExecutable').mockReturnValue(true)
     jest.spyOn(sharedHooks, 'useValidateNonce').mockReturnValue(true)
