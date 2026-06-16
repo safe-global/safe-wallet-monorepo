@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useRouter } from 'next/router'
-import { ArrowRight } from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
 import { enableClassicView } from '@/hooks/useClassicView'
 import { AppRoutes } from '@/config/routes'
 import { parseNextUrlForRouter } from '@/utils/nextUrl'
@@ -24,15 +24,15 @@ const ClassicViewLink = () => {
   }, [router])
 
   return (
-    <div className="mb-5 mt-2 flex justify-center">
+    <div className="mt-3">
       <button
         type="button"
         onClick={onClick}
         data-testid="classic-view-link"
-        className="inline-flex cursor-pointer items-center gap-1.5 rounded-sm text-[13px] font-medium text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline focus-visible:text-foreground focus-visible:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-md border border-border bg-card px-4 text-[15px] font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
+        <RotateCcw size={18} />
         Use the old UI
-        <ArrowRight size={13} />
       </button>
     </div>
   )
