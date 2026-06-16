@@ -124,7 +124,10 @@ const SrcEthHashInfo = ({
             {badgeTooltip
               ? badgeTooltip
               : !!addressBookNameSource && (
-                  <Tooltip title={`From your ${addressBookNameSource} address book`} placement="top">
+                  <Tooltip
+                    title={`From your ${addressBookNameSource === ContactSource.space ? 'workspace' : 'local'} address book`}
+                    placement="top"
+                  >
                     <span style={{ lineHeight: 0, color: 'var(--color-border-main)' }}>
                       {addressBookNameSource === ContactSource.local ? (
                         <HardDrive size={16} />
