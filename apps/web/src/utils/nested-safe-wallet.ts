@@ -87,10 +87,10 @@ export const getNestedWallet = (
 
       let result: TransactionResult | null = null
 
-      // When relaying is enabled, signing and execution are split: the EOA only signs + proposes and
-      // never executes (the parent's approveHash is relayed separately, no EOA gas). On chains without
-      // relaying we keep the original behavior (immediate EOA execution for threshold 1).
-      const splitSigningAndExecution = !!chain && hasFeature(chain, FEATURES.RELAYING)
+      // On GTF chains, signing and execution are split: the EOA only signs + proposes and never
+      // executes (the parent's approveHash is relayed separately, GTF-sponsored, no EOA gas). On
+      // non-GTF chains we keep the original behavior (immediate EOA execution for threshold 1).
+      const splitSigningAndExecution = !!chain && hasFeature(chain, FEATURES.GTF)
 
       try {
         if (await isSmartContractWallet(safeInfo.chainId, actualWallet.address)) {

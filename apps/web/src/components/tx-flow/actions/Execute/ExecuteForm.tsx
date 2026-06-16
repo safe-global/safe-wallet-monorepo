@@ -36,6 +36,7 @@ import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { SafeTxContext } from '../../SafeTxProvider'
 import { isGtfSafePaid } from '@/features/gtf/utils/isGtfSafePaid'
 import { RelaySimulationError } from '@/services/tx/relayErrors'
+import { decodeNestedApproval } from '@/services/tx/confirmNestedApproval'
 
 export const ExecuteForm = ({
   safeTx,
@@ -88,9 +89,15 @@ export const ExecuteForm = ({
   // relay path on a tx whose payload doesn't carry the GTF fee fields (would fail in handlePayment).
   const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
   const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+
+  // TX_P: the zero-fee parent approveHash from the nested split-sign and execute flow. It is NOT GtfSafePaid
+  // (carries no fee fields), but it must be relayed — sponsored, so the parent's EOA needs no gas.
+  const isNestedApproveHash = !!safeTx && !!decodeNestedApproval(safeTx)
+
   const requiresRelay =
     (safeTx && isGtfSafePaid(safeTx.data)) ||
-    (isGtfChain && !!safeTx && safeTx.signatures.size === 0 && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken)
+    (isGtfChain && !!safeTx && safeTx.signatures.size === 0 && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken) ||
+    isNestedApproveHash
 
   // We default to relay, but the option is only shown if we canRelay
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
@@ -123,12 +130,13 @@ export const ExecuteForm = ({
   // Also show if gas is too high but feature is otherwise available (to show disabled state)
   // Or if limit is reached (to show 0/X available state)
   const showExecutionSelector =
-    !requiresRelay &&
-    !isGtfChain &&
-    (canNoFeeCampaign ||
-      canRelay ||
-      (isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && gasTooHigh) ||
-      isLimitReached)
+    isNestedApproveHash ||
+    (!requiresRelay &&
+      !isGtfChain &&
+      (canNoFeeCampaign ||
+        canRelay ||
+        (isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && gasTooHigh) ||
+        isLimitReached))
 
   // Determine which method will be used
   const willRelay = !!(canRelay && executionMethod === ExecutionMethod.RELAY)
@@ -258,7 +266,7 @@ export const ExecuteForm = ({
                 <ExecutionMethodSelector
                   executionMethod={executionMethod}
                   setExecutionMethod={handleExecutionMethodChange}
-                  relays={canNoFeeCampaign ? undefined : relays[0]}
+                  relays={canNoFeeCampaign || isNestedApproveHash ? undefined : relays[0]}
                   noFeeCampaign={
                     isNoFeeCampaign && !blockedAddress
                       ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }

@@ -187,8 +187,8 @@ export const useTxActions = (): TxActions => {
 
       safeTx = await withGtfFeeParams(safeTx)
 
-      // Nested signer on a relay-enabled chain: sign + propose the parent's approveHash (no EOA gas)
-      if (signer.isSafe && signer.safeInfo && chain && hasFeature(chain, FEATURES.RELAYING) && web3ReadOnly) {
+      // Nested signer on a GTF chain: sign + propose the parent's approveHash (no EOA gas)
+      if (signer.isSafe && signer.safeInfo && chain && hasFeature(chain, FEATURES.GTF) && web3ReadOnly) {
         return signNestedApproval(signer.safeInfo, signer.address, web3ReadOnly, safeTx, txId, origin)
       }
 

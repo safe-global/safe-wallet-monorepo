@@ -331,7 +331,7 @@ describe('SignOrExecute hooks', () => {
       expect(id).toBe('456')
     })
 
-    it('should sign + propose the parent approveHash (TX_P) for a nested signer on a relay chain, without executing or relaying', async () => {
+    it('should sign + propose the parent approveHash (TX_P) for a nested signer on a GTF chain, without executing or relaying', async () => {
       const parentSafe = safeInfoBuilder()
         .with({ address: { value: zeroPadValue('0x0aaa', 20) }, chainId: '1' })
         .build()
@@ -352,7 +352,7 @@ describe('SignOrExecute hooks', () => {
       } as unknown as ConnectedWallet)
       jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
         chainBuilder()
-          .with({ chainId: '1', features: [FEATURES.RELAYING] })
+          .with({ chainId: '1', features: [FEATURES.GTF] })
           .build(),
       )
       jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue({} as never)
@@ -418,7 +418,10 @@ describe('SignOrExecute hooks', () => {
       expect(id).toBe('child_tx')
     })
 
-    it('falls back to on-chain signing for a nested signer on a non-relay chain', async () => {
+    it.each([
+      ['a chain without GTF or relaying', [] as FEATURES[]],
+      ['a RELAYING-only chain (split is GTF-only, so this falls back)', [FEATURES.RELAYING]],
+    ])('falls back to on-chain signing for a nested signer on %s', async (_label, features) => {
       const parentSafe = safeInfoBuilder().with({ chainId: '1' }).build()
 
       jest.spyOn(wallet, 'useSigner').mockReturnValue({
@@ -428,10 +431,8 @@ describe('SignOrExecute hooks', () => {
         isSafe: true,
         safeInfo: parentSafe,
       } as unknown as NestedWallet)
-      // Chain WITHOUT the relaying feature
-      jest
-        .spyOn(useChains, 'useCurrentChain')
-        .mockReturnValue(chainBuilder().with({ chainId: '1', features: [] }).build())
+      // Split signing is gated on GTF only — neither an empty feature set nor RELAYING enables it.
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainBuilder().with({ chainId: '1', features }).build())
       jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue({} as never)
 
       jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({

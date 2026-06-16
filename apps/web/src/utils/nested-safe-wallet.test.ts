@@ -23,10 +23,15 @@ jest.mock('@/services/safe-wallet-provider', () => ({
   }),
 }))
 
-const relayChain = chainBuilder()
+// Split signing is gated on GTF only.
+const gtfChain = chainBuilder()
+  .with({ features: [FEATURES.GTF] })
+  .build()
+// RELAYING without GTF does NOT trigger the split — it falls back to the legacy EOA-execution flow.
+const relayingOnlyChain = chainBuilder()
   .with({ features: [FEATURES.RELAYING] })
   .build()
-const noRelayChain = chainBuilder().with({ features: [] }).build()
+const noFeatureChain = chainBuilder().with({ features: [] }).build()
 
 describe('getNestedWallet', () => {
   const router = {} as unknown as NextRouter
@@ -36,7 +41,7 @@ describe('getNestedWallet', () => {
     const parentSafe = safeInfoBuilder().build()
     const actualWallet = { ...connectedWalletBuilder().build(), provider: MockEip1193Provider }
 
-    const nestedWallet = getNestedWallet(actualWallet, parentSafe, web3ReadOnly, router, relayChain)
+    const nestedWallet = getNestedWallet(actualWallet, parentSafe, web3ReadOnly, router, gtfChain)
 
     expect(nestedWallet.isSafe).toBe(true)
     expect(nestedWallet.address).toBe(parentSafe.address.value)
@@ -57,7 +62,7 @@ describe('getNestedWallet', () => {
       approveTransactionHash: jest.fn(() => Promise.resolve({ hash: '0xexec' })),
     } as unknown as Safe
 
-    const sendRequest = async (parentSafe: SafeState, chain = relayChain) => {
+    const sendRequest = async (parentSafe: SafeState, chain = gtfChain) => {
       const actualWallet = { ...connectedWalletBuilder().build(), provider: MockEip1193Provider }
       // Building the nested wallet constructs the SafeWalletProvider, capturing its WalletSDK.
       getNestedWallet(actualWallet, parentSafe, web3ReadOnly, router, chain)
@@ -79,29 +84,32 @@ describe('getNestedWallet', () => {
       jest.spyOn(proposeTxModule, 'default').mockResolvedValue({} as never)
     })
 
-    it('on a relay chain, signs off-chain and proposes for an EOA owner, never executing from the EOA (threshold 1)', async () => {
+    it('on a GTF chain, signs off-chain and proposes for an EOA owner, never executing from the EOA (threshold 1)', async () => {
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
       const parentSafe = safeInfoBuilder()
         .with({ threshold: 1, implementation: { value: '0x0000000000000000000000000000000000000041' } })
         .build()
 
-      await sendRequest(parentSafe, relayChain)
+      await sendRequest(parentSafe, gtfChain)
 
+      // GTF provides the sponsored relay path, so signing and execution are split.
       expect(sdk.tryOffChainTxSigning).toHaveBeenCalledWith(unsignedTx, connectedSdk)
       expect(proposeTxModule.default).toHaveBeenCalled()
-      // With relaying enabled, signing and execution are split — never executed from the EOA here.
       expect(executeTransaction).not.toHaveBeenCalled()
     })
 
-    it('on a non-relay chain, keeps the original flow: proposes and executes from the EOA (threshold 1)', async () => {
+    it.each([
+      ['a RELAYING-only chain (split is GTF-only)', relayingOnlyChain],
+      ['a chain without GTF or relaying', noFeatureChain],
+    ])('on %s, keeps the original flow: proposes and executes from the EOA (threshold 1)', async (_label, chain) => {
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
       const parentSafe = safeInfoBuilder()
         .with({ threshold: 1, implementation: { value: '0x0000000000000000000000000000000000000041' } })
         .build()
 
-      await sendRequest(parentSafe, noRelayChain)
+      await sendRequest(parentSafe, chain)
 
-      // Relaying disabled → unchanged behavior: execute directly from the EOA, no off-chain signing
+      // No GTF → unchanged behavior: execute directly from the EOA, no off-chain signing
       expect(proposeTxModule.default).toHaveBeenCalled()
       expect(executeTransaction).toHaveBeenCalledWith(unsignedTx)
       expect(sdk.tryOffChainTxSigning).not.toHaveBeenCalled()
