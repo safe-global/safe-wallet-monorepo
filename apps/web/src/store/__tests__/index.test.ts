@@ -1,4 +1,5 @@
 import { _hydrationReducer } from '@/store'
+import { OrderByOption, ORDER_BY_RESET_VERSION } from '@/store/orderByPreferenceSlice'
 
 describe('store', () => {
   describe('hydrationReducer', () => {
@@ -143,6 +144,38 @@ describe('store', () => {
       expect(mergedState === initialState).toBeFalsy()
       // @ts-expect-error demo state
       expect(mergedState === persistedState).toBeFalsy()
+    })
+
+    it('resets orderByPreference to the A→Z default once for users on the old default', () => {
+      const persistedState = { orderByPreference: { orderBy: OrderByOption.LAST_VISITED } }
+      const initialState = { orderByPreference: { orderBy: OrderByOption.NAME } }
+
+      const mergedState = _hydrationReducer(initialState, {
+        type: '@@HYDRATE',
+        payload: persistedState,
+      })
+
+      expect(mergedState.orderByPreference).toEqual({
+        orderBy: OrderByOption.NAME,
+        resetVersion: ORDER_BY_RESET_VERSION,
+      })
+    })
+
+    it('keeps the saved order once the one-time reset has already been applied', () => {
+      const persistedState = {
+        orderByPreference: { orderBy: OrderByOption.LAST_VISITED, resetVersion: ORDER_BY_RESET_VERSION },
+      }
+      const initialState = { orderByPreference: { orderBy: OrderByOption.NAME } }
+
+      const mergedState = _hydrationReducer(initialState, {
+        type: '@@HYDRATE',
+        payload: persistedState,
+      })
+
+      expect(mergedState.orderByPreference).toEqual({
+        orderBy: OrderByOption.LAST_VISITED,
+        resetVersion: ORDER_BY_RESET_VERSION,
+      })
     })
   })
 })

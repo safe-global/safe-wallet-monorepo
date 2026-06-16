@@ -110,6 +110,8 @@ function NavigationStack() {
       <Stack.Screen name="signers" options={{ headerShown: false }} />
       <Stack.Screen name="import-signers" options={{ headerShown: false }} />
       <Stack.Screen name="(send)" options={{ headerShown: false }} />
+      <Stack.Screen name="wallet-connect-scan" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="wallet-connect-manual" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="safe-shield-details-sheet" options={transparentModalOptions} />
       <Stack.Screen name="import-data" options={{ headerShown: false }} />
       <Stack.Screen name="app-settings" options={{ headerShown: true, title: '' }} />

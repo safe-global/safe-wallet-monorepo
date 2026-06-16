@@ -8,12 +8,6 @@ jest.mock('@/components/common/Header/Topbar', () => {
   return { __esModule: true, default: MockTopbar }
 })
 
-jest.mock('@/components/common/ClassicViewToast', () => {
-  const MockClassicViewToast = () => null
-  MockClassicViewToast.displayName = 'ClassicViewToast'
-  return { __esModule: true, default: MockClassicViewToast }
-})
-
 jest.mock('@/components/common/SafeLogo', () => {
   const MockSafeLogo = ({ href }: { href?: string }) => <a data-testid="safe-logo" href={href} />
   MockSafeLogo.displayName = 'SafeLogo'
@@ -186,11 +180,11 @@ describe('PageLayout', () => {
       expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
     })
 
-    it('still shows Topbar while the flag is loading (undefined) and the user is signed in', () => {
+    it('hides Topbar on /welcome/spaces while the flag is loading (undefined) to avoid an empty-selector flash', () => {
       useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
       mockUseIsSignedIn.mockReturnValue(true)
       renderLayout(AppRoutes.welcome.spaces)
-      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
     })
 
     it('renders Topbar on / when the gate is OFF', () => {
@@ -205,10 +199,10 @@ describe('PageLayout', () => {
       expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
     })
 
-    it('still shows Topbar on / while the flag is loading (undefined)', () => {
+    it('hides Topbar on / while the flag is loading (undefined) to avoid an empty-selector flash', () => {
       useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
       renderLayout(AppRoutes.index)
-      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
     })
   })
 

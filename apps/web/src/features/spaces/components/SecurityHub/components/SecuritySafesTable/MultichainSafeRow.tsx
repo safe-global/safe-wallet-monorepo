@@ -14,12 +14,11 @@ import StatusCell from '../StatusCell/StatusCell'
 import { BalanceCell, ScoreCell } from './cells'
 import { CARD_ROW_CLASS, CELL_BASE, GRID_COLS, HIDE_BALANCE, ROW_VARIANTS } from './constants'
 import {
-  countChecks,
   formatBalance,
-  getAggregateCheckCounts,
+  getAggregateNonPassingCount,
   getAggregateSafeGrade,
   getAggregateSummary,
-  getStatusCount,
+  getNonPassingCount,
   hasMultichainWarning,
   isAnyChainScanning,
   type GetSafeSecurityHref,
@@ -74,7 +73,7 @@ const MultichainChildRow = ({
   const results = scanResults[key]
   const summary = results ? computeSummary(results) : null
   const childGrade = results ? getSafeGrade(results) : null
-  const childStatusCount = getStatusCount(childGrade, countChecks(results))
+  const childStatusCount = getNonPassingCount(results)
   const isSelected = sameAddress(selectedSafe?.address, safe.address) && selectedSafe?.chainId === chain.chainId
   const isScanning = scanningKeys?.has(key)
   const childHref = getSafeSecurityHref(safe.address, chain.chainId)
@@ -162,7 +161,7 @@ const MultichainSafeRow = ({
   const { scanKey, getSafeGrade } = security
   const aggregateSummary = getAggregateSummary(safe, scanResults, security)
   const aggregateGrade = getAggregateSafeGrade(safe, scanResults, scanKey, getSafeGrade)
-  const aggregateChecks = getAggregateCheckCounts(safe, scanResults, scanKey)
+  const aggregateNonPassing = getAggregateNonPassingCount(safe, scanResults, scanKey)
   const aggregateScanning = isAnyChainScanning(safe, scanningKeys, scanKey)
   const showMultichainWarning = hasMultichainWarning(safe, scanResults, scanKey)
   const totalBalance = safe.chainEntries.reduce(
@@ -241,11 +240,7 @@ const MultichainSafeRow = ({
           <ScoreCell summary={aggregateSummary} isScanning={aggregateScanning} />
         </div>
         <div className={CELL_BASE}>
-          <StatusCell
-            grade={aggregateGrade}
-            count={getStatusCount(aggregateGrade, aggregateChecks)}
-            isScanning={aggregateScanning}
-          />
+          <StatusCell grade={aggregateGrade} count={aggregateNonPassing} isScanning={aggregateScanning} />
         </div>
         <div className={cn(CELL_BASE, 'justify-end')} />
       </motion.div>

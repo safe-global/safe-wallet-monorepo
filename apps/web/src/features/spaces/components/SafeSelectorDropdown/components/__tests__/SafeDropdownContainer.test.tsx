@@ -7,6 +7,12 @@ import type { SafeItemData } from '../../types'
 // Resolver is exercised in its own unit test; here we stub it so the component renders without a
 // store. Default behaviour mirrors production: the safe's own name wins, else the address-book name.
 const mockAddressBookNames: Record<string, string> = {}
+const mockUseWallet = jest.fn()
+jest.mock('@/hooks/wallets/useWallet', () => ({
+  __esModule: true,
+  default: () => mockUseWallet(),
+}))
+
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   useSafeNameResolver:
     () =>
@@ -49,6 +55,12 @@ jest.mock('../MultiChainSafeItemRow', () => ({
   default: ({ item }: { item: SafeItemData }) => <div data-testid="multi-chain-row">{item.name}</div>,
 }))
 
+// Redux-backed; stubbed here so the container test doesn't need a store.
+jest.mock('@/components/common/SafeListSortToggle', () => ({
+  __esModule: true,
+  default: () => <div data-testid="safe-list-sort-toggle" />,
+}))
+
 const createItem = (overrides: Partial<SafeItemData> = {}): SafeItemData => ({
   id: '1:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
   name: 'Safe A',
@@ -76,6 +88,28 @@ const fireScroll = (el: HTMLElement) => {
 }
 
 describe('SafeDropdownContainer', () => {
+  beforeEach(() => {
+    mockUseWallet.mockReturnValue({ address: '0x1234567890123456789012345678901234567890' })
+  })
+
+  describe('empty state', () => {
+    it('prompts to connect a wallet when there are no safes and no wallet is connected', () => {
+      mockUseWallet.mockReturnValue(null)
+
+      render(<SafeDropdownContainer items={[]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
+
+      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('Connect a wallet to find your Safe Accounts')
+    })
+
+    it('shows "No safes yet" when there are no safes but a wallet is connected', () => {
+      mockUseWallet.mockReturnValue({ address: '0x1234567890123456789012345678901234567890' })
+
+      render(<SafeDropdownContainer items={[]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
+
+      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes yet')
+    })
+  })
+
   describe('footer', () => {
     it('renders the footer node when provided', () => {
       render(
@@ -137,6 +171,27 @@ describe('SafeDropdownContainer', () => {
 
     it('renders the search input when there are items', () => {
       renderWithSearch()
+      expect(screen.getByTestId('safe-dropdown-search-input')).toBeInTheDocument()
+    })
+
+    it('hides the search input when the only safe is the currently-selected one', () => {
+      render(
+        <SafeDropdownContainer
+          items={[createItem({ id: '1:0xaaaa', address: '0xaaaa' })]}
+          selectedItemId="1:0xaaaa"
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+        />,
+      )
+
+      expect(screen.queryByTestId('safe-dropdown-search-input')).not.toBeInTheDocument()
+      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes yet')
+    })
+
+    it('keeps the search input visible when a query matches nothing', async () => {
+      renderWithSearch()
+      await userEvent.type(screen.getByTestId('safe-dropdown-search-input'), 'nonexistent')
+
       expect(screen.getByTestId('safe-dropdown-search-input')).toBeInTheDocument()
     })
 

@@ -309,6 +309,14 @@ describe('AddressInput tests', () => {
     await waitFor(() => expect(utils.getByText(mockSafeName)).toBeInTheDocument())
   })
 
+  it('should render a readable read-only field when disabled even if the address is not in the address book', async () => {
+    // Address book is empty (mocked in beforeEach), mirroring a contact shown under a source
+    // (e.g. spaceOnly) that does not contain it. The disabled field must still be readable.
+    const { utils } = setup(TEST_ADDRESS_A, undefined, true)
+
+    await waitFor(() => expect(utils.getByTestId('address-book-recipient')).toBeInTheDocument())
+  })
+
   it('should clear the input on click if the address is in the address book and not disabled', async () => {
     const mockChainId = '11155111'
     const mockSafeName = 'Test Safe'

@@ -1,12 +1,19 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import AuthState from './index'
+import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
 
 const mockUseSpacesGetOneV1Query = jest.fn()
 const mockUseUsersGetWithWalletsV1Query = jest.fn()
 const mockUseHasFeature = jest.fn()
 const mockDispatch = jest.fn()
+const mockReplace = jest.fn()
+const mockIsUnauthorized = jest.fn()
 let mockIsAuthenticated = true
 let mockIsOidcLoginPending = false
+
+jest.mock('next/router', () => ({
+  useRouter: () => ({ replace: mockReplace }),
+}))
 
 jest.mock('@/store', () => ({
   useAppSelector: (selector: string) => {
@@ -51,11 +58,15 @@ jest.mock('../LoadingState', () => ({
 }))
 
 jest.mock('@/features/spaces/utils', () => ({
-  isUnauthorized: () => false,
+  isUnauthorized: (...args: unknown[]) => mockIsUnauthorized(...args),
+}))
+
+jest.mock('@/config/routes', () => ({
+  AppRoutes: { welcome: { spaces: '/welcome/spaces' } },
 }))
 
 jest.mock('@/features/spaces', () => ({
-  MemberStatus: { DECLINED: 'DECLINED' },
+  MemberStatus: { ACTIVE: 'ACTIVE' },
 }))
 
 describe('AuthState', () => {
@@ -63,11 +74,13 @@ describe('AuthState', () => {
     jest.clearAllMocks()
     mockIsAuthenticated = true
     mockIsOidcLoginPending = false
+    mockIsUnauthorized.mockReturnValue(false)
     mockUseHasFeature.mockReturnValue(true)
     mockUseSpacesGetOneV1Query.mockReturnValue({
-      currentData: { id: 1, members: [] },
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'ACTIVE' }] },
       error: undefined,
       isLoading: false,
+      isFetching: false,
     })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 'u1' } })
   })
@@ -81,7 +94,7 @@ describe('AuthState', () => {
       </AuthState>,
     )
 
-    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true, ...SPACE_REFRESH_OPTIONS })
   })
 
   it('skips the space query when spaceId is empty', () => {
@@ -92,7 +105,7 @@ describe('AuthState', () => {
     )
 
     // Without the guard, Number('') would be 0 and the query would hit /v1/spaces/0
-    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true, ...SPACE_REFRESH_OPTIONS })
   })
 
   it('skips the space query when spaceId is null at runtime (Number(null) is 0)', () => {
@@ -102,7 +115,7 @@ describe('AuthState', () => {
       </AuthState>,
     )
 
-    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true, ...SPACE_REFRESH_OPTIONS })
   })
 
   it('skips the space query when spaceId is undefined at runtime', () => {
@@ -112,7 +125,7 @@ describe('AuthState', () => {
       </AuthState>,
     )
 
-    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
+    expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true, ...SPACE_REFRESH_OPTIONS })
   })
 
   it('fires the space query with the uuid when authenticated and spaceId is set', () => {
@@ -124,7 +137,146 @@ describe('AuthState', () => {
 
     expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(
       { id: '11111111-1111-1111-1111-111111111111' },
-      { skip: false },
+      { skip: false, ...SPACE_REFRESH_OPTIONS },
     )
+  })
+
+  it('renders the children for an active member', () => {
+    render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(screen.getByTestId('children')).toBeInTheDocument()
+    expect(mockReplace).not.toHaveBeenCalled()
+  })
+
+  it('redirects to the spaces overview when the space query is unauthorized', () => {
+    mockIsUnauthorized.mockReturnValue(true)
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, error: { status: 404 }, isLoading: false })
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).toHaveBeenCalledWith('/welcome/spaces')
+    expect(queryByTestId('children')).toBeNull()
+    expect(queryByTestId('unauthorized')).not.toBeNull()
+  })
+
+  it('redirects an invited (pending) member to the workspace list without showing the red error state', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'INVITED' }] },
+      error: undefined,
+      isLoading: false,
+      isFetching: false,
+    })
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).toHaveBeenCalledWith('/welcome/spaces')
+    expect(queryByTestId('children')).toBeNull()
+    // Inactive members get the neutral loading state, not the red UnauthorizedState
+    expect(queryByTestId('loading')).not.toBeNull()
+    expect(queryByTestId('unauthorized')).toBeNull()
+  })
+
+  // Accepting an invite invalidates the 'spaces' tag — while the stale cache
+  // entry (status INVITED) refetches, the member must not be bounced back to
+  // the workspace list they just accepted from.
+  it('does not redirect an invited member while the space query is refetching', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'INVITED' }] },
+      error: undefined,
+      isLoading: false,
+      isFetching: true,
+    })
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).not.toHaveBeenCalled()
+    // The stale INVITED data must not flash the space content either
+    expect(queryByTestId('children')).toBeNull()
+    expect(queryByTestId('loading')).not.toBeNull()
+  })
+
+  it('redirects to the spaces overview when the current user has declined membership', () => {
+    mockUseSpacesGetOneV1Query.mockReturnValue({
+      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'DECLINED' }] },
+      error: undefined,
+      isLoading: false,
+      isFetching: false,
+    })
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).toHaveBeenCalledWith('/welcome/spaces')
+    expect(queryByTestId('children')).toBeNull()
+  })
+
+  it('does not redirect while the current user is still loading', () => {
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
+
+    render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).not.toHaveBeenCalled()
+  })
+
+  it('does not redirect while the space query is still loading', () => {
+    mockIsUnauthorized.mockReturnValue(true)
+    mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, error: undefined, isLoading: true })
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).not.toHaveBeenCalled()
+    expect(queryByTestId('loading')).not.toBeNull()
+  })
+
+  it('does not redirect when the user is signed out', () => {
+    mockIsAuthenticated = false
+    mockIsUnauthorized.mockReturnValue(true)
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).not.toHaveBeenCalled()
+    expect(queryByTestId('signed-out')).not.toBeNull()
+  })
+
+  it('does not redirect when the user is still authorized', () => {
+    const { queryByTestId } = render(
+      <AuthState spaceId="7">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(mockReplace).not.toHaveBeenCalled()
+    expect(queryByTestId('children')).not.toBeNull()
   })
 })

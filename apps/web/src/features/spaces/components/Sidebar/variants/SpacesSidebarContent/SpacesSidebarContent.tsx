@@ -1,6 +1,6 @@
 import { type ReactElement, useMemo } from 'react'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import { useIsActiveMember } from '@/features/spaces/hooks/useSpaceMembers'
+import { useCurrentSpaceId } from '../../../../hooks/useCurrentSpaceId'
+import { useIsActiveMember } from '../../../../hooks/useSpaceMembers'
 import { spacesMainNavigation, spacesSetupGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
 import type { SidebarItemConfig, SidebarVariantContentProps } from '../../types'
@@ -18,6 +18,7 @@ export const SpacesSidebarContent = ({
   const spaceId = useCurrentSpaceId()
   const isActiveMember = useIsActiveMember(selectedSpace?.uuid)
   const isSecurityHubEnabled = useHasFeature(FEATURES.SECURITY_HUB)
+  const isAuditLogEnabled = useHasFeature(FEATURES.SPACE_AUDIT_LOG)
 
   const getLink = (item: SidebarItemConfig) => ({
     pathname: item.href,
@@ -45,7 +46,16 @@ export const SpacesSidebarContent = ({
     [isSecurityHubEnabled],
   )
 
-  const { mainNavItems, setupGroup } = useResolvedSidebarNav(spacesMainNavigation, filteredSetupGroup, {
+  // Same anti-flicker rule for the Activity entry (SPACE_AUDIT_LOG flag).
+  const filteredMainNavigation = useMemo(
+    () =>
+      isAuditLogEnabled === false
+        ? spacesMainNavigation.filter((i) => i.href !== AppRoutes.spaces.activity)
+        : spacesMainNavigation,
+    [isAuditLogEnabled],
+  )
+
+  const { mainNavItems, setupGroup } = useResolvedSidebarNav(filteredMainNavigation, filteredSetupGroup, {
     getLink,
     isItemDisabled,
     isItemActive,

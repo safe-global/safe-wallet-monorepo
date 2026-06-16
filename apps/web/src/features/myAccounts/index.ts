@@ -56,10 +56,16 @@ export { default as useSpaceAccountsData } from './hooks/useSpaceAccountsData'
 export { usePinActions } from './hooks/usePinActions'
 
 // Address safety hooks
-export { default as useSafeSelectionModal } from './hooks/useSafeSelectionModal'
 export { default as useNonPinnedSafeWarning } from './hooks/useNonPinnedSafeWarning'
 export { default as useSimilarAddressDetection } from './hooks/useSimilarAddressDetection'
 export { useTrustSafe } from './hooks/useTrustSafe'
+
+// ─────────────────────────────────────────────────────────────────
+// PUBLIC COMPONENTS
+// ─────────────────────────────────────────────────────────────────
+
+export { AccountItem } from './components/AccountItem'
+export { default as AddTrustedSafeDialog } from './components/NonPinnedWarning/AddTrustedSafeDialog'
 
 // Public types
 export type * from './types'

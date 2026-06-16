@@ -39,7 +39,7 @@ import { hasFeature, FEATURES } from '@safe-global/utils/utils/chains'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { useLoadFeature } from '@/features/__core__'
 import { GTFFeature } from '@/features/gtf'
-import { mergeGtfFeeParams } from '@/features/gtf/services/mergeGtfFeeParams'
+import { mergeGtfFeeParams } from '@/features/gtf/services'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useAppDispatch } from '@/store'
 

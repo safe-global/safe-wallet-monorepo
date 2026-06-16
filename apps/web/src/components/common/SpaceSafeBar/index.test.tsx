@@ -24,6 +24,9 @@ jest.mock('next/router', () => ({
 
 jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: jest.fn(() => false),
+  get SafeSelectorDropdown() {
+    return jest.requireMock('@/features/spaces/components/SafeSelectorDropdown').default
+  },
 }))
 
 jest.mock('./hooks/useSpaceSafeSelectorItems', () => ({
@@ -76,13 +79,20 @@ jest.mock('./AccountsModal', () => {
 
 jest.mock('@/features/myAccounts', () => ({
   MyAccountsFeature: {},
-  useSafeSelectionModal: () => ({ open: jest.fn(), close: jest.fn(), isOpen: false }),
 }))
 
 jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({
-    SafeSelectionModal: () => null,
-  }),
+  useLoadFeature: () => ({}),
+}))
+
+jest.mock('@/components/common/TrustedSafesModal', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+
+jest.mock('@/components/common/TrustedSafesModal/useTrustedSafesModal', () => ({
+  __esModule: true,
+  default: () => ({ open: jest.fn(), close: jest.fn(), isOpen: false }),
 }))
 
 jest.mock('@/hooks/useSafeInfo', () => () => ({ safeAddress: '0xSafe1' }))
@@ -150,6 +160,7 @@ describe('SpaceSafeBar', () => {
       handleItemSelect: jest.fn(),
       isError: false,
       refetch: jest.fn(),
+      isInSpaceContext: false,
     })
     mockUseSpaceBackLink.mockReturnValue({
       space: undefined,
@@ -239,6 +250,14 @@ describe('SpaceSafeBar', () => {
 
   it('renders the "Safes in this workspace" dropdown header on the Spaces level', () => {
     mockUseIsQualifiedSafe.mockReturnValue(true)
+    mockUseSpaceSafeSelectorItems.mockReturnValue({
+      items: mockItems,
+      selectedItemId: '1:0xSafe1',
+      handleItemSelect: jest.fn(),
+      isError: false,
+      refetch: jest.fn(),
+      isInSpaceContext: true,
+    })
     mockUseSpaceBackLink.mockReturnValue({
       space: { id: 1, name: 'Test Space' },
       handleBackToSpace: jest.fn(),
@@ -253,6 +272,21 @@ describe('SpaceSafeBar', () => {
 
     const { queryByTestId } = render(<SpaceSafeBar />)
     expect(queryByTestId('workspace-header')).not.toBeInTheDocument()
+  })
+
+  it('renders the workspace header in a space context even when the safe is not qualified', () => {
+    mockUseIsQualifiedSafe.mockReturnValue(false)
+    mockUseSpaceSafeSelectorItems.mockReturnValue({
+      items: mockItems,
+      selectedItemId: '1:0xSafe1',
+      handleItemSelect: jest.fn(),
+      isError: false,
+      refetch: jest.fn(),
+      isInSpaceContext: true,
+    })
+
+    const { getByTestId } = render(<SpaceSafeBar />)
+    expect(getByTestId('workspace-header').textContent).toBe('Safes in this workspace')
   })
 
   it('renders SpaceBackLink when in space context and space data is available', () => {

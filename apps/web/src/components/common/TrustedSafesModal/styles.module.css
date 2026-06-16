@@ -1,0 +1,17 @@
+.listItem {
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--space-1);
+  margin-bottom: 12px;
+  padding: 0;
+  flex-wrap: wrap;
+  background-color: var(--color-background-paper);
+}
+
+.listItem > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.multiListItem {
+  /* Marker class for multichain group items */
+}

@@ -15,22 +15,3 @@ const matchThreshold = (clearRatio: number) =>
   SCORING_THRESHOLDS.find((t) => clearRatio >= t.minRatio) ?? SCORING_THRESHOLDS[SCORING_THRESHOLDS.length - 1]
 
 export const getGrade = (clearRatio: number): SecurityGrade => matchThreshold(clearRatio).grade
-
-// Colours follow the SecurityHub score ramp: green → yellow → orange → red.
-const GRADE_COLORS: Record<SecurityGrade, string> = {
-  Low: 'success.main',
-  Medium: 'score.review',
-  High: 'warning.main',
-  Critical: 'error.main',
-}
-
-const GRADE_BG_COLORS: Record<SecurityGrade, string> = {
-  Low: 'success.background',
-  Medium: 'warning.background',
-  High: 'error.background',
-  Critical: 'error.background',
-}
-
-export const getGradeColor = (grade: SecurityGrade): string => GRADE_COLORS[grade]
-
-export const getGradeBgColor = (grade: SecurityGrade): string => GRADE_BG_COLORS[grade]

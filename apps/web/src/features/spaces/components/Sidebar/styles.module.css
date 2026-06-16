@@ -345,6 +345,32 @@
   color: var(--color-text-secondary, #737373);
 }
 
+.profileTriggerAvatarPlain {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--color-static-text-brand) 10%, transparent);
+  color: var(--color-text-secondary, #737373);
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.profileTriggerAvatarPlain:hover {
+  background-color: color-mix(in srgb, var(--color-static-text-brand) 18%, transparent);
+}
+
+.profileTriggerAvatarPlain:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--background),
+    0 0 0 4px var(--primary);
+}
+
 .profilePopover {
   display: flex;
   flex-direction: column;

@@ -10,7 +10,7 @@ import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import { PendingSafeStatus } from '@/features/counterfactual/types'
 import type { UndeployedSafesState } from '@/features/counterfactual/types'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -20,7 +20,7 @@ import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import type { SafeItemData, SafeItemDataChain } from '@/features/spaces/components/SafeSelectorDropdown/types'
+import type { SafeItemData, SafeItemDataChain } from '@/features/spaces'
 import type { ChainInfo } from '@/features/spaces/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -133,7 +133,7 @@ function buildSingleChainItem(
 }
 
 export function useSpaceSafeSelectorItems() {
-  const { dropdownSafes: allSafes } = useSafeBarSafes()
+  const { dropdownSafes: allSafes, isInSpaceContext } = useSafeBarSafes()
   const { safe, safeAddress: reduxSafeAddress } = useSafeInfo()
   const urlSafeAddress = useSafeAddressFromUrl()
   const effectiveSafeAddress = urlSafeAddress || reduxSafeAddress
@@ -207,5 +207,6 @@ export function useSpaceSafeSelectorItems() {
     isLoading: overviewsLoading || itemsNotReady,
     isError: overviewsError,
     refetch: refetchOverviews,
+    isInSpaceContext,
   }
 }

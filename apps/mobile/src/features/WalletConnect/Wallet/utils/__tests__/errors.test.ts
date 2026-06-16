@@ -1,4 +1,4 @@
-import { isBenignWalletKitError, logWalletKitError } from '../errors'
+import { getPairErrorMessage, isBenignWalletKitError, logWalletKitError } from '../errors'
 
 describe('isBenignWalletKitError', () => {
   it('returns true for known benign relay-replay errors', () => {
@@ -10,6 +10,22 @@ describe('isBenignWalletKitError', () => {
   it('returns false for real errors', () => {
     expect(isBenignWalletKitError(new Error('respondSessionRequest failed'))).toBe(false)
     expect(isBenignWalletKitError(undefined)).toBe(false)
+  })
+})
+
+describe('getPairErrorMessage', () => {
+  it('maps expired-URI errors to an actionable message', () => {
+    expect(getPairErrorMessage(new Error('Pairing URI expired'))).toMatch(/expired/i)
+  })
+
+  it('does not leak raw WalletKit messages for unknown errors', () => {
+    const message = getPairErrorMessage(new Error("No matching key. session topic doesn't exist"))
+    expect(message).not.toContain('No matching key')
+    expect(message).toBe('Failed to pair. Please try again.')
+  })
+
+  it('falls back to the generic message for non-Error values', () => {
+    expect(getPairErrorMessage(undefined)).toBe('Failed to pair. Please try again.')
   })
 })
 

@@ -23,7 +23,6 @@ import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import { isAlwaysPublic } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
-import ClassicViewToast from '@/components/common/ClassicViewToast'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -53,7 +52,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const { BatchSidebar } = useLoadFeature(BatchingFeature)
   const { SelectSafeModal } = useLoadFeature(SpacesFeature)
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
-  const isRequireLoginEnabled = useIsRequireLoginEnabled() === true
+  // Tri-state: `undefined` while the chains config (hence the gate decision) is still loading.
+  const isRequireLoginEnabled = useIsRequireLoginEnabled()
   const isSignedIn = useIsSignedIn()
   // The login page (`/welcome/spaces` or `/`) is the canonical login surface
   // when the require-login gate is on (and the Topbar's URL-derived hooks then
@@ -64,9 +64,12 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const isWelcomeWorskpacePage = pathname === AppRoutes.welcome.spaces
   const hideHeader =
     NO_HEADER_ROUTES.includes(pathname) ||
-    (isRequireLoginEnabled && isLoginPath) ||
-    (isRequireLoginEnabled && isWelcomeWorskpacePage) ||
-    (pathname === AppRoutes.welcome.spaces && !isSignedIn)
+    Boolean(isRequireLoginEnabled && isLoginPath) ||
+    Boolean(isRequireLoginEnabled && isWelcomeWorskpacePage) ||
+    (pathname === AppRoutes.welcome.spaces && !isSignedIn) ||
+    // While the gate is still resolving, keep the Topbar off the login paths so it
+    // can't flash an empty safe-selector skeleton before it (often) gets hidden.
+    (isRequireLoginEnabled === undefined && isLoginPath)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
   const isSpaceRoute = useIsSpaceRoute()
   const parentSafe = useParentSafe()
@@ -96,8 +99,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      <ClassicViewToast />
-
       {isStaticPage && (
         <div className="px-6 py-4">
           <SafeLogo />

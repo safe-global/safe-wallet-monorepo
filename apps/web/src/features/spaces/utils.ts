@@ -1,3 +1,4 @@
+import { format, isToday, isValid, isYesterday } from 'date-fns'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/users'
@@ -61,4 +62,25 @@ export const isUserActiveAdmin = (members: SpaceMemberDto[], userId: number | un
   if (!userId) return false
   const membership = members.find((member) => member.user.id === userId)
   return !!membership && membership.role === MemberRole.ADMIN && membership.status === MemberStatus.ACTIVE
+}
+
+/**
+ * Formats an ISO date string as a relative day label with time,
+ * e.g. "Today at 9:41 AM", "Yesterday at 9:41 AM" or "Jun 11 at 9:41 AM".
+ * Returns an empty string for missing or unparsable input.
+ */
+export function formatDate(dateStr: string): string {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  if (!isValid(date)) return ''
+
+  const timeStr = format(date, 'p')
+
+  if (isToday(date)) {
+    return `Today at ${timeStr}`
+  }
+  if (isYesterday(date)) {
+    return `Yesterday at ${timeStr}`
+  }
+  return `${format(date, 'MMM d')} at ${timeStr}`
 }

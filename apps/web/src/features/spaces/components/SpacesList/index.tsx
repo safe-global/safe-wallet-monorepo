@@ -187,7 +187,7 @@ const SpacesList = () => {
   const inviteAmount = pendingInvites?.length
   const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
   const { membership, signerAddress, isLoading, email } = useCurrentMemberProfile()
-  const { profileName, displayName } = membership ? getSidebarProfileInfo(membership, signerAddress, email) : {}
+  const { profileName, displayName } = getSidebarProfileInfo(membership, signerAddress, email)
 
   const singleSpaceId = activeSpaces.length === 1 ? activeSpaces[0].uuid : null
 
@@ -233,9 +233,13 @@ const SpacesList = () => {
               <SafeLogo alt="Safe logo" width={24} height={24} />
             </div>
 
-            {isUserSignedIn && activeSpaces.length > 0 && (
+            {isUserSignedIn && (
               <div className="flex gap-4 flex-1 justify-between">
-                <AddSpaceButton disabled={isAtSpacesLimit} onClick={onAddSpaceBtnClick} />
+                {activeSpaces.length > 0 ? (
+                  <AddSpaceButton disabled={isAtSpacesLimit} onClick={onAddSpaceBtnClick} />
+                ) : (
+                  <div />
+                )}
 
                 {isLoading ? (
                   <Pulse className="h-12 w-12 rounded-full group-data-[collapsible=icon]:w-9" />
