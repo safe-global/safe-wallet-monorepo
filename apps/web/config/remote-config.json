@@ -1,0 +1,274 @@
+{
+  "$schema": "./remote-config.schema.json",
+  "service": "WALLET_WEB",
+  "features": [
+    {
+      "key": "ERC721",
+      "description": "ERC-721 NFT / collectibles support.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "SAFE_APPS",
+      "description": "Safe Apps marketplace and iframe integration.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "DOMAIN_LOOKUP",
+      "description": "ENS / domain name lookup for addresses.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "SPENDING_LIMIT",
+      "description": "Allowance / spending-limit module support.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "EIP1559",
+      "description": "EIP-1559 fee estimation for transactions.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "SAFE_TX_GAS_OPTIONAL",
+      "description": "Treat safeTxGas as optional (Safe >= 1.3.0).",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "TX_SIMULATION",
+      "description": "Transaction simulation via Tenderly.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "DEFAULT_TOKENLIST",
+      "description": "Curated default token list for the chain.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "RELAYING", "description": "Gasless transaction relaying.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "EIP1271",
+      "description": "EIP-1271 smart-contract signature verification.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "RISK_MITIGATION",
+      "description": "Blockaid transaction risk scanning.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "PUSH_NOTIFICATIONS",
+      "description": "Push notifications for Safe activity.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "NATIVE_WALLETCONNECT",
+      "description": "Native WalletConnect integration (connect a Safe as a wallet).",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "RECOVERY",
+      "description": "Account recovery via the Zodiac Delay module.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "COUNTERFACTUAL",
+      "description": "Counterfactual (undeployed) Safe support.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "DELETE_TX", "description": "Delete a queued transaction.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "SPEED_UP_TX",
+      "description": "Speed up a pending transaction.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "SAP_BANNER", "description": "Safe Apps promotion banner.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "NATIVE_SWAPS", "description": "Native token swaps.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "NATIVE_SWAPS_USE_COW_STAGING_SERVER",
+      "description": "Point native swaps at the CoW staging server.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "NATIVE_SWAPS_FEE_ENABLED",
+      "description": "Enable swap fees on native swaps.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "NATIVE_SWAPS_COW",
+      "description": "Use the CoW protocol for native swaps.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "ZODIAC_ROLES",
+      "description": "Zodiac Roles modifier support.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "STAKING", "description": "Native staking (Kiln) widget.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "STAKING_PROMO", "description": "Staking promotion banner.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "MULTI_CHAIN_SAFE_CREATION",
+      "description": "Create the same Safe across multiple chains.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "MULTI_CHAIN_SAFE_ADD_NETWORK",
+      "description": "Add a network to an existing multi-chain Safe.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "PROPOSERS",
+      "description": "Transaction proposers (delegate proposing).",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "TARGETED_SURVEY",
+      "description": "Targeted in-app user surveys.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "BRIDGE", "description": "Cross-chain bridging widget.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "RENEW_NOTIFICATIONS_TOKEN",
+      "description": "Renew the push-notification registration token.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "TX_NOTES", "description": "Free-text notes on transactions.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "NESTED_SAFES",
+      "description": "Nested Safe (Safe-owns-Safe) support.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "MASS_PAYOUTS", "description": "Batch / mass payout flow.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "SPACES",
+      "description": "Organisation Spaces (shared address book, members).",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "PRIVATE_ADDRESS_BOOK",
+      "description": "Client-side encrypted private address book.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "SECURITY_HUB", "description": "Security hub dashboard.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "EARN", "description": "Earn (DeFi yield) integration.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "EARN_PROMO", "description": "Earn promotion banner.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "MIXPANEL", "description": "Mixpanel product analytics.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "POSITIONS", "description": "DeFi positions display.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "PORTFOLIO_ENDPOINT",
+      "description": "Use the Zerion-backed CGW portfolio endpoint for balances.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "NATIVE_COW_SWAP_FEE_V2",
+      "description": "Version 2 of the CoW native-swap fee handling.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "CSV_TX_EXPORT",
+      "description": "Export transaction history as CSV.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "NO_FEE_NOVEMBER",
+      "description": "No-fee November promotional campaign.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "HYPERNATIVE",
+      "description": "Hypernative transaction screening.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "HYPERNATIVE_RELAX_GUARD_CHECK",
+      "description": "Relax the guard check in Hypernative screening.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "HYPERNATIVE_QUEUE_SCAN",
+      "description": "Hypernative queued-transaction scanning.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "EURCV_BOOST",
+      "description": "EURCV stablecoin boost campaign.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "MY_ACCOUNTS",
+      "description": "Redesigned 'My accounts' list.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "SEND_FLOW", "description": "New token send flow.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "BATCHING", "description": "Transaction batching.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "OIDC_AUTH", "description": "OIDC-based social login.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "HIDE_NATIVE_TOKEN",
+      "description": "Hide the native token from balances (stablecoin-fee chains).",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "TEMPO_GAS_TOKEN", "description": "Tempo gas-token support.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "SUPPORT_CHAT", "description": "In-app support chat.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "GTF", "description": "GTF relayer strategy support.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "SAFE_STAKING", "description": "Safe-token staking.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "WELCOME_ACCOUNTS_REDESIGN",
+      "description": "Redesigned welcome / accounts screen.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "REQUIRE_LOGIN",
+      "description": "Require login (gated access).",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "CLASSIC_VIEW",
+      "description": "Classic (legacy) UI view toggle.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "SPACE_ONBOARDING_SURVEY",
+      "description": "Onboarding survey for Spaces.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "SPACE_AUDIT_LOG", "description": "Audit log for Spaces.", "scope": "PER_CHAIN", "defaultChains": [] }
+  ]
+}

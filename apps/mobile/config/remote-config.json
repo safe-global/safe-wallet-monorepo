@@ -1,0 +1,33 @@
+{
+  "$schema": "./remote-config.schema.json",
+  "service": "MOBILE",
+  "features": [
+    {
+      "key": "DEFAULT_TOKENLIST",
+      "description": "Curated default token list for the chain.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "NATIVE_WALLETCONNECT",
+      "description": "Native WalletConnect integration (connect a Safe as a wallet).",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "PORTFOLIO_ENDPOINT",
+      "description": "Use the Zerion-backed CGW portfolio endpoint for balances.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "POSITIONS", "description": "DeFi positions display.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "RELAYING", "description": "Gasless transaction relaying.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "RISK_MITIGATION",
+      "description": "Blockaid transaction risk scanning.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "SEND_FLOW", "description": "New token send flow.", "scope": "PER_CHAIN", "defaultChains": [] }
+  ]
+}

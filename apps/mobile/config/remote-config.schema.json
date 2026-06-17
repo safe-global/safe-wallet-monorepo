@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://safe.global/schemas/remote-config.schema.json",
+  "title": "Safe remote-config declaration",
+  "description": "Declares the runtime feature flags a service expects in the Safe Config Service. Reconciled against the Feature/Service/Chain models via the config-service admin diff view.",
+  "type": "object",
+  "required": ["service", "features"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "service": {
+      "type": "string",
+      "pattern": "^[A-Z0-9_]+$",
+      "description": "The owning Service.key (e.g. WALLET_WEB, MOBILE, CGW)."
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "description", "scope"],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+$",
+            "description": "Unique feature key. Matches Feature.key."
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "description": "Human-readable description. Code is authoritative."
+          },
+          "scope": {
+            "enum": ["GLOBAL", "PER_CHAIN"],
+            "description": "GLOBAL applies to all chains; PER_CHAIN limits to selected chains."
+          },
+          "defaultChains": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[0-9]+$" },
+            "default": [],
+            "description": "Release-time chain IDs to seed Feature.chains on ADD. Ignored when scope = GLOBAL."
+          }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "scope": { "const": "GLOBAL" } } },
+            "then": { "properties": { "defaultChains": { "type": "array", "maxItems": 0 } } }
+          }
+        ]
+      }
+    }
+  }
+}
