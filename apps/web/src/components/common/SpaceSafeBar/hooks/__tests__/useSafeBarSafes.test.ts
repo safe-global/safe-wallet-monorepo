@@ -1,16 +1,14 @@
 import { renderHook } from '@testing-library/react'
-import { useSafeBarSafes } from '../useSafeBarSafes'
+import { _useWorkspaceBarSafes, _useGlobalBarSafes } from '../useSafeBarSafes'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import type { AllSafeItems } from '@/hooks/safes'
 
 // ── mocks ──────────────────────────────────────────────────────────────
 
-const mockUseIsQualifiedSafe = jest.fn(() => false)
 const mockSpaceSafes: AllSafeItems = []
 const mockUseSpaceSafes = jest.fn(() => ({ allSafes: mockSpaceSafes }))
 
 jest.mock('@/features/spaces', () => ({
-  useIsQualifiedSafe: () => mockUseIsQualifiedSafe(),
   useSpaceSafes: () => mockUseSpaceSafes(),
 }))
 
@@ -51,11 +49,6 @@ jest.mock('@/store', () => ({
     selector({ orderByPreference: { orderBy: mockOrderBy() } }),
 }))
 
-const mockIsSpaceRoute = jest.fn(() => false)
-jest.mock('@/hooks/useIsSpaceRoute', () => ({
-  useIsSpaceRoute: () => mockIsSpaceRoute(),
-}))
-
 // ── helpers ────────────────────────────────────────────────────────────
 
 const createSafe = (address: string, isPinned = false, chainId = '1'): SafeItem => ({
@@ -67,80 +60,120 @@ const createSafe = (address: string, isPinned = false, chainId = '1'): SafeItem 
   name: undefined,
 })
 
-// ── tests ──────────────────────────────────────────────────────────────
+const resetMocks = () => {
+  jest.clearAllMocks()
+  mockSafeAddress.mockReturnValue('0xCurrentSafe')
+  mockReduxSafeAddress.mockReturnValue('')
+  mockChainId.mockReturnValue('1')
+  mockOrderBy.mockReturnValue('name')
+  mockAllSafes.mockReturnValue(undefined)
+  mockUseSpaceSafes.mockReturnValue({ allSafes: [] })
+  // Default: pass-through. Tests needing multi-chain grouping override per-case.
+  mockGrouped.mockImplementation((items: SafeItem[]) => ({
+    allMultiChainSafes: [],
+    allSingleSafes: items,
+  }))
+}
 
-describe('useSafeBarSafes', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-    mockUseIsQualifiedSafe.mockReturnValue(false)
-    mockIsSpaceRoute.mockReturnValue(false)
-    mockSafeAddress.mockReturnValue('0xCurrentSafe')
+// ── workspace switcher (space safes; never enumerates owned safes) ────────
+
+describe('useWorkspaceBarSafes', () => {
+  beforeEach(resetMocks)
+
+  // The workspace path must not reach the owned-safes enumeration: it does not depend on
+  // `useAllSafes` at all.
+  it('never enumerates owned safes', () => {
+    const spaceSafe = createSafe('0xSpaceSafe', true)
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
+    mockSafeAddress.mockReturnValue('0xSpaceSafe')
+
+    renderHook(() => _useWorkspaceBarSafes())
+
+    expect(mockAllSafes).not.toHaveBeenCalled()
+    expect(mockGrouped).not.toHaveBeenCalled()
+  })
+
+  it('returns the space safes for both lists', () => {
+    const spaceSafe = createSafe('0xSpaceSafe', true)
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
+    mockSafeAddress.mockReturnValue('0xSpaceSafe')
+
+    const { result } = renderHook(() => _useWorkspaceBarSafes())
+
+    expect(result.current.isInSpaceContext).toBe(true)
+    expect(result.current.dropdownSafes).toEqual([spaceSafe])
+    expect(result.current.chainSelectorSafes).toEqual([spaceSafe])
+  })
+
+  it('injects a fallback current safe when it is not part of the space', () => {
+    const spaceSafe = createSafe('0xSpaceSafe', true)
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
+    mockSafeAddress.mockReturnValue('0xOutsideSafe')
+    mockChainId.mockReturnValue('11155111')
+
+    const { result } = renderHook(() => _useWorkspaceBarSafes())
+
+    expect(result.current.dropdownSafes).toHaveLength(2)
+    expect(result.current.dropdownSafes[0].address).toBe('0xOutsideSafe')
+    expect(result.current.dropdownSafes[1].address).toBe('0xSpaceSafe')
+  })
+
+  it('returns the space list as-is when there is no current safe', () => {
+    const spaceSafe = createSafe('0xSpaceSafe', true)
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
+    mockSafeAddress.mockReturnValue('')
     mockReduxSafeAddress.mockReturnValue('')
-    mockChainId.mockReturnValue('1')
-    mockOrderBy.mockReturnValue('name')
-    mockAllSafes.mockReturnValue(undefined)
-    // Default: pass-through. Tests needing multi-chain grouping override per-case.
-    mockGrouped.mockImplementation((items: SafeItem[]) => ({
-      allMultiChainSafes: [],
-      allSingleSafes: items,
-    }))
+
+    const { result } = renderHook(() => _useWorkspaceBarSafes())
+
+    expect(result.current.dropdownSafes).toEqual([spaceSafe])
+  })
+})
+
+// ── global account switcher (owned-safes enumeration) ────────────────────
+
+describe('useGlobalBarSafes', () => {
+  beforeEach(resetMocks)
+
+  it('enumerates owned safes', () => {
+    mockAllSafes.mockReturnValue([])
+
+    renderHook(() => _useGlobalBarSafes())
+
+    expect(mockAllSafes).toHaveBeenCalled()
   })
 
   it('returns empty lists when allSafes is undefined', () => {
     mockAllSafes.mockReturnValue(undefined)
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
+    expect(result.current.isInSpaceContext).toBe(false)
     // dropdownSafes should contain only the fallback current safe
     expect(result.current.dropdownSafes).toHaveLength(1)
     expect(result.current.dropdownSafes[0].address).toBe('0xCurrentSafe')
   })
 
-  it('returns space safes when in space context and the URL safe is in the space', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(true)
-    const spaceSafe = createSafe('0xSpaceSafe', true)
-    mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
-    mockSafeAddress.mockReturnValue('0xSpaceSafe')
-
-    const { result } = renderHook(() => useSafeBarSafes())
-
-    expect(result.current.dropdownSafes).toEqual([spaceSafe])
-    expect(result.current.chainSelectorSafes).toEqual([spaceSafe])
-  })
-
-  it('returns space safes when on a space route even if the current safe is not qualified', () => {
-    mockUseIsQualifiedSafe.mockReturnValue(false)
-    mockIsSpaceRoute.mockReturnValue(true)
-    const spaceSafe = createSafe('0xSpaceSafe', true)
-    mockUseSpaceSafes.mockReturnValue({ allSafes: [spaceSafe] })
-    mockSafeAddress.mockReturnValue('0xSpaceSafe')
-
-    const { result } = renderHook(() => useSafeBarSafes())
-
-    expect(result.current.dropdownSafes).toEqual([spaceSafe])
-    expect(result.current.chainSelectorSafes).toEqual([spaceSafe])
-  })
-
-  it('returns pinned safes for dropdown in non-space context', () => {
+  it('returns pinned safes for dropdown', () => {
     const pinned = createSafe('0xPinned', true)
     const unpinned = createSafe('0xUnpinned', false)
     mockAllSafes.mockReturnValue([pinned, unpinned])
     mockSafeAddress.mockReturnValue('0xPinned')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     // dropdown should have pinned safe (current safe is already pinned, no injection)
     expect(result.current.dropdownSafes).toHaveLength(1)
     expect(result.current.dropdownSafes[0].address).toBe('0xPinned')
   })
 
-  it('returns all known safes for chain selector in non-space context', () => {
+  it('returns all known safes for chain selector', () => {
     const pinned = createSafe('0xPinned', true)
     const unpinned = createSafe('0xUnpinned', false)
     mockAllSafes.mockReturnValue([pinned, unpinned])
     mockSafeAddress.mockReturnValue('0xPinned')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     expect(result.current.chainSelectorSafes).toHaveLength(2)
   })
@@ -151,7 +184,7 @@ describe('useSafeBarSafes', () => {
     mockAllSafes.mockReturnValue([pinned, current])
     mockSafeAddress.mockReturnValue('0xCurrentSafe')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     // Current safe should be injected at the front
     expect(result.current.dropdownSafes).toHaveLength(2)
@@ -165,7 +198,7 @@ describe('useSafeBarSafes', () => {
     mockSafeAddress.mockReturnValue('0xUnknownSafe')
     mockChainId.mockReturnValue('11155111')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     // Fallback should be injected
     expect(result.current.dropdownSafes).toHaveLength(2)
@@ -183,7 +216,7 @@ describe('useSafeBarSafes', () => {
     mockSafeAddress.mockReturnValue('0xNestedChild')
     mockChainId.mockReturnValue('11155111')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     expect(result.current.dropdownSafes).toHaveLength(3)
     expect(result.current.dropdownSafes[0].address).toBe('0xNestedChild')
@@ -196,7 +229,7 @@ describe('useSafeBarSafes', () => {
     mockSafeAddress.mockReturnValue('0xUnknownSafe')
     mockChainId.mockReturnValue('1')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     expect(result.current.chainSelectorSafes).toHaveLength(1)
     expect(result.current.chainSelectorSafes[0].address).toBe('0xUnknownSafe')
@@ -207,7 +240,7 @@ describe('useSafeBarSafes', () => {
     mockAllSafes.mockReturnValue([pinned])
     mockSafeAddress.mockReturnValue('0xCurrentSafe')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     expect(result.current.dropdownSafes).toHaveLength(1)
     expect(result.current.dropdownSafes[0].address).toBe('0xCurrentSafe')
@@ -218,7 +251,7 @@ describe('useSafeBarSafes', () => {
     mockAllSafes.mockReturnValue([safe])
     mockSafeAddress.mockReturnValue('0xCurrentSafe')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     expect(result.current.chainSelectorSafes).toHaveLength(1)
   })
@@ -229,7 +262,7 @@ describe('useSafeBarSafes', () => {
     mockSafeAddress.mockReturnValue('')
     mockReduxSafeAddress.mockReturnValue('')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     expect(result.current.dropdownSafes).toHaveLength(1)
     expect(result.current.dropdownSafes[0].address).toBe('0xPinned')
@@ -242,7 +275,7 @@ describe('useSafeBarSafes', () => {
     mockReduxSafeAddress.mockReturnValue('0xFromRedux')
     mockChainId.mockReturnValue('1')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     expect(result.current.dropdownSafes).toHaveLength(2)
     expect(result.current.dropdownSafes[0].address).toBe('0xFromRedux')
@@ -255,7 +288,7 @@ describe('useSafeBarSafes', () => {
     mockSafeAddress.mockReturnValue('0xFromUrl')
     mockReduxSafeAddress.mockReturnValue('0xFromRedux')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     expect(result.current.dropdownSafes[0].address).toBe('0xFromUrl')
   })
@@ -266,7 +299,7 @@ describe('useSafeBarSafes', () => {
     mockAllSafes.mockReturnValue([knownSafe])
     mockSafeAddress.mockReturnValue('0xCurrentSafe')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     // Should use the real entry from allKnownSafes, not the fallback
     const injected = result.current.dropdownSafes[0] as SafeItem
@@ -302,7 +335,7 @@ describe('useSafeBarSafes', () => {
     mockSafeAddress.mockReturnValue('0xMultiSafe')
     mockGrouped.mockImplementation(groupByAddress)
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     // Current safe row should reflect both chains so the user can switch.
     expect(result.current.dropdownSafes).toHaveLength(1)
@@ -320,7 +353,7 @@ describe('useSafeBarSafes', () => {
     mockSafeAddress.mockReturnValue('0xMultiSafe')
     mockGrouped.mockImplementation(groupByAddress)
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     expect(result.current.dropdownSafes).toHaveLength(2)
     const current = result.current.dropdownSafes[0] as MultiChainSafeItem
@@ -337,7 +370,7 @@ describe('useSafeBarSafes', () => {
     mockAllSafes.mockReturnValue([current, zeta, alpha])
     mockSafeAddress.mockReturnValue('0xCurrent')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     // Current first, then the rest A→Z.
     expect(result.current.dropdownSafes.map((s) => s.address)).toEqual(['0xCurrent', '0xAlpha', '0xZeta'])
@@ -351,7 +384,7 @@ describe('useSafeBarSafes', () => {
     mockAllSafes.mockReturnValue([current, older, newer])
     mockSafeAddress.mockReturnValue('0xCurrent')
 
-    const { result } = renderHook(() => useSafeBarSafes())
+    const { result } = renderHook(() => _useGlobalBarSafes())
 
     // Current first, then most-recently-visited first.
     expect(result.current.dropdownSafes.map((s) => s.address)).toEqual(['0xCurrent', '0xNewer', '0xOlder'])

@@ -24,9 +24,14 @@ jest.mock('next/router', () => ({
 
 jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: jest.fn(() => false),
+  useSpaceSafes: jest.fn(() => ({ allSafes: [] })),
   get SafeSelectorDropdown() {
     return jest.requireMock('@/features/spaces/components/SafeSelectorDropdown').default
   },
+}))
+
+jest.mock('@/hooks/useIsSpaceRoute', () => ({
+  useIsSpaceRoute: jest.fn(() => false),
 }))
 
 jest.mock('./hooks/useSpaceSafeSelectorItems', () => ({
@@ -106,6 +111,7 @@ jest.mock('@/hooks/useChainId', () => () => '1')
 jest.mock('@/hooks/safes', () => ({
   ...jest.requireActual('@/hooks/safes'),
   useAllSafes: () => [],
+  useAllSafesGrouped: () => ({ allMultiChainSafes: [], allSingleSafes: [] }),
 }))
 
 jest.mock('@/hooks/wallets/useWallet', () => ({
@@ -134,8 +140,9 @@ jest.mock('./SpaceBackLink', () => {
 
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
-import { useIsQualifiedSafe } from '@/features/spaces'
+import { useIsQualifiedSafe, useSpaceSafes } from '@/features/spaces'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
@@ -143,6 +150,8 @@ import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 const mockUsePathname = usePathname as jest.Mock
 const mockUseRouter = useRouter as jest.Mock
 const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
+const mockUseSpaceSafes = useSpaceSafes as jest.Mock
+const mockUseIsSpaceRoute = useIsSpaceRoute as jest.Mock
 const mockUseSafeAddressFromUrl = useSafeAddressFromUrl as jest.Mock
 const mockUseSpaceSafeSelectorItems = useSpaceSafeSelectorItems as jest.Mock
 const mockUseSpaceBackLink = useSpaceBackLink as jest.Mock
@@ -153,6 +162,8 @@ describe('SpaceSafeBar', () => {
     jest.resetAllMocks()
     mockUsePathname.mockReturnValue('/home')
     mockUseRouter.mockReturnValue({ pathname: '/home' })
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [] })
+    mockUseIsSpaceRoute.mockReturnValue(false)
     mockUseSafeAddressFromUrl.mockReturnValue('0xSafe1')
     mockUseSpaceSafeSelectorItems.mockReturnValue({
       items: mockItems,

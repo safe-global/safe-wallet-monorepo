@@ -54,7 +54,7 @@ export function _buildSafeItems(
     const addresses = safes[chainId]
 
     addresses?.forEach((address) => {
-      const isReadOnly = !!allOwned && !(allOwned[chainId] || []).includes(address)
+      const isReadOnly = !!allOwned && !(allOwned[chainId] || []).some((owned) => sameAddress(owned, address))
       const name = allSafeNames[chainId]?.[address]
       const lastVisited = allVisitedSafes?.[chainId]?.[address]?.lastVisited || 0
 
@@ -92,8 +92,8 @@ export const _getSingleChainAccounts = (safes: SafeItems, allMultiChainSafes: Mu
   return safes.filter((safe) => !allMultiChainSafes.some((multiSafe) => sameAddress(multiSafe.address, safe.address)))
 }
 
-export const useAllSafesGrouped = (customSafes?: SafeItems) => {
-  const safes = useAllSafes()
+export const useAllSafesGrouped = (customSafes?: SafeItems, fetchOwnedSafes = true) => {
+  const safes = useAllSafes(fetchOwnedSafes)
   const allSafes = customSafes ?? safes
 
   return useMemo<AllSafeItemsGrouped>(() => {

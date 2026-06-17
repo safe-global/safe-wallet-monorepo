@@ -55,6 +55,19 @@ describe('useTrustedSafesModal', () => {
     expect(result.current.isOpen).toBe(true)
   })
 
+  // The owned-safes enumeration must stay deferred until the modal is actually opened.
+  it('only enumerates safes while the modal is open', () => {
+    const { result } = renderHook(() => useTrustedSafesModal())
+
+    expect(useAllSafes.default).toHaveBeenLastCalledWith(false)
+
+    act(() => {
+      result.current.open()
+    })
+
+    expect(useAllSafes.default).toHaveBeenLastCalledWith(true)
+  })
+
   it('should close modal', () => {
     const { result } = renderHook(() => useTrustedSafesModal())
 

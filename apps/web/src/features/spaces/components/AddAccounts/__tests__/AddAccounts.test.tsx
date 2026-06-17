@@ -71,11 +71,15 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 let mockAllOwned: Record<string, string[]> = {}
+const mockUseAllOwnedSafes = jest.fn<readonly [Record<string, string[]>, boolean], [string]>(() => [
+  mockAllOwned,
+  false,
+])
 jest.mock('@/hooks/safes', () => {
   const actual = jest.requireActual('@/hooks/safes')
   return {
     ...actual,
-    useAllOwnedSafes: () => [mockAllOwned, false] as const,
+    useAllOwnedSafes: (address: string) => mockUseAllOwnedSafes(address),
     useSafesSearch: (safes: unknown) => safes,
   }
 })
@@ -109,6 +113,20 @@ describe('AddAccounts — wallet connection state', () => {
     mockAllOwned = {}
     mockIsAdmin = true
     mockSpaceSafes = []
+  })
+
+  // The modal body that enumerates owned safes only mounts while open, so when closed the hook is
+  // never reached at all.
+  it('does not enumerate owned safes while the modal is closed', () => {
+    render(<AddAccounts />)
+
+    expect(mockUseAllOwnedSafes).not.toHaveBeenCalled()
+  })
+
+  it('enumerates owned safes once the modal is open', () => {
+    render(<AddAccounts externalOpen onExternalClose={() => {}} />)
+
+    expect(mockUseAllOwnedSafes).toHaveBeenCalledWith('0xWallet')
   })
 
   it('does not render the connect-wallet hint when a wallet is connected', () => {

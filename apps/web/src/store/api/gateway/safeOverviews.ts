@@ -126,7 +126,8 @@ const batchedFetcher = new SafeOverviewFetcher()
 type MultiOverviewQueryParams = {
   currency: string
   walletAddress?: string
-  safes: SafeItem[]
+  // Only chainId/address are read by the query and the cache key; callers may pass full SafeItems.
+  safes: Pick<SafeItem, 'chainId' | 'address'>[]
 }
 
 export const safeOverviewEndpoints = (
@@ -162,6 +163,17 @@ export const safeOverviewEndpoints = (
     },
   ),
   getMultipleSafeOverviews: builder.query<SafeOverview[], MultiOverviewQueryParams>({
+    // Normalize the cache key so every subscriber with the same set of safes shares ONE entry,
+    // independent of safe-item field values (isReadOnly, name, …) and array order. The default
+    // serializer stringifies the whole args object — including those volatile fields — which would
+    // otherwise create duplicate fetches and a feedback loop once ownership is derived here.
+    // RTK re-pipes a non-string return through the default serializer, so returning an object is safe.
+    serializeQueryArgs: ({ queryArgs }) => ({
+      ...queryArgs,
+      safes: [...queryArgs.safes]
+        .map((safe) => ({ chainId: safe.chainId, address: safe.address }))
+        .sort((a, b) => `${a.chainId}:${a.address}`.localeCompare(`${b.chainId}:${b.address}`)),
+    }),
     providesTags: (result) =>
       result && result.length > 0
         ? result.map((overview) => ({

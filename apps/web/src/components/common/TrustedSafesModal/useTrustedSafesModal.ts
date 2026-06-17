@@ -95,8 +95,9 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
   const [pendingSelectAllConfirmation, setPendingSelectAllConfirmation] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const allSafes = useAllSafes()
-  const { allMultiChainSafes, allSingleSafes } = useAllSafesGrouped()
+  // The list is only shown while the modal is open, so only enumerate owned safes then.
+  const allSafes = useAllSafes(isOpen)
+  const { allMultiChainSafes, allSingleSafes } = useAllSafesGrouped(undefined, isOpen)
   const addedSafes = useAppSelector(selectAllAddedSafes)
 
   const addresses = useMemo(() => {
