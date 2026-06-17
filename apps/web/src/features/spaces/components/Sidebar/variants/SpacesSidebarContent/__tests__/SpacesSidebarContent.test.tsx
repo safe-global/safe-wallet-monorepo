@@ -8,9 +8,15 @@ const mockUseCurrentSpaceId = jest.fn()
 const mockUseIsActiveMember = jest.fn()
 const mockUseResolvedSidebarNav = jest.fn()
 const mockUseHasFeature = jest.fn()
+const mockUseIsBillingVisible = jest.fn()
 
 jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
+}))
+
+jest.mock('@/features/spaces/hooks/useIsBillingVisible', () => ({
+  __esModule: true,
+  default: () => mockUseIsBillingVisible(),
 }))
 
 jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
@@ -56,6 +62,12 @@ jest.mock('../../../config', () => ({
         icon: () => <div>Security</div>,
         label: 'Security',
         href: '/spaces/security',
+        activeMemberOnly: true,
+      },
+      {
+        icon: () => <div>Billing</div>,
+        label: 'Billing',
+        href: '/spaces/billing',
         activeMemberOnly: true,
       },
     ],
@@ -123,6 +135,7 @@ describe('SpacesSidebarContent', () => {
     mockUseIsActiveMember.mockReturnValue(true)
     mockUseResolvedSidebarNav.mockReturnValue(mockResolvedNavItems)
     mockUseHasFeature.mockReturnValue(true)
+    mockUseIsBillingVisible.mockReturnValue(true)
   })
 
   it('renders SpacesSidebarVariant with resolved navigation', () => {
@@ -179,8 +192,8 @@ describe('SpacesSidebarContent', () => {
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
-      // The mocked config has Team + Security; only Team should remain.
-      expect(setupGroup.items.map((i: { href: string }) => i.href)).toEqual(['/spaces/members'])
+      // The mocked config has Team + Security + Billing; Security should be dropped.
+      expect(setupGroup.items.map((i: { href: string }) => i.href)).toEqual(['/spaces/members', '/spaces/billing'])
     })
 
     it('keeps the Security entry while the flag is undefined (chain config still loading)', () => {
@@ -189,7 +202,7 @@ describe('SpacesSidebarContent', () => {
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
-      expect(setupGroup.items).toHaveLength(2)
+      expect(setupGroup.items).toHaveLength(3)
     })
 
     it('keeps the Security entry when the flag is enabled', () => {
@@ -198,7 +211,37 @@ describe('SpacesSidebarContent', () => {
       render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
 
       const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
-      expect(setupGroup.items).toHaveLength(2)
+      expect(setupGroup.items).toHaveLength(3)
+    })
+  })
+
+  describe('Billing visibility (GTF_PLANS || GTF)', () => {
+    it('hides the Billing entry when billing is not visible', () => {
+      mockUseIsBillingVisible.mockReturnValue(false)
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
+      // Team + Security remain; Billing is dropped.
+      expect(setupGroup.items.map((i: { href: string }) => i.href)).toEqual(['/spaces/members', '/spaces/security'])
+    })
+
+    it('keeps the Billing entry while visibility is undefined (chain config still loading)', () => {
+      mockUseIsBillingVisible.mockReturnValue(undefined)
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(setupGroup.items).toHaveLength(3)
+    })
+
+    it('keeps the Billing entry when billing is visible', () => {
+      mockUseIsBillingVisible.mockReturnValue(true)
+
+      render(<SpacesSidebarContent spaceInitial="T" selectedSpace={mockSpace} spaces={mockSpaces} />)
+
+      const [, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
+      expect(setupGroup.items.map((i: { href: string }) => i.href)).toContain('/spaces/billing')
     })
   })
 
@@ -241,6 +284,6 @@ describe('SpacesSidebarContent', () => {
 
     const [mainNav, setupGroup] = mockUseResolvedSidebarNav.mock.calls[0]
     expect(mainNav).toHaveLength(3)
-    expect(setupGroup.items).toHaveLength(2)
+    expect(setupGroup.items).toHaveLength(3)
   })
 })
