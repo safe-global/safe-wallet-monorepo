@@ -17,7 +17,7 @@ import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPric
 import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCandidates'
-import { isGtfSafePaid } from '../utils/isGtfSafePaid'
+import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import {
   computeTotalOutgoing,
   getSendInGasToken,

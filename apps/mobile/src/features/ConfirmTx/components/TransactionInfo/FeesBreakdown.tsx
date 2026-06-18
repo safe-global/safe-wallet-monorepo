@@ -1,0 +1,140 @@
+import React, { useMemo } from 'react'
+import { Text, View, XStack } from 'tamagui'
+import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import type {
+  MultisigExecutionDetails,
+  TransactionDetails,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { ListTable } from '../ListTable/ListTable'
+import { InfoSheet } from '@/src/components/InfoSheet/InfoSheet'
+import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { TokenAmount } from '@/src/components/TokenAmount'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectActiveChainCurrency } from '@/src/store/chains'
+import { selectCurrency } from '@/src/store/settingsSlice'
+import { useBalances } from '@/src/hooks/useBalances'
+import { useTokenDetails } from '@/src/hooks/useTokenDetails/useTokenDetails'
+import { isTransferTxInfo } from '@/src/utils/transaction-guards'
+import { buildFeesBreakdown, type FeeLine } from './feeRows'
+
+const EXECUTION_FEE_INFO =
+  'Covers third-party services required to securely execute this transaction. Based on the transaction amount. Currently free while the new model is introduced.'
+const GAS_FEE_INFO = 'Network cost required to process this transaction.'
+
+const LabelWithInfo = ({ label, title, info }: { label: string; title: string; info: string }) => (
+  <InfoSheet title={title} info={info} displayIcon={false}>
+    <XStack alignItems="center" gap="$1" flex={1}>
+      <Text color="$textSecondaryLight" fontSize="$4">
+        {label}
+      </Text>
+      <SafeFontIcon name="info" size={16} color="$colorSecondary" />
+    </XStack>
+  </InfoSheet>
+)
+
+const FeeAmount = ({ line, fiat, currency }: { line: FeeLine; fiat?: number; currency: string }) => (
+  <XStack alignItems="center" gap="$1" flexWrap="wrap" justifyContent="flex-end">
+    <TokenAmount
+      value={line.amount}
+      decimals={line.decimals}
+      tokenSymbol={line.symbol}
+      textProps={{ fontSize: '$4' }}
+    />
+    {fiat !== undefined && <Text color="$textSecondaryLight">({formatCurrency(fiat, currency)})</Text>}
+  </XStack>
+)
+
+export function FeesBreakdown({
+  detailedExecutionInfo,
+  txDetails,
+}: {
+  detailedExecutionInfo: MultisigExecutionDetails
+  txDetails?: TransactionDetails
+}) {
+  const nativeCurrency = useAppSelector(selectActiveChainCurrency)
+  const currency = useAppSelector(selectCurrency)
+  const { balances } = useBalances()
+
+  const txInfo = txDetails?.txInfo
+  const transfer = txInfo && isTransferTxInfo(txInfo) ? txInfo : undefined
+  const tokenDetails = useTokenDetails(transfer ?? ({ transferInfo: {} } as never))
+
+  const breakdown = useMemo(() => {
+    if (!nativeCurrency) {
+      return undefined
+    }
+    const outgoing: FeeLine | undefined =
+      transfer && tokenDetails.decimals !== undefined
+        ? {
+            amount: tokenDetails.value || '0',
+            symbol: tokenDetails.tokenSymbol ?? nativeCurrency.symbol,
+            decimals: tokenDetails.decimals,
+            // Native transfers resolve to the zero address — the same key balances use for native.
+            address: transferTokenAddress(transfer, ZERO_ADDRESS),
+          }
+        : undefined
+
+    return buildFeesBreakdown({
+      detailedExecutionInfo,
+      nativeCurrency: {
+        address: ZERO_ADDRESS,
+        symbol: nativeCurrency.symbol,
+        decimals: nativeCurrency.decimals,
+      },
+      outgoing,
+      balances,
+    })
+  }, [detailedExecutionInfo, nativeCurrency, transfer, tokenDetails, balances])
+
+  if (!breakdown) {
+    return null
+  }
+
+  return (
+    <ListTable
+      testID="fees-breakdown"
+      items={[
+        {
+          label: <LabelWithInfo label="Execution fee" title="Execution fee" info={EXECUTION_FEE_INFO} />,
+          render: () => (
+            <Text fontSize="$4" textAlign="right">
+              FREE
+            </Text>
+          ),
+        },
+        {
+          label: <LabelWithInfo label="Max gas fee" title="Gas fee" info={gasFeeInfo(breakdown.paidFromSafe)} />,
+          render: () => <FeeAmount line={breakdown.maxGasFee} fiat={breakdown.maxGasFeeFiat} currency={currency} />,
+        },
+        {
+          label: 'Total outgoing',
+          render: () => (
+            <View alignItems="flex-end" gap="$1">
+              {breakdown.totalOutgoing.map((line) => (
+                <TokenAmount
+                  key={`${line.symbol}-${line.decimals}`}
+                  value={line.amount}
+                  decimals={line.decimals}
+                  tokenSymbol={line.symbol}
+                  textProps={{ fontSize: '$4' }}
+                />
+              ))}
+              {breakdown.totalOutgoingFiat !== undefined && (
+                <Text color="$textSecondaryLight">{formatCurrency(breakdown.totalOutgoingFiat, currency)}</Text>
+              )}
+            </View>
+          ),
+        },
+      ]}
+    />
+  )
+}
+
+const gasFeeInfo = (paidFromSafe: boolean): string =>
+  `${GAS_FEE_INFO} ${paidFromSafe ? 'Paid from your Safe.' : 'Paid from the signer.'}`
+
+const transferTokenAddress = (transfer: { transferInfo: Record<string, unknown> }, nativeAddress: string): string => {
+  const tokenAddress = transfer.transferInfo?.tokenAddress
+  return typeof tokenAddress === 'string' ? tokenAddress : nativeAddress
+}

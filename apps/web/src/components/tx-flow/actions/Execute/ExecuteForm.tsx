@@ -34,8 +34,8 @@ import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { SafeTxContext } from '../../SafeTxProvider'
-import { isGtfSafePaid } from '@/features/gtf/utils/isGtfSafePaid'
-import { RelaySimulationError } from '@/services/tx/relayErrors'
+import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 
 export const ExecuteForm = ({
   safeTx,

@@ -14,6 +14,7 @@ jest.mock('expo-router', () => ({
 }))
 
 import { useExecutionFlow } from './useExecutionFlow'
+import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 
 describe('useExecutionFlow', () => {
   const mockExecute = jest.fn()
@@ -287,6 +288,86 @@ describe('useExecutionFlow', () => {
           resolveExecute()
         }
       })
+    })
+  })
+
+  describe('relay simulation errors', () => {
+    it('SIMULATION_FAILED is terminal => navigates to the error screen, no retry sheet', async () => {
+      mockExecute.mockRejectedValue(new RelaySimulationError('SIMULATION_FAILED', 'Insufficient gas-token balance'))
+
+      const { result } = renderHook(() =>
+        useExecutionFlow({ ...defaultParams, executionMethod: ExecutionMethod.WITH_RELAY }),
+      )
+
+      await act(async () => {
+        await result.current.handleConfirmPress()
+      })
+
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/execution-error',
+        params: { description: 'Insufficient gas-token balance' },
+      })
+      expect(result.current.showIndeterminateSheet).toBe(false)
+    })
+
+    it('INDETERMINATE_SIMULATION shows the confirmation sheet instead of the error screen', async () => {
+      mockExecute.mockRejectedValue(new RelaySimulationError('INDETERMINATE_SIMULATION', 'Could not simulate'))
+
+      const { result } = renderHook(() =>
+        useExecutionFlow({ ...defaultParams, executionMethod: ExecutionMethod.WITH_RELAY }),
+      )
+
+      await act(async () => {
+        await result.current.handleConfirmPress()
+      })
+
+      expect(result.current.showIndeterminateSheet).toBe(true)
+      expect(mockPush).not.toHaveBeenCalledWith(expect.objectContaining({ pathname: '/execution-error' }))
+    })
+
+    it('confirmExecuteAnyway re-runs execution with acceptUnverifiedSimulation = true', async () => {
+      mockExecute
+        .mockRejectedValueOnce(new RelaySimulationError('INDETERMINATE_SIMULATION', 'Could not simulate'))
+        .mockResolvedValueOnce(undefined)
+
+      const { result } = renderHook(() =>
+        useExecutionFlow({ ...defaultParams, executionMethod: ExecutionMethod.WITH_RELAY }),
+      )
+
+      await act(async () => {
+        await result.current.handleConfirmPress()
+      })
+
+      await act(async () => {
+        await result.current.confirmExecuteAnyway()
+      })
+
+      expect(mockExecute).toHaveBeenNthCalledWith(1, undefined)
+      expect(mockExecute).toHaveBeenNthCalledWith(2, true)
+      expect(result.current.showIndeterminateSheet).toBe(false)
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: '/execution-success',
+        params: { txId: 'tx123' },
+      })
+    })
+
+    it('dismissIndeterminateSheet closes the sheet without executing', async () => {
+      mockExecute.mockRejectedValue(new RelaySimulationError('INDETERMINATE_SIMULATION', 'Could not simulate'))
+
+      const { result } = renderHook(() =>
+        useExecutionFlow({ ...defaultParams, executionMethod: ExecutionMethod.WITH_RELAY }),
+      )
+
+      await act(async () => {
+        await result.current.handleConfirmPress()
+      })
+
+      act(() => {
+        result.current.dismissIndeterminateSheet()
+      })
+
+      expect(result.current.showIndeterminateSheet).toBe(false)
+      expect(mockExecute).toHaveBeenCalledTimes(1)
     })
   })
 

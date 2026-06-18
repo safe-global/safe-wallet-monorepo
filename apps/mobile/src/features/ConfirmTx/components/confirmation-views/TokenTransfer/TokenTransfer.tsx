@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Container } from '@/src/components/Container'
 import { View, YStack, Text, H3 } from 'tamagui'
 import { Logo } from '@/src/components/Logo'
@@ -9,13 +9,17 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useTokenDetails } from '@/src/hooks/useTokenDetails'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectChainById } from '@/src/store/chains'
+import { selectChainById, selectActiveChainCurrency } from '@/src/store/chains'
 import { RootState } from '@/src/store'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Address } from '@/src/types/address'
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { ParametersButton } from '@/src/components/ParametersButton'
 import { HashDisplay } from '@/src/components/HashDisplay'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { buildFeesBreakdown } from '@/src/features/ConfirmTx/components/TransactionInfo/feeRows'
+import { isERC20Transfer } from '@/src/utils/transaction-guards'
 
 interface TokenTransferProps {
   txId: string
@@ -27,9 +31,25 @@ interface TokenTransferProps {
 export function TokenTransfer({ txId, txInfo, executionInfo, executedAt }: TokenTransferProps) {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
+  const nativeCurrency = useAppSelector(selectActiveChainCurrency)
   const { value, tokenSymbol, logoUri, decimals } = useTokenDetails(txInfo)
 
   const recipientAddress = txInfo.recipient.value as Address
+
+  const safePaidFee = useMemo(() => {
+    if (!nativeCurrency) {
+      return undefined
+    }
+    const breakdown = buildFeesBreakdown({
+      detailedExecutionInfo: executionInfo,
+      nativeCurrency: { address: ZERO_ADDRESS, symbol: nativeCurrency.symbol, decimals: nativeCurrency.decimals },
+    })
+    const transferTokenAddress = isERC20Transfer(txInfo.transferInfo) ? txInfo.transferInfo.tokenAddress : ZERO_ADDRESS
+    if (!breakdown.paidFromSafe || sameAddress(breakdown.maxGasFee.address, transferTokenAddress)) {
+      return undefined
+    }
+    return breakdown.maxGasFee
+  }, [executionInfo, nativeCurrency, txInfo])
 
   return (
     <>
@@ -39,15 +59,32 @@ export function TokenTransfer({ txId, txInfo, executionInfo, executedAt }: Token
         badgeThemeName="badge_error"
         badgeColor="$error"
         title={
-          <H3 fontWeight={600}>
-            <TokenAmount
-              value={value}
-              decimals={decimals}
-              tokenSymbol={tokenSymbol}
-              direction={txInfo.direction}
-              preciseAmount
-            />
-          </H3>
+          <YStack alignItems="center" gap="$1">
+            <Text color="$textSecondaryLight" fontSize="$4">
+              Sending
+            </Text>
+            <H3 fontWeight={600} textAlign="center" paddingHorizontal="$4">
+              <TokenAmount
+                value={value}
+                decimals={decimals}
+                tokenSymbol={tokenSymbol}
+                direction={txInfo.direction}
+                preciseAmount
+              />
+              {safePaidFee && (
+                <>
+                  {' · '}
+                  <TokenAmount
+                    value={safePaidFee.amount}
+                    decimals={safePaidFee.decimals}
+                    tokenSymbol={safePaidFee.symbol}
+                    direction={txInfo.direction}
+                    preciseAmount
+                  />
+                </>
+              )}
+            </H3>
+          </YStack>
         }
         submittedAt={executionInfo?.submittedAt || executedAt}
       />

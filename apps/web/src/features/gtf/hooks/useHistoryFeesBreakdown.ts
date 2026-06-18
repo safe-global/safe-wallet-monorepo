@@ -15,7 +15,7 @@ import { selectCurrency } from '@/store/settingsSlice'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { Errors, logError } from '@/services/exceptions'
 import type { FeeRow } from './useFeesPreview'
-import { isGtfSafePaid } from '../utils/isGtfSafePaid'
+import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 
 export type HistoryFeesData = {
   totalFee: { amount: string; currency: string; fiatAmount?: string }

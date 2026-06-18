@@ -16,13 +16,15 @@ import { selectEstimatedFee } from '@/src/store/estimatedFeeSlice'
 import { selectExecutionMethod } from '@/src/store/executionMethodSlice'
 import { selectActiveChain } from '@/src/store/chains'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
-import { getExecutionMethod } from './helpers'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { getExecutionMethod, txRequiresRelay } from './helpers'
 import { parseFeeParams } from '@/src/utils/feeParams'
 import { useOptionalWalletConnectContext } from '@/src/features/WalletConnect/Signer/context/WalletConnectContext'
 import useGasFee from '../../hooks/useGasFee'
 import { useTransactionExecution } from '../../hooks/useTransactionExecution'
 import { useExecutionFunds } from '../../hooks/useExecutionFunds'
 import { useExecutionFlow } from '../../hooks/useExecutionFlow'
+import { IndeterminateSimulationSheet } from '../IndeterminateSimulationSheet/IndeterminateSimulationSheet'
 
 export function ReviewAndExecuteContainer() {
   const { txId } = useLocalSearchParams<{ txId: string }>()
@@ -48,8 +50,11 @@ export function ReviewAndExecuteContainer() {
   // Execution method (considers relay availability and signer type)
   const storedExecutionMethod = useAppSelector(selectExecutionMethod)
   const isRelayAvailable = Boolean(relaysRemaining?.remaining && relaysRemaining.remaining > 0)
+  // GTF Safe-pays txs must relay regardless of the daily quota — derived from the signed payload only.
+  const requiresRelay = txRequiresRelay(txDetails)
+  const isRelayEnabled = chain ? hasFeature(chain, FEATURES.RELAYING) : false
   const executionMethod = chain
-    ? getExecutionMethod(storedExecutionMethod, isRelayAvailable, chain, activeSigner)
+    ? getExecutionMethod(storedExecutionMethod, isRelayAvailable, chain, activeSigner, requiresRelay)
     : ExecutionMethod.WITH_PK
 
   // Gas fees
@@ -81,14 +86,15 @@ export function ReviewAndExecuteContainer() {
   })
 
   // Execution flow (state + handler)
-  const { isExecuting, handleConfirmPress } = useExecutionFlow({
-    txId: txId || '',
-    activeSigner,
-    isBiometricsEnabled,
-    executionMethod,
-    feeParams: estimatedFeeParams,
-    execute,
-  })
+  const { isExecuting, handleConfirmPress, showIndeterminateSheet, dismissIndeterminateSheet, confirmExecuteAnyway } =
+    useExecutionFlow({
+      txId: txId || '',
+      activeSigner,
+      isBiometricsEnabled,
+      executionMethod,
+      feeParams: estimatedFeeParams,
+      execute,
+    })
 
   // Funds check
   const { hasSufficientFunds, isCheckingFunds } = useExecutionFunds({
@@ -127,6 +133,16 @@ export function ReviewAndExecuteContainer() {
     )
   }
 
+  // Safe-pays txs can only be relayed. With no signer fallback possible, surface a terminal state
+  // when the chain doesn't support relaying instead of letting the (double-charging) signer route run.
+  if (requiresRelay && !isRelayEnabled) {
+    return (
+      <View flex={1} justifyContent="center" alignItems="center" paddingHorizontal="$4">
+        <Text textAlign="center">This transaction must be relayed but relay is not available on this network.</Text>
+      </View>
+    )
+  }
+
   return (
     <ReviewAndConfirmView txDetails={txDetails}>
       {isLoadingRelays ? (
@@ -144,6 +160,10 @@ export function ReviewAndExecuteContainer() {
           isExecuting={isExecuting}
           onConfirmPress={handleConfirmPress}
         />
+      )}
+
+      {showIndeterminateSheet && (
+        <IndeterminateSimulationSheet onConfirm={confirmExecuteAnyway} onDismiss={dismissIndeterminateSheet} />
       )}
     </ReviewAndConfirmView>
   )

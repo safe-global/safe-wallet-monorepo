@@ -15,6 +15,7 @@ import { executeRelayTx } from '@/src/services/tx-execution/relayExecutor'
 import { executeLedgerTx } from '@/src/services/tx-execution/ledgerExecutor'
 import { executeWalletConnectTx } from '@/src/services/tx-execution/walletConnectExecutor'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import type { Provider } from '@reown/appkit-common-react-native'
 
 export enum ExecutionStatus {
@@ -41,6 +42,7 @@ export function useTransactionExecution({
   wcProvider,
 }: UseTransactionExecutionProps) {
   const [status, setStatus] = useState<ExecutionStatus>(ExecutionStatus.IDLE)
+  const [simulationError, setSimulationError] = useState<RelaySimulationError | undefined>(undefined)
   const dispatch = useAppDispatch()
   const activeSafe = useDefinedActiveSafe()
   const { safe } = useSafeInfo()
@@ -58,12 +60,13 @@ export function useTransactionExecution({
         feeParams,
       })
     },
-    [ExecutionMethod.WITH_RELAY]: async () => {
+    [ExecutionMethod.WITH_RELAY]: async (acceptUnverifiedSimulation?: boolean) => {
       return await executeRelayTx({
         chain: activeChain,
         activeSafe,
         safe,
         txId,
+        acceptUnverifiedSimulation,
         relayMutation: async (args) => {
           const result = await relayMutation(args).unwrap()
           return result
@@ -93,46 +96,61 @@ export function useTransactionExecution({
     },
   }
 
-  const execute = useCallback(async () => {
-    setStatus(ExecutionStatus.LOADING)
-    dispatch(startExecuting({ txId, executionMethod }))
+  const execute = useCallback(
+    async (acceptUnverifiedSimulation?: boolean) => {
+      setStatus(ExecutionStatus.LOADING)
+      setSimulationError(undefined)
+      dispatch(startExecuting({ txId, executionMethod }))
 
-    try {
-      const executor = executors[executionMethod]
+      try {
+        const executor = executors[executionMethod]
 
-      if (!executor) {
-        throw new Error(`No executor found for execution method: ${executionMethod}`)
+        if (!executor) {
+          throw new Error(`No executor found for execution method: ${executionMethod}`)
+        }
+
+        const pendingTxPayload = await executor(acceptUnverifiedSimulation)
+
+        dispatch(setExecutingSuccess(txId))
+        dispatch(addPendingTx(pendingTxPayload))
+
+        setStatus(ExecutionStatus.PROCESSING)
+      } catch (error) {
+        logger.error('Error executing transaction:', error)
+        setStatus(ExecutionStatus.ERROR)
+        dispatch(setExecutingError({ txId, error: asError(error).message }))
+
+        // CGW's pre-relay simulation surfaces SIMULATION_FAILED / INDETERMINATE_SIMULATION. The UI
+        // branches on this: SIMULATION_FAILED is terminal, INDETERMINATE offers an explicit retry.
+        if (error instanceof RelaySimulationError) {
+          setSimulationError(error)
+        }
+
+        throw error
       }
-
-      const pendingTxPayload = await executor()
-
-      dispatch(setExecutingSuccess(txId))
-      dispatch(addPendingTx(pendingTxPayload))
-
-      setStatus(ExecutionStatus.PROCESSING)
-    } catch (error) {
-      logger.error('Error executing transaction:', error)
-      setStatus(ExecutionStatus.ERROR)
-      dispatch(setExecutingError({ txId, error: asError(error).message }))
-
-      throw error
-    }
-  }, [
-    executionMethod,
-    activeChain,
-    activeSafe,
-    safe,
-    txId,
-    signerAddress,
-    feeParams,
-    relayMutation,
-    wcProvider,
-    dispatch,
-  ])
+    },
+    [
+      executionMethod,
+      activeChain,
+      activeSafe,
+      safe,
+      txId,
+      signerAddress,
+      feeParams,
+      relayMutation,
+      wcProvider,
+      dispatch,
+    ],
+  )
 
   const retry = useCallback(() => {
     execute()
   }, [execute])
 
-  return { status, execute, retry }
+  // Re-runs the relay after the user accepts the risk on an INDETERMINATE_SIMULATION.
+  const retryWithAcceptUnverified = useCallback(() => {
+    execute(true)
+  }, [execute])
+
+  return { status, execute, retry, simulationError, retryWithAcceptUnverified }
 }
