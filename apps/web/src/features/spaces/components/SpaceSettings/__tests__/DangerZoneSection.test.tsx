@@ -30,7 +30,6 @@ describe('DangerZoneSection', () => {
 
   it('passes the viewed space id to useIsAdmin and useIsActiveMember', () => {
     const space: GetSpaceResponse = {
-      id: 42,
       uuid: MOCK_SPACE_UUID,
       name: 'Other Workspace',
       members: [],
@@ -52,7 +51,6 @@ describe('DangerZoneSection', () => {
 
   it('does not fall back to the last-used space when a different space is viewed', () => {
     const viewedSpace: GetSpaceResponse = {
-      id: 99,
       uuid: MOCK_SPACE_UUID_ALT,
       name: 'Viewed',
       members: [],

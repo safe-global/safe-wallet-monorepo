@@ -29,7 +29,7 @@ const renderWithStore = (ui: React.ReactElement) => {
 }
 
 describe('UpdateSpaceForm', () => {
-  const mockSpace = spaceBuilder().with({ id: 123, uuid: MOCK_SPACE_UUID, name: 'Test Space', members: [] }).build()
+  const mockSpace = spaceBuilder().with({ uuid: MOCK_SPACE_UUID, name: 'Test Space', members: [] }).build()
 
   // Helper functions to reduce code duplication
   const setupForm = (space: GetSpaceResponse | undefined, isAdmin: boolean) => {

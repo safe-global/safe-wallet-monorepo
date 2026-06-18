@@ -17,7 +17,6 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const mockSpace: GetSpaceResponse = {
-  id: 1,
   uuid: 'uuid-1',
   name: 'Space Name',
   safeCount: 5,
