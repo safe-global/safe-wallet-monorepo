@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Theme, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ShareContainer } from '@/src/features/Share'
@@ -29,6 +29,14 @@ export function ScanConnect() {
 
   const scanActive = tab === 'scan'
 
+  // The My code tab renders a CPU-heavy QR. Defer mounting it off the first render so the scanner
+  // sheet appears immediately; by the time the user switches tabs it is ready.
+  const [isMyCodeMounted, setIsMyCodeMounted] = useState(false)
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setIsMyCodeMounted(true))
+    return () => cancelAnimationFrame(frame)
+  }, [])
+
   return (
     <View flex={1} backgroundColor="$background">
       {/* Both panels stay laid out and painted; we toggle opacity rather than `display` so revealing
@@ -57,7 +65,7 @@ export function ScanConnect() {
         paddingBottom={controlClearance}
         testID="scan-connect-mycode-panel"
       >
-        <ShareContainer />
+        {isMyCodeMounted || tab === 'mycode' ? <ShareContainer /> : null}
       </View>
 
       <View
