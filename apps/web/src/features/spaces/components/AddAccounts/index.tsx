@@ -101,7 +101,7 @@ const AddAccountsDialogContent = ({ onClose }: { onClose: () => void }) => {
 
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const dispatch = useAppDispatch()
-  const { allSafes: spaceSafes } = useSpaceSafes()
+  const { allSafes: spaceSafes, isLoading: isSpaceSafesLoading } = useSpaceSafes()
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
@@ -211,15 +211,17 @@ const AddAccountsDialogContent = ({ onClose }: { onClose: () => void }) => {
     setValue,
   })
 
-  // Pre-select the safes already in the space when the modal mounts. Applied once; a later
-  // space-safes update must not clobber the user's in-progress selection.
+  // Pre-select the safes already in the space when the modal mounts. Deferred until the space-safes
+  // query resolves — applying it while still loading would commit an empty selection and mark the
+  // existing safes as removed on submit. Applied once; a later update must not clobber the user's
+  // in-progress selection.
   const hasResetForOpen = useRef(false)
   useEffect(() => {
-    if (!hasResetForOpen.current) {
+    if (!hasResetForOpen.current && !isSpaceSafesLoading) {
       reset({ selectedSafes: defaultSelectedSafes })
       hasResetForOpen.current = true
     }
-  }, [defaultSelectedSafes, reset])
+  }, [defaultSelectedSafes, reset, isSpaceSafesLoading])
 
   const onSubmit = handleSubmit(async (data) => {
     if (!isAdmin) {

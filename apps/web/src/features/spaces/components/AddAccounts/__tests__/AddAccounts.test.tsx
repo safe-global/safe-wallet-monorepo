@@ -86,10 +86,11 @@ jest.mock('@/hooks/safes', () => {
 
 let mockIsAdmin = true
 let mockSpaceSafes: Array<{ chainId: string; address: string }> = []
+let mockSpaceSafesLoading = false
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => mockIsAdmin,
-  useSpaceSafes: () => ({ allSafes: mockSpaceSafes }),
+  useSpaceSafes: () => ({ allSafes: mockSpaceSafes, isLoading: mockSpaceSafesLoading }),
 }))
 
 const mockAddSafesToSpace = jest.fn()
@@ -113,6 +114,7 @@ describe('AddAccounts — wallet connection state', () => {
     mockAllOwned = {}
     mockIsAdmin = true
     mockSpaceSafes = []
+    mockSpaceSafesLoading = false
   })
 
   // The modal body that enumerates owned safes only mounts while open, so when closed the hook is
@@ -208,6 +210,8 @@ describe('AddAccounts — admin guard on submit', () => {
     mockWalletValue = { address: '0xWallet' }
     mockAllOwned = {}
     mockIsAdmin = true
+    mockSpaceSafes = []
+    mockSpaceSafesLoading = false
   })
 
   it('blocks submission and shows an error when the user is not an admin', async () => {
@@ -264,6 +268,7 @@ describe('AddAccounts — list fade gradient', () => {
     mockWalletValue = { address: '0xWallet' }
     mockIsAdmin = true
     mockSpaceSafes = []
+    mockSpaceSafesLoading = false
   })
 
   it('hides the fade when the list does not overflow', () => {
@@ -280,5 +285,48 @@ describe('AddAccounts — list fade gradient', () => {
     setListOverflow(true)
 
     expect(screen.getByTestId('add-accounts-list-fade')).toBeInTheDocument()
+  })
+})
+
+describe('AddAccounts — deferred pre-selection while space safes load', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockWalletValue = { address: '0xWallet' }
+    mockAllOwned = {}
+    mockIsAdmin = true
+    mockSpaceSafes = []
+    mockSpaceSafesLoading = false
+  })
+
+  // Regression: the modal body mounts only once the dialog opens, so the space-safes query can
+  // still be loading on first render. Pre-selecting before it resolves commits an empty selection
+  // and marks the existing safes as removed on submit, silently unlinking them.
+  it('waits for space safes to load before pre-selecting, so existing safes are not unlinked', async () => {
+    const address = '0x0000000000000000000000000000000000001234'
+    mockAddSafesToSpace.mockResolvedValue({})
+    mockRemoveSafesFromSpace.mockResolvedValue({})
+
+    // First render: query still loading, no space safes known yet.
+    mockSpaceSafesLoading = true
+    mockSpaceSafes = []
+    const { rerender } = render(<AddAccounts externalOpen onExternalClose={() => {}} />)
+
+    // Query resolves with one existing space safe.
+    mockSpaceSafesLoading = false
+    mockSpaceSafes = [{ chainId: '1', address }]
+    rerender(<AddAccounts externalOpen onExternalClose={() => {}} />)
+
+    // Submit without touching the selection — the existing safe is now pre-checked, so it must not
+    // be treated as removed. `act` flushes the async submit handler so the assertion is reliable
+    // (a `not.toHaveBeenCalled()` inside `waitFor` would pass on its first poll, before the handler
+    // ever runs).
+    const form = screen.getByTestId('add-accounts-button').closest('form')
+    expect(form).not.toBeNull()
+    await act(async () => {
+      fireEvent.submit(form!)
+    })
+
+    expect(mockRemoveSafesFromSpace).not.toHaveBeenCalled()
+    expect(mockAddSafesToSpace).not.toHaveBeenCalled()
   })
 })
