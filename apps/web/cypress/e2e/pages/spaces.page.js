@@ -163,7 +163,7 @@ export function getPendingTxItem(index) {
 
 function getSpaceId() {
   return cy.url().then((url) => {
-    const match = url.match(/spaceId=(\d+)/)
+    const match = url.match(/spaceId=([^&]+)/)
     if (!match) {
       throw new Error('spaceId not found in the URL')
     }
@@ -568,7 +568,7 @@ function submitSpaceName(name) {
 function skipSelectSafesStep() {
   cy.url({ timeout: 30000 }).should('include', onboardingSelectSafesPath).and('include', 'spaceId=')
   cy.url().then((url) => {
-    const match = url.match(/spaceId=(\d+)/)
+    const match = url.match(/spaceId=([^&]+)/)
     if (!match) throw new Error('spaceId not found in URL')
     const spaceId = match[1]
     cy.visit(`${onboardingInviteMembersPath}?spaceId=${spaceId}`)

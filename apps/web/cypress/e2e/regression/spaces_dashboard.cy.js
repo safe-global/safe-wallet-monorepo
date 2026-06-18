@@ -13,7 +13,7 @@ describe('Spaces dashboard tests', () => {
     wallet.connectSigner(owner)
     space.clickOnSignInBtn()
     space.waitForSpacesWelcomeReady()
-    space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.id)
+    space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.uuid)
   })
 
   // ===========================================
@@ -21,7 +21,7 @@ describe('Spaces dashboard tests', () => {
   // ===========================================
 
   it('Verify that the Space dashboard loads correctly after login for a user with an existing Space and Safes', () => {
-    //space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.id)
+    //space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.uuid)
     space.verifySpaceDashboardTotalValueFormat()
     space.verifySpaceDashboardWidgetVisible('Accounts')
     // 9 including multichainsafes
@@ -225,7 +225,7 @@ Safe Selector through Spaces empty dashboard: commented out; remove this block c
     it('Verify that accessing the app without being logged in redirects to the welcome page', () => {
       cy.clearAllCookies()
       cy.clearAllLocalStorage()
-      space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.id)
+      space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.uuid)
 
       cy.contains('Welcome').should('be.visible')
       space.verifyUrlIncludesPath('/welcome')
@@ -252,7 +252,7 @@ describe('Spaces empty dashboard tests', () => {
     cy.visit(constants.spacesUrl)
     wallet.connectSigner(owner)
     space.clickOnSignInBtn()
-    space.visitSpaceDashboard(staticSpaces.emptyGettingStarted.id)
+    space.visitSpaceDashboard(staticSpaces.emptyGettingStarted.uuid)
   })
 
   describe('Empty State - Getting Started', () => {
