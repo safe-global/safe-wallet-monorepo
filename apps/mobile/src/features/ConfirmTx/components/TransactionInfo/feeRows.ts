@@ -20,6 +20,7 @@ export interface FeeLine {
 
 export interface FeesBreakdown {
   paidFromSafe: boolean
+  gasNotYetKnown: boolean
   maxGasFee: FeeLine
   maxGasFeeFiat?: number
   totalOutgoing: FeeLine[]
@@ -62,6 +63,9 @@ export const buildFeesBreakdown = ({
   })
 
   const gasWei = ((BigInt(safeTxGas) + BigInt(baseGas)) * BigInt(gasPrice)).toString()
+
+  // Signer-pays without a fixed gas price yet: the real fee is only known at execution.
+  const gasNotYetKnown = !paidFromSafe && BigInt(gasWei) === 0n
 
   // Safe-pays: fee is denominated in the gas token. Signer-pays: in the native currency.
   const isNativeGasToken = !gasToken || sameAddress(gasToken, ZERO_ADDRESS)
@@ -109,6 +113,7 @@ export const buildFeesBreakdown = ({
 
   return {
     paidFromSafe,
+    gasNotYetKnown,
     maxGasFee,
     maxGasFeeFiat,
     totalOutgoing: lines,

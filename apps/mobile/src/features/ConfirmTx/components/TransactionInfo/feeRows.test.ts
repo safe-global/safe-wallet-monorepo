@@ -23,6 +23,11 @@ const EXPECTED_NATIVE_GAS_WEI = '41022563851386544'
 
 describe('buildFeesBreakdown', () => {
   describe('Safe-pays (native gas token)', () => {
+    it('never flags Safe-pays gas as not yet known (gas price is fixed in the payload)', () => {
+      const result = buildFeesBreakdown({ detailedExecutionInfo: SAFE_PAYS_NATIVE, nativeCurrency: NATIVE })
+      expect(result.gasNotYetKnown).toBe(false)
+    })
+
     it('computes the deterministic gas fee in the native currency', () => {
       const result = buildFeesBreakdown({ detailedExecutionInfo: SAFE_PAYS_NATIVE, nativeCurrency: NATIVE })
 
@@ -86,6 +91,17 @@ describe('buildFeesBreakdown', () => {
       const result = buildFeesBreakdown({ detailedExecutionInfo: SIGNER_PAYS, nativeCurrency: NATIVE })
       expect(result.paidFromSafe).toBe(false)
       expect(result.maxGasFee.symbol).toBe('MATIC')
+    })
+
+    it('flags the gas fee as not yet known when the gas price is zero', () => {
+      const result = buildFeesBreakdown({ detailedExecutionInfo: SIGNER_PAYS, nativeCurrency: NATIVE })
+      expect(result.gasNotYetKnown).toBe(true)
+    })
+
+    it('does not flag gas as unknown once a gas price is set', () => {
+      const withGasPrice = { ...SIGNER_PAYS, gasPrice: '443094379592' } as unknown as MultisigExecutionDetails
+      const result = buildFeesBreakdown({ detailedExecutionInfo: withGasPrice, nativeCurrency: NATIVE })
+      expect(result.gasNotYetKnown).toBe(false)
     })
   })
 

@@ -6,7 +6,7 @@ import type {
   MultisigExecutionDetails,
   TransactionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { ListTable } from '../ListTable/ListTable'
+import { ListTable, type ListTableItem } from '../ListTable/ListTable'
 import { InfoSheet } from '@/src/components/InfoSheet/InfoSheet'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TokenAmount } from '@/src/components/TokenAmount'
@@ -91,44 +91,53 @@ export function FeesBreakdown({
     return null
   }
 
-  return (
-    <ListTable
-      testID="fees-breakdown"
-      items={[
-        {
-          label: <LabelWithInfo label="Execution fee" title="Execution fee" info={EXECUTION_FEE_INFO} />,
-          render: () => (
-            <Text fontSize="$4" textAlign="right">
-              FREE
-            </Text>
-          ),
-        },
-        {
-          label: <LabelWithInfo label="Max gas fee" title="Gas fee" info={gasFeeInfo(breakdown.paidFromSafe)} />,
-          render: () => <FeeAmount line={breakdown.maxGasFee} fiat={breakdown.maxGasFeeFiat} currency={currency} />,
-        },
-        {
-          label: 'Total outgoing',
-          render: () => (
-            <View alignItems="flex-end" gap="$1">
-              {breakdown.totalOutgoing.map((line) => (
-                <TokenAmount
-                  key={`${line.symbol}-${line.decimals}`}
-                  value={line.amount}
-                  decimals={line.decimals}
-                  tokenSymbol={line.symbol}
-                  textProps={{ fontSize: '$4' }}
-                />
-              ))}
-              {breakdown.totalOutgoingFiat !== undefined && (
-                <Text color="$textSecondaryLight">{formatCurrency(breakdown.totalOutgoingFiat, currency)}</Text>
-              )}
-            </View>
-          ),
-        },
-      ]}
-    />
-  )
+  const items: ListTableItem[] = [
+    {
+      label: <LabelWithInfo label="Execution fee" title="Execution fee" info={EXECUTION_FEE_INFO} />,
+      render: () => (
+        <Text fontSize="$4" textAlign="right">
+          FREE
+        </Text>
+      ),
+    },
+    {
+      label: <LabelWithInfo label="Max gas fee" title="Gas fee" info={gasFeeInfo(breakdown.paidFromSafe)} />,
+      render: () =>
+        breakdown.gasNotYetKnown ? (
+          <Text color="$textSecondaryLight" fontSize="$4" textAlign="right">
+            Calculated at execution
+          </Text>
+        ) : (
+          <FeeAmount line={breakdown.maxGasFee} fiat={breakdown.maxGasFeeFiat} currency={currency} />
+        ),
+    },
+  ]
+
+  // Total outgoing depends on the gas fee; with the fee unknown until execution there is nothing
+  // meaningful to total, so the row is hidden (mirrors web's signer-pays preview).
+  if (!breakdown.gasNotYetKnown) {
+    items.push({
+      label: 'Total outgoing',
+      render: () => (
+        <View alignItems="flex-end" gap="$1">
+          {breakdown.totalOutgoing.map((line) => (
+            <TokenAmount
+              key={`${line.symbol}-${line.decimals}`}
+              value={line.amount}
+              decimals={line.decimals}
+              tokenSymbol={line.symbol}
+              textProps={{ fontSize: '$4' }}
+            />
+          ))}
+          {breakdown.totalOutgoingFiat !== undefined && (
+            <Text color="$textSecondaryLight">{formatCurrency(breakdown.totalOutgoingFiat, currency)}</Text>
+          )}
+        </View>
+      ),
+    })
+  }
+
+  return <ListTable testID="fees-breakdown" items={items} />
 }
 
 const gasFeeInfo = (paidFromSafe: boolean): string =>
