@@ -462,22 +462,21 @@ export function ensureReadyToCreateSpace() {
   // Wait for the page to settle: either the spaces list or the create button must be visible
   cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 
-  // Use the live jQuery collection so the count reflects what's actually in the DOM now
-  cy.get('body')
-    .find(spaceCard)
-    .then(($cards) => {
-      if ($cards.length >= MAX_SPACES) {
-        // At the limit — delete one space to free a slot
-        const firstCardName = $cards.first().find(spaceCardName).text().trim()
-        cy.wrap($cards.first()).within(() => {
-          cy.get(spaceCardContextMenuBtn).click({ force: true })
-        })
-        cy.get(contectMenuRemoveBtn).click({ force: true })
-        cy.get(spaceConfirmNameInput).type(firstCardName)
-        cy.get(spaceConfirmDeleteBtn).should('be.enabled').click()
-        cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
-      }
-    })
+  // Read the DOM synchronously — zero cards is a valid state, so avoid the retrying `.find()` command
+  cy.get('body').then(($body) => {
+    const $cards = $body.find(spaceCard)
+    if ($cards.length >= MAX_SPACES) {
+      // At the limit — delete one space to free a slot
+      const firstCardName = $cards.first().find(spaceCardName).text().trim()
+      cy.wrap($cards.first()).within(() => {
+        cy.get(spaceCardContextMenuBtn).click({ force: true })
+      })
+      cy.get(contectMenuRemoveBtn).click({ force: true })
+      cy.get(spaceConfirmNameInput).type(firstCardName)
+      cy.get(spaceConfirmDeleteBtn).should('be.enabled').click()
+      cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
+    }
+  })
 
   // Wait for either the create button or the create-space form to settle after deletion/redirect
   cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
