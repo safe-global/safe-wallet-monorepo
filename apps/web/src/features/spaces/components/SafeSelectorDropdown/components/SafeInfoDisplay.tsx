@@ -5,6 +5,7 @@ import { cn } from '@/utils/cn'
 import { getInitials, getSafeDisplayInfo } from '../utils'
 import ThresholdBadge from './ThresholdBadge'
 import CopyAddressButton from './CopyAddressButton'
+import TruncatedText from './TruncatedText'
 
 export interface SafeInfoDisplayProps {
   name: string
@@ -28,9 +29,7 @@ const SafeInfoDisplay = ({ name, address, className, threshold, owners }: SafeIn
         {threshold !== undefined && owners !== undefined && <ThresholdBadge threshold={threshold} owners={owners} />}
       </div>
       <div className="flex flex-col items-start flex-1 min-w-0">
-        <Typography variant="paragraph-small-medium" className="truncate">
-          {displayName}
-        </Typography>
+        <TruncatedText variant="paragraph-small-medium" className="max-w-full" text={displayName} />
         <div className="flex items-center gap-1 min-w-0">
           <Typography variant="paragraph-mini" color="muted" className="truncate">
             {shortAddress}

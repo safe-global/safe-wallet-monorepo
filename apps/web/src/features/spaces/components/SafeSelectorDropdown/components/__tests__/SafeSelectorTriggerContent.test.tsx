@@ -2,6 +2,14 @@ import { render } from '@testing-library/react'
 import SafeSelectorTriggerContent from '../SafeSelectorTriggerContent'
 import type { SafeItemData } from '../../types'
 
+// jsdom lacks ResizeObserver; TruncatedText (the name line) sets one up to detect overflow.
+class ResizeObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+;(globalThis as unknown as { ResizeObserver: typeof ResizeObserverStub }).ResizeObserver = ResizeObserverStub
+
 const mockUseSafeDisplayName = jest.fn()
 
 jest.mock('@/hooks/useSafeDisplayName', () => ({
@@ -56,6 +64,16 @@ describe('SafeSelectorTriggerContent', () => {
     const { getByText } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" />)
 
     expect(getByText('Polygon Name')).toBeInTheDocument()
+  })
+
+  it('renders the full name without character truncation (CSS handles clipping)', () => {
+    const fullName = 'Nested safe with more owners than fit'
+    mockUseSafeDisplayName.mockReturnValue(fullName)
+    const item = createItem()
+
+    const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" />)
+
+    expect(getByTestId('safe-selector-trigger-name')).toHaveTextContent(fullName)
   })
 
   it('displays the address when no name exists for the current chain', () => {

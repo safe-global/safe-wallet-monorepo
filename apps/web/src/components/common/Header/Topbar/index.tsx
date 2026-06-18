@@ -110,7 +110,7 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             one line. When the header (container query — accounts for sidebar + route) is too
             narrow to fit both groups, this drops onto its own full-width row below the actions.
             Below md (sidebar hidden) the wrapped rows align right; at/above md they align left. */}
-        <div className="shrink-0 flex items-center @max-[1100px]:order-1 @max-[1100px]:basis-full max-[899px]:justify-end">
+        <div className="shrink-0 flex min-w-0 items-center @max-[1100px]:order-1 @max-[1100px]:basis-full max-[899px]:justify-end">
           {isSettingsWithoutSafe ? (
             <SafeLogo />
           ) : showSpaceSafeBar ? (

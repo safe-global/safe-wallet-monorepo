@@ -120,7 +120,9 @@ function SafeSelectorDropdown({
         className={cn(
           // The wrapper's overflow-hidden clips this focus-visible ring into stray top/bottom bars,
           // so suppress it — the card shows no focus ring by design (wrapper sets focus:ring-0).
-          '-m-4 flex-1 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-6 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent focus-visible:ring-0 focus-visible:border-0 [&_[data-slot=select-value]]:pr-0 relative',
+          // min-w-0 lets the trigger shrink below the (nowrap) name's intrinsic width so the name
+          // truncates inside the card instead of forcing the whole header wider than the viewport.
+          '-m-4 flex-1 min-w-0 border-0 shadow-none bg-transparent dark:bg-transparent py-0 pl-6 hover:bg-transparent dark:hover:bg-transparent data-[state=open]:bg-transparent focus-visible:ring-0 focus-visible:border-0 [&_[data-slot=select-value]]:pr-0 relative',
           variants.triggerClass,
           isDisabled && 'cursor-not-allowed opacity-50',
         )}

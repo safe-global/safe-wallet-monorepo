@@ -150,7 +150,8 @@ function SelectItem({ className, children, ...props }: SelectPrimitive.Item.Prop
       )}
       {...props}
     >
-      <SelectPrimitive.ItemText className="flex flex-1 gap-2 shrink-0 whitespace-nowrap">
+      {/* min-w-0: let item content with `truncate` shrink instead of forcing the popup wider. */}
+      <SelectPrimitive.ItemText className="flex min-w-0 flex-1 gap-2 shrink-0 whitespace-nowrap">
         {children}
       </SelectPrimitive.ItemText>
       <SelectPrimitive.ItemIndicator

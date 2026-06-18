@@ -127,7 +127,10 @@ function SpaceSafeBar() {
         )
 
   return (
-    <div data-testid="safe-level-navigation" className="flex flex-wrap items-center gap-2 max-[899px]:justify-end">
+    <div
+      data-testid="safe-level-navigation"
+      className="flex min-w-0 flex-wrap items-center gap-2 max-[899px]:justify-end"
+    >
       {/* Back-link + safe selector are one unit so they never split across rows. Under 430px
           the group dissolves (display:contents) so the back-link joins the nested/network
           controls on one row and the safe selector drops to its own full-width row below. */}

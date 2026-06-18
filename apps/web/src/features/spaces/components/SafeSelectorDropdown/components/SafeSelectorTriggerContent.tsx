@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Typography } from '@/components/ui/typography'
 import { getInitials, getSafeDisplayInfo } from '../utils'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
+import TruncatedText from './TruncatedText'
 import SafeBalanceBlock from './SafeBalanceBlock'
 import ThresholdBadge from './ThresholdBadge'
 import CopyAddressButton from './CopyAddressButton'
@@ -33,9 +34,12 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
         <ThresholdBadge threshold={selectedItem.threshold} owners={selectedItem.owners} />
       </div>
       <div className="flex flex-col items-start flex-1 min-w-0" data-testid="safe-selector-trigger-details">
-        <Typography data-testid="safe-selector-trigger-name" variant="paragraph-small-medium" className="truncate">
-          {displayName}
-        </Typography>
+        <TruncatedText
+          data-testid="safe-selector-trigger-name"
+          variant="paragraph-small-medium"
+          className="max-w-full"
+          text={displayName}
+        />
         <div className="flex items-center gap-1 min-w-0">
           <Typography data-testid="safe-selector-trigger-address" variant="paragraph-mini" color="muted">
             {shortAddress}

@@ -2,6 +2,14 @@ import { render, screen } from '@testing-library/react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import SafeInfoDisplay from '../SafeInfoDisplay'
 
+// jsdom lacks ResizeObserver; TruncatedText (the name line) sets one up to detect overflow.
+class ResizeObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+;(globalThis as unknown as { ResizeObserver: typeof ResizeObserverStub }).ResizeObserver = ResizeObserverStub
+
 const address = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 const baseProps = {
   name: 'My Safe',
@@ -28,6 +36,12 @@ describe('SafeInfoDisplay', () => {
     render(<SafeInfoDisplay {...baseProps} />)
     expect(screen.getByText('My Safe')).toBeInTheDocument()
     expect(screen.getByTestId('safe-item-copy-address')).toBeInTheDocument()
+  })
+
+  it('renders a long name in full without character truncation', () => {
+    const longName = 'Nested safe with more owners than fit'
+    render(<SafeInfoDisplay name={longName} address={address} />)
+    expect(screen.getByText(longName)).toBeInTheDocument()
   })
 
   it('shows the shortened address on the address line', () => {
