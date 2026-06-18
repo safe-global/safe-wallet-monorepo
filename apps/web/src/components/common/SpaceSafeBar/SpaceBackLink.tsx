@@ -1,9 +1,10 @@
+import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import BackLink from '@/components/common/BackLink'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { getDeterministicColor } from '@/utils/colors'
 
 type SpaceBackLinkProps = {
-  space: { id: number; name: string }
+  space: Pick<GetSpaceResponse, 'name'>
   onClick: () => void
 }
 

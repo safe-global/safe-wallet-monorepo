@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import { useSpaceMembersByStatus, useCurrentMembership } from '../useSpaceMembers'
+import { SPACE_REFRESH_OPTIONS } from '../refreshOptions'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
 
@@ -45,7 +46,10 @@ describe('useAllMembers (via useSpaceMembersByStatus / useCurrentMembership)', (
 
     renderHook(() => useSpaceMembersByStatus())
 
-    expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
+    expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith(expect.anything(), {
+      skip: true,
+      ...SPACE_REFRESH_OPTIONS,
+    })
   })
 
   it('skips the members query when there is no current spaceId', () => {
@@ -53,7 +57,10 @@ describe('useAllMembers (via useSpaceMembersByStatus / useCurrentMembership)', (
 
     renderHook(() => useSpaceMembersByStatus())
 
-    expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
+    expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith(expect.anything(), {
+      skip: true,
+      ...SPACE_REFRESH_OPTIONS,
+    })
   })
 
   it('fires the members query with the spaceId when authenticated and spaceId is set', () => {
@@ -61,7 +68,10 @@ describe('useAllMembers (via useSpaceMembersByStatus / useCurrentMembership)', (
 
     renderHook(() => useSpaceMembersByStatus())
 
-    expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID }, { skip: false })
+    expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith(
+      { spaceId: MOCK_SPACE_UUID },
+      { skip: false, ...SPACE_REFRESH_OPTIONS },
+    )
   })
 
   it('prefers the explicit spaceId arg over the current spaceId', () => {
@@ -69,6 +79,36 @@ describe('useAllMembers (via useSpaceMembersByStatus / useCurrentMembership)', (
 
     renderHook(() => useCurrentMembership(MOCK_SPACE_UUID_ALT))
 
-    expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID_ALT }, { skip: false })
+    expect(mockUseMembersGetUsersV1Query).toHaveBeenCalledWith(
+      { spaceId: MOCK_SPACE_UUID_ALT },
+      { skip: false, ...SPACE_REFRESH_OPTIONS },
+    )
+  })
+
+  describe('revoked membership (failed refetch)', () => {
+    const staleMembers = [
+      { status: 'ACTIVE', user: { id: 'u1' } },
+      { status: 'INVITED', user: { id: 'u2' } },
+    ]
+
+    it.each([403, 404])('drops access when the refetch returns %i, ignoring stale data', (status) => {
+      mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
+      mockUseMembersGetUsersV1Query.mockReturnValue({ data: { members: staleMembers }, error: { status } })
+
+      const { result } = renderHook(() => useSpaceMembersByStatus())
+
+      expect(result.current.activeMembers).toEqual([])
+      expect(result.current.invitedMembers).toEqual([])
+    })
+
+    it('keeps the stale member list on a transient error so a blip does not drop access', () => {
+      mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
+      mockUseMembersGetUsersV1Query.mockReturnValue({ data: { members: staleMembers }, error: { status: 500 } })
+
+      const { result } = renderHook(() => useSpaceMembersByStatus())
+
+      expect(result.current.activeMembers).toHaveLength(1)
+      expect(result.current.invitedMembers).toHaveLength(1)
+    })
   })
 })

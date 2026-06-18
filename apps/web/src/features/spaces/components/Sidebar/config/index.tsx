@@ -17,6 +17,7 @@ import {
   PanelRight,
   EllipsisVertical,
   Shield,
+  History,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
@@ -42,6 +43,12 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
     icon: BookUser,
     label: 'Address book',
     href: AppRoutes.spaces.addressBook,
+  },
+  {
+    icon: History,
+    label: 'Activity',
+    href: AppRoutes.spaces.activity,
+    activeMemberOnly: true,
   },
 ]
 

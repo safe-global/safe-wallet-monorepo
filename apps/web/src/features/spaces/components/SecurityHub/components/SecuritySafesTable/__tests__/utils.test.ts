@@ -1,5 +1,82 @@
-import { formatBalance } from '../utils'
+import type { ScanResult, SecurityGrade } from '@/features/security/types'
+import type { SpaceSafeEntry } from '../../../types'
+import { formatBalance, getAggregateNonPassingCount, getNonPassingCount } from '../utils'
 import { DASH } from '../constants'
+
+const mkResult = (status: ScanResult['status'], severity: SecurityGrade = 'Low'): ScanResult => ({
+  status,
+  severity,
+  score: status === 'clear' ? 100 : 30,
+  evidence: [],
+  remediation: '',
+  lastChecked: '2026-06-12T00:00:00Z',
+})
+
+const scanKey = (address: string, chainId: string) => `${address.toLowerCase()}:${chainId}`
+
+describe('getNonPassingCount', () => {
+  it('returns 0 for undefined results (Safe never scanned)', () => {
+    expect(getNonPassingCount(undefined)).toBe(0)
+  })
+
+  it('returns 0 when every check passes', () => {
+    expect(
+      getNonPassingCount({
+        a: mkResult('clear'),
+        b: mkResult('clear'),
+      }),
+    ).toBe(0)
+  })
+
+  it('counts both issue and partial as non-passing (matches panel applicableCount - passing)', () => {
+    // 1 issue + 2 partial = 3 non-passing — the same number the panel header surfaces.
+    expect(
+      getNonPassingCount({
+        a: mkResult('issue', 'High'),
+        b: mkResult('partial', 'High'),
+        c: mkResult('partial', 'Medium'),
+        d: mkResult('clear'),
+      }),
+    ).toBe(3)
+  })
+
+  it('excludes not_applicable and inconclusive (mirrors computeSummary)', () => {
+    expect(
+      getNonPassingCount({
+        a: mkResult('issue'),
+        b: mkResult('not_applicable'),
+        c: mkResult('inconclusive'),
+      }),
+    ).toBe(1)
+  })
+})
+
+describe('getAggregateNonPassingCount', () => {
+  const safe: SpaceSafeEntry = {
+    address: '0xabc0000000000000000000000000000000000001',
+    chainId: '1',
+    name: 'Multi',
+    isMultichain: true,
+    chainEntries: [
+      { chainId: '1', isDeployed: true },
+      { chainId: '137', isDeployed: true },
+      { chainId: '10', isDeployed: true },
+    ] as SpaceSafeEntry['chainEntries'],
+  }
+
+  it('sums non-passing counts across every chain entry', () => {
+    const scanResults = {
+      [scanKey(safe.address, '1')]: { a: mkResult('issue'), b: mkResult('partial') }, // 2
+      [scanKey(safe.address, '137')]: { a: mkResult('clear') }, //                      0
+      [scanKey(safe.address, '10')]: { a: mkResult('issue'), b: mkResult('issue') }, // 2
+    } as Record<string, Record<string, ScanResult>>
+    expect(getAggregateNonPassingCount(safe, scanResults, scanKey)).toBe(4)
+  })
+
+  it('treats missing scan results as 0 (chain not scanned yet)', () => {
+    expect(getAggregateNonPassingCount(safe, {}, scanKey)).toBe(0)
+  })
+})
 
 describe('formatBalance', () => {
   describe('zero balance (WA-2354)', () => {

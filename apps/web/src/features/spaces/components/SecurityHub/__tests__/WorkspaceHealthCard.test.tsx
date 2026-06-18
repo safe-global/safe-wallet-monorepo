@@ -118,10 +118,10 @@ describe('WorkspaceHealthCard', () => {
         isScanning={false}
       />,
     )
-    expect(screen.getByText('1 At risk')).toBeInTheDocument()
+    expect(screen.getByText('At risk · 1 account')).toBeInTheDocument()
   })
 
-  it('shows the Healthy band label when every account passes', () => {
+  it('shows a Healthy filter chip with the all-clear safe count when every account passes', () => {
     render(
       <WorkspaceHealthCard
         {...baseProps}
@@ -133,7 +133,33 @@ describe('WorkspaceHealthCard', () => {
         isScanning={false}
       />,
     )
-    expect(screen.getByText('Healthy')).toBeInTheDocument()
+    expect(screen.getByText('Healthy · 2 accounts')).toBeInTheDocument()
+  })
+
+  it('renders a Critical filter chip when a Safe has a Critical-severity finding', () => {
+    const withCritical = { ...allClear, account_setup: mkResult('issue', 'Critical') }
+    render(
+      <WorkspaceHealthCard
+        {...baseProps}
+        safes={[safe(SAFE_A)]}
+        scanResults={{ [scanKey(SAFE_A, '1')]: withCritical }}
+        isScanning={false}
+      />,
+    )
+    expect(screen.getByText('Critical · 1 account')).toBeInTheDocument()
+  })
+
+  it('renders a Needs review filter chip when a Safe has only partial / Medium findings', () => {
+    const withPartial = { ...allClear, guard: mkResult('partial', 'Medium') }
+    render(
+      <WorkspaceHealthCard
+        {...baseProps}
+        safes={[safe(SAFE_A)]}
+        scanResults={{ [scanKey(SAFE_A, '1')]: withPartial }}
+        isScanning={false}
+      />,
+    )
+    expect(screen.getByText('Needs review · 1 account')).toBeInTheDocument()
   })
 
   it('shows an incomplete-scan note when the last scan was partial and not running', () => {

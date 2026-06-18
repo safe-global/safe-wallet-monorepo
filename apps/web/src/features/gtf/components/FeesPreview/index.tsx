@@ -26,7 +26,7 @@ const onActivateKey = (open: () => void) => (e: KeyboardEvent) => {
     open()
   }
 }
-const HOW_FEES_WORK_URL = 'https://help.safe.global/en/articles/618701-safe-wallet-gas-fees-faq'
+const HOW_FEES_WORK_URL = 'https://help.safe.global/articles/9993850744-safewallet-gas-fees-faq'
 
 const TotalOutgoingSection = ({ totalOutgoing }: { totalOutgoing: TotalOutgoing }): ReactElement => (
   <div className={css.totalOutgoing}>

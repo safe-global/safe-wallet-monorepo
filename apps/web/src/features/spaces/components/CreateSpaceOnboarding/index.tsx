@@ -20,6 +20,7 @@ import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 import useOnboardingExit from './hooks/useOnboardingExit'
+import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 
 const ONBOARDING_STEP = 1
 const FORM_ID = 'create-space-form'
@@ -49,7 +50,10 @@ const CreateSpaceOnboarding = (): ReactElement => {
   const [hasUserEdited, setHasUserEdited] = useState(false)
   const nameReg = register('name', {
     required: true,
-    maxLength: { value: 30, message: 'Workspace name must be 30 characters or less' },
+    maxLength: {
+      value: SPACE_NAME_MAX_LENGTH,
+      message: `Workspace name must be ${SPACE_NAME_MAX_LENGTH} characters or less`,
+    },
     pattern: { value: /^[a-zA-Z0-9 ]+$/, message: 'Workspace name must not contain special characters' },
     validate: (value) => value?.trim() !== '',
   })

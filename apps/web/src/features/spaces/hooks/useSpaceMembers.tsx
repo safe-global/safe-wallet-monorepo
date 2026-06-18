@@ -5,13 +5,21 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useMemo } from 'react'
 import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
+import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 
 // Stable reference so consumers relying on identity don't re-run on every render
 const EMPTY_MEMBERS: MemberDto[] = []
+
+// A revoked membership makes the members endpoint return 403, a deleted space 404. Both mean the
+// caller no longer has access. Transient errors (5xx/network) are excluded so a blip doesn't drop access.
+const isMembershipRevoked = (error: FetchBaseQueryError | SerializedError | undefined): boolean =>
+  !!error && 'status' in error && (error.status === 403 || error.status === 404)
 
 export enum MemberStatus {
   INVITED = 'INVITED',
@@ -40,11 +48,14 @@ const useAllMembers = (spaceId?: string) => {
   const currentSpaceId = useCurrentSpaceId()
   const actualSpaceId = spaceId ?? currentSpaceId
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { data: currentData } = useMembersGetUsersV1Query(
+  const { data, error } = useMembersGetUsersV1Query(
     { spaceId: actualSpaceId ?? '' },
-    { skip: !isUserSignedIn || !actualSpaceId },
+    { skip: !isUserSignedIn || !actualSpaceId, ...SPACE_REFRESH_OPTIONS },
   )
-  return currentData?.members ?? EMPTY_MEMBERS
+  // RTK keeps the last successful `data` on a failed refetch. When our membership is revoked in
+  // another session the refetch 403s, so drop access instead of returning the stale member list.
+  if (isMembershipRevoked(error)) return EMPTY_MEMBERS
+  return data?.members ?? EMPTY_MEMBERS
 }
 
 export const useSpaceMembersByStatus = () => {

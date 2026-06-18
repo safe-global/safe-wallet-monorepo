@@ -4,18 +4,41 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import EmailInfo from '@/components/common/EmailInfo'
 import { NetworkLogosList } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { BookUser } from 'lucide-react'
+import { HardDrive } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from './SpaceAddressBookActions'
+import LocalContactActions from './LocalContactActions'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/utils/cn'
-import { formatDate } from './ActivityLog'
+import { formatDate } from '@/features/spaces/utils'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
+import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
 import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
   isLocal: boolean
-  isPrivate?: boolean
   isDuplicate?: boolean
+}
+
+// Resolution order: space member name → wallet address → email. Shared
+// address-book names are member-editable and are deliberately not used here.
+function AddedBy({ createdBy, memberName }: { createdBy: string; memberName?: string }) {
+  if (memberName) {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        <InitialsAvatar name={memberName} size="xsmall" rounded />
+        <span className="min-w-0 truncate text-sm">{memberName}</span>
+      </span>
+    )
+  }
+
+  if (isAddress(createdBy)) {
+    return (
+      <EthHashInfo address={createdBy} avatarSize={20} showName={false} showPrefix={false} showCopyButton={false} />
+    )
+  }
+
+  return <EmailInfo email={createdBy} size="xsmall" />
 }
 
 type SpaceAddressBookTableProps = {
@@ -32,6 +55,7 @@ function SpaceAddressBookTable({
   renderExtraAction,
 }: SpaceAddressBookTableProps) {
   const isMobile = useIsMobile()
+  const resolveMemberName = useMemberNameResolver()
   const hasMiddleColumn = showAddedBy || showLastUpdated
 
   const columns: DataTableColumn<AddressBookEntry>[] = [
@@ -91,14 +115,11 @@ function SpaceAddressBookTable({
     </Tooltip>
   )
 
-  // Added-by / Last-updated content — used in the desktop column and the mobile detail row
+  // Added-by / Last-updated content — used in the desktop column and the mobile detail row.
+  // Resolution order: space member name → wallet address → email.
   const renderAddedBy = (entry: AddressBookEntry) =>
     showAddedBy && entry.createdBy ? (
-      isAddress(entry.createdBy) ? (
-        <EthHashInfo address={entry.createdBy} avatarSize={20} onlyName showPrefix={false} showCopyButton={false} />
-      ) : (
-        <EmailInfo email={entry.createdBy} size="xsmall" />
-      )
+      <AddedBy createdBy={entry.createdBy} memberName={resolveMemberName(entry.createdByUserId)} />
     ) : showLastUpdated ? (
       <span className="text-muted-foreground text-xs">{formatDate(entry.updatedAt || entry.createdAt)}</span>
     ) : null
@@ -108,14 +129,14 @@ function SpaceAddressBookTable({
       case 'name':
         return (
           <div className={cn('flex items-center gap-1.5 overflow-hidden', entry.isDuplicate && 'line-through')}>
-            {entry.isLocal && <BookUser className="text-muted-foreground size-4 flex-shrink-0" />}
+            {entry.isLocal && <HardDrive className="text-muted-foreground size-4 flex-shrink-0" />}
             <span className="min-w-0 truncate">{entry.name}</span>
           </div>
         )
 
       case 'address':
         return (
-          <div className="text-[0.8em]">
+          <div className="text-[0.8em] font-mono">
             <EthHashInfo
               address={entry.address}
               shortAddress={isMobile}
@@ -139,7 +160,7 @@ function SpaceAddressBookTable({
         return (
           <span className="inline-flex items-center justify-end gap-1">
             {renderExtraAction?.(entry)}
-            {!entry.isLocal && !entry.isPrivate && <SpaceAddressBookActions entry={entry} />}
+            {entry.isLocal ? <LocalContactActions entry={entry} /> : <SpaceAddressBookActions entry={entry} />}
           </span>
         )
 

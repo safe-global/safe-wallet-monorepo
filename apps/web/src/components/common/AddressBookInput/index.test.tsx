@@ -1,5 +1,5 @@
 import { act } from 'react'
-import { fireEvent, render, waitFor } from '@/tests/test-utils'
+import { fireEvent, render, waitFor, within } from '@/tests/test-utils'
 import { FormProvider, useForm } from 'react-hook-form'
 import AddressBookInput from '.'
 import { AddressBookSourceProvider } from '../AddressBookSourceProvider'
@@ -11,22 +11,16 @@ import { FEATURES } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { AddressBook } from '@/store/addressBookSlice'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useGetPrivateAddressBook, useGetSpaceAddressBook } from '@/features/spaces'
-
-jest.mock('@/features/spaces/hooks/useGetPrivateAddressBook', () => ({
-  __esModule: true,
-  default: jest.fn((): SpaceAddressBookItemDto[] => []),
-}))
+import { useGetSpaceAddressBook } from '@/features/spaces'
 
 jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
   __esModule: true,
   default: jest.fn((): SpaceAddressBookItemDto[] => []),
 }))
 
-const mockUseGetPrivateAddressBook = useGetPrivateAddressBook as jest.MockedFunction<typeof useGetPrivateAddressBook>
 const mockUseGetSpaceAddressBook = useGetSpaceAddressBook as jest.MockedFunction<typeof useGetSpaceAddressBook>
 
-const privateContactBuilder = (overrides: Partial<SpaceAddressBookItemDto> = {}): SpaceAddressBookItemDto => ({
+const spaceContactBuilder = (overrides: Partial<SpaceAddressBookItemDto> = {}): SpaceAddressBookItemDto => ({
   name: 'Server Contact',
   address: checksumAddress(faker.finance.ethereumAddress()),
   chainIds: ['4'],
@@ -125,7 +119,6 @@ describe('AddressBookInput', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseGetPrivateAddressBook.mockReturnValue([])
     mockUseGetSpaceAddressBook.mockReturnValue([])
     jest.spyOn(useChains, 'default').mockImplementation(() => ({
       configs: [mockChain],
@@ -304,9 +297,9 @@ describe('AddressBookInput', () => {
     await waitFor(() => expect(utils.queryByText('add it to your address book', { exact: false })).toBeNull())
   })
 
-  it('should show a cloud icon for a server-stored (private) contact even in a spaceOnly context', async () => {
-    const privateContact = privateContactBuilder({ name: 'Server Contact' })
-    mockUseGetPrivateAddressBook.mockReturnValue([privateContact])
+  it('should group a server-stored (space) contact under the workspace header with the workspace icon', async () => {
+    const spaceContact = spaceContactBuilder({ name: 'Server Contact' })
+    mockUseGetSpaceAddressBook.mockReturnValue([spaceContact])
 
     const name = 'recipient'
     const SpaceForm = () => {
@@ -330,11 +323,20 @@ describe('AddressBookInput', () => {
       fireEvent.mouseUp(input)
     })
 
-    await waitFor(() => expect(utils.getByText('Server Contact', { exact: false })).toBeDefined())
-    expect(utils.getByTestId('CloudOutlinedIcon')).toBeInTheDocument()
+    // Scope to the space contact's own group. Persisted local contacts from other
+    // tests can leak into the listbox via localStorage, so assert on this group.
+    const option = await waitFor(() => utils.getByText('Server Contact', { exact: false }))
+    const groupEl = option.closest('.groupList')!.closest('li') as HTMLElement
+    const group = within(groupEl)
+
+    // Workspace source: "Contacts of …" header with the building (workspace) icon,
+    // not the local hard-drive icon.
+    expect(group.getByText('Contacts of', { exact: false })).toBeInTheDocument()
+    expect(groupEl.querySelector('.lucide-building-2')).toBeInTheDocument()
+    expect(groupEl.querySelector('.lucide-hard-drive')).not.toBeInTheDocument()
   })
 
-  it('should not show a cloud icon for a local contact', async () => {
+  it('should group a local contact under the local contacts header with the local icon', async () => {
     const { input, utils } = setup('', {
       [checksumAddress(faker.finance.ethereumAddress())]: 'Local Contact',
     })
@@ -344,7 +346,15 @@ describe('AddressBookInput', () => {
       fireEvent.mouseUp(input)
     })
 
-    await waitFor(() => expect(utils.getByText('Local Contact', { exact: false })).toBeDefined())
-    expect(utils.queryByTestId('CloudOutlinedIcon')).not.toBeInTheDocument()
+    // Scope to the contact's own group (see note above).
+    const option = await waitFor(() => utils.getByText('Local Contact', { exact: true }))
+    const groupEl = option.closest('.groupList')!.closest('li') as HTMLElement
+    const group = within(groupEl)
+
+    // Local source: "Local contacts" header with the hard-drive icon, not the
+    // building (workspace) icon.
+    expect(group.getByText('Local contacts')).toBeInTheDocument()
+    expect(groupEl.querySelector('.lucide-hard-drive')).toBeInTheDocument()
+    expect(groupEl.querySelector('.lucide-building-2')).not.toBeInTheDocument()
   })
 })
