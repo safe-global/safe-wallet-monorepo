@@ -13,7 +13,7 @@ import { cn } from '@/utils/cn'
 import { formatDate } from '@/features/spaces/utils'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
-import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
+import PaginatedDataTable, { type DataTableColumn, type ColumnWidth } from '../PaginatedDataTable'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
   isLocal: boolean
@@ -89,10 +89,10 @@ function SpaceAddressBookTable({
     {
       id: 'name',
       header: 'Name',
-      className: 'md:w-[20%]',
+      width: '20%',
       sticky: true,
       minWidth: 140,
-      cellClassName: 'font-bold',
+      emphasis: 'strong',
       sortValue: (e) => e.name,
       cell: (entry) => (
         <div className={cn('flex items-center gap-1.5 overflow-hidden', entry.isDuplicate && 'line-through')}>
@@ -104,7 +104,7 @@ function SpaceAddressBookTable({
     {
       id: 'address',
       header: 'Address',
-      className: 'md:w-[30%]',
+      width: '30%',
       minWidth: 200,
       sortValue: (e) => e.address,
       cell: (entry) => (
@@ -125,7 +125,7 @@ function SpaceAddressBookTable({
     {
       id: 'chains',
       header: 'Chains',
-      className: 'md:w-[15%]',
+      width: '15%',
       priority: 'secondary',
       minWidth: 100,
       sortValue: (e) => e.chainIds.length,
@@ -136,7 +136,7 @@ function SpaceAddressBookTable({
           {
             id: 'middle',
             header: showAddedBy ? 'Added by' : 'Last updated',
-            className: 'md:w-[20%]',
+            width: '20%' as const,
             priority: 'secondary' as const,
             minWidth: 140,
             sortValue: (e: AddressBookEntry) => (showAddedBy ? e.createdBy : e.updatedAt || e.createdAt),
@@ -146,8 +146,8 @@ function SpaceAddressBookTable({
       : []),
     {
       id: 'actions',
-      className: hasMiddleColumn ? 'md:w-[15%]' : 'md:w-[35%]',
-      cellClassName: 'text-right',
+      width: (hasMiddleColumn ? '15%' : '35%') as ColumnWidth,
+      align: 'end',
       minWidth: 80,
       cell: (entry) => (
         <span className="inline-flex items-center justify-end gap-1">

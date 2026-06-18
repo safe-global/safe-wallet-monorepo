@@ -112,7 +112,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     {
       id: 'name',
       header: 'Name',
-      className: 'md:w-[40%]',
+      width: '40%',
       sticky: true,
       minWidth: 200,
       cellTestId: 'table-cell-name',
@@ -137,7 +137,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     {
       id: 'email',
       header: 'Email',
-      className: 'md:w-[30%]',
+      width: '30%',
       priority: 'secondary',
       minWidth: 180,
       cellTestId: 'table-cell-email',
@@ -153,7 +153,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     {
       id: 'role',
       header: 'Role',
-      className: 'md:w-[15%]',
+      width: '15%',
       minWidth: 90,
       cellTestId: 'table-cell-role',
       sortValue: (m) => m.role,
@@ -161,8 +161,8 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     },
     {
       id: 'actions',
-      className: 'md:w-[15%]',
-      cellClassName: 'text-right',
+      width: '15%',
+      align: 'end',
       cellTestId: 'table-cell-actions',
       minWidth: 80,
       cell: (member) => {

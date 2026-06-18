@@ -1,9 +1,41 @@
 import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { cva } from 'class-variance-authority'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { cn } from '@/utils/cn'
+
+// Bounded design-system styling for columns. Consumers pick from these variant
+// axes — they never pass raw className/style — so no table can drift on color,
+// font, radius, or alignment. (Promoting these onto the shared ui/table.tsx
+// primitive, app-wide, is the follow-up step.)
+const columnAlign = { start: 'text-left', center: 'text-center', end: 'text-right' } as const
+
+const tableHeadVariants = cva('text-muted-foreground', {
+  variants: { align: columnAlign },
+  defaultVariants: { align: 'start' },
+})
+
+const tableCellVariants = cva('', {
+  variants: {
+    align: columnAlign,
+    emphasis: { default: '', strong: 'font-bold' },
+  },
+  defaultVariants: { align: 'start', emphasis: 'default' },
+})
+
+// Desktop column widths bounded to a shared scale (applied at md+; mobile auto-sizes).
+// A new width is a deliberate addition here, not an arbitrary class at the call site.
+const COLUMN_WIDTHS = {
+  '15%': 'md:w-[15%]',
+  '20%': 'md:w-[20%]',
+  '30%': 'md:w-[30%]',
+  '35%': 'md:w-[35%]',
+  '40%': 'md:w-[40%]',
+} as const
+
+export type ColumnWidth = keyof typeof COLUMN_WIDTHS
 
 export type DataTableColumn<T> = {
   /** Stable identifier used as the React key and for sort state */
@@ -11,12 +43,14 @@ export type DataTableColumn<T> = {
   header?: ReactNode
   /** Renders the content of this column's cell; the table owns the `<TableCell>` wrapper */
   cell: (row: T) => ReactNode
-  /** Utility classes applied to the column's `<TableHead>` (e.g. alignment) */
-  className?: string
-  /** Utility classes applied to the column's body `<TableCell>` */
-  cellClassName?: string
   /** `data-testid` applied to the column's body `<TableCell>` */
   cellTestId?: string
+  /** Horizontal alignment of the header and cell content */
+  align?: 'start' | 'center' | 'end'
+  /** Visual emphasis of the cell content */
+  emphasis?: 'default' | 'strong'
+  /** Desktop column width, bounded to the shared scale (mobile auto-sizes) */
+  width?: ColumnWidth
   /** `secondary` columns are hidden below the mobile breakpoint (768px) */
   priority?: 'essential' | 'secondary'
   /** Pins the column to the left while horizontally scrolling on mobile */
@@ -143,7 +177,12 @@ function PaginatedDataTable<T>({
                   key={column.id}
                   aria-sort={column.sortValue ? ariaSortValue(direction) : undefined}
                   style={column.minWidth ? { minWidth: column.minWidth } : undefined}
-                  className={cn('text-muted-foreground', hideClass(column), stickyClass(column), column.className)}
+                  className={cn(
+                    tableHeadVariants({ align: column.align }),
+                    hideClass(column),
+                    stickyClass(column),
+                    column.width && COLUMN_WIDTHS[column.width],
+                  )}
                 >
                   {column.sortValue ? (
                     <button
@@ -178,7 +217,11 @@ function PaginatedDataTable<T>({
                       key={column.id}
                       data-testid={column.cellTestId}
                       style={column.minWidth ? { minWidth: column.minWidth } : undefined}
-                      className={cn(column.cellClassName, hideClass(column), stickyClass(column))}
+                      className={cn(
+                        tableCellVariants({ align: column.align, emphasis: column.emphasis }),
+                        hideClass(column),
+                        stickyClass(column),
+                      )}
                     >
                       {column.cell(row)}
                     </TableCell>
