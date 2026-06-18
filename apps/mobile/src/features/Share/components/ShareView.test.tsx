@@ -21,7 +21,8 @@ jest.mock('@tamagui/toast', () => ({
 }))
 
 const mockPush = jest.fn()
-jest.mock('expo-router', () => ({ router: { push: (path: string) => mockPush(path) } }))
+const mockBack = jest.fn()
+jest.mock('expo-router', () => ({ router: { push: (path: string) => mockPush(path), back: () => mockBack() } }))
 
 const mockCopyAndDispatchToast = jest.fn()
 
@@ -80,5 +81,13 @@ describe('ShareView', () => {
     const { getByTestId } = render(<ShareView activeSafe={activeSafe} availableChains={availableChains} />)
     fireEvent.press(getByTestId('supported-networks-button'))
     expect(mockPush).toHaveBeenCalledWith('/supported-networks')
+  })
+
+  it('closes the screen when the close button is pressed', () => {
+    const activeSafe = { address: '0x123', chainId: '1' } as SafeInfo
+    const availableChains = [{ chainName: 'Ethereum' }] as Chain[]
+    const { getByTestId } = render(<ShareView activeSafe={activeSafe} availableChains={availableChains} />)
+    fireEvent.press(getByTestId('share-close-button'))
+    expect(mockBack).toHaveBeenCalledTimes(1)
   })
 })

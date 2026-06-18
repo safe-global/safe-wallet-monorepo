@@ -54,7 +54,6 @@ export function ScanConnect() {
         bottom={0}
         opacity={scanActive ? 0 : 1}
         pointerEvents={scanActive ? 'none' : 'auto'}
-        paddingHorizontal="$4"
         paddingBottom={controlClearance}
         testID="scan-connect-mycode-panel"
       >

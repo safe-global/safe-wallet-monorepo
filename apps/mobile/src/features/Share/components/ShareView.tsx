@@ -5,6 +5,7 @@ import Share from 'react-native-share'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Identicon } from '@/src/components/Identicon'
+import { Badge } from '@/src/components/Badge'
 import QRCodeStyled from 'react-native-qrcode-styled'
 import { Platform, Pressable, StyleSheet } from 'react-native'
 import { router } from 'expo-router'
@@ -43,11 +44,21 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
   return (
     <>
       <YStack flex={1} paddingBottom={'$4'}>
+        <XStack justifyContent={'flex-start'} paddingTop={30} paddingLeft={20}>
+          <Pressable
+            onPress={() => router.back()}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            testID="share-close-button"
+          >
+            <Badge themeName="badge_background" circleSize="$9" content={<SafeFontIcon size={20} name="close" />} />
+          </Pressable>
+        </XStack>
         <YStack flex={1} justifyContent={'flex-end'} alignItems={'center'} marginBottom={'$6'}>
           <H3 fontWeight={600}>{contact ? contact.name : 'Unnamed safe'}</H3>
         </YStack>
         <YStack flex={3} alignItems={'center'}>
-          <Container marginHorizontal={'$10'}>
+          <Container maxWidth={260}>
             <View>
               <View style={styles.root}>
                 <QRCodeStyled
