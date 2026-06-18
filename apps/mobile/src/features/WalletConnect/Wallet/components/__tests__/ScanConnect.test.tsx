@@ -31,12 +31,11 @@ describe('ScanConnect', () => {
     expect(getByTestId('share-marker')).toBeTruthy()
   })
 
-  it('pauses the scanner camera while the My code tab is active, then resumes', () => {
+  it('pauses the scanner camera on the My code tab, then resumes', () => {
     const { getByText, getByTestId } = render(<ScanConnect />)
 
     fireEvent.press(getByText('My code'))
-    // The scan panel is hidden (display: none) but stays mounted, so query hidden elements.
-    expect(getByTestId('scan-marker', { includeHiddenElements: true }).props.children.join('')).toBe('scan:false')
+    expect(getByTestId('scan-marker').props.children.join('')).toBe('scan:false')
 
     fireEvent.press(getByText('Scan QR'))
     expect(getByTestId('scan-marker').props.children.join('')).toBe('scan:true')

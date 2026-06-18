@@ -27,14 +27,33 @@ export function ScanConnect() {
   // Reserve room at the bottom of the My code panel so the floating control never overlaps content.
   const controlClearance = (typeof insets.bottom === 'number' ? insets.bottom : 0) + 64
 
+  const scanActive = tab === 'scan'
+
   return (
     <View flex={1} backgroundColor="$background">
-      <View flex={1} display={tab === 'scan' ? 'flex' : 'none'} testID="scan-connect-scan-panel">
-        <WalletConnectScanContainer isActive={tab === 'scan'} />
+      {/* Both panels stay laid out and painted; we toggle opacity rather than `display` so revealing
+          the My code QR is a cheap GPU composite, not a first layout/paint that would jank the
+          tab-switch animation. */}
+      <View
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        opacity={scanActive ? 1 : 0}
+        pointerEvents={scanActive ? 'auto' : 'none'}
+        testID="scan-connect-scan-panel"
+      >
+        <WalletConnectScanContainer isActive={scanActive} />
       </View>
       <View
-        flex={1}
-        display={tab === 'mycode' ? 'flex' : 'none'}
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        opacity={scanActive ? 0 : 1}
+        pointerEvents={scanActive ? 'none' : 'auto'}
         paddingHorizontal="$4"
         paddingBottom={controlClearance}
         testID="scan-connect-mycode-panel"
