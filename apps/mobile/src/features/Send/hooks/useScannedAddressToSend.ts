@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback } from 'react'
 import { useRouter } from 'expo-router'
 import { useToastController } from '@tamagui/toast'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
@@ -20,26 +20,13 @@ export const resolveScannedAddress = (raw: string): ScannedAddress | null => {
 type NavigateMode = 'dismissTo' | 'replace'
 
 // Shared address-to-Send logic for both QR scanners: the in-Send scanner (`/(send)/scan-qr`) and the
-// header scanner (`/wallet-connect-scan`). Owns the chain-mismatch warning, the invalid-address
-// toast (deduped per value) and navigation into the Send flow with the recipient prefilled. The
-// camera lifecycle stays with each scanner since they differ.
+// header scanner (`/wallet-connect-scan`). Owns the chain-mismatch warning and navigation into the
+// Send flow with the recipient prefilled. The camera lifecycle and invalid-address error display
+// stay with each scanner since they differ.
 export const useScannedAddressToSend = () => {
   const router = useRouter()
   const toast = useToastController()
   const activeChain = useAppSelector(selectActiveChain)
-  const toastForValueShown = useRef<Set<string>>(new Set())
-
-  const showInvalidAddressToast = useCallback(
-    (code: string) => {
-      if (toastForValueShown.current.has(code)) {
-        return
-      }
-
-      toastForValueShown.current.add(code)
-      toast.show('Not a valid address', { native: false, duration: 2000 })
-    },
-    [toast],
-  )
 
   const warnChainMismatch = useCallback(
     (prefix: string | undefined) => {
@@ -73,5 +60,5 @@ export const useScannedAddressToSend = () => {
     [router],
   )
 
-  return { showInvalidAddressToast, warnChainMismatch, navigateToRecipient }
+  return { warnChainMismatch, navigateToRecipient }
 }

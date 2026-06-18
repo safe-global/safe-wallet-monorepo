@@ -3,9 +3,11 @@ import { Text } from 'tamagui'
 import { Code } from 'react-native-vision-camera'
 import { useFocusEffect } from 'expo-router'
 import { ToastViewport } from '@tamagui/toast'
-import { QrCamera } from '@/src/components/Camera'
+import { QrCamera, ScanErrorOverlay } from '@/src/components/Camera'
 import { useCameraPermissionFlow } from '@/src/components/Camera/useCameraPermissionFlow'
 import { resolveScannedAddress, useScannedAddressToSend } from './hooks/useScannedAddressToSend'
+
+const INVALID_ADDRESS_MESSAGE = 'Not a valid address'
 
 const headingForPermission = (permission: ReturnType<typeof useCameraPermissionFlow>['permission']): string => {
   switch (permission) {
@@ -37,7 +39,8 @@ export function ScanQrSendContainer() {
   const { permission, requestPermission, openSettings } = useCameraPermissionFlow()
   const hasScanned = useRef(false)
   const [isCameraActive, setIsCameraActive] = useState(false)
-  const { showInvalidAddressToast, warnChainMismatch, navigateToRecipient } = useScannedAddressToSend()
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const { warnChainMismatch, navigateToRecipient } = useScannedAddressToSend()
 
   const handleFocusEffect = useCallback(() => {
     if (permission !== 'granted') {
@@ -64,7 +67,10 @@ export function ScanQrSendContainer() {
       const resolved = resolveScannedAddress(code)
 
       if (!resolved) {
-        showInvalidAddressToast(code)
+        // Surface the failure on the lens (camera off until Try again), mirroring the
+        // WalletConnect scanner, instead of a transient toast.
+        setErrorMessage(INVALID_ADDRESS_MESSAGE)
+        setIsCameraActive(false)
         return
       }
 
@@ -73,12 +79,19 @@ export function ScanQrSendContainer() {
       setIsCameraActive(false)
       navigateToRecipient(resolved.address)
     },
-    [isCameraActive, showInvalidAddressToast, warnChainMismatch, navigateToRecipient],
+    [isCameraActive, warnChainMismatch, navigateToRecipient],
   )
 
   const handleActivateCamera = useCallback(() => {
     setIsCameraActive(true)
   }, [])
+
+  const onTryAgain = useCallback(() => {
+    setErrorMessage(null)
+    if (permission === 'granted') {
+      setIsCameraActive(true)
+    }
+  }, [permission])
 
   return (
     <>
@@ -90,6 +103,13 @@ export function ScanQrSendContainer() {
         onRequestPermission={requestPermission}
         onPressSettings={openSettings}
         heading={headingForPermission(permission)}
+        lensTone={errorMessage ? 'error' : 'neutral'}
+        dimLens={Boolean(errorMessage)}
+        centerOverlay={
+          errorMessage ? (
+            <ScanErrorOverlay message={errorMessage} onTryAgain={onTryAgain} testID="send-scan-try-again" />
+          ) : undefined
+        }
         footer={<Text textAlign="center">{bodyForPermission(permission)}</Text>}
       />
       <ToastViewport multipleToasts={false} left={0} right={0} />

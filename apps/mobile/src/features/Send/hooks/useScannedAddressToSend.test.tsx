@@ -87,13 +87,4 @@ describe('useScannedAddressToSend', () => {
 
     expect(mockShow).not.toHaveBeenCalled()
   })
-
-  it('shows the invalid-address toast only once per value', () => {
-    const { result } = renderHook(() => useScannedAddressToSend())
-
-    act(() => result.current.showInvalidAddressToast('foo'))
-    act(() => result.current.showInvalidAddressToast('foo'))
-
-    expect(mockShow).toHaveBeenCalledTimes(1)
-  })
 })
