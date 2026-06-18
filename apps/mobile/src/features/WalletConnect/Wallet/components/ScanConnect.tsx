@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Theme, View } from 'tamagui'
+import { getTokenValue, Theme, View } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { ShareContainer } from '@/src/features/Share'
 import { SegmentedControl, type SegmentedControlOption } from '@/src/components/SegmentedControl'
@@ -11,6 +11,14 @@ const TABS: SegmentedControlOption<ScanConnectTab>[] = [
   { label: 'Scan QR', value: 'scan' },
   { label: 'My code', value: 'mycode' },
 ]
+
+// The floating control sits CONTROL_BOTTOM_OFFSET above the safe-area inset; CONTROL_FOOTPRINT
+// covers its own height + the padding around it. Both the control's `bottom` and the My code
+// panel's bottom clearance are derived from these so they stay in sync when either is tweaked.
+const CONTROL_BOTTOM_OFFSET = '$8'
+const CONTROL_FOOTPRINT = 64
+// 50% width, centred — the narrow 2-state look from the Figma frames.
+const CONTROL_WIDTH = '50%'
 
 // Tabbed shell for the WalletConnect QR sheet: a Scan QR tab (the camera scanner) and a My code
 // tab that reuses the home-screen Receive surface (ShareContainer). Both panels stay mounted and
@@ -24,8 +32,9 @@ const TABS: SegmentedControlOption<ScanConnectTab>[] = [
 export function ScanConnect() {
   const insets = useSafeAreaInsets()
   const [tab, setTab] = useState<ScanConnectTab>('scan')
-  // Reserve room at the bottom of the My code panel so the floating control never overlaps content.
-  const controlClearance = (typeof insets.bottom === 'number' ? insets.bottom : 0) + 64
+  // Reserve room at the bottom of the My code panel so the floating control never overlaps content,
+  // derived from where the control actually sits (offset above the inset + its footprint).
+  const controlClearance = insets.bottom + getTokenValue(CONTROL_BOTTOM_OFFSET) + CONTROL_FOOTPRINT
 
   const scanActive = tab === 'scan'
 
@@ -72,14 +81,16 @@ export function ScanConnect() {
         position="absolute"
         left={0}
         right={0}
-        bottom="$8"
+        bottom={CONTROL_BOTTOM_OFFSET}
         paddingHorizontal="$4"
         paddingTop="$3"
         paddingBottom={insets.bottom || '$4'}
         pointerEvents="box-none"
       >
         <Theme name="dark">
-          <SegmentedControl options={TABS} value={tab} onChange={setTab} testID="scan-connect-tabs" />
+          <View width={CONTROL_WIDTH} alignSelf="center">
+            <SegmentedControl options={TABS} value={tab} onChange={setTab} testID="scan-connect-tabs" />
+          </View>
         </Theme>
       </View>
     </View>
