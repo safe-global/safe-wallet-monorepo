@@ -23,6 +23,12 @@ export const useWalletConnectScan = ({ isActive = true }: { isActive?: boolean }
   const statusRef = useRef(status)
   statusRef.current = status
 
+  // Same pattern for `isActive`: the focus effect must not turn the camera on for a hidden tab,
+  // but adding `isActive` to its deps would re-run the effect (clearing the live timer) on every
+  // tab switch. The dedicated `[isActive, permission]` effect below owns the live toggling.
+  const isActiveRef = useRef(isActive)
+  isActiveRef.current = isActive
+
   // Guards a second pair attempt while one is in flight (rapid re-scans).
   const pairingRef = useRef(false)
   // Set true when the timeout fires; later writes for that attempt become no-ops.
@@ -47,7 +53,7 @@ export const useWalletConnectScan = ({ isActive = true }: { isActive?: boolean }
 
   useFocusEffect(
     useCallback(() => {
-      if (permission === 'granted' && statusRef.current === 'scanning') {
+      if (isActiveRef.current && permission === 'granted' && statusRef.current === 'scanning') {
         setIsCameraActive(true)
       }
       return () => {
