@@ -45,3 +45,31 @@ export const calculateTokensFiatTotal = (items: Balances['items']): string => {
   const total = items.reduce((sum, item) => sum + parseFloat(item.fiatBalance || '0'), 0)
   return total.toString()
 }
+
+/**
+ * Removes the given token addresses from a balances object, adjusting the fiat totals accordingly.
+ * Matching is case-insensitive. Returns the original object untouched when nothing matches so
+ * downstream memoization stays referentially stable.
+ */
+export const excludeTokensFromBalances = (
+  balances: PortfolioBalances,
+  excludedAddresses: string[],
+): PortfolioBalances => {
+  const excluded = new Set(excludedAddresses.map((address) => address.toLowerCase()))
+  const removed = balances.items.filter((item) => excluded.has(item.tokenInfo.address.toLowerCase()))
+
+  if (removed.length === 0) {
+    return balances
+  }
+
+  const items = balances.items.filter((item) => !excluded.has(item.tokenInfo.address.toLowerCase()))
+  const removedFiat = removed.reduce((sum, item) => sum + parseFloat(item.fiatBalance || '0'), 0)
+  const subtract = (total: string): string => (parseFloat(total) - removedFiat).toString()
+
+  return {
+    ...balances,
+    items,
+    fiatTotal: balances.fiatTotal ? subtract(balances.fiatTotal) : balances.fiatTotal,
+    tokensFiatTotal: balances.tokensFiatTotal != null ? subtract(balances.tokensFiatTotal) : balances.tokensFiatTotal,
+  }
+}

@@ -2,7 +2,9 @@ import {
   createPortfolioBalances,
   transformPortfolioToBalances,
   calculateTokensFiatTotal,
+  excludeTokensFromBalances,
   initialBalancesState,
+  type PortfolioBalances,
 } from '@safe-global/utils/hooks/portfolioBalances'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
@@ -171,6 +173,66 @@ describe('portfolioBalances helpers', () => {
       ]
 
       expect(calculateTokensFiatTotal(items)).toBe('0')
+    })
+  })
+
+  describe('excludeTokensFromBalances', () => {
+    const makeBalances = (): PortfolioBalances => ({
+      fiatTotal: '300',
+      tokensFiatTotal: '300',
+      positionsFiatTotal: '0',
+      items: [
+        {
+          balance: '1',
+          fiatBalance: '100',
+          fiatConversion: '100',
+          tokenInfo: { address: '0xAAA', decimals: 18, logoUri: '', name: 'A', symbol: 'A', type: 'ERC20' },
+        },
+        {
+          balance: '1',
+          fiatBalance: '200',
+          fiatConversion: '200',
+          tokenInfo: { address: '0xBBB', decimals: 18, logoUri: '', name: 'B', symbol: 'B', type: 'ERC20' },
+        },
+      ],
+    })
+
+    it('should remove matching tokens and adjust fiat totals', () => {
+      const result = excludeTokensFromBalances(makeBalances(), ['0xbbb'])
+
+      expect(result.items).toHaveLength(1)
+      expect(result.items[0]?.tokenInfo.address).toBe('0xAAA')
+      expect(result.fiatTotal).toBe('100')
+      expect(result.tokensFiatTotal).toBe('100')
+    })
+
+    it('should match addresses case-insensitively', () => {
+      const result = excludeTokensFromBalances(makeBalances(), ['0XbBb'])
+
+      expect(result.items.map((item) => item.tokenInfo.address)).toEqual(['0xAAA'])
+    })
+
+    it('should return the same reference when nothing matches', () => {
+      const balances = makeBalances()
+      const result = excludeTokensFromBalances(balances, ['0xdoesnotexist'])
+
+      expect(result).toBe(balances)
+    })
+
+    it('should leave empty fiat totals untouched', () => {
+      const balances: PortfolioBalances = { ...makeBalances(), fiatTotal: '', tokensFiatTotal: undefined }
+      const result = excludeTokensFromBalances(balances, ['0xbbb'])
+
+      expect(result.fiatTotal).toBe('')
+      expect(result.tokensFiatTotal).toBeUndefined()
+    })
+
+    it('should handle removed tokens with missing fiatBalance', () => {
+      const balances = makeBalances()
+      balances.items[1]!.fiatBalance = ''
+      const result = excludeTokensFromBalances(balances, ['0xbbb'])
+
+      expect(result.fiatTotal).toBe('300')
     })
   })
 })

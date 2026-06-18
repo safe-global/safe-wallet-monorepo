@@ -6,6 +6,8 @@ import useSafeInfo from '../useSafeInfo'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCounterfactualBalances } from '@/features/counterfactual'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import { excludeTokensFromBalances } from '@safe-global/utils/hooks/portfolioBalances'
+import { DEPRECATED_TOKEN_ADDRESSES } from '@/config/deprecatedTokens'
 import { type PortfolioBalances, createPortfolioBalances, useTokenListSetting } from './useLoadBalances'
 
 /**
@@ -43,12 +45,20 @@ export const useTrustedTokenBalances = (): AsyncResult<PortfolioBalances> => {
 
   return useMemo<AsyncResult<PortfolioBalances>>(() => {
     if (isCounterfactual && cfData) {
-      return [createPortfolioBalances(cfData), cfError, cfLoading]
+      return [
+        excludeTokensFromBalances(createPortfolioBalances(cfData), DEPRECATED_TOKEN_ADDRESSES),
+        cfError,
+        cfLoading,
+      ]
     }
 
     if (txServiceBalances) {
       const error = txServiceError ? new Error(String(txServiceError)) : undefined
-      return [createPortfolioBalances(txServiceBalances), error, txServiceLoading]
+      return [
+        excludeTokensFromBalances(createPortfolioBalances(txServiceBalances), DEPRECATED_TOKEN_ADDRESSES),
+        error,
+        txServiceLoading,
+      ]
     }
 
     const error = txServiceError ? new Error(String(txServiceError)) : undefined

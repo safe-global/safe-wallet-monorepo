@@ -8,7 +8,8 @@ import { useCounterfactualBalances } from '@/features/counterfactual'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useTotalBalances from '@safe-global/utils/hooks/useTotalBalances'
-import type { PortfolioBalances } from '@safe-global/utils/hooks/portfolioBalances'
+import { excludeTokensFromBalances, type PortfolioBalances } from '@safe-global/utils/hooks/portfolioBalances'
+import { DEPRECATED_TOKEN_ADDRESSES } from '@/config/deprecatedTokens'
 
 // Re-export shared types and helpers for backward compatibility
 export type { PortfolioBalances } from '@safe-global/utils/hooks/portfolioBalances'
@@ -61,7 +62,12 @@ const useLoadBalances = (): AsyncResult<PortfolioBalances> => {
     refetchOnFocus: true,
   })
 
-  return [data, error, loading]
+  const filteredData = useMemo(
+    () => (data ? excludeTokensFromBalances(data, DEPRECATED_TOKEN_ADDRESSES) : data),
+    [data],
+  )
+
+  return [filteredData, error, loading]
 }
 
 export default useLoadBalances
