@@ -3,7 +3,6 @@ import type { VariantProps } from 'class-variance-authority'
 import { typographyVariants } from '@/components/ui/typography'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
-import { useIsTruncated } from '../hooks/useIsTruncated'
 
 type TruncatedTextProps = {
   text: string
@@ -14,30 +13,40 @@ type TruncatedTextProps = {
 // Only reveal on a deliberate hover dwell, never instantly while the cursor passes through.
 const OPEN_DELAY_MS = 450
 
+type Measurable = Pick<HTMLElement, 'scrollWidth' | 'clientWidth'>
+
 /**
- * Single-line text that ellipsizes to fit its container and reveals the full
- * value in a tooltip — but only when the text is actually clipped, so short
- * names that already fit don't get a redundant tooltip.
+ * Whether the tooltip should open: only on a hover dwell (never on focus, which would pop after a
+ * rename restores focus to the trigger), and only when the text is actually clipped. Measured
+ * lazily at open time, so no standing resize observation is needed.
+ */
+export const shouldOpenTooltip = (
+  requestedOpen: boolean,
+  reason: string | undefined,
+  el: Measurable | null,
+): boolean => {
+  if (!requestedOpen || reason === 'trigger-focus') return false
+  return el !== null && el.scrollWidth > el.clientWidth
+}
+
+/**
+ * Single-line text that ellipsizes (CSS `truncate`) to fit its container and reveals the full value
+ * in a tooltip — but only when the text is actually clipped, so short names that already fit don't
+ * get a redundant tooltip.
  *
- * The tooltip is hover-only and click-through so it never traps neighbouring
- * controls (e.g. the copy button that sits directly beneath the name): it
- * ignores focus-triggered opens (which would otherwise pop after a rename
- * restores focus to the trigger) and the popup is pointer-events-none.
+ * The tooltip is hover-only and click-through so it never traps neighbouring controls (e.g. the copy
+ * button that sits directly beneath the name): it ignores focus-triggered opens and the popup is
+ * pointer-events-none.
  */
 function TruncatedText({ text, variant, color, className, ...rest }: TruncatedTextProps) {
   const ref = useRef<HTMLSpanElement>(null)
-  const isTruncated = useIsTruncated(ref, text)
   const [open, setOpen] = useState(false)
 
   return (
     <Tooltip
       delay={OPEN_DELAY_MS}
       open={open}
-      onOpenChange={(nextOpen, details) => {
-        // Suppress focus-triggered opens; allow hover opens and every close.
-        if (nextOpen && details.reason === 'trigger-focus') return
-        setOpen(nextOpen)
-      }}
+      onOpenChange={(nextOpen, details) => setOpen(shouldOpenTooltip(nextOpen, details.reason, ref.current))}
       disableHoverablePopup
     >
       <TooltipTrigger
@@ -47,7 +56,7 @@ function TruncatedText({ text, variant, color, className, ...rest }: TruncatedTe
           </span>
         }
       />
-      {isTruncated && <TooltipContent className="pointer-events-none">{text}</TooltipContent>}
+      <TooltipContent className="pointer-events-none">{text}</TooltipContent>
     </Tooltip>
   )
 }
