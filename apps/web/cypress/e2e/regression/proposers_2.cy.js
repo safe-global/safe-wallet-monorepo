@@ -1,5 +1,4 @@
 import * as constants from '../../support/constants.js'
-import * as owner from '../pages/owners.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as proposer from '../pages/proposers.pages.js'
@@ -60,16 +59,5 @@ describe('Proposers 2 tests', () => {
     proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress_2)
     proposer.verifyEditProposerBtnDisabled(proposerAddress)
     proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress)
-  })
-
-  //TODO: Unskip when tenderly visibilty bug is solved
-  it.skip('Verify a Tenderly simulation can be performed while proposing a tx', () => {
-    cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
-    wallet.connectSigner(signer2)
-    owner.openAddOwnerWindow()
-    owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
-    owner.clickOnNextBtn()
-    createtx.clickOnSimulateTxBtn()
-    createtx.verifySuccessfulSimulation()
   })
 })

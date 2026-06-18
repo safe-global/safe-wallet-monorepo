@@ -52,32 +52,7 @@ describe('Spaces basic flow tests', () => {
     space.addAccountManually(staticSafes.SEP_STATIC_SAFE_35.substring(4), constants.networks.sepolia)
   })
 
-  // Skipping this test as it is not possible to log out on localhost:
-  // there is a redirect to the page https://safe-client.staging.5afe.dev/v1/auth/logout/redirect after clicking sign out,
-  // and test is failing
-  it.skip('Verify that re-signing in lands on the single space, not on /welcome/create-space', () => {
-    const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
-
-    wallet.connectSigner(admin)
-    space.clickOnSignInBtn()
-    space.ensureReadyToCreateSpace()
-    cy.wait(3000)
-    space.createSpaceViaOnboardingWithSkip(spaceName)
-
-    space.signOutViaSidebarProfile()
-    wallet.connectSigner(admin)
-    space.clickOnSignInBtn()
-
-    // With exactly one space, sign-in should short-circuit straight to the
-    // space dashboard. Crucially we must NOT be bounced into /welcome/create-space
-    // (the regressed re-login behavior).
-    space.verifyOnSingleSpaceDashboard(spaceName)
-
-    space.goToSpaceSettings()
-    space.deleteSpace(spaceName)
-  })
-
-  it.only('Verify a new member can be invited and accept the invite', () => {
+  it('Verify a new member can be invited and accept the invite', () => {
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
     const memberName = 'Member ' + Math.random().toString(36).substring(2, 12)
     const newInviteName = 'Invited member ' + Math.random().toString(36).substring(2, 12)
