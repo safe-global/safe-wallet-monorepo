@@ -31,6 +31,12 @@ export const HeaderQrButton: React.FC = () => {
     }
     isOpeningRef.current = true
     router.push('/wallet-connect-scan')
+    // Fallback unlock: if the push is ever swallowed (a transient upstream guard, etc.) the
+    // focus reset never fires, so without this the button would stay dead until the user
+    // navigates away and back. The happy path resets on focus well before this elapses.
+    setTimeout(() => {
+      isOpeningRef.current = false
+    }, 500)
   }
 
   return (
