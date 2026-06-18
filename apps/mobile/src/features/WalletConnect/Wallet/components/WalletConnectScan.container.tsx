@@ -4,7 +4,7 @@ import type { CameraPermissionStatus } from 'react-native-vision-camera'
 import { Text, View, YStack } from 'tamagui'
 import { router } from 'expo-router'
 import { ToastViewport } from '@tamagui/toast'
-import { QrCamera } from '@/src/components/Camera'
+import { QrCamera, ScanErrorOverlay } from '@/src/components/Camera'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { resolveScannedAddress, useScannedAddressToSend } from '@/src/features/Send/hooks/useScannedAddressToSend'
@@ -49,19 +49,6 @@ function ConnectingOverlay() {
   )
 }
 
-function ErrorOverlay({ message, onTryAgain }: { message: string; onTryAgain: () => void }) {
-  return (
-    <YStack alignItems="center" gap="$3" paddingHorizontal="$3">
-      <Text color="$error" textAlign="center" fontWeight="600">
-        {message}
-      </Text>
-      <SafeButton rounded secondary onPress={onTryAgain} testID="wc-scan-try-again">
-        Try again
-      </SafeButton>
-    </YStack>
-  )
-}
-
 function CenterOverlay({
   status,
   errorMessage,
@@ -75,7 +62,7 @@ function CenterOverlay({
     case 'connecting':
       return <ConnectingOverlay />
     case 'error':
-      return <ErrorOverlay message={errorMessage} onTryAgain={onTryAgain} />
+      return <ScanErrorOverlay message={errorMessage} onTryAgain={onTryAgain} testID="wc-scan-try-again" />
     default:
       return null
   }

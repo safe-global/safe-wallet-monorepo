@@ -16,7 +16,6 @@ jest.mock('@/src/features/Send/hooks/useScannedAddressToSend', () => ({
   useScannedAddressToSend: () => ({
     warnChainMismatch: mockWarnChainMismatch,
     navigateToRecipient: mockNavigateToRecipient,
-    showInvalidAddressToast: jest.fn(),
   }),
   resolveScannedAddress: (raw: string) => mockResolveScannedAddress(raw),
 }))
@@ -55,12 +54,28 @@ const lastOnAddressScanned = () => mockUseScan.mock.calls[mockUseScan.mock.calls
 // "no overlay passed" (scanning — QrCamera keeps its own CTA) from "overlay renders nothing".
 jest.mock('@/src/components/Camera', () => {
   const React = require('react')
-  const { View } = require('react-native')
+  const { View, Text, Pressable } = require('react-native')
   return {
     QrCamera: ({ centerOverlay, footer }: { centerOverlay?: React.ReactNode; footer?: React.ReactNode }) => (
       <>
         {centerOverlay != null ? <View testID="wc-center-overlay">{centerOverlay}</View> : null}
         {footer}
+      </>
+    ),
+    ScanErrorOverlay: ({
+      message,
+      onTryAgain,
+      testID,
+    }: {
+      message: string
+      onTryAgain: () => void
+      testID?: string
+    }) => (
+      <>
+        <Text>{message}</Text>
+        <Pressable testID={testID} onPress={onTryAgain}>
+          <Text>Try again</Text>
+        </Pressable>
       </>
     ),
   }
