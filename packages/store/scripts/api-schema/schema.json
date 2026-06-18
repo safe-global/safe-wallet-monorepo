@@ -1671,8 +1671,8 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Message created successfully"
+          "202": {
+            "description": "Message accepted. The Transaction Service indexes messages asynchronously, so the message may not be immediately retrievable — poll GET /v1/chains/{chainId}/messages/{messageHash}."
           },
           "400": {
             "description": "Invalid message format or signature"
@@ -2283,47 +2283,6 @@
           }
         },
         "summary": "Get user spaces",
-        "tags": [
-          "spaces"
-        ]
-      }
-    },
-    "/v1/spaces/create-with-user": {
-      "post": {
-        "deprecated": true,
-        "description": "Creates a new space for the authenticated user. This endpoint is deprecated, please use POST /v1/spaces instead.",
-        "operationId": "spacesCreateWithUserV1",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "description": "Space creation data including the name of the space",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSpaceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Space created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateSpaceResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required - valid JWT token must be provided"
-          },
-          "403": {
-            "description": "Forbidden resource - user lacks permission to create spaces"
-          }
-        },
-        "summary": "Create space with user (deprecated)",
         "tags": [
           "spaces"
         ]
@@ -13522,7 +13481,6 @@
             }
           },
           "gasTokenInfo": {
-            "type": "object",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/NativeToken"
@@ -13701,7 +13659,6 @@
             ]
           },
           "detailedExecutionInfo": {
-            "type": "object",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/MultisigExecutionDetails"
@@ -14029,7 +13986,6 @@
             ]
           },
           "executionInfo": {
-            "type": "object",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/MultisigExecutionInfo"

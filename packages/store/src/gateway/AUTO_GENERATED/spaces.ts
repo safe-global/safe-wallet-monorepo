@@ -80,10 +80,6 @@ const injectedRtkApi = api
         query: () => ({ url: `/v1/spaces` }),
         providesTags: ['spaces'],
       }),
-      spacesCreateWithUserV1: build.mutation<SpacesCreateWithUserV1ApiResponse, SpacesCreateWithUserV1ApiArg>({
-        query: (queryArg) => ({ url: `/v1/spaces/create-with-user`, method: 'POST', body: queryArg.createSpaceDto }),
-        invalidatesTags: ['spaces'],
-      }),
       spacesGetOneV1: build.query<SpacesGetOneV1ApiResponse, SpacesGetOneV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.id}` }),
         providesTags: ['spaces'],
@@ -263,11 +259,6 @@ export type SpacesCreateV1ApiArg = {
 }
 export type SpacesGetV1ApiResponse = /** status 200 User spaces retrieved successfully */ GetSpaceResponse[]
 export type SpacesGetV1ApiArg = void
-export type SpacesCreateWithUserV1ApiResponse = /** status 200 Space created successfully */ CreateSpaceResponse
-export type SpacesCreateWithUserV1ApiArg = {
-  /** Space creation data including the name of the space */
-  createSpaceDto: CreateSpaceDto
-}
 export type SpacesGetOneV1ApiResponse = /** status 200 Space information retrieved successfully */ GetSpaceResponse
 export type SpacesGetOneV1ApiArg = {
   /** Space UUID (numeric ID accepted for legacy clients, deprecated) */
@@ -643,7 +634,6 @@ export const {
   useSpacesCreateV1Mutation,
   useSpacesGetV1Query,
   useLazySpacesGetV1Query,
-  useSpacesCreateWithUserV1Mutation,
   useSpacesGetOneV1Query,
   useLazySpacesGetOneV1Query,
   useSpacesUpdateV1Mutation,
