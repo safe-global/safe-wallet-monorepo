@@ -6,9 +6,11 @@ import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronLeftIcon, ChevronR
 import { cn } from '@/utils/cn'
 
 export type DataTableColumn<T> = {
-  /** Stable identifier used as the React key and passed back to `renderCell` */
+  /** Stable identifier used as the React key and for sort state */
   id: string
   header?: ReactNode
+  /** Renders the content of this column's cell; the table owns the `<TableCell>` wrapper */
+  cell: (row: T) => ReactNode
   /** Utility classes applied to the column's `<TableHead>` (e.g. alignment) */
   className?: string
   /** Utility classes applied to the column's body `<TableCell>` */
@@ -33,8 +35,6 @@ const DEFAULT_PAGE_SIZE = 25
 type PaginatedDataTableProps<T> = {
   columns: DataTableColumn<T>[]
   rows: T[]
-  /** Renders the content of a single column's cell; the table owns the `<TableCell>` wrapper */
-  renderCell: (row: T, column: DataTableColumn<T>) => ReactNode
   /** Optional mobile-only collapsible detail row, revealed per row via a toggle */
   renderRowDetail?: (row: T) => ReactNode
   getRowKey: (row: T) => string
@@ -76,7 +76,6 @@ const SortIcon = ({ direction }: { direction?: SortDirection }) => {
 function PaginatedDataTable<T>({
   columns,
   rows,
-  renderCell,
   renderRowDetail,
   getRowKey,
   getRowClassName,
@@ -181,7 +180,7 @@ function PaginatedDataTable<T>({
                       style={column.minWidth ? { minWidth: column.minWidth } : undefined}
                       className={cn(column.cellClassName, hideClass(column), stickyClass(column))}
                     >
-                      {renderCell(row, column)}
+                      {column.cell(row)}
                     </TableCell>
                   ))}
                   {showDetailToggle && (

@@ -4,16 +4,10 @@ import PaginatedDataTable, { type DataTableColumn } from './index'
 const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
-const columns: DataTableColumn<string>[] = [{ id: 'value', header: 'Value' }]
+const columns: DataTableColumn<string>[] = [{ id: 'value', header: 'Value', cell: (row) => row }]
 
 const tableElement = (rows: string[], pageSize?: number) => (
-  <PaginatedDataTable
-    columns={columns}
-    rows={rows}
-    pageSize={pageSize}
-    getRowKey={(row) => row}
-    renderCell={(row) => row}
-  />
+  <PaginatedDataTable columns={columns} rows={rows} pageSize={pageSize} getRowKey={(row) => row} />
 )
 
 beforeEach(() => {
@@ -73,7 +67,7 @@ describe('PaginatedDataTable', () => {
 
   describe('sorting', () => {
     const sortableColumns: DataTableColumn<{ name: string }>[] = [
-      { id: 'name', header: 'Name', sortValue: (row) => row.name },
+      { id: 'name', header: 'Name', sortValue: (row) => row.name, cell: (row) => row.name },
     ]
 
     const renderSortable = () =>
@@ -82,7 +76,6 @@ describe('PaginatedDataTable', () => {
           columns={sortableColumns}
           rows={[{ name: 'Charlie' }, { name: 'Alice' }, { name: 'Bob' }]}
           getRowKey={(row) => row.name}
-          renderCell={(row) => row.name}
         />,
       )
 
@@ -115,8 +108,8 @@ describe('PaginatedDataTable', () => {
   describe('responsive behaviour', () => {
     type Row = { name: string; email: string }
     const responsiveColumns: DataTableColumn<Row>[] = [
-      { id: 'name', header: 'Name', sticky: true, minWidth: 200, sortValue: (r) => r.name },
-      { id: 'email', header: 'Email', priority: 'secondary', sortValue: (r) => r.email },
+      { id: 'name', header: 'Name', sticky: true, minWidth: 200, sortValue: (r) => r.name, cell: (r) => r.name },
+      { id: 'email', header: 'Email', priority: 'secondary', sortValue: (r) => r.email, cell: (r) => r.email },
     ]
     const rows: Row[] = [
       { name: 'Alice', email: 'a@example.io' },
@@ -129,7 +122,6 @@ describe('PaginatedDataTable', () => {
           columns={responsiveColumns}
           rows={rows}
           getRowKey={(r) => r.name}
-          renderCell={(r, c) => (c.id === 'name' ? r.name : r.email)}
           renderRowDetail={withDetail ? (r) => <span>detail-{r.name}</span> : undefined}
         />,
       )

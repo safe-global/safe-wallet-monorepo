@@ -58,45 +58,6 @@ function SpaceAddressBookTable({
   const resolveMemberName = useMemberNameResolver()
   const hasMiddleColumn = showAddedBy || showLastUpdated
 
-  const columns: DataTableColumn<AddressBookEntry>[] = [
-    {
-      id: 'name',
-      header: 'Name',
-      className: 'md:w-[20%]',
-      sticky: true,
-      minWidth: 140,
-      cellClassName: 'font-bold',
-      sortValue: (e) => e.name,
-    },
-    { id: 'address', header: 'Address', className: 'md:w-[30%]', minWidth: 200, sortValue: (e) => e.address },
-    {
-      id: 'chains',
-      header: 'Chains',
-      className: 'md:w-[15%]',
-      priority: 'secondary',
-      minWidth: 100,
-      sortValue: (e) => e.chainIds.length,
-    },
-    ...(hasMiddleColumn
-      ? [
-          {
-            id: 'middle',
-            header: showAddedBy ? 'Added by' : 'Last updated',
-            className: 'md:w-[20%]',
-            priority: 'secondary' as const,
-            minWidth: 140,
-            sortValue: (e: AddressBookEntry) => (showAddedBy ? e.createdBy : e.updatedAt || e.createdAt),
-          },
-        ]
-      : []),
-    {
-      id: 'actions',
-      className: hasMiddleColumn ? 'md:w-[15%]' : 'md:w-[35%]',
-      cellClassName: 'text-right',
-      minWidth: 80,
-    },
-  ]
-
   // Chain logo cluster — used in the desktop "Chains" cell
   const renderChains = (entry: AddressBookEntry) => (
     <Tooltip>
@@ -124,50 +85,78 @@ function SpaceAddressBookTable({
       <span className="text-muted-foreground text-xs">{formatDate(entry.updatedAt || entry.createdAt)}</span>
     ) : null
 
-  const renderCell = (entry: AddressBookEntry, column: DataTableColumn<AddressBookEntry>) => {
-    switch (column.id) {
-      case 'name':
-        return (
-          <div className={cn('flex items-center gap-1.5 overflow-hidden', entry.isDuplicate && 'line-through')}>
-            {entry.isLocal && <HardDrive className="text-muted-foreground size-4 flex-shrink-0" />}
-            <span className="min-w-0 truncate">{entry.name}</span>
-          </div>
-        )
-
-      case 'address':
-        return (
-          <div className="text-[0.8em] font-mono">
-            <EthHashInfo
-              address={entry.address}
-              shortAddress={isMobile}
-              showPrefix={false}
-              showName={false}
-              highlight4bytes
-              hasExplorer
-              showCopyButton
-              avatarSize={24}
-            />
-          </div>
-        )
-
-      case 'chains':
-        return renderChains(entry)
-
-      case 'middle':
-        return renderAddedBy(entry)
-
-      case 'actions':
-        return (
-          <span className="inline-flex items-center justify-end gap-1">
-            {renderExtraAction?.(entry)}
-            {entry.isLocal ? <LocalContactActions entry={entry} /> : <SpaceAddressBookActions entry={entry} />}
-          </span>
-        )
-
-      default:
-        return null
-    }
-  }
+  const columns: DataTableColumn<AddressBookEntry>[] = [
+    {
+      id: 'name',
+      header: 'Name',
+      className: 'md:w-[20%]',
+      sticky: true,
+      minWidth: 140,
+      cellClassName: 'font-bold',
+      sortValue: (e) => e.name,
+      cell: (entry) => (
+        <div className={cn('flex items-center gap-1.5 overflow-hidden', entry.isDuplicate && 'line-through')}>
+          {entry.isLocal && <HardDrive className="text-muted-foreground size-4 flex-shrink-0" />}
+          <span className="min-w-0 truncate">{entry.name}</span>
+        </div>
+      ),
+    },
+    {
+      id: 'address',
+      header: 'Address',
+      className: 'md:w-[30%]',
+      minWidth: 200,
+      sortValue: (e) => e.address,
+      cell: (entry) => (
+        <div className="text-[0.8em] font-mono">
+          <EthHashInfo
+            address={entry.address}
+            shortAddress={isMobile}
+            showPrefix={false}
+            showName={false}
+            highlight4bytes
+            hasExplorer
+            showCopyButton
+            avatarSize={24}
+          />
+        </div>
+      ),
+    },
+    {
+      id: 'chains',
+      header: 'Chains',
+      className: 'md:w-[15%]',
+      priority: 'secondary',
+      minWidth: 100,
+      sortValue: (e) => e.chainIds.length,
+      cell: renderChains,
+    },
+    ...(hasMiddleColumn
+      ? [
+          {
+            id: 'middle',
+            header: showAddedBy ? 'Added by' : 'Last updated',
+            className: 'md:w-[20%]',
+            priority: 'secondary' as const,
+            minWidth: 140,
+            sortValue: (e: AddressBookEntry) => (showAddedBy ? e.createdBy : e.updatedAt || e.createdAt),
+            cell: renderAddedBy,
+          },
+        ]
+      : []),
+    {
+      id: 'actions',
+      className: hasMiddleColumn ? 'md:w-[15%]' : 'md:w-[35%]',
+      cellClassName: 'text-right',
+      minWidth: 80,
+      cell: (entry) => (
+        <span className="inline-flex items-center justify-end gap-1">
+          {renderExtraAction?.(entry)}
+          {entry.isLocal ? <LocalContactActions entry={entry} /> : <SpaceAddressBookActions entry={entry} />}
+        </span>
+      ),
+    },
+  ]
 
   // Surfaces the columns hidden on mobile (chains, added-by / last-updated)
   const renderRowDetail = (entry: AddressBookEntry) => (
@@ -195,7 +184,6 @@ function SpaceAddressBookTable({
       rows={entries}
       getRowKey={(entry) => entry.address}
       getRowClassName={(entry) => (entry.isDuplicate ? 'opacity-50' : '')}
-      renderCell={renderCell}
       renderRowDetail={renderRowDetail}
     />
   )
