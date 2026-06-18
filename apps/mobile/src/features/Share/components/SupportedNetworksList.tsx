@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import { Text, View, XStack, YStack } from 'tamagui'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Logo } from '@/src/components/Logo'
@@ -28,13 +28,11 @@ function TestnetsDivider() {
 
 // Lists the networks a Safe is deployed on, mainnets first and testnets below a "Testnets" divider.
 export function SupportedNetworksList({ chains }: { chains: Chain[] }) {
-  const { mainnets, testnets } = useMemo(
-    () => ({
-      mainnets: chains.filter((chain) => !chain.isTestnet),
-      testnets: chains.filter((chain) => chain.isTestnet),
-    }),
-    [chains],
-  )
+  const mainnets: Chain[] = []
+  const testnets: Chain[] = []
+  for (const chain of chains) {
+    ;(chain.isTestnet ? testnets : mainnets).push(chain)
+  }
 
   return (
     <YStack width="100%">
