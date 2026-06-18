@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Pressable } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import { Text, View, XStack } from 'tamagui'
@@ -21,8 +21,10 @@ const THUMB_SPRING = { damping: 20, mass: 1.2, stiffness: 250 }
 // iOS-style segmented control: a recessed track with a raised thumb that slides to the selected
 // segment. Segments are equal width and the thumb is positioned in percentages, so it needs no
 // layout measurement — it renders in the right place on the first frame (even on Android) and still
-// animates. Colours follow the active theme — wrap it in a dark Theme to get the Figma sheet control
-// (dark track, white thumb, dark selected text).
+// animates. Generic over N options; the caller sizes the control (it fills its parent's width), so
+// wrap it in a width-constrained container for a narrow 2-state look. Colours follow the active
+// theme — wrap it in a dark Theme to get the Figma sheet control (dark track, white thumb, dark
+// selected text).
 export function SegmentedControl<T extends string>({ options, value, onChange, testID }: SegmentedControlProps<T>) {
   const count = options.length
   const segmentPercent = 100 / count
@@ -32,7 +34,14 @@ export function SegmentedControl<T extends string>({ options, value, onChange, t
   )
 
   const progress = useSharedValue(selectedIndex)
+  // The thumb already renders at the selected segment on mount (progress is seeded to
+  // selectedIndex), so skip the first effect — animate only on later selection changes.
+  const isFirstRender = useRef(true)
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
     progress.value = withSpring(selectedIndex, THUMB_SPRING)
   }, [selectedIndex, progress])
 
@@ -42,8 +51,12 @@ export function SegmentedControl<T extends string>({ options, value, onChange, t
   }))
 
   return (
-    <XStack width="50%" alignSelf="center" backgroundColor="$backgroundSecondary" borderRadius={10} testID={testID}>
-      <Animated.View pointerEvents="none" style={[{ position: 'absolute', top: 0, bottom: 0, padding: 3 }, thumbStyle]}>
+    <XStack width="100%" backgroundColor="$backgroundSecondary" borderRadius={10} testID={testID}>
+      <Animated.View
+        pointerEvents="none"
+        style={[{ position: 'absolute', top: 0, bottom: 0, padding: 3 }, thumbStyle]}
+        testID={testID ? `${testID}-thumb` : undefined}
+      >
         <View
           flex={1}
           borderRadius={8}
