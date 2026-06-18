@@ -1,6 +1,6 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
-import { getRtkQueryErrorMessage, RTK_QUERY_ERROR_MESSAGES } from './rtkQuery'
+import { getRtkQueryErrorMessage, RTK_QUERY_ERROR_MESSAGES, getGenericErrorWithStatus } from './rtkQuery'
 
 describe('getRtkQueryErrorMessage', () => {
   it('returns a friendly message for a network failure instead of the raw JS error', () => {
@@ -43,9 +43,9 @@ describe('getRtkQueryErrorMessage', () => {
     expect(getRtkQueryErrorMessage(error)).toBe('Names must be at least 3 characters long')
   })
 
-  it('falls back to the status code for an HTTP error with no message', () => {
+  it('returns a generic message with the status code for an HTTP error with no message', () => {
     const error: FetchBaseQueryError = { status: 400, data: {} }
-    expect(getRtkQueryErrorMessage(error)).toBe('Error: 400')
+    expect(getRtkQueryErrorMessage(error)).toBe(getGenericErrorWithStatus(400))
   })
 
   it('passes through a CUSTOM_ERROR developer message', () => {
@@ -60,6 +60,6 @@ describe('getRtkQueryErrorMessage', () => {
 
   it('falls back to a generic message for an empty SerializedError', () => {
     const error: SerializedError = {}
-    expect(getRtkQueryErrorMessage(error)).toBe('Unknown error')
+    expect(getRtkQueryErrorMessage(error)).toBe(RTK_QUERY_ERROR_MESSAGES.generic)
   })
 })
