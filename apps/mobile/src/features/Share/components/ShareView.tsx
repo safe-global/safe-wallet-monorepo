@@ -44,7 +44,7 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
   return (
     <>
       <YStack flex={1} paddingBottom={'$4'}>
-        <XStack justifyContent={'flex-start'} paddingTop={30} paddingLeft={20}>
+        <XStack justifyContent={'flex-start'} paddingTop={'$8'} paddingLeft={'$5'}>
           <Pressable
             onPress={() => router.back()}
             accessibilityRole="button"
@@ -58,6 +58,8 @@ export const ShareView = ({ activeSafe, availableChains }: ShareViewProps) => {
           <H3 fontWeight={600}>{contact ? contact.name : 'Unnamed safe'}</H3>
         </YStack>
         <YStack flex={3} alignItems={'center'}>
+          {/* Fixed px (no spacing token at this scale): caps the QR card width so it stays a
+              comfortable square on large screens rather than stretching to the column. */}
           <Container maxWidth={260}>
             <View>
               <View style={styles.root}>
