@@ -1,11 +1,13 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { ActivityIndicator } from 'react-native'
 import type { CameraPermissionStatus } from 'react-native-vision-camera'
 import { Text, View, YStack } from 'tamagui'
 import { router } from 'expo-router'
+import { ToastViewport } from '@tamagui/toast'
 import { QrCamera } from '@/src/components/Camera'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { resolveScannedAddress, useScannedAddressToSend } from '@/src/features/Send/hooks/useScannedAddressToSend'
 import { useWalletConnectScan, type ScanStatus } from '../hooks/useWalletConnectScan'
 
 const GRANTED_FOOTER = 'Scan an Ethereum wallet address or connect to a desktop app'
@@ -80,6 +82,23 @@ function CenterOverlay({
 }
 
 export function WalletConnectScanContainer({ isActive = true }: { isActive?: boolean } = {}) {
+  const { warnChainMismatch, navigateToRecipient } = useScannedAddressToSend()
+
+  // A scanned Ethereum address leaves the scanner modal and lands on the Send recipient screen,
+  // matching the home-screen Send button (replace so back returns to the tabs, not the scanner).
+  const onAddressScanned = useCallback(
+    (raw: string) => {
+      const resolved = resolveScannedAddress(raw)
+      if (!resolved) {
+        return false
+      }
+      warnChainMismatch(resolved.prefix)
+      navigateToRecipient(resolved.address, 'replace')
+      return true
+    },
+    [warnChainMismatch, navigateToRecipient],
+  )
+
   const {
     status,
     errorMessage,
@@ -90,7 +109,7 @@ export function WalletConnectScanContainer({ isActive = true }: { isActive?: boo
     onScan,
     onTryAgain,
     onActivateCamera,
-  } = useWalletConnectScan({ isActive })
+  } = useWalletConnectScan({ isActive, onAddressScanned })
 
   const granted = permission === 'granted'
 
@@ -103,37 +122,40 @@ export function WalletConnectScanContainer({ isActive = true }: { isActive?: boo
     ) : undefined
 
   return (
-    <QrCamera
-      permission={permission}
-      isCameraActive={isCameraActive}
-      onScan={onScan}
-      onActivateCamera={onActivateCamera}
-      onRequestPermission={requestPermission}
-      onPressSettings={openSettings}
-      heading={granted ? null : headingForPermission(permission)}
-      lensTone={status === 'error' ? 'error' : 'neutral'}
-      dimLens={status !== 'scanning'}
-      centerOverlay={centerOverlay}
-      footer={
-        <YStack gap="$3">
-          <Text textAlign="center" color="$color">
-            {granted ? GRANTED_FOOTER : bodyForPermission(permission)}
-          </Text>
-          {__DEV__ && (
-            <View alignItems="center" marginTop="$5">
-              <SafeButton
-                secondary
-                size="$sm"
-                icon={<SafeFontIcon name="copy" size={18} />}
-                onPress={() => router.push('/wallet-connect-manual')}
-                testID="wc-enter-manually"
-              >
-                Enter manually
-              </SafeButton>
-            </View>
-          )}
-        </YStack>
-      }
-    />
+    <>
+      <QrCamera
+        permission={permission}
+        isCameraActive={isCameraActive}
+        onScan={onScan}
+        onActivateCamera={onActivateCamera}
+        onRequestPermission={requestPermission}
+        onPressSettings={openSettings}
+        heading={granted ? null : headingForPermission(permission)}
+        lensTone={status === 'error' ? 'error' : 'neutral'}
+        dimLens={status !== 'scanning'}
+        centerOverlay={centerOverlay}
+        footer={
+          <YStack gap="$3">
+            <Text textAlign="center" color="$color">
+              {granted ? GRANTED_FOOTER : bodyForPermission(permission)}
+            </Text>
+            {__DEV__ && (
+              <View alignItems="center" marginTop="$5">
+                <SafeButton
+                  secondary
+                  size="$sm"
+                  icon={<SafeFontIcon name="copy" size={18} />}
+                  onPress={() => router.push('/wallet-connect-manual')}
+                  testID="wc-enter-manually"
+                >
+                  Enter manually
+                </SafeButton>
+              </View>
+            )}
+          </YStack>
+        }
+      />
+      <ToastViewport multipleToasts={false} left={0} right={0} />
+    </>
   )
 }

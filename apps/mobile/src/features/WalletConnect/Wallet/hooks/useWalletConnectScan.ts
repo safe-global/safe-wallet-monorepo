@@ -11,7 +11,15 @@ const UNRECOGNISED_MESSAGE = 'Unrecognised QR code'
 
 export type ScanStatus = 'scanning' | 'connecting' | 'error'
 
-export const useWalletConnectScan = ({ isActive = true }: { isActive?: boolean } = {}) => {
+export const useWalletConnectScan = ({
+  isActive = true,
+  onAddressScanned,
+}: {
+  isActive?: boolean
+  // Handles a scanned non-WalletConnect code. Returns true when it recognised and handled the code
+  // (e.g. an Ethereum address routed into the Send flow), false to fall through to the error overlay.
+  onAddressScanned?: (raw: string) => boolean
+} = {}) => {
   const router = useRouter()
   const { permission, requestPermission, openSettings } = useCameraPermissionFlow()
   const [status, setStatus] = useState<ScanStatus>('scanning')
@@ -120,13 +128,18 @@ export const useWalletConnectScan = ({ isActive = true }: { isActive?: boolean }
       if (!raw || pairingRef.current || status !== 'scanning') {
         return
       }
-      if (!isPairingUri(raw)) {
-        toError(UNRECOGNISED_MESSAGE)
+      if (isPairingUri(raw)) {
+        void startPair(raw)
         return
       }
-      void startPair(raw)
+      // Not a WalletConnect URI — give the address handler a chance before failing. It navigates
+      // away when it recognises an address, so this hook just needs to avoid the error overlay.
+      if (onAddressScanned?.(raw)) {
+        return
+      }
+      toError(UNRECOGNISED_MESSAGE)
     },
-    [startPair, toError, status],
+    [startPair, toError, status, onAddressScanned],
   )
 
   const onTryAgain = useCallback(() => {
