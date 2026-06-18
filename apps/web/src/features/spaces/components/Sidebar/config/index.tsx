@@ -2,6 +2,7 @@ import {
   House,
   ArrowRightLeft,
   WalletCards,
+  Network,
   BookUser,
   UsersRound,
   Settings,
@@ -38,6 +39,11 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
     icon: WalletCards,
     label: 'Safe accounts',
     href: AppRoutes.spaces.safeAccounts,
+  },
+  {
+    icon: Network,
+    label: 'Nested safes',
+    href: AppRoutes.spaces.nestedSafes,
   },
   {
     icon: BookUser,

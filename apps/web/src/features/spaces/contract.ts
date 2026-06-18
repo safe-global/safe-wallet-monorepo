@@ -26,6 +26,7 @@ import type PendingTxWidget from './components/Dashboard/PendingTxWidget'
 import type SpaceDashboardPage from './components/Dashboard/Page'
 import type SpaceMembersPage from './components/Members/Page'
 import type SpaceSafeAccountsPage from './components/SafeAccounts/Page'
+import type NestedSafesGraphPage from './components/NestedSafesGraph/Page'
 import type SpaceAddressBookPage from './components/SpaceAddressBook/Page'
 import type SpaceSettingsPage from './components/SpaceSettings/Page'
 import type CreateSpaceOnboarding from './components/CreateSpaceOnboarding'
@@ -64,6 +65,7 @@ export interface SpacesContract {
   SpaceDashboardPage: typeof SpaceDashboardPage
   SpaceMembersPage: typeof SpaceMembersPage
   SpaceSafeAccountsPage: typeof SpaceSafeAccountsPage
+  NestedSafesGraphPage: typeof NestedSafesGraphPage
   SpaceAddressBookPage: typeof SpaceAddressBookPage
   SpaceSettingsPage: typeof SpaceSettingsPage
   SecurityHubPage: typeof SecurityHubPage

@@ -30,6 +30,7 @@ import PendingTxWidget from './components/Dashboard/PendingTxWidget'
 import SpaceDashboardPage from './components/Dashboard/Page'
 import SpaceMembersPage from './components/Members/Page'
 import SpaceSafeAccountsPage from './components/SafeAccounts/Page'
+import NestedSafesGraphPage from './components/NestedSafesGraph/Page'
 import SpaceAddressBookPage from './components/SpaceAddressBook/Page'
 import SpaceSettingsPage from './components/SpaceSettings/Page'
 import CreateSpaceOnboarding from './components/CreateSpaceOnboarding'
@@ -76,6 +77,7 @@ const feature: SpacesContract = {
   SpaceDashboardPage,
   SpaceMembersPage,
   SpaceSafeAccountsPage,
+  NestedSafesGraphPage,
   SpaceAddressBookPage,
   SpaceSettingsPage,
   SecurityHubPage,
