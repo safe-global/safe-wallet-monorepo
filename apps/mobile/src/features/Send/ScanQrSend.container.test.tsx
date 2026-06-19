@@ -4,18 +4,24 @@ import { ScanQrSendContainer } from './ScanQrSend.container'
 
 type CapturedQrProps = {
   onScan: (codes: { value?: string }[]) => void
+  isCameraActive?: boolean
   centerOverlay?: React.ReactNode
   footer?: React.ReactNode
   heading?: React.ReactNode
 }
 
 let qrProps: CapturedQrProps | undefined
+let focusCb: (() => undefined | (() => void)) | null = null
 
 jest.mock('expo-router', () => {
   const React = require('react')
   return {
-    // Run the focus callback once on mount so the camera activates with granted permission.
-    useFocusEffect: (cb: () => undefined | (() => void)) => React.useEffect(cb, []),
+    // Run the focus callback once on mount (so the camera activates) and keep a handle so tests can
+    // simulate a blur → refocus.
+    useFocusEffect: (cb: () => undefined | (() => void)) => {
+      focusCb = cb
+      React.useEffect(cb, [])
+    },
   }
 })
 
@@ -70,6 +76,7 @@ describe('ScanQrSendContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     qrProps = undefined
+    focusCb = null
   })
 
   it('shows the error overlay on the lens for an invalid address and does not navigate', () => {
@@ -102,6 +109,20 @@ describe('ScanQrSendContainer', () => {
 
     act(() => fireEvent.press(getByTestId('send-scan-try-again')))
     expect(queryByText('Not a valid address')).toBeNull()
+  })
+
+  it('does not wake the camera behind the error overlay when the screen refocuses', () => {
+    mockResolve.mockReturnValue(null)
+    render(<ScanQrSendContainer />)
+
+    act(() => qrProps?.onScan([{ value: 'nope' }]))
+    expect(qrProps?.isCameraActive).toBe(false)
+
+    // Blur → refocus while the error is shown must not re-arm the camera behind the overlay.
+    act(() => void focusCb?.())
+
+    expect(qrProps?.isCameraActive).toBe(false)
+    expect(qrProps?.centerOverlay).toBeTruthy()
   })
 
   it('warns on chain mismatch and navigates to the recipient for a valid address', () => {

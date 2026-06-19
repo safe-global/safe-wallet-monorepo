@@ -121,6 +121,26 @@ describe('useScan', () => {
 
       expect(mockPush).not.toHaveBeenCalled()
     })
+
+    it('does not wake the camera behind the error overlay when the screen refocuses', () => {
+      jest.mocked(parsePrefixedAddress).mockReturnValue({ address: 'invalid-address' })
+      jest.mocked(isValidAddress).mockReturnValue(false)
+
+      const { result } = renderHook(() => useScan())
+      activateCamera()
+
+      act(() => {
+        result.current.onScan([{ value: 'invalid-code' } as Code])
+      })
+      expect(result.current.errorMessage).toBe('Not a valid address')
+      expect(result.current.isCameraActive).toBe(false)
+
+      // Blur → refocus while the error is shown must not re-arm the camera behind the overlay.
+      activateCamera()
+
+      expect(result.current.isCameraActive).toBe(false)
+      expect(result.current.errorMessage).toBe('Not a valid address')
+    })
   })
 
   describe('Focus handling', () => {

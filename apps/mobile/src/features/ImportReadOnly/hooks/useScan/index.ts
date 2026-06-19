@@ -12,8 +12,14 @@ export const useScan = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { hasPermission } = useCameraPermission()
 
+  // Read the latest error inside the focus effect without listing it in deps (which would re-run the
+  // effect and fight the live state).
+  const errorRef = useRef(errorMessage)
+  errorRef.current = errorMessage
+
   const handleFocusEffect = useCallback(() => {
-    if (!hasPermission) {
+    // Don't wake the camera behind a visible error overlay — the user resumes via Try again.
+    if (!hasPermission || errorRef.current) {
       return
     }
 
