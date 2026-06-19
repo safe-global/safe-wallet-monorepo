@@ -22,7 +22,13 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
-const mockSpace: GetSpaceResponse = { uuid: MOCK_SPACE_UUID, name: 'My Workspace', members: [], safeCount: 0 }
+const mockSpace: GetSpaceResponse = {
+  uuid: MOCK_SPACE_UUID,
+  name: 'My Workspace',
+  members: [],
+  memberCount: 0,
+  safeCount: 0,
+}
 
 const renderDialog = (opts: { space?: GetSpaceResponse | undefined; onClose?: () => void } = {}) => {
   const space = 'space' in opts ? opts.space : mockSpace
