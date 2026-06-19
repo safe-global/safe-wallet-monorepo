@@ -38,6 +38,9 @@ export const useWalletConnectScan = ({
 
   // Guards a second pair attempt while one is in flight (rapid re-scans).
   const pairingRef = useRef(false)
+  // Same guard for the address path: once an address has been handed off (and we're navigating
+  // away), ignore the burst of follow-up frames vision-camera fires for the same code.
+  const handledRef = useRef(false)
   // Set true when the timeout fires; later writes for that attempt become no-ops.
   const cancelledRef = useRef(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -125,7 +128,7 @@ export const useWalletConnectScan = ({
   const onScan = useCallback(
     (scanned: Code[]) => {
       const raw = scanned[0]?.value
-      if (!raw || pairingRef.current || status !== 'scanning') {
+      if (!raw || pairingRef.current || handledRef.current || status !== 'scanning') {
         return
       }
       if (isPairingUri(raw)) {
@@ -135,6 +138,7 @@ export const useWalletConnectScan = ({
       // Not a WalletConnect URI — give the address handler a chance before failing. It navigates
       // away when it recognises an address, so this hook just needs to avoid the error overlay.
       if (onAddressScanned?.(raw)) {
+        handledRef.current = true
         return
       }
       toError(UNRECOGNISED_MESSAGE)
@@ -143,6 +147,7 @@ export const useWalletConnectScan = ({
   )
 
   const onTryAgain = useCallback(() => {
+    handledRef.current = false
     setErrorMessage('')
     setStatus('scanning')
     if (permission === 'granted') {

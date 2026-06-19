@@ -82,6 +82,21 @@ describe('useWalletConnectScan', () => {
     expect(mockPair).not.toHaveBeenCalled()
   })
 
+  it('ignores follow-up frames once an address scan has been handed off', () => {
+    const onAddressScanned = jest.fn(() => true)
+    const { result } = renderHook(() => useWalletConnectScan({ onAddressScanned }))
+    const address = codes('eth:0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045')
+
+    act(() => {
+      result.current.onScan(address)
+    })
+    act(() => {
+      result.current.onScan(address)
+    })
+
+    expect(onAddressScanned).toHaveBeenCalledTimes(1)
+  })
+
   it('shows "Unrecognised QR code" when onAddressScanned does not handle the code', () => {
     const onAddressScanned = jest.fn(() => false)
     const { result } = renderHook(() => useWalletConnectScan({ onAddressScanned }))
