@@ -6,6 +6,11 @@ import { selectActiveChain } from '@/src/store/chains'
 
 type NavigateMode = 'dismissTo' | 'replace'
 
+// Monotonically increasing nonce so each navigation re-triggers the recipient screen's effect even
+// when the same address is scanned twice. Module-level so it survives the scanner unmounting after
+// navigation; deterministic, unlike Date.now() which can collide within a millisecond.
+let scanSeq = 0
+
 // Shared address-to-Send logic for both QR scanners: the in-Send scanner (`/(send)/scan-qr`) and the
 // header scanner (`/wallet-connect-scan`). Owns the chain-mismatch warning and navigation into the
 // Send flow with the recipient prefilled. The camera lifecycle and invalid-address error display
@@ -35,7 +40,7 @@ export const useScannedAddressToSend = () => {
     (address: string, mode: NavigateMode = 'dismissTo') => {
       const target = {
         pathname: '/(send)/recipient' as const,
-        params: { scannedAddress: address, scanTimestamp: Date.now().toString() },
+        params: { scannedAddress: address, scanNonce: String(++scanSeq) },
       }
 
       if (mode === 'replace') {
