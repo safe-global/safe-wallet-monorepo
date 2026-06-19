@@ -9,6 +9,7 @@ import * as navigation from './navigation.page.js'
 // -- Auth & welcome --
 const orgList = '[data-testid="org-list"]'
 export const createSpaceBtn = '[data-testid="create-space-button"]'
+const sidebarLogo = '[data-testid="logo-container"]'
 
 // -- Space selector --
 const spaceSelectorBtn = '[data-testid="space-selector-button"]'
@@ -184,6 +185,12 @@ export function clickOnSignInBtn() {
   cy.get(continueWithWalletBtn).click()
 }
 
+export function blockBeamer() {
+  // Block the Beamer widget script so its announcement popup never renders and
+  // covers onboarding buttons. Call before cy.visit().
+  cy.intercept('GET', 'https://*.getbeamer.com/**', { statusCode: 204, body: '' })
+}
+
 export function signOutViaSidebarProfile() {
   cy.get(sidebarProfileTrigger, { timeout: 30000 }).should('be.visible').click()
   cy.get(sidebarProfilePopover).should('be.visible')
@@ -206,6 +213,18 @@ export function waitForSpacesWelcomeReady() {
 
 export function visitSpaceDashboard(spaceId) {
   cy.visit(constants.spaceDashboardUrl + String(spaceId))
+}
+
+export function goToSpacesView() {
+  // When the account has a single space, sign-in auto-redirects into the space
+  // dashboard where the Create button is absent — click the top-left logo to
+  // return to the Spaces View.
+  cy.get('body').then(($body) => {
+    if (!$body.find(`${createSpaceBtn}:visible`).length) {
+      cy.get(sidebarLogo).should('be.visible').click()
+      cy.url().should('include', constants.spacesUrl)
+    }
+  })
 }
 
 export function clickOnSpaceSelector(spaceName) {

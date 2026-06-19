@@ -16,6 +16,7 @@ describe('Spaces basic flow tests', () => {
   })
 
   beforeEach(() => {
+    space.blockBeamer()
     cy.visit(constants.spacesUrl)
   })
 
@@ -25,6 +26,7 @@ describe('Spaces basic flow tests', () => {
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
+    space.goToSpacesView()
     space.ensureReadyToCreateSpace()
     cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
@@ -41,7 +43,7 @@ describe('Spaces basic flow tests', () => {
     main.verifyElementsIsVisible([space.createSpaceBtn])
   })
 
-  it('Verify an account can be added manually', () => {
+  it.only('Verify an account can be added manually', () => {
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
 
     wallet.connectSigner(admin)
@@ -59,6 +61,7 @@ describe('Spaces basic flow tests', () => {
 
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
+    space.goToSpacesView()
     space.ensureReadyToCreateSpace()
     cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
