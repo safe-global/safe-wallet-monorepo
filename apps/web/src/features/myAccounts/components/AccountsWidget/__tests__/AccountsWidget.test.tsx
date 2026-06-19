@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, fireEvent } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { SafeItem } from '@/hooks/safes'
 import type { Account } from '../types'
@@ -74,6 +74,23 @@ describe('AccountsWidget', () => {
 
     expect(screen.getByText('Vault')).toBeInTheDocument()
     expect(screen.getByText('1/1')).toBeInTheDocument()
+  })
+
+  it('renders a copy address button for every account row', () => {
+    render(<AccountsWidget accounts={mockAccounts} />)
+
+    expect(screen.getAllByRole('button', { name: 'Copy address' })).toHaveLength(mockAccounts.length)
+  })
+
+  it('copies the account address when the copy button is clicked', () => {
+    const writeText = jest.fn()
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
+
+    render(<AccountsWidget accounts={[mockAccounts[1]]} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy address' }))
+
+    expect(writeText).toHaveBeenCalledWith(mockAccounts[1].address)
   })
 
   it('renders an identicon for each account', () => {

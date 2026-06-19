@@ -7,6 +7,7 @@ import { WidgetItem } from '@/features/spaces'
 import { AccountItem } from '../AccountItem'
 import type { Account } from './types'
 import Identicon from '@/components/common/Identicon'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { NotActivatedBadge } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 
@@ -34,9 +35,12 @@ const AccountWidgetItem = ({
         </Typography>
       }
       info={
-        <Typography data-testid="single-account-address" variant="paragraph-mini" color="muted">
-          {shortenAddress(account.address, 4)}
-        </Typography>
+        <div className="flex min-w-0 items-center gap-1.5">
+          <Typography data-testid="single-account-address" variant="paragraph-mini" color="muted">
+            {shortenAddress(account.address, 4)}
+          </Typography>
+          <CopyAddressIconButton address={account.address} />
+        </div>
       }
       startNode={
         <Avatar data-testid="single-account-identicon">
