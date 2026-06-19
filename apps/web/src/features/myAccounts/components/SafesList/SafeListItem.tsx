@@ -69,7 +69,12 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
         threshold={threshold}
         owners={owners.length}
       />
-      <AccountItem.Info address={safeItem.address} chainId={safeItem.chainId} name={isSpaceSafe ? safeItem.name : name}>
+      <AccountItem.Info
+        address={safeItem.address}
+        chainId={safeItem.chainId}
+        name={isSpaceSafe ? safeItem.name : name}
+        showCopyButton
+      >
         {!isMobile && statusChips}
       </AccountItem.Info>
       <AccountItem.ChainBadge chainId={safeItem.chainId} />

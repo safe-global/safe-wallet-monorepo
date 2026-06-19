@@ -135,6 +135,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
                 chainId={sortedSafes[0]?.chainId ?? '1'}
                 name={multiSafeAccountItem.name}
                 showPrefix={false}
+                showCopyButton
                 addressBookNameSource={isSpaceSafe ? ContactSource.space : undefined}
                 data-testid="group-address"
               />

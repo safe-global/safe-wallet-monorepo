@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import NextLink from 'next/link'
 import Identicon from '@/components/common/Identicon'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import { FiatBalance } from '@/features/spaces'
 import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
 import { AccountItem as BaseAccountItem } from '../../../AccountItem'
@@ -148,9 +149,12 @@ const MultiAccountItem = ({ multiSafeAccountItem, onLinkClick, isSpaceSafe = fal
               <Typography variant="paragraph-medium" className="text-foreground truncate">
                 {displayName}
               </Typography>
-              <Typography variant="paragraph-mini" color="muted" className="truncate">
-                {shortenAddress(address)}
-              </Typography>
+              <div className="flex min-w-0 items-center gap-1.5">
+                <Typography variant="paragraph-mini" color="muted" className="truncate">
+                  {shortenAddress(address)}
+                </Typography>
+                <CopyAddressIconButton address={address} />
+              </div>
             </div>
           </div>
 
