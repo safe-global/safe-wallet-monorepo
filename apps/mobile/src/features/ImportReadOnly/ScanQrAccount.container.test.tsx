@@ -13,10 +13,6 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn() }),
 }))
 
-jest.mock('@/src/components/Camera/useCameraPermissionFlow', () => ({
-  useCameraPermissionFlow: () => ({ permission: 'granted', requestPermission: jest.fn(), openSettings: jest.fn() }),
-}))
-
 jest.mock('@/src/components/Camera', () => {
   const React = require('react')
   const { View, Text, Pressable } = require('react-native')
@@ -38,6 +34,7 @@ jest.mock('@/src/components/Camera', () => {
         <Text>{message}</Text>
       </Pressable>
     ),
+    useCameraPermissionFlow: () => ({ permission: 'granted', requestPermission: jest.fn(), openSettings: jest.fn() }),
   }
 })
 
