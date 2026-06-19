@@ -12,7 +12,13 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesUpdateV1Mutation: jest.fn(() => [mockUpdateSpace]),
 }))
 
-const mockSpace: GetSpaceResponse = { id: 42, uuid: MOCK_SPACE_UUID, name: 'My Workspace', members: [], safeCount: 0 }
+const mockSpace: GetSpaceResponse = {
+  uuid: MOCK_SPACE_UUID,
+  name: 'My Workspace',
+  members: [],
+  safeCount: 0,
+  memberCount: 0,
+}
 
 const renderWithStore = () => {
   const store = makeStore(undefined, { skipBroadcast: true })
