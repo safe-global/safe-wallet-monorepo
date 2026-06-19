@@ -3,6 +3,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Checkbox } from '@/components/ui/checkbox'
 import { AccountItem } from '@/features/myAccounts'
 import Identicon from '@/components/common/Identicon'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import { Badge } from '@/components/ui/badge'
 import { TriangleAlert } from 'lucide-react'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
@@ -81,18 +82,21 @@ export const SafeCardLayout = ({
         <div className="flex min-w-0 items-center gap-2">
           <span className="truncate text-base font-medium text-foreground">{name || shortenAddress(address)}</span>
         </div>
-        <span className="block min-w-0 break-all text-xs text-muted-foreground">
-          {isSimilar ? (
-            <>
-              {address.slice(0, 2)}
-              <b>{address.slice(2, 6)}</b>
-              {address.slice(6, -4)}
-              <b>{address.slice(-4)}</b>
-            </>
-          ) : (
-            shortenAddress(address)
-          )}
-        </span>
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span className="block min-w-0 break-all text-xs text-muted-foreground">
+            {isSimilar ? (
+              <>
+                {address.slice(0, 2)}
+                <b>{address.slice(2, 6)}</b>
+                {address.slice(6, -4)}
+                <b>{address.slice(-4)}</b>
+              </>
+            ) : (
+              shortenAddress(address)
+            )}
+          </span>
+          <CopyAddressIconButton address={address} />
+        </div>
       </div>
     </div>
 

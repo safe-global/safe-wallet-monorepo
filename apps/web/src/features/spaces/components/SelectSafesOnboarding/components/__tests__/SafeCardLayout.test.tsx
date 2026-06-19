@@ -70,4 +70,16 @@ describe('SafeCardLayout', () => {
     fireEvent.click(card)
     expect(onToggle).toHaveBeenCalled()
   })
+
+  it('copies the address without toggling the card selection', () => {
+    const writeText = jest.fn()
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
+    const onToggle = jest.fn()
+    render(<SafeCardLayout {...baseProps} onToggle={onToggle} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy address' }))
+
+    expect(writeText).toHaveBeenCalledWith(baseProps.address)
+    expect(onToggle).not.toHaveBeenCalled()
+  })
 })
