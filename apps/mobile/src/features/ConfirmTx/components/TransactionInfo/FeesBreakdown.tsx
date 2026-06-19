@@ -7,8 +7,6 @@ import type {
   TransactionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ListTable, type ListTableItem } from '../ListTable/ListTable'
-import { InfoSheet } from '@/src/components/InfoSheet/InfoSheet'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChainCurrency } from '@/src/store/chains'
@@ -17,21 +15,8 @@ import { useBalances } from '@/src/hooks/useBalances'
 import { useTokenDetails } from '@/src/hooks/useTokenDetails/useTokenDetails'
 import { isTransferTxInfo, isERC20Transfer } from '@/src/utils/transaction-guards'
 import { buildFeesBreakdown, type FeeLine } from './feeRows'
-
-const EXECUTION_FEE_INFO =
-  'Covers third-party services required to securely execute this transaction. Based on the transaction amount. Currently free while the new model is introduced.'
-const GAS_FEE_INFO = 'Network cost required to process this transaction.'
-
-const LabelWithInfo = ({ label, title, info }: { label: string; title: string; info: string }) => (
-  <InfoSheet title={title} info={info} displayIcon={false}>
-    <XStack alignItems="center" gap="$1" flex={1}>
-      <Text color="$textSecondaryLight" fontSize="$4">
-        {label}
-      </Text>
-      <SafeFontIcon name="info" size={16} color="$colorSecondary" />
-    </XStack>
-  </InfoSheet>
-)
+import { FeeLabelWithInfo } from './FeeLabelWithInfo'
+import { EXECUTION_FEE_INFO, gasFeeInfo } from './feeInfoText'
 
 const FeeAmount = ({ line, fiat, currency }: { line: FeeLine; fiat?: number; currency: string }) => (
   <XStack alignItems="center" gap="$1" flexWrap="wrap" justifyContent="flex-end">
@@ -94,7 +79,7 @@ export function FeesBreakdown({
 
   const items: ListTableItem[] = [
     {
-      label: <LabelWithInfo label="Execution fee" title="Execution fee" info={EXECUTION_FEE_INFO} />,
+      label: <FeeLabelWithInfo label="Execution fee" title="Execution fee" info={EXECUTION_FEE_INFO} />,
       render: () => (
         <Text fontSize="$4" textAlign="right">
           FREE
@@ -102,7 +87,7 @@ export function FeesBreakdown({
       ),
     },
     {
-      label: <LabelWithInfo label="Max gas fee" title="Gas fee" info={gasFeeInfo(breakdown.paidFromSafe)} />,
+      label: <FeeLabelWithInfo label="Max gas fee" title="Gas fee" info={gasFeeInfo(breakdown.paidFromSafe)} />,
       render: () =>
         breakdown.gasNotYetKnown ? (
           <Text color="$textSecondaryLight" fontSize="$4" textAlign="right">
@@ -140,6 +125,3 @@ export function FeesBreakdown({
 
   return <ListTable testID="fees-breakdown" items={items} />
 }
-
-const gasFeeInfo = (paidFromSafe: boolean): string =>
-  `${GAS_FEE_INFO} ${paidFromSafe ? 'Paid from your Safe.' : 'Paid from the signer.'}`

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Text, View } from 'tamagui'
 
 import { Identicon } from '@/src/components/Identicon'
@@ -8,17 +8,25 @@ import { ContactDisplayNameContainer } from '@/src/features/AddressBook'
 import { Address } from '@/src/types/address'
 import { Container } from '../Container'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
+import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
+import { buildFeesBreakdown } from '@/src/features/ConfirmTx/components/TransactionInfo/feeRows'
+import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectActiveChainCurrency } from '@/src/store/chains'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
 type Props = {
   address: Address
   txId: string
   executionMethod: ExecutionMethod
+  /** GTF Safe-pays tx: relay is the only path, so the method can't be changed. */
+  isSafePays?: boolean
 }
 
-export function SelectExecutor({ address, txId, executionMethod }: Props) {
+export function SelectExecutor({ address, txId, executionMethod, isSafePays }: Props) {
   return (
     <View
-      onPress={() => router.push({ pathname: '/how-to-execute-sheet', params: { txId } })}
+      onPress={isSafePays ? undefined : () => router.push({ pathname: '/how-to-execute-sheet', params: { txId } })}
       flexDirection="row"
       justifyContent="space-between"
       alignItems="center"
@@ -36,7 +44,9 @@ export function SelectExecutor({ address, txId, executionMethod }: Props) {
           alignItems="center"
           gap={'$1'}
         >
-          {executionMethod === ExecutionMethod.WITH_RELAY ? (
+          {isSafePays ? (
+            <Text fontWeight={600}>Fees paid from the Safe</Text>
+          ) : executionMethod === ExecutionMethod.WITH_RELAY ? (
             <Text fontWeight={600}>Sponsored by Safe</Text>
           ) : (
             <>
@@ -46,7 +56,7 @@ export function SelectExecutor({ address, txId, executionMethod }: Props) {
           )}
         </Container>
 
-        <SafeFontIcon name="chevron-right" />
+        {!isSafePays && <SafeFontIcon name="chevron-right" />}
       </View>
     </View>
   )

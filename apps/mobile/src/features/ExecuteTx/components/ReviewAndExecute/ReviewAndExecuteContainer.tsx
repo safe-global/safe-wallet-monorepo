@@ -17,6 +17,7 @@ import { selectExecutionMethod } from '@/src/store/executionMethodSlice'
 import { selectActiveChain } from '@/src/store/chains'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { getExecutionMethod } from './helpers'
+import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
 import { parseFeeParams } from '@/src/utils/feeParams'
 import { useOptionalWalletConnectContext } from '@/src/features/WalletConnect/Signer/context/WalletConnectContext'
 import useGasFee from '../../hooks/useGasFee'
@@ -139,6 +140,12 @@ export function ReviewAndExecuteContainer() {
           txId={txId}
           activeSigner={activeSigner}
           executionMethod={executionMethod}
+          isSafePays={requiresRelay}
+          detailedExecutionInfo={
+            isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
+              ? txDetails.detailedExecutionInfo
+              : undefined
+          }
           totalFee={totalFee}
           isLoadingFees={isLoadingFees}
           willFail={willFail}
