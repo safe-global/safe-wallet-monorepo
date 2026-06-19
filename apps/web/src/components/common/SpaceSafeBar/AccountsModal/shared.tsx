@@ -112,7 +112,7 @@ export function NameSourceIcon({ source }: { source: ContactSource }) {
           <Cloud className="size-3 text-muted-foreground stroke-[2.5]" />
         )}
       </TooltipTrigger>
-      <TooltipContent>From your {source} address book</TooltipContent>
+      <TooltipContent>From your {source === ContactSource.space ? 'workspace' : 'local'} address book</TooltipContent>
     </Tooltip>
   )
 }

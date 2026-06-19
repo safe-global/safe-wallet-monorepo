@@ -5,6 +5,7 @@ import UpdateSpaceForm from '../UpdateSpaceForm'
 
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { spaceBuilder } from '@/tests/builders/space'
+import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUnwrap = jest.fn()
@@ -76,6 +77,13 @@ describe('UpdateSpaceForm', () => {
       const { input } = getFormElements()
       expect(input).toHaveValue('Updated Space Name')
     })
+  })
+
+  it('should cap the workspace name input length', () => {
+    setupForm(mockSpace, true)
+
+    const { input } = getFormElements()
+    expect(input).toHaveAttribute('maxlength', String(SPACE_NAME_MAX_LENGTH))
   })
 
   it('should disable save button when name is unchanged', () => {

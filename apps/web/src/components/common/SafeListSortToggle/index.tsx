@@ -14,7 +14,7 @@ import { OrderByOption, selectOrderByPreference, setOrderByPreference } from '@/
 
 const labels: Record<OrderByOption, string> = {
   [OrderByOption.NAME]: 'Name',
-  [OrderByOption.LAST_VISITED]: 'Most recent',
+  [OrderByOption.LAST_VISITED]: 'Last visited',
 }
 
 /**
@@ -32,7 +32,7 @@ const SafeListSortToggle = () => {
           <Button
             variant="outline"
             // Match the adjacent search InputGroup exactly: h-9, rounded-md, border-gray-100, shadow-none.
-            // Fixed width so the trigger doesn't grow/shrink between "Name" and "Most recent".
+            // Fixed width so the trigger doesn't grow/shrink between "Name" and "Last visited".
             size="default"
             className="h-9 w-[160px] shrink-0 justify-between gap-1.5 rounded-md border-gray-100 shadow-none text-muted-foreground"
             data-testid="safe-list-sort-toggle"
