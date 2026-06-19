@@ -25,10 +25,6 @@ jest.mock('expo-router', () => {
   }
 })
 
-jest.mock('@/src/components/Camera/useCameraPermissionFlow', () => ({
-  useCameraPermissionFlow: () => ({ permission: 'granted', requestPermission: jest.fn(), openSettings: jest.fn() }),
-}))
-
 jest.mock('@tamagui/toast', () => ({ ToastViewport: () => null }))
 
 jest.mock('@/src/components/Camera', () => {
@@ -62,6 +58,7 @@ jest.mock('@/src/components/Camera', () => {
     ),
     resolveScannedAddress: (raw: string) => mockResolve(raw),
     INVALID_ADDRESS_MESSAGE: 'Not a valid address',
+    useCameraPermissionFlow: () => ({ permission: 'granted', requestPermission: jest.fn(), openSettings: jest.fn() }),
   }
 })
 
