@@ -1,8 +1,6 @@
 import { act, renderHook } from '@/src/tests/test-utils'
 import { useScan } from './index'
 import { Code } from 'react-native-vision-camera'
-import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
-import { isValidAddress } from '@safe-global/utils/utils/validation'
 
 // Store the focus callback for later testing
 let mockFocusCallback: (() => void) | null = null
@@ -29,12 +27,11 @@ jest.mock('expo-router', () => ({
   }),
 }))
 
-jest.mock('@safe-global/utils/utils/addresses', () => ({
-  parsePrefixedAddress: jest.fn().mockReturnValue({ address: 'mocked-address' }),
-}))
-
-jest.mock('@safe-global/utils/utils/validation', () => ({
-  isValidAddress: jest.fn().mockReturnValue(false),
+// Mock the scanned-address contract directly rather than its internal parse/validate helpers.
+const mockResolveScannedAddress = jest.fn()
+jest.mock('@/src/components/Camera/scannedAddress', () => ({
+  resolveScannedAddress: (raw: string) => mockResolveScannedAddress(raw),
+  INVALID_ADDRESS_MESSAGE: 'Not a valid address',
 }))
 
 const mockPush = jest.fn()
@@ -67,8 +64,7 @@ describe('useScan', () => {
     }
 
     it('surfaces an invalid address on the lens and pauses the camera', () => {
-      jest.mocked(parsePrefixedAddress).mockReturnValue({ address: 'invalid-address' })
-      jest.mocked(isValidAddress).mockReturnValue(false)
+      mockResolveScannedAddress.mockReturnValue(null)
 
       const { result } = renderHook(() => useScan())
       activateCamera()
@@ -83,8 +79,7 @@ describe('useScan', () => {
     })
 
     it('clears the error and re-activates the camera on Try again', () => {
-      jest.mocked(parsePrefixedAddress).mockReturnValue({ address: 'invalid-address' })
-      jest.mocked(isValidAddress).mockReturnValue(false)
+      mockResolveScannedAddress.mockReturnValue(null)
 
       const { result } = renderHook(() => useScan())
       activateCamera()
@@ -103,8 +98,7 @@ describe('useScan', () => {
     })
 
     it('does not scan again while the error overlay is shown', () => {
-      jest.mocked(parsePrefixedAddress).mockReturnValue({ address: 'invalid-address' })
-      jest.mocked(isValidAddress).mockReturnValue(false)
+      mockResolveScannedAddress.mockReturnValue(null)
 
       const { result } = renderHook(() => useScan())
       activateCamera()
@@ -114,7 +108,7 @@ describe('useScan', () => {
       })
 
       // Camera is paused, so a follow-up frame is ignored until Try again re-activates it.
-      jest.mocked(isValidAddress).mockReturnValue(true)
+      mockResolveScannedAddress.mockReturnValue({ address: '0xvalid' })
       act(() => {
         result.current.onScan([{ value: 'eth:0xvalid' } as Code])
       })
@@ -123,8 +117,7 @@ describe('useScan', () => {
     })
 
     it('does not wake the camera behind the error overlay when the screen refocuses', () => {
-      jest.mocked(parsePrefixedAddress).mockReturnValue({ address: 'invalid-address' })
-      jest.mocked(isValidAddress).mockReturnValue(false)
+      mockResolveScannedAddress.mockReturnValue(null)
 
       const { result } = renderHook(() => useScan())
       activateCamera()
@@ -146,8 +139,7 @@ describe('useScan', () => {
   describe('Focus handling', () => {
     it('should reset hasScanned when screen gains focus', () => {
       const validAddress = '0x1234valid'
-      jest.mocked(parsePrefixedAddress).mockReturnValue({ address: validAddress })
-      jest.mocked(isValidAddress).mockReturnValue(true)
+      mockResolveScannedAddress.mockReturnValue({ address: validAddress })
 
       const { result } = renderHook(() => useScan())
 
