@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import { Text, View } from 'tamagui'
 
 import { Identicon } from '@/src/components/Identicon'
@@ -8,12 +8,6 @@ import { ContactDisplayNameContainer } from '@/src/features/AddressBook'
 import { Address } from '@/src/types/address'
 import { Container } from '../Container'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
-import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
-import { buildFeesBreakdown } from '@/src/features/ConfirmTx/components/TransactionInfo/feeRows'
-import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
-import { useAppSelector } from '@/src/store/hooks'
-import { selectActiveChainCurrency } from '@/src/store/chains'
-import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
 type Props = {
   address: Address

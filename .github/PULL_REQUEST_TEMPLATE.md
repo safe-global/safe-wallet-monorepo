@@ -43,7 +43,6 @@ Example:
 - [ ] I've documented how it affects the analytics (if at all) 📊
 - [ ] I've written a unit/e2e test for it (if applicable) 🧑‍💻
 - [ ] I've listed affected flows and blast radius, and named what I did not verify 🎯
-- [ ] For web feature/bugfix PRs, I've added a Playwright one-shot happy-path clickthrough under apps/web/e2e/tests/one-shots/ and run it locally — CI records and posts the clickthrough GIF 🎬
 
 ---
 
