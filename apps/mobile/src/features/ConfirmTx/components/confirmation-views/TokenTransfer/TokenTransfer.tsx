@@ -71,19 +71,18 @@ export function TokenTransfer({ txId, txInfo, executionInfo, executedAt }: Token
                 direction={txInfo.direction}
                 preciseAmount
               />
-              {safePaidFee && (
-                <>
-                  {' · '}
-                  <TokenAmount
-                    value={safePaidFee.amount}
-                    decimals={safePaidFee.decimals}
-                    tokenSymbol={safePaidFee.symbol}
-                    direction={txInfo.direction}
-                    preciseAmount
-                  />
-                </>
-              )}
             </H3>
+            {safePaidFee && (
+              <H3 fontWeight={600} textAlign="center" paddingHorizontal="$4">
+                <TokenAmount
+                  value={safePaidFee.amount}
+                  decimals={safePaidFee.decimals}
+                  tokenSymbol={safePaidFee.symbol}
+                  direction={txInfo.direction}
+                  preciseAmount
+                />
+              </H3>
+            )}
           </YStack>
         }
         submittedAt={executionInfo?.submittedAt || executedAt}
