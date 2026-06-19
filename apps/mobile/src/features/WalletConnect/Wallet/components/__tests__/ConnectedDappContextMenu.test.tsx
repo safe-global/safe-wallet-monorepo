@@ -1,53 +1,60 @@
 import React from 'react'
+import { Text } from 'react-native'
 import { fireEvent } from '@testing-library/react-native'
 import { render } from '@/src/tests/test-utils'
-import { ConnectedDappContextMenu, getMenuPlacement } from '../ConnectedDappContextMenu'
+import { ConnectedDappContextMenu } from '../ConnectedDappContextMenu'
 
-const WINDOW = { width: 375, height: 800 }
-
-describe('getMenuPlacement', () => {
-  it('anchors below the tap when there is room', () => {
-    const placement = getMenuPlacement({ x: 350, y: 120 }, WINDOW)
-    expect(placement.top).toBe(128)
-    expect(placement.bottom).toBeUndefined()
-  })
-
-  it('flips above the tap when anchoring below would overflow the bottom', () => {
-    const placement = getMenuPlacement({ x: 350, y: 780 }, WINDOW)
-    expect(placement.top).toBeUndefined()
-    expect(placement.bottom).toBe(WINDOW.height - 780 + 8)
-  })
-
-  it('right-aligns to the tap and clamps to a 16px gutter', () => {
-    expect(getMenuPlacement({ x: 300, y: 100 }, WINDOW).right).toBe(75)
-    expect(getMenuPlacement({ x: 374, y: 100 }, WINDOW).right).toBe(16)
-  })
+// Stub the native menu: render the trigger plus a pressable per action so we can assert
+// that selecting an action forwards its id to onPressAction.
+jest.mock('@react-native-menu/menu', () => {
+  const { Pressable, Text: RNText } = jest.requireActual('react-native')
+  return {
+    MenuView: ({
+      children,
+      actions,
+      onPressAction,
+    }: {
+      children: React.ReactNode
+      actions: { id: string; title: string }[]
+      onPressAction: (event: { nativeEvent: { event: string } }) => void
+    }) => (
+      <>
+        {children}
+        {actions.map((action) => (
+          <Pressable
+            key={action.id}
+            testID={`menu-action-${action.id}`}
+            onPress={() => onPressAction({ nativeEvent: { event: action.id } })}
+          >
+            <RNText>{action.title}</RNText>
+          </Pressable>
+        ))}
+      </>
+    ),
+  }
 })
 
 describe('ConnectedDappContextMenu', () => {
-  it('disconnects when the Disconnect item is pressed', () => {
-    const onDisconnect = jest.fn()
-    const { getByTestId, getByText } = render(
-      <ConnectedDappContextMenu
-        anchor={{ x: 300, y: 120 }}
-        onDisconnect={onDisconnect}
-        onClose={jest.fn()}
-        testID="menu-disconnect"
-      />,
+  it('renders the trigger and a Disconnect action', () => {
+    const { getByText } = render(
+      <ConnectedDappContextMenu onDisconnect={jest.fn()}>
+        <Text>trigger</Text>
+      </ConnectedDappContextMenu>,
     )
 
+    expect(getByText('trigger')).toBeTruthy()
     expect(getByText('Disconnect')).toBeTruthy()
-    fireEvent.press(getByTestId('menu-disconnect'))
-    expect(onDisconnect).toHaveBeenCalledTimes(1)
   })
 
-  it('closes when the surrounding backdrop is pressed', () => {
-    const onClose = jest.fn()
-    const { getByLabelText } = render(
-      <ConnectedDappContextMenu anchor={{ x: 300, y: 120 }} onDisconnect={jest.fn()} onClose={onClose} />,
+  it('calls onDisconnect when the Disconnect action is selected', () => {
+    const onDisconnect = jest.fn()
+    const { getByTestId } = render(
+      <ConnectedDappContextMenu onDisconnect={onDisconnect}>
+        <Text>trigger</Text>
+      </ConnectedDappContextMenu>,
     )
 
-    fireEvent.press(getByLabelText('Close menu'))
-    expect(onClose).toHaveBeenCalledTimes(1)
+    fireEvent.press(getByTestId('menu-action-disconnect'))
+    expect(onDisconnect).toHaveBeenCalledTimes(1)
   })
 })

@@ -24,32 +24,58 @@ jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () => {
   )
 })
 
+// Stub the native menu: render the trigger plus a pressable per action so the disconnect action
+// is selectable without the native menu internals.
+jest.mock('@react-native-menu/menu', () => {
+  const { Pressable } = jest.requireActual('react-native')
+  return {
+    MenuView: ({
+      children,
+      actions,
+      onPressAction,
+    }: {
+      children: React.ReactNode
+      actions: { id: string }[]
+      onPressAction: (event: { nativeEvent: { event: string } }) => void
+    }) => (
+      <>
+        {children}
+        {actions.map((action) => (
+          <Pressable
+            key={action.id}
+            testID={`menu-action-${action.id}`}
+            onPress={() => onPressAction({ nativeEvent: { event: action.id } })}
+          />
+        ))}
+      </>
+    ),
+  }
+})
+
 const session = (topic: string, name: string): SessionTypes.Struct =>
   ({ topic, peer: { metadata: { name, url: `https://${name}.test`, icons: [] } } }) as unknown as SessionTypes.Struct
 
 describe('ConnectedDappRow', () => {
   it('renders the dApp name', () => {
     const { getByText } = render(
-      <ConnectedDappRow session={session('t1', 'Uniswap')} onOpenMenu={jest.fn()} onRequestDisconnect={jest.fn()} />,
+      <ConnectedDappRow session={session('t1', 'Uniswap')} onRequestDisconnect={jest.fn()} />,
     )
     expect(getByText('Uniswap')).toBeTruthy()
   })
 
-  it('opens the overflow menu anchored at the tapped point', () => {
-    const onOpenMenu = jest.fn()
+  it('requests disconnect from the overflow menu', () => {
+    const onRequest = jest.fn()
     const { getByTestId } = render(
-      <ConnectedDappRow session={session('t1', 'Uniswap')} onOpenMenu={onOpenMenu} onRequestDisconnect={jest.fn()} />,
+      <ConnectedDappRow session={session('t1', 'Uniswap')} onRequestDisconnect={onRequest} />,
     )
 
-    fireEvent.press(getByTestId('connected-dapp-menu-t1'), { nativeEvent: { pageX: 300, pageY: 120 } })
-    expect(onOpenMenu).toHaveBeenCalledWith(expect.objectContaining({ topic: 't1' }), { x: 300, y: 120 })
+    fireEvent.press(getByTestId('menu-action-disconnect'))
+    expect(onRequest).toHaveBeenCalledWith(expect.objectContaining({ topic: 't1' }))
   })
 
   it('requests disconnect from the swipe-left trash action', () => {
     const onRequest = jest.fn()
-    const { getByTestId } = render(
-      <ConnectedDappRow session={session('t2', 'Aave')} onOpenMenu={jest.fn()} onRequestDisconnect={onRequest} />,
-    )
+    const { getByTestId } = render(<ConnectedDappRow session={session('t2', 'Aave')} onRequestDisconnect={onRequest} />)
     fireEvent.press(getByTestId('connected-dapp-trash-t2'))
     expect(onRequest).toHaveBeenCalledWith(expect.objectContaining({ topic: 't2' }))
   })

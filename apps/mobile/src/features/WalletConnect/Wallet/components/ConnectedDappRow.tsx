@@ -7,19 +7,17 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import type { VerifyVariant } from '../utils/verifyStatus'
 import { DappIcon } from './DappIcon'
 import { VerifyStatusIcon } from './VerifyStatusIcon'
-import type { MenuAnchor } from './ConnectedDappContextMenu'
+import { ConnectedDappContextMenu } from './ConnectedDappContextMenu'
 
 interface Props {
   session: SessionTypes.Struct
   variant?: VerifyVariant
-  /** Opens the overflow menu for this session, anchored at the tapped point. */
-  onOpenMenu: (session: SessionTypes.Struct, anchor: MenuAnchor) => void
   /** Asks the screen to open the disconnect confirmation for this session. */
   onRequestDisconnect: (session: SessionTypes.Struct) => void
 }
 
-/** A connected-dApp card; the overflow menu is owned by the screen and a left-swipe reveals a trash action. */
-export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onOpenMenu, onRequestDisconnect }) => {
+/** A connected-dApp card; the overflow menu and a left-swipe both route to a disconnect confirmation. */
+export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onRequestDisconnect }) => {
   const meta = session.peer.metadata
   const swipeRef = useRef<SwipeableMethods>(null)
 
@@ -73,14 +71,13 @@ export const ConnectedDappRow: React.FC<Props> = ({ session, variant, onOpenMenu
         <Text flex={1} fontWeight="600" fontSize={14} numberOfLines={1}>
           {meta.name}
         </Text>
-        <Pressable
-          hitSlop={8}
-          onPress={(e) => onOpenMenu(session, { x: e.nativeEvent.pageX, y: e.nativeEvent.pageY })}
-          accessibilityLabel={`Options for ${meta.name}`}
+        <ConnectedDappContextMenu
+          onDisconnect={requestDisconnect}
           testID={`connected-dapp-menu-${session.topic}`}
+          accessibilityLabel={`Options for ${meta.name}`}
         >
           <SafeFontIcon name="options-horizontal" color="$colorSecondary" />
-        </Pressable>
+        </ConnectedDappContextMenu>
       </XStack>
     </ReanimatedSwipeable>
   )
