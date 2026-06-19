@@ -10,6 +10,7 @@ import NameInput from '@/components/common/NameInput'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import useChains from '@/hooks/useChains'
+import { DEFAULT_MAINNET_CHAIN_ID } from '@/config/constants'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
@@ -55,6 +56,9 @@ const AddContactDialog = ({
   const { configs: allNetworks } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+
+  // Contacts are chain-agnostic, so resolve ENS names on mainnet regardless of the connected chain
+  const ensChain = allNetworks.find((chain) => chain.chainId === String(DEFAULT_MAINNET_CHAIN_ID))
 
   const defaultValues = {
     name: '',
@@ -134,7 +138,7 @@ const AddContactDialog = ({
                 {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
 
                 <NameInput name="name" label="Name" required />
-                <AddressInput name="address" label="Address or ENS" required showPrefix={false} />
+                <AddressInput name="address" label="Address or ENS" required showPrefix={false} chain={ensChain} />
 
                 <div>
                   <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
