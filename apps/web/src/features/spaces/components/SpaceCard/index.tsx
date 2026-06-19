@@ -6,7 +6,6 @@ import css from './styles.module.css'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import classNames from 'classnames'
 import { isUserActiveAdmin } from '@/features/spaces/utils'
-import { MemberStatus } from '@/features/spaces'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import SpaceContextMenu from './SpaceContextMenu'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
@@ -56,8 +55,7 @@ const SpaceCard = ({
   isLink?: boolean
   currentUserId?: number
 }) => {
-  const { uuid, name, members, safeCount } = space
-  const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
+  const { uuid, name, members, safeCount, memberCount } = space
   const isAdmin = isUserActiveAdmin(members, currentUserId)
 
   const handleClick = () => {
@@ -84,7 +82,7 @@ const SpaceCard = ({
 
       <InitialsAvatar name={name} size={isCompact ? 'medium' : 'large'} />
 
-      <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={numberOfMembers} isCompact={isCompact} />
+      <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={memberCount} isCompact={isCompact} />
 
       {isAdmin && <SpaceContextMenu space={space} />}
     </Card>

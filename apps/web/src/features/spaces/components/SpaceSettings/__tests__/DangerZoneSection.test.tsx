@@ -33,8 +33,8 @@ describe('DangerZoneSection', () => {
       uuid: MOCK_SPACE_UUID,
       name: 'Other Workspace',
       members: [],
-      safeCount: 0,
       memberCount: 0,
+      safeCount: 0,
     }
 
     renderSection(space)
@@ -55,8 +55,8 @@ describe('DangerZoneSection', () => {
       uuid: MOCK_SPACE_UUID_ALT,
       name: 'Viewed',
       members: [],
-      safeCount: 0,
       memberCount: 0,
+      safeCount: 0,
     }
 
     renderSection(viewedSpace)
