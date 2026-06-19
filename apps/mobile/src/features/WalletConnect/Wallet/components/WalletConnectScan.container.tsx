@@ -3,7 +3,6 @@ import { ActivityIndicator } from 'react-native'
 import type { CameraPermissionStatus } from 'react-native-vision-camera'
 import { Text, View, YStack } from 'tamagui'
 import { router } from 'expo-router'
-import { ToastViewport } from '@tamagui/toast'
 import { QrCamera, ScanErrorOverlay, resolveScannedAddress } from '@/src/components/Camera'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
@@ -109,40 +108,37 @@ export function WalletConnectScanContainer({ isActive = true }: { isActive?: boo
     ) : undefined
 
   return (
-    <>
-      <QrCamera
-        permission={permission}
-        isCameraActive={isCameraActive}
-        onScan={onScan}
-        onActivateCamera={onActivateCamera}
-        onRequestPermission={requestPermission}
-        onPressSettings={openSettings}
-        heading={granted ? null : headingForPermission(permission)}
-        lensTone={status === 'error' ? 'error' : 'neutral'}
-        dimLens={status !== 'scanning'}
-        centerOverlay={centerOverlay}
-        footer={
-          <YStack gap="$3">
-            <Text textAlign="center" color="$color">
-              {granted ? GRANTED_FOOTER : bodyForPermission(permission)}
-            </Text>
-            {__DEV__ && (
-              <View alignItems="center" marginTop="$5">
-                <SafeButton
-                  secondary
-                  size="$sm"
-                  icon={<SafeFontIcon name="copy" size={18} />}
-                  onPress={() => router.push('/wallet-connect-manual')}
-                  testID="wc-enter-manually"
-                >
-                  Enter manually
-                </SafeButton>
-              </View>
-            )}
-          </YStack>
-        }
-      />
-      <ToastViewport multipleToasts={false} left={0} right={0} />
-    </>
+    <QrCamera
+      permission={permission}
+      isCameraActive={isCameraActive}
+      onScan={onScan}
+      onActivateCamera={onActivateCamera}
+      onRequestPermission={requestPermission}
+      onPressSettings={openSettings}
+      heading={granted ? null : headingForPermission(permission)}
+      lensTone={status === 'error' ? 'error' : 'neutral'}
+      dimLens={status !== 'scanning'}
+      centerOverlay={centerOverlay}
+      footer={
+        <YStack gap="$3">
+          <Text textAlign="center" color="$color">
+            {granted ? GRANTED_FOOTER : bodyForPermission(permission)}
+          </Text>
+          {__DEV__ && (
+            <View alignItems="center" marginTop="$5">
+              <SafeButton
+                secondary
+                size="$sm"
+                icon={<SafeFontIcon name="copy" size={18} />}
+                onPress={() => router.push('/wallet-connect-manual')}
+                testID="wc-enter-manually"
+              >
+                Enter manually
+              </SafeButton>
+            </View>
+          )}
+        </YStack>
+      }
+    />
   )
 }

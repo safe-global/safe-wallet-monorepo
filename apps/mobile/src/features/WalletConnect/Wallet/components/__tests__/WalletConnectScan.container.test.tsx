@@ -7,8 +7,6 @@ import type { ScanStatus } from '../../hooks/useWalletConnectScan'
 const mockPush = jest.fn()
 jest.mock('expo-router', () => ({ router: { push: (p: string) => mockPush(p) } }))
 
-jest.mock('@tamagui/toast', () => ({ ToastViewport: () => null }))
-
 const mockWarnChainMismatch = jest.fn()
 const mockNavigateToRecipient = jest.fn()
 const mockResolveScannedAddress = jest.fn()

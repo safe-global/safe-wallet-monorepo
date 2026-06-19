@@ -2,7 +2,6 @@ import React, { useCallback, useRef, useState } from 'react'
 import { Text } from 'tamagui'
 import { Code } from 'react-native-vision-camera'
 import { useFocusEffect } from 'expo-router'
-import { ToastViewport } from '@tamagui/toast'
 import {
   QrCamera,
   ScanErrorOverlay,
@@ -103,25 +102,22 @@ export function ScanQrSendContainer() {
   }, [permission])
 
   return (
-    <>
-      <QrCamera
-        permission={permission}
-        isCameraActive={isCameraActive}
-        onScan={onScan}
-        onActivateCamera={handleActivateCamera}
-        onRequestPermission={requestPermission}
-        onPressSettings={openSettings}
-        heading={errorMessage ? undefined : headingForPermission(permission)}
-        lensTone={errorMessage ? 'error' : 'neutral'}
-        dimLens={Boolean(errorMessage)}
-        centerOverlay={
-          errorMessage ? (
-            <ScanErrorOverlay message={errorMessage} onTryAgain={onTryAgain} testID="send-scan-try-again" />
-          ) : undefined
-        }
-        footer={<Text textAlign="center">{bodyForPermission(permission)}</Text>}
-      />
-      <ToastViewport multipleToasts={false} left={0} right={0} />
-    </>
+    <QrCamera
+      permission={permission}
+      isCameraActive={isCameraActive}
+      onScan={onScan}
+      onActivateCamera={handleActivateCamera}
+      onRequestPermission={requestPermission}
+      onPressSettings={openSettings}
+      heading={errorMessage ? undefined : headingForPermission(permission)}
+      lensTone={errorMessage ? 'error' : 'neutral'}
+      dimLens={Boolean(errorMessage)}
+      centerOverlay={
+        errorMessage ? (
+          <ScanErrorOverlay message={errorMessage} onTryAgain={onTryAgain} testID="send-scan-try-again" />
+        ) : undefined
+      }
+      footer={<Text textAlign="center">{bodyForPermission(permission)}</Text>}
+    />
   )
 }

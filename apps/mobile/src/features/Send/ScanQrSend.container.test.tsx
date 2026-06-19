@@ -25,8 +25,6 @@ jest.mock('expo-router', () => {
   }
 })
 
-jest.mock('@tamagui/toast', () => ({ ToastViewport: () => null }))
-
 jest.mock('@/src/components/Camera', () => {
   const React = require('react')
   const { View, Text, Pressable } = require('react-native')
