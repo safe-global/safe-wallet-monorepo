@@ -7,8 +7,9 @@ import { selectActiveChain } from '@/src/store/chains'
 type NavigateMode = 'dismissTo' | 'replace'
 
 // Monotonically increasing nonce so each navigation re-triggers the recipient screen's effect even
-// when the same address is scanned twice. Module-level so it survives the scanner unmounting after
-// navigation; deterministic, unlike Date.now() which can collide within a millisecond.
+// when the same address is scanned twice; deterministic, unlike Date.now() which can collide within
+// a millisecond. Intentionally a module-level singleton — do NOT move it into a useRef: the scanner
+// unmounts on navigation, so a per-instance ref would reset to 0 and break cross-mount uniqueness.
 let scanSeq = 0
 
 // Shared address-to-Send logic for both QR scanners: the in-Send scanner (`/(send)/scan-qr`) and the
