@@ -65,7 +65,7 @@ export function ConfirmationSheet({
         <YStack testID={testID} gap="$4" padding="$4" alignItems="center">
           <Badge
             themeName={badgeThemeName}
-            circleSize="$12"
+            circleSize={64}
             content={<SafeFontIcon name={iconName} size={32} color="$color" />}
           />
 

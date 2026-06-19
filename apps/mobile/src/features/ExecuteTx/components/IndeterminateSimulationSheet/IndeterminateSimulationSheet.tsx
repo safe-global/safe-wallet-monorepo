@@ -18,7 +18,7 @@ export function IndeterminateSimulationSheet({ onConfirm, onDismiss }: Indetermi
       iconName="alert-triangle"
       badgeThemeName="badge_warning"
       title="Confirm execution"
-      message="We couldn't review this transaction. If you execute and it fails, you'll still pay the network fee."
+      message="We couldn't review this transaction. If you execute and it fails, you'll still pay the network fee. You can run the simulation yourself from the Safe Shield section before deciding."
       onDismiss={onDismiss}
     >
       {(dismiss) => (
