@@ -1,21 +1,8 @@
 import { useCallback } from 'react'
 import { useRouter } from 'expo-router'
 import { useToastController } from '@tamagui/toast'
-import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
-import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChain } from '@/src/store/chains'
-
-export type ScannedAddress = { address: string; prefix?: string }
-
-// Recognises a scanned QR value as an Ethereum (optionally `prefix:`-tagged) address. Returns null
-// for anything else — WalletConnect URIs, URLs, junk — so callers can fall back to their own
-// handling. `parsePrefixedAddress` never throws (it leaves non-addresses unchanged), so feeding it
-// arbitrary scanner output is safe.
-export const resolveScannedAddress = (raw: string): ScannedAddress | null => {
-  const { address, prefix } = parsePrefixedAddress(raw)
-  return isValidAddress(address) ? { address, prefix } : null
-}
 
 type NavigateMode = 'dismissTo' | 'replace'
 

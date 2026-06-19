@@ -3,10 +3,7 @@ import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { useFocusEffect } from 'expo-router'
 
-import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
-import { isValidAddress } from '@safe-global/utils/utils/validation'
-
-const INVALID_ADDRESS_MESSAGE = 'Not a valid address'
+import { resolveScannedAddress, INVALID_ADDRESS_MESSAGE } from '@/src/components/Camera/scannedAddress'
 
 export const useScan = () => {
   const router = useRouter()
@@ -37,12 +34,12 @@ export const useScan = () => {
       }
 
       const code = codes[0].value || ''
-      const { address } = parsePrefixedAddress(code)
+      const resolved = resolveScannedAddress(code)
 
-      if (isValidAddress(address)) {
+      if (resolved) {
         hasScanned.current = true
         setIsCameraActive(false)
-        router.push(`/(import-accounts)/form?safeAddress=${address}`)
+        router.push(`/(import-accounts)/form?safeAddress=${resolved.address}`)
         return
       }
 

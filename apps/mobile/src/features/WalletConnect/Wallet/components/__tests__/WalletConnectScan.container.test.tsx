@@ -17,7 +17,6 @@ jest.mock('@/src/features/Send/hooks/useScannedAddressToSend', () => ({
     warnChainMismatch: mockWarnChainMismatch,
     navigateToRecipient: mockNavigateToRecipient,
   }),
-  resolveScannedAddress: (raw: string) => mockResolveScannedAddress(raw),
 }))
 
 const baseHook: {
@@ -78,6 +77,7 @@ jest.mock('@/src/components/Camera', () => {
         </Pressable>
       </>
     ),
+    resolveScannedAddress: (raw: string) => mockResolveScannedAddress(raw),
   }
 })
 

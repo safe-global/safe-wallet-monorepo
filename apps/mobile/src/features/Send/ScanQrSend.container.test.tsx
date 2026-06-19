@@ -54,6 +54,8 @@ jest.mock('@/src/components/Camera', () => {
         </Pressable>
       </>
     ),
+    resolveScannedAddress: (raw: string) => mockResolve(raw),
+    INVALID_ADDRESS_MESSAGE: 'Not a valid address',
   }
 })
 
@@ -61,7 +63,6 @@ const mockResolve = jest.fn()
 const mockWarn = jest.fn()
 const mockNavigate = jest.fn()
 jest.mock('./hooks/useScannedAddressToSend', () => ({
-  resolveScannedAddress: (raw: string) => mockResolve(raw),
   useScannedAddressToSend: () => ({ warnChainMismatch: mockWarn, navigateToRecipient: mockNavigate }),
 }))
 

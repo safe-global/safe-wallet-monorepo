@@ -3,11 +3,9 @@ import { Text } from 'tamagui'
 import { Code } from 'react-native-vision-camera'
 import { useFocusEffect } from 'expo-router'
 import { ToastViewport } from '@tamagui/toast'
-import { QrCamera, ScanErrorOverlay } from '@/src/components/Camera'
+import { QrCamera, ScanErrorOverlay, resolveScannedAddress, INVALID_ADDRESS_MESSAGE } from '@/src/components/Camera'
 import { useCameraPermissionFlow } from '@/src/components/Camera/useCameraPermissionFlow'
-import { resolveScannedAddress, useScannedAddressToSend } from './hooks/useScannedAddressToSend'
-
-const INVALID_ADDRESS_MESSAGE = 'Not a valid address'
+import { useScannedAddressToSend } from './hooks/useScannedAddressToSend'
 
 const headingForPermission = (permission: ReturnType<typeof useCameraPermissionFlow>['permission']): string => {
   switch (permission) {
