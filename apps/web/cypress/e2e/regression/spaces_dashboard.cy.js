@@ -20,10 +20,8 @@ describe('Spaces dashboard tests', () => {
   // ===========================================
 
   it('Verify that the Space dashboard loads correctly after login for a user with an existing Space and Safes', () => {
-    //space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.uuid)
     space.verifySpaceDashboardTotalValueFormat()
     space.verifySpaceDashboardWidgetVisible('Accounts')
-    // 9 including multichainsafes
     space.verifySpaceDashboardAccountsWidgetRowCount(3)
     space.verifySpaceDashboardWidgetVisible('Pending')
     space.verifyPendingTxWidgetItemCount(3)
@@ -37,7 +35,7 @@ describe('Spaces dashboard tests', () => {
     space.verifySpaceDashboardWidgetVisible('Accounts')
     const row = staticSpaces.dashboardWithSafes.pendingTxAccount
 
-    space.clickAccountItemByIndex(staticSpaces.dashboardWithSafes.singleChainAccountRowIndex)
+    space.clickSingleChainAccountRow()
 
     space.verifyOpenedSafeDashboardFromSpaceAccountsRow({
       safeFullQuery: row.safeUrlParam,
@@ -75,7 +73,7 @@ describe('Spaces dashboard tests', () => {
       space.verifySpaceSidebarItemsVisible()
       // Action: click on a safe in the accounts widget
       space.verifySpaceDashboardWidgetVisible('Accounts')
-      space.clickAccountItemByIndex(staticSpaces.dashboardWithSafes.singleChainAccountRowIndex)
+      space.clickSingleChainAccountRow()
       space.verifySpaceSidebarItemsNotVisible()
       space.verifySafeLevelNavigationElements()
     })

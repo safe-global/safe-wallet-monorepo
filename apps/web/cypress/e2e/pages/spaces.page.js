@@ -154,6 +154,8 @@ function getAccountItem(index) {
   return `${spaceDashboardAccountsWidget} [data-testid="space-dashboard-accounts-row-${index}"]`
 }
 
+const singleChainAccountRow = `${spaceDashboardAccountsWidget} [data-testid^="space-dashboard-accounts-row-"]:has(${singleAccountName})`
+
 function getAccountExpandedPanel(rowIndex) {
   return `${spaceDashboardAccountsWidget} [data-testid="space-dashboard-accounts-expanded-${rowIndex}"]`
 }
@@ -268,6 +270,10 @@ export function goToSpaceMembers() {
 
 export function clickAccountItemByIndex(index) {
   cy.get(getAccountItem(index)).click()
+}
+
+export function clickSingleChainAccountRow() {
+  cy.get(singleChainAccountRow).first().should('be.visible').click()
 }
 
 export function clickExpandedPanelSubAccountRow(rowIndex, subRowIndex) {

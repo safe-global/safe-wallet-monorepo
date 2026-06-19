@@ -54,8 +54,6 @@ export default {
       /** Single-chain row — `AccountWidgetItem` owners badge (e.g. `2/3`). */
       ownersThreshold: '2/3',
     },
-    /** `AccountWidgetItem` row index — single-chain Pending tx row; click opens `/home?safe=…`. */
-    singleChainAccountRowIndex: 2,
   },
   emptyGettingStarted: {
     uuid: 'ca3d2ede-3492-4799-a4e9-bf0dcdd0c52f',
