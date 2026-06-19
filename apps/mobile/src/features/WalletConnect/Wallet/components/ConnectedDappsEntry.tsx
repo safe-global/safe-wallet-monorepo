@@ -1,6 +1,6 @@
 import React from 'react'
 import { Pressable } from 'react-native'
-import { router, type RelativePathString } from 'expo-router'
+import { router } from 'expo-router'
 import { Text, View } from 'tamagui'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useAppSelector } from '@/src/store/hooks'
@@ -23,7 +23,7 @@ export const ConnectedDappsEntry: React.FC = () => {
   return (
     <Pressable
       style={({ pressed }) => [{ opacity: pressed ? 0.5 : 1.0 }]}
-      onPress={() => router.push('/connected-apps' as RelativePathString)}
+      onPress={() => router.push('/connected-apps')}
       testID="settings-connected-apps-entry"
     >
       <SafeListItem
