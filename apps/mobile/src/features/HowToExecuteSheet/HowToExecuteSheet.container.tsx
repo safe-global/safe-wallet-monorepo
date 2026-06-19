@@ -24,15 +24,12 @@ import { getTotalFee } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { toBigInt } from 'ethers'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { ExecutionMethod } from './types'
-import { useRelayGetRelaysRemainingV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { RelayAvailable } from './components/RelayAvailable/RelayAvailable'
 import { RelayUnavailable } from './components/RelayUnavailable/RelayUnavailable'
 import { RelayUnavailableSheet } from './components/RelayUnavailableSheet/RelayUnavailableSheet'
-import { hasFeature } from '@safe-global/utils/utils/chains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useAppDispatch } from '@/src/store/hooks'
 import { SignerTypeBadge } from '@/src/components/SignerTypeBadge'
-import { txRequiresRelay } from '@/src/features/ExecuteTx/components/ReviewAndExecute/helpers'
+import { useRequiresRelay } from '@/src/features/ExecuteTx/hooks/useRequiresRelay'
 
 const getActiveSignerRightNode = (totalFee: bigint, item: SignerInfo & { balance: string }) => {
   return (
@@ -77,10 +74,8 @@ export const HowToExecuteSheetContainer = () => {
   const { estimatedFeeParams } = useGasFee(txDetails as TransactionDetails, manualParams)
   const totalFee = getTotalFee(estimatedFeeParams.maxFeePerGas ?? 0n, estimatedFeeParams.gasLimit ?? 0n)
 
-  const { data: relaysRemaining, isLoading: isLoadingRelays } = useRelayGetRelaysRemainingV1Query({
-    chainId: activeSafe.chainId,
-    safeAddress: activeSafe.address,
-  })
+  const { requiresRelay, isRelayEnabled, isRelayAvailable, isLoadingRelays, relaysRemaining } =
+    useRequiresRelay(txDetails)
 
   const handleExecutionMethodSelect = (selectedMethod: ExecutionMethod, signer?: SignerInfo) => {
     if (signer && activeSigner?.value !== signer.value) {
@@ -96,20 +91,10 @@ export const HowToExecuteSheetContainer = () => {
     })
   }
 
-  const isRelayEnabled = hasFeature(activeChain, FEATURES.RELAYING)
-  // GTF Safe-pays txs must relay regardless of the daily quota. Derived from the signed payload only.
-  const requiresRelay = txRequiresRelay(txDetails as TransactionDetails)
-  // For Safe-pays, bypass the quota gate, the Safe itself funds the fee, so "relays remaining" is
-  // irrelevant. The relay option is always available (and selected) when the chain supports relaying.
-  const isRelayAvailable = requiresRelay
-    ? isRelayEnabled
-    : Boolean(relaysRemaining?.remaining && relaysRemaining.remaining > 0)
-
-  React.useEffect(() => {
-    if (requiresRelay && isRelayEnabled && executionMethod !== ExecutionMethod.WITH_RELAY) {
-      dispatch(setExecutionMethod(ExecutionMethod.WITH_RELAY))
-    }
-  }, [requiresRelay, isRelayEnabled, executionMethod, dispatch])
+  // Relay is the selected option when the user picked it, or implicitly for Safe-pays txs (which must
+  // relay). Derived for highlighting only — getExecutionMethod() is the source of truth at execution,
+  // so no Redux write is needed here.
+  const isRelaySelected = executionMethod === ExecutionMethod.WITH_RELAY || requiresRelay
 
   // Safe-pays on a chain without relaying: terminal state, no signer fallback allowed. Surface a
   // dedicated error sheet with a single CTA instead of navigating to review-and-execute.
@@ -126,11 +111,9 @@ export const HowToExecuteSheetContainer = () => {
             <>
               <Container
                 spaced={false}
-                backgroundColor={
-                  executionMethod === ExecutionMethod.WITH_RELAY ? '$backgroundSecondary' : 'transparent'
-                }
-                borderWidth={executionMethod === ExecutionMethod.WITH_RELAY ? 0 : 1}
-                borderColor={executionMethod !== ExecutionMethod.WITH_RELAY ? '$borderLight' : undefined}
+                backgroundColor={isRelaySelected ? '$backgroundSecondary' : 'transparent'}
+                borderWidth={isRelaySelected ? 0 : 1}
+                borderColor={!isRelaySelected ? '$borderLight' : undefined}
                 paddingVertical="$3"
                 paddingHorizontal="$4"
                 gap="$1"
@@ -140,7 +123,7 @@ export const HowToExecuteSheetContainer = () => {
                   <RelayAvailable
                     isLoadingRelays={isLoadingRelays}
                     relaysRemaining={relaysRemaining}
-                    executionMethod={executionMethod}
+                    executionMethod={isRelaySelected ? ExecutionMethod.WITH_RELAY : executionMethod}
                   />
                 ) : (
                   <RelayUnavailable />

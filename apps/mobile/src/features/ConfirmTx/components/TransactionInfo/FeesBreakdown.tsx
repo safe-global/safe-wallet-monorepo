@@ -15,7 +15,7 @@ import { selectActiveChainCurrency } from '@/src/store/chains'
 import { selectCurrency } from '@/src/store/settingsSlice'
 import { useBalances } from '@/src/hooks/useBalances'
 import { useTokenDetails } from '@/src/hooks/useTokenDetails/useTokenDetails'
-import { isTransferTxInfo } from '@/src/utils/transaction-guards'
+import { isTransferTxInfo, isERC20Transfer } from '@/src/utils/transaction-guards'
 import { buildFeesBreakdown, type FeeLine } from './feeRows'
 
 const EXECUTION_FEE_INFO =
@@ -58,7 +58,7 @@ export function FeesBreakdown({
 
   const txInfo = txDetails?.txInfo
   const transfer = txInfo && isTransferTxInfo(txInfo) ? txInfo : undefined
-  const tokenDetails = useTokenDetails(transfer ?? ({ transferInfo: {} } as never))
+  const tokenDetails = useTokenDetails(transfer)
 
   const breakdown = useMemo(() => {
     if (!nativeCurrency) {
@@ -70,8 +70,9 @@ export function FeesBreakdown({
             amount: tokenDetails.value || '0',
             symbol: tokenDetails.tokenSymbol ?? nativeCurrency.symbol,
             decimals: tokenDetails.decimals,
-            // Native transfers resolve to the zero address — the same key balances use for native.
-            address: transferTokenAddress(transfer, ZERO_ADDRESS),
+            // ERC-20 carries a token address; native and ERC-721 resolve to the zero address — the
+            // same key balances use for native.
+            address: isERC20Transfer(transfer.transferInfo) ? transfer.transferInfo.tokenAddress : ZERO_ADDRESS,
           }
         : undefined
 
@@ -142,8 +143,3 @@ export function FeesBreakdown({
 
 const gasFeeInfo = (paidFromSafe: boolean): string =>
   `${GAS_FEE_INFO} ${paidFromSafe ? 'Paid from your Safe.' : 'Paid from the signer.'}`
-
-const transferTokenAddress = (transfer: { transferInfo: Record<string, unknown> }, nativeAddress: string): string => {
-  const tokenAddress = transfer.transferInfo?.tokenAddress
-  return typeof tokenAddress === 'string' ? tokenAddress : nativeAddress
-}

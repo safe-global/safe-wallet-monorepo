@@ -1,16 +1,7 @@
-import { useCallback, useEffect, useRef } from 'react'
-import { Platform } from 'react-native'
-import { BottomSheetModal, BottomSheetScrollView } from '@gorhom/bottom-sheet'
-import { getVariable, H4, Text, YStack, useTheme } from 'tamagui'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { FullWindowOverlay } from 'react-native-screens'
 import { SafeButton } from '@/src/components/SafeButton'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
-import { Badge } from '@/src/components/Badge'
-import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
+import { ConfirmationSheet } from '@/src/components/ConfirmationSheet'
 
 interface RelayUnavailableSheetProps {
-  /** Closes the sheet. Called both on CTA press and on dismiss. */
   onDismiss: () => void
 }
 
@@ -19,52 +10,20 @@ interface RelayUnavailableSheetProps {
  * support relaying. There is no signer fallback, so the only action is to acknowledge and close.
  */
 export function RelayUnavailableSheet({ onDismiss }: RelayUnavailableSheetProps) {
-  const bottomSheetRef = useRef<BottomSheetModal>(null)
-  const insets = useSafeAreaInsets()
-  const theme = useTheme()
-
-  useEffect(() => {
-    bottomSheetRef.current?.present()
-  }, [])
-
-  const handleClose = useCallback(() => {
-    bottomSheetRef.current?.dismiss()
-  }, [])
-
-  const renderBackdrop = useCallback(() => <BackdropComponent shouldNavigateBack={false} />, [])
-
   return (
-    <BottomSheetModal
-      // @ts-expect-error - FullWindowOverlay is not typed
-      containerComponent={Platform.OS === 'ios' ? FullWindowOverlay : undefined}
-      ref={bottomSheetRef}
-      backgroundComponent={BackgroundComponent}
-      backdropComponent={renderBackdrop}
-      topInset={insets.top}
-      enableDynamicSizing
-      handleIndicatorStyle={{ backgroundColor: getVariable(theme.borderMain) }}
+    <ConfirmationSheet
+      testID="relay-unavailable-sheet"
+      iconName="alert-triangle"
+      badgeThemeName="badge_error"
+      title="Relay not available"
+      message="This transaction must be relayed, but relaying is not available on this network."
       onDismiss={onDismiss}
-      accessible={false}
     >
-      <BottomSheetScrollView contentContainerStyle={{ paddingBottom: insets.bottom }}>
-        <YStack testID="relay-unavailable-sheet" gap="$4" padding="$4" alignItems="center">
-          <Badge
-            themeName="badge_error"
-            circleSize="$12"
-            content={<SafeFontIcon name="alert-triangle" size={32} color="$color" />}
-          />
-
-          <H4 fontWeight="600">Relay not available</H4>
-
-          <Text textAlign="center" color="$colorSecondary" fontSize={16} lineHeight={24} paddingHorizontal="$4">
-            This transaction must be relayed, but relaying is not available on this network.
-          </Text>
-
-          <SafeButton width="100%" onPress={handleClose} testID="relay-unavailable-close-button">
-            Got it
-          </SafeButton>
-        </YStack>
-      </BottomSheetScrollView>
-    </BottomSheetModal>
+      {(dismiss) => (
+        <SafeButton width="100%" onPress={dismiss} testID="relay-unavailable-close-button">
+          Got it
+        </SafeButton>
+      )}
+    </ConfirmationSheet>
   )
 }
