@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useRouter } from 'next/router'
-import { RotateCcw } from 'lucide-react'
+import { History } from 'lucide-react'
 import { enableClassicView } from '@/hooks/useClassicView'
 import { AppRoutes } from '@/config/routes'
 import { parseNextUrlForRouter } from '@/utils/nextUrl'
@@ -31,7 +31,7 @@ const ClassicViewLink = () => {
         data-testid="classic-view-link"
         className="flex h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-md border border-border bg-card px-4 text-[15px] font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <RotateCcw size={18} />
+        <History size={18} />
         Use the old UI
       </button>
     </div>
