@@ -6,6 +6,7 @@ type CapturedQrProps = {
   onScan: (codes: { value?: string }[]) => void
   centerOverlay?: React.ReactNode
   footer?: React.ReactNode
+  heading?: React.ReactNode
 }
 
 let qrProps: CapturedQrProps | undefined
@@ -79,6 +80,16 @@ describe('ScanQrSendContainer', () => {
     expect(getByTestId('center-overlay')).toBeTruthy()
     expect(getByText('Not a valid address')).toBeTruthy()
     expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('hides the scanning heading while the error overlay is shown', () => {
+    mockResolve.mockReturnValue(null)
+    render(<ScanQrSendContainer />)
+
+    expect(qrProps?.heading).toBe('Scan an address')
+
+    act(() => qrProps?.onScan([{ value: 'nope' }]))
+    expect(qrProps?.heading).toBeUndefined()
   })
 
   it('clears the error and re-activates scanning on Try again', () => {

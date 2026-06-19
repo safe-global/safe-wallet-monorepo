@@ -102,7 +102,7 @@ export function ScanQrSendContainer() {
         onActivateCamera={handleActivateCamera}
         onRequestPermission={requestPermission}
         onPressSettings={openSettings}
-        heading={headingForPermission(permission)}
+        heading={errorMessage ? undefined : headingForPermission(permission)}
         lensTone={errorMessage ? 'error' : 'neutral'}
         dimLens={Boolean(errorMessage)}
         centerOverlay={
