@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { useFocusEffect } from 'expo-router'
 
-import { resolveScannedAddress, INVALID_ADDRESS_MESSAGE } from '@/src/components/Camera/scannedAddress'
+import { resolveScannedAddress, INVALID_ADDRESS_MESSAGE } from '@/src/components/Camera'
 
 export const useScan = () => {
   const router = useRouter()

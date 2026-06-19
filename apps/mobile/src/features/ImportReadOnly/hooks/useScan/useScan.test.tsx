@@ -29,7 +29,7 @@ jest.mock('expo-router', () => ({
 
 // Mock the scanned-address contract directly rather than its internal parse/validate helpers.
 const mockResolveScannedAddress = jest.fn()
-jest.mock('@/src/components/Camera/scannedAddress', () => ({
+jest.mock('@/src/components/Camera', () => ({
   resolveScannedAddress: (raw: string) => mockResolveScannedAddress(raw),
   INVALID_ADDRESS_MESSAGE: 'Not a valid address',
 }))
