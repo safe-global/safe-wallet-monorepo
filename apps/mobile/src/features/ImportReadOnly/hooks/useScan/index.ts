@@ -5,15 +5,14 @@ import { useFocusEffect } from 'expo-router'
 
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
-import { useToastController } from '@tamagui/toast'
 
-const toastForValueShown: Record<string, boolean> = {}
+const INVALID_ADDRESS_MESSAGE = 'Not a valid address'
 
 export const useScan = () => {
   const router = useRouter()
   const hasScanned = useRef(false)
   const [isCameraActive, setIsCameraActive] = useState(false)
-  const toast = useToastController()
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const { hasPermission } = useCameraPermission()
 
   const handleFocusEffect = useCallback(() => {
@@ -33,30 +32,34 @@ export const useScan = () => {
 
   const onScan = useCallback(
     (codes: Code[]) => {
-      if (codes.length > 0 && isCameraActive && !hasScanned.current) {
-        const code = codes[0].value || ''
-        const { address } = parsePrefixedAddress(code)
-
-        if (isValidAddress(address)) {
-          hasScanned.current = true
-          setIsCameraActive(false)
-          router.push(`/(import-accounts)/form?safeAddress=${address}`)
-        } else {
-          // the camera constantly sends us the qr code value, so we would be sending the toast multiple times
-          // at one point the view was crashing because of this
-          // not sure what the real cause for that is, but this is a workaround
-          if (!toastForValueShown[code]) {
-            toastForValueShown[code] = true
-            toast.show('Not a valid address', {
-              native: false,
-              duration: 2000,
-            })
-          }
-        }
+      if (codes.length === 0 || !isCameraActive || hasScanned.current) {
+        return
       }
+
+      const code = codes[0].value || ''
+      const { address } = parsePrefixedAddress(code)
+
+      if (isValidAddress(address)) {
+        hasScanned.current = true
+        setIsCameraActive(false)
+        router.push(`/(import-accounts)/form?safeAddress=${address}`)
+        return
+      }
+
+      // Surface the failure on the lens (camera off until Try again) instead of a transient toast.
+      // Pausing the camera also avoids the burst of repeat frames vision-camera fires for the same code.
+      setErrorMessage(INVALID_ADDRESS_MESSAGE)
+      setIsCameraActive(false)
     },
-    [isCameraActive, router, toast, setIsCameraActive],
+    [isCameraActive, router],
   )
 
-  return { onScan, isCameraActive, setIsCameraActive }
+  const onTryAgain = useCallback(() => {
+    setErrorMessage(null)
+    if (hasPermission) {
+      setIsCameraActive(true)
+    }
+  }, [hasPermission])
+
+  return { onScan, isCameraActive, setIsCameraActive, errorMessage, onTryAgain }
 }

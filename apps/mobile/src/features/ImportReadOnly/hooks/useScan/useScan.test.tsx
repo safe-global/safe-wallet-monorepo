@@ -29,11 +29,6 @@ jest.mock('expo-router', () => ({
   }),
 }))
 
-// Mock the global toastForValueShown object
-const mockToastForValueShown: Record<string, boolean> = {}
-// @ts-expect-error - intentionally extending global
-global.toastForValueShown = mockToastForValueShown
-
 jest.mock('@safe-global/utils/utils/addresses', () => ({
   parsePrefixedAddress: jest.fn().mockReturnValue({ address: 'mocked-address' }),
 }))
@@ -44,22 +39,9 @@ jest.mock('@safe-global/utils/utils/validation', () => ({
 
 const mockPush = jest.fn()
 
-// Mock Toast
-const mockShow = jest.fn()
-jest.mock('@tamagui/toast', () => ({
-  useToastController: () => ({
-    show: mockShow,
-  }),
-}))
-
 describe('useScan', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-
-    // Clear the toast record
-    Object.keys(mockToastForValueShown).forEach((key) => {
-      mockToastForValueShown[key] = false
-    })
 
     // Reset focus callback
     mockFocusCallback = null
@@ -69,50 +51,75 @@ describe('useScan', () => {
     const { result } = renderHook(() => useScan())
 
     expect(result.current.isCameraActive).toBe(false) // Now false by default since focus effect isn't called
+    expect(result.current.errorMessage).toBeNull()
     expect(typeof result.current.setIsCameraActive).toBe('function')
     expect(typeof result.current.onScan).toBe('function')
   })
 
-  describe('Toast handling', () => {
-    it('should show toast for invalid address and not show duplicate toasts', () => {
-      const invalidCode = 'invalid-code'
-
-      jest.mocked(parsePrefixedAddress).mockReturnValue({ address: 'invalid-address' })
-      jest.mocked(isValidAddress).mockReturnValue(false)
-
-      const { result } = renderHook(() => useScan())
-
-      // Manually trigger the focus effect to activate camera
+  describe('Error handling', () => {
+    const activateCamera = () => {
       if (mockFocusCallback) {
         act(() => {
           const callback = mockFocusCallback as () => void
           callback()
         })
       }
+    }
+
+    it('surfaces an invalid address on the lens and pauses the camera', () => {
+      jest.mocked(parsePrefixedAddress).mockReturnValue({ address: 'invalid-address' })
+      jest.mocked(isValidAddress).mockReturnValue(false)
+
+      const { result } = renderHook(() => useScan())
+      activateCamera()
 
       act(() => {
-        result.current.onScan([{ value: invalidCode } as Code])
+        result.current.onScan([{ value: 'invalid-code' } as Code])
       })
 
-      expect(mockShow).toHaveBeenCalledTimes(1)
-      expect(mockShow).toHaveBeenCalledWith('Not a valid address', {
-        native: false,
-        duration: 2000,
-      })
+      expect(result.current.errorMessage).toBe('Not a valid address')
+      expect(result.current.isCameraActive).toBe(false)
+      expect(mockPush).not.toHaveBeenCalled()
+    })
 
-      mockShow.mockClear()
+    it('clears the error and re-activates the camera on Try again', () => {
+      jest.mocked(parsePrefixedAddress).mockReturnValue({ address: 'invalid-address' })
+      jest.mocked(isValidAddress).mockReturnValue(false)
+
+      const { result } = renderHook(() => useScan())
+      activateCamera()
 
       act(() => {
-        result.current.onScan([{ value: invalidCode } as Code])
+        result.current.onScan([{ value: 'invalid-code' } as Code])
       })
-
-      expect(mockShow).not.toHaveBeenCalled()
+      expect(result.current.errorMessage).toBe('Not a valid address')
 
       act(() => {
-        result.current.onScan([{ value: 'another-invalid-code' } as Code])
+        result.current.onTryAgain()
       })
 
-      expect(mockShow).toHaveBeenCalledTimes(1)
+      expect(result.current.errorMessage).toBeNull()
+      expect(result.current.isCameraActive).toBe(true)
+    })
+
+    it('does not scan again while the error overlay is shown', () => {
+      jest.mocked(parsePrefixedAddress).mockReturnValue({ address: 'invalid-address' })
+      jest.mocked(isValidAddress).mockReturnValue(false)
+
+      const { result } = renderHook(() => useScan())
+      activateCamera()
+
+      act(() => {
+        result.current.onScan([{ value: 'invalid-code' } as Code])
+      })
+
+      // Camera is paused, so a follow-up frame is ignored until Try again re-activates it.
+      jest.mocked(isValidAddress).mockReturnValue(true)
+      act(() => {
+        result.current.onScan([{ value: 'eth:0xvalid' } as Code])
+      })
+
+      expect(mockPush).not.toHaveBeenCalled()
     })
   })
 
