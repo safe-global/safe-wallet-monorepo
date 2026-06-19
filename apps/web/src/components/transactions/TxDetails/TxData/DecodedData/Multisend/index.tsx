@@ -7,11 +7,16 @@ import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedD
 import { Button, Divider, Stack } from '@mui/material'
 import css from './styles.module.css'
 import classnames from 'classnames'
+import useSafeAddress from '@/hooks/useSafeAddress'
+import { resolveMultiSendToAddress } from '@safe-global/utils/utils/multiSend'
 
 type MultisendProps = {
   txData?: TransactionData | null
   compact?: boolean
   isExecuted?: boolean
+  // The Safe executing the batch, i.e. MultiSend's `address(this)`. Defaults to the connected Safe;
+  // pass explicitly when rendering a nested Safe's batch where it is not the connected Safe.
+  executingSafeAddress?: string
 }
 
 export const MultisendActionsHeader = ({
@@ -44,9 +49,16 @@ export const MultisendActionsHeader = ({
   )
 }
 
-const Multisend = ({ txData, compact = false, isExecuted = false }: MultisendProps): ReactElement | null => {
+const Multisend = ({
+  txData,
+  compact = false,
+  isExecuted = false,
+  executingSafeAddress,
+}: MultisendProps): ReactElement | null => {
   const [openMap, setOpenMap] = useState<Record<number, boolean>>()
   const isOpenMapUndefined = openMap == null
+  const connectedSafeAddress = useSafeAddress()
+  const safeAddress = executingSafeAddress || connectedSafeAddress
 
   // multiSend method receives one parameter `transactions`
   const multiSendTransactions = txData?.dataDecoded?.parameters?.[0].valueDecoded
@@ -70,7 +82,10 @@ const Multisend = ({ txData, compact = false, isExecuted = false }: MultisendPro
 
       <div className={compact ? css.compact : ''}>
         {Array.isArray(multiSendTransactions) &&
-          multiSendTransactions.map(({ dataDecoded, data, value, to, operation }, index) => {
+          multiSendTransactions.map(({ dataDecoded, data, value, to: rawTo, operation }, index) => {
+            // MultiSend rewrites a zero-address sub-transaction `to` to the executing Safe.
+            const to = resolveMultiSendToAddress(rawTo, safeAddress)
+
             const onChange: AccordionProps['onChange'] = (_, expanded) => {
               setOpenMap((prev) => ({
                 ...prev,

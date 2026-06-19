@@ -11,6 +11,7 @@ import { useTxTokenInfo } from '@safe-global/utils/hooks/useTxTokenInfo'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChainCurrency } from '@/src/store/chains'
 import { HashDisplay } from '@/src/components/HashDisplay'
+import { resolveMultiSendToAddress } from '@safe-global/utils/utils/multiSend'
 
 interface TxActionsListProps {
   txDetails: TransactionDetails
@@ -32,17 +33,20 @@ interface TxActionItemProps {
   index: number
   addressInfoIndex?: AddressInfoIndex
   txData: TransactionDetails['txData']
+  safeAddress: string
 }
 
-const TxActionItem = ({ action, index, addressInfoIndex, txData }: TxActionItemProps) => {
+const TxActionItem = ({ action, index, addressInfoIndex, txData, safeAddress }: TxActionItemProps) => {
   const valueDecoded = txData?.dataDecoded?.parameters?.[0].valueDecoded
   const tx = Array.isArray(valueDecoded) ? valueDecoded[index] : undefined
+  // MultiSend rewrites a zero-address sub-transaction `to` to the executing Safe.
+  const to = tx ? resolveMultiSendToAddress(tx.to, safeAddress) : ''
   const nativeCurrency = useAppSelector(selectActiveChainCurrency)
 
   const transferTokenInfo = useTxTokenInfo(
     tx?.data?.toString() || undefined,
     tx?.value || undefined,
-    tx?.to || '',
+    to,
     nativeCurrency as NativeToken,
     txData?.tokenInfoIndex ?? {},
   )
@@ -64,7 +68,7 @@ const TxActionItem = ({ action, index, addressInfoIndex, txData }: TxActionItemP
                 Send {formatVisualAmount(transferTokenInfo.transferValue, transferTokenInfo?.tokenInfo?.decimals, 6)}{' '}
                 {transferTokenInfo.tokenInfo.symbol} to
               </Text>
-              <HashDisplay value={tx.to as `0x${string}`} showCopy={false} showExternalLink={false} />
+              <HashDisplay value={to as `0x${string}`} showCopy={false} showExternalLink={false} />
             </View>
           ) : (
             <Text fontSize="$4" flexShrink={1} flexWrap="wrap">
@@ -83,6 +87,7 @@ export function TxActionsList({ txDetails }: TxActionsListProps) {
   const { txId } = useLocalSearchParams<{ txId: string }>()
 
   const { dataDecoded, addressInfoIndex } = txDetails.txData || {}
+  const safeAddress = txDetails.safeAddress
 
   const onActionPress = (action: MultiSend) => {
     router.push({
@@ -97,8 +102,14 @@ export function TxActionsList({ txDetails }: TxActionsListProps) {
 
   const transaction = dataDecoded?.parameters?.find((action) => action.name === 'transactions' && action.valueDecoded)
   const actions = useMemo(() => {
-    return Array.isArray(transaction?.valueDecoded) ? transaction?.valueDecoded : [transaction?.valueDecoded]
-  }, [transaction])
+    const rawActions = Array.isArray(transaction?.valueDecoded)
+      ? transaction?.valueDecoded
+      : [transaction?.valueDecoded]
+    // MultiSend rewrites a zero-address sub-transaction `to` to the executing Safe.
+    return rawActions?.map((action) =>
+      action && 'to' in action ? { ...action, to: resolveMultiSendToAddress(action.to, safeAddress) } : action,
+    )
+  }, [transaction, safeAddress])
 
   return (
     <YStack gap="$2" padding="$4">
@@ -116,7 +127,7 @@ export function TxActionsList({ txDetails }: TxActionsListProps) {
             testID={`tx-action-item-${index}`}
             collapsable={false}
           >
-            <TxActionItem txData={txDetails.txData} action={action} index={index} />
+            <TxActionItem txData={txDetails.txData} action={action} index={index} safeAddress={safeAddress} />
           </Container>
         )
       })}
