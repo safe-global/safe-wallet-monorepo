@@ -191,6 +191,12 @@ export function blockBeamer() {
   cy.intercept('GET', 'https://*.getbeamer.com/**', { statusCode: 204, body: '' })
 }
 
+export function interceptSpacesList() {
+  // Alias the spaces list request so we can wait for it to resolve before deciding
+  // whether the account has spaces. Register before cy.visit().
+  cy.intercept('GET', constants.spacesEndpoint).as('spacesList')
+}
+
 export function signOutViaSidebarProfile() {
   cy.get(sidebarProfileTrigger, { timeout: 30000 }).should('be.visible').click()
   cy.get(sidebarProfilePopover).should('be.visible')
@@ -522,9 +528,8 @@ export function openAddAccountsToWorkspace() {
   cy.contains('[role="dialog"]', 'Manage Safe accounts', { timeout: 30000 })
     .should('be.visible')
     .within(() => {
-      cy.get(addSpaceAccountToWorkspaceBtn, { timeout: 30000 })
-        .should('be.visible')
-        .and('not.have.attr', 'aria-disabled')
+      cy.get(addSpaceAccountToWorkspaceBtn, { timeout: 30000 }).should('be.visible')
+      cy.get(addSpaceAccountToWorkspaceBtn).should('not.have.attr', 'aria-disabled')
       cy.get(addSpaceAccountToWorkspaceBtn).click({ force: true })
     })
 }
@@ -634,4 +639,23 @@ export function createSpaceViaOnboardingWithSkip(name) {
   skipInviteMembersStep()
   completeSurveyStep()
   verifySpaceDashboardLoaded()
+}
+
+function openFirstExistingSpace() {
+  cy.get(`${orgList} ${spaceCard}`, { timeout: 30000 }).first().should('be.visible').click()
+  cy.url({ timeout: 30000 }).should('include', constants.spaceDashboardUrl).and('include', 'spaceId=')
+}
+
+export function openFirstSpaceFromSpacesView() {
+  // After sign-in a single-space account auto-redirects into the space dashboard;
+  // click the logo to return to the Spaces View so a space card is always present.
+  cy.wait('@spacesList', { timeout: 60000 })
+  cy.url({ timeout: 30000 }).then((url) => {
+    if (url.includes(constants.spaceDashboardUrl)) {
+      cy.get(sidebarLogo).should('be.visible').click()
+      cy.url().should('include', constants.spacesUrl)
+    }
+  })
+  cy.get(`${orgList} ${spaceCard}`, { timeout: 30000 }).should('have.length.at.least', 1)
+  openFirstExistingSpace()
 }

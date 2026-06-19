@@ -17,6 +17,7 @@ describe('Spaces basic flow tests', () => {
 
   beforeEach(() => {
     space.blockBeamer()
+    space.interceptSpacesList()
     cy.visit(constants.spacesUrl)
   })
 
@@ -43,14 +44,10 @@ describe('Spaces basic flow tests', () => {
     main.verifyElementsIsVisible([space.createSpaceBtn])
   })
 
-  it('Verify an account can be added manually', () => {
-    const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
-
+  it.only('Verify an account can be added manually', () => {
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
-    space.ensureReadyToCreateSpace()
-    cy.wait(3000)
-    space.createSpaceViaOnboardingWithSkip(spaceName)
+    space.openFirstSpaceFromSpacesView()
     space.addAccountManually(staticSafes.SEP_STATIC_SAFE_35.substring(4), constants.networks.sepolia)
   })
 
