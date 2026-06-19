@@ -44,7 +44,7 @@ describe('Spaces basic flow tests', () => {
     main.verifyElementsIsVisible([space.createSpaceBtn])
   })
 
-  it.only('Verify an account can be added manually', () => {
+  it('Verify an account can be added manually', () => {
     wallet.connectSigner(admin)
     space.clickOnSignInBtn()
     space.openFirstSpaceFromSpacesView()
@@ -68,8 +68,12 @@ describe('Spaces basic flow tests', () => {
     space.goToSpaceMembers()
     space.addMember(memberName, user_address)
     space.disconnectFromSpaceLevel()
+    cy.clearAllCookies()
+    cy.visit(constants.spacesUrl)
     wallet.connectSigner(user)
     space.clickOnSignInBtn()
+    cy.wait(3000)
+    cy.visit(constants.spacesUrl)
     space.verifySpaceInviteBannerVisible(spaceName)
     space.acceptInvite(newInviteName)
     main.verifyElementByTextExists(space.acceptInviteConfirmationMsg(spaceName))

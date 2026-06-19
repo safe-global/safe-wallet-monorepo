@@ -90,7 +90,7 @@ const netwrokItem = '[data-testid="network-item"]'
 // -- Add member --
 const addMemberBtn = '[data-testid="add-member-button"]'
 const addMemberModalBtn = '[data-testid="add-member-modal-button"]'
-const memberAddressInput = '[data-testid="member-address-input"]'
+const memberAddressInput = '[data-testid="member-invitee-identifier-input"]'
 const memberNameInput = '[data-testid="member-name-input"]'
 const pendingMembersTab = '[data-testid="pending-members-tab"]'
 
@@ -224,13 +224,17 @@ export function visitSpaceDashboard(spaceId) {
 export function goToSpacesView() {
   // When the account has a single space, sign-in auto-redirects into the space
   // dashboard where the Create button is absent — click the top-left logo to
-  // return to the Spaces View.
-  cy.get('body').then(($body) => {
-    if (!$body.find(`${createSpaceBtn}:visible`).length) {
+  // return to the Spaces View. Wait for the spaces list to resolve first so the
+  // welcome page has rendered before we read whether the Create button exists;
+  // otherwise we misread the in-flight page as a space dashboard.
+  cy.wait('@spacesList', { timeout: 60000 })
+  cy.url({ timeout: 30000 }).then((url) => {
+    if (url.includes(constants.spaceDashboardUrl)) {
       cy.get(sidebarLogo).should('be.visible').click()
       cy.url().should('include', constants.spacesUrl)
     }
   })
+  cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 }
 
 export function clickOnSpaceSelector(spaceName) {
@@ -551,7 +555,7 @@ export function addAccountManually(address, network) {
 
 export function addMember(name, address) {
   cy.get(addMemberBtn, { timeout: 30000 }).should('be.enabled').click()
-  cy.get(memberAddressInput).find('input').clear().type(address)
+  cy.get(memberAddressInput).clear().type(address)
   cy.get(memberNameInput).find('input').clear().type(name)
   cy.get(addMemberModalBtn).should('be.enabled').click()
 
@@ -561,6 +565,8 @@ export function addMember(name, address) {
 
 export function verifySpaceInviteBannerVisible(spaceName) {
   cy.get(inviteBanner, { timeout: 30000 })
+    .contains(spaceName)
+    .parents(inviteBanner)
     .should('be.visible')
     .within(() => {
       cy.contains(inviteBannerHeadingText).should('be.visible')
