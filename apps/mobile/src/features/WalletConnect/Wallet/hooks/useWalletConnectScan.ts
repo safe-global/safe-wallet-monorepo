@@ -38,8 +38,11 @@ export const useWalletConnectScan = ({
 
   // Guards a second pair attempt while one is in flight (rapid re-scans).
   const pairingRef = useRef(false)
-  // Same guard for the address path: once an address has been handed off (and we're navigating
-  // away), ignore the burst of follow-up frames vision-camera fires for the same code.
+  // Same guard for the address path: once an address has been handed off, ignore the burst of
+  // follow-up frames vision-camera fires for the same code. Today the handoff uses router.replace,
+  // which unmounts this modal — so it only needs resetting on Try again. It's also reset on focus
+  // cleanup so a future path that keeps the scanner mounted (e.g. back-nav from the Send flow) can't
+  // leave it stuck swallowing every scan.
   const handledRef = useRef(false)
   // Set true when the timeout fires; later writes for that attempt become no-ops.
   const cancelledRef = useRef(false)
@@ -69,6 +72,7 @@ export const useWalletConnectScan = ({
       return () => {
         setIsCameraActive(false)
         clearTimer()
+        handledRef.current = false
       }
     }, [permission, clearTimer]),
   )
