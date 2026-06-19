@@ -6,9 +6,12 @@ import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
 import ThresholdBadge from './ThresholdBadge'
 import CopyAddressButton from './CopyAddressButton'
+import ExplorerLinkButton from './ExplorerLinkButton'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData } from '../types'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
+import { useChain } from '@/hooks/useChains'
+import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 
 export interface SafeSelectorTriggerContentProps {
   selectedItem: SafeItemData
@@ -22,6 +25,9 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
 
   const resolvedName = useSafeDisplayName(selectedItem.address, selectedChainId)
   const { shortAddress, displayName } = getSafeDisplayInfo(resolvedName, selectedItem.address)
+
+  const chainConfig = useChain(selectedChain?.chainId ?? '')
+  const blockExplorerLink = chainConfig ? getBlockExplorerLink(chainConfig, selectedItem.address) : undefined
 
   return (
     <div className="flex items-center gap-2 sm:gap-4 w-full">
@@ -41,6 +47,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
             {shortAddress}
           </Typography>
           <CopyAddressButton address={selectedItem.address} />
+          {blockExplorerLink && <ExplorerLinkButton href={blockExplorerLink.href} title={blockExplorerLink.title} />}
           <EnvHintButton chainId={selectedChainId} />
         </div>
       </div>
