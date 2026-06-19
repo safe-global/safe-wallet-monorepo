@@ -78,7 +78,7 @@ const safeAccountsPageTitle = 'Safe Accounts'
 const safeAccountsListItem = '[data-testid="safe-list-item"]'
 
 // -- Add account --
-const addSpaceAccountBtn = '[data-testid="add-space-account-button"]'
+const openAddAccountsChooserBtn = '[data-testid="open-add-accounts-chooser-button"]'
 const addSpaceAccountToWorkspaceBtn = '[data-testid="add-safe-accounts-to-workspace-button"]'
 const addSpaceAccountManuallyBtn = '[data-testid="add-space-account-manually-button"]'
 const addSpaceAccountManuallyModalBtn = '[data-testid="add-manually-button"]'
@@ -477,23 +477,30 @@ export function deleteSpace(name) {
 
 const MAX_SPACES = 10
 
+function deleteOneSpace() {
+  cy.get(spaceCard).then(($cards) => {
+    const firstCardName = $cards.first().find(spaceCardName).text().trim()
+    cy.wrap($cards.first()).within(() => {
+      cy.get(spaceCardContextMenuBtn).click({ force: true })
+    })
+    cy.get(contectMenuRemoveBtn).click({ force: true })
+    cy.get(spaceConfirmNameInput).type(firstCardName)
+    cy.get(spaceConfirmDeleteBtn).should('be.enabled').click()
+    cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
+  })
+}
+
 export function ensureReadyToCreateSpace() {
   // Wait for the page to settle: either the spaces list or the create button must be visible
   cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 
-  // Read the DOM synchronously — zero cards is a valid state, so avoid the retrying `.find()` command
+  // The cards may render slightly after the list container, and at the limit the
+  // Create button is disabled. Give the cards a beat to load, then read the count
+  // and delete a space to free a slot before any create attempt.
+  cy.wait(2000)
   cy.get('body').then(($body) => {
-    const $cards = $body.find(spaceCard)
-    if ($cards.length >= MAX_SPACES) {
-      // At the limit — delete one space to free a slot
-      const firstCardName = $cards.first().find(spaceCardName).text().trim()
-      cy.wrap($cards.first()).within(() => {
-        cy.get(spaceCardContextMenuBtn).click({ force: true })
-      })
-      cy.get(contectMenuRemoveBtn).click({ force: true })
-      cy.get(spaceConfirmNameInput).type(firstCardName)
-      cy.get(spaceConfirmDeleteBtn).should('be.enabled').click()
-      cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
+    if ($body.find(spaceCard).length >= MAX_SPACES) {
+      deleteOneSpace()
     }
   })
 
@@ -510,12 +517,20 @@ export function selectNetwork(network) {
   cy.get(netwrokItem).contains(network).click()
 }
 
-export function addAccountManually(address, network) {
-  cy.get(addSpaceAccountBtn).should('be.enabled').click()
-  cy.get(addSpaceAccountToWorkspaceBtn, { timeout: 30000 })
+export function openAddAccountsToWorkspace() {
+  cy.get(openAddAccountsChooserBtn, { timeout: 30000 }).should('be.visible').and('be.enabled').click({ force: true })
+  cy.contains('[role="dialog"]', 'Manage Safe accounts', { timeout: 30000 })
     .should('be.visible')
-    .and('not.have.attr', 'aria-disabled')
-    .click()
+    .within(() => {
+      cy.get(addSpaceAccountToWorkspaceBtn, { timeout: 30000 })
+        .should('be.visible')
+        .and('not.have.attr', 'aria-disabled')
+      cy.get(addSpaceAccountToWorkspaceBtn).click({ force: true })
+    })
+}
+
+export function addAccountManually(address, network) {
+  openAddAccountsToWorkspace()
   cy.get(addSpaceAccountManuallyModalBtn).should('be.visible').click()
   selectNetwork(network)
   cy.get(addAddressInput).find('input').clear().type(address)

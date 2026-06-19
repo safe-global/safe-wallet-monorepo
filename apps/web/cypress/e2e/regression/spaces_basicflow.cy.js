@@ -43,7 +43,7 @@ describe('Spaces basic flow tests', () => {
     main.verifyElementsIsVisible([space.createSpaceBtn])
   })
 
-  it.only('Verify an account can be added manually', () => {
+  it('Verify an account can be added manually', () => {
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
 
     wallet.connectSigner(admin)
