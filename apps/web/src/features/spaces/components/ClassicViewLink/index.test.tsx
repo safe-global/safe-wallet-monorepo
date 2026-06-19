@@ -14,7 +14,7 @@ describe('ClassicViewLink', () => {
     disableClassicView()
   })
 
-  it('renders the "Use the old UI" copy with a trailing arrow icon', () => {
+  it('renders the "Use the old UI" copy with a leading rotate icon', () => {
     render(<ClassicViewLink />, { routerProps: { query: {} } })
 
     const link = screen.getByTestId('classic-view-link')

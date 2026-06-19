@@ -2,7 +2,7 @@
   "name": "@safe-global/web",
   "homepage": "https://github.com/safe-global/safe-wallet-web",
   "license": "GPL-3.0",
-  "version": "1.91.0",
+  "version": "1.91.1",
   "type": "module",
   "scripts": {
     "pw:test": "npx playwright test --config=e2e/playwright.config.ts --project=chromium",
@@ -10,8 +10,6 @@
     "pw:test:api": "npx playwright test --config=e2e/playwright.config.ts --grep @api",
     "pw:test:ui": "npx playwright test --config=e2e/playwright.config.ts --grep @ui",
     "pw:report": "npx playwright show-report e2e/reports/html",
-    "pw:test:oneshot": "npx playwright test --config=e2e/playwright.config.ts --project=one-shots",
-    "pw:oneshot:record": "bash scripts/record-oneshot.sh",
     "pw:ci": "CI=true npx playwright test --config=e2e/playwright.config.ts --grep @smoke",
     "dev": "cross-env USE_RSPACK=1 next dev",
     "dev:full": "cross-env USE_RSPACK=0 ENABLE_PWA=1 ENABLE_EXPERIMENTAL_OPTIMIZATIONS=1 next dev",

@@ -212,25 +212,18 @@ Every code change must include tests. See [`apps/web/docs/TESTING.md`](apps/web/
 
 ### Fast Feedback Loop
 
-The repo provides automated verification via **shared Claude Code `Stop` hooks** checked into `.claude/settings.json` (so every contributor's Claude Code runs them automatically):
+Verify your changes with the repo's `verify` scripts before committing — running them is your responsibility:
 
-1. **Automatic verification**: A `Stop` hook runs `verify:changed` once at the end of each agent turn. It early-exits (no-op) when no `.ts/.tsx/.js/.jsx` files have been modified. When it does run, type-check runs on the full project (TSC requires this), while lint, prettier, and tests are scoped to changed files only. The workspace (web/mobile) is auto-detected from the changed file paths. Set `SKIP_VERIFY=1` to disable. Fix any errors before moving on.
+1. **Scoped check**: Run `yarn verify:changed:web` (or `yarn verify:changed` from the repo root) to type-check the project and run lint, prettier, and tests scoped to your changed files. The workspace (web/mobile) is auto-detected from the changed file paths.
 
-1b. **Automatic test reminders** (advisory — never blocks): the `Stop` hook `.claude/hooks/check-tests.mjs` inspects the branch's changed files and nudges, at most once per new set of changes, when:
-
-- web app code (`apps/web/src/**`) changed but no Playwright **one-shot** clickthrough (`apps/web/e2e/tests/one-shots/**`) was added — see [One-shot clickthroughs](apps/web/e2e/docs/README.md#one-shot-clickthroughs);
-- significant source (`apps/web/src`, `apps/mobile/src`, `packages/*/src`) changed but no colocated **unit test** (`*.test.ts(x)`) was added/updated.
-
-These are reminders, not gates: add the test, or note in the PR why one genuinely doesn't apply. Set `SKIP_TEST_REMINDERS=1` to disable.
-
-2. **Manual**: Run `yarn verify:changed:web` anytime to check your work. Run `yarn verify:web` for a full check before committing.
+2. **Full check**: Run `yarn verify:web` for a full check before committing.
 
 3. **Test scaffolding**: Run `yarn test:scaffold <file>` to generate a test skeleton with the correct imports, mocks, and structure. See the Test Decision Matrix in the Testing Guidelines section for which files need tests.
 
 **Rules for agents:**
 
-- Fix all `verify:changed` errors before proceeding to the next task
-- If `verify:changed` reports a missing test, write one before committing
+- Run `verify:changed` and fix all errors before moving on
+- If a significant code change has no colocated unit test, write one before committing
 - Do NOT run type-check, lint, prettier, and test separately — use `verify`
 - Do NOT commit without a clean `verify:changed` pass
 
@@ -323,48 +316,40 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 
 7. **Pull requests**: fill out the PR template and ensure all checks pass.
 
-8. **PR poem**: Include a short technical poem at the very top of each PR description that acts as a concise summary of what the PR actually changes. The poem should prioritize clarity over artistry — a reader should understand the gist of the PR from the poem alone. Use a randomly chosen short form (e.g., haiku, limerick, free verse, tanka) and keep it to 2–4 lines. Wrap in a blockquote:
+8. **PR description**: Always use the GitHub PR template (`.github/PULL_REQUEST_TEMPLATE.md`). Fill out all sections — "What it solves", "How this PR fixes it", "How to test it", and the checklist.
 
-   ```markdown
-   > Strip Sentry SDK and config,
-   > no more error tracking calls,
-   > bundle shrinks, tests pass clean.
+9. **PR visual summary (required)**: Every PR must include a visual in the `## Visual summary` section. This is mandatory, not optional.
+   - **Architecture/logic changes** → Mermaid diagram (flowchart, sequence, or class diagram) showing what changed
+   - **UI changes** → Screenshot of the result (use Chrome DevTools MCP if the app is running, or describe how to capture manually)
+   - **Both** if the PR includes UI + logic changes
+
+   Mermaid diagrams are rendered natively by GitHub. Example:
+
+   ````markdown
+   ```mermaid
+   flowchart LR
+     A[useSafeInfo hook] --> B[New validation logic]
+     B --> C{Is owner?}
+     C -->|Yes| D[Show actions]
+     C -->|No| E[Show read-only]
    ```
+   ````
 
-9. **PR description**: Always use the GitHub PR template (`.github/PULL_REQUEST_TEMPLATE.md`). Fill out all sections — "What it solves", "How this PR fixes it", "How to test it", and the checklist.
+   For refactors, use a before/after diagram:
 
-10. **PR visual summary (required)**: Every PR must include a visual in the `## Visual summary` section. This is mandatory, not optional.
-    - **Architecture/logic changes** → Mermaid diagram (flowchart, sequence, or class diagram) showing what changed
-    - **UI changes** → Screenshot of the result (use Chrome DevTools MCP if the app is running, or describe how to capture manually)
-    - **Both** if the PR includes UI + logic changes
-
-    Mermaid diagrams are rendered natively by GitHub. Example:
-
-    ````markdown
-    ```mermaid
-    flowchart LR
-      A[useSafeInfo hook] --> B[New validation logic]
-      B --> C{Is owner?}
-      C -->|Yes| D[Show actions]
-      C -->|No| E[Show read-only]
-    ```
-    ````
-
-    For refactors, use a before/after diagram:
-
-    ````markdown
-    ```mermaid
-    flowchart TB
-      subgraph Before
-        A1[Component A] --> B1[Inline logic]
-        A1 --> C1[Inline logic]
-      end
-      subgraph After
-        A2[Component A] --> H[useSharedHook]
-        H --> B2[Extracted service]
-      end
-    ```
-    ````
+   ````markdown
+   ```mermaid
+   flowchart TB
+     subgraph Before
+       A1[Component A] --> B1[Inline logic]
+       A1 --> C1[Inline logic]
+     end
+     subgraph After
+       A2[Component A] --> H[useSharedHook]
+       H --> B2[Extracted service]
+     end
+   ```
+   ````
 
 **Environment Variables** – Web apps use `NEXT_PUBLIC_*` prefix, mobile apps use `EXPO_PUBLIC_*` prefix for environment variables. In shared packages, check for both prefixes.
 
