@@ -1902,7 +1902,7 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space UUID to get address book for (numeric ID accepted for legacy clients, deprecated)",
+            "description": "Space UUID to get address book for",
             "schema": {
               "example": "123e4567-e89b-12d3-a456-426614174000",
               "type": "string"
@@ -1919,6 +1919,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid space identifier"
           },
           "401": {
             "description": "Authentication required - valid JWT token must be provided"
@@ -2020,6 +2023,9 @@
           "204": {
             "description": "Address book entry deleted successfully"
           },
+          "400": {
+            "description": "Invalid space identifier"
+          },
           "403": {
             "description": "Access forbidden - user is not authorized to modify this address book"
           },
@@ -2042,7 +2048,7 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space UUID (numeric ID accepted for legacy clients, deprecated)",
+            "description": "Space UUID",
             "schema": {
               "example": "123e4567-e89b-12d3-a456-426614174000",
               "type": "string"
@@ -2059,6 +2065,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid space identifier"
           },
           "401": {
             "description": "Authentication required"
@@ -2297,7 +2306,7 @@
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Space UUID (numeric ID accepted for legacy clients, deprecated)",
+            "description": "Space UUID",
             "schema": {
               "example": "123e4567-e89b-12d3-a456-426614174000",
               "type": "string"
@@ -2315,6 +2324,9 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid space identifier"
+          },
           "401": {
             "description": "Authentication required - valid JWT token must be provided"
           },
@@ -2325,7 +2337,7 @@
             "description": "Space not found"
           }
         },
-        "summary": "Get space by ID",
+        "summary": "Get space by UUID",
         "tags": [
           "spaces"
         ]
@@ -2367,6 +2379,9 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid space identifier"
+          },
           "401": {
             "description": "Authentication required or user unauthorized to update this space"
           },
@@ -2401,6 +2416,9 @@
           "204": {
             "description": "Space deleted successfully"
           },
+          "400": {
+            "description": "Invalid space identifier"
+          },
           "401": {
             "description": "Authentication required or user unauthorized to delete this space"
           },
@@ -2426,8 +2444,9 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space identifier (UUID, or legacy numeric id)",
+            "description": "Space UUID",
             "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
               "type": "string"
             }
           },
@@ -2501,6 +2520,9 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid space identifier"
+          },
           "401": {
             "description": "Authentication required - valid JWT token must be provided"
           },
@@ -2523,8 +2545,9 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space identifier (UUID, or legacy numeric id)",
+            "description": "Space UUID",
             "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
               "type": "string"
             }
           }
@@ -2542,6 +2565,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid space identifier"
           },
           "401": {
             "description": "Authentication required - valid JWT token must be provided"
@@ -2587,6 +2613,9 @@
           "201": {
             "description": "Safes added to space successfully"
           },
+          "400": {
+            "description": "Invalid space identifier"
+          },
           "401": {
             "description": "Authentication required or user unauthorized to modify this space"
           },
@@ -2610,7 +2639,7 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space UUID to get Safes for (numeric ID accepted for legacy clients, deprecated)",
+            "description": "Space UUID to get Safes for",
             "schema": {
               "example": "123e4567-e89b-12d3-a456-426614174000",
               "type": "string"
@@ -2627,6 +2656,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid space identifier"
           },
           "401": {
             "description": "Authentication required or user unauthorized to access this space"
@@ -2672,6 +2704,9 @@
         "responses": {
           "204": {
             "description": "Safes removed from space successfully"
+          },
+          "400": {
+            "description": "Invalid space identifier"
           },
           "401": {
             "description": "Authentication required or user unauthorized to modify this space"
@@ -2730,6 +2765,9 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid space identifier"
+          },
           "401": {
             "description": "Authentication required or user not admin or member not active"
           },
@@ -2777,6 +2815,9 @@
           "200": {
             "description": "Invitation accepted successfully - user is now a member of the space"
           },
+          "400": {
+            "description": "Invalid space identifier"
+          },
           "403": {
             "description": "Access forbidden - user is not authorized to accept this invitation"
           },
@@ -2813,6 +2854,9 @@
           "200": {
             "description": "Invitation declined successfully"
           },
+          "400": {
+            "description": "Invalid space identifier"
+          },
           "403": {
             "description": "Access forbidden - user is not authorized to decline this invitation"
           },
@@ -2838,7 +2882,7 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space UUID containing the invitation (numeric ID accepted for legacy clients, deprecated)",
+            "description": "Space UUID containing the invitation",
             "schema": {
               "example": "123e4567-e89b-12d3-a456-426614174000",
               "type": "string"
@@ -2866,6 +2910,9 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid space identifier"
+          },
           "403": {
             "description": "Access forbidden - user is not an active admin of this space"
           },
@@ -2891,7 +2938,7 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space UUID to get members for (numeric ID accepted for legacy clients, deprecated)",
+            "description": "Space UUID to get members for",
             "schema": {
               "example": "123e4567-e89b-12d3-a456-426614174000",
               "type": "string"
@@ -2908,6 +2955,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid space identifier"
           },
           "403": {
             "description": "Access forbidden - user is not authorized to view this space's members"
@@ -2940,6 +2990,9 @@
           "200": {
             "description": "Membership deleted"
           },
+          "400": {
+            "description": "Invalid space identifier"
+          },
           "401": {
             "description": "Not authenticated"
           },
@@ -2968,7 +3021,7 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space UUID to fetch the caller's membership for (numeric ID accepted for legacy clients, deprecated)",
+            "description": "Space UUID to fetch the caller's membership for",
             "schema": {
               "example": "123e4567-e89b-12d3-a456-426614174000",
               "type": "string"
@@ -2985,6 +3038,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid space identifier"
           },
           "401": {
             "description": "Not authenticated"
@@ -3040,6 +3096,9 @@
           "200": {
             "description": "Member role updated successfully"
           },
+          "400": {
+            "description": "Invalid space identifier"
+          },
           "401": {
             "description": "User is not active or not an admin of this space"
           },
@@ -3089,6 +3148,9 @@
           "200": {
             "description": "Alias updated"
           },
+          "400": {
+            "description": "Invalid space identifier"
+          },
           "403": {
             "description": "User not authorized"
           },
@@ -3131,6 +3193,9 @@
         "responses": {
           "200": {
             "description": "Member removed from space successfully"
+          },
+          "400": {
+            "description": "Invalid space identifier"
           },
           "401": {
             "description": "User is not active or not an admin of this space"
@@ -3244,7 +3309,7 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space UUID (numeric ID accepted for legacy clients, deprecated)",
+            "description": "Space UUID",
             "schema": {
               "example": "123e4567-e89b-12d3-a456-426614174000",
               "type": "string"
@@ -3261,6 +3326,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid space identifier"
           },
           "401": {
             "description": "Authentication required or user is not a member of this space"
@@ -3284,7 +3352,7 @@
             "name": "spaceId",
             "required": true,
             "in": "path",
-            "description": "Space UUID to get survey state for (numeric ID accepted for legacy clients, deprecated)",
+            "description": "Space UUID to get survey state for",
             "schema": {
               "example": "123e4567-e89b-12d3-a456-426614174000",
               "type": "string"
@@ -3310,6 +3378,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid space identifier"
           },
           "401": {
             "description": "Not authenticated"
@@ -8932,11 +9003,6 @@
       "SpaceAddressBookDto": {
         "type": "object",
         "properties": {
-          "spaceId": {
-            "type": "string",
-            "deprecated": true,
-            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
-          },
           "spaceUuid": {
             "type": "string",
             "description": "Space UUID"
@@ -8949,7 +9015,6 @@
           }
         },
         "required": [
-          "spaceId",
           "spaceUuid",
           "data"
         ]
@@ -9060,11 +9125,6 @@
       "AddressBookRequestsDto": {
         "type": "object",
         "properties": {
-          "spaceId": {
-            "type": "string",
-            "deprecated": true,
-            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
-          },
           "spaceUuid": {
             "type": "string",
             "description": "Space UUID"
@@ -9077,7 +9137,6 @@
           }
         },
         "required": [
-          "spaceId",
           "spaceUuid",
           "data"
         ]
@@ -9125,11 +9184,6 @@
           "name": {
             "type": "string"
           },
-          "id": {
-            "type": "number",
-            "deprecated": true,
-            "description": "Numeric Space id (deprecated, use uuid). Kept for FE fallback"
-          },
           "uuid": {
             "type": "string",
             "description": "Space UUID"
@@ -9137,7 +9191,6 @@
         },
         "required": [
           "name",
-          "id",
           "uuid"
         ]
       },
@@ -9201,11 +9254,6 @@
       "GetSpaceResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "number",
-            "deprecated": true,
-            "description": "Numeric Space id (deprecated, use uuid). Kept for FE fallback"
-          },
           "uuid": {
             "type": "string",
             "description": "Space UUID"
@@ -9214,10 +9262,16 @@
             "type": "string"
           },
           "members": {
+            "description": "Members of the space. A pending (INVITED) member only sees their own membership row here, not the other members.",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SpaceMemberDto"
             }
+          },
+          "memberCount": {
+            "type": "number",
+            "description": "Total count of ACTIVE members in the space",
+            "example": 5
           },
           "safeCount": {
             "type": "number",
@@ -9226,10 +9280,10 @@
           }
         },
         "required": [
-          "id",
           "uuid",
           "name",
           "members",
+          "memberCount",
           "safeCount"
         ]
       },
@@ -9250,18 +9304,12 @@
       "UpdateSpaceResponse": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "number",
-            "deprecated": true,
-            "description": "Numeric Space id (deprecated, use uuid). Kept for FE fallback"
-          },
           "uuid": {
             "type": "string",
             "description": "Space UUID"
           }
         },
         "required": [
-          "id",
           "uuid"
         ]
       },
@@ -9524,11 +9572,6 @@
           "name": {
             "type": "string"
           },
-          "spaceId": {
-            "type": "number",
-            "deprecated": true,
-            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
-          },
           "spaceUuid": {
             "type": "string",
             "description": "Space UUID"
@@ -9556,7 +9599,6 @@
         "required": [
           "userId",
           "name",
-          "spaceId",
           "spaceUuid",
           "role",
           "status",
@@ -10100,11 +10142,6 @@
           "id": {
             "type": "number"
           },
-          "spaceId": {
-            "type": "number",
-            "deprecated": true,
-            "description": "Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback"
-          },
           "spaceUuid": {
             "type": "string",
             "description": "Space UUID"
@@ -10139,7 +10176,6 @@
         },
         "required": [
           "id",
-          "spaceId",
           "spaceUuid",
           "surveySlug",
           "surveyVersion",

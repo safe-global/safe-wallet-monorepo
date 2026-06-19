@@ -206,7 +206,7 @@ export { injectedRtkApi as cgwApi }
 export type AddressBooksGetAddressBookItemsV1ApiResponse =
   /** status 200 Address book items retrieved successfully */ SpaceAddressBookDto
 export type AddressBooksGetAddressBookItemsV1ApiArg = {
-  /** Space UUID to get address book for (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID to get address book for */
   spaceId: string
 }
 export type AddressBooksUpsertAddressBookItemsV1ApiResponse =
@@ -227,7 +227,7 @@ export type AddressBooksDeleteByAddressV1ApiArg = {
 export type AddressBookRequestsGetPendingRequestsV1ApiResponse =
   /** status 200 Pending requests retrieved successfully */ AddressBookRequestsDto
 export type AddressBookRequestsGetPendingRequestsV1ApiArg = {
-  /** Space UUID (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID */
   spaceId: string
 }
 export type AddressBookRequestsCreateRequestV1ApiResponse =
@@ -261,7 +261,7 @@ export type SpacesGetV1ApiResponse = /** status 200 User spaces retrieved succes
 export type SpacesGetV1ApiArg = void
 export type SpacesGetOneV1ApiResponse = /** status 200 Space information retrieved successfully */ GetSpaceResponse
 export type SpacesGetOneV1ApiArg = {
-  /** Space UUID (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID */
   id: string
 }
 export type SpacesUpdateV1ApiResponse = /** status 200 Space updated successfully */ UpdateSpaceResponse
@@ -278,7 +278,7 @@ export type SpacesDeleteV1ApiArg = {
 }
 export type SpaceAuditGetAuditLogV1ApiResponse = /** status 200 Paginated audit log entries */ SpaceAuditLogPage
 export type SpaceAuditGetAuditLogV1ApiArg = {
-  /** Space identifier (UUID, or legacy numeric id) */
+  /** Space UUID */
   spaceId: string
   /** Comma-separated list of event types to filter by */
   eventType?: string
@@ -296,7 +296,7 @@ export type SpaceAuditGetAuditLogV1ApiArg = {
 export type SpaceAuditGetAuditLogActorsV1ApiResponse =
   /** status 200 Distinct audit log actors */ SpaceAuditLogActorDto[]
 export type SpaceAuditGetAuditLogActorsV1ApiArg = {
-  /** Space identifier (UUID, or legacy numeric id) */
+  /** Space UUID */
   spaceId: string
 }
 export type SpaceSafesCreateV1ApiResponse = unknown
@@ -308,7 +308,7 @@ export type SpaceSafesCreateV1ApiArg = {
 }
 export type SpaceSafesGetV1ApiResponse = /** status 200 Space Safes retrieved successfully */ GetSpaceSafeResponse
 export type SpaceSafesGetV1ApiArg = {
-  /** Space UUID to get Safes for (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID to get Safes for */
   spaceId: string
 }
 export type SpaceSafesDeleteV1ApiResponse = unknown
@@ -339,14 +339,14 @@ export type MembersDeclineInviteV1ApiArg = {
 }
 export type MembersRenewInviteV1ApiResponse = /** status 200 Invitation renewed successfully */ Invitation
 export type MembersRenewInviteV1ApiArg = {
-  /** Space UUID containing the invitation (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID containing the invitation */
   spaceId: string
   /** User ID of the invited member */
   userId: number
 }
 export type MembersGetUsersV1ApiResponse = /** status 200 Space members retrieved successfully */ MembersDto
 export type MembersGetUsersV1ApiArg = {
-  /** Space UUID to get members for (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID to get members for */
   spaceId: string
 }
 export type MembersSelfRemoveV1ApiResponse = unknown
@@ -356,7 +356,7 @@ export type MembersSelfRemoveV1ApiArg = {
 }
 export type MembersGetMembershipV1ApiResponse = /** status 200 Membership retrieved successfully */ MemberDto
 export type MembersGetMembershipV1ApiArg = {
-  /** Space UUID to fetch the caller's membership for (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID to fetch the caller's membership for */
   spaceId: string
 }
 export type MembersUpdateRoleV1ApiResponse = unknown
@@ -384,7 +384,7 @@ export type MembersRemoveUserV1ApiArg = {
 export type SpaceCounterfactualSafesGetV1ApiResponse =
   /** status 200 Counterfactual Safes retrieved successfully */ GetCounterfactualSafesResponse
 export type SpaceCounterfactualSafesGetV1ApiArg = {
-  /** Space UUID (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID */
   spaceId: string
 }
 export type SpaceAddressBookItemDto = {
@@ -403,8 +403,6 @@ export type SpaceAddressBookItemDto = {
   updatedAt: string
 }
 export type SpaceAddressBookDto = {
-  /** Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback */
-  spaceId: string
   /** Space UUID */
   spaceUuid: string
   data: SpaceAddressBookItemDto[]
@@ -435,8 +433,6 @@ export type AddressBookRequestItemDto = {
   updatedAt: string
 }
 export type AddressBookRequestsDto = {
-  /** Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback */
-  spaceId: string
   /** Space UUID */
   spaceUuid: string
   data: AddressBookRequestItemDto[]
@@ -451,8 +447,6 @@ export type CreateAddressBookRequestDto = {
 }
 export type CreateSpaceResponse = {
   name: string
-  /** Numeric Space id (deprecated, use uuid). Kept for FE fallback */
-  id: number
   /** Space UUID */
   uuid: string
 }
@@ -472,18 +466,17 @@ export type SpaceMemberDto = {
   user: UserDto
 }
 export type GetSpaceResponse = {
-  /** Numeric Space id (deprecated, use uuid). Kept for FE fallback */
-  id: number
   /** Space UUID */
   uuid: string
   name: string
+  /** Members of the space. A pending (INVITED) member only sees their own membership row here, not the other members. */
   members: SpaceMemberDto[]
+  /** Total count of ACTIVE members in the space */
+  memberCount: number
   /** Total count of Safes in the space */
   safeCount: number
 }
 export type UpdateSpaceResponse = {
-  /** Numeric Space id (deprecated, use uuid). Kept for FE fallback */
-  id: number
   /** Space UUID */
   uuid: string
 }
@@ -548,8 +541,6 @@ export type DeleteSpaceSafesDto = {
 export type Invitation = {
   userId: number
   name: string
-  /** Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback */
-  spaceId: number
   /** Space UUID */
   spaceUuid: string
   role: 'ADMIN' | 'MEMBER'
