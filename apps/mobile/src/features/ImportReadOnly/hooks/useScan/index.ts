@@ -1,7 +1,6 @@
 import { Code, useCameraPermission } from 'react-native-vision-camera'
 import { useCallback, useRef, useState } from 'react'
-import { useRouter } from 'expo-router'
-import { useFocusEffect } from 'expo-router'
+import { useRouter, useFocusEffect } from 'expo-router'
 
 import { resolveScannedAddress, INVALID_ADDRESS_MESSAGE } from '@/src/components/Camera'
 
