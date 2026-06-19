@@ -17,13 +17,12 @@ export const useScan = () => {
   errorRef.current = errorMessage
 
   const handleFocusEffect = useCallback(() => {
-    // Don't wake the camera behind a visible error overlay — the user resumes via Try again.
-    if (!hasPermission || errorRef.current) {
-      return
+    // Arm the camera only when we can scan; don't wake it behind a visible error overlay (the user
+    // resumes via Try again). The cleanup is always registered so a blur pauses the camera regardless.
+    if (hasPermission && !errorRef.current) {
+      setIsCameraActive(true)
+      hasScanned.current = false
     }
-
-    setIsCameraActive(true)
-    hasScanned.current = false
 
     return () => {
       setIsCameraActive(false)

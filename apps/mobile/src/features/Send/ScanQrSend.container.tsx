@@ -50,13 +50,12 @@ export function ScanQrSendContainer() {
   errorRef.current = errorMessage
 
   const handleFocusEffect = useCallback(() => {
-    // Don't wake the camera behind a visible error overlay — the user resumes via Try again.
-    if (permission !== 'granted' || errorRef.current) {
-      return
+    // Arm the camera only when we can scan; don't wake it behind a visible error overlay (the user
+    // resumes via Try again). The cleanup is always registered so a blur pauses the camera regardless.
+    if (permission === 'granted' && !errorRef.current) {
+      setIsCameraActive(true)
+      hasScanned.current = false
     }
-
-    setIsCameraActive(true)
-    hasScanned.current = false
 
     return () => {
       setIsCameraActive(false)
