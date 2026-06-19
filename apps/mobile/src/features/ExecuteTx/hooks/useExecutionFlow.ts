@@ -68,9 +68,16 @@ export const useExecutionFlow = ({
           return
         }
 
+        // SIMULATION_FAILED: the tx is expected to revert on-chain, so relay is blocked (fail-closed).
+        // Surface the same explanatory copy as web instead of the raw CGW message.
+        const description =
+          err instanceof RelaySimulationError && err.code === 'SIMULATION_FAILED'
+            ? "This transaction is expected to fail on-chain, so it can't be relayed. Review the transaction or reject it."
+            : getErrorMessage(err)
+
         router.push({
           pathname: '/execution-error',
-          params: { description: getErrorMessage(err) },
+          params: { description },
         })
       }
     },
