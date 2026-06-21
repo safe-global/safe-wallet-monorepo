@@ -51,13 +51,13 @@ const SecuritySafesTable = ({
     return map
   }, [chainsData])
 
-  // Link the Safe name to that Safe's home dashboard. The per-Safe security view
-  // now lives entirely inside this hub's drawer — clicking the row still opens it.
+  // Link the Safe name to that Safe's security settings, so navigating back from there returns
+  // to the Workspace Security Hub rather than the Home tab. Clicking the row still opens the drawer.
   const getSafeSecurityHref = useCallback<GetSafeSecurityHref>(
     (address, chainId) => {
       const shortName = chainShortNames[chainId]
       if (!shortName) return undefined
-      return { pathname: AppRoutes.home, query: { safe: `${shortName}:${address}` } }
+      return { pathname: AppRoutes.settings.security, query: { safe: `${shortName}:${address}` } }
     },
     [chainShortNames],
   )

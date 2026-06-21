@@ -23,6 +23,7 @@ import { useRouter } from 'next/router'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppSelector } from '@/store'
+import { selectLastUsedSpacePath } from '@/features/spaces/store'
 import { AppRoutes } from '@/config/routes'
 import { spaceBuilder } from '@/tests/builders/space'
 
@@ -35,10 +36,15 @@ const mockUseCurrentSpaceId = useCurrentSpaceId as jest.Mock
 const mockUseSpacesGetOneV1Query = useSpacesGetOneV1Query as jest.Mock
 const mockUseAppSelector = useAppSelector as jest.Mock
 
-function setupDefaults(overrides: { spaceId?: string | null; isSignedIn?: boolean; space?: object | null } = {}) {
+function setupDefaults(
+  overrides: { spaceId?: string | null; isSignedIn?: boolean; space?: object | null; originPath?: string | null } = {},
+) {
   mockUseRouter.mockReturnValue({ push: mockPush })
   mockUseCurrentSpaceId.mockReturnValue('spaceId' in overrides ? overrides.spaceId : MOCK_SPACE_UUID)
-  mockUseAppSelector.mockReturnValue(overrides.isSignedIn ?? true)
+  // The hook reads two selectors: isAuthenticated and selectLastUsedSpacePath — return per-selector.
+  mockUseAppSelector.mockImplementation((selector) =>
+    selector === selectLastUsedSpacePath ? (overrides.originPath ?? null) : (overrides.isSignedIn ?? true),
+  )
   mockUseSpacesGetOneV1Query.mockReturnValue({
     currentData: 'space' in overrides ? overrides.space : mockSpace,
   })
@@ -56,7 +62,7 @@ describe('useSpaceBackLink', () => {
     expect(result.current.space).toEqual(mockSpace)
   })
 
-  it('navigates to the space page when handleBackToSpace is called', () => {
+  it('falls back to the workspace landing when no origin path is recorded', () => {
     const { result } = renderHook(() => useSpaceBackLink())
 
     act(() => {
@@ -65,6 +71,21 @@ describe('useSpaceBackLink', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: AppRoutes.spaces.index,
+      query: { spaceId: MOCK_SPACE_UUID },
+    })
+  })
+
+  it('navigates back to the recorded origin space page when set', () => {
+    setupDefaults({ originPath: AppRoutes.spaces.security })
+
+    const { result } = renderHook(() => useSpaceBackLink())
+
+    act(() => {
+      result.current.handleBackToSpace()
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: AppRoutes.spaces.security,
       query: { spaceId: MOCK_SPACE_UUID },
     })
   })

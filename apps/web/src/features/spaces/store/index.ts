@@ -7,3 +7,5 @@ export {
   selectSafeActionsModalOpen,
   selectSafeActionsModalType,
 } from './safeActionsModalSlice'
+
+export { spaceNavigationSlice, setLastUsedSpacePath, selectLastUsedSpacePath } from './spaceNavigationSlice'

@@ -6,6 +6,7 @@ import UnauthorizedState from '../UnauthorizedState'
 import LoadingState from '../LoadingState'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated, selectIsOidcLoginPending, setLastUsedSpace } from '@/store/authSlice'
+import { setLastUsedSpacePath } from '@/features/spaces/store'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
@@ -36,7 +37,11 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
 
   useEffect(() => {
     dispatch(setLastUsedSpace(spaceId))
-  }, [dispatch, spaceId])
+    // Remember the space sub-page (matched route, e.g. `/spaces/security`) so the in-Safe
+    // "Back to workspace" link returns here instead of the workspace landing. AuthState only
+    // mounts on space pages, so this is never overwritten while viewing a Safe.
+    dispatch(setLastUsedSpacePath(router.pathname))
+  }, [dispatch, spaceId, router.pathname])
 
   // !isFetching: accepting an invite refetches the space — don't redirect on the stale INVITED entry
   useEffect(() => {
