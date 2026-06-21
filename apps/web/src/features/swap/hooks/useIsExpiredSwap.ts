@@ -29,6 +29,13 @@ const useIsExpiredSwap = (txInfo: TransactionInfo) => {
   useEffect(() => {
     if (!isSwapOrderTxInfo(txInfo)) return
 
+    // A settled order (fulfilled or cancelled) can no longer expire, so its
+    // past validUntil must not be reported as an expiry that needs rejecting.
+    if (txInfo.status === 'fulfilled' || txInfo.status === 'cancelled') {
+      setIsExpired(false)
+      return
+    }
+
     const delay = getExpiryDelay(txInfo.validUntil)
 
     if (delay === 0) {
