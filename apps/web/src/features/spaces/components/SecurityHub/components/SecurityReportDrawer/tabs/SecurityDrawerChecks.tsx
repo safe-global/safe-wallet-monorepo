@@ -18,6 +18,7 @@ type SecurityDrawerChecksProps = {
   /** The `shortName:address` param used to deep-link a CTA to the correct Safe (e.g., "eth:0x..."). */
   safeQueryParam?: string
   onRemoveModule?: (address: string) => void
+  onHnSignupClick?: () => void
 }
 
 /**
@@ -31,6 +32,7 @@ const SecurityDrawerChecks = ({
   lastScannedAt,
   safeQueryParam,
   onRemoveModule,
+  onHnSignupClick,
 }: SecurityDrawerChecksProps): ReactElement => {
   const security = useLoadFeature(SecurityFeature)
   const header = usePanelHeader(results, isComplete)
@@ -69,6 +71,7 @@ const SecurityDrawerChecks = ({
         results={results}
         safeQueryParam={safeQueryParam}
         onRemoveModule={onRemoveModule}
+        onHnSignupClick={onHnSignupClick}
       />
     </div>
   )

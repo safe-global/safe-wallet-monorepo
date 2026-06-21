@@ -68,6 +68,8 @@ export const useSecurityChecks = (
   safeQueryParam: string | undefined,
   /** Launches the remove-module tx flow for a vulnerable module (drawer-provided). */
   onRemoveModule?: (address: string) => void,
+  /** Opens the Hypernative signup flow for a partner-tagged guard nudge (drawer-provided). */
+  onHnSignupClick?: () => void,
 ): UseSecurityChecksResult => {
   const security = useLoadFeature(SecurityFeature)
   const [modulesExpanded, setModulesExpanded] = useState(false)
@@ -241,6 +243,13 @@ export const useSecurityChecks = (
         : hasGuard
           ? 'Transaction guard is unverified'
           : 'Transaction guard is recommended'
+      // A partner-tagged, actionable guard result opens the Hypernative signup flow in place of a
+      // deep-link. Passing results already get no CTA (buildCta returns null), so this only fires
+      // for the Tier-3 nudge (no guard, high-value, Hypernative chain).
+      const guardCta =
+        !ok && guardResult.partner === 'hypernative' && onHnSignupClick
+          ? { label: guardResult.ctaLabelOverride || 'Set up protection', onClick: onHnSignupClick }
+          : buildCta('guard', guardResult, safeQueryParam)
       items.push({
         key: 'guard',
         severity: guardResult.severity,
@@ -251,7 +260,7 @@ export const useSecurityChecks = (
             accentTone={toneFor(guardResult)}
             subtitle={subtitleFor(guardResult)}
             title={title}
-            expandedContent={buildExpanded(guardResult, buildCta('guard', guardResult, safeQueryParam))}
+            expandedContent={buildExpanded(guardResult, guardCta)}
           />
         ),
       })
@@ -451,6 +460,7 @@ export const useSecurityChecks = (
     safeQueryParam,
     modulesExpanded,
     onRemoveModule,
+    onHnSignupClick,
   ])
 
   if (!security.$isReady || !buildCta) {
