@@ -7,7 +7,9 @@ import { faker } from '@faker-js/faker'
 const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
-jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
+jest.mock('@/hooks/useChains', () => () => ({
+  configs: [],
+}))
 jest.mock('@/components/common/EthHashInfo', () => {
   const EthHashInfo = ({ address, shortAddress }: { address: string; shortAddress?: boolean }) => (
     <span data-testid="eth-hash-info" data-short-address={String(Boolean(shortAddress))}>
