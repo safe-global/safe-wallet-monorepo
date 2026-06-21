@@ -1,6 +1,17 @@
 import type { AddressBookState } from '@/store/addressBookSlice'
-import { createContactItems, flattenAddressBook, getSelectedAddresses, validateContactName } from '../utils'
+import {
+  createContactItems,
+  flattenAddressBook,
+  getNetworkAvailabilityText,
+  getSelectedAddresses,
+  getSupportedChainIds,
+  validateContactName,
+} from '../utils'
 import type { ImportContactsFormValues } from '../Import/ImportAddressBookDialog'
+import { chainBuilder } from '@/tests/builders/chains'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
+
+const buildChain = (chainId: string, chainName: string) => chainBuilder().with({ chainId, chainName }).build()
 
 describe('space address book utils', () => {
   describe('flattenAddressBook', () => {
@@ -201,6 +212,69 @@ describe('space address book utils', () => {
       expect(validateContactName('José')).toMatch(/must start with a letter or number/)
       expect(validateContactName('name\!')).toMatch(/must start with a letter or number/)
       expect(validateContactName('-leading')).toMatch(/must start with a letter or number/)
+    })
+  })
+
+  describe('getSupportedChainIds', () => {
+    const configs = [buildChain('1', 'Ethereum'), buildChain('137', 'Polygon'), buildChain('10', 'Optimism')]
+
+    it('keeps only chain ids that are still in the config', () => {
+      expect(getSupportedChainIds(['1', '99999', '137'], configs)).toEqual(['1', '137'])
+    })
+
+    it('preserves the original order of the supported chain ids', () => {
+      expect(getSupportedChainIds(['137', '10', '1'], configs)).toEqual(['137', '10', '1'])
+    })
+
+    it('returns an empty array when every stored chain has been delisted', () => {
+      expect(getSupportedChainIds(['99998', '99999'], configs)).toEqual([])
+    })
+
+    it('returns an empty array when no chains are configured', () => {
+      expect(getSupportedChainIds(['1', '137'], [])).toEqual([])
+    })
+  })
+
+  describe('getNetworkAvailabilityText', () => {
+    const configs = [
+      buildChain('1', 'Ethereum'),
+      buildChain('137', 'Polygon'),
+      buildChain('10', 'Optimism'),
+      buildChain('42161', 'Arbitrum'),
+      buildChain('100', 'Gnosis'),
+    ]
+
+    it('returns "all networks" when the entry covers every configured chain', () => {
+      expect(getNetworkAvailabilityText(['1', '137', '10', '42161', '100'], configs)).toBe(
+        'Available on all supported networks',
+      )
+    })
+
+    it('lists the missing networks when only a few are not covered', () => {
+      expect(getNetworkAvailabilityText(['1', '137', '10'], configs)).toBe(
+        'Available on all supported networks except Arbitrum, Gnosis',
+      )
+    })
+
+    it('uses a single missing network name without a separator', () => {
+      expect(getNetworkAvailabilityText(['1', '137', '10', '42161'], configs)).toBe(
+        'Available on all supported networks except Gnosis',
+      )
+    })
+
+    it('summarises as "X of Y" when many networks are missing', () => {
+      expect(getNetworkAvailabilityText(['1'], configs)).toBe(`Available on 1 of 5 supported network${maybePlural(5)}`)
+    })
+
+    it('ignores stored chain ids that are no longer in the config', () => {
+      expect(getNetworkAvailabilityText(['1', '137', '10', '42161', '100', '999'], configs)).toBe(
+        'Available on all supported networks',
+      )
+    })
+
+    it('falls back to the raw count when no chains are configured', () => {
+      expect(getNetworkAvailabilityText(['1', '137'], [])).toBe(`Available on 2 supported network${maybePlural(2)}`)
+      expect(getNetworkAvailabilityText(['1'], [])).toBe(`Available on 1 supported network${maybePlural(1)}`)
     })
   })
 })

@@ -14,6 +14,7 @@ type NetworkMultiSelectorInputProps = {
   error?: boolean
   helperText?: string
   showSelectAll?: boolean
+  maxVisibleTags?: number
 }
 
 const SELECT_ALL_OPTION = { chainId: 'select-all', chainName: 'Select All' } as Chain
@@ -26,6 +27,7 @@ const NetworkMultiSelectorInput = ({
   error,
   helperText,
   showSelectAll = false,
+  maxVisibleTags,
 }: NetworkMultiSelectorInputProps): ReactElement => {
   const { configs } = useChains()
   const { setValue } = useFormContext()
@@ -79,18 +81,29 @@ const NetworkMultiSelectorInput = ({
         )
       }
 
-      return selectedOptions.map((chain) => (
-        <Chip
-          variant="outlined"
-          key={chain.chainId}
-          avatar={<ChainIndicator chainId={chain.chainId} onlyLogo inline />}
-          label={chain.chainName}
-          onDelete={() => handleDelete(chain.chainId)}
-          className={css.multiChainChip}
-        />
-      ))
+      const visibleOptions =
+        maxVisibleTags != null && selectedOptions.length > maxVisibleTags
+          ? selectedOptions.slice(0, maxVisibleTags)
+          : selectedOptions
+      const hiddenCount = selectedOptions.length - visibleOptions.length
+
+      return (
+        <>
+          {visibleOptions.map((chain) => (
+            <Chip
+              variant="outlined"
+              key={chain.chainId}
+              avatar={<ChainIndicator chainId={chain.chainId} onlyLogo inline />}
+              label={chain.chainName}
+              onDelete={() => handleDelete(chain.chainId)}
+              className={css.multiChainChip}
+            />
+          ))}
+          {hiddenCount > 0 && <Chip variant="outlined" label={`+${hiddenCount} more`} className={css.multiChainChip} />}
+        </>
+      )
     },
-    [showSelectAll, isAllSelected, handleDelete],
+    [showSelectAll, isAllSelected, handleDelete, maxVisibleTags],
   )
 
   const renderOption = useCallback(
