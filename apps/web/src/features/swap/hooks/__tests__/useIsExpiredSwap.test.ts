@@ -37,6 +37,30 @@ describe('useIsExpiredSwap', () => {
     expect(result.current).toBe(true)
   })
 
+  it('returns false for a fulfilled order even when validUntil is in the past', () => {
+    jest.spyOn(guards, 'isSwapOrderTxInfo').mockReturnValue(true)
+
+    const now = Date.now()
+    const pastUnixTime = Math.floor((now - 1000) / 1000)
+    const txInfo = { validUntil: pastUnixTime, status: 'fulfilled' } as unknown as TransactionInfo
+
+    const { result } = renderHook(() => useIsExpiredSwap(txInfo))
+
+    expect(result.current).toBe(false)
+  })
+
+  it('returns false for a cancelled order even when validUntil is in the past', () => {
+    jest.spyOn(guards, 'isSwapOrderTxInfo').mockReturnValue(true)
+
+    const now = Date.now()
+    const pastUnixTime = Math.floor((now - 1000) / 1000)
+    const txInfo = { validUntil: pastUnixTime, status: 'cancelled' } as unknown as TransactionInfo
+
+    const { result } = renderHook(() => useIsExpiredSwap(txInfo))
+
+    expect(result.current).toBe(false)
+  })
+
   it('returns false initially and true after expiry time if the swap has not yet expired', () => {
     jest.spyOn(guards, 'isSwapOrderTxInfo').mockReturnValue(true)
 
