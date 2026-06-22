@@ -1,48 +1,37 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Tooltip } from '@mui/material'
-import { Check, Copy } from 'lucide-react'
+import type { KeyboardEvent } from 'react'
+import { Copy } from 'lucide-react'
+import CopyTooltip from '../CopyTooltip'
 import { cn } from '@/utils/cn'
 
-const RESET_DELAY = 2000
-
 /**
- * Inline icon button that copies an address to the clipboard. Designed to sit
- * next to a (shortened) address inside clickable rows/cards — it stops click
- * propagation and prevents default so it never triggers the parent link.
+ * Inline copy-address affordance for account rows/cards. Reuses CopyTooltip for
+ * the copy + tooltip logic, and renders a non-`<button>` element so it is safe
+ * to nest inside clickable rows (links, collapsible triggers, selection
+ * buttons) without invalid button-in-button markup.
  */
 const CopyAddressIconButton = ({ address, className }: { address: string; className?: string }) => {
-  const [copied, setCopied] = useState(false)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-
-  useEffect(() => () => clearTimeout(timeoutRef.current), [])
-
-  const handleCopy = useCallback(
-    (e: React.MouseEvent) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLSpanElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
-      e.stopPropagation()
-      navigator.clipboard.writeText(address)
-      setCopied(true)
-      clearTimeout(timeoutRef.current)
-      timeoutRef.current = setTimeout(() => setCopied(false), RESET_DELAY)
-    },
-    [address],
-  )
+      e.currentTarget.click()
+    }
+  }
 
   return (
-    <Tooltip title={copied ? 'Copied!' : 'Copy address'} placement="top">
-      <button
-        onClick={handleCopy}
-        className={cn('shrink-0 cursor-pointer rounded p-0.5 transition-colors hover:bg-muted', className)}
+    <CopyTooltip text={address} initialToolTipText="Copy address">
+      <span
+        role="button"
+        tabIndex={0}
         aria-label="Copy address"
-        type="button"
-      >
-        {copied ? (
-          <Check className="size-3.5 text-green-600" />
-        ) : (
-          <Copy className="size-3.5 text-muted-foreground hover:text-foreground" />
+        onKeyDown={handleKeyDown}
+        className={cn(
+          'text-muted-foreground hover:bg-muted hover:text-foreground inline-flex shrink-0 cursor-pointer rounded p-0.5 transition-colors',
+          className,
         )}
-      </button>
-    </Tooltip>
+      >
+        <Copy className="size-3.5" />
+      </span>
+    </CopyTooltip>
   )
 }
 

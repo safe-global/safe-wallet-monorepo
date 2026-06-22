@@ -30,6 +30,14 @@ describe('CopyAddressIconButton', () => {
     expect(writeText).toHaveBeenCalledWith(ADDRESS)
   })
 
+  it('copies the address when activated via the keyboard', () => {
+    render(<CopyAddressIconButton address={ADDRESS} />)
+
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Copy address' }), { key: 'Enter' })
+
+    expect(writeText).toHaveBeenCalledWith(ADDRESS)
+  })
+
   it('does not trigger the surrounding link/click handler', () => {
     const onParentClick = jest.fn()
 
