@@ -303,9 +303,13 @@ describe('useExecutionFlow', () => {
         await result.current.handleConfirmPress()
       })
 
+      // SIMULATION_FAILED surfaces the same explanatory copy as web, not the raw CGW message.
       expect(mockPush).toHaveBeenCalledWith({
         pathname: '/execution-error',
-        params: { description: 'Insufficient gas-token balance' },
+        params: {
+          description:
+            "This transaction is expected to fail on-chain, so it can't be relayed. Review the transaction or reject it.",
+        },
       })
       expect(result.current.showIndeterminateSheet).toBe(false)
     })
