@@ -16,16 +16,16 @@ describe('modulesScanner', () => {
     mockIsAffected.mockResolvedValue(false)
   })
 
-  it('returns clear when no modules are installed', async () => {
+  it('returns not_applicable when no modules are installed', async () => {
     const result = await modulesScanner.scan(createMockContext({ modules: null }))
-    expect(result.status).toBe('clear')
+    expect(result.status).toBe('not_applicable')
     expect(result.severity).toBe('Low')
     expect(result.score).toBe(100)
   })
 
-  it('returns clear for empty modules array', async () => {
+  it('returns not_applicable for empty modules array', async () => {
     const result = await modulesScanner.scan(createMockContext({ modules: [] }))
-    expect(result.status).toBe('clear')
+    expect(result.status).toBe('not_applicable')
     expect(result.score).toBe(100)
   })
 
@@ -127,7 +127,7 @@ describe('modulesScanner', () => {
         modules: [{ value: '0x0000000000000000000000000000000000000000' }],
       }),
     )
-    expect(result.status).toBe('clear')
+    expect(result.status).toBe('not_applicable')
     expect(result.score).toBe(100)
   })
 
