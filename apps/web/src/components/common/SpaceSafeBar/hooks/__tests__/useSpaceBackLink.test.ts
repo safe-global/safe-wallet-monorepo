@@ -28,7 +28,7 @@ import { spaceBuilder } from '@/tests/builders/space'
 
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
-const mockSpace = spaceBuilder().with({ id: 42, uuid: MOCK_SPACE_UUID, name: 'Acme Corp' }).build()
+const mockSpace = spaceBuilder().with({ uuid: MOCK_SPACE_UUID, name: 'Acme Corp' }).build()
 
 const mockUseRouter = useRouter as jest.Mock
 const mockUseCurrentSpaceId = useCurrentSpaceId as jest.Mock

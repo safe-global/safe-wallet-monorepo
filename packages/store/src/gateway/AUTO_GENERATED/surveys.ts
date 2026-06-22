@@ -24,7 +24,7 @@ const injectedRtkApi = api
 export { injectedRtkApi as cgwApi }
 export type SurveysGetStateV1ApiResponse = /** status 200  */ SurveyStateDto
 export type SurveysGetStateV1ApiArg = {
-  /** Space UUID to get survey state for (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID to get survey state for */
   spaceId: string
   slug: string
 }
@@ -75,8 +75,6 @@ export type SurveyStateDto = {
 }
 export type SurveyResponseResultDto = {
   id: number
-  /** Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback */
-  spaceId: number
   /** Space UUID */
   spaceUuid: string
   surveySlug: string
