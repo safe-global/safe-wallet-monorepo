@@ -1,15 +1,11 @@
 import { H3, Text, View } from 'tamagui'
-import { Logo } from '@/src/components/Logo'
-import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import React from 'react'
 import { YStack } from 'tamagui'
 import { IconName } from '@/src/types/iconTypes'
 import { BadgeThemeTypes } from '@/src/components/Logo/Logo'
-import { Identicon } from '@/src/components/Identicon'
-import { Address } from 'blo'
 import { formatWithSchema } from '@/src/utils/date'
-import { DappIcon } from '@/src/features/WalletConnect/Wallet/components/DappIcon'
 import { useDappOrigin } from '../DappOriginContext'
+import { TransactionHeaderLogo } from './TransactionHeaderLogo'
 
 interface TransactionHeaderProps {
   logo?: string
@@ -42,26 +38,15 @@ export function TransactionHeader({
 
   return (
     <YStack position="relative" alignItems="center" gap="$2" marginTop="$4">
-      {dappOrigin ? (
-        <DappIcon
-          url={dappOrigin.logoUri}
-          size={44}
-          badgeContent={<SafeFontIcon name={badgeIcon} color={badgeColor} size={12} />}
-          badgeThemeName={badgeThemeName}
-          circle
-        />
-      ) : isIdenticon ? (
-        <Identicon address={logo as Address} size={44} />
-      ) : (
-        (customLogo ?? (
-          <Logo
-            logoUri={logo}
-            size="$10"
-            badgeContent={<SafeFontIcon name={badgeIcon} color={badgeColor} size={12} />}
-            badgeThemeName={badgeThemeName}
-          />
-        ))
-      )}
+      <TransactionHeaderLogo
+        dappOrigin={dappOrigin}
+        logo={logo}
+        customLogo={customLogo}
+        badgeIcon={badgeIcon}
+        badgeThemeName={badgeThemeName}
+        badgeColor={badgeColor}
+        isIdenticon={isIdenticon}
+      />
 
       <View alignItems="center" gap="$2">
         {typeof showTitle === 'string' ? (
