@@ -16,8 +16,10 @@ describe('StarterUpsellBanner', () => {
   it('renders the recent-usage summary and Upgrade CTA', () => {
     renderBanner()
 
-    expect(screen.getByText(/In the past 30 days/)).toBeInTheDocument()
-    expect(screen.getByText(/42 transactions/)).toBeInTheDocument()
+    const banner = screen.getByTestId('billing-upsell-banner')
+    expect(banner).toHaveTextContent('In the past 30 days')
+    expect(banner).toHaveTextContent('42 transactions')
+    expect(screen.getByText('Get flat pricing')).toBeInTheDocument()
     expect(screen.getByTestId('billing-upsell-upgrade')).toBeInTheDocument()
   })
 

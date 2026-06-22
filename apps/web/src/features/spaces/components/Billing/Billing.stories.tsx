@@ -9,8 +9,26 @@ const withStarter: Decorator = (Story) => (
   </BillingDataProvider>
 )
 
-const withSubscription: Decorator = (Story) => (
-  <BillingDataProvider value={createPaidBillingState()}>
+const withinLimit: Decorator = (Story) => (
+  <BillingDataProvider value={createPaidBillingState('within_limit')}>
+    <Story />
+  </BillingDataProvider>
+)
+
+const approachingLimit: Decorator = (Story) => (
+  <BillingDataProvider value={createPaidBillingState('approaching_limit')}>
+    <Story />
+  </BillingDataProvider>
+)
+
+const limitReached: Decorator = (Story) => (
+  <BillingDataProvider value={createPaidBillingState('limit_reached')}>
+    <Story />
+  </BillingDataProvider>
+)
+
+const paymentFailed: Decorator = (Story) => (
+  <BillingDataProvider value={createPaidBillingState('payment_failed')}>
     <Story />
   </BillingDataProvider>
 )
@@ -30,7 +48,19 @@ export const Starter: Story = {
   decorators: [withStarter],
 }
 
-// Paid: subscription/usage section on top, Plans below.
+// Paid: subscription/usage section on top, Plans below. One story per header status state.
 export const WithSubscription: Story = {
-  decorators: [withSubscription],
+  decorators: [withinLimit],
+}
+
+export const ApproachingLimit: Story = {
+  decorators: [approachingLimit],
+}
+
+export const LimitReached: Story = {
+  decorators: [limitReached],
+}
+
+export const PaymentFailed: Story = {
+  decorators: [paymentFailed],
 }

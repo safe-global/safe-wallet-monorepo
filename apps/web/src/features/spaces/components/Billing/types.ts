@@ -1,12 +1,19 @@
-export type BillingInterval = 'month' | 'year'
+export type BillingPeriod = 'monthly' | 'yearly'
 
-export interface BillingPlan {
+export interface PlanTier {
   id: string
   name: string
-  priceUsd: number
-  interval: BillingInterval
+  priceMonthlyUsd: number
   features: string[]
-  highlighted?: boolean
+  cta: string
+  /** The currently-active plan renders a non-actionable CTA (e.g. "Default plan"). */
+  isCurrent?: boolean
+}
+
+export interface PlanGroup {
+  id: string
+  /** One tier (Starter) or several selectable tiers (Pro / Pro+). */
+  tiers: PlanTier[]
 }
 
 export type SubscriptionStatus = 'active' | 'past_due' | 'canceled'
@@ -24,10 +31,21 @@ export interface UsageSummary {
   periodDays: number
 }
 
+/** Paid-plan usage dashboard data. Distinct from UsageSummary, which feeds the Starter upsell. */
+export interface SubscriptionUsage {
+  feeFreeVolume: { usedUsd: number; allowanceUsd: number }
+  gaslessTransactions: { used: number; allowance: number }
+  /** Addresses of the Safes the subscription covers; drives the count + the avatar stack. */
+  activeSafes: string[]
+}
+
+export type UsageStatus = 'within_limit' | 'approaching_limit' | 'limit_reached' | 'payment_failed'
+
 export interface BillingState {
   /** `null` for the Starter / no-paid-plan state. */
   subscription: Subscription | null
-  currentPlanId: string | null
-  plans: BillingPlan[]
+  planGroups: PlanGroup[]
   usage: UsageSummary
+  /** `null` for the Starter / no-paid-plan state. */
+  subscriptionUsage: SubscriptionUsage | null
 }

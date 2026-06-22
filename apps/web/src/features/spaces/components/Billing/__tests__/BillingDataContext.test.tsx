@@ -13,7 +13,7 @@ describe('BillingDataContext', () => {
     })
 
     expect(result.current.subscription).toBeNull()
-    expect(result.current.plans.length).toBeGreaterThan(0)
+    expect(result.current.planGroups.length).toBeGreaterThan(0)
   })
 
   it('provides an injected value override', () => {

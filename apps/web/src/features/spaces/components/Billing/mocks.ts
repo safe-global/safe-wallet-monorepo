@@ -1,27 +1,66 @@
-import type { BillingPlan, BillingState, Subscription, UsageSummary } from './types'
+import type { BillingState, PlanGroup, Subscription, SubscriptionUsage, UsageStatus, UsageSummary } from './types'
 
-export const MOCK_PLANS: BillingPlan[] = [
+export const MOCK_PLAN_GROUPS: PlanGroup[] = [
   {
     id: 'starter',
-    name: 'Starter',
-    priceUsd: 0,
-    interval: 'month',
-    features: ['Pay-as-you-go gas', 'Community support'],
+    tiers: [
+      {
+        id: 'starter',
+        name: 'Starter',
+        priceMonthlyUsd: 0,
+        cta: 'Default plan',
+        isCurrent: true,
+        features: ['Covers one Safe', '$5K/mo fee-free volume', 'Included by default', 'In-app support chat'],
+      },
+    ],
   },
   {
     id: 'pro',
-    name: 'Pro',
-    priceUsd: 99,
-    interval: 'month',
-    features: ['Flat gas pricing', 'Priority support', 'Usage analytics'],
-    highlighted: true,
+    tiers: [
+      {
+        id: 'pro',
+        name: 'Pro',
+        priceMonthlyUsd: 49,
+        cta: 'Upgrade to Pro',
+        features: [
+          'Covers unlimited Safes',
+          '$500K/mo fee-free volume',
+          '15 gasless transactions',
+          'In-app support chat',
+        ],
+      },
+      {
+        id: 'pro-plus',
+        name: 'Pro+',
+        priceMonthlyUsd: 99,
+        cta: 'Upgrade to Pro+',
+        features: [
+          'Covers unlimited Safes',
+          '$1M/mo fee-free volume',
+          '50 gasless transactions',
+          'In-app support chat',
+        ],
+      },
+    ],
   },
   {
-    id: 'enterprise',
-    name: 'Enterprise',
-    priceUsd: 499,
-    interval: 'month',
-    features: ['Custom limits', 'Dedicated support', 'SLA'],
+    id: 'business',
+    tiers: [
+      {
+        id: 'business',
+        name: 'Business',
+        priceMonthlyUsd: 599,
+        cta: 'Upgrade to Business',
+        features: ['Covers unlimited Safes', '$50M/mo fee-free volume', '100 gasless transactions', 'Priority support'],
+      },
+      {
+        id: 'business-plus',
+        name: 'Business+',
+        priceMonthlyUsd: 1299,
+        cta: 'Upgrade to Business+',
+        features: ['Covers unlimited Safes', 'Unlimited volume', 'Unlimited gasless transactions', 'Priority support'],
+      },
+    ],
   },
 ]
 
@@ -38,17 +77,48 @@ const MOCK_SUBSCRIPTION: Subscription = {
   currentPeriodEnd: '2026-07-31T00:00:00.000Z',
 }
 
+const MOCK_ACTIVE_SAFES = [
+  '0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326',
+  '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+  '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed',
+  '0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8',
+]
+
+/** One representative usage shape per header state, so each can be demoed/tested in isolation. */
+const SUBSCRIPTION_USAGE_BY_STATUS: Record<UsageStatus, SubscriptionUsage> = {
+  within_limit: {
+    feeFreeVolume: { usedUsd: 250_000, allowanceUsd: 500_000 },
+    gaslessTransactions: { used: 11, allowance: 15 },
+    activeSafes: MOCK_ACTIVE_SAFES,
+  },
+  approaching_limit: {
+    feeFreeVolume: { usedUsd: 450_000, allowanceUsd: 500_000 },
+    gaslessTransactions: { used: 13, allowance: 15 },
+    activeSafes: MOCK_ACTIVE_SAFES,
+  },
+  limit_reached: {
+    feeFreeVolume: { usedUsd: 520_000, allowanceUsd: 500_000 },
+    gaslessTransactions: { used: 15, allowance: 15 },
+    activeSafes: MOCK_ACTIVE_SAFES,
+  },
+  payment_failed: {
+    feeFreeVolume: { usedUsd: 250_000, allowanceUsd: 500_000 },
+    gaslessTransactions: { used: 11, allowance: 15 },
+    activeSafes: MOCK_ACTIVE_SAFES,
+  },
+}
+
 export const createStarterBillingState = (overrides?: Partial<BillingState>): BillingState => ({
   subscription: null,
-  currentPlanId: 'starter',
-  plans: MOCK_PLANS,
+  planGroups: MOCK_PLAN_GROUPS,
   usage: MOCK_USAGE,
+  subscriptionUsage: null,
   ...overrides,
 })
 
-export const createPaidBillingState = (): BillingState => ({
-  subscription: MOCK_SUBSCRIPTION,
-  currentPlanId: 'pro',
-  plans: MOCK_PLANS,
+export const createPaidBillingState = (status: UsageStatus = 'within_limit'): BillingState => ({
+  subscription: { ...MOCK_SUBSCRIPTION, status: status === 'payment_failed' ? 'past_due' : 'active' },
+  planGroups: MOCK_PLAN_GROUPS,
   usage: MOCK_USAGE,
+  subscriptionUsage: SUBSCRIPTION_USAGE_BY_STATUS[status],
 })
