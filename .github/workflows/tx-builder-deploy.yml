@@ -42,7 +42,7 @@ jobs:
 
     steps:
       - name: Post building comment
-        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
+        uses: mshick/add-pr-comment@ec328af66588ab8f77cdeb2c264f14aba45bbf59 # v3.12.0
         with:
           message-id: tx-builder-preview
           message: |
@@ -81,7 +81,7 @@ jobs:
 
       - name: Post deployment link
         if: always()
-        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
+        uses: mshick/add-pr-comment@ec328af66588ab8f77cdeb2c264f14aba45bbf59 # v3.12.0
         with:
           message-id: tx-builder-preview
           message: |
