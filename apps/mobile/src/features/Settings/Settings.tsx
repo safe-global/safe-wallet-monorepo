@@ -18,6 +18,7 @@ import { Alert } from '@/src/components/Alert'
 
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useCopyAndDispatchToast } from '@/src/hooks/useCopyAndDispatchToast'
+import { ConnectedDappsEntry } from '@/src/features/WalletConnect/Wallet/components/ConnectedDappsEntry'
 
 interface SettingsProps {
   data: SafeState
@@ -163,6 +164,7 @@ export const Settings = ({
                       }
                     />
                   </Pressable>
+                  <ConnectedDappsEntry />
                 </View>
 
                 <View backgroundColor="$backgroundDark" padding="$4" borderRadius="$3" gap={'$2'}>
