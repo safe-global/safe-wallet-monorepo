@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import TxNonce from '../index'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext, initialContext as initialTxFlowContext } from '@/components/tx-flow/TxFlowProvider'
@@ -192,6 +192,78 @@ describe('TxNonce', () => {
       renderTxNonce({ nonce: 5, recommendedNonce: 5, isReadOnly: false }, false)
       expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
       expect(screen.getByText('5')).toBeInTheDocument()
+    })
+  })
+
+  describe('replace existing nonce label', () => {
+    const buildQueuedTx = (overrides: { note?: string | null; humanDescription?: string | null } = {}) => ({
+      type: 'TRANSACTION' as const,
+      conflictType: 'None' as const,
+      transaction: {
+        id: 'tx-1',
+        timestamp: Date.now(),
+        txStatus: 'AWAITING_CONFIRMATIONS' as const,
+        note: overrides.note ?? null,
+        txInfo: {
+          type: 'Custom' as const,
+          humanDescription: overrides.humanDescription ?? null,
+          to: { value: '0x0000000000000000000000000000000000000000' },
+          dataSize: '0',
+          value: '0',
+          isCancellation: false,
+          methodName: null,
+          actionCount: null,
+        },
+      },
+    })
+
+    const openNonceDropdown = () => {
+      const combobox = screen.getByRole('combobox')
+      fireEvent.mouseDown(combobox)
+      return screen.getByRole('listbox')
+    }
+
+    const mockQueueByNonce = (nonce: number, tx: ReturnType<typeof buildQueuedTx> | null) => {
+      mockUseQueuedTxByNonce.mockImplementation((n: number) => (n === nonce && tx ? [tx] : []))
+    }
+
+    const getPreviousNonceOption = (listbox: HTMLElement) => within(listbox).getByRole('option', { selected: false })
+
+    it('shows the transaction note when present', () => {
+      mockUsePreviousNonces.mockReturnValue([4])
+      mockQueueByNonce(4, buildQueuedTx({ note: 'Treasury payout', humanDescription: 'fallback' }))
+      renderTxNonce({ nonce: 5, recommendedNonce: 5 })
+
+      const option = getPreviousNonceOption(openNonceDropdown())
+      expect(option).toHaveTextContent(/Treasury payout/)
+      expect(option).not.toHaveTextContent(/fallback/)
+    })
+
+    it('falls back to humanDescription when note is missing', () => {
+      mockUsePreviousNonces.mockReturnValue([4])
+      mockQueueByNonce(4, buildQueuedTx({ note: null, humanDescription: 'Send to alice.eth' }))
+      renderTxNonce({ nonce: 5, recommendedNonce: 5 })
+
+      const option = getPreviousNonceOption(openNonceDropdown())
+      expect(option).toHaveTextContent(/Send to alice\.eth/)
+    })
+
+    it('treats a whitespace-only note as missing and falls back', () => {
+      mockUsePreviousNonces.mockReturnValue([4])
+      mockQueueByNonce(4, buildQueuedTx({ note: '   ', humanDescription: 'Send to alice.eth' }))
+      renderTxNonce({ nonce: 5, recommendedNonce: 5 })
+
+      const option = getPreviousNonceOption(openNonceDropdown())
+      expect(option).toHaveTextContent(/Send to alice\.eth/)
+    })
+
+    it('shows "New transaction" when no queued txs exist for that nonce', () => {
+      mockUsePreviousNonces.mockReturnValue([4])
+      mockQueueByNonce(4, null)
+      renderTxNonce({ nonce: 5, recommendedNonce: 5 })
+
+      const option = getPreviousNonceOption(openNonceDropdown())
+      expect(option).toHaveTextContent(/New transaction/)
     })
   })
 
