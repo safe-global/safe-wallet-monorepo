@@ -1,7 +1,7 @@
 import React from 'react'
 import { renderWithStore, createTestStore } from '@/src/tests/test-utils'
 import { TransactionHeader } from '../TransactionHeader'
-import { DappOriginProvider } from '../../DappOriginContext'
+import { DappOriginContextProvider } from '../../DappOriginContext'
 import type { IconName } from '@/src/types/iconTypes'
 
 const baseProps = {
@@ -19,9 +19,9 @@ describe('TransactionHeader', () => {
 
   it('falls back to the contract title when the dApp publishes an empty name', () => {
     const { getByText } = renderWithStore(
-      <DappOriginProvider value={{ name: '', logoUri: 'https://x/icon.png' }}>
+      <DappOriginContextProvider value={{ name: '', logoUri: 'https://x/icon.png' }}>
         <TransactionHeader {...baseProps} />
-      </DappOriginProvider>,
+      </DappOriginContextProvider>,
       createTestStore(),
     )
     expect(getByText('Some contract')).toBeTruthy()
@@ -29,9 +29,9 @@ describe('TransactionHeader', () => {
 
   it('replaces the title with the originating dApp name when present', () => {
     const { getByText, queryByText } = renderWithStore(
-      <DappOriginProvider value={{ name: 'Uniswap', logoUri: 'https://x/icon.png' }}>
+      <DappOriginContextProvider value={{ name: 'Uniswap', logoUri: 'https://x/icon.png' }}>
         <TransactionHeader {...baseProps} />
-      </DappOriginProvider>,
+      </DappOriginContextProvider>,
       createTestStore(),
     )
     expect(getByText('Uniswap')).toBeTruthy()

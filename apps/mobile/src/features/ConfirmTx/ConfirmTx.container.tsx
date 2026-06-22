@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { ScrollView, View } from 'tamagui'
 import { RefreshControl } from 'react-native'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
@@ -16,7 +16,6 @@ import { PendingStatus, selectPendingTxById } from '@/src/store/pendingTxsSlice'
 import { useTransactionProcessingState } from '@/src/hooks/useTransactionProcessingState'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { selectDappMetadataByTxHash } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
 import { WcRejectOnBack } from '@/src/features/WalletConnect/Wallet/components/WcRejectOnBack'
 import { DappOriginProvider } from './components/DappOriginContext'
 
@@ -60,15 +59,6 @@ function ConfirmTxContainer() {
   useFocusEffect(handleHistoryNavigation)
   const headerText = getHeaderText(isExecuting, isSigning)
 
-  // When the tx originates from a WalletConnect dApp, surface its logo + name in the
-  // on-screen TransactionHeader (provided via context, consumed by TransactionHeader).
-  // Memoized so context consumers don't re-render on every unrelated parent render.
-  const dappMetadata = useAppSelector((state) => selectDappMetadataByTxHash(state, txId))
-  const dappOrigin = useMemo(
-    () => (dappMetadata ? { name: dappMetadata.name, logoUri: dappMetadata.icons?.[0] } : null),
-    [dappMetadata],
-  )
-
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>{headerText}</NavBarTitle>,
     alwaysVisible: true,
@@ -90,7 +80,7 @@ function ConfirmTxContainer() {
   const isExpired = !!(txDetails && 'status' in txDetails.txInfo && txDetails.txInfo.status === 'expired')
 
   return (
-    <DappOriginProvider value={dappOrigin}>
+    <DappOriginProvider txId={txId}>
       <View flex={1}>
         <WcRejectOnBack safeTxHash={txId} />
         <ScrollView
