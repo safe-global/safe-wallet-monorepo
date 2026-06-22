@@ -73,8 +73,8 @@ export const sidebarItemAddressBook = '[data-testid="sidebar-item-address-book"]
 export const sidebarItemTeam = '[data-testid="sidebar-item-team"]'
 export const sidebarItemSettings = '[data-testid="sidebar-item-settings"]'
 
-// -- Safe Accounts page --
-const safeAccountsPageTitle = 'Safe Accounts'
+// -- Safe accounts page --
+const safeAccountsPageTitle = 'Safe accounts'
 const safeAccountsListItem = '[data-testid="safe-list-item"]'
 
 // -- Add account --
@@ -120,8 +120,8 @@ const onboardingSurveyPath = '/welcome/survey'
 
 // -- Empty dashboard --
 export const gettingStartedLabel = 'Getting started'
-export const addSafeAccountsLabel = 'Add your Safe Accounts'
-export const addAccountsModalLabel = 'Add Safe Accounts'
+export const addSafeAccountsLabel = 'Add your Safe accounts'
+export const addAccountsModalLabel = 'Add Safe accounts'
 export const importAddressBookBtn = '[aria-label="Import address book"]'
 export const importAddressBookLabel = 'Import address book'
 export const dashboardAddMemberBtn = '[data-testid="add-member-button"]'
@@ -440,7 +440,7 @@ export function verifySafeLevelNavigationElements() {
 }
 
 // ===========================================
-// Safe Accounts page verify functions
+// Safe accounts page verify functions
 // ===========================================
 
 export function verifyViewAllAccountsPageOpened(expectedAccountsCount) {

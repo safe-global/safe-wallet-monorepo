@@ -12,7 +12,7 @@ describe('WcHints component tests', () => {
   const CONNECT_STEP = 'Open a WalletConnect supported dApp'
   const INTERACT_STEP = 'Connect a dApp by following the above steps'
   const CONNECT_WALLET = 'Connect a wallet'
-  const ENSURE_CHAIN = 'Ensure the dApp is connected to the same chain as your Safe Account'
+  const ENSURE_CHAIN = 'Ensure the dApp is connected to the same chain as your Safe account'
 
   beforeEach(() => {
     jest.clearAllMocks()

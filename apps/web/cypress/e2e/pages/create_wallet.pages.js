@@ -55,8 +55,8 @@ export const addSignerStr = 'Add signer'
 export const accountRecoveryStr = 'Account recovery'
 export const sendTokensStr = 'Send tokens'
 const noWalletConnectedMsg = 'No wallet connected'
-export const deployWalletStr = 'about to deploy this Safe Account'
-export const yourSafeAccountPreviewStr = 'Your Safe Account preview'
+export const deployWalletStr = 'about to deploy this Safe account'
+export const yourSafeAccountPreviewStr = 'Your Safe account preview'
 
 export function waitForConnectionMsgDisappear() {
   cy.contains(noWalletConnectedMsg).should('not.exist')

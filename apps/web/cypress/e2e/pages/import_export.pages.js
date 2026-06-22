@@ -26,7 +26,7 @@ export const darkModeStr = 'Dark mode'
 
 // Import messages for data_import.json
 const importMessages = [
-  'Added Safe Accounts on 4 chains',
+  'Added Safe accounts on 4 chains',
   'Address book for 4 chains',
   'Address book for 4 chains',
   'Settings (appearance, currency, hidden tokens and custom environment variables)',
@@ -91,7 +91,7 @@ export function clickOnImportBtnDataImportModal() {
 
 export function verifyImportModalData() {
   //verifies that the modal says the amount of chains/addressbook values it uploaded for file ../fixtures/data_import.json
-  cy.contains('Added Safe Accounts on 4 chains').should('be.visible')
+  cy.contains('Added Safe accounts on 4 chains').should('be.visible')
   cy.contains('Address book for 4 chains').should('be.visible')
   cy.contains('Settings').should('be.visible')
   cy.contains('Bookmarked Safe Apps').should('be.visible')
@@ -103,7 +103,7 @@ export function clickOnImportedSafe(safe) {
 }
 
 export function clickOnOpenSafeListSidebar() {
-  cy.contains('My Safe Accounts').click()
+  cy.contains('My Safe accounts').click()
 }
 
 export function clickOnAddressBookBtn() {

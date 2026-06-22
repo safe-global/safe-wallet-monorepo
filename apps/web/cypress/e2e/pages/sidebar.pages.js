@@ -153,7 +153,7 @@ export const sideBarSafesPendingActions = {
 }
 export const testSafeHeaderDetails = ['2/2', safes.SEP_STATIC_SAFE_9_SHORT]
 const receiveAssetsStr = 'Receive assets'
-const emptyPinnedListStr = 'Watch any Safe Account to keep an eye on its activity'
+const emptyPinnedListStr = 'Watch any Safe account to keep an eye on its activity'
 const emptySafeListStr = "You don't have any safes yet"
 const accountsRegex = /(My accounts|Accounts) \((\d+)\)/
 const confirmTxStr = (number) => `${number} to confirm`

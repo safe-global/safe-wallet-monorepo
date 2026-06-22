@@ -26,7 +26,7 @@ export const LoginCard: StoryObj = {
         Get started
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mt: 2, mb: 3 }}>
-        Connect your wallet to create a Safe Account or watch an existing one
+        Connect your wallet to create a Safe account or watch an existing one
       </Typography>
       <Button variant="contained" size="large" fullWidth>
         Connect wallet
@@ -58,7 +58,7 @@ export const LoginCardConnected: StoryObj = {
         Get started
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mt: 2, mb: 3 }}>
-        Open your existing Safe Accounts or create a new one
+        Open your existing Safe accounts or create a new one
       </Typography>
       <Button variant="contained" size="large" fullWidth>
         Continue
@@ -81,7 +81,7 @@ export const LoginCardMobile: StoryObj = {
         Get started
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
-        Connect your wallet to create a Safe Account
+        Connect your wallet to create a Safe account
       </Typography>
       <Button variant="contained" size="medium" fullWidth>
         Connect wallet
@@ -154,7 +154,7 @@ export const WelcomePage: StoryObj = {
           Get started
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mt: 2, mb: 3 }}>
-          Connect your wallet to create a Safe Account or watch an existing one
+          Connect your wallet to create a Safe account or watch an existing one
         </Typography>
         <Button variant="contained" size="large" fullWidth>
           Connect wallet
@@ -198,7 +198,7 @@ export const OnDarkBackground: StoryObj = {
           Get started
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mt: 2, mb: 3 }}>
-          Connect your wallet to create a Safe Account
+          Connect your wallet to create a Safe account
         </Typography>
         <Button variant="contained" size="large" fullWidth>
           Connect wallet

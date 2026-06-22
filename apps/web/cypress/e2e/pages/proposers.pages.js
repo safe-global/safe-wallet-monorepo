@@ -11,7 +11,7 @@ const editProposerBtn = '[data-testid="edit-proposer-btn"]'
 const confrimDeleteProposerBtn = '[data-testid="confirm-delete-proposer-btn"]'
 const submitProposerBtn = '[data-testid="submit-proposer-btn"]'
 
-const safeAsProposerMessage = 'Cannot add Safe Account itself as proposer'
+const safeAsProposerMessage = 'Cannot add Safe account itself as proposer'
 const proposedTxMessage =
   'This transaction was created by a Proposer. Please review and either confirm or reject it. Once confirmed, it can be finalized and executed'
 const proposerAddedMsg = 'Proposer added successfully!'

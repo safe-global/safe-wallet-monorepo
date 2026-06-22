@@ -41,7 +41,7 @@ const EmptyBatch = ({ children }: { children: ReactNode }) => (
 
         <div>
           <SvgIcon component={SettingsIcon} inheritViewBox />
-          <div>Safe Account settings</div>
+          <div>Safe account settings</div>
         </div>
       </Box>
     </Typography>
