@@ -114,7 +114,8 @@ function SafeSelectorDropdown({
       onValueChange={handleSafeChange}
       open={variants.canOpen && !isDisabled ? dropdownOpen : false}
       onOpenChange={isDisabled ? undefined : handleOpenChange}
-      disabled={isDisabled}
+      // Deliberately not disabled: a disabled <button> blocks the inline address actions (copy,
+      // explorer, env hint). Safe switching is prevented by the forced-closed `open` above instead.
     >
       <SelectTrigger
         className={cn(

@@ -368,12 +368,14 @@ describe('SafeSelectorDropdown', () => {
       )
     }
 
-    it('disables the Select and forces it closed when a tx flow is open', () => {
+    it('keeps the Select mounted, not disabled, and forced closed when a tx flow is open', () => {
       renderWithTxFlow(<div data-testid="active-tx-flow" />)
 
       const selectRoot = screen.getByTestId('mock-select-root')
-      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('true')
+      // Not disabled — a disabled <button> would block the nested copy button — but forced closed.
+      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('false')
       expect(selectRoot.getAttribute('data-mock-open')).toBe('false')
+      expect(screen.getByTestId('safe-selector-trigger-content')).toBeInTheDocument()
     })
 
     it('renders the explanatory tooltip when a tx flow is open', () => {
@@ -382,12 +384,14 @@ describe('SafeSelectorDropdown', () => {
       expect(screen.getByTestId('tooltip-content')).toHaveTextContent('Changing the Safe is not allowed in this screen')
     })
 
-    it('applies the disabled styling to the trigger when a tx flow is open', () => {
+    it('keeps the disabled styling but leaves the inline address actions interactive when a tx flow is open', () => {
       renderWithTxFlow(<div data-testid="active-tx-flow" />)
 
-      const trigger = screen.getByTestId('open-safes-icon')
-      expect(trigger.className).toMatch(/cursor-not-allowed/)
-      expect(trigger.className).toMatch(/opacity-50/)
+      const content = screen.getByTestId('open-safes-icon')
+      expect(content.className).toMatch(/cursor-not-allowed/)
+      expect(content.className).toMatch(/opacity-50/)
+      // The trigger isn't turned into a dead button, so copy + explorer + env hint stay clickable.
+      expect(content.className).not.toMatch(/\[&_\*\]:pointer-events-none/)
     })
 
     it('does not disable the Select or render the tooltip when no tx flow is active', () => {
@@ -412,12 +416,13 @@ describe('SafeSelectorDropdown', () => {
       return render(<SafeSelectorDropdown items={[itemA]} selectedItemId={itemA.id} onItemSelect={jest.fn()} />)
     }
 
-    it('disables the Select on /apps/open when an appUrl is present', () => {
+    it('keeps the Select forced closed and shows the tooltip on /apps/open when an appUrl is present', () => {
       jest.mocked(useSafeAppUrl).mockReturnValue('https://example-safe-app.test')
       renderAtRoute(AppRoutes.apps.open, { appUrl: 'https://example-safe-app.test' })
 
       const selectRoot = screen.getByTestId('mock-select-root')
-      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('true')
+      expect(selectRoot.getAttribute('data-mock-disabled')).toBe('false')
+      expect(selectRoot.getAttribute('data-mock-open')).toBe('false')
       expect(screen.getByTestId('tooltip-content')).toHaveTextContent('Changing the Safe is not allowed in this screen')
     })
 
