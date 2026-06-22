@@ -263,7 +263,7 @@ const SpacesList = () => {
           pendingInvites.length > 0 &&
           pendingInvites.map((invitingSpace: GetSpaceResponse) => (
             <SpaceListInvite
-              key={invitingSpace.id}
+              key={invitingSpace.uuid}
               space={invitingSpace}
               invitedByName={getInvitedByName(invitingSpace, currentUser?.id)}
             />
