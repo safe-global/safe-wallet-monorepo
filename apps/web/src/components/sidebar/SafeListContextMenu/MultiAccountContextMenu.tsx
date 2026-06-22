@@ -6,7 +6,6 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import MenuItem from '@mui/material/MenuItem'
 import ListItemText from '@mui/material/ListItemText'
 
-import EntryDialog from '@/components/address-book/EntryDialog'
 import EditIcon from '@/public/images/common/edit.svg'
 import PlusIcon from '@/public/images/common/plus.svg'
 import ContextMenu from '@/components/common/ContextMenu'
@@ -15,13 +14,13 @@ import { SvgIcon } from '@mui/material'
 import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
 import { CreateSafeOnNewChain } from '@/features/multichain'
+import { useRenameSafe } from '@/features/spaces'
 
 enum ModalType {
-  RENAME = 'rename',
   ADD_CHAIN = 'add_chain',
 }
 
-const defaultOpen = { [ModalType.RENAME]: false, [ModalType.ADD_CHAIN]: false }
+const defaultOpen = { [ModalType.ADD_CHAIN]: false }
 
 const MultiAccountContextMenu = ({
   name,
@@ -36,6 +35,9 @@ const MultiAccountContextMenu = ({
 }): ReactElement => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
+  // Local (non-space) rename; elevate above the Trusted Safes modal overlay (--z-overlay: 1400)
+  // for the multichain group there. Harmless on the (non-modal) My accounts page.
+  const { openRename, renameDialog } = useRenameSafe({ dialogSx: { zIndex: 1500 } })
 
   const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
     e.stopPropagation()
@@ -62,13 +64,21 @@ const MultiAccountContextMenu = ({
     setOpen(defaultOpen)
   }
 
+  const handleRename = (e: MouseEvent) => {
+    const trackingLabel =
+      router.pathname === AppRoutes.welcome.accounts ? OVERVIEW_LABELS.login_page : OVERVIEW_LABELS.sidebar
+    handleCloseContextMenu(e)
+    trackEvent({ ...OVERVIEW_EVENTS.SIDEBAR_RENAME, label: trackingLabel })
+    openRename({ address, chainIds, currentName: name, isSpaceSafe: false, spaceId: null })
+  }
+
   return (
     <>
       <IconButton data-testid="safe-options-btn" edge="end" size="small" onClick={handleOpenContextMenu}>
         <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
       </IconButton>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
-        <MenuItem onClick={handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME)}>
+        <MenuItem onClick={handleRename}>
           <ListItemIcon>
             <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
           </ListItemIcon>
@@ -84,14 +94,7 @@ const MultiAccountContextMenu = ({
         )}
       </ContextMenu>
 
-      {open[ModalType.RENAME] && (
-        <EntryDialog
-          handleClose={handleCloseModal}
-          defaultValues={{ name, address }}
-          chainIds={chainIds}
-          disableAddressInput
-        />
-      )}
+      {renameDialog}
 
       {open[ModalType.ADD_CHAIN] && (
         <CreateSafeOnNewChain

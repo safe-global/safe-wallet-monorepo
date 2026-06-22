@@ -1,12 +1,21 @@
-import { render } from '@testing-library/react'
+import { fireEvent, render } from '@testing-library/react'
 import SafeSelectorTriggerContent from '../SafeSelectorTriggerContent'
 import type { SafeItemData } from '../../types'
 
 const mockUseSafeDisplayName = jest.fn()
 const mockUseChain = jest.fn()
+const mockUseAddressBookItem = jest.fn()
 
 jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: (...args: unknown[]) => mockUseSafeDisplayName(...args),
+}))
+
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  useAddressBookItem: (...args: unknown[]) => mockUseAddressBookItem(...args),
+}))
+
+jest.mock('@/components/common/SpaceSafeBar/AccountsModal/shared', () => ({
+  NameSourceIcon: ({ source }: { source: string }) => <span data-testid="name-source-icon" data-source={source} />,
 }))
 
 jest.mock('@/hooks/useChains', () => ({
@@ -149,5 +158,51 @@ describe('SafeSelectorTriggerContent', () => {
     const { queryByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" />)
 
     expect(queryByTestId('safe-item-explorer-link')).not.toBeInTheDocument()
+  })
+
+  it('renders no rename pencil when canRename is false', () => {
+    const item = createItem()
+
+    const { queryByTestId } = render(
+      <SafeSelectorTriggerContent selectedItem={item} selectedChainId="1" canRename={false} onRename={jest.fn()} />,
+    )
+
+    expect(queryByTestId('rename-safe-btn')).not.toBeInTheDocument()
+  })
+
+  it('calls onRename with the current safe address, all chainIds and the resolved name', () => {
+    mockUseSafeDisplayName.mockReturnValue('Polygon Name')
+    const onRename = jest.fn()
+    const item = createItem()
+
+    const { getByTestId } = render(
+      <SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" canRename onRename={onRename} />,
+    )
+
+    fireEvent.click(getByTestId('rename-safe-btn'))
+
+    expect(onRename).toHaveBeenCalledWith({
+      address: '0xabc',
+      chainIds: ['1', '137'],
+      currentName: 'Polygon Name',
+    })
+  })
+
+  it('shows the name source icon reflecting the address-book source', () => {
+    mockUseAddressBookItem.mockReturnValue({ name: 'Shared name', source: 'space' })
+    const item = createItem()
+
+    const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" />)
+
+    expect(getByTestId('name-source-icon')).toHaveAttribute('data-source', 'space')
+  })
+
+  it('shows no source icon when the address has no address-book entry', () => {
+    mockUseAddressBookItem.mockReturnValue(undefined)
+    const item = createItem()
+
+    const { queryByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" />)
+
+    expect(queryByTestId('name-source-icon')).not.toBeInTheDocument()
   })
 })

@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
-import { useIsQualifiedSafe, useSpaceSafes } from '@/features/spaces'
+import { useSpaceSafes } from '@/features/spaces'
 import { useAllSafes, useAllSafesGrouped, getComparator, type AllSafeItems } from '@/hooks/safes'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
+import { useIsInSpaceContext } from '@/hooks/useIsInSpaceContext'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
@@ -39,9 +39,7 @@ const orderDropdownSafes = (
  * and chain switcher render even when the safe isn't pinned.
  */
 export function useSafeBarSafes() {
-  const isQualifiedSafe = useIsQualifiedSafe()
-  const isSpaceRoute = useIsSpaceRoute()
-  const isInSpaceContext = isQualifiedSafe || isSpaceRoute
+  const isInSpaceContext = useIsInSpaceContext()
   const { allSafes: spaceSafes } = useSpaceSafes()
   const urlSafeAddress = useSafeAddressFromUrl()
   const { safeAddress: reduxSafeAddress } = useSafeInfo()

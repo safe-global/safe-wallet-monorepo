@@ -11,6 +11,7 @@ import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import type { SafeItemData } from '../types'
+import type { RenameClickTarget } from '../../../hooks/useRenameSafe'
 
 const matchesSearch = (item: SafeItemData, displayName: string, query: string): boolean => {
   const name = displayName.toLowerCase()
@@ -31,6 +32,8 @@ export interface SafeDropdownContainerProps {
   header?: React.ReactNode
   footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
   closeDropdown: () => void
+  canRename?: boolean
+  onRename?: (target: RenameClickTarget) => void
 }
 
 function SafeItemSkeleton() {
@@ -76,6 +79,8 @@ const SafeDropdownContainer = ({
   header,
   footer,
   closeDropdown,
+  canRename,
+  onRename,
 }: SafeDropdownContainerProps) => {
   const [search, setSearch] = useState('')
   const query = search.trim().toLowerCase()
@@ -119,7 +124,7 @@ const SafeDropdownContainer = ({
 
     return filteredItems.map((item) => {
       if (item.chains.length > 1) {
-        return <MultiChainSafeItemRow key={item.id} item={item} />
+        return <MultiChainSafeItemRow key={item.id} item={item} canRename={canRename} onRename={onRename} />
       }
       return (
         <SelectItem
@@ -127,7 +132,7 @@ const SafeDropdownContainer = ({
           value={item.id}
           className="h-auto py-4 px-4 rounded-lg my-1 data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer"
         >
-          <SafeItem {...item} />
+          <SafeItem {...item} canRename={canRename} onRename={onRename} />
         </SelectItem>
       )
     })

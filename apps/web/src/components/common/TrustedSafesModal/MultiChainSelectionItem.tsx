@@ -2,6 +2,7 @@ import { useState, type MouseEvent } from 'react'
 import classnames from 'classnames'
 import type { SelectableMultiChainSafe } from './useTrustedSafesModal.types'
 import { useMultiAccountItemData, useSafeItemData, AccountItem } from '@/features/myAccounts'
+import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
 import SimilarityWarning from './SimilarityWarning'
 import css from './styles.module.css'
 
@@ -112,13 +113,12 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
               </AccountItem.Info>
               <AccountItem.ChainBadge safes={safes} />
               <AccountItem.Balance fiatTotal={totalFiatValue?.toString()} isLoading={totalFiatValue === undefined} />
-              <AccountItem.ContextMenu
+              {/* Multichain group → multi-chain context menu so Rename can target all the safe's chains. */}
+              <MultiAccountContextMenu
                 address={address}
-                chainId={safes[0]?.chainId ?? '1'}
-                name={name}
-                isReplayable={false}
-                undeployedSafe={false}
-                hideNestedSafes
+                chainIds={safes.map((safeItem) => safeItem.chainId).filter((id): id is string => Boolean(id))}
+                name={name ?? ''}
+                addNetwork={false}
               />
             </AccountItem.Content>
           </div>

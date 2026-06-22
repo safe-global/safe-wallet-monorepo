@@ -20,6 +20,15 @@ jest.mock('@/hooks/useChains', () => ({
   default: jest.fn(),
 }))
 
+// The dropdown now wires inline rename. This test renders without a Redux store and stubs the
+// list container, so stub the rename hooks at the boundary to keep it focused on dropdown behavior.
+jest.mock('@/hooks/useIsInSpaceContext', () => ({ useIsInSpaceContext: () => false }))
+jest.mock('../../../hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => null }))
+jest.mock('../../../hooks/useSpaceMembers', () => ({ useIsAdmin: () => false }))
+jest.mock('../../../hooks/useRenameSafe', () => ({
+  useRenameSafe: () => ({ openRename: jest.fn(), renameDialog: null }),
+}))
+
 jest.mock('@/components/ui/tooltip', () => ({
   __esModule: true,
   Tooltip: ({ children }: { children?: React.ReactNode }) => <>{children}</>,

@@ -40,4 +40,19 @@ describe('SafeInfoDisplay', () => {
     // No name → the name line falls back to the address, so it appears on both the name and address lines.
     expect(screen.getAllByText(shortenAddress(address))).toHaveLength(2)
   })
+
+  it('renders a nameAction next to the name when provided', () => {
+    render(<SafeInfoDisplay {...baseProps} nameAction={<span data-testid="my-action" />} />)
+    expect(screen.getByTestId('my-action')).toBeInTheDocument()
+  })
+
+  it('renders no nameAction by default', () => {
+    render(<SafeInfoDisplay {...baseProps} />)
+    expect(screen.queryByTestId('my-action')).not.toBeInTheDocument()
+  })
+
+  it('renders a nameIndicator next to the name when provided', () => {
+    render(<SafeInfoDisplay {...baseProps} nameIndicator={<span data-testid="my-indicator" />} />)
+    expect(screen.getByTestId('my-indicator')).toBeInTheDocument()
+  })
 })

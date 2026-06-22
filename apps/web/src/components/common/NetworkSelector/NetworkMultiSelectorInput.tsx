@@ -14,6 +14,8 @@ type NetworkMultiSelectorInputProps = {
   error?: boolean
   helperText?: string
   showSelectAll?: boolean
+  /** Limit the selectable networks (defaults to all configured chains). */
+  chains?: Chain[]
 }
 
 const SELECT_ALL_OPTION = { chainId: 'select-all', chainName: 'Select All' } as Chain
@@ -26,8 +28,10 @@ const NetworkMultiSelectorInput = ({
   error,
   helperText,
   showSelectAll = false,
+  chains,
 }: NetworkMultiSelectorInputProps): ReactElement => {
   const { configs } = useChains()
+  const availableChains = chains ?? configs
   const { setValue } = useFormContext()
 
   const getOptionDisabled = isOptionDisabled || (() => false)
@@ -54,17 +58,17 @@ const NetworkMultiSelectorInput = ({
     [handleChange, value],
   )
 
-  const isAllSelected = value.length === configs.length
+  const isAllSelected = value.length === availableChains.length
 
   const toggleSelectAll = useCallback(() => {
     if (isAllSelected) {
       handleChange([])
     } else {
-      handleChange(configs)
+      handleChange(availableChains)
     }
-  }, [isAllSelected, handleChange, configs])
+  }, [isAllSelected, handleChange, availableChains])
 
-  const options = showSelectAll ? [SELECT_ALL_OPTION, ...configs] : configs
+  const options = showSelectAll ? [SELECT_ALL_OPTION, ...availableChains] : availableChains
 
   const renderTags = useCallback(
     (selectedOptions: (Chain | typeof SELECT_ALL_OPTION)[]) => {
@@ -125,6 +129,9 @@ const NetworkMultiSelectorInput = ({
       multiple
       value={value || []}
       disableCloseOnSelect
+      // Render the dropdown above modals (incl. the rename dialog elevated to 1500 inside the
+      // Accounts / Trusted Safes modals), otherwise the option list is occluded and looks empty.
+      slotProps={{ popper: { sx: { zIndex: 1600 } } }}
       options={options}
       renderTags={renderTags}
       renderOption={renderOption}

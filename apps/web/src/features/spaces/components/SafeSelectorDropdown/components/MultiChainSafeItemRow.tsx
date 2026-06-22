@@ -6,14 +6,20 @@ import { SelectItem } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
+import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import SafeInfoDisplay from './SafeInfoDisplay'
 import BalanceDisplay from './BalanceDisplay'
 import ChainLogo from './ChainLogo'
+import RenameSafeButton from './RenameSafeButton'
+import { NameSourceIcon } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData, SafeItemDataChain } from '../types'
+import type { RenameClickTarget } from '../../../hooks/useRenameSafe'
 
 interface MultiChainSafeItemRowProps {
   item: SafeItemData
+  canRename?: boolean
+  onRename?: (target: RenameClickTarget) => void
 }
 
 function StatusBadge({ chain }: { chain: SafeItemDataChain }) {
@@ -31,14 +37,32 @@ function StatusBadge({ chain }: { chain: SafeItemDataChain }) {
   return null
 }
 
-const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
+const MultiChainSafeItemRow = ({ item, canRename, onRename }: MultiChainSafeItemRowProps) => {
   const chainId = item.chains[0]?.chainId ?? ''
   const resolvedName = useSafeDisplayName(item.address, chainId, item.name)
+  const addressBookItem = useAddressBookItem(item.address, chainId)
+  const nameIndicator =
+    addressBookItem?.name && addressBookItem.source ? <NameSourceIcon source={addressBookItem.source} /> : undefined
+
+  const renameButton =
+    canRename && onRename ? (
+      <RenameSafeButton
+        onClick={() =>
+          onRename({ address: item.address, chainIds: item.chains.map((c) => c.chainId), currentName: resolvedName })
+        }
+      />
+    ) : undefined
 
   return (
     <Collapsible className="my-1 rounded-lg">
       <CollapsibleTrigger className="flex w-full items-center gap-3 rounded-lg px-4 py-4 text-left outline-none hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring cursor-pointer">
-        <SafeInfoDisplay name={resolvedName} address={item.address} className="flex-1 min-w-0" />
+        <SafeInfoDisplay
+          name={resolvedName}
+          address={item.address}
+          className="flex-1 min-w-0"
+          nameIndicator={nameIndicator}
+          nameAction={renameButton}
+        />
         <div className="flex items-center bg-muted rounded-full p-0.5 shrink-0">
           {item.chains.slice(0, 3).map((chainItem, index) => (
             <span

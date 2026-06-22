@@ -170,7 +170,7 @@ const SafeItemCard = ({
       </Tooltip>
 
       {/* Context menu */}
-      <PinnedSafeContextMenu address={safeItem.address} chainId={safeItem.chainId} name={displayName} />
+      <PinnedSafeContextMenu address={safeItem.address} chainIds={[safeItem.chainId]} name={displayName} />
     </div>
   )
 }

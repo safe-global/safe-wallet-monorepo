@@ -6,7 +6,6 @@ import MoreVertIcon from '@mui/icons-material/MoreVert'
 import MenuItem from '@mui/material/MenuItem'
 import ListItemText from '@mui/material/ListItemText'
 
-import EntryDialog from '@/components/address-book/EntryDialog'
 import SafeListRemoveDialog from '@/components/sidebar/SafeListRemoveDialog'
 import NestedSafesIcon from '@/public/images/sidebar/nested-safes-icon.svg'
 import EditIcon from '@/public/images/common/edit.svg'
@@ -23,19 +22,18 @@ import { NestedSafesPopover } from '../NestedSafesPopover'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { useHasFeature } from '@/hooks/useChains'
 import { useNestedSafesVisibility } from '@/hooks/useNestedSafesVisibility'
+import { useRenameSafe } from '@/features/spaces'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 enum ModalType {
   NESTED_SAFES = 'nested_safes',
-  RENAME = 'rename',
   REMOVE = 'remove',
   ADD_CHAIN = 'add_chain',
 }
 
 const defaultOpen = {
   [ModalType.NESTED_SAFES]: false,
-  [ModalType.RENAME]: false,
   [ModalType.REMOVE]: false,
   [ModalType.ADD_CHAIN]: false,
 }
@@ -66,6 +64,8 @@ const SafeListContextMenu = ({
     { skip: !isNestedSafesEnabled || hideNestedSafes || !address || !anchorEl },
   )
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
+  // Local (non-space) rename; elevate above the Trusted Safes modal overlay (--z-overlay: 1400).
+  const { openRename, renameDialog } = useRenameSafe({ dialogSx: { zIndex: 1500 } })
 
   const nestedSafesForChain = ownedSafes?.safes ?? []
   const { allSafesWithStatus, visibleSafes, hasCompletedCuration, isLoading, startFiltering } =
@@ -103,6 +103,14 @@ const SafeListContextMenu = ({
     setOpen(defaultOpen)
   }
 
+  const handleRename = (e: MouseEvent<HTMLLIElement, globalThis.MouseEvent>) => {
+    e.stopPropagation()
+    e.preventDefault()
+    handleCloseContextMenu()
+    trackEvent({ ...OVERVIEW_EVENTS.SIDEBAR_RENAME, label: trackingLabel })
+    openRename({ address, chainIds: [chainId], currentName: name, isSpaceSafe: false, spaceId: null })
+  }
+
   return (
     <>
       <IconButton data-testid="safe-options-btn" edge="end" size="small" onClick={handleOpenContextMenu}>
@@ -135,7 +143,7 @@ const SafeListContextMenu = ({
           )}
 
         {rename && (
-          <MenuItem onClick={handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME)}>
+          <MenuItem onClick={handleRename}>
             <ListItemIcon>
               <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
             </ListItemIcon>
@@ -178,16 +186,7 @@ const SafeListContextMenu = ({
         />
       )}
 
-      {open[ModalType.RENAME] && (
-        <EntryDialog
-          handleClose={handleCloseModal}
-          defaultValues={{ name, address }}
-          chainIds={[chainId]}
-          disableAddressInput
-          // Above shadcn's overlay layer (--z-overlay: 1400) so Rename shows over the Trusted Safes modal
-          sx={{ zIndex: 1500 }}
-        />
-      )}
+      {renameDialog}
 
       {open[ModalType.REMOVE] && (
         <SafeListRemoveDialog handleClose={handleCloseModal} address={address} chainId={chainId} />

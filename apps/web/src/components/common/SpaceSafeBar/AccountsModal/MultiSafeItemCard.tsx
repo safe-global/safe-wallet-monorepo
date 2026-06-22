@@ -135,7 +135,7 @@ const MultiSafeItemCard = ({
           </Tooltip>
 
           {/* Context menu — outside trigger for the same reason */}
-          <PinnedSafeContextMenu address={address} chainId={sortedSafes[0]?.chainId ?? ''} name={displayName} />
+          <PinnedSafeContextMenu address={address} chainIds={sortedSafes.map((s) => s.chainId)} name={displayName} />
         </div>
 
         <CollapsibleContent>

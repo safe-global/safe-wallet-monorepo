@@ -47,7 +47,11 @@ jest.mock('@/components/ui/select', () => ({
 
 jest.mock('../SafeItem', () => ({
   __esModule: true,
-  default: ({ name }: { name: string }) => <div data-testid="safe-item">{name}</div>,
+  default: ({ name, canRename }: { name: string; canRename?: boolean }) => (
+    <div data-testid="safe-item" data-can-rename={String(Boolean(canRename))}>
+      {name}
+    </div>
+  ),
 }))
 
 jest.mock('../MultiChainSafeItemRow', () => ({
@@ -145,6 +149,28 @@ describe('SafeDropdownContainer', () => {
       render(<SafeDropdownContainer items={[createItem()]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
 
       expect(screen.queryByTestId('scroll-hint')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('rename forwarding', () => {
+    it('forwards canRename to rows', () => {
+      render(
+        <SafeDropdownContainer
+          items={[createItem()]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          canRename
+          onRename={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByTestId('safe-item')).toHaveAttribute('data-can-rename', 'true')
+    })
+
+    it('defaults rows to not renameable when canRename is omitted', () => {
+      render(<SafeDropdownContainer items={[createItem()]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
+
+      expect(screen.getByTestId('safe-item')).toHaveAttribute('data-can-rename', 'false')
     })
   })
 

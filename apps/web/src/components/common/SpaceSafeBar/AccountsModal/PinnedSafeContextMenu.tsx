@@ -2,22 +2,24 @@ import { useState, type MouseEvent } from 'react'
 import { MoreVertical, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import EntryDialog from '@/components/address-book/EntryDialog'
+import { useRenameSafe } from '@/features/spaces'
 
 interface PinnedSafeContextMenuProps {
   address: string
-  chainId: string
+  chainIds: string[]
   name: string
 }
 
-const PinnedSafeContextMenu = ({ address, chainId, name }: PinnedSafeContextMenuProps) => {
+const PinnedSafeContextMenu = ({ address, chainIds, name }: PinnedSafeContextMenuProps) => {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [renameOpen, setRenameOpen] = useState(false)
+  // Trusted/pinned safes are non-space → the dialog writes the local name. Elevate it above the
+  // Accounts modal (z-overlay 1400) so it isn't rendered behind.
+  const { openRename, renameDialog } = useRenameSafe({ dialogSx: { zIndex: 1500 } })
 
   const handleRename = (e: MouseEvent) => {
     e.stopPropagation()
     setMenuOpen(false)
-    setRenameOpen(true)
+    openRename({ address, chainIds, currentName: name, isSpaceSafe: false, spaceId: null })
   }
 
   return (
@@ -45,17 +47,7 @@ const PinnedSafeContextMenu = ({ address, chainId, name }: PinnedSafeContextMenu
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* MUI EntryDialog defaults to z-index 1300. Elevate above shadcn Dialog
-          which now uses --z-overlay (1400) for its backdrop. */}
-      {renameOpen && (
-        <EntryDialog
-          handleClose={() => setRenameOpen(false)}
-          defaultValues={{ name, address }}
-          chainIds={[chainId]}
-          disableAddressInput
-          sx={{ zIndex: 1500 }}
-        />
-      )}
+      {renameDialog}
     </>
   )
 }

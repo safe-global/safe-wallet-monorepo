@@ -3,7 +3,8 @@ import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
 import { isAddress } from 'ethers'
 import { useTheme } from '@mui/material/styles'
 import { Box, Tooltip } from '@mui/material'
-import { Building2, HardDrive } from 'lucide-react'
+import { Cloud } from 'lucide-react'
+import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import Identicon from '../../Identicon'
 import CopyAddressButton from '../../CopyAddressButton'
@@ -130,9 +131,9 @@ const SrcEthHashInfo = ({
                   >
                     <span style={{ lineHeight: 0, color: 'var(--color-border-main)' }}>
                       {addressBookNameSource === ContactSource.local ? (
-                        <HardDrive size={16} />
+                        <AddressBookIcon width={16} height={16} />
                       ) : (
-                        <Building2 size={16} />
+                        <Cloud size={16} />
                       )}
                     </span>
                   </Tooltip>

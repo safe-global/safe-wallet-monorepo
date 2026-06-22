@@ -64,6 +64,8 @@ export { default as useGetSpaceAuditLogActors } from './hooks/useGetSpaceAuditLo
 export { default as useGetAddressBookRequests } from './hooks/useGetAddressBookRequests'
 export { useAdminCount, useIsLastActiveAdmin } from './hooks/useIsLastActiveAdmin'
 export { default as useIsQualifiedSafe } from './hooks/useIsQualifiedSafe'
+export { useRenameSafe } from './hooks/useRenameSafe'
+export type { RenameTarget, RenameClickTarget } from './hooks/useRenameSafe'
 export { useMembersSearch } from './hooks/useMembersSearch'
 export { default as useTrackSpace } from './hooks/useTrackSpace'
 

@@ -10,28 +10,25 @@ import MenuItem from '@mui/material/MenuItem'
 import ContextMenu from '@/components/common/ContextMenu'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
-import EntryDialog from '@/components/address-book/EntryDialog'
 import { useAppSelector } from '@/store'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
-import { useIsAdmin } from '@/features/spaces'
-
-enum ModalType {
-  RENAME = 'rename',
-  REMOVE = 'remove',
-}
-
-const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
+import { useIsAdmin, useCurrentSpaceId, useRenameSafe } from '@/features/spaces'
 
 const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSafeItem }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
-  const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
+  const [removeOpen, setRemoveOpen] = useState(false)
   const isAdmin = useIsAdmin()
+  const spaceId = useCurrentSpaceId()
+  const { openRename, renameDialog } = useRenameSafe()
 
   const allAddressBooks = useAppSelector(selectAllAddressBooks)
   const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
   const name = isMultiChainSafeItem(safeItem) ? safeItem.name : allAddressBooks[safeItem.chainId]?.[safeItem.address]
+
+  // Rename + Remove are both admin-only in a space; with no actions there is nothing to show.
+  if (!isAdmin) return null
 
   const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
     e.preventDefault()
@@ -44,15 +41,17 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
     setAnchorEl(undefined)
   }
 
-  const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
+  const handleRename = (e: MouseEvent) => {
     e.stopPropagation()
-    if (type === ModalType.REMOVE) trackEvent({ ...SPACE_EVENTS.DELETE_ACCOUNT_MODAL })
     setAnchorEl(undefined)
-    setOpen((prev) => ({ ...prev, [type]: true }))
+    openRename({ address: safeItem.address, chainIds, currentName: name || '', isSpaceSafe: true, spaceId })
   }
 
-  const handleCloseModal = () => {
-    setOpen(defaultOpen)
+  const handleRemove = (e: MouseEvent) => {
+    e.stopPropagation()
+    trackEvent({ ...SPACE_EVENTS.DELETE_ACCOUNT_MODAL })
+    setAnchorEl(undefined)
+    setRemoveOpen(true)
   }
 
   return (
@@ -72,34 +71,24 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
         </IconButton>
       </span>
       <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu} autoFocus={false}>
-        <MenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>
+        <MenuItem onClick={handleRename}>
           <ListItemIcon>
             <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
           </ListItemIcon>
           <ListItemText>Rename</ListItemText>
         </MenuItem>
 
-        {isAdmin && (
-          <MenuItem onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
-            <ListItemIcon>
-              <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
-            </ListItemIcon>
-            <ListItemText>Remove</ListItemText>
-          </MenuItem>
-        )}
+        <MenuItem onClick={handleRemove}>
+          <ListItemIcon>
+            <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
+          </ListItemIcon>
+          <ListItemText>Remove</ListItemText>
+        </MenuItem>
       </ContextMenu>
 
-      {open[ModalType.RENAME] && (
-        <EntryDialog
-          handleClose={handleCloseModal}
-          defaultValues={{ name: name || '', address: safeItem.address }}
-          chainIds={chainIds}
-          currentChainId={isMultiChainSafeItem(safeItem) ? undefined : chainIds[0]}
-          disableAddressInput
-        />
-      )}
+      {renameDialog}
 
-      {open[ModalType.REMOVE] && <RemoveSafeDialog safeItem={safeItem} handleClose={handleCloseModal} />}
+      {removeOpen && <RemoveSafeDialog safeItem={safeItem} handleClose={() => setRemoveOpen(false)} />}
     </>
   )
 }

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import MultiChainSafeItemRow from '../MultiChainSafeItemRow'
 import type { SafeItemData, SafeItemDataChain } from '../../types'
@@ -7,8 +7,22 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
 }))
 
+const mockUseAddressBookItem = jest.fn()
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  useAddressBookItem: (...args: unknown[]) => mockUseAddressBookItem(...args),
+}))
+
+jest.mock('@/components/common/SpaceSafeBar/AccountsModal/shared', () => ({
+  NameSourceIcon: ({ source }: { source: string }) => <span data-testid="name-source-icon" data-source={source} />,
+}))
+
 jest.mock('../SafeInfoDisplay', () => {
-  const Mock = () => <div data-testid="safe-info-display" />
+  const Mock = ({ nameAction, nameIndicator }: { nameAction?: React.ReactNode; nameIndicator?: React.ReactNode }) => (
+    <div data-testid="safe-info-display">
+      {nameIndicator}
+      {nameAction}
+    </div>
+  )
   Mock.displayName = 'SafeInfoDisplay'
   return { __esModule: true, default: Mock }
 })
@@ -125,5 +139,44 @@ describe('MultiChainSafeItemRow undeployed status badge', () => {
     await expandRow()
 
     expect(screen.queryByTestId('not-activated-badge')).not.toBeInTheDocument()
+  })
+})
+
+describe('MultiChainSafeItemRow rename pencil', () => {
+  it('shows no pencil when canRename is false', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} canRename={false} onRename={jest.fn()} />)
+
+    expect(screen.queryByTestId('rename-safe-btn')).not.toBeInTheDocument()
+  })
+
+  it('calls onRename with all chainIds for a multi-chain safe', () => {
+    const onRename = jest.fn()
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} canRename onRename={onRename} />)
+
+    fireEvent.click(screen.getByTestId('rename-safe-btn'))
+
+    expect(onRename).toHaveBeenCalledWith({
+      address: '0xaaa',
+      chainIds: ['1', '137'],
+      currentName: 'Test Safe',
+    })
+  })
+})
+
+describe('MultiChainSafeItemRow name source indicator', () => {
+  afterEach(() => mockUseAddressBookItem.mockReset())
+
+  it('shows the source icon reflecting the address-book source', () => {
+    mockUseAddressBookItem.mockReturnValue({ name: 'Shared name', source: 'space' })
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+
+    expect(screen.getByTestId('name-source-icon')).toHaveAttribute('data-source', 'space')
+  })
+
+  it('shows no source icon when the address has no address-book entry', () => {
+    mockUseAddressBookItem.mockReturnValue(undefined)
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+
+    expect(screen.queryByTestId('name-source-icon')).not.toBeInTheDocument()
   })
 })

@@ -6,9 +6,13 @@ import { useIsAdmin } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
+const mockOpenRename = jest.fn()
+
 jest.mock('@/store')
 jest.mock('@/features/spaces', () => ({
   useIsAdmin: jest.fn(),
+  useCurrentSpaceId: jest.fn(() => 'space-uuid'),
+  useRenameSafe: () => ({ openRename: mockOpenRename, renameDialog: <div data-testid="rename-safe-dialog" /> }),
 }))
 jest.mock('@/services/analytics')
 jest.mock('@/hooks/safes', () => ({
@@ -17,10 +21,6 @@ jest.mock('@/hooks/safes', () => ({
 
 jest.mock('../RemoveSafeDialog', () => {
   return jest.fn(() => <div data-testid="remove-safe-dialog">Remove Safe Dialog</div>)
-})
-
-jest.mock('@/components/address-book/EntryDialog', () => {
-  return jest.fn(() => <div data-testid="entry-dialog">Entry Dialog</div>)
 })
 
 describe('SpaceSafeContextMenu', () => {
@@ -53,125 +53,72 @@ describe('SpaceSafeContextMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useAppSelector as jest.Mock).mockReturnValue(mockAddressBooks)
-    ;(useIsAdmin as jest.Mock).mockReturnValue(false)
+    // Rename + Remove are admin-only in a space, so default to admin to render the menu.
+    ;(useIsAdmin as jest.Mock).mockReturnValue(true)
     ;(isMultiChainSafeItem as unknown as jest.Mock).mockImplementation(
       (item) => 'safes' in item && Array.isArray(item.safes),
     )
   })
 
-  it('renders with a SafeItem', () => {
-    render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
-
-    const menuButton = screen.getByRole('button')
-    expect(menuButton).toBeInTheDocument()
+  it('renders nothing for non-admins', () => {
+    ;(useIsAdmin as jest.Mock).mockReturnValue(false)
+    const { container } = render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
+    expect(container).toBeEmptyDOMElement()
   })
 
-  it('renders with a MultiChainSafeItem', () => {
+  it('renders the menu button for admins (SafeItem)', () => {
+    render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
+    expect(screen.getByRole('button')).toBeInTheDocument()
+  })
+
+  it('renders the menu button for admins (MultiChainSafeItem)', () => {
     render(<SpaceSafeContextMenu safeItem={mockMultiChainSafeItem} />)
-
-    const menuButton = screen.getByRole('button')
-    expect(menuButton).toBeInTheDocument()
+    expect(screen.getByRole('button')).toBeInTheDocument()
   })
 
-  it('opens context menu when clicking the button', async () => {
+  it('opens the context menu with Rename and Remove for admins', async () => {
     render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
-
-    const menuButton = screen.getByRole('button')
-    fireEvent.click(menuButton)
-
+    fireEvent.click(screen.getByRole('button'))
     await waitFor(() => {
       expect(screen.getByText('Rename')).toBeInTheDocument()
-    })
-  })
-
-  it('shows "Rename" when safe has no name', async () => {
-    ;(useAppSelector as jest.Mock).mockReturnValue({})
-
-    render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
-
-    const menuButton = screen.getByRole('button')
-    fireEvent.click(menuButton)
-
-    await waitFor(() => {
-      expect(screen.getByText('Rename')).toBeInTheDocument()
-    })
-  })
-
-  it('shows "Rename" when safe has a name in address book', async () => {
-    render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
-
-    const menuButton = screen.getByRole('button')
-    fireEvent.click(menuButton)
-
-    await waitFor(() => {
-      expect(screen.getByText('Rename')).toBeInTheDocument()
-    })
-  })
-
-  it('shows "Rename" when MultiChainSafeItem has a name', async () => {
-    render(<SpaceSafeContextMenu safeItem={mockMultiChainSafeItem} />)
-
-    const menuButton = screen.getByRole('button')
-    fireEvent.click(menuButton)
-
-    await waitFor(() => {
-      expect(screen.getByText('Rename')).toBeInTheDocument()
-    })
-  })
-
-  it('shows Remove option for admin users', async () => {
-    ;(useIsAdmin as jest.Mock).mockReturnValue(true)
-
-    render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
-
-    const menuButton = screen.getByRole('button')
-    fireEvent.click(menuButton)
-
-    await waitFor(() => {
       expect(screen.getByText('Remove')).toBeInTheDocument()
     })
   })
 
-  it('does not show Remove option for non-admin users', async () => {
+  it('opens the rename dialog with isSpaceSafe + spaceId and the chainId (single-chain)', async () => {
     render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
+    fireEvent.click(screen.getByRole('button'))
+    await waitFor(() => fireEvent.click(screen.getByText('Rename')))
 
-    const menuButton = screen.getByRole('button')
-    fireEvent.click(menuButton)
+    expect(mockOpenRename).toHaveBeenCalledWith({
+      address: '0x123',
+      chainIds: ['5'],
+      currentName: 'Test Safe Name',
+      isSpaceSafe: true,
+      spaceId: 'space-uuid',
+    })
+    expect(screen.getByTestId('rename-safe-dialog')).toBeInTheDocument()
+  })
 
-    await waitFor(() => {
-      expect(screen.queryByText('Remove')).not.toBeInTheDocument()
+  it('opens the rename dialog with all chainIds for a multi-chain safe', async () => {
+    render(<SpaceSafeContextMenu safeItem={mockMultiChainSafeItem} />)
+    fireEvent.click(screen.getByRole('button'))
+    await waitFor(() => fireEvent.click(screen.getByText('Rename')))
+
+    expect(mockOpenRename).toHaveBeenCalledWith({
+      address: '0x123',
+      chainIds: ['5', '1'],
+      currentName: 'Multi Chain Safe',
+      isSpaceSafe: true,
+      spaceId: 'space-uuid',
     })
   })
 
-  it('opens EntryDialog when clicking Rename option', async () => {
+  it('opens RemoveSafeDialog when clicking Remove', async () => {
     render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
+    fireEvent.click(screen.getByRole('button'))
+    await waitFor(() => fireEvent.click(screen.getByText('Remove')))
 
-    const menuButton = screen.getByRole('button')
-    fireEvent.click(menuButton)
-
-    await waitFor(() => {
-      const renameOption = screen.getByText('Rename')
-      fireEvent.click(renameOption)
-    })
-
-    // Verify the EntryDialog is rendered
-    expect(screen.getByTestId('entry-dialog')).toBeInTheDocument()
-  })
-
-  it('opens RemoveSafeDialog when clicking Remove option', async () => {
-    ;(useIsAdmin as jest.Mock).mockReturnValue(true)
-
-    render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
-
-    const menuButton = screen.getByRole('button')
-    fireEvent.click(menuButton)
-
-    await waitFor(() => {
-      const removeOption = screen.getByText('Remove')
-      fireEvent.click(removeOption)
-    })
-
-    // Verify the RemoveSafeDialog is rendered
     expect(screen.getByTestId('remove-safe-dialog')).toBeInTheDocument()
     expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.DELETE_ACCOUNT_MODAL)
   })

@@ -13,6 +13,10 @@ import useChains from '@/hooks/useChains'
 import { getSafeSelectorClassVariants } from './utils/classVariants'
 import type { SafeItemData, SafeSelectorDropdownProps } from './types'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { useRenameSafe, type RenameClickTarget } from '../../hooks/useRenameSafe'
+import { useCurrentSpaceId } from '../../hooks/useCurrentSpaceId'
+import { useIsAdmin } from '../../hooks/useSpaceMembers'
+import { useIsInSpaceContext } from '@/hooks/useIsInSpaceContext'
 
 // Keeps the dropdown trigger renderable when the current safe isn't in `items`.
 function buildFallbackSafeItem(selectedItemId: string | undefined, chainConfigs: Chain[]): SafeItemData | null {
@@ -91,6 +95,18 @@ function SafeSelectorDropdown({
   const safeSelectValue = selectedItemId ?? selectedItem?.id
   const safeItemSelect = onItemSelect ?? (() => {})
 
+  // Inline rename: route the write by context (space → shared/admin-only, else local/everyone).
+  const isInSpaceContext = useIsInSpaceContext()
+  const spaceId = useCurrentSpaceId()
+  const isAdmin = useIsAdmin()
+  const canRename = isInSpaceContext ? isAdmin : true
+  const { openRename, renameDialog } = useRenameSafe()
+  const handleRename = (target: RenameClickTarget) => {
+    // Close the dropdown first so the modal isn't unmounted with the Select popup.
+    closeDropdown()
+    openRename({ ...target, isSpaceSafe: isInSpaceContext, spaceId })
+  }
+
   const { configs: chainConfigs } = useChains()
   const fallbackSelectedItem = useMemo(
     () => (selectedItem ? null : buildFallbackSafeItem(selectedItemId, chainConfigs)),
@@ -129,7 +145,12 @@ function SafeSelectorDropdown({
         data-testid="open-safes-icon"
       >
         <SelectValue>
-          <SafeSelectorTriggerContent selectedItem={triggerItem} selectedChainId={selectedChainId} />
+          <SafeSelectorTriggerContent
+            selectedItem={triggerItem}
+            selectedChainId={selectedChainId}
+            canRename={canRename}
+            onRename={handleRename}
+          />
         </SelectValue>
       </SelectTrigger>
 
@@ -143,6 +164,8 @@ function SafeSelectorDropdown({
         header={header}
         footer={footer}
         closeDropdown={closeDropdown}
+        canRename={canRename}
+        onRename={handleRename}
       />
     </Select>
   )
@@ -157,6 +180,7 @@ function SafeSelectorDropdown({
     <>
       <div className="pointer-events-none absolute inset-1 rounded-md bg-muted/30 opacity-0 group-hover:opacity-100" />
       {selectElement}
+      {renameDialog}
     </>
   )
 

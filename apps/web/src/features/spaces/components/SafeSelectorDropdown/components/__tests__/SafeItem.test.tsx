@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import SafeItem from '../SafeItem'
 import type { SafeItemData, SafeItemDataChain } from '../../types'
 
@@ -6,8 +6,22 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
 }))
 
+const mockUseAddressBookItem = jest.fn()
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  useAddressBookItem: (...args: unknown[]) => mockUseAddressBookItem(...args),
+}))
+
+jest.mock('@/components/common/SpaceSafeBar/AccountsModal/shared', () => ({
+  NameSourceIcon: ({ source }: { source: string }) => <span data-testid="name-source-icon" data-source={source} />,
+}))
+
 jest.mock('../SafeInfoDisplay', () => {
-  const Mock = () => <div data-testid="safe-info-display" />
+  const Mock = ({ nameAction, nameIndicator }: { nameAction?: React.ReactNode; nameIndicator?: React.ReactNode }) => (
+    <div data-testid="safe-info-display">
+      {nameIndicator}
+      {nameAction}
+    </div>
+  )
   Mock.displayName = 'SafeInfoDisplay'
   return { __esModule: true, default: Mock }
 })
@@ -73,5 +87,51 @@ describe('SafeItem undeployed state', () => {
     render(<SafeItem {...createItem(makeChain({ isUndeployed: true }))} />)
 
     expect(screen.getByTestId('row-end-column')).toContainElement(screen.getByTestId('not-activated-badge'))
+  })
+})
+
+describe('SafeItem rename pencil', () => {
+  it('shows no pencil when canRename is false', () => {
+    render(<SafeItem {...createItem(makeChain())} canRename={false} onRename={jest.fn()} />)
+
+    expect(screen.queryByTestId('rename-safe-btn')).not.toBeInTheDocument()
+  })
+
+  it('calls onRename with address, all chainIds and the resolved name', () => {
+    const onRename = jest.fn()
+    render(<SafeItem {...createItem(makeChain())} canRename onRename={onRename} />)
+
+    fireEvent.click(screen.getByTestId('rename-safe-btn'))
+
+    expect(onRename).toHaveBeenCalledWith({
+      address: '0xaaa',
+      chainIds: ['1'],
+      currentName: 'Test Safe',
+    })
+  })
+})
+
+describe('SafeItem name source indicator', () => {
+  afterEach(() => mockUseAddressBookItem.mockReset())
+
+  it('shows the source icon for a space (shared) name', () => {
+    mockUseAddressBookItem.mockReturnValue({ name: 'Shared name', source: 'space' })
+    render(<SafeItem {...createItem(makeChain())} />)
+
+    expect(screen.getByTestId('name-source-icon')).toHaveAttribute('data-source', 'space')
+  })
+
+  it('shows the source icon for a local name', () => {
+    mockUseAddressBookItem.mockReturnValue({ name: 'Local name', source: 'local' })
+    render(<SafeItem {...createItem(makeChain())} />)
+
+    expect(screen.getByTestId('name-source-icon')).toHaveAttribute('data-source', 'local')
+  })
+
+  it('shows no source icon when the address has no address-book entry', () => {
+    mockUseAddressBookItem.mockReturnValue(undefined)
+    render(<SafeItem {...createItem(makeChain())} />)
+
+    expect(screen.queryByTestId('name-source-icon')).not.toBeInTheDocument()
   })
 })
