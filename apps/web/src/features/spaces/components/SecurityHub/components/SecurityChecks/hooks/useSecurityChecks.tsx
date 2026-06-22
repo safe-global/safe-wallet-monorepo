@@ -239,7 +239,7 @@ export const useSecurityChecks = (
       const title = ok
         ? hasGuard
           ? 'Transaction guard is active'
-          : 'No transaction guard in use'
+          : 'No unsupported guard installed'
         : hasGuard
           ? 'Transaction guard is unverified'
           : 'Transaction guard is recommended'
@@ -310,7 +310,7 @@ export const useSecurityChecks = (
               leadIcon={iconFor(modulesResult)}
               accentTone={toneFor(modulesResult)}
               subtitle={subtitleFor(modulesResult)}
-              title="No modules installed"
+              title="No unsupported module installed"
               expandedContent={buildExpanded(modulesResult, buildCta('modules', modulesResult, safeQueryParam))}
             />
           ),
