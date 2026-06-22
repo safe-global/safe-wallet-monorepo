@@ -10,12 +10,7 @@ jest.mock('@/src/hooks/useHasFeature', () => ({ useHasFeature: () => mockUseHasF
 jest.mock('../WalletKitProvider', () => {
   const { Text: RNText } = jest.requireActual('react-native')
   return {
-    WalletKitProvider: ({ children }: { children: React.ReactNode }) => (
-      <>
-        <RNText>provider-mounted</RNText>
-        {children}
-      </>
-    ),
+    WalletKitProvider: () => <RNText>provider-mounted</RNText>,
   }
 })
 
