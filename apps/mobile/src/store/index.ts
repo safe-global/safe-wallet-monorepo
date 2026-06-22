@@ -115,6 +115,17 @@ const persistConfig = {
   migrate,
 }
 
+// Sessions/pending stay volatile (walletKit is in the root blacklist) and rehydrate from
+// walletKit.getActiveSessions() on app start. We persist ONLY verifyByTopic so a session's
+// verify badge survives a restart. The nested persistor is flushed by the parent persistStore.
+export const walletKitPersistConfig = {
+  key: walletKitSliceName,
+  storage: reduxStorage,
+  version: 1,
+  whitelist: ['verifyByTopic'],
+}
+const persistedWalletKit = persistReducer(walletKitPersistConfig, walletKit)
+
 const combinedReducer = combineReducers({
   txHistory,
   safes,
@@ -136,7 +147,7 @@ const combinedReducer = combineReducers({
   signerImportFlow,
   executingState,
   draftTx,
-  walletKit,
+  walletKit: persistedWalletKit,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,

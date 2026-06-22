@@ -9,6 +9,7 @@ import { addSession, removePending } from '../store/walletKitSlice'
 import { buildSafeApprovedNamespaces, buildSafeSessionProperties } from '../services/namespaces'
 import { rejectProposal } from './useSessionProposalHandler'
 import { logWalletKitError } from '../utils/errors'
+import { verifyStatusToVariant } from '../utils/verifyStatus'
 
 type PendingProposal = { id: number; proposal: WalletKitTypes.SessionProposal }
 
@@ -53,7 +54,8 @@ export const useApproveProposal = (walletKit: IWalletKit | null) => {
         // Signal atomic-batch support up front so dApps don't need wallet_getCapabilities first.
         const sessionProperties = buildSafeSessionProperties({ safeAddress: activeSafe.address, supportedChains })
         const session = await walletKit.approveSession({ id, namespaces, sessionProperties })
-        dispatch(addSession(session))
+        const verifyVariant = verifyStatusToVariant(pending.proposal.verifyContext?.verified)
+        dispatch(addSession({ session, verifyVariant }))
         dispatch(removePending({ id, kind: 'proposal' }))
         // WalletKit auto-redirects back to the dApp; surface a success toast on our side.
         toast.show('Connected to app', { native: false, duration: 3000 })
