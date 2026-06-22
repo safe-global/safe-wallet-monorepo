@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react'
-import { Text, View, XStack } from 'tamagui'
+import { Text, View, YStack } from 'tamagui'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type {
   MultisigExecutionDetails,
   TransactionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { ListTable, type ListTableItem } from '../ListTable/ListTable'
+import { Container } from '@/src/components/Container'
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChainCurrency } from '@/src/store/chains'
@@ -18,16 +18,36 @@ import { buildFeesBreakdown, type FeeLine } from './feeRows'
 import { FeeLabelWithInfo } from './FeeLabelWithInfo'
 import { EXECUTION_FEE_INFO, gasFeeInfo } from './feeInfoText'
 
+const FeeRow = ({ label, children }: { label: React.ReactNode; children: React.ReactNode }) => (
+  <View
+    flexDirection="row"
+    justifyContent="space-between"
+    alignItems="center"
+    gap="$2"
+    paddingHorizontal="$3"
+    minHeight={40}
+  >
+    <View flex={1}>{label}</View>
+    <YStack alignItems="flex-end" flexShrink={0}>
+      {children}
+    </YStack>
+  </View>
+)
+
 const FeeAmount = ({ line, fiat, currency }: { line: FeeLine; fiat?: number; currency: string }) => (
-  <XStack alignItems="center" gap="$1" flexWrap="wrap" justifyContent="flex-end">
+  <>
     <TokenAmount
       value={line.amount}
       decimals={line.decimals}
       tokenSymbol={line.symbol}
-      textProps={{ fontSize: '$4' }}
+      textProps={{ fontSize: '$4', color: '$textSecondaryLight' }}
     />
-    {fiat !== undefined && <Text color="$textSecondaryLight">({formatCurrency(fiat, currency)})</Text>}
-  </XStack>
+    {fiat !== undefined && (
+      <Text color="$textSecondaryLight" fontSize="$3" lineHeight={16}>
+        {formatCurrency(fiat, currency)}
+      </Text>
+    )}
+  </>
 )
 
 export function FeesBreakdown({
@@ -77,51 +97,52 @@ export function FeesBreakdown({
     return null
   }
 
-  const items: ListTableItem[] = [
-    {
-      label: <FeeLabelWithInfo label="Execution fee" title="Execution fee" info={EXECUTION_FEE_INFO} />,
-      render: () => (
-        <Text fontSize="$4" textAlign="right">
+  return (
+    <Container testID="fees-breakdown" paddingHorizontal={0} paddingVertical="$3" gap="$1" borderRadius="$3">
+      <FeeRow label={<FeeLabelWithInfo label="Execution fee" title="Execution fee" info={EXECUTION_FEE_INFO} />}>
+        <Text fontSize="$4" color="$success">
           FREE
         </Text>
-      ),
-    },
-    {
-      label: <FeeLabelWithInfo label="Max gas fee" title="Gas fee" info={gasFeeInfo(breakdown.paidFromSafe)} />,
-      render: () =>
-        breakdown.gasNotYetKnown ? (
-          <Text color="$textSecondaryLight" fontSize="$4" textAlign="right">
+      </FeeRow>
+
+      <FeeRow
+        label={<FeeLabelWithInfo label="Max gas fee" title="Gas fee" info={gasFeeInfo(breakdown.paidFromSafe)} />}
+      >
+        {breakdown.gasNotYetKnown ? (
+          <Text color="$textSecondaryLight" fontSize="$4">
             Calculated at execution
           </Text>
         ) : (
           <FeeAmount line={breakdown.maxGasFee} fiat={breakdown.maxGasFeeFiat} currency={currency} />
-        ),
-    },
-  ]
+        )}
+      </FeeRow>
 
-  // Total outgoing depends on the gas fee; with the fee unknown until execution there is nothing
-  // meaningful to total, so the row is hidden (mirrors web's signer-pays preview).
-  if (!breakdown.gasNotYetKnown) {
-    items.push({
-      label: 'Total outgoing',
-      render: () => (
-        <View alignItems="flex-end" gap="$1">
+      {/* Total outgoing depends on the gas fee; with the fee unknown until execution there is nothing
+          meaningful to total, so the row is hidden (mirrors web's signer-pays preview). */}
+      {!breakdown.gasNotYetKnown && (
+        <FeeRow
+          label={
+            <Text fontSize="$4" fontWeight={500}>
+              Total outgoing
+            </Text>
+          }
+        >
           {breakdown.totalOutgoing.map((line) => (
             <TokenAmount
               key={`${line.symbol}-${line.decimals}`}
               value={line.amount}
               decimals={line.decimals}
               tokenSymbol={line.symbol}
-              textProps={{ fontSize: '$4' }}
+              textProps={{ fontSize: '$4', fontWeight: '500' }}
             />
           ))}
           {breakdown.totalOutgoingFiat !== undefined && (
-            <Text color="$textSecondaryLight">{formatCurrency(breakdown.totalOutgoingFiat, currency)}</Text>
+            <Text color="$textSecondaryLight" fontSize="$3" lineHeight={16}>
+              {formatCurrency(breakdown.totalOutgoingFiat, currency)}
+            </Text>
           )}
-        </View>
-      ),
-    })
-  }
-
-  return <ListTable testID="fees-breakdown" items={items} />
+        </FeeRow>
+      )}
+    </Container>
+  )
 }
