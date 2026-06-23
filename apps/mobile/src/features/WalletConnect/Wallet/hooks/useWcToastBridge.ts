@@ -16,14 +16,20 @@ export const showWcToast: WcToastShow = (title, options) => {
 
 /**
  * Registers the active toast controller so the walletKit listener can show toasts from outside
- * React. Mounted once inside WalletKitProvider; unregisters on unmount.
+ * React. Mounted once inside WalletKitController; unregisters on unmount.
  */
 export const useWcToastBridge = () => {
   const toast = useToastController()
   useEffect(() => {
-    currentShow = (title, options) => toast.show(title, options)
+    const show: WcToastShow = (title, options) => toast.show(title, options)
+    currentShow = show
+    // Identity-guard the teardown: under a double-mount (HMR, strict-mode double-invoke, a
+    // test that mounts before tearing down the previous render) the newer effect has already
+    // overwritten currentShow, so the older cleanup must not clear the live bridge.
     return () => {
-      currentShow = null
+      if (currentShow === show) {
+        currentShow = null
+      }
     }
   }, [toast])
 }
