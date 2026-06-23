@@ -20,7 +20,8 @@ import reducer, {
 } from '../walletKitSlice'
 import type { SessionTypes } from '@walletconnect/types'
 
-const session = (topic: string): SessionTypes.Struct => ({ topic }) as unknown as SessionTypes.Struct
+const session = (topic: string, metadata?: SessionTypes.Struct['peer']['metadata']): SessionTypes.Struct =>
+  ({ topic, peer: { metadata } }) as unknown as SessionTypes.Struct
 
 const proposalItem = (id: number): PendingItem => ({ kind: 'proposal', id, proposal: { id } as never })
 const requestItem = (id: number): PendingItem => ({
@@ -185,8 +186,13 @@ describe('walletKitSlice selectors', () => {
   })
 
   it('selectDappMetadataByTxHash resolves safeTxHash → session peer metadata', () => {
-    const metadata = { name: 'Uniswap', url: 'https://uniswap.org', icons: ['https://x/i.png'] }
-    let state = reducer(undefined, addSession({ topic: 't', peer: { metadata } } as unknown as SessionTypes.Struct))
+    const metadata = {
+      name: 'Uniswap',
+      description: 'Swap tokens',
+      url: 'https://uniswap.org',
+      icons: ['https://x/i.png'],
+    }
+    let state = reducer(undefined, addSession({ session: session('t', metadata), verifyVariant: 'verified' }))
     state = reducer(
       state,
       setOutstandingRequest({

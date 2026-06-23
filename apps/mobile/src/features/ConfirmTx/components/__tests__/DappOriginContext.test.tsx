@@ -13,9 +13,19 @@ function OriginProbe() {
 const seedDappTx = (store: ReturnType<typeof createTestStore>, safeTxHash: string) => {
   store.dispatch(
     addSession({
-      topic: 't',
-      peer: { metadata: { name: 'Uniswap', url: 'https://uniswap.org', icons: ['https://x/icon.png'] } },
-    } as unknown as SessionTypes.Struct),
+      session: {
+        topic: 't',
+        peer: {
+          metadata: {
+            name: 'Uniswap',
+            description: 'Swap tokens',
+            url: 'https://uniswap.org',
+            icons: ['https://x/icon.png'],
+          },
+        },
+      } as unknown as SessionTypes.Struct,
+      verifyVariant: 'verified',
+    }),
   )
   store.dispatch(
     setOutstandingRequest({
