@@ -16,20 +16,19 @@ import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 
+// When the Safe is inside a space, the top SpaceSafeBar already provides "back to workspace"
+// navigation, so the sidebar renders no workspace header. The addToWorkspace header is only for
+// Safes that aren't part of a space yet.
 const buildWorkspaceHeader = (
   selectedSpace: SpaceItem | undefined,
-  spaceInitial: string | undefined,
   spaces: SpaceItem[] | undefined,
   onSpaceAdded: ((space: SpaceItem) => void) | undefined,
-): SafeWorkspaceHeaderProps =>
-  selectedSpace
-    ? { variant: 'backToSpace', spaceName: selectedSpace.name, spaceInitial, spaceId: selectedSpace.uuid }
-    : { variant: 'addToWorkspace', selectedSpace, spaces, onSpaceAdded }
+): SafeWorkspaceHeaderProps | undefined =>
+  selectedSpace ? undefined : { variant: 'addToWorkspace', selectedSpace, spaces, onSpaceAdded }
 
 export const SafeSidebarContent = ({
   selectedSpace,
   spaces,
-  spaceInitial,
   onSpaceAdded,
   isLoading = false,
 }: SidebarVariantContentProps): ReactElement => {
@@ -113,7 +112,7 @@ export const SafeSidebarContent = ({
     isItemActive,
   })
 
-  const workspaceHeader = buildWorkspaceHeader(selectedSpace, spaceInitial, spaces, onSpaceAdded)
+  const workspaceHeader = buildWorkspaceHeader(selectedSpace, spaces, onSpaceAdded)
 
   return (
     <SafeSidebarVariant

@@ -33,18 +33,6 @@
   min-width: var(--sidebar-width, 230px) !important;
 }
 
-.backToSpace {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 40px;
-  padding: 8px 12px;
-  padding-left: 4px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
 /* "Add Safe to space" (opens space selector) */
 .addSafeToWorkspaceTrigger {
   display: flex;
@@ -169,16 +157,6 @@
 :global(.group[data-collapsible='icon']) .spaceSelectorText,
 :global(.group[data-collapsible='icon']) .spaceSelector > div:last-of-type {
   display: none !important;
-}
-
-:global(.group[data-collapsible='icon']) .backToSpace {
-  justify-content: center;
-  gap: 0;
-  padding: 0;
-}
-
-:global(.group[data-collapsible='icon']) .backToSpaceChevron {
-  display: none;
 }
 
 :global(.group[data-collapsible='icon']) .addSafeToWorkspaceTrigger {

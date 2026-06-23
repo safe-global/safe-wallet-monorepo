@@ -316,18 +316,6 @@ const VariantLayout = ({ children }: { children: ReactNode }) => (
   </SidebarProvider>
 )
 
-export const VariantBackToSpace: Story = {
-  render: () => (
-    <VariantLayout>
-      <SafeSidebarVariant
-        workspaceHeader={{ variant: 'backToSpace', spaceName: 'Company Space', spaceInitial: 'C', spaceId: '1' }}
-        mainNavItems={variantMainNavItems}
-        defiGroup={variantDefiGroup}
-      />
-    </VariantLayout>
-  ),
-}
-
 export const VariantAddToWorkspace: Story = {
   render: () => (
     <VariantLayout>
@@ -342,6 +330,14 @@ export const VariantAddToWorkspace: Story = {
         mainNavItems={variantMainNavItems}
         defiGroup={variantDefiGroup}
       />
+    </VariantLayout>
+  ),
+}
+
+export const VariantInSpaceNoHeader: Story = {
+  render: () => (
+    <VariantLayout>
+      <SafeSidebarVariant mainNavItems={variantMainNavItems} defiGroup={variantDefiGroup} />
     </VariantLayout>
   ),
 }
