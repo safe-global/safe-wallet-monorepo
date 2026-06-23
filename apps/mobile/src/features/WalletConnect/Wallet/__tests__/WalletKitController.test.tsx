@@ -1,9 +1,13 @@
 import React from 'react'
 import { waitFor } from '@testing-library/react-native'
 import { renderWithStore, createTestStore } from '@/src/tests/test-utils'
-import { WalletKitProvider } from '../WalletKitProvider'
-import { walletKitSliceName } from '../../store/walletKitSlice'
+import { WalletKitController } from '../WalletKitController'
+import { walletKitSliceName } from '../store/walletKitSlice'
 import type { IWalletKit } from '@reown/walletkit'
+
+// Feature gate: on by default so the controller initialises; individual tests flip it off.
+const mockUseHasFeature = jest.fn(() => true)
+jest.mock('@/src/hooks/useHasFeature', () => ({ useHasFeature: () => mockUseHasFeature() }))
 
 // expo-linking: capture the registered url handler so we can fire events manually.
 // Variables referenced inside jest.mock factories must be named with mock* prefix (Jest hoisting rule).
@@ -19,8 +23,8 @@ jest.mock('expo-linking', () => ({
 }))
 
 // Isolate from the heavy children — covered by their own tests.
-jest.mock('../../components/RequestSheetHost', () => ({ RequestSheetHost: () => null }))
-jest.mock('../../hooks/useActiveSafeBinding', () => ({ useActiveSafeBinding: jest.fn() }))
+jest.mock('../components/RequestSheetHost', () => ({ RequestSheetHost: () => null }))
+jest.mock('../hooks/useActiveSafeBinding', () => ({ useActiveSafeBinding: jest.fn() }))
 
 let listeners: Record<string, (arg: unknown) => void> = {}
 const session = { topic: 'seeded-topic' }
@@ -36,30 +40,32 @@ const mockWalletKit = {
   respondSessionRequest: jest.fn().mockResolvedValue(undefined),
 } as unknown as IWalletKit & Record<string, jest.Mock>
 
-jest.mock('../../walletKit', () => ({ getWalletKit: jest.fn(() => Promise.resolve(mockWalletKit)) }))
+const mockGetWalletKit = jest.fn(() => Promise.resolve(mockWalletKit))
+jest.mock('../walletKit', () => ({ getWalletKit: () => mockGetWalletKit() }))
 
-const renderProvider = () => {
+const renderController = () => {
   const store = createTestStore({
     [walletKitSliceName]: { sessions: {}, verifyByTopic: {}, pending: [], outstandingRequests: {} },
   } as never)
-  const utils = renderWithStore(<WalletKitProvider />, store)
+  const utils = renderWithStore(<WalletKitController />, store)
   return { store, ...utils }
 }
 
-describe('WalletKitProvider', () => {
+describe('WalletKitController', () => {
   beforeEach(() => {
     mockUrlHandler = undefined
     listeners = {}
     jest.clearAllMocks()
+    mockUseHasFeature.mockReturnValue(true)
     mockGetInitialURL.mockResolvedValue(null)
   })
 
   it('mounts without crashing', () => {
-    expect(() => renderProvider()).not.toThrow()
+    expect(() => renderController()).not.toThrow()
   })
 
   it('seeds the slice from getActiveSessions on mount', async () => {
-    const { store } = renderProvider()
+    const { store } = renderController()
     await waitFor(() => {
       expect(store.getState()[walletKitSliceName].sessions['seeded-topic']).toEqual(session)
     })
@@ -80,7 +86,7 @@ describe('WalletKitProvider', () => {
         params: { chainId: 'eip155:1', request: { method: 'eth_sendTransaction', params: [{ to: '0xabc' }] } },
       },
     ])
-    const { store } = renderProvider()
+    const { store } = renderController()
     await waitFor(() => {
       expect(store.getState()[walletKitSliceName].pending).toHaveLength(1)
     })
@@ -91,7 +97,7 @@ describe('WalletKitProvider', () => {
   })
 
   it('subscribes to all six session events', async () => {
-    renderProvider()
+    renderController()
     await waitFor(() => expect(mockWalletKit.on).toHaveBeenCalled())
     const events = (mockWalletKit.on as jest.Mock).mock.calls.map((c) => c[0])
     expect(events).toEqual(
@@ -107,14 +113,14 @@ describe('WalletKitProvider', () => {
   })
 
   it('pairs on a foregrounded wc: deep link', async () => {
-    renderProvider()
+    renderController()
     await waitFor(() => expect(mockUrlHandler).toBeDefined())
     mockUrlHandler?.({ url: 'wc:abc123@2?relay-protocol=irn' })
     await waitFor(() => expect(mockWalletKit.pair).toHaveBeenCalledWith({ uri: 'wc:abc123@2?relay-protocol=irn' }))
   })
 
   it('ignores non-wc deep links', async () => {
-    renderProvider()
+    renderController()
     await waitFor(() => expect(mockUrlHandler).toBeDefined())
     mockUrlHandler?.({ url: 'https://app.safe.global/foo' })
     // handleUrl returns early (synchronously) for non-wc: URLs; flush microtasks rather
@@ -125,16 +131,32 @@ describe('WalletKitProvider', () => {
 
   it('pairs on the initial URL when it is a wc: link', async () => {
     mockGetInitialURL.mockResolvedValue('wc:initial@2')
-    renderProvider()
+    renderController()
     await waitFor(() => expect(mockWalletKit.pair).toHaveBeenCalledWith({ uri: 'wc:initial@2' }))
   })
 
   it('rejects session_authenticate', async () => {
-    renderProvider()
+    renderController()
     await waitFor(() => expect(listeners['session_authenticate']).toBeDefined())
     listeners['session_authenticate']({ id: 42 })
     await waitFor(() =>
       expect(mockWalletKit.rejectSessionAuthenticate).toHaveBeenCalledWith(expect.objectContaining({ id: 42 })),
     )
+  })
+
+  it('does not initialise WalletKit when the feature flag is off', async () => {
+    mockUseHasFeature.mockReturnValue(false)
+    renderController()
+    // Give the (skipped) init effect a chance to run.
+    await Promise.resolve()
+    expect(mockGetWalletKit).not.toHaveBeenCalled()
+    expect(mockWalletKit.on).not.toHaveBeenCalled()
+  })
+
+  it('treats an undefined flag (no active safe) as off', async () => {
+    mockUseHasFeature.mockReturnValue(undefined as unknown as boolean)
+    renderController()
+    await Promise.resolve()
+    expect(mockGetWalletKit).not.toHaveBeenCalled()
   })
 })

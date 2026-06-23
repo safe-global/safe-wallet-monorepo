@@ -4,28 +4,48 @@ import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { getSdkError } from '@walletconnect/utils'
 import { formatJsonRpcError } from '@walletconnect/jsonrpc-utils'
 import { useStore } from 'react-redux'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
+import { useHasFeature } from '@/src/hooks/useHasFeature'
 import { useAppDispatch } from '@/src/store/hooks'
 import { type RootState } from '@/src/store'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
-import { getWalletKit } from '../walletKit'
-import { useActiveSafeBinding } from '../hooks/useActiveSafeBinding'
-import { useSessionProposalHandler } from '../hooks/useSessionProposalHandler'
-import { useSessionRequestHandler } from '../hooks/useSessionRequestHandler'
-import { useWcToastBridge } from '../hooks/useWcToastBridge'
-import { isValidTxRequestParams } from '../services/methodRouter'
-import { setSessions, removeSession, pushPending, isDeferredTxMethod } from '../store/walletKitSlice'
-import { RequestSheetHost } from '../components/RequestSheetHost'
-import { logWalletKitError } from '../utils/errors'
+import { getWalletKit } from './walletKit'
+import { useActiveSafeBinding } from './hooks/useActiveSafeBinding'
+import { useSessionProposalHandler } from './hooks/useSessionProposalHandler'
+import { useSessionRequestHandler } from './hooks/useSessionRequestHandler'
+import { useWcToastBridge } from './hooks/useWcToastBridge'
+import { isValidTxRequestParams } from './services/methodRouter'
+import { setSessions, removeSession, pushPending, isDeferredTxMethod } from './store/walletKitSlice'
+import { RequestSheetHost } from './components/RequestSheetHost'
+import { logWalletKitError } from './utils/errors'
 
-export const WalletKitProvider: React.FC = () => {
+/**
+ * Side-effect component driving WalletConnect-for-dApps: it owns the WalletKit singleton
+ * init, session-lifecycle listeners, deep-link pairing and the request sheet host. It
+ * renders no layout of its own — it is mounted as a sibling of the navigation tree, never
+ * a wrapper.
+ *
+ * The whole controller is gated behind the NATIVE_WALLETCONNECT chain-config flag. When
+ * the active chain does not advertise the feature — or no Safe is active yet, so
+ * useHasFeature is undefined — WalletKit is never initialised: no listeners, no request
+ * sheet, no singleton init. Flipping the flag (e.g. when the first Safe is imported and an
+ * active chain appears) simply runs the init effect; because the controller is a sibling
+ * and never wraps the navigation tree, that flip can never unmount or remount navigation.
+ */
+export const WalletKitController: React.FC = () => {
+  const isEnabled = useHasFeature(FEATURES.NATIVE_WALLETCONNECT) ?? false
   const dispatch = useAppDispatch()
   const store = useStore<RootState>()
   const [walletKit, setWalletKit] = useState<IWalletKit | null>(null)
 
   // Init + seed: mirror the SDK's active sessions and any deferred-tx requests that
-  // survived a restart into the slice.
+  // survived a restart into the slice. Gated on isEnabled so nothing initialises while
+  // the feature is off.
   useEffect(() => {
+    if (!isEnabled) {
+      return
+    }
     let mounted = true
     getWalletKit()
       .then((wk) => {
@@ -71,7 +91,7 @@ export const WalletKitProvider: React.FC = () => {
     return () => {
       mounted = false
     }
-  }, [dispatch, store])
+  }, [dispatch, store, isEnabled])
 
   // Subscribe to session lifecycle events. session_proposal is handled by
   // useSessionProposalHandler (WA-2318) and session_request by useSessionRequestHandler
