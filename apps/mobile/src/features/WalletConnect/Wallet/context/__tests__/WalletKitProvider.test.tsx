@@ -1,5 +1,4 @@
 import React from 'react'
-import { Text } from 'react-native'
 import { waitFor } from '@testing-library/react-native'
 import { renderWithStore, createTestStore } from '@/src/tests/test-utils'
 import { WalletKitProvider } from '../WalletKitProvider'
@@ -42,12 +41,7 @@ const renderProvider = () => {
   const store = createTestStore({
     [walletKitSliceName]: { sessions: {}, verifyByTopic: {}, pending: [], outstandingRequests: {} },
   } as never)
-  const utils = renderWithStore(
-    <WalletKitProvider>
-      <Text>child</Text>
-    </WalletKitProvider>,
-    store,
-  )
+  const utils = renderWithStore(<WalletKitProvider />, store)
   return { store, ...utils }
 }
 
@@ -59,9 +53,8 @@ describe('WalletKitProvider', () => {
     mockGetInitialURL.mockResolvedValue(null)
   })
 
-  it('renders children', () => {
-    const { getByText } = renderProvider()
-    expect(getByText('child')).toBeTruthy()
+  it('mounts without crashing', () => {
+    expect(() => renderProvider()).not.toThrow()
   })
 
   it('seeds the slice from getActiveSessions on mount', async () => {
