@@ -1,19 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import * as Linking from 'expo-linking'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { getSdkError } from '@walletconnect/utils'
 import { formatJsonRpcError } from '@walletconnect/jsonrpc-utils'
 import { useStore } from 'react-redux'
 import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
-import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { useAppDispatch } from '@/src/store/hooks'
 import { type RootState } from '@/src/store'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
-import { selectChainById } from '@/src/store/chains'
-import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { getWalletKit } from '../walletKit'
 import { useActiveSafeBinding } from '../hooks/useActiveSafeBinding'
 import { useSessionProposalHandler } from '../hooks/useSessionProposalHandler'
-import { useSessionRequestHandler, type SessionRequestHandlerDeps } from '../hooks/useSessionRequestHandler'
+import { useSessionRequestHandler } from '../hooks/useSessionRequestHandler'
+import { useWcToastBridge } from '../hooks/useWcToastBridge'
 import { isValidTxRequestParams } from '../services/methodRouter'
 import { setSessions, removeSession, pushPending, isDeferredTxMethod } from '../store/walletKitSlice'
 import { RequestSheetHost } from '../components/RequestSheetHost'
@@ -142,24 +141,12 @@ export const WalletKitProvider: React.FC = () => {
     }
   }, [walletKit])
 
-  // Active context for the session-request router, read from local slices so cold-start
-  // requests aren't rejected while CGW fetches are in flight (the compose path loads the
-  // full SafeState itself); `hasSigner` gates tx requests with 4100.
-  const activeSafe = useAppSelector(selectActiveSafe)
-  const activeChain = useAppSelector((s) => (activeSafe ? (selectChainById(s, activeSafe.chainId) ?? null) : null))
-  const activeSigner = useAppSelector((s) => (activeSafe ? selectActiveSigner(s, activeSafe.address) : undefined))
-
-  const deps: SessionRequestHandlerDeps = useMemo(
-    () => ({
-      activeChain: activeChain ?? null,
-      activeSafeAddress: activeSafe?.address ?? null,
-      hasSigner: !!activeSigner,
-    }),
-    [activeChain, activeSafe?.address, activeSigner],
-  )
+  // Registers the toast controller so the walletKit listener can surface session-request
+  // toasts (no-signer / unsupported method / wrong active chain) from outside React.
+  useWcToastBridge()
 
   useSessionProposalHandler(walletKit)
-  useSessionRequestHandler(walletKit, deps)
+  useSessionRequestHandler(walletKit)
   useActiveSafeBinding(walletKit)
 
   return <RequestSheetHost walletKit={walletKit} />

@@ -4,21 +4,38 @@ import { getSdkError } from '@walletconnect/utils'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { stripEip155Prefix } from '@safe-global/utils/features/walletconnect/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { AppStartListening } from '@/src/store'
-import { setActiveSafe, switchActiveChain, clearActiveSafe } from '@/src/store/activeSafeSlice'
+import type { AppDispatch, AppStartListening, RootState } from '@/src/store'
+import { selectActiveSafe, setActiveSafe, switchActiveChain, clearActiveSafe } from '@/src/store/activeSafeSlice'
+import { selectActiveSigner } from '@/src/store/activeSignerSlice'
+import { selectChainById } from '@/src/store/chains'
 import { getWalletKit } from '../walletKit'
 import { logWalletKitError } from '../utils/errors'
+import { showWcToast } from '../hooks/useWcToastBridge'
+import { routeSessionRequest, isDeferredResponse, NO_SIGNER_ERROR_CODE } from '../services/methodRouter'
+import { REJECTED_SIGNING_METHODS } from '../services/constants'
 import {
   clearOutstandingRequest,
   markOutstandingProposing,
   markReviewAbandoned,
+  pushPending,
   removePending,
   rejectPending,
+  sessionRequestReceived,
+  isDeferredTxMethod,
   selectOutstandingRequestByHash,
   selectOutstandingRequests,
   selectPending,
+  selectSessionsRecord,
   type PendingSessionRequest,
 } from './walletKitSlice'
+
+// safe_setSettings is in the reject list but isn't a signing method — showing the
+// "message signing" toast for it would be misleading, so it's rejected silently.
+const MESSAGE_SIGNING_METHODS_SET: ReadonlySet<string> = new Set(
+  REJECTED_SIGNING_METHODS.filter((m) => m !== 'safe_setSettings'),
+)
+
+const WRONG_ACTIVE_CHAIN_CODE = getSdkError('UNSUPPORTED_CHAINS').code
 
 // The /propose mutation's originalArgs carry the safeTxHash we key outstanding requests by.
 const safeTxHashOf = (action: { meta: { arg: { originalArgs: unknown } } }) =>
@@ -141,6 +158,82 @@ export const walletKitListeners = (startListening: AppStartListening) => {
         await respondRejected(item.topic, item.id)
       }
       api.dispatch(removePending({ id: item.id, kind: item.kind }))
+    },
+  })
+
+  // A WalletConnect session_request arrived. Read the active context from the store at
+  // process time (not closed over by the subscribing hook), route it, and either push a
+  // deferred tx request to the sheet or respond synchronously + surface the matching toast.
+  startListening({
+    actionCreator: sessionRequestReceived,
+    effect: async (action, api) => {
+      const request = action.payload
+      const state = api.getState() as RootState
+      const activeSafe = selectActiveSafe(state)
+      const activeChain = activeSafe ? (selectChainById(state, activeSafe.chainId) ?? null) : null
+      const hasSigner = activeSafe ? !!selectActiveSigner(state, activeSafe.address) : false
+
+      const response = await routeSessionRequest({
+        request,
+        dispatch: api.dispatch as AppDispatch,
+        getState: api.getState as () => RootState,
+        activeChain,
+        activeSafeAddress: activeSafe?.address ?? null,
+        hasSigner,
+      })
+
+      if (isDeferredResponse(response)) {
+        // UI sheet will respond later. methodRouter only emits the deferred sentinel for
+        // eth_sendTransaction / wallet_sendCalls, so this guard is true by construction — it
+        // just propagates that invariant to the slice's tightened method type.
+        const method = request.params.request.method
+        if (!isDeferredTxMethod(method)) {
+          return
+        }
+        api.dispatch(
+          pushPending({
+            kind: 'request',
+            id: request.id,
+            topic: request.topic,
+            chainId: request.params.chainId,
+            method,
+            params: request.params.request.params,
+            safeAddress: activeSafe?.address ?? undefined,
+            verifyContext: request.verifyContext,
+          }),
+        )
+        return
+      }
+
+      // Swallow stale-topic errors (typical after a Metro reload / long backgrounding — the
+      // relayer reconnects and processes backlogged messages referencing sessions WalletKit no
+      // longer knows about). Surfacing these is noise; the dApp will retry.
+      try {
+        const walletKit = await getWalletKit()
+        await walletKit.respondSessionRequest({ topic: request.topic, response })
+      } catch (e) {
+        logWalletKitError('respondSessionRequest failed', e)
+      }
+
+      // Surface the spec-mandated toast on the no-signer auto-reject path.
+      if ('error' in response && response.error?.code === NO_SIGNER_ERROR_CODE) {
+        showWcToast('No signer attached to this Safe', { native: false, duration: 2500 })
+      }
+      // Explain rejections of message-signing methods (eth_signTypedData_v4, personal_sign, …) —
+      // dApps like CowSwap fire these in parallel with their tx request, and without a toast the
+      // user just sees a red "unknown RPC error" in the dApp with no context.
+      if (MESSAGE_SIGNING_METHODS_SET.has(request.params.request.method)) {
+        showWcToast('Message signing is not yet supported on mobile', { native: false, duration: 2500 })
+      }
+      // Explain tx requests auto-rejected because the active Safe was switched to a chain the
+      // dApp's session doesn't cover (methodRouter returns WRONG_ACTIVE_CHAIN_CODE rather than
+      // deferring). The toast tells the user which network to switch back to.
+      if ('error' in response && response.error?.code === WRONG_ACTIVE_CHAIN_CODE) {
+        const requestChainId = stripEip155Prefix(request.params.chainId)
+        const network = selectChainById(state, requestChainId)?.chainName ?? `chain ${requestChainId}`
+        const dappName = selectSessionsRecord(state)[request.topic]?.peer.metadata?.name || 'this dApp'
+        showWcToast(`Switch your active Safe to ${network} to use ${dappName}`, { native: false, duration: 3000 })
+      }
     },
   })
 

@@ -2,12 +2,16 @@ import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit'
 import { waitFor } from '@testing-library/react-native'
 import { http, HttpResponse, delay } from 'msw'
 import { formatJsonRpcResult } from '@walletconnect/jsonrpc-utils'
+import { getSdkError } from '@walletconnect/utils'
+import type { WalletKitTypes } from '@reown/walletkit'
 import { GATEWAY_URL } from '@/src/config/constants'
 import { server } from '@/src/tests/server'
 import { rootReducer, type AppStartListening } from '@/src/store'
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import { cgwApi, type ProposeTransactionDto } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { setActiveSafe, switchActiveChain, clearActiveSafe } from '@/src/store/activeSafeSlice'
+import { setActiveSigner } from '@/src/store/activeSignerSlice'
+import { NO_SIGNER_ERROR_CODE } from '../../services/methodRouter'
 import walletKitListeners from '../walletKitListeners'
 import {
   walletKitSliceName,
@@ -16,6 +20,8 @@ import {
   markOutstandingProposing,
   pushPending,
   rejectPending,
+  sessionRequestReceived,
+  addSession,
   type DeferredTxMethod,
   type PendingItem,
 } from '../walletKitSlice'
@@ -28,9 +34,25 @@ const mockWalletKit = {
 }
 jest.mock('../../walletKit', () => ({ getWalletKit: jest.fn(() => Promise.resolve(mockWalletKit)) }))
 
+const mockShowWcToast = jest.fn()
+jest.mock('../../hooks/useWcToastBridge', () => ({
+  // Lazy: the factory runs at module-load time, before `const mockShowWcToast` initializes,
+  // so capture it inside an arrow that runs at call time.
+  showWcToast: (...args: unknown[]) => mockShowWcToast(...args),
+  useWcToastBridge: jest.fn(),
+}))
+
+const mockRoute = jest.fn()
+jest.mock('../../services/methodRouter', () => ({
+  ...jest.requireActual('../../services/methodRouter'),
+  routeSessionRequest: (ctx: unknown) => mockRoute(ctx),
+}))
+
 const SAFE = '0x1111111111111111111111111111111111111111'
 const OTHER_SAFE = '0x2222222222222222222222222222222222222222'
 const HASH = '0xhash'
+const WRONG_CHAIN_CODE = getSdkError('UNSUPPORTED_CHAINS').code
+const DEFERRED = { id: 7, jsonrpc: '2.0', result: '__DEFERRED__' }
 
 // A fresh listener middleware per store so registrations stay isolated between tests.
 const makeStore = () => {
@@ -58,6 +80,13 @@ const requestItem = (id: number, chainId: string, safeAddress: string): PendingI
 })
 
 const getWcState = (store: Store) => store.getState()[walletKitSliceName]
+
+const makeRequest = (method: string, params: unknown[] = [], chainId = 'eip155:1'): WalletKitTypes.SessionRequest =>
+  ({
+    id: 7,
+    topic: 'topic',
+    params: { chainId, request: { method, params } },
+  }) as unknown as WalletKitTypes.SessionRequest
 
 const proposeUrl = `${GATEWAY_URL}/v1/chains/1/transactions/${SAFE}/propose`
 const dispatchPropose = (store: Store) =>
@@ -233,5 +262,92 @@ describe('walletKitListeners — safe/chain switch', () => {
     await waitFor(() => expect(mockRespond).toHaveBeenCalledTimes(2))
     expect(getWcState(store).outstandingRequests[HASH]).toBeUndefined()
     expect(getWcState(store).pending).toHaveLength(0)
+  })
+})
+
+describe('walletKitListeners — sessionRequestReceived', () => {
+  it('passes the active Safe/signer context (read from the store) to the router', async () => {
+    const store = makeStore()
+    store.dispatch(setActiveSafe({ address: SAFE as `0x${string}`, chainId: '1' }))
+    store.dispatch(setActiveSigner({ safeAddress: SAFE as `0x${string}`, signer: { value: '0xsigner' } as never }))
+    mockRoute.mockResolvedValueOnce({ id: 7, jsonrpc: '2.0', error: { code: -32601, message: 'x' } })
+
+    store.dispatch(sessionRequestReceived(makeRequest('eth_unknownMethod')))
+
+    await waitFor(() => expect(mockRoute).toHaveBeenCalled())
+    expect(mockRoute).toHaveBeenCalledWith(expect.objectContaining({ activeSafeAddress: SAFE, hasSigner: true }))
+  })
+
+  it('pushes a deferred tx request to pending instead of responding', async () => {
+    const store = makeStore()
+    store.dispatch(setActiveSafe({ address: SAFE as `0x${string}`, chainId: '1' }))
+    mockRoute.mockResolvedValueOnce(DEFERRED)
+
+    store.dispatch(sessionRequestReceived(makeRequest('eth_sendTransaction', [{ to: '0xabc' }])))
+
+    await waitFor(() => expect(getWcState(store).pending).toHaveLength(1))
+    expect(mockRespond).not.toHaveBeenCalled()
+    expect(getWcState(store).pending[0]).toMatchObject({ id: 7, method: 'eth_sendTransaction', safeAddress: SAFE })
+  })
+
+  it('responds and toasts when no signer is attached (4100)', async () => {
+    const store = makeStore()
+    mockRoute.mockResolvedValueOnce({
+      id: 7,
+      jsonrpc: '2.0',
+      error: { code: NO_SIGNER_ERROR_CODE, message: 'No signer attached to this Safe' },
+    })
+
+    store.dispatch(sessionRequestReceived(makeRequest('eth_sendTransaction', [{ to: '0xabc' }])))
+
+    await waitFor(() =>
+      expect(mockShowWcToast).toHaveBeenCalledWith('No signer attached to this Safe', expect.anything()),
+    )
+    expect(mockRespond).toHaveBeenCalled()
+  })
+
+  it('responds and toasts for rejected message-signing methods', async () => {
+    const store = makeStore()
+    mockRoute.mockResolvedValueOnce({ id: 7, jsonrpc: '2.0', error: { code: 5101, message: 'unsupported' } })
+
+    store.dispatch(sessionRequestReceived(makeRequest('personal_sign', ['0xmsg', SAFE])))
+
+    await waitFor(() =>
+      expect(mockShowWcToast).toHaveBeenCalledWith('Message signing is not yet supported on mobile', expect.anything()),
+    )
+    expect(mockRespond).toHaveBeenCalled()
+  })
+
+  it('rejects safe_setSettings silently — no message-signing toast', async () => {
+    const store = makeStore()
+    mockRoute.mockResolvedValueOnce({ id: 7, jsonrpc: '2.0', error: { code: 5101, message: 'unsupported' } })
+
+    store.dispatch(sessionRequestReceived(makeRequest('safe_setSettings', [{ offChainSigning: true }])))
+
+    await waitFor(() => expect(mockRespond).toHaveBeenCalled())
+    await jest.advanceTimersByTimeAsync(50) // let the (skipped) toast branch run before asserting
+    expect(mockShowWcToast).not.toHaveBeenCalled()
+  })
+
+  it('toasts a switch-network hint (with the dApp name) on a wrong-active-chain rejection', async () => {
+    const store = makeStore()
+    store.dispatch(
+      addSession({
+        session: { topic: 'topic', peer: { metadata: { name: 'Uniswap' } } } as never,
+        verifyVariant: 'verified',
+      }),
+    )
+    mockRoute.mockResolvedValueOnce({
+      id: 7,
+      jsonrpc: '2.0',
+      error: { code: WRONG_CHAIN_CODE, message: 'wrong chain' },
+    })
+
+    store.dispatch(sessionRequestReceived(makeRequest('eth_sendTransaction', [{ to: '0xabc' }], 'eip155:137')))
+
+    await waitFor(() =>
+      expect(mockShowWcToast).toHaveBeenCalledWith(expect.stringContaining('Uniswap'), expect.anything()),
+    )
+    expect(mockRespond).toHaveBeenCalled()
   })
 })
