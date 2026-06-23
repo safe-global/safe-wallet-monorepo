@@ -6,14 +6,15 @@ interface FeeLabelWithInfoProps {
   label: string
   title: string
   info: string
+  link?: { text: string; url: string }
 }
 
 /**
  * A fee-row label with a trailing info icon that opens an explanatory bottom sheet. Shared by the
  * fees breakdown and the execute footer so the copy and affordance stay consistent.
  */
-export const FeeLabelWithInfo = ({ label, title, info }: FeeLabelWithInfoProps) => (
-  <InfoSheet title={title} info={info} displayIcon={false}>
+export const FeeLabelWithInfo = ({ label, title, info, link }: FeeLabelWithInfoProps) => (
+  <InfoSheet title={title} info={info} displayIcon={false} link={link}>
     <XStack alignItems="center" gap="$1" flex={1}>
       <Text color="$textSecondaryLight" fontSize="$4">
         {label}

@@ -14,7 +14,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Signer } from '@/src/store/signersSlice'
 import { WalletConnectGate } from '@/src/features/WalletConnect/Signer/components/WalletConnectGate'
 import { FeeLabelWithInfo } from '@/src/features/ConfirmTx/components/TransactionInfo/FeeLabelWithInfo'
-import { EXECUTION_FEE_INFO, gasFeeInfo } from '@/src/features/ConfirmTx/components/TransactionInfo/feeInfoText'
+import { EXECUTION_FEE_INFO, GAS_FEE_INFO } from '@/src/features/ConfirmTx/components/TransactionInfo/feeInfoText'
 import { buildFeesBreakdown } from '@/src/features/ConfirmTx/components/TransactionInfo/feeRows'
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { useAppSelector } from '@/src/store/hooks'
@@ -94,7 +94,7 @@ export function ReviewExecuteFooter({
 
         {safePaysGasFee ? (
           <View flexDirection="row" justifyContent="space-between" gap="$2" alignItems="center">
-            <FeeLabelWithInfo label="Max gas fee" title="Gas fee" info={gasFeeInfo(true)} />
+            <FeeLabelWithInfo label="Max gas fee" title="Max gas fee" info={GAS_FEE_INFO} />
             <TokenAmount
               value={safePaysGasFee.maxGasFee.amount}
               decimals={safePaysGasFee.maxGasFee.decimals}

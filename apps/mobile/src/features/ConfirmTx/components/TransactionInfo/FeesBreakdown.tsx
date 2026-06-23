@@ -16,7 +16,7 @@ import { useTokenDetails } from '@/src/hooks/useTokenDetails/useTokenDetails'
 import { isTransferTxInfo, isERC20Transfer } from '@/src/utils/transaction-guards'
 import { buildFeesBreakdown, type FeeLine } from './feeRows'
 import { FeeLabelWithInfo } from './FeeLabelWithInfo'
-import { EXECUTION_FEE_INFO, gasFeeInfo } from './feeInfoText'
+import { EXECUTION_FEE_INFO, GAS_FEE_INFO, GAS_FEE_HELP_LINK } from './feeInfoText'
 
 const FeeRow = ({ label, children }: { label: React.ReactNode; children: React.ReactNode }) => (
   <View
@@ -106,7 +106,9 @@ export function FeesBreakdown({
       </FeeRow>
 
       <FeeRow
-        label={<FeeLabelWithInfo label="Max gas fee" title="Gas fee" info={gasFeeInfo(breakdown.paidFromSafe)} />}
+        label={
+          <FeeLabelWithInfo label="Max gas fee" title="Max gas fee" info={GAS_FEE_INFO} link={GAS_FEE_HELP_LINK} />
+        }
       >
         {breakdown.gasNotYetKnown ? (
           <Text color="$textSecondaryLight" fontSize="$4">
