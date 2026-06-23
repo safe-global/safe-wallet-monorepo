@@ -154,8 +154,13 @@ export const walletKitListeners = (startListening: AppStartListening) => {
         } catch (e) {
           logWalletKitError('rejectSession (reject pending) failed', e)
         }
-      } else {
+      } else if (item.kind === 'request') {
         await respondRejected(item.topic, item.id)
+      } else {
+        // Compile-time guard: a new PendingItem kind must declare its own reject semantics
+        // here rather than silently inheriting the request path (wrong SDK method back to the dApp).
+        const _exhaustive: never = item
+        return _exhaustive
       }
       api.dispatch(removePending({ id: item.id, kind: item.kind }))
     },
