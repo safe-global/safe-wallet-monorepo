@@ -66,7 +66,9 @@ const PlanCard = ({
           <span className={css.priceAmount}>{formatPrice(tier.priceMonthlyUsd, period)}</span>
           <span className={css.priceUnit}>/mo</span>
           {tier.id === currentPlanId && (
-            <span className={css.priceStatus}>• {status === 'payment_failed' ? 'Renewal failed' : 'Active'}</span>
+            <span className={`${css.priceUnit} ${css.priceStatus}`}>
+              • {status === 'payment_failed' ? 'Renewal failed' : 'Active'}
+            </span>
           )}
         </p>
       </div>

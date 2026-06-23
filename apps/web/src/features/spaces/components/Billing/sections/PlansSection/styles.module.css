@@ -148,9 +148,6 @@
 
 .priceStatus {
   margin-left: 6px;
-  font-size: 16px;
-  color: var(--color-text-secondary);
-  letter-spacing: 0.15px;
 }
 
 /* ---- Tier toggle (Pro / Pro+) ---- */
