@@ -2,6 +2,7 @@ import { createSlice, type PayloadAction, createSelector } from '@reduxjs/toolki
 import type { SessionTypes } from '@walletconnect/types'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { RootState } from '@/src/store'
+import type { VerifyVariant } from '@safe-global/utils/features/walletconnect/verify'
 
 // The only session_request methods that need UI / a deferred response. Other methods
 // are answered synchronously and never reach the slice.
@@ -39,12 +40,14 @@ export type OutstandingTxRequest = {
 
 type State = {
   sessions: Record<string, SessionTypes.Struct> // keyed by topic
+  verifyByTopic: Record<string, VerifyVariant> // verify variant captured at approval, keyed by topic
   pending: PendingItem[]
   outstandingRequests: Record<string, OutstandingTxRequest> // keyed by safeTxHash
 }
 
 const initialState: State = {
   sessions: {},
+  verifyByTopic: {},
   pending: [],
   outstandingRequests: {},
 }
@@ -57,13 +60,24 @@ const walletKitSlice = createSlice({
   reducers: {
     setSessions(state, action: PayloadAction<Record<string, SessionTypes.Struct>>) {
       state.sessions = action.payload
+      // Prune verify entries for sessions that are no longer active (e.g. expired while the
+      // app was closed); keep entries for still-active topics so a captured badge survives
+      // rehydrate. We never add entries here — restored sessions carry no verify context.
+      const activeTopics = new Set(Object.keys(action.payload))
+      state.verifyByTopic = Object.fromEntries(
+        Object.entries(state.verifyByTopic).filter(([topic]) => activeTopics.has(topic)),
+      )
     },
-    addSession(state, action: PayloadAction<SessionTypes.Struct>) {
-      state.sessions[action.payload.topic] = action.payload
+    addSession(state, action: PayloadAction<{ session: SessionTypes.Struct; verifyVariant: VerifyVariant }>) {
+      const { session, verifyVariant } = action.payload
+      state.sessions[session.topic] = session
+      state.verifyByTopic[session.topic] = verifyVariant
     },
     removeSession(state, action: PayloadAction<string>) {
       const { [action.payload]: _removed, ...rest } = state.sessions
       state.sessions = rest
+      const { [action.payload]: _removedVerify, ...restVerify } = state.verifyByTopic
+      state.verifyByTopic = restVerify
     },
     setPending(state, action: PayloadAction<PendingItem[]>) {
       state.pending = action.payload
@@ -106,6 +120,7 @@ export const {
 export const selectSessionsRecord = (state: RootState) => state[sliceName].sessions
 export const selectSessions = createSelector(selectSessionsRecord, (s) => Object.values(s))
 export const selectSessionCount = createSelector(selectSessions, (s) => s.length)
+export const selectVerifyByTopic = (state: RootState) => state[sliceName].verifyByTopic
 export const selectPending = (state: RootState) => state[sliceName].pending
 export const selectCurrentRequest = createSelector(selectPending, (p) => p[0] ?? null)
 export const selectOutstandingRequests = (state: RootState) => state[sliceName].outstandingRequests

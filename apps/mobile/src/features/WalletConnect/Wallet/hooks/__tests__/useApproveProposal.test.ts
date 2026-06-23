@@ -5,7 +5,7 @@ import { getSdkError } from '@walletconnect/utils'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { renderHookWithStore, createTestStore } from '@/src/tests/test-utils'
 import { useApproveProposal } from '../useApproveProposal'
-import { selectSessions, selectPending } from '../../store/walletKitSlice'
+import { selectSessions, selectPending, selectVerifyByTopic } from '../../store/walletKitSlice'
 import type { RootState } from '@/src/store'
 
 const mockToastShow = jest.fn()
@@ -22,6 +22,7 @@ const makePending = (id: number): { id: number; proposal: WalletKitTypes.Session
       requiredNamespaces: { eip155: { chains: ['eip155:1'], methods: [], events: [] } },
       optionalNamespaces: {},
     },
+    verifyContext: { verified: { validation: 'VALID', origin: 'https://dapp.test', isScam: false } },
   } as unknown as WalletKitTypes.SessionProposal,
 })
 
@@ -54,6 +55,7 @@ describe('useApproveProposal', () => {
     expect(arg.sessionProperties).toBeDefined()
     expect(selectSessions(store.getState() as RootState)).toHaveLength(1)
     expect(selectPending(store.getState() as RootState)).toHaveLength(0)
+    expect(selectVerifyByTopic(store.getState() as RootState)[session.topic]).toBe('verified')
     expect(mockToastShow).toHaveBeenCalledWith('Connected to app', expect.anything())
   })
 

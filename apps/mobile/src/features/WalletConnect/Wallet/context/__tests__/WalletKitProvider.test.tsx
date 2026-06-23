@@ -40,7 +40,7 @@ jest.mock('../../walletKit', () => ({ getWalletKit: jest.fn(() => Promise.resolv
 
 const renderProvider = () => {
   const store = createTestStore({
-    [walletKitSliceName]: { sessions: {}, pending: [], outstandingRequests: {} },
+    [walletKitSliceName]: { sessions: {}, verifyByTopic: {}, pending: [], outstandingRequests: {} },
   } as never)
   const utils = renderWithStore(
     <WalletKitProvider>
