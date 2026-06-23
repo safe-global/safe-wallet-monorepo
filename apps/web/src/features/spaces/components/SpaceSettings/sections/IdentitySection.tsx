@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Typography } from '@/components/ui/typography'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-
-const MAX_NAME_LENGTH = 60
+import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
+import { getBackendNameError } from '@/utils/rtkQuery'
 
 const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const dispatch = useAppDispatch()
@@ -28,9 +29,10 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
     setName(space?.name ?? '')
   }, [space?.name])
 
-  const trimmedName = name.trim()
-  const isDirty = !!space && trimmedName !== space.name && trimmedName.length > 0
-  const canSave = isDirty && isAdmin && !isSaving && !isAwaitingCacheSync.current
+  const sanitizedName = sanitizeName(name)
+  const validationError = name.length > 0 ? validateName(sanitizedName, { minLength: NAME_MIN_LENGTH }) : undefined
+  const isDirty = !!space && sanitizedName !== space.name && sanitizedName.length > 0
+  const canSave = isDirty && isAdmin && !validationError && !isSaving && !isAwaitingCacheSync.current
   const canCancel = !!space && name !== space.name && isAdmin && !isSaving && !isAwaitingCacheSync.current
 
   const handleCancel = () => {
@@ -43,8 +45,8 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
     setError(undefined)
     try {
       isAwaitingCacheSync.current = true
-      await updateSpace({ id: space.uuid, updateSpaceDto: { name: trimmedName } }).unwrap()
-      setName(trimmedName)
+      await updateSpace({ id: space.uuid, updateSpaceDto: { name: sanitizedName } }).unwrap()
+      setName(sanitizedName)
       isAwaitingCacheSync.current = false
       dispatch(
         showNotification({
@@ -56,7 +58,7 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
     } catch (e) {
       console.error(e)
       isAwaitingCacheSync.current = false
-      setError("Couldn't update workspace. Please try again.")
+      setError(getBackendNameError(e) ?? "Couldn't update workspace. Please try again.")
     }
   }
 
@@ -76,8 +78,9 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
             id="space-name"
             data-testid="space-name-input"
             value={name}
-            maxLength={MAX_NAME_LENGTH}
+            maxLength={SPACE_NAME_MAX_LENGTH}
             onChange={(e) => setName(e.target.value)}
+            onBlur={() => setName(sanitizeName(name))}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && canSave) {
                 e.preventDefault()
@@ -85,7 +88,7 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
               }
             }}
             disabled={!isAdmin}
-            error={error}
+            error={error ?? validationError}
             className="max-w-md"
           />
           {canCancel && (

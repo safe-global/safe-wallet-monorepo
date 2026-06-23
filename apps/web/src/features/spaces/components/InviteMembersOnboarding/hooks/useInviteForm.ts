@@ -6,6 +6,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MemberRole } from '../../../hooks/useSpaceMembers'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { ALLOWED_NAME_REGEX, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { buildInviteUserPayload, isEmailAddress } from '../../AddMemberModal/utils'
 
 interface MemberInvite {
@@ -18,27 +19,16 @@ export interface InviteMembersFormValues {
   members: MemberInvite[]
 }
 
-// Mirrors the backend's name.schema NAME_MIN_LENGTH: names shorter than this are rejected.
-const NAME_MIN_LENGTH = 3
-
-/**
- * The onboarding flow has no dedicated name field, so a display name is derived from the
- * identifier. Wallet/ENS invites keep using the address as the name (as before); email
- * invites use the email's local part, sanitized to the alphanumeric-ish characters the
- * backend's name validation accepts (the raw email's "@" would be rejected). A local part
- * shorter than the backend minimum (e.g. "r@cc0x.dev") falls back to a default name so the
- * invite isn't rejected for a too-short name.
- */
+// Derives a display name from the identifier: wallet/ENS keep the address; emails use the
+// sanitized local part (the "@" is stripped), falling back to 'Member' when too short.
 export const toInviteName = (identifier: string): string => {
   if (!isEmailAddress(identifier)) return identifier
 
   const localPart = identifier.slice(0, identifier.indexOf('@'))
-  const sanitized = localPart
-    .replace(/[^a-zA-Z0-9 ._-]/g, '')
-    .replace(/^[^a-zA-Z0-9]+/, '')
-    .trim()
+  const allowedChars = [...sanitizeName(localPart)].filter((char) => ALLOWED_NAME_REGEX.test(char)).join('')
+  const sanitized = sanitizeName(allowedChars)
 
-  return sanitized.length >= NAME_MIN_LENGTH ? sanitized : 'Member'
+  return [...sanitized].length >= NAME_MIN_LENGTH ? sanitized : 'Member'
 }
 
 const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {

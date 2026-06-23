@@ -5,6 +5,7 @@ import { Button, TextField } from '@mui/material'
 import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsAdmin } from '@/features/spaces'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 
 const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const { handleUpdate, error } = useUpdateSpace(space)
@@ -31,13 +32,23 @@ const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => 
         <Controller
           name="name"
           control={control}
-          render={({ field }) => (
+          rules={{
+            validate: (value) => {
+              const sanitized = sanitizeName(value ?? '')
+              if (sanitized === '') return 'Required'
+              return validateName(sanitized, { minLength: NAME_MIN_LENGTH, maxLength: SPACE_NAME_MAX_LENGTH }) ?? true
+            },
+          }}
+          render={({ field, fieldState }) => (
             <TextField
               {...field}
               label="Workspace name"
               fullWidth
               value={field.value || ''}
+              error={Boolean(fieldState.error)}
+              helperText={fieldState.error?.message}
               slotProps={{ inputLabel: { shrink: true }, htmlInput: { maxLength: SPACE_NAME_MAX_LENGTH } }}
+              onBlur={() => field.onChange(sanitizeName(field.value ?? ''))}
               onKeyDown={(e) => e.stopPropagation()}
             />
           )}

@@ -61,8 +61,8 @@ describe('toInviteName', () => {
     expect(toInviteName('john+safe@example.com')).toBe('johnsafe')
   })
 
-  it('strips leading non-alphanumeric characters', () => {
-    expect(toInviteName('_test@example.com')).toBe('test')
+  it('keeps allowed leading punctuation that the backend accepts', () => {
+    expect(toInviteName('_test@example.com')).toBe('_test')
   })
 
   it('falls back to a default when nothing valid remains', () => {

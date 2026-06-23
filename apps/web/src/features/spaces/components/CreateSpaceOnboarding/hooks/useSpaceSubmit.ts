@@ -7,6 +7,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { sanitizeName } from '@safe-global/utils/validation/names'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { sanitizeNextUrl } from '@/utils/nextUrl'
 import type { UseFormHandleSubmit } from 'react-hook-form'
@@ -65,10 +66,12 @@ const useSpaceSubmit = (
     try {
       setIsSubmitting(true)
 
+      const name = sanitizeName(data.name)
+
       if (isEditMode && spaceId) {
-        await editSpace(data.name)
+        await editSpace(name)
       } else {
-        await createSpace(data.name)
+        await createSpace(name)
       }
     } catch (error) {
       const errorMessage =

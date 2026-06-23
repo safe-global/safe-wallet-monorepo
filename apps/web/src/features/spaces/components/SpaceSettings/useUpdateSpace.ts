@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { type GetSpaceResponse, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { getBackendNameError } from '@/utils/rtkQuery'
+import { sanitizeName } from '@safe-global/utils/validation/names'
 
 export type UpdateSpaceFormData = {
   name: string
@@ -20,7 +22,7 @@ export const useUpdateSpace = (space: GetSpaceResponse | undefined) => {
     }
 
     try {
-      await updateSpace({ id: space.uuid, updateSpaceDto: { name: data.name } }).unwrap()
+      await updateSpace({ id: space.uuid, updateSpaceDto: { name: sanitizeName(data.name) } }).unwrap()
 
       dispatch(
         showNotification({
@@ -31,7 +33,7 @@ export const useUpdateSpace = (space: GetSpaceResponse | undefined) => {
       )
     } catch (e) {
       console.error(e)
-      setError('Error updating the workspace. Please try again.')
+      setError(getBackendNameError(e) ?? 'Error updating the workspace. Please try again.')
     }
   }
 
