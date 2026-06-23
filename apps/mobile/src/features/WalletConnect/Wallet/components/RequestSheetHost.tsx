@@ -63,7 +63,7 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
 
   // Review/Reject for the transaction-request sheet. Review composes a draft and navigates to
   // the confirm flow; the dApp is answered later by the propose-success listener.
-  const { review, reject, composing, ready } = useSendTransaction(walletKit, request)
+  const { review, reject, composing, ready } = useSendTransaction(request)
 
   // Reset the permissions view whenever the queue head changes (new proposal or cleared).
   useEffect(() => {

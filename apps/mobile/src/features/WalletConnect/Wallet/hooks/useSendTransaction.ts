@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useToastController } from '@tamagui/toast'
-import type { IWalletKit } from '@reown/walletkit'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectChainById } from '@/src/store/chains'
@@ -36,7 +35,7 @@ const extractCalls = (method: PendingSessionRequest['method'], params: unknown):
  * throws before setDraft). Reject only records intent (rejectPending) — the walletKit listener
  * answers the dApp with USER_REJECTED and clears the pending item.
  */
-export const useSendTransaction = (walletKit: IWalletKit | null, pending: PendingSessionRequest | null) => {
+export const useSendTransaction = (pending: PendingSessionRequest | null) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const toast = useToastController()
@@ -60,7 +59,7 @@ export const useSendTransaction = (walletKit: IWalletKit | null, pending: Pendin
   }, [pending, dispatch])
 
   const review = useCallback(async () => {
-    if (!walletKit || !pending || !activeSafe || !safe || !chain) {
+    if (!pending || !activeSafe || !safe || !chain) {
       return
     }
     setComposing(true)
@@ -96,7 +95,7 @@ export const useSendTransaction = (walletKit: IWalletKit | null, pending: Pendin
     } finally {
       setComposing(false)
     }
-  }, [walletKit, pending, activeSafe, safe, chain, dispatch, router, toast])
+  }, [pending, activeSafe, safe, chain, dispatch, router, toast])
 
   return { review, reject, composing, ready }
 }
