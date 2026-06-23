@@ -11,7 +11,7 @@ import { setSessions, removeSession, pushPending, isDeferredTxMethod } from '../
 import { RequestSheetHost } from '../components/RequestSheetHost'
 import { logWalletKitError } from '../utils/errors'
 
-export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const WalletKitProvider: React.FC = () => {
   const dispatch = useAppDispatch()
   const [walletKit, setWalletKit] = useState<IWalletKit | null>(null)
 
@@ -126,10 +126,5 @@ export const WalletKitProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   useSessionProposalHandler(walletKit)
   useActiveSafeBinding(walletKit)
 
-  return (
-    <>
-      {children}
-      <RequestSheetHost walletKit={walletKit} />
-    </>
-  )
+  return <RequestSheetHost walletKit={walletKit} />
 }
