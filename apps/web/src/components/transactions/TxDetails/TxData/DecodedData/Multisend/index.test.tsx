@@ -5,8 +5,13 @@ import { faker } from '@faker-js/faker'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import useSafeAddress from '@/hooks/useSafeAddress'
+import { multiSendDefaultsToSelf } from '@safe-global/utils/utils/multiSend'
 
 jest.mock('@/hooks/useSafeAddress')
+jest.mock('@safe-global/utils/utils/multiSend', () => ({
+  ...jest.requireActual('@safe-global/utils/utils/multiSend'),
+  multiSendDefaultsToSelf: jest.fn(),
+}))
 
 const safeInterface = Safe__factory.createInterface()
 const encodeEnableModule = (module: string) => safeInterface.encodeFunctionData('enableModule', [module])
@@ -43,9 +48,11 @@ describe('Multisend', () => {
 
   beforeEach(() => {
     ;(useSafeAddress as jest.Mock).mockReturnValue(safeAddress)
+    // Default: the batch's MultiSend version defaults a zero `to` to the Safe (v1.5.0+)
+    ;(multiSendDefaultsToSelf as jest.Mock).mockReturnValue(true)
   })
 
-  it('resolves a zero-address inner action to the Safe (MultiSend defaults `to` to address(this))', () => {
+  it('resolves a zero-address inner action to the Safe (MultiSend v1.5.0+ defaults `to` to address(this))', () => {
     const moduleAddress = faker.finance.ethereumAddress()
     const result = render(<Multisend txData={buildMultisendTxData([{ to: ZERO_ADDRESS, module: moduleAddress }])} />)
 
@@ -64,6 +71,18 @@ describe('Multisend', () => {
     fireEvent.click(result.getByTestId('expande-all-btn'))
 
     // A real target is not rewritten to the Safe
+    expect(result.queryByText('This Safe Account')).not.toBeInTheDocument()
+  })
+
+  it('does NOT resolve the zero address for a pre-1.5.0 MultiSend (keeps the raw zero address)', () => {
+    // Older MultiSend versions call the zero address as-is — no zero->Safe default
+    ;(multiSendDefaultsToSelf as jest.Mock).mockReturnValue(false)
+    const moduleAddress = faker.finance.ethereumAddress()
+    const result = render(<Multisend txData={buildMultisendTxData([{ to: ZERO_ADDRESS, module: moduleAddress }])} />)
+
+    fireEvent.click(result.getByTestId('expande-all-btn'))
+
+    expect(result.getByText('0x0000...0000')).toBeInTheDocument()
     expect(result.queryByText('This Safe Account')).not.toBeInTheDocument()
   })
 

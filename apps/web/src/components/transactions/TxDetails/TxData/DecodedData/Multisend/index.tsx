@@ -8,7 +8,8 @@ import { Button, Divider, Stack } from '@mui/material'
 import css from './styles.module.css'
 import classnames from 'classnames'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import { resolveMultiSendToAddress } from '@safe-global/utils/utils/multiSend'
+import useChainId from '@/hooks/useChainId'
+import { multiSendDefaultsToSelf, resolveMultiSendToAddress } from '@safe-global/utils/utils/multiSend'
 
 type MultisendProps = {
   txData?: TransactionData | null
@@ -59,6 +60,10 @@ const Multisend = ({
   const isOpenMapUndefined = openMap == null
   const connectedSafeAddress = useSafeAddress()
   const safeAddress = executingSafeAddress || connectedSafeAddress
+  const chainId = useChainId()
+  // Only MultiSend v1.5.0+ defaults a zero-address sub-transaction `to` to the executing Safe.
+  const multiSendAddress = txData?.to?.value
+  const defaultsToSelf = !!multiSendAddress && multiSendDefaultsToSelf(multiSendAddress, chainId)
 
   // multiSend method receives one parameter `transactions`
   const multiSendTransactions = txData?.dataDecoded?.parameters?.[0].valueDecoded
@@ -83,8 +88,7 @@ const Multisend = ({
       <div className={compact ? css.compact : ''}>
         {Array.isArray(multiSendTransactions) &&
           multiSendTransactions.map(({ dataDecoded, data, value, to: rawTo, operation }, index) => {
-            // MultiSend rewrites a zero-address sub-transaction `to` to the executing Safe.
-            const to = resolveMultiSendToAddress(rawTo, safeAddress)
+            const to = defaultsToSelf ? resolveMultiSendToAddress(rawTo, safeAddress) : rawTo
 
             const onChange: AccordionProps['onChange'] = (_, expanded) => {
               setOpenMap((prev) => ({

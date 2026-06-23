@@ -8,6 +8,10 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import useSafeAddress from '@/hooks/useSafeAddress'
 
 jest.mock('@/hooks/useSafeAddress')
+jest.mock('@safe-global/utils/utils/multiSend', () => ({
+  ...jest.requireActual('@safe-global/utils/utils/multiSend'),
+  multiSendDefaultsToSelf: jest.fn(() => true),
+}))
 
 const safeInterface = Safe__factory.createInterface()
 

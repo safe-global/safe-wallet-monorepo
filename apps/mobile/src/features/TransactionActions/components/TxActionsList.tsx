@@ -11,7 +11,8 @@ import { useTxTokenInfo } from '@safe-global/utils/hooks/useTxTokenInfo'
 import { useAppSelector } from '@/src/store/hooks'
 import { selectActiveChainCurrency } from '@/src/store/chains'
 import { HashDisplay } from '@/src/components/HashDisplay'
-import { resolveMultiSendToAddress } from '@safe-global/utils/utils/multiSend'
+import { multiSendDefaultsToSelf, resolveMultiSendToAddress } from '@safe-global/utils/utils/multiSend'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 
 interface TxActionsListProps {
   txDetails: TransactionDetails
@@ -34,13 +35,14 @@ interface TxActionItemProps {
   addressInfoIndex?: AddressInfoIndex
   txData: TransactionDetails['txData']
   safeAddress: string
+  defaultsToSelf: boolean
 }
 
-const TxActionItem = ({ action, index, addressInfoIndex, txData, safeAddress }: TxActionItemProps) => {
+const TxActionItem = ({ action, index, addressInfoIndex, txData, safeAddress, defaultsToSelf }: TxActionItemProps) => {
   const valueDecoded = txData?.dataDecoded?.parameters?.[0].valueDecoded
   const tx = Array.isArray(valueDecoded) ? valueDecoded[index] : undefined
-  // MultiSend rewrites a zero-address sub-transaction `to` to the executing Safe.
-  const to = tx ? resolveMultiSendToAddress(tx.to, safeAddress) : ''
+  // MultiSend v1.5.0+ rewrites a zero-address sub-transaction `to` to the executing Safe.
+  const to = tx ? (defaultsToSelf ? resolveMultiSendToAddress(tx.to, safeAddress) : tx.to) : ''
   const nativeCurrency = useAppSelector(selectActiveChainCurrency)
 
   const transferTokenInfo = useTxTokenInfo(
@@ -88,6 +90,10 @@ export function TxActionsList({ txDetails }: TxActionsListProps) {
 
   const { dataDecoded, addressInfoIndex } = txDetails.txData || {}
   const safeAddress = txDetails.safeAddress
+  const { chainId } = useDefinedActiveSafe()
+  // Only MultiSend v1.5.0+ defaults a zero-address sub-transaction `to` to the executing Safe.
+  const multiSendAddress = txDetails.txData?.to?.value
+  const defaultsToSelf = !!multiSendAddress && multiSendDefaultsToSelf(multiSendAddress, chainId)
 
   const onActionPress = (action: MultiSend) => {
     router.push({
@@ -105,11 +111,13 @@ export function TxActionsList({ txDetails }: TxActionsListProps) {
     const rawActions = Array.isArray(transaction?.valueDecoded)
       ? transaction?.valueDecoded
       : [transaction?.valueDecoded]
-    // MultiSend rewrites a zero-address sub-transaction `to` to the executing Safe.
+    // MultiSend v1.5.0+ rewrites a zero-address sub-transaction `to` to the executing Safe.
     return rawActions?.map((action) =>
-      action && 'to' in action ? { ...action, to: resolveMultiSendToAddress(action.to, safeAddress) } : action,
+      defaultsToSelf && action && 'to' in action
+        ? { ...action, to: resolveMultiSendToAddress(action.to, safeAddress) }
+        : action,
     )
-  }, [transaction, safeAddress])
+  }, [transaction, safeAddress, defaultsToSelf])
 
   return (
     <YStack gap="$2" padding="$4">
@@ -127,7 +135,13 @@ export function TxActionsList({ txDetails }: TxActionsListProps) {
             testID={`tx-action-item-${index}`}
             collapsable={false}
           >
-            <TxActionItem txData={txDetails.txData} action={action} index={index} safeAddress={safeAddress} />
+            <TxActionItem
+              txData={txDetails.txData}
+              action={action}
+              index={index}
+              safeAddress={safeAddress}
+              defaultsToSelf={defaultsToSelf}
+            />
           </Container>
         )
       })}
