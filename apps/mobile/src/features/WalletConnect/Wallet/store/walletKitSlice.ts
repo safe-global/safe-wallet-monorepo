@@ -47,9 +47,13 @@ export type OutstandingTxRequest = {
   chainId: string
   safeAddress: string
   // True while the /propose mutation is in flight (set from its pending/rejected actions).
-  // WcRejectOnBack must not reject during this window — the draft still exists, but a
-  // reject would race the propose-fulfilled success response.
+  // The abandon listener must not reject during this window — a reject would race the
+  // propose-fulfilled success response.
   proposing?: boolean
+  // Set when the user backs out of review while /propose is in flight. The propose-rejected
+  // listener honours it: a failed propose then responds USER_REJECTED instead of leaving the
+  // dApp to time out. A successful propose ignores it (the success response wins).
+  cancelRequested?: boolean
 }
 
 type State = {
@@ -109,16 +113,29 @@ const walletKitSlice = createSlice({
       const { safeTxHash, ...req } = action.payload
       state.outstandingRequests[safeTxHash] = req
     },
-    setOutstandingProposing(state, action: PayloadAction<{ safeTxHash: string; proposing: boolean }>) {
+    markOutstandingProposing(state, action: PayloadAction<{ safeTxHash: string; proposing: boolean }>) {
       const req = state.outstandingRequests[action.payload.safeTxHash]
       if (req) {
         req.proposing = action.payload.proposing
+      }
+    },
+    // Records that the user left review for a handed-off tx. The walletKit listener owns the
+    // actual dApp response; this only flags intent so the propose-rejected listener can honour
+    // it. No-op for a non-WC tx (no outstanding entry).
+    markReviewAbandoned(state, action: PayloadAction<{ safeTxHash: string }>) {
+      const req = state.outstandingRequests[action.payload.safeTxHash]
+      if (req) {
+        req.cancelRequested = true
       }
     },
     clearOutstandingRequest(state, action: PayloadAction<string>) {
       const { [action.payload]: _removed, ...rest } = state.outstandingRequests
       state.outstandingRequests = rest
     },
+    // Signal action: the user rejected/dismissed a pending sheet item. The walletKit listener
+    // owns the dApp response (respondSessionRequest for a request, rejectSession for a
+    // proposal) and the removePending cleanup; the reducer itself does nothing.
+    rejectPending(_state, _action: PayloadAction<PendingItem>) {},
     clear() {
       return initialState
     },
@@ -133,8 +150,10 @@ export const {
   pushPending,
   removePending,
   setOutstandingRequest,
-  setOutstandingProposing,
+  markOutstandingProposing,
+  markReviewAbandoned,
   clearOutstandingRequest,
+  rejectPending,
   clear: clearWalletKitState,
 } = walletKitSlice.actions
 

@@ -6,7 +6,8 @@ import reducer, {
   pushPending,
   removePending,
   setOutstandingRequest,
-  setOutstandingProposing,
+  markOutstandingProposing,
+  markReviewAbandoned,
   clearOutstandingRequest,
   clearWalletKitState,
   selectSessions,
@@ -60,7 +61,7 @@ describe('walletKitSlice reducers', () => {
     expect(state.pending).toEqual([proposalItem(1)])
   })
 
-  it('setOutstandingProposing toggles the flag and is a no-op for unknown hashes', () => {
+  it('markOutstandingProposing toggles the flag and is a no-op for unknown hashes', () => {
     let state = reducer(
       undefined,
       setOutstandingRequest({
@@ -72,11 +73,29 @@ describe('walletKitSlice reducers', () => {
         safeAddress: '0xsafe',
       }),
     )
-    state = reducer(state, setOutstandingProposing({ safeTxHash: '0xhash', proposing: true }))
+    state = reducer(state, markOutstandingProposing({ safeTxHash: '0xhash', proposing: true }))
     expect(state.outstandingRequests['0xhash'].proposing).toBe(true)
-    state = reducer(state, setOutstandingProposing({ safeTxHash: '0xhash', proposing: false }))
+    state = reducer(state, markOutstandingProposing({ safeTxHash: '0xhash', proposing: false }))
     expect(state.outstandingRequests['0xhash'].proposing).toBe(false)
-    state = reducer(state, setOutstandingProposing({ safeTxHash: '0xnope', proposing: true }))
+    state = reducer(state, markOutstandingProposing({ safeTxHash: '0xnope', proposing: true }))
+    expect(state.outstandingRequests['0xnope']).toBeUndefined()
+  })
+
+  it('markReviewAbandoned sets cancelRequested and is a no-op for unknown hashes', () => {
+    let state = reducer(
+      undefined,
+      setOutstandingRequest({
+        safeTxHash: '0xhash',
+        topic: 't',
+        id: 7,
+        method: 'eth_sendTransaction',
+        chainId: '1',
+        safeAddress: '0xsafe',
+      }),
+    )
+    state = reducer(state, markReviewAbandoned({ safeTxHash: '0xhash' }))
+    expect(state.outstandingRequests['0xhash'].cancelRequested).toBe(true)
+    state = reducer(state, markReviewAbandoned({ safeTxHash: '0xnope' }))
     expect(state.outstandingRequests['0xnope']).toBeUndefined()
   })
 

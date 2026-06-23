@@ -25,7 +25,7 @@ import {
   removePending,
   isDeferredTxMethod,
   clearOutstandingRequest,
-  setOutstandingProposing,
+  markOutstandingProposing,
   selectOutstandingRequestByHash,
   selectOutstandingRequests,
   selectPending,
@@ -144,7 +144,7 @@ export const WalletKitProvider: React.FC = () => {
         effect: async (action, api) => {
           const safeTxHash = safeTxHashOf(action)
           if (safeTxHash) {
-            api.dispatch(setOutstandingProposing({ safeTxHash, proposing: true }))
+            api.dispatch(markOutstandingProposing({ safeTxHash, proposing: true }))
           }
         },
       }),
@@ -154,7 +154,7 @@ export const WalletKitProvider: React.FC = () => {
         effect: async (action, api) => {
           const safeTxHash = safeTxHashOf(action)
           if (safeTxHash) {
-            api.dispatch(setOutstandingProposing({ safeTxHash, proposing: false }))
+            api.dispatch(markOutstandingProposing({ safeTxHash, proposing: false }))
           }
         },
       }),
