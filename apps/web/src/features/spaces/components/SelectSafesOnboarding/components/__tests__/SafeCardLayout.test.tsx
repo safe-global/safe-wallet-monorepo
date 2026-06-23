@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { render, screen, fireEvent, mockClipboard } from '@/tests/test-utils'
 import { SafeCardLayout } from '../SafeCardLayout'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -72,8 +72,7 @@ describe('SafeCardLayout', () => {
   })
 
   it('copies the address without toggling the card selection', () => {
-    const writeText = jest.fn()
-    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
+    const writeText = mockClipboard()
     const onToggle = jest.fn()
     render(<SafeCardLayout {...baseProps} onToggle={onToggle} />)
 

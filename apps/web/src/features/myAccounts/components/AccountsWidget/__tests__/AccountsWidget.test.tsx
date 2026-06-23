@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { render, screen, fireEvent, mockClipboard } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { SafeItem } from '@/hooks/safes'
 import type { Account } from '../types'
@@ -83,8 +83,7 @@ describe('AccountsWidget', () => {
   })
 
   it('copies the account address when the copy button is clicked', () => {
-    const writeText = jest.fn()
-    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
+    const writeText = mockClipboard()
 
     render(<AccountsWidget accounts={[mockAccounts[1]]} />)
 

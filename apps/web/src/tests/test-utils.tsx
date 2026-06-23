@@ -106,6 +106,16 @@ function customRenderHook<Result, Props>(
 
 export const fakerChecksummedAddress = () => checksumAddress(faker.finance.ethereumAddress())
 
+/**
+ * Stub `navigator.clipboard.writeText` and return the mock so tests can assert
+ * what was copied. Keeps clipboard mocking consistent across test files.
+ */
+export const mockClipboard = (): jest.Mock => {
+  const writeText = jest.fn().mockResolvedValue(undefined)
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
+  return writeText
+}
+
 // https://testing-library.com/docs/user-event/intro#writing-tests-with-userevent
 export const renderWithUserEvent = (
   ui: React.ReactElement,

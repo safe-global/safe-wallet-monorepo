@@ -1,20 +1,14 @@
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen, mockClipboard } from '@/tests/test-utils'
 import CopyAddressIconButton from '.'
 
 const ADDRESS = '0xA98ABC1234567890123456789012345678932F8'
 
 describe('CopyAddressIconButton', () => {
-  const writeText = jest.fn()
-
-  beforeAll(() => {
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText },
-    })
-  })
+  let writeText: jest.Mock
 
   beforeEach(() => {
     jest.clearAllMocks()
+    writeText = mockClipboard()
   })
 
   it('renders a copy button labelled with the address action', () => {
@@ -30,10 +24,10 @@ describe('CopyAddressIconButton', () => {
     expect(writeText).toHaveBeenCalledWith(ADDRESS)
   })
 
-  it('copies the address when activated via the keyboard', () => {
+  it.each(['Enter', ' '])('copies the address when activated via the keyboard (%s)', (key) => {
     render(<CopyAddressIconButton address={ADDRESS} />)
 
-    fireEvent.keyDown(screen.getByRole('button', { name: 'Copy address' }), { key: 'Enter' })
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Copy address' }), { key })
 
     expect(writeText).toHaveBeenCalledWith(ADDRESS)
   })

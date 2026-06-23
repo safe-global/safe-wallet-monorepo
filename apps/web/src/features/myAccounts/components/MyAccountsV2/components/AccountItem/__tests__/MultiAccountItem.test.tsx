@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { render, screen, fireEvent, mockClipboard } from '@/tests/test-utils'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import type { MultiChainSafeItem, SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -132,17 +132,11 @@ const buildSafeItemHookReturn = (overrides: Partial<SafeItemHookReturn> = {}): S
   }) as SafeItemHookReturn
 
 describe('MultiAccountItem (MyAccountsV2)', () => {
-  const writeText = jest.fn()
-
-  beforeAll(() => {
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText },
-    })
-  })
+  let writeText: jest.Mock
 
   beforeEach(() => {
     jest.clearAllMocks()
+    writeText = mockClipboard()
     mockedUseMultiAccountItemData.mockReturnValue(buildMultiAccountHookReturn())
     mockedUseSafeItemData.mockReturnValue(buildSafeItemHookReturn())
   })
