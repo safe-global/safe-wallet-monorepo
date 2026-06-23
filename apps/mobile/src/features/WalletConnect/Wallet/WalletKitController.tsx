@@ -44,6 +44,7 @@ export const WalletKitController: React.FC = () => {
   // the feature is off.
   useEffect(() => {
     if (!isEnabled) {
+      setWalletKit(null)
       return
     }
     let mounted = true

@@ -159,4 +159,17 @@ describe('WalletKitController', () => {
     await Promise.resolve()
     expect(mockGetWalletKit).not.toHaveBeenCalled()
   })
+
+  it('tears down listeners when the feature flag flips off', async () => {
+    const store = createTestStore({
+      [walletKitSliceName]: { sessions: {}, verifyByTopic: {}, pending: [], outstandingRequests: {} },
+    } as never)
+    const { rerender } = renderWithStore(<WalletKitController />, store)
+    await waitFor(() => expect(listeners['session_request']).toBeDefined())
+
+    mockUseHasFeature.mockReturnValue(false)
+    rerender(<WalletKitController />)
+
+    await waitFor(() => expect(mockWalletKit.off).toHaveBeenCalledWith('session_request', expect.any(Function)))
+  })
 })
