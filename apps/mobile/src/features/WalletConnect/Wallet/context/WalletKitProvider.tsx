@@ -2,15 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react'
 import * as Linking from 'expo-linking'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { getSdkError } from '@walletconnect/utils'
-import { formatJsonRpcError, formatJsonRpcResult } from '@walletconnect/jsonrpc-utils'
-import { isAnyOf } from '@reduxjs/toolkit'
+import { formatJsonRpcError } from '@walletconnect/jsonrpc-utils'
 import { useStore } from 'react-redux'
-import { isPairingUri, stripEip155Prefix } from '@safe-global/utils/features/walletconnect/utils'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
-import { startAppListening, type RootState } from '@/src/store'
-import { selectActiveSafe, setActiveSafe, switchActiveChain, clearActiveSafe } from '@/src/store/activeSafeSlice'
+import { type RootState } from '@/src/store'
+import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectChainById } from '@/src/store/chains'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { getWalletKit } from '../walletKit'
@@ -18,19 +15,7 @@ import { useActiveSafeBinding } from '../hooks/useActiveSafeBinding'
 import { useSessionProposalHandler } from '../hooks/useSessionProposalHandler'
 import { useSessionRequestHandler, type SessionRequestHandlerDeps } from '../hooks/useSessionRequestHandler'
 import { isValidTxRequestParams } from '../services/methodRouter'
-import {
-  setSessions,
-  removeSession,
-  pushPending,
-  removePending,
-  isDeferredTxMethod,
-  clearOutstandingRequest,
-  markOutstandingProposing,
-  selectOutstandingRequestByHash,
-  selectOutstandingRequests,
-  selectPending,
-  type PendingSessionRequest,
-} from '../store/walletKitSlice'
+import { setSessions, removeSession, pushPending, isDeferredTxMethod } from '../store/walletKitSlice'
 import { RequestSheetHost } from '../components/RequestSheetHost'
 import { logWalletKitError } from '../utils/errors'
 
@@ -125,128 +110,6 @@ export const WalletKitProvider: React.FC = () => {
       walletKit.off('session_authenticate', onAuthenticate)
     }
   }, [walletKit, dispatch])
-
-  // Respond to the dApp once the user has actually signed. The existing confirm flow calls
-  // transactionsProposeTransactionV1 after signing; match its fulfilled action against any
-  // outstanding tx request keyed by safeTxHash and reply with the hash (or { id } for 5792).
-  // The pending/rejected matchers maintain the `proposing` flag so WcRejectOnBack can't
-  // race the success response with a USER_REJECTED while /propose is in flight.
-  useEffect(() => {
-    if (!walletKit) {
-      return
-    }
-    const safeTxHashOf = (action: { meta: { arg: { originalArgs: unknown } } }) =>
-      (action.meta.arg.originalArgs as { proposeTransactionDto?: { safeTxHash?: string } }).proposeTransactionDto
-        ?.safeTxHash
-    const unsubscribers = [
-      startAppListening({
-        matcher: cgwApi.endpoints.transactionsProposeTransactionV1.matchPending,
-        effect: async (action, api) => {
-          const safeTxHash = safeTxHashOf(action)
-          if (safeTxHash) {
-            api.dispatch(markOutstandingProposing({ safeTxHash, proposing: true }))
-          }
-        },
-      }),
-      startAppListening({
-        // A failed /propose keeps the draft (AC) — re-enable reject-on-back for it.
-        matcher: cgwApi.endpoints.transactionsProposeTransactionV1.matchRejected,
-        effect: async (action, api) => {
-          const safeTxHash = safeTxHashOf(action)
-          if (safeTxHash) {
-            api.dispatch(markOutstandingProposing({ safeTxHash, proposing: false }))
-          }
-        },
-      }),
-      startAppListening({
-        matcher: cgwApi.endpoints.transactionsProposeTransactionV1.matchFulfilled,
-        effect: async (action, api) => {
-          const safeTxHash = safeTxHashOf(action)
-          if (!safeTxHash) {
-            return
-          }
-          const outstanding = selectOutstandingRequestByHash(api.getState(), safeTxHash)
-          if (!outstanding) {
-            return
-          }
-          const result = outstanding.method === 'wallet_sendCalls' ? { id: safeTxHash } : safeTxHash
-          try {
-            await walletKit.respondSessionRequest({
-              topic: outstanding.topic,
-              response: formatJsonRpcResult(outstanding.id, result),
-            })
-          } catch (e) {
-            logWalletKitError('respondSessionRequest after propose failed', e)
-          }
-          api.dispatch(clearOutstandingRequest(safeTxHash))
-        },
-      }),
-    ]
-    return () => {
-      unsubscribers.forEach((unsubscribe) => unsubscribe())
-    }
-  }, [walletKit])
-
-  // A Safe/chain switch invalidates WC tx requests in both stages: handed-off entries lose
-  // their draft to draftTxSlice's cleanup on the same actions, and pre-compose sheet entries
-  // would otherwise let Review compose the dApp's calls against the wrong Safe. Reject the
-  // stale entries so the dApp doesn't hang until the WC timeout (mirrors draftTxSlice's
-  // isSameSafe semantics; entries matching the new active Safe are kept). Clearing a pending
-  // entry also dismisses its sheet via the FIFO head.
-  useEffect(() => {
-    if (!walletKit) {
-      return
-    }
-    const respondRejected = async (topic: string, id: number) => {
-      try {
-        await walletKit.respondSessionRequest({
-          topic,
-          response: formatJsonRpcError(id, getSdkError('USER_REJECTED').message),
-        })
-      } catch (e) {
-        logWalletKitError('respondSessionRequest after Safe switch failed', e)
-      }
-    }
-    const unsubscribe = startAppListening({
-      matcher: isAnyOf(setActiveSafe, switchActiveChain, clearActiveSafe),
-      effect: async (action, api) => {
-        // For clearActiveSafe (and setActiveSafe(null)) both `next` and `nextChainId` stay
-        // undefined, so matchesNext is false for every entry — all requests get rejected.
-        const next = setActiveSafe.match(action) ? action.payload : null
-        const nextChainId = switchActiveChain.match(action) ? action.payload.chainId : next?.chainId
-        // switchActiveChain keeps the Safe address; the other actions carry the full context.
-        // An unknown (undefined) entry address never matches — the conservative choice.
-        const matchesNext = (chainId: string, safeAddress: string | undefined) => {
-          if (chainId !== nextChainId) {
-            return false
-          }
-          return switchActiveChain.match(action) ? true : sameAddress(safeAddress, next?.address)
-        }
-
-        // Handed-off requests (waiting on /propose) + pre-compose requests still showing
-        // (or queued behind) the sheet. Clear the state first so the UI dismisses
-        // immediately, then send all rejections in parallel — a slow relay must not
-        // serialize the cleanup (respondRejected swallows its own errors).
-        const staleOutstanding = Object.entries(selectOutstandingRequests(api.getState())).filter(
-          ([, req]) => !matchesNext(req.chainId, req.safeAddress),
-        )
-        const stalePending = selectPending(api.getState())
-          .filter((p): p is PendingSessionRequest => p.kind === 'request')
-          .filter((p) => !matchesNext(stripEip155Prefix(p.chainId), p.safeAddress))
-
-        staleOutstanding.forEach(([safeTxHash]) => api.dispatch(clearOutstandingRequest(safeTxHash)))
-        stalePending.forEach((p) => api.dispatch(removePending({ id: p.id, kind: 'request' })))
-
-        await Promise.all([
-          ...staleOutstanding.map(([, req]) => respondRejected(req.topic, req.id)),
-          ...stalePending.map((p) => respondRejected(p.topic, p.id)),
-        ])
-      },
-    })
-    return () => {
-      unsubscribe()
-    }
-  }, [walletKit])
 
   // Deep-link listener: wc: URIs arriving via the OS land here.
   useEffect(() => {

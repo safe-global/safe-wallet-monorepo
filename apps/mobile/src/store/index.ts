@@ -46,6 +46,7 @@ import notificationSyncMiddleware from './middleware/notificationSync'
 import { migrate } from './migrations'
 import { setBackendStore } from '@/src/store/utils/singletonStore'
 import pendingTxsListeners from '@/src/store/middleware/pendingTxs'
+import walletKitListeners from '@/src/features/WalletConnect/Wallet/store/walletKitListeners'
 import signingState from './signingStateSlice'
 import signerImportFlow from './signerImportFlowSlice'
 import executingState from './executingStateSlice'
@@ -166,7 +167,7 @@ export type AppListenerEffectAPI = ListenerEffectAPI<RootState, AppDispatch>
 export const listenerMiddlewareInstance = createListenerMiddleware<RootState>()
 export const startAppListening = listenerMiddlewareInstance.startListening as AppStartListening
 
-const listeners = [pendingTxsListeners]
+const listeners = [pendingTxsListeners, walletKitListeners]
 
 export const makeStore = () =>
   configureStore({
