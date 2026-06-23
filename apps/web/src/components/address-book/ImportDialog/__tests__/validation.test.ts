@@ -79,13 +79,34 @@ describe('Address book import validation', () => {
       expect(hasValidAbNames(entries)).toBe(true)
     })
 
-    it('should return false if any entry has invalid names', () => {
+    it('should return false if any entry has an empty name', () => {
       const entries = [
         ['0xAb5e3288640396C3988af5a820510682f3C58adF', '', 'chainId'],
         ['0x1F2504De05f5167650bEA', 'name2', 'chainId2'],
       ]
 
       expect(hasValidAbNames(entries)).toBe(false)
+    })
+
+    it('should return false if any name is shorter than the minimum', () => {
+      const entries = [['0xAb5e3288640396C3988af5a820510682f3C58adF', 'Jo', 'chainId']]
+
+      expect(hasValidAbNames(entries)).toBe(false)
+    })
+
+    it('should return false if any name contains disallowed characters', () => {
+      const entries = [['0xAb5e3288640396C3988af5a820510682f3C58adF', 'Bad<script>', 'chainId']]
+
+      expect(hasValidAbNames(entries)).toBe(false)
+    })
+
+    it('should return true for accented and punctuation names', () => {
+      const entries = [
+        ['0xAb5e3288640396C3988af5a820510682f3C58adF', 'José', 'chainId'],
+        ['0x1F2504De05f5167650bE5B28c472601Be434b60A', 'Smith & Co.', 'chainId'],
+      ]
+
+      expect(hasValidAbNames(entries)).toBe(true)
     })
   })
 
@@ -159,17 +180,17 @@ describe('Address book import validation', () => {
       expect(abOnUploadValidator(result)).toBe('Address book contains an invalid address on row 2')
     })
 
-    it('should return an error if some entries have empty names', () => {
+    it('should return an error with the row and reason for an invalid name', () => {
       const result = {
         data: [
           ['address', 'name', 'chainId'],
-          ['0xAb5e3288640396C3988af5a820510682f3C58adF', '', '1'],
+          ['0xAb5e3288640396C3988af5a820510682f3C58adF', 'Bad<script>', '1'],
         ],
         errors: [],
         meta: {} as ParseMeta,
       } as ParseResult<string[]>
 
-      expect(abOnUploadValidator(result)).toBe('Address book contains an invalid name on row 2')
+      expect(abOnUploadValidator(result)).toMatch(/^Address book contains an invalid name on row 2: /)
     })
   })
 })

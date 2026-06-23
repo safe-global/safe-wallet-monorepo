@@ -7,6 +7,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import { useState, type ReactNode } from 'react'
 import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import useChains from '@/hooks/useChains'
@@ -144,7 +145,13 @@ const AddContactDialog = ({
               <div className="flex flex-col gap-6">
                 {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
 
-                <NameInput name="name" label="Name" required />
+                <NameInput
+                  name="name"
+                  label="Name"
+                  required
+                  minLength={NAME_MIN_LENGTH}
+                  maxLength={ADDRESS_BOOK_NAME_MAX_LENGTH}
+                />
                 <AddressInput name="address" label="Address or ENS" required showPrefix={false} chain={ensChain} />
 
                 <div>

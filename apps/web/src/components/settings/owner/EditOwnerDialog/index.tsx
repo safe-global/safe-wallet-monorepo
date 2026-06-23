@@ -1,6 +1,7 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
 import Track from '@/components/common/Track'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import { useAppDispatch } from '@/store'
@@ -64,7 +65,13 @@ export const EditOwnerDialog = ({ chainId, address, name }: { chainId: string; a
           <form onSubmit={handleSubmit(onSubmit)}>
             <DialogContent>
               <Box py={2}>
-                <NameInput label="Signer name" name="name" required />
+                <NameInput
+                  label="Signer name"
+                  name="name"
+                  required
+                  minLength={NAME_MIN_LENGTH}
+                  maxLength={ADDRESS_BOOK_NAME_MAX_LENGTH}
+                />
               </Box>
 
               <Box py={2}>

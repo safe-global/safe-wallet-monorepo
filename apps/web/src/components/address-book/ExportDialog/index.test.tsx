@@ -23,6 +23,18 @@ describe('ExportDialog', () => {
         { address: '0x2', name: 'Alice Cooper', chainId: '100' },
       ])
     })
+
+    it('neutralizes CSV formula-injection in cell values', () => {
+      const addressBooks = {
+        '4': {
+          '=cmd|/c calc': '=HYPERLINK("http://evil")',
+        },
+      }
+
+      expect(_getCsvData(addressBooks)).toStrictEqual([
+        { address: "'=cmd|/c calc", name: '\'=HYPERLINK("http://evil")', chainId: '4' },
+      ])
+    })
   })
 
   it('should render the export dialog', () => {

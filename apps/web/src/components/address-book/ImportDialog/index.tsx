@@ -8,6 +8,7 @@ import { type ReactElement, useState, type MouseEvent, useMemo } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
+import { sanitizeName } from '@safe-global/utils/validation/names'
 import { useAppDispatch } from '@/store'
 
 import css from './styles.module.css'
@@ -61,7 +62,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
 
     for (const entry of entries) {
       const [address, name, chainId] = entry
-      dispatch(upsertAddressBookEntries({ address, name, chainIds: [chainId.trim()] }))
+      dispatch(upsertAddressBookEntries({ address, name: sanitizeName(name), chainIds: [chainId.trim()] }))
     }
 
     trackEvent({ ...ADDRESS_BOOK_EVENTS.IMPORT, label: entries.length })

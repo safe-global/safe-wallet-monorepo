@@ -5,6 +5,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import AddressInput from '@/components/common/AddressInput'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
 import useChainId from '@/hooks/useChainId'
 import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
@@ -69,7 +70,15 @@ function EntryDialog({
         <form onSubmit={onSubmit}>
           <DialogContent>
             <Box mb={2}>
-              <NameInput data-testid="name-input" label="Name" autoFocus name="name" required />
+              <NameInput
+                data-testid="name-input"
+                label="Name"
+                autoFocus
+                name="name"
+                required
+                minLength={NAME_MIN_LENGTH}
+                maxLength={ADDRESS_BOOK_NAME_MAX_LENGTH}
+              />
             </Box>
 
             <Box>

@@ -13,6 +13,7 @@ import { trackEvent, ADDRESS_BOOK_EVENTS } from '@/services/analytics'
 import ExternalLink from '@/components/common/ExternalLink'
 import madProps from '@/utils/mad-props'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { escapeCsvFormula } from '@safe-global/utils/utils/csv'
 
 const COL_1 = 'address'
 const COL_2 = 'name'
@@ -24,9 +25,9 @@ export const _getCsvData = (addressBooks: AddressBookState): CsvData => {
   const csvData = Object.entries(addressBooks).reduce<CsvData>((acc, [chainId, entries]) => {
     Object.entries(entries).forEach(([address, name]) => {
       acc.push({
-        [COL_1]: address,
-        [COL_2]: name,
-        [COL_3]: chainId,
+        [COL_1]: escapeCsvFormula(address),
+        [COL_2]: escapeCsvFormula(name),
+        [COL_3]: escapeCsvFormula(chainId),
       })
     })
 

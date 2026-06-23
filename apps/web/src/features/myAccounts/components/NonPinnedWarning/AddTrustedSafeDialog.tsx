@@ -5,6 +5,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import NameInput from '@/components/common/NameInput'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
 import SimilarAddressAlert from './SimilarAddressAlert'
 import type { SimilarAddressInfo } from '../../hooks/useNonPinnedSafeWarning.types'
 
@@ -99,6 +100,8 @@ const AddTrustedSafeDialog = ({
                 label="Safe name"
                 placeholder="Enter a name for this Safe"
                 autoFocus
+                minLength={NAME_MIN_LENGTH}
+                maxLength={ADDRESS_BOOK_NAME_MAX_LENGTH}
               />
             </Box>
           </DialogContent>

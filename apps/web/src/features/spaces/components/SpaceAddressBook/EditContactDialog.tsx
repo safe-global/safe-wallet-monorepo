@@ -4,6 +4,8 @@ import ModalDialog from '@/components/common/ModalDialog'
 import { useState, useMemo } from 'react'
 import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import NameInput from '@/components/common/NameInput'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
+import { applyBackendNameError } from '@/utils/rtkQuery'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -23,7 +25,7 @@ type EditContactDialogProps = {
 }
 
 const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
-  const [error, setError] = useState<string>()
+  const [localError, setLocalError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { configs } = useChains()
   const dispatch = useAppDispatch()
@@ -47,7 +49,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
     defaultValues,
   })
 
-  const { handleSubmit, formState, control, reset, watch } = methods
+  const { handleSubmit, formState, control, reset, watch, setError } = methods
 
   const { errors } = formState
 
@@ -70,12 +72,12 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
 
   const handleClose = () => {
     reset(defaultValues)
-    setError('')
+    setLocalError('')
     onClose()
   }
 
   const onSubmit = handleSubmit(async (data) => {
-    setError(undefined)
+    setLocalError(undefined)
 
     const addressBookItem = {
       name: data.name,
@@ -93,7 +95,9 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
       })
 
       if (result.error) {
-        setError('Something went wrong. Please try again.')
+        if (!applyBackendNameError(result.error, setError, 'name')) {
+          setLocalError('Something went wrong. Please try again.')
+        }
         return
       }
 
@@ -106,8 +110,8 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
       )
 
       handleClose()
-    } catch (error) {
-      setError('Something went wrong. Please try again.')
+    } catch {
+      setLocalError('Something went wrong. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -124,7 +128,13 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
                 <AddressInputReadOnly address={entry.address} chainId={entry.chainIds[0]} />
               </Box>
 
-              <NameInput name="name" label="Name" required />
+              <NameInput
+                name="name"
+                label="Name"
+                required
+                minLength={NAME_MIN_LENGTH}
+                maxLength={ADDRESS_BOOK_NAME_MAX_LENGTH}
+              />
 
               <Box>
                 <Typography variant="h5" fontWeight={700} display="inline-flex" alignItems="center" gap={1} mt={2}>
@@ -150,9 +160,9 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
               </Box>
             </Stack>
 
-            {error && (
+            {localError && (
               <Alert severity="error" sx={{ mt: 2 }}>
-                {error}
+                {localError}
               </Alert>
             )}
           </DialogContent>
