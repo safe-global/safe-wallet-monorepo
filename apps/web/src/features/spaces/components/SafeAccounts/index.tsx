@@ -11,7 +11,6 @@ import {
   _getMultiChainAccounts,
   _getSingleChainAccounts,
   getComparator,
-  useSafeItemBuilder,
 } from '@/hooks/safes'
 import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useSpaceSafes, useIsInvited } from '@/features/spaces'
@@ -38,14 +37,13 @@ const SpaceSafeAccounts = () => {
   // Use same organization logic as onboarding
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)
-  const { buildSafeItem } = useSafeItemBuilder()
 
-  const spaceSafeItems = useMemo(() => {
-    // Only include safes that are part of the current space
-    const spaceSafes = allSafes?.flatMap((item) => ('safes' in item ? item.safes : [item])) || []
-
-    return spaceSafes.map((safe) => buildSafeItem(safe.chainId, safe.address))
-  }, [buildSafeItem, allSafes])
+  // `allSafes` already carries overview-derived ownership/name/visited for the space safes, so source
+  // the display items from it directly instead of rebuilding them via `useSafeItemBuilder`.
+  const spaceSafeItems = useMemo<SafeItem[]>(
+    () => (allSafes ?? []).flatMap((item) => ('safes' in item ? item.safes : [item])),
+    [allSafes],
+  )
 
   const similarAddresses = useMemo<Set<string>>(
     () => getFlaggedSimilarAddressSet(spaceSafeItems.map((s) => s.address)),

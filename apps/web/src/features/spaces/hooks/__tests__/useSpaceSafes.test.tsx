@@ -6,9 +6,7 @@ const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 const mockUseCurrentSpaceId = jest.fn()
 const mockUseSpaceSafesGetV1Query = jest.fn()
 const mockUseGetSpaceAddressBook = jest.fn()
-const mockUseWallet = jest.fn()
-const mockUseAllOwnedSafes = jest.fn()
-const mockUseAllSafesGrouped = jest.fn()
+const mockUseSpaceSafeOverviews = jest.fn()
 let mockIsAuthenticated = true
 let mockLocalAddressBook: Record<string, Record<string, string>> = {}
 
@@ -19,6 +17,10 @@ jest.mock('../useCurrentSpaceId', () => ({
 jest.mock('../useGetSpaceAddressBook', () => ({
   __esModule: true,
   default: () => mockUseGetSpaceAddressBook(),
+}))
+
+jest.mock('../useSpaceSafeOverviews', () => ({
+  useSpaceSafeOverviews: () => mockUseSpaceSafeOverviews(),
 }))
 
 jest.mock('@/store', () => ({
@@ -50,14 +52,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 
 jest.mock('@/hooks/safes', () => ({
   _buildSafeItems: jest.fn(() => []),
-  useAllSafesGrouped: () => mockUseAllSafesGrouped(),
-  useAllOwnedSafes: () => mockUseAllOwnedSafes(),
+  _getMultiChainAccounts: jest.fn(() => []),
+  _getSingleChainAccounts: jest.fn(() => []),
   getComparator: () => () => 0,
-}))
-
-jest.mock('@/hooks/wallets/useWallet', () => ({
-  __esModule: true,
-  default: () => mockUseWallet(),
 }))
 
 jest.mock('../../utils', () => ({
@@ -70,9 +67,7 @@ describe('useSpaceSafes', () => {
     mockIsAuthenticated = true
     mockLocalAddressBook = {}
     mockUseGetSpaceAddressBook.mockReturnValue([])
-    mockUseWallet.mockReturnValue({ address: '0xabc' })
-    mockUseAllOwnedSafes.mockReturnValue([{}])
-    mockUseAllSafesGrouped.mockReturnValue({ allMultiChainSafes: [], allSingleSafes: [] })
+    mockUseSpaceSafeOverviews.mockReturnValue({ ownedByChain: {}, isOwnershipResolved: true })
     mockUseSpaceSafesGetV1Query.mockReturnValue({
       currentData: undefined,
       isLoading: false,
@@ -137,6 +132,30 @@ describe('useSpaceSafes', () => {
       { '1': ['0xA'] },
       expect.objectContaining({ '1': { '0xA': 'Local Name' } }),
       expect.anything(),
+      expect.anything(),
+    )
+  })
+
+  // Ownership is derived from the batched overviews and fed into _buildSafeItems as the `allOwned`
+  // argument.
+  it('feeds the overview-derived ownership map into _buildSafeItems', () => {
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
+    mockUseSpaceSafesGetV1Query.mockReturnValue({
+      currentData: { safes: { '1': ['0xA'] } },
+      isLoading: false,
+      isError: false,
+      error: undefined,
+      refetch: jest.fn(),
+    })
+    mockUseSpaceSafeOverviews.mockReturnValue({ ownedByChain: { '1': ['0xA'] }, isOwnershipResolved: true })
+
+    renderHook(() => useSpaceSafes())
+
+    const { _buildSafeItems } = jest.requireMock('@/hooks/safes') as { _buildSafeItems: jest.Mock }
+    expect(_buildSafeItems).toHaveBeenCalledWith(
+      { '1': ['0xA'] },
+      expect.anything(),
+      { '1': ['0xA'] },
       expect.anything(),
     )
   })

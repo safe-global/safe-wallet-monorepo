@@ -89,22 +89,19 @@ interface AddAccountsProps {
   onExternalClose?: () => void
 }
 
-const AddAccounts = ({
-  buttonVariant = 'outline',
-  buttonLabel = 'Add Accounts',
-  externalOpen,
-  onExternalClose,
-}: AddAccountsProps = {}) => {
+/**
+ * Modal body. Mounted only while the dialog is open, so the owned-safes enumeration
+ * (`useAllOwnedSafes`) runs only when needed rather than from the always-mounted trigger button.
+ * Closing unmounts this subtree, which also discards the form/search/selection state.
+ */
+const AddAccountsDialogContent = ({ onClose }: { onClose: () => void }) => {
   const isAdmin = useIsAdmin()
-  const [open, setOpen] = useState<boolean>(false)
-  const isOpen = externalOpen ?? open
   const [error, setError] = useState<string>()
   const [manualSafes, setManualSafes] = useState<SafeItems>([])
-  const hasResetForOpen = useRef(false)
 
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const dispatch = useAppDispatch()
-  const { allSafes: spaceSafes } = useSpaceSafes()
+  const { allSafes: spaceSafes, isLoading: isSpaceSafesLoading } = useSpaceSafes()
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
@@ -117,7 +114,6 @@ const AddAccounts = ({
   const { configs } = useChains()
   const allChainIds = useMemo(() => configs.map((c) => c.chainId), [configs])
 
-  // Get safe data
   const [allOwned = {}] = useAllOwnedSafes(walletAddress)
   const allAdded = useAppSelector(selectAllAddedSafes)
   const allUndeployed = useAppSelector(selectUndeployedSafes)
@@ -215,15 +211,17 @@ const AddAccounts = ({
     setValue,
   })
 
-  // Reset form when modal opens
+  // Pre-select the safes already in the space when the modal mounts. Deferred until the space-safes
+  // query resolves — applying it while still loading would commit an empty selection and mark the
+  // existing safes as removed on submit. Applied once; a later update must not clobber the user's
+  // in-progress selection.
+  const hasResetForOpen = useRef(false)
   useEffect(() => {
-    if (isOpen && !hasResetForOpen.current) {
+    if (!hasResetForOpen.current && !isSpaceSafesLoading) {
       reset({ selectedSafes: defaultSelectedSafes })
       hasResetForOpen.current = true
-    } else if (!isOpen) {
-      hasResetForOpen.current = false
     }
-  }, [isOpen, defaultSelectedSafes, reset])
+  }, [defaultSelectedSafes, reset, isSpaceSafesLoading])
 
   const onSubmit = handleSubmit(async (data) => {
     if (!isAdmin) {
@@ -304,7 +302,7 @@ const AddAccounts = ({
         }),
       )
 
-      handleClose()
+      onClose()
     } catch (e) {
       console.log(e)
     }
@@ -328,15 +326,6 @@ const AddAccounts = ({
 
     const safeId = getSafeId(newSafeItem)
     setValue(`selectedSafes.${safeId}`, true, { shouldValidate: true })
-  }
-
-  const handleClose = () => {
-    setError(undefined)
-    setRawSearchQuery('')
-    setManualSafes([])
-    setValue('selectedSafes', {}) // Reset doesn't seem to work consistently with an object
-    setOpen(false)
-    onExternalClose?.()
   }
 
   useEffect(() => {
@@ -364,6 +353,150 @@ const AddAccounts = ({
     observer.observe(region)
     return () => observer.disconnect()
   }, [visibleTrusted, visibleOwned, isListEmpty, hasNoSearchMatch])
+
+  return (
+    <div className={cn('shadcn-scope flex h-dvh max-h-dvh flex-col', isDarkMode && 'dark')}>
+      <div className="flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col overflow-hidden bg-secondary p-4">
+        <div className="mx-auto flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col gap-6 sm:max-w-[520px]">
+          <FormProvider {...formMethods}>
+            <form onSubmit={onSubmit} className="flex min-h-0 w-full flex-1 flex-col gap-6">
+              <div className="flex shrink-0 flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <Button type="button" variant="ghost" size="icon" onClick={onClose} className="rounded-md">
+                    <X className="size-5" />
+                  </Button>
+                  <Typography variant="h2" align="center" className="flex-1">
+                    Add Safe Accounts
+                  </Typography>
+                  <div className="size-10" />
+                </div>
+
+                <Typography variant="paragraph" align="center" color="muted">
+                  You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts
+                </Typography>
+
+                <InputGroup className="bg-card px-2">
+                  <InputGroupAddon>
+                    <Search className="size-4" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    placeholder="Search for safes"
+                    aria-label="Search Safe list"
+                    autoComplete="off"
+                    onChange={(e) => setRawSearchQuery(e.target.value)}
+                  />
+                </InputGroup>
+              </div>
+
+              {!wallet && <ConnectWalletHint testId="add-accounts-connect-wallet-button" />}
+
+              <div className="relative min-h-0 w-full min-w-0 flex-1">
+                <div
+                  ref={listRegionRef}
+                  className="h-full w-full overflow-y-auto"
+                  data-testid="add-accounts-safes-list-region"
+                >
+                  {isListEmpty ? (
+                    <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                      {emptyStateMessage}
+                    </Typography>
+                  ) : hasNoSearchMatch ? (
+                    <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                      No safes match your search
+                    </Typography>
+                  ) : (
+                    <OnboardingSafesList
+                      trustedSafes={visibleTrusted}
+                      ownedSafes={visibleOwned}
+                      similarAddresses={similarAddresses}
+                      isAtLimit={isAtLimit}
+                      trustedSelectAll={{
+                        state: trustedSelection.state,
+                        count: trustedSelection.selectedCount,
+                        total: trustedSelection.total,
+                        onToggle: (check) => handleSelectAll('trusted', check),
+                        disabled: trustedSelection.disabled,
+                      }}
+                      ownedSelectAll={{
+                        state: ownedSelection.state,
+                        count: ownedSelection.selectedCount,
+                        total: ownedSelection.total,
+                        onToggle: (check) => handleSelectAll('owned', check),
+                        disabled: ownedSelection.disabled,
+                      }}
+                    />
+                  )}
+                </div>
+
+                {!isListEmpty && !hasNoSearchMatch && isListOverflowing && (
+                  <div
+                    data-testid="add-accounts-list-fade"
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-secondary to-transparent"
+                  />
+                )}
+              </div>
+
+              {error && (
+                <Alert variant="destructive" className="shrink-0">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="flex shrink-0 flex-col gap-2">
+                <Track {...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY_MODAL}>
+                  <AddManually handleAddSafe={handleAddSafe} disabled={isAtLimit} />
+                </Track>
+
+                <div className="flex shrink-0 flex-col gap-2">
+                  <Button
+                    data-testid="add-accounts-button"
+                    type="submit"
+                    size="lg"
+                    disabled={!isFormDirty || isSubmitting}
+                    className="w-full"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      `Add Accounts (${selectedSafesLength})`
+                    )}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="lg"
+                    onClick={onClose}
+                    disabled={isSubmitting}
+                    className="w-full hover:bg-card"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </FormProvider>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const AddAccounts = ({
+  buttonVariant = 'outline',
+  buttonLabel = 'Add Accounts',
+  externalOpen,
+  onExternalClose,
+}: AddAccountsProps = {}) => {
+  const isAdmin = useIsAdmin()
+  const [open, setOpen] = useState<boolean>(false)
+  const isOpen = externalOpen ?? open
+  const spaceId = useCurrentSpaceId()
+
+  const handleClose = () => {
+    setOpen(false)
+    onExternalClose?.()
+  }
 
   return (
     <>
@@ -394,130 +527,7 @@ const AddAccounts = ({
       )}
 
       <ModalDialog open={isOpen} fullScreen hideChainIndicator>
-        <div className={cn('shadcn-scope flex h-dvh max-h-dvh flex-col', isDarkMode && 'dark')}>
-          <div className="flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col overflow-hidden bg-secondary p-4">
-            <div className="mx-auto flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col gap-6 sm:max-w-[520px]">
-              <FormProvider {...formMethods}>
-                <form onSubmit={onSubmit} className="flex min-h-0 w-full flex-1 flex-col gap-6">
-                  <div className="flex shrink-0 flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <Button type="button" variant="ghost" size="icon" onClick={handleClose} className="rounded-md">
-                        <X className="size-5" />
-                      </Button>
-                      <Typography variant="h2" align="center" className="flex-1">
-                        Add Safe Accounts
-                      </Typography>
-                      <div className="size-10" />
-                    </div>
-
-                    <Typography variant="paragraph" align="center" color="muted">
-                      You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts
-                    </Typography>
-
-                    <InputGroup className="bg-card px-2">
-                      <InputGroupAddon>
-                        <Search className="size-4" />
-                      </InputGroupAddon>
-                      <InputGroupInput
-                        placeholder="Search for safes"
-                        aria-label="Search Safe list"
-                        autoComplete="off"
-                        onChange={(e) => setRawSearchQuery(e.target.value)}
-                      />
-                    </InputGroup>
-                  </div>
-
-                  {!wallet && <ConnectWalletHint testId="add-accounts-connect-wallet-button" />}
-
-                  <div className="relative min-h-0 w-full min-w-0 flex-1">
-                    <div
-                      ref={listRegionRef}
-                      className="h-full w-full overflow-y-auto"
-                      data-testid="add-accounts-safes-list-region"
-                    >
-                      {isListEmpty ? (
-                        <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                          {emptyStateMessage}
-                        </Typography>
-                      ) : hasNoSearchMatch ? (
-                        <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                          No safes match your search
-                        </Typography>
-                      ) : (
-                        <OnboardingSafesList
-                          trustedSafes={visibleTrusted}
-                          ownedSafes={visibleOwned}
-                          similarAddresses={similarAddresses}
-                          isAtLimit={isAtLimit}
-                          trustedSelectAll={{
-                            state: trustedSelection.state,
-                            count: trustedSelection.selectedCount,
-                            total: trustedSelection.total,
-                            onToggle: (check) => handleSelectAll('trusted', check),
-                            disabled: trustedSelection.disabled,
-                          }}
-                          ownedSelectAll={{
-                            state: ownedSelection.state,
-                            count: ownedSelection.selectedCount,
-                            total: ownedSelection.total,
-                            onToggle: (check) => handleSelectAll('owned', check),
-                            disabled: ownedSelection.disabled,
-                          }}
-                        />
-                      )}
-                    </div>
-
-                    {!isListEmpty && !hasNoSearchMatch && isListOverflowing && (
-                      <div
-                        data-testid="add-accounts-list-fade"
-                        className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-secondary to-transparent"
-                      />
-                    )}
-                  </div>
-
-                  {error && (
-                    <Alert variant="destructive" className="shrink-0">
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
-
-                  <div className="flex shrink-0 flex-col gap-2">
-                    <Track {...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY_MODAL}>
-                      <AddManually handleAddSafe={handleAddSafe} disabled={isAtLimit} />
-                    </Track>
-
-                    <div className="flex shrink-0 flex-col gap-2">
-                      <Button
-                        data-testid="add-accounts-button"
-                        type="submit"
-                        size="lg"
-                        disabled={!isFormDirty || isSubmitting}
-                        className="w-full"
-                      >
-                        {isSubmitting ? (
-                          <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                          `Add Accounts (${selectedSafesLength})`
-                        )}
-                      </Button>
-
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="lg"
-                        onClick={handleClose}
-                        disabled={isSubmitting}
-                        className="w-full hover:bg-card"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                </form>
-              </FormProvider>
-            </div>
-          </div>
-        </div>
+        {isOpen && <AddAccountsDialogContent onClose={handleClose} />}
       </ModalDialog>
     </>
   )

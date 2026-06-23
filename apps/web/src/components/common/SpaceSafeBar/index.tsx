@@ -13,7 +13,9 @@ import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
+import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
+import { WorkspaceSafeBarProvider, GlobalSafeBarProvider } from './hooks/useSafeBarSafes'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 import SpaceBackLink from './SpaceBackLink'
 import SpaceChainSelector from './SpaceChainSelector'
@@ -77,10 +79,35 @@ function ConnectWalletFooter({ onConnect, onClose }: { onConnect: () => void; on
   )
 }
 
+/**
+ * Picks the safe-list source for the bar via separate providers: the workspace switcher (space safes,
+ * derived from batched overviews) and the global account switcher (owned-safes enumeration). The
+ * owned-safes lookup only mounts outside a space, so no runtime gating flag is needed.
+ */
 function SpaceSafeBar() {
   const pathname = usePathname()
   const router = useRouter()
   const urlSafeAddress = useSafeAddressFromUrl()
+  const isQualifiedSafe = useIsQualifiedSafe()
+  const isSpaceRoute = useIsSpaceRoute()
+  const isInSpaceContext = isQualifiedSafe || isSpaceRoute
+
+  // Use the matched Next.js route, not `usePathname`: error pages (404/403) render
+  // under the original unmatched URL (e.g. `/hom`), where `usePathname` wouldn't match.
+  if (HIDDEN_ROUTES.includes(router.pathname)) return null
+  // /settings/* serves both per-safe (URL has ?safe=) and global pages — hide when no safe context.
+  if (pathname?.startsWith(AppRoutes.settings.index) && !urlSafeAddress) return null
+
+  const Provider = isInSpaceContext ? WorkspaceSafeBarProvider : GlobalSafeBarProvider
+
+  return (
+    <Provider>
+      <SpaceSafeBarContent />
+    </Provider>
+  )
+}
+
+function SpaceSafeBarContent() {
   const isQualifiedSafe = useIsQualifiedSafe()
   const { items, selectedItemId, handleItemSelect, isLoading, isError, refetch, isInSpaceContext } =
     useSpaceSafeSelectorItems()
@@ -91,12 +118,6 @@ function SpaceSafeBar() {
   const connectWallet = useConnectWallet()
   const { txFlow } = useContext(TxModalContext)
   const trustedSafesModal = useTrustedSafesModal()
-
-  // Use the matched Next.js route, not `usePathname`: error pages (404/403) render
-  // under the original unmatched URL (e.g. `/hom`), where `usePathname` wouldn't match.
-  if (HIDDEN_ROUTES.includes(router.pathname)) return null
-  // /settings/* serves both per-safe (URL has ?safe=) and global pages — hide when no safe context.
-  if (pathname?.startsWith(AppRoutes.settings.index) && !urlSafeAddress) return null
 
   const handleOpenAccountsModal = () => {
     setAccountsModalOpen(true)

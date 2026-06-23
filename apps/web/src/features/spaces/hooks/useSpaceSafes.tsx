@@ -1,6 +1,13 @@
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { _buildSafeItems, type AllSafeItems, useAllSafesGrouped, useAllOwnedSafes, getComparator } from '@/hooks/safes'
+import {
+  _buildSafeItems,
+  type AllSafeItems,
+  _getMultiChainAccounts,
+  _getSingleChainAccounts,
+  getComparator,
+} from '@/hooks/safes'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
+import { useSpaceSafeOverviews } from './useSpaceSafeOverviews'
 import useGetSpaceAddressBook from './useGetSpaceAddressBook'
 import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 import { mapSpaceContactsToAddressBookState } from '../utils'
@@ -10,7 +17,6 @@ import { selectAllAddressBooks, selectAllVisitedSafes } from '@/store/slices'
 import merge from 'lodash/merge'
 import { useMemo } from 'react'
 import { isAuthenticated } from '@/store/authSlice'
-import useWallet from '@/hooks/wallets/useWallet'
 
 export const useSpaceSafes = () => {
   const spaceId = useCurrentSpaceId()
@@ -37,18 +43,33 @@ export const useSpaceSafes = () => {
     [localAddressBook, spaceContacts],
   )
 
-  const { address: walletAddress = '' } = useWallet() || {}
-  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
+  // Ownership is derived from the batched overviews this surface already fetches; the pure groupers
+  // below avoid pulling in `useAllSafes()`.
+  const spaceSafeItems = useMemo(
+    () =>
+      currentData
+        ? Object.entries(currentData.safes).flatMap(([chainId, addresses]) =>
+            addresses.map((address) => ({ chainId, address })),
+          )
+        : [],
+    [currentData],
+  )
+  const { ownedByChain } = useSpaceSafeOverviews(spaceSafeItems)
   const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
-  const safeItems = currentData ? _buildSafeItems(currentData.safes, addressBooks, allOwned, allVisitedSafes) : []
-  const safes = useAllSafesGrouped(safeItems)
+
+  const safeItems = useMemo(
+    () => (currentData ? _buildSafeItems(currentData.safes, addressBooks, ownedByChain, allVisitedSafes) : []),
+    [currentData, addressBooks, ownedByChain, allVisitedSafes],
+  )
+
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const sortComparator = getComparator(orderBy)
 
-  const allSafes = useMemo<AllSafeItems>(
-    () => [...(safes.allMultiChainSafes ?? []), ...(safes.allSingleSafes ?? [])].sort(sortComparator),
-    [safes.allMultiChainSafes, safes.allSingleSafes, sortComparator],
-  )
+  const allSafes = useMemo<AllSafeItems>(() => {
+    const allMultiChainSafes = _getMultiChainAccounts(safeItems)
+    const allSingleSafes = _getSingleChainAccounts(safeItems, allMultiChainSafes)
+    return [...allMultiChainSafes, ...allSingleSafes].sort(sortComparator)
+  }, [safeItems, sortComparator])
 
   return { allSafes, isLoading, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes }
 }

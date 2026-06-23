@@ -11,7 +11,8 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
  * @returns Array of network names where the Safe is deployed
  */
 export const useNetworksOfSafe = (safeAddress: string): string[] => {
-  const { allMultiChainSafes } = useAllSafesGrouped()
+  // Without an address this returns [] anyway, so skip the owned-safes enumeration entirely.
+  const { allMultiChainSafes } = useAllSafesGrouped(undefined, !!safeAddress)
   const { configs: allChains } = useChains()
 
   const chainMap = useMemo(() => {

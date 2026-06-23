@@ -29,14 +29,15 @@ import { useAllSafes, useGetHref, type SafeItem } from '@/hooks/safes'
 import { useLoadFeature } from '@/features/__core__'
 import { WalletConnectFeature } from '@/features/walletconnect'
 
-export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | undefined => {
+export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSafes = true): WalletSDK | undefined => {
   const { safe } = useSafeInfo()
   const currentChain = useCurrentChain()
   const { setTxFlow } = useContext(TxModalContext)
   const web3ReadOnly = useWeb3ReadOnly()
   const router = useRouter()
   const { configs } = useChains()
-  const allSafes = useAllSafes()
+  // `allSafes` is only read by `switchChain`; callers enable the owned-safes lookup only when needed.
+  const allSafes = useAllSafes(fetchOwnedSafes)
   const getHref = useGetHref(router)
   const pendingTxs = useRef<Record<string, string>>({})
   const walletConnect = useLoadFeature(WalletConnectFeature)
@@ -302,11 +303,11 @@ export const useTxFlowApi = (chainId: string, safeAddress: string): WalletSDK | 
   ])
 }
 
-const useSafeWalletProvider = (): SafeWalletProvider | undefined => {
+const useSafeWalletProvider = (fetchOwnedSafes = true): SafeWalletProvider | undefined => {
   const { safe, safeAddress } = useSafeInfo()
   const { chainId } = safe
 
-  const txFlowApi = useTxFlowApi(chainId, safeAddress)
+  const txFlowApi = useTxFlowApi(chainId, safeAddress, fetchOwnedSafes)
 
   return useMemo(() => {
     if (!safeAddress || !chainId || !txFlowApi) return
