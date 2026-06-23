@@ -16,7 +16,7 @@ import { PendingStatus, selectPendingTxById } from '@/src/store/pendingTxsSlice'
 import { useTransactionProcessingState } from '@/src/hooks/useTransactionProcessingState'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { WcRejectOnBack } from '@/src/features/WalletConnect/Wallet/components/WcRejectOnBack'
+import { useWcReviewAbandon } from '@/src/features/WalletConnect/Wallet/hooks/useWcReviewAbandon'
 import { DappOriginProvider } from './components/DappOriginContext'
 
 const getHeaderText = (isExecuting: boolean, isSigning: boolean): string => {
@@ -79,10 +79,11 @@ function ConfirmTxContainer() {
 
   const isExpired = !!(txDetails && 'status' in txDetails.txInfo && txDetails.txInfo.status === 'expired')
 
+  useWcReviewAbandon(txId)
+
   return (
     <DappOriginProvider txId={txId}>
       <View flex={1}>
-        <WcRejectOnBack safeTxHash={txId} />
         <ScrollView
           onScroll={handleScroll}
           refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
