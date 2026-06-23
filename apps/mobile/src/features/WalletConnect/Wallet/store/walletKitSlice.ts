@@ -138,6 +138,12 @@ const walletKitSlice = createSlice({
     rejectPending(_state, _action: PayloadAction<PendingItem>) {
       // No state change — the walletKit listener performs the dApp response and removePending.
     },
+    // Signal action: a WalletConnect session_request arrived from the SDK. The walletKit
+    // listener reads the active context from the store, routes it, and performs the side
+    // effects (respond / pushPending / toast); the reducer itself does nothing.
+    sessionRequestReceived(_state, _action: PayloadAction<WalletKitTypes.SessionRequest>) {
+      // No state change — the walletKit listener owns routing and side effects.
+    },
     clear() {
       return initialState
     },
@@ -156,6 +162,7 @@ export const {
   markReviewAbandoned,
   clearOutstandingRequest,
   rejectPending,
+  sessionRequestReceived,
   clear: clearWalletKitState,
 } = walletKitSlice.actions
 

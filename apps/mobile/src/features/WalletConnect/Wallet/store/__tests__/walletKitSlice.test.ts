@@ -9,6 +9,8 @@ import reducer, {
   markOutstandingProposing,
   markReviewAbandoned,
   clearOutstandingRequest,
+  rejectPending,
+  sessionRequestReceived,
   clearWalletKitState,
   selectSessions,
   selectSessionCount,
@@ -120,6 +122,12 @@ describe('walletKitSlice reducers', () => {
     })
     state = reducer(state, clearOutstandingRequest('0xhash'))
     expect(state.outstandingRequests).toEqual({})
+  })
+
+  it('rejectPending and sessionRequestReceived are no-op signals (state unchanged)', () => {
+    const start = reducer(undefined, { type: '@@init' })
+    expect(reducer(start, rejectPending({ kind: 'request', id: 1 } as never))).toBe(start)
+    expect(reducer(start, sessionRequestReceived({ id: 1 } as never))).toBe(start)
   })
 
   it('clearWalletKitState resets to initial', () => {
