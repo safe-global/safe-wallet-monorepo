@@ -3,7 +3,7 @@ import type { IWalletKit } from '@reown/walletkit'
 import { renderHookWithStore, createTestStore } from '@/src/tests/test-utils'
 import { useSendTransaction } from '../useSendTransaction'
 import { composeSafeTxDraft } from '../../services/composeSafeTxDraft'
-import { walletKitSliceName, type PendingSessionRequest } from '../../store/walletKitSlice'
+import { rejectPending, walletKitSliceName, type PendingSessionRequest } from '../../store/walletKitSlice'
 
 const mockPush = jest.fn()
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }))
@@ -51,16 +51,14 @@ describe('useSendTransaction', () => {
     expect(result.current.ready).toBe(true)
   })
 
-  it('reject answers the dApp with USER_REJECTED and clears the pending request', async () => {
+  it('reject dispatches rejectPending for the current request (listener owns the response)', () => {
     const store = seededStore()
+    const dispatchSpy = jest.spyOn(store, 'dispatch')
     const { result } = renderHookWithStore(() => useSendTransaction(walletKit, pending), store)
-    await act(async () => {
-      await result.current.reject()
+    act(() => {
+      result.current.reject()
     })
-    expect(mockRespond).toHaveBeenCalledWith(
-      expect.objectContaining({ topic: 'topic', response: expect.objectContaining({ error: expect.anything() }) }),
-    )
-    expect(store.getState()[walletKitSliceName].pending).toHaveLength(0)
+    expect(dispatchSpy).toHaveBeenCalledWith(rejectPending(pending))
   })
 
   it('review composes a draft, stashes the outstanding request, and navigates to the confirm flow', async () => {

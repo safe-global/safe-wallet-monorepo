@@ -9,17 +9,14 @@ import type { IWalletKit } from '@reown/walletkit'
 import { useStore } from 'react-redux'
 import { getVariable, useTheme, YStack, XStack } from 'tamagui'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { formatJsonRpcError } from '@walletconnect/jsonrpc-utils'
-import { getSdkError } from '@walletconnect/utils'
 import { BackdropComponent, BackgroundComponent } from '@/src/components/Dropdown/sheetComponents'
 import { SafeButton } from '@/src/components/SafeButton'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import type { RootState } from '@/src/store'
-import { removePending, selectCurrentRequest } from '../store/walletKitSlice'
+import { rejectPending, selectCurrentRequest } from '../store/walletKitSlice'
 import { useApproveProposal } from '../hooks/useApproveProposal'
 import { useSendTransaction } from '../hooks/useSendTransaction'
 import { verifyStatusToVariant } from '../utils/verifyStatus'
-import { logWalletKitError } from '../utils/errors'
 import { SessionProposalSheet } from './SessionProposalSheet'
 import { SendTransactionSheet } from './SendTransactionSheet'
 import { ConnectionPermissionsPanel } from './ConnectionPermissionsPanel'
@@ -37,9 +34,9 @@ const FOOTER_CLEARANCE = 72
 /**
  * Root-level host for incoming WalletConnect request sheets. Reads the FIFO head of the
  * pending queue and presents the sheet for it. The sheet is dismissable by swipe-down or
- * backdrop tap; an implicit dismissal is treated as the user declining, so we send a
- * USER_REJECTED reply to the dApp (rejectSession for proposals, an error response for
- * requests).
+ * backdrop tap; an implicit dismissal is treated as the user declining, so we dispatch
+ * rejectPending and the walletKit listener replies USER_REJECTED to the dApp (rejectSession
+ * for proposals, an error response for requests).
  *
  * The proposal flow has two views — the proposal and a permissions detail panel — and both
  * primary CTAs ("Connect" / "Got it") are rendered here as a BottomSheetFooter so they sit
@@ -96,7 +93,7 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
   // to the dApp. Tapping an explicit action dispatches removePending first, clearing
   // `current` synchronously — so by the time onDismiss fires from those paths this is a
   // no-op. Reading state imperatively avoids a stale closure.
-  const onSheetDismiss = useCallback(async () => {
+  const onSheetDismiss = useCallback(() => {
     if (!walletKit) {
       return
     }
@@ -109,28 +106,9 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
     if (!currentAtDismiss) {
       return
     }
-    if (currentAtDismiss.kind === 'proposal') {
-      try {
-        await walletKit.rejectSession({
-          id: currentAtDismiss.id,
-          reason: getSdkError('USER_REJECTED'),
-        })
-      } catch (e) {
-        logWalletKitError('rejectSession on sheet dismiss failed', e)
-      }
-      dispatch(removePending({ id: currentAtDismiss.id, kind: 'proposal' }))
-      return
-    }
-    // currentAtDismiss.kind === 'request'
-    try {
-      await walletKit.respondSessionRequest({
-        topic: currentAtDismiss.topic,
-        response: formatJsonRpcError(currentAtDismiss.id, getSdkError('USER_REJECTED').message),
-      })
-    } catch (e) {
-      logWalletKitError('respondSessionRequest on sheet dismiss failed', e)
-    }
-    dispatch(removePending({ id: currentAtDismiss.id, kind: 'request' }))
+    // Record intent only; the walletKit listener rejects the dApp (rejectSession for a
+    // proposal, an error response for a request) and clears the pending item.
+    dispatch(rejectPending(currentAtDismiss))
   }, [walletKit, busy, composing, store, dispatch])
 
   // The active view's primary CTA, pinned to the bottom edge of the sheet. No background so
