@@ -1,7 +1,9 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
+import type { UseFormSetError, FieldValues, FieldPath } from 'react-hook-form'
 
 const HTTP_TOO_MANY_REQUESTS = 429
+const HTTP_UNPROCESSABLE_ENTITY = 422
 
 // User-facing copy for transport-level failures, so raw JS error strings (e.g.
 // "TypeError: Failed to fetch", "SyntaxError: ... is not valid JSON" from a plain-text
@@ -56,3 +58,28 @@ export const getRtkQueryErrorMessage = (error: FetchBaseQueryError | SerializedE
   // SerializedError
   return error.message || RTK_QUERY_ERROR_MESSAGES.generic
 }
+
+const isUnprocessableEntity = (error: unknown): error is FetchBaseQueryError =>
+  typeof error === 'object' &&
+  error !== null &&
+  'status' in error &&
+  (error as FetchBaseQueryError).status === HTTP_UNPROCESSABLE_ENTITY
+
+/**
+ * Maps a backend 422 onto a form field so its message shows inline. Returns true when set
+ * (caller falls back to a toast otherwise). The field is caller-supplied because the 422
+ * `path` is `[]` for bare-string schemas.
+ */
+export const applyBackendNameError = <T extends FieldValues>(
+  error: unknown,
+  setError: UseFormSetError<T>,
+  field: FieldPath<T>,
+): boolean => {
+  if (!isUnprocessableEntity(error)) return false
+  setError(field, { type: 'server', message: getRtkQueryErrorMessage(error) })
+  return true
+}
+
+// Non-RHF variant: returns the 422 message for local error state, or undefined otherwise.
+export const getBackendNameError = (error: unknown): string | undefined =>
+  isUnprocessableEntity(error) ? getRtkQueryErrorMessage(error) : undefined
