@@ -126,9 +126,13 @@ export const ExecuteForm = ({
     setExecutionMethod(newMethod)
   }
 
-  // Show execution selector when either no-fee campaign OR relay is available
-  // Also show if gas is too high but feature is otherwise available (to show disabled state)
-  // Or if limit is reached (to show 0/X available state)
+  // A nested approveHash always shows the selector so the user can select between:
+  //   - relay (default, so no gas cost to the user), or
+  //   - pay gas from the EOA
+  // Otherwise (non-relay-forced, non-GTF chain) show the selector when:
+  //   - the no-fee campaign or relay is available, or
+  //   - gas is too high but the no-fee campaign is otherwise available (to show the disabled state), or
+  //   - the daily relay limit is reached (to show 0/X available state)
   const showExecutionSelector =
     isNestedApproveHash ||
     (!requiresRelay &&
