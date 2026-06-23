@@ -8,7 +8,7 @@ import Billing from './index'
 // DEV PREVIEW: set to a status to force that paid-plan header state on the dev server, or `null`
 // for normal (Starter) behaviour. Ignored in production. Remove once wired to live data.
 // 'within_limit' | 'approaching_limit' | 'limit_reached' | 'payment_failed'
-const DEV_PREVIEW_STATUS: UsageStatus | null = 'within_limit'
+const DEV_PREVIEW_STATUS: UsageStatus | null = 'payment_failed'
 
 export default function SpaceBillingPage({ spaceId }: { spaceId: string }) {
   const previewValue: BillingState | undefined =

@@ -146,14 +146,23 @@
   letter-spacing: 0.15px;
 }
 
+.priceStatus {
+  margin-left: 6px;
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.15px;
+}
+
 /* ---- Tier toggle (Pro / Pro+) ---- */
 .tierToggle {
   display: flex;
+  align-self: stretch;
+  justify-content: center;
   align-items: center;
   height: 46px;
   padding: 4px;
-  border: 1px solid var(--color-border-light);
   border-radius: 16px;
+  background-color: var(--color-background-main);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
@@ -176,8 +185,29 @@
   cursor: pointer;
 }
 
+.currentDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.currentDotSuccess {
+  background-color: var(--color-success-main);
+}
+
+.currentDotWarning {
+  background-color: var(--color-warning-main);
+}
+
+.currentDotError {
+  background-color: var(--color-error-main);
+}
+
 .tierTabActive {
   background-color: var(--color-background-paper);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.1);
   font-weight: 600;
   color: var(--color-text-primary);
 }

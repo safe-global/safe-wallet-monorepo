@@ -79,6 +79,7 @@
 
 .badgeSuccess {
   background-color: var(--color-success-background);
+  color: var(--color-success-dark);
 }
 
 .badgeSuccess .badgeDot {
@@ -87,6 +88,7 @@
 
 .badgeWarning {
   background-color: var(--color-warning-background);
+  color: var(--color-warning-dark);
 }
 
 .badgeWarning .badgeDot {
@@ -95,6 +97,7 @@
 
 .badgeError {
   background-color: var(--color-error-background);
+  color: var(--color-error-dark);
 }
 
 .badgeError .badgeDot {
