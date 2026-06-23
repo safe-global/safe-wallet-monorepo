@@ -135,7 +135,9 @@ const walletKitSlice = createSlice({
     // Signal action: the user rejected/dismissed a pending sheet item. The walletKit listener
     // owns the dApp response (respondSessionRequest for a request, rejectSession for a
     // proposal) and the removePending cleanup; the reducer itself does nothing.
-    rejectPending(_state, _action: PayloadAction<PendingItem>) {},
+    rejectPending(_state, _action: PayloadAction<PendingItem>) {
+      // No state change — the walletKit listener performs the dApp response and removePending.
+    },
     clear() {
       return initialState
     },
