@@ -121,7 +121,8 @@ const MultiAccountItem = ({ multiSafeAccountItem, onLinkClick, isSpaceSafe = fal
     })
   }
 
-  const displayName = multiSafeAccountItem.name || name || shortenAddress(address)
+  const resolvedName = multiSafeAccountItem.name || name
+  const displayName = resolvedName || shortenAddress(address)
 
   return (
     <Collapsible open={expanded} onOpenChange={toggleExpand} data-testid="safe-list-item">
@@ -148,9 +149,11 @@ const MultiAccountItem = ({ multiSafeAccountItem, onLinkClick, isSpaceSafe = fal
               <Typography variant="paragraph-medium" className="text-foreground truncate">
                 {displayName}
               </Typography>
-              <Typography variant="paragraph-mini" color="muted" className="truncate">
-                {shortenAddress(address)}
-              </Typography>
+              {resolvedName && (
+                <Typography variant="paragraph-mini" color="muted" className="truncate">
+                  {shortenAddress(address)}
+                </Typography>
+              )}
             </div>
           </div>
 

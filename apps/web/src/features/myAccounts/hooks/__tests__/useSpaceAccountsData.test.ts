@@ -281,4 +281,39 @@ describe('useSpaceAccountsData', () => {
       expect(result.current.accounts[0].isUndeployed).toBe(false)
     })
   })
+
+  describe('display name', () => {
+    it('uses the safe name when present', () => {
+      const safes: AllSafeItems = [makeSafeItem({ chainId: '1', address: '0xNamed', name: 'My Safe' })]
+
+      const { result } = renderHook(() => useSpaceAccountsData(safes))
+
+      expect(result.current.accounts[0].name).toBe('My Safe')
+    })
+
+    it('returns an empty name when no name is available so the address is not shown twice', () => {
+      const safes: AllSafeItems = [makeSafeItem({ chainId: '1', address: '0xNoName', name: undefined })]
+
+      const { result } = renderHook(() => useSpaceAccountsData(safes))
+
+      expect(result.current.accounts[0].name).toBe('')
+    })
+
+    it('returns an empty name for an unnamed multichain account', () => {
+      const address = '0xMultiNoName'
+      const safes: AllSafeItems = [
+        {
+          address,
+          safes: [makeSafeItem({ chainId: '1', address }), makeSafeItem({ chainId: '137', address })],
+          isPinned: false,
+          lastVisited: 0,
+          name: undefined,
+        },
+      ]
+
+      const { result } = renderHook(() => useSpaceAccountsData(safes))
+
+      expect(result.current.accounts[0].name).toBe('')
+    })
+  })
 })

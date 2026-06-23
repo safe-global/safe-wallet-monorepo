@@ -16,7 +16,6 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { skipToken } from '@reduxjs/toolkit/query'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { AppRoutes } from '@/config/routes'
 import type { Account, SubAccount } from '../components/AccountsWidget/types'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
@@ -74,7 +73,7 @@ const formatMultichainAccount = (
   const totalFiat = safeOverviews.reduce((sum, overview) => sum + parseFloat(overview.fiatTotal || '0'), 0)
   const firstOverview = safeOverviews[0]
   const firstChain = chainMap.get(safe.safes[0]?.chainId)
-  const name = safe.name || getLocalName(safe.address, safe.safes, localAddressBooks) || shortenAddress(safe.address)
+  const name = safe.name || getLocalName(safe.address, safe.safes, localAddressBooks) || ''
 
   const subAccounts: SubAccount[] = safe.safes.map((s) => {
     const chain = chainMap.get(s.chainId)
@@ -116,7 +115,7 @@ const formatSingleSafe = (
   const chain = chainMap.get(safe.chainId)
   const overview = overviews?.find((o) => sameAddress(o.address.value, safe.address) && o.chainId === safe.chainId)
 
-  const name = safe.name || localAddressBooks[safe.chainId]?.[safe.address] || shortenAddress(safe.address)
+  const name = safe.name || localAddressBooks[safe.chainId]?.[safe.address] || ''
 
   const owners = overview
     ? `${overview.threshold}/${overview.owners.length}`

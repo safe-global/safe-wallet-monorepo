@@ -333,15 +333,16 @@ describe('AccountsWidget – display name', () => {
     owners: '1/1',
   })
 
-  it('displays the resolved name from account.name', () => {
+  it('shows the address only once when the account has no name', () => {
+    render(<AccountsWidget accounts={[makeAccount('')]} />)
+
+    expect(screen.getAllByText('0x1234...5678')).toHaveLength(1)
+  })
+
+  it('shows the name and the address when a name is present', () => {
     render(<AccountsWidget accounts={[makeAccount('My Safe')]} />)
 
     expect(screen.getByText('My Safe')).toBeInTheDocument()
-  })
-
-  it('displays shortened address when name is a short address', () => {
-    render(<AccountsWidget accounts={[makeAccount('0x1234...5678')]} />)
-
-    expect(screen.getAllByText('0x1234...5678')).toHaveLength(2)
+    expect(screen.getByText('0x1234...5678')).toBeInTheDocument()
   })
 })

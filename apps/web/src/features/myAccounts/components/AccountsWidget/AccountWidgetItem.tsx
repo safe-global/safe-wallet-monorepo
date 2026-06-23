@@ -30,13 +30,15 @@ const AccountWidgetItem = ({
       onClick={onItemClick ? () => onItemClick(account.address) : undefined}
       label={
         <Typography data-testid="single-account-name" variant="paragraph-bold">
-          {account.name}
+          {account.name || shortenAddress(account.address, 4)}
         </Typography>
       }
       info={
-        <Typography data-testid="single-account-address" variant="paragraph-mini" color="muted">
-          {shortenAddress(account.address, 4)}
-        </Typography>
+        account.name ? (
+          <Typography data-testid="single-account-address" variant="paragraph-mini" color="muted">
+            {shortenAddress(account.address, 4)}
+          </Typography>
+        ) : undefined
       }
       startNode={
         <Avatar data-testid="single-account-identicon">

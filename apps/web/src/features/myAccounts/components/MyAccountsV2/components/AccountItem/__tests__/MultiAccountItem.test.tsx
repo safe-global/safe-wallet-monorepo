@@ -163,8 +163,8 @@ describe('MultiAccountItem (MyAccountsV2)', () => {
 
       render(<MultiAccountItem multiSafeAccountItem={item} />)
 
-      // Shortened form appears both in the display name and in the address row
-      expect(screen.getAllByText('0x1234...5678').length).toBeGreaterThanOrEqual(1)
+      // With no name, the shortened address is shown once (as the title) and not duplicated below
+      expect(screen.getAllByText('0x1234...5678')).toHaveLength(1)
     })
 
     it('always displays the shortened address below the name', () => {

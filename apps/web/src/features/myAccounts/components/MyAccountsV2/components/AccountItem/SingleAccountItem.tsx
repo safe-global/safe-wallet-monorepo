@@ -32,7 +32,8 @@ const SingleAccountItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Singl
     trackingLabel,
   } = useSafeItemData(safeItem, { isSpaceSafe })
 
-  const displayName = (isSpaceSafe ? safeItem.name : name) || shortenAddress(safeItem.address)
+  const resolvedName = isSpaceSafe ? safeItem.name : name
+  const displayName = resolvedName || shortenAddress(safeItem.address)
 
   const hasQueuedItems =
     !safeItem.isReadOnly &&
@@ -60,9 +61,11 @@ const SingleAccountItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Singl
             <Typography variant="paragraph-medium" className="text-foreground truncate">
               {displayName}
             </Typography>
-            <Typography variant="paragraph-mini" color="muted" className="truncate">
-              {shortenAddress(safeItem.address)}
-            </Typography>
+            {resolvedName && (
+              <Typography variant="paragraph-mini" color="muted" className="truncate">
+                {shortenAddress(safeItem.address)}
+              </Typography>
+            )}
 
             <div className="mt-1 flex flex-wrap items-center gap-1">
               <BaseAccountItem.StatusChip

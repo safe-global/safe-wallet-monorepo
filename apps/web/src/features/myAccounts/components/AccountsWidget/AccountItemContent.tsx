@@ -20,11 +20,13 @@ const AccountItemContent = ({ account, children }: AccountItemContentProps): Rea
         </Avatar>
         <div className="flex min-w-0 flex-col gap-0.5 text-left">
           <Typography data-testid="multichain-account-name" variant="paragraph-bold">
-            {account.name}
+            {account.name || shortenAddress(account.address, 4)}
           </Typography>
-          <Typography data-testid="multichain-account-address" variant="paragraph-mini" color="muted">
-            {shortenAddress(account.address, 4)}
-          </Typography>
+          {account.name && (
+            <Typography data-testid="multichain-account-address" variant="paragraph-mini" color="muted">
+              {shortenAddress(account.address, 4)}
+            </Typography>
+          )}
         </div>
       </div>
 
