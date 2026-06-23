@@ -1,4 +1,12 @@
-import { DISALLOWED_CHARACTER_MESSAGE, EMPTY_NAME_MESSAGE, NAME_MAX_LENGTH, sanitizeName, validateName } from './names'
+import {
+  DISALLOWED_CHARACTER_MESSAGE,
+  DISALLOWED_CHARACTER_SHORT_MESSAGE,
+  EMPTY_NAME_MESSAGE,
+  NAME_MAX_LENGTH,
+  getNameValidationDisplay,
+  sanitizeName,
+  validateName,
+} from './names'
 
 const ZERO_WIDTH_SPACE = '​'
 const BIDI_OVERRIDE = '‮'
@@ -31,6 +39,20 @@ describe('sanitizeName', () => {
 
   it('trims surrounding whitespace', () => {
     expect(sanitizeName('  Alice  ')).toBe('Alice')
+  })
+})
+
+describe('getNameValidationDisplay', () => {
+  it('returns a short label and full tooltip for disallowed characters', () => {
+    expect(getNameValidationDisplay(DISALLOWED_CHARACTER_MESSAGE)).toEqual({
+      label: DISALLOWED_CHARACTER_SHORT_MESSAGE,
+      tooltip: DISALLOWED_CHARACTER_MESSAGE,
+    })
+  })
+
+  it('returns the message as the label when no short form exists', () => {
+    const message = 'Names must be at least 3 character(s) long'
+    expect(getNameValidationDisplay(message)).toEqual({ label: message })
   })
 })
 

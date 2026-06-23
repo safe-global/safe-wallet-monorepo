@@ -24,6 +24,20 @@ export const ALLOWED_NAME_REGEX = new RegExp(`^[\\p{L}\\p{M}\\p{N}${ALLOWED_PUNC
 export const DISALLOWED_CHARACTER_MESSAGE =
   "Names can only contain letters, numbers, spaces and the characters . _ - # @ & ' , ( )"
 
+export const DISALLOWED_CHARACTER_SHORT_MESSAGE = 'Invalid characters'
+
+export interface NameValidationDisplay {
+  label: string
+  tooltip?: string
+}
+
+export const getNameValidationDisplay = (message: string): NameValidationDisplay => {
+  if (message === DISALLOWED_CHARACTER_MESSAGE) {
+    return { label: DISALLOWED_CHARACTER_SHORT_MESSAGE, tooltip: message }
+  }
+  return { label: message }
+}
+
 export const EMPTY_NAME_MESSAGE = 'Names cannot be empty'
 
 export const sanitizeName = (value: string): string => {

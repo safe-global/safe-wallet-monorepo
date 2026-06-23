@@ -1,4 +1,8 @@
-import { NAME_MIN_LENGTH, DISALLOWED_CHARACTER_MESSAGE } from '@safe-global/utils/validation/names'
+import {
+  DISALLOWED_CHARACTER_MESSAGE,
+  DISALLOWED_CHARACTER_SHORT_MESSAGE,
+  NAME_MIN_LENGTH,
+} from '@safe-global/utils/validation/names'
 import { useForm, FormProvider } from 'react-hook-form'
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import NameInput from '.'
@@ -16,7 +20,7 @@ const renderNameInput = (props: Partial<React.ComponentProps<typeof NameInput>> 
   )
 
 const typeName = (value: string) => {
-  const input = screen.getByLabelText('Name', { exact: false })
+  const input = screen.getByRole('textbox')
   fireEvent.change(input, { target: { value } })
   return input
 }
@@ -31,18 +35,30 @@ describe('NameInput', () => {
     })
   })
 
-  it('shows the disallowed-character message for invalid input', async () => {
+  it('shows invalid characters in the label with full details in a tooltip', async () => {
     renderNameInput({ minLength: NAME_MIN_LENGTH })
     typeName('Alice<script>')
 
-    expect((await screen.findAllByText(DISALLOWED_CHARACTER_MESSAGE)).length).toBeGreaterThan(0)
+    await waitFor(() => {
+      expect(screen.getByRole('textbox', { name: DISALLOWED_CHARACTER_SHORT_MESSAGE })).toHaveAttribute(
+        'aria-invalid',
+        'true',
+      )
+    })
+    expect(screen.getByTitle(DISALLOWED_CHARACTER_MESSAGE)).toBeInTheDocument()
+    expect(screen.queryByRole('textbox', { name: 'Name' })).not.toBeInTheDocument()
   })
 
   it('enforces the minimum length when minLength is set', async () => {
     renderNameInput({ minLength: NAME_MIN_LENGTH })
     typeName('Jo')
 
-    expect((await screen.findAllByText('Names must be at least 3 character(s) long')).length).toBeGreaterThan(0)
+    await waitFor(() => {
+      expect(screen.getByRole('textbox', { name: 'Names must be at least 3 character(s) long' })).toHaveAttribute(
+        'aria-invalid',
+        'true',
+      )
+    })
   })
 
   it('does not enforce a minimum length by default', async () => {
@@ -58,7 +74,12 @@ describe('NameInput', () => {
     renderNameInput({ maxLength: 5 })
     typeName('abcdef')
 
-    expect((await screen.findAllByText('Names must be at most 5 characters long')).length).toBeGreaterThan(0)
+    await waitFor(() => {
+      expect(screen.getByRole('textbox', { name: 'Names must be at most 5 characters long' })).toHaveAttribute(
+        'aria-invalid',
+        'true',
+      )
+    })
   })
 
   it('sanitizes the value on blur', async () => {
@@ -76,6 +97,8 @@ describe('NameInput', () => {
     const input = typeName('abc')
     fireEvent.change(input, { target: { value: '' } })
 
-    expect((await screen.findAllByText('Required')).length).toBeGreaterThan(0)
+    await waitFor(() => {
+      expect(screen.getByRole('textbox', { name: 'Required' })).toHaveAttribute('aria-invalid', 'true')
+    })
   })
 })
