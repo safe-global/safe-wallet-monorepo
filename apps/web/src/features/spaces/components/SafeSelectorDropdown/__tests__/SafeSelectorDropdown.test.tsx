@@ -384,14 +384,15 @@ describe('SafeSelectorDropdown', () => {
       expect(screen.getByTestId('tooltip-content')).toHaveTextContent('Changing the Safe is not allowed in this screen')
     })
 
-    it('keeps the disabled styling but leaves the inline address actions interactive when a tx flow is open', () => {
+    it('dims the trigger and marks it aria-disabled (not native disabled) when a tx flow is open', () => {
       renderWithTxFlow(<div data-testid="active-tx-flow" />)
 
       const content = screen.getByTestId('open-safes-icon')
       expect(content.className).toMatch(/cursor-not-allowed/)
       expect(content.className).toMatch(/opacity-50/)
-      // The trigger isn't turned into a dead button, so copy + explorer + env hint stay clickable.
-      expect(content.className).not.toMatch(/\[&_\*\]:pointer-events-none/)
+      // Announced as disabled to assistive tech, but NOT the native `disabled` that would block the
+      // nested copy/explorer buttons. ("Not a dead button" is covered by the data-mock-disabled test.)
+      expect(content.getAttribute('aria-disabled')).toBe('true')
     })
 
     it('does not disable the Select or render the tooltip when no tx flow is active', () => {
@@ -404,6 +405,7 @@ describe('SafeSelectorDropdown', () => {
       const trigger = screen.getByTestId('open-safes-icon')
       expect(trigger.className).not.toMatch(/cursor-not-allowed/)
       expect(trigger.className).not.toMatch(/opacity-50/)
+      expect(trigger.getAttribute('aria-disabled')).toBeNull()
     })
   })
 

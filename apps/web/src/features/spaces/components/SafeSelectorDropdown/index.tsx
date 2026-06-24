@@ -127,6 +127,9 @@ function SafeSelectorDropdown({
         )}
         size="default"
         iconWrapperClassName={variants.iconWrapperClass}
+        // Not the native `disabled` (that would kill the nested copy/explorer buttons); aria-disabled
+        // just announces the inert trigger to assistive tech while leaving descendants operable.
+        aria-disabled={isDisabled || undefined}
         data-testid="open-safes-icon"
       >
         <SelectValue>
