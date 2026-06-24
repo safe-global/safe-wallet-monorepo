@@ -160,7 +160,7 @@ describe('WalletKitController', () => {
     expect(mockGetWalletKit).not.toHaveBeenCalled()
   })
 
-  it('tears down listeners when the feature flag flips off', async () => {
+  it('tears down all six SDK listeners when the feature flag flips off', async () => {
     const store = createTestStore({
       [walletKitSliceName]: { sessions: {}, verifyByTopic: {}, pending: [], outstandingRequests: {} },
     } as never)
@@ -170,6 +170,19 @@ describe('WalletKitController', () => {
     mockUseHasFeature.mockReturnValue(false)
     rerender(<WalletKitController />)
 
-    await waitFor(() => expect(mockWalletKit.off).toHaveBeenCalledWith('session_request', expect.any(Function)))
+    // Flag-off sets walletKit to null, which fires the cleanup of every subscription effect:
+    // the controller's lifecycle subs plus useSessionRequestHandler / useSessionProposalHandler.
+    // Lock the full teardown contract so a future change can't leak a stale subscription.
+    const events = [
+      'session_proposal',
+      'session_request',
+      'session_delete',
+      'proposal_expire',
+      'session_request_expire',
+      'session_authenticate',
+    ]
+    await waitFor(() =>
+      events.forEach((event) => expect(mockWalletKit.off).toHaveBeenCalledWith(event, expect.any(Function))),
+    )
   })
 })
