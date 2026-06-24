@@ -249,7 +249,7 @@ export const tokenNames = {
 export const addressBookErrrMsg = {
   invalidFormat: 'Invalid address format',
   invalidChecksum: 'Invalid address checksum',
-  exceedChars: 'Maximum 50 symbols',
+  exceedChars: 'Names must be at most 50 characters long',
   ownSafeManage: 'The Safe account cannot own itself',
   ownSafe: 'Cannot use Safe account itself as signer',
   alreadyAdded: 'Address already added',

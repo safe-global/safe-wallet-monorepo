@@ -6,7 +6,7 @@ import { addressBookRecipient } from '../pages/address_book.page'
 const addExistingAccountBtnStr = 'Add existing one'
 const contactStr = 'Choose address, network and a name'
 export const invalidAddressFormatErrorMsg = 'Invalid address format'
-const invalidAddressNameLengthErrorMsg = 'Maximum 50 symbols'
+const invalidAddressNameLengthErrorMsg = constants.addressBookErrrMsg.exceedChars
 
 const safeDataForm = '[data-testid=load-safe-form]'
 const removeOwnerBtn = '[data-testid="remove-owner-btn"]'
