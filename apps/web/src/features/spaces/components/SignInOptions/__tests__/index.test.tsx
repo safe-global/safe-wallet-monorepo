@@ -58,9 +58,11 @@ describe('SignInOptions', () => {
     const wallet = screen.getByTestId('connect-wallet-btn')
     const divider = screen.getByText('OR')
     const google = screen.getByTestId('google-login-btn')
+    const email = screen.getByTestId('email-login-btn')
 
-    expect(wallet.compareDocumentPosition(divider) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(divider.compareDocumentPosition(google) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(wallet.compareDocumentPosition(divider) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+    expect(divider.compareDocumentPosition(google) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
+    expect(google.compareDocumentPosition(email) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   })
 
   it('should render only wallet button when OIDC auth is disabled', () => {
