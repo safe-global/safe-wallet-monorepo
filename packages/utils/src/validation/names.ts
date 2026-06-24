@@ -22,7 +22,7 @@ const ALLOWED_PUNCTUATION = " ._\\-#@&',()"
 export const ALLOWED_NAME_REGEX = new RegExp(`^[\\p{L}\\p{M}\\p{N}${ALLOWED_PUNCTUATION}]*$`, 'u')
 
 export const DISALLOWED_CHARACTER_MESSAGE =
-  "Names can only contain letters, numbers, spaces and the characters . _ - # @ & ' , ( )"
+  "Names can only contain letters, numbers, spaces and the characters _ - # @ & ' , ( ) ."
 
 export const DISALLOWED_CHARACTER_SHORT_MESSAGE = 'Invalid characters'
 

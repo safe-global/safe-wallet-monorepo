@@ -60,16 +60,18 @@ const UploadSummary = ({ fileInfo, onRemove }: { fileInfo: FileInfo; onRemove: (
           </IconButton>
         </Grid>
       </Grid>
-      <Grid
-        item
-        xs={12}
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-start',
-        }}
-      >
-        <div className={css.verticalLine} />
-      </Grid>
+      {(fileInfo.summary.length > 0 || fileInfo.error) && (
+        <Grid
+          item
+          xs={12}
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-start',
+          }}
+        >
+          <div data-testid="file-upload-connector" className={css.verticalLine} />
+        </Grid>
+      )}
       <>
         {fileInfo.summary.map((summaryItem, idx) => (
           <Grid

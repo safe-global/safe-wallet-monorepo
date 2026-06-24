@@ -1,6 +1,7 @@
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
+import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import { useCSVReader, formatFileSize } from 'react-papaparse'
 import type { ParseResult } from 'papaparse'
@@ -129,11 +130,13 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
               ? {
                   name: acceptedFile.name,
                   additionalInfo: formatFileSize(acceptedFile.size),
-                  summary: [
-                    <Typography data-testid="summary-message" key="abSummary">
-                      {`Found ${entryCount} entries on ${chainCount} ${chainCount > 1 ? 'chains' : 'chain'}`}
-                    </Typography>,
-                  ],
+                  summary: error
+                    ? []
+                    : [
+                        <Typography data-testid="summary-message" key="abSummary">
+                          {`Found ${entryCount} entries on ${chainCount} ${chainCount > 1 ? 'chains' : 'chain'}`}
+                        </Typography>,
+                      ],
                 }
               : undefined
 
@@ -151,7 +154,11 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
 
         <div className={css.horizontalDivider} />
 
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {error && (
+          <Box my={2}>
+            <ErrorMessage>{error}</ErrorMessage>
+          </Box>
+        )}
 
         <Typography>
           Only CSV files exported from a {BRAND_NAME} can be imported.
