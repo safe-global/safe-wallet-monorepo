@@ -30,7 +30,10 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
   }, [space?.name])
 
   const sanitizedName = sanitizeName(name)
-  const validationError = name.length > 0 ? validateName(sanitizedName, { minLength: NAME_MIN_LENGTH }) : undefined
+  const validationError =
+    name.length > 0
+      ? validateName(sanitizedName, { minLength: NAME_MIN_LENGTH, maxLength: SPACE_NAME_MAX_LENGTH })
+      : undefined
   const isDirty = !!space && sanitizedName !== space.name && sanitizedName.length > 0
   const canSave = isDirty && isAdmin && !validationError && !isSaving && !isAwaitingCacheSync.current
   const canCancel = !!space && name !== space.name && isAdmin && !isSaving && !isAwaitingCacheSync.current
