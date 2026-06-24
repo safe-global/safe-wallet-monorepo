@@ -12,7 +12,7 @@ import FiatBalance from './FiatBalance'
 import ThresholdBadge from './ThresholdBadge'
 
 interface SafeCardLayoutProps {
-  ref?: React.Ref<HTMLButtonElement>
+  ref?: React.Ref<HTMLDivElement>
   checked: boolean
   onToggle: () => void
   onCheckedChange?: (checked: boolean) => void
@@ -44,15 +44,14 @@ export const SafeCardLayout = ({
   isActivating = false,
   disabled = false,
 }: SafeCardLayoutProps) => (
-  <button
+  <div
     ref={ref}
-    type="button"
-    role="checkbox"
-    aria-checked={checked}
-    onClick={onToggle}
-    disabled={disabled}
+    data-testid="safe-card"
+    onClick={disabled ? undefined : onToggle}
+    data-disabled={disabled || undefined}
     className={cn(
-      'box-border flex w-full min-w-0 max-w-full cursor-pointer items-center gap-1.5 rounded-3xl border-2 py-4 pl-2 pr-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:gap-2 sm:pr-6',
+      'box-border flex w-full min-w-0 max-w-full items-center gap-1.5 rounded-3xl border-2 py-4 pl-2 pr-3 text-left transition-colors sm:gap-2 sm:pr-6',
+      disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
       checked
         ? 'border-[var(--color-secondary-light)] bg-[var(--color-secondary-background)]'
         : 'border-card bg-card hover:bg-muted/50',
@@ -64,6 +63,7 @@ export const SafeCardLayout = ({
         disabled={disabled}
         onCheckedChange={onCheckedChange ?? (() => onToggle())}
         onClick={(e) => e.stopPropagation()}
+        aria-label={`Select ${name || shortenAddress(address)}`}
       />
     </div>
 
@@ -115,5 +115,5 @@ export const SafeCardLayout = ({
       {!isUndeployed && <FiatBalance value={fiatValue} />}
       {threshold > 0 && <ThresholdBadge threshold={threshold} owners={ownersCount} />}
     </div>
-  </button>
+  </div>
 )
