@@ -10,6 +10,12 @@ import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/b
 import { faker } from '@faker-js/faker'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
+import { Provider } from 'react-redux'
+import { makeStore } from '@/store'
+import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import type { SafeTransaction } from '@safe-global/types-kit'
+import { safeFixtures } from '../../../../../config/test/msw/fixtures'
+import { createSafeInfoState } from '@/stories/mocks/defaults'
 
 // Seed faker for deterministic visual regression tests
 faker.seed(456)
@@ -320,6 +326,78 @@ export const HypernativeMaliciousThreat: Story = {
       description: {
         story:
           'SafeShieldWidget when Hypernative guard is enabled, user is authenticated, and there is a critical contract check result',
+      },
+    },
+  },
+}
+
+// Top-3 cap + overflow row: 5 THREAT + 4 CUSTOM_CHECKS findings.
+// useSafeShieldAssessmentUrl reads from SafeTxContext + safeInfoSlice to compute
+// the Hypernative URL, so the decorator below seeds both.
+const overflowMockSafeTx = {
+  addSignature: () => {},
+  encodedSignatures: () => '',
+  getSignature: () => undefined,
+  signatures: new Map(),
+  data: {
+    to: '0x00000000000000000000000000000000000000aa',
+    value: '0',
+    data: '0x',
+    operation: 0,
+    safeTxGas: '0',
+    baseGas: '0',
+    gasPrice: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+    refundReceiver: '0x0000000000000000000000000000000000000000',
+    nonce: 0,
+  },
+} as unknown as SafeTransaction
+
+const overflowSafeTxContextValue: SafeTxContextParams = {
+  safeTx: overflowMockSafeTx,
+  setSafeTx: () => {},
+  setSafeMessage: () => {},
+  setSafeMessageHash: () => {},
+  setSafeTxError: () => {},
+  setNonce: () => {},
+  setNonceNeeded: () => {},
+  setSafeTxGas: () => {},
+  setTxOrigin: () => {},
+  isReadOnly: false,
+  gtfPaymentMode: 'safe',
+  setGtfPaymentMode: () => {},
+  setGtfSelectedGasToken: () => {},
+}
+
+const overflowStore = makeStore({
+  safeInfo: createSafeInfoState(safeFixtures.efSafe),
+})
+
+export const OverflowFindings: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty().threat(ThreatAnalysisBuilder.overflowFindings()).build(),
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
+  },
+  decorators: [
+    (Story) => (
+      <Provider store={overflowStore}>
+        <SafeTxContext.Provider value={overflowSafeTxContextValue}>
+          <Story />
+        </SafeTxContext.Provider>
+      </Provider>
+    ),
+  ],
+  tags: ['!chromatic'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '5 THREAT + 4 CUSTOM_CHECKS findings — both sections should cap at top 3 and show "+N More" overflow row linking to Hypernative.',
       },
     },
   },

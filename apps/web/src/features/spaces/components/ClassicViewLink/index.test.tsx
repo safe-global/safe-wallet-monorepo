@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
-import ClassicViewLink from '@/features/spaces/components/ClassicViewLink'
+import ClassicViewLink from './'
 import { disableClassicView, useIsClassicViewOptedIn } from '@/hooks/useClassicView'
 import { AppRoutes } from '@/config/routes'
 import { renderHook } from '@testing-library/react'
@@ -12,6 +12,14 @@ describe('ClassicViewLink', () => {
 
   afterEach(() => {
     disableClassicView()
+  })
+
+  it('renders the "Use the old UI" copy with a leading history icon', () => {
+    render(<ClassicViewLink />, { routerProps: { query: {} } })
+
+    const link = screen.getByTestId('classic-view-link')
+    expect(link).toHaveTextContent('Use the old UI')
+    expect(link.querySelector('svg')).toBeInTheDocument()
   })
 
   it('enables classic view and redirects to /welcome/accounts when no ?next= is present', () => {

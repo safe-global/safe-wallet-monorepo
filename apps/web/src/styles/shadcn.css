@@ -5,7 +5,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@source '../components/ui';
+/* Scan the whole apps/web/src tree so Tailwind generates every utility used
+   in JSX. Under Next.js the framework auto-scans the project; under Vite
+   (apps/web-tanstack) we need to declare the scan explicitly here so the
+   directive lives in the same file that imports tailwindcss/utilities.css
+   — that's how Tailwind v4's source detection aggregates correctly. */
+@source '../';
+/* Also scan shared packages whose JSX is reused via path aliases. */
+@source '../../../../packages';
 
 /* CSS variables scoped to .shadcn-scope ONLY — never :root */
 .shadcn-scope {
@@ -15,10 +22,13 @@
   --card-foreground: #0a0a0a;
   --popover: #ffffff;
   --popover-foreground: #0a0a0a;
+  --dialog: #ffffff;
+  --backdrop: rgba(99, 102, 105, 0.75);
   --primary: #171717;
   --primary-foreground: #fafafa;
   --secondary: #f5f5f5;
   --secondary-foreground: #171717;
+  --secondary-hover: var(--border);
   --muted: #f5f5f5;
   --muted-foreground: #737373;
   --accent: #f5f5f5;
@@ -56,10 +66,13 @@
   --card-foreground: #f5f5f5;
   --popover: #171717;
   --popover-foreground: #f5f5f5;
+  --dialog: #1c1c1c;
+  --backdrop: rgba(99, 102, 105, 0.75);
   --primary: #12ff80;
   --primary-foreground: #0a0a0a;
   --secondary: #262626;
   --secondary-foreground: #f5f5f5;
+  --secondary-hover: rgba(255, 255, 255, 0.12);
   --muted: #262626;
   --muted-foreground: #a3a3a3;
   --accent: #12ff8033;
@@ -96,10 +109,13 @@
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+  --color-dialog: var(--dialog);
+  --color-backdrop: var(--backdrop);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-hover: var(--secondary-hover);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
@@ -124,6 +140,9 @@
   --color-accent-secondary: var(--accent-secondary);
   --color-accent-secondary-foreground: var(--accent-secondary-foreground);
   --color-accent-success: var(--accent-success);
+  --color-success-subtle: var(--color-success-background);
+  --color-success-muted: var(--color-success-light);
+  --color-success-strong: var(--color-success-dark);
   --radius-2xs: 0.25rem;
   --radius-xs: 0.5rem;
   --radius-sm: 0.5rem;

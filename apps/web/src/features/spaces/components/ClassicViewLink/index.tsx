@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useRouter } from 'next/router'
-import { Box, Link } from '@mui/material'
+import { History } from 'lucide-react'
 import { enableClassicView } from '@/hooks/useClassicView'
 import { AppRoutes } from '@/config/routes'
 import { parseNextUrlForRouter } from '@/utils/nextUrl'
@@ -24,18 +24,17 @@ const ClassicViewLink = () => {
   }, [router])
 
   return (
-    <Box mt={2} textAlign="center">
-      <Link
-        component="button"
+    <div className="mt-3">
+      <button
         type="button"
         onClick={onClick}
         data-testid="classic-view-link"
-        underline="hover"
-        sx={{ fontSize: 14 }}
+        className="flex h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-md border border-border bg-card px-4 text-[15px] font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        View classic app
-      </Link>
-    </Box>
+        <History size={18} />
+        Use the old UI
+      </button>
+    </div>
   )
 }
 

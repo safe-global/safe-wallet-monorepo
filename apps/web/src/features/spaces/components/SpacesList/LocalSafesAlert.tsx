@@ -1,5 +1,4 @@
-import { Box, Stack, Typography, alpha } from '@mui/material'
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet'
+import { WalletMinimal } from 'lucide-react'
 import { useAppSelector } from '@/store'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 
@@ -10,34 +9,21 @@ const LocalSafesAlert = () => {
   if (count === 0) return null
 
   return (
-    <Stack
-      direction="row"
-      alignItems="center"
-      gap={1.5}
+    <div
       data-testid="local-safes-alert"
-      sx={{
-        mb: 2,
-        mx: 'auto',
-        p: 2,
-        width: '100%',
-        maxWidth: 350,
-        textAlign: 'left',
-        borderRadius: 1,
-        border: '1px solid',
-        borderColor: 'success.main',
-        backgroundColor: (theme) => alpha(theme.palette.success.main, 0.08),
-      }}
+      className="mb-5 flex items-center gap-3 rounded-md border p-3 text-left bg-[color-mix(in_srgb,var(--color-static-text-brand)_8%,transparent)] border-[color-mix(in_srgb,var(--color-static-text-brand)_35%,transparent)]"
     >
-      <AccountBalanceWalletIcon sx={{ color: 'success.main' }} />
-      <Box>
-        <Typography fontWeight={700}>
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-xs text-[var(--color-static-main)] bg-[var(--color-static-text-brand)]">
+        <WalletMinimal size={18} />
+      </div>
+
+      <div className="min-w-0">
+        <p className="text-sm font-bold leading-5 text-foreground">
           {count} {count === 1 ? 'Safe' : 'Safes'} detected on this browser
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Sign in to resume where you left off.
-        </Typography>
-      </Box>
-    </Stack>
+        </p>
+        <p className="text-[13px] leading-[18px] text-muted-foreground">Sign in to resume where you left off.</p>
+      </div>
+    </div>
   )
 }
 

@@ -151,7 +151,7 @@ describe('SecuritySafesTable', () => {
   it('calls onViewReport when a deployed row is clicked', () => {
     const onViewReport = jest.fn()
     renderTable({ onViewReport })
-    fireEvent.click(screen.getByText('My Vault').closest('tr')!)
+    fireEvent.click(screen.getByText('My Vault').closest('[data-testid="security-safe-row"]')!)
     expect(onViewReport).toHaveBeenCalledWith(singleSafe.address, singleSafe.chainId)
   })
 
@@ -162,7 +162,7 @@ describe('SecuritySafesTable', () => {
       chainEntries: [{ chainId: '1', isDeployed: false }],
     }
     renderTable({ safes: [undeployed], onViewReport, scanResults: {} })
-    fireEvent.click(screen.getByText('My Vault').closest('tr')!)
+    fireEvent.click(screen.getByText('My Vault').closest('[data-testid="security-safe-row"]')!)
     expect(onViewReport).not.toHaveBeenCalled()
     expect(screen.getByText('Not deployed')).toBeInTheDocument()
   })
@@ -186,24 +186,34 @@ describe('SecuritySafesTable', () => {
     // before useAutoScan's sequential queue reaches it. Cells must prefer data over the
     // scanning flag so the row shows real values immediately instead of stale skeletons.
     const key = scanKey(singleSafe.address, singleSafe.chainId)
-    const scanResults = buildScanResults([{ address: singleSafe.address, chainId: singleSafe.chainId }], {
-      account_setup: {
-        ...mkResult(),
-        evidence: [{ label: 'Threshold', value: '2 of 3' }],
-      } as ScanResult,
-      contract_version: {
-        ...mkResult(),
-        evidence: [{ label: 'Current version', value: '1.4.1' }],
-      } as ScanResult,
-    })
+    const scanResults = buildScanResults([{ address: singleSafe.address, chainId: singleSafe.chainId }])
     const { container } = renderTable({
       scanningKeys: new Set([key]),
       scanResults,
       balanceMap: { [key]: '1000' },
     })
-    expect(screen.getByText('2 of 3')).toBeInTheDocument()
-    expect(screen.getByText('1.4.1')).toBeInTheDocument()
+    // Balance resolves to real data ($1.0K) rather than a skeleton.
+    expect(screen.getByText('$1.0K')).toBeInTheDocument()
     expect(container.querySelectorAll('.MuiSkeleton-root').length).toBe(0)
+  })
+
+  it('shows total non-passing checks in the status column, regardless of status/severity', () => {
+    const scanResults = buildScanResults([{ address: singleSafe.address, chainId: singleSafe.chainId }], {
+      account_setup: mkResult('issue'),
+      recovery: mkResult('partial'),
+      guard: mkResult('partial'),
+    })
+    renderTable({ scanResults })
+    // 1 issue + 2 partial = 3 non-passing; chip color is at_risk (issue → at_risk), text leads
+    // with the grade word so the column matches the panel header and sidebar group chips.
+    expect(screen.getByText('At risk · 3 issues found')).toBeInTheDocument()
+  })
+
+  it('renders just "Healthy" with no count when every check passes', () => {
+    // Default scan results in renderTable are all clear → grade=passing → chip is the bare "Healthy" label.
+    renderTable()
+    expect(screen.getByText('Healthy')).toBeInTheDocument()
+    expect(screen.queryByText(/0 issues found/i)).not.toBeInTheDocument()
   })
 
   describe('multichain safes', () => {
@@ -217,20 +227,20 @@ describe('SecuritySafesTable', () => {
       // Parent + child rows both contain the name; assert at least one exists.
       expect(screen.getAllByText('Multi Safe').length).toBeGreaterThanOrEqual(1)
       expect(screen.getByTestId('network-logos')).toBeInTheDocument()
-      expect(screen.getByTestId('ExpandMoreRoundedIcon')).toBeInTheDocument()
+      expect(screen.getByTestId('expand-networks')).toBeInTheDocument()
     })
 
     it('reveals per-chain child rows when the parent is expanded', () => {
       const onViewReport = jest.fn()
       renderTable({ safes: [multiSafe], scanResults, onViewReport })
       // Expand the multichain row — click the parent (first match)
-      const parentRow = screen.getAllByText('Multi Safe')[0].closest('tr')!
+      const parentRow = screen.getAllByText('Multi Safe')[0].closest('[data-testid="security-safe-row"]')!
       fireEvent.click(parentRow)
       // After expand, child chain rows become visible — each has a chain indicator
       expect(screen.getByTestId('chain-1')).toBeInTheDocument()
       expect(screen.getByTestId('chain-137')).toBeInTheDocument()
       // Click a child row — should fire onViewReport with that chain
-      fireEvent.click(screen.getByTestId('chain-137').closest('tr')!)
+      fireEvent.click(screen.getByTestId('chain-137').closest('[data-testid="security-safe-row"]')!)
       expect(onViewReport).toHaveBeenCalledWith(multiSafe.address, '137')
     })
 
@@ -243,14 +253,29 @@ describe('SecuritySafesTable', () => {
         { multichain_setup: { status: 'partial', severity: 'Medium' } as ScanResult },
       )
       renderTable({ safes: [multiSafe], scanResults: warnResults })
-      expect(screen.getByTestId('WarningAmberRoundedIcon')).toBeInTheDocument()
+      expect(screen.getByLabelText('Signer setup differs across networks')).toBeInTheDocument()
     })
+  })
+
+  it('renders skeleton rows instead of safe rows while overviews load', () => {
+    renderTable({ isLoading: true, safes: [singleSafe, multiSafe] })
+    // The skeleton stands in for the rows — no real safe row or name is painted yet,
+    // so optimistic deployment flags/balances never flip on screen.
+    expect(screen.getByTestId('security-safes-table-skeleton')).toBeInTheDocument()
+    expect(screen.queryByText('My Vault')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('security-safe-row')).not.toBeInTheDocument()
+  })
+
+  it('renders real rows once overviews have loaded', () => {
+    renderTable({ isLoading: false })
+    expect(screen.queryByTestId('security-safes-table-skeleton')).not.toBeInTheDocument()
+    expect(screen.getByText('My Vault')).toBeInTheDocument()
   })
 
   it('highlights the selected safe row', () => {
     const selected: SelectedSafe = { address: singleSafe.address, chainId: '1' }
     renderTable({ selectedSafe: selected })
-    const row = screen.getByText('My Vault').closest('tr')!
-    expect(row).toHaveClass('Mui-selected')
+    const row = screen.getByText('My Vault').closest('[data-testid="security-safe-row"]')!
+    expect(row).toHaveAttribute('data-selected', 'true')
   })
 })

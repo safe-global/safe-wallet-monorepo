@@ -1,72 +1,76 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import {
-  useAddressBookRequestsCreateRequestV1Mutation,
-  useUserAddressBookUpsertPrivateItemsV1Mutation,
-} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+  Alert,
+  Box,
+  Button as MuiButton,
+  CircularProgress,
+  DialogActions,
+  DialogContent,
+  Stack,
+  Tooltip,
+  Typography,
+} from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import ModalDialog from '@/components/common/ModalDialog'
+import EthHashInfo from '@/components/common/EthHashInfo'
+import ChainIndicator from '@/components/common/ChainIndicator'
+import { NetworkLogosList } from '@/features/multichain'
+import { useAddressBookRequestsCreateRequestV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
-import { removeAddressBookEntry } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
-import { Badge } from '@/components/ui/badge'
-import { Spinner } from '@/components/ui/spinner'
+import useChains from '@/hooks/useChains'
+import { validateContactName } from './utils'
 
 type RequestToAddButtonProps = {
   address: string
   name: string
   chainIds: string[]
-  isLocal?: boolean
   alreadyRequested?: boolean
 }
 
-const RequestToAddButton = ({ address, name, chainIds, isLocal, alreadyRequested }: RequestToAddButtonProps) => {
+const getRequestErrorMessage = (error: unknown): string => {
+  const err = error as { status?: number | string; data?: { message?: string } }
+  if (err?.status === 409) return 'A request for this address is already pending.'
+  if (err?.status === 429) return 'Too many requests. Please try again later.'
+  if (typeof err?.data?.message === 'string') return err.data.message
+  return 'Failed to create request. Please try again.'
+}
+
+const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: RequestToAddButtonProps) => {
   const spaceId = useCurrentSpaceId()
+  const chains = useChains()
   const dispatch = useAppDispatch()
   const [createRequest] = useAddressBookRequestsCreateRequestV1Mutation()
-  const [upsertPrivate] = useUserAddressBookUpsertPrivateItemsV1Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [requested, setRequested] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const isDone = alreadyRequested || requested
+  const nameError = validateContactName(name)
 
-  const handleRequest = async () => {
+  const handleConfirm = async () => {
     if (!spaceId || isDone) return
 
     try {
       setIsSubmitting(true)
 
-      // Local contacts need to be uploaded as private first
-      if (isLocal) {
-        const uploadResult = await upsertPrivate({
-          spaceId: Number(spaceId),
-          upsertAddressBookItemsDto: { items: [{ name, address, chainIds }] },
-        })
-        if (uploadResult.error) {
-          dispatch(
-            showNotification({
-              message: 'Failed to upload contact. Please try again.',
-              variant: 'error',
-              groupKey: 'request-to-add-error',
-            }),
-          )
-          return
-        }
-
-        // Remove from local address book now that it's stored on the server
-        for (const chainId of chainIds) {
-          dispatch(removeAddressBookEntry({ chainId, address }))
-        }
-      }
-
       const result = await createRequest({
-        spaceId: Number(spaceId),
-        createAddressBookRequestDto: { address },
+        spaceId,
+        createAddressBookRequestDto: { address, name: name.trim(), chainIds },
       })
 
       if (result.error) {
+        const err = result.error as { status?: number | string }
+        // A pending request already exists, reflect that instead of erroring
+        if (err.status === 409) {
+          setRequested(true)
+          setOpen(false)
+        }
         dispatch(
           showNotification({
-            message: 'Failed to create request. Please try again.',
+            message: getRequestErrorMessage(result.error),
             variant: 'error',
             groupKey: 'request-to-add-error',
           }),
@@ -75,6 +79,7 @@ const RequestToAddButton = ({ address, name, chainIds, isLocal, alreadyRequested
       }
 
       setRequested(true)
+      setOpen(false)
       dispatch(
         showNotification({
           message: 'Request submitted for admin approval',
@@ -100,9 +105,80 @@ const RequestToAddButton = ({ address, name, chainIds, isLocal, alreadyRequested
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={handleRequest} disabled={isSubmitting}>
-      {isSubmitting ? <Spinner className="size-3.5" /> : 'Request to add'}
-    </Button>
+    <>
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+        Request to add
+      </Button>
+
+      <ModalDialog open={open} onClose={() => setOpen(false)} dialogTitle="Request to add contact" hideChainIndicator>
+        <DialogContent sx={{ py: 2 }}>
+          <Stack spacing={2}>
+            <Typography variant="body2" color="text.secondary">
+              An admin has to approve the request before the contact appears in the workspace address book.
+            </Typography>
+
+            <Box>
+              <Typography variant="body2" color="text.secondary" mb={0.5}>
+                Name
+              </Typography>
+              <Typography variant="body1">{name}</Typography>
+            </Box>
+
+            <Box>
+              <Typography variant="body2" color="text.secondary" mb={0.5}>
+                Address
+              </Typography>
+              <EthHashInfo address={address} shortAddress={false} showPrefix={false} showName={false} avatarSize={24} />
+            </Box>
+
+            <Box>
+              <Typography variant="body2" color="text.secondary" mb={1}>
+                Networks
+              </Typography>
+              {chains.configs.length === chainIds.length ? (
+                <Typography variant="body1">All networks</Typography>
+              ) : (
+                <Tooltip
+                  title={
+                    <Stack spacing={0.5}>
+                      {chainIds.map((chainId) => (
+                        <ChainIndicator key={chainId} chainId={chainId} />
+                      ))}
+                    </Stack>
+                  }
+                  placement="top"
+                  arrow
+                >
+                  <Box display="inline-flex">
+                    <NetworkLogosList networks={chainIds.map((chainId) => ({ chainId }))} showHasMore maxVisible={6} />
+                  </Box>
+                </Tooltip>
+              )}
+            </Box>
+
+            {nameError && (
+              <Alert severity="warning">Rename this contact to share it with the workspace. {nameError}.</Alert>
+            )}
+          </Stack>
+        </DialogContent>
+
+        <DialogActions>
+          <MuiButton data-testid="cancel-btn" onClick={() => setOpen(false)}>
+            Cancel
+          </MuiButton>
+          <MuiButton
+            data-testid="confirm-request-btn"
+            type="submit"
+            variant="contained"
+            onClick={handleConfirm}
+            disabled={!!nameError || isSubmitting}
+            disableElevation
+          >
+            {isSubmitting ? <CircularProgress size={20} /> : 'Request to add'}
+          </MuiButton>
+        </DialogActions>
+      </ModalDialog>
+    </>
   )
 }
 

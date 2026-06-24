@@ -7,7 +7,7 @@ import { CardStepper } from '@/components/new-safe/CardStepper'
 import type { TxStepperProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import SetAddressStep from '@/components/new-safe/load/steps/SetAddressStep'
-import { AppRoutes } from '@/config/routes'
+import { getNewSafeReturnUrl } from '@/components/new-safe/getReturnUrl'
 import SafeOwnerStep from '@/components/new-safe/load/steps/SafeOwnerStep'
 import SafeReviewStep from '@/components/new-safe/load/steps/SafeReviewStep'
 
@@ -46,7 +46,7 @@ const LoadSafe = ({ initialData }: { initialData?: TxStepperProps<LoadSafeFormDa
   const router = useRouter()
 
   const onClose = () => {
-    router.push(AppRoutes.welcome.index)
+    router.push(getNewSafeReturnUrl(router.query.next))
   }
 
   const initialSafe = initialData ?? loadSafeDefaultData

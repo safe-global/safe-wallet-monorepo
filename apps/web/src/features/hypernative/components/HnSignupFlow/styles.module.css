@@ -125,15 +125,6 @@
   line-height: 20px;
 }
 
-.logo {
-  height: 16px;
-  border-radius: 4px;
-}
-
-[data-theme='dark'] .logo {
-  filter: brightness(0) invert(1);
-}
-
 .subtitle {
   font-size: 14px;
   line-height: 24px;

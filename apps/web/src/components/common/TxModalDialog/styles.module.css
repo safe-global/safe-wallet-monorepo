@@ -3,6 +3,15 @@
   left: 230px;
   z-index: 3;
   transition: left 225ms cubic-bezier(0, 0, 0.2, 1) 0ms;
+  /* Opaque so macOS elastic overscroll can't reveal the page behind the
+     dialog (the backdrop is hidden, so the root is otherwise transparent). */
+  background-color: var(--color-border-background);
+}
+
+/* Keep scrolling inside the dialog: no chaining to the page behind and no
+   rubber-band bounce past the dialog's own content. */
+.dialog :global .MuiDialog-container {
+  overscroll-behavior: none;
 }
 
 .dialog.fullWidth {
@@ -61,6 +70,16 @@
   .title {
     position: sticky;
     top: 0;
+  }
+}
+
+/* Between 900–1148px the topbar wraps onto a second row (148px instead of
+   --topbar-height) — see Topbar's @max-[1100px] container classes plus its 48px
+   padding. The elevated topbar (z-index 99) paints over the dialog, so start
+   the dialog below it to keep the close button visible and clickable. */
+@media (min-width: 900px) and (max-width: 1147.95px) {
+  .dialog {
+    top: 148px;
   }
 }
 

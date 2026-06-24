@@ -17,8 +17,7 @@ const SEVERITY_BY_RANK = (Object.entries(SEVERITY_RANK) as Array<[SecurityGrade,
 export type SecurityUtils = Pick<SecurityContract, 'scanKey' | 'computeSummary' | 'severityRank'>
 
 /** Superset used by row components: SecurityUtils + the formatters/grade helpers they render. */
-export type RowSecurity = SecurityUtils &
-  Pick<SecurityContract, 'formatTimestamp' | 'getStrengthLevel' | 'getStrengthColor' | 'getSafeGrade'>
+export type RowSecurity = SecurityUtils & Pick<SecurityContract, 'formatTimestamp' | 'getSafeGrade'>
 
 /** Builder returning a Safe's home URL for a given (address, chainId), or undefined if the chain has no short name. */
 export type GetSafeSecurityHref = (
@@ -26,18 +25,32 @@ export type GetSafeSecurityHref = (
   chainId: string,
 ) => { pathname: string; query: { safe: string } } | undefined
 
-/** Extract a specific evidence label's value from a ScanResult. */
-export const getEvidence = (
-  results: Record<string, ScanResult> | undefined,
-  scannerId: string,
-  label: string,
-): string | null => {
-  const evidence = results?.[scannerId]?.evidence
-  if (!evidence) return null
-  for (const item of evidence) {
-    if (typeof item !== 'string' && item.label === label) return item.value
+/**
+ * Total non-passing applicable checks for a single Safe's scan results — the same
+ * count the panel header uses (`applicableCount − passing`), so the column and panel
+ * reconcile by construction. Excludes `not_applicable` and `inconclusive` checks.
+ */
+export const getNonPassingCount = (results: Record<string, ScanResult> | undefined): number => {
+  if (!results) return 0
+  let count = 0
+  for (const result of Object.values(results)) {
+    if (result.status === 'not_applicable' || result.status === 'inconclusive') continue
+    if (result.status !== 'clear') count++
   }
-  return null
+  return count
+}
+
+/** Sum non-passing checks across all of a multichain Safe's chain entries. */
+export const getAggregateNonPassingCount = (
+  safe: SpaceSafeEntry,
+  scanResults: Record<string, Record<string, ScanResult>>,
+  scanKey: SecurityContract['scanKey'],
+): number => {
+  let total = 0
+  for (const chain of safe.chainEntries) {
+    total += getNonPassingCount(scanResults[scanKey(safe.address, chain.chainId)])
+  }
+  return total
 }
 
 /**

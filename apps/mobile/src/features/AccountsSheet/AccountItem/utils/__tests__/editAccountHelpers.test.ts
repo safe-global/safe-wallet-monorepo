@@ -12,22 +12,28 @@ import {
 import { ErrorType } from '@/src/utils/errors'
 import { Address } from '@/src/types/address'
 import { AppDispatch } from '@/src/store'
-import { keyStorageService } from '@/src/services/key-storage'
+import { BiometryInvalidationError, keyStorageService } from '@/src/services/key-storage'
 import { removeSigner } from '@/src/store/signersSlice'
 import Logger from '@/src/utils/logger'
 
-jest.mock('@/src/services/key-storage', () => ({
-  keyStorageService: {
-    getPrivateKey: jest.fn(),
-    removePrivateKey: jest.fn(),
-  },
-}))
+jest.mock('@/src/services/key-storage', () => {
+  const actual = jest.requireActual('@/src/services/key-storage/errors')
+  return {
+    keyStorageService: {
+      getPrivateKey: jest.fn(),
+      removePrivateKey: jest.fn(),
+    },
+    BiometryInvalidationError: actual.BiometryInvalidationError,
+  }
+})
 
 jest.mock('@/src/store/signersSlice', () => ({
   removeSigner: jest.fn(),
 }))
 
 jest.mock('@/src/utils/logger', () => ({
+  __esModule: true,
+  default: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), trace: jest.fn() },
   error: jest.fn(),
 }))
 
@@ -218,7 +224,7 @@ describe('editAccountHelpers', () => {
       expect(mockDispatch).toHaveBeenCalledWith(removeSigner(mockAddress1))
     })
 
-    it('should handle missing private key', async () => {
+    it('should NOT wipe the signer when getPrivateKey returns undefined without invalidation', async () => {
       const mockDispatch = jest.fn() as unknown as AppDispatch
       const mockRemoveAllDelegatesForOwner = jest.fn()
 
@@ -228,7 +234,6 @@ describe('editAccountHelpers', () => {
 
       expect(result.success).toBe(false)
       expect(result.error?.type).toBe(ErrorType.STORAGE_ERROR)
-      expect(result.error?.message).toBe('Private key not found for the specified address')
       expect(mockRemoveAllDelegatesForOwner).not.toHaveBeenCalled()
       expect(keyStorageService.removePrivateKey).not.toHaveBeenCalled()
       expect(mockDispatch).not.toHaveBeenCalled()
@@ -314,7 +319,7 @@ describe('editAccountHelpers', () => {
       expect(mockDispatch).not.toHaveBeenCalled()
     })
 
-    it('should handle missing private key gracefully', async () => {
+    it('should report STORAGE_ERROR when getPrivateKey returns undefined without invalidation', async () => {
       const mockDispatch = jest.fn() as unknown as AppDispatch
       const mockRemoveAllDelegatesForOwner = jest.fn()
 
@@ -325,6 +330,23 @@ describe('editAccountHelpers', () => {
       expect(mockRemoveAllDelegatesForOwner).not.toHaveBeenCalled()
       expect(keyStorageService.removePrivateKey).not.toHaveBeenCalled()
       expect(mockDispatch).not.toHaveBeenCalled()
+    })
+
+    it('should cleanly remove the signer when the wrapping key has been biometry-invalidated', async () => {
+      const mockDispatch = jest.fn() as unknown as AppDispatch
+      const mockRemoveAllDelegatesForOwner = jest.fn()
+
+      ;(keyStorageService.getPrivateKey as jest.Mock).mockRejectedValue(
+        new BiometryInvalidationError(new Error('SE invalidated')),
+      )
+      ;(keyStorageService.removePrivateKey as jest.Mock).mockResolvedValue(undefined)
+
+      const result = await cleanupSinglePrivateKey(mockAddress1, mockRemoveAllDelegatesForOwner, mockDispatch)
+
+      expect(result.success).toBe(true)
+      expect(mockRemoveAllDelegatesForOwner).not.toHaveBeenCalled()
+      expect(keyStorageService.removePrivateKey).toHaveBeenCalledWith(mockAddress1, { requireAuthentication: false })
+      expect(mockDispatch).toHaveBeenCalledWith(removeSigner(mockAddress1))
     })
 
     it('should handle keychain errors gracefully', async () => {

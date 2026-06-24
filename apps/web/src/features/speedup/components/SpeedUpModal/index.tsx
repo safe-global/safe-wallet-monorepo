@@ -20,9 +20,10 @@ import { isWalletRejection } from '@/utils/wallets'
 import { type TransactionOptions } from '@safe-global/types-kit'
 import { PendingTxType, type PendingProcessingTx } from '@/store/pendingTxsSlice'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { MODALS_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { TX_EVENTS } from '@/services/analytics/events/transactions'
 import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
+import { isGtfSafePaid } from '@/features/gtf/utils/isGtfSafePaid'
 import { trackError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -44,6 +45,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   const [speedUpFee] = useGasPrice(true)
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false)
   const isEIP1559 = useHasFeature(FEATURES.EIP1559)
+  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
 
   const wallet = useWallet()
   const onboard = useOnboard()
@@ -94,7 +96,11 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
         )
         const { data: details } = await trigger({ chainId: chainInfo.chainId, id: txId })
         const txType = getTransactionTrackingType(details)
-        trackEvent({ ...TX_EVENTS.SPEED_UP, label: txType })
+        const gasPaymentSource = isGtfChain ? (isGtfSafePaid(safeTx.data) ? 'safe' : 'signing_wallet') : undefined
+        trackEvent(
+          { ...TX_EVENTS.SPEED_UP, label: txType },
+          gasPaymentSource ? { [MixpanelEventParams.GAS_PAYMENT_SOURCE]: gasPaymentSource } : undefined,
+        )
       } else {
         await dispatchCustomTxSpeedUp(
           txOptions as Omit<TransactionOptions, 'nonce'> & { nonce: number },

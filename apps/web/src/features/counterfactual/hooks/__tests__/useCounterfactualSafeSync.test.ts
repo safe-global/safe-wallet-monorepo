@@ -7,6 +7,7 @@ const deleteInitiate = jest.fn()
 let userResponse: unknown = { safes: {} }
 let spaceResponse: unknown = { safes: {} }
 let deleteShouldFail = false
+let deleteRejection: unknown = null
 let pendingDeletesState: { chainId: string; address: string }[] = []
 let userFailureCount = 0
 
@@ -35,13 +36,24 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes', () =
         initiate: (arg: unknown) => {
           deleteInitiate(arg)
           return {
-            unwrap: () => (deleteShouldFail ? Promise.reject(new Error('boom')) : Promise.resolve({ ok: true })),
+            unwrap: () => {
+              if (deleteRejection !== null) return Promise.reject(deleteRejection)
+              if (deleteShouldFail) return Promise.reject(new Error('boom'))
+              return Promise.resolve({ ok: true })
+            },
           }
         },
       },
     },
   },
 }))
+
+jest.mock('@/services/exceptions', () => ({
+  Errors: { _650: '650' },
+  logError: jest.fn(),
+}))
+
+const logErrorMock = jest.requireMock('@/services/exceptions').logError as jest.Mock
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   cgwApi: {
@@ -92,6 +104,8 @@ jest.mock('../../store/pendingCfDeletesSlice', () => ({
 import { useAppSelector } from '@/store'
 import useCounterfactualSafeSync from '../useCounterfactualSafeSync'
 import { isAuthenticated, selectIsStoreHydrated, lastUsedSpace } from '@/store/authSlice'
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
+const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
 
 const mockSelectors = (authenticated: boolean, hydrated: boolean, spaceId: string | null) => {
   ;(useAppSelector as jest.Mock).mockImplementation((selector: unknown) => {
@@ -114,8 +128,10 @@ describe('useCounterfactualSafeSync', () => {
     userResponse = { safes: {} }
     spaceResponse = { safes: {} }
     deleteShouldFail = false
+    deleteRejection = null
     pendingDeletesState = []
     userFailureCount = 0
+    logErrorMock.mockClear()
     ;(useAppSelector as jest.Mock).mockReset()
   })
 
@@ -147,30 +163,30 @@ describe('useCounterfactualSafeSync', () => {
   })
 
   it('fetches space CF safes when a space is active', async () => {
-    mockSelectors(true, true, '42')
+    mockSelectors(true, true, MOCK_SPACE_UUID)
     renderHook(() => useCounterfactualSafeSync())
     await flush()
 
-    expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: 42 })
+    expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID })
   })
 
   it('re-fetches when spaceId changes', async () => {
-    mockSelectors(true, true, '1')
+    mockSelectors(true, true, MOCK_SPACE_UUID)
     const { rerender } = renderHook(() => useCounterfactualSafeSync())
     await flush()
-    expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: 1 })
+    expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID })
 
     // Switch to another space — hook must re-run and fetch the new space's safes.
-    mockSelectors(true, true, '2')
+    mockSelectors(true, true, MOCK_SPACE_UUID_ALT)
     rerender()
     await flush()
 
-    expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: 2 })
+    expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID_ALT })
     expect(spaceInitiate).toHaveBeenCalledTimes(2)
   })
 
-  it('does not call the space endpoint when spaceId is non-numeric (legacy persisted state)', async () => {
-    mockSelectors(true, true, 'abc')
+  it('does not call the space endpoint when spaceId is empty (legacy persisted state)', async () => {
+    mockSelectors(true, true, '   ')
     renderHook(() => useCounterfactualSafeSync())
     await flush()
 
@@ -179,11 +195,11 @@ describe('useCounterfactualSafeSync', () => {
   })
 
   it('does not re-fetch when the same spaceId is retained across rerenders', async () => {
-    mockSelectors(true, true, '1')
+    mockSelectors(true, true, MOCK_SPACE_UUID)
     const { rerender } = renderHook(() => useCounterfactualSafeSync())
     await flush()
 
-    mockSelectors(true, true, '1')
+    mockSelectors(true, true, MOCK_SPACE_UUID)
     rerender()
     await flush()
 
@@ -222,7 +238,6 @@ describe('useCounterfactualSafeSync', () => {
   it('keeps queued entries when the DELETE fails so they can retry on next sign-in', async () => {
     pendingDeletesState = [{ chainId: '1', address: '0xabc' }]
     deleteShouldFail = true
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
     mockSelectors(true, true, null)
 
     renderHook(() => useCounterfactualSafeSync())
@@ -234,7 +249,32 @@ describe('useCounterfactualSafeSync', () => {
         typeof d === 'object' && d !== null && (d as { type?: string }).type === 'removePendingCfDelete',
     )
     expect(removeActions).toHaveLength(0)
-    consoleSpy.mockRestore()
+    expect(logErrorMock).toHaveBeenCalledWith('650', expect.any(Error))
+  })
+
+  it('drops queued entries on 404 so the queue does not retry forever against an already-deleted resource', async () => {
+    // Reproduces the bug: after activating a CF safe, ghost entries pile up in
+    // pendingCfDeletes and every page load fires N DELETEs that all 404. Each 404
+    // means the resource is already gone — drop the entry instead of retrying.
+    pendingDeletesState = [
+      { chainId: '1', address: '0xabc' },
+      { chainId: '1', address: '0xdef' },
+    ]
+    deleteRejection = { status: 404, data: { message: 'not found' } }
+    mockSelectors(true, true, null)
+
+    renderHook(() => useCounterfactualSafeSync())
+    await flush()
+
+    expect(deleteInitiate).toHaveBeenCalledTimes(2)
+    // Each 404 must remove the corresponding queue entry.
+    const removeActions = dispatched.filter(
+      (d): d is { type: string; payload: { chainId: string; address: string } } =>
+        typeof d === 'object' && d !== null && (d as { type?: string }).type === 'removePendingCfDelete',
+    )
+    expect(removeActions).toHaveLength(2)
+    // 404 is the intended end state — no error noise.
+    expect(logErrorMock).not.toHaveBeenCalled()
   })
 
   it('does not re-add a safe whose pending DELETE was just flushed', async () => {
@@ -259,7 +299,7 @@ describe('useCounterfactualSafeSync', () => {
 
     pendingDeletesState = [{ chainId: '11155111', address: '0xc21a' }]
     spaceResponse = { safes: { '11155111': [{ ...dtoBase, address: '0xc21a' }] } }
-    mockSelectors(true, true, '42')
+    mockSelectors(true, true, MOCK_SPACE_UUID)
 
     renderHook(() => useCounterfactualSafeSync())
     await flush()
@@ -302,7 +342,7 @@ describe('useCounterfactualSafeSync', () => {
       },
     }
 
-    mockSelectors(true, true, '42')
+    mockSelectors(true, true, MOCK_SPACE_UUID)
     renderHook(() => useCounterfactualSafeSync())
     await flush()
 
@@ -364,7 +404,6 @@ describe('useCounterfactualSafeSync', () => {
     // Without the retry, a single network blip stuck users who land on a
     // space-mate's CF safe URL on "Safe couldn't be loaded".
     jest.useFakeTimers()
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
     userFailureCount = 1
     userResponse = {
@@ -410,12 +449,10 @@ describe('useCounterfactualSafeSync', () => {
     expect(addActions.find((a) => a.payload.address === '0xRetry')).toBeDefined()
 
     jest.useRealTimers()
-    consoleSpy.mockRestore()
   })
 
   it('settles cfSafeSynced=true even when both attempts fail so consumers do not wait forever', async () => {
     jest.useFakeTimers()
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
     userFailureCount = 2
     mockSelectors(true, true, null)
@@ -436,6 +473,5 @@ describe('useCounterfactualSafeSync', () => {
     expect(syncedActions.some((a) => a.payload === true)).toBe(true)
 
     jest.useRealTimers()
-    consoleSpy.mockRestore()
   })
 })

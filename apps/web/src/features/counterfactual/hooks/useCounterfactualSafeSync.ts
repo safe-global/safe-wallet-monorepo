@@ -4,6 +4,7 @@ import { getStoreInstance } from '@/store'
 import { isAuthenticated, selectIsStoreHydrated, lastUsedSpace, setCfSafeSynced } from '@/store/authSlice'
 import { addUndeployedSafe, selectUndeployedSafes } from '../store/undeployedSafesSlice'
 import { removePendingCfDelete, selectPendingCfDeletes } from '../store/pendingCfDeletesSlice'
+import { Errors, logError } from '@/services/exceptions'
 import { fromBackendDto } from '../services/counterfactualSafeMapper'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import {
@@ -12,9 +13,12 @@ import {
   type GetCounterfactualSafesResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { parseSpaceId } from '@/utils/spaces'
+import { normalizeSpaceId } from '@/utils/spaces'
 
 const SYNC_RETRY_DELAY_MS = 2000
+
+const is404 = (error: unknown): boolean =>
+  typeof error === 'object' && error !== null && 'status' in error && (error as { status?: unknown }).status === 404
 
 /**
  * Syncs counterfactual safes from the backend into Redux on app load.
@@ -68,7 +72,13 @@ const useCounterfactualSafeSync = () => {
               ).unwrap()
               dispatch(removePendingCfDelete({ chainId, address }))
             } catch (e) {
-              console.error('[CF Sync] Failed to flush pending CF delete', e)
+              // 404 means the record is already gone server-side — our intended end
+              // state. Drop the queue entry so we stop retrying it on every page load.
+              if (is404(e)) {
+                dispatch(removePendingCfDelete({ chainId, address }))
+                return
+              }
+              logError(Errors._650, e)
             }
           }),
         )
@@ -77,11 +87,11 @@ const useCounterfactualSafeSync = () => {
       // Fetch CF safes from user endpoint and space endpoint
       const userQuery = dispatch(counterfactualSafesApi.endpoints.counterfactualSafesGetV1.initiate(undefined))
       // Guard against persisted/legacy lastUsedSpace values that aren't a clean
-      // integer — Number('abc') is NaN and would silently hit the API with NaN.
-      const numericSpaceId = parseSpaceId(spaceId)
+      // UUID or non-empty string — pass through unchanged, null means skip.
+      const resolvedSpaceId = normalizeSpaceId(spaceId)
       const spaceQuery =
-        numericSpaceId !== null
-          ? dispatch(spacesApi.endpoints.spaceCounterfactualSafesGetV1.initiate({ spaceId: numericSpaceId }))
+        resolvedSpaceId !== null
+          ? dispatch(spacesApi.endpoints.spaceCounterfactualSafesGetV1.initiate({ spaceId: resolvedSpaceId }))
           : null
 
       try {
@@ -150,12 +160,12 @@ const useCounterfactualSafeSync = () => {
       try {
         await fetchAndMerge()
       } catch (firstError) {
-        console.error('[CF Sync] Initial sync failed, retrying once', firstError)
+        logError(Errors._650, firstError)
         await new Promise((resolve) => setTimeout(resolve, SYNC_RETRY_DELAY_MS))
         try {
           await fetchAndMerge()
         } catch (retryError) {
-          console.error('[CF Sync] Retry also failed, giving up until next auth/space change', retryError)
+          logError(Errors._650, retryError)
         }
       }
       // Settle regardless of outcome — leaving consumers waiting forever is worse

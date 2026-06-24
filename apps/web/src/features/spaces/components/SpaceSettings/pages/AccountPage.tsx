@@ -4,11 +4,11 @@ import useLogout from '@/hooks/useLogout'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import InitialsAvatar from '../../InitialsAvatar'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 
 const AccountPage = () => {
   const { membership, signerAddress, email, isLoading } = useCurrentMemberProfile()

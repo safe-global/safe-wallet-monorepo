@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { type GetSpaceResponse, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import InitialsAvatar from '../../InitialsAvatar'
 import { useIsAdmin } from '@/features/spaces'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
@@ -8,12 +7,13 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Typography } from '@/components/ui/typography'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 
 const MAX_NAME_LENGTH = 60
 
 const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const dispatch = useAppDispatch()
-  const isAdmin = useIsAdmin(space?.id)
+  const isAdmin = useIsAdmin(space?.uuid)
   const [updateSpace, { isLoading: isSaving }] = useSpacesUpdateV1Mutation()
 
   const [name, setName] = useState(space?.name ?? '')
@@ -43,7 +43,7 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
     setError(undefined)
     try {
       isAwaitingCacheSync.current = true
-      await updateSpace({ id: space.id, updateSpaceDto: { name: trimmedName } }).unwrap()
+      await updateSpace({ id: space.uuid, updateSpaceDto: { name: trimmedName } }).unwrap()
       setName(trimmedName)
       isAwaitingCacheSync.current = false
       dispatch(

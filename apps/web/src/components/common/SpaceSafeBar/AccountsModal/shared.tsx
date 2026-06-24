@@ -1,13 +1,14 @@
 /**
- * Shared shadcn-only primitives used by PinnedSafeItem and PinnedMultiSafeItem.
+ * Shared shadcn-only primitives used by the AccountsModal safe rows.
  * No MUI dependencies.
  */
 import { type MouseEvent, useState } from 'react'
 import { isAddress } from 'ethers'
-import { Eye, AlertCircle, Cloud, Copy, Check, TriangleAlert } from 'lucide-react'
+import { Eye, Cloud, Copy, Check, TriangleAlert } from 'lucide-react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useChain } from '@/hooks/useChains'
 import { Skeleton } from '@/components/ui/skeleton'
+import NotActivatedBadgeBase from '@/components/common/NotActivatedBadge'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { cn } from '@/utils/cn'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
@@ -111,7 +112,7 @@ export function NameSourceIcon({ source }: { source: ContactSource }) {
           <Cloud className="size-3 text-muted-foreground stroke-[2.5]" />
         )}
       </TooltipTrigger>
-      <TooltipContent>From your {source} address book</TooltipContent>
+      <TooltipContent>From your {source === ContactSource.space ? 'workspace' : 'local'} address book</TooltipContent>
     </Tooltip>
   )
 }
@@ -131,8 +132,21 @@ const TooltipFullAddress = ({ address }: { address: string }) => {
   )
 }
 
-/** Shortened address; hover shows full address in a tooltip */
-export function ShortAddressWithTooltip({ address, className }: { address: string; className?: string }) {
+/**
+ * Shortened address; hover shows full address in a tooltip.
+ *
+ * When `isSimilar` is true, the two visible hex groups (first 4 and last 4) are
+ * bolded inline so users can compare against another address at a glance.
+ */
+export function ShortAddressWithTooltip({
+  address,
+  className,
+  isSimilar = false,
+}: {
+  address: string
+  className?: string
+  isSimilar?: boolean
+}) {
   return (
     <Tooltip>
       <TooltipTrigger
@@ -142,7 +156,16 @@ export function ShortAddressWithTooltip({ address, className }: { address: strin
           />
         }
       >
-        {shortenAddress(address)}
+        {isSimilar && address.startsWith('0x') && address.length >= 10 ? (
+          <>
+            0x
+            <b className="text-foreground">{address.slice(2, 6)}</b>
+            ...
+            <b className="text-foreground">{address.slice(-4)}</b>
+          </>
+        ) : (
+          shortenAddress(address)
+        )}
       </TooltipTrigger>
       <TooltipContent
         side="top"
@@ -181,7 +204,7 @@ export function CopyAddressButton({ address }: { address: string }) {
 /** Skeleton row mimicking a safe card — used while data is loading */
 export function SafeItemSkeleton() {
   return (
-    <div className="flex items-center gap-3 rounded-md border border-border bg-card px-3 py-3 mb-2">
+    <div className="flex items-center gap-3 rounded-lg px-3 py-3 mb-1">
       <Skeleton className="size-9 rounded-full shrink-0" />
       <div className="flex flex-col gap-1.5 flex-1 min-w-0">
         <Skeleton className="h-3.5 w-28" />
@@ -219,25 +242,13 @@ export function ReadOnlyBadge() {
 
 /** Not activated / activating badge */
 export function NotActivatedBadge({ isActivating }: { isActivating: boolean }) {
-  return (
-    <span
-      className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full px-1.5 py-px text-[11px] leading-none"
-      style={{
-        backgroundColor: isActivating ? 'var(--color-info-light)' : 'var(--color-warning-background)',
-        color: isActivating ? 'var(--color-info-dark)' : 'var(--color-warning-main)',
-      }}
-      data-testid="pending-activation-icon"
-    >
-      <AlertCircle className="size-3 shrink-0" />
-      {isActivating ? 'Activating account' : 'Not activated'}
-    </span>
-  )
+  return <NotActivatedBadgeBase isActivating={isActivating} data-testid="pending-activation-icon" />
 }
 
 /** "High similarity" warning badge */
 export function SimilarityBadge() {
   return (
-    <span className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full bg-amber-50 px-1.5 py-px text-[11px] leading-none text-amber-700">
+    <span className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full bg-amber-50 px-1.5 py-px text-[11px] leading-none text-amber-700 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-warning1-contrast-text)]">
       <TriangleAlert className="size-3 shrink-0" />
       High similarity
     </span>

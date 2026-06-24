@@ -1,0 +1,33 @@
+import { TriangleAlert } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+
+const TOOLTIP_TEXT =
+  'This address looks similar to another address in your list. Attackers create lookalike addresses to trick you. Verify the full address before selecting.'
+
+/**
+ * Warning chip for addresses that are similar to others in the list
+ * Shows a neutral "Similar address" label - we don't assess risk level
+ * since any similarity could be an attack
+ */
+const SimilarityWarning = () => {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Badge
+            variant="outline"
+            data-testid="similarity-warning"
+            className="cursor-help gap-1 border-yellow-300 text-yellow-800 dark:border-[var(--color-warning-main)] dark:text-[var(--color-warning1-contrast-text)]"
+          >
+            <TriangleAlert className="size-4" />
+            High similarity
+          </Badge>
+        }
+      />
+      <TooltipContent className="max-w-xs">{TOOLTIP_TEXT}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+export default SimilarityWarning

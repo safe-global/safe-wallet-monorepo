@@ -16,8 +16,9 @@ import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import '@/styles/globals.css'
 import '@/styles/shadcn.css'
 import { BRAND_NAME } from '@/config/constants'
-import { makeStore, setStoreInstance, useHydrateStore, useInitStaticChains } from '@/store'
+import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
 import PageLayout from '@/components/common/PageLayout'
+import LaunchScreen from '@/components/common/LaunchScreen'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import useTxNotifications from '@/hooks/useTxNotifications'
@@ -37,11 +38,11 @@ import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
 import useSafeMessagePendingStatuses from '@/hooks/messages/useSafeMessagePendingStatuses'
 import useChangedValue from '@/hooks/useChangedValue'
+import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
 import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
-import { CounterfactualFeature } from '@/features/counterfactual'
-import useCounterfactualSafeSync from '@/features/counterfactual/hooks/useCounterfactualSafeSync'
+import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -85,11 +86,11 @@ import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
+import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureException, initObservability } from '@/services/observability'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
-import { useSafeLabsTerms } from '@/hooks/useSafeLabsTerms'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
 import { useOidcLoginCallback } from '@/features/oidc-auth'
@@ -121,13 +122,14 @@ const SafeScopedSubscriptions = (): null => {
   useTxTracking()
   useSafeMsgTracking()
   usePortfolioRefetchOnTxHistory()
+  useInvalidateOverviewsOnTx()
   useCounterfactualSafeSync()
   return null
 }
 
 const InitApp = (): ReactElement | null => {
   useHydrateStore(reduxStore)
-  useInitStaticChains()
+  useInitChains()
   useAdjustUrl()
   useGtm()
   useMixpanel()
@@ -137,10 +139,10 @@ const InitApp = (): ReactElement | null => {
   useInitWeb3()
   useBeamer()
   useVisitedSafes()
-  useSafeLabsTerms() // Automatically disconnect wallets if terms not accepted and feature is enabled
   useOidcLoginCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
+  useUnlockBodyScroll()
 
   const isGateBlocking = useIsAuthGateBlocking()
   return isGateBlocking ? null : <SafeScopedSubscriptions />
@@ -189,16 +191,6 @@ interface SafeWalletAppProps extends AppProps {
   emotionCache?: EmotionCache
 }
 
-const TermsGate = ({ children }: { children: ReactNode }) => {
-  const { shouldShowContent } = useSafeLabsTerms()
-
-  if (!shouldShowContent) {
-    return null
-  }
-
-  return <>{children}</>
-}
-
 const SafeWalletApp = ({
   Component,
   pageProps,
@@ -223,27 +215,27 @@ const SafeWalletApp = ({
 
             <LazyWeb3Init />
 
-            <TermsGate>
-              <PageLayout pathname={router.pathname}>
-                <Component {...pageProps} key={safeKey} />
-              </PageLayout>
+            <LaunchScreen />
 
-              <CookieAndTermBanner />
+            <PageLayout pathname={router.pathname}>
+              <Component {...pageProps} key={safeKey} />
+            </PageLayout>
 
-              <TargetedOutreachPopupLoader />
+            <CookieAndTermBanner />
 
-              <Notifications />
+            <TargetedOutreachPopupLoader />
 
-              <RecoveryLoader />
+            <Notifications />
 
-              <CounterfactualHooksLoader />
+            <RecoveryLoader />
 
-              <SpendingLimitsLoaderWrapper />
+            <CounterfactualHooksLoader />
 
-              <Analytics />
+            <SpendingLimitsLoaderWrapper />
 
-              <PkModulePopup />
-            </TermsGate>
+            <Analytics />
+
+            <PkModulePopup />
           </CaptchaProvider>
         </AppProviders>
       </CacheProvider>

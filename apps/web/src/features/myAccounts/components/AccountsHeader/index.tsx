@@ -14,8 +14,10 @@ import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
+import { useNewSafeNextParam } from '@/components/new-safe/getReturnUrl'
 
 const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; onLinkClick?: () => void }) => {
+  const next = useNewSafeNextParam()
   return (
     <Track {...OVERVIEW_EVENTS.ADD_TO_WATCHLIST} label={trackingLabel}>
       <Button
@@ -24,7 +26,7 @@ const AddSafeButton = ({ trackingLabel, onLinkClick }: { trackingLabel: string; 
         size="lg"
         onClick={onLinkClick}
         className="w-full rounded-lg h-full px-5 text-base "
-        render={<NextLink href={AppRoutes.newSafe.load} />}
+        render={<NextLink href={{ pathname: AppRoutes.newSafe.load, query: { next } }} />}
       >
         <AddIcon color="currentColor" className="size-5 fill-primary" />
         Add

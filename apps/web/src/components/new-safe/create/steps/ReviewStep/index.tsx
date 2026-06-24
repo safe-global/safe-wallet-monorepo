@@ -7,8 +7,7 @@ import {
   activateReplayedSafe,
   persistCounterfactualSafe,
 } from '@/features/counterfactual/services'
-import { PayNowPayLater } from '@/features/counterfactual/components'
-import { CF_TX_GROUP_KEY } from '@/features/counterfactual'
+import { CF_TX_GROUP_KEY, PayNowPayLater } from '@/features/counterfactual'
 import { NetworkLogosList, predictAddressBasedOnReplayData } from '@/features/multichain'
 
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
@@ -22,6 +21,7 @@ import { getAvailableSaltNonce } from '@/components/new-safe/create/logic/utils'
 import {
   buildTransactionOptions,
   getDeploymentType,
+  getEffectivePayMethod,
   getNetworkLabel,
   getPaymentMethodLabel,
   getThresholdLabel,
@@ -65,6 +65,8 @@ import { useAllSafes } from '@/hooks/safes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
 import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
+import { useIsAdmin, useSpaceSafeCount } from '@/features/spaces'
+import { normalizeSpaceId } from '@/utils/spaces'
 import { AppRoutes } from '@/config/routes'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
@@ -191,6 +193,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const isCounterfactualEnabled = useHasFeature(FEATURES.COUNTERFACTUAL)
   const isUserAuthenticated = useAppSelector(isAuthenticated)
   const spaceId = useAppSelector(lastUsedSpace)
+  const isAdminOfActiveSpace = useIsAdmin(normalizeSpaceId(spaceId) ?? undefined)
+  const spaceSafeCount = useSpaceSafeCount(spaceId)
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
   const { showGasFeeEstimation, showInsufficientFundsWarning, showFeeInConfirmationText } = chain
     ? getNativeTokenDisplay(chain)
@@ -245,8 +249,13 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
   const customRPCs = useAppSelector(selectRpc)
 
-  // Derive effective pay method synchronously to avoid one-render gap
-  const effectivePayMethod = !isUserAuthenticated && payMethod === PayMethod.PayLater ? PayMethod.PayNow : payMethod
+  // Derive effective pay method synchronously to avoid one-render gap.
+  const effectivePayMethod = getEffectivePayMethod(
+    isMultiChainDeployment,
+    isUserAuthenticated,
+    payMethod,
+    isCounterfactualEnabled,
+  )
 
   const handleBack = () => {
     onBack(data)
@@ -350,6 +359,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           payMethod: effectivePayMethod,
           spaceId,
           isUserAuthenticated,
+          isAdminOfActiveSpace,
+          spaceSafeCount,
+          isMultiChainCreation: isMultiChainDeployment,
           dispatch,
         })
         if (!result.ok) throw result.error
@@ -427,7 +439,12 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     isCounterfactualEnabled,
   )
 
-  const isDisabled = showNetworkWarning || isCreating
+  // Pay later persists counterfactual data to the backend, so it requires an
+  // authenticated session. This only blocks multichain (where Pay now is
+  // disabled and Pay later is forced); single-chain Pay later falls back to
+  // Pay now when not signed in, so effectivePayMethod is never PayLater there.
+  const requiresSignIn = effectivePayMethod === PayMethod.PayLater && !isUserAuthenticated
+  const isDisabled = showNetworkWarning || isCreating || requiresSignIn
 
   return (
     <>
@@ -440,8 +457,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           <Box data-testid="pay-now-later-message-box" className={layoutCss.row}>
             <PayNowPayLater
               totalFee={totalFee}
+              willRelay={willRelay}
               isMultiChain={isMultiChainDeployment}
-              canRelay={canRelay}
               payMethod={effectivePayMethod}
               setPayMethod={setPayMethod}
               isUserAuthenticated={isUserAuthenticated}

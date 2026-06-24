@@ -1,4 +1,4 @@
-import AddAccounts from '../AddAccounts'
+import AddAccountsChooser from '../AddAccountsChooser'
 import Image from 'next/image'
 import { Typography, Paper, Box, Stack } from '@mui/material'
 import EmptyDashboard from '@/public/images/spaces/empty_dashboard.png'
@@ -26,7 +26,7 @@ const AddAccountsCard = () => {
           </Typography>
 
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
-            <AddAccounts />
+            <AddAccountsChooser buttonLabel="Manage accounts" entryPoint="dashboard" />
           </Track>
         </Box>
 

@@ -5,7 +5,7 @@ import * as useChains from '@/hooks/useChains'
 import * as store from '@/store'
 import * as balancesQueries from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import * as portfolioQueries from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
-import * as useCounterfactualBalances from '@/features/counterfactual/hooks'
+import * as useCounterfactualBalances from '@/features/counterfactual'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { chainBuilder } from '@/tests/builders/chains'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
@@ -461,11 +461,11 @@ describe('useLoadBalances', () => {
         } as unknown as store.RootState),
       )
 
-      jest
+      const balancesSpy = jest
         .spyOn(balancesQueries, 'useBalancesGetBalancesV1Query')
         .mockReturnValue(mockQueryResult({ currentData: mockTxServiceBalances }))
 
-      jest
+      const portfolioSpy = jest
         .spyOn(portfolioQueries, 'usePortfolioGetPortfolioV1Query')
         .mockReturnValue(mockQueryResult({ currentData: mockPortfolio }))
 
@@ -489,6 +489,14 @@ describe('useLoadBalances', () => {
       expect(balances?.items).toEqual(mockTxServiceBalances.items)
       // isAllTokensMode flag should be true
       expect(balances?.isAllTokensMode).toBe(true)
+      expect(portfolioSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ trusted: false }),
+        expect.objectContaining({ skip: false }),
+      )
+      expect(balancesSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ trusted: false }),
+        expect.objectContaining({ skip: false }),
+      )
       expect(error).toBeUndefined()
       expect(loading).toBe(false)
     })

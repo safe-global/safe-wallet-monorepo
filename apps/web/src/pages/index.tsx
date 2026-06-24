@@ -6,6 +6,7 @@ import isEmpty from 'lodash/isEmpty'
 import local from '@/services/local-storage/local'
 import { addedSafesSlice, type AddedSafesState } from '@/store/addedSafesSlice'
 import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import { SpacesLogin } from '@/features/spaces'
 
 const IndexPage: NextPage = () => {
   const router = useRouter()
@@ -17,20 +18,16 @@ const IndexPage: NextPage = () => {
       return
     }
 
-    // Wait until the chains config has resolved the feature flag.
-    if (isRequireLoginEnabled === undefined) {
+    // Only the gate-off (classic) view redirects. The gate-on view renders inline,
+    // and the still-loading state (undefined) does nothing.
+    if (isRequireLoginEnabled !== false) {
       return
     }
 
-    let pathname: string
-    if (isRequireLoginEnabled) {
-      pathname = AppRoutes.welcome.spaces
-    } else {
-      // TODO: Replace with useLocalStorage. For now read directly from localstorage so we have value on first render
-      const addedSafes = local.getItem<AddedSafesState>(addedSafesSlice.name)
-      const hasAddedSafes = addedSafes !== null && !isEmpty(addedSafes)
-      pathname = hasAddedSafes ? AppRoutes.welcome.accounts : AppRoutes.welcome.index
-    }
+    // TODO: Replace with useLocalStorage. For now read directly from localstorage so we have value on first render
+    const addedSafes = local.getItem<AddedSafesState>(addedSafesSlice.name)
+    const hasAddedSafes = addedSafes !== null && !isEmpty(addedSafes)
+    const pathname = hasAddedSafes ? AppRoutes.welcome.accounts : AppRoutes.welcome.index
 
     router.replace({
       pathname,
@@ -38,7 +35,7 @@ const IndexPage: NextPage = () => {
     })
   }, [router, chain, isRequireLoginEnabled])
 
-  return <></>
+  return isRequireLoginEnabled ? <SpacesLogin /> : <></>
 }
 
 export default IndexPage

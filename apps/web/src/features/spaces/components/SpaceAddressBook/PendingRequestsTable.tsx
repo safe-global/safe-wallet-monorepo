@@ -12,14 +12,20 @@ import {
   useAddressBookRequestsApproveRequestV1Mutation,
   useAddressBookRequestsRejectRequestV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId, useIsAdmin } from '@/features/spaces'
+import { useCurrentSpaceId, useGetSpaceAddressBook, useIsAdmin } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
 import { Check, X } from 'lucide-react'
+import { useMemo } from 'react'
 
 type PendingRequestsTableProps = {
   requests: AddressBookRequestItemDto[]
+}
+
+const getApproveErrorMessage = (error: unknown): string => {
+  const err = error as { data?: { message?: string } }
+  return typeof err?.data?.message === 'string' ? err.data.message : 'Failed to approve request'
 }
 
 function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
@@ -27,18 +33,30 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
   const isAdmin = useIsAdmin()
   const spaceId = useCurrentSpaceId()
   const dispatch = useAppDispatch()
+  const spaceAddressBook = useGetSpaceAddressBook()
   const [approveRequest] = useAddressBookRequestsApproveRequestV1Mutation()
   const [rejectRequest] = useAddressBookRequestsRejectRequestV1Mutation()
   const [loadingId, setLoadingId] = useState<number | null>(null)
+
+  // Approving a request for an address that is already in the workspace book
+  // overwrites the existing entry, so admins get a warning badge.
+  const spaceAddresses = useMemo(
+    () => new Set(spaceAddressBook.map((item) => item.address.toLowerCase())),
+    [spaceAddressBook],
+  )
 
   const handleApprove = async (requestId: number) => {
     if (!spaceId) return
     setLoadingId(requestId)
     try {
-      const result = await approveRequest({ spaceId: Number(spaceId), requestId })
+      const result = await approveRequest({ spaceId: spaceId ?? '', requestId })
       if (result.error) {
         dispatch(
-          showNotification({ message: 'Failed to approve request', variant: 'error', groupKey: 'approve-error' }),
+          showNotification({
+            message: getApproveErrorMessage(result.error),
+            variant: 'error',
+            groupKey: 'approve-error',
+          }),
         )
         return
       }
@@ -60,7 +78,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     if (!spaceId) return
     setLoadingId(requestId)
     try {
-      const result = await rejectRequest({ spaceId: Number(spaceId), requestId })
+      const result = await rejectRequest({ spaceId: spaceId ?? '', requestId })
       if (result.error) {
         dispatch(showNotification({ message: 'Failed to reject request', variant: 'error', groupKey: 'reject-error' }))
         return
@@ -92,7 +110,17 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       <TableBody>
         {requests.map((req) => (
           <TableRow key={req.id}>
-            <TableCell className="font-bold">{req.name}</TableCell>
+            <TableCell className="font-bold">
+              <span className="inline-flex items-center gap-2">
+                <span className="min-w-0 truncate">{req.name}</span>
+                {spaceAddresses.has(req.address.toLowerCase()) && (
+                  <Tooltip>
+                    <TooltipTrigger render={<Badge variant="outline">Already in workspace</Badge>} />
+                    <TooltipContent>Approving replaces the existing workspace entry for this address.</TooltipContent>
+                  </Tooltip>
+                )}
+              </span>
+            </TableCell>
 
             <TableCell>
               <div className="text-[0.8em]">

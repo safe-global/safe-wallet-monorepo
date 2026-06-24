@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import { useSpacesCreateV1Mutation, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppDispatch } from '@/store'
 import { setLastUsedSpace } from '@/store/authSlice'
-import { showNotification } from '@/store/notificationsSlice'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
@@ -26,19 +25,11 @@ const useSpaceSubmit = (
   const [updateSpace] = useSpacesUpdateV1Mutation()
 
   const editSpace = async (name: string) => {
-    const response = await updateSpace({ id: Number(spaceId), updateSpaceDto: { name } })
+    const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name } })
 
     if (response.error) {
       throw new Error(getRtkQueryErrorMessage(response.error))
     }
-
-    dispatch(
-      showNotification({
-        message: `Updated workspace name to ${name}.`,
-        variant: 'success',
-        groupKey: 'update-space-success',
-      }),
-    )
 
     const next = sanitizeNextUrl(router.query.next)
     router.push({
@@ -51,18 +42,10 @@ const useSpaceSubmit = (
     const response = await createSpaceWithUser({ createSpaceDto: { name } })
 
     if (response.data) {
-      const newSpaceId = response.data.id.toString()
+      const newSpaceId = response.data.uuid
       trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: newSpaceId }, { workspace_id: newSpaceId })
 
       dispatch(setLastUsedSpace(newSpaceId))
-
-      dispatch(
-        showNotification({
-          message: `Created workspace with name ${name}.`,
-          variant: 'success',
-          groupKey: 'create-space-success',
-        }),
-      )
 
       const next = sanitizeNextUrl(router.query.next)
       router.push({

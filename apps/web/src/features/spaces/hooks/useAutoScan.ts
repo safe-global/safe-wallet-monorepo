@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ScanResult, SecurityScanner } from '@/features/security/types'
 import type { SecurityContract } from '@/features/security'
-import useSafeScanContext, { type OverviewData } from '@/features/spaces/hooks/useSafeScanContext'
-import type { SpaceSafeEntry, SelectedSafe } from '@/features/spaces/components/SecurityHub'
+import useSafeScanContext, { type OverviewData } from './useSafeScanContext'
+import type { SpaceSafeEntry, SelectedSafe } from '../components/SecurityHub'
 import { scheduleWhileVisible } from '@/utils/visibility'
 
 // How long to wait for useSafeScanContext to resolve before bailing past a target.

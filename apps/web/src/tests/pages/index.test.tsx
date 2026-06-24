@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import IndexPage from '../../pages/index'
 import { AppRoutes } from '@/config/routes'
 import * as router from 'next/router'
@@ -17,7 +17,13 @@ jest.mock('@/hooks/useIsRequireLoginEnabled', () => ({
 
 jest.mock('@/services/local-storage/local', () => ({
   __esModule: true,
+  ...jest.requireActual('@/services/local-storage/local'),
   default: { getItem: jest.fn(), setItem: jest.fn(), removeItem: jest.fn() },
+}))
+
+jest.mock('@/features/spaces/components/SpacesLogin', () => ({
+  __esModule: true,
+  default: () => <div data-testid="spaces-login" />,
 }))
 
 const setup = ({
@@ -43,24 +49,13 @@ describe('IndexPage', () => {
     jest.clearAllMocks()
   })
 
-  it('redirects to /welcome/spaces when the require-login gate is on', async () => {
+  it('renders SpacesLogin inline (no redirect) when the require-login gate is on', () => {
     setup({ isRequireLoginEnabled: true })
 
     render(<IndexPage />)
 
-    await waitFor(() =>
-      expect(mockReplace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.spaces, query: undefined }),
-    )
-  })
-
-  it('forwards ?chain= when redirecting to /welcome/spaces', async () => {
-    setup({ isRequireLoginEnabled: true, query: { chain: 'eth' } })
-
-    render(<IndexPage />)
-
-    await waitFor(() =>
-      expect(mockReplace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.spaces, query: { chain: 'eth' } }),
-    )
+    expect(screen.getByTestId('spaces-login')).toBeInTheDocument()
+    expect(mockReplace).not.toHaveBeenCalled()
   })
 
   it('uses legacy /welcome behaviour when the gate is off and no safes added', async () => {
@@ -70,6 +65,16 @@ describe('IndexPage', () => {
 
     await waitFor(() =>
       expect(mockReplace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.index, query: undefined }),
+    )
+  })
+
+  it('forwards ?chain= when redirecting to /welcome on gate off', async () => {
+    setup({ isRequireLoginEnabled: false, addedSafes: null, query: { chain: 'eth' } })
+
+    render(<IndexPage />)
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.index, query: { chain: 'eth' } }),
     )
   })
 
@@ -92,7 +97,7 @@ describe('IndexPage', () => {
   })
 
   it('does not redirect before the router is ready', () => {
-    setup({ isRequireLoginEnabled: true, isReady: false })
+    setup({ isRequireLoginEnabled: false, isReady: false })
 
     render(<IndexPage />)
 

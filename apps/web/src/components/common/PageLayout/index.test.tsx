@@ -8,18 +8,6 @@ jest.mock('@/components/common/Header/Topbar', () => {
   return { __esModule: true, default: MockTopbar }
 })
 
-jest.mock('@/components/common/ClassicViewToast', () => {
-  const MockClassicViewToast = () => null
-  MockClassicViewToast.displayName = 'ClassicViewToast'
-  return { __esModule: true, default: MockClassicViewToast }
-})
-
-jest.mock('@/components/common/ClassicViewWarningBorder', () => {
-  const MockClassicViewWarningBorder = () => null
-  MockClassicViewWarningBorder.displayName = 'ClassicViewWarningBorder'
-  return { __esModule: true, default: MockClassicViewWarningBorder }
-})
-
 jest.mock('@/components/common/SafeLogo', () => {
   const MockSafeLogo = ({ href }: { href?: string }) => <a data-testid="safe-logo" href={href} />
   MockSafeLogo.displayName = 'SafeLogo'
@@ -96,6 +84,11 @@ jest.mock('@/hooks/useIsAuthGateBlocking', () => ({
   useIsAuthGateBlocking: () => mockUseIsAuthGateBlocking(),
 }))
 
+const mockUseIsSignedIn = jest.fn(() => false)
+jest.mock('@/hooks/useIsSignedIn', () => ({
+  useIsSignedIn: () => mockUseIsSignedIn(),
+}))
+
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(() => ({
     BatchSidebar: () => null,
@@ -114,6 +107,7 @@ describe('PageLayout', () => {
   beforeEach(() => {
     mockUseSafeAddressFromUrl.mockReturnValue('')
     mockUseIsAuthGateBlocking.mockReturnValue(false)
+    mockUseIsSignedIn.mockReturnValue(false)
   })
 
   const renderLayout = (pathname: string) =>
@@ -156,7 +150,7 @@ describe('PageLayout', () => {
     )
   })
 
-  describe('/welcome/spaces topbar gating', () => {
+  describe('login page topbar gating (/welcome/spaces and /)', () => {
     const useIsRequireLoginEnabledModule = jest.requireMock('@/hooks/useIsRequireLoginEnabled') as {
       useIsRequireLoginEnabled: jest.Mock
     }
@@ -165,22 +159,74 @@ describe('PageLayout', () => {
       useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
     })
 
-    it('renders Topbar on /welcome/spaces when the gate is OFF', () => {
+    it('renders Topbar on /welcome/spaces when the gate is OFF and the user is signed in', () => {
       useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      mockUseIsSignedIn.mockReturnValue(true)
       renderLayout(AppRoutes.welcome.spaces)
       expect(screen.getByTestId('topbar')).toBeInTheDocument()
     })
 
-    it('hides Topbar on /welcome/spaces when the gate is ON', () => {
-      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(true)
+    it('hides Topbar on /welcome/spaces when the user is signed out (sign-in form rendered)', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      mockUseIsSignedIn.mockReturnValue(false)
       renderLayout(AppRoutes.welcome.spaces)
       expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
     })
 
-    it('still shows Topbar while the flag is loading (undefined)', () => {
-      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
+    it('hides Topbar on /welcome/spaces when the gate is ON', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(true)
+      mockUseIsSignedIn.mockReturnValue(true)
       renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+    })
+
+    it('hides Topbar on /welcome/spaces while the flag is loading (undefined) to avoid an empty-selector flash', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
+      mockUseIsSignedIn.mockReturnValue(true)
+      renderLayout(AppRoutes.welcome.spaces)
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+    })
+
+    it('renders Topbar on / when the gate is OFF', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      renderLayout(AppRoutes.index)
       expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
+
+    it('hides Topbar on / when the gate is ON', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(true)
+      renderLayout(AppRoutes.index)
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+    })
+
+    it('hides Topbar on / while the flag is loading (undefined) to avoid an empty-selector flash', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
+      renderLayout(AppRoutes.index)
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('accounts page topbar gating (/welcome/accounts)', () => {
+    const useIsRequireLoginEnabledModule = jest.requireMock('@/hooks/useIsRequireLoginEnabled') as {
+      useIsRequireLoginEnabled: jest.Mock
+    }
+
+    afterEach(() => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+    })
+
+    it('renders Topbar on /welcome/accounts when the user is signed in', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      mockUseIsSignedIn.mockReturnValue(true)
+      renderLayout(AppRoutes.welcome.accounts)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
+
+    it('hides Topbar on /welcome/accounts when the user is signed out (mirrors /welcome/spaces)', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      mockUseIsSignedIn.mockReturnValue(false)
+      renderLayout(AppRoutes.welcome.accounts)
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
     })
   })
 
@@ -201,6 +247,11 @@ describe('PageLayout', () => {
       expect(screen.getByTestId('page-content')).toBeInTheDocument()
     })
 
+    it('still renders / (the index login page) so the user can sign in', () => {
+      renderLayout(AppRoutes.index)
+      expect(screen.getByTestId('page-content')).toBeInTheDocument()
+    })
+
     it('still renders onboarding routes so a partially-onboarded user can finish the flow', () => {
       renderLayout(AppRoutes.welcome.createSpace)
       expect(screen.getByTestId('page-content')).toBeInTheDocument()
@@ -209,29 +260,6 @@ describe('PageLayout', () => {
     it.each(STATIC_ROUTES.map((r) => [r]))('still renders the always-public legal page %s', (pathname) => {
       renderLayout(pathname)
       expect(screen.getByTestId('page-content')).toBeInTheDocument()
-    })
-  })
-
-  describe('settings route padding-top', () => {
-    it('applies the compact main class on settings without a safe address', () => {
-      mockUseSafeAddressFromUrl.mockReturnValue('')
-      const { container } = renderLayout('/settings/notifications')
-      const main = container.querySelector('main, [class*="main"]')
-      expect(main?.className).toMatch(/mainSpaceCompact/)
-    })
-
-    it('does not apply the compact main class on settings with a safe address', () => {
-      mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
-      const { container } = renderLayout('/settings/notifications')
-      const main = container.querySelector('main, [class*="main"]')
-      expect(main?.className).not.toMatch(/mainSpaceCompact/)
-    })
-
-    it('does not apply the compact main class on non-settings routes', () => {
-      mockUseSafeAddressFromUrl.mockReturnValue('')
-      const { container } = renderLayout('/home')
-      const main = container.querySelector('main, [class*="main"]')
-      expect(main?.className).not.toMatch(/mainSpaceCompact/)
     })
   })
 })

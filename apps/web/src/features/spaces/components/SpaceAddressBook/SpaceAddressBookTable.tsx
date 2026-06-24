@@ -1,20 +1,47 @@
 import { useEffect, useState } from 'react'
+import { useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import EmailInfo from '@/components/common/EmailInfo'
 import { NetworkLogosList } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { BookUser, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { HardDrive, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from './SpaceAddressBookActions'
+import LocalContactActions from './LocalContactActions'
 import { cn } from '@/utils/cn'
-import { formatDate } from './ActivityLog'
+import { formatDate } from '@/features/spaces/utils'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
+import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
   isLocal: boolean
-  isPrivate?: boolean
   isDuplicate?: boolean
+}
+
+// Resolution order: space member name → wallet address → email. Shared
+// address-book names are member-editable and are deliberately not used here.
+function AddedBy({ createdBy, memberName }: { createdBy: string; memberName?: string }) {
+  if (memberName) {
+    return (
+      <span className="inline-flex items-center gap-1.5">
+        <InitialsAvatar name={memberName} size="xsmall" rounded />
+        <span className="min-w-0 truncate text-sm">{memberName}</span>
+      </span>
+    )
+  }
+
+  if (isAddress(createdBy)) {
+    return (
+      <EthHashInfo address={createdBy} avatarSize={20} showName={false} showPrefix={false} showCopyButton={false} />
+    )
+  }
+
+  return <EmailInfo email={createdBy} size="xsmall" />
 }
 
 type SpaceAddressBookTableProps = {
@@ -33,6 +60,9 @@ function SpaceAddressBookTable({
   renderExtraAction,
 }: SpaceAddressBookTableProps) {
   const [page, setPage] = useState(0)
+  const resolveMemberName = useMemberNameResolver()
+  const theme = useTheme()
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'))
 
   useEffect(() => {
     setPage(0)
@@ -68,7 +98,7 @@ function SpaceAddressBookTable({
                       />
                     }
                   >
-                    {entry.isLocal && <BookUser className="text-muted-foreground size-4 flex-shrink-0" />}
+                    {entry.isLocal && <HardDrive className="text-muted-foreground size-4 flex-shrink-0" />}
                     <span className="min-w-0 truncate">{entry.name}</span>
                   </TooltipTrigger>
                   <TooltipContent>{entry.name}</TooltipContent>
@@ -77,10 +107,10 @@ function SpaceAddressBookTable({
 
               {/* Address */}
               <TableCell>
-                <div className="text-[0.8em]">
+                <div className="text-[0.8em] font-mono">
                   <EthHashInfo
                     address={entry.address}
-                    shortAddress={false}
+                    shortAddress={isSmallScreen}
                     showPrefix={false}
                     showName={false}
                     highlight4bytes
@@ -117,13 +147,7 @@ function SpaceAddressBookTable({
               {hasMiddleColumn && (
                 <TableCell>
                   {showAddedBy && entry.createdBy ? (
-                    <EthHashInfo
-                      address={entry.createdBy}
-                      avatarSize={20}
-                      onlyName
-                      showPrefix={false}
-                      showCopyButton={false}
-                    />
+                    <AddedBy createdBy={entry.createdBy} memberName={resolveMemberName(entry.createdByUserId)} />
                   ) : showLastUpdated ? (
                     <span className="text-muted-foreground text-xs">
                       {formatDate(entry.updatedAt || entry.createdAt)}
@@ -136,7 +160,7 @@ function SpaceAddressBookTable({
               <TableCell className="text-right">
                 <span className="inline-flex items-center gap-1">
                   {renderExtraAction?.(entry)}
-                  {!entry.isLocal && !entry.isPrivate && <SpaceAddressBookActions entry={entry} />}
+                  {entry.isLocal ? <LocalContactActions entry={entry} /> : <SpaceAddressBookActions entry={entry} />}
                 </span>
               </TableCell>
             </TableRow>

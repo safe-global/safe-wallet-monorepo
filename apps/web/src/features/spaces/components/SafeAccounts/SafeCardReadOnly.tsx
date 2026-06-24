@@ -1,7 +1,8 @@
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
+import { AccountItem } from '@/features/myAccounts'
 import Identicon from '@/components/common/Identicon'
+import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TriangleAlert, Copy, Check, RotateCw } from 'lucide-react'
@@ -11,7 +12,7 @@ import FiatBalance from '../SelectSafesOnboarding/components/FiatBalance'
 import ThresholdBadge from '../SelectSafesOnboarding/components/ThresholdBadge'
 import useSafeCardData from '../SelectSafesOnboarding/hooks/useSafeCardData'
 import { useLoadFeature } from '@/features/__core__'
-import { SpacesFeature } from '@/features/spaces'
+import { SpacesFeature } from '../../SpacesFeature'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
@@ -195,9 +196,12 @@ const SafeCardReadOnly = ({
           <AccountItem.ChainBadge safes={safes} className="justify-end" />
         </div>
 
-        <div className="flex min-w-0 shrink-0 flex-col items-end gap-2 pl-1 sm:min-w-16 sm:pl-0">
+        <div
+          data-testid="balance-column"
+          className="flex min-w-0 shrink-0 flex-col items-end gap-2 pl-1 sm:min-w-16 sm:pl-0"
+        >
           {isUndeployed ? (
-            <AccountItem.StatusChip undeployedSafe isActivating={isActivating} />
+            <NotActivatedBadge isActivating={isActivating} data-testid="pending-activation-chip" />
           ) : (
             <FiatBalance value={fiatValue} />
           )}

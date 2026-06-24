@@ -1,11 +1,25 @@
-import { ChevronDown, RotateCw } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { RotateCw, Search } from 'lucide-react'
+import { useState } from 'react'
 import { SelectContent, SelectItem } from '@/components/ui/select'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
+import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
+import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
+import useWallet from '@/hooks/wallets/useWallet'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
+import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import type { SafeItemData } from '../types'
+
+const matchesSearch = (item: SafeItemData, displayName: string, query: string): boolean => {
+  const name = displayName.toLowerCase()
+  const address = item.address.toLowerCase()
+  if (name.includes(query) || address.includes(query)) return true
+  return item.chains.some(
+    (chain) => chain.chainName?.toLowerCase().includes(query) || chain.shortName?.toLowerCase().includes(query),
+  )
+}
 
 export interface SafeDropdownContainerProps {
   items: SafeItemData[]
@@ -63,47 +77,44 @@ const SafeDropdownContainer = ({
   footer,
   closeDropdown,
 }: SafeDropdownContainerProps) => {
+  const [search, setSearch] = useState('')
+  const query = search.trim().toLowerCase()
+  const resolveName = useSafeNameResolver()
+  const wallet = useWallet()
+
   // Multi-chain items stay visible even when currently selected so the user can expand and switch chains.
-  const filteredItems = items.filter((item) => item.chains.length > 1 || item.id !== selectedItemId)
+  const structuralItems = items.filter((item) => item.chains.length > 1 || item.id !== selectedItemId)
+  const filteredItems = query
+    ? structuralItems.filter((item) =>
+        matchesSearch(item, resolveName(item.address, item.chains[0]?.chainId, item.name), query),
+      )
+    : structuralItems
 
-  const footerRef = useRef<HTMLDivElement>(null)
-  const [showScrollHint, setShowScrollHint] = useState(false)
+  // Key the search bar to displayable rows, so it's hidden when there's nothing to filter.
+  const showSearch = !isError && structuralItems.length > 0
 
-  // Custom scroll hint replaces base-ui's built-in scroll arrows: they sit at `bottom: 0`
-  // (colliding with the sticky footer) and don't animate, so users miss that the list is scrollable.
-  useEffect(() => {
-    const el = footerRef.current
-    if (!el) return
-    // base-ui's Popup is the scroll container; reach it via the project's `data-slot` marker.
-    const scroller = el.closest<HTMLElement>('[data-slot="select-content"]')
-    if (!scroller) return
-
-    const update = () => {
-      const hasOverflow = scroller.scrollHeight > scroller.clientHeight + 1
-      const atBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 1
-      setShowScrollHint(hasOverflow && !atBottom)
-    }
-
-    update()
-    scroller.addEventListener('scroll', update, { passive: true })
-    // base-ui sizes the popup async and avatars/logos load late, so the initial
-    // measurement often misses the overflow. Observe size changes to catch up.
-    const resizeObserver = new ResizeObserver(update)
-    resizeObserver.observe(scroller)
-    Array.from(scroller.children).forEach((child) => resizeObserver.observe(child))
-    return () => {
-      scroller.removeEventListener('scroll', update)
-      resizeObserver.disconnect()
-    }
-  }, [filteredItems.length, isLoading, isError])
+  // Bottom-fade scroll hint, shown only while more rows lie below the fold.
+  const { setScrollNode, showFade: showScrollHint } = useBottomScrollFade([filteredItems.length, isLoading, isError])
 
   const renderContent = () => {
     if (isError) {
       return <DropdownContentError onRetry={onRetry} />
     }
 
-    if (isLoading && filteredItems.length === 0) {
+    if (isLoading && filteredItems.length === 0 && !query) {
       return Array.from({ length: SKELETON_COUNT }, (_, i) => <SafeItemSkeleton key={i} />)
+    }
+
+    if (filteredItems.length === 0) {
+      return (
+        <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">
+          {query
+            ? 'No safes match your search'
+            : wallet
+              ? 'No safes yet'
+              : 'Connect a wallet to find your Safe Accounts'}
+        </p>
+      )
     }
 
     return filteredItems.map((item) => {
@@ -127,25 +138,67 @@ const SafeDropdownContainer = ({
       align="start"
       side="bottom"
       alignItemWithTrigger={false}
-      className="w-[430px] max-w-[calc(100vw-2rem)] max-h-[20rem] overflow-y-auto overscroll-y-none bg-card border-0 ring-0 rounded-lg px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
+      // outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
+      // :focus-visible and would otherwise draw the browser's blue outline around the whole popup.
+      className="w-[430px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-lg [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
       sideOffset={20}
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
     >
-      {header}
-      {renderContent()}
-      {footer && (
-        <div ref={footerRef} className="sticky bottom-0 z-10 bg-card">
-          {showScrollHint && (
-            <ChevronDown
-              data-testid="scroll-hint"
-              aria-hidden
-              className="pointer-events-none absolute -top-3 left-1/2 size-4 -translate-x-1/2 animate-bounce text-muted-foreground"
-            />
-          )}
-          {typeof footer === 'function' ? footer(closeDropdown) : footer}
+      {/* Fallback to 34rem: until base-ui sets --available-height the clamp must still apply, else the
+          list expands to full height, measures as non-overflowing, and the scroll-hint fade is missed. */}
+      <div className="flex max-h-[min(34rem,var(--available-height,34rem))] flex-col">
+        {(header || showSearch) && (
+          <div className="shrink-0 bg-card">
+            {header}
+            {showSearch && (
+              <div className="flex items-center gap-2 px-3 pb-2 pt-1">
+                <InputGroup className="flex-1 rounded-md border-gray-100 shadow-none">
+                  <InputGroupAddon>
+                    <Search className="size-4" />
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    placeholder="by name, address or network"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    // Stop keystrokes reaching base-ui Select's typeahead, which would hijack typing.
+                    // Trade-off: arrows/Enter stay in the input (no list nav); Escape still closes.
+                    onKeyDown={(e) => {
+                      if (e.key !== 'Escape') e.stopPropagation()
+                    }}
+                    autoComplete="off"
+                    data-testid="safe-dropdown-search-input"
+                  />
+                </InputGroup>
+                <SafeListSortToggle />
+              </div>
+            )}
+          </div>
+        )}
+
+        <div
+          ref={setScrollNode}
+          data-testid="dropdown-scroll-area"
+          className="min-h-0 flex-1 overflow-y-auto overscroll-y-none px-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
+        >
+          {renderContent()}
         </div>
-      )}
+
+        {footer && (
+          <div className="relative shrink-0 bg-card">
+            {showScrollHint && (
+              <div
+                data-testid="scroll-hint"
+                aria-hidden
+                // Fade the last visible row into the dropdown background. `card` isn't a :root color
+                // token (so `to-card` renders transparent) — reference the paper var it resolves to.
+                className="pointer-events-none absolute inset-x-0 -top-16 h-16 bg-gradient-to-b from-transparent to-[var(--color-background-paper)]"
+              />
+            )}
+            {typeof footer === 'function' ? footer(closeDropdown) : footer}
+          </div>
+        )}
+      </div>
     </SelectContent>
   )
 }

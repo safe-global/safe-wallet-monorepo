@@ -1,4 +1,4 @@
-import { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement, useCallback, useEffect, useState } from 'react'
 import {
   Alert,
   Box,
@@ -22,17 +22,22 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { useAppDispatch } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import MemberInfoForm from './MemberInfoForm'
-import AddressBookInput from '@/components/common/AddressBookInput'
 import useAddressBook from '@/hooks/useAddressBook'
-
-type MemberField = {
-  name: string
-  address: string
-  role: MemberRole
-}
+import { isAuthenticated } from '@/store/authSlice'
+import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { isAddress } from 'ethers'
+import {
+  type MemberField,
+  buildInviteUserPayload,
+  getInviteeIdentifierValidationError,
+  normalizeInviteeIdentifier,
+} from './utils'
+import AddMemberInput from './AddMemberInput'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 export const RoleMenuItem = ({
   role,
@@ -47,7 +52,7 @@ export const RoleMenuItem = ({
 
   return (
     <Box width="100%" alignItems="center" className={css.roleMenuItem}>
-      <Box sx={{ gridArea: 'icon', display: 'flex', alignItems: 'center' }}>
+      <Box className={css.roleIcon}>
         <SvgIcon mr={1} component={isAdmin ? adminIcon : memberIcon} inheritViewBox fontSize="small" />
       </Box>
       <Typography gridArea="title" fontWeight={hasDescription ? 'bold' : undefined}>
@@ -55,15 +60,13 @@ export const RoleMenuItem = ({
       </Typography>
       {hasDescription && (
         <>
-          <Box gridArea="description">
-            <Typography variant="body2" sx={{ maxWidth: '300px', whiteSpace: 'normal', wordWrap: 'break-word' }}>
-              {isAdmin
-                ? 'Admins can create and delete workspaces, invite members, and more.'
-                : 'Can view the workspace data.'}
+          <Box className={css.roleDescription}>
+            <Typography variant="body2">
+              {isAdmin ? 'Admins can create and delete spaces, invite members, and more.' : 'Can view the space data.'}
             </Typography>
           </Box>
-          <Box gridArea="checkIcon" sx={{ visibility: selected ? 'visible' : 'hidden', mx: 1 }}>
-            <CheckIcon fontSize="small" sx={{ color: 'text.primary' }} />
+          <Box className={selected ? css.roleCheckIcon : css.roleCheckIconHidden}>
+            <CheckIcon fontSize="small" className={css.roleCheckSvg} />
           </Box>
         </>
       )}
@@ -79,29 +82,59 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [inviteMembers] = useMembersInviteUserV1Mutation()
   const addressBook = useAddressBook()
+  const isUserSignedIn = useAppSelector(isAuthenticated)
+  const { data: session } = useAuthGetMeV1Query(undefined, { skip: !isUserSignedIn })
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
+  const sessionEmail = session && 'email' in session && typeof session.email === 'string' ? session.email : undefined
 
   const methods = useForm<MemberField>({
     mode: 'onChange',
     defaultValues: {
       name: '',
-      address: '',
+      inviteeIdentifier: '',
       role: MemberRole.MEMBER,
     },
   })
 
-  const { handleSubmit, formState, watch, setValue } = methods
+  const { handleSubmit, formState, register, watch, setValue } = methods
 
-  const addressValue = watch('address')
+  const inviteeIdentifierValue = watch('inviteeIdentifier')
+  const inviteeIdentifierInputProps = register('inviteeIdentifier', {
+    required: true,
+    validate: (value) => {
+      return (
+        getInviteeIdentifierValidationError({
+          inviteeIdentifier: value,
+          sessionEmail,
+          walletAddresses: currentUser?.wallets?.map((wallet) => wallet.address),
+        }) ?? true
+      )
+    },
+  })
 
   useEffect(() => {
-    const addressBookName = addressBook[addressValue]
-    if (addressBookName) {
-      setValue('name', addressBookName)
+    if (!isAddress(inviteeIdentifierValue)) {
+      return
     }
-  }, [addressBook, addressValue, setValue])
+
+    const addressBookName = addressBook[inviteeIdentifierValue]
+    if (addressBookName) {
+      setValue('name', addressBookName, { shouldValidate: true })
+    }
+  }, [addressBook, inviteeIdentifierValue, setValue])
+
+  const handleSelectAddress = useCallback(
+    (address: string, name: string) => {
+      setValue('inviteeIdentifier', address, { shouldValidate: true })
+      setValue('name', name, { shouldValidate: true })
+    },
+    [setValue],
+  )
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
+
+    const inviteeIdentifier = normalizeInviteeIdentifier(data.inviteeIdentifier)
 
     if (!spaceId) {
       setError('Something went wrong. Please try again.')
@@ -111,8 +144,10 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
     try {
       setIsSubmitting(true)
       const response = await inviteMembers({
-        spaceId: Number(spaceId),
-        inviteUsersDto: { users: [{ address: data.address, role: data.role, name: data.name }] },
+        spaceId: spaceId ?? '',
+        inviteUsersDto: {
+          users: [buildInviteUserPayload(data)],
+        },
       })
 
       if (response.data) {
@@ -129,7 +164,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
         dispatch(
           showNotification({
-            message: `Invited ${data.name} to space`,
+            message: `Invited ${data.name || inviteeIdentifier} to space`,
             variant: 'success',
             groupKey: 'invite-member-success',
           }),
@@ -138,9 +173,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
         onClose()
       }
       if (response.error) {
-        // @ts-ignore
-        const errorMessage = response.error?.data?.message || 'Invite failed. Please try again.'
-        setError(errorMessage)
+        setError(getRtkQueryErrorMessage(response.error) || 'Invite failed. Please try again.')
       }
     } catch (e) {
       console.error(e)
@@ -154,21 +187,17 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
     <ModalDialog open onClose={onClose} dialogTitle="Add member" hideChainIndicator>
       <FormProvider {...methods}>
         <form onSubmit={onSubmit}>
-          <DialogContent sx={{ py: 2 }}>
-            <Typography mb={2}>
-              Invite a signer of the Safe Accounts, or any other wallet address. Anyone in the workspace can see their
-              name.
-            </Typography>
+          <DialogContent sx={{ overflow: 'visible', py: 2 }}>
+            <Typography mb={2}>Invite a member by email or wallet address.</Typography>
 
             <Stack spacing={3}>
               <MemberInfoForm />
 
-              <AddressBookInput
-                data-testid="member-address-input"
-                name="address"
-                label="Address"
-                required
-                showPrefix={false}
+              <AddMemberInput
+                error={formState.errors.inviteeIdentifier?.message}
+                inputProps={inviteeIdentifierInputProps}
+                onSelectAddress={handleSelectAddress}
+                value={inviteeIdentifierValue}
               />
             </Stack>
 

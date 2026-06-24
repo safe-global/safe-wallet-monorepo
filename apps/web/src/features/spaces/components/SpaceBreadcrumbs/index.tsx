@@ -6,7 +6,7 @@ import SpaceIcon from '@/public/images/spaces/space.svg'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import InitialsAvatar from '../InitialsAvatar'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { BreadcrumbItem } from '@/components/common/Breadcrumbs/BreadcrumbItem'
 import { useParentSafe } from '@/hooks/useParentSafe'
 import { useCurrentSpaceId, useIsQualifiedSafe } from '@/features/spaces'
@@ -18,7 +18,7 @@ const SpaceBreadcrumbs = () => {
   const isQualifiedSafe = useIsQualifiedSafe()
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: space } = useSpacesGetOneV1Query({ id: Number(spaceId) }, { skip: !isUserSignedIn || !spaceId })
+  const { currentData: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !isUserSignedIn || !spaceId })
 
   const safeAddress = useSafeAddressFromUrl()
   const parentSafe = useParentSafe()

@@ -1,17 +1,31 @@
 import { modulesScanner } from '../modules'
 import { createMockContext } from '../test-helpers'
+import { isSafeAffectedByZodiacVulnerability } from '../../../services/vulnerableModules'
+
+jest.mock('../../../services/vulnerableModules', () => ({
+  isSafeAffectedByZodiacVulnerability: jest.fn().mockResolvedValue(false),
+}))
+
+const mockIsAffected = isSafeAffectedByZodiacVulnerability as jest.MockedFunction<
+  typeof isSafeAffectedByZodiacVulnerability
+>
 
 describe('modulesScanner', () => {
-  it('returns clear when no modules are installed', async () => {
+  beforeEach(() => {
+    mockIsAffected.mockReset()
+    mockIsAffected.mockResolvedValue(false)
+  })
+
+  it('returns not_applicable when no modules are installed', async () => {
     const result = await modulesScanner.scan(createMockContext({ modules: null }))
-    expect(result.status).toBe('clear')
+    expect(result.status).toBe('not_applicable')
     expect(result.severity).toBe('Low')
     expect(result.score).toBe(100)
   })
 
-  it('returns clear for empty modules array', async () => {
+  it('returns not_applicable for empty modules array', async () => {
     const result = await modulesScanner.scan(createMockContext({ modules: [] }))
-    expect(result.status).toBe('clear')
+    expect(result.status).toBe('not_applicable')
     expect(result.score).toBe(100)
   })
 
@@ -113,7 +127,7 @@ describe('modulesScanner', () => {
         modules: [{ value: '0x0000000000000000000000000000000000000000' }],
       }),
     )
-    expect(result.status).toBe('clear')
+    expect(result.status).toBe('not_applicable')
     expect(result.score).toBe(100)
   })
 
@@ -134,5 +148,60 @@ describe('modulesScanner', () => {
       )
       expect(result.status).toBe('clear')
     }
+  })
+
+  describe('known Zodiac vulnerability', () => {
+    it('does not call the security-check API when there are no modules', async () => {
+      await modulesScanner.scan(createMockContext({ modules: [] }))
+      expect(mockIsAffected).not.toHaveBeenCalled()
+    })
+
+    it('flags a vulnerable Delay module as Critical with a remove CTA', async () => {
+      mockIsAffected.mockResolvedValue(true)
+      const delay = { value: '0x1111111111111111111111111111111111111111', name: 'Delay Modifier' }
+      const result = await modulesScanner.scan(createMockContext({ modules: [delay] }))
+
+      expect(result.status).toBe('issue')
+      expect(result.severity).toBe('Critical')
+      expect(result.score).toBe(0)
+      expect(result.ctaLabelOverride).toBe('Remove unsupported module')
+      expect(result.vulnerableModules).toEqual([delay.value])
+      expect(result.evidence).toContainEqual({ label: 'Vulnerable module', value: 'Delay Modifier' })
+    })
+
+    it('flags a vulnerable Roles module as Critical', async () => {
+      mockIsAffected.mockResolvedValue(true)
+      const roles = { value: '0x2222222222222222222222222222222222222222', name: 'Roles Modifier' }
+      const result = await modulesScanner.scan(createMockContext({ modules: [roles] }))
+
+      expect(result.severity).toBe('Critical')
+      expect(result.vulnerableModules).toEqual([roles.value])
+    })
+
+    it('returns Critical warning without a remove target when affected via a related Safe', async () => {
+      mockIsAffected.mockResolvedValue(true)
+      // Affected, but no installed module matches Delay/Roles by name (nested case).
+      const result = await modulesScanner.scan(
+        createMockContext({ modules: [{ value: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF' }] }),
+      )
+
+      expect(result.status).toBe('issue')
+      expect(result.severity).toBe('Critical')
+      expect(result.vulnerableModules).toEqual([])
+      expect(result.ctaLabelOverride).toBeUndefined()
+    })
+
+    it('falls back to the trust tiers when the Safe is not affected', async () => {
+      mockIsAffected.mockResolvedValue(false)
+      const result = await modulesScanner.scan(
+        createMockContext({
+          modules: [{ value: '0x1111111111111111111111111111111111111111', name: 'Delay Modifier' }],
+        }),
+      )
+
+      expect(result.status).toBe('clear')
+      expect(result.severity).toBe('Low')
+      expect(result.vulnerableModules).toBeUndefined()
+    })
   })
 })

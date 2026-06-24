@@ -59,7 +59,12 @@ export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balanc
       gap: 1,
     }}
   >
-    <TokenIcon logoUri={item.tokenInfo.logoUri} key={item.tokenInfo.address} tokenSymbol={item.tokenInfo.symbol} />
+    <TokenIcon
+      logoUri={item.tokenInfo.logoUri}
+      key={item.tokenInfo.address}
+      tokenSymbol={item.tokenInfo.symbol}
+      size={32}
+    />
 
     <Grid item xs data-testid="token-item">
       <Typography

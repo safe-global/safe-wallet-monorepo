@@ -37,22 +37,30 @@
  * - camelCase → service (undefined when not ready)
  */
 
-import { createFeatureHandle } from '@/features/__core__'
-import type { SpacesContract } from './contract'
-
 // Feature handle - uses semantic mapping
-export const SpacesFeature = createFeatureHandle<SpacesContract>('spaces')
+export { SpacesFeature } from './SpacesFeature'
 
 // Contract type (for type annotations if needed)
 export type { SpacesContract } from './contract'
+
+// Domain constants (max accounts/workspaces, shared limit copy)
+export { SAFE_ACCOUNTS_LIMIT, SPACES_LIMIT, safeAccountsLimitReachedText } from './constants'
 
 // Hooks exported directly (always loaded, not in contract)
 // Keep hooks lightweight - minimal imports, heavy logic in services if needed
 export { default as useAddressBookSearch } from './hooks/useAddressBookSearch'
 export { useCurrentSpaceId } from './hooks/useCurrentSpaceId'
+export {
+  useIsCurrentSpaceAtSafeLimit,
+  useCurrentSpaceSafeCount,
+  useSpaceSafeCount,
+} from './hooks/useIsCurrentSpaceAtSafeLimit'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
+export { default as useFeatureRedirect } from './hooks/useFeatureRedirect'
 export { default as useGetSpaceAddressBook } from './hooks/useGetSpaceAddressBook'
-export { default as useGetPrivateAddressBook } from './hooks/useGetPrivateAddressBook'
+export { useMemberNameResolver } from './hooks/useMemberNameResolver'
+export { default as useGetSpaceAuditLog } from './hooks/useGetSpaceAuditLog'
+export { default as useGetSpaceAuditLogActors } from './hooks/useGetSpaceAuditLogActors'
 export { default as useGetAddressBookRequests } from './hooks/useGetAddressBookRequests'
 export { useAdminCount, useIsLastActiveAdmin } from './hooks/useIsLastActiveAdmin'
 export { default as useIsQualifiedSafe } from './hooks/useIsQualifiedSafe'
@@ -69,6 +77,7 @@ export {
   useIsInvited,
   isAdmin,
   isActiveAdmin,
+  isInviteExpired,
   MemberStatus,
   MemberRole,
 } from './hooks/useSpaceMembers'
@@ -92,5 +101,16 @@ export {
 // Public types (compile-time only, no runtime cost)
 export { mapSpaceContactsToAddressBookState } from './utils'
 
-// Utilities
-export { getDeterministicColor } from './components/InitialsAvatar'
+// Components consumed from outside the feature
+export { HeaderNavigation } from './components/HeaderNavigation'
+export { SpacesEnhancedSidebar } from './components/Sidebar/SpacesEnhancedSidebar'
+export { default as ConnectWalletHint } from './components/ConnectWalletHint'
+export { default as ChainSelectorBlock } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'
+export type { ChainSelectorBlockProps } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'
+export type { SafeItemData, SafeItemDataChain } from './components/SafeSelectorDropdown/types'
+export { default as SafeSelectorDropdown } from './components/SafeSelectorDropdown'
+export { default as SafeWidget, WidgetItem } from './components/SafeWidget'
+export { default as SafeCardReadOnly } from './components/SafeAccounts/SafeCardReadOnly'
+export { default as FiatBalance } from './components/SelectSafesOnboarding/components/FiatBalance'
+export { DashboardHeader } from './components/Dashboard/DashboardHeader'
+export { default as SpacesLogin } from './components/SpacesLogin'

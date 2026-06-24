@@ -6,7 +6,7 @@ import { BannerType } from '../../hooks/useBannerStorage'
 import { HnBannerWithDismissal } from './HnBannerWithDismissal'
 
 // Export the original pure component for tests and stories
-export { HnBanner, hnBannerID } from './HnBanner'
+export { HnBanner } from './HnBanner'
 export type { HnBannerProps } from './HnBanner'
 
 // Export the carousel-compatible version
@@ -25,7 +25,3 @@ const HnBannerForSettingsWithConditions = withHnBannerConditions(BannerType.Sett
   HnBannerWithSignupAndDismissal as ComponentType<WithHnBannerConditionsProps>,
 )
 export const HnBannerForSettings = withHnFeature(HnBannerForSettingsWithConditions)
-
-// Export versions for Queue and History pages (same logic as HnBannerForCarousel)
-export { HnBannerForQueue } from './HnBannerForQueue'
-export { HnBannerForHistory } from './HnBannerForHistory'

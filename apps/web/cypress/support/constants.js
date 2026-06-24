@@ -51,7 +51,7 @@ export const spaceSafeAccountsUrl = '/spaces/safe-accounts?spaceId='
 export const spaceAddressBookUrl = '/spaces/address-book?spaceId='
 export const userSettingsUrl = '/user-settings'
 export const prodbaseUrl = 'https://app.safe.global'
-export const swapWidget = 'https://swap.cow.finance/#/11155111/widget/swap/'
+export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
 export const TX_Builder_url = 'https://tx-builder.staging.5afe.dev'
@@ -114,6 +114,7 @@ export const relayPath = '/relay/'
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
 
 export const usersEndpoint = '**/v1/users'
+export const counterfactualSafesEndpoint = '**/v1/users/counterfactual-safes'
 export const spacesEndpoint = '**/**/spaces*'
 export const spacesGetOneEndpoint = '**/v1/spaces/*'
 export const spacesMembersEndpoint = '**/v1/spaces/*/members'
@@ -319,7 +320,7 @@ export const localStorageKeys = {
   SAFE_v2__SafeApps__browserPermissions: 'SAFE_v2__SafeApps__browserPermissions',
   SAFE_v2__SafeApps__infoModal: 'SAFE_v2__SafeApps__infoModal',
   SAFE_v2__undeployedSafes: 'SAFE_v2__undeployedSafes',
-  SAFE_v2__batch: 'SAFE_v2__batch',
+  SAFE_v2__pendingCfDeletes: 'SAFE_v2__pendingCfDeletes',
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
   SAFE_v2__auth: 'SAFE_v2__auth',
 }

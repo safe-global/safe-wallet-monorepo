@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { isAddress } from 'ethers'
-import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useAppDispatch } from '@/store'
-import { showNotification } from '@/store/notificationsSlice'
+import { type InviteUsersDto, useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { MemberRole } from '@/features/spaces/hooks/useSpaceMembers'
+import { MemberRole } from '../../../hooks/useSpaceMembers'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { buildInviteUserPayload, isEmailAddress } from '../../AddMemberModal/utils'
 
 interface MemberInvite {
-  address: string
+  // Can be a wallet address, ENS name, or email.
+  identifier: string
   role: MemberRole
 }
 
@@ -17,8 +18,30 @@ export interface InviteMembersFormValues {
   members: MemberInvite[]
 }
 
+// Mirrors the backend's name.schema NAME_MIN_LENGTH: names shorter than this are rejected.
+const NAME_MIN_LENGTH = 3
+
+/**
+ * The onboarding flow has no dedicated name field, so a display name is derived from the
+ * identifier. Wallet/ENS invites keep using the address as the name (as before); email
+ * invites use the email's local part, sanitized to the alphanumeric-ish characters the
+ * backend's name validation accepts (the raw email's "@" would be rejected). A local part
+ * shorter than the backend minimum (e.g. "r@cc0x.dev") falls back to a default name so the
+ * invite isn't rejected for a too-short name.
+ */
+export const toInviteName = (identifier: string): string => {
+  if (!isEmailAddress(identifier)) return identifier
+
+  const localPart = identifier.slice(0, identifier.indexOf('@'))
+  const sanitized = localPart
+    .replace(/[^a-zA-Z0-9 ._-]/g, '')
+    .replace(/^[^a-zA-Z0-9]+/, '')
+    .trim()
+
+  return sanitized.length >= NAME_MIN_LENGTH ? sanitized : 'Member'
+}
+
 const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
-  const dispatch = useAppDispatch()
   const [inviteMembers] = useMembersInviteUserV1Mutation()
 
   const [error, setError] = useState<string>()
@@ -27,7 +50,7 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
   const methods = useForm<InviteMembersFormValues>({
     mode: 'onChange',
     defaultValues: {
-      members: [{ address: '', role: MemberRole.MEMBER }],
+      members: [{ identifier: '', role: MemberRole.MEMBER }],
     },
   })
 
@@ -37,16 +60,17 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
   const onSubmit = handleSubmit(async (data) => {
     if (!spaceId) return
 
-    const validMembers = data.members.filter((m) => m.address.trim() !== '')
+    const validMembers = data.members
+      .map((m) => ({ ...m, identifier: m.identifier.trim() }))
+      .filter((m) => m.identifier !== '')
 
-    const hasUnresolvedNames = validMembers.some((m) => !isAddress(m.address))
+    const hasUnresolvedNames = validMembers.some((m) => !isEmailAddress(m.identifier) && !isAddress(m.identifier))
     if (hasUnresolvedNames) {
       setError('Please wait for all ENS names to resolve')
       return
     }
 
     if (validMembers.length === 0) {
-      setIsSubmitting(true)
       onSuccess()
       return
     }
@@ -54,23 +78,26 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     setError(undefined)
     setIsSubmitting(true)
 
+    // On success we hand off to onSuccess(), which navigates away and unmounts the form,
+    // so the spinner stays up through the route change. On every other exit the finally
+    // block resets isSubmitting so a failed/aborted submit can never leave the button stuck.
+    let succeeded = false
     try {
-      const usersToInvite = validMembers.map((member) => ({
-        address: member.address,
-        name: member.address,
-        role: member.role,
-      }))
+      const usersToInvite: InviteUsersDto['users'] = validMembers.map((member) =>
+        buildInviteUserPayload({
+          name: toInviteName(member.identifier),
+          inviteeIdentifier: member.identifier,
+          role: member.role,
+        }),
+      )
 
       const result = await inviteMembers({
-        spaceId: Number(spaceId),
+        spaceId,
         inviteUsersDto: { users: usersToInvite },
       })
 
       if (result.error) {
-        // @ts-ignore
-        const errorMessage = result.error?.data?.message || 'Failed to invite members. Please try again.'
-        setError(errorMessage)
-        setIsSubmitting(false)
+        setError(getRtkQueryErrorMessage(result.error) || 'Failed to invite members. Please try again.')
         return
       }
 
@@ -86,18 +113,12 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
         )
       })
 
-      dispatch(
-        showNotification({
-          message: `Invited ${validMembers.length} member(s) to space`,
-          variant: 'success',
-          groupKey: 'invite-member-success',
-        }),
-      )
-
+      succeeded = true
       onSuccess()
     } catch {
       setError('Something went wrong inviting members. Please try again.')
-      setIsSubmitting(false)
+    } finally {
+      if (!succeeded) setIsSubmitting(false)
     }
   })
 
