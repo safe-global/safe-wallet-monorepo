@@ -14,10 +14,12 @@ const mockConfigs = [
   { chainId: '1', chainName: 'Ethereum', shortName: 'eth' },
   { chainId: '137', chainName: 'Polygon', shortName: 'matic' },
 ]
+// Lets a test simulate configs not being loaded yet (empty array).
+let mockConfigsOverride: typeof mockConfigs | null = null
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({ configs: mockConfigs }),
-  useChain: (chainId: string) => mockConfigs.find((chain) => chain.chainId === chainId),
+  default: () => ({ configs: mockConfigsOverride ?? mockConfigs }),
+  useChain: (chainId: string) => (mockConfigsOverride ?? mockConfigs).find((chain) => chain.chainId === chainId),
 }))
 
 const address = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
@@ -39,6 +41,7 @@ function Probe({ chainId }: { chainId: string }) {
 describe('RenameSafeDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockConfigsOverride = null
     mockUpsertSpace.mockResolvedValue({ data: {} })
   })
 
@@ -62,6 +65,23 @@ describe('RenameSafeDialog', () => {
     await waitFor(() => expect(screen.getByTestId('probe')).toHaveTextContent('New name'))
     expect(mockUpsertSpace).not.toHaveBeenCalled()
     expect(onClose).toHaveBeenCalled()
+  })
+
+  it('falls back to the Safe chains when configs are not loaded (never writes empty chainIds)', async () => {
+    mockConfigsOverride = []
+    const { user } = renderWithUserEvent(
+      <>
+        <RenameSafeDialog target={baseTarget} onClose={jest.fn()} />
+        <Probe chainId="1" />
+      </>,
+    )
+    const input = screen.getByDisplayValue('Old name')
+    await user.clear(input)
+    await user.type(input, 'Fallback name')
+    await user.click(screen.getByTestId('save-btn'))
+    // Empty configs → the chain selector never renders; the write must still target the Safe's
+    // own chains (target.chainIds) rather than an empty set, so the name lands on chain '1'.
+    await waitFor(() => expect(screen.getByTestId('probe')).toHaveTextContent('Fallback name'))
   })
 
   it('writes the SPACE address book for a space target with all chainIds', async () => {

@@ -17,6 +17,7 @@ import { useRenameSafe, type RenameClickTarget } from '../../hooks/useRenameSafe
 import { useCurrentSpaceId } from '../../hooks/useCurrentSpaceId'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useIsInSpaceContext } from '@/hooks/useIsInSpaceContext'
+import { RENAME_DIALOG_Z_INDEX } from '@/config/zIndices'
 
 // Keeps the dropdown trigger renderable when the current safe isn't in `items`.
 function buildFallbackSafeItem(selectedItemId: string | undefined, chainConfigs: Chain[]): SafeItemData | null {
@@ -102,7 +103,7 @@ function SafeSelectorDropdown({
   const canRename = isInSpaceContext ? isAdmin : true
   // Elevate above the dropdown popup (z = --z-overlay = 1400) so the dialog stacks on top of the
   // still-open dropdown.
-  const { openRename, renameDialog, isRenameOpen } = useRenameSafe({ dialogSx: { zIndex: 1500 } })
+  const { openRename, renameDialog, isRenameOpen } = useRenameSafe({ dialogSx: { zIndex: RENAME_DIALOG_Z_INDEX } })
   // Keep the dropdown open while renaming. Ref mirrors isRenameOpen so the close guard reads it
   // synchronously on the onOpenChange(false) base-ui fires the instant the dialog grabs focus.
   const keepOpenRef = useRef(false)

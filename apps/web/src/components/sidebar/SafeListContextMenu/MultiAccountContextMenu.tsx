@@ -15,6 +15,7 @@ import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
 import { CreateSafeOnNewChain } from '@/features/multichain'
 import { useRenameSafe } from '@/features/spaces'
+import { RENAME_DIALOG_Z_INDEX } from '@/config/zIndices'
 
 enum ModalType {
   ADD_CHAIN = 'add_chain',
@@ -37,7 +38,7 @@ const MultiAccountContextMenu = ({
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   // Local (non-space) rename; elevate above the Trusted Safes modal overlay (--z-overlay: 1400)
   // for the multichain group there. Harmless on the (non-modal) My accounts page.
-  const { openRename, renameDialog } = useRenameSafe({ dialogSx: { zIndex: 1500 } })
+  const { openRename, renameDialog } = useRenameSafe({ dialogSx: { zIndex: RENAME_DIALOG_Z_INDEX } })
 
   const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
     e.stopPropagation()

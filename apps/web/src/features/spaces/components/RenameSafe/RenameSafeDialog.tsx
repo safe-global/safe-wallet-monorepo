@@ -24,6 +24,13 @@ import type { RenameTarget } from './types'
 
 type FormValues = { name: string; networks: Chain[] }
 
+const GENERIC_ERROR = 'Something went wrong. Please try again.'
+const SUCCESS_NOTIFICATION = {
+  message: 'Updated Safe name',
+  variant: 'success' as const,
+  groupKey: 'rename-safe-success',
+}
+
 export interface RenameSafeDialogProps {
   target: RenameTarget
   onClose: () => void
@@ -53,11 +60,15 @@ const RenameSafeDialog = ({ target, onClose, sx }: RenameSafeDialogProps): React
 
   const onSubmit = handleSubmit(async ({ name, networks }) => {
     setError(undefined)
-    const chainIds = networks.map((network) => network.chainId)
-    const writeToSpace = target.isSpaceSafe && Boolean(target.spaceId)
+    // Fall back to the Safe's chains when the selector never rendered (single-chain Safe) or configs
+    // hadn't loaded when the dialog mounted — never write an empty chainIds set.
+    const selectedChainIds = networks.map((network) => network.chainId)
+    const chainIds = selectedChainIds.length > 0 ? selectedChainIds : target.chainIds
+    const { spaceId } = target
 
-    if (!writeToSpace) {
+    if (!target.isSpaceSafe || !spaceId) {
       dispatch(upsertAddressBookEntries({ name, address: target.address, chainIds }))
+      dispatch(showNotification(SUCCESS_NOTIFICATION))
       onClose()
       return
     }
@@ -65,17 +76,17 @@ const RenameSafeDialog = ({ target, onClose, sx }: RenameSafeDialogProps): React
     try {
       setIsSubmitting(true)
       const result = await upsertSpaceAddressBook({
-        spaceId: target.spaceId as string,
+        spaceId,
         upsertAddressBookItemsDto: { items: [{ name, address: target.address, chainIds }] },
       })
       if (result.error) {
-        setError('Something went wrong. Please try again.')
+        setError(GENERIC_ERROR)
         return
       }
-      dispatch(showNotification({ message: 'Updated Safe name', variant: 'success', groupKey: 'rename-safe-success' }))
+      dispatch(showNotification(SUCCESS_NOTIFICATION))
       onClose()
     } catch {
-      setError('Something went wrong. Please try again.')
+      setError(GENERIC_ERROR)
     } finally {
       setIsSubmitting(false)
     }

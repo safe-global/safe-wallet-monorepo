@@ -5,6 +5,7 @@ import ChainIndicator from '../ChainIndicator'
 import css from './styles.module.css'
 import { useFormContext } from 'react-hook-form'
 import useChains from '@/hooks/useChains'
+import { RENAME_DIALOG_POPPER_Z_INDEX } from '@/config/zIndices'
 
 type NetworkMultiSelectorInputProps = {
   value: Chain[]
@@ -131,7 +132,7 @@ const NetworkMultiSelectorInput = ({
       disableCloseOnSelect
       // Render the dropdown above modals (incl. the rename dialog elevated to 1500 inside the
       // Accounts / Trusted Safes modals), otherwise the option list is occluded and looks empty.
-      slotProps={{ popper: { sx: { zIndex: 1600 } } }}
+      slotProps={{ popper: { sx: { zIndex: RENAME_DIALOG_POPPER_Z_INDEX } } }}
       options={options}
       renderTags={renderTags}
       renderOption={renderOption}

@@ -23,6 +23,7 @@ import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/eve
 import { useHasFeature } from '@/hooks/useChains'
 import { useNestedSafesVisibility } from '@/hooks/useNestedSafesVisibility'
 import { useRenameSafe } from '@/features/spaces'
+import { RENAME_DIALOG_Z_INDEX } from '@/config/zIndices'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -65,7 +66,7 @@ const SafeListContextMenu = ({
   )
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   // Local (non-space) rename; elevate above the Trusted Safes modal overlay (--z-overlay: 1400).
-  const { openRename, renameDialog } = useRenameSafe({ dialogSx: { zIndex: 1500 } })
+  const { openRename, renameDialog } = useRenameSafe({ dialogSx: { zIndex: RENAME_DIALOG_Z_INDEX } })
 
   const nestedSafesForChain = ownedSafes?.safes ?? []
   const { allSafesWithStatus, visibleSafes, hasCompletedCuration, isLoading, startFiltering } =

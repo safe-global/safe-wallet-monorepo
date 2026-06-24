@@ -3,6 +3,7 @@ import { MoreVertical, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useRenameSafe } from '@/features/spaces'
+import { RENAME_DIALOG_Z_INDEX } from '@/config/zIndices'
 
 interface PinnedSafeContextMenuProps {
   address: string
@@ -14,7 +15,7 @@ const PinnedSafeContextMenu = ({ address, chainIds, name }: PinnedSafeContextMen
   const [menuOpen, setMenuOpen] = useState(false)
   // Trusted/pinned safes are non-space → the dialog writes the local name. Elevate it above the
   // Accounts modal (z-overlay 1400) so it isn't rendered behind.
-  const { openRename, renameDialog } = useRenameSafe({ dialogSx: { zIndex: 1500 } })
+  const { openRename, renameDialog } = useRenameSafe({ dialogSx: { zIndex: RENAME_DIALOG_Z_INDEX } })
 
   const handleRename = (e: MouseEvent) => {
     e.stopPropagation()
