@@ -1,9 +1,9 @@
 /**
- * @fileoverview Staging E2E Space **id + name** registry (same import pattern as `fixtures/safes/static.js`).
+ * @fileoverview Staging E2E Space **uuid + name** registry (same import pattern as `fixtures/safes/static.js`).
  *
  * @example
  * import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
- * space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.id)
+ * space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.uuid)
  * cy.contains(staticSpaces.dashboardWithSafes.name)
  *
  * | Key | Typical use |
@@ -13,7 +13,7 @@
  */
 export default {
   dashboardWithSafes: {
-    id: '2343',
+    uuid: 'b0d9f2bd-48db-466e-95d0-a114a9e843e9',
     name: 'Automation Test Space',
     /** Expected top-level account rows on the Space dashboard (`space-dashboard-accounts-row-*`). Align with CGW for this space. */
     accountsWidgetRowCount: 9,
@@ -54,11 +54,9 @@ export default {
       /** Single-chain row — `AccountWidgetItem` owners badge (e.g. `2/3`). */
       ownersThreshold: '2/3',
     },
-    /** `AccountWidgetItem` row index — single-chain Pending tx row; click opens `/home?safe=…`. */
-    singleChainAccountRowIndex: 2,
   },
   emptyGettingStarted: {
-    id: '2362',
+    uuid: 'ca3d2ede-3492-4799-a4e9-bf0dcdd0c52f',
     name: 'Automation Empty Space',
   },
 }

@@ -20,22 +20,6 @@ describe('[PROD] Production recovery health check tests', { defaultCommandTimeou
       })
   })
 
-  it.skip('Verify that the Security section contains Account recovery block on supported netwroks', () => {
-    const safes = [
-      staticSafes.ETH_STATIC_SAFE_15,
-      staticSafes.GNO_STATIC_SAFE_16,
-      staticSafes.MATIC_STATIC_SAFE_17,
-      staticSafes.SEP_STATIC_SAFE_13,
-    ]
-
-    safes.forEach((safe) => {
-      cy.visit(constants.prodbaseUrl + constants.securityUrl + safe)
-      cy.contains(createTx.settingsStr, { timeout: 10000 })
-      closeSecurityNotice()
-      recovery.getSetupRecoveryBtn()
-    })
-  })
-
   it('Verify that the Security and Login section does not contain Account recovery block on unsupported networks', () => {
     const safes = [
       staticSafes.BNB_STATIC_SAFE_18,
