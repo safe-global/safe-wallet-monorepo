@@ -135,11 +135,9 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    const checkboxes = screen.getAllByRole('checkbox')
-    const cardButton = checkboxes.find((el) => el.tagName === 'BUTTON')!
-    fireEvent.click(cardButton)
+    fireEvent.click(screen.getByTestId('safe-card'))
 
-    expect(cardButton).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('checkbox')).toHaveAttribute('aria-checked', 'true')
   })
 
   it('renders multi-chain safe with chain badge', () => {
@@ -159,14 +157,13 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    const checkboxes = screen.getAllByRole('checkbox')
-    const cardButton = checkboxes.find((el) => el.tagName === 'BUTTON')!
-    fireEvent.click(cardButton)
+    fireEvent.click(screen.getByTestId('safe-card'))
 
-    expect(cardButton).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('checkbox')).toHaveAttribute('aria-checked', 'true')
   })
 
-  const getCardButton = () => screen.getAllByRole('checkbox').find((el) => el.tagName === 'BUTTON')!
+  const getCard = () => screen.getByTestId('safe-card')
+  const getCheckbox = () => screen.getByRole('checkbox')
 
   it('disables an unselected single-chain safe when at limit', () => {
     render(
@@ -175,7 +172,7 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    expect(getCardButton()).toBeDisabled()
+    expect(getCheckbox()).toHaveAttribute('data-disabled')
   })
 
   it('keeps a selected single-chain safe enabled when at limit so it can be deselected', () => {
@@ -185,10 +182,9 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    const cardButton = getCardButton()
-    expect(cardButton).not.toBeDisabled()
-    fireEvent.click(cardButton)
-    expect(cardButton).toHaveAttribute('aria-checked', 'false')
+    expect(getCheckbox()).not.toHaveAttribute('data-disabled')
+    fireEvent.click(getCard())
+    expect(getCheckbox()).toHaveAttribute('aria-checked', 'false')
   })
 
   it('does not disable single-chain safes when not at limit', () => {
@@ -198,7 +194,7 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    expect(getCardButton()).not.toBeDisabled()
+    expect(getCheckbox()).not.toHaveAttribute('data-disabled')
   })
 
   it('disables an unselected multi-chain safe when at limit', () => {
@@ -208,7 +204,7 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    expect(getCardButton()).toBeDisabled()
+    expect(getCheckbox()).toHaveAttribute('data-disabled')
   })
 
   it('keeps a fully-selected multi-chain safe enabled when at limit', () => {
@@ -218,7 +214,7 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    expect(getCardButton()).not.toBeDisabled()
+    expect(getCheckbox()).not.toHaveAttribute('data-disabled')
   })
 
   it('keeps a partially-selected multi-chain safe enabled when at limit so it can be deselected', () => {
@@ -228,7 +224,7 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    expect(getCardButton()).not.toBeDisabled()
+    expect(getCheckbox()).not.toHaveAttribute('data-disabled')
   })
 
   it('clicking a disabled single-chain safe does not select it', () => {
@@ -238,10 +234,9 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    const cardButton = getCardButton()
-    expect(cardButton).toHaveAttribute('aria-checked', 'false')
-    fireEvent.click(cardButton)
-    expect(cardButton).toHaveAttribute('aria-checked', 'false')
+    expect(getCheckbox()).toHaveAttribute('aria-checked', 'false')
+    fireEvent.click(getCard())
+    expect(getCheckbox()).toHaveAttribute('aria-checked', 'false')
   })
 
   it('clicking a disabled multi-chain safe does not select it', () => {
@@ -251,9 +246,8 @@ describe('SafeCard', () => {
       </FormWrapper>,
     )
 
-    const cardButton = getCardButton()
-    expect(cardButton).toHaveAttribute('aria-checked', 'false')
-    fireEvent.click(cardButton)
-    expect(cardButton).toHaveAttribute('aria-checked', 'false')
+    expect(getCheckbox()).toHaveAttribute('aria-checked', 'false')
+    fireEvent.click(getCard())
+    expect(getCheckbox()).toHaveAttribute('aria-checked', 'false')
   })
 })
