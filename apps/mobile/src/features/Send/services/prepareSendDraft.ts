@@ -22,13 +22,8 @@ function validateAddresses(recipient: string, tokenAddress: string): void {
 }
 
 /**
- * Validates inputs, builds a token-transfer SafeTransaction locally, then runs the shared
- * draft pipeline (CGW /preview → synthesized details → stashed DraftTx) so the existing
- * sign/review screens can render it without a CGW round-trip via /propose. The actual
- * /propose call only happens when the user signs — the signer at sign time becomes the
- * proposer recorded by CGW.
- *
- * Returns the `safeTxHash` (used as the synthetic txId for the downstream review screens).
+ * Builds a token-transfer SafeTransaction and runs the shared draft pipeline (see
+ * previewAndStashDraft). Returns the safeTxHash used as the downstream txId.
  */
 export const prepareSendDraft = async ({
   recipient,

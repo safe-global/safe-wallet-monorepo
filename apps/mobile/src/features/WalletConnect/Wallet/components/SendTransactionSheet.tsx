@@ -6,15 +6,12 @@ import { selectSessionsRecord, type PendingSessionRequest } from '../store/walle
 
 type Props = {
   pending: PendingSessionRequest
-  // Asks the host to swap in the permissions panel (same affordance as the proposal sheet:
-  // the verify badge and the domain pill both open it).
+  // Asks the host to swap in the permissions panel (opened by the verify badge or domain pill).
   onOpenPermissions?: () => void
 }
 
-// Identity-only "Transaction request" gate (Figma `16755-4705`): dApp logo + verify badge,
-// name and domain. No decoded transaction and no draft are created while this is open — the
-// draft is composed only when the user taps Review (handled by useTxRequestActions in the
-// host footer). dApp metadata is resolved from the mirrored session by topic.
+// Identity-only "Transaction request" gate: no draft is composed until the
+// user taps Review (useTxRequestActions). dApp metadata comes from the mirrored session by topic.
 export const SendTransactionSheet: React.FC<Props> = ({ pending, onOpenPermissions }) => {
   const meta = useAppSelector((s) => selectSessionsRecord(s)[pending.topic]?.peer.metadata)
   const variant = useMemo(() => verifyStatusToVariant(pending.verifyContext?.verified), [pending.verifyContext])

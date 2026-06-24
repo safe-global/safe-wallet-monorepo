@@ -16,38 +16,32 @@ import {
 } from '../store/walletKitSlice'
 import { logWalletKitError } from '../utils/errors'
 
-// pending.method is the narrowed DeferredTxMethod, so this is total — no throw needed.
 const extractCalls = (method: PendingSessionRequest['method'], params: unknown): DappCall[] => {
   if (method === 'eth_sendTransaction') {
     const [tx] = params as [DappCall]
     return [tx]
   }
-  // wallet_sendCalls
-  const [batch] = params as [{ calls: DappCall[] }]
+  const [batch] = params as [{ calls: DappCall[] }] // wallet_sendCalls
   return batch.calls
 }
 
 /**
- * Review / Reject actions for a transaction-request sheet, consumed by RequestSheetHost's
- * pinned footer. Review composes a draft on tap (one CGW /preview), then hands off to the
- * confirm-transaction flow — the dApp is answered later by the propose-success listener, not
- * here. A /preview failure surfaces a toast and stays on the sheet with no draft (compose
- * throws before setDraft). Reject only records intent (rejectPending) — the walletKit listener
- * answers the dApp with USER_REJECTED and clears the pending item.
+ * Review / Reject actions for the tx-request sheet footer. Review composes a draft and routes to
+ * the confirm flow (the dApp is answered later by the propose-success listener); Reject just
+ * dispatches rejectPending. Both responses are owned by the walletKit listener, not this hook.
  */
 export const useTxRequestActions = (pending: PendingSessionRequest | null) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const activeSafe = useAppSelector(selectActiveSafe)
   const chain = useAppSelector((s) => (activeSafe ? (selectChainById(s, activeSafe.chainId) ?? null) : null))
-  // Only subscribe while a request sheet is up — the host is mounted at the app root.
+  // Only query while a sheet is up — the host is mounted at the app root.
   const { data: safe } = useSafesGetSafeV1Query(
     pending && activeSafe ? { chainId: activeSafe.chainId, safeAddress: activeSafe.address } : skipToken,
   )
   const safeSDK = useSafeSDK()
   const [composing, setComposing] = useState(false)
 
-  // Review can only compose once the Safe state, chain config and protocol-kit SDK are ready.
   const ready = !!(activeSafe && safe && chain && safeSDK)
 
   const reject = useCallback(() => {
@@ -72,8 +66,7 @@ export const useTxRequestActions = (pending: PendingSessionRequest | null) => {
         chain,
         dispatch,
       })
-      // Hand off to the confirm-transaction flow. The dApp response is sent later by the
-      // propose-success listener in walletKitListeners, NOT here — the user hasn't signed yet.
+      // Hand off to the confirm flow; the dApp is answered later by the propose-success listener.
       dispatch(
         setOutstandingRequest({
           safeTxHash,
@@ -87,8 +80,7 @@ export const useTxRequestActions = (pending: PendingSessionRequest | null) => {
       dispatch(removePending({ id: pending.id, kind: 'request' }))
       router.push({ pathname: '/confirm-transaction', params: { txId: safeTxHash } })
     } catch (e) {
-      // composeSafeTxDraft throws before setDraft on a /preview failure, so there is no draft
-      // to clean up; stay on the sheet so the user can retry or reject.
+      // compose throws before setDraft, so there's nothing to clean up — stay on the sheet.
       logWalletKitError('composeSafeTxDraft failed', e)
       dispatch(showToast({ message: 'Failed to build transaction', duration: 3000, variant: 'error' }))
     } finally {

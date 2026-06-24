@@ -31,7 +31,7 @@ export function TransactionHeader({
   const date = formatWithSchema(submittedAt, 'd MMM yyyy')
   const time = formatWithSchema(submittedAt, 'hh:mm a')
   // When the tx originates from a WalletConnect dApp, surface its logo + name in place of the
-  // contract logo/title (Figma `5316-26402`). Absent provider (history, native flows) → no-op.
+  // contract logo/title. Absent provider (history, native flows) → no-op.
   const dappOrigin = useDappOrigin()
   // `||` not `??`: a dApp publishing metadata.name = '' must not blank the header.
   const showTitle = dappOrigin?.name || title

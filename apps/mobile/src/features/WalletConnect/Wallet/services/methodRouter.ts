@@ -29,8 +29,7 @@ const NS = SUPPORTED_NAMESPACE + ':'
 // useSessionRequestHandler keys its "No signer attached" toast off this code.
 export const NO_SIGNER_ERROR_CODE = 4100
 
-// Sentinel result the caller checks for via isDeferredResponse: the request needs UI, so
-// the caller pushes it to the slice and does NOT call respondSessionRequest yet.
+// Sentinel (checked via isDeferredResponse): the request needs UI, so don't respond yet.
 const DEFERRED_RESULT = '__DEFERRED__'
 
 const crossNamespaceError = (id: number) => formatJsonRpcError(id, getSdkError('UNAUTHORIZED_METHOD').message)
@@ -57,11 +56,8 @@ const isValidDappCall = (call: { to?: string; value?: string; data?: string } | 
 }
 
 /**
- * Structural validation of a tx request's params — everything extractCalls /
- * composeSafeTxDraft rely on downstream. Used by the live routing path below AND by
- * WalletKitProvider when seeding requests restored after a restart, which never pass
- * through routeSessionRequest (so a malformed bundle would otherwise only blow up
- * inside compose with an unactionable toast).
+ * Structural validation of a tx request's params (what compose relies on). Also used by the
+ * controller when seeding restored requests, which skip routeSessionRequest.
  */
 export const isValidTxRequestParams = (
   method: 'eth_sendTransaction' | 'wallet_sendCalls',
@@ -78,10 +74,8 @@ export const isValidTxRequestParams = (
   return !!bundle?.calls?.length && Array.isArray(bundle.calls) && bundle.calls.every(isValidDappCall)
 }
 
-// Scope (WA-2321): the transaction-request flow only. Read-only RPC passthrough and the
-// EIP-5792 capabilities / getCallsStatus / showCallsStatus surface (plus
-// wallet_switchEthereumChain) are wired in WA-2322 — they slot in as extra branches here
-// without reworking this router or its RouteContext.
+// Scope: the tx-request flow only. The 5792 capabilities / status surface and read-only
+// passthrough land later as extra branches here.
 export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResponse> => {
   const { request, activeChain, activeSafeAddress, hasSigner } = ctx
   const { id, params } = request
@@ -93,24 +87,18 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     return crossNamespaceError(id)
   }
 
-  // Methods we explicitly reject without UI (message signing isn't supported on mobile yet).
-  // dApps like CowSwap fire these in parallel with their tx request; the handler surfaces a
-  // toast so the rejection is explained rather than showing an opaque dApp-side error.
+  // Rejected without UI (message signing isn't supported yet); the handler toasts the reason.
   if ((REJECTED_SIGNING_METHODS as readonly string[]).includes(method)) {
     return unsupportedError(id)
   }
 
-  // Local-answerable methods — a dApp needs these to establish the session before it can
-  // send a transaction.
+  // Locally-answerable methods a dApp needs to establish the session.
   if (method === 'eth_accounts') {
-    // EIP-55 checksummed to match the session-namespace accounts (buildSafeApprovedNamespaces
-    // checksums them the same way) — dApps compare the two strings verbatim. Lowercase first:
-    // getAddress treats mixed-case input as a checksum assertion and throws on a mismatch,
-    // while lowercase input is always re-checksummed.
+    // EIP-55 checksummed to match the namespace accounts dApps compare against. Lowercase first:
+    // getAddress throws on a mixed-case mismatch but always re-checksums lowercase input.
     return formatJsonRpcResult(id, activeSafeAddress ? [getAddress(activeSafeAddress.toLowerCase())] : [])
   }
-  // A fabricated '0x0' / '0' would be an invalid EIP-695 / net_version response — error
-  // instead when the chain config hasn't resolved yet.
+  // Error rather than fabricate an invalid '0x0' chainId before the chain config resolves.
   if (method === 'eth_chainId' || method === 'net_version') {
     if (!activeChain) {
       return noActiveChainError(id)
@@ -118,8 +106,7 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     return formatJsonRpcResult(id, method === 'eth_chainId' ? chainIdToHex(activeChain.chainId) : activeChain.chainId)
   }
 
-  // Transaction methods — the handler pushes the request to the slice so RequestSheetHost
-  // renders the sheet. The sheet sends the response when the user reviews+signs or rejects.
+  // Transaction methods — deferred to the sheet (the response is sent after review).
   if (method === 'eth_sendTransaction' || method === 'wallet_sendCalls') {
     if (!activeSafeAddress) {
       return formatJsonRpcError(id, { code: -32603, message: 'No active Safe' })
@@ -127,32 +114,22 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     if (!hasSigner) {
       return formatJsonRpcError(id, { code: NO_SIGNER_ERROR_CODE, message: 'No signer attached to this Safe' })
     }
-    // Both tx methods need the active chain config (downstream compose uses it to look up
-    // CreateCall deployments and to verify the SDK is bound to the same chain). Fail
-    // synchronously so the dApp sees a structured error instead of an opaque compose
-    // failure later.
+    // compose needs the chain config; fail synchronously instead of deep inside compose.
     if (!activeChain) {
       return noActiveChainError(id)
     }
-    // The dApp's session can be bound to a chain the active Safe is no longer on (the user
-    // switched networks after connecting). We can only sign on the active chain, so reject
-    // here rather than composing on the wrong chain; useSessionRequestHandler surfaces a
-    // toast telling the user which network to switch back to. `chainId` is the dApp's
-    // session chain.
+    // The dApp's session chain may differ from the active Safe's (user switched networks). We
+    // can only sign on the active chain, so reject rather than compose on the wrong one.
     if (chainId !== `${NS}${activeChain.chainId}`) {
       return formatJsonRpcError(id, getSdkError('UNSUPPORTED_CHAINS'))
     }
-    // Validate the call shape(s) up front (mirrors apps/web/.../safe-wallet-provider/index.ts
-    // wallet_sendCalls). Malformed requests fail synchronously with -32602 rather than
-    // burning a sheet + compose pass that can only end in an opaque toast.
+    // Validate up front (mirrors web's safe-wallet-provider) so malformed requests fail fast.
     if (!isValidTxRequestParams(method, rpcParams)) {
       return invalidParamsError(id)
     }
-    // wallet_sendCalls additionally binds the bundle to the active context.
     if (method === 'wallet_sendCalls') {
       const [bundle] = rpcParams as [{ chainId?: `0x${string}`; from?: `0x${string}` }]
-      // Numeric comparison, not string equality: EIP-5792 specifies a Quantity but dApps
-      // do send padded hex like '0x01'. BigInt throws on malformed hex → mismatch.
+      // Numeric compare, not string: EIP-5792 chainId is a Quantity but dApps send padded hex.
       let chainMatches = false
       try {
         chainMatches = bundle.chainId !== undefined && BigInt(bundle.chainId) === BigInt(activeChain.chainId)

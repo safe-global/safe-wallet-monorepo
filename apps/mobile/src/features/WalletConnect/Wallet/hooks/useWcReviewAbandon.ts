@@ -4,15 +4,9 @@ import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { markReviewAbandoned, selectOutstandingRequestByHash } from '../store/walletKitSlice'
 
 /**
- * Detects when the user leaves the confirm-transaction screen for a handed-off WalletConnect
- * tx (pop / iOS swipe / hardware back — not router.replace, which never fires beforeRemove).
- * It only records intent: `markReviewAbandoned` is dispatched and the walletKit listener owns
- * the dApp response. The intercept is armed only while an outstanding WC request exists for
- * this txId, so it is a no-op for native (non-WC) txs.
- *
- * The predicate stays true even while /propose is in flight: the listener no-ops in that
- * window but the reducer records `cancelRequested`, so a propose that then fails still rejects
- * the dApp instead of leaving it to time out.
+ * Dispatches markReviewAbandoned when the user backs out of review for a handed-off WC tx; the
+ * walletKit listener owns the response. Armed only while an outstanding request exists (no-op for
+ * native txs), and stays armed during /propose so cancelRequested can settle a later failure.
  */
 export const useWcReviewAbandon = (safeTxHash: string) => {
   const dispatch = useAppDispatch()

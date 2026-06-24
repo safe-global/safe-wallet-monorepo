@@ -20,17 +20,11 @@ import { RequestSheetHost } from './components/RequestSheetHost'
 import { logWalletKitError } from './utils/errors'
 
 /**
- * Side-effect component driving WalletConnect-for-dApps: it owns the WalletKit singleton
- * init, session-lifecycle listeners, deep-link pairing and the request sheet host. It
- * renders no layout of its own — it is mounted as a sibling of the navigation tree, never
- * a wrapper.
- *
- * The whole controller is gated behind the NATIVE_WALLETCONNECT chain-config flag. When
- * the active chain does not advertise the feature — or no Safe is active yet, so
- * useHasFeature is undefined — WalletKit is never initialised: no listeners, no request
- * sheet, no singleton init. Flipping the flag (e.g. when the first Safe is imported and an
- * active chain appears) simply runs the init effect; because the controller is a sibling
- * and never wraps the navigation tree, that flip can never unmount or remount navigation.
+ * Side-effect component for WalletConnect-for-dApps: WalletKit init, session-lifecycle
+ * listeners, deep-link pairing and the request sheet host. Renders no layout — mounted as a
+ * sibling of the navigation tree (never a wrapper), so flipping the NATIVE_WALLETCONNECT flag
+ * just runs the init effect and can't unmount navigation. When the flag is off WalletKit is
+ * never initialised.
  */
 export const WalletKitController: React.FC = () => {
   const isEnabled = useHasFeature(FEATURES.NATIVE_WALLETCONNECT) ?? false
@@ -38,9 +32,7 @@ export const WalletKitController: React.FC = () => {
   const store = useStore<RootState>()
   const [walletKit, setWalletKit] = useState<IWalletKit | null>(null)
 
-  // Init + seed: mirror the SDK's active sessions and any deferred-tx requests that
-  // survived a restart into the slice. Gated on isEnabled so nothing initialises while
-  // the feature is off.
+  // Init + seed the slice from the SDK's active sessions and restart-surviving tx requests.
   useEffect(() => {
     if (!isEnabled) {
       setWalletKit(null)
@@ -54,8 +46,7 @@ export const WalletKitController: React.FC = () => {
         }
         setWalletKit(wk)
         dispatch(setSessions(wk.getActiveSessions()))
-        // Restored requests are stamped with the rehydrated active Safe: the sheet always
-        // composes against the current active Safe, so that is the context Review would use.
+        // Stamp restored requests with the active Safe — the context Review composes against.
         const restoredSafeAddress = selectActiveSafe(store.getState())?.address
         const pendings = wk.getPendingSessionRequests() as WalletKitTypes.SessionRequest[]
         pendings.forEach((r) => {
@@ -63,9 +54,7 @@ export const WalletKitController: React.FC = () => {
           if (!isDeferredTxMethod(method)) {
             return
           }
-          // Restored requests never passed routeSessionRequest, so enforce the same param
-          // shape here — a malformed bundle would otherwise only blow up inside compose
-          // with an unactionable toast. Reject it back to the dApp instead of seeding.
+          // Restored requests skipped routeSessionRequest — re-validate, rejecting malformed ones.
           if (!isValidTxRequestParams(method, r.params.request.params)) {
             wk.respondSessionRequest({
               topic: r.topic,
@@ -93,10 +82,8 @@ export const WalletKitController: React.FC = () => {
     }
   }, [dispatch, store, isEnabled])
 
-  // Subscribe to session lifecycle events. session_proposal is handled by
-  // useSessionProposalHandler (WA-2318) and session_request by useSessionRequestHandler
-  // (WA-2321). delete/expire keep the slice's session mirror in sync; authenticate is
-  // rejected (out of scope).
+  // Lifecycle events: delete/expire keep the session mirror in sync, authenticate is rejected
+  // (out of scope). session_proposal/session_request are handled by their own hooks.
   useEffect(() => {
     if (!walletKit) {
       return
@@ -104,9 +91,8 @@ export const WalletKitController: React.FC = () => {
     const refreshSessions = () => dispatch(setSessions(walletKit.getActiveSessions()))
 
     const onDelete = ({ topic }: { topic: string }) => dispatch(removeSession(topic))
-    // proposal_expire / session_request_expire are the lifecycle-expiry events @reown/walletkit
-    // actually surfaces (its event map has no `session_expire` / `session_update`). Re-seed from
-    // the SDK so the slice's session mirror can't drift after a prune/expiry.
+    // proposal_expire / session_request_expire are the expiry events @reown/walletkit surfaces;
+    // re-seed from the SDK so the session mirror can't drift after a prune.
     const onProposalExpire = () => refreshSessions()
     const onRequestExpire = () => refreshSessions()
     const onAuthenticate = async ({ id }: { id: number }) => {

@@ -29,21 +29,18 @@ import {
   type PendingSessionRequest,
 } from './walletKitSlice'
 
-// safe_setSettings is in the reject list but isn't a signing method — showing the
-// "message signing" toast for it would be misleading, so it's rejected silently.
+// safe_setSettings is in the reject list but isn't a signing method, so it skips the toast below.
 const MESSAGE_SIGNING_METHODS_SET: ReadonlySet<string> = new Set(
   REJECTED_SIGNING_METHODS.filter((m) => m !== 'safe_setSettings'),
 )
 
 const WRONG_ACTIVE_CHAIN_CODE = getSdkError('UNSUPPORTED_CHAINS').code
 
-// The /propose mutation's originalArgs carry the safeTxHash we key outstanding requests by.
 const safeTxHashOf = (action: { meta: { arg: { originalArgs: unknown } } }) =>
   (action.meta.arg.originalArgs as { proposeTransactionDto?: { safeTxHash?: string } }).proposeTransactionDto
     ?.safeTxHash
 
-// Reject a request back to the dApp. Errors are swallowed (a stale topic after a relay
-// reconnect is benign — the dApp times out client-side) so callers never serialize on a slow relay.
+// Errors swallowed: a stale topic (after a relay reconnect) is benign and must not block callers.
 const respondRejected = async (topic: string, id: number) => {
   try {
     const walletKit = await getWalletKit()
@@ -57,16 +54,12 @@ const respondRejected = async (topic: string, id: number) => {
 }
 
 /**
- * Side effects that respond to the dApp on behalf of the WalletConnect-for-dApps feature.
- * All `respondSessionRequest` / `rejectSession` for user-driven flows live here: screens and
- * hooks only dispatch intent (markReviewAbandoned / rejectPending), the slice owns lifecycle
- * state, and these listeners own the protocol I/O via the WalletKit singleton.
- *
- * Registered globally in the store, not gated by the feature flag: nothing populates the
- * outstanding/pending state when the feature is off, so every listener early-returns.
+ * Owns every dApp protocol response (respondSessionRequest / rejectSession) for user-driven
+ * flows — screens/hooks only dispatch intent. Registered globally but inert when the feature
+ * is off (nothing populates the outstanding/pending state).
  */
 export const walletKitListeners = (startListening: AppStartListening) => {
-  // /propose is in flight — block the abandon listener from racing the success response.
+  // Mark proposing so the abandon listener can't race the propose-success response.
   startListening({
     matcher: cgwApi.endpoints.transactionsProposeTransactionV1.matchPending,
     effect: (action, api) => {
@@ -77,7 +70,6 @@ export const walletKitListeners = (startListening: AppStartListening) => {
     },
   })
 
-  // The user signed and /propose succeeded: answer the dApp with the hash (or { id } for 5792).
   startListening({
     matcher: cgwApi.endpoints.transactionsProposeTransactionV1.matchFulfilled,
     effect: async (action, api) => {
@@ -89,6 +81,7 @@ export const walletKitListeners = (startListening: AppStartListening) => {
       if (!outstanding) {
         return
       }
+      // EIP-5792 wants a { id } bundle envelope; eth_sendTransaction wants the bare hash.
       const result = outstanding.method === 'wallet_sendCalls' ? { id: safeTxHash } : safeTxHash
       try {
         const walletKit = await getWalletKit()
@@ -103,8 +96,8 @@ export const walletKitListeners = (startListening: AppStartListening) => {
     },
   })
 
-  // /propose failed. If the user backed out while it was in flight, honour that now and reject
-  // the dApp; otherwise the draft is retained (AC) — re-enable the abandon path for a later back-out.
+  // Failed /propose: honour a pending back-out (cancelRequested), else clear proposing so the
+  // retained draft can be abandoned later.
   startListening({
     matcher: cgwApi.endpoints.transactionsProposeTransactionV1.matchRejected,
     effect: async (action, api) => {
@@ -125,9 +118,7 @@ export const walletKitListeners = (startListening: AppStartListening) => {
     },
   })
 
-  // The user left the review screen for a handed-off tx. Reject immediately unless /propose is
-  // in flight — in that window we only record the intent (cancelRequested) and let the
-  // propose-rejected / propose-fulfilled listeners settle the response.
+  // User left review: reject now, unless /propose is in flight (cancelRequested settles it later).
   startListening({
     actionCreator: markReviewAbandoned,
     effect: async (action, api) => {
@@ -140,9 +131,7 @@ export const walletKitListeners = (startListening: AppStartListening) => {
     },
   })
 
-  // The user rejected/dismissed a pending sheet item before hand-off. Requests get a
-  // USER_REJECTED response; proposals get rejectSession. The kind→SDK-method mapping is a
-  // protocol decision, so it lives here rather than in the sheet.
+  // Reject a dismissed sheet item: respondSessionRequest for a request, rejectSession for a proposal.
   startListening({
     actionCreator: rejectPending,
     effect: async (action, api) => {
@@ -157,8 +146,7 @@ export const walletKitListeners = (startListening: AppStartListening) => {
       } else if (item.kind === 'request') {
         await respondRejected(item.topic, item.id)
       } else {
-        // Compile-time guard: a new PendingItem kind must declare its own reject semantics
-        // here rather than silently inheriting the request path (wrong SDK method back to the dApp).
+        // A new PendingItem kind must add its own reject branch, not inherit the request path.
         const _exhaustive: never = item
         return _exhaustive
       }
@@ -166,9 +154,8 @@ export const walletKitListeners = (startListening: AppStartListening) => {
     },
   })
 
-  // A WalletConnect session_request arrived. Read the active context from the store at
-  // process time (not closed over by the subscribing hook), route it, and either push a
-  // deferred tx request to the sheet or respond synchronously + surface the matching toast.
+  // Route a session_request using context read from the store now (not stale React state),
+  // then push to the sheet (deferred) or respond + toast.
   startListening({
     actionCreator: sessionRequestReceived,
     effect: async (action, api) => {
@@ -188,9 +175,7 @@ export const walletKitListeners = (startListening: AppStartListening) => {
       })
 
       if (isDeferredResponse(response)) {
-        // UI sheet will respond later. methodRouter only emits the deferred sentinel for
-        // eth_sendTransaction / wallet_sendCalls, so this guard is true by construction — it
-        // just propagates that invariant to the slice's tightened method type.
+        // routeSessionRequest only defers tx methods, so this guard just narrows the type.
         const method = request.params.request.method
         if (!isDeferredTxMethod(method)) {
           return
@@ -210,9 +195,6 @@ export const walletKitListeners = (startListening: AppStartListening) => {
         return
       }
 
-      // Swallow stale-topic errors (typical after a Metro reload / long backgrounding — the
-      // relayer reconnects and processes backlogged messages referencing sessions WalletKit no
-      // longer knows about). Surfacing these is noise; the dApp will retry.
       try {
         const walletKit = await getWalletKit()
         await walletKit.respondSessionRequest({ topic: request.topic, response })
@@ -220,19 +202,15 @@ export const walletKitListeners = (startListening: AppStartListening) => {
         logWalletKitError('respondSessionRequest failed', e)
       }
 
-      // Surface the spec-mandated toast on the no-signer auto-reject path.
       if ('error' in response && response.error?.code === NO_SIGNER_ERROR_CODE) {
         api.dispatch(showToast({ message: 'No signer attached to this Safe', duration: 2500 }))
       }
-      // Explain rejections of message-signing methods (eth_signTypedData_v4, personal_sign, …) —
-      // dApps like CowSwap fire these in parallel with their tx request, and without a toast the
-      // user just sees a red "unknown RPC error" in the dApp with no context.
+      // dApps fire signing methods alongside their tx request; explain the rejection instead of
+      // leaving an opaque dApp-side error.
       if (MESSAGE_SIGNING_METHODS_SET.has(request.params.request.method)) {
         api.dispatch(showToast({ message: 'Message signing is not yet supported on mobile', duration: 2500 }))
       }
-      // Explain tx requests auto-rejected because the active Safe was switched to a chain the
-      // dApp's session doesn't cover (methodRouter returns WRONG_ACTIVE_CHAIN_CODE rather than
-      // deferring). The toast tells the user which network to switch back to.
+      // Rejected because the active Safe is on a different chain than the dApp session.
       if ('error' in response && response.error?.code === WRONG_ACTIVE_CHAIN_CODE) {
         const requestChainId = stripEip155Prefix(request.params.chainId)
         const network = selectChainById(state, requestChainId)?.chainName ?? `chain ${requestChainId}`
@@ -242,21 +220,15 @@ export const walletKitListeners = (startListening: AppStartListening) => {
     },
   })
 
-  // A Safe/chain switch invalidates WC tx requests in both stages: handed-off entries lose
-  // their draft to draftTxSlice's cleanup on the same actions, and pre-compose sheet entries
-  // would otherwise let Review compose the dApp's calls against the wrong Safe. Reject the
-  // stale entries so the dApp doesn't hang until the WC timeout (mirrors draftTxSlice's
-  // isSameSafe semantics; entries matching the new active Safe are kept). Clearing a pending
-  // entry also dismisses its sheet via the FIFO head.
+  // A Safe/chain switch makes in-flight WC requests stale (handed-off + pre-compose). Reject
+  // the ones that don't match the new active Safe so the dApp doesn't hang; matching ones stay.
   startListening({
     matcher: isAnyOf(setActiveSafe, switchActiveChain, clearActiveSafe),
     effect: async (action, api) => {
-      // For clearActiveSafe (and setActiveSafe(null)) both `next` and `nextChainId` stay
-      // undefined, so matchesNext is false for every entry — all requests get rejected.
+      // clearActiveSafe / setActiveSafe(null): next + nextChainId stay undefined → nothing matches.
       const next = setActiveSafe.match(action) ? action.payload : null
       const nextChainId = switchActiveChain.match(action) ? action.payload.chainId : next?.chainId
-      // switchActiveChain keeps the Safe address; the other actions carry the full context.
-      // An unknown (undefined) entry address never matches — the conservative choice.
+      // switchActiveChain keeps the address; otherwise match on it (undefined never matches).
       const matchesNext = (chainId: string, safeAddress: string | undefined) => {
         if (chainId !== nextChainId) {
           return false
@@ -264,10 +236,7 @@ export const walletKitListeners = (startListening: AppStartListening) => {
         return switchActiveChain.match(action) ? true : sameAddress(safeAddress, next?.address)
       }
 
-      // Handed-off requests (waiting on /propose) + pre-compose requests still showing
-      // (or queued behind) the sheet. Clear the state first so the UI dismisses
-      // immediately, then send all rejections in parallel — a slow relay must not
-      // serialize the cleanup (respondRejected swallows its own errors).
+      // Clear state first so the sheet dismisses immediately, then reject in parallel.
       const staleOutstanding = Object.entries(selectOutstandingRequests(api.getState())).filter(
         ([, req]) => !matchesNext(req.chainId, req.safeAddress),
       )

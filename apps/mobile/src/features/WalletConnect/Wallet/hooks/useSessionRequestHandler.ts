@@ -4,10 +4,8 @@ import { useAppDispatch } from '@/src/store/hooks'
 import { sessionRequestReceived } from '../store/walletKitSlice'
 
 /**
- * Subscribes to the WalletKit session_request event and dispatches it as a Redux signal.
- * Routing and all side effects (respond / pushPending / toast) live in the walletKit listener
- * middleware, which reads the active Safe/chain/signer from the store at process time — so this
- * hook holds no active context and never closes over stale React state.
+ * Forwards the WalletKit session_request event to Redux as a signal. The walletKit listener owns
+ * routing and side effects, reading context from the store — so this hook holds no stale state.
  */
 export const useSessionRequestHandler = (walletKit: IWalletKit | null) => {
   const dispatch = useAppDispatch()

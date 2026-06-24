@@ -10,9 +10,8 @@ import type { AppDispatch } from '@/src/store'
 type SafeSDK = NonNullable<ReturnType<typeof getSafeSDK>>
 
 /**
- * Returns the protocol-kit SDK singleton, verified to be bound to the expected chain.
- * Composing on a mismatched SDK would produce a draft for the wrong chain, so this throws
- * instead — shared by the Send flow and the WalletConnect tx-request flow.
+ * The protocol-kit SDK singleton, verified bound to `chainId` — throws on a mismatch rather than
+ * composing a draft for the wrong chain.
  */
 export async function getVerifiedSafeSDK(chainId: string): Promise<SafeSDK> {
   const safeSDK = getSafeSDK()
@@ -38,14 +37,9 @@ export type PreviewAndStashDraftArgs = {
 }
 
 /**
- * Shared tail of the local draft pipeline: hash the composed SafeTransaction, ask CGW for a
- * /preview, synthesize a TransactionDetails shape, and stash a DraftTx so the existing
- * sign/review screens render it without a /propose round-trip. The /propose call only
- * happens when the user signs.
- *
- * Throws (without stashing anything) when the preview fails.
- *
- * Returns the `safeTxHash` (used as the synthetic txId for the downstream review screens).
+ * Shared draft pipeline: hash the SafeTransaction, fetch a CGW /preview, synthesize details and
+ * stash a DraftTx so the review screens render without /propose (which only runs on sign).
+ * Throws without stashing if the preview fails. Returns the safeTxHash (the synthetic txId).
  */
 export const previewAndStashDraft = async ({
   safeSDK,

@@ -11,18 +11,16 @@ type Props = {
   url?: string
   iconUrl?: string
   variant: VerifyVariant
-  // Optional press handlers — the proposal sheet routes both to its permissions panel; the
-  // tx-request sheet has no panel and leaves them undefined (static identity).
+  // Undefined on the tx-request sheet (static identity, no permissions panel).
   onPressBadge?: () => void
   onPressDomain?: () => void
   domainTestID?: string
 }
 
 /**
- * Shared dApp-identity header for the WalletConnect request sheets: title, dApp logo with an
- * overlapping verify badge, name, and a domain pill with an info icon. The presentation is
- * identical across the session-proposal and transaction-request sheets (Figma `16755-4705`);
- * only the title, metadata source and press affordances differ.
+ * Shared dApp-identity header for the WC request sheets: title, logo with an
+ * overlapping verify badge, name, and a domain pill. Used by both the proposal and tx-request
+ * sheets — only the title, metadata source and press affordances differ.
  */
 export const DappIdentity: React.FC<Props> = ({
   title,
@@ -34,8 +32,7 @@ export const DappIdentity: React.FC<Props> = ({
   onPressDomain,
   domainTestID,
 }) => {
-  // dApp domain only, e.g. 'https://app.uniswap.org/swap?chain=1' -> 'app.uniswap.org'.
-  // Fall back to naive scheme/trailing-slash stripping for unparseable metadata URLs.
+  // Host only ('https://app.uniswap.org/swap' -> 'app.uniswap.org'); naive strip if unparseable.
   const domain = useMemo(() => {
     if (!url) {
       return ''
@@ -56,8 +53,7 @@ export const DappIdentity: React.FC<Props> = ({
       <YStack gap="$3" alignItems="center">
         <YStack width={64} height={64}>
           <DappIcon url={iconUrl} size={64} />
-          {/* Verify badge overlapping the icon's bottom-right corner. The $background ring
-              separates the badge from the dApp icon, matching the design. */}
+          {/* Verify badge over the icon's corner; the $background ring separates the two. */}
           <YStack position="absolute" bottom={-4} right={-4} borderRadius={100} backgroundColor="$background">
             <VerifyStatusIcon variant={variant} size={22} onPress={onPressBadge} />
           </YStack>

@@ -27,21 +27,14 @@ type Props = { walletKit: IWalletKit | null }
 const SNAP_COMPACT = 0
 const SNAP_EXPANDED = 1
 
-// Bottom padding for the scroll content so it never sits under the pinned footer CTA
-// (button + its vertical padding). Added on top of the safe-area inset.
+// Scroll-content clearance so it never sits under the pinned footer CTA (on top of the inset).
 const FOOTER_CLEARANCE = 72
 
 /**
- * Root-level host for incoming WalletConnect request sheets. Reads the FIFO head of the
- * pending queue and presents the sheet for it. The sheet is dismissable by swipe-down or
- * backdrop tap; an implicit dismissal is treated as the user declining, so we dispatch
- * rejectPending and the walletKit listener replies USER_REJECTED to the dApp (rejectSession
- * for proposals, an error response for requests).
- *
- * The proposal flow has two views — the proposal and a permissions detail panel — and both
- * primary CTAs ("Connect" / "Got it") are rendered here as a BottomSheetFooter so they sit
- * pinned to the sheet's bottom edge regardless of content height. The body components are
- * pure presentation; the approve flow lives in useApproveProposal.
+ * Root-level host for incoming WC request sheets: presents the FIFO head of the pending queue.
+ * An implicit dismissal (swipe-down / backdrop) dispatches rejectPending. The CTAs ("Connect" /
+ * "Got it" / "Reject" / "Review") are rendered as a pinned BottomSheetFooter; bodies are
+ * presentation-only and the approve flow lives in useApproveProposal.
  */
 export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
   const current = useAppSelector(selectCurrentRequest)
@@ -61,17 +54,14 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
     proposal ? proposal.proposal.verifyContext?.verified : request?.verifyContext?.verified,
   )
 
-  // Review/Reject for the transaction-request sheet. Review composes a draft and navigates to
-  // the confirm flow; the dApp is answered later by the propose-success listener.
   const { review, reject, composing, ready } = useTxRequestActions(request)
 
-  // Reset the permissions view whenever the queue head changes (new proposal or cleared).
+  // Reset the permissions view whenever the queue head changes.
   useEffect(() => {
     setPermissionsOpen(false)
   }, [current?.id, current?.kind])
 
-  // The permissions panel is taller than the proposal, so grow the sheet (index 1) while
-  // it's open and shrink back (index 0) when it closes.
+  // The permissions panel is taller, so grow the sheet while it's open and shrink back after.
   const openPermissions = useCallback(() => {
     setPermissionsOpen(true)
     ref.current?.snapToIndex(SNAP_EXPANDED)
@@ -89,16 +79,13 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
     ref.current?.present()
   }, [current, walletKit])
 
-  // Treat an implicit sheet dismissal (swipe-down, backdrop tap) as a USER_REJECTED reply
-  // to the dApp. Tapping an explicit action dispatches removePending first, clearing
-  // `current` synchronously — so by the time onDismiss fires from those paths this is a
-  // no-op. Reading state imperatively avoids a stale closure.
+  // Implicit dismissal (swipe / backdrop) = decline. Read state imperatively to avoid a stale
+  // closure; explicit actions already cleared `current`, so this is a no-op for them.
   const onSheetDismiss = useCallback(() => {
     if (!walletKit) {
       return
     }
-    // A connect or compose is in flight — let useApproveProposal / useTxRequestActions own the
-    // outcome (each clears the pending item). Rejecting here would race their response.
+    // Connect/compose in flight — useApproveProposal / useTxRequestActions own the outcome.
     if (busy || composing) {
       return
     }
@@ -106,21 +93,15 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
     if (!currentAtDismiss) {
       return
     }
-    // Record intent only; the walletKit listener rejects the dApp (rejectSession for a
-    // proposal, an error response for a request) and clears the pending item.
     dispatch(rejectPending(currentAtDismiss))
   }, [walletKit, busy, composing, store, dispatch])
 
-  // The active view's primary CTA, pinned to the bottom edge of the sheet. No background so
-  // its top edge doesn't show a seam against the content; the panel/proposal content is short
-  // enough that it never scrolls under the CTA.
   const renderFooter = useCallback(
     (footerProps: BottomSheetFooterProps) => {
       if (!walletKit) {
         return null
       }
-      // The permissions panel replaces the active view for either kind; its "Got it" CTA
-      // returns to that view without responding to the dApp.
+      // "Got it" returns to the active view without responding to the dApp.
       if ((proposal || request) && permissionsOpen) {
         return (
           <BottomSheetFooter {...footerProps} bottomInset={insets.bottom}>
@@ -150,9 +131,7 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
         )
       }
       if (request) {
-        // Identity-only gate: Reject answers the dApp with USER_REJECTED; Review composes the
-        // draft and routes to the confirm flow. Review is disabled until the Safe/chain/SDK
-        // are ready (Figma `16755-4705`).
+        // Review is disabled until the Safe/chain/SDK are ready.
         return (
           <BottomSheetFooter {...footerProps} bottomInset={insets.bottom}>
             <XStack gap="$3" paddingHorizontal="$4" paddingTop="$2" paddingBottom="$2">

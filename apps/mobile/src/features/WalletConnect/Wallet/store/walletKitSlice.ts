@@ -4,8 +4,7 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import type { RootState } from '@/src/store'
 import type { VerifyVariant } from '@safe-global/utils/features/walletconnect/verify'
 
-// The only session_request methods that need UI / a deferred response. Other methods
-// are answered synchronously and never reach the slice.
+// session_request methods that need UI; everything else is answered synchronously by the router.
 export const DEFERRED_TX_METHODS = ['eth_sendTransaction', 'wallet_sendCalls'] as const
 export type DeferredTxMethod = (typeof DEFERRED_TX_METHODS)[number]
 
@@ -25,34 +24,26 @@ export type PendingSessionRequest = {
   chainId: string // CAIP-2, e.g. 'eip155:1'
   method: DeferredTxMethod
   params: unknown
-  // The Safe the request was routed against. The safe-switch listener rejects entries whose
-  // context no longer matches, so Review can't compose a dApp's calls against a different
-  // Safe. Optional only because it may be unknown for requests restored after a restart.
+  // The Safe the request was routed against; the safe-switch listener rejects stale entries.
+  // Optional only for requests restored after a restart, where it may be unknown.
   safeAddress?: string
-  // WC's per-request domain verification, used by the sheet to render the verify badge.
   verifyContext?: WalletKitTypes.SessionRequest['verifyContext']
 }
 
 export type PendingItem = PendingSessionProposal | PendingSessionRequest
 
-// Tx requests handed off to the review-and-confirm flow, keyed by safeTxHash. We respond
-// to the dApp only after the propose mutation fulfils (user actually signed), not when the
-// sheet's Sign button is tapped. chainId/safeAddress record the Safe context the draft was
-// composed against, so the safe-switch listener can reject entries that became stale
-// (mirrors draftTxSlice's isSameSafe cleanup).
+// Tx requests handed off to the confirm flow, keyed by safeTxHash. The dApp is answered only
+// after /propose fulfils (user signed). chainId/safeAddress let the safe-switch listener drop
+// stale entries (mirrors draftTxSlice's isSameSafe cleanup).
 export type OutstandingTxRequest = {
   topic: string
   id: number
   method: DeferredTxMethod
   chainId: string
   safeAddress: string
-  // True while the /propose mutation is in flight (set from its pending/rejected actions).
-  // The abandon listener must not reject during this window — a reject would race the
-  // propose-fulfilled success response.
+  // True while /propose is in flight; the abandon listener must not reject and race the success.
   proposing?: boolean
-  // Set when the user backs out of review while /propose is in flight. The propose-rejected
-  // listener honours it: a failed propose then responds USER_REJECTED instead of leaving the
-  // dApp to time out. A successful propose ignores it (the success response wins).
+  // User backed out mid-propose: a failed propose then rejects the dApp; a successful one ignores it.
   cancelRequested?: boolean
 }
 
@@ -78,9 +69,8 @@ const walletKitSlice = createSlice({
   reducers: {
     setSessions(state, action: PayloadAction<Record<string, SessionTypes.Struct>>) {
       state.sessions = action.payload
-      // Prune verify entries for sessions that are no longer active (e.g. expired while the
-      // app was closed); keep entries for still-active topics so a captured badge survives
-      // rehydrate. We never add entries here — restored sessions carry no verify context.
+      // Prune verify entries whose session is gone; keep still-active ones so the badge survives
+      // rehydrate. Never adds entries — restored sessions carry no verify context.
       const activeTopics = new Set(Object.keys(action.payload))
       state.verifyByTopic = Object.fromEntries(
         Object.entries(state.verifyByTopic).filter(([topic]) => activeTopics.has(topic)),
@@ -119,9 +109,6 @@ const walletKitSlice = createSlice({
         req.proposing = action.payload.proposing
       }
     },
-    // Records that the user left review for a handed-off tx. The walletKit listener owns the
-    // actual dApp response; this only flags intent so the propose-rejected listener can honour
-    // it. No-op for a non-WC tx (no outstanding entry).
     markReviewAbandoned(state, action: PayloadAction<{ safeTxHash: string }>) {
       const req = state.outstandingRequests[action.payload.safeTxHash]
       if (req) {
@@ -132,17 +119,11 @@ const walletKitSlice = createSlice({
       const { [action.payload]: _removed, ...rest } = state.outstandingRequests
       state.outstandingRequests = rest
     },
-    // Signal action: the user rejected/dismissed a pending sheet item. The walletKit listener
-    // owns the dApp response (respondSessionRequest for a request, rejectSession for a
-    // proposal) and the removePending cleanup; the reducer itself does nothing.
     rejectPending(_state, _action: PayloadAction<PendingItem>) {
-      // No state change — the walletKit listener performs the dApp response and removePending.
+      // Signal only: the walletKit listener sends the dApp response and removePending.
     },
-    // Signal action: a WalletConnect session_request arrived from the SDK. The walletKit
-    // listener reads the active context from the store, routes it, and performs the side
-    // effects (respond / pushPending / toast); the reducer itself does nothing.
     sessionRequestReceived(_state, _action: PayloadAction<WalletKitTypes.SessionRequest>) {
-      // No state change — the walletKit listener owns routing and side effects.
+      // Signal only: the walletKit listener routes the request and runs the side effects.
     },
     clear() {
       return initialState
@@ -176,9 +157,7 @@ export const selectOutstandingRequests = (state: RootState) => state[sliceName].
 export const selectOutstandingRequestByHash = (state: RootState, safeTxHash: string) =>
   state[sliceName].outstandingRequests[safeTxHash]
 
-// Resolve the originating dApp's metadata for a handed-off tx: safeTxHash → outstanding
-// request (topic) → active session → peer metadata. Returns undefined for non-WC txs and
-// after the request is cleared on propose-success.
+// dApp metadata for a handed-off tx: safeTxHash → outstanding topic → session peer metadata.
 export const selectDappMetadataByTxHash = (state: RootState, safeTxHash: string) => {
   const topic = state[sliceName].outstandingRequests[safeTxHash]?.topic
   return topic ? state[sliceName].sessions[topic]?.peer.metadata : undefined

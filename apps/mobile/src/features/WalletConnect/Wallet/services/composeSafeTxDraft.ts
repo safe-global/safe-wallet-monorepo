@@ -22,10 +22,8 @@ export type ComposeSafeTxDraftInput = {
   dispatch: AppDispatch
 }
 
-// dApps send numeric fields as hex per JSON-RPC convention (e.g. Uniswap: value = '0x16345785d8a0000').
-// Protocol-kit / ethers expect decimal strings here — failure mode is a misleading
-// "invalid base-10 numeric string" thrown deep in the sign path. BigInt() accepts both '0x...' and
-// decimal input, and .toString() always emits decimal, so this normalizes either form safely.
+// dApps send value as hex, but protocol-kit/ethers want decimal (else a misleading
+// "invalid base-10 numeric string" deep in the sign path). BigInt accepts both; toString emits decimal.
 const normalizeValue = (value: string | undefined): string => {
   if (!value) {
     return '0'
@@ -33,8 +31,7 @@ const normalizeValue = (value: string | undefined): string => {
   return BigInt(value).toString()
 }
 
-// Contract deployment routed through CreateCall (no-to + only-data); mirrors web's
-// WalletSDK.getCreateCallTransaction in apps/web/.../useSafeWalletProvider.tsx.
+// Contract deployment (no-to + data-only) routed through CreateCall, mirroring web.
 const buildCreateCallTx = (chain: Chain, safeVersion: SafeState['version'], data: string): MetaTransactionData => {
   const deployment = getCreateCallContractDeployment(chain, safeVersion)
   if (!deployment) {
@@ -56,8 +53,7 @@ const buildCreateCallTx = (chain: Chain, safeVersion: SafeState['version'], data
 
 const toMetaTx = (call: DappCall, chain: Chain, safeVersion: SafeState['version']): MetaTransactionData => {
   if (!call.to) {
-    // The router has already ruled out empty / no-to-with-value; this branch is
-    // strictly the contract-deployment case (data-only).
+    // Router already ruled out the invalid no-to cases, so this is a contract deployment.
     return buildCreateCallTx(chain, safeVersion, call.data ?? '0x')
   }
   return {
@@ -69,14 +65,8 @@ const toMetaTx = (call: DappCall, chain: Chain, safeVersion: SafeState['version'
 }
 
 /**
- * Build a SafeTransaction from one or more dApp-supplied calls, then run the shared draft
- * pipeline (CGW /preview → synthesized details → stashed DraftTx) so the existing
- * review-and-confirm flow can render it without a /propose round-trip. The /propose call
- * happens when the user signs.
- *
- * For batches (calls.length > 1) the SDK auto-wraps via multiSend (DelegateCall).
- *
- * Returns the safeTxHash (used as the txId in downstream navigation).
+ * Build a SafeTransaction from dApp calls (batches auto-wrap via multiSend) and run the shared
+ * draft pipeline (see previewAndStashDraft). Returns the safeTxHash used as the downstream txId.
  */
 export const composeSafeTxDraft = async ({
   calls,
