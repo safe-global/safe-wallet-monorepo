@@ -64,14 +64,28 @@ export const cgwClientFilter = createFilter(
   [`queries.getChainsConfigV2("${CONFIG_SERVICE_KEY}")`, 'config'],
 )
 
-type QueryEntry = { status?: string } | undefined
+type QueryEntry = { status?: string; data?: unknown } | undefined
 type RtkQueryState = {
   queries?: Record<string, QueryEntry>
   [key: string]: unknown
 }
 
-// RTK Query persists status: 'pending' for in-flight requests. If the app is killed mid-request,
-// this stale pending status prevents new requests from being initiated on restart.
+// RTK Query persists status: 'pending' for in-flight requests. If the app is killed mid-refetch,
+// the previous behavior deleted the whole entry on rehydrate — including the last successfully
+// fetched data — which is how a transient backend outage wiped the cached chains. Instead, keep the
+// data and mark the entry 'fulfilled' so it rehydrates as a settled cache hit rather than stuck
+// fetching; the bootstrap force-refetch then refreshes it. Entries with no usable data are dropped
+// so the query re-initiates on the next launch.
+const hasUsableData = (data: unknown): boolean => {
+  if (data === undefined || data === null) {
+    return false
+  }
+  // Entity-adapter state (e.g. chains) is a non-null object even when empty; an empty list is not
+  // "successful data", so treat it the same as no data.
+  const ids = (data as { ids?: unknown[] }).ids
+  return Array.isArray(ids) ? ids.length > 0 : true
+}
+
 export const sanitizePendingQueriesTransform = createTransform<RtkQueryState, RtkQueryState>(
   (inboundState) => inboundState,
   (outboundState) => {
@@ -82,6 +96,9 @@ export const sanitizePendingQueriesTransform = createTransform<RtkQueryState, Rt
     const sanitizedQueries: Record<string, QueryEntry> = {}
     for (const [key, query] of Object.entries(outboundState.queries)) {
       if (query?.status === 'pending') {
+        if (hasUsableData(query.data)) {
+          sanitizedQueries[key] = { ...query, status: 'fulfilled' }
+        }
         continue
       }
       sanitizedQueries[key] = query
