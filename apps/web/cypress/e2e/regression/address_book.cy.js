@@ -6,7 +6,7 @@ import * as main from '../../e2e/pages/main.page'
 import * as ls from '../../support/localstorage_data.js'
 import * as accountsModal from '../pages/accounts_modal.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
-import * as wallet from '../../support/utils/wallet.js'
+import * as space from '../pages/spaces.page.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -22,7 +22,7 @@ describe('Address book tests', () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4)
+    space.signInAndVisit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, signer)
   })
 
   it('Verify owners name can be edited', () => {
@@ -122,7 +122,6 @@ describe('Address book tests', () => {
         addressBook.clickOnImportFileBtn()
         addressBook.importCSVFile(addressBook.addedSafesCSVFile)
         addressBook.clickOnImportBtn()
-        wallet.connectSigner(signer)
         accountsModal.openAccountsModal()
         accountsModal.verifyAccountsListContains(importedSafe)
       })

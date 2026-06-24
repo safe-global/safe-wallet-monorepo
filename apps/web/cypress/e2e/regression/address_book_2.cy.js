@@ -5,9 +5,12 @@ import * as ls from '../../support/localstorage_data.js'
 import * as createtx from '../../e2e/pages/create_tx.pages'
 import * as data from '../../fixtures/txhistory_data_data.json'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import * as space from '../pages/spaces.page.js'
 
 let staticSafes = []
 
+const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
+const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 const typeReceive = data.type.receive
 
 const owner1 = 'Automation owner'
@@ -20,7 +23,7 @@ describe('Address book tests - 2', () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4)
+    space.signInAndVisit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, signer)
   })
 
   it('Verify Name and Address columns sorting works', () => {

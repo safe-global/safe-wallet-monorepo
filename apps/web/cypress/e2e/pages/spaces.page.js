@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from './main.page.js'
 import * as navigation from './navigation.page.js'
+import * as wallet from '../../support/utils/wallet.js'
 
 // ===========================================
 // Selectors
@@ -185,6 +186,18 @@ const spaceDashboardWidgetSelectorByTitle = {
 
 export function clickOnSignInBtn() {
   cy.get(continueWithWalletBtn).click()
+}
+
+// Authenticate past the require-login gate, then visit a login-gated page.
+// The global beforeEach in support/e2e.js clears cookies/storage before every
+// test, so the gated UI must be unlocked per test, not once in `before`.
+export function signInAndVisit(url, signer) {
+  blockBeamer()
+  cy.visit(constants.spacesUrl)
+  wallet.connectSigner(signer)
+  clickOnSignInBtn()
+  waitForSpacesWelcomeReady()
+  cy.visit(url)
 }
 
 export function blockBeamer() {

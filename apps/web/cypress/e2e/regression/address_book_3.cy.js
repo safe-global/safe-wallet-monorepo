@@ -4,6 +4,7 @@ import * as main from '../pages/main.page.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
+import * as space from '../pages/spaces.page.js'
 
 let staticSafes = []
 
@@ -22,7 +23,7 @@ describe('Address book tests - 3', () => {
   })
 
   beforeEach(() => {
-    cy.visit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4)
+    space.signInAndVisit(constants.addressBookUrl + staticSafes.SEP_STATIC_SAFE_4, signer)
   })
 
   it('Verify entry can be added', () => {
