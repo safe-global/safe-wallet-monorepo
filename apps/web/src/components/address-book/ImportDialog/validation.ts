@@ -1,13 +1,7 @@
 import type { ParseResult } from 'papaparse'
 
 import { validateAddress } from '@safe-global/utils/utils/validation'
-import {
-  ADDRESS_BOOK_NAME_MAX_LENGTH,
-  EMPTY_NAME_MESSAGE,
-  NAME_MIN_LENGTH,
-  sanitizeName,
-  validateName,
-} from '@safe-global/utils/validation/names'
+import { EMPTY_NAME_MESSAGE } from '@safe-global/utils/validation/names'
 
 export const abCsvReaderValidator = ({ size }: File): string[] | undefined => {
   if (size > 1_000_000) {
@@ -25,10 +19,7 @@ export const hasValidAbEntryAddresses = (entries: string[][]) => {
 
 export const getAbNameError = (name: string | undefined): string | undefined => {
   if (!name) return EMPTY_NAME_MESSAGE
-  return validateName(sanitizeName(name), {
-    minLength: NAME_MIN_LENGTH,
-    maxLength: ADDRESS_BOOK_NAME_MAX_LENGTH,
-  })
+  return undefined
 }
 
 export const hasValidAbNames = (entries: string[][]) => {

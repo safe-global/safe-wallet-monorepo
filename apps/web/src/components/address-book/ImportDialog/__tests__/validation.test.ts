@@ -88,16 +88,16 @@ describe('Address book import validation', () => {
       expect(hasValidAbNames(entries)).toBe(false)
     })
 
-    it('should return false if any name is shorter than the minimum', () => {
+    it('should return true for short names (local address book has no length restriction)', () => {
       const entries = [['0xAb5e3288640396C3988af5a820510682f3C58adF', 'Jo', 'chainId']]
 
-      expect(hasValidAbNames(entries)).toBe(false)
+      expect(hasValidAbNames(entries)).toBe(true)
     })
 
-    it('should return false if any name contains disallowed characters', () => {
+    it('should return true for names with special characters (local address book has no character restrictions)', () => {
       const entries = [['0xAb5e3288640396C3988af5a820510682f3C58adF', 'Bad<script>', 'chainId']]
 
-      expect(hasValidAbNames(entries)).toBe(false)
+      expect(hasValidAbNames(entries)).toBe(true)
     })
 
     it('should return true for accented and punctuation names', () => {
@@ -186,7 +186,7 @@ describe('Address book import validation', () => {
       expect(abOnUploadValidator(result)).toBe('Address book contains an invalid address on row 2')
     })
 
-    it('should return an error with the row and reason for an invalid name', () => {
+    it('should return undefined for names with special characters (local address book has no character restrictions)', () => {
       const result = {
         data: [
           ['address', 'name', 'chainId'],
@@ -196,7 +196,7 @@ describe('Address book import validation', () => {
         meta: {} as ParseMeta,
       } as ParseResult<string[]>
 
-      expect(abOnUploadValidator(result)).toMatch(/^Address book contains an invalid name on row 2: /)
+      expect(abOnUploadValidator(result)).toBeUndefined()
     })
   })
 })
