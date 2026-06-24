@@ -7,9 +7,6 @@ import { rejectPending, walletKitSliceName, type PendingSessionRequest } from '.
 const mockPush = jest.fn()
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }))
 
-const mockToastShow = jest.fn()
-jest.mock('@tamagui/toast', () => ({ useToastController: () => ({ show: mockToastShow }) }))
-
 jest.mock('@/src/hooks/coreSDK/safeCoreSDK', () => ({ useSafeSDK: () => ({}) }))
 
 jest.mock('@/src/store/chains', () => ({ selectChainById: () => ({ chainId: '1' }) }))
@@ -81,7 +78,9 @@ describe('useSendTransaction', () => {
     await act(async () => {
       await result.current.review()
     })
-    expect(mockToastShow).toHaveBeenCalledWith('Failed to build transaction', expect.anything())
+    expect(store.getState().toast.queue).toContainEqual(
+      expect.objectContaining({ message: 'Failed to build transaction', variant: 'error' }),
+    )
     expect(mockPush).not.toHaveBeenCalled()
     // No outstanding request, pending retained → user can retry or reject.
     expect(store.getState()[walletKitSliceName].outstandingRequests).toEqual({})

@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { skipToken } from '@reduxjs/toolkit/query'
-import { useToastController } from '@tamagui/toast'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
+import { showToast } from '@/src/store/toastSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectChainById } from '@/src/store/chains'
 import { useSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
@@ -38,7 +38,6 @@ const extractCalls = (method: PendingSessionRequest['method'], params: unknown):
 export const useSendTransaction = (pending: PendingSessionRequest | null) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
-  const toast = useToastController()
   const activeSafe = useAppSelector(selectActiveSafe)
   const chain = useAppSelector((s) => (activeSafe ? (selectChainById(s, activeSafe.chainId) ?? null) : null))
   // Only subscribe while a request sheet is up — the host is mounted at the app root.
@@ -91,11 +90,11 @@ export const useSendTransaction = (pending: PendingSessionRequest | null) => {
       // composeSafeTxDraft throws before setDraft on a /preview failure, so there is no draft
       // to clean up; stay on the sheet so the user can retry or reject.
       logWalletKitError('composeSafeTxDraft failed', e)
-      toast.show('Failed to build transaction', { native: false, duration: 3000, variant: 'error' })
+      dispatch(showToast({ message: 'Failed to build transaction', duration: 3000, variant: 'error' }))
     } finally {
       setComposing(false)
     }
-  }, [pending, activeSafe, safe, chain, dispatch, router, toast])
+  }, [pending, activeSafe, safe, chain, dispatch, router])
 
   return { review, reject, composing, ready }
 }

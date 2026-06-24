@@ -8,9 +8,6 @@ import { pushPending, rejectPending, selectPending, walletKitSliceName } from '.
 import type { RootState } from '@/src/store'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 
-const mockToastShow = jest.fn()
-jest.mock('@tamagui/toast', () => ({ useToastController: () => ({ show: mockToastShow }) }))
-
 const mockPresent = jest.fn()
 const mockDismiss = jest.fn()
 // Captures the latest onDismiss prop so tests can simulate a swipe-down / backdrop dismissal.
@@ -88,7 +85,6 @@ describe('RequestSheetHost', () => {
   beforeEach(() => {
     mockPresent.mockClear()
     mockDismiss.mockClear()
-    mockToastShow.mockClear()
     mockOnDismiss = undefined
   })
 

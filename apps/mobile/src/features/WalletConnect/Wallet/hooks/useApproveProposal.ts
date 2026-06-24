@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react'
 import { useStore } from 'react-redux'
-import { useToastController } from '@tamagui/toast'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { useAppDispatch } from '@/src/store/hooks'
+import { showToast } from '@/src/store/toastSlice'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import type { RootState } from '@/src/store'
 import { addSession, removePending } from '../store/walletKitSlice'
@@ -25,7 +25,6 @@ type PendingProposal = { id: number; proposal: WalletKitTypes.SessionProposal }
 export const useApproveProposal = (walletKit: IWalletKit | null) => {
   const dispatch = useAppDispatch()
   const store = useStore<RootState>()
-  const toast = useToastController()
   const [busy, setBusy] = useState(false)
 
   const approve = useCallback(
@@ -58,11 +57,11 @@ export const useApproveProposal = (walletKit: IWalletKit | null) => {
         dispatch(addSession({ session, verifyVariant }))
         dispatch(removePending({ id, kind: 'proposal' }))
         // WalletKit auto-redirects back to the dApp; surface a success toast on our side.
-        toast.show('Connected to app', { native: false, duration: 3000 })
+        dispatch(showToast({ message: 'Connected to app', duration: 3000 }))
       } catch (e) {
         // Show a friendly toast; log the underlying (often technical) error for diagnostics.
         logWalletKitError('approveSession failed', e)
-        toast.show('Connection to app failed', { native: false, duration: 3000, variant: 'error' })
+        dispatch(showToast({ message: 'Connection to app failed', duration: 3000, variant: 'error' }))
         // rejectProposal swallows + logs its own errors, so it never throws here.
         await rejectProposal(walletKit, id)
         dispatch(removePending({ id, kind: 'proposal' }))
@@ -70,7 +69,7 @@ export const useApproveProposal = (walletKit: IWalletKit | null) => {
         setBusy(false)
       }
     },
-    [walletKit, store, dispatch, toast],
+    [walletKit, store, dispatch],
   )
 
   return { approve, busy }
