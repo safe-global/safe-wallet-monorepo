@@ -30,7 +30,7 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
   const [acceptInvite] = useMembersAcceptInviteV1Mutation()
   const memberName = space.members.find((member) => member.user.id === currentUser?.id)?.name
 
-  const methods = useForm<{ name: string }>({ mode: 'onChange', defaultValues: { name: memberName } })
+  const methods = useForm<{ name: string }>({ mode: 'onChange', defaultValues: { name: memberName ?? '' } })
   const { handleSubmit, formState, setError } = methods
 
   const onSubmit = handleSubmit(async (data) => {
