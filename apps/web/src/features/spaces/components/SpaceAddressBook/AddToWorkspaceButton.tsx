@@ -72,7 +72,7 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
   if (hasInvalidChars) {
     return (
       <Tooltip>
-        <TooltipTrigger render={<span />}>{button}</TooltipTrigger>
+        <TooltipTrigger render={<div />}>{button}</TooltipTrigger>
         <TooltipContent>
           This contact contains invalid characters. Edit the contact before adding it to a workspace.
         </TooltipContent>

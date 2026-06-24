@@ -106,7 +106,7 @@ describe('AddToWorkspaceButton', () => {
     const button = screen.getByRole('button', { name: 'Add to workspace' })
     expect(button).toBeDisabled()
 
-    await userEvent.hover(button.closest('span')!)
+    await userEvent.hover(button.closest('div')!)
     await waitFor(() =>
       expect(screen.getByText(/Edit the contact before adding it to a workspace/i)).toBeInTheDocument(),
     )
