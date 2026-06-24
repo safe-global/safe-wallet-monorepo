@@ -24,17 +24,17 @@ export function isInvalidDateRange(createdAtGte: string | undefined, createdAtLt
 export const DATE_RANGE_ERROR = "'From' date can't be after the 'To' date"
 export const FUTURE_DATE_ERROR = "Date can't be in the future"
 
+/** Inline messages to render under each field; absent when the field is valid. */
 export type DateFilterValidation = {
-  message?: string
-  fromInvalid: boolean
-  toInvalid: boolean
+  fromError?: string
+  toError?: string
 }
 
 /**
  * Validates the From/To bounds against today (passed as `YYYY-MM-DD` so this stays pure).
- * A future bound takes precedence over an out-of-order range; the
- * out-of-order range check applies only when both bounds are legitimate past dates, so a
- * future date never drags the other, valid field into an error.
+ * A future bound is flagged on the offending field and takes precedence; the out-of-order
+ * range check applies only when both bounds are legitimate past dates (so a future date never
+ * drags the other, valid field into an error) and is reported on From, the field at fault.
  */
 export function getDateFilterValidation(
   createdAtGte: string | undefined,
@@ -45,13 +45,11 @@ export function getDateFilterValidation(
   const toFuture = toDateInputValue(createdAtLte) > today
 
   if (fromFuture || toFuture) {
-    return { message: FUTURE_DATE_ERROR, fromInvalid: fromFuture, toInvalid: toFuture }
+    return {
+      fromError: fromFuture ? FUTURE_DATE_ERROR : undefined,
+      toError: toFuture ? FUTURE_DATE_ERROR : undefined,
+    }
   }
 
-  const rangeInvalid = isInvalidDateRange(createdAtGte, createdAtLte)
-  return {
-    message: rangeInvalid ? DATE_RANGE_ERROR : undefined,
-    fromInvalid: rangeInvalid,
-    toInvalid: rangeInvalid,
-  }
+  return isInvalidDateRange(createdAtGte, createdAtLte) ? { fromError: DATE_RANGE_ERROR } : {}
 }

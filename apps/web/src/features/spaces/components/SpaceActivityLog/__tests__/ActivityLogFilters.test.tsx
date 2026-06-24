@@ -70,7 +70,7 @@ describe('ActivityLogFilters', () => {
     expect(filters.createdAtGte).toBeUndefined()
   })
 
-  it('shows a validation error when the from date is after the to date', () => {
+  it('shows the range error on the from field when the from date is after the to date', () => {
     render(
       <ActivityLogFilters
         filters={{
@@ -81,9 +81,10 @@ describe('ActivityLogFilters', () => {
       />,
     )
 
+    // The range violation is From's fault, so it's flagged inline on From only.
     expect(screen.getByRole('alert')).toHaveTextContent("'From' date can't be after the 'To' date")
     expect(screen.getByLabelText('From')).toHaveAttribute('aria-invalid', 'true')
-    expect(screen.getByLabelText('To')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText('To')).not.toHaveAttribute('aria-invalid')
   })
 
   it.each<[string, ActivityLogFilterState]>([

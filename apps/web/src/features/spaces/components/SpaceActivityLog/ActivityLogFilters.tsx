@@ -18,7 +18,6 @@ export const EMPTY_FILTERS: ActivityLogFilterState = {}
 
 const ALL_ACTORS = 'all'
 const ALL_ACTORS_LABEL = 'All members'
-const DATE_ERROR_ID = 'activity-date-error'
 
 const SORT_LABELS: Record<'asc' | 'desc', string> = {
   desc: 'Newest first',
@@ -43,7 +42,7 @@ function DateFilter({
   value,
   min,
   max,
-  invalid,
+  error,
   onValueChange,
 }: {
   id: string
@@ -51,7 +50,7 @@ function DateFilter({
   value: string
   min?: string
   max?: string
-  invalid: boolean
+  error?: string
   onValueChange: (value: string) => void
 }) {
   return (
@@ -59,12 +58,11 @@ function DateFilter({
       <Input
         id={id}
         type="date"
-        className="bg-card dark:bg-card border-input w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark]"
+        className="bg-card dark:bg-card border-input w-40 rounded-lg [color-scheme:light] dark:[color-scheme:dark] [&~p]:w-40 [&~p]:text-xs"
         value={value}
         min={min}
         max={max}
-        aria-invalid={invalid || undefined}
-        aria-describedby={invalid ? DATE_ERROR_ID : undefined}
+        error={error}
         onChange={(event) => onValueChange(event.target.value)}
       />
     </FilterField>
@@ -97,75 +95,65 @@ function ActivityLogFilters({
   const fromDateMax = toDateBound && toDateBound < today ? toDateBound : today
 
   return (
-    <div className="mb-4 flex flex-col gap-1.5">
-      <div data-testid="activity-log-filters" className="flex flex-wrap items-end gap-3">
-        <FilterField id="activity-actor-filter" label="Member">
-          <Select
-            value={filters.actorUserId !== undefined ? String(filters.actorUserId) : ALL_ACTORS}
-            onValueChange={(value) =>
-              onFiltersChange({ ...filters, actorUserId: value === ALL_ACTORS ? undefined : Number(value) })
-            }
-          >
-            <SelectTrigger id="activity-actor-filter" className="bg-card dark:bg-card w-48 cursor-pointer rounded-lg">
-              <SelectValue placeholder={ALL_ACTORS_LABEL}>
-                <span className="truncate">
-                  {selectedActor ? getActorLabel(selectedActor.actorUserId, selectedActor.actor) : ALL_ACTORS_LABEL}
-                </span>
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent alignItemWithTrigger={false} align="start">
-              <SelectItem value={ALL_ACTORS}>{ALL_ACTORS_LABEL}</SelectItem>
-              {actors.map((actor) => (
-                <SelectItem key={actor.actorUserId} value={String(actor.actorUserId)}>
-                  {getActorLabel(actor.actorUserId, actor.actor)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </FilterField>
+    <div data-testid="activity-log-filters" className="mb-4 flex flex-wrap items-start gap-3">
+      <FilterField id="activity-actor-filter" label="Member">
+        <Select
+          value={filters.actorUserId !== undefined ? String(filters.actorUserId) : ALL_ACTORS}
+          onValueChange={(value) =>
+            onFiltersChange({ ...filters, actorUserId: value === ALL_ACTORS ? undefined : Number(value) })
+          }
+        >
+          <SelectTrigger id="activity-actor-filter" className="bg-card dark:bg-card w-48 cursor-pointer rounded-lg">
+            <SelectValue placeholder={ALL_ACTORS_LABEL}>
+              <span className="truncate">
+                {selectedActor ? getActorLabel(selectedActor.actorUserId, selectedActor.actor) : ALL_ACTORS_LABEL}
+              </span>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent alignItemWithTrigger={false} align="start">
+            <SelectItem value={ALL_ACTORS}>{ALL_ACTORS_LABEL}</SelectItem>
+            {actors.map((actor) => (
+              <SelectItem key={actor.actorUserId} value={String(actor.actorUserId)}>
+                {getActorLabel(actor.actorUserId, actor.actor)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </FilterField>
 
-        <DateFilter
-          id="activity-from-filter"
-          label="From"
-          value={toDateInputValue(filters.createdAtGte)}
-          max={fromDateMax}
-          invalid={validation.fromInvalid}
-          onValueChange={(value) => onFiltersChange({ ...filters, createdAtGte: toIsoBound(value, false) })}
-        />
+      <DateFilter
+        id="activity-from-filter"
+        label="From"
+        value={toDateInputValue(filters.createdAtGte)}
+        max={fromDateMax}
+        error={validation.fromError}
+        onValueChange={(value) => onFiltersChange({ ...filters, createdAtGte: toIsoBound(value, false) })}
+      />
 
-        <DateFilter
-          id="activity-to-filter"
-          label="To"
-          value={toDateInputValue(filters.createdAtLte)}
-          min={toDateInputValue(filters.createdAtGte) || undefined}
-          max={today}
-          invalid={validation.toInvalid}
-          onValueChange={(value) => onFiltersChange({ ...filters, createdAtLte: toIsoBound(value, true) })}
-        />
+      <DateFilter
+        id="activity-to-filter"
+        label="To"
+        value={toDateInputValue(filters.createdAtLte)}
+        min={toDateInputValue(filters.createdAtGte) || undefined}
+        max={today}
+        error={validation.toError}
+        onValueChange={(value) => onFiltersChange({ ...filters, createdAtLte: toIsoBound(value, true) })}
+      />
 
-        <FilterField id="activity-sort-filter" label="Sort">
-          <Select
-            value={sortDirection}
-            onValueChange={(value) =>
-              onFiltersChange({ ...filters, sortDirection: value === 'asc' ? 'asc' : undefined })
-            }
-          >
-            <SelectTrigger id="activity-sort-filter" className="bg-card dark:bg-card w-40 cursor-pointer rounded-lg">
-              <SelectValue>{SORT_LABELS[sortDirection]}</SelectValue>
-            </SelectTrigger>
-            <SelectContent alignItemWithTrigger={false} align="start">
-              <SelectItem value="desc">{SORT_LABELS.desc}</SelectItem>
-              <SelectItem value="asc">{SORT_LABELS.asc}</SelectItem>
-            </SelectContent>
-          </Select>
-        </FilterField>
-      </div>
-
-      {validation.message && (
-        <p id={DATE_ERROR_ID} role="alert" className="text-destructive text-sm">
-          {validation.message}
-        </p>
-      )}
+      <FilterField id="activity-sort-filter" label="Sort">
+        <Select
+          value={sortDirection}
+          onValueChange={(value) => onFiltersChange({ ...filters, sortDirection: value === 'asc' ? 'asc' : undefined })}
+        >
+          <SelectTrigger id="activity-sort-filter" className="bg-card dark:bg-card w-40 cursor-pointer rounded-lg">
+            <SelectValue>{SORT_LABELS[sortDirection]}</SelectValue>
+          </SelectTrigger>
+          <SelectContent alignItemWithTrigger={false} align="start">
+            <SelectItem value="desc">{SORT_LABELS.desc}</SelectItem>
+            <SelectItem value="asc">{SORT_LABELS.asc}</SelectItem>
+          </SelectContent>
+        </Select>
+      </FilterField>
     </div>
   )
 }

@@ -75,57 +75,45 @@ describe('dateFilters', () => {
     const pastEnd = (day: string) => new Date(`${day}T23:59:59`).toISOString()
 
     it('is valid for an empty, single-bound, or in-range selection', () => {
-      expect(getDateFilterValidation(undefined, undefined, today)).toEqual({
-        message: undefined,
-        fromInvalid: false,
-        toInvalid: false,
-      })
-      expect(getDateFilterValidation(past('2026-06-01'), undefined, today).message).toBeUndefined()
-      expect(getDateFilterValidation(past('2026-06-01'), pastEnd('2026-06-10'), today).message).toBeUndefined()
+      expect(getDateFilterValidation(undefined, undefined, today)).toEqual({})
+      expect(getDateFilterValidation(past('2026-06-01'), undefined, today)).toEqual({})
+      expect(getDateFilterValidation(past('2026-06-01'), pastEnd('2026-06-10'), today)).toEqual({})
     })
 
     it('treats today as valid (not future)', () => {
-      const result = getDateFilterValidation(past(today), pastEnd(today), today)
-      expect(result.message).toBeUndefined()
-      expect(result.fromInvalid).toBe(false)
-      expect(result.toInvalid).toBe(false)
+      expect(getDateFilterValidation(past(today), pastEnd(today), today)).toEqual({})
     })
 
-    it('flags only the to field when the to date is in the future', () => {
+    it('shows an inline future error under the to field only', () => {
       const result = getDateFilterValidation(undefined, pastEnd('2027-01-01'), today)
-      expect(result.message).toBe(FUTURE_DATE_ERROR)
-      expect(result.toInvalid).toBe(true)
-      expect(result.fromInvalid).toBe(false)
+      expect(result.toError).toBe(FUTURE_DATE_ERROR)
+      expect(result.fromError).toBeUndefined()
     })
 
-    it('flags only the from field when the from date is in the future', () => {
+    it('shows an inline future error under the from field only', () => {
       const result = getDateFilterValidation(past('2027-01-01'), undefined, today)
-      expect(result.message).toBe(FUTURE_DATE_ERROR)
-      expect(result.fromInvalid).toBe(true)
-      expect(result.toInvalid).toBe(false)
+      expect(result.fromError).toBe(FUTURE_DATE_ERROR)
+      expect(result.toError).toBeUndefined()
     })
 
-    it('reports the range error when bounds are out of order but in the past', () => {
+    it('reports the range error on the from field when bounds are out of order but in the past', () => {
       const result = getDateFilterValidation(past('2026-06-10'), pastEnd('2026-06-01'), today)
-      expect(result.message).toBe(DATE_RANGE_ERROR)
-      expect(result.fromInvalid).toBe(true)
-      expect(result.toInvalid).toBe(true)
+      expect(result.fromError).toBe(DATE_RANGE_ERROR)
+      expect(result.toError).toBeUndefined()
     })
 
     it('flags only the future field when a future bound also breaks range order', () => {
       // From is in the future (so From > a past To): the future bound is the real problem,
       // so only From is flagged — the valid past To must not be dragged into the error.
       const result = getDateFilterValidation(past('2027-01-01'), pastEnd('2026-06-01'), today)
-      expect(result.message).toBe(FUTURE_DATE_ERROR)
-      expect(result.fromInvalid).toBe(true)
-      expect(result.toInvalid).toBe(false)
+      expect(result.fromError).toBe(FUTURE_DATE_ERROR)
+      expect(result.toError).toBeUndefined()
     })
 
-    it('flags both fields when both bounds are in the future', () => {
+    it('shows an inline future error under both fields when both are in the future', () => {
       const result = getDateFilterValidation(past('2027-01-01'), pastEnd('2027-02-01'), today)
-      expect(result.message).toBe(FUTURE_DATE_ERROR)
-      expect(result.fromInvalid).toBe(true)
-      expect(result.toInvalid).toBe(true)
+      expect(result.fromError).toBe(FUTURE_DATE_ERROR)
+      expect(result.toError).toBe(FUTURE_DATE_ERROR)
     })
   })
 })
