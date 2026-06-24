@@ -11,12 +11,13 @@ const target: RenameTarget = {
 }
 
 function Harness() {
-  const { openRename, renameDialog } = useRenameSafe()
+  const { openRename, renameDialog, isRenameOpen } = useRenameSafe()
   return (
     <>
       <button data-testid="open" onClick={() => openRename(target)}>
         open
       </button>
+      <span data-testid="is-open">{String(isRenameOpen)}</span>
       {renameDialog}
     </>
   )
@@ -42,5 +43,14 @@ describe('useRenameSafe', () => {
     act(() => screen.getByTestId('open').click())
     act(() => screen.getByTestId('cancel-btn').click())
     expect(screen.queryByTestId('rename-safe-dialog')).not.toBeInTheDocument()
+  })
+
+  it('reflects open state via isRenameOpen', () => {
+    render(<Harness />)
+    expect(screen.getByTestId('is-open')).toHaveTextContent('false')
+    act(() => screen.getByTestId('open').click())
+    expect(screen.getByTestId('is-open')).toHaveTextContent('true')
+    act(() => screen.getByTestId('cancel-btn').click())
+    expect(screen.getByTestId('is-open')).toHaveTextContent('false')
   })
 })

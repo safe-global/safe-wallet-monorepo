@@ -26,7 +26,7 @@ jest.mock('@/hooks/useIsInSpaceContext', () => ({ useIsInSpaceContext: () => fal
 jest.mock('../../../hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => null }))
 jest.mock('../../../hooks/useSpaceMembers', () => ({ useIsAdmin: () => false }))
 jest.mock('../../../hooks/useRenameSafe', () => ({
-  useRenameSafe: () => ({ openRename: jest.fn(), renameDialog: null }),
+  useRenameSafe: () => ({ openRename: jest.fn(), renameDialog: null, isRenameOpen: false }),
 }))
 
 jest.mock('@/components/ui/tooltip', () => ({

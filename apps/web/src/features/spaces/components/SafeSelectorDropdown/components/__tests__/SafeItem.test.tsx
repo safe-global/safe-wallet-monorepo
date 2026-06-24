@@ -6,21 +6,9 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
 }))
 
-const mockUseAddressBookItem = jest.fn()
-jest.mock('@/hooks/useAllAddressBooks', () => ({
-  useAddressBookItem: (...args: unknown[]) => mockUseAddressBookItem(...args),
-}))
-
-jest.mock('@/components/common/SpaceSafeBar/AccountsModal/shared', () => ({
-  NameSourceIcon: ({ source }: { source: string }) => <span data-testid="name-source-icon" data-source={source} />,
-}))
-
 jest.mock('../SafeInfoDisplay', () => {
-  const Mock = ({ nameAction, nameIndicator }: { nameAction?: React.ReactNode; nameIndicator?: React.ReactNode }) => (
-    <div data-testid="safe-info-display">
-      {nameIndicator}
-      {nameAction}
-    </div>
+  const Mock = ({ nameAction }: { nameAction?: React.ReactNode }) => (
+    <div data-testid="safe-info-display">{nameAction}</div>
   )
   Mock.displayName = 'SafeInfoDisplay'
   return { __esModule: true, default: Mock }
@@ -108,30 +96,5 @@ describe('SafeItem rename pencil', () => {
       chainIds: ['1'],
       currentName: 'Test Safe',
     })
-  })
-})
-
-describe('SafeItem name source indicator', () => {
-  afterEach(() => mockUseAddressBookItem.mockReset())
-
-  it('shows the source icon for a space (shared) name', () => {
-    mockUseAddressBookItem.mockReturnValue({ name: 'Shared name', source: 'space' })
-    render(<SafeItem {...createItem(makeChain())} />)
-
-    expect(screen.getByTestId('name-source-icon')).toHaveAttribute('data-source', 'space')
-  })
-
-  it('shows the source icon for a local name', () => {
-    mockUseAddressBookItem.mockReturnValue({ name: 'Local name', source: 'local' })
-    render(<SafeItem {...createItem(makeChain())} />)
-
-    expect(screen.getByTestId('name-source-icon')).toHaveAttribute('data-source', 'local')
-  })
-
-  it('shows no source icon when the address has no address-book entry', () => {
-    mockUseAddressBookItem.mockReturnValue(undefined)
-    render(<SafeItem {...createItem(makeChain())} />)
-
-    expect(screen.queryByTestId('name-source-icon')).not.toBeInTheDocument()
   })
 })

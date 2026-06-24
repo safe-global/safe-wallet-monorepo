@@ -3,13 +3,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Typography } from '@/components/ui/typography'
 import { getInitials, getSafeDisplayInfo } from '../utils'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
-import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import SafeBalanceBlock from './SafeBalanceBlock'
 import ThresholdBadge from './ThresholdBadge'
 import CopyAddressButton from './CopyAddressButton'
 import ExplorerLinkButton from './ExplorerLinkButton'
 import RenameSafeButton from './RenameSafeButton'
-import { NameSourceIcon } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData } from '../types'
 import type { RenameClickTarget } from '../../../hooks/useRenameSafe'
@@ -36,7 +34,6 @@ function SafeSelectorTriggerContent({
 
   const resolvedName = useSafeDisplayName(selectedItem.address, selectedChainId)
   const { shortAddress, displayName } = getSafeDisplayInfo(resolvedName, selectedItem.address)
-  const addressBookItem = useAddressBookItem(selectedItem.address, selectedChainId)
 
   const chainConfig = useChain(selectedChain?.chainId ?? '')
   const blockExplorerLink = chainConfig ? getBlockExplorerLink(chainConfig, selectedItem.address) : undefined
@@ -55,11 +52,6 @@ function SafeSelectorTriggerContent({
           <Typography data-testid="safe-selector-trigger-name" variant="paragraph-small-medium" className="truncate">
             {displayName}
           </Typography>
-          {addressBookItem?.name && addressBookItem.source && (
-            <span className="relative -top-1 shrink-0 inline-flex leading-none [&_svg]:size-2.5">
-              <NameSourceIcon source={addressBookItem.source} />
-            </span>
-          )}
           {canRename && onRename && (
             <RenameSafeButton
               onClick={() =>

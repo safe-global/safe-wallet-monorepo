@@ -16,19 +16,9 @@ export interface SafeInfoDisplayProps {
   owners?: number
   /** Rendered right after the name on the first line (e.g. a rename pencil). */
   nameAction?: ReactNode
-  /** Rendered between the name and the nameAction (e.g. a name-source icon). */
-  nameIndicator?: ReactNode
 }
 
-const SafeInfoDisplay = ({
-  name,
-  address,
-  className,
-  threshold,
-  owners,
-  nameAction,
-  nameIndicator,
-}: SafeInfoDisplayProps) => {
+const SafeInfoDisplay = ({ name, address, className, threshold, owners, nameAction }: SafeInfoDisplayProps) => {
   const { shortAddress, displayName } = getSafeDisplayInfo(name, address)
 
   return (
@@ -45,10 +35,6 @@ const SafeInfoDisplay = ({
           <Typography variant="paragraph-small-medium" className="truncate">
             {displayName}
           </Typography>
-          {/* Source icon sits as a small superscript at the name's top-right. */}
-          {nameIndicator && (
-            <span className="relative -top-1 shrink-0 inline-flex leading-none [&_svg]:size-2.5">{nameIndicator}</span>
-          )}
           {nameAction}
         </div>
         <div className="flex items-center gap-1 min-w-0">

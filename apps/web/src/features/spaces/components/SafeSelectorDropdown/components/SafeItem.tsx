@@ -1,13 +1,11 @@
 import FiatValue from '@/components/common/FiatValue'
 import { cn } from '@/utils/cn'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
-import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import SafeInfoDisplay from './SafeInfoDisplay'
 import BalanceDisplay from './BalanceDisplay'
 import RowEndColumn from './RowEndColumn'
 import ChainLogo from './ChainLogo'
 import RenameSafeButton from './RenameSafeButton'
-import { NameSourceIcon } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData } from '../types'
 import type { RenameClickTarget } from '../../../hooks/useRenameSafe'
@@ -30,9 +28,6 @@ const SafeItem = ({
   const isActivating = Boolean(chains[0]?.isActivating)
 
   const resolvedName = useSafeDisplayName(address, chainId, name)
-  const addressBookItem = useAddressBookItem(address, chainId)
-  const nameIndicator =
-    addressBookItem?.name && addressBookItem.source ? <NameSourceIcon source={addressBookItem.source} /> : undefined
 
   const renameButton =
     canRename && onRename ? (
@@ -49,7 +44,6 @@ const SafeItem = ({
         className="flex-1 min-w-0"
         threshold={threshold}
         owners={owners}
-        nameIndicator={nameIndicator}
         nameAction={renameButton}
       />
       <div className="flex items-center gap-2 bg-muted rounded-full p-0.5 shrink-0">

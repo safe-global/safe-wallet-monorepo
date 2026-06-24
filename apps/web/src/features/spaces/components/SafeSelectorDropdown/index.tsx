@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -100,11 +100,22 @@ function SafeSelectorDropdown({
   const spaceId = useCurrentSpaceId()
   const isAdmin = useIsAdmin()
   const canRename = isInSpaceContext ? isAdmin : true
-  const { openRename, renameDialog } = useRenameSafe()
+  // Elevate above the dropdown popup (z = --z-overlay = 1400) so the dialog stacks on top of the
+  // still-open dropdown.
+  const { openRename, renameDialog, isRenameOpen } = useRenameSafe({ dialogSx: { zIndex: 1500 } })
+  // Keep the dropdown open while renaming. Ref mirrors isRenameOpen so the close guard reads it
+  // synchronously on the onOpenChange(false) base-ui fires the instant the dialog grabs focus.
+  const keepOpenRef = useRef(false)
+  keepOpenRef.current = isRenameOpen
   const handleRename = (target: RenameClickTarget) => {
-    // Close the dropdown first so the modal isn't unmounted with the Select popup.
-    closeDropdown()
+    keepOpenRef.current = true
     openRename({ ...target, isSpaceSafe: isInSpaceContext, spaceId })
+  }
+  // Suppress base-ui's auto-close (outside-press / blur / escape from the stacked MUI dialog) while
+  // the rename dialog is open, so the dropdown is still there when it closes.
+  const handleSelectOpenChange = (next: boolean) => {
+    if (!next && keepOpenRef.current) return
+    handleOpenChange(next)
   }
 
   const { configs: chainConfigs } = useChains()
@@ -129,7 +140,10 @@ function SafeSelectorDropdown({
       value={safeSelectValue}
       onValueChange={handleSafeChange}
       open={variants.canOpen && !isDisabled ? dropdownOpen : false}
-      onOpenChange={isDisabled ? undefined : handleOpenChange}
+      onOpenChange={isDisabled ? undefined : handleSelectOpenChange}
+      // Drop base-ui's modal lock while renaming so the stacked MUI dialog stays interactive
+      // (modal=true would make the rest of the document inert).
+      modal={!isRenameOpen}
       disabled={isDisabled}
     >
       <SelectTrigger

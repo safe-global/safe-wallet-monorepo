@@ -50,9 +50,4 @@ describe('SafeInfoDisplay', () => {
     render(<SafeInfoDisplay {...baseProps} />)
     expect(screen.queryByTestId('my-action')).not.toBeInTheDocument()
   })
-
-  it('renders a nameIndicator next to the name when provided', () => {
-    render(<SafeInfoDisplay {...baseProps} nameIndicator={<span data-testid="my-indicator" />} />)
-    expect(screen.getByTestId('my-indicator')).toBeInTheDocument()
-  })
 })

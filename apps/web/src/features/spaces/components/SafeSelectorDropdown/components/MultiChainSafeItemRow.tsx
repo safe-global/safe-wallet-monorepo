@@ -6,12 +6,10 @@ import { SelectItem } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
-import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import SafeInfoDisplay from './SafeInfoDisplay'
 import BalanceDisplay from './BalanceDisplay'
 import ChainLogo from './ChainLogo'
 import RenameSafeButton from './RenameSafeButton'
-import { NameSourceIcon } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData, SafeItemDataChain } from '../types'
 import type { RenameClickTarget } from '../../../hooks/useRenameSafe'
@@ -40,9 +38,6 @@ function StatusBadge({ chain }: { chain: SafeItemDataChain }) {
 const MultiChainSafeItemRow = ({ item, canRename, onRename }: MultiChainSafeItemRowProps) => {
   const chainId = item.chains[0]?.chainId ?? ''
   const resolvedName = useSafeDisplayName(item.address, chainId, item.name)
-  const addressBookItem = useAddressBookItem(item.address, chainId)
-  const nameIndicator =
-    addressBookItem?.name && addressBookItem.source ? <NameSourceIcon source={addressBookItem.source} /> : undefined
 
   const renameButton =
     canRename && onRename ? (
@@ -60,7 +55,6 @@ const MultiChainSafeItemRow = ({ item, canRename, onRename }: MultiChainSafeItem
           name={resolvedName}
           address={item.address}
           className="flex-1 min-w-0"
-          nameIndicator={nameIndicator}
           nameAction={renameButton}
         />
         <div className="flex items-center bg-muted rounded-full p-0.5 shrink-0">

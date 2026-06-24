@@ -7,21 +7,9 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
 }))
 
-const mockUseAddressBookItem = jest.fn()
-jest.mock('@/hooks/useAllAddressBooks', () => ({
-  useAddressBookItem: (...args: unknown[]) => mockUseAddressBookItem(...args),
-}))
-
-jest.mock('@/components/common/SpaceSafeBar/AccountsModal/shared', () => ({
-  NameSourceIcon: ({ source }: { source: string }) => <span data-testid="name-source-icon" data-source={source} />,
-}))
-
 jest.mock('../SafeInfoDisplay', () => {
-  const Mock = ({ nameAction, nameIndicator }: { nameAction?: React.ReactNode; nameIndicator?: React.ReactNode }) => (
-    <div data-testid="safe-info-display">
-      {nameIndicator}
-      {nameAction}
-    </div>
+  const Mock = ({ nameAction }: { nameAction?: React.ReactNode }) => (
+    <div data-testid="safe-info-display">{nameAction}</div>
   )
   Mock.displayName = 'SafeInfoDisplay'
   return { __esModule: true, default: Mock }
@@ -160,23 +148,5 @@ describe('MultiChainSafeItemRow rename pencil', () => {
       chainIds: ['1', '137'],
       currentName: 'Test Safe',
     })
-  })
-})
-
-describe('MultiChainSafeItemRow name source indicator', () => {
-  afterEach(() => mockUseAddressBookItem.mockReset())
-
-  it('shows the source icon reflecting the address-book source', () => {
-    mockUseAddressBookItem.mockReturnValue({ name: 'Shared name', source: 'space' })
-    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
-
-    expect(screen.getByTestId('name-source-icon')).toHaveAttribute('data-source', 'space')
-  })
-
-  it('shows no source icon when the address has no address-book entry', () => {
-    mockUseAddressBookItem.mockReturnValue(undefined)
-    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
-
-    expect(screen.queryByTestId('name-source-icon')).not.toBeInTheDocument()
   })
 })

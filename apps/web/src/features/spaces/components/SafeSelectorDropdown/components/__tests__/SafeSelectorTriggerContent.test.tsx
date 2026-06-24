@@ -4,18 +4,9 @@ import type { SafeItemData } from '../../types'
 
 const mockUseSafeDisplayName = jest.fn()
 const mockUseChain = jest.fn()
-const mockUseAddressBookItem = jest.fn()
 
 jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: (...args: unknown[]) => mockUseSafeDisplayName(...args),
-}))
-
-jest.mock('@/hooks/useAllAddressBooks', () => ({
-  useAddressBookItem: (...args: unknown[]) => mockUseAddressBookItem(...args),
-}))
-
-jest.mock('@/components/common/SpaceSafeBar/AccountsModal/shared', () => ({
-  NameSourceIcon: ({ source }: { source: string }) => <span data-testid="name-source-icon" data-source={source} />,
 }))
 
 jest.mock('@/hooks/useChains', () => ({
@@ -186,23 +177,5 @@ describe('SafeSelectorTriggerContent', () => {
       chainIds: ['1', '137'],
       currentName: 'Polygon Name',
     })
-  })
-
-  it('shows the name source icon reflecting the address-book source', () => {
-    mockUseAddressBookItem.mockReturnValue({ name: 'Shared name', source: 'space' })
-    const item = createItem()
-
-    const { getByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" />)
-
-    expect(getByTestId('name-source-icon')).toHaveAttribute('data-source', 'space')
-  })
-
-  it('shows no source icon when the address has no address-book entry', () => {
-    mockUseAddressBookItem.mockReturnValue(undefined)
-    const item = createItem()
-
-    const { queryByTestId } = render(<SafeSelectorTriggerContent selectedItem={item} selectedChainId="137" />)
-
-    expect(queryByTestId('name-source-icon')).not.toBeInTheDocument()
   })
 })

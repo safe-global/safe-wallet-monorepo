@@ -14,11 +14,13 @@ export type { RenameTarget, RenameClickTarget } from '../components/RenameSafe/t
 export function useRenameSafe(options?: { dialogSx?: SxProps<Theme> }): {
   openRename: (target: RenameTarget) => void
   renameDialog: ReactNode
+  /** True while the dialog is open — lets a host keep its own popup open underneath. */
+  isRenameOpen: boolean
 } {
   const [target, setTarget] = useState<RenameTarget | null>(null)
   const openRename = useCallback((next: RenameTarget) => setTarget(next), [])
   const renameDialog = target ? (
     <RenameSafeDialog target={target} onClose={() => setTarget(null)} sx={options?.dialogSx} />
   ) : null
-  return { openRename, renameDialog }
+  return { openRename, renameDialog, isRenameOpen: target !== null }
 }
