@@ -55,7 +55,6 @@
   background-color: var(--color-primary-dark);
 }
 
-/* Uses shadcn-scoped tokens — renders correctly only inside a .shadcn-scope ancestor */
 .walletBtnSecondary {
   background-color: var(--sidebar-primary);
   color: var(--sidebar-primary-foreground);
