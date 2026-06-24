@@ -39,15 +39,28 @@ describe('SignInOptions', () => {
     jest.clearAllMocks()
   })
 
-  it('should render email, Google, divider, and wallet buttons when OIDC auth is enabled', () => {
+  it('should render wallet, divider, Google, and email buttons when OIDC auth is enabled', () => {
     mockOidcAuthFeature(false)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 
-    expect(screen.getByTestId('email-login-btn')).toBeInTheDocument()
-    expect(screen.getByTestId('google-login-btn')).toBeInTheDocument()
-    expect(screen.getByText('OR')).toBeInTheDocument()
     expect(screen.getByTestId('connect-wallet-btn')).toBeInTheDocument()
+    expect(screen.getByText('OR')).toBeInTheDocument()
+    expect(screen.getByTestId('google-login-btn')).toBeInTheDocument()
+    expect(screen.getByTestId('email-login-btn')).toBeInTheDocument()
+  })
+
+  it('should render the wallet button first, above the divider and OIDC options', () => {
+    mockOidcAuthFeature(false)
+
+    render(<SignInOptions afterSignIn={mockAfterSignIn} />)
+
+    const wallet = screen.getByTestId('connect-wallet-btn')
+    const divider = screen.getByText('OR')
+    const google = screen.getByTestId('google-login-btn')
+
+    expect(wallet.compareDocumentPosition(divider) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(divider.compareDocumentPosition(google) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('should render only wallet button when OIDC auth is disabled', () => {
