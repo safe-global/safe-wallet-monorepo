@@ -159,6 +159,22 @@ describe('ImportAddressBookDialog', () => {
     expect(screen.getByRole('button', { name: /Import contacts \(1\)/i })).not.toBeDisabled()
   })
 
+  it('disables a row with invalid chars and shows a tooltip', async () => {
+    mockedUseAllAddressBooks.mockReturnValue({
+      '1': { '0x123': 'José 🦄' },
+    })
+
+    render(<ImportAddressBookDialog handleClose={jest.fn()} />)
+
+    const row = screen.getByText('José 🦄').closest('[role="button"]')!
+    expect(row).toHaveAttribute('aria-disabled', 'true')
+
+    await userEvent.hover(row)
+    await waitFor(() =>
+      expect(screen.getByText(/Edit the contact before adding it to a workspace/i)).toBeInTheDocument(),
+    )
+  })
+
   it('filters the contact list based on the search input', async () => {
     jest.useFakeTimers()
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })

@@ -6,6 +6,7 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import type { ImportContactsFormValues } from './ImportAddressBookDialog'
 import { getSelectedAddresses, getContactId } from '../utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { ALLOWED_NAME_REGEX } from '@safe-global/utils/validation/names'
 import { useGetSpaceAddressBook } from '@/features/spaces'
 import { cn } from '@/utils/cn'
 
@@ -28,6 +29,7 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
         const alreadyAdded = spaceContacts.some((spaceContact) =>
           sameAddress(spaceContact.address, contactItem.address),
         )
+        const hasInvalidChars = !ALLOWED_NAME_REGEX.test(contactItem.name)
 
         return (
           <Controller
@@ -37,7 +39,7 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
             render={({ field }) => {
               const isSelected = Boolean(field.value)
               const isSameAddressSelected = selectedAddresses.has(contactItem.address) && !isSelected
-              const disabled = alreadyAdded || isSameAddressSelected
+              const disabled = alreadyAdded || isSameAddressSelected || hasInvalidChars
 
               const setSelected = (next: boolean) => field.onChange(next ? contactItem.name : false)
 
@@ -92,9 +94,11 @@ const ContactsList = ({ contactItems }: { contactItems: ContactItem[] }) => {
                         {row}
                       </TooltipTrigger>
                       <TooltipContent>
-                        {alreadyAdded
-                          ? 'You already added a contact with this address.'
-                          : 'You already selected a contact with this address.'}
+                        {hasInvalidChars
+                          ? 'This contact contains invalid characters. Edit the contact before adding it to a workspace.'
+                          : alreadyAdded
+                            ? 'You already added a contact with this address.'
+                            : 'You already selected a contact with this address.'}
                       </TooltipContent>
                     </Tooltip>
                   ) : (
