@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import useGetSpaceAuditLogActors from '../../hooks/useGetSpaceAuditLogActors'
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
-import { isInvalidDateRange, toDateInputValue, toIsoBound } from './dateFilters'
+import { getDateFilterValidation, toDateInputValue, toIsoBound } from './dateFilters'
 
 export type ActivityLogFilterState = {
   actorUserId?: number
@@ -19,7 +19,6 @@ export const EMPTY_FILTERS: ActivityLogFilterState = {}
 const ALL_ACTORS = 'all'
 const ALL_ACTORS_LABEL = 'All members'
 const DATE_ERROR_ID = 'activity-date-error'
-const DATE_RANGE_ERROR = "'From' date can't be after the 'To' date"
 
 const SORT_LABELS: Record<'asc' | 'desc', string> = {
   desc: 'Newest first',
@@ -90,9 +89,9 @@ function ActivityLogFilters({
   const selectedActor = actors.find((actor) => actor.actorUserId === filters.actorUserId)
   const sortDirection = filters.sortDirection ?? 'desc'
 
-  const hasInvalidRange = isInvalidDateRange(filters.createdAtGte, filters.createdAtLte)
   // Activity is historical, so neither bound may be in the future.
   const today = format(new Date(), 'yyyy-MM-dd')
+  const validation = getDateFilterValidation(filters.createdAtGte, filters.createdAtLte, today)
   // Cap From at the To date, but never let a (typed) future To re-open it past today.
   const toDateBound = toDateInputValue(filters.createdAtLte)
   const fromDateMax = toDateBound && toDateBound < today ? toDateBound : today
@@ -130,7 +129,7 @@ function ActivityLogFilters({
           label="From"
           value={toDateInputValue(filters.createdAtGte)}
           max={fromDateMax}
-          invalid={hasInvalidRange}
+          invalid={validation.fromInvalid}
           onValueChange={(value) => onFiltersChange({ ...filters, createdAtGte: toIsoBound(value, false) })}
         />
 
@@ -140,7 +139,7 @@ function ActivityLogFilters({
           value={toDateInputValue(filters.createdAtLte)}
           min={toDateInputValue(filters.createdAtGte) || undefined}
           max={today}
-          invalid={hasInvalidRange}
+          invalid={validation.toInvalid}
           onValueChange={(value) => onFiltersChange({ ...filters, createdAtLte: toIsoBound(value, true) })}
         />
 
@@ -162,9 +161,9 @@ function ActivityLogFilters({
         </FilterField>
       </div>
 
-      {hasInvalidRange && (
+      {validation.message && (
         <p id={DATE_ERROR_ID} role="alert" className="text-destructive text-sm">
-          {DATE_RANGE_ERROR}
+          {validation.message}
         </p>
       )}
     </div>

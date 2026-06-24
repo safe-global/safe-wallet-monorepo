@@ -14,6 +14,8 @@ const mockUseActors = useGetSpaceAuditLogActors as jest.MockedFunction<typeof us
 describe('ActivityLogFilters', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers().setSystemTime(new Date('2026-06-24T12:00:00'))
+
     mockResolveMemberName.mockReturnValue(undefined)
     // Includes a former/deleted member — the dropdown is fed from the audit
     // log itself, not from current members.
@@ -21,6 +23,10 @@ describe('ActivityLogFilters', () => {
       { actorUserId: 1, actor: '0x1234567890abcdef1234567890abcdef12345678' },
       { actorUserId: 2, actor: 'Former member' },
     ])
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
   it('emits an inclusive ISO lower bound for the from date', () => {
@@ -105,7 +111,6 @@ describe('ActivityLogFilters', () => {
   })
 
   it('constrains each date picker with the opposite bound', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-06-24T12:00:00'))
     render(
       <ActivityLogFilters
         filters={{
@@ -118,20 +123,16 @@ describe('ActivityLogFilters', () => {
 
     expect(screen.getByLabelText('From')).toHaveAttribute('max', '2026-06-10')
     expect(screen.getByLabelText('To')).toHaveAttribute('min', '2026-06-01')
-    jest.useRealTimers()
   })
 
   it('caps both date pickers at today when no opposite bound is set', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-06-24T12:00:00'))
     render(<ActivityLogFilters filters={EMPTY_FILTERS} onFiltersChange={jest.fn()} />)
 
     expect(screen.getByLabelText('From')).toHaveAttribute('max', '2026-06-24')
     expect(screen.getByLabelText('To')).toHaveAttribute('max', '2026-06-24')
-    jest.useRealTimers()
   })
 
   it('keeps the from cap at today when a future to date is set', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-06-24T12:00:00'))
     render(
       <ActivityLogFilters
         filters={{ createdAtLte: new Date('2027-01-01T23:59:59').toISOString() }}
@@ -140,7 +141,48 @@ describe('ActivityLogFilters', () => {
     )
 
     expect(screen.getByLabelText('From')).toHaveAttribute('max', '2026-06-24')
-    jest.useRealTimers()
+  })
+
+  it('shows a future-date error and flags only the to field when the to date is in the future', () => {
+    render(
+      <ActivityLogFilters
+        filters={{ createdAtLte: new Date('2027-01-01T23:59:59').toISOString() }}
+        onFiltersChange={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent("Date can't be in the future")
+    expect(screen.getByLabelText('To')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText('From')).not.toHaveAttribute('aria-invalid')
+  })
+
+  it('shows a future-date error and flags only the from field when the from date is in the future', () => {
+    render(
+      <ActivityLogFilters
+        filters={{ createdAtGte: new Date('2027-01-01T00:00:00').toISOString() }}
+        onFiltersChange={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent("Date can't be in the future")
+    expect(screen.getByLabelText('From')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText('To')).not.toHaveAttribute('aria-invalid')
+  })
+
+  it('flags only the future field even when it breaks range order against a valid past bound', () => {
+    render(
+      <ActivityLogFilters
+        filters={{
+          createdAtGte: new Date('2027-01-01T00:00:00').toISOString(),
+          createdAtLte: new Date('2026-06-01T23:59:59').toISOString(),
+        }}
+        onFiltersChange={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent("Date can't be in the future")
+    expect(screen.getByLabelText('From')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText('To')).not.toHaveAttribute('aria-invalid')
   })
 
   it('sources the member dropdown from the audit log actors endpoint', () => {
