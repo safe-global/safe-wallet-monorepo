@@ -45,7 +45,8 @@
   background-color: var(--color-background-main);
   color: var(--color-text-primary);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  line-height: 20px;
   text-transform: none;
   box-shadow: none;
 }
@@ -128,7 +129,13 @@
   padding: 8px;
   border: 1px solid var(--color-border-light);
   border-radius: 24px;
+  background: transparent;
   color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.safesSelector:hover {
+  background-color: var(--color-background-main);
 }
 
 .avatarStack {

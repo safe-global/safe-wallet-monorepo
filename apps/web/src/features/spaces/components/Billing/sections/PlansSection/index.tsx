@@ -30,7 +30,14 @@ const PlansSection = (): ReactElement => {
 
       <div className={css.cardsRow}>
         {planGroups.map((group) => (
-          <PlanCard key={group.id} group={group} period={period} currentPlanId={currentPlanId} status={status} />
+          <PlanCard
+            key={group.id}
+            group={group}
+            period={period}
+            currentPlanId={currentPlanId}
+            status={status}
+            hasSubscription={subscription != null}
+          />
         ))}
       </div>
     </section>

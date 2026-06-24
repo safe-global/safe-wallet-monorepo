@@ -22,12 +22,14 @@ const PlanCard = ({
   period,
   currentPlanId,
   status,
+  hasSubscription = true,
   onSelectPlan,
 }: {
   group: PlanGroup
   period: BillingPeriod
   currentPlanId?: string
   status?: UsageStatus | null
+  hasSubscription?: boolean
   onSelectPlan?: (tierId: string) => void
 }): ReactElement => {
   const currentTierIndex = group.tiers.findIndex((t) => t.id === currentPlanId)
@@ -93,7 +95,7 @@ const PlanCard = ({
           onClick={() => onSelectPlan?.(tier.id)}
           data-testid={`billing-plan-cta-${group.id}`}
         >
-          {tier.cta}
+          {tier.id === currentPlanId ? 'Manage plan' : hasSubscription ? tier.cta : 'Subscribe now'}
         </button>
       )}
     </div>

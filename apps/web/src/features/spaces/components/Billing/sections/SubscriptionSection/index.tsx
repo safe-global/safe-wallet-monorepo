@@ -1,17 +1,19 @@
-import { type ReactElement } from 'react'
+import { type ReactElement, useState } from 'react'
 import { Box, Button, Typography } from '@mui/material'
 import { ChartLine, ChevronDown, Fuel } from 'lucide-react'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import Identicon from '@/components/common/Identicon'
 import { useBillingData } from '../../BillingDataContext'
+import SelectSafesModal from '../../SelectSafesModal'
 import StatusBadge from './StatusBadge'
 import UsageTile from './UsageTile'
 import { getUsageStatus } from './getUsageStatus'
 import css from './styles.module.css'
 
-/** Paid-plan header + usage dashboard. Manage-plan / selector / PAYG controls are presentational until Stripe + live data are wired. */
+/** Paid-plan header + usage dashboard. Manage-plan / PAYG controls are presentational until Stripe + live data are wired. */
 const SubscriptionSection = (): ReactElement | null => {
   const { subscription, subscriptionUsage } = useBillingData()
+  const [safesModalOpen, setSafesModalOpen] = useState(false)
 
   if (!subscription || !subscriptionUsage) return null
 
@@ -42,7 +44,13 @@ const SubscriptionSection = (): ReactElement | null => {
         </Typography>
 
         <Box className={css.selectorRow}>
-          <Box className={css.safesSelector} data-testid="billing-safes-selector">
+          <Box
+            component="button"
+            type="button"
+            className={css.safesSelector}
+            data-testid="billing-safes-selector"
+            onClick={() => setSafesModalOpen(true)}
+          >
             <Box className={css.avatarStack}>
               {shownSafes.map((address) => (
                 <span key={address} className={css.avatar}>
@@ -82,6 +90,15 @@ const SubscriptionSection = (): ReactElement | null => {
           />
         </Box>
       )}
+
+      <SelectSafesModal
+        open={safesModalOpen}
+        onClose={() => setSafesModalOpen(false)}
+        initialSelected={activeSafes}
+        onSave={() => {
+          // TODO: wire to subscription update once the endpoint exists.
+        }}
+      />
     </Box>
   )
 }
