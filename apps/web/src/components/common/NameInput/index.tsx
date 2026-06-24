@@ -46,7 +46,6 @@ const NameInput = ({
           return validateName(sanitized, { minLength, maxLength }) ?? true
         },
       }}
-      // eslint-disable-next-line
       render={({ field: { ref, onBlur, onChange, ...field } }) => (
         <Tooltip title={tooltip ?? ''} open={Boolean(tooltip) && isFocused} arrow describeChild>
           <TextField
