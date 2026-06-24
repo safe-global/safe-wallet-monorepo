@@ -46,10 +46,12 @@ import notificationSyncMiddleware from './middleware/notificationSync'
 import { migrate } from './migrations'
 import { setBackendStore } from '@/src/store/utils/singletonStore'
 import pendingTxsListeners from '@/src/store/middleware/pendingTxs'
+import walletKitListeners from '@/src/features/WalletConnect/Wallet/store/walletKitListeners'
 import signingState from './signingStateSlice'
 import signerImportFlow from './signerImportFlowSlice'
 import executingState from './executingStateSlice'
 import draftTx from './draftTxSlice'
+import toast from './toastSlice'
 import walletKit, { walletKitSliceName } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
 import { withE2EReset } from './resetE2EState'
 
@@ -118,6 +120,7 @@ export const persistBlacklist = [
   'signerImportFlow',
   'executingState',
   'draftTx',
+  'toast',
   walletKitSliceName,
 ]
 
@@ -164,6 +167,7 @@ const combinedReducer = combineReducers({
   signerImportFlow,
   executingState,
   draftTx,
+  toast,
   walletKit: persistedWalletKit,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
@@ -183,7 +187,7 @@ export type AppListenerEffectAPI = ListenerEffectAPI<RootState, AppDispatch>
 export const listenerMiddlewareInstance = createListenerMiddleware<RootState>()
 export const startAppListening = listenerMiddlewareInstance.startListening as AppStartListening
 
-const listeners = [pendingTxsListeners]
+const listeners = [pendingTxsListeners, walletKitListeners]
 
 export const makeStore = () =>
   configureStore({

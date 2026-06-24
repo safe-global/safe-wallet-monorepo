@@ -2,22 +2,42 @@ import React, { useEffect, useState } from 'react'
 import * as Linking from 'expo-linking'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { getSdkError } from '@walletconnect/utils'
+import { formatJsonRpcError } from '@walletconnect/jsonrpc-utils'
+import { useStore } from 'react-redux'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
+import { useHasFeature } from '@/src/hooks/useHasFeature'
 import { useAppDispatch } from '@/src/store/hooks'
-import { getWalletKit } from '../walletKit'
-import { useActiveSafeBinding } from '../hooks/useActiveSafeBinding'
-import { useSessionProposalHandler } from '../hooks/useSessionProposalHandler'
-import { setSessions, removeSession, pushPending, isDeferredTxMethod } from '../store/walletKitSlice'
-import { RequestSheetHost } from '../components/RequestSheetHost'
-import { logWalletKitError } from '../utils/errors'
+import { type RootState } from '@/src/store'
+import { selectActiveSafe } from '@/src/store/activeSafeSlice'
+import { getWalletKit } from './walletKit'
+import { useActiveSafeBinding } from './hooks/useActiveSafeBinding'
+import { useSessionProposalHandler } from './hooks/useSessionProposalHandler'
+import { useSessionRequestHandler } from './hooks/useSessionRequestHandler'
+import { isValidTxRequestParams } from './services/methodRouter'
+import { setSessions, removeSession, pushPending, isDeferredTxMethod } from './store/walletKitSlice'
+import { RequestSheetHost } from './components/RequestSheetHost'
+import { logWalletKitError } from './utils/errors'
 
-export const WalletKitProvider: React.FC = () => {
+/**
+ * Side-effect component for WalletConnect-for-dApps: WalletKit init, session-lifecycle
+ * listeners, deep-link pairing and the request sheet host. Renders no layout — mounted as a
+ * sibling of the navigation tree (never a wrapper), so flipping the NATIVE_WALLETCONNECT flag
+ * just runs the init effect and can't unmount navigation. When the flag is off WalletKit is
+ * never initialised.
+ */
+export const WalletKitController: React.FC = () => {
+  const isEnabled = useHasFeature(FEATURES.NATIVE_WALLETCONNECT) ?? false
   const dispatch = useAppDispatch()
+  const store = useStore<RootState>()
   const [walletKit, setWalletKit] = useState<IWalletKit | null>(null)
 
-  // Init + seed: mirror the SDK's active sessions and any deferred-tx requests that
-  // survived a restart into the slice.
+  // Init + seed the slice from the SDK's active sessions and restart-surviving tx requests.
   useEffect(() => {
+    if (!isEnabled) {
+      setWalletKit(null)
+      return
+    }
     let mounted = true
     getWalletKit()
       .then((wk) => {
@@ -26,10 +46,20 @@ export const WalletKitProvider: React.FC = () => {
         }
         setWalletKit(wk)
         dispatch(setSessions(wk.getActiveSessions()))
+        // Stamp restored requests with the active Safe — the context Review composes against.
+        const restoredSafeAddress = selectActiveSafe(store.getState())?.address
         const pendings = wk.getPendingSessionRequests() as WalletKitTypes.SessionRequest[]
         pendings.forEach((r) => {
           const method = r.params.request.method
           if (!isDeferredTxMethod(method)) {
+            return
+          }
+          // Restored requests skipped routeSessionRequest — re-validate, rejecting malformed ones.
+          if (!isValidTxRequestParams(method, r.params.request.params)) {
+            wk.respondSessionRequest({
+              topic: r.topic,
+              response: formatJsonRpcError(r.id, { code: -32602, message: 'Invalid call parameters.' }),
+            }).catch((e) => logWalletKitError('respondSessionRequest (restored, invalid params) failed', e))
             return
           }
           dispatch(
@@ -40,6 +70,8 @@ export const WalletKitProvider: React.FC = () => {
               chainId: r.params.chainId,
               method,
               params: r.params.request.params,
+              safeAddress: restoredSafeAddress,
+              verifyContext: r.verifyContext,
             }),
           )
         })
@@ -48,25 +80,19 @@ export const WalletKitProvider: React.FC = () => {
     return () => {
       mounted = false
     }
-  }, [dispatch])
+  }, [dispatch, store, isEnabled])
 
-  // Subscribe to session events. session_proposal is handled by useSessionProposalHandler
-  // (WA-2318). session_request handling is wired in WA-2321/2322. delete/expire/update keep
-  // the slice's session mirror in sync; authenticate is rejected (out of scope).
+  // Lifecycle events: delete/expire keep the session mirror in sync, authenticate is rejected
+  // (out of scope). session_proposal/session_request are handled by their own hooks.
   useEffect(() => {
     if (!walletKit) {
       return
     }
     const refreshSessions = () => dispatch(setSessions(walletKit.getActiveSessions()))
 
-    const onRequest = (r: WalletKitTypes.SessionRequest) => {
-      // TODO(WA-2321 / WA-2322): route + render request sheets.
-      console.log('[walletKit] session_request (stub)', r.id)
-    }
     const onDelete = ({ topic }: { topic: string }) => dispatch(removeSession(topic))
-    // proposal_expire / session_request_expire are the lifecycle-expiry events @reown/walletkit
-    // actually surfaces (its event map has no `session_expire` / `session_update`). Re-seed from
-    // the SDK so the slice's session mirror can't drift after a prune/expiry.
+    // proposal_expire / session_request_expire are the expiry events @reown/walletkit surfaces;
+    // re-seed from the SDK so the session mirror can't drift after a prune.
     const onProposalExpire = () => refreshSessions()
     const onRequestExpire = () => refreshSessions()
     const onAuthenticate = async ({ id }: { id: number }) => {
@@ -77,14 +103,12 @@ export const WalletKitProvider: React.FC = () => {
       }
     }
 
-    walletKit.on('session_request', onRequest)
     walletKit.on('session_delete', onDelete)
     walletKit.on('proposal_expire', onProposalExpire)
     walletKit.on('session_request_expire', onRequestExpire)
     walletKit.on('session_authenticate', onAuthenticate)
 
     return () => {
-      walletKit.off('session_request', onRequest)
       walletKit.off('session_delete', onDelete)
       walletKit.off('proposal_expire', onProposalExpire)
       walletKit.off('session_request_expire', onRequestExpire)
@@ -124,6 +148,7 @@ export const WalletKitProvider: React.FC = () => {
   }, [walletKit])
 
   useSessionProposalHandler(walletKit)
+  useSessionRequestHandler(walletKit)
   useActiveSafeBinding(walletKit)
 
   return <RequestSheetHost walletKit={walletKit} />

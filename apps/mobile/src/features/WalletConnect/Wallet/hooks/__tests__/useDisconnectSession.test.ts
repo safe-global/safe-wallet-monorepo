@@ -6,9 +6,6 @@ import { useDisconnectSession } from '../useDisconnectSession'
 import { selectSessionsRecord } from '../../store/walletKitSlice'
 import type { RootState } from '@/src/store'
 
-const mockToastShow = jest.fn()
-jest.mock('@tamagui/toast', () => ({ useToastController: () => ({ show: mockToastShow }) }))
-
 const mockDisconnectSession = jest.fn()
 jest.mock('../../walletKit', () => ({
   getWalletKit: () => Promise.resolve({ disconnectSession: mockDisconnectSession }),
@@ -29,7 +26,6 @@ const storeWithSession = (topic: string) =>
 
 describe('useDisconnectSession', () => {
   beforeEach(() => {
-    mockToastShow.mockClear()
     mockDisconnectSession.mockReset()
   })
 
@@ -49,7 +45,7 @@ describe('useDisconnectSession', () => {
       reason: getSdkError('USER_DISCONNECTED'),
     })
     expect(selectSessionsRecord(store.getState() as RootState)['topic-1']).toBeUndefined()
-    expect(mockToastShow).toHaveBeenCalledWith('dApp disconnected', expect.anything())
+    expect(store.getState().toast.queue).toContainEqual(expect.objectContaining({ message: 'dApp disconnected' }))
     expect(result.current.busyTopic).toBeNull()
   })
 
@@ -65,7 +61,9 @@ describe('useDisconnectSession', () => {
 
     expect(returned).toBe(false)
     expect(selectSessionsRecord(store.getState() as RootState)['topic-2']).toBeDefined()
-    expect(mockToastShow).toHaveBeenCalledWith('Failed to disconnect', expect.objectContaining({ variant: 'error' }))
+    expect(store.getState().toast.queue).toContainEqual(
+      expect.objectContaining({ message: 'Failed to disconnect', variant: 'error' }),
+    )
     expect(result.current.busyTopic).toBeNull()
   })
 })

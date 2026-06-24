@@ -25,6 +25,8 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
         matchFulfilled: Object.assign(() => false, { type: 'cgwApi/test/get/matchFulfilled' }),
       },
       transactionsProposeTransactionV1: {
+        matchPending: Object.assign(() => false, { type: 'cgwApi/test/propose/matchPending' }),
+        matchRejected: Object.assign(() => false, { type: 'cgwApi/test/propose/matchRejected' }),
         matchFulfilled: Object.assign(() => false, { type: 'cgwApi/test/propose/matchFulfilled' }),
       },
     },
