@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import ActivityLogFilters, { EMPTY_FILTERS } from '../ActivityLogFilters'
+import ActivityLogFilters, { EMPTY_FILTERS, type ActivityLogFilterState } from '../ActivityLogFilters'
 import useGetSpaceAuditLogActors from '../../../hooks/useGetSpaceAuditLogActors'
 
 jest.mock('../../../hooks/useGetSpaceAuditLogActors')
@@ -62,6 +62,72 @@ describe('ActivityLogFilters', () => {
 
     const [filters] = onFiltersChange.mock.lastCall
     expect(filters.createdAtGte).toBeUndefined()
+  })
+
+  it('shows a validation error when the from date is after the to date', () => {
+    render(
+      <ActivityLogFilters
+        filters={{
+          createdAtGte: new Date('2026-06-10T00:00:00').toISOString(),
+          createdAtLte: new Date('2026-06-01T23:59:59').toISOString(),
+        }}
+        onFiltersChange={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent("'From' date can't be after the 'To' date")
+    expect(screen.getByLabelText('From')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText('To')).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it.each<[string, ActivityLogFilterState]>([
+    [
+      'a valid range',
+      {
+        createdAtGte: new Date('2026-06-01T00:00:00').toISOString(),
+        createdAtLte: new Date('2026-06-10T23:59:59').toISOString(),
+      },
+    ],
+    [
+      // From is start-of-day, To is end-of-day, so the range is valid.
+      'a same-day range',
+      {
+        createdAtGte: new Date('2026-06-01T00:00:00').toISOString(),
+        createdAtLte: new Date('2026-06-01T23:59:59').toISOString(),
+      },
+    ],
+    // Nothing to compare against when only one bound is set.
+    ['a single bound', { createdAtGte: new Date('2026-06-10T00:00:00').toISOString() }],
+  ])('does not show a validation error for %s', (_label, filters) => {
+    render(<ActivityLogFilters filters={filters} onFiltersChange={jest.fn()} />)
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('constrains each date picker with the opposite bound', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-06-24T12:00:00'))
+    render(
+      <ActivityLogFilters
+        filters={{
+          createdAtGte: new Date('2026-06-01T00:00:00').toISOString(),
+          createdAtLte: new Date('2026-06-10T23:59:59').toISOString(),
+        }}
+        onFiltersChange={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByLabelText('From')).toHaveAttribute('max', '2026-06-10')
+    expect(screen.getByLabelText('To')).toHaveAttribute('min', '2026-06-01')
+    jest.useRealTimers()
+  })
+
+  it('caps both date pickers at today when no opposite bound is set', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-06-24T12:00:00'))
+    render(<ActivityLogFilters filters={EMPTY_FILTERS} onFiltersChange={jest.fn()} />)
+
+    expect(screen.getByLabelText('From')).toHaveAttribute('max', '2026-06-24')
+    expect(screen.getByLabelText('To')).toHaveAttribute('max', '2026-06-24')
+    jest.useRealTimers()
   })
 
   it('sources the member dropdown from the audit log actors endpoint', () => {
