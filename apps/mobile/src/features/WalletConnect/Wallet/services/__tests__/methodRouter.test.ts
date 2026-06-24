@@ -53,12 +53,15 @@ describe('routeSessionRequest', () => {
   it('rejects cross-namespace requests', async () => {
     const res = await routeSessionRequest(makeCtx(makeRequest('eth_sendTransaction', sendTxParams, 'cosmos:1')))
     expect(res).toHaveProperty('error')
+    // The SDK code survives (not stripped to -32000).
+    expect((res as { error: { code: number } }).error.code).toBe(getSdkError('UNAUTHORIZED_METHOD').code)
     expect(isDeferredResponse(res)).toBe(false)
   })
 
   it('rejects message-signing methods without UI', async () => {
     const res = await routeSessionRequest(makeCtx(makeRequest('personal_sign', ['0xmsg', SAFE_ADDRESS])))
     expect((res as { error: { message: string } }).error.message).toBe(getSdkError('UNSUPPORTED_METHODS').message)
+    expect((res as { error: { code: number } }).error.code).toBe(getSdkError('UNSUPPORTED_METHODS').code)
   })
 
   it('answers eth_accounts with the checksummed active Safe address', async () => {
@@ -202,6 +205,7 @@ describe('routeSessionRequest', () => {
   it('returns UNSUPPORTED_METHODS for unknown methods', async () => {
     const res = await routeSessionRequest(makeCtx(makeRequest('eth_unknownMethod')))
     expect((res as { error: { message: string } }).error.message).toBe(getSdkError('UNSUPPORTED_METHODS').message)
+    expect((res as { error: { code: number } }).error.code).toBe(getSdkError('UNSUPPORTED_METHODS').code)
   })
 })
 
@@ -231,6 +235,15 @@ describe('routeSessionRequest — read-only + wallet-control branches', () => {
     it('responds -32602 when the target chainId is missing', async () => {
       const res = await routeSessionRequest(makeCtx(makeRequest('wallet_switchEthereumChain', [{}])))
       expect((res as { error: { code: number } }).error.code).toBe(-32602)
+    })
+
+    it('responds -32602 (not a NOT_DEPLOYED reject) for a malformed hex chainId', async () => {
+      const switchActiveChainByCaip2 = jest.fn().mockResolvedValue({ ok: true })
+      const res = await routeSessionRequest(
+        makeCtx(makeRequest('wallet_switchEthereumChain', [{ chainId: '0xZZ' }]), { switchActiveChainByCaip2 }),
+      )
+      expect((res as { error: { code: number } }).error.code).toBe(-32602)
+      expect(switchActiveChainByCaip2).not.toHaveBeenCalled()
     })
   })
 
@@ -298,13 +311,14 @@ describe('routeSessionRequest — read-only + wallet-control branches', () => {
       expect((res as { result: unknown }).result).toEqual(envelope)
     })
 
-    it('maps a thrown lookup to -32603', async () => {
+    it('maps a thrown lookup to -32000 with the reason preserved', async () => {
       const getCallsStatus = jest.fn().mockRejectedValue(new Error('Transaction not found'))
       const res = await routeSessionRequest(
         makeCtx(makeRequest('wallet_getCallsStatus', ['0xunknown']), { getCallsStatus }),
       )
-      // jsonrpc-utils normalizes the message for the reserved -32603 code, so assert the code.
-      expect((res as { error: { code: number } }).error.code).toBe(-32603)
+      // -32000 (not the reserved -32603) so jsonrpc-utils keeps our message on the wire.
+      expect((res as { error: { code: number; message: string } }).error.code).toBe(-32000)
+      expect((res as { error: { message: string } }).error.message).toBe('Transaction not found')
     })
   })
 

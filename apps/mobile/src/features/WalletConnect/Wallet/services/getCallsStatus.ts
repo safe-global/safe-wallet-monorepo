@@ -1,4 +1,4 @@
-import { chainIdToHex } from '@safe-global/utils/features/walletconnect/utils'
+import { toHex } from '@safe-global/utils/features/walletconnect/utils'
 
 // EIP-5792 GetCallsResult envelope (mirrors apps/web/.../safe-wallet-provider/index.ts).
 // status codes: 100 PENDING | 200 CONFIRMED | 400 OFFCHAIN_FAILURE | 500 REVERTED.
@@ -56,7 +56,7 @@ export const buildGetCallsResult = (
   const envelope = {
     version: '2.0.0' as const,
     id,
-    chainId: chainIdToHex(numericChainId) as `0x${string}`,
+    chainId: toHex(numericChainId) as `0x${string}`,
     status: mapTxStatus(tx.txStatus),
     atomic: true as const,
   }
@@ -75,9 +75,9 @@ export const buildGetCallsResult = (
       logs: receipt.logs,
       status: onChainStatusHex,
       blockHash: receipt.blockHash,
-      // chainIdToHex (BigInt-based) handles block numbers / gas above 2^53 and normalizes padding.
-      blockNumber: chainIdToHex(receipt.blockNumber) as `0x${string}`,
-      gasUsed: chainIdToHex(receipt.gasUsed) as `0x${string}`,
+      // BigInt-based: handles block numbers / gas above 2^53 and normalizes padding.
+      blockNumber: toHex(receipt.blockNumber) as `0x${string}`,
+      gasUsed: toHex(receipt.gasUsed) as `0x${string}`,
       transactionHash: (tx.txHash ?? receipt.transactionHash) as `0x${string}`,
     })),
   }

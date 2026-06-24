@@ -11,8 +11,8 @@ export const getEip155ChainId = (chainId: string): `${typeof EIP155}:${string}` 
 
 // Integer (decimal or 0x-hex string, or number) -> canonical hex quantity, e.g. '137' -> '0x89'.
 // Uses BigInt so values above 2^53 (e.g. block numbers / gas) don't lose precision.
-export const chainIdToHex = (chainId: string | number): string => {
-  return '0x' + BigInt(chainId).toString(16)
+export const toHex = (value: string | number): string => {
+  return '0x' + BigInt(value).toString(16)
 }
 
 // CAIP-2 / CAIP-10 -> trailing segment, e.g. 'eip155:1' -> '1', 'eip155:1:0xabc' -> '0xabc'.

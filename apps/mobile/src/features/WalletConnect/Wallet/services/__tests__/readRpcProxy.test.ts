@@ -1,6 +1,6 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { createWeb3ReadOnly } from '@/src/services/web3'
-import { isReadOnlyMethod, proxyReadOnlyCall } from '../readRpcProxy'
+import { isReadOnlyMethod, proxyReadOnlyCall, __clearProviderCache } from '../readRpcProxy'
 
 jest.mock('@/src/services/web3', () => ({
   createWeb3ReadOnly: jest.fn(),
@@ -29,6 +29,7 @@ describe('isReadOnlyMethod', () => {
 describe('proxyReadOnlyCall', () => {
   beforeEach(() => {
     mockCreateWeb3ReadOnly.mockReset()
+    __clearProviderCache()
   })
 
   it('forwards an allow-listed call to provider.send', async () => {
@@ -75,5 +76,15 @@ describe('proxyReadOnlyCall', () => {
     await proxyReadOnlyCall(makeChain('105', 'https://rpc.old/105'), 'eth_blockNumber', [])
     await proxyReadOnlyCall(makeChain('105', 'https://rpc.new/105'), 'eth_blockNumber', [])
     expect(mockCreateWeb3ReadOnly).toHaveBeenCalledTimes(2)
+  })
+
+  it('evicts the stale entry on a url swap (does not accumulate per chain)', async () => {
+    const send = jest.fn().mockResolvedValue('0x1')
+    mockCreateWeb3ReadOnly.mockReturnValue({ send })
+    await proxyReadOnlyCall(makeChain('106', 'https://rpc.old/106'), 'eth_blockNumber', [])
+    await proxyReadOnlyCall(makeChain('106', 'https://rpc.new/106'), 'eth_blockNumber', [])
+    // Reverting to the old url rebuilds — the old entry was evicted, not retained alongside the new.
+    await proxyReadOnlyCall(makeChain('106', 'https://rpc.old/106'), 'eth_blockNumber', [])
+    expect(mockCreateWeb3ReadOnly).toHaveBeenCalledTimes(3)
   })
 })

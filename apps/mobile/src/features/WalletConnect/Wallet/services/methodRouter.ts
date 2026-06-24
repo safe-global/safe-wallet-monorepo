@@ -4,7 +4,7 @@ import { getAddress } from 'ethers'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { AppDispatch, RootState } from '@/src/store'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { chainIdToHex, getEip155ChainId, stripEip155Prefix } from '@safe-global/utils/features/walletconnect/utils'
+import { toHex, getEip155ChainId, stripEip155Prefix } from '@safe-global/utils/features/walletconnect/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { buildAtomicCapabilities } from '@safe-global/utils/features/walletconnect/eip5792'
 import { REJECTED_SIGNING_METHODS, SUPPORTED_NAMESPACE } from './constants'
@@ -41,20 +41,20 @@ export const NO_SIGNER_ERROR_CODE = 4100
 // Sentinel (checked via isDeferredResponse): the request needs UI, so don't respond yet.
 const DEFERRED_RESULT = '__DEFERRED__'
 
-const crossNamespaceError = (id: number) => formatJsonRpcError(id, getSdkError('UNAUTHORIZED_METHOD').message)
+const crossNamespaceError = (id: number) => formatJsonRpcError(id, getSdkError('UNAUTHORIZED_METHOD'))
 
-const unsupportedError = (id: number) => formatJsonRpcError(id, getSdkError('UNSUPPORTED_METHODS').message)
+const unsupportedError = (id: number) => formatJsonRpcError(id, getSdkError('UNSUPPORTED_METHODS'))
 
 const invalidParamsError = (id: number) => formatJsonRpcError(id, { code: -32602, message: 'Invalid call parameters.' })
 
 // The active chain config hasn't resolved (yet) — the dApp can retry.
 const noActiveChainError = (id: number) => formatJsonRpcError(id, { code: -32603, message: 'No active chain' })
 
-// chainIdToHex throws on a non-integer id; wallet_getCapabilities feeds it dApp-supplied chain
+// toHex throws on a non-integer id; wallet_getCapabilities feeds it dApp-supplied chain
 // ids, so drop malformed ones rather than failing the whole request.
 const toChainHexOrNull = (chainId: string): string | null => {
   try {
-    return chainIdToHex(chainId)
+    return toHex(chainId)
   } catch {
     return null
   }
@@ -120,7 +120,7 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     if (!activeChain) {
       return noActiveChainError(id)
     }
-    return formatJsonRpcResult(id, method === 'eth_chainId' ? chainIdToHex(activeChain.chainId) : activeChain.chainId)
+    return formatJsonRpcResult(id, method === 'eth_chainId' ? toHex(activeChain.chainId) : activeChain.chainId)
   }
 
   // Chain switch — the target chain lives in rpc.params[0].chainId as a hex string (EIP-3326).
@@ -130,8 +130,12 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     if (!target?.chainId) {
       return formatJsonRpcError(id, { code: -32602, message: 'Missing target chainId' })
     }
-    const targetDecimal = String(parseInt(target.chainId, 16))
-    const result = await ctx.switchActiveChainByCaip2(getEip155ChainId(targetDecimal))
+    const parsed = parseInt(target.chainId, 16)
+    // A malformed hex chainId must read as invalid params, not a NOT_DEPLOYED ('NaN' chain) reject.
+    if (Number.isNaN(parsed)) {
+      return formatJsonRpcError(id, { code: -32602, message: 'Invalid target chainId' })
+    }
+    const result = await ctx.switchActiveChainByCaip2(getEip155ChainId(String(parsed)))
     if (!result.ok) {
       return formatJsonRpcError(id, { code: 4901, message: 'Safe is not deployed on this chain' })
     }
@@ -164,10 +168,10 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
       const result = await ctx.getCallsStatus(chainId, callsId)
       return formatJsonRpcResult(id, result)
     } catch (e) {
-      // An unknown id is an error, not {status:100} — viem/wagmi treat "missing" and "pending"
-      // as distinct. jsonrpc-utils replaces the message for the reserved -32603 code, so this
-      // string is only a developer hint.
-      return formatJsonRpcError(id, { code: -32603, message: e instanceof Error ? e.message : 'Transaction not found' })
+      // An unknown id is an error, not {status:100} — viem/wagmi treat "missing" and "pending" as
+      // distinct. Use -32000 (web parity), not the reserved -32603 whose message jsonrpc-utils
+      // rewrites, so the dApp keeps the actual reason.
+      return formatJsonRpcError(id, { code: -32000, message: e instanceof Error ? e.message : 'Transaction not found' })
     }
   }
   if (method === 'wallet_showCallsStatus') {
