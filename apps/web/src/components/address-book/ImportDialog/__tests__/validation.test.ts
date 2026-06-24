@@ -108,6 +108,12 @@ describe('Address book import validation', () => {
 
       expect(hasValidAbNames(entries)).toBe(true)
     })
+
+    it('should return false if a row has no name column', () => {
+      const entries = [['0xAb5e3288640396C3988af5a820510682f3C58adF']]
+
+      expect(hasValidAbNames(entries)).toBe(false)
+    })
   })
 
   describe('abOnUploadValidator', () => {

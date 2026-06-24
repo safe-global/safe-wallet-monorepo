@@ -3,6 +3,7 @@ import type { ParseResult } from 'papaparse'
 import { validateAddress } from '@safe-global/utils/utils/validation'
 import {
   ADDRESS_BOOK_NAME_MAX_LENGTH,
+  EMPTY_NAME_MESSAGE,
   NAME_MIN_LENGTH,
   sanitizeName,
   validateName,
@@ -23,7 +24,7 @@ export const hasValidAbEntryAddresses = (entries: string[][]) => {
 }
 
 export const getAbNameError = (name: string | undefined): string | undefined => {
-  if (!name) return 'name is empty'
+  if (!name) return EMPTY_NAME_MESSAGE
   return validateName(sanitizeName(name), {
     minLength: NAME_MIN_LENGTH,
     maxLength: ADDRESS_BOOK_NAME_MAX_LENGTH,
@@ -31,7 +32,7 @@ export const getAbNameError = (name: string | undefined): string | undefined => 
 }
 
 export const hasValidAbNames = (entries: string[][]) => {
-  return entries.every((entry) => entry.length >= 2 && !getAbNameError(entry[1]))
+  return entries.every((entry) => !getAbNameError(entry[1]))
 }
 
 export const abOnUploadValidator = ({ data, errors }: ParseResult<string[]>): string | undefined => {
@@ -66,9 +67,9 @@ export const abOnUploadValidator = ({ data, errors }: ParseResult<string[]>): st
   }
 
   // An entry has invalid name
-  if (!hasValidAbNames(entries)) {
-    const i = entries.findIndex((entry) => (entry.length >= 2 ? getAbNameError(entry[1]) : true))
-    const reason = entries[i]?.length >= 2 ? getAbNameError(entries[i][1]) : 'name is missing'
-    return `Address book contains an invalid name on row ${i + 2}: ${reason}`
+  const invalidNameIndex = entries.findIndex((entry) => getAbNameError(entry[1]))
+  if (invalidNameIndex !== -1) {
+    const reason = getAbNameError(entries[invalidNameIndex][1])
+    return `Address book contains an invalid name on row ${invalidNameIndex + 2}: ${reason}`
   }
 }
