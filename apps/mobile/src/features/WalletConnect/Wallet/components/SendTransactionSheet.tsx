@@ -13,7 +13,7 @@ type Props = {
 
 // Identity-only "Transaction request" gate (Figma `16755-4705`): dApp logo + verify badge,
 // name and domain. No decoded transaction and no draft are created while this is open — the
-// draft is composed only when the user taps Review (handled by useSendTransaction in the
+// draft is composed only when the user taps Review (handled by useTxRequestActions in the
 // host footer). dApp metadata is resolved from the mirrored session by topic.
 export const SendTransactionSheet: React.FC<Props> = ({ pending, onOpenPermissions }) => {
   const meta = useAppSelector((s) => selectSessionsRecord(s)[pending.topic]?.peer.metadata)

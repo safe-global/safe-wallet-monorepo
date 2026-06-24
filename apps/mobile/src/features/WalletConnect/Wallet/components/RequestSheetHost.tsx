@@ -15,7 +15,7 @@ import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import type { RootState } from '@/src/store'
 import { rejectPending, selectCurrentRequest } from '../store/walletKitSlice'
 import { useApproveProposal } from '../hooks/useApproveProposal'
-import { useSendTransaction } from '../hooks/useSendTransaction'
+import { useTxRequestActions } from '../hooks/useTxRequestActions'
 import { verifyStatusToVariant } from '../utils/verifyStatus'
 import { SessionProposalSheet } from './SessionProposalSheet'
 import { SendTransactionSheet } from './SendTransactionSheet'
@@ -63,7 +63,7 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
 
   // Review/Reject for the transaction-request sheet. Review composes a draft and navigates to
   // the confirm flow; the dApp is answered later by the propose-success listener.
-  const { review, reject, composing, ready } = useSendTransaction(request)
+  const { review, reject, composing, ready } = useTxRequestActions(request)
 
   // Reset the permissions view whenever the queue head changes (new proposal or cleared).
   useEffect(() => {
@@ -97,7 +97,7 @@ export const RequestSheetHost: React.FC<Props> = ({ walletKit }) => {
     if (!walletKit) {
       return
     }
-    // A connect or compose is in flight — let useApproveProposal / useSendTransaction own the
+    // A connect or compose is in flight — let useApproveProposal / useTxRequestActions own the
     // outcome (each clears the pending item). Rejecting here would race their response.
     if (busy || composing) {
       return

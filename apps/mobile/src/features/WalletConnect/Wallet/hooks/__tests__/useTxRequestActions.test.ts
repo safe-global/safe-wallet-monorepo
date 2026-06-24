@@ -1,6 +1,6 @@
 import { act } from '@testing-library/react-native'
 import { renderHookWithStore, createTestStore } from '@/src/tests/test-utils'
-import { useSendTransaction } from '../useSendTransaction'
+import { useTxRequestActions } from '../useTxRequestActions'
 import { composeSafeTxDraft } from '../../services/composeSafeTxDraft'
 import { rejectPending, walletKitSliceName, type PendingSessionRequest } from '../../store/walletKitSlice'
 
@@ -38,16 +38,16 @@ const seededStore = () =>
 
 beforeEach(() => jest.clearAllMocks())
 
-describe('useSendTransaction', () => {
+describe('useTxRequestActions', () => {
   it('reports ready once Safe, chain and SDK are resolved', () => {
-    const { result } = renderHookWithStore(() => useSendTransaction(pending), seededStore())
+    const { result } = renderHookWithStore(() => useTxRequestActions(pending), seededStore())
     expect(result.current.ready).toBe(true)
   })
 
   it('reject dispatches rejectPending for the current request (listener owns the response)', () => {
     const store = seededStore()
     const dispatchSpy = jest.spyOn(store, 'dispatch')
-    const { result } = renderHookWithStore(() => useSendTransaction(pending), store)
+    const { result } = renderHookWithStore(() => useTxRequestActions(pending), store)
     act(() => {
       result.current.reject()
     })
@@ -57,7 +57,7 @@ describe('useSendTransaction', () => {
   it('review composes a draft, stashes the outstanding request, and navigates to the confirm flow', async () => {
     mockCompose.mockResolvedValue(SAFE_TX_HASH)
     const store = seededStore()
-    const { result } = renderHookWithStore(() => useSendTransaction(pending), store)
+    const { result } = renderHookWithStore(() => useTxRequestActions(pending), store)
     await act(async () => {
       await result.current.review()
     })
@@ -74,7 +74,7 @@ describe('useSendTransaction', () => {
   it('review toasts and stays on the sheet when the preview fails', async () => {
     mockCompose.mockRejectedValue(new Error('preview failed'))
     const store = seededStore()
-    const { result } = renderHookWithStore(() => useSendTransaction(pending), store)
+    const { result } = renderHookWithStore(() => useTxRequestActions(pending), store)
     await act(async () => {
       await result.current.review()
     })

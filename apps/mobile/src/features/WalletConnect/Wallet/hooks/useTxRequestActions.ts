@@ -35,7 +35,7 @@ const extractCalls = (method: PendingSessionRequest['method'], params: unknown):
  * throws before setDraft). Reject only records intent (rejectPending) — the walletKit listener
  * answers the dApp with USER_REJECTED and clears the pending item.
  */
-export const useSendTransaction = (pending: PendingSessionRequest | null) => {
+export const useTxRequestActions = (pending: PendingSessionRequest | null) => {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const activeSafe = useAppSelector(selectActiveSafe)
