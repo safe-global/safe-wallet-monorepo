@@ -49,7 +49,7 @@ const respondRejected = async (topic: string, id: number) => {
     const walletKit = await getWalletKit()
     await walletKit.respondSessionRequest({
       topic,
-      response: formatJsonRpcError(id, getSdkError('USER_REJECTED').message),
+      response: formatJsonRpcError(id, getSdkError('USER_REJECTED')),
     })
   } catch (e) {
     logWalletKitError('respondSessionRequest USER_REJECTED failed', e)
