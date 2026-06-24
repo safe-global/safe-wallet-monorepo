@@ -34,7 +34,7 @@ const exportBtn = 'Export'
 const whatsNewBtnStr = "What's new"
 const beamrCookiesStr = 'accept the "Beamer" cookies'
 const headerImportBtnStr = 'Import'
-const mandatoryNameStr = 'Name *'
+const requiredNameStr = 'Required'
 const nameSortBtn = 'Name'
 const addressortBtn = 'Address'
 const addToAddressBookStr = 'Add to address book'
@@ -241,5 +241,5 @@ export function verifyBeameriFrameExists() {
 export function verifyEmptyOwnerNameNotAllowed() {
   cy.get(main.nameInput).clear()
   main.verifyElementsStatus([saveBtn], constants.enabledStates.disabled)
-  cy.get(divInput).contains(mandatoryNameStr)
+  cy.get(divInput).contains(requiredNameStr)
 }
