@@ -7,7 +7,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import { useState, type ReactNode } from 'react'
 import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
-import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import useChains from '@/hooks/useChains'
@@ -94,7 +94,7 @@ const AddContactDialog = ({
     setError(undefined)
 
     const item: AddContactItem = {
-      name: data.name,
+      name: sanitizeName(data.name),
       address: data.address,
       chainIds: data.networks.map((network) => network.chainId),
     }

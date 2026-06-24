@@ -4,7 +4,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import { useState, useMemo } from 'react'
 import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import NameInput from '@/components/common/NameInput'
-import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { applyBackendNameError } from '@/utils/rtkQuery'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import { trackEvent } from '@/services/analytics'
@@ -80,7 +80,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
     setLocalError(undefined)
 
     const addressBookItem = {
-      name: data.name,
+      name: sanitizeName(data.name),
       address: data.address,
       chainIds: data.networks.map((network) => network.chainId),
     }

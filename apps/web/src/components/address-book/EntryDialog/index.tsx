@@ -5,7 +5,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import AddressInput from '@/components/common/AddressInput'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
-import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import useChainId from '@/hooks/useChainId'
 import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
@@ -47,7 +47,13 @@ function EntryDialog({
   const { handleSubmit, formState } = methods
 
   const submitCallback = handleSubmit((data: AddressEntry) => {
-    dispatch(upsertAddressBookEntries({ ...data, chainIds: chainIds ?? [actualChainId] }))
+    dispatch(
+      upsertAddressBookEntries({
+        address: data.address,
+        name: sanitizeName(data.name),
+        chainIds: chainIds ?? [actualChainId],
+      }),
+    )
     handleClose()
   })
 

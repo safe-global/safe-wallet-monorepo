@@ -1,7 +1,7 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
-import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import Track from '@/components/common/Track'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import { useAppDispatch } from '@/store'
@@ -23,12 +23,13 @@ export const EditOwnerDialog = ({ chainId, address, name }: { chainId: string; a
   const handleClose = () => setOpen(false)
 
   const onSubmit = (data: EditOwnerValues) => {
-    if (data.name !== name) {
+    const sanitizedName = sanitizeName(data.name)
+    if (sanitizedName !== name) {
       dispatch(
         upsertAddressBookEntries({
           chainIds: [chainId],
           address,
-          name: data.name,
+          name: sanitizedName,
         }),
       )
       handleClose()
