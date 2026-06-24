@@ -14,7 +14,6 @@ import { getWalletKit } from './walletKit'
 import { useActiveSafeBinding } from './hooks/useActiveSafeBinding'
 import { useSessionProposalHandler } from './hooks/useSessionProposalHandler'
 import { useSessionRequestHandler } from './hooks/useSessionRequestHandler'
-import { useWcToastBridge } from './hooks/useWcToastBridge'
 import { isValidTxRequestParams } from './services/methodRouter'
 import { setSessions, removeSession, pushPending, isDeferredTxMethod } from './store/walletKitSlice'
 import { RequestSheetHost } from './components/RequestSheetHost'
@@ -161,10 +160,6 @@ export const WalletKitController: React.FC = () => {
       sub.remove()
     }
   }, [walletKit])
-
-  // Registers the toast controller so the walletKit listener can surface session-request
-  // toasts (no-signer / unsupported method / wrong active chain) from outside React.
-  useWcToastBridge()
 
   useSessionProposalHandler(walletKit)
   useSessionRequestHandler(walletKit)

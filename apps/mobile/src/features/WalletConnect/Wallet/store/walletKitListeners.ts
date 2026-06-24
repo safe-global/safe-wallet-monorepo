@@ -8,9 +8,9 @@ import type { AppDispatch, AppStartListening, RootState } from '@/src/store'
 import { selectActiveSafe, setActiveSafe, switchActiveChain, clearActiveSafe } from '@/src/store/activeSafeSlice'
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { selectChainById } from '@/src/store/chains'
+import { showToast } from '@/src/store/toastSlice'
 import { getWalletKit } from '../walletKit'
 import { logWalletKitError } from '../utils/errors'
-import { showWcToast } from '../hooks/useWcToastBridge'
 import { routeSessionRequest, isDeferredResponse, NO_SIGNER_ERROR_CODE } from '../services/methodRouter'
 import { REJECTED_SIGNING_METHODS } from '../services/constants'
 import {
@@ -222,13 +222,13 @@ export const walletKitListeners = (startListening: AppStartListening) => {
 
       // Surface the spec-mandated toast on the no-signer auto-reject path.
       if ('error' in response && response.error?.code === NO_SIGNER_ERROR_CODE) {
-        showWcToast('No signer attached to this Safe', { native: false, duration: 2500 })
+        api.dispatch(showToast({ message: 'No signer attached to this Safe', duration: 2500 }))
       }
       // Explain rejections of message-signing methods (eth_signTypedData_v4, personal_sign, …) —
       // dApps like CowSwap fire these in parallel with their tx request, and without a toast the
       // user just sees a red "unknown RPC error" in the dApp with no context.
       if (MESSAGE_SIGNING_METHODS_SET.has(request.params.request.method)) {
-        showWcToast('Message signing is not yet supported on mobile', { native: false, duration: 2500 })
+        api.dispatch(showToast({ message: 'Message signing is not yet supported on mobile', duration: 2500 }))
       }
       // Explain tx requests auto-rejected because the active Safe was switched to a chain the
       // dApp's session doesn't cover (methodRouter returns WRONG_ACTIVE_CHAIN_CODE rather than
@@ -237,7 +237,7 @@ export const walletKitListeners = (startListening: AppStartListening) => {
         const requestChainId = stripEip155Prefix(request.params.chainId)
         const network = selectChainById(state, requestChainId)?.chainName ?? `chain ${requestChainId}`
         const dappName = selectSessionsRecord(state)[request.topic]?.peer.metadata?.name || 'this dApp'
-        showWcToast(`Switch your active Safe to ${network} to use ${dappName}`, { native: false, duration: 3000 })
+        api.dispatch(showToast({ message: `Switch your active Safe to ${network} to use ${dappName}`, duration: 3000 }))
       }
     },
   })

@@ -34,14 +34,6 @@ const mockWalletKit = {
 }
 jest.mock('../../walletKit', () => ({ getWalletKit: jest.fn(() => Promise.resolve(mockWalletKit)) }))
 
-const mockShowWcToast = jest.fn()
-jest.mock('../../hooks/useWcToastBridge', () => ({
-  // Lazy: the factory runs at module-load time, before `const mockShowWcToast` initializes,
-  // so capture it inside an arrow that runs at call time.
-  showWcToast: (...args: unknown[]) => mockShowWcToast(...args),
-  useWcToastBridge: jest.fn(),
-}))
-
 const mockRoute = jest.fn()
 jest.mock('../../services/methodRouter', () => ({
   ...jest.requireActual('../../services/methodRouter'),
@@ -80,6 +72,7 @@ const requestItem = (id: number, chainId: string, safeAddress: string): PendingI
 })
 
 const getWcState = (store: Store) => store.getState()[walletKitSliceName]
+const getToasts = (store: Store) => store.getState().toast.queue
 
 const makeRequest = (method: string, params: unknown[] = [], chainId = 'eip155:1'): WalletKitTypes.SessionRequest =>
   ({
@@ -290,7 +283,7 @@ describe('walletKitListeners — sessionRequestReceived', () => {
     expect(getWcState(store).pending[0]).toMatchObject({ id: 7, method: 'eth_sendTransaction', safeAddress: SAFE })
   })
 
-  it('responds and toasts when no signer is attached (4100)', async () => {
+  it('responds and queues a toast when no signer is attached (4100)', async () => {
     const store = makeStore()
     mockRoute.mockResolvedValueOnce({
       id: 7,
@@ -301,19 +294,21 @@ describe('walletKitListeners — sessionRequestReceived', () => {
     store.dispatch(sessionRequestReceived(makeRequest('eth_sendTransaction', [{ to: '0xabc' }])))
 
     await waitFor(() =>
-      expect(mockShowWcToast).toHaveBeenCalledWith('No signer attached to this Safe', expect.anything()),
+      expect(getToasts(store)).toContainEqual(expect.objectContaining({ message: 'No signer attached to this Safe' })),
     )
     expect(mockRespond).toHaveBeenCalled()
   })
 
-  it('responds and toasts for rejected message-signing methods', async () => {
+  it('responds and queues a toast for rejected message-signing methods', async () => {
     const store = makeStore()
     mockRoute.mockResolvedValueOnce({ id: 7, jsonrpc: '2.0', error: { code: 5101, message: 'unsupported' } })
 
     store.dispatch(sessionRequestReceived(makeRequest('personal_sign', ['0xmsg', SAFE])))
 
     await waitFor(() =>
-      expect(mockShowWcToast).toHaveBeenCalledWith('Message signing is not yet supported on mobile', expect.anything()),
+      expect(getToasts(store)).toContainEqual(
+        expect.objectContaining({ message: 'Message signing is not yet supported on mobile' }),
+      ),
     )
     expect(mockRespond).toHaveBeenCalled()
   })
@@ -326,10 +321,10 @@ describe('walletKitListeners — sessionRequestReceived', () => {
 
     await waitFor(() => expect(mockRespond).toHaveBeenCalled())
     await jest.advanceTimersByTimeAsync(50) // let the (skipped) toast branch run before asserting
-    expect(mockShowWcToast).not.toHaveBeenCalled()
+    expect(getToasts(store)).toHaveLength(0)
   })
 
-  it('toasts a switch-network hint (with the dApp name) on a wrong-active-chain rejection', async () => {
+  it('queues a switch-network hint (with the dApp name) on a wrong-active-chain rejection', async () => {
     const store = makeStore()
     store.dispatch(
       addSession({
@@ -346,7 +341,7 @@ describe('walletKitListeners — sessionRequestReceived', () => {
     store.dispatch(sessionRequestReceived(makeRequest('eth_sendTransaction', [{ to: '0xabc' }], 'eip155:137')))
 
     await waitFor(() =>
-      expect(mockShowWcToast).toHaveBeenCalledWith(expect.stringContaining('Uniswap'), expect.anything()),
+      expect(getToasts(store)).toContainEqual(expect.objectContaining({ message: expect.stringContaining('Uniswap') })),
     )
     expect(mockRespond).toHaveBeenCalled()
   })

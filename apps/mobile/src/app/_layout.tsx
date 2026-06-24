@@ -36,6 +36,7 @@ import { useNotificationHandler } from '@/src/hooks/useNotificationHandler'
 import { usePendingTxsMonitor } from '../hooks/usePendingTxsMonitor'
 import { SigningMonitor } from '@/src/components/SigningMonitor'
 import { ExecutingMonitor } from '@/src/components/ExecutingMonitor'
+import { ToastMonitor } from '@/src/components/ToastMonitor'
 import { useDatadogConsent } from '@/src/hooks/useDatadogConsent'
 import { DatadogWrapper } from '@/src/providers/DatadogWrapper'
 import { AppKitInitializer } from '@/src/features/WalletConnect/Signer/components/AppKitInitializer'
@@ -162,6 +163,7 @@ function RootLayout() {
                               <HooksInitializer />
                               <SigningMonitor />
                               <ExecutingMonitor />
+                              <ToastMonitor />
                               <TestCtrls />
                               <NavigationStack />
                               <SafeStatusBar />
