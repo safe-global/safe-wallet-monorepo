@@ -93,6 +93,9 @@ function ActivityLogFilters({
   const hasInvalidRange = isInvalidDateRange(filters.createdAtGte, filters.createdAtLte)
   // Activity is historical, so neither bound may be in the future.
   const today = format(new Date(), 'yyyy-MM-dd')
+  // Cap From at the To date, but never let a (typed) future To re-open it past today.
+  const toDateBound = toDateInputValue(filters.createdAtLte)
+  const fromDateMax = toDateBound && toDateBound < today ? toDateBound : today
 
   return (
     <div className="mb-4 flex flex-col gap-1.5">
@@ -126,7 +129,7 @@ function ActivityLogFilters({
           id="activity-from-filter"
           label="From"
           value={toDateInputValue(filters.createdAtGte)}
-          max={toDateInputValue(filters.createdAtLte) || today}
+          max={fromDateMax}
           invalid={hasInvalidRange}
           onValueChange={(value) => onFiltersChange({ ...filters, createdAtGte: toIsoBound(value, false) })}
         />

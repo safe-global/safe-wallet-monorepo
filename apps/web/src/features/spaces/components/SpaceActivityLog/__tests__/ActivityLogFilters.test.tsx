@@ -130,6 +130,19 @@ describe('ActivityLogFilters', () => {
     jest.useRealTimers()
   })
 
+  it('keeps the from cap at today when a future to date is set', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-06-24T12:00:00'))
+    render(
+      <ActivityLogFilters
+        filters={{ createdAtLte: new Date('2027-01-01T23:59:59').toISOString() }}
+        onFiltersChange={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByLabelText('From')).toHaveAttribute('max', '2026-06-24')
+    jest.useRealTimers()
+  })
+
   it('sources the member dropdown from the audit log actors endpoint', () => {
     render(<ActivityLogFilters filters={EMPTY_FILTERS} onFiltersChange={jest.fn()} />)
 
