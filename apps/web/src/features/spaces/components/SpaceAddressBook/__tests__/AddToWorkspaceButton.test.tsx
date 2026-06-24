@@ -23,7 +23,7 @@ describe('AddToWorkspaceButton', () => {
     jest.clearAllMocks()
   })
 
-  it('adds the contact to the workspace address book', async () => {
+  it('adds the contact to the workspace address book and transitions to Added state on success', async () => {
     mockUpsert.mockResolvedValue({ data: {} })
     render(<AddToWorkspaceButton address={address} name="Alice" chainIds={['1', '137']} />, {
       initialReduxState: { addressBook: { '1': { [address]: 'Alice' }, '137': { [address]: 'Alice' } } },
@@ -38,7 +38,7 @@ describe('AddToWorkspaceButton', () => {
       })
     })
 
-    await waitFor(() => expect(screen.getByText('Added')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Added' })).toBeDisabled())
   })
 
   it('keeps the contact in the local address book after adding to the workspace', async () => {
@@ -98,5 +98,25 @@ describe('AddToWorkspaceButton', () => {
       const notifications = getStoreInstance().getState().notifications
       expect(notifications.some((n) => /Something went wrong \(500\)\. Please try again/.test(n.message))).toBe(true)
     })
+  })
+
+  it('disables the button and shows a tooltip when the name contains invalid characters', async () => {
+    render(<AddToWorkspaceButton address={address} name="José 🦄" chainIds={['1']} />)
+
+    const button = screen.getByRole('button', { name: 'Add to workspace' })
+    expect(button).toBeDisabled()
+
+    await userEvent.hover(button.closest('span')!)
+    await waitFor(() =>
+      expect(screen.getByText(/Edit the contact before adding it to a workspace/i)).toBeInTheDocument(),
+    )
+
+    expect(mockUpsert).not.toHaveBeenCalled()
+  })
+
+  it('does not disable the button for a valid name', () => {
+    render(<AddToWorkspaceButton address={address} name="Alice" chainIds={['1']} />)
+
+    expect(screen.getByRole('button', { name: 'Add to workspace' })).toBeEnabled()
   })
 })

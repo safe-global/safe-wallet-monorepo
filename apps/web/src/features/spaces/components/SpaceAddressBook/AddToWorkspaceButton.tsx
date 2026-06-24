@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { Spinner } from '@/components/ui/spinner'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { ALLOWED_NAME_REGEX } from '@safe-global/utils/validation/names'
 
 type AddToWorkspaceButtonProps = {
   address: string
@@ -59,11 +61,26 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
     }
   }
 
-  return (
-    <Button variant="outline" size="sm" onClick={handleAdd} disabled={isSubmitting || added}>
+  const hasInvalidChars = !ALLOWED_NAME_REGEX.test(name)
+
+  const button = (
+    <Button variant="outline" size="sm" onClick={handleAdd} disabled={isSubmitting || added || hasInvalidChars}>
       {isSubmitting ? <Spinner className="size-3.5" /> : added ? 'Added' : 'Add to workspace'}
     </Button>
   )
+
+  if (hasInvalidChars) {
+    return (
+      <Tooltip>
+        <TooltipTrigger render={<span />}>{button}</TooltipTrigger>
+        <TooltipContent>
+          This contact contains invalid characters. Edit the contact before adding it to a workspace.
+        </TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  return button
 }
 
 export default AddToWorkspaceButton
