@@ -1,37 +1,37 @@
-import { spaceNavigationSlice, setLastUsedSpacePath, selectLastUsedSpacePath } from './spaceNavigationSlice'
+import { spaceNavigationSlice, setLastUsedSpaceOrigin, selectLastUsedSpaceOrigin } from './spaceNavigationSlice'
 import type { RootState } from '@/store'
 
 describe('spaceNavigationSlice', () => {
   const { reducer } = spaceNavigationSlice
 
-  it('defaults lastUsedSpacePath to null', () => {
+  it('defaults the origin to null', () => {
     const state = reducer(undefined, { type: 'unknown' })
 
-    expect(state.lastUsedSpacePath).toBeNull()
+    expect(state.origin).toBeNull()
   })
 
-  describe('setLastUsedSpacePath', () => {
-    it('records the space sub-page path', () => {
-      const state = reducer(undefined, setLastUsedSpacePath('/spaces/security'))
+  describe('setLastUsedSpaceOrigin', () => {
+    it('records the space sub-page path scoped to its space', () => {
+      const state = reducer(undefined, setLastUsedSpaceOrigin({ path: '/spaces/security', spaceId: 'space-1' }))
 
-      expect(state.lastUsedSpacePath).toBe('/spaces/security')
+      expect(state.origin).toEqual({ path: '/spaces/security', spaceId: 'space-1' })
     })
 
     it('accepts null to clear it', () => {
-      const withPath = reducer(undefined, setLastUsedSpacePath('/spaces/security'))
-      const state = reducer(withPath, setLastUsedSpacePath(null))
+      const withOrigin = reducer(undefined, setLastUsedSpaceOrigin({ path: '/spaces/security', spaceId: 'space-1' }))
+      const state = reducer(withOrigin, setLastUsedSpaceOrigin(null))
 
-      expect(state.lastUsedSpacePath).toBeNull()
+      expect(state.origin).toBeNull()
     })
   })
 
-  describe('selectLastUsedSpacePath', () => {
-    it('returns the recorded path', () => {
+  describe('selectLastUsedSpaceOrigin', () => {
+    it('returns the recorded origin', () => {
       const rootState = {
-        spaceNavigation: { lastUsedSpacePath: '/spaces/members' },
+        spaceNavigation: { origin: { path: '/spaces/members', spaceId: 'space-2' } },
       } as unknown as RootState
 
-      expect(selectLastUsedSpacePath(rootState)).toBe('/spaces/members')
+      expect(selectLastUsedSpaceOrigin(rootState)).toEqual({ path: '/spaces/members', spaceId: 'space-2' })
     })
   })
 })

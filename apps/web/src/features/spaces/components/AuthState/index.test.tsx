@@ -31,7 +31,10 @@ jest.mock('@/store/authSlice', () => ({
 }))
 
 jest.mock('@/features/spaces/store', () => ({
-  setLastUsedSpacePath: (path: string) => ({ type: 'setLastUsedSpacePath', payload: path }),
+  setLastUsedSpaceOrigin: (origin: { path: string; spaceId: string } | null) => ({
+    type: 'setLastUsedSpaceOrigin',
+    payload: origin,
+  }),
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
@@ -155,7 +158,10 @@ describe('AuthState', () => {
       type: 'setLastUsedSpace',
       payload: '11111111-1111-1111-1111-111111111111',
     })
-    expect(mockDispatch).toHaveBeenCalledWith({ type: 'setLastUsedSpacePath', payload: '/spaces/security' })
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'setLastUsedSpaceOrigin',
+      payload: { path: '/spaces/security', spaceId: '11111111-1111-1111-1111-111111111111' },
+    })
   })
 
   it('renders the children for an active member', () => {

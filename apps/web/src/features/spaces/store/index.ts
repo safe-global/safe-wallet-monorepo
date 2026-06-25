@@ -8,4 +8,5 @@ export {
   selectSafeActionsModalType,
 } from './safeActionsModalSlice'
 
-export { spaceNavigationSlice, setLastUsedSpacePath, selectLastUsedSpacePath } from './spaceNavigationSlice'
+export { spaceNavigationSlice, setLastUsedSpaceOrigin, selectLastUsedSpaceOrigin } from './spaceNavigationSlice'
+export type { SpaceNavigationOrigin } from './spaceNavigationSlice'
