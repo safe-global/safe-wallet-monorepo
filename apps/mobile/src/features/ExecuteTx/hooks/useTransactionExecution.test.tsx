@@ -99,7 +99,7 @@ describe('useTransactionExecution', () => {
     await waitFor(() => expect(result.current.status).toBe(ExecutionStatus.PROCESSING))
   })
 
-  it('exposes the RelaySimulationError on a 422 and rethrows it', async () => {
+  it('rethrows a RelaySimulationError so the flow can branch on it, and goes to ERROR status', async () => {
     const simulationError = new RelaySimulationError('SIMULATION_FAILED', 'Insufficient gas-token balance')
     mockExecuteRelayTx.mockRejectedValue(simulationError)
 
@@ -109,40 +109,16 @@ describe('useTransactionExecution', () => {
       await expect(result.current.execute()).rejects.toBe(simulationError)
     })
 
-    expect(result.current.simulationError).toBe(simulationError)
     expect(result.current.status).toBe(ExecutionStatus.ERROR)
   })
 
-  it('retryWithAcceptUnverified re-runs the relay with acceptUnverifiedSimulation = true', async () => {
+  it('forwards acceptUnverifiedSimulation = true when execute is retried with the accepted risk', async () => {
     const { result } = renderExecution()
 
     await act(async () => {
-      await result.current.retryWithAcceptUnverified()
+      await result.current.execute(true)
     })
 
     expect(mockExecuteRelayTx).toHaveBeenCalledWith(expect.objectContaining({ acceptUnverifiedSimulation: true }))
-  })
-
-  it('clears a previous simulationError when a retry starts', async () => {
-    const simulationError = new RelaySimulationError('INDETERMINATE_SIMULATION', 'Could not simulate')
-    mockExecuteRelayTx.mockRejectedValueOnce(simulationError).mockResolvedValueOnce({
-      type: ExecutionMethod.WITH_RELAY,
-      txId: 'tx123',
-      taskId: 'task456',
-      chainId: '137',
-      safeAddress: '0xSafe',
-    })
-
-    const { result } = renderExecution()
-
-    await act(async () => {
-      await expect(result.current.execute()).rejects.toBe(simulationError)
-    })
-    expect(result.current.simulationError).toBe(simulationError)
-
-    await act(async () => {
-      await result.current.retryWithAcceptUnverified()
-    })
-    expect(result.current.simulationError).toBeUndefined()
   })
 })

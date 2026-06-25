@@ -15,7 +15,6 @@ import { executeRelayTx } from '@/src/services/tx-execution/relayExecutor'
 import { executeLedgerTx } from '@/src/services/tx-execution/ledgerExecutor'
 import { executeWalletConnectTx } from '@/src/services/tx-execution/walletConnectExecutor'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import type { Provider } from '@reown/appkit-common-react-native'
 
 export enum ExecutionStatus {
@@ -42,7 +41,6 @@ export function useTransactionExecution({
   wcProvider,
 }: UseTransactionExecutionProps) {
   const [status, setStatus] = useState<ExecutionStatus>(ExecutionStatus.IDLE)
-  const [simulationError, setSimulationError] = useState<RelaySimulationError | undefined>(undefined)
   const dispatch = useAppDispatch()
   const activeSafe = useDefinedActiveSafe()
   const { safe } = useSafeInfo()
@@ -99,7 +97,6 @@ export function useTransactionExecution({
   const execute = useCallback(
     async (acceptUnverifiedSimulation?: boolean) => {
       setStatus(ExecutionStatus.LOADING)
-      setSimulationError(undefined)
       dispatch(startExecuting({ txId, executionMethod }))
 
       try {
@@ -120,12 +117,9 @@ export function useTransactionExecution({
         setStatus(ExecutionStatus.ERROR)
         dispatch(setExecutingError({ txId, error: asError(error).message }))
 
-        // CGW's pre-relay simulation surfaces SIMULATION_FAILED / INDETERMINATE_SIMULATION. The UI
-        // branches on this: SIMULATION_FAILED is terminal, INDETERMINATE offers an explicit retry.
-        if (error instanceof RelaySimulationError) {
-          setSimulationError(error)
-        }
-
+        // CGW's pre-relay simulation surfaces SIMULATION_FAILED / INDETERMINATE_SIMULATION as a typed
+        // RelaySimulationError. It's re-thrown unchanged so useExecutionFlow can branch on it
+        // (SIMULATION_FAILED is terminal, INDETERMINATE offers an explicit retry).
         throw error
       }
     },
@@ -143,14 +137,5 @@ export function useTransactionExecution({
     ],
   )
 
-  const retry = useCallback(() => {
-    execute()
-  }, [execute])
-
-  // Re-runs the relay after the user accepts the risk on an INDETERMINATE_SIMULATION.
-  const retryWithAcceptUnverified = useCallback(() => {
-    execute(true)
-  }, [execute])
-
-  return { status, execute, retry, simulationError, retryWithAcceptUnverified }
+  return { status, execute }
 }
