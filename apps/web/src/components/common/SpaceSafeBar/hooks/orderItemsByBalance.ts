@@ -1,10 +1,8 @@
 import type { SafeItemData } from '@/features/spaces'
 
 /**
- * Orders dropdown items by fiat balance, highest first, with the current Safe
- * pinned to the front (mirrors the Name / Last visited behaviour). Uses the same
- * `balance` shown on the row (single-chain = that chain; multi-chain = current
- * chain). Zero, missing, or still-loading balances ('0' / '') sort last; ties keep input order.
+ * Orders items by fiat balance (desc), current Safe pinned first, using each row's shown `balance`
+ * (multi-chain = current chain). Zero/missing balances sort last; ties keep input order.
  */
 export const orderItemsByBalance = (items: SafeItemData[], currentItemId: string): SafeItemData[] => {
   const current = items.find((item) => item.id === currentItemId)

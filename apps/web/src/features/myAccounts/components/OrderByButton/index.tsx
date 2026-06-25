@@ -15,7 +15,6 @@ const labelOf = (value: OrderByOption) => BASIC_SORT_OPTIONS.find((option) => op
 
 const OrderByButton = ({ orderBy, onOrderByChange }: OrderByButtonProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
-  // This control only offers the basic options; a persisted balance order falls back to the first one.
   const active = BASIC_SORT_OPTIONS.find((option) => option.value === orderBy) ?? BASIC_SORT_OPTIONS[0]
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {

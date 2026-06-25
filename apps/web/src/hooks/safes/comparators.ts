@@ -14,9 +14,7 @@ export const nameComparator: Comparator = (a, b) => {
 
 export const lastVisitedComparator: Comparator = (a, b) => b.lastVisited - a.lastVisited
 
-// Comparators for keys that live on SafeItem. Other orders — e.g. balance, which comes from
-// SafeOverview and is sorted on enriched data only in the dropdown — aren't listed and fall back
-// to name, so lazy-loaded lists stay sensibly ordered when the shared preference is one of them.
+// Balance isn't on SafeItem (it's sorted on enriched data in the dropdown); unlisted orders fall back to name.
 const COMPARATORS: Partial<Record<OrderByOption, Comparator>> = {
   [OrderByOption.NAME]: nameComparator,
   [OrderByOption.LAST_VISITED]: lastVisitedComparator,

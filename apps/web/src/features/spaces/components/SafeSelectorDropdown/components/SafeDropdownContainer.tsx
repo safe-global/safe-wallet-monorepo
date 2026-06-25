@@ -126,9 +126,7 @@ const SafeDropdownContainer = ({
         <SelectItem
           key={item.id}
           value={item.id}
-          // [&>span.absolute]:hidden suppresses the built-in checkmark (see SelectItem in ui/select.tsx) —
-          // the current safe is already indicated by data-[state=checked]:bg-muted, and the checkmark would
-          // overlap the balance (matches MultiChainSafeItemRow's sub-items).
+          // Hide the built-in checkmark — it overlaps the balance (active safe shown via bg-muted).
           className="h-auto py-4 px-4 rounded-lg my-1 data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer [&>span.absolute]:hidden"
         >
           <SafeItem {...item} />

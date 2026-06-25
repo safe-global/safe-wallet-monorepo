@@ -13,18 +13,14 @@ export type SortOption = {
   label: string
 }
 
-// Sort options available on any Safe list — the keys are intrinsic to SafeItem.
 export const BASIC_SORT_OPTIONS: SortOption[] = [
   { value: OrderByOption.NAME, label: 'Name' },
   { value: OrderByOption.LAST_VISITED, label: 'Last visited' },
 ]
 
-// Overview-derived sorts (balance, …) — only offered where every row's overview is eager-loaded.
-// To add one: add a row here, then sort it in useSpaceSafeSelectorItems (on the enriched items).
-// Don't add it to comparators.ts — that only handles keys present on SafeItem before enrichment.
+// Balance needs eager-loaded overviews, so it's only offered where those exist (the dropdown).
 export const EXTENDED_SORT_OPTIONS: SortOption[] = [{ value: OrderByOption.BALANCE, label: 'Balance' }]
 
-// The full set, for surfaces that can show everything (the account selector dropdown).
 export const ALL_SORT_OPTIONS: SortOption[] = [...BASIC_SORT_OPTIONS, ...EXTENDED_SORT_OPTIONS]
 
 // Bump to force every user back to the default order once (see _hydrationReducer).

@@ -53,9 +53,7 @@ const SafeListSortToggle = ({ options = BASIC_SORT_OPTIONS }: SafeListSortToggle
           <DropdownMenuLabel>Sort by</DropdownMenuLabel>
           <DropdownMenuRadioGroup
             value={active.value}
-            // The menu fires onValueChange even for the already-selected item; guard against the active
-            // value so re-clicking the shown option (e.g. the coerced fallback) doesn't overwrite a
-            // preference set on another surface.
+            // base-ui fires onValueChange even on re-selecting the shown item; guard against it.
             onValueChange={(next) => {
               if (next !== active.value) dispatch(setOrderByPreference({ orderBy: next as OrderByOption }))
             }}
