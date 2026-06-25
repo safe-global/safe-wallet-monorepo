@@ -25,7 +25,7 @@ interface ReviewExecuteFooterProps {
   txId: string
   activeSigner: Signer | undefined
   executionMethod: ExecutionMethod
-  isSafePays: boolean
+  isPaidFromSafe: boolean
   detailedExecutionInfo?: MultisigExecutionDetails
   totalFee: string
   isLoadingFees: boolean
@@ -44,7 +44,7 @@ export function ReviewExecuteFooter({
   txId,
   activeSigner,
   executionMethod,
-  isSafePays,
+  isPaidFromSafe,
   detailedExecutionInfo,
   totalFee,
   isLoadingFees,
@@ -66,7 +66,7 @@ export function ReviewExecuteFooter({
   // Safe-pays: the fee is the deterministic max gas fee in the Safe's gas token, shown like the
   // sign-screen breakdown. Non-Safe-pays keeps the estimated network fee row.
   const breakdown = useFeesBreakdown({ detailedExecutionInfo })
-  const safePaysGasFee = isSafePays ? breakdown : undefined
+  const paidFromSafeGasFee = isPaidFromSafe ? breakdown : undefined
 
   return (
     <View paddingHorizontal="$4" gap="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
@@ -77,7 +77,12 @@ export function ReviewExecuteFooter({
         paddingVertical={'$3'}
         borderColor="$borderLight"
       >
-        <SelectExecutor executionMethod={executionMethod} address={signerAddress} txId={txId} isSafePays={isSafePays} />
+        <SelectExecutor
+          executionMethod={executionMethod}
+          address={signerAddress}
+          txId={txId}
+          isPaidFromSafe={isPaidFromSafe}
+        />
 
         <FeeRow
           label={
@@ -89,13 +94,17 @@ export function ReviewExecuteFooter({
           <FeeFreeValue />
         </FeeRow>
 
-        {safePaysGasFee ? (
+        {paidFromSafeGasFee ? (
           <FeeRow
             label={
               <FeeLabelWithInfo label="Max gas fee" title="Max gas fee" info={GAS_FEE_INFO} link={GAS_FEE_HELP_LINK} />
             }
           >
-            <FeeAmount line={safePaysGasFee.maxGasFee} fiat={safePaysGasFee.maxGasFeeFiat} currency={currency} />
+            <FeeAmount
+              line={paidFromSafeGasFee.maxGasFee}
+              fiat={paidFromSafeGasFee.maxGasFeeFiat}
+              currency={currency}
+            />
           </FeeRow>
         ) : (
           <EstimatedNetworkFee

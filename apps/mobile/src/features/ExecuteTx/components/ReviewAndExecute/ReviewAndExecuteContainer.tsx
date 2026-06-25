@@ -140,7 +140,7 @@ export function ReviewAndExecuteContainer() {
           txId={txId}
           activeSigner={activeSigner}
           executionMethod={executionMethod}
-          isSafePays={requiresRelay}
+          isPaidFromSafe={requiresRelay}
           detailedExecutionInfo={
             isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
               ? txDetails.detailedExecutionInfo
