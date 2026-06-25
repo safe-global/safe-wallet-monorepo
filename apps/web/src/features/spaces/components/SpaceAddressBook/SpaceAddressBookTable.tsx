@@ -101,7 +101,9 @@ function SpaceAddressBookTable({
                     {entry.isLocal && <HardDrive className="text-muted-foreground size-4 flex-shrink-0" />}
                     <span className="min-w-0 truncate">{entry.name}</span>
                   </TooltipTrigger>
-                  <TooltipContent>{entry.name}</TooltipContent>
+                  <TooltipContent align="start" alignOffset={6}>
+                    {entry.name}
+                  </TooltipContent>
                 </Tooltip>
               </TableCell>
 
