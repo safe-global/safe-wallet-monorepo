@@ -74,9 +74,9 @@ describe('TxData — MultiSend executing-Safe resolution', () => {
 
     fireEvent.click(result.getByTestId('expande-all-btn'))
 
-    // Resolves to the child Safe (the tx's own Safe), not "This Safe Account" (connected parent) nor 0x0
+    // Resolves to the child Safe (the tx's own Safe), not "This Safe account" (connected parent) nor 0x0
     expect(result.getAllByText(/Child Safe/).length).toBeGreaterThan(0)
-    expect(result.queryByText('This Safe Account')).not.toBeInTheDocument()
+    expect(result.queryByText('This Safe account')).not.toBeInTheDocument()
     expect(result.queryByText('0x0000...0000')).not.toBeInTheDocument()
   })
 })
