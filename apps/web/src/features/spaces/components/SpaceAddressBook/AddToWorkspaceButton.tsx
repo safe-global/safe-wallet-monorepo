@@ -5,6 +5,7 @@ import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { Spinner } from '@/components/ui/spinner'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 type AddToWorkspaceButtonProps = {
   address: string
@@ -32,7 +33,11 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
 
       if (result.error) {
         dispatch(
-          showNotification({ message: 'Failed to add contact', variant: 'error', groupKey: 'add-to-workspace-error' }),
+          showNotification({
+            message: getRtkQueryErrorMessage(result.error),
+            variant: 'error',
+            groupKey: 'add-to-workspace-error',
+          }),
         )
         return
       }
