@@ -1,6 +1,8 @@
 import { EIP155 } from '@safe-global/utils/features/walletconnect/constants'
 
-// EIP-1193 / WC namespace methods this wallet supports.
+// Methods advertised in the session namespace. Intentionally excludes READ_ONLY_RPC_ALLOW_LIST:
+// reads are proxied opportunistically, and a strict dApp that gates on the namespace can fall
+// back to its own RPC for them (mirrors web's safe-wallet-provider).
 export const WALLET_SUPPORTED_METHODS = [
   'eth_accounts',
   'eth_chainId',
