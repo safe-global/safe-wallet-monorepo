@@ -10,7 +10,6 @@ import UsageTile from './UsageTile'
 import { getUsageStatus } from './getUsageStatus'
 import css from './styles.module.css'
 
-/** Paid-plan header + usage dashboard. Manage-plan / PAYG controls are presentational until Stripe + live data are wired. */
 const SubscriptionSection = (): ReactElement | null => {
   const { subscription, subscriptionUsage } = useBillingData()
   const [safesModalOpen, setSafesModalOpen] = useState(false)

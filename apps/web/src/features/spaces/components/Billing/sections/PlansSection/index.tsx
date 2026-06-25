@@ -7,13 +7,12 @@ import BillingPeriodToggle from './BillingPeriodToggle'
 import PlanCard from './PlanCard'
 import css from './styles.module.css'
 
-/** Billing-period toggle + the per-group plan cards. Purchase wiring is not yet implemented (CTAs are no-ops). */
 const PlansSection = (): ReactElement => {
   const { planGroups, subscription, subscriptionUsage } = useBillingData()
   const [period, setPeriod] = useState<BillingPeriod>('monthly')
 
   const status = subscription && subscriptionUsage ? getUsageStatus(subscriptionUsage, subscription) : null
-  const currentPlanId = status ? subscription?.planId : undefined
+  const currentPlanId = subscription?.planId
 
   return (
     <section className={css.section} data-testid="billing-plans-section">

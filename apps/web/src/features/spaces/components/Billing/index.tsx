@@ -5,11 +5,6 @@ import SubscriptionSection from './sections/SubscriptionSection'
 import PlansSection from './sections/PlansSection'
 import StarterUpsellBanner from './StarterUpsellBanner'
 
-/**
- * Workspace Billing page — a single route with two stacked sections (subscription/usage on top,
- * Plans below). In the Starter (no-paid-plan) state the subscription header is replaced by the
- * "Get flat pricing" upsell banner. Section internals are owned by PLA-1641 / PLA-1640.
- */
 const Billing = (): ReactElement => {
   const { subscription } = useBillingData()
 

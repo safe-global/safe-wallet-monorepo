@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import { Box, Button, Stack, Typography } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 import { TicketPercent } from 'lucide-react'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { useBillingData } from '../BillingDataContext'
@@ -19,7 +19,7 @@ const StarterUpsellBanner = ({ onUpgrade }: { onUpgrade?: () => void }): ReactEl
       </Box>
 
       <Box className={css.content}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1.5}>
+        <Box className={css.titleRow}>
           <Typography variant="h4" fontWeight={700}>
             Get flat pricing
           </Typography>
@@ -31,9 +31,9 @@ const StarterUpsellBanner = ({ onUpgrade }: { onUpgrade?: () => void }): ReactEl
           >
             Upgrade to Pro
           </Button>
-        </Stack>
+        </Box>
 
-        <Typography mt={0.5}>
+        <Typography className={css.summary}>
           In the past {usage.periodDays} days, you moved <strong>{formatCurrency(usage.movedUsd, 'USD')}</strong> across{' '}
           <strong>{usage.transactionCount}</strong> transactions.
         </Typography>

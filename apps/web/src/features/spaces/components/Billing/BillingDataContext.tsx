@@ -2,13 +2,9 @@ import { createContext, useContext, type ReactElement, type ReactNode } from 're
 import type { BillingState } from './types'
 import { createStarterBillingState } from './mocks'
 
+// TODO: replace with RTK Query (useGetBillingQuery) and delete this context when the billing endpoint is wired.
 const BillingDataContext = createContext<BillingState | null>(null)
 
-/**
- * Supplies plan / subscription / usage state to the Billing page. Defaults to mock data so the
- * shell is demoable before the real endpoints exist; consumers keep the same `useBillingData()`
- * signature once it's wired to RTK Query.
- */
 export const BillingDataProvider = ({
   value,
   children,

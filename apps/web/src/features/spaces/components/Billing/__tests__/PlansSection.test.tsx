@@ -29,7 +29,6 @@ describe('PlansSection', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Yearly/ }))
 
-    // 49 * 0.9 = 44.1 → rounded to 44
     expect(within(proCard).getByText('$44')).toBeInTheDocument()
   })
 
@@ -47,7 +46,6 @@ describe('PlansSection', () => {
   it('renders the current plan CTA as non-actionable and upgrade CTAs as buttons', () => {
     renderSection()
 
-    // Starter is the current plan → plain label, not a button CTA.
     expect(screen.queryByTestId('billing-plan-cta-starter')).not.toBeInTheDocument()
     expect(screen.getByTestId('billing-plan-cta-pro')).toBeInTheDocument()
     expect(screen.getByTestId('billing-plan-cta-business')).toBeInTheDocument()

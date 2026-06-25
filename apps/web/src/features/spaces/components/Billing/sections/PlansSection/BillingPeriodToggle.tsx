@@ -1,6 +1,9 @@
 import { type ReactElement } from 'react'
 import type { BillingPeriod } from '../../types'
+import { YEARLY_DISCOUNT } from './constants'
 import css from './styles.module.css'
+
+const DISCOUNT_LABEL = `-${Math.round((1 - YEARLY_DISCOUNT) * 100)}%`
 
 const BillingPeriodToggle = ({
   value,
@@ -25,7 +28,7 @@ const BillingPeriodToggle = ({
       onClick={() => onChange('yearly')}
     >
       Yearly
-      <span className={css.periodCounter}>-10%</span>
+      <span className={css.periodCounter}>{DISCOUNT_LABEL}</span>
     </button>
   </div>
 )

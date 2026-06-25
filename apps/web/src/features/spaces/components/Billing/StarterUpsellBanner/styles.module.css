@@ -12,8 +12,6 @@
     0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
 
-/* Decorative green glow — reproduced 1:1 from Figma: a rotated, blurred green rectangle
-   clipped to the rounded container via overflow: hidden on .banner. */
 .glow {
   position: absolute;
   left: -35.9px;
@@ -57,4 +55,15 @@
 .upgradeButton {
   border-radius: 12px;
   flex-shrink: 0;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summary {
+  margin-top: 4px;
 }

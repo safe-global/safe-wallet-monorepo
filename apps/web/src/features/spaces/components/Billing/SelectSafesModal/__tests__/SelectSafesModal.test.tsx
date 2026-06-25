@@ -75,6 +75,23 @@ describe('SelectSafesModal', () => {
     expect(screen.getByRole('checkbox', { name: 'Select A longer name' })).toBeChecked()
   })
 
+  it('select-all unchecks every row when all are already selected', () => {
+    renderModal({ initialSelected: [SAFE_A, SAFE_B, SAFE_C] })
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select all safes' }))
+    expect(screen.getByRole('checkbox', { name: 'Select My account' })).not.toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Select Treasury' })).not.toBeChecked()
+  })
+
+  it('keeps in-progress selection when the parent re-renders with a fresh initialSelected array', () => {
+    const { rerender } = render(<SelectSafesModal open onClose={jest.fn()} initialSelected={[]} onSave={jest.fn()} />)
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select Treasury' }))
+    expect(screen.getByRole('checkbox', { name: 'Select Treasury' })).toBeChecked()
+
+    // New array literal, same content — must not reset the selection.
+    rerender(<SelectSafesModal open onClose={jest.fn()} initialSelected={[]} onSave={jest.fn()} />)
+    expect(screen.getByRole('checkbox', { name: 'Select Treasury' })).toBeChecked()
+  })
+
   it('filters rows by the search query', () => {
     renderModal()
     fireEvent.change(screen.getByLabelText('Search for safes'), { target: { value: 'treasury' } })

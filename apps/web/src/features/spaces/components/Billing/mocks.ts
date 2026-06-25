@@ -84,13 +84,14 @@ const MOCK_ACTIVE_SAFES = [
   '0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8',
 ]
 
-/** One representative usage shape per header state, so each can be demoed/tested in isolation. */
+const HEALTHY_USAGE: SubscriptionUsage = {
+  feeFreeVolume: { usedUsd: 250_000, allowanceUsd: 500_000 },
+  gaslessTransactions: { used: 11, allowance: 15 },
+  activeSafes: MOCK_ACTIVE_SAFES,
+}
+
 const SUBSCRIPTION_USAGE_BY_STATUS: Record<UsageStatus, SubscriptionUsage> = {
-  within_limit: {
-    feeFreeVolume: { usedUsd: 250_000, allowanceUsd: 500_000 },
-    gaslessTransactions: { used: 11, allowance: 15 },
-    activeSafes: MOCK_ACTIVE_SAFES,
-  },
+  within_limit: HEALTHY_USAGE,
   approaching_limit: {
     feeFreeVolume: { usedUsd: 450_000, allowanceUsd: 500_000 },
     gaslessTransactions: { used: 13, allowance: 15 },
@@ -101,11 +102,7 @@ const SUBSCRIPTION_USAGE_BY_STATUS: Record<UsageStatus, SubscriptionUsage> = {
     gaslessTransactions: { used: 15, allowance: 15 },
     activeSafes: MOCK_ACTIVE_SAFES,
   },
-  payment_failed: {
-    feeFreeVolume: { usedUsd: 250_000, allowanceUsd: 500_000 },
-    gaslessTransactions: { used: 11, allowance: 15 },
-    activeSafes: MOCK_ACTIVE_SAFES,
-  },
+  payment_failed: HEALTHY_USAGE,
 }
 
 export const createStarterBillingState = (overrides?: Partial<BillingState>): BillingState => ({

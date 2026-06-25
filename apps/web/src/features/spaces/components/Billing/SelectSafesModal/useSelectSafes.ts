@@ -4,19 +4,18 @@ import { useSafesSearch } from '@/hooks/safes/useSafesSearch'
 
 const toKey = (address: string) => address.toLowerCase()
 
-/** Selection + search state for the "Select Safes for your plan" modal. Selection is keyed by address. */
 export const useSelectSafes = (open: boolean, initialSelected: string[]) => {
   const { allSafes, isLoading } = useSpaceSafes()
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
-  // Seed selection from the current plan whenever the modal (re)opens.
+  const initialKey = initialSelected.map(toKey).sort().join(',')
   useEffect(() => {
     if (open) {
-      setSelected(new Set(initialSelected.map(toKey)))
+      setSelected(new Set(initialKey ? initialKey.split(',') : []))
       setQuery('')
     }
-  }, [open, initialSelected])
+  }, [open, initialKey])
 
   const searchResults = useSafesSearch(allSafes, query)
   const displayed = query ? searchResults : allSafes

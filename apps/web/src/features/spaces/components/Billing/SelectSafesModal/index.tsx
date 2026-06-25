@@ -12,11 +12,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import SafeSearch from '../../SelectSafeModal/SafeSearch'
 import SelectableSafeRow from './SelectableSafeRow'
 import { useSelectSafes } from './useSelectSafes'
+import css from './styles.module.css'
 
 interface SelectSafesModalProps {
   open: boolean
   onClose: () => void
-  /** Addresses currently included in the plan; pre-checks their rows. */
   initialSelected: string[]
   onSave: (addresses: string[]) => void
 }
@@ -42,17 +42,15 @@ const SelectSafesModal = ({ open, onClose, initialSelected, onSave }: SelectSafe
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="flex max-h-[90vh] w-full max-w-[560px] flex-col gap-0 p-0">
-        <DialogHeader className="shrink-0 px-6 pb-2 pt-6">
-          <DialogTitle className="text-[24px] font-semibold leading-[28.8px] tracking-[-1px] text-foreground">
-            Select Safes for your plan
-          </DialogTitle>
-          <DialogDescription className="text-base font-normal leading-6 text-muted-foreground">
+      <DialogContent className={css.content}>
+        <DialogHeader className={css.header}>
+          <DialogTitle className={css.title}>Select Safes for your plan</DialogTitle>
+          <DialogDescription className={css.description}>
             Choose which safes you want to include in this plan. You can add more later.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex shrink-0 items-center gap-3 px-6 py-3">
+        <div className={css.toolbar}>
           <button
             type="button"
             role="checkbox"
@@ -60,30 +58,26 @@ const SelectSafesModal = ({ open, onClose, initialSelected, onSave }: SelectSafe
             aria-label="Select all safes"
             onClick={toggleAll}
             disabled={displayed.length === 0}
-            className="flex cursor-pointer items-center"
+            className={css.selectAll}
           >
             <Checkbox
               checked={allSelected}
               indeterminate={someSelected}
               tabIndex={-1}
               aria-hidden
-              className="pointer-events-none"
+              className={css.checkbox}
             />
           </button>
-          <div className="flex-1">
+          <div className={css.search}>
             <SafeSearch value={query} onChange={setQuery} />
           </div>
         </div>
 
-        <div className="flex max-h-[336px] min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-6 pb-2">
+        <div className={css.list}>
           {isLoading ? (
-            <>
-              <Skeleton className="h-[60px] w-full rounded-2xl" />
-              <Skeleton className="h-[60px] w-full rounded-2xl" />
-              <Skeleton className="h-[60px] w-full rounded-2xl" />
-            </>
+            Array.from({ length: 3 }, (_, i) => <Skeleton key={i} className={css.skeleton} />)
           ) : displayed.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">No safes found</p>
+            <p className={css.empty}>No safes found</p>
           ) : (
             displayed.map((safe) => (
               <SelectableSafeRow
@@ -96,8 +90,8 @@ const SelectSafesModal = ({ open, onClose, initialSelected, onSave }: SelectSafe
           )}
         </div>
 
-        <DialogFooter className="shrink-0 px-6 pb-6 pt-4">
-          <Button className="w-full" onClick={handleSave}>
+        <DialogFooter className={css.footer}>
+          <Button className={css.saveButton} onClick={handleSave}>
             Save
           </Button>
         </DialogFooter>

@@ -43,12 +43,10 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-// Empty / Starter: no subscription header — upsell banner + Plans only.
 export const Starter: Story = {
   decorators: [withStarter],
 }
 
-// Paid: subscription/usage section on top, Plans below. One story per header status state.
 export const WithSubscription: Story = {
   decorators: [withinLimit],
 }

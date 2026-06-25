@@ -1,9 +1,8 @@
-import { type ReactElement, useState } from 'react'
+import { type ReactElement, useEffect, useState } from 'react'
 import { Check } from 'lucide-react'
 import type { BillingPeriod, PlanGroup, UsageStatus } from '../../types'
+import { YEARLY_DISCOUNT } from './constants'
 import css from './styles.module.css'
-
-const YEARLY_DISCOUNT = 0.9
 
 const STATUS_DOT_CLASS: Record<UsageStatus, string> = {
   within_limit: css.currentDotSuccess,
@@ -38,9 +37,14 @@ const PlanCard = ({
     currentTierIndex < 0 ? 0 : nudgeUpgrade ? Math.min(currentTierIndex + 1, group.tiers.length - 1) : currentTierIndex
 
   const [activeTierIndex, setActiveTierIndex] = useState(initialTierIndex)
+  useEffect(() => setActiveTierIndex(initialTierIndex), [initialTierIndex])
+
   const tier = group.tiers[activeTierIndex]
   const hasTiers = group.tiers.length > 1
   const dotClass = status ? STATUS_DOT_CLASS[status] : ''
+
+  const isDefaultPlan = tier.isCurrent
+  const isActiveSubscription = tier.id === currentPlanId
 
   return (
     <div className={css.planCard} data-testid={`billing-plan-card-${group.id}`}>
@@ -67,7 +71,7 @@ const PlanCard = ({
         <p className={css.price}>
           <span className={css.priceAmount}>{formatPrice(tier.priceMonthlyUsd, period)}</span>
           <span className={css.priceUnit}>/mo</span>
-          {tier.id === currentPlanId && (
+          {isActiveSubscription && (
             <span className={`${css.priceUnit} ${css.priceStatus}`}>
               • {status === 'payment_failed' ? 'Renewal failed' : 'Active'}
             </span>
@@ -86,7 +90,7 @@ const PlanCard = ({
         ))}
       </ul>
 
-      {tier.isCurrent ? (
+      {isDefaultPlan ? (
         <div className={css.currentPlan}>{tier.cta}</div>
       ) : (
         <button
@@ -95,7 +99,7 @@ const PlanCard = ({
           onClick={() => onSelectPlan?.(tier.id)}
           data-testid={`billing-plan-cta-${group.id}`}
         >
-          {tier.id === currentPlanId ? 'Manage plan' : hasSubscription ? tier.cta : 'Subscribe now'}
+          {isActiveSubscription ? 'Manage plan' : hasSubscription ? tier.cta : 'Subscribe now'}
         </button>
       )}
     </div>

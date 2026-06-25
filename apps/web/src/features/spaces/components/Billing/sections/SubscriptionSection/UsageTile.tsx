@@ -3,7 +3,6 @@ import { Box, Typography } from '@mui/material'
 import { getMetricStatus } from './getUsageStatus'
 import css from './styles.module.css'
 
-/** One usage allowance shown as icon + label and the *remaining* amount over the total. */
 const UsageTile = ({
   icon,
   label,
