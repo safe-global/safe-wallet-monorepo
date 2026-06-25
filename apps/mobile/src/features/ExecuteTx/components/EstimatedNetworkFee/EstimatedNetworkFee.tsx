@@ -41,8 +41,10 @@ export const EstimatedNetworkFee = ({
   }
 
   return (
-    <View flexDirection="row" justifyContent="space-between" gap="$2" alignItems="center">
-      <Text color="$textSecondaryLight">Est. network fee</Text>
+    <View flexDirection="row" justifyContent="space-between" gap="$2" alignItems="center" minHeight={40}>
+      <Text color="$textSecondaryLight" fontSize="$4">
+        Est. network fee
+      </Text>
 
       {isLoadingFees || isLoadingRelays ? (
         <SafeSkeleton height={16} width={100} />
