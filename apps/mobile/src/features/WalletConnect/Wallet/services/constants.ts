@@ -17,7 +17,8 @@ export const WALLET_SUPPORTED_METHODS = [
 
 export type SupportedMethod = (typeof WALLET_SUPPORTED_METHODS)[number]
 
-// Read-only methods proxied to the chain RPC (ethers JsonRpcProvider).
+// Read-only methods proxied to the chain RPC. Params aren't range-validated (e.g. eth_getLogs
+// block range) — the configured RPC enforces its own limits, so this is an accepted limitation.
 export const READ_ONLY_RPC_ALLOW_LIST = [
   'eth_blockNumber',
   'eth_call',
