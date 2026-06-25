@@ -39,7 +39,7 @@ export function SelectExecutor({ address, txId, executionMethod, isPaidFromSafe 
           gap={'$1'}
         >
           {isPaidFromSafe ? (
-            <Text fontWeight={600}>this Safe</Text>
+            <Text fontWeight={600}>This Safe</Text>
           ) : executionMethod === ExecutionMethod.WITH_RELAY ? (
             <Text fontWeight={600}>Sponsored by Safe</Text>
           ) : (
