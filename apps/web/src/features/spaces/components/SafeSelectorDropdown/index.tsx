@@ -114,7 +114,8 @@ function SafeSelectorDropdown({
       onValueChange={handleSafeChange}
       open={variants.canOpen && !isDisabled ? dropdownOpen : false}
       onOpenChange={isDisabled ? undefined : handleOpenChange}
-      disabled={isDisabled}
+      // Deliberately not disabled: a disabled <button> blocks the inline address actions (copy,
+      // explorer, env hint). Safe switching is prevented by the forced-closed `open` above instead.
     >
       <SelectTrigger
         className={cn(
@@ -126,6 +127,9 @@ function SafeSelectorDropdown({
         )}
         size="default"
         iconWrapperClassName={variants.iconWrapperClass}
+        // Not the native `disabled` (that would kill the nested copy/explorer buttons); aria-disabled
+        // just announces the inert trigger to assistive tech while leaving descendants operable.
+        aria-disabled={isDisabled || undefined}
         data-testid="open-safes-icon"
       >
         <SelectValue>

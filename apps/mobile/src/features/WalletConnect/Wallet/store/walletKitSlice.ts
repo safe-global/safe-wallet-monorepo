@@ -4,8 +4,7 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import type { RootState } from '@/src/store'
 import type { VerifyVariant } from '@safe-global/utils/features/walletconnect/verify'
 
-// The only session_request methods that need UI / a deferred response. Other methods
-// are answered synchronously and never reach the slice.
+// session_request methods that need UI; everything else is answered synchronously by the router.
 export const DEFERRED_TX_METHODS = ['eth_sendTransaction', 'wallet_sendCalls'] as const
 export type DeferredTxMethod = (typeof DEFERRED_TX_METHODS)[number]
 
@@ -25,17 +24,27 @@ export type PendingSessionRequest = {
   chainId: string // CAIP-2, e.g. 'eip155:1'
   method: DeferredTxMethod
   params: unknown
+  // The Safe the request was routed against; the safe-switch listener rejects stale entries.
+  // Optional only for requests restored after a restart, where it may be unknown.
+  safeAddress?: string
+  verifyContext?: WalletKitTypes.SessionRequest['verifyContext']
 }
 
 export type PendingItem = PendingSessionProposal | PendingSessionRequest
 
-// Tx requests handed off to the review-and-confirm flow, keyed by safeTxHash. We respond
-// to the dApp only after the propose mutation fulfils (user actually signed), not when the
-// sheet's Sign button is tapped.
+// Tx requests handed off to the confirm flow, keyed by safeTxHash. The dApp is answered only
+// after /propose fulfils (user signed). chainId/safeAddress let the safe-switch listener drop
+// stale entries (mirrors draftTxSlice's isSameSafe cleanup).
 export type OutstandingTxRequest = {
   topic: string
   id: number
   method: DeferredTxMethod
+  chainId: string
+  safeAddress: string
+  // True while /propose is in flight; the abandon listener must not reject and race the success.
+  proposing?: boolean
+  // User backed out mid-propose: a failed propose then rejects the dApp; a successful one ignores it.
+  cancelRequested?: boolean
 }
 
 type State = {
@@ -60,9 +69,8 @@ const walletKitSlice = createSlice({
   reducers: {
     setSessions(state, action: PayloadAction<Record<string, SessionTypes.Struct>>) {
       state.sessions = action.payload
-      // Prune verify entries for sessions that are no longer active (e.g. expired while the
-      // app was closed); keep entries for still-active topics so a captured badge survives
-      // rehydrate. We never add entries here — restored sessions carry no verify context.
+      // Prune verify entries whose session is gone; keep still-active ones so the badge survives
+      // rehydrate. Never adds entries — restored sessions carry no verify context.
       const activeTopics = new Set(Object.keys(action.payload))
       state.verifyByTopic = Object.fromEntries(
         Object.entries(state.verifyByTopic).filter(([topic]) => activeTopics.has(topic)),
@@ -95,9 +103,27 @@ const walletKitSlice = createSlice({
       const { safeTxHash, ...req } = action.payload
       state.outstandingRequests[safeTxHash] = req
     },
+    markOutstandingProposing(state, action: PayloadAction<{ safeTxHash: string; proposing: boolean }>) {
+      const req = state.outstandingRequests[action.payload.safeTxHash]
+      if (req) {
+        req.proposing = action.payload.proposing
+      }
+    },
+    markReviewAbandoned(state, action: PayloadAction<{ safeTxHash: string }>) {
+      const req = state.outstandingRequests[action.payload.safeTxHash]
+      if (req) {
+        req.cancelRequested = true
+      }
+    },
     clearOutstandingRequest(state, action: PayloadAction<string>) {
       const { [action.payload]: _removed, ...rest } = state.outstandingRequests
       state.outstandingRequests = rest
+    },
+    rejectPending(_state, _action: PayloadAction<PendingItem>) {
+      // Signal only: the walletKit listener sends the dApp response and removePending.
+    },
+    sessionRequestReceived(_state, _action: PayloadAction<WalletKitTypes.SessionRequest>) {
+      // Signal only: the walletKit listener routes the request and runs the side effects.
     },
     clear() {
       return initialState
@@ -113,7 +139,11 @@ export const {
   pushPending,
   removePending,
   setOutstandingRequest,
+  markOutstandingProposing,
+  markReviewAbandoned,
   clearOutstandingRequest,
+  rejectPending,
+  sessionRequestReceived,
   clear: clearWalletKitState,
 } = walletKitSlice.actions
 
@@ -126,6 +156,12 @@ export const selectCurrentRequest = createSelector(selectPending, (p) => p[0] ??
 export const selectOutstandingRequests = (state: RootState) => state[sliceName].outstandingRequests
 export const selectOutstandingRequestByHash = (state: RootState, safeTxHash: string) =>
   state[sliceName].outstandingRequests[safeTxHash]
+
+// dApp metadata for a handed-off tx: safeTxHash → outstanding topic → session peer metadata.
+export const selectDappMetadataByTxHash = (state: RootState, safeTxHash: string) => {
+  const topic = state[sliceName].outstandingRequests[safeTxHash]?.topic
+  return topic ? state[sliceName].sessions[topic]?.peer.metadata : undefined
+}
 
 export default walletKitSlice.reducer
 export const walletKitSliceName = sliceName

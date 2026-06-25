@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, TriangleAlert } from 'lucide-react'
 import type { ScanResult } from '@/features/security/types'
 import Identicon from '@/components/common/Identicon'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosList } from '@/features/multichain'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -216,9 +217,12 @@ const MultichainSafeRow = ({
                   </Tooltip>
                 )}
               </div>
-              <span className="truncate text-[0.6875rem] leading-none text-muted-foreground">
-                {shortenAddress(safe.address)}
-              </span>
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className="truncate text-[0.6875rem] leading-none text-muted-foreground">
+                  {shortenAddress(safe.address)}
+                </span>
+                <CopyAddressIconButton address={safe.address} />
+              </div>
             </div>
           </div>
         </div>

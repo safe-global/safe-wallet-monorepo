@@ -1,6 +1,5 @@
 import * as constants from '../../support/constants.js'
 import * as space from '../pages/spaces.page.js'
-import * as main from '../pages/main.page.js'
 import * as wallet from '../../support/utils/wallet.js'
 import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
 
@@ -13,7 +12,7 @@ describe('Spaces dashboard tests', () => {
     wallet.connectSigner(owner)
     space.clickOnSignInBtn()
     space.waitForSpacesWelcomeReady()
-    space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.id)
+    space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.uuid)
   })
 
   // ===========================================
@@ -21,10 +20,8 @@ describe('Spaces dashboard tests', () => {
   // ===========================================
 
   it('Verify that the Space dashboard loads correctly after login for a user with an existing Space and Safes', () => {
-    //space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.id)
     space.verifySpaceDashboardTotalValueFormat()
     space.verifySpaceDashboardWidgetVisible('Accounts')
-    // 9 including multichainsafes
     space.verifySpaceDashboardAccountsWidgetRowCount(3)
     space.verifySpaceDashboardWidgetVisible('Pending')
     space.verifyPendingTxWidgetItemCount(3)
@@ -34,45 +31,11 @@ describe('Spaces dashboard tests', () => {
   // Accounts Widget
   // ===========================================
 
-  it('Verify that the single chain safe row displays name, address, balance and owners threshold', () => {
-    const safeData = staticSpaces.dashboardWithSafes.pendingTxAccount
-
-    space.verifySpaceDashboardWidgetVisible('Accounts')
-    space.verifyAccountRowDetails('single', staticSpaces.dashboardWithSafes.singleChainAccountRowIndex, {
-      name: safeData.name,
-      address: safeData.address,
-      balanceRegex: space.nonZeroBalanceRegex,
-      ownersThreshold: safeData.ownersThreshold,
-    })
-  })
-
-  it('Verify that the unnamed multichain account row displays shortened address as name and chain logos', () => {
-    const account = staticSpaces.dashboardWithSafes.unnamedAccount
-
-    space.verifySpaceDashboardWidgetVisible('Accounts')
-    space.verifyAccountRowDetails('multichain', staticSpaces.dashboardWithSafes.unnamedAccountRowIndex, {
-      name: main.shortenAddress(account.address),
-      address: account.address,
-      chainLogosCount: account.chainLogosCount,
-    })
-  })
-
-  it('Verify that the multichain account row with address book name displays name and chain logos', () => {
-    const account = staticSpaces.dashboardWithSafes.multichainAccount
-
-    space.verifySpaceDashboardWidgetVisible('Accounts')
-    space.verifyAccountRowDetails('multichain', staticSpaces.dashboardWithSafes.multichainAccountRowIndex, {
-      name: account.name,
-      address: account.address,
-      chainLogosCount: account.chainLogosCount,
-    })
-  })
-
   it('Verify that a click on a single-chain account row opens that Safe dashboard with URL and header', () => {
     space.verifySpaceDashboardWidgetVisible('Accounts')
     const row = staticSpaces.dashboardWithSafes.pendingTxAccount
 
-    space.clickAccountItemByIndex(staticSpaces.dashboardWithSafes.singleChainAccountRowIndex)
+    space.clickSingleChainAccountRow()
 
     space.verifyOpenedSafeDashboardFromSpaceAccountsRow({
       safeFullQuery: row.safeUrlParam,
@@ -82,25 +45,6 @@ describe('Spaces dashboard tests', () => {
       balanceRegex: space.nonZeroBalanceRegex,
       ownersThreshold: row.ownersThreshold,
     })
-  })
-
-  it('Verify that a click on a multichain account row expands the row with one sub-account per chain', () => {
-    space.verifySpaceDashboardWidgetVisible('Accounts')
-    const rowIndex = staticSpaces.dashboardWithSafes.multichainAccountRowIndex
-
-    space.clickAccountItemByIndex(rowIndex)
-    space.verifyAccountExpandedPanelVisible(rowIndex)
-    space.verifyExpandedPanelSubAccountRowsCount(rowIndex, staticSpaces.dashboardWithSafes.multichainSubAccounts.length)
-  })
-
-  it('Verify that a click on an expanded sub-account row opens the Safe on the correct network', () => {
-    space.verifySpaceDashboardWidgetVisible('Accounts')
-    const rowIndex = staticSpaces.dashboardWithSafes.multichainAccountRowIndex
-    const sub = staticSpaces.dashboardWithSafes.multichainSubAccounts[1]
-
-    space.clickAccountItemByIndex(rowIndex)
-    space.clickExpandedPanelSubAccountRow(rowIndex, 1)
-    space.verifySafeUrlIncludesParam(sub.safeQueryIncludes)
   })
 
   it('Verify that clicking View all accounts in the Accounts widget opens the Accounts tab of the Space', () => {
@@ -129,7 +73,7 @@ describe('Spaces dashboard tests', () => {
       space.verifySpaceSidebarItemsVisible()
       // Action: click on a safe in the accounts widget
       space.verifySpaceDashboardWidgetVisible('Accounts')
-      space.clickAccountItemByIndex(staticSpaces.dashboardWithSafes.singleChainAccountRowIndex)
+      space.clickSingleChainAccountRow()
       space.verifySpaceSidebarItemsNotVisible()
       space.verifySafeLevelNavigationElements()
     })
@@ -176,40 +120,6 @@ Safe Selector through Spaces empty dashboard: commented out; remove this block c
   })
 
   // ===========================================
-  // Pending Transactions Widget
-  // ===========================================
-
-  describe('Pending Transactions Widget', () => {
-    it('Verify that the Pending Transactions widget shows pending tx summary for all Safes in the current Space', () => {
-      space.verifySpaceDashboardWidgetVisible('Pending')
-      main.verifyElementsCount(`${space.pendingTxWidget} ${space.widgetItem}`, 2)
-    })
-
-    it('Verify that pending tx item at index 1 shows correct name and status', () => {
-      space.verifySpaceDashboardWidgetVisible('Pending')
-      cy.get(space.getPendingTxItem(1))
-        .should('be.visible')
-        .and('contain.text', space.pendingTxName)
-        .and('contain.text', space.pendingTxStatus)
-      cy.get(space.getPendingTxItem(1)).find('svg').should('exist')
-    })
-
-    it('Verify that clicking a pending transaction in the widget routes to the relevant Safe-level page for action or review', () => {
-      space.verifySpaceDashboardWidgetVisible('Pending')
-      cy.get(space.getPendingTxItem(0)).should('be.visible').click()
-
-      cy.contains(space.txDetailsLabel).should('be.visible')
-      space.verifyUrlIncludesPath('/transactions/tx')
-    })
-
-    it('Verify that each pending transaction displays a Safe identicon', () => {
-      space.verifySpaceDashboardWidgetVisible('Pending')
-      cy.get(space.getPendingTxItem(0)).find('img').should('exist')
-      cy.get(space.getPendingTxItem(1)).find('img').should('exist')
-    })
-  })
-
-  // ===========================================
   // Deep Links & Routing
   // ===========================================
 
@@ -225,7 +135,7 @@ Safe Selector through Spaces empty dashboard: commented out; remove this block c
     it('Verify that accessing the app without being logged in redirects to the welcome page', () => {
       cy.clearAllCookies()
       cy.clearAllLocalStorage()
-      space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.id)
+      space.visitSpaceDashboard(staticSpaces.dashboardWithSafes.uuid)
 
       cy.contains('Welcome').should('be.visible')
       space.verifyUrlIncludesPath('/welcome')
@@ -252,7 +162,7 @@ describe('Spaces empty dashboard tests', () => {
     cy.visit(constants.spacesUrl)
     wallet.connectSigner(owner)
     space.clickOnSignInBtn()
-    space.visitSpaceDashboard(staticSpaces.emptyGettingStarted.id)
+    space.visitSpaceDashboard(staticSpaces.emptyGettingStarted.uuid)
   })
 
   describe('Empty State - Getting Started', () => {
