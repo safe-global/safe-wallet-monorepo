@@ -26,7 +26,7 @@ export function SelectExecutor({ address, txId, executionMethod, isPaidFromSafe 
       gap={'$2'}
       minHeight="$10"
     >
-      <Text color="$colorSecondary">Execution method</Text>
+      <Text color="$colorSecondary">Pay fees from</Text>
 
       <View flexDirection="row" justifyContent="center" alignItems="center" gap={'$2'}>
         <Container
@@ -39,7 +39,7 @@ export function SelectExecutor({ address, txId, executionMethod, isPaidFromSafe 
           gap={'$1'}
         >
           {isPaidFromSafe ? (
-            <Text fontWeight={600}>Pay fees from this Safe</Text>
+            <Text fontWeight={600}>this Safe</Text>
           ) : executionMethod === ExecutionMethod.WITH_RELAY ? (
             <Text fontWeight={600}>Sponsored by Safe</Text>
           ) : (
