@@ -9,6 +9,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { buildAtomicCapabilities } from '@safe-global/utils/features/walletconnect/eip5792'
 import { REJECTED_SIGNING_METHODS, SUPPORTED_NAMESPACE } from './constants'
 import { isReadOnlyMethod, proxyReadOnlyCall } from './readRpcProxy'
+import { logWalletKitWarn } from '../utils/errors'
 import type { GetCallsResult } from './getCallsStatus'
 
 export type RoutedResponse = ReturnType<typeof formatJsonRpcResult> | ReturnType<typeof formatJsonRpcError>
@@ -157,6 +158,10 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     const deployedChainsHex = new Set(ctx.deployedChainIds.map(toChainHexOrNull).filter((c): c is string => c !== null))
     const chainsToReport = candidateChains.filter((c) => deployedChainsHex.has(c))
     if (chainsToReport.length === 0) {
+      // No deployed chains at all means Safe data hasn't synced yet (cold start), not a genuine miss.
+      if (ctx.deployedChainIds.length === 0) {
+        logWalletKitWarn('wallet_getCapabilities: no deployed chains known yet (Safe data not synced?)')
+      }
       return formatJsonRpcResult(id, {})
     }
     return formatJsonRpcResult(id, buildAtomicCapabilities(chainsToReport))

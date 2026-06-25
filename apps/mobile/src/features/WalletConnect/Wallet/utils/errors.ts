@@ -45,3 +45,7 @@ export const logWalletKitError = (context: string, e: unknown): void => {
   }
   console.error(label, e)
 }
+
+export const logWalletKitWarn = (context: string): void => {
+  console.warn(`[walletKit] ${context}`)
+}

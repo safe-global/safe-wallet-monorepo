@@ -289,6 +289,25 @@ describe('routeSessionRequest — read-only + wallet-control branches', () => {
       expect((res as { result: Record<string, unknown> }).result).toEqual({})
     })
 
+    it('warns (cold start) when no deployed chains are known, but not on a genuine miss', async () => {
+      const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+      // deployedChainIds non-empty but the requested chain isn't among them → legitimate {}, no warn.
+      await routeSessionRequest(
+        makeCtx(makeRequest('wallet_getCapabilities', [SAFE_ADDRESS, ['0x89']]), { deployedChainIds: ['1'] }),
+      )
+      expect(warn).not.toHaveBeenCalled()
+
+      // No deployed chains at all → Safe data hasn't synced yet → warn.
+      const res = await routeSessionRequest(
+        makeCtx(makeRequest('wallet_getCapabilities', [SAFE_ADDRESS, ['0x1']]), { deployedChainIds: [] }),
+      )
+      expect((res as { result: Record<string, unknown> }).result).toEqual({})
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('no deployed chains known yet'))
+
+      warn.mockRestore()
+    })
+
     it('skips a non-numeric deployed chain id instead of throwing (BigInt safety)', async () => {
       const res = await routeSessionRequest(
         makeCtx(makeRequest('wallet_getCapabilities', [SAFE_ADDRESS, ['0x1']]), {
