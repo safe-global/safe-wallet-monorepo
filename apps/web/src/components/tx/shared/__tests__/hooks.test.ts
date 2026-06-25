@@ -566,6 +566,106 @@ describe('SignOrExecute hooks', () => {
       expect(signSpy).not.toHaveBeenCalled()
       expect(relaySpy).not.toHaveBeenCalled()
     })
+
+    describe('sign-then-execute flow', () => {
+      const setupThreshold1Safe = () => {
+        jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+          safe: {
+            ...extendedSafeInfo,
+            version: '1.3.0',
+            address: { value: zeroPadValue('0x0000', 20) },
+            nonce: 100,
+            threshold: 1,
+            owners: [{ value: zeroPadValue('0x0123', 20) }],
+            chainId: '1',
+          },
+          safeAddress: zeroPadValue('0x0000', 20),
+          safeError: undefined,
+          safeLoading: false,
+          safeLoaded: true,
+        }))
+      }
+
+      it('signs before executing a new unsigned tx for an EOA wallet', async () => {
+        jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(false)
+        setupThreshold1Safe()
+
+        const tx = createSafeTx()
+        const signedTx = createSafeTx()
+        signedTx.addSignature({
+          signer: '0x1234567890000000000000000000000000000000',
+          data: '0x0001',
+          staticPart: () => '',
+          dynamicPart: () => '',
+          isContractSignature: false,
+        })
+
+        const callOrder: string[] = []
+        const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => {
+          callOrder.push('sign')
+          return Promise.resolve(signedTx)
+        })
+        jest.spyOn(txSender, 'dispatchTxProposal').mockImplementation((() => {
+          callOrder.push('propose')
+          return Promise.resolve({ txId: '123' })
+        }) as unknown as typeof txSender.dispatchTxProposal)
+        jest.spyOn(txSender, 'dispatchTxExecution').mockImplementation((() => {
+          callOrder.push('execute')
+          return Promise.resolve('0xhash')
+        }) as unknown as typeof txSender.dispatchTxExecution)
+
+        const { result } = renderHook(() => useTxActions())
+        const id = await result.current.executeTx({ gasPrice: 1 }, tx)
+
+        expect(signSpy).toHaveBeenCalledWith(tx, MockEip1193Provider, undefined)
+        expect(callOrder).toEqual(['sign', 'propose', 'execute'])
+        expect(id).toBe('123')
+      })
+
+      it('skips signing when the tx is already fully signed', async () => {
+        jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(false)
+        setupThreshold1Safe()
+
+        const tx = createSafeTx()
+        tx.addSignature({
+          signer: '0x1234567890000000000000000000000000000000',
+          data: '0x0001',
+          staticPart: () => '',
+          dynamicPart: () => '',
+          isContractSignature: false,
+        })
+
+        const signSpy = jest.spyOn(txSender, 'dispatchTxSigning')
+        jest
+          .spyOn(txSender, 'dispatchTxExecution')
+          .mockImplementation((() => Promise.resolve('0xhash')) as unknown as typeof txSender.dispatchTxExecution)
+
+        const { result } = renderHook(() => useTxActions())
+        await result.current.executeTx({ gasPrice: 1 }, tx, '123')
+
+        expect(signSpy).not.toHaveBeenCalled()
+      })
+
+      it('skips signing for SC wallets and uses implicit executor approval', async () => {
+        jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(true)
+        setupThreshold1Safe()
+
+        const tx = createSafeTx()
+
+        const signSpy = jest.spyOn(txSender, 'dispatchTxSigning')
+        jest
+          .spyOn(txSender, 'dispatchTxProposal')
+          .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+        jest
+          .spyOn(txSender, 'dispatchTxExecution')
+          .mockImplementation((() => Promise.resolve('0xhash')) as unknown as typeof txSender.dispatchTxExecution)
+
+        const { result } = renderHook(() => useTxActions())
+        await result.current.executeTx({ gasPrice: 1 }, tx)
+
+        expect(signSpy).not.toHaveBeenCalled()
+      })
+    })
   })
 
   describe('useAlreadySigned', () => {
