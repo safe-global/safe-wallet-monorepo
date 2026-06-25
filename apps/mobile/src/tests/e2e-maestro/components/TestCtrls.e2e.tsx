@@ -1,8 +1,8 @@
-import { LogBox, Pressable, TextInput, StyleSheet } from 'react-native'
+import { LogBox, Pressable, TextInput, StyleSheet, View as RNView } from 'react-native'
 import { View, Text } from 'tamagui'
 import { useDispatch } from 'react-redux'
 import { useRouter } from 'expo-router'
-import { useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import { setupOnboardedAccount, setupTestOnboarding, setupSeedPhraseImportAccount } from '../setup/onboardingSetup'
 import {
   setupConnectSignerOwner,
@@ -24,7 +24,16 @@ import {
   setupSafeShieldSafe,
 } from '../setup/pendingTxSetup'
 import { setupHistory, setupTransactionHistory, setupTransactionHistoryDirect } from '../setup/historySetup'
+import {
+  setupWcDappsBase,
+  synthSessionProposalValid,
+  synthSessionProposalUnverified,
+  synthSessionProposalScam,
+  synthSessionDelete,
+  setWcPairHang,
+} from '../setup/walletConnectDappsSetup'
 import { appUpdateE2eState } from '@/src/features/AppUpdate/hooks/appUpdateE2eState'
+import { walletKitE2eState } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
 
 LogBox.ignoreAllLogs()
 
@@ -87,6 +96,23 @@ function ClipboardVerificationContainer({
       </Pressable>
     </View>
   )
+}
+
+/**
+ * Side-channel for the WalletConnect dApp reject flow: renders a 1x1 marker with
+ * the `e2e-wc-reject-called` test-id once the fake rejectSession() has run.
+ */
+function WcRejectIndicator() {
+  const rejectCalled = useSyncExternalStore(
+    walletKitE2eState.subscribe,
+    () => walletKitE2eState.get().rejectSessionCalled,
+  )
+  if (!rejectCalled) {
+    return null
+  }
+  // Plain RN View so testID maps to accessibilityIdentifier reliably (Tamagui
+  // Views aren't always exposed to iOS accessibility / Maestro).
+  return <RNView testID="e2e-wc-reject-called" style={styles.marker} />
 }
 
 export function TestCtrls() {
@@ -266,8 +292,44 @@ export function TestCtrls() {
           style={BTN}
         />
 
+        {/* WalletConnect dApp pairing & session approval scenarios */}
+        <Pressable
+          testID="e2eWcDappsBase"
+          onPress={() => setupWcDappsBase(dispatch, router)}
+          accessibilityRole="button"
+          style={BTN}
+        />
+        <Pressable
+          testID="e2eWcSynthProposalValid"
+          onPress={() => synthSessionProposalValid()}
+          accessibilityRole="button"
+          style={BTN}
+        />
+        <Pressable
+          testID="e2eWcSynthProposalUnverified"
+          onPress={() => synthSessionProposalUnverified()}
+          accessibilityRole="button"
+          style={BTN}
+        />
+        <Pressable
+          testID="e2eWcSynthProposalScam"
+          onPress={() => synthSessionProposalScam()}
+          accessibilityRole="button"
+          style={BTN}
+        />
+        <Pressable
+          testID="e2eWcSynthDelete"
+          onPress={() => synthSessionDelete()}
+          accessibilityRole="button"
+          style={BTN}
+        />
+        <Pressable testID="e2eWcPairHang" onPress={() => setWcPairHang()} accessibilityRole="button" style={BTN} />
+
         {/* Clipboard Verification Trigger */}
         <ClipboardVerificationTrigger onPress={() => setIsClipboardVisible(true)} />
+
+        {/* WalletConnect dApp reject side-channel */}
+        <WcRejectIndicator />
       </View>
 
       {/* Clipboard Verification Container - rendered outside buttons View */}
@@ -288,6 +350,11 @@ const styles = StyleSheet.create({
   trigger: {
     height: 1,
     width: 1,
+  },
+  marker: {
+    height: 1,
+    width: 1,
+    backgroundColor: 'red',
   },
   clipboardContainer: {
     position: 'absolute',
