@@ -1,0 +1,29 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+  - suite
+---
+# WalletConnect dApps pairing & session-approval suite. Each flow calls
+# resetReduxForE2E (via e2eWcDappsBase) before seeding, so ordering is
+# presentation-only — flows are independent.
+
+- runFlow:
+    file: ./pair-scan-happy.yml
+
+- runFlow:
+    file: ./pair-scan-invalid.yml
+
+- runFlow:
+    file: ./pair-scan-timeout.yml
+
+- runFlow:
+    file: ./pair-deep-link.yml
+
+- runFlow:
+    file: ./pair-proposal-reject.yml
+
+- runFlow:
+    file: ./pair-proposal-unverified.yml
+
+- runFlow:
+    file: ./pair-proposal-scam.yml

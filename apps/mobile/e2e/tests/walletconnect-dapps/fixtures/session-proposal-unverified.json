@@ -1,0 +1,10 @@
+{
+  "_comment": "Reference payload for the UNKNOWN / unverified proposal (red banner). Canonical source: walletConnectDappsSetup.ts (synthSessionProposalUnverified).",
+  "verifyContext": {
+    "verified": {
+      "verifyUrl": "",
+      "validation": "UNKNOWN",
+      "origin": "https://app.uniswap.org"
+    }
+  }
+}

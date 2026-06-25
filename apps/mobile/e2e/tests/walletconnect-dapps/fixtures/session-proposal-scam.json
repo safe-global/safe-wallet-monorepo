@@ -1,0 +1,11 @@
+{
+  "_comment": "Reference payload for the scam-flagged proposal (malicious variant). Canonical source: walletConnectDappsSetup.ts (synthSessionProposalScam).",
+  "verifyContext": {
+    "verified": {
+      "verifyUrl": "",
+      "validation": "VALID",
+      "origin": "https://app.uniswap.org",
+      "isScam": true
+    }
+  }
+}
