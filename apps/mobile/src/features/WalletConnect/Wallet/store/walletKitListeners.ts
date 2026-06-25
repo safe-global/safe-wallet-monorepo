@@ -9,13 +9,11 @@ import { selectActiveSafe, setActiveSafe, switchActiveChain, clearActiveSafe } f
 import { selectActiveSigner } from '@/src/store/activeSignerSlice'
 import { selectChainById } from '@/src/store/chains'
 import { showToast } from '@/src/store/toastSlice'
-import { router } from 'expo-router'
 import { getWalletKit } from '../walletKit'
 import { logWalletKitError } from '../utils/errors'
 import { routeSessionRequest, isDeferredResponse, NO_SIGNER_ERROR_CODE } from '../services/methodRouter'
-import { proxyReadOnlyCall } from '../services/readRpcProxy'
-import { buildGetCallsResult, type RawTxReceipt } from '../services/getCallsStatus'
 import { REJECTED_SIGNING_METHODS } from '../services/constants'
+import { makeSwitchActiveChainByCaip2, makeGetCallsStatus, navigateToCallsStatus } from './sessionRequestActions'
 import {
   clearOutstandingRequest,
   markOutstandingProposing,
@@ -169,71 +167,8 @@ export const walletKitListeners = (startListening: AppStartListening) => {
       const hasSigner = activeSafe ? !!selectActiveSigner(state, activeSafe.address) : false
       const deployedChainIds = activeSafe ? Object.keys(state.safes[activeSafe.address] ?? {}) : []
 
-      // switchActiveChain triggers the setActiveSafe/switchActiveChain listener above, which
-      // re-syncs the WC sessions — so no explicit walletKit.updateSession is needed here. The two
-      // NOT_DEPLOYED gates are distinct: no chain config loaded, and Safe not deployed there.
-      const switchActiveChainByCaip2 = async (caip2: string) => {
-        const chainId = stripEip155Prefix(caip2)
-        const current = api.getState() as RootState
-        if (!selectChainById(current, chainId)) {
-          return { ok: false as const, reason: 'NOT_DEPLOYED' as const }
-        }
-        const safeAddress = selectActiveSafe(current)?.address
-        const safeChains = safeAddress ? Object.keys(current.safes[safeAddress] ?? {}) : []
-        if (!safeChains.includes(chainId)) {
-          return { ok: false as const, reason: 'NOT_DEPLOYED' as const }
-        }
-        api.dispatch(switchActiveChain({ chainId }))
-        return { ok: true as const }
-      }
-
-      // `chainId` is the WC envelope's session chain — correct because wallet_sendCalls is bound
-      // to the active chain at send time. Mirrors apps/web/.../safe-wallet-provider/index.ts.
-      const getCallsStatus = async (chainId: string, id: string) => {
-        const numericChainId = stripEip155Prefix(chainId)
-
-        let tx
-        try {
-          tx = await api
-            .dispatch(cgwApi.endpoints.transactionsGetTransactionByIdV1.initiate({ chainId: numericChainId, id }))
-            .unwrap()
-        } catch {
-          throw new Error('Transaction not found')
-        }
-
-        // buildGetCallsResult tolerates a null receipt (pending bundle), so only fetch one when
-        // there's a hash to look up and a chain config to reach.
-        let receipt: RawTxReceipt | null = null
-        if (tx.txHash) {
-          const chain = selectChainById(api.getState() as RootState, numericChainId)
-          if (chain) {
-            try {
-              receipt = (await proxyReadOnlyCall(chain, 'eth_getTransactionReceipt', [
-                tx.txHash,
-              ])) as RawTxReceipt | null
-            } catch (e) {
-              // Non-fatal: fall back to the receipt-less envelope, but leave a breadcrumb.
-              logWalletKitError('getCallsStatus receipt fetch failed', e)
-              receipt = null
-            }
-          } else {
-            // A mined tx on a chain we have no config for is anomalous — log rather than silently
-            // dropping to the receipt-less envelope.
-            logWalletKitError(
-              'getCallsStatus: no chain config for receipt lookup',
-              new Error(`chainId=${numericChainId}`),
-            )
-          }
-        }
-
-        return buildGetCallsResult(id, numericChainId, tx, receipt)
-      }
-
-      // The screen ignores the params for now, so this lands on the queue, not the specific tx.
-      // chainId is the CAIP-2 envelope value — strip the prefix before any numeric use.
-      const navigateToCallsStatus = (chainId: string, id: string) => {
-        router.push({ pathname: '/pending-transactions', params: { chainId, txId: id } })
-      }
+      const switchActiveChainByCaip2 = makeSwitchActiveChainByCaip2(api.getState as () => RootState, api.dispatch)
+      const getCallsStatus = makeGetCallsStatus(api.getState as () => RootState, api.dispatch)
 
       const response = await routeSessionRequest({
         request,
