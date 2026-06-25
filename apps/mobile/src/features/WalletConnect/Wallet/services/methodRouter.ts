@@ -47,8 +47,8 @@ const unsupportedError = (id: number) => formatJsonRpcError(id, getSdkError('UNS
 
 const invalidParamsError = (id: number) => formatJsonRpcError(id, { code: -32602, message: 'Invalid call parameters.' })
 
-// The active chain config hasn't resolved (yet) — the dApp can retry.
-const noActiveChainError = (id: number) => formatJsonRpcError(id, { code: -32603, message: 'No active chain' })
+// -32002 (non-reserved), not -32603: jsonrpc-utils rewrites reserved codes' messages, dropping our hint.
+const noActiveChainError = (id: number) => formatJsonRpcError(id, { code: -32002, message: 'No active chain' })
 
 // toHex throws on a non-integer id; wallet_getCapabilities feeds it dApp-supplied chain
 // ids, so drop malformed ones rather than failing the whole request.
@@ -190,14 +190,15 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
       const result = await proxyReadOnlyCall(activeChain, method, rpcParams)
       return formatJsonRpcResult(id, result)
     } catch (e) {
-      return formatJsonRpcError(id, { code: -32603, message: e instanceof Error ? e.message : 'RPC proxy failed' })
+      // -32000 (non-reserved) so the upstream RPC reason survives jsonrpc-utils' reserved-code rewrite.
+      return formatJsonRpcError(id, { code: -32000, message: e instanceof Error ? e.message : 'RPC proxy failed' })
     }
   }
 
   // Transaction methods — deferred to the sheet (the response is sent after review).
   if (method === 'eth_sendTransaction' || method === 'wallet_sendCalls') {
     if (!activeSafeAddress) {
-      return formatJsonRpcError(id, { code: -32603, message: 'No active Safe' })
+      return formatJsonRpcError(id, { code: -32002, message: 'No active Safe' })
     }
     if (!hasSigner) {
       return formatJsonRpcError(id, { code: NO_SIGNER_ERROR_CODE, message: 'No signer attached to this Safe' })

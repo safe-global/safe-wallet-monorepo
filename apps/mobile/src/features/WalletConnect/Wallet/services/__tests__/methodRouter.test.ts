@@ -90,9 +90,9 @@ describe('routeSessionRequest', () => {
 
   it('errors on eth_chainId / net_version while the chain config is unresolved', async () => {
     const chainIdRes = await routeSessionRequest(makeCtx(makeRequest('eth_chainId'), { activeChain: null }))
-    expect((chainIdRes as { error: { code: number } }).error.code).toBe(-32603)
+    expect((chainIdRes as { error: { code: number } }).error.code).toBe(-32002)
     const netVersionRes = await routeSessionRequest(makeCtx(makeRequest('net_version'), { activeChain: null }))
-    expect((netVersionRes as { error: { code: number } }).error.code).toBe(-32603)
+    expect((netVersionRes as { error: { code: number } }).error.code).toBe(-32002)
   })
 
   it('defers eth_sendTransaction for the sheet', async () => {
@@ -109,7 +109,7 @@ describe('routeSessionRequest', () => {
     const res = await routeSessionRequest(
       makeCtx(makeRequest('eth_sendTransaction', sendTxParams), { activeSafeAddress: null }),
     )
-    expect((res as { error: { code: number } }).error.code).toBe(-32603)
+    expect((res as { error: { code: number } }).error.code).toBe(-32002)
     expect(isDeferredResponse(res)).toBe(false)
   })
 
@@ -124,7 +124,7 @@ describe('routeSessionRequest', () => {
     const res = await routeSessionRequest(
       makeCtx(makeRequest('eth_sendTransaction', sendTxParams), { activeChain: null }),
     )
-    expect((res as { error: { code: number } }).error.code).toBe(-32603)
+    expect((res as { error: { code: number } }).error.code).toBe(-32002)
   })
 
   it('rejects tx requests on the wrong active chain with UNSUPPORTED_CHAINS', async () => {
@@ -341,16 +341,17 @@ describe('routeSessionRequest — read-only + wallet-control branches', () => {
       expect((res as { result: string }).result).toBe('0x10')
     })
 
-    it('responds -32603 when no active chain is resolved', async () => {
+    it('responds -32002 when no active chain is resolved', async () => {
       const res = await routeSessionRequest(makeCtx(makeRequest('eth_call', [{}]), { activeChain: null }))
-      expect((res as { error: { code: number } }).error.code).toBe(-32603)
+      expect((res as { error: { code: number } }).error.code).toBe(-32002)
       expect(mockProxyReadOnlyCall).not.toHaveBeenCalled()
     })
 
-    it('maps a proxy failure to -32603', async () => {
+    it('maps a proxy failure to -32000 with the reason preserved', async () => {
       mockProxyReadOnlyCall.mockRejectedValue(new Error('RPC down'))
       const res = await routeSessionRequest(makeCtx(makeRequest('eth_getBalance', [SAFE_ADDRESS, 'latest'])))
-      expect((res as { error: { code: number } }).error.code).toBe(-32603)
+      expect((res as { error: { code: number; message: string } }).error.code).toBe(-32000)
+      expect((res as { error: { message: string } }).error.message).toBe('RPC down')
     })
   })
 })
