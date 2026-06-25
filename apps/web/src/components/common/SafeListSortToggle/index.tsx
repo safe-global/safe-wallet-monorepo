@@ -10,20 +10,23 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { OrderByOption, selectOrderByPreference, setOrderByPreference } from '@/store/orderByPreferenceSlice'
+import type { OrderByOption, SortOption } from '@/store/orderByPreferenceSlice'
+import { BASIC_SORT_OPTIONS, selectOrderByPreference, setOrderByPreference } from '@/store/orderByPreferenceSlice'
 
-const labels: Record<OrderByOption, string> = {
-  [OrderByOption.NAME]: 'Name',
-  [OrderByOption.LAST_VISITED]: 'Last visited',
+interface SafeListSortToggleProps {
+  /** Sort options to offer. Defaults to the basic set; pass ALL_SORT_OPTIONS where balances are eager-loaded. */
+  options?: SortOption[]
 }
 
 /**
  * Sort control for the Safe lists (account selector dropdown + All accounts modal).
  * Reads/writes the shared, persisted orderByPreference so every Safe list stays in sync.
  */
-const SafeListSortToggle = () => {
+const SafeListSortToggle = ({ options = BASIC_SORT_OPTIONS }: SafeListSortToggleProps) => {
   const dispatch = useAppDispatch()
   const { orderBy } = useAppSelector(selectOrderByPreference)
+  // Fall back to the first option when the persisted order isn't offered here (e.g. balance in the modal).
+  const active = options.find((option) => option.value === orderBy) ?? options[0]
 
   return (
     <DropdownMenu>
@@ -32,7 +35,7 @@ const SafeListSortToggle = () => {
           <Button
             variant="outline"
             // Match the adjacent search InputGroup exactly: h-9, rounded-md, border-gray-100, shadow-none.
-            // Fixed width so the trigger doesn't grow/shrink between "Name" and "Last visited".
+            // Fixed width so the trigger doesn't grow/shrink between options.
             size="default"
             className="h-9 w-[160px] shrink-0 justify-between gap-1.5 rounded-md border-gray-100 shadow-none text-muted-foreground"
             data-testid="safe-list-sort-toggle"
@@ -41,7 +44,7 @@ const SafeListSortToggle = () => {
       >
         <span className="flex items-center gap-1.5 whitespace-nowrap">
           <ArrowDownUp className="size-4 shrink-0" />
-          {labels[orderBy]}
+          {active.label}
         </span>
         <ChevronDown className="size-4 shrink-0 opacity-60" />
       </DropdownMenuTrigger>
@@ -49,13 +52,19 @@ const SafeListSortToggle = () => {
         <DropdownMenuGroup>
           <DropdownMenuLabel>Sort by</DropdownMenuLabel>
           <DropdownMenuRadioGroup
-            value={orderBy}
-            onValueChange={(value) => dispatch(setOrderByPreference({ orderBy: value as OrderByOption }))}
+            value={active.value}
+            // The menu fires onValueChange even for the already-selected item; guard against the active
+            // value so re-clicking the shown option (e.g. the coerced fallback) doesn't overwrite a
+            // preference set on another surface.
+            onValueChange={(next) => {
+              if (next !== active.value) dispatch(setOrderByPreference({ orderBy: next as OrderByOption }))
+            }}
           >
-            <DropdownMenuRadioItem value={OrderByOption.NAME}>{labels[OrderByOption.NAME]}</DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value={OrderByOption.LAST_VISITED}>
-              {labels[OrderByOption.LAST_VISITED]}
-            </DropdownMenuRadioItem>
+            {options.map((option) => (
+              <DropdownMenuRadioItem key={option.value} value={option.value}>
+                {option.label}
+              </DropdownMenuRadioItem>
+            ))}
           </DropdownMenuRadioGroup>
         </DropdownMenuGroup>
       </DropdownMenuContent>

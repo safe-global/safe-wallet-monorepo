@@ -20,6 +20,11 @@ describe('orderByPreferenceSlice', () => {
     expect(state.orderBy).toBe(OrderByOption.LAST_VISITED)
   })
 
+  it('supports the balance order', () => {
+    const state = reducer(undefined, setOrderByPreference({ orderBy: OrderByOption.BALANCE }))
+    expect(state.orderBy).toBe(OrderByOption.BALANCE)
+  })
+
   it('selector falls back to the Name default when the slice is absent', () => {
     expect(selectOrderByPreference({} as RootState).orderBy).toBe(OrderByOption.NAME)
   })

@@ -22,6 +22,7 @@ import SafeItemCard from './SafeItemCard'
 import MultiSafeItemCard from './MultiSafeItemCard'
 import { useAccountsModalItems } from './useAccountsModalItems'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
+import { BASIC_SORT_OPTIONS } from '@/store/orderByPreferenceSlice'
 import type { AllSafeItems } from '@/hooks/safes'
 
 interface AccountsModalProps {
@@ -152,7 +153,7 @@ const AccountsModal = ({
               data-testid="accounts-search-input"
             />
           </InputGroup>
-          <SafeListSortToggle />
+          <SafeListSortToggle options={BASIC_SORT_OPTIONS} />
         </div>
 
         <div

@@ -73,6 +73,7 @@ import useChains from '@/hooks/useChains'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
 import { selectUndeployedSafes } from '@/features/counterfactual/store'
+import { selectOrderByPreference, OrderByOption } from '@/store/orderByPreferenceSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useRouter } from 'next/router'
 
@@ -666,6 +667,38 @@ describe('useSpaceSafeSelectorItems', () => {
 
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
     expect(result.current.items[0].chains[0].isUndeployed).toBe(false)
+  })
+
+  // ── balance sort ──
+
+  it('orders items by balance (desc) with the current safe first when the order is balance', () => {
+    const current = {
+      chainId: '1',
+      address: '0xSafe1',
+      isReadOnly: false,
+      isPinned: false,
+      lastVisited: 0,
+      name: 'Current',
+    }
+    const safeA = { chainId: '1', address: '0xA', isReadOnly: false, isPinned: false, lastVisited: 0, name: 'A' }
+    const safeB = { chainId: '1', address: '0xB', isReadOnly: false, isPinned: false, lastVisited: 0, name: 'B' }
+
+    setupDefaults({
+      allSafes: [current, safeA, safeB],
+      safeAddress: '0xSafe1',
+      overviews: [
+        { address: { value: '0xSafe1' }, chainId: '1', fiatTotal: '10', threshold: 1, owners: [{ value: '0xO' }] },
+        { address: { value: '0xA' }, chainId: '1', fiatTotal: '100', threshold: 1, owners: [{ value: '0xO' }] },
+        { address: { value: '0xB' }, chainId: '1', fiatTotal: '900', threshold: 1, owners: [{ value: '0xO' }] },
+      ],
+    })
+    ;(useAppSelector as jest.Mock).mockImplementation((selector: unknown) =>
+      selector === selectOrderByPreference ? { orderBy: OrderByOption.BALANCE } : 'usd',
+    )
+
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+    // current ('0xSafe1', $10) pinned first; rest by balance desc: B ($900), A ($100)
+    expect(result.current.items.map((i) => i.address)).toEqual(['0xSafe1', '0xB', '0xA'])
   })
 
   // ── undeployed status mapped per-chain on multi-chain safes ──

@@ -10,6 +10,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
+import { ALL_SORT_OPTIONS } from '@/store/orderByPreferenceSlice'
 import type { SafeItemData } from '../types'
 
 const matchesSearch = (item: SafeItemData, displayName: string, query: string): boolean => {
@@ -125,7 +126,10 @@ const SafeDropdownContainer = ({
         <SelectItem
           key={item.id}
           value={item.id}
-          className="h-auto py-4 px-4 rounded-lg my-1 data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer"
+          // [&>span.absolute]:hidden suppresses the built-in checkmark (see SelectItem in ui/select.tsx) —
+          // the current safe is already indicated by data-[state=checked]:bg-muted, and the checkmark would
+          // overlap the balance (matches MultiChainSafeItemRow's sub-items).
+          className="h-auto py-4 px-4 rounded-lg my-1 data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer [&>span.absolute]:hidden"
         >
           <SafeItem {...item} />
         </SelectItem>
@@ -170,7 +174,7 @@ const SafeDropdownContainer = ({
                     data-testid="safe-dropdown-search-input"
                   />
                 </InputGroup>
-                <SafeListSortToggle />
+                <SafeListSortToggle options={ALL_SORT_OPTIONS} />
               </div>
             )}
           </div>

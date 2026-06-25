@@ -10,6 +10,8 @@ import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
+import { OrderByOption, selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { orderItemsByBalance } from './orderItemsByBalance'
 import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import { PendingSafeStatus } from '@/features/counterfactual/types'
 import type { UndeployedSafesState } from '@/features/counterfactual/types'
@@ -142,6 +144,8 @@ export function useSpaceSafeSelectorItems() {
   const router = useRouter()
   const currency = useAppSelector(selectCurrency)
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
+  const { orderBy } = useAppSelector(selectOrderByPreference)
+  const sortByBalance = orderBy === OrderByOption.BALANCE
   const { address: walletAddress } = useWallet() || {}
   const spaceId = useCurrentSpaceId()
 
@@ -154,8 +158,10 @@ export function useSpaceSafeSelectorItems() {
     refetch: refetchOverviews,
   } = useGetMultipleSafeOverviewsQuery(flatSafes.length > 0 ? { safes: flatSafes, currency, walletAddress } : skipToken)
 
+  const selectedItemId = effectiveSafeAddress ? `${currentChainId}:${effectiveSafeAddress}` : ''
+
   const items: SafeItemData[] = useMemo(() => {
-    return allSafes.map((item) => {
+    const baseItems = allSafes.map((item) => {
       const isCurrentSafe = sameAddress(item.address, effectiveSafeAddress)
 
       if (isMultiChainSafeItem(item)) {
@@ -173,9 +179,22 @@ export function useSpaceSafeSelectorItems() {
 
       return buildSingleChainItem(item, isCurrentSafe, overviews, overviewsLoading, safe, chainConfigs, undeployedSafes)
     })
-  }, [allSafes, effectiveSafeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs, undeployedSafes])
 
-  const selectedItemId = effectiveSafeAddress ? `${currentChainId}:${effectiveSafeAddress}` : ''
+    // Balance sorts on the enriched items here; the upstream Name/Last visited sort from
+    // useSafeBarSafes is intentionally superseded in this case.
+    return sortByBalance ? orderItemsByBalance(baseItems, selectedItemId) : baseItems
+  }, [
+    allSafes,
+    effectiveSafeAddress,
+    currentChainId,
+    safe,
+    overviews,
+    overviewsLoading,
+    chainConfigs,
+    undeployedSafes,
+    sortByBalance,
+    selectedItemId,
+  ])
 
   const handleItemSelect = useCallback(
     (itemId: string) => {

@@ -3,7 +3,7 @@ import { Box, Button, ListItemText, MenuItem, SvgIcon, Typography } from '@mui/m
 import ContextMenu from '@/components/common/ContextMenu'
 import TransactionsIcon from '@/public/images/transactions/transactions.svg'
 import CheckIcon from '@/public/images/common/check.svg'
-import { OrderByOption } from '@/store/orderByPreferenceSlice'
+import { OrderByOption, BASIC_SORT_OPTIONS } from '@/store/orderByPreferenceSlice'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 
 type OrderByButtonProps = {
@@ -11,13 +11,12 @@ type OrderByButtonProps = {
   onOrderByChange: (orderBy: OrderByOption) => void
 }
 
-const orderByLabels = {
-  [OrderByOption.LAST_VISITED]: 'Last visited',
-  [OrderByOption.NAME]: 'Name',
-}
+const labelOf = (value: OrderByOption) => BASIC_SORT_OPTIONS.find((option) => option.value === value)?.label ?? ''
 
-const OrderByButton = ({ orderBy: orderBy, onOrderByChange: onOrderByChange }: OrderByButtonProps) => {
+const OrderByButton = ({ orderBy, onOrderByChange }: OrderByButtonProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
+  // This control only offers the basic options; a persisted balance order falls back to the first one.
+  const active = BASIC_SORT_OPTIONS.find((option) => option.value === orderBy) ?? BASIC_SORT_OPTIONS[0]
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
@@ -27,9 +26,12 @@ const OrderByButton = ({ orderBy: orderBy, onOrderByChange: onOrderByChange }: O
     setAnchorEl(undefined)
   }
 
-  const handleOrderByChange = (newOrderBy: OrderByOption) => {
-    trackEvent({ ...OVERVIEW_EVENTS.SORT_SAFES, label: orderByLabels[newOrderBy] })
-    onOrderByChange(newOrderBy)
+  const handleOrderByChange = (newOrderBy: OrderByOption.NAME | OrderByOption.LAST_VISITED) => {
+    // Skip when the shown option is re-selected, so an order set on another surface isn't overwritten.
+    if (newOrderBy !== active.value) {
+      trackEvent({ ...OVERVIEW_EVENTS.SORT_SAFES, label: labelOf(newOrderBy) })
+      onOrderByChange(newOrderBy)
+    }
     handleClose()
   }
 
@@ -43,7 +45,7 @@ const OrderByButton = ({ orderBy: orderBy, onOrderByChange: onOrderByChange }: O
         size="small"
       >
         <Typography variant="body2" noWrap>
-          Sort by: {orderByLabels[orderBy]}
+          Sort by: {active.label}
         </Typography>
       </Button>
 
@@ -61,22 +63,23 @@ const OrderByButton = ({ orderBy: orderBy, onOrderByChange: onOrderByChange }: O
         <MenuItem disabled>
           <ListItemText>Sort by</ListItemText>
         </MenuItem>
+        {/* Items kept explicit to preserve the existing data-testids (last-visited-option / name-option). */}
         <MenuItem
           data-testid="last-visited-option"
           sx={{ borderRadius: 0 }}
           onClick={() => handleOrderByChange(OrderByOption.LAST_VISITED)}
-          selected={orderBy === OrderByOption.LAST_VISITED}
+          selected={active.value === OrderByOption.LAST_VISITED}
         >
-          <ListItemText sx={{ mr: 2 }}>{orderByLabels[OrderByOption.LAST_VISITED]}</ListItemText>
-          {orderBy === OrderByOption.LAST_VISITED && <CheckIcon sx={{ ml: 1 }} />}
+          <ListItemText sx={{ mr: 2 }}>{labelOf(OrderByOption.LAST_VISITED)}</ListItemText>
+          {active.value === OrderByOption.LAST_VISITED && <CheckIcon sx={{ ml: 1 }} />}
         </MenuItem>
         <MenuItem
           data-testid="name-option"
           onClick={() => handleOrderByChange(OrderByOption.NAME)}
-          selected={orderBy === OrderByOption.NAME}
+          selected={active.value === OrderByOption.NAME}
         >
-          <ListItemText>{orderByLabels[OrderByOption.NAME]}</ListItemText>
-          {orderBy === OrderByOption.NAME && <CheckIcon sx={{ ml: 1 }} />}
+          <ListItemText>{labelOf(OrderByOption.NAME)}</ListItemText>
+          {active.value === OrderByOption.NAME && <CheckIcon sx={{ ml: 1 }} />}
         </MenuItem>
       </ContextMenu>
     </Box>
