@@ -13,7 +13,6 @@ type Props = {
   address: Address
   txId: string
   executionMethod: ExecutionMethod
-  /** GTF Safe-pays tx: relay is the only path, so the method can't be changed. */
   isSafePays?: boolean
 }
 
@@ -25,6 +24,7 @@ export function SelectExecutor({ address, txId, executionMethod, isSafePays }: P
       justifyContent="space-between"
       alignItems="center"
       gap={'$2'}
+      minHeight={40}
     >
       <Text color="$colorSecondary">Execution method</Text>
 

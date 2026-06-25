@@ -15,7 +15,7 @@ interface FeeLabelWithInfoProps {
  */
 export const FeeLabelWithInfo = ({ label, title, info, link }: FeeLabelWithInfoProps) => (
   <InfoSheet title={title} info={info} displayIcon={false} link={link}>
-    <XStack alignItems="center" gap="$1" flex={1}>
+    <XStack alignItems="center" gap="$1">
       <Text color="$textSecondaryLight" fontSize="$4">
         {label}
       </Text>

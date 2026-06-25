@@ -18,7 +18,7 @@ export interface FeeLine {
   address: string
 }
 
-export interface FeesBreakdown {
+export interface FeesBreakdownData {
   paidFromSafe: boolean
   gasNotYetKnown: boolean
   maxGasFee: FeeLine
@@ -53,7 +53,7 @@ export const buildFeesBreakdown = ({
   nativeCurrency,
   outgoing,
   balances,
-}: BuildFeesBreakdownArgs): FeesBreakdown => {
+}: BuildFeesBreakdownArgs): FeesBreakdownData => {
   const { safeTxGas, baseGas, gasPrice, gasToken, gasTokenInfo } = detailedExecutionInfo
 
   const paidFromSafe = isGtfSafePaid({

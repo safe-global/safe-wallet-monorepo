@@ -9,7 +9,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useTokenDetails } from '@/src/hooks/useTokenDetails'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectChainById, selectActiveChainCurrency } from '@/src/store/chains'
+import { selectChainById } from '@/src/store/chains'
 import { RootState } from '@/src/store'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Address } from '@/src/types/address'
@@ -18,7 +18,7 @@ import { ParametersButton } from '@/src/components/ParametersButton'
 import { HashDisplay } from '@/src/components/HashDisplay'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { buildFeesBreakdown } from '@/src/features/ConfirmTx/components/TransactionInfo/feeRows'
+import { useFeesBreakdown } from '@/src/features/ConfirmTx/components/TransactionInfo/useFeesBreakdown'
 import { isERC20Transfer } from '@/src/utils/transaction-guards'
 
 interface TokenTransferProps {
@@ -31,25 +31,24 @@ interface TokenTransferProps {
 export function TokenTransfer({ txId, txInfo, executionInfo, executedAt }: TokenTransferProps) {
   const activeSafe = useDefinedActiveSafe()
   const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
-  const nativeCurrency = useAppSelector(selectActiveChainCurrency)
   const { value, tokenSymbol, logoUri, decimals } = useTokenDetails(txInfo)
 
   const recipientAddress = txInfo.recipient.value as Address
 
+  const breakdown = useFeesBreakdown({ detailedExecutionInfo: executionInfo })
+
+  // Show the Safe-paid fee in the header only when the Safe funds the fee in a token that differs
+  // from the one being sent (otherwise it's already implied by the transfer amount).
   const safePaidFee = useMemo(() => {
-    if (!nativeCurrency) {
+    if (!breakdown?.paidFromSafe) {
       return undefined
     }
-    const breakdown = buildFeesBreakdown({
-      detailedExecutionInfo: executionInfo,
-      nativeCurrency: { address: ZERO_ADDRESS, symbol: nativeCurrency.symbol, decimals: nativeCurrency.decimals },
-    })
     const transferTokenAddress = isERC20Transfer(txInfo.transferInfo) ? txInfo.transferInfo.tokenAddress : ZERO_ADDRESS
-    if (!breakdown.paidFromSafe || sameAddress(breakdown.maxGasFee.address, transferTokenAddress)) {
+    if (sameAddress(breakdown.maxGasFee.address, transferTokenAddress)) {
       return undefined
     }
     return breakdown.maxGasFee
-  }, [executionInfo, nativeCurrency, txInfo])
+  }, [breakdown, txInfo])
 
   return (
     <>
