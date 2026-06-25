@@ -260,7 +260,7 @@ describe('SafeSidebarContent', () => {
     })
   })
 
-  describe('workspaceHeader', () => {
+  describe('onSpaceAdded propagation', () => {
     it('passes onSpaceAdded into the addToWorkspace workspaceHeader when no space is selected', () => {
       const onSpaceAdded = jest.fn()
       render(
@@ -280,17 +280,6 @@ describe('SafeSidebarContent', () => {
           }),
         }),
       )
-    })
-
-    it('passes no workspaceHeader when a space is selected (the top bar handles back navigation)', () => {
-      const selectedSpace = { uuid: 'uuid-1', name: 'My Space', safeCount: 0 }
-      render(
-        <GeoblockingContext.Provider value={false}>
-          <SafeSidebarContent selectedSpace={selectedSpace} spaces={[selectedSpace]} />
-        </GeoblockingContext.Provider>,
-      )
-
-      expect(mockSafeSidebarVariant).toHaveBeenCalledWith(expect.objectContaining({ workspaceHeader: undefined }))
     })
   })
 

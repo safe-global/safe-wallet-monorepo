@@ -1,7 +1,12 @@
 import { render, screen } from '@testing-library/react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { SafeSidebarVariant } from '../SafeSidebarVariant'
-import type { SafeWorkspaceHeaderAddToWorkspace, ResolvedSidebarItem, ResolvedSidebarGroup } from '../../../types'
+import type {
+  SafeWorkspaceHeaderBackToSpace,
+  SafeWorkspaceHeaderAddToWorkspace,
+  ResolvedSidebarItem,
+  ResolvedSidebarGroup,
+} from '../../../types'
 import { AppRoutes } from '@/config/routes'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 
@@ -68,6 +73,14 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '42',
 }))
 
+jest.mock('@/components/common/SpaceSafeBar/hooks/useSpaceBackLink', () => ({
+  useSpaceBackLink: () => ({ handleBackToSpace: jest.fn() }),
+}))
+
+jest.mock('@/utils/colors', () => ({
+  getDeterministicColor: (name: string) => `color-${name}`,
+}))
+
 jest.mock('../../NavItem', () => ({
   NavItem: ({ item }: { item: ResolvedSidebarItem | null }) =>
     item ? (
@@ -122,6 +135,31 @@ jest.mock('@/components/ui/tooltip', () => ({
   TooltipContent: () => null,
 }))
 
+jest.mock('@/components/ui/avatar', () => ({
+  Avatar: ({ children, className }: { children: ReactNode; className?: string }) => (
+    <div className={className}>{children}</div>
+  ),
+  AvatarFallback: ({
+    children,
+    className,
+    style,
+  }: {
+    children: ReactNode
+    className?: string
+    style?: CSSProperties
+  }) => (
+    <div data-testid="space-avatar-fallback" className={className} style={style}>
+      {children}
+    </div>
+  ),
+}))
+
+jest.mock('../../../config', () => ({
+  icons: {
+    ChevronLeft: () => <div>ChevronLeft</div>,
+  },
+}))
+
 jest.mock('../../SpaceSelectorDropdown', () => ({
   SpaceSelectorDropdown: ({ triggerVariant }: { triggerVariant?: 'default' | 'addToWorkspace' }) =>
     triggerVariant === 'addToWorkspace' ? (
@@ -132,6 +170,13 @@ jest.mock('../../SpaceSelectorDropdown', () => ({
       <div data-testid="space-selector-default">Space selector</div>
     ),
 }))
+
+const createBackHeader = (overrides: Partial<SafeWorkspaceHeaderBackToSpace> = {}): SafeWorkspaceHeaderBackToSpace => ({
+  variant: 'backToSpace',
+  spaceName: 'Test Safe',
+  spaceId: '123',
+  ...overrides,
+})
 
 const createAddHeader = (
   overrides: Partial<SafeWorkspaceHeaderAddToWorkspace> = {},
@@ -187,7 +232,13 @@ describe('SafeSidebarVariant', () => {
   })
 
   it('renders all navigation sections', () => {
-    render(<SafeSidebarVariant workspaceHeader={undefined} mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />)
+    render(
+      <SafeSidebarVariant
+        workspaceHeader={createBackHeader({ spaceName: 'Test Safe', spaceInitial: 'T' })}
+        mainNavItems={mockMainNavItems}
+        defiGroup={mockDefiGroup}
+      />,
+    )
 
     expect(screen.getByText('Overview')).toBeInTheDocument()
     expect(screen.getByTestId('sidebar-item-transactions')).toBeInTheDocument()
@@ -209,6 +260,21 @@ describe('SafeSidebarVariant', () => {
 
     expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
     expect(screen.queryByText('Add Safe to workspace')).not.toBeInTheDocument()
+  })
+
+  it('still renders backToSpace workspace header when Safe is counterfactual', () => {
+    mockUseIsCounterfactualSafe.mockReturnValue(true)
+
+    render(
+      <SafeSidebarVariant
+        workspaceHeader={createBackHeader({ spaceName: 'My Space', spaceId: '9' })}
+        mainNavItems={mockMainNavItems}
+        defiGroup={mockDefiGroup}
+      />,
+    )
+
+    expect(screen.getByTestId('back-to-space-button')).toBeInTheDocument()
+    expect(screen.getByText('My Space')).toBeInTheDocument()
   })
 
   it('renders all main navigation items', () => {
@@ -233,7 +299,7 @@ describe('SafeSidebarVariant', () => {
 
     render(
       <SafeSidebarVariant
-        workspaceHeader={undefined}
+        workspaceHeader={createBackHeader({ spaceName: 'Test Safe' })}
         mainNavItems={allNavItems}
         defiGroup={{ label: 'Defi', items: [] }}
       />,
@@ -248,7 +314,11 @@ describe('SafeSidebarVariant', () => {
   describe('Settings', () => {
     it('renders Settings button', () => {
       render(
-        <SafeSidebarVariant workspaceHeader={undefined} mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Test Safe' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
       )
 
       expect(screen.getByText('Settings')).toBeInTheDocument()
@@ -260,7 +330,11 @@ describe('SafeSidebarVariant', () => {
       })
 
       const { container } = render(
-        <SafeSidebarVariant workspaceHeader={undefined} mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Test Safe' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
       )
 
       expect(container.querySelector('span[aria-hidden]')).toBeInTheDocument()
@@ -272,7 +346,11 @@ describe('SafeSidebarVariant', () => {
       })
 
       const { container } = render(
-        <SafeSidebarVariant workspaceHeader={undefined} mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Test Safe' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
       )
 
       expect(container.querySelector('span[aria-hidden]')).not.toBeInTheDocument()
@@ -280,16 +358,30 @@ describe('SafeSidebarVariant', () => {
   })
 
   describe('workspace header variants', () => {
-    it('does not render a workspace header group when no workspaceHeader is provided (Safe inside a space)', () => {
+    it('renders the backToSpace variant with space name and back button', () => {
       render(
-        <SafeSidebarVariant workspaceHeader={undefined} mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Development', spaceId: '42' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
       )
 
-      expect(screen.queryByTestId('back-to-space-button')).not.toBeInTheDocument()
-      expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
-      // Navigation still renders below the (absent) header
-      expect(screen.getByText('Overview')).toBeInTheDocument()
-      expect(screen.getByTestId('new-tx-btn')).toBeInTheDocument()
+      expect(screen.getByText('Development')).toBeInTheDocument()
+      expect(screen.getByTestId('back-to-space-button')).toBeInTheDocument()
+    })
+
+    it('uses the correct space initial for backToSpace variant avatar', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Enterprise', spaceInitial: 'E' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      const avatarFallback = screen.getByTestId('space-avatar-fallback')
+      expect(avatarFallback).toHaveTextContent('E')
     })
 
     it('renders the addToWorkspace variant with the trigger button', () => {
@@ -365,6 +457,21 @@ describe('SafeSidebarVariant', () => {
       expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
     })
 
+    it('keeps backToSpace header visible when Safe is counterfactual', () => {
+      mockUseIsCounterfactualSafe.mockReturnValue(true)
+
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Shared Workspace', spaceId: '100' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByTestId('back-to-space-button')).toBeInTheDocument()
+      expect(screen.getByText('Shared Workspace')).toBeInTheDocument()
+    })
+
     it('renders correct number of spaces in addToWorkspace when multiple spaces provided', () => {
       const spaces = Array.from({ length: 5 }, (_, i) => ({
         id: i + 1,
@@ -388,7 +495,7 @@ describe('SafeSidebarVariant', () => {
 
   describe('conditional rendering edge cases', () => {
     it('renders correctly with empty main navigation items', () => {
-      render(<SafeSidebarVariant workspaceHeader={undefined} mainNavItems={[]} defiGroup={mockDefiGroup} />)
+      render(<SafeSidebarVariant workspaceHeader={createBackHeader()} mainNavItems={[]} defiGroup={mockDefiGroup} />)
 
       expect(screen.getByText('Defi')).toBeInTheDocument()
       expect(screen.getByText('Settings')).toBeInTheDocument()
@@ -397,7 +504,7 @@ describe('SafeSidebarVariant', () => {
     it('hides DeFi group when it has no items', () => {
       render(
         <SafeSidebarVariant
-          workspaceHeader={undefined}
+          workspaceHeader={createBackHeader()}
           mainNavItems={mockMainNavItems}
           defiGroup={{ label: 'Defi', items: [] }}
         />,
@@ -413,7 +520,11 @@ describe('SafeSidebarVariant', () => {
       }
 
       render(
-        <SafeSidebarVariant workspaceHeader={undefined} mainNavItems={mockMainNavItems} defiGroup={singleDefiGroup} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={singleDefiGroup}
+        />,
       )
 
       expect(screen.getByText('Defi')).toBeInTheDocument()
@@ -431,7 +542,11 @@ describe('SafeSidebarVariant', () => {
       }
 
       render(
-        <SafeSidebarVariant workspaceHeader={undefined} mainNavItems={mockMainNavItems} defiGroup={multiDefiGroup} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={multiDefiGroup}
+        />,
       )
 
       expect(screen.getByText('Defi')).toBeInTheDocument()
@@ -464,7 +579,11 @@ describe('SafeSidebarVariant', () => {
       })
 
       render(
-        <SafeSidebarVariant workspaceHeader={undefined} mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
       )
 
       const settingsButton = screen.getByTestId('sidebar-settings-item')
@@ -480,7 +599,11 @@ describe('SafeSidebarVariant', () => {
       })
 
       render(
-        <SafeSidebarVariant workspaceHeader={undefined} mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
       )
 
       const settingsButton = screen.getByTestId('sidebar-settings-item')
@@ -493,7 +616,11 @@ describe('SafeSidebarVariant', () => {
       })
 
       const { container } = render(
-        <SafeSidebarVariant workspaceHeader={undefined} mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
       )
 
       const outdatedDot = container.querySelector('span[aria-hidden]')
@@ -506,7 +633,11 @@ describe('SafeSidebarVariant', () => {
       })
 
       const { container } = render(
-        <SafeSidebarVariant workspaceHeader={undefined} mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
       )
 
       expect(container.querySelector('span[aria-hidden]')).not.toBeInTheDocument()
@@ -514,16 +645,46 @@ describe('SafeSidebarVariant', () => {
 
     it('renders sidebar with no props variations when all groups are empty', () => {
       render(
-        <SafeSidebarVariant workspaceHeader={undefined} mainNavItems={[]} defiGroup={{ label: 'Defi', items: [] }} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: '' })}
+          mainNavItems={[]}
+          defiGroup={{ label: 'Defi', items: [] }}
+        />,
       )
 
       expect(screen.getByText('Settings')).toBeInTheDocument()
       expect(screen.queryByText('Defi')).not.toBeInTheDocument()
     })
 
-    it('renders action button regardless of workspace header', () => {
+    it('handles backToSpace variant when isHydrated is true', () => {
+      const mockRouter = jest.requireMock('next/router').useRouter as jest.Mock
+      mockRouter.mockReturnValue({
+        push: jest.fn(),
+        query: { safe: '0xDeadBeef' },
+        pathname: '/home',
+      })
+
+      mockUseSidebarHydrated.mockReturnValue(true)
+
       render(
-        <SafeSidebarVariant workspaceHeader={undefined} mainNavItems={mockMainNavItems} defiGroup={mockDefiGroup} />,
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader({ spaceName: 'Main Workspace', spaceId: '1' })}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByText('Main Workspace')).toBeInTheDocument()
+      expect(screen.getByTestId('back-to-space-button')).toBeInTheDocument()
+    })
+
+    it('renders action button in all variants', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
       )
 
       expect(screen.getByTestId('new-tx-btn')).toBeInTheDocument()

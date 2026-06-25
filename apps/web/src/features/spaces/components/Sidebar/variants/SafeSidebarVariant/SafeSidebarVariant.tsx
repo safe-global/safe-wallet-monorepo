@@ -65,7 +65,8 @@ export const SafeSidebarVariant = ({
     testId: 'sidebar-settings-item',
   }
 
-  const shouldRenderWorkspaceHeaderGroup = !!workspaceHeader && isUserSignedIn && !(isHydrated && isCounterfactualSafe)
+  const shouldRenderWorkspaceHeaderGroup =
+    workspaceHeader.variant === 'backToSpace' || (isUserSignedIn && !(isHydrated && isCounterfactualSafe))
 
   // Use provided items or create placeholders for skeleton
   const displayMainNavItems = mainNavItems || Array(MAIN_NAV_SKELETON_COUNT).fill(null)
@@ -74,7 +75,7 @@ export const SafeSidebarVariant = ({
   return (
     <SidebarContent>
       <motion.div variants={containerVariants} initial="hidden" animate="visible">
-        {shouldRenderWorkspaceHeaderGroup && workspaceHeader && (
+        {shouldRenderWorkspaceHeaderGroup && (
           <motion.div variants={itemVariants} className="mb-2">
             <SidebarGroup className={css.sidebarGroup}>
               <SidebarMenu>

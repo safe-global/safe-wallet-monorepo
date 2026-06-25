@@ -49,6 +49,13 @@ export type SidebarVariantContentProps = SpaceSelectorProps & {
   isLoading?: boolean
 }
 
+export interface SafeWorkspaceHeaderBackToSpace {
+  variant: 'backToSpace'
+  spaceName: string
+  spaceInitial?: string
+  spaceId: string
+}
+
 export interface SafeWorkspaceHeaderAddToWorkspace {
   variant: 'addToWorkspace'
   selectedSpace?: SpaceItem
@@ -56,10 +63,10 @@ export interface SafeWorkspaceHeaderAddToWorkspace {
   onSpaceAdded?: (space: SpaceItem) => void
 }
 
-export type SafeWorkspaceHeaderProps = SafeWorkspaceHeaderAddToWorkspace
+export type SafeWorkspaceHeaderProps = SafeWorkspaceHeaderBackToSpace | SafeWorkspaceHeaderAddToWorkspace
 
 export interface SafeSidebarVariantProps {
-  workspaceHeader?: SafeWorkspaceHeaderProps
+  workspaceHeader: SafeWorkspaceHeaderProps
   mainNavItems: ResolvedSidebarItem[] | null
   defiGroup: ResolvedSidebarGroup | null
   isLoading?: boolean
