@@ -24,7 +24,7 @@ export function SelectExecutor({ address, txId, executionMethod, isSafePays }: P
       justifyContent="space-between"
       alignItems="center"
       gap={'$2'}
-      minHeight={40}
+      minHeight="$10"
     >
       <Text color="$colorSecondary">Execution method</Text>
 

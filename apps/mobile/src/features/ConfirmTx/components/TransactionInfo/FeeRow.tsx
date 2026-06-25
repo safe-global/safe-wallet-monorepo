@@ -9,7 +9,7 @@ import type { FeeLine } from './feeRows'
  * Used by every fee surface (breakdown, execute footer) so the visual contract stays consistent.
  */
 export const FeeRow = ({ label, children }: { label: React.ReactNode; children: React.ReactNode }) => (
-  <View flexDirection="row" justifyContent="space-between" alignItems="center" gap="$2" minHeight={40}>
+  <View flexDirection="row" justifyContent="space-between" alignItems="center" gap="$2" minHeight="$10">
     <View flex={1}>{label}</View>
     <YStack alignItems="flex-end" flexShrink={0}>
       {children}

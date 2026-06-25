@@ -41,7 +41,7 @@ export const EstimatedNetworkFee = ({
   }
 
   return (
-    <View flexDirection="row" justifyContent="space-between" gap="$2" alignItems="center" minHeight={40}>
+    <View flexDirection="row" justifyContent="space-between" gap="$2" alignItems="center" minHeight="$10">
       <Text color="$textSecondaryLight" fontSize="$4">
         Est. network fee
       </Text>
