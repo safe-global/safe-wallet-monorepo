@@ -69,4 +69,34 @@ describe('AddToWorkspaceButton', () => {
     expect(getStoreInstance().getState().addressBook['1'][address]).toBe('Alice')
     expect(screen.queryByText('Added')).not.toBeInTheDocument()
   })
+
+  it('surfaces the backend error message in the toast', async () => {
+    mockUpsert.mockResolvedValue({
+      error: { status: 422, data: { message: 'Name contains invalid characters' } },
+    })
+    render(<AddToWorkspaceButton address={address} name="Alice" chainIds={['1']} />, {
+      initialReduxState: { addressBook: { '1': { [address]: 'Alice' } } },
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+
+    await waitFor(() => {
+      const notifications = getStoreInstance().getState().notifications
+      expect(notifications.some((n) => n.message === 'Name contains invalid characters')).toBe(true)
+    })
+  })
+
+  it('falls back to a friendly message when the backend provides none', async () => {
+    mockUpsert.mockResolvedValue({ error: { status: 500, data: {} } })
+    render(<AddToWorkspaceButton address={address} name="Alice" chainIds={['1']} />, {
+      initialReduxState: { addressBook: { '1': { [address]: 'Alice' } } },
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+
+    await waitFor(() => {
+      const notifications = getStoreInstance().getState().notifications
+      expect(notifications.some((n) => /Something went wrong \(500\)\. Please try again/.test(n.message))).toBe(true)
+    })
+  })
 })
