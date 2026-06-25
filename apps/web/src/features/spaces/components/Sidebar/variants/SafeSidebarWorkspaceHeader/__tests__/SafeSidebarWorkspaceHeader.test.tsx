@@ -165,21 +165,21 @@ describe('SafeSidebarWorkspaceHeader', () => {
       render(
         <SafeSidebarWorkspaceHeader
           workspaceHeader={createBackHeader({
-            spaceName: 'My Safe Account',
+            spaceName: 'My Safe account',
             spaceInitial: 'M',
             spaceId: '123',
           })}
         />,
       )
 
-      expect(screen.getByText('My Safe Account')).toBeInTheDocument()
+      expect(screen.getByText('My Safe account')).toBeInTheDocument()
       expect(screen.getByText('Workspace')).toBeInTheDocument()
       expect(screen.getByText('M')).toBeInTheDocument()
       expect(screen.getByText('ChevronLeft')).toBeInTheDocument()
     })
 
     it('applies deterministic avatar color from space name', () => {
-      const spaceName = 'My Safe Account'
+      const spaceName = 'My Safe account'
 
       render(
         <SafeSidebarWorkspaceHeader
@@ -234,7 +234,7 @@ describe('SafeSidebarWorkspaceHeader', () => {
       render(
         <SafeSidebarWorkspaceHeader
           workspaceHeader={createBackHeader({
-            spaceName: 'My Safe Account',
+            spaceName: 'My Safe account',
             spaceInitial: 'M',
             spaceId: '42',
           })}

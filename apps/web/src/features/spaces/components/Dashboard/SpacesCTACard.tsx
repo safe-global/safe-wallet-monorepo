@@ -41,7 +41,7 @@ const SpacesCTACard = () => {
             Explore spaces
           </Typography>
           <Typography variant="body2" color="primary.light">
-            Seamlessly use your Safe Accounts from one place and collaborate with your team members.
+            Seamlessly use your Safe accounts from one place and collaborate with your team members.
           </Typography>
         </Box>
       </Paper>

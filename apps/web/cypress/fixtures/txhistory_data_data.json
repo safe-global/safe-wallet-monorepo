@@ -14,7 +14,7 @@
       "actionsSummary": "Created by 0xC16D...6fED",
       "transactionSafehash": {},
       "summaryTime": "10:30 AM",
-      "title": "Safe Account created",
+      "title": "Safe account created",
       "creator": {
         "actionTitle": "Creator",
         "address": "sep:0xC16Db0251654C0a72E91B190d81eAD367d2C6fED"
@@ -30,7 +30,7 @@
         "address": "sep:0xfb1bffC9d739B8D520DaF37dF666da4C687191EA"
       },
       "transactionHash": "0x05d4...7979",
-      "altTmage": "Safe Account created"
+      "altTmage": "Safe account created"
     },
     "receive": {
       "title": "Receive",

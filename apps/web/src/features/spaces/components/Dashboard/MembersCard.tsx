@@ -47,7 +47,7 @@ const MembersCard = () => {
             Add members
           </Typography>
           <Typography variant="body2" color="primary.light">
-            Invite team members to help manage your Safe Accounts. You can add both Safe Account signers and external
+            Invite team members to help manage your Safe accounts. You can add both Safe account signers and external
             collaborators.
           </Typography>
         </Box>

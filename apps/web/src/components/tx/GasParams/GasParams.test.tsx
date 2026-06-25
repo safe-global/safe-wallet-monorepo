@@ -93,7 +93,7 @@ describe('GasParams', () => {
 
     const { getByText } = render(<GasParams params={params} isExecution={true} isEIP1559={true} onEdit={jest.fn} />)
 
-    expect(getByText('Safe Account transaction nonce')).toBeInTheDocument()
+    expect(getByText('Safe account transaction nonce')).toBeInTheDocument()
     expect(getByText('123')).toBeInTheDocument()
   })
 

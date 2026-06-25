@@ -78,7 +78,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
       button = (
         <Link href={createSafeHrefWithRedirect} passHref legacyBehavior>
           <Button variant="contained" sx={{ width: CTA_BUTTON_WIDTH }}>
-            Create new Safe Account
+            Create new Safe account
           </Button>
         </Link>
       )
@@ -94,7 +94,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
   if (hasWallet && hasSafes) {
     body = (
       <FormControl>
-        <InputLabel id="safe-select-label">Select a Safe Account</InputLabel>
+        <InputLabel id="safe-select-label">Select a Safe account</InputLabel>
         <Select
           labelId="safe-select-label"
           value={safeToUse?.address || ''}
@@ -103,7 +103,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
             setSafeToUse(safeToUse)
           }}
           autoWidth
-          label="Select a Safe Account"
+          label="Select a Safe account"
           sx={({ spacing }) => ({
             width: '311px',
             minHeight: '56px',
@@ -153,7 +153,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
           fontWeight: 700,
         }}
       >
-        Use the App with your Safe Account
+        Use the App with your Safe account
       </Typography>
       {body}
       {button}

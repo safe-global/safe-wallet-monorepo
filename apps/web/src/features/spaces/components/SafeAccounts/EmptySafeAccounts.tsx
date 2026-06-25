@@ -10,7 +10,7 @@ const EmptySafeAccounts = () => {
         </Box>
 
         <Typography color="text.secondary" mb={2}>
-          Add existing Safe Accounts in your space to see them here.
+          Add existing Safe accounts in your space to see them here.
         </Typography>
       </Card>
     </>

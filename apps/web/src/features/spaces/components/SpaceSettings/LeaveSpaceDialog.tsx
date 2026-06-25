@@ -65,7 +65,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
         </AlertDialogHeader>
 
         <Typography variant="paragraph-small" color="muted">
-          Your wallet and any linked Safe Accounts are not affected.
+          Your wallet and any linked Safe accounts are not affected.
         </Typography>
 
         {error && (

@@ -106,7 +106,7 @@ const AdvancedOptionsStep = ({ onSubmit, onBack, data, setStep }: StepRenderProp
             >
               Safe version
               <Tooltip
-                title="The threshold of a Safe Account specifies how many signers need to confirm a Safe Account transaction before it can be executed."
+                title="The threshold of a Safe account specifies how many signers need to confirm a Safe account transaction before it can be executed."
                 arrow
                 placement="top"
               >

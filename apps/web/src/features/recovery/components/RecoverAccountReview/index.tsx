@@ -136,7 +136,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
 
         <Box my={1}>
           <Typography variant="body2" color="text.secondary" gutterBottom>
-            After recovery, Safe Account transactions will require:
+            After recovery, Safe account transactions will require:
           </Typography>
           <Typography>
             <b>{threshold}</b> out of <b>{owners.length} signers.</b>
