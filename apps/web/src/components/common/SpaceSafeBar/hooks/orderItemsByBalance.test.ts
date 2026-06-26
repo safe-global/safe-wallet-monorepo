@@ -22,7 +22,7 @@ describe('orderItemsByBalance', () => {
     expect(orderItemsByBalance(items, 'cur').map((i) => i.id)).toEqual(['cur', 'b', 'a'])
   })
 
-  it('sorts missing or zero balances last', () => {
+  it('sorts zero and missing balances after positive ones', () => {
     const items = [makeItem('a', ''), makeItem('b', '500'), makeItem('c', '0')]
     expect(orderItemsByBalance(items, 'none').map((i) => i.id)).toEqual(['b', 'a', 'c'])
   })

@@ -180,7 +180,6 @@ export function useSpaceSafeSelectorItems() {
       return buildSingleChainItem(item, isCurrentSafe, overviews, overviewsLoading, safe, chainConfigs, undeployedSafes)
     })
 
-    // Balance re-sorts the enriched items here, superseding the upstream name/last-visited sort.
     return sortByBalance ? orderItemsByBalance(baseItems, selectedItemId) : baseItems
   }, [
     allSafes,

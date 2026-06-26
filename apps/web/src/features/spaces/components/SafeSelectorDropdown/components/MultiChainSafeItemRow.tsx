@@ -69,8 +69,8 @@ const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
               <SelectItem
                 key={`${chain.chainId}:${item.address}`}
                 value={`${chain.chainId}:${item.address}`}
-                // [&>span.absolute]:hidden suppresses the built-in checkmark span (see SelectItem in ui/select.tsx) — this row uses its own right-aligned StatusBadge / queued count / balance instead, and the checkmark would overlap them.
-                className="flex items-center gap-3 rounded-md px-3 py-2 cursor-pointer data-[state=checked]:bg-muted hover:bg-muted/30 [&>span.absolute]:hidden"
+                hideIndicator // this row's own badges / balance sit where the checkmark would
+                className="flex items-center gap-3 rounded-md px-3 py-2 cursor-pointer data-[state=checked]:bg-muted hover:bg-muted/30"
               >
                 <ChainLogo chainId={chain.chainId} />
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">

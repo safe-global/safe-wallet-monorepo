@@ -1,6 +1,11 @@
 import { render, screen } from '@/tests/test-utils'
-import { ORDER_BY_RESET_VERSION, OrderByOption, ALL_SORT_OPTIONS } from '@/store/orderByPreferenceSlice'
-import SafeListSortToggle from '.'
+import {
+  ORDER_BY_RESET_VERSION,
+  OrderByOption,
+  ALL_SORT_OPTIONS,
+  setOrderByPreference,
+} from '@/store/orderByPreferenceSlice'
+import SafeListSortToggle, { sortChangeAction } from '.'
 
 // The popup/menu open state is verified in the browser: base-ui menus don't open in jsdom,
 // so here we cover that the trigger mounts and reflects the persisted preference.
@@ -39,5 +44,17 @@ describe('SafeListSortToggle', () => {
     const trigger = screen.getByTestId('safe-list-sort-toggle')
     expect(trigger).toHaveTextContent('Name')
     expect(trigger).not.toHaveTextContent('Balance')
+  })
+})
+
+describe('sortChangeAction', () => {
+  it('returns a setOrderByPreference action for a newly chosen option', () => {
+    expect(sortChangeAction(OrderByOption.BALANCE, OrderByOption.NAME)).toEqual(
+      setOrderByPreference({ orderBy: OrderByOption.BALANCE }),
+    )
+  })
+
+  it('returns null when re-selecting the shown option (no clobber)', () => {
+    expect(sortChangeAction(OrderByOption.NAME, OrderByOption.NAME)).toBeNull()
   })
 })

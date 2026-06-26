@@ -126,8 +126,8 @@ const SafeDropdownContainer = ({
         <SelectItem
           key={item.id}
           value={item.id}
-          // Hide the built-in checkmark — it overlaps the balance (active safe shown via bg-muted).
-          className="h-auto py-4 px-4 rounded-lg my-1 data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer [&>span.absolute]:hidden"
+          hideIndicator // the checkmark overlaps the balance; active safe is shown via bg-muted
+          className="h-auto py-4 px-4 rounded-lg my-1 data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer"
         >
           <SafeItem {...item} />
         </SelectItem>

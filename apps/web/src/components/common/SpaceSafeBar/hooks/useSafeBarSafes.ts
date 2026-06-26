@@ -3,7 +3,7 @@ import { useIsQualifiedSafe, useSpaceSafes } from '@/features/spaces'
 import { useAllSafes, useAllSafesGrouped, getComparator, type AllSafeItems } from '@/hooks/safes'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import { useAppSelector } from '@/store'
-import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { OrderByOption, selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
@@ -19,12 +19,11 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 const orderDropdownSafes = (
   items: AllSafeItems,
   safeAddress: string,
-  comparator: ReturnType<typeof getComparator>,
+  comparator: ReturnType<typeof getComparator> | undefined,
   current: SafeItem | MultiChainSafeItem | undefined,
 ): AllSafeItems => {
-  const rest = (safeAddress ? items.filter((s) => !sameAddress(s.address, safeAddress)) : items)
-    .slice()
-    .sort(comparator)
+  const filtered = safeAddress ? items.filter((s) => !sameAddress(s.address, safeAddress)) : items
+  const rest = comparator ? filtered.slice().sort(comparator) : filtered
   return safeAddress && current ? [current, ...rest] : rest
 }
 
@@ -51,7 +50,8 @@ export function useSafeBarSafes() {
   const allSafeItems = useAllSafes()
 
   const { orderBy } = useAppSelector(selectOrderByPreference)
-  const comparator = useMemo(() => getComparator(orderBy), [orderBy])
+  // Balance is sorted downstream on enriched items (useSpaceSafeSelectorItems); skip the throwaway sort here.
+  const comparator = useMemo(() => (orderBy === OrderByOption.BALANCE ? undefined : getComparator(orderBy)), [orderBy])
 
   const pinnedItems = useMemo(() => allSafeItems?.filter((s) => s.isPinned) ?? [], [allSafeItems])
 

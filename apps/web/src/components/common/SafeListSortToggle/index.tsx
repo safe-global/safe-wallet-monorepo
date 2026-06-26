@@ -13,6 +13,10 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import type { OrderByOption, SortOption } from '@/store/orderByPreferenceSlice'
 import { BASIC_SORT_OPTIONS, selectOrderByPreference, setOrderByPreference } from '@/store/orderByPreferenceSlice'
 
+// base-ui fires onValueChange even on re-select; return null then to avoid clobbering a balance order set elsewhere.
+export const sortChangeAction = (next: string, activeValue: OrderByOption) =>
+  next === activeValue ? null : setOrderByPreference({ orderBy: next as OrderByOption })
+
 interface SafeListSortToggleProps {
   /** Sort options to offer. Defaults to the basic set; pass ALL_SORT_OPTIONS where balances are eager-loaded. */
   options?: SortOption[]
@@ -53,9 +57,9 @@ const SafeListSortToggle = ({ options = BASIC_SORT_OPTIONS }: SafeListSortToggle
           <DropdownMenuLabel>Sort by</DropdownMenuLabel>
           <DropdownMenuRadioGroup
             value={active.value}
-            // base-ui fires onValueChange even on re-selecting the shown item; guard against it.
             onValueChange={(next) => {
-              if (next !== active.value) dispatch(setOrderByPreference({ orderBy: next as OrderByOption }))
+              const action = sortChangeAction(next, active.value)
+              if (action) dispatch(action)
             }}
           >
             {options.map((option) => (
