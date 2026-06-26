@@ -2,16 +2,11 @@ import React from 'react'
 import { act, fireEvent, waitFor } from '@testing-library/react-native'
 import { getAddress } from 'ethers'
 import { faker } from '@faker-js/faker'
-import { getSdkError } from '@walletconnect/utils'
-import { formatJsonRpcError } from '@walletconnect/jsonrpc-utils'
 import { renderWithStore, createTestStore } from '@/src/tests/test-utils'
 import { RequestSheetHost } from '../RequestSheetHost'
-import { pushPending, selectPending, walletKitSliceName } from '../../store/walletKitSlice'
+import { pushPending, rejectPending, selectPending, walletKitSliceName } from '../../store/walletKitSlice'
 import type { RootState } from '@/src/store'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
-
-const mockToastShow = jest.fn()
-jest.mock('@tamagui/toast', () => ({ useToastController: () => ({ show: mockToastShow }) }))
 
 const mockPresent = jest.fn()
 const mockDismiss = jest.fn()
@@ -52,12 +47,13 @@ jest.mock('@gorhom/bottom-sheet', () => {
   }
 })
 
-const mockRejectSession = jest.fn().mockResolvedValue(undefined)
-const mockRespondSessionRequest = jest.fn().mockResolvedValue(undefined)
-const fakeWalletKit = {
-  rejectSession: mockRejectSession,
-  respondSessionRequest: mockRespondSessionRequest,
-} as unknown as IWalletKit
+// The component no longer calls the SDK directly — it dispatches rejectPending and the
+// walletKit listener (tested in walletKitListeners.test) owns the response. A truthy walletKit
+// prop is all these tests need; the approve-flow tests pass their own mock instead.
+const fakeWalletKit = {} as unknown as IWalletKit
+
+const rejectPendingActionFor = (item: { id: number; kind: string }) =>
+  expect.objectContaining({ type: rejectPending.type, payload: expect.objectContaining(item) })
 
 const safeAddress = getAddress(faker.finance.ethereumAddress()) as `0x${string}`
 
@@ -89,9 +85,6 @@ describe('RequestSheetHost', () => {
   beforeEach(() => {
     mockPresent.mockClear()
     mockDismiss.mockClear()
-    mockRejectSession.mockClear()
-    mockRespondSessionRequest.mockClear()
-    mockToastShow.mockClear()
     mockOnDismiss = undefined
   })
 
@@ -172,6 +165,7 @@ describe('RequestSheetHost', () => {
       rejectSession: jest.fn().mockResolvedValue(undefined),
     } as unknown as IWalletKit & { rejectSession: jest.Mock }
     const store = proposalStore(7)
+    const dispatchSpy = jest.spyOn(store, 'dispatch')
     const { getByTestId } = renderWithStore(<RequestSheetHost walletKit={walletKit} />, store)
 
     // Start the connect (sets busy); approveSession stays pending.
@@ -181,7 +175,7 @@ describe('RequestSheetHost', () => {
     await act(async () => {
       await mockOnDismiss?.()
     })
-    expect(walletKit.rejectSession).not.toHaveBeenCalled()
+    expect(dispatchSpy).not.toHaveBeenCalledWith(rejectPendingActionFor({ id: 7, kind: 'proposal' }))
 
     // Let the in-flight approve settle so the promise isn't left dangling.
     await act(async () => {
@@ -203,16 +197,16 @@ describe('RequestSheetHost', () => {
     // Tapping the domain pill swaps in the permissions panel + the "Got it" footer.
     fireEvent.press(getByTestId('wc-proposal-domain'))
     expect(getByText('This domain has been verified.')).toBeTruthy()
-    expect(getByTestId('wc-proposal-permissions-dismiss')).toBeTruthy()
+    expect(getByTestId('wc-permissions-dismiss')).toBeTruthy()
     expect(queryByTestId('wc-proposal-connect')).toBeNull()
 
     // "Got it" returns to the proposal view.
-    fireEvent.press(getByTestId('wc-proposal-permissions-dismiss'))
+    fireEvent.press(getByTestId('wc-permissions-dismiss'))
     expect(getByTestId('wc-proposal-connect')).toBeTruthy()
-    expect(queryByTestId('wc-proposal-permissions-dismiss')).toBeNull()
+    expect(queryByTestId('wc-permissions-dismiss')).toBeNull()
   })
 
-  it('rejects the proposal with USER_REJECTED when the sheet is dismissed', async () => {
+  it('dispatches rejectPending for the proposal when the sheet is dismissed', async () => {
     const store = createTestStore({
       [walletKitSliceName]: {
         sessions: {},
@@ -220,18 +214,17 @@ describe('RequestSheetHost', () => {
         outstandingRequests: {},
       },
     } as never)
+    const dispatchSpy = jest.spyOn(store, 'dispatch')
     renderWithStore(<RequestSheetHost walletKit={fakeWalletKit} />, store)
 
     await act(async () => {
       await mockOnDismiss?.()
     })
 
-    expect(mockRejectSession).toHaveBeenCalledWith({ id: 2, reason: getSdkError('USER_REJECTED') })
-    expect(mockRespondSessionRequest).not.toHaveBeenCalled()
-    expect(getPending(store)).toHaveLength(0)
+    expect(dispatchSpy).toHaveBeenCalledWith(rejectPendingActionFor({ id: 2, kind: 'proposal' }))
   })
 
-  it('responds USER_REJECTED to a request when the sheet is dismissed', async () => {
+  it('dispatches rejectPending for a request when the sheet is dismissed', async () => {
     const store = createTestStore({
       [walletKitSliceName]: {
         sessions: {},
@@ -241,31 +234,88 @@ describe('RequestSheetHost', () => {
         outstandingRequests: {},
       },
     } as never)
+    const dispatchSpy = jest.spyOn(store, 'dispatch')
     renderWithStore(<RequestSheetHost walletKit={fakeWalletKit} />, store)
 
     await act(async () => {
       await mockOnDismiss?.()
     })
 
-    expect(mockRespondSessionRequest).toHaveBeenCalledWith({
-      topic: 'topic-1',
-      response: formatJsonRpcError(3, getSdkError('USER_REJECTED').message),
-    })
-    expect(mockRejectSession).not.toHaveBeenCalled()
-    expect(getPending(store)).toHaveLength(0)
+    expect(dispatchSpy).toHaveBeenCalledWith(rejectPendingActionFor({ id: 3, kind: 'request' }))
   })
 
   it('does nothing on dismiss when there is no current request', async () => {
     const store = createTestStore({
       [walletKitSliceName]: { sessions: {}, pending: [], outstandingRequests: {} },
     } as never)
+    const dispatchSpy = jest.spyOn(store, 'dispatch')
     renderWithStore(<RequestSheetHost walletKit={fakeWalletKit} />, store)
 
     await act(async () => {
       await mockOnDismiss?.()
     })
 
-    expect(mockRejectSession).not.toHaveBeenCalled()
-    expect(mockRespondSessionRequest).not.toHaveBeenCalled()
+    expect(dispatchSpy).not.toHaveBeenCalledWith(expect.objectContaining({ type: rejectPending.type }))
+  })
+
+  it('renders the Reject/Review footer for a tx request and wires Reject to rejectPending', () => {
+    const store = createTestStore({
+      activeSafe: { address: safeAddress, chainId: '1' },
+      [walletKitSliceName]: {
+        sessions: { 'topic-1': { peer: { metadata: { name: 'Uniswap', url: 'https://uniswap.org' } } } },
+        pending: [
+          { kind: 'request', id: 4, topic: 'topic-1', chainId: 'eip155:1', method: 'eth_sendTransaction', params: {} },
+        ],
+        outstandingRequests: {},
+      },
+    } as never)
+    const dispatchSpy = jest.spyOn(store, 'dispatch')
+    const { getByTestId } = renderWithStore(<RequestSheetHost walletKit={fakeWalletKit} />, store)
+
+    expect(getByTestId('wc-tx-review')).toBeTruthy()
+    fireEvent.press(getByTestId('wc-tx-reject'))
+
+    expect(dispatchSpy).toHaveBeenCalledWith(rejectPendingActionFor({ id: 4, kind: 'request' }))
+  })
+
+  it('opens the permissions panel from the tx-request domain pill and restores Reject/Review on "Got it"', () => {
+    const store = createTestStore({
+      activeSafe: { address: safeAddress, chainId: '1' },
+      [walletKitSliceName]: {
+        sessions: { 'topic-1': { peer: { metadata: { name: 'Uniswap', url: 'https://uniswap.org' } } } },
+        pending: [
+          {
+            kind: 'request',
+            id: 6,
+            topic: 'topic-1',
+            chainId: 'eip155:1',
+            method: 'eth_sendTransaction',
+            params: {},
+            verifyContext: { verified: { validation: 'VALID' } },
+          },
+        ],
+        outstandingRequests: {},
+      },
+    } as never)
+    const dispatchSpy = jest.spyOn(store, 'dispatch')
+    const { getByTestId, queryByTestId, getByText } = renderWithStore(
+      <RequestSheetHost walletKit={fakeWalletKit} />,
+      store,
+    )
+
+    // Request view: Reject/Review in the footer.
+    expect(getByTestId('wc-tx-review')).toBeTruthy()
+
+    // Tapping the domain pill swaps in the permissions panel + the "Got it" footer.
+    fireEvent.press(getByTestId('wc-tx-domain'))
+    expect(getByText('This domain has been verified.')).toBeTruthy()
+    expect(getByTestId('wc-permissions-dismiss')).toBeTruthy()
+    expect(queryByTestId('wc-tx-review')).toBeNull()
+
+    // "Got it" returns to the request view without responding to the dApp.
+    fireEvent.press(getByTestId('wc-permissions-dismiss'))
+    expect(getByTestId('wc-tx-review')).toBeTruthy()
+    expect(dispatchSpy).not.toHaveBeenCalledWith(expect.objectContaining({ type: rejectPending.type }))
+    expect(getPending(store)).toHaveLength(1)
   })
 })

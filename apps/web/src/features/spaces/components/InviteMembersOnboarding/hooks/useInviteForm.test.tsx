@@ -68,6 +68,15 @@ describe('toInviteName', () => {
   it('falls back to a default when nothing valid remains', () => {
     expect(toInviteName('+++@example.com')).toBe('Member')
   })
+
+  it('falls back to a default when the local part is shorter than the minimum name length', () => {
+    expect(toInviteName('r@cc0x.dev')).toBe('Member')
+    expect(toInviteName('ab@example.com')).toBe('Member')
+  })
+
+  it('keeps a local part at the minimum name length', () => {
+    expect(toInviteName('abc@example.com')).toBe('abc')
+  })
 })
 
 describe('useInviteForm tracking', () => {

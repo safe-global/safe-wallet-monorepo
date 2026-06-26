@@ -89,7 +89,7 @@ const getItems = ({
     const addedSafesPreview: ListItemTextProps = {
       primary: (
         <>
-          <b>Added Safe Accounts</b> on {addedSafeChainAmount} {addedSafeChainAmount === 1 ? 'chain' : 'chains'}
+          <b>Added Safe accounts</b> on {addedSafeChainAmount} {addedSafeChainAmount === 1 ? 'chain' : 'chains'}
         </>
       ),
       secondary: showPreview ? getItemSecondaryText(chains, addedSafes, 'Safe', 'Safes') : undefined,
@@ -127,7 +127,7 @@ const getItems = ({
     const visitedSafesPreview: ListItemTextProps = {
       primary: (
         <>
-          <b>Visited Safe Accounts history</b>
+          <b>Visited Safe accounts history</b>
         </>
       ),
     }
@@ -152,7 +152,7 @@ const getItems = ({
     const undeployedSafesPreview: ListItemTextProps = {
       primary: (
         <>
-          <b>Not activated Safe Accounts</b> {undeployedSafesCount}
+          <b>Not activated Safe accounts</b> {undeployedSafesCount}
         </>
       ),
     }

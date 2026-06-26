@@ -40,7 +40,7 @@ const SafeCard = ({ safe, isSimilar, isAtLimit = false }: SafeCardProps) => {
   if (isMultiChain) {
     return (
       <SafeCardLayout
-        ref={elementRef as React.Ref<HTMLButtonElement>}
+        ref={elementRef as React.Ref<HTMLDivElement>}
         checked={allSubSafesChecked}
         onToggle={handleMultiChainToggle}
         disabled={isAtLimit && noSubSafesChecked}
@@ -63,7 +63,7 @@ const SafeCard = ({ safe, isSimilar, isAtLimit = false }: SafeCardProps) => {
       control={control}
       render={({ field }) => (
         <SafeCardLayout
-          ref={elementRef as React.Ref<HTMLButtonElement>}
+          ref={elementRef as React.Ref<HTMLDivElement>}
           checked={Boolean(field.value)}
           onToggle={() => field.onChange(!field.value)}
           onCheckedChange={(checked) => field.onChange(checked)}

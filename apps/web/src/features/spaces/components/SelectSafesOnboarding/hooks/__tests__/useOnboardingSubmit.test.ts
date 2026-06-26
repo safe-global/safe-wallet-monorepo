@@ -4,6 +4,7 @@ import useOnboardingSubmit from '../useOnboardingSubmit'
 import type { SafeItem } from '@/hooks/safes'
 import type { MultiChainSafeItem } from '@/hooks/safes'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../../constants'
+import { getGenericErrorWithStatus } from '@/utils/rtkQuery'
 
 const mockChains: Chain[] = []
 
@@ -274,7 +275,7 @@ describe('useOnboardingSubmit', () => {
       await result.current.onSubmit()
     })
 
-    expect(result.current.error).toBe('Error: 400')
+    expect(result.current.error).toBe(getGenericErrorWithStatus(400))
   })
 
   it('should track analytics event on submit', async () => {

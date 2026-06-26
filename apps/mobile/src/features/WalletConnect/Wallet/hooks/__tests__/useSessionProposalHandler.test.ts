@@ -7,9 +7,6 @@ import { useSessionProposalHandler } from '../useSessionProposalHandler'
 import { selectPending } from '../../store/walletKitSlice'
 import type { RootState } from '@/src/store'
 
-const mockToastShow = jest.fn()
-jest.mock('@tamagui/toast', () => ({ useToastController: () => ({ show: mockToastShow }) }))
-
 const safeAddress = getAddress(faker.finance.ethereumAddress()) as `0x${string}`
 
 // Capture the registered session_proposal listener so tests can invoke it directly.
@@ -93,14 +90,16 @@ describe('useSessionProposalHandler', () => {
   it('auto-rejects with UNSUPPORTED_CHAINS when the dApp does not support the active chain', async () => {
     const { wk, rejectSession, emit } = makeWalletKit()
     // Active Safe on chain 1, also deployed on 137; dApp only lists 137 -> active chain unsupported.
-    const { result } = renderHookWithStore(() => useSessionProposalHandler(wk), seededStore())
-    void result
+    const store = seededStore()
+    renderHookWithStore(() => useSessionProposalHandler(wk), store)
     emit(makeProposal(eip155Proposal(['eip155:137'])))
     await waitFor(() =>
       expect(rejectSession).toHaveBeenCalledWith({ id: 123, reason: getSdkError('UNSUPPORTED_CHAINS') }),
     )
     // The toast is what distinguishes this path from the required-chain reject above.
-    expect(mockToastShow).toHaveBeenCalledWith(expect.stringContaining("doesn't support"), expect.anything())
+    expect(store.getState().toast.queue).toContainEqual(
+      expect.objectContaining({ message: expect.stringContaining("doesn't support"), variant: 'error' }),
+    )
   })
 
   it('pushes a compatible proposal to the slice', async () => {

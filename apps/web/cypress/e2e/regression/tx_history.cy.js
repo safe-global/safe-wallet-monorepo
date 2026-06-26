@@ -153,12 +153,4 @@ describe('Tx history tests 1', () => {
     ])
     createTx.collapseAdvancedDetails([typeDeleteAllowance.baseGas])
   })
-
-  it.skip('Verify address can be copied in advanced details', () => {
-    const data =
-      '0x885133e3000000000000000000000000c16db0251654c0a72e91b190d81ead367d2c6fed0000000000000000000000000000000000000000000000000000000000000000'
-    createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
-    createTx.expandAdvancedDetails([typeDeleteAllowance.baseGas])
-    createTx.clickOnCopyDataBtn(data)
-  })
 })

@@ -9,7 +9,7 @@
 
 export default {
   // Sepolia Safes
-  /** Create Safe CF and multichain testing - Used in: create_safe_cf.cy.js, multichain_sidebar.cy.js, notifications.cy.js */
+  /** Create Safe CF and multichain testing - Used in: create_safe_cf.cy.js, notifications.cy.js */
   SEP_STATIC_SAFE_0: 'sep:0x926186108f74dB20BFeb2b6c888E523C78cb7E00',
   /** Swaps and swap history testing - Used in: swaps.cy.js, swaps_history.cy.js, swaps_tokens.cy.js, limit_order_history.cy.js, apps_list.cy.js */
   SEP_STATIC_SAFE_1: 'sep:0x03042B890b99552b60A073F808100517fb148F60',
@@ -27,12 +27,12 @@ export default {
   SEP_STATIC_SAFE_7: 'sep:0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
   /** Spending limits and transaction notes testing - Used in: spending_limits.cy.js, tx_notes.cy.js, mass_payouts.cy.js */
   SEP_STATIC_SAFE_8: 'sep:0x9190cc22D592dDcf396Fa616ce84a9978fD96Fc9',
-  /** Sidebar testing - Used in: sidebar_2.cy.js through sidebar_8.cy.js */
+  /** Sidebar testing */
   SEP_STATIC_SAFE_9: 'sep:0x98705770aF3b18db0a64597F6d4DCe825915fec0',
   SEP_STATIC_SAFE_9_SHORT: '0x9870...fec0',
   /** Messages (onchain/offchain) testing - Used in: messages_offchain.cy.js, messages_onchain.cy.js, messages_popup.cy.js, create_tx.cy.js */
   SEP_STATIC_SAFE_10: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
-  /** Sidebar non-owner testing - Used in: sidebar_nonowner.cy.js, sidebar.cy.js */
+  /** Sidebar non-owner testing - Used in: sidebar.cy.js (prodhealthcheck) */
   SEP_STATIC_SAFE_11: 'sep:0x10B45a24640E2170B6AA63ea3A289D723a0C9cba',
   /** Dashboard testing - Used in: dashboard.cy.js */
   SEP_STATIC_SAFE_12: 'sep:0xFFfaC243A24EecE6553f0Da278322aCF1Fb6CeF1',
@@ -84,7 +84,7 @@ export default {
   SEP_STATIC_SAFE_25: 'sep:0x4ECFAa2E8cb4697bCD27bdC9Ce3E16f03F73124F',
   /** Transaction notes and messages testing - Used in: tx_notes.cy.js, messages_offchain.cy.js */
   SEP_STATIC_SAFE_26: 'sep:0x755428b02A458eD17fa93c86F6C3a2046F2c4C3C',
-  /** TWAP and swap testing - Used in: twaps_integration.cy.js, twaps_history.cy.js, limit_order.cy.js */
+  /** TWAP and swap testing - Used in: twaps_integration.cy.js, twaps_history.cy.js */
   SEP_STATIC_SAFE_27: 'sep:0xC97FCf0B8890a5a7b1a1490d44Dc9EbE3cE04884',
 
   // More Polygon (Matic) Safes
@@ -97,9 +97,9 @@ export default {
   ZKSYNC_STATIC_SAFE_29: 'zksync:0x950e07c80d7Bb754CcD84afE2b7751dc7Fd65D1f',
 
   // More Sepolia Safes
-  /** Swaps testing - Used in: swaps.cy.js (happypath_2) */
+  /** Available for general testing */
   SEP_STATIC_SAFE_30: 'sep:0x2687E6643E189c1245EA8419e5e427809136021F',
-  /** Proposers testing - Used in: proposers.cy.js, proposers_2.cy.js, tx_share_block.cy.js, sidebar_8.cy.js */
+  /** Proposers testing - Used in: proposers.cy.js, proposers_2.cy.js, tx_share_block.cy.js */
   SEP_STATIC_SAFE_31: 'sep:0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35',
   /** Proposers testing - Used in: proposers.cy.js (happypath_2) */
   SEP_STATIC_SAFE_32: 'sep:0x698C8D95D7B6b0B50338c2885d9583737546768f',

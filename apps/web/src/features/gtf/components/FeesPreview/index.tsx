@@ -14,7 +14,7 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import type { GtfPaymentMode } from '@/features/gtf/types'
 import type { FeesPreviewData, TotalOutgoing } from '../../hooks/useFeesPreview'
 import { FeeBreakdownRow } from '../shared/FeeBreakdownRow'
-import { EXECUTION_FEE_TOOLTIP, GAS_FEE_TOOLTIP } from '../shared/tooltips'
+import { GAS_FEE_TOOLTIP } from '../shared/tooltips'
 import css from './styles.module.css'
 
 const SIGNER_FEE_TOOLTIP = 'Fees will be paid from the connected signer wallet when executing this transaction.'
@@ -26,7 +26,7 @@ const onActivateKey = (open: () => void) => (e: KeyboardEvent) => {
     open()
   }
 }
-const HOW_FEES_WORK_URL = 'https://help.safe.global/en/articles/618701-safe-wallet-gas-fees-faq'
+const HOW_FEES_WORK_URL = 'https://help.safe.global/articles/9993850744-safewallet-gas-fees-faq'
 
 const TotalOutgoingSection = ({ totalOutgoing }: { totalOutgoing: TotalOutgoing }): ReactElement => (
   <div className={css.totalOutgoing}>
@@ -372,7 +372,7 @@ const FeesPreview = (props: FeesPreviewData): ReactElement => {
           </>
         )}
 
-        <FeeBreakdownRow {...executionFee} loading={props.loading} tooltip={EXECUTION_FEE_TOOLTIP} />
+        <FeeBreakdownRow {...executionFee} loading={props.loading} />
         <FeeBreakdownRow {...gasFee} loading={props.loading} error={props.error} tooltip={GAS_FEE_TOOLTIP} />
       </div>
 

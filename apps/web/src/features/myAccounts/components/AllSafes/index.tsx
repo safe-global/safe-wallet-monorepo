@@ -66,7 +66,7 @@ const AllSafes = ({
           >
             {!wallet ? (
               <>
-                <Box mb={2}>Connect a wallet to view your Safe Accounts or to create a new one</Box>
+                <Box mb={2}>Connect a wallet to view your Safe accounts or to create a new one</Box>
                 <Track {...OVERVIEW_EVENTS.OPEN_ONBOARD} label={trackingLabel}>
                   <ConnectWalletButton text="Connect a wallet" contained />
                 </Track>

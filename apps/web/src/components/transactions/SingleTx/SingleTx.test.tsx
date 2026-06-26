@@ -116,7 +116,7 @@ describe('SingleTx', () => {
     fireEvent.click(screen.getByText('Details'))
 
     await waitFor(() => {
-      expect(screen.getByText('Transaction with this id was not found in this Safe Account')).toBeInTheDocument()
+      expect(screen.getByText('Transaction with this id was not found in this Safe account')).toBeInTheDocument()
     })
   })
 })

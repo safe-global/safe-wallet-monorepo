@@ -155,7 +155,7 @@ describe('FallbackHandler', () => {
       await waitFor(() => {
         expect(
           fbHandler.queryByText(
-            'The fallback handler adds fallback logic for funtionality that may not be present in the Safe Account contract. Learn more about the fallback handler',
+            'The fallback handler adds fallback logic for funtionality that may not be present in the Safe account contract. Learn more about the fallback handler',
           ),
         ).toBeDefined()
 
@@ -169,7 +169,7 @@ describe('FallbackHandler', () => {
     })
   })
 
-  it('should render nothing if the Safe Account version does not support Fallback Handlers', () => {
+  it('should render nothing if the Safe account version does not support Fallback Handlers', () => {
     jest.spyOn(useSafeInfoHook, 'default').mockImplementation(
       () =>
         ({

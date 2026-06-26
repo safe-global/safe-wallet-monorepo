@@ -108,9 +108,9 @@ export const guardScanner: SecurityScanner = {
         score,
         evidence: [{ label: 'Status', value: 'No transaction guard configured' }],
         remediation:
-          'For high-value accounts, a transaction guard adds pre-execution validation. Enterprise-grade protection is available.',
+          'For high-value accounts, a transaction guard adds pre-execution validation. Enterprise-grade protection is available via Hypernative.',
         lastChecked: now,
-        ctaLabelOverride: 'Learn more',
+        ctaLabelOverride: 'Set up protection',
         partner: 'hypernative',
       }
     }
@@ -118,8 +118,8 @@ export const guardScanner: SecurityScanner = {
     // Tier 4: No guard — normal (low-value Safe or unsupported chain)
     const score = 100
     return {
-      status: 'clear',
-      severity: getSeverityFromScore(score),
+      status: 'not_applicable',
+      severity: getSeverityFromScore(score, { excluded: true }),
       score,
       evidence: [{ label: 'Status', value: 'No guard required' }],
       remediation: '',

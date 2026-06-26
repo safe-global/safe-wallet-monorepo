@@ -93,7 +93,7 @@ const PaginatedTxns = ({
   const [loadedPages, setLoadedPages] = useState<Map<string, QueuedItemPage>>(new Map())
   const lastPageItemsRef = useRef<QueuedItemPage[]>([])
 
-  // Reset the pages when the Safe Account or filter changes
+  // Reset the pages when the Safe account or filter changes
   useEffect(() => {
     setPages([''])
   }, [filter, safe.chainId, safeAddress, useTxns])
