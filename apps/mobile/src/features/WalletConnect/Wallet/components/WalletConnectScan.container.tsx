@@ -79,7 +79,7 @@ function CenterOverlay({
   }
 }
 
-export function WalletConnectScanContainer() {
+export function WalletConnectScanContainer({ isActive = true }: { isActive?: boolean } = {}) {
   const {
     status,
     errorMessage,
@@ -90,7 +90,7 @@ export function WalletConnectScanContainer() {
     onScan,
     onTryAgain,
     onActivateCamera,
-  } = useWalletConnectScan()
+  } = useWalletConnectScan({ isActive })
 
   const granted = permission === 'granted'
 

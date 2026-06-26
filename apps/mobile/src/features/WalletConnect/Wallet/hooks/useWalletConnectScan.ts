@@ -11,7 +11,7 @@ const UNRECOGNISED_MESSAGE = 'Unrecognised QR code'
 
 export type ScanStatus = 'scanning' | 'connecting' | 'error'
 
-export const useWalletConnectScan = () => {
+export const useWalletConnectScan = ({ isActive = true }: { isActive?: boolean } = {}) => {
   const router = useRouter()
   const { permission, requestPermission, openSettings } = useCameraPermissionFlow()
   const [status, setStatus] = useState<ScanStatus>('scanning')
@@ -22,6 +22,11 @@ export const useWalletConnectScan = () => {
   // listing `status` in its deps (which would re-run the effect and clear the live timer).
   const statusRef = useRef(status)
   statusRef.current = status
+
+  // Read in the focus effect via a ref so it isn't a dep there (that would clear the live timer on
+  // every tab switch); the [isActive, permission] effect below owns the live toggling.
+  const isActiveRef = useRef(isActive)
+  isActiveRef.current = isActive
 
   // Guards a second pair attempt while one is in flight (rapid re-scans).
   const pairingRef = useRef(false)
@@ -47,7 +52,7 @@ export const useWalletConnectScan = () => {
 
   useFocusEffect(
     useCallback(() => {
-      if (permission === 'granted' && statusRef.current === 'scanning') {
+      if (isActiveRef.current && permission === 'granted' && statusRef.current === 'scanning') {
         setIsCameraActive(true)
       }
       return () => {
@@ -56,6 +61,18 @@ export const useWalletConnectScan = () => {
       }
     }, [permission, clearTimer]),
   )
+
+  // Pause the camera while the tab is hidden, resume on return; status/error are left intact so an
+  // in-progress scan survives the switch.
+  useEffect(() => {
+    if (!isActive) {
+      setIsCameraActive(false)
+      return
+    }
+    if (permission === 'granted' && statusRef.current === 'scanning') {
+      setIsCameraActive(true)
+    }
+  }, [isActive, permission])
 
   const startPair = useCallback(
     async (uri: string) => {

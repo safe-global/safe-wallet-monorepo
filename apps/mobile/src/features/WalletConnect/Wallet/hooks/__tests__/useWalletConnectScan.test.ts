@@ -144,6 +144,28 @@ describe('useWalletConnectScan', () => {
     expect(mockBack).not.toHaveBeenCalled()
   })
 
+  it('keeps the camera paused while the tab is inactive', () => {
+    const { result } = renderHook(() => useWalletConnectScan({ isActive: false }))
+    expect(result.current.status).toBe('scanning')
+    expect(result.current.isCameraActive).toBe(false)
+  })
+
+  it('pauses and resumes the camera when isActive toggles, preserving status', () => {
+    const { result, rerender } = renderHook((props?: { isActive: boolean }) => useWalletConnectScan(props))
+    expect(result.current.isCameraActive).toBe(true)
+
+    act(() => {
+      rerender({ isActive: false })
+    })
+    expect(result.current.isCameraActive).toBe(false)
+    expect(result.current.status).toBe('scanning')
+
+    act(() => {
+      rerender({ isActive: true })
+    })
+    expect(result.current.isCameraActive).toBe(true)
+  })
+
   it('ignores a second scan while a pair is in flight', async () => {
     let resolvePair: () => void = () => undefined
     mockPair.mockImplementationOnce(() => new Promise<void>((res) => (resolvePair = res)))
