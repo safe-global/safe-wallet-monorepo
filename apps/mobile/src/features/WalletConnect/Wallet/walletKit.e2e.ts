@@ -7,10 +7,19 @@
 import type { IWalletKit } from '@reown/walletkit'
 import type { SessionTypes } from '@walletconnect/types'
 import { walletKitE2eState, E2E_SESSION_TOPIC, E2E_PAIRING_TOPIC } from './walletKitE2eState'
-import { SAFE_WALLET_METADATA } from '../shared/metadata'
+
+// Recursively freeze so a caller mutating a nested field (e.g. namespaces.accounts)
+// can't corrupt the shared singleton — getActiveSessions hands out this same ref.
+const deepFreeze = <V>(value: V): V => {
+  if (value !== null && typeof value === 'object') {
+    Object.values(value).forEach(deepFreeze)
+    Object.freeze(value)
+  }
+  return value
+}
 
 /** Session approveSession() returns; values mirror the test Safe but aren't asserted. */
-export const APPROVED_SESSION: SessionTypes.Struct = {
+export const APPROVED_SESSION: SessionTypes.Struct = deepFreeze({
   topic: E2E_SESSION_TOPIC,
   pairingTopic: E2E_PAIRING_TOPIC,
   relay: { protocol: 'irn' },
@@ -27,7 +36,7 @@ export const APPROVED_SESSION: SessionTypes.Struct = {
   },
   requiredNamespaces: {},
   optionalNamespaces: {},
-  self: { publicKey: 'self', metadata: SAFE_WALLET_METADATA },
+  self: { publicKey: 'self', metadata: { name: 'Safe', description: '', url: '', icons: [] } },
   peer: {
     publicKey: 'e2e-proposer-pubkey',
     metadata: {
@@ -37,7 +46,7 @@ export const APPROVED_SESSION: SessionTypes.Struct = {
       icons: [],
     },
   },
-}
+})
 
 const asyncNoop = async (): Promise<void> => undefined
 const noop = (): void => undefined
@@ -85,7 +94,9 @@ const fakeWalletKit = {
 
 // Unimplemented methods default to a resolved no-op so a new app-side WalletKit
 // call can't crash mid-flow. `then`/symbols must stay undefined, or await would
-// treat the fake as a thenable and hang.
+// treat the fake as a thenable and hang. Trade-off: if the SDK renames a method
+// the fake stubs (e.g. approveSession), flows pass but no session lands — revisit
+// the explicit method list above on @reown/walletkit bumps.
 const instance = new Proxy(fakeWalletKit, {
   get(target, prop, receiver) {
     if (prop in target) {

@@ -30,6 +30,11 @@ describe('walletKit.e2e (fake WalletKit)', () => {
     await expect(wk.approveSession({ id: 1, namespaces: {} })).resolves.toBe(APPROVED_SESSION)
     expect(wk.getActiveSessions()).toEqual({ [APPROVED_SESSION.topic]: APPROVED_SESSION })
 
+    // Fresh outer map each call + deeply frozen session: callers can't corrupt the singleton.
+    expect(wk.getActiveSessions()).not.toBe(wk.getActiveSessions())
+    expect(Object.isFrozen(APPROVED_SESSION)).toBe(true)
+    expect(Object.isFrozen(APPROVED_SESSION.namespaces.eip155.accounts)).toBe(true)
+
     // disconnect removes it again, so setSessions(getActiveSessions()) can't resurrect it.
     await wk.disconnectSession({ topic: APPROVED_SESSION.topic, reason: { code: 6000, message: 'x' } })
     expect(wk.getActiveSessions()).toEqual({})

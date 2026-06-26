@@ -7,7 +7,7 @@ import {
   selectSessionsRecord,
   type PendingSessionProposal,
 } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
-import { walletKitE2eState } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
+import { walletKitE2eState, E2E_SESSION_TOPIC } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
 import {
   synthSessionProposalValid,
   synthSessionProposalUnverified,
@@ -46,12 +46,12 @@ describe('walletConnectDappsSetup synthesis', () => {
   })
 
   it('synthSessionDelete removes the fixture session from the slice', () => {
-    const fixtureSession = { topic: 'e2e-session-topic' } as SessionTypes.Struct
+    const fixtureSession = { topic: E2E_SESSION_TOPIC } as SessionTypes.Struct
     store.dispatch(addSession({ session: fixtureSession, verifyVariant: 'verified' }))
-    expect(selectSessionsRecord(store.getState())['e2e-session-topic']).toBeDefined()
+    expect(selectSessionsRecord(store.getState())[E2E_SESSION_TOPIC]).toBeDefined()
 
     synthSessionDelete()
-    expect(selectSessionsRecord(store.getState())['e2e-session-topic']).toBeUndefined()
+    expect(selectSessionsRecord(store.getState())[E2E_SESSION_TOPIC]).toBeUndefined()
   })
 
   it('setWcPairHang arms the fake pair() to hang', () => {
