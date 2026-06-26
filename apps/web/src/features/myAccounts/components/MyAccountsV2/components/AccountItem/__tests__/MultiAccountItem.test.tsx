@@ -24,7 +24,7 @@ jest.mock('@/features/spaces/components/SelectSafesOnboarding/components/FiatBal
   default: ({ value }: { value?: string }) => <div data-testid="fiat-balance">{value ?? ''}</div>,
 }))
 
-jest.mock('@/features/myAccounts/components/SafeListContextMenu/MultiAccountContextMenu', () => ({
+jest.mock('@/components/common/SafeListContextMenu/MultiAccountContextMenu', () => ({
   __esModule: true,
   default: ({ name, address }: { name: string; address: string }) => (
     <div data-testid="multi-account-context-menu" data-name={name} data-address={address} />
