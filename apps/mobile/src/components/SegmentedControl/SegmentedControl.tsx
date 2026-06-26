@@ -15,16 +15,11 @@ type SegmentedControlProps<T extends string> = {
   testID?: string
 }
 
-// Slightly under-damped so the thumb overshoots and snaps into place at the end.
+// Under-damped so the thumb overshoots and settles.
 const THUMB_SPRING = { damping: 20, mass: 1.2, stiffness: 250 }
 
-// iOS-style segmented control: a recessed track with a raised thumb that slides to the selected
-// segment. Segments are equal width and the thumb is positioned in percentages, so it needs no
-// layout measurement — it renders in the right place on the first frame (even on Android) and still
-// animates. Generic over N options; the caller sizes the control (it fills its parent's width), so
-// wrap it in a width-constrained container for a narrow 2-state look. Colours follow the active
-// theme — wrap it in a dark Theme to get the Figma sheet control (dark track, white thumb, dark
-// selected text).
+// Thumb positioned by percentage, so it needs no layout measurement — correct on the first frame,
+// even on Android.
 export function SegmentedControl<T extends string>({ options, value, onChange, testID }: SegmentedControlProps<T>) {
   const count = options.length
   const segmentPercent = 100 / count
@@ -34,8 +29,7 @@ export function SegmentedControl<T extends string>({ options, value, onChange, t
   )
 
   const progress = useSharedValue(selectedIndex)
-  // The thumb already renders at the selected segment on mount (progress is seeded to
-  // selectedIndex), so skip the first effect — animate only on later selection changes.
+  // Seeded to the selected segment, so skip the mount run and animate only on change.
   const isFirstRender = useRef(true)
   useEffect(() => {
     if (isFirstRender.current) {

@@ -23,9 +23,8 @@ export const useWalletConnectScan = ({ isActive = true }: { isActive?: boolean }
   const statusRef = useRef(status)
   statusRef.current = status
 
-  // Same pattern for `isActive`: the focus effect must not turn the camera on for a hidden tab,
-  // but adding `isActive` to its deps would re-run the effect (clearing the live timer) on every
-  // tab switch. The dedicated `[isActive, permission]` effect below owns the live toggling.
+  // Read in the focus effect via a ref so it isn't a dep there (that would clear the live timer on
+  // every tab switch); the [isActive, permission] effect below owns the live toggling.
   const isActiveRef = useRef(isActive)
   isActiveRef.current = isActive
 
@@ -63,9 +62,8 @@ export const useWalletConnectScan = ({ isActive = true }: { isActive?: boolean }
     }, [permission, clearTimer]),
   )
 
-  // When the scanner shares a screen with another tab (the ScanConnect sheet), pause the camera
-  // while the tab is hidden and resume on return. We only toggle `isCameraActive` here — `status`
-  // and any error message are left intact so an in-progress scan/error survives the switch.
+  // Pause the camera while the tab is hidden, resume on return; status/error are left intact so an
+  // in-progress scan survives the switch.
   useEffect(() => {
     if (!isActive) {
       setIsCameraActive(false)

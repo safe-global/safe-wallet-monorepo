@@ -12,34 +12,21 @@ const TABS: SegmentedControlOption<ScanConnectTab>[] = [
   { label: 'My code', value: 'mycode' },
 ]
 
-// The floating control sits CONTROL_BOTTOM_OFFSET above the safe-area inset; CONTROL_FOOTPRINT
-// covers its own height + the padding around it. Both the control's `bottom` and the My code
-// panel's bottom clearance are derived from these so they stay in sync when either is tweaked.
 const CONTROL_BOTTOM_OFFSET = '$8'
+// Control height + surrounding padding; the My code panel reserves this as bottom clearance.
 const CONTROL_FOOTPRINT = 64
-// 50% width, centred — the narrow 2-state look from the Figma frames.
 const CONTROL_WIDTH = '50%'
 
-// Tabbed shell for the WalletConnect QR sheet: a Scan QR tab (the camera scanner) and a My code
-// tab that reuses the home-screen Receive surface (ShareContainer). Both panels stay mounted and
-// the inactive one is hidden so switching tabs preserves scanner state; the scanner camera is
-// paused via `isActive` while the My code tab is open.
-//
-// The active panel fills the whole sheet and the segmented control floats on top of it, so the
-// control's surroundings are whatever is behind it — the dark camera surround while scanning, the
-// (themed) Receive view on My code — and always match. The control itself is kept dark in both
-// tabs to match the Figma frames.
+// Both panels stay mounted so switching preserves scanner state; the scanner camera is paused via
+// `isActive` while the My code tab is hidden.
 export function ScanConnect() {
   const insets = useSafeAreaInsets()
   const [tab, setTab] = useState<ScanConnectTab>('scan')
-  // Reserve room at the bottom of the My code panel so the floating control never overlaps content,
-  // derived from where the control actually sits (offset above the inset + its footprint).
   const controlClearance = insets.bottom + getTokenValue(CONTROL_BOTTOM_OFFSET) + CONTROL_FOOTPRINT
 
   const scanActive = tab === 'scan'
 
-  // The My code tab renders a CPU-heavy QR. Defer mounting it off the first render so the scanner
-  // sheet appears immediately; by the time the user switches tabs it is ready.
+  // Defer mounting the CPU-heavy My code QR so the scanner sheet opens immediately.
   const [isMyCodeMounted, setIsMyCodeMounted] = useState(false)
   useEffect(() => {
     const frame = requestAnimationFrame(() => setIsMyCodeMounted(true))
@@ -48,9 +35,7 @@ export function ScanConnect() {
 
   return (
     <View flex={1} backgroundColor="$background">
-      {/* Both panels stay laid out and painted; we toggle opacity rather than `display` so revealing
-          the My code QR is a cheap GPU composite, not a first layout/paint that would jank the
-          tab-switch animation. */}
+      {/* Toggle opacity, not `display`, so revealing the QR is a GPU composite and never janks the switch. */}
       <View
         position="absolute"
         top={0}

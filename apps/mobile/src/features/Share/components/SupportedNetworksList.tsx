@@ -26,7 +26,6 @@ function TestnetsDivider() {
   )
 }
 
-// Lists the networks a Safe is deployed on, mainnets first and testnets below a "Testnets" divider.
 export function SupportedNetworksList({ chains }: { chains: Chain[] }) {
   const mainnets: Chain[] = []
   const testnets: Chain[] = []
