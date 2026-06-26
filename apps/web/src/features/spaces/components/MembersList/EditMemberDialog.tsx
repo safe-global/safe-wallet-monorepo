@@ -53,31 +53,33 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
       })
 
       if (error) {
-        throw error
+        setError(getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError))
+        return
       }
-
-      trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_ROLE_CHANGED, label: spaceId },
-        {
-          workspace_id: spaceId,
-          target_user_id: member.user.id,
-          from_role: member.role.toLowerCase(),
-          to_role: data.role.toLowerCase(),
-        },
-      )
-
-      dispatch(
-        showNotification({
-          message: `Updated role of ${data.name} to ${data.role}`,
-          variant: 'success',
-          groupKey: 'update-member-success',
-        }),
-      )
-
-      handleClose()
     } catch (e) {
       setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
+      return
     }
+
+    trackEvent(
+      { ...SPACE_EVENTS.WORKSPACE_MEMBER_ROLE_CHANGED, label: spaceId },
+      {
+        workspace_id: spaceId,
+        target_user_id: member.user.id,
+        from_role: member.role.toLowerCase(),
+        to_role: data.role.toLowerCase(),
+      },
+    )
+
+    dispatch(
+      showNotification({
+        message: `Updated role of ${data.name} to ${data.role}`,
+        variant: 'success',
+        groupKey: 'update-member-success',
+      }),
+    )
+
+    handleClose()
   })
 
   return (

@@ -42,32 +42,34 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
       const response = await acceptInvite({ spaceId: space.uuid, acceptInviteDto: { name: data.name } })
 
       if (response.error) {
-        throw response.error
+        setError(getRtkQueryErrorMessage(response.error as FetchBaseQueryError | SerializedError))
+        return
       }
-
-      trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: space.uuid },
-        { workspace_id: space.uuid, user_id: currentUser?.id },
-      )
-
-      if (router.pathname === AppRoutes.welcome.spaces) {
-        router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.uuid } })
-      }
-
-      onClose()
-
-      dispatch(
-        showNotification({
-          message: `Accepted invite to ${space.name}`,
-          variant: 'success',
-          groupKey: 'accept-invite-success',
-        }),
-      )
     } catch (e) {
       setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
+      return
     } finally {
       setIsSubmitting(false)
     }
+
+    trackEvent(
+      { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_ACCEPTED, label: space.uuid },
+      { workspace_id: space.uuid, user_id: currentUser?.id },
+    )
+
+    if (router.pathname === AppRoutes.welcome.spaces) {
+      router.push({ pathname: AppRoutes.spaces.index, query: { spaceId: space.uuid } })
+    }
+
+    onClose()
+
+    dispatch(
+      showNotification({
+        message: `Accepted invite to ${space.name}`,
+        variant: 'success',
+        groupKey: 'accept-invite-success',
+      }),
+    )
   })
 
   return (
