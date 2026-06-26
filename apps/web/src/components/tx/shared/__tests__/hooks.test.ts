@@ -30,6 +30,11 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import * as loadFeature from '@/features/__core__/useLoadFeature'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 
+const mockAddTxToBatch = jest.fn().mockResolvedValue(undefined)
+jest.mock('@/features/batching', () => ({
+  useUpdateBatch: () => [mockAddTxToBatch, jest.fn()],
+}))
+
 const chainInfo = chainBuilder().with({ chainId: '1' }).build()
 
 describe('SignOrExecute hooks', () => {
@@ -567,6 +572,102 @@ describe('SignOrExecute hooks', () => {
       expect(relaySpy).not.toHaveBeenCalled()
     })
 
+    describe('sign-then-batch flow', () => {
+      const setupThreshold1Safe = () => {
+        jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+          safe: {
+            ...extendedSafeInfo,
+            version: '1.3.0',
+            address: { value: zeroPadValue('0x0000', 20) },
+            nonce: 100,
+            threshold: 1,
+            owners: [{ value: zeroPadValue('0x0123', 20) }],
+            chainId: '1',
+          },
+          safeAddress: zeroPadValue('0x0000', 20),
+          safeError: undefined,
+          safeLoading: false,
+          safeLoaded: true,
+        }))
+      }
+
+      it('signs before proposing when adding to batch with an EOA wallet', async () => {
+        jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(false)
+        setupThreshold1Safe()
+
+        const tx = createSafeTx()
+        const signedTx = createSafeTx()
+        signedTx.addSignature({
+          signer: '0x1234567890000000000000000000000000000000',
+          data: '0x0001',
+          staticPart: () => '',
+          dynamicPart: () => '',
+          isContractSignature: false,
+        })
+
+        const callOrder: string[] = []
+        const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => {
+          callOrder.push('sign')
+          return Promise.resolve(signedTx)
+        })
+        const proposeSpy = jest.spyOn(txSender, 'dispatchTxProposal').mockImplementation((() => {
+          callOrder.push('propose')
+          return Promise.resolve({ txId: '123' })
+        }) as unknown as typeof txSender.dispatchTxProposal)
+
+        const { result } = renderHook(() => useTxActions())
+        const id = await result.current.addToBatch(tx)
+
+        expect(signSpy).toHaveBeenCalledWith(tx, MockEip1193Provider)
+        expect(callOrder).toEqual(['sign', 'propose'])
+        expect(id).toBe('123')
+        // dispatchTxProposal receives the signed tx
+        expect(proposeSpy).toHaveBeenCalledWith(expect.objectContaining({ safeTx: signedTx }))
+      })
+
+      it('skips signing for SC wallets when adding to batch', async () => {
+        jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(true)
+        setupThreshold1Safe()
+
+        const tx = createSafeTx()
+
+        const signSpy = jest.spyOn(txSender, 'dispatchTxSigning')
+        const proposeSpy = jest
+          .spyOn(txSender, 'dispatchTxProposal')
+          .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+
+        const { result } = renderHook(() => useTxActions())
+        await result.current.addToBatch(tx)
+
+        expect(signSpy).not.toHaveBeenCalled()
+        expect(proposeSpy).toHaveBeenCalledWith(expect.objectContaining({ safeTx: tx }))
+      })
+
+      it('skips signing when the tx is already fully signed', async () => {
+        jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(false)
+        setupThreshold1Safe()
+
+        const tx = createSafeTx()
+        tx.addSignature({
+          signer: '0x1234567890000000000000000000000000000000',
+          data: '0x0001',
+          staticPart: () => '',
+          dynamicPart: () => '',
+          isContractSignature: false,
+        })
+
+        const signSpy = jest.spyOn(txSender, 'dispatchTxSigning')
+        jest
+          .spyOn(txSender, 'dispatchTxProposal')
+          .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+
+        const { result } = renderHook(() => useTxActions())
+        await result.current.addToBatch(tx)
+
+        expect(signSpy).not.toHaveBeenCalled()
+      })
+    })
+
     describe('sign-then-execute flow', () => {
       const setupThreshold1Safe = () => {
         jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
@@ -609,7 +710,7 @@ describe('SignOrExecute hooks', () => {
           callOrder.push('propose')
           return Promise.resolve({ txId: '123' })
         }) as unknown as typeof txSender.dispatchTxProposal)
-        jest.spyOn(txSender, 'dispatchTxExecution').mockImplementation((() => {
+        const executeSpy = jest.spyOn(txSender, 'dispatchTxExecution').mockImplementation((() => {
           callOrder.push('execute')
           return Promise.resolve('0xhash')
         }) as unknown as typeof txSender.dispatchTxExecution)
@@ -620,6 +721,49 @@ describe('SignOrExecute hooks', () => {
         expect(signSpy).toHaveBeenCalledWith(tx, MockEip1193Provider, undefined)
         expect(callOrder).toEqual(['sign', 'propose', 'execute'])
         expect(id).toBe('123')
+        // dispatchTxExecution receives the signed tx
+        expect(executeSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          signedTx,
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+        )
+      })
+
+      it('clears the pre-validated-sig gas estimate before executing after EIP-712 signing', async () => {
+        jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(false)
+        setupThreshold1Safe()
+
+        const tx = createSafeTx()
+        const signedTx = createSafeTx()
+        signedTx.addSignature({
+          signer: '0x1234567890000000000000000000000000000000',
+          data: '0x0001',
+          staticPart: () => '',
+          dynamicPart: () => '',
+          isContractSignature: false,
+        })
+
+        jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(signedTx)
+        jest
+          .spyOn(txSender, 'dispatchTxProposal')
+          .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+        const executeSpy = jest
+          .spyOn(txSender, 'dispatchTxExecution')
+          .mockImplementation((() => Promise.resolve('0xhash')) as unknown as typeof txSender.dispatchTxExecution)
+
+        const { result } = renderHook(() => useTxActions())
+        // Pass a gasLimit that was estimated with a pre-validated signature
+        await result.current.executeTx({ gasPrice: 1, gasLimit: 50000 }, tx)
+
+        // gasLimit must be cleared so the SDK re-estimates with the actual EIP-712 signature
+        const [, , calledTxOptions] = executeSpy.mock.calls[0]
+        expect(calledTxOptions).not.toHaveProperty('gasLimit', 50000)
+        expect(calledTxOptions?.gasLimit).toBeUndefined()
       })
 
       it('skips signing when the tx is already fully signed', async () => {
