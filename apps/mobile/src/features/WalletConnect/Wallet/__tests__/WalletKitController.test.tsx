@@ -119,6 +119,14 @@ describe('WalletKitController', () => {
     await waitFor(() => expect(mockWalletKit.pair).toHaveBeenCalledWith({ uri: 'wc:abc123@2?relay-protocol=irn' }))
   })
 
+  it('pairs on a registry-envelope deep link (safe://wc?uri=…)', async () => {
+    renderController()
+    await waitFor(() => expect(mockUrlHandler).toBeDefined())
+    const inner = 'wc:abc123@2?relay-protocol=irn'
+    mockUrlHandler?.({ url: `safe://wc?uri=${encodeURIComponent(inner)}` })
+    await waitFor(() => expect(mockWalletKit.pair).toHaveBeenCalledWith({ uri: inner }))
+  })
+
   it('ignores non-wc deep links', async () => {
     renderController()
     await waitFor(() => expect(mockUrlHandler).toBeDefined())
