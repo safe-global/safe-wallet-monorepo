@@ -1,20 +1,5 @@
 import type { ReactElement } from 'react'
-import React from 'react'
 import { AppRoutes } from '@/config/routes'
-import HomeIcon from '@/public/images/sidebar/home.svg'
-import AssetsIcon from '@/public/images/sidebar/assets.svg'
-import TransactionIcon from '@/public/images/sidebar/transactions.svg'
-import ABIcon from '@/public/images/sidebar/address-book.svg'
-import AppsIcon from '@/public/images/apps/apps-icon.svg'
-import SettingsIcon from '@/public/images/sidebar/settings.svg'
-import ApiIcon from '@/public/images/sidebar/api.svg'
-import { Chip } from '@/components/common/Chip'
-import BridgeIcon from '@/public/images/common/bridge.svg'
-import SwapIcon from '@/public/images/common/swap.svg'
-import StakeIcon from '@/public/images/common/stake.svg'
-import EarnIcon from '@/public/images/common/earn.svg'
-import { SvgIcon } from '@mui/material'
-import { DEVELOPER_PORTAL_URL } from '@/config/constants'
 
 export type NavItem = {
   label: string
@@ -24,39 +9,6 @@ export type NavItem = {
   disabled?: boolean
   externalUrl?: string
 }
-
-export const navItems: NavItem[] = [
-  { label: 'Home', icon: <SvgIcon component={HomeIcon} inheritViewBox />, href: AppRoutes.home },
-  { label: 'Assets', icon: <SvgIcon component={AssetsIcon} inheritViewBox />, href: AppRoutes.balances.index },
-  {
-    label: 'Transactions',
-    icon: <SvgIcon component={TransactionIcon} inheritViewBox />,
-    href: AppRoutes.transactions.history,
-  },
-  { label: 'Address book', icon: <SvgIcon component={ABIcon} inheritViewBox />, href: AppRoutes.addressBook },
-  { label: 'Apps', icon: <SvgIcon component={AppsIcon} inheritViewBox />, href: AppRoutes.apps.index },
-
-  { label: 'Swap', icon: <SvgIcon component={SwapIcon} inheritViewBox />, href: AppRoutes.swap },
-  { label: 'Bridge', icon: <SvgIcon component={BridgeIcon} inheritViewBox />, href: AppRoutes.bridge },
-  {
-    label: 'Earn',
-    icon: <SvgIcon component={EarnIcon} inheritViewBox />,
-    href: AppRoutes.earn,
-  },
-  { label: 'Stake', icon: <SvgIcon component={StakeIcon} inheritViewBox />, href: AppRoutes.stake },
-  {
-    label: 'Settings',
-    icon: <SvgIcon data-testid="settings-nav-icon" component={SettingsIcon} inheritViewBox />,
-    href: AppRoutes.settings.setup,
-  },
-  {
-    label: 'API',
-    icon: <SvgIcon component={ApiIcon} inheritViewBox />,
-    href: '',
-    externalUrl: DEVELOPER_PORTAL_URL,
-    tag: <Chip sx={{ backgroundColor: 'secondary.light', color: 'static.main' }} />,
-  },
-]
 
 export const transactionNavItems = [
   { label: 'Queue', href: AppRoutes.transactions.queue },
