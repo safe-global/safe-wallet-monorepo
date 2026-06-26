@@ -143,9 +143,8 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
     return formatJsonRpcResult(id, null)
   }
 
-  // EIP-5792 wallet_getCapabilities(address, chainIds?). Response is keyed by hex chain id (not
-  // CAIP-2) for the chains the dApp asked about (falling back to the envelope chain). Only
-  // advertise batching for chains the Safe is deployed on, else a later wallet_sendCalls rejects.
+  // EIP-5792 wallet_getCapabilities, keyed by hex chain id (not CAIP-2). Only advertise batching
+  // for chains the Safe is deployed on, else a later wallet_sendCalls rejects.
   if (method === 'wallet_getCapabilities') {
     const [, requestedChainIds] = rpcParams as [string, unknown]
     // Drop non-string entries (a dApp can send numbers); an uncaught throw would drop the reply.
@@ -174,8 +173,7 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
       return formatJsonRpcResult(id, result)
     } catch (e) {
       // An unknown id is an error, not {status:100} — viem/wagmi treat "missing" and "pending" as
-      // distinct. Use -32000 (web parity), not the reserved -32603 whose message jsonrpc-utils
-      // rewrites, so the dApp keeps the actual reason.
+      // distinct. -32000 is non-reserved (see noActiveChainError).
       return formatJsonRpcError(id, { code: -32000, message: e instanceof Error ? e.message : 'Transaction not found' })
     }
   }
@@ -195,7 +193,7 @@ export const routeSessionRequest = async (ctx: RouteContext): Promise<RoutedResp
       const result = await proxyReadOnlyCall(activeChain, method, rpcParams)
       return formatJsonRpcResult(id, result)
     } catch (e) {
-      // -32000 (non-reserved) so the upstream RPC reason survives jsonrpc-utils' reserved-code rewrite.
+      // Non-reserved code so the upstream RPC reason survives (see noActiveChainError).
       return formatJsonRpcError(id, { code: -32000, message: e instanceof Error ? e.message : 'RPC proxy failed' })
     }
   }

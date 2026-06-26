@@ -28,25 +28,15 @@ export type RawTxReceipt = {
   transactionHash: `0x${string}`
 }
 
-// Minimal shape of the CGW transaction details this builder reads (assignable from the
-// generated TransactionDetails, whose nested fields are nullable).
 export type CallsStatusTx = {
   txStatus?: string
   txHash?: string | null
   txData?: { dataDecoded?: { parameters?: { valueDecoded?: unknown }[] | null } | null } | null
 }
 
-// BundleTxStatuses (verbatim from web):
-//   AWAITING_CONFIRMATIONS / AWAITING_EXECUTION → 100 PENDING
-//   SUCCESS → 200 CONFIRMED | CANCELLED → 400 OFFCHAIN_FAILURE | FAILED → 500 REVERTED
 const mapTxStatus = (txStatus?: string): number =>
   txStatus === 'SUCCESS' ? 200 : txStatus === 'CANCELLED' ? 400 : txStatus === 'FAILED' ? 500 : 100
 
-/**
- * Build the EIP-5792 GetCallsResult envelope from a CGW transaction and an optional on-chain
- * receipt. Pure: the caller fetches `tx` (and `receipt` when there's a tx hash to look up).
- * When `receipt` is null the envelope is still valid (a pending / off-chain-failed bundle).
- */
 export const buildGetCallsResult = (
   id: string,
   numericChainId: string,
@@ -75,7 +65,6 @@ export const buildGetCallsResult = (
       logs: receipt.logs,
       status: onChainStatusHex,
       blockHash: receipt.blockHash,
-      // BigInt-based: handles block numbers / gas above 2^53 and normalizes padding.
       blockNumber: toHex(receipt.blockNumber) as `0x${string}`,
       gasUsed: toHex(receipt.gasUsed) as `0x${string}`,
       transactionHash: (tx.txHash ?? receipt.transactionHash) as `0x${string}`,

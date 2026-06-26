@@ -10,8 +10,6 @@ import { logWalletKitError } from '../utils/errors'
 
 type GetState = () => RootState
 
-// Side-effecting methodRouter callbacks, factored out of walletKitListeners so they're unit-testable.
-
 // switchActiveChain re-syncs the WC sessions via the safe-switch listener, so no explicit updateSession.
 export const makeSwitchActiveChainByCaip2 =
   (getState: GetState, dispatch: AppDispatch) =>
@@ -44,7 +42,6 @@ export const makeGetCallsStatus =
       throw new Error('Transaction not found')
     }
 
-    // A null receipt is valid (pending bundle); only fetch when there's a hash and a chain to reach.
     let receipt: RawTxReceipt | null = null
     if (tx.txHash) {
       const chain = selectChainById(getState(), numericChainId)

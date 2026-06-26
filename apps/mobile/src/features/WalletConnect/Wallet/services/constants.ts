@@ -1,8 +1,7 @@
 import { EIP155 } from '@safe-global/utils/features/walletconnect/constants'
 
-// Methods advertised in the session namespace. Intentionally excludes READ_ONLY_RPC_ALLOW_LIST:
-// reads are proxied opportunistically, and a strict dApp that gates on the namespace can fall
-// back to its own RPC for them (mirrors web's safe-wallet-provider).
+// Intentionally excludes the read-only methods: those are proxied opportunistically, and a strict
+// dApp that gates on the namespace can fall back to its own RPC (mirrors web's safe-wallet-provider).
 export const WALLET_SUPPORTED_METHODS = [
   'eth_accounts',
   'eth_chainId',
@@ -17,8 +16,8 @@ export const WALLET_SUPPORTED_METHODS = [
 
 export type SupportedMethod = (typeof WALLET_SUPPORTED_METHODS)[number]
 
-// Read-only methods proxied to the chain RPC. Params aren't range-validated (e.g. eth_getLogs
-// block range) — the configured RPC enforces its own limits, so this is an accepted limitation.
+// Proxied to the chain RPC. Params aren't range-validated (e.g. eth_getLogs block range); the
+// configured RPC enforces its own limits — an accepted limitation.
 export const READ_ONLY_RPC_ALLOW_LIST = [
   'eth_blockNumber',
   'eth_call',

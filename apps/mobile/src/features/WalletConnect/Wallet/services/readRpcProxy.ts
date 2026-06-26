@@ -30,7 +30,7 @@ const getProviderForChain = (chain: Chain): JsonRpcProvider => {
   return provider
 }
 
-// Test-only: reset the module-level cache so tests don't couple through provider identity.
+// Test-only: reset the module-level cache.
 export const __clearProviderCache = (): void => {
   providerCache.clear()
 }
