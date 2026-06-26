@@ -1,4 +1,5 @@
 import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { formatTimeInWords, formatWithSchema } from '@safe-global/utils/utils/date'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { Badge } from '@/components/ui/badge'
@@ -10,7 +11,7 @@ import MemberName from './MemberName'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import RenewInviteButton from './RenewInviteButton'
 import MemberRowActionsMenu from './MemberRowActionsMenu'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import {
   useIsAdmin,
   isAdmin as checkIsAdmin,
@@ -30,6 +31,72 @@ import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
 import { getMemberTwoFactorStatus, MemberTwoFactorBadge } from '@/features/oidc-auth'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
+
+type MembersListVariant = 'active' | 'pending'
+
+const DATE_FORMAT = 'MMM d, yyyy'
+
+const formatDate = (timestamp: number) => formatWithSchema(timestamp, DATE_FORMAT)
+
+// `format` throws on invalid dates, so resolve to a timestamp only when the value parses.
+const toTimestamp = (value: string | null | undefined): number | null => {
+  if (!value) return null
+  const timestamp = new Date(value).getTime()
+  return Number.isFinite(timestamp) ? timestamp : null
+}
+
+type DateCell = { rawValue: string | number | null; content: ReactNode }
+
+// Sorts on the raw timestamp; renders a dash when there's no date. `formatDate` gives an absolute
+// date (join / invite date), `formatTimeInWords` a relative one ("in 6 days" / "5 days ago") so an
+// invite's remaining lifetime is readable at a glance instead of looking like its creation date.
+const dateCell = (timestamp: number | null, render: (timestamp: number) => string): DateCell => ({
+  rawValue: timestamp,
+  content: (
+    <Typography variant="body2" color="text.secondary" noWrap>
+      {timestamp !== null ? render(timestamp) : '–'}
+    </Typography>
+  ),
+})
+
+const getHeadCells = (variant: MembersListVariant) => [
+  {
+    id: 'name',
+    label: 'Name',
+    width: variant === 'pending' ? '22%' : '28%',
+  },
+  {
+    id: 'email',
+    label: 'Email',
+    width: variant === 'pending' ? '22%' : '26%',
+  },
+  {
+    id: 'role',
+    label: 'Role',
+    width: variant === 'pending' ? '12%' : '14%',
+  },
+  // Active members show when they joined; pending invites show when they were invited plus how
+  // long the invite has left.
+  ...(variant === 'pending'
+    ? [
+        { id: 'invitedOn', label: 'Invited on', width: '16%' },
+        { id: 'expires', label: 'Expires', width: '16%' },
+      ]
+    : [{ id: 'memberSince', label: 'Member since', width: '20%' }]),
+  {
+    id: 'actions',
+    label: '',
+    width: '12%',
+    sticky: true,
+  },
+]
+
+// Precompute per variant — the column set only depends on `variant`, so there's no need to rebuild
+// it on every render.
+const HEAD_CELLS: Record<MembersListVariant, ReturnType<typeof getHeadCells>> = {
+  active: getHeadCells('active'),
+  pending: getHeadCells('pending'),
+}
 
 const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean }) => {
   const [open, setOpen] = useState(false)
@@ -93,7 +160,7 @@ export const RemoveMemberButton = ({
   )
 }
 
-const MembersList = ({ members }: { members: MemberDto[] }) => {
+const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; variant?: MembersListVariant }) => {
   const isAdmin = useIsAdmin()
   const adminCount = useAdminCount(members)
   const isMobile = useIsMobile()
@@ -120,6 +187,14 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     // Contract: Email invites can always be renewed (resending the email);
     // wallet invites are only renewed once they have expired.
     const canRenew = isPendingInvite && (Boolean(memberEmail) || isExpired)
+    const createdTimestamp = toTimestamp(member.createdAt)
+    const dateCells: Record<string, DateCell> =
+      variant === 'pending'
+        ? {
+            invitedOn: dateCell(createdTimestamp, formatDate),
+            expires: dateCell(toTimestamp(member.inviteExpiresAt), formatTimeInWords),
+          }
+        : { memberSince: dateCell(createdTimestamp, formatDate) }
     return { isDeclined, isExpired, isInvite, isDisabled, editDisabled, canRenew, memberEmail }
   }
 
@@ -215,6 +290,7 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
   ]
 
   return <PaginatedDataTable columns={columns} rows={members} getRowKey={(member) => String(member.id)} />
+  // return <EnhancedTable rows={rows} headCells={HEAD_CELLS[variant]} fixedLayout />
 }
 
 export default MembersList
