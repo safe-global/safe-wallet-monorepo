@@ -1,7 +1,10 @@
 import { render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import type { ReactNode } from 'react'
+import { formatTimeInWords, formatWithSchema } from '@safe-global/utils/utils/date'
 import { memberBuilder, memberUserBuilder } from '@/tests/builders/member'
 import MembersList from './index'
+
+const formatDate = (iso: string) => formatWithSchema(new Date(iso).getTime(), 'MMM d, yyyy')
 
 jest.mock('./MemberName', () => ({
   __esModule: true,
@@ -169,5 +172,58 @@ describe('MembersList', () => {
     )
 
     expect(screen.queryByRole('button', { name: 'Renew invitation' })).not.toBeInTheDocument()
+  })
+
+  it('shows a single "Member since" join-date column for the active variant', () => {
+    const createdAt = '2026-04-22T12:00:00.000Z'
+    render(<MembersList variant="active" members={[memberBuilder().with({ name: 'Alice', createdAt }).build()]} />)
+
+    expect(screen.getByText('Member since')).toBeInTheDocument()
+    expect(screen.queryByText('Invited on')).not.toBeInTheDocument()
+    expect(screen.queryByText('Expires')).not.toBeInTheDocument()
+    expect(within(screen.getByTestId('table-cell-memberSince')).getByText(formatDate(createdAt))).toBeInTheDocument()
+  })
+
+  it('shows both an "Invited on" date and a relative "Expires" column for the pending variant', () => {
+    const createdAt = '2026-04-22T12:00:00.000Z'
+    const inviteExpiresAt = '2027-01-01T12:00:00.000Z'
+    render(
+      <MembersList
+        variant="pending"
+        members={[memberBuilder().with({ status: 'INVITED', name: 'Bob', createdAt, inviteExpiresAt }).build()]}
+      />,
+    )
+
+    expect(screen.getByText('Invited on')).toBeInTheDocument()
+    expect(screen.getByText('Expires')).toBeInTheDocument()
+    expect(screen.queryByText('Member since')).not.toBeInTheDocument()
+
+    // "Invited on" is the absolute creation date; "Expires" is relative time-to-go.
+    expect(within(screen.getByTestId('table-cell-invitedOn')).getByText(formatDate(createdAt))).toBeInTheDocument()
+    expect(
+      within(screen.getByTestId('table-cell-expires')).getByText(
+        formatTimeInWords(new Date(inviteExpiresAt).getTime()),
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('renders a dash in the Expires column when a pending invite has no expiry', () => {
+    render(
+      <MembersList
+        variant="pending"
+        members={[
+          memberBuilder()
+            .with({
+              status: 'INVITED',
+              name: 'Bob',
+              inviteExpiresAt: null,
+              user: memberUserBuilder().with({ email: 'bob@x.io' }).build(),
+            })
+            .build(),
+        ]}
+      />,
+    )
+
+    expect(within(screen.getByTestId('table-cell-expires')).getByText('–')).toBeInTheDocument()
   })
 })
