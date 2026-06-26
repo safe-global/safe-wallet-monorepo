@@ -11,7 +11,15 @@ const UNRECOGNISED_MESSAGE = 'Unrecognised QR code'
 
 export type ScanStatus = 'scanning' | 'connecting' | 'error'
 
-export const useWalletConnectScan = ({ isActive = true }: { isActive?: boolean } = {}) => {
+export const useWalletConnectScan = ({
+  isActive = true,
+  onAddressScanned,
+}: {
+  isActive?: boolean
+  // Handles a scanned non-WalletConnect code. Returns true when it recognised and handled the code
+  // (e.g. an Ethereum address routed into the Send flow), false to fall through to the error overlay.
+  onAddressScanned?: (raw: string) => boolean
+} = {}) => {
   const router = useRouter()
   const { permission, requestPermission, openSettings } = useCameraPermissionFlow()
   const [status, setStatus] = useState<ScanStatus>('scanning')
@@ -30,6 +38,12 @@ export const useWalletConnectScan = ({ isActive = true }: { isActive?: boolean }
 
   // Guards a second pair attempt while one is in flight (rapid re-scans).
   const pairingRef = useRef(false)
+  // Same guard for the address path: once an address has been handed off, ignore the burst of
+  // follow-up frames vision-camera fires for the same code. Today the handoff uses router.replace,
+  // which unmounts this modal — so it only needs resetting on Try again. It's also reset on focus
+  // cleanup so a future path that keeps the scanner mounted (e.g. back-nav from the Send flow) can't
+  // leave it stuck swallowing every scan.
+  const handledRef = useRef(false)
   // Set true when the timeout fires; later writes for that attempt become no-ops.
   const cancelledRef = useRef(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -58,6 +72,7 @@ export const useWalletConnectScan = ({ isActive = true }: { isActive?: boolean }
       return () => {
         setIsCameraActive(false)
         clearTimer()
+        handledRef.current = false
       }
     }, [permission, clearTimer]),
   )
@@ -117,19 +132,26 @@ export const useWalletConnectScan = ({ isActive = true }: { isActive?: boolean }
   const onScan = useCallback(
     (scanned: Code[]) => {
       const raw = scanned[0]?.value
-      if (!raw || pairingRef.current || status !== 'scanning') {
+      if (!raw || pairingRef.current || handledRef.current || status !== 'scanning') {
         return
       }
-      if (!isPairingUri(raw)) {
-        toError(UNRECOGNISED_MESSAGE)
+      if (isPairingUri(raw)) {
+        void startPair(raw)
         return
       }
-      void startPair(raw)
+      // Not a WalletConnect URI — give the address handler a chance before failing. It navigates
+      // away when it recognises an address, so this hook just needs to avoid the error overlay.
+      if (onAddressScanned?.(raw)) {
+        handledRef.current = true
+        return
+      }
+      toError(UNRECOGNISED_MESSAGE)
     },
-    [startPair, toError, status],
+    [startPair, toError, status, onAddressScanned],
   )
 
   const onTryAgain = useCallback(() => {
+    handledRef.current = false
     setErrorMessage('')
     setStatus('scanning')
     if (permission === 'granted') {
