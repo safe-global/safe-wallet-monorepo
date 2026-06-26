@@ -24,6 +24,14 @@ describe('createE2eStore', () => {
     expect(store.get()).toEqual({ a: 0, b: 'x' })
   })
 
+  it('reset() restores nested values even after in-place mutation of get()', () => {
+    const store = createE2eStore('nested', { items: [] as number[], obj: { n: 0 } })
+    store.get().items.push(1, 2)
+    store.get().obj.n = 5
+    store.reset()
+    expect(store.get()).toEqual({ items: [], obj: { n: 0 } })
+  })
+
   it('notifies subscribers on set/reset and stops after unsubscribe', () => {
     const store = make()
     const listener = jest.fn()

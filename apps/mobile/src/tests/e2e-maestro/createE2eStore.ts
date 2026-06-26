@@ -3,8 +3,9 @@
  * and walletConnectE2eState. TestCtrls mutate it via set(); `.e2e` overrides read
  * it via get()/useSyncExternalStore; reset() runs between flows.
  *
- * State is shallow-cloned — update via set() with new values, never mutate a
- * nested value in place (it would corrupt initialState and break reset()).
+ * reset() restores a deep clone of the initial state, so a scenario that mutated
+ * even a nested value can't leak into the next flow. Update via set() with new
+ * values — mutating get() in place won't notify subscribers.
  */
 export interface E2eStore<T> {
   get: () => T
@@ -13,9 +14,21 @@ export interface E2eStore<T> {
   subscribe: (listener: () => void) => () => void
 }
 
+// Structural clone for plain data (objects/arrays/primitives) — the only shapes
+// e2e scenario state holds. Keeps initialState pristine across reset().
+const deepClone = <V>(value: V): V => {
+  if (Array.isArray(value)) {
+    return value.map(deepClone) as V
+  }
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, deepClone(v)])) as V
+  }
+  return value
+}
+
 export const createE2eStore = <T extends object>(label: string, initialState: T): E2eStore<T> => {
   let listeners: (() => void)[] = []
-  let state: T = { ...initialState }
+  let state: T = deepClone(initialState)
 
   const notifyListeners = () => {
     for (const listener of listeners) {
@@ -34,7 +47,7 @@ export const createE2eStore = <T extends object>(label: string, initialState: T)
       notifyListeners()
     },
     reset: () => {
-      state = { ...initialState }
+      state = deepClone(initialState)
       notifyListeners()
     },
     subscribe: (listener) => {
