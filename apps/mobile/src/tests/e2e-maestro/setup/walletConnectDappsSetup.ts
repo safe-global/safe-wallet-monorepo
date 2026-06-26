@@ -4,7 +4,11 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import { getEip155ChainId } from '@safe-global/utils/features/walletconnect/utils'
 import { store } from '@/src/store'
 import { pushPending, removeSession } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
-import { walletKitE2eState, E2E_SESSION_TOPIC } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
+import {
+  walletKitE2eState,
+  E2E_SESSION_TOPIC,
+  E2E_PAIRING_TOPIC,
+} from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
 import { mockedActiveAccount, TEST_WALLET_ICON } from './mockData'
 import { onboardAndNavigate, resetReduxForE2E } from './setupHelpers'
 
@@ -13,8 +17,6 @@ import { onboardAndNavigate, resetReduxForE2E } from './setupHelpers'
 // approved-session fixture lives in walletKit.e2e.ts, next to the fake.
 
 const CAIP2 = getEip155ChainId(mockedActiveAccount.chainId) // 'eip155:11155111'
-
-const PAIRING_TOPIC = 'e2e-pairing-topic'
 
 /** Uniswap-shaped dApp metadata. */
 const DAPP_METADATA = {
@@ -40,7 +42,7 @@ const buildProposal = (verified: VerifiedFixture): WalletKitTypes.SessionProposa
     id,
     params: {
       id,
-      pairingTopic: PAIRING_TOPIC,
+      pairingTopic: E2E_PAIRING_TOPIC,
       expiryTimestamp: 0,
       requiredNamespaces: {},
       optionalNamespaces: {

@@ -15,6 +15,9 @@ import { createE2eStore } from '@/src/tests/e2e-maestro/createE2eStore'
 /** Topic of the fixture session the fake approves; shared so synthSessionDelete targets it. */
 export const E2E_SESSION_TOPIC = 'e2e-session-topic'
 
+/** Pairing topic shared by the synthesised proposal and the approved-session fixture. */
+export const E2E_PAIRING_TOPIC = 'e2e-pairing-topic'
+
 /** What the fake `getWalletKit().pair()` should do for the next scan/deep-link. */
 export type PairBehavior = 'resolve' | 'hang' | 'reject'
 

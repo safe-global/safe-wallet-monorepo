@@ -53,5 +53,10 @@ describe('walletKit.e2e (fake WalletKit)', () => {
     const wk = await getWalletKit()
     const unknownMethod = (wk as unknown as Record<string, () => Promise<unknown>>).extendSession
     await expect(unknownMethod()).resolves.toBeUndefined()
+
+    // Symbol accesses must read as undefined (not asyncNoop) — what the guard exists for.
+    const bySymbol = wk as unknown as Record<symbol, unknown>
+    expect(bySymbol[Symbol.iterator]).toBeUndefined()
+    expect(bySymbol[Symbol.asyncIterator]).toBeUndefined()
   })
 })

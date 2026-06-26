@@ -6,13 +6,13 @@
  */
 import type { IWalletKit } from '@reown/walletkit'
 import type { SessionTypes } from '@walletconnect/types'
-import { walletKitE2eState, E2E_SESSION_TOPIC } from './walletKitE2eState'
+import { walletKitE2eState, E2E_SESSION_TOPIC, E2E_PAIRING_TOPIC } from './walletKitE2eState'
 import { SAFE_WALLET_METADATA } from '../shared/metadata'
 
 /** Session approveSession() returns; values mirror the test Safe but aren't asserted. */
 export const APPROVED_SESSION: SessionTypes.Struct = {
   topic: E2E_SESSION_TOPIC,
-  pairingTopic: 'e2e-pairing-topic',
+  pairingTopic: E2E_PAIRING_TOPIC,
   relay: { protocol: 'irn' },
   expiry: 0,
   acknowledged: true,
@@ -51,7 +51,8 @@ const fakeWalletKit = {
   respondSessionRequest: asyncNoop,
 
   // Reflects approved sessions so setSessions(getActiveSessions()) can't clobber the slice.
-  getActiveSessions: (): Record<string, SessionTypes.Struct> => walletKitE2eState.get().sessions,
+  // Spread so callers can't mutate the singleton's map (real getActiveSessions returns fresh).
+  getActiveSessions: (): Record<string, SessionTypes.Struct> => ({ ...walletKitE2eState.get().sessions }),
   getPendingSessionRequests: () => [],
 
   pair: async (_params: { uri: string }): Promise<void> => {
