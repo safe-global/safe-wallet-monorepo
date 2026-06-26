@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { render, screen, fireEvent, mockClipboard } from '@/tests/test-utils'
 import { SafeCardLayout } from '../SafeCardLayout'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -45,8 +45,8 @@ describe('SafeCardLayout', () => {
     const onToggle = jest.fn()
     render(<SafeCardLayout {...baseProps} onToggle={onToggle} disabled />)
 
-    const card = screen.getAllByRole('checkbox').find((el) => el.tagName === 'BUTTON') as HTMLButtonElement
-    expect(card).toBeDisabled()
+    const card = screen.getByTestId('safe-card')
+    expect(card).toHaveAttribute('data-disabled')
     fireEvent.click(card)
     expect(onToggle).not.toHaveBeenCalled()
   })
@@ -65,9 +65,20 @@ describe('SafeCardLayout', () => {
     const onToggle = jest.fn()
     render(<SafeCardLayout {...baseProps} onToggle={onToggle} />)
 
-    const card = screen.getAllByRole('checkbox').find((el) => el.tagName === 'BUTTON') as HTMLButtonElement
-    expect(card).not.toBeDisabled()
+    const card = screen.getByTestId('safe-card')
+    expect(card).not.toHaveAttribute('data-disabled')
     fireEvent.click(card)
     expect(onToggle).toHaveBeenCalled()
+  })
+
+  it('copies the address without toggling the card selection', () => {
+    const writeText = mockClipboard()
+    const onToggle = jest.fn()
+    render(<SafeCardLayout {...baseProps} onToggle={onToggle} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy address' }))
+
+    expect(writeText).toHaveBeenCalledWith(baseProps.address)
+    expect(onToggle).not.toHaveBeenCalled()
   })
 })

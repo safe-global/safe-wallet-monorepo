@@ -276,13 +276,13 @@ export const ExecuteForm = ({
           <NonOwnerError />
         ) : isExecutionLoop ? (
           <ErrorMessage>
-            Cannot execute a transaction from the Safe Account itself, please connect a different account.
+            Cannot execute a transaction from the Safe account itself, please connect a different account.
           </ErrorMessage>
         ) : relayUnavailableForGtf ? (
           <ErrorMessage>Safe-paid fees require Gelato relay, which is currently unavailable.</ErrorMessage>
         ) : blockSafePaysFromNestedExecutor ? (
           <ErrorMessage level="info">
-            Can&apos;t pay gas from this Safe Account when executing through a parent Safe Account. Sign the
+            Can&apos;t pay gas from this Safe account when executing through a parent Safe account. Sign the
             transaction, or switch to another signer to execute.
           </ErrorMessage>
         ) : !walletCanPay && !willRelay && !willNoFeeCampaign ? (

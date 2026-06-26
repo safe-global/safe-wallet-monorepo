@@ -76,7 +76,7 @@ describe('SafeHeaderInfo', () => {
       })
 
       jest.spyOn(useAddressResolver, 'useAddressResolver').mockReturnValue({
-        ens: 'My Safe Account',
+        ens: 'My Safe account',
         name: undefined,
         resolving: false,
       })

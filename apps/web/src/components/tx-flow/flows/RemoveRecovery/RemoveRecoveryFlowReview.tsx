@@ -29,8 +29,8 @@ export function RemoveRecoveryFlowReview({
   return (
     <ReviewTransaction onSubmit={onFormSubmit}>
       <Typography>
-        This transaction will remove the recovery module from your Safe Account. You will no longer be able to recover
-        your Safe Account once this transaction is executed.
+        This transaction will remove the recovery module from your Safe account. You will no longer be able to recover
+        your Safe account once this transaction is executed.
       </Typography>
 
       <OwnerList

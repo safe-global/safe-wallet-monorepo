@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { getSdkError } from '@walletconnect/utils'
-import { useToastController } from '@tamagui/toast'
 import { useAppDispatch } from '@/src/store/hooks'
+import { showToast } from '@/src/store/toastSlice'
 import { removeSession } from '../store/walletKitSlice'
 import { getWalletKit } from '../walletKit'
 import { logWalletKitError } from '../utils/errors'
@@ -13,7 +13,6 @@ import { logWalletKitError } from '../utils/errors'
  */
 export const useDisconnectSession = () => {
   const dispatch = useAppDispatch()
-  const toast = useToastController()
   const [busyTopic, setBusyTopic] = useState<string | null>(null)
 
   const disconnect = useCallback(
@@ -23,17 +22,17 @@ export const useDisconnectSession = () => {
         const wk = await getWalletKit()
         await wk.disconnectSession({ topic, reason: getSdkError('USER_DISCONNECTED') })
         dispatch(removeSession(topic))
-        toast.show(`${peerName ?? 'App'} disconnected`, { native: false, duration: 2500 })
+        dispatch(showToast({ message: `${peerName ?? 'App'} disconnected`, duration: 2500 }))
         return true
       } catch (e) {
         logWalletKitError('disconnectSession failed', e)
-        toast.show('Failed to disconnect', { native: false, duration: 2500, variant: 'error' })
+        dispatch(showToast({ message: 'Failed to disconnect', duration: 2500, variant: 'error' }))
         return false
       } finally {
         setBusyTopic(null)
       }
     },
-    [dispatch, toast],
+    [dispatch],
   )
 
   return { disconnect, busyTopic }

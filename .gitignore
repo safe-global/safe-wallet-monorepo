@@ -32,7 +32,8 @@ apps/web-tanstack/dist/
 # beads
 .beads/
 
-# Yarn v4
+# Yarn v4 / tooling cache (redirected inside workspace in container envs)
+.cache-tmp/
 .yarn/*
 !.yarn/patches
 !.yarn/plugins

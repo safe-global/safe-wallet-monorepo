@@ -14,6 +14,9 @@ import { DEFAULT_MAINNET_CHAIN_ID } from '@/config/constants'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
 
 export type ContactField = {
   name: string
@@ -102,7 +105,9 @@ const AddContactDialog = ({
       const result = await submit(item, spaceId ?? '')
 
       if (result.error) {
-        setError('Something went wrong. Please try again.')
+        const message = getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError)
+        setError(message)
+        dispatch(showNotification({ message, variant: 'error', groupKey: `${successGroupKey}-error` }))
         return
       }
 
@@ -117,8 +122,10 @@ const AddContactDialog = ({
       )
 
       handleClose()
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (error) {
+      const message = getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError)
+      setError(message)
+      dispatch(showNotification({ message, variant: 'error', groupKey: `${successGroupKey}-error` }))
     } finally {
       setIsSubmitting(false)
     }

@@ -148,6 +148,23 @@ describe('SecuritySafesTable', () => {
     expect(screen.getByTestId('chain-1')).toBeInTheDocument()
   })
 
+  it('renders a copy-address button on the safe row', () => {
+    renderTable()
+    expect(screen.getByRole('button', { name: 'Copy address' })).toBeInTheDocument()
+  })
+
+  it('copying the address does not trigger the row click', () => {
+    const writeText = jest.fn()
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
+    const onViewReport = jest.fn()
+    renderTable({ onViewReport })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy address' }))
+
+    expect(writeText).toHaveBeenCalledWith(singleSafe.address)
+    expect(onViewReport).not.toHaveBeenCalled()
+  })
+
   it('calls onViewReport when a deployed row is clicked', () => {
     const onViewReport = jest.fn()
     renderTable({ onViewReport })

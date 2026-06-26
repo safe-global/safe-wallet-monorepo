@@ -1,5 +1,5 @@
-import { WalletConnectScanContainer } from '@/src/features/WalletConnect/Wallet/components/WalletConnectScan.container'
+import { ScanConnect } from '@/src/features/WalletConnect/Wallet/components/ScanConnect'
 
 export default function WalletConnectScanScreen() {
-  return <WalletConnectScanContainer />
+  return <ScanConnect />
 }

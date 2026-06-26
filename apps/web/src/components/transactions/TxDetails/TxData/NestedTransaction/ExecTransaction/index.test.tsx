@@ -109,9 +109,9 @@ describe('ExecTransaction (nested Safe MultiSend)', () => {
 
     fireEvent.click(result.getByTestId('expande-all-btn'))
 
-    // Resolves to the nested Safe, not the connected Safe ("This Safe Account") nor the zero address
+    // Resolves to the nested Safe, not the connected Safe ("This Safe account") nor the zero address
     expect(result.getAllByText(/Nested Safe B/).length).toBeGreaterThan(0)
-    expect(result.queryByText('This Safe Account')).not.toBeInTheDocument()
+    expect(result.queryByText('This Safe account')).not.toBeInTheDocument()
     expect(result.queryByText('0x0000...0000')).not.toBeInTheDocument()
   })
 })

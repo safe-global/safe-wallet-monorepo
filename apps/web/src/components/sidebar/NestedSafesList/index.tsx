@@ -83,6 +83,7 @@ function NestedSafeItem({
           name={name}
           chainId={safeItem.chainId}
           fullAddress
+          showCopyButton
           highlight4bytes={showSimilarityWarning}
         />
         <AccountItemGroup>
@@ -102,7 +103,7 @@ function NestedSafeItem({
           owners={owners.length}
           chainId={safeItem.chainId}
         />
-        <AccountItemInfo address={safeItem.address} name={name} chainId={safeItem.chainId} />
+        <AccountItemInfo address={safeItem.address} name={name} chainId={safeItem.chainId} showCopyButton />
         <AccountItemBalance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview} />
       </AccountItemLink>
     </Track>

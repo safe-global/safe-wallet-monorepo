@@ -8,16 +8,6 @@ const safe = 'eth:0xAD1Cf279D18f34a13c3Bf9b79F4D427D5CD9505B'
 const historyData = staking_data.type.history
 
 describe('Staking history tests', { defaultCommandTimeout: 30000 }, () => {
-  //Skipped until we find out why it’s flaky on the CGW side.
-  it.skip('Verify Claim tx shows amount received', () => {
-    cy.visit(constants.transactionUrl + safe + staking.stakingTxs.claim)
-    main.waitForElementByTextInContainer(create_tx.transactionItem, historyData.claim)
-    staking.checkTxHeaderData([historyData.ETH_3205184, historyData.claim])
-    create_tx.verifyExpandedDetails([historyData.ETH_3205184, historyData.received])
-    create_tx.clickOnAdvancedDetails()
-    create_tx.verifyAdvancedDetails([historyData.call_batchWithdrawCLFee, historyData.StakingContract])
-  })
-
   it('Verify Withdraw request shows amount of validators and Validator status', () => {
     cy.visit(constants.transactionUrl + safe + staking.stakingTxs.withdrawal)
     staking.checkTxHeaderData([historyData.withdrawal, historyData.validator_1])

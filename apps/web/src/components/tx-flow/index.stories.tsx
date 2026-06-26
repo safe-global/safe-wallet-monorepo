@@ -66,7 +66,7 @@ const MockTxLayout = ({
     {/* Sidebar */}
     <Paper sx={{ width: 280, p: 2, flexShrink: 0 }}>
       <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-        Safe Account
+        Safe account
       </Typography>
       <Typography variant="body2" fontFamily="monospace" sx={{ mb: 2 }}>
         0x1234...5678
