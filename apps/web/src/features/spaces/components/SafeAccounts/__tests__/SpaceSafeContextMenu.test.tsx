@@ -20,9 +20,9 @@ jest.mock('@/hooks/safes', () => ({
 }))
 
 // Space-first name resolution; defaults to no space name so the local fallback is asserted.
-const mockGetFromSpace = jest.fn((): { name: string } | undefined => undefined)
+const mockGetFromSpaceByAddress = jest.fn((): { name: string } | undefined => undefined)
 jest.mock('@/hooks/useAllAddressBooks', () => ({
-  useMergedAddressBooks: () => ({ getFromSpace: mockGetFromSpace }),
+  useMergedAddressBooks: () => ({ getFromSpaceByAddress: mockGetFromSpaceByAddress }),
 }))
 
 jest.mock('../RemoveSafeDialog', () => {
@@ -58,7 +58,7 @@ describe('SpaceSafeContextMenu', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockGetFromSpace.mockReturnValue(undefined)
+    mockGetFromSpaceByAddress.mockReturnValue(undefined)
     ;(useAppSelector as jest.Mock).mockReturnValue(mockAddressBooks)
     // Rename + Remove are admin-only in a space, so default to admin to render the menu.
     ;(useIsAdmin as jest.Mock).mockReturnValue(true)
@@ -108,7 +108,7 @@ describe('SpaceSafeContextMenu', () => {
   })
 
   it('prefills the shared (space) name, not the local one, when a space name exists', async () => {
-    mockGetFromSpace.mockReturnValue({ name: 'Cloud Name' })
+    mockGetFromSpaceByAddress.mockReturnValue({ name: 'Cloud Name' })
     render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
     fireEvent.click(screen.getByRole('button'))
     await waitFor(() => fireEvent.click(screen.getByText('Rename')))

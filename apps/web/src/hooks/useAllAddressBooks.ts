@@ -46,6 +46,10 @@ export type MergedAddressBook = {
   get: (address: string, chainId: string) => ExtendedContact | undefined
   getFromSpace: (address: string, chainId: string) => ExtendedContact | undefined
   getFromLocal: (address: string, chainId: string) => ExtendedContact | undefined
+  /** Space contact for this address regardless of chain (one name per address, full chainIds). */
+  getFromSpaceByAddress: (address: string) => ExtendedContact | undefined
+  /** Local contact for this address from any chain — cross-chain inheritance fallback. */
+  getFromLocalAnyChain: (address: string) => ExtendedContact | undefined
   has: (address: string, chainId: string) => boolean
 }
 
@@ -54,17 +58,24 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
   const actualChainId = chainId ?? fallbackChainId
   const spaceAddressBook = useGetSpaceAddressBook()
   const localAddressBook = useAppSelector((state) => selectAddressBookByChain(state, actualChainId))
+  // Every chain's local book, for address-level (cross-chain) fallback so a name set on one chain
+  // is inherited when the same Safe appears on another chain.
+  const allLocalBooks = useAppSelector(selectAllAddressBooks)
 
   return useMemo<MergedAddressBook>(() => {
     const byKeyMerged = new Map<string, ExtendedContact>()
     const byKeySpace = new Map<string, ExtendedContact>()
     const byKeyLocal = new Map<string, ExtendedContact>()
+    // Address-level (chain-agnostic) maps: one entry per address.
+    const byAddressSpace = new Map<string, ExtendedContact>()
+    const byAddressLocal = new Map<string, ExtendedContact>()
 
     const spaceContacts = mapSpaceToContacts(spaceAddressBook)
     const localContacts = mapLocalToContacts(localAddressBook, actualChainId)
 
     // Priority 1: Space contacts (highest)
     for (const spaceContact of spaceContacts) {
+      byAddressSpace.set(spaceContact.address.toLowerCase(), spaceContact) // full chainIds preserved
       for (const chainId of spaceContact.chainIds) {
         const key = addressBookKey(spaceContact.address, chainId)
         byKeySpace.set(key, { ...spaceContact, chainIds: [chainId] })
@@ -83,6 +94,16 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
       }
     }
 
+    // Address-level local from EVERY chain: the current chain's name wins, otherwise any chain's.
+    for (const [cid, book] of Object.entries(allLocalBooks)) {
+      for (const localContact of mapLocalToContacts(book, cid)) {
+        const addrKey = localContact.address.toLowerCase()
+        if (cid === actualChainId || !byAddressLocal.has(addrKey)) {
+          byAddressLocal.set(addrKey, localContact)
+        }
+      }
+    }
+
     // Build list: space + non-duplicate local
     const filteredLocal = localContacts.filter(
       (local) =>
@@ -96,9 +117,13 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
     const has = (address: string, chainId: string) => byKeyMerged.has(addressBookKey(address, chainId))
     const getFromSpace = (address: string, cid: string) => byKeySpace.get(addressBookKey(address, cid))
     const getFromLocal = (address: string, cid: string) => byKeyLocal.get(addressBookKey(address, cid))
+    const getFromSpaceByAddress = (address: string) =>
+      typeof address === 'string' ? byAddressSpace.get(address.toLowerCase()) : undefined
+    const getFromLocalAnyChain = (address: string) =>
+      typeof address === 'string' ? byAddressLocal.get(address.toLowerCase()) : undefined
 
-    return { list, get, has, getFromSpace, getFromLocal }
-  }, [actualChainId, localAddressBook, spaceAddressBook])
+    return { list, get, has, getFromSpace, getFromLocal, getFromSpaceByAddress, getFromLocalAnyChain }
+  }, [actualChainId, localAddressBook, spaceAddressBook, allLocalBooks])
 }
 
 /**
@@ -108,27 +133,27 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
  * @param chainId
  */
 export const useAddressBookItem = (address: string, chainId: string | undefined): ExtendedContact | undefined => {
-  const { get, getFromLocal } = useMergedAddressBooks(chainId)
+  const { getFromSpaceByAddress, getFromLocal, getFromLocalAnyChain } = useMergedAddressBooks(chainId)
   const source = useAddressBookSource()
 
   return useMemo<ExtendedContact | undefined>(() => {
     if (!chainId) return undefined
 
+    // Local book view: strictly per-chain (editing a specific chain's entry).
     if (source === 'localOnly') {
       return getFromLocal(address, chainId)
     }
 
-    if (source === 'merged') {
-      return get(address, chainId)
-    }
+    // Space name resolves by address (one name per address, shown on every chain).
+    const spaceItem = getFromSpaceByAddress(address)
 
     if (source === 'spaceOnly') {
-      const item = get(address, chainId)
-      return item?.source === ContactSource.space ? item : undefined
+      return spaceItem
     }
 
-    return undefined
-  }, [chainId, source, getFromLocal, address, get])
+    // merged: space (any chain) > local (this chain) > local (any chain, for cross-chain inheritance)
+    return spaceItem ?? getFromLocal(address, chainId) ?? getFromLocalAnyChain(address)
+  }, [chainId, source, address, getFromSpaceByAddress, getFromLocal, getFromLocalAnyChain])
 }
 
 /**
@@ -148,7 +173,7 @@ export const useSafeNameResolver = (): ((
   chainId: string | undefined,
   preferredName?: string,
 ) => string) => {
-  const { get } = useMergedAddressBooks()
+  const { getFromSpaceByAddress } = useMergedAddressBooks()
   const allLocal = useAppSelector(selectAllAddressBooks)
   const source = useAddressBookSource()
 
@@ -164,18 +189,29 @@ export const useSafeNameResolver = (): ((
     return map
   }, [allLocal])
 
+  // Address-level local lookup (any chain) for cross-chain inheritance.
+  const localByAddress = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const [, book] of Object.entries(allLocal)) {
+      for (const [addr, name] of Object.entries(book)) {
+        map.set(addr.toLowerCase(), name)
+      }
+    }
+    return map
+  }, [allLocal])
+
   return useCallback(
     (address, chainId, preferredName) => {
       if (preferredName) return preferredName
       if (!chainId) return ''
-      const localName = localByKey.get(addressBookKey(address, chainId))
-      if (source === 'localOnly') return localName ?? ''
-      const item = get(address, chainId)
-      if (source === 'spaceOnly') return item?.source === ContactSource.space ? (item.name ?? '') : ''
-      // merged: space (cross-chain) takes priority, then any chain's local
-      return item?.name ?? localName ?? ''
+      const localThisChain = localByKey.get(addressBookKey(address, chainId))
+      if (source === 'localOnly') return localThisChain ?? ''
+      const spaceName = getFromSpaceByAddress(address)?.name
+      if (source === 'spaceOnly') return spaceName ?? ''
+      // merged: space (any chain) > local (this chain) > local (any chain)
+      return spaceName ?? localThisChain ?? localByAddress.get(address.toLowerCase()) ?? ''
     },
-    [get, source, localByKey],
+    [getFromSpaceByAddress, source, localByKey, localByAddress],
   )
 }
 

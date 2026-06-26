@@ -65,13 +65,11 @@ const SafeCardReadOnly = ({
   const spaces = useLoadFeature(SpacesFeature)
   const chain = useChain(singleSafe?.chainId || '')
   // On space surfaces (preferSpaceName), let the shared (space) name win, then fall back to the
-  // existing (local) resolution. The space book is checked across ALL of the Safe's chains — a
-  // multichain Safe may carry the shared name on a different chain than the first one. `getFromSpace`
-  // is source-independent, so this works even though the page renders under the spaceOnly source.
-  const { getFromSpace } = useMergedAddressBooks(singleSafe?.chainId)
-  const spaceName = preferSpaceName
-    ? safes.map((s) => getFromSpace(safe.address, s.chainId)?.name).find(Boolean)
-    : undefined
+  // existing (local) resolution. `getFromSpaceByAddress` is address-level (one name per address,
+  // any chain) and source-independent, so it works even though the page renders under the spaceOnly
+  // source and the rebuilt safe item only carries a local name.
+  const { getFromSpaceByAddress } = useMergedAddressBooks(singleSafe?.chainId)
+  const spaceName = preferSpaceName ? getFromSpaceByAddress(safe.address)?.name : undefined
   const displayName = useSafeDisplayName(safe.address, singleSafe?.chainId || '', spaceName ?? name)
   const currency = useAppSelector(selectCurrency)
   const { address: walletAddress } = useWallet() || {}

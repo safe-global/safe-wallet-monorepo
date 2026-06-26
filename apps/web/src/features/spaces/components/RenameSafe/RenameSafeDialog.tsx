@@ -9,20 +9,18 @@ import {
   type SxProps,
   type Theme,
 } from '@mui/material'
-import { Controller, FormProvider, useForm } from 'react-hook-form'
-import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
 import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
-import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
-import useChains from '@/hooks/useChains'
 import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import type { RenameTarget } from './types'
 
-type FormValues = { name: string; networks: Chain[] }
+type FormValues = { name: string }
 
 const GENERIC_ERROR = 'Something went wrong. Please try again.'
 const SUCCESS_NOTIFICATION = {
@@ -40,39 +38,33 @@ export interface RenameSafeDialogProps {
 
 const RenameSafeDialog = ({ target, onClose, sx }: RenameSafeDialogProps): ReactElement => {
   const dispatch = useAppDispatch()
-  const { configs } = useChains()
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [upsertSpaceAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
-
-  // The selector is scoped to the chains THIS Safe is on (not all Safe-supported chains),
-  // and defaults to all of them; the user can narrow which of the Safe's chains the name applies to.
-  const safeChains = target.chainIds
-    .map((chainId) => (configs ?? []).find((chain) => chain.chainId === chainId))
-    .filter((chain): chain is Chain => Boolean(chain))
+  const { getFromSpaceByAddress } = useMergedAddressBooks()
 
   const methods = useForm<FormValues>({
     mode: 'onChange',
-    defaultValues: { name: target.currentName, networks: safeChains },
+    defaultValues: { name: target.currentName },
   })
-  const { handleSubmit, formState, control } = methods
-  const { errors } = formState
+  const { handleSubmit, formState } = methods
 
-  const onSubmit = handleSubmit(async ({ name, networks }) => {
+  const onSubmit = handleSubmit(async ({ name }) => {
     setError(undefined)
-    // Fall back to the Safe's chains when the selector never rendered (single-chain Safe) or configs
-    // hadn't loaded when the dialog mounted — never write an empty chainIds set.
-    const selectedChainIds = networks.map((network) => network.chainId)
-    const chainIds = selectedChainIds.length > 0 ? selectedChainIds : target.chainIds
     const { spaceId } = target
 
     if (!target.isSpaceSafe || !spaceId) {
-      dispatch(upsertAddressBookEntries({ name, address: target.address, chainIds }))
+      // Local: one name across networks — write it to ALL the Safe's chains.
+      dispatch(upsertAddressBookEntries({ name, address: target.address, chainIds: target.chainIds }))
       dispatch(showNotification(SUCCESS_NOTIFICATION))
       onClose()
       return
     }
 
+    // Space (cloud): the CGW row is keyed by (space, address) — one name. Only change the name and
+    // PRESERVE the existing chain_ids (the upsert API replaces them, so re-send the row's current
+    // set). A brand-new entry has none yet → use the Safe's chains.
+    const chainIds = getFromSpaceByAddress(target.address)?.chainIds ?? target.chainIds
     try {
       setIsSubmitting(true)
       const result = await upsertSpaceAddressBook({
@@ -108,25 +100,6 @@ const RenameSafeDialog = ({ target, onClose, sx }: RenameSafeDialogProps): React
               <AddressInputReadOnly address={target.address} chainId={target.chainIds[0]} />
 
               <NameInput data-testid="name-input" name="name" label="Name" autoFocus required />
-
-              {/* Only offer a chain picker when the Safe spans more than one chain. */}
-              {safeChains.length > 1 && (
-                <Controller
-                  name="networks"
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <NetworkMultiSelectorInput
-                      name="networks"
-                      showSelectAll
-                      chains={safeChains}
-                      value={field.value || []}
-                      error={!!errors.networks}
-                      helperText={errors.networks ? 'Select at least one network' : ''}
-                    />
-                  )}
-                />
-              )}
             </Stack>
 
             {error && (

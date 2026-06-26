@@ -145,6 +145,8 @@ describe('useAllAddressBooks', () => {
     afterEach(() => {
       remoteContacts = []
       localAddressBook = {}
+      localAddressBooksByChain = {}
+      mockAddressBookSource = 'merged'
       signedIn = false
       jest.clearAllMocks()
     })
@@ -180,6 +182,74 @@ describe('useAllAddressBooks', () => {
       const { result } = renderHook(() => useAddressBookItem('0xB', undefined))
 
       expect(result.current).toBeUndefined()
+    })
+
+    it('resolves the space name by address regardless of chain (spaceOnly + merged)', () => {
+      signedIn = true
+      remoteContacts = [
+        {
+          name: 'Shared',
+          address: '0xA',
+          chainIds: ['1'], // named only on chain 1
+          createdBy: '',
+          createdByUserId: 0,
+          lastUpdatedBy: '',
+          lastUpdatedByUserId: 0,
+          createdAt: '',
+          updatedAt: '',
+          source: ContactSource.space,
+        },
+      ]
+
+      mockAddressBookSource = 'spaceOnly'
+      const spaceOnly = renderHook(() => useAddressBookItem('0xA', '137')) // a chain NOT in chainIds
+      expect(spaceOnly.result.current?.name).toBe('Shared')
+
+      mockAddressBookSource = 'merged'
+      const merged = renderHook(() => useAddressBookItem('0xA', '137'))
+      expect(merged.result.current?.name).toBe('Shared')
+
+      // The address-level helper keeps the full chainIds of the underlying row.
+      const m = renderHook(() => useMergedAddressBooks('137'))
+      expect(m.result.current.getFromSpaceByAddress('0xA')?.chainIds).toEqual(['1'])
+    })
+
+    it('inherits a local name across chains under merged, but not under localOnly', () => {
+      signedIn = true
+      remoteContacts = []
+      localAddressBook = {} // no entry on the currently-viewed chain (137)
+      localAddressBooksByChain = { '1': { '0xL': 'Local' } } // name set only on chain 1
+
+      mockAddressBookSource = 'merged'
+      const merged = renderHook(() => useAddressBookItem('0xL', '137'))
+      expect(merged.result.current?.name).toBe('Local') // inherited via any-chain fallback
+
+      mockAddressBookSource = 'localOnly'
+      const localOnly = renderHook(() => useAddressBookItem('0xL', '137'))
+      expect(localOnly.result.current).toBeUndefined() // localOnly stays strictly per-chain
+    })
+
+    it('prefers the space name over a local name for the same address (merged)', () => {
+      signedIn = true
+      remoteContacts = [
+        {
+          name: 'Shared',
+          address: '0xA',
+          chainIds: ['1'],
+          createdBy: '',
+          createdByUserId: 0,
+          lastUpdatedBy: '',
+          lastUpdatedByUserId: 0,
+          createdAt: '',
+          updatedAt: '',
+          source: ContactSource.space,
+        },
+      ]
+      localAddressBooksByChain = { '1': { '0xA': 'Local' } }
+      mockAddressBookSource = 'merged'
+
+      const { result } = renderHook(() => useAddressBookItem('0xA', '1'))
+      expect(result.current?.name).toBe('Shared')
     })
   })
 

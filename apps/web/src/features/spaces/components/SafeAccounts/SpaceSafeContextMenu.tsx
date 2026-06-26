@@ -25,14 +25,15 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
   const { openRename, renameDialog } = useRenameSafe()
 
   const allAddressBooks = useAppSelector(selectAllAddressBooks)
-  const { getFromSpace } = useMergedAddressBooks()
+  const { getFromSpaceByAddress } = useMergedAddressBooks()
   const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
-  // Rename here writes the shared (space) name, so prefill that — looked up across the Safe's chains
-  // — and only fall back to the local name. Without this the dialog opens with the personal local name.
+  // Rename here writes the shared (space) name, so prefill that — resolved address-level (one name
+  // per address) — and only fall back to the local name. Without this the dialog opens with the
+  // personal local name.
   const localName = isMultiChainSafeItem(safeItem)
     ? safeItem.name
     : allAddressBooks[safeItem.chainId]?.[safeItem.address]
-  const spaceName = chainIds.map((chainId) => getFromSpace(safeItem.address, chainId)?.name).find(Boolean)
+  const spaceName = getFromSpaceByAddress(safeItem.address)?.name
   const name = spaceName ?? localName
 
   // Rename + Remove are both admin-only in a space; with no actions there is nothing to show.
