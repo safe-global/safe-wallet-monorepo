@@ -16,12 +16,9 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { showNotification } from '@/store/notificationsSlice'
 import ExternalLink from '@/components/common/ExternalLink'
-
-const getAcceptInviteErrorMessage = (error: unknown): string => {
-  const err = error as { data?: { message?: string } }
-  if (typeof err?.data?.message === 'string') return err.data.message
-  return 'Failed accepting the invite. Please try again.'
-}
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
@@ -67,7 +64,7 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
         }),
       )
     } catch (e) {
-      setError(getAcceptInviteErrorMessage(e))
+      setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
     } finally {
       setIsSubmitting(false)
     }

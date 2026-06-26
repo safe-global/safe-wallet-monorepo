@@ -103,7 +103,9 @@ describe('AcceptInviteDialog tracking', () => {
   })
 
   it('bubbles the backend error message when accepting the invite fails', async () => {
-    mockAcceptInvite.mockResolvedValue({ error: { data: { message: 'Name contains invalid characters' } } })
+    mockAcceptInvite.mockResolvedValue({
+      error: { status: 422, data: { message: 'Name contains invalid characters' } },
+    })
 
     render(<AcceptInviteDialog space={mockSpace} onClose={jest.fn()} />)
 
@@ -117,7 +119,7 @@ describe('AcceptInviteDialog tracking', () => {
   })
 
   it('falls back to a generic error when the backend provides no message', async () => {
-    mockAcceptInvite.mockResolvedValue({ error: {} })
+    mockAcceptInvite.mockResolvedValue({ error: { status: 500, data: {} } })
 
     render(<AcceptInviteDialog space={mockSpace} onClose={jest.fn()} />)
 
@@ -127,6 +129,6 @@ describe('AcceptInviteDialog tracking', () => {
     await waitFor(() => expect(submitButton).not.toBeDisabled())
     fireEvent.click(submitButton)
 
-    expect(await screen.findByText('Failed accepting the invite. Please try again.')).toBeInTheDocument()
+    expect(await screen.findByText(/Something went wrong \(500\)/)).toBeInTheDocument()
   })
 })

@@ -10,6 +10,9 @@ import { useAppDispatch } from '@/store'
 import MemberInfoForm from '../AddMemberModal/MemberInfoForm'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 type MemberField = {
   name: string
@@ -73,7 +76,7 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
 
       handleClose()
     } catch (e) {
-      setError('An unexpected error occurred while editing the member.')
+      setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
     }
   })
 
