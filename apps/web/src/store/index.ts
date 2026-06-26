@@ -63,6 +63,7 @@ const rootReducer = combineReducers({
   [slices.globalSearchSlice.name]: slices.globalSearchSlice.reducer,
   [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
   [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
+  [slices.txAiInsightsSlice.name]: slices.txAiInsightsSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
@@ -90,6 +91,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.authSlice.name,
   slices.hnStateSlice.name,
   slices.gtfPaymentSourcePreferenceSlice.name,
+  slices.txAiInsightsSlice.name,
 ]
 
 export const getPersistedState = () => {
