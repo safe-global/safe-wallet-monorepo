@@ -1,7 +1,7 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
 import { Grid2 as Grid, Stack, StepIcon, Typography } from '@mui/material'
 import ExternalLink from '@/components/common/ExternalLink'
-import { type PropsWithChildren, useContext } from 'react'
+import { useContext } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import Track from '@/components/common/Track'
@@ -10,8 +10,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { isHardwareWallet, isLedgerLive } from '@/utils/wallets'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { Receipt } from '../ConfirmTxDetails/Receipt'
-import { Slot, SlotName } from '@/components/tx-flow/slots'
-import { Sign } from '@/components/tx-flow/actions/Sign'
+import { TxActions } from '@/components/tx-flow/actions'
 
 const InfoSteps = [
   {
@@ -65,7 +64,7 @@ const HardwareWalletStep = [
   InfoSteps[2],
 ]
 
-export const ConfirmTxReceipt = ({ children, onSubmit }: PropsWithChildren<{ onSubmit: () => void }>) => {
+export const ConfirmTxReceipt = ({ onSubmit }: { onSubmit: () => void }) => {
   const { safeTx } = useContext(SafeTxContext)
   const [txPreview] = useTxPreview(safeTx?.data)
   const wallet = useWallet()
@@ -98,16 +97,7 @@ export const ConfirmTxReceipt = ({ children, onSubmit }: PropsWithChildren<{ onS
           </Grid>
         </Grid>
 
-        {children}
-
-        <Slot name={SlotName.Submit} onSubmitSuccess={onSubmit}>
-          <Sign
-            onSubmitSuccess={onSubmit}
-            options={[{ id: 'sign', label: 'Sign' }]}
-            onChange={() => {}}
-            slotId="sign"
-          />
-        </Slot>
+        <TxActions onSubmit={onSubmit} />
       </TxCard>
     </TxFlowStep>
   )

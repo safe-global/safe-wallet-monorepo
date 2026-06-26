@@ -1,5 +1,5 @@
 import type { TransactionDetails, TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { PropsWithChildren, ReactElement } from 'react'
+import type { PropsWithChildren, ReactElement, ReactNode } from 'react'
 import { useCallback, useContext } from 'react'
 import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -19,7 +19,12 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
-export type ReviewTransactionContentProps = PropsWithChildren<{ onSubmit: SubmitCallback; withDecodedData?: boolean }>
+export type ReviewTransactionContentProps = PropsWithChildren<{
+  onSubmit: SubmitCallback
+  withDecodedData?: boolean
+  /** Replaces the default "Continue" button. Used by single-screen flows to render the submit actions inline. */
+  actions?: ReactNode
+}>
 
 export const ReviewTransactionContent = ({
   safeTx,
@@ -30,6 +35,7 @@ export const ReviewTransactionContent = ({
   txDetails,
   txPreview,
   withDecodedData = true,
+  actions,
 }: ReviewTransactionContentProps & {
   safeTx: ReturnType<typeof useSafeTx>
   safeTxError: ReturnType<typeof useSafeTxError>
@@ -83,25 +89,27 @@ export const ReviewTransactionContent = ({
         <NetworkWarning />
         <UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />
 
-        <TxCardActions sx={{ marginTop: '0 !important' }}>
-          {/* Continue button */}
-          <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
-            {(isOk) => {
-              return (
-                <Button
-                  data-testid="continue-sign-btn"
-                  variant="contained"
-                  type="submit"
-                  onClick={onContinueClick}
-                  disabled={!isOk || isSubmitDisabled || (needsRiskConfirmation && !isRiskConfirmed)}
-                  sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
-                >
-                  {isSubmitLoading ? <CircularProgress size={20} /> : 'Continue'}
-                </Button>
-              )
-            }}
-          </CheckWallet>
-        </TxCardActions>
+        {actions ?? (
+          <TxCardActions sx={{ marginTop: '0 !important' }}>
+            {/* Continue button */}
+            <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
+              {(isOk) => {
+                return (
+                  <Button
+                    data-testid="continue-sign-btn"
+                    variant="contained"
+                    type="submit"
+                    onClick={onContinueClick}
+                    disabled={!isOk || isSubmitDisabled || (needsRiskConfirmation && !isRiskConfirmed)}
+                    sx={{ minWidth: '82px', order: '1', width: ['100%', '100%', '100%', 'auto'] }}
+                  >
+                    {isSubmitLoading ? <CircularProgress size={20} /> : 'Continue'}
+                  </Button>
+                )
+              }}
+            </CheckWallet>
+          </TxCardActions>
+        )}
       </TxCard>
     </>
   )
