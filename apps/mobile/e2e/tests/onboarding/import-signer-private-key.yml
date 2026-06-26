@@ -88,7 +88,7 @@ tags:
 
 # Verify error screen appears (PK doesn't belong to any signer of the Safe)
 - assertVisible: "Private key couldn't be imported"
-- assertVisible: 'This private key does not belong to any signer of this Safe Account. Double-check the address and try to import again.'
+- assertVisible: 'This private key does not belong to any signer of this Safe account. Double-check the address and try to import again.'
 - assertVisible: Don’t worry, your private key was not stored!
 
 # Tap "Import again" to go back to import screen

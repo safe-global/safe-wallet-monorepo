@@ -65,7 +65,7 @@ const SpaceSafeAccounts = () => {
       {isInvited && <PreviewInvite />}
       <div className="mb-6 flex flex-col gap-6">
         <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
-          Safe Accounts
+          Safe accounts
         </Typography>
         <Stack direction="row" justifyContent="flex-start">
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>

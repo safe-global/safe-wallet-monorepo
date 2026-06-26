@@ -9,7 +9,7 @@ describe('NoFunds', () => {
     // Check for the main elements
     expect(screen.getByText('Top up your balance')).toBeTruthy()
     expect(
-      screen.getByText('Send funds to your Safe Account from another wallet by copying your address.'),
+      screen.getByText('Send funds to your Safe account from another wallet by copying your address.'),
     ).toBeTruthy()
   })
 

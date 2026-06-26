@@ -41,7 +41,7 @@ function CancelRecoveryReview({
     <ReviewTransaction onSubmit={handleSubmit}>
       <Typography mb={1}>
         All actions initiated by the Recoverer will be cancelled. The current signers will remain the signers of the
-        Safe Account.
+        Safe account.
       </Typography>
 
       <ErrorMessage level="info">

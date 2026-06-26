@@ -56,7 +56,7 @@ export const ReviewDataView = ({
                   />
                   <YStack>
                     <Text fontSize="$4" fontWeight="500">
-                      Safe Accounts
+                      Safe accounts
                     </Text>
                     <Text fontSize="$2" color="$colorSecondary">
                       Including read-only

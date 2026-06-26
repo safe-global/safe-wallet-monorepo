@@ -17,7 +17,7 @@ export default {
     name: 'Automation Test Space',
     /** Expected top-level account rows on the Space dashboard (`space-dashboard-accounts-row-*`). Align with CGW for this space. */
     accountsWidgetRowCount: 9,
-    /** Expected account rows on the Safe Accounts page (`safe-list-item`). Multi-chain Safes appear as one card each. */
+    /** Expected account rows on the Safe accounts page (`safe-list-item`). Multi-chain Safes appear as one card each. */
     safeAccountsPageCount: 3,
 
     /** Row 0 — unnamed multichain Safe (no address book name). Displays shortened address as name. */

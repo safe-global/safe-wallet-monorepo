@@ -56,7 +56,7 @@ const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
   }
 
   return (
-    <Tooltip placement="top" title={canSend ? 'Send tokens' : 'You are not a signer of this Safe Account'}>
+    <Tooltip placement="top" title={canSend ? 'Send tokens' : 'You are not a signer of this Safe account'}>
       <span>
         <IconButton className={css.sendButton} size="medium" onClick={onNewTxClick} disabled={!canSend}>
           <ArrowOutwardIcon />

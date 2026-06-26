@@ -185,5 +185,5 @@ function toPersistError(error: unknown): Error {
   if ((error as BackendError)?.status === 409) {
     return new Error(CONFLICT_MESSAGE)
   }
-  return new Error('Failed to save Safe Account to backend')
+  return new Error('Failed to save Safe account to backend')
 }
