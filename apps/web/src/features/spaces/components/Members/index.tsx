@@ -50,7 +50,7 @@ const SpaceMembers = () => {
         </TabsList>
 
         <TabsContent value="members">
-          <MembersList members={activeMembers} />
+          <MembersList members={activeMembers} variant="active" />
         </TabsContent>
 
         <TabsContent value="pending">
@@ -59,7 +59,7 @@ const SpaceMembers = () => {
               <p className="text-muted-foreground text-sm">No pending members.</p>
             </div>
           ) : (
-            <MembersList members={invitedMembers} />
+            <MembersList members={invitedMembers} variant="pending" />
           )}
         </TabsContent>
       </Tabs>
