@@ -14,7 +14,8 @@ const renderSafeCards = (safes: AllSafeItems, similarAddresses: Set<string>) =>
     const key = isMultiChainSafeItem(safe) ? `multi-${safe.address}-${index}` : `${safe.chainId}:${safe.address}`
     return (
       <SafeCardsErrorBoundary key={key}>
-        <SafeCardReadOnly safe={safe} isSimilar={isSimilar} />
+        {/* Space Safe accounts: show the shared (space) name first, falling back to local. */}
+        <SafeCardReadOnly safe={safe} isSimilar={isSimilar} preferSpaceName />
       </SafeCardsErrorBoundary>
     )
   })

@@ -18,6 +18,7 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
+import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
@@ -32,6 +33,13 @@ interface SafeCardReadOnlyProps {
   onClick?: () => void
   disabled?: boolean
   disabledTooltip?: string
+  /**
+   * Resolve the display name from the shared (space) address book first, falling back to the local
+   * one. The default path (`useSafeCardData` → `useSafeItemData`/`buildSafeItem`) reads the local
+   * address book only, which lets a personal local name override the Safe's shared (space) name. Opt
+   * in on space surfaces (the Safe accounts list); defaults off so other consumers are unchanged.
+   */
+  preferSpaceName?: boolean
 }
 
 const SafeCardReadOnly = ({
@@ -43,6 +51,7 @@ const SafeCardReadOnly = ({
   hideContextMenu = false,
   disabled = false,
   disabledTooltip,
+  preferSpaceName = false,
 }: SafeCardReadOnlyProps) => {
   const [copied, setCopied] = useState(false)
   const router = useRouter()
@@ -55,7 +64,15 @@ const SafeCardReadOnly = ({
   const singleSafe = safes[0]
   const spaces = useLoadFeature(SpacesFeature)
   const chain = useChain(singleSafe?.chainId || '')
-  const displayName = useSafeDisplayName(safe.address, singleSafe?.chainId || '', name)
+  // On space surfaces (preferSpaceName), let the shared (space) name win, then fall back to the
+  // existing (local) resolution. The space book is checked across ALL of the Safe's chains — a
+  // multichain Safe may carry the shared name on a different chain than the first one. `getFromSpace`
+  // is source-independent, so this works even though the page renders under the spaceOnly source.
+  const { getFromSpace } = useMergedAddressBooks(singleSafe?.chainId)
+  const spaceName = preferSpaceName
+    ? safes.map((s) => getFromSpace(safe.address, s.chainId)?.name).find(Boolean)
+    : undefined
+  const displayName = useSafeDisplayName(safe.address, singleSafe?.chainId || '', spaceName ?? name)
   const currency = useAppSelector(selectCurrency)
   const { address: walletAddress } = useWallet() || {}
 

@@ -1,5 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import SafeCardReadOnly from '../SafeCardReadOnly'
+import type { MultiChainSafeItem } from '@/hooks/safes'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { chainBuilder } from '@/tests/builders/chains'
 import type { RootState } from '@/store'
@@ -49,17 +50,23 @@ jest.mock('@/features/__core__', () => ({
   createFeatureHandle: () => ({}),
 }))
 
+// The shared (space) address book; a test can populate it to assert space-first name resolution.
+let mockSpaceContacts: { address: string; name: string; chainIds: string[] }[] = []
 jest.mock('@/features/spaces', () => ({
   SpacesFeature: {},
-  useGetSpaceAddressBook: () => [],
+  useGetSpaceAddressBook: () => mockSpaceContacts,
   useCurrentSpaceId: () => undefined,
 }))
 
 describe('SafeCardReadOnly', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockSpaceContacts = []
     jest
       .spyOn(gatewayApi, 'useGetSafeOverviewQuery')
+      .mockReturnValue({ data: undefined, isLoading: false, isError: false, refetch: jest.fn() } as never)
+    jest
+      .spyOn(gatewayApi, 'useGetMultipleSafeOverviewsQuery')
       .mockReturnValue({ data: undefined, isLoading: false, isError: false, refetch: jest.fn() } as never)
     jest.spyOn(gatewaySlices, 'useGetSafeOverviewQuery').mockReturnValue({ data: undefined } as never)
   })
@@ -89,6 +96,72 @@ describe('SafeCardReadOnly', () => {
     })
 
     expect(screen.getByTestId('pending-activation-chip')).toBeInTheDocument()
+  })
+
+  it('prefers the shared (space) name over a local one when preferSpaceName is set', () => {
+    const safe = safeItemBuilder().with({ chainId: '1' }).build()
+    mockSpaceContacts = [{ address: safe.address, name: 'Cloud Name', chainIds: ['1'] }]
+
+    render(<SafeCardReadOnly safe={safe} preferSpaceName />, {
+      initialReduxState: {
+        addressBook: { '1': { [safe.address]: 'Local Name' } },
+      } as unknown as Partial<RootState>,
+    })
+
+    expect(screen.getByText('Cloud Name')).toBeInTheDocument()
+    expect(screen.queryByText('Local Name')).not.toBeInTheDocument()
+  })
+
+  it('falls back to the local name when preferSpaceName is set but no space name exists', () => {
+    const safe = safeItemBuilder().with({ chainId: '1' }).build()
+    mockSpaceContacts = []
+
+    render(<SafeCardReadOnly safe={safe} preferSpaceName />, {
+      initialReduxState: {
+        addressBook: { '1': { [safe.address]: 'Local Name' } },
+      } as unknown as Partial<RootState>,
+    })
+
+    expect(screen.getByText('Local Name')).toBeInTheDocument()
+  })
+
+  it('finds the shared (space) name on any of a multichain Safe’s chains, not just the first', () => {
+    const base = safeItemBuilder().with({ chainId: '1' }).build()
+    const multiSafe: MultiChainSafeItem = {
+      address: base.address,
+      safes: [
+        { ...base, chainId: '1' },
+        { ...base, chainId: '137' },
+      ],
+      isPinned: false,
+      lastVisited: 0,
+      name: undefined,
+    }
+    // Shared name set only on chain 137 (NOT the first chain).
+    mockSpaceContacts = [{ address: base.address, name: 'Cloud Name', chainIds: ['137'] }]
+
+    render(<SafeCardReadOnly safe={multiSafe} preferSpaceName />, {
+      initialReduxState: {
+        addressBook: { '1': { [base.address]: 'Local Name' } },
+      } as unknown as Partial<RootState>,
+    })
+
+    expect(screen.getByText('Cloud Name')).toBeInTheDocument()
+    expect(screen.queryByText('Local Name')).not.toBeInTheDocument()
+  })
+
+  it('uses the local address-book name by default, ignoring the space name (other consumers unchanged)', () => {
+    const safe = safeItemBuilder().with({ chainId: '1' }).build()
+    mockSpaceContacts = [{ address: safe.address, name: 'Cloud Name', chainIds: ['1'] }]
+
+    render(<SafeCardReadOnly safe={safe} />, {
+      initialReduxState: {
+        addressBook: { '1': { [safe.address]: 'Local Name' } },
+      } as unknown as Partial<RootState>,
+    })
+
+    expect(screen.getByText('Local Name')).toBeInTheDocument()
+    expect(screen.queryByText('Cloud Name')).not.toBeInTheDocument()
   })
 
   it('renders the Not activated chip in place of the balance for an undeployed safe', () => {

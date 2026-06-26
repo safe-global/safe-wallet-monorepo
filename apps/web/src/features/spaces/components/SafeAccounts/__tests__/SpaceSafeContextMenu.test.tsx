@@ -19,6 +19,12 @@ jest.mock('@/hooks/safes', () => ({
   isMultiChainSafeItem: jest.fn(),
 }))
 
+// Space-first name resolution; defaults to no space name so the local fallback is asserted.
+const mockGetFromSpace = jest.fn((): { name: string } | undefined => undefined)
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  useMergedAddressBooks: () => ({ getFromSpace: mockGetFromSpace }),
+}))
+
 jest.mock('../RemoveSafeDialog', () => {
   return jest.fn(() => <div data-testid="remove-safe-dialog">Remove Safe Dialog</div>)
 })
@@ -52,6 +58,7 @@ describe('SpaceSafeContextMenu', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockGetFromSpace.mockReturnValue(undefined)
     ;(useAppSelector as jest.Mock).mockReturnValue(mockAddressBooks)
     // Rename + Remove are admin-only in a space, so default to admin to render the menu.
     ;(useIsAdmin as jest.Mock).mockReturnValue(true)
@@ -98,6 +105,15 @@ describe('SpaceSafeContextMenu', () => {
       spaceId: 'space-uuid',
     })
     expect(screen.getByTestId('rename-safe-dialog')).toBeInTheDocument()
+  })
+
+  it('prefills the shared (space) name, not the local one, when a space name exists', async () => {
+    mockGetFromSpace.mockReturnValue({ name: 'Cloud Name' })
+    render(<SpaceSafeContextMenu safeItem={mockSafeItem} />)
+    fireEvent.click(screen.getByRole('button'))
+    await waitFor(() => fireEvent.click(screen.getByText('Rename')))
+
+    expect(mockOpenRename).toHaveBeenCalledWith(expect.objectContaining({ currentName: 'Cloud Name' }))
   })
 
   it('opens the rename dialog with all chainIds for a multi-chain safe', async () => {

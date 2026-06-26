@@ -12,6 +12,7 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
 import { useAppSelector } from '@/store'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
+import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { useIsAdmin, useCurrentSpaceId, useRenameSafe } from '@/features/spaces'
@@ -24,8 +25,15 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
   const { openRename, renameDialog } = useRenameSafe()
 
   const allAddressBooks = useAppSelector(selectAllAddressBooks)
+  const { getFromSpace } = useMergedAddressBooks()
   const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
-  const name = isMultiChainSafeItem(safeItem) ? safeItem.name : allAddressBooks[safeItem.chainId]?.[safeItem.address]
+  // Rename here writes the shared (space) name, so prefill that — looked up across the Safe's chains
+  // — and only fall back to the local name. Without this the dialog opens with the personal local name.
+  const localName = isMultiChainSafeItem(safeItem)
+    ? safeItem.name
+    : allAddressBooks[safeItem.chainId]?.[safeItem.address]
+  const spaceName = chainIds.map((chainId) => getFromSpace(safeItem.address, chainId)?.name).find(Boolean)
+  const name = spaceName ?? localName
 
   // Rename + Remove are both admin-only in a space; with no actions there is nothing to show.
   if (!isAdmin) return null
