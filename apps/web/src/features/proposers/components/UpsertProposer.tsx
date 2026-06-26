@@ -109,7 +109,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
   const validateAddress = useCallback<Validate<string>>(
     (value) =>
-      addressIsNotCurrentSafe(safeAddress, 'Cannot add Safe Account itself as proposer')(value) ??
+      addressIsNotCurrentSafe(safeAddress, 'Cannot add Safe account itself as proposer')(value) ??
       addressIsNotOwner(safeOwnerAddresses, 'Cannot add Safe Owner as proposer')(value),
     [safeAddress, safeOwnerAddresses],
   )
@@ -321,7 +321,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
                   <SvgIcon component={SignatureIcon} inheritViewBox fontSize="small" />
                   Delegate as
                   <Tooltip
-                    title="Your connected wallet controls multiple Safe Accounts that are owners of this Safe. Select which account to create the proposer under."
+                    title="Your connected wallet controls multiple Safe accounts that are owners of this Safe. Select which account to create the proposer under."
                     arrow
                     placement="top"
                   >

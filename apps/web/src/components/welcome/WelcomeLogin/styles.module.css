@@ -56,8 +56,8 @@
 }
 
 .walletBtnSecondary {
-  background-color: var(--color-background-main);
-  color: var(--color-text-primary);
+  background-color: var(--sidebar-primary);
+  color: var(--sidebar-primary-foreground);
   border-radius: 12px;
   padding: 12px 16px;
   font-weight: 600;
@@ -68,7 +68,7 @@
 }
 
 .walletBtnSecondary:hover {
-  background-color: var(--color-border-light);
+  background-color: color-mix(in oklab, var(--sidebar-primary) 90%, transparent);
 }
 
 .walletBtnStatic {

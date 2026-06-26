@@ -131,7 +131,7 @@ export const OVERVIEW_EVENTS = {
     action: 'Click on SEP5 allocation button',
     category: OVERVIEW_CATEGORY,
   },
-  // Track clicks on links to Safe Accounts
+  // Track clicks on links to Safe accounts
   OPEN_SAFE: {
     action: 'Open Safe',
     category: OVERVIEW_CATEGORY,
@@ -141,7 +141,7 @@ export const OVERVIEW_EVENTS = {
     action: 'Toggle Safe pinned state',
     category: OVERVIEW_CATEGORY,
   },
-  // Track clicks on links to Safe Accounts
+  // Track clicks on links to Safe accounts
   EXPAND_MULTI_SAFE: {
     action: 'Expand multi Safe',
     category: OVERVIEW_CATEGORY,

@@ -46,7 +46,7 @@ export class DelegateCallModule implements SecurityModule<DelegateCallModuleRequ
       payload: {
         description: {
           short: 'Unexpected DelegateCall',
-          long: 'This transaction is a DelegateCall. It calls a smart contract that will be able to modify your Safe Account.',
+          long: 'This transaction is a DelegateCall. It calls a smart contract that will be able to modify your Safe account.',
         },
       },
     }

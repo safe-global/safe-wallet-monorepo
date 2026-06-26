@@ -34,7 +34,7 @@ export function ImportError() {
               <LargeHeaderTitle textAlign="center">Private key couldn't be imported</LargeHeaderTitle>
 
               <Text textAlign="center" fontSize="$4">
-                This private key does not belong to any signer of this Safe Account. Double-check the address and try to
+                This private key does not belong to any signer of this Safe account. Double-check the address and try to
                 import again.
               </Text>
 

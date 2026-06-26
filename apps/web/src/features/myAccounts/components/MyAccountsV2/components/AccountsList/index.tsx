@@ -105,7 +105,7 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
       {showCurrentSafe && (
         <section data-testid="current-safe-section" className="mb-6">
           <Typography variant="paragraph-small-bold" className="mb-2">
-            Current Safe Account
+            Current Safe account
           </Typography>
           <AccountItem safe={currentSafeItem} onLinkClick={onLinkClick} />
         </section>

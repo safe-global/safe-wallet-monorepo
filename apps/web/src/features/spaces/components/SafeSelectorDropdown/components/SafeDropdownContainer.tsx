@@ -117,7 +117,7 @@ const SafeDropdownContainer = ({
             ? 'No safes match your search'
             : wallet
               ? 'No safes yet'
-              : 'Connect a wallet to find your Safe Accounts'}
+              : 'Connect a wallet to find your Safe accounts'}
         </p>
       )
     }

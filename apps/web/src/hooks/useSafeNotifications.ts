@@ -95,8 +95,8 @@ const useSafeNotifications = (): void => {
         groupKey: OUTDATED_VERSION_KEY,
 
         message: isUnsupported
-          ? `Safe Account version ${version} is not supported by this web app anymore. You can update your Safe Account via the CLI.`
-          : `Your Safe Account version ${version} is out of date. Please update it.`,
+          ? `Safe account version ${version} is not supported by this web app anymore. You can update your Safe account via the CLI.`
+          : `Your Safe account version ${version} is out of date. Please update it.`,
 
         link: isUnsupported
           ? CLI_LINK
@@ -105,7 +105,7 @@ const useSafeNotifications = (): void => {
                 pathname: AppRoutes.settings.setup,
                 query: { safe: query.safe },
               },
-              title: 'Update Safe Account',
+              title: 'Update Safe account',
             },
 
         onClose: () => dismissUpdateNotification(OUTDATED_VERSION_KEY),

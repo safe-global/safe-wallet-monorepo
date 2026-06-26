@@ -102,7 +102,7 @@ describe('SafeDropdownContainer', () => {
 
       render(<SafeDropdownContainer items={[]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
 
-      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('Connect a wallet to find your Safe Accounts')
+      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('Connect a wallet to find your Safe accounts')
     })
 
     it('shows "No safes yet" when there are no safes but a wallet is connected', () => {

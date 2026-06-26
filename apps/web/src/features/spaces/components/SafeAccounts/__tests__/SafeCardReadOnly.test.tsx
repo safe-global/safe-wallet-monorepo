@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, fireEvent, mockClipboard } from '@/tests/test-utils'
 import SafeCardReadOnly from '../SafeCardReadOnly'
 import type { MultiChainSafeItem } from '@/hooks/safes'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
@@ -77,6 +77,19 @@ describe('SafeCardReadOnly', () => {
     render(<SafeCardReadOnly safe={safe} />)
 
     expect(screen.queryByTestId('pending-activation-chip')).toBeNull()
+  })
+
+  it('renders a copy-address button and copies the address', () => {
+    const writeText = mockClipboard()
+    const safe = safeItemBuilder().with({ chainId: '1', address: '0xDEADBEEF' }).build()
+
+    render(<SafeCardReadOnly safe={safe} />)
+
+    const copyButton = screen.getByRole('button', { name: 'Copy address' })
+    expect(copyButton).toBeInTheDocument()
+
+    fireEvent.click(copyButton)
+    expect(writeText).toHaveBeenCalledWith(safe.address)
   })
 
   it('renders the Not activated chip for an undeployed safe', () => {

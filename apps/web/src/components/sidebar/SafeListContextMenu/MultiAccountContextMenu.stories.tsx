@@ -14,7 +14,7 @@ const meta = {
     (Story) => (
       <Paper sx={{ padding: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <span>My Safe Account</span>
+          <span>My Safe account</span>
           <Story />
         </Box>
       </Paper>

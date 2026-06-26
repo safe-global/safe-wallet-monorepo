@@ -21,7 +21,7 @@ const ALL_SAFE_PAID_TOOLTIP =
   "Bulk execution is not available when all ready transactions pay fees from the Safe. You'd pay gas twice, once from the Safe and once from your signer wallet."
 
 const NOT_BATCHABLE_TOOLTIP =
-  'Batch execution is only available for transactions that have been fully signed and are strictly sequential in Safe Account nonce.'
+  'Batch execution is only available for transactions that have been fully signed and are strictly sequential in Safe account nonce.'
 
 const BATCHABLE_TOOLTIP = 'All highlighted transactions will be included in the batch execution.'
 

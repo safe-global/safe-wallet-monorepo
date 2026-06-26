@@ -14,5 +14,5 @@ export const isValidSafeVersion = (safeVersion?: SafeState['version']): safeVers
 
 // `assert` does not work with arrow functions
 export function assertValidSafeVersion<T extends SafeState['version']>(safeVersion?: T): asserts safeVersion {
-  return invariant(isValidSafeVersion(safeVersion), `${safeVersion} is not a valid Safe Account version`)
+  return invariant(isValidSafeVersion(safeVersion), `${safeVersion} is not a valid Safe account version`)
 }

@@ -5,8 +5,8 @@ import Identicon from '@/components/common/Identicon'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
-import { TriangleAlert, Copy, Check, RotateCw } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { TriangleAlert, RotateCw } from 'lucide-react'
+import { useMemo } from 'react'
 import { Tooltip } from '@mui/material'
 import FiatBalance from '../SelectSafesOnboarding/components/FiatBalance'
 import ThresholdBadge from '../SelectSafesOnboarding/components/ThresholdBadge'
@@ -23,6 +23,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { cn } from '@/utils/cn'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 
 interface SafeCardReadOnlyProps {
   safe: SafeItem | MultiChainSafeItem
@@ -53,7 +54,6 @@ const SafeCardReadOnly = ({
   disabledTooltip,
   preferSpaceName = false,
 }: SafeCardReadOnlyProps) => {
-  const [copied, setCopied] = useState(false)
   const router = useRouter()
   const isMultiChain = isMultiChainSafeItem(safe)
   const { name, fiatValue, threshold, ownersCount, elementRef, isUndeployed, isActivating } = useSafeCardData(safe)
@@ -93,13 +93,6 @@ const SafeCardReadOnly = ({
 
   const isClickable = Boolean(singleSafe) && !disabled
   const tooltipTitle = disabled ? (disabledTooltip ?? '') : !singleSafe ? 'Safe data is not available' : ''
-
-  const handleCopyAddress = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    navigator.clipboard.writeText(safe.address)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
 
   const handleCardClick = () => {
     if (!singleSafe || !chain?.shortName) return
@@ -157,20 +150,7 @@ const SafeCardReadOnly = ({
                   shortenAddress(safe.address)
                 )}
               </span>
-              <Tooltip title={copied ? 'Copied!' : 'Copy address'} placement="top">
-                <button
-                  onClick={handleCopyAddress}
-                  className="shrink-0 p-0.5 rounded hover:bg-muted transition-colors cursor-pointer"
-                  aria-label="Copy address"
-                  type="button"
-                >
-                  {copied ? (
-                    <Check className="size-3.5 text-green-600" />
-                  ) : (
-                    <Copy className="size-3.5 text-muted-foreground hover:text-foreground" />
-                  )}
-                </button>
-              </Tooltip>
+              <CopyAddressIconButton address={safe.address} />
             </div>
           </div>
         </div>

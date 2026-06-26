@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { render, screen, fireEvent, mockClipboard } from '@/tests/test-utils'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import type { MultiChainSafeItem, SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -132,10 +132,36 @@ const buildSafeItemHookReturn = (overrides: Partial<SafeItemHookReturn> = {}): S
   }) as SafeItemHookReturn
 
 describe('MultiAccountItem (MyAccountsV2)', () => {
+  let writeText: jest.Mock
+
   beforeEach(() => {
     jest.clearAllMocks()
+    writeText = mockClipboard()
     mockedUseMultiAccountItemData.mockReturnValue(buildMultiAccountHookReturn())
     mockedUseSafeItemData.mockReturnValue(buildSafeItemHookReturn())
+  })
+
+  describe('copy address', () => {
+    it('renders a copy address button in the group header', () => {
+      mockedUseMultiAccountItemData.mockReturnValue(buildMultiAccountHookReturn({ isCurrentSafe: false }))
+
+      render(<MultiAccountItem multiSafeAccountItem={buildMultiChainSafeItem()} />)
+
+      expect(screen.getByRole('button', { name: 'Copy address' })).toBeInTheDocument()
+    })
+
+    it('copies the group address without toggling expansion', () => {
+      const address = '0x1234567890abcdef1234567890abcdef12345678'
+      mockedUseMultiAccountItemData.mockReturnValue(buildMultiAccountHookReturn({ address, isCurrentSafe: false }))
+
+      render(<MultiAccountItem multiSafeAccountItem={buildMultiChainSafeItem({ address })} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Copy address' }))
+
+      expect(writeText).toHaveBeenCalledWith(address)
+      // Clicking copy must not expand the collapsible
+      expect(screen.queryByTestId('subacounts-container')).not.toBeInTheDocument()
+    })
   })
 
   describe('display name', () => {

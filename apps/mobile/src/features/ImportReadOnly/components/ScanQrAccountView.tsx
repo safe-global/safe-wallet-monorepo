@@ -32,11 +32,11 @@ const headingForPermission = (permission: CameraPermissionStatus): string => {
 const bodyForPermission = (permission: CameraPermissionStatus): string => {
   switch (permission) {
     case 'denied':
-      return 'Enable camera access to scan QR codes for adding Safe Accounts and connecting wallets. You can change this in Settings.'
+      return 'Enable camera access to scan QR codes for adding Safe accounts and connecting wallets. You can change this in Settings.'
     case 'restricted':
       return 'Camera access is disabled by a device restriction. If you manage this device, you can change it in Settings.'
     case 'not-determined':
-      return 'Safe needs camera access to scan QR codes for adding Safe Accounts and connecting wallets.'
+      return 'Safe needs camera access to scan QR codes for adding Safe accounts and connecting wallets.'
     default:
       return 'Scan the QR code of the account you want to import. You can find it under Receive or in the sidebar.'
   }

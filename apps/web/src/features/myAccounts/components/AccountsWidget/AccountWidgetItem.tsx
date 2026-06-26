@@ -7,7 +7,7 @@ import { WidgetItem } from '@/features/spaces'
 import { AccountItem } from '../AccountItem'
 import type { Account } from './types'
 import Identicon from '@/components/common/Identicon'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import AddressWithCopy from '@/components/common/AddressWithCopy'
 import { NotActivatedBadge } from '@/components/common/SpaceSafeBar/AccountsModal/shared'
 
 interface AccountWidgetItemProps {
@@ -33,11 +33,7 @@ const AccountWidgetItem = ({
           {account.name}
         </Typography>
       }
-      info={
-        <Typography data-testid="single-account-address" variant="paragraph-mini" color="muted">
-          {shortenAddress(account.address, 4)}
-        </Typography>
-      }
+      info={<AddressWithCopy address={account.address} data-testid="single-account-address" />}
       startNode={
         <Avatar data-testid="single-account-identicon">
           <Identicon address={account.address} size={40} />

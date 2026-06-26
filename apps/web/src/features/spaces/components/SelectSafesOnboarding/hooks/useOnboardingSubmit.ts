@@ -191,7 +191,7 @@ const useOnboardingSubmit = (
 
       onSuccess()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something went wrong updating Safe Accounts. Please try again.')
+      setError(e instanceof Error ? e.message : 'Something went wrong updating Safe accounts. Please try again.')
       setIsSubmitting(false)
     }
   })
