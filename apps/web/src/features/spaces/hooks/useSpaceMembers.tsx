@@ -40,6 +40,8 @@ export const isInviteExpired = (member: MemberDto): boolean => {
   return Number.isFinite(expiresAt) && expiresAt <= Date.now()
 }
 
+export const getMemberDisplayName = (member: Pick<MemberDto, 'name' | 'alias'>) => member.alias || member.name
+
 const useAllMembers = (spaceId?: string) => {
   const currentSpaceId = useCurrentSpaceId()
   const actualSpaceId = spaceId ?? currentSpaceId

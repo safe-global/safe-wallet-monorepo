@@ -15,6 +15,8 @@ import {
   isInviteExpired,
   MemberStatus,
   useAdminCount,
+  useCurrentMembership,
+  getMemberDisplayName,
 } from '@/features/spaces'
 import EditMemberDialog from './EditMemberDialog'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
@@ -44,8 +46,18 @@ const headCells = [
   },
 ]
 
-const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean }) => {
+const EditButton = ({
+  member,
+  isCurrentUser,
+  disableRole,
+}: {
+  member: MemberDto
+  isCurrentUser: boolean
+  disableRole: boolean
+}) => {
   const [open, setOpen] = useState(false)
+  // The last admin can't change their role, but can still rename themselves
+  const disabled = disableRole && !isCurrentUser
 
   return (
     <>
@@ -56,7 +68,14 @@ const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean
           </IconButton>
         </Box>
       </Tooltip>
-      {open && <EditMemberDialog member={member} handleClose={() => setOpen(false)} />}
+      {open && (
+        <EditMemberDialog
+          member={member}
+          handleClose={() => setOpen(false)}
+          isCurrentUser={isCurrentUser}
+          disableRole={disableRole}
+        />
+      )}
     </>
   )
 }
@@ -92,7 +111,7 @@ export const RemoveMemberButton = ({
       {openRemoveMemberDialog && (
         <RemoveMemberDialog
           userId={member.user.id}
-          memberName={member.name}
+          memberName={getMemberDisplayName(member)}
           handleClose={() => setOpenRemoveMemberDialog(false)}
           isInvite={isInvite}
         />
@@ -104,6 +123,7 @@ export const RemoveMemberButton = ({
 const MembersList = ({ members }: { members: MemberDto[] }) => {
   const isAdmin = useIsAdmin()
   const adminCount = useAdminCount(members)
+  const currentMembership = useCurrentMembership()
 
   const rows = members.map((member) => {
     const isLastAdmin = adminCount === 1 && isActiveAdmin(member)
@@ -111,7 +131,9 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     const isDeclined = member.status === MemberStatus.DECLINED
     const isInvite = isPendingInvite || isDeclined
     const isExpired = isInviteExpired(member)
-    const isDisabled = isAdmin && isLastAdmin && !isInvite
+    // The last active admin can't be demoted or removed, but can still rename themselves
+    const isRoleLocked = isAdmin && isLastAdmin && !isInvite
+    const isCurrentUser = member.user.id === currentMembership?.user.id
     const memberEmail = member.user.email
     // Contract: Email invites can always be renewed (resending the email);
     // wallet invites are only renewed once they have expired.
@@ -120,10 +142,10 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
     return {
       cells: {
         name: {
-          rawValue: member.name,
+          rawValue: getMemberDisplayName(member),
           content: (
             <Stack direction="row" alignItems="center" justifyContent="left" gap={1}>
-              <MemberName member={member} />
+              <MemberName member={member} isCurrentUser={isCurrentUser} />
               {isDeclined && (
                 <Chip
                   label="Declined"
@@ -164,13 +186,16 @@ const MembersList = ({ members }: { members: MemberDto[] }) => {
         actions: {
           rawValue: '',
           sticky: true,
-          content: isAdmin ? (
-            <div className={tableCss.actions}>
-              {!isInvite && <EditButton member={member} disabled={isDisabled} />}
-              {canRenew && <RenewInviteButton member={member} />}
-              <RemoveMemberButton member={member} disabled={isDisabled} isInvite={isInvite} />
-            </div>
-          ) : null,
+          // Wait for membership before rendering actions so the current user's row doesn't
+          // briefly show the edit pencil as disabled until isCurrentUser is known.
+          content:
+            isAdmin && currentMembership ? (
+              <div className={tableCss.actions}>
+                {!isInvite && <EditButton member={member} isCurrentUser={isCurrentUser} disableRole={isRoleLocked} />}
+                {canRenew && <RenewInviteButton member={member} />}
+                <RemoveMemberButton member={member} disabled={isRoleLocked} isInvite={isInvite} />
+              </div>
+            ) : null,
         },
       },
     }
