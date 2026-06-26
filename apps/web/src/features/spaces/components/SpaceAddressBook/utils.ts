@@ -2,6 +2,42 @@ import type { AddressBookState } from '@/store/addressBookSlice'
 import type { ContactItem } from './Import/ContactsList'
 import type { ImportContactsFormValues } from './Import/ImportAddressBookDialog'
 import type { AddressBookItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
+
+const MAX_LISTED_MISSING_NETWORKS = 3
+
+// Stored chain ids can outlive the chain config when a network is delisted.
+// Those ids resolve to an "unknown network" logo, so callers should display
+// only the chains that are still supported.
+export const getSupportedChainIds = (chainIds: string[], configs: Chain[]): string[] => {
+  const supportedIds = new Set(configs.map((chain) => chain.chainId))
+  return chainIds.filter((chainId) => supportedIds.has(chainId))
+}
+
+// Human-readable summary of which networks a contact applies to, shown instead
+// of listing every chain. "All networks" is derived from the current chain
+// config rather than a stored flag, so it reflects what is supported now. The
+// evergreen, intent-based version is tracked in WA-2695.
+export const getNetworkAvailabilityText = (chainIds: string[], configs: Chain[]): string => {
+  const total = configs.length
+  if (total === 0) {
+    return `Available on ${chainIds.length} supported network${maybePlural(chainIds.length)}`
+  }
+
+  const selectedIds = new Set(chainIds)
+  const missing = configs.filter((chain) => !selectedIds.has(chain.chainId))
+
+  if (missing.length === 0) {
+    return 'Available on all supported networks'
+  }
+
+  if (missing.length <= MAX_LISTED_MISSING_NETWORKS) {
+    return `Available on all supported networks except ${missing.map((chain) => chain.chainName).join(', ')}`
+  }
+
+  return `Available on ${total - missing.length} of ${total} supported network${maybePlural(total)}`
+}
 
 export const flattenAddressBook = (allAddressBooks: AddressBookState): ContactItem[] => {
   return Object.entries(allAddressBooks).flatMap(([chainId, addressBook]) => {

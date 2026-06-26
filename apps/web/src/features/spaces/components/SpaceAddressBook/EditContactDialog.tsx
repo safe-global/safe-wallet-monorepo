@@ -140,6 +140,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
                     <NetworkMultiSelectorInput
                       name="networks"
                       showSelectAll
+                      maxVisibleTags={6}
                       value={field.value || []}
                       error={!!errors.networks}
                       helperText={errors.networks ? 'Select at least one network' : ''}

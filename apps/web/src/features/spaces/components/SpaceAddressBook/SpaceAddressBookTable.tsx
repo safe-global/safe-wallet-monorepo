@@ -8,7 +8,6 @@ import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EmailInfo from '@/components/common/EmailInfo'
 import { NetworkLogosList } from '@/features/multichain'
-import ChainIndicator from '@/components/common/ChainIndicator'
 import { HardDrive, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from './SpaceAddressBookActions'
@@ -17,6 +16,8 @@ import { cn } from '@/utils/cn'
 import { formatDate } from '@/features/spaces/utils'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
+import useChains from '@/hooks/useChains'
+import { getNetworkAvailabilityText, getSupportedChainIds } from './utils'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
   isLocal: boolean
@@ -61,6 +62,7 @@ function SpaceAddressBookTable({
 }: SpaceAddressBookTableProps) {
   const [page, setPage] = useState(0)
   const resolveMemberName = useMemberNameResolver()
+  const { configs } = useChains()
   const theme = useTheme()
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'))
 
@@ -127,19 +129,13 @@ function SpaceAddressBookTable({
                   <TooltipTrigger>
                     <span className="inline-flex origin-left scale-85">
                       <NetworkLogosList
-                        networks={entry.chainIds.map((chainId) => ({ chainId }))}
+                        networks={getSupportedChainIds(entry.chainIds, configs).map((chainId) => ({ chainId }))}
                         showHasMore
                         maxVisible={3}
                       />
                     </span>
                   </TooltipTrigger>
-                  <TooltipContent>
-                    <div className="flex flex-col gap-1">
-                      {entry.chainIds.map((chainId) => (
-                        <ChainIndicator key={chainId} chainId={chainId} />
-                      ))}
-                    </div>
-                  </TooltipContent>
+                  <TooltipContent>{getNetworkAvailabilityText(entry.chainIds, configs)}</TooltipContent>
                 </Tooltip>
               </TableCell>
 

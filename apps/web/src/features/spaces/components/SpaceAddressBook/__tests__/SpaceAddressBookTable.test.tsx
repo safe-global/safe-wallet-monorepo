@@ -4,7 +4,9 @@ import type { AddressBookEntry } from '../SpaceAddressBookTable'
 import { Builder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
 
-jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
+jest.mock('@/hooks/useChains', () => () => ({
+  configs: ['1', '5', '10', '100', '137', '42161', '8453'].map((chainId) => ({ chainId, chainName: chainId })),
+}))
 jest.mock('@/components/common/EthHashInfo', () => {
   const EthHashInfo = ({ address }: { address: string }) => <span data-testid="eth-hash-info">{address}</span>
   return EthHashInfo
@@ -105,6 +107,14 @@ describe('SpaceAddressBookTable', () => {
     expect(logosList).toHaveAttribute('data-show-has-more', 'true')
     expect(logosList).toHaveAttribute('data-max-visible', '3')
     expect(logosList).toHaveAttribute('data-count', '5')
+  })
+
+  it('excludes delisted chains (no longer in the config) from the chain logos', () => {
+    const chainIds = ['1', '137', '99999']
+    render(<SpaceAddressBookTable entries={[entryBuilder().with({ chainIds }).build()]} />)
+
+    // 99999 is not in the chain config, so only the two supported chains are counted
+    expect(screen.getByTestId('network-logos')).toHaveAttribute('data-count', '2')
   })
 
   it('renders NetworkLogosList even when entry covers all chains', () => {
