@@ -12,6 +12,9 @@
 import type { SessionTypes } from '@walletconnect/types'
 import { createE2eStore } from '@/src/tests/e2e-maestro/createE2eStore'
 
+/** Topic of the fixture session the fake approves; shared so synthSessionDelete targets it. */
+export const E2E_SESSION_TOPIC = 'e2e-session-topic'
+
 /** What the fake `getWalletKit().pair()` should do for the next scan/deep-link. */
 export type PairBehavior = 'resolve' | 'hang' | 'reject'
 

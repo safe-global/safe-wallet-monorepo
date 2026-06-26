@@ -1,26 +1,20 @@
 import type { Dispatch } from '@reduxjs/toolkit'
 import type { Router } from 'expo-router'
-import type { SessionTypes } from '@walletconnect/types'
 import type { WalletKitTypes } from '@reown/walletkit'
 import { getEip155ChainId } from '@safe-global/utils/features/walletconnect/utils'
 import { store } from '@/src/store'
 import { pushPending, removeSession } from '@/src/features/WalletConnect/Wallet/store/walletKitSlice'
-import { walletKitE2eState } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
-import { SAFE_WALLET_METADATA } from '@/src/features/WalletConnect/shared/metadata'
-import { mockedActiveAccount, mockedActiveSafeInfo, TEST_WALLET_ICON } from './mockData'
+import { walletKitE2eState, E2E_SESSION_TOPIC } from '@/src/features/WalletConnect/Wallet/walletKitE2eState'
+import { mockedActiveAccount, TEST_WALLET_ICON } from './mockData'
 import { onboardAndNavigate, resetReduxForE2E } from './setupHelpers'
 
 // ── Fixtures ───────────────────────────────────────────────────────────────
-// The dApp surface (header QR, controller) is gated by NATIVE_WALLETCONNECT and
-// approval is built from the active Safe's deployments, so these fixtures pin to
-// the same Sepolia Safe the other e2e setups use.
+// Pinned to the active test Safe's chain so the proposal is approvable. The
+// approved-session fixture lives in walletKit.e2e.ts, next to the fake.
 
-const CHAIN_ID = mockedActiveAccount.chainId // '11155111'
-const CAIP2 = getEip155ChainId(CHAIN_ID) // 'eip155:11155111'
-const SAFE_ADDRESS = mockedActiveSafeInfo.address.value
+const CAIP2 = getEip155ChainId(mockedActiveAccount.chainId) // 'eip155:11155111'
 
 const PAIRING_TOPIC = 'e2e-pairing-topic'
-const SESSION_TOPIC = 'e2e-session-topic'
 
 /** Uniswap-shaped dApp metadata. */
 const DAPP_METADATA = {
@@ -35,10 +29,11 @@ type VerifiedFixture = {
   isScam?: boolean
 }
 
-// Counter (not Date/random) keeps proposal ids deterministic and unique per synth.
-let proposalSeq = 1000
+// Deterministic ids; reset per flow in setupWcDappsBase so they're stable across runs.
+const PROPOSAL_SEQ_START = 1000
+let proposalSeq = PROPOSAL_SEQ_START
 
-/** Build a relay-shaped session proposal whose namespaces are approvable for the active Safe. */
+/** Build a session proposal whose namespaces are approvable for the active Safe. */
 const buildProposal = (verified: VerifiedFixture): WalletKitTypes.SessionProposal => {
   const id = ++proposalSeq
   return {
@@ -47,7 +42,6 @@ const buildProposal = (verified: VerifiedFixture): WalletKitTypes.SessionProposa
       id,
       pairingTopic: PAIRING_TOPIC,
       expiryTimestamp: 0,
-      // No hard requirements; the optional eip155 namespace intersects with the Safe's chain.
       requiredNamespaces: {},
       optionalNamespaces: {
         eip155: {
@@ -64,33 +58,12 @@ const buildProposal = (verified: VerifiedFixture): WalletKitTypes.SessionProposa
         verifyUrl: '',
         validation: verified.validation,
         origin: DAPP_METADATA.url,
-        isScam: verified.isScam,
+        // Only present for the scam fixture; real non-scam proposals omit it.
+        ...(verified.isScam ? { isScam: true } : {}),
       },
     },
-  } as WalletKitTypes.SessionProposal
+  }
 }
-
-/** Fixture session the fake approveSession() returns / addSession mirrors into the slice. */
-export const APPROVED_SESSION: SessionTypes.Struct = {
-  topic: SESSION_TOPIC,
-  pairingTopic: PAIRING_TOPIC,
-  relay: { protocol: 'irn' },
-  expiry: 0,
-  acknowledged: true,
-  controller: 'self',
-  namespaces: {
-    eip155: {
-      chains: [CAIP2],
-      accounts: [`${CAIP2}:${SAFE_ADDRESS}`],
-      methods: ['eth_sendTransaction', 'wallet_sendCalls'],
-      events: ['chainChanged', 'accountsChanged'],
-    },
-  },
-  requiredNamespaces: {},
-  optionalNamespaces: {},
-  self: { publicKey: 'self', metadata: SAFE_WALLET_METADATA },
-  peer: { publicKey: 'e2e-proposer-pubkey', metadata: DAPP_METADATA },
-} as SessionTypes.Struct
 
 // ── Setup + synthesis (driven by TestCtrls buttons) ──────────────────────────
 
@@ -100,6 +73,7 @@ export const APPROVED_SESSION: SessionTypes.Struct = {
  */
 export const setupWcDappsBase = (dispatch: Dispatch, router: Router) => {
   resetReduxForE2E(dispatch)
+  proposalSeq = PROPOSAL_SEQ_START
   walletKitE2eState.set({ forceNativeWalletConnect: true })
   onboardAndNavigate(dispatch, router)
 }
@@ -120,8 +94,8 @@ export const synthSessionProposalScam = () => synthProposal({ validation: 'VALID
 
 /** Synthesise a session_delete for the fixture session topic (slice + fake's session store). */
 export const synthSessionDelete = () => {
-  store.dispatch(removeSession(SESSION_TOPIC))
-  const { [SESSION_TOPIC]: _removed, ...rest } = walletKitE2eState.get().sessions
+  store.dispatch(removeSession(E2E_SESSION_TOPIC))
+  const { [E2E_SESSION_TOPIC]: _removed, ...rest } = walletKitE2eState.get().sessions
   walletKitE2eState.set({ sessions: rest })
 }
 

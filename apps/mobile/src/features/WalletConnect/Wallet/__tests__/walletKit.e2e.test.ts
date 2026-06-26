@@ -1,6 +1,5 @@
-import { getWalletKit } from '../walletKit.e2e'
+import { getWalletKit, APPROVED_SESSION } from '../walletKit.e2e'
 import { walletKitE2eState } from '../walletKitE2eState'
-import { APPROVED_SESSION } from '@/src/tests/e2e-maestro/setup/walletConnectDappsSetup'
 
 describe('walletKit.e2e (fake WalletKit)', () => {
   beforeEach(() => walletKitE2eState.reset())
@@ -47,5 +46,12 @@ describe('walletKit.e2e (fake WalletKit)', () => {
     const wk = await getWalletKit()
     expect(wk.getActiveSessions()).toEqual({})
     expect(wk.getPendingSessionRequests()).toEqual([])
+  })
+
+  it('defaults unimplemented methods to a resolved no-op (and is not a thenable)', async () => {
+    // `await getWalletKit()` resolving proves the Proxy exposes no `then`.
+    const wk = await getWalletKit()
+    const unknownMethod = (wk as unknown as Record<string, () => Promise<unknown>>).extendSession
+    await expect(unknownMethod()).resolves.toBeUndefined()
   })
 })

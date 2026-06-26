@@ -1,20 +1,43 @@
 /**
- * E2E override for `walletKit.ts` (selected by Metro via RN_SRC_EXT=e2e.ts).
- *
- * Replaces the relay-backed WalletKit with a deterministic fake so Maestro
- * flows never depend on a live relay node or an external dApp fixture. Only the
- * surface the Wallet feature actually calls is implemented; everything else is
- * a resolved no-op. Behaviour is driven by `walletKitE2eState`.
- *
- * session_proposal / session_request / session_delete events are NOT emitted
- * through the SDK here — they are synthesised by dispatching fixture payloads
- * straight into `walletKitSlice` from TestCtrls (see walletConnectDappsSetup).
- * So `on`/`off` are intentionally no-ops.
+ * E2E override for `walletKit.ts` (Metro picks it via RN_SRC_EXT=e2e.ts): a
+ * deterministic fake so Maestro never depends on a live relay. Events are
+ * synthesised straight into `walletKitSlice` (see walletConnectDappsSetup), so
+ * `on`/`off` are no-ops; behaviour is driven by `walletKitE2eState`.
  */
 import type { IWalletKit } from '@reown/walletkit'
 import type { SessionTypes } from '@walletconnect/types'
-import { walletKitE2eState } from './walletKitE2eState'
-import { APPROVED_SESSION } from '@/src/tests/e2e-maestro/setup/walletConnectDappsSetup'
+import { walletKitE2eState, E2E_SESSION_TOPIC } from './walletKitE2eState'
+import { SAFE_WALLET_METADATA } from '../shared/metadata'
+
+/** Session approveSession() returns; values mirror the test Safe but aren't asserted. */
+export const APPROVED_SESSION: SessionTypes.Struct = {
+  topic: E2E_SESSION_TOPIC,
+  pairingTopic: 'e2e-pairing-topic',
+  relay: { protocol: 'irn' },
+  expiry: 0,
+  acknowledged: true,
+  controller: 'self',
+  namespaces: {
+    eip155: {
+      chains: ['eip155:11155111'],
+      accounts: ['eip155:11155111:0x2f3e600a3F38b66aDcbe6530B191F2BE55c2Fbb6'],
+      methods: ['eth_sendTransaction', 'wallet_sendCalls'],
+      events: ['chainChanged', 'accountsChanged'],
+    },
+  },
+  requiredNamespaces: {},
+  optionalNamespaces: {},
+  self: { publicKey: 'self', metadata: SAFE_WALLET_METADATA },
+  peer: {
+    publicKey: 'e2e-proposer-pubkey',
+    metadata: {
+      name: 'Uniswap',
+      description: 'Swap or provide liquidity on the Uniswap Protocol',
+      url: 'https://app.uniswap.org',
+      icons: [],
+    },
+  },
+}
 
 const asyncNoop = async (): Promise<void> => undefined
 const noop = (): void => undefined
@@ -27,8 +50,7 @@ const fakeWalletKit = {
   rejectSessionAuthenticate: asyncNoop,
   respondSessionRequest: asyncNoop,
 
-  // Reflects approved sessions so the controller's setSessions(getActiveSessions())
-  // on init/expiry stays consistent with the slice instead of clobbering it with {}.
+  // Reflects approved sessions so setSessions(getActiveSessions()) can't clobber the slice.
   getActiveSessions: (): Record<string, SessionTypes.Struct> => walletKitE2eState.get().sessions,
   getPendingSessionRequests: () => [],
 
@@ -38,10 +60,9 @@ const fakeWalletKit = {
       throw new Error('E2E pair rejected')
     }
     if (pairBehavior === 'hang') {
-      // Never resolves: the scanner's PAIR_TIMEOUT_MS timer fires the timeout overlay.
+      // Never resolves → the scanner's PAIR_TIMEOUT_MS timer fires the timeout overlay.
       return new Promise<void>(() => undefined)
     }
-    // 'resolve': pairs instantly. The proposal is synthesised separately via TestCtrls.
   },
 
   approveSession: async (_params: unknown): Promise<SessionTypes.Struct> => {
@@ -61,8 +82,16 @@ const fakeWalletKit = {
   },
 }
 
-// The fake implements only the methods the Wallet feature invokes; narrow the
-// cast to IWalletKit rather than widening callers with `any`.
-const instance = fakeWalletKit as unknown as IWalletKit
+// Unimplemented methods default to a resolved no-op so a new app-side WalletKit
+// call can't crash mid-flow. `then`/symbols must stay undefined, or await would
+// treat the fake as a thenable and hang.
+const instance = new Proxy(fakeWalletKit, {
+  get(target, prop, receiver) {
+    if (prop in target) {
+      return Reflect.get(target, prop, receiver)
+    }
+    return prop === 'then' || typeof prop === 'symbol' ? undefined : asyncNoop
+  },
+}) as unknown as IWalletKit
 
 export const getWalletKit = (): Promise<IWalletKit> => Promise.resolve(instance)
