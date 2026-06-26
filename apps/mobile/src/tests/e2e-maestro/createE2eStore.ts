@@ -1,11 +1,10 @@
 /**
- * Tiny observable singleton store for E2E test scenarios.
+ * Tiny observable singleton store for E2E scenarios, shared by walletKitE2eState
+ * and walletConnectE2eState. TestCtrls mutate it via set(); `.e2e` overrides read
+ * it via get()/useSyncExternalStore; reset() runs between flows.
  *
- * TestCtrls buttons mutate it via set(); `.e2e` overrides read it via get() or
- * subscribe to it with useSyncExternalStore. Each scenario store is reset
- * between flows (wire reset() into resetReduxForE2E). Collapses the
- * hand-rolled get/set/reset/subscribe singletons (walletKitE2eState,
- * walletConnectE2eState) into one tested implementation.
+ * State is shallow-cloned — update via set() with new values, never mutate a
+ * nested value in place (it would corrupt initialState and break reset()).
  */
 export interface E2eStore<T> {
   get: () => T
