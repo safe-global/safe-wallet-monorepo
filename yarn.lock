@@ -13520,15 +13520,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/api-kit@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "@safe-global/api-kit@npm:4.1.0"
+"@safe-global/api-kit@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "@safe-global/api-kit@npm:5.0.1"
   dependencies:
-    "@safe-global/protocol-kit": "npm:^7.0.0"
-    "@safe-global/types-kit": "npm:^3.1.0"
+    "@safe-global/protocol-kit": "npm:^8.0.1"
+    "@safe-global/types-kit": "npm:^4.0.1"
     node-fetch: "npm:^2.7.0"
-    viem: "npm:^2.21.8"
-  checksum: 10/d094775d73811476d007d52653b0cece433e02c322ae1676f5dcc78b396aac5d88ed2e7ac840821da64d8a8f0bb15ecce21d2e9203ab3cc52dcc998cefff9c6a
+    viem: "npm:^2.52.2"
+  checksum: 10/48be46864b0779a923d5527b9a71f5823f1805a7ab3cae5f3d3bf92a9dadd45e4af9c87856090ade794722786c704f2ad66104a33d65e1f442cefb080bbafe38
   languageName: node
   linkType: hard
 
@@ -13578,11 +13578,11 @@ __metadata:
     "@reown/appkit-react-native": "npm:^2.0.3"
     "@reown/walletkit": "npm:^1.2.7"
     "@rtk-query/codegen-openapi": "npm:^2.0.0"
-    "@safe-global/protocol-kit": "npm:^7.1.0"
+    "@safe-global/protocol-kit": "npm:^8.0.1"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
-    "@safe-global/types-kit": "npm:^3.1.0"
+    "@safe-global/types-kit": "npm:^4.0.1"
     "@safe-global/utils": "workspace:^"
     "@shopify/flash-list": "npm:^2.3.0"
     "@storybook/addon-actions": "npm:^9.0.8"
@@ -13703,45 +13703,24 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@safe-global/protocol-kit@npm:^7.0.0":
-  version: 7.0.0
-  resolution: "@safe-global/protocol-kit@npm:7.0.0"
+"@safe-global/protocol-kit@npm:^8.0.1":
+  version: 8.0.1
+  resolution: "@safe-global/protocol-kit@npm:8.0.1"
   dependencies:
     "@noble/curves": "npm:^1.6.0"
     "@peculiar/asn1-schema": "npm:^2.3.13"
-    "@safe-global/safe-deployments": "npm:^1.37.52"
-    "@safe-global/safe-modules-deployments": "npm:^3.0.0"
-    "@safe-global/types-kit": "npm:^3.1.0"
-    abitype: "npm:^1.0.2"
-    semver: "npm:^7.7.2"
-    viem: "npm:^2.21.8"
+    "@safe-global/safe-deployments": "npm:^1.37.57"
+    "@safe-global/safe-modules-deployments": "npm:^3.0.4"
+    "@safe-global/types-kit": "npm:^4.0.1"
+    abitype: "npm:^1.2.3"
+    semver: "npm:^7.8.0"
+    viem: "npm:^2.52.2"
   dependenciesMeta:
     "@noble/curves":
       optional: true
     "@peculiar/asn1-schema":
       optional: true
-  checksum: 10/84749ca6b6327a568de07e2973b0e96e0ad8e2a6c54b4b74c5401e7ce7bd92be05e833260bf41092f20b811610bca68d069580a197d1134799626b023f11c94e
-  languageName: node
-  linkType: hard
-
-"@safe-global/protocol-kit@npm:^7.1.0":
-  version: 7.1.0
-  resolution: "@safe-global/protocol-kit@npm:7.1.0"
-  dependencies:
-    "@noble/curves": "npm:^1.6.0"
-    "@peculiar/asn1-schema": "npm:^2.3.13"
-    "@safe-global/safe-deployments": "npm:^1.37.54"
-    "@safe-global/safe-modules-deployments": "npm:^3.0.2"
-    "@safe-global/types-kit": "npm:^3.1.0"
-    abitype: "npm:^1.0.2"
-    semver: "npm:^7.7.2"
-    viem: "npm:^2.21.8"
-  dependenciesMeta:
-    "@noble/curves":
-      optional: true
-    "@peculiar/asn1-schema":
-      optional: true
-  checksum: 10/16944fe7981606c3e129140a6b447904efc14325ef05ee5f4da656a97b0c87a11ea4dc93384d44b760b1d4b303da543b2c3b5401744624c3f622e36d9c783e39
+  checksum: 10/aaee5ec701a62c5a1afcf486dc69de789ac9cb28989920edc7d5cdd492a3e939a7079a0ae683a1b1d46c48d4dc02fa140cb045c9c6acfa472398aab6f3b98d30
   languageName: node
   linkType: hard
 
@@ -13776,12 +13755,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-deployments@npm:^1.37.52, @safe-global/safe-deployments@npm:^1.37.54":
-  version: 1.37.54
-  resolution: "@safe-global/safe-deployments@npm:1.37.54"
+"@safe-global/safe-deployments@npm:^1.37.57":
+  version: 1.37.57
+  resolution: "@safe-global/safe-deployments@npm:1.37.57"
   dependencies:
     semver: "npm:^7.6.2"
-  checksum: 10/1a5e76d076fb8850d1320526489b60d3cebab7abfbc00ab10d916bf146f5741195f060af3636fec6ef6b0ed85682c70db5e9c2fbbaaf97b43977cb5ee8b6c731
+  checksum: 10/6188f703b786e4bfe10dae59fc251afa1f125486579aebe8c824e8c539aac009abae0dd1cd97f33aaa3e89e06d3a2c4f2cb0e70e7a6dd62f93e330d6092eb24c
   languageName: node
   linkType: hard
 
@@ -13799,10 +13778,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@safe-global/safe-modules-deployments@npm:^3.0.0, @safe-global/safe-modules-deployments@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "@safe-global/safe-modules-deployments@npm:3.0.2"
-  checksum: 10/8b3ec33e7505aedbc214df25fe3d51d520d2572f301b9f58a9f15901deecd5e75b34f77b7aa309c56a2f8bb5831b2de820ec411665d0b777e678fab2f40269d0
+"@safe-global/safe-modules-deployments@npm:^3.0.4, @safe-global/safe-modules-deployments@npm:^3.0.5":
+  version: 3.0.5
+  resolution: "@safe-global/safe-modules-deployments@npm:3.0.5"
+  checksum: 10/b0362d5ba1d75840f5a7710c5413e65da37b19d1e987b0d3a89a095716c21617bccf2755af0426357e7626e6892d06e0b90a5fb88500a6009d92b7f5c22d84ab
   languageName: node
   linkType: hard
 
@@ -13855,7 +13834,7 @@ __metadata:
   dependencies:
     "@faker-js/faker": "npm:^9.2.0"
     "@safe-global/store": "workspace:^"
-    "@safe-global/types-kit": "npm:^3.1.0"
+    "@safe-global/types-kit": "npm:^4.0.1"
     ethers: "npm:6.14.3"
     jest: "npm:^29.7.0"
     jest-transform-stub: "npm:2.0.0"
@@ -13913,7 +13892,7 @@ __metadata:
     "@safe-global/safe-apps-provider": "npm:^0.18.6"
     "@safe-global/safe-apps-react-sdk": "npm:^4.7.2"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.54"
+    "@safe-global/safe-deployments": "npm:^1.37.57"
     "@safe-global/safe-gateway-typescript-sdk": "npm:^3.22.9"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
@@ -13956,12 +13935,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@safe-global/types-kit@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "@safe-global/types-kit@npm:3.1.0"
+"@safe-global/types-kit@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "@safe-global/types-kit@npm:4.0.1"
   dependencies:
-    abitype: "npm:^1.0.2"
-  checksum: 10/a610e9846afc93b01be5cd9c3250ea62ba7a429ac43ac759242c7c843e34bc6f92246e8df46a68ae776ab6042f2c90902c5b46b3c1ed7c31eb8d581587459cbc
+    abitype: "npm:^1.2.3"
+  checksum: 10/8c8fcdb685bad4df6eba571c8e880ba17f7514d36de060b3b9a8f640328957f3ddce1c188309063576e525a5d144b1b5dcb050b84a6e299f5fef6709a4d3ef5d
   languageName: node
   linkType: hard
 
@@ -14077,15 +14056,15 @@ __metadata:
     "@reduxjs/toolkit": "npm:^2.11.0"
     "@reown/walletkit": "npm:^1.2.7"
     "@rspack/plugin-react-refresh": "npm:^1.0.0"
-    "@safe-global/api-kit": "npm:^4.1.0"
-    "@safe-global/protocol-kit": "npm:^7.1.0"
+    "@safe-global/api-kit": "npm:^5.0.1"
+    "@safe-global/protocol-kit": "npm:^8.0.1"
     "@safe-global/safe-apps-sdk": "npm:^9.1.0"
-    "@safe-global/safe-deployments": "npm:^1.37.54"
-    "@safe-global/safe-modules-deployments": "npm:^3.0.2"
+    "@safe-global/safe-deployments": "npm:^1.37.57"
+    "@safe-global/safe-modules-deployments": "npm:^3.0.5"
     "@safe-global/store": "workspace:^"
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
-    "@safe-global/types-kit": "npm:^3.1.0"
+    "@safe-global/types-kit": "npm:^4.0.1"
     "@storybook/addon-designs": "npm:^11.0.1"
     "@storybook/addon-docs": "npm:^10.2.6"
     "@storybook/addon-links": "npm:^10.2.6"
@@ -21564,7 +21543,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"abitype@npm:^1.0.2, abitype@npm:^1.0.6, abitype@npm:^1.0.9":
+"abitype@npm:^1.0.6, abitype@npm:^1.0.9":
   version: 1.1.1
   resolution: "abitype@npm:1.1.1"
   peerDependencies:
@@ -21576,6 +21555,21 @@ __metadata:
     zod:
       optional: true
   checksum: 10/3193d4e228caf606e4c915858e0af78b0b2529fc3baa149c2516379db74c0f9e2ace1999bf479a515b4f8f06d27b1cf8fca37f60b4f73a251eedd7bcac11cf89
+  languageName: node
+  linkType: hard
+
+"abitype@npm:^1.2.3":
+  version: 1.2.4
+  resolution: "abitype@npm:1.2.4"
+  peerDependencies:
+    typescript: ">=5.0.4"
+    zod: ^3.22.0 || ^4.0.0
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+    zod:
+      optional: true
+  checksum: 10/500b317a53b34cb6ffe3e4f090e135972b43cd2fbdfebe64fc497dfd8515d9117919e5f88f0aaede332d29a21c1826be64a3ffa620b0b91c16e8b560b6635714
   languageName: node
   linkType: hard
 
@@ -42075,6 +42069,15 @@ __metadata:
   bin:
     semver: bin/semver.js
   checksum: 10/4cfa1eb91ef3751e20fc52e47a935a0118d56d6f15a837ab814da0c150778ba2ca4f1a4d9068b33070ea4273629e615066664c2cfcd7c272caf7a8a0f6518b2c
+  languageName: node
+  linkType: hard
+
+"semver@npm:^7.8.0":
+  version: 7.8.4
+  resolution: "semver@npm:7.8.4"
+  bin:
+    semver: bin/semver.js
+  checksum: 10/a9c139031d4143932adfacfd2165d6489848c3b84c26d5fc2beef88c6d54c01191ef553e3f71049ccc47df85f0df30748907f84005f46f326095003171c5b673
   languageName: node
   linkType: hard
 
