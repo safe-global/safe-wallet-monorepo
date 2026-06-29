@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
-import { CircleAlert } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Box, Link, SvgIcon, Typography } from '@mui/material'
+import { ChevronRight } from 'lucide-react'
+import WarningIcon from '@/public/images/notifications/warning.svg'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 
@@ -9,6 +9,10 @@ import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity
  * Inline warning shown when an entered/displayed address dangerously resembles a
  * trusted anchor. CRITICAL = both visible ends match (the truncated-display attack);
  * WARN = a single end matches. `onReview` opens the full-length side-by-side compare.
+ *
+ * Mirrors the visual language of the app's standard `ErrorMessage` (palette-driven
+ * background, warning glyph, bold title) so it sits naturally inside the surrounding
+ * MUI forms — without that component's store/tx coupling.
  */
 const AddressSimilarityWarning = ({
   match,
@@ -18,44 +22,60 @@ const AddressSimilarityWarning = ({
   onReview?: () => void
 }): ReactElement => {
   const isCritical = match.severity === Severity.CRITICAL
+  const level = isCritical ? 'error' : 'warning'
 
   return (
-    <Alert
-      variant={isCritical ? 'default' : 'warning'}
+    <Box
       role="alert"
       data-testid="address-similarity-warning"
-      className={
-        isCritical
-          ? 'border-transparent bg-red-50 text-red-800 *:data-[slot=alert-description]:text-red-800'
-          : undefined
-      }
+      sx={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 'var(--space-1)',
+        p: 'var(--space-2)',
+        borderRadius: '6px',
+        backgroundColor: `var(--color-${level}-background)`,
+        color: `var(--color-${level}-dark)`,
+      }}
     >
-      <CircleAlert />
-      <AlertTitle>
-        {isCritical
-          ? 'This address looks almost identical to one you trust'
-          : 'This address resembles a trusted address'}
-      </AlertTitle>
-      <AlertDescription>
-        <span>
+      <SvgIcon
+        component={WarningIcon}
+        inheritViewBox
+        fontSize="medium"
+        sx={{ flexShrink: 0, color: ({ palette }) => `${palette[level].main} !important` }}
+      />
+      <Box>
+        <Typography variant="subtitle2" fontWeight={700}>
+          {isCritical
+            ? 'This address looks almost identical to one you trust'
+            : 'This address resembles a trusted address'}
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 0.5 }}>
           It shares the {isCritical ? 'first and last characters' : 'visible characters'} of an address you trust but
           differs in the middle — a common address-poisoning pattern. Verify the full address before continuing.
-        </span>
+        </Typography>
         {onReview && (
-          <div className="mt-3 flex justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onReview}
-              data-testid="address-similarity-review"
-            >
-              Compare full addresses
-            </Button>
-          </div>
+          <Link
+            component="button"
+            type="button"
+            onClick={onReview}
+            data-testid="address-similarity-review"
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 0.25,
+              mt: 1,
+              fontWeight: 600,
+              color: 'inherit',
+              textDecoration: 'none',
+            }}
+          >
+            Compare full addresses
+            <ChevronRight size={16} />
+          </Link>
         )}
-      </AlertDescription>
-    </Alert>
+      </Box>
+    </Box>
   )
 }
 

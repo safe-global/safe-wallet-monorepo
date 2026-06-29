@@ -32,7 +32,7 @@ const DiffAddress = ({ address, other, label }: { address: string; other: string
             component="span"
             key={index}
             {...(differs ? { 'data-testid': 'diff-char' } : {})}
-            sx={{ color: differs ? 'error.main' : 'text.primary', fontWeight: differs ? 700 : 400 }}
+            sx={{ color: differs ? 'error.dark' : 'text.primary', fontWeight: differs ? 700 : 400 }}
           >
             {char}
           </Box>
@@ -98,6 +98,7 @@ const SimilarAddressConfirmDialog = ({
           color="error"
           variant="contained"
           data-testid="confirm-proceed"
+          sx={{ bgcolor: 'error.dark', '&:hover': { bgcolor: 'error.dark' } }}
         >
           Proceed anyway
         </Button>
