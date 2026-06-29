@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo } from 'react'
-import { CircularProgress, FormControl, Grid, IconButton, SvgIcon, Typography } from '@mui/material'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Box, CircularProgress, FormControl, Grid, IconButton, SvgIcon, Typography } from '@mui/material'
+import { isAddress } from 'ethers'
 import NameInput from '@/components/common/NameInput'
 import InputAdornment from '@mui/material/InputAdornment'
 import AddressBookInput from '@/components/common/AddressBookInput'
@@ -13,6 +14,12 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import css from './styles.module.css'
 import classNames from 'classnames'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import {
+  useAddressSimilarity,
+  AddressSimilarityWarning,
+  SimilarAddressConfirmDialog,
+} from '@/features/address-poisoning'
 
 const OwnerRow = ({
   index,
@@ -30,7 +37,7 @@ const OwnerRow = ({
   const { safeAddress } = useSafeInfo()
   const wallet = useWallet()
   const fieldName = `${groupName}.${index}`
-  const { control, getValues, setValue } = useFormContext()
+  const { control, getValues, setValue, trigger } = useFormContext()
   const owners = useWatch({
     control,
     name: groupName,
@@ -44,6 +51,31 @@ const OwnerRow = ({
     return Array.from({ length: owners.length }, (_, i) => `${groupName}.${i}`)
   }, [owners, groupName])
 
+  // Address-poisoning: flag a signer that dangerously resembles a trusted anchor.
+  const candidateAddress = useMemo(() => {
+    const raw = owner.address?.split(':').pop()
+    return raw && isAddress(raw) ? raw : undefined
+  }, [owner.address])
+  const similarityMatch = useAddressSimilarity(candidateAddress)
+  const [acknowledged, setAcknowledged] = useState(false)
+  const [isCompareOpen, setIsCompareOpen] = useState(false)
+  // Refs so the (memoized) validator reads current values without re-creating.
+  const matchRef = useRef(similarityMatch)
+  matchRef.current = similarityMatch
+  const acknowledgedRef = useRef(acknowledged)
+  acknowledgedRef.current = acknowledged
+  const addressFieldName = `${fieldName}.address`
+
+  // A new candidate must be re-acknowledged.
+  useEffect(() => {
+    setAcknowledged(false)
+  }, [candidateAddress])
+
+  // Re-run validation when the match or acknowledgement changes so the gate updates.
+  useEffect(() => {
+    void trigger(addressFieldName)
+  }, [similarityMatch?.anchor, similarityMatch?.severity, acknowledged, trigger, addressFieldName])
+
   const validateOwnerAddress = useCallback(
     async (address: string) => {
       if (sameAddress(address, safeAddress)) {
@@ -52,6 +84,10 @@ const OwnerRow = ({
       const owners = getValues('owners')
       if (owners.filter((owner: NamedAddress) => sameAddress(owner.address, address)).length > 1) {
         return 'Signer is already added'
+      }
+      // Block a both-ends (CRITICAL) lookalike until the user acknowledges.
+      if (matchRef.current?.severity === Severity.CRITICAL && !acknowledgedRef.current) {
+        return 'This address closely resembles one you trust — compare and confirm before continuing'
       }
     },
     [getValues, safeAddress],
@@ -109,15 +145,36 @@ const OwnerRow = ({
             <EthHashInfo address={owner.address} shortAddress hasExplorer showCopyButton />
           </Typography>
         ) : (
-          <FormControl fullWidth>
-            <AddressBookInput
-              name={`${fieldName}.address`}
-              label="Signer"
-              validate={validateOwnerAddress}
-              deps={deps}
-              onReset={() => setValue(`${fieldName}.name`, '')}
-            />
-          </FormControl>
+          <>
+            <FormControl fullWidth>
+              <AddressBookInput
+                name={`${fieldName}.address`}
+                label="Signer"
+                validate={validateOwnerAddress}
+                deps={deps}
+                onReset={() => setValue(`${fieldName}.name`, '')}
+              />
+            </FormControl>
+
+            {similarityMatch && (
+              <Box sx={{ mt: 1 }}>
+                <AddressSimilarityWarning match={similarityMatch} onReview={() => setIsCompareOpen(true)} />
+              </Box>
+            )}
+
+            {similarityMatch && candidateAddress && (
+              <SimilarAddressConfirmDialog
+                open={isCompareOpen}
+                candidate={candidateAddress}
+                match={similarityMatch}
+                onConfirm={() => {
+                  setAcknowledged(true)
+                  setIsCompareOpen(false)
+                }}
+                onCancel={() => setIsCompareOpen(false)}
+              />
+            )}
+          </>
         )}
       </Grid>
       {!readOnly && (
