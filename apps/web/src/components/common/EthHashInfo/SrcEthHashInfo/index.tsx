@@ -3,7 +3,7 @@ import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
 import { isAddress } from 'ethers'
 import { useTheme } from '@mui/material/styles'
 import { Box, Tooltip } from '@mui/material'
-import { Building2, HardDrive } from 'lucide-react'
+import { Building2, CircleAlert, HardDrive } from 'lucide-react'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import Identicon from '../../Identicon'
 import CopyAddressButton from '../../CopyAddressButton'
@@ -34,6 +34,8 @@ export type EthHashInfoProps = {
   addressBookNameSource?: ContactSource
   highlight4bytes?: boolean
   badgeTooltip?: ReactNode
+  /** When set, renders a red danger badge + tooltip flagging an address-poisoning lookalike (Mode B). */
+  similarityWarning?: ReactNode
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -58,6 +60,7 @@ const SrcEthHashInfo = ({
   addressBookNameSource,
   highlight4bytes = false,
   badgeTooltip,
+  similarityWarning,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
   const theme = useTheme()
@@ -157,6 +160,14 @@ const SrcEthHashInfo = ({
                 addressElement
               )}
             </Box>
+          )}
+
+          {similarityWarning && (
+            <Tooltip title={similarityWarning} placement="top">
+              <span style={{ lineHeight: 0, color: 'var(--color-error-main)' }} data-testid="address-similarity-badge">
+                <CircleAlert size={16} />
+              </span>
+            </Tooltip>
           )}
 
           {showCopyButton && (
