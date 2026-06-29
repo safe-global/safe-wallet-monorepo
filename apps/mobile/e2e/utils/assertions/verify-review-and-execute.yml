@@ -306,9 +306,9 @@ tags:
     when:
       true: '${output.isConfirmFlow === true}'
     commands:
-      # Verify "Sign with" label is visible
+      # Verify "Sign with" label is visible (rendered as "Sign with:")
       - assertVisible:
-          text: 'Sign with'
+          text: 'Sign with.*'
       # Verify the active signer is visible
       - assertVisible:
           text: '${EXPECTED_SIGNER_PATTERN || ".*Signer.*"}'
