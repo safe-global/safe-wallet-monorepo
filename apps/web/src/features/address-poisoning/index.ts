@@ -8,5 +8,6 @@
 export { default as useAddressSimilarity } from './hooks/useAddressSimilarity'
 export { default as useAddressSimilarityGate } from './hooks/useAddressSimilarityGate'
 export type { AddressSimilarityGate } from './hooks/useAddressSimilarityGate'
+export { default as useListSimilarities } from './hooks/useListSimilarities'
 export { default as AddressSimilarityWarning } from './components/AddressSimilarityWarning'
 export { default as SimilarAddressConfirmDialog } from './components/SimilarAddressConfirmDialog'
