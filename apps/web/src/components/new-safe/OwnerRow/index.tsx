@@ -112,42 +112,42 @@ const OwnerRow = ({
   const walletIsOwner = owner.address === wallet?.address
 
   return (
-    <Grid
-      container
-      spacing={3}
-      className={classNames({ [css.helper]: walletIsOwner })}
-      sx={{
-        alignItems: 'center',
-        marginBottom: 3,
-        flexWrap: ['wrap', undefined, 'nowrap'],
-      }}
-    >
-      <Grid item xs={12} md={readOnly ? 5 : 4}>
-        <FormControl fullWidth>
-          <NameInput
-            data-testid="owner-name"
-            name={`${fieldName}.name`}
-            label="Signer name"
-            InputLabelProps={{ shrink: true }}
-            placeholder={ens || `Signer ${index + 1}`}
-            helperText={walletIsOwner && 'Your connected wallet'}
-            InputProps={{
-              endAdornment: resolving ? (
-                <InputAdornment position="end">
-                  <CircularProgress size={20} />
-                </InputAdornment>
-              ) : null,
-            }}
-          />
-        </FormControl>
-      </Grid>
-      <Grid item xs={11} md={7}>
-        {readOnly ? (
-          <Typography variant="body2" component="div">
-            <EthHashInfo address={owner.address} shortAddress hasExplorer showCopyButton />
-          </Typography>
-        ) : (
-          <>
+    <>
+      <Grid
+        container
+        spacing={3}
+        className={classNames({ [css.helper]: walletIsOwner })}
+        sx={{
+          alignItems: 'center',
+          marginBottom: !readOnly && similarityMatch ? 1 : 3,
+          flexWrap: ['wrap', undefined, 'nowrap'],
+        }}
+      >
+        <Grid item xs={12} md={readOnly ? 5 : 4}>
+          <FormControl fullWidth>
+            <NameInput
+              data-testid="owner-name"
+              name={`${fieldName}.name`}
+              label="Signer name"
+              InputLabelProps={{ shrink: true }}
+              placeholder={ens || `Signer ${index + 1}`}
+              helperText={walletIsOwner && 'Your connected wallet'}
+              InputProps={{
+                endAdornment: resolving ? (
+                  <InputAdornment position="end">
+                    <CircularProgress size={20} />
+                  </InputAdornment>
+                ) : null,
+              }}
+            />
+          </FormControl>
+        </Grid>
+        <Grid item xs={11} md={7}>
+          {readOnly ? (
+            <Typography variant="body2" component="div">
+              <EthHashInfo address={owner.address} shortAddress hasExplorer showCopyButton />
+            </Typography>
+          ) : (
             <FormControl fullWidth>
               <AddressBookInput
                 name={`${fieldName}.address`}
@@ -157,50 +157,50 @@ const OwnerRow = ({
                 onReset={() => setValue(`${fieldName}.name`, '')}
               />
             </FormControl>
-
-            {similarityMatch && (
-              <Box sx={{ mt: 1 }}>
-                <AddressSimilarityWarning match={similarityMatch} onReview={() => setIsCompareOpen(true)} />
-              </Box>
-            )}
-
-            {similarityMatch && candidateAddress && (
-              <SimilarAddressConfirmDialog
-                open={isCompareOpen}
-                candidate={candidateAddress}
-                match={similarityMatch}
-                onConfirm={() => {
-                  setAcknowledged(true)
-                  setIsCompareOpen(false)
-                }}
-                onCancel={() => setIsCompareOpen(false)}
-              />
-            )}
-          </>
-        )}
-      </Grid>
-      {!readOnly && (
-        <Grid
-          item
-          xs={1}
-          sx={{
-            ml: -2,
-            alignSelf: 'stretch',
-            display: 'flex',
-            alignItems: 'center',
-            flexShrink: 0,
-          }}
-        >
-          {removable && (
-            <>
-              <IconButton data-testid="remove-owner-btn" onClick={() => remove?.(index)} aria-label="Remove signer">
-                <SvgIcon component={DeleteIcon} inheritViewBox />
-              </IconButton>
-            </>
           )}
         </Grid>
+        {!readOnly && (
+          <Grid
+            item
+            xs={1}
+            sx={{
+              ml: -2,
+              alignSelf: 'stretch',
+              display: 'flex',
+              alignItems: 'center',
+              flexShrink: 0,
+            }}
+          >
+            {removable && (
+              <>
+                <IconButton data-testid="remove-owner-btn" onClick={() => remove?.(index)} aria-label="Remove signer">
+                  <SvgIcon component={DeleteIcon} inheritViewBox />
+                </IconButton>
+              </>
+            )}
+          </Grid>
+        )}
+      </Grid>
+
+      {!readOnly && similarityMatch && (
+        <Box sx={{ mb: 3 }}>
+          <AddressSimilarityWarning match={similarityMatch} onReview={() => setIsCompareOpen(true)} />
+        </Box>
       )}
-    </Grid>
+
+      {!readOnly && similarityMatch && candidateAddress && (
+        <SimilarAddressConfirmDialog
+          open={isCompareOpen}
+          candidate={candidateAddress}
+          match={similarityMatch}
+          onConfirm={() => {
+            setAcknowledged(true)
+            setIsCompareOpen(false)
+          }}
+          onCancel={() => setIsCompareOpen(false)}
+        />
+      )}
+    </>
   )
 }
 
