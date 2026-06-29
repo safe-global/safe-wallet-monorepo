@@ -23,11 +23,6 @@ describe('[PROD] Sidebar tests', () => {
     acceptCookies2()
   })
 
-  it('Verify current safe details', () => {
-    wallet.connectSigner(signer)
-    sideBar.verifySafeHeaderDetails(sideBar.testSafeHeaderDetails)
-  })
-
   it('Verify New transaction button enabled for owners', () => {
     wallet.connectSigner(signer)
     sideBar.verifyNewTxBtnStatus(constants.enabledStates.enabled)

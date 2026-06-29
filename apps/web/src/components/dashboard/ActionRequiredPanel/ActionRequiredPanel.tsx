@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, type ReactElement, type ReactNode } from '
 import { Card, Stack, Typography, Collapse, IconButton } from '@mui/material'
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded'
 
-import { SidebarListItemCounter } from '@/components/sidebar/SidebarList'
+import { SidebarListItemCounter } from '@/components/common/SidebarList'
 import { useWarningCount } from './useWarningCount'
 import css from './styles.module.css'
 
