@@ -32,7 +32,9 @@ export type FeePreviewTransactionDto = {
   operation: OperationType
   gasToken: string
   numberSignatures: number
+  nonce: string
   fiatCode?: string
+  origin?: string
 }
 
 export type FeePreviewTxData = {
