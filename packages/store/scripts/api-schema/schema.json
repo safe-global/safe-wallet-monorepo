@@ -7275,6 +7275,36 @@
           "textColor"
         ]
       },
+      "Relayer": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "GTF",
+              "RELAY_FEE",
+              "DAILY_LIMIT",
+              "NO_FEE_CAMPAIGN"
+            ],
+            "nullable": true
+          },
+          "safeCreationSponsored": {
+            "type": "boolean"
+          },
+          "safeTransactionSponsored": {
+            "type": "boolean"
+          },
+          "enableTenderlySimulationBeforeRelay": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "type",
+          "safeCreationSponsored",
+          "safeTransactionSponsored",
+          "enableTenderlySimulationBeforeRelay"
+        ]
+      },
       "Chain": {
         "type": "object",
         "properties": {
@@ -7365,6 +7395,15 @@
           "recommendedMasterCopyVersion": {
             "type": "string",
             "nullable": true
+          },
+          "relayer": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Relayer"
+              }
+            ]
           }
         },
         "required": [
@@ -7386,7 +7425,8 @@
           "rpcUri",
           "safeAppsRpcUri",
           "shortName",
-          "theme"
+          "theme",
+          "relayer"
         ]
       },
       "ChainPage": {

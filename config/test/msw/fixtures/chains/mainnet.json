@@ -107,5 +107,11 @@
     "textColor": "#ffffff",
     "backgroundColor": "#627EEA"
   },
-  "recommendedMasterCopyVersion": "1.4.1"
+  "recommendedMasterCopyVersion": "1.4.1",
+  "relayer": {
+    "type": "GTF",
+    "safeCreationSponsored": true,
+    "safeTransactionSponsored": true,
+    "enableTenderlySimulationBeforeRelay": false
+  }
 }

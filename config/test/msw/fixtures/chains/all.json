@@ -112,7 +112,13 @@
         "textColor": "#ffffff",
         "backgroundColor": "#627EEA"
       },
-      "recommendedMasterCopyVersion": "1.4.1"
+      "recommendedMasterCopyVersion": "1.4.1",
+      "relayer": {
+        "type": "GTF",
+        "safeCreationSponsored": true,
+        "safeTransactionSponsored": true,
+        "enableTenderlySimulationBeforeRelay": false
+      }
     },
     {
       "chainId": "560048",
@@ -200,7 +206,13 @@
         "textColor": "#ffffff",
         "backgroundColor": "#000000"
       },
-      "recommendedMasterCopyVersion": "1.4.1"
+      "recommendedMasterCopyVersion": "1.4.1",
+      "relayer": {
+        "type": "GTF",
+        "safeCreationSponsored": true,
+        "safeTransactionSponsored": true,
+        "enableTenderlySimulationBeforeRelay": false
+      }
     },
     {
       "chainId": "137",
@@ -300,7 +312,13 @@
         "textColor": "#ffffff",
         "backgroundColor": "#8248E5"
       },
-      "recommendedMasterCopyVersion": "1.4.1"
+      "recommendedMasterCopyVersion": "1.4.1",
+      "relayer": {
+        "type": "GTF",
+        "safeCreationSponsored": true,
+        "safeTransactionSponsored": true,
+        "enableTenderlySimulationBeforeRelay": false
+      }
     },
     {
       "chainId": "11155111",
@@ -401,7 +419,13 @@
         "textColor": "#ffffff",
         "backgroundColor": "#B8AAD5"
       },
-      "recommendedMasterCopyVersion": "1.4.1"
+      "recommendedMasterCopyVersion": "1.4.1",
+      "relayer": {
+        "type": "GTF",
+        "safeCreationSponsored": true,
+        "safeTransactionSponsored": true,
+        "enableTenderlySimulationBeforeRelay": false
+      }
     }
   ]
 }
