@@ -20,7 +20,7 @@ const AddressSimilarityWarning = ({
   const isCritical = match.severity === Severity.CRITICAL
 
   return (
-    <Alert variant="warning" role="alert" data-testid="address-similarity-warning">
+    <Alert variant={isCritical ? 'destructive' : 'warning'} role="alert" data-testid="address-similarity-warning">
       <CircleAlert />
       <AlertTitle>
         {isCritical
@@ -33,16 +33,17 @@ const AddressSimilarityWarning = ({
           differs in the middle — a common address-poisoning pattern. Verify the full address before continuing.
         </span>
         {onReview && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={onReview}
-            data-testid="address-similarity-review"
-            className="mt-2 w-fit"
-          >
-            Compare full addresses
-          </Button>
+          <div className="mt-3 flex justify-end">
+            <Button
+              type="button"
+              variant={isCritical ? 'destructive' : 'outline'}
+              size="sm"
+              onClick={onReview}
+              data-testid="address-similarity-review"
+            >
+              Compare full addresses
+            </Button>
+          </div>
         )}
       </AlertDescription>
     </Alert>
