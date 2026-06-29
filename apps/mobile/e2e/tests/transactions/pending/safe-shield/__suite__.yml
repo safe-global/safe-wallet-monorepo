@@ -1,0 +1,94 @@
+appId: ${APP_ID}
+tags:
+  - transactions
+  - pending
+  - safe-shield
+  - suite
+---
+# SafeShield Test Suite
+# All tests target the same safe via the e2eSafeShieldSafe button, each tapping a
+# different pending tx card. First test does a clean start; the rest preserve state.
+
+# ============================================
+# Transfers
+# ============================================
+
+# First test: clean start
+- runFlow:
+    file: ./send-matic-benign.yml
+
+- runFlow:
+    file: ./send-matic-malicious.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./send-dai-malicious.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+# ============================================
+# Contract interactions
+# ============================================
+
+- runFlow:
+    file: ./approve-malicious.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./contract-interaction-malicious.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+# ============================================
+# Batch transactions
+# ============================================
+
+- runFlow:
+    file: ./batch-2-actions.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./batch-3-actions-benign.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./batch-3-actions-warn.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./batch-malicious.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+# ============================================
+# Settings changes
+# ============================================
+
+- runFlow:
+    file: ./settings-change.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./settings-change-fallback-handler.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+# ============================================
+# Bridges
+# ============================================
+
+- runFlow:
+    file: ./pending-bridge.yml
+    env:
+      SKIP_CLEAN_START: 'true'
+
+- runFlow:
+    file: ./pending-bridge-unknown-network.yml
+    env:
+      SKIP_CLEAN_START: 'true'
