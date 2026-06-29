@@ -10,8 +10,6 @@ import MenuItem from '@mui/material/MenuItem'
 import ContextMenu from '@/components/common/ContextMenu'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
-import { useAppSelector } from '@/store'
-import { selectAllAddressBooks } from '@/store/addressBookSlice'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
@@ -24,15 +22,13 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
   const spaceId = useCurrentSpaceId()
   const { openRename, renameDialog } = useRenameSafe()
 
-  const allAddressBooks = useAppSelector(selectAllAddressBooks)
-  const { getFromSpaceByAddress } = useMergedAddressBooks()
+  const { getFromSpaceByAddress, getFromLocalAnyChain } = useMergedAddressBooks()
   const chainIds = isMultiChainSafeItem(safeItem) ? safeItem.safes.map((safe) => safe.chainId) : [safeItem.chainId]
   // Rename here writes the shared (space) name, so prefill that — resolved address-level (one name
-  // per address) — and only fall back to the local name. Without this the dialog opens with the
-  // personal local name.
-  const localName = isMultiChainSafeItem(safeItem)
-    ? safeItem.name
-    : allAddressBooks[safeItem.chainId]?.[safeItem.address]
+  // per address) — and only fall back to the local name. Both lookups are address-level and lowercase
+  // the address, so casing never causes a miss. Without this the dialog opens with the personal local
+  // name.
+  const localName = isMultiChainSafeItem(safeItem) ? safeItem.name : getFromLocalAnyChain(safeItem.address)?.name
   const spaceName = getFromSpaceByAddress(safeItem.address)?.name
   const name = spaceName ?? localName
 

@@ -97,7 +97,7 @@ const RenameSafeDialog = ({ target, onClose, sx }: RenameSafeDialogProps): React
         <form onSubmit={onSubmit}>
           <DialogContent>
             <Stack spacing={3} sx={{ pt: 1 }}>
-              <AddressInputReadOnly address={target.address} chainId={target.chainIds[0]} />
+              <AddressInputReadOnly address={target.address} chainId={target.chainIds[0] ?? ''} />
 
               <NameInput data-testid="name-input" name="name" label="Name" autoFocus required />
             </Stack>

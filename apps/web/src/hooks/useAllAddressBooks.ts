@@ -94,7 +94,12 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
       }
     }
 
-    // Address-level local from EVERY chain: the current chain's name wins, otherwise any chain's.
+    // Address-level local name from EVERY chain, for cross-chain inheritance. Tie-break is
+    // deterministic: the currently-viewed chain's entry always wins; otherwise the first chain
+    // encountered is kept (Object.entries on the chain-keyed book yields ascending chainId order).
+    // In practice a local rename writes the same name to all of a Safe's chains, so the per-chain
+    // names agree and this only has to pick a winner in the rare case the same address was named
+    // differently on different chains.
     for (const [cid, book] of Object.entries(allLocalBooks)) {
       for (const localContact of mapLocalToContacts(book, cid)) {
         const addrKey = localContact.address.toLowerCase()
@@ -119,6 +124,9 @@ export const useMergedAddressBooks = (chainId?: string): MergedAddressBook => {
     const getFromLocal = (address: string, cid: string) => byKeyLocal.get(addressBookKey(address, cid))
     const getFromSpaceByAddress = (address: string) =>
       typeof address === 'string' ? byAddressSpace.get(address.toLowerCase()) : undefined
+    // Address-level local lookup for cross-chain inheritance. The returned contact's `chainIds`
+    // reflect the chain the name was actually stored on, NOT the chain it's being inherited onto, so
+    // callers showing an inherited name should read `.name` only — never `.chainIds`.
     const getFromLocalAnyChain = (address: string) =>
       typeof address === 'string' ? byAddressLocal.get(address.toLowerCase()) : undefined
 

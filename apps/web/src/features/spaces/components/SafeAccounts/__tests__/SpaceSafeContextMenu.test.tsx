@@ -1,6 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import SpaceSafeContextMenu from '../SpaceSafeContextMenu'
-import { useAppSelector } from '@/store'
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
 import { useIsAdmin } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
@@ -19,10 +18,15 @@ jest.mock('@/hooks/safes', () => ({
   isMultiChainSafeItem: jest.fn(),
 }))
 
-// Space-first name resolution; defaults to no space name so the local fallback is asserted.
+// Space-first name resolution; both helpers are address-level. Defaults to no space name so the
+// (address-level, lowercased) local fallback is asserted.
 const mockGetFromSpaceByAddress = jest.fn((): { name: string } | undefined => undefined)
+const mockGetFromLocalAnyChain = jest.fn((): { name: string } | undefined => undefined)
 jest.mock('@/hooks/useAllAddressBooks', () => ({
-  useMergedAddressBooks: () => ({ getFromSpaceByAddress: mockGetFromSpaceByAddress }),
+  useMergedAddressBooks: () => ({
+    getFromSpaceByAddress: mockGetFromSpaceByAddress,
+    getFromLocalAnyChain: mockGetFromLocalAnyChain,
+  }),
 }))
 
 jest.mock('../RemoveSafeDialog', () => {
@@ -50,16 +54,11 @@ describe('SpaceSafeContextMenu', () => {
     lastVisited: 0,
   }
 
-  const mockAddressBooks = {
-    '5': {
-      '0x123': 'Test Safe Name',
-    },
-  }
-
   beforeEach(() => {
     jest.clearAllMocks()
     mockGetFromSpaceByAddress.mockReturnValue(undefined)
-    ;(useAppSelector as jest.Mock).mockReturnValue(mockAddressBooks)
+    // Local name for the single-chain Safe, resolved address-level (any chain).
+    mockGetFromLocalAnyChain.mockReturnValue({ name: 'Test Safe Name' })
     // Rename + Remove are admin-only in a space, so default to admin to render the menu.
     ;(useIsAdmin as jest.Mock).mockReturnValue(true)
     ;(isMultiChainSafeItem as unknown as jest.Mock).mockImplementation(
