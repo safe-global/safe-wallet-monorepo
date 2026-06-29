@@ -1,6 +1,6 @@
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { isGtfSafePaid } from './isGtfSafePaid'
+import { isGtfSafePaid } from '../isGtfSafePaid'
 
 const GELATO = '0xc918e75504D1B0c741Eb4236B72Dae7A52401E95'
 

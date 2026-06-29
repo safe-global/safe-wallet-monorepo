@@ -9,6 +9,7 @@ import {
   getErrorMessage,
 } from '@/src/features/ExecuteTx/components/ReviewAndExecute/helpers'
 import { useIsMounted } from '@/src/hooks/useIsMounted'
+import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 
 interface UseExecutionFlowParams {
   txId: string
@@ -16,12 +17,15 @@ interface UseExecutionFlowParams {
   isBiometricsEnabled: boolean
   executionMethod: ExecutionMethod
   feeParams: FeeParams
-  execute: () => Promise<void>
+  execute: (acceptUnverifiedSimulation?: boolean) => Promise<void>
 }
 
 interface UseExecutionFlowReturn {
   isExecuting: boolean
   handleConfirmPress: () => Promise<void>
+  showIndeterminateSheet: boolean
+  dismissIndeterminateSheet: () => void
+  confirmExecuteAnyway: () => Promise<void>
 }
 
 /**
@@ -36,7 +40,49 @@ export const useExecutionFlow = ({
   execute,
 }: UseExecutionFlowParams): UseExecutionFlowReturn => {
   const [isExecuting, setIsExecuting] = useState(false)
+  const [showIndeterminateSheet, setShowIndeterminateSheet] = useState(false)
   const isMounted = useIsMounted()
+
+  const runExecution = useCallback(
+    async (acceptUnverifiedSimulation?: boolean) => {
+      try {
+        setIsExecuting(true)
+        await execute(acceptUnverifiedSimulation)
+
+        if (isMounted()) {
+          router.replace({
+            pathname: '/execution-success',
+            params: { txId },
+          })
+        }
+      } catch (err) {
+        if (!isMounted()) {
+          return
+        }
+        setIsExecuting(false)
+
+        // INDETERMINATE_SIMULATION: CGW couldn't complete the pre-relay simulation. Offer an explicit
+        // "execute anyway" confirmation instead of failing.
+        if (err instanceof RelaySimulationError && err.code === 'INDETERMINATE_SIMULATION') {
+          setShowIndeterminateSheet(true)
+          return
+        }
+
+        // SIMULATION_FAILED: the tx is expected to revert on-chain, so relay is blocked (fail-closed).
+        // Surface the same explanatory copy as web instead of the raw CGW message.
+        const description =
+          err instanceof RelaySimulationError && err.code === 'SIMULATION_FAILED'
+            ? "This transaction is expected to fail on-chain, so it can't be relayed. Review the transaction or reject it."
+            : getErrorMessage(err)
+
+        router.push({
+          pathname: '/execution-error',
+          params: { description },
+        })
+      }
+    },
+    [execute, isMounted, txId],
+  )
 
   const handleConfirmPress = useCallback(async () => {
     if (isExecuting) {
@@ -65,26 +111,23 @@ export const useExecutionFlow = ({
     }
 
     // WalletConnect and standard flow - execute directly
-    try {
-      setIsExecuting(true)
-      await execute()
+    await runExecution()
+  }, [isExecuting, txId, executionMethod, feeParams, activeSigner, isBiometricsEnabled, runExecution])
 
-      if (isMounted()) {
-        router.replace({
-          pathname: '/execution-success',
-          params: { txId },
-        })
-      }
-    } catch (err) {
-      if (isMounted()) {
-        setIsExecuting(false)
-        router.push({
-          pathname: '/execution-error',
-          params: { description: getErrorMessage(err) },
-        })
-      }
-    }
-  }, [isExecuting, txId, executionMethod, feeParams, activeSigner, isBiometricsEnabled, execute, isMounted])
+  const dismissIndeterminateSheet = useCallback(() => {
+    setShowIndeterminateSheet(false)
+  }, [])
 
-  return { isExecuting, handleConfirmPress }
+  const confirmExecuteAnyway = useCallback(async () => {
+    setShowIndeterminateSheet(false)
+    await runExecution(true)
+  }, [runExecution])
+
+  return {
+    isExecuting,
+    handleConfirmPress,
+    showIndeterminateSheet,
+    dismissIndeterminateSheet,
+    confirmExecuteAnyway,
+  }
 }
