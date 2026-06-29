@@ -9,6 +9,7 @@ import {
   selectCuratedNestedSafes,
   selectHasCompletedCuration,
   selectCuratedAddresses,
+  selectAllCuratedNestedSafes,
 } from '../settingsSlice'
 import type { SettingsState } from '../settingsSlice'
 import type { RootState } from '..'
@@ -373,6 +374,39 @@ describe('settingsSlice', () => {
       const state = createCurationState({})
 
       expect(selectCuratedAddresses(state, parentSafe)).toEqual([])
+    })
+  })
+
+  describe('selectAllCuratedNestedSafes', () => {
+    const parentA = toBeHex('0x1', 20)
+    const parentB = toBeHex('0x2', 20)
+    const nested1 = toBeHex('0x10', 20)
+    const nested2 = toBeHex('0x20', 20)
+    const nested3 = toBeHex('0x30', 20)
+
+    it('flattens, lowercases and dedupes curated addresses across all parents', () => {
+      const state = createCurationState({
+        [parentA.toLowerCase()]: {
+          selectedAddresses: [nested1, nested2.toUpperCase()],
+          hasCompletedCuration: true,
+          lastModified: 1,
+        },
+        [parentB.toLowerCase()]: {
+          selectedAddresses: [nested2, nested3], // nested2 duplicated across parents
+          hasCompletedCuration: true,
+          lastModified: 2,
+        },
+      })
+
+      const result = selectAllCuratedNestedSafes(state)
+      expect(result).toContain(nested1.toLowerCase())
+      expect(result).toContain(nested2.toLowerCase())
+      expect(result).toContain(nested3.toLowerCase())
+      expect(result.filter((addr) => addr === nested2.toLowerCase())).toHaveLength(1)
+    })
+
+    it('returns an empty array when there is no curation', () => {
+      expect(selectAllCuratedNestedSafes(createCurationState({}))).toEqual([])
     })
   })
 })
