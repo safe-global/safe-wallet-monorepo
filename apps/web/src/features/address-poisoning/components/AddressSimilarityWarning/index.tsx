@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { CircleAlert } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 
@@ -27,12 +28,21 @@ const AddressSimilarityWarning = ({
           : 'This address resembles a trusted address'}
       </AlertTitle>
       <AlertDescription>
-        It shares the {isCritical ? 'first and last characters' : 'visible characters'} of an address you trust but
-        differs in the middle — a common address-poisoning pattern. Verify the full address before continuing.
+        <span>
+          It shares the {isCritical ? 'first and last characters' : 'visible characters'} of an address you trust but
+          differs in the middle — a common address-poisoning pattern. Verify the full address before continuing.
+        </span>
         {onReview && (
-          <button type="button" onClick={onReview} data-testid="address-similarity-review">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onReview}
+            data-testid="address-similarity-review"
+            className="mt-2 w-fit"
+          >
             Compare full addresses
-          </button>
+          </Button>
         )}
       </AlertDescription>
     </Alert>
