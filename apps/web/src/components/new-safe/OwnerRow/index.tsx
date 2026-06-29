@@ -85,9 +85,11 @@ const OwnerRow = ({
       if (owners.filter((owner: NamedAddress) => sameAddress(owner.address, address)).length > 1) {
         return 'Signer is already added'
       }
-      // Block a both-ends (CRITICAL) lookalike until the user acknowledges.
+      // Block a both-ends (CRITICAL) lookalike until acknowledged. Return `false`
+      // (invalid, no message) so the inline warning card is the single explanation
+      // rather than duplicating it as a field error.
       if (matchRef.current?.severity === Severity.CRITICAL && !acknowledgedRef.current) {
-        return 'This address closely resembles one you trust — compare and confirm before continuing'
+        return false
       }
     },
     [getValues, safeAddress],
