@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, CircularProgress, FormControl, Grid, IconButton, SvgIcon, Typography } from '@mui/material'
 import { isAddress } from 'ethers'
 import NameInput from '@/components/common/NameInput'
@@ -14,6 +14,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import css from './styles.module.css'
 import classNames from 'classnames'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   useAddressSimilarity,
   AddressSimilarityWarning,
@@ -36,7 +37,7 @@ const OwnerRow = ({
   const { safeAddress } = useSafeInfo()
   const wallet = useWallet()
   const fieldName = `${groupName}.${index}`
-  const { control, getValues, setValue } = useFormContext()
+  const { control, getValues, setValue, trigger } = useFormContext()
   const owners = useWatch({
     control,
     name: groupName,
@@ -56,7 +57,24 @@ const OwnerRow = ({
     return raw && isAddress(raw) ? raw : undefined
   }, [owner.address])
   const similarityMatch = useAddressSimilarity(candidateAddress)
+  const [acknowledged, setAcknowledged] = useState(false)
   const [isCompareOpen, setIsCompareOpen] = useState(false)
+  // Refs so the (memoized) validator reads current values without re-creating.
+  const matchRef = useRef(similarityMatch)
+  matchRef.current = similarityMatch
+  const acknowledgedRef = useRef(acknowledged)
+  acknowledgedRef.current = acknowledged
+  const addressFieldName = `${fieldName}.address`
+
+  // A new candidate must be re-acknowledged.
+  useEffect(() => {
+    setAcknowledged(false)
+  }, [candidateAddress])
+
+  // Re-run validation when the match or acknowledgement changes so the gate updates.
+  useEffect(() => {
+    void trigger(addressFieldName)
+  }, [similarityMatch?.anchor, similarityMatch?.severity, acknowledged, trigger, addressFieldName])
 
   const validateOwnerAddress = useCallback(
     async (address: string) => {
@@ -66,6 +84,12 @@ const OwnerRow = ({
       const owners = getValues('owners')
       if (owners.filter((owner: NamedAddress) => sameAddress(owner.address, address)).length > 1) {
         return 'Signer is already added'
+      }
+      // Block a both-ends (CRITICAL) lookalike until acknowledged. Return `false`
+      // (invalid, no message) so the inline warning card is the single explanation
+      // rather than duplicating it as a field error.
+      if (matchRef.current?.severity === Severity.CRITICAL && !acknowledgedRef.current) {
+        return false
       }
     },
     [getValues, safeAddress],
@@ -169,7 +193,10 @@ const OwnerRow = ({
           open={isCompareOpen}
           candidate={candidateAddress}
           match={similarityMatch}
-          onConfirm={() => setIsCompareOpen(false)}
+          onConfirm={() => {
+            setAcknowledged(true)
+            setIsCompareOpen(false)
+          }}
           onCancel={() => setIsCompareOpen(false)}
         />
       )}

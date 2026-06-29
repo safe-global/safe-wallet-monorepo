@@ -20,7 +20,16 @@ const AddressSimilarityWarning = ({
   const isCritical = match.severity === Severity.CRITICAL
 
   return (
-    <Alert variant={isCritical ? 'destructive' : 'warning'} role="alert" data-testid="address-similarity-warning">
+    <Alert
+      variant={isCritical ? 'default' : 'warning'}
+      role="alert"
+      data-testid="address-similarity-warning"
+      className={
+        isCritical
+          ? 'border-transparent bg-red-50 text-red-800 *:data-[slot=alert-description]:text-red-800'
+          : undefined
+      }
+    >
       <CircleAlert />
       <AlertTitle>
         {isCritical
@@ -36,7 +45,7 @@ const AddressSimilarityWarning = ({
           <div className="mt-3 flex justify-end">
             <Button
               type="button"
-              variant={isCritical ? 'destructive' : 'outline'}
+              variant="outline"
               size="sm"
               onClick={onReview}
               data-testid="address-similarity-review"

@@ -10,8 +10,9 @@ import { MultiTokenTransferFields, TokenTransferFields, TokenTransferType } from
 import { useTokenAmount } from '../utils'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { isAddress } from 'ethers'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   useAddressSimilarity,
   AddressSimilarityWarning,
@@ -61,7 +62,8 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
   const recipient = watch(recipientFieldName)
   const tokenAddress = watch(getFieldName(TokenTransferFields.tokenAddress, fieldArray))
 
-  // Address-poisoning: warn when the recipient dangerously resembles a trusted anchor.
+  // Address-poisoning: warn (and gate on a both-ends match) when the recipient
+  // dangerously resembles an address the user explicitly trusts.
   const candidateRecipient = useMemo(() => {
     const raw = String(recipient ?? '')
       .split(':')
@@ -69,7 +71,28 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
     return raw && isAddress(raw) ? raw : undefined
   }, [recipient])
   const similarityMatch = useAddressSimilarity(candidateRecipient)
+  const [acknowledged, setAcknowledged] = useState(false)
   const [isCompareOpen, setIsCompareOpen] = useState(false)
+  const matchRef = useRef(similarityMatch)
+  matchRef.current = similarityMatch
+  const acknowledgedRef = useRef(acknowledged)
+  acknowledgedRef.current = acknowledged
+
+  // A new recipient must be re-acknowledged; re-validate when match/ack changes.
+  useEffect(() => {
+    setAcknowledged(false)
+  }, [candidateRecipient])
+  useEffect(() => {
+    void trigger(recipientFieldName)
+  }, [similarityMatch?.anchor, similarityMatch?.severity, acknowledged, trigger, recipientFieldName])
+
+  const validateSimilarity = useCallback(async () => {
+    // Block a both-ends (CRITICAL) lookalike until acknowledged. Return `false`
+    // (invalid, no message) so the inline warning card is the single explanation.
+    if (matchRef.current?.severity === Severity.CRITICAL && !acknowledgedRef.current) {
+      return false
+    }
+  }, [])
 
   const selectedToken = balancesItems.find((item) => sameAddress(item.tokenInfo.address, tokenAddress))
 
@@ -126,7 +149,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
     <Stack spacing={1}>
       <Stack spacing={2}>
         <FormControl fullWidth>
-          <AddressBookInput name={recipientFieldName} canAdd={isAddressValid} />
+          <AddressBookInput name={recipientFieldName} canAdd={isAddressValid} validate={validateSimilarity} />
         </FormControl>
 
         {similarityMatch && (
@@ -189,7 +212,10 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
           open={isCompareOpen}
           candidate={candidateRecipient}
           match={similarityMatch}
-          onConfirm={() => setIsCompareOpen(false)}
+          onConfirm={() => {
+            setAcknowledged(true)
+            setIsCompareOpen(false)
+          }}
           onCancel={() => setIsCompareOpen(false)}
         />
       )}
