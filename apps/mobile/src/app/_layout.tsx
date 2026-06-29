@@ -120,6 +120,7 @@ function NavigationStack() {
       <Stack.Screen name="conflict-transaction-sheet" options={transparentModalOptions} />
       <Stack.Screen name="accounts-sheet" options={transparentModalOptions} />
       <Stack.Screen name="networks-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="supported-networks" options={transparentModalOptions} />
       <Stack.Screen name="confirmations-sheet" options={transparentModalOptions} />
       <Stack.Screen name="change-signer-sheet" options={transparentModalOptions} />
       <Stack.Screen name="change-estimated-fee-sheet" options={transparentModalOptions} />

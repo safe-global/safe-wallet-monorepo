@@ -1,11 +1,12 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { ActivityIndicator } from 'react-native'
 import type { CameraPermissionStatus } from 'react-native-vision-camera'
 import { Text, View, YStack } from 'tamagui'
 import { router } from 'expo-router'
-import { QrCamera } from '@/src/components/Camera'
+import { QrCamera, ScanErrorOverlay, resolveScannedAddress } from '@/src/components/Camera'
 import { SafeButton } from '@/src/components/SafeButton'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
+import { useScannedAddressToSend } from '@/src/features/Send/hooks/useScannedAddressToSend'
 import { useWalletConnectScan, type ScanStatus } from '../hooks/useWalletConnectScan'
 
 const GRANTED_FOOTER = 'Scan an Ethereum wallet address or connect to a desktop app'
@@ -47,19 +48,6 @@ function ConnectingOverlay() {
   )
 }
 
-function ErrorOverlay({ message, onTryAgain }: { message: string; onTryAgain: () => void }) {
-  return (
-    <YStack alignItems="center" gap="$3" paddingHorizontal="$3">
-      <Text color="$error" textAlign="center" fontWeight="600">
-        {message}
-      </Text>
-      <SafeButton rounded secondary onPress={onTryAgain} testID="wc-scan-try-again">
-        Try again
-      </SafeButton>
-    </YStack>
-  )
-}
-
 function CenterOverlay({
   status,
   errorMessage,
@@ -73,13 +61,30 @@ function CenterOverlay({
     case 'connecting':
       return <ConnectingOverlay />
     case 'error':
-      return <ErrorOverlay message={errorMessage} onTryAgain={onTryAgain} />
+      return <ScanErrorOverlay message={errorMessage} onTryAgain={onTryAgain} testID="wc-scan-try-again" />
     default:
       return null
   }
 }
 
-export function WalletConnectScanContainer() {
+export function WalletConnectScanContainer({ isActive = true }: { isActive?: boolean } = {}) {
+  const { warnChainMismatch, navigateToRecipient } = useScannedAddressToSend()
+
+  // A scanned Ethereum address leaves the scanner modal and lands on the Send recipient screen,
+  // matching the home-screen Send button (replace so back returns to the tabs, not the scanner).
+  const onAddressScanned = useCallback(
+    (raw: string) => {
+      const resolved = resolveScannedAddress(raw)
+      if (!resolved) {
+        return false
+      }
+      warnChainMismatch(resolved.prefix)
+      navigateToRecipient(resolved.address, 'replace')
+      return true
+    },
+    [warnChainMismatch, navigateToRecipient],
+  )
+
   const {
     status,
     errorMessage,
@@ -90,7 +95,7 @@ export function WalletConnectScanContainer() {
     onScan,
     onTryAgain,
     onActivateCamera,
-  } = useWalletConnectScan()
+  } = useWalletConnectScan({ isActive, onAddressScanned })
 
   const granted = permission === 'granted'
 
