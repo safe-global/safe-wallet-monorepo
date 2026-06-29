@@ -16,8 +16,7 @@ function SafeAccountInput() {
 
   useImportSafe()
 
-  // useWatch (not the watch method) subscribes this child component to the field,
-  // so it re-renders when useImportSafe writes the result via setValue.
+  // useWatch subscribes this child to the field; the watch() method only re-renders the form root.
   const result = useWatch({ control, name: 'importedSafeResult' })
 
   return (
