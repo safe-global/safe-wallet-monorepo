@@ -8,7 +8,9 @@ import {
   buildRouteParams,
   determineExecutionPath,
   getErrorMessage,
+  txRequiresRelay,
 } from './helpers'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { BIOMETRY_ROTATION_DESCRIPTION, BiometryInvalidationError } from '@/src/services/key-storage'
 
 // Mock chain with relay feature enabled
@@ -98,6 +100,65 @@ describe('helpers', () => {
     it('should return WITH_PK when no signer is provided', () => {
       const result = getExecutionMethod(ExecutionMethod.WITH_PK, true, mockChainWithRelay)
       expect(result).toBe(ExecutionMethod.WITH_PK)
+    })
+
+    it('should force WITH_RELAY for Safe-pays even when relay is not available (quota exhausted)', () => {
+      const result = getExecutionMethod(ExecutionMethod.WITH_PK, false, mockChainWithRelay, mockLedgerSigner, true)
+      expect(result).toBe(ExecutionMethod.WITH_RELAY)
+    })
+
+    it('should NOT force WITH_RELAY for Safe-pays when the chain does not support relaying', () => {
+      const result = getExecutionMethod(
+        ExecutionMethod.WITH_PK,
+        true,
+        mockChainWithoutRelay,
+        mockPrivateKeySigner,
+        true,
+      )
+      expect(result).toBe(ExecutionMethod.WITH_PK)
+    })
+  })
+
+  describe('txRequiresRelay', () => {
+    const GELATO = '0xaEf22e5f09980fC1Ba6F2ec3EC34c1B9aeC885b5'
+
+    const makeTx = (info: Partial<Record<string, unknown>>): TransactionDetails =>
+      ({
+        detailedExecutionInfo: {
+          type: 'MULTISIG',
+          baseGas: '79646',
+          gasPrice: '443094379592',
+          refundReceiver: { value: GELATO },
+          ...info,
+        },
+      }) as unknown as TransactionDetails
+
+    it('returns true for a GTF Safe-pays payload', () => {
+      expect(txRequiresRelay(makeTx({}))).toBe(true)
+    })
+
+    it('returns false when gasPrice is zero', () => {
+      expect(txRequiresRelay(makeTx({ gasPrice: '0' }))).toBe(false)
+    })
+
+    it('returns false when baseGas is zero', () => {
+      expect(txRequiresRelay(makeTx({ baseGas: '0' }))).toBe(false)
+    })
+
+    it('returns false when refundReceiver is the zero address', () => {
+      expect(txRequiresRelay(makeTx({ refundReceiver: { value: '0x0000000000000000000000000000000000000000' } }))).toBe(
+        false,
+      )
+    })
+
+    it('returns false for a non-multisig execution info', () => {
+      expect(txRequiresRelay({ detailedExecutionInfo: { type: 'MODULE' } } as unknown as TransactionDetails)).toBe(
+        false,
+      )
+    })
+
+    it('returns false when txDetails is undefined', () => {
+      expect(txRequiresRelay(undefined)).toBe(false)
     })
   })
 

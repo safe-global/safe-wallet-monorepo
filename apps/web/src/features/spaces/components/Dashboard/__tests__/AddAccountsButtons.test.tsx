@@ -59,9 +59,6 @@ jest.mock('@/hooks/safes', () => ({
   flattenSafeItems: jest.fn((items: unknown[]) => items),
 }))
 
-jest.mock('../MembersCard', () => () => null)
-jest.mock('../SpacesCTACard', () => () => null)
-jest.mock('../ImportAddressBookCard', () => () => null)
 jest.mock('../AddAccountsCard', () => () => null)
 jest.mock('../AggregatedBalances', () => () => null)
 jest.mock('../../InviteBanner/PreviewInvite', () => () => null)

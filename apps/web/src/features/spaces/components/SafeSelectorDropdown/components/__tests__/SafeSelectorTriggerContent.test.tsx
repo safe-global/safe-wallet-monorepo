@@ -4,6 +4,7 @@ import type { SafeItemData } from '../../types'
 
 const mockUseSafeDisplayName = jest.fn()
 const mockUseChain = jest.fn()
+const mockUseIsHypernativeGuard = jest.fn()
 
 jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: (...args: unknown[]) => mockUseSafeDisplayName(...args),
@@ -12,6 +13,18 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   useChain: (...args: unknown[]) => mockUseChain(...args),
+  useHasFeature: () => false,
+}))
+
+jest.mock('@/features/hypernative', () => ({
+  __esModule: true,
+  HypernativeFeature: {},
+  useIsHypernativeGuard: (...args: unknown[]) => mockUseIsHypernativeGuard(...args),
+}))
+
+jest.mock('@/features/__core__', () => ({
+  __esModule: true,
+  useLoadFeature: () => ({ SafeHeaderHnTooltip: () => null }),
 }))
 
 jest.mock('../SafeBalanceBlock', () => {
@@ -45,6 +58,7 @@ describe('SafeSelectorTriggerContent', () => {
     jest.resetAllMocks()
     mockUseSafeDisplayName.mockReturnValue('')
     mockUseChain.mockReturnValue(undefined)
+    mockUseIsHypernativeGuard.mockReturnValue({ isHypernativeGuard: false, loading: false })
   })
 
   it('resolves name per chain without using the cross-chain item name', () => {

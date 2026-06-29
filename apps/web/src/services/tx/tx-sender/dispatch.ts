@@ -34,7 +34,7 @@ import { createWeb3, getUserNonce } from '@/hooks/wallets/web3'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import chains from '@safe-global/utils/config/chains'
 import { createExistingTx } from './create'
-import { getRelaySimulationError } from '@/services/tx/relayErrors'
+import { getRelaySimulationError } from '@safe-global/utils/services/relayErrors'
 
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 

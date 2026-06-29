@@ -13,7 +13,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import useChainId from '@/hooks/useChainId'
 import { useTransactionsGetMultipleTransactionDetailsQuery } from '@safe-global/store/gateway/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import { isGtfSafePaid } from '@/features/gtf/utils/isGtfSafePaid'
+import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import ModalDialog from '@/components/common/ModalDialog'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 
