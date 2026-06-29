@@ -74,7 +74,8 @@ describe('signWithWalletConnect', () => {
   const mockTypedData = {
     domain: {
       verifyingContract: '0xSafeAddress',
-      chainId: 1,
+      // protocol-kit's generateTypedData returns chainId as a bigint.
+      chainId: BigInt(1),
     },
     types: {
       EIP712Domain: [{ name: 'verifyingContract', type: 'address' }],
@@ -159,13 +160,16 @@ describe('signWithWalletConnect', () => {
     expect(types).toHaveProperty('SafeTx')
   })
 
-  it('calls provider.request with eth_signTypedData_v4', async () => {
+  it('calls provider.request with eth_signTypedData_v4 and a bigint-safe typed-data string', async () => {
     await signWithWalletConnect(defaultParams)
 
-    expect(mockProvider.request).toHaveBeenCalledWith({
-      method: SigningMethod.ETH_SIGN_TYPED_DATA_V4,
-      params: ['0xSignerAddress', JSON.stringify(mockTypedData)],
-    })
+    expect(mockProvider.request).toHaveBeenCalledTimes(1)
+    const { method, params } = mockProvider.request.mock.calls[0][0]
+    expect(method).toBe(SigningMethod.ETH_SIGN_TYPED_DATA_V4)
+    expect(params[0]).toBe('0xSignerAddress')
+    // The bigint domain.chainId must serialize (plain JSON.stringify throws) as a decimal string.
+    const parsed = JSON.parse(params[1])
+    expect(parsed.domain.chainId).toBe('1')
   })
 
   it('throws when provider returns non-string signature', async () => {
