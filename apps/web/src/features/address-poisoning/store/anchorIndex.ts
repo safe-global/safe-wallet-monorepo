@@ -5,6 +5,7 @@ import { selectAllAddressBooks } from '@/store/addressBookSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllCuratedNestedSafes } from '@/store/settingsSlice'
 import { selectUndeployedSafes } from '@/features/counterfactual/store'
+import type { RootState } from '@/store'
 
 /**
  * Every address the user has EXPLICITLY trusted, gathered only from local sources
@@ -19,7 +20,16 @@ import { selectUndeployedSafes } from '@/features/counterfactual/store'
  * never anchors, so the similarity baseline itself cannot be poisoned.
  */
 export const selectAnchorAddresses = createSelector(
-  [selectAllAddressBooks, selectAllAddedSafes, selectAllCuratedNestedSafes, selectUndeployedSafes],
+  [
+    selectAllAddressBooks,
+    selectAllAddedSafes,
+    // `selectAllCuratedNestedSafes` lives near the end of settingsSlice, which is
+    // still mid-evaluation when this module is first pulled in via the store barrel
+    // (slices.ts). Reading the binding eagerly here yields `undefined` and crashes
+    // createSelector. Wrap it so the live binding is resolved at call-time instead.
+    (state: RootState) => selectAllCuratedNestedSafes(state),
+    selectUndeployedSafes,
+  ],
   (addressBooks, addedSafes, curatedNested, undeployedSafes): string[] => {
     const addresses: string[] = []
     for (const perChain of Object.values(addressBooks)) addresses.push(...Object.keys(perChain))
