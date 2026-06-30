@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import {
-  Alert,
   Box,
   Button as MuiButton,
   CircularProgress,
@@ -11,6 +10,11 @@ import {
   Typography,
 } from '@mui/material'
 import { Button } from '@/components/ui/button'
+import {
+  Tooltip as UITooltip,
+  TooltipContent as UITooltipContent,
+  TooltipTrigger as UITooltipTrigger,
+} from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -105,11 +109,22 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
     return <Badge variant="secondary">Requested</Badge>
   }
 
+  const trigger = (
+    <Button variant="outline" size="sm" onClick={() => setOpen(true)} disabled={!!nameError}>
+      Request to add
+    </Button>
+  )
+
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-        Request to add
-      </Button>
+      {nameError ? (
+        <UITooltip>
+          <UITooltipTrigger render={<div className="inline-flex w-fit" />}>{trigger}</UITooltipTrigger>
+          <UITooltipContent>Rename this contact to add it to the workspace. {nameError}</UITooltipContent>
+        </UITooltip>
+      ) : (
+        trigger
+      )}
 
       <ModalDialog open={open} onClose={() => setOpen(false)} dialogTitle="Request to add contact" hideChainIndicator>
         <DialogContent sx={{ py: 2 }}>
@@ -156,10 +171,6 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
                 </Tooltip>
               )}
             </Box>
-
-            {nameError && (
-              <Alert severity="warning">Rename this contact to share it with the workspace. {nameError}.</Alert>
-            )}
           </Stack>
         </DialogContent>
 
