@@ -41,7 +41,8 @@ import {
 } from '@mui/material'
 import {
   useDelegatesPostDelegateV1Mutation,
-  useDelegatesPostDelegateV2Mutation,
+  useDelegatesPostDelegateV3Mutation,
+  useDelegatesUpdateDelegateV3Mutation,
   type CreateDelegateDto,
   type Delegate,
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
@@ -52,7 +53,6 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import SignerSelector from '@/components/common/SignerSelector'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import SignatureIcon from '@/public/images/transactions/signature.svg'
-import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
 type UpsertProposerProps = {
   onClose: () => void
@@ -75,7 +75,8 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [multiSigInitiated, setMultiSigInitiated] = useState<boolean>(false)
   const [addDelegateV1] = useDelegatesPostDelegateV1Mutation()
-  const [addDelegateV2] = useDelegatesPostDelegateV2Mutation()
+  const [addDelegateV3] = useDelegatesPostDelegateV3Mutation()
+  const [updateDelegateV3] = useDelegatesUpdateDelegateV3Mutation()
   const dispatch = useAppDispatch()
 
   const chainId = useChainId()
@@ -129,12 +130,21 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
       let signature: string
       let delegator: string
 
+      const delegateAction = isEditing ? 'edit' : 'add'
+
       if (parentSafeAddress) {
         if (isMultiSigRequired) {
           // Multi-sig flow: create off-chain message on parent Safe for signature collection
-          const eoaSignature = await signProposerTypedDataForSafe(chainId, data.address, parentSafeAddress, signer)
-          const delegateTypedData = getDelegateTypedData(chainId, data.address) as TypedData
-          const origin = buildDelegationOrigin(proposer ? 'edit' : 'add', data.address, safeAddress, data.name)
+          const eoaSignature = await signProposerTypedDataForSafe(
+            chainId,
+            data.address,
+            parentSafeAddress,
+            safeAddress,
+            delegateAction,
+            signer,
+          )
+          const delegateTypedData = getDelegateTypedData(chainId, data.address, safeAddress, delegateAction)
+          const origin = buildDelegationOrigin(isEditing ? 'edit' : 'add', data.address, safeAddress, data.name)
 
           await createDelegationMessage(dispatch, chainId, parentSafeAddress, delegateTypedData, eoaSignature, origin)
 
@@ -145,14 +155,24 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
         }
 
         // Single-sig nested Safe owner: sign and submit immediately
-        const eoaSignature = await signProposerTypedDataForSafe(chainId, data.address, parentSafeAddress, signer)
+        const eoaSignature = await signProposerTypedDataForSafe(
+          chainId,
+          data.address,
+          parentSafeAddress,
+          safeAddress,
+          delegateAction,
+          signer,
+        )
         signature = await encodeEIP1271Signature(parentSafeAddress, eoaSignature)
         delegator = parentSafeAddress
       } else {
-        // Direct owner: sign delegate typed data directly
-        const eoaSignature = shouldEthSign
-          ? await signProposerData(data.address, signer)
-          : await signProposerTypedData(chainId, data.address, signer)
+        // Direct owner: sign delegate typed data directly.
+        // Editing requires EIP-712 with action: 'edit'; the v1 eth_sign payload
+        // cannot encode that, so edits always go through the EIP-712 path.
+        const eoaSignature =
+          shouldEthSign && !isEditing
+            ? await signProposerData(data.address, signer)
+            : await signProposerTypedData(chainId, data.address, safeAddress, delegateAction, signer)
         signature = eoaSignature
         delegator = wallet.address
       }
@@ -165,10 +185,12 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
         safe: safeAddress,
       }
 
-      if (shouldEthSign && !parentSafeAddress) {
+      if (isEditing) {
+        await updateDelegateV3({ chainId, updateDelegateV3Dto: createDelegateDto }).unwrap()
+      } else if (shouldEthSign && !parentSafeAddress) {
         await addDelegateV1({ chainId, createDelegateDto }).unwrap()
       } else {
-        await addDelegateV2({ chainId, createDelegateDto }).unwrap()
+        await addDelegateV3({ chainId, createDelegateDto }).unwrap()
       }
 
       trackEvent(
@@ -178,9 +200,11 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
       dispatch(
         showNotification({
           variant: 'success',
-          groupKey: 'add-proposer-success',
-          title: 'Proposer added successfully!',
-          message: `${shortenAddress(data.address)} can now suggest transactions for this account.`,
+          groupKey: isEditing ? 'edit-proposer-success' : 'add-proposer-success',
+          title: isEditing ? 'Proposer updated successfully!' : 'Proposer added successfully!',
+          message: isEditing
+            ? `${shortenAddress(data.address)}'s name has been updated.`
+            : `${shortenAddress(data.address)} can now suggest transactions for this account.`,
         }),
       )
 

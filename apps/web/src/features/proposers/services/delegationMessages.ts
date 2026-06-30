@@ -1,9 +1,9 @@
 import type { DelegationOrigin } from '@/features/proposers/types'
-import type { TypedData, CreateMessageDto } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import type { CreateMessageDto } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { normalizeTypedData } from '@safe-global/utils/utils/web3'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { parseDelegationOrigin } from '@/features/proposers/utils/delegationParsing'
+import { getDelegateTypedData, normalizeDelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { AppDispatch } from '@/store'
 
 /**
@@ -37,18 +37,18 @@ export async function createDelegationMessage(
   dispatch: AppDispatch,
   chainId: string,
   parentSafeAddress: string,
-  delegateTypedData: TypedData,
+  delegateTypedData: ReturnType<typeof getDelegateTypedData>,
   signature: string,
   origin: string,
 ): Promise<void> {
-  const typedDataDelegate = (delegateTypedData.message as { delegateAddress?: string })?.delegateAddress
+  const typedDataDelegate = delegateTypedData.message.delegateAddress
   const parsedOrigin = parseDelegationOrigin(origin)
 
   if (typedDataDelegate && parsedOrigin && !sameAddress(typedDataDelegate, parsedOrigin.delegate)) {
     throw new Error('Security error: Origin delegate does not match typed data')
   }
 
-  const normalizedMessage = normalizeTypedData(delegateTypedData)
+  const normalizedMessage = normalizeDelegateTypedData(delegateTypedData)
   const requestedAction = parsedOrigin?.action ?? null
 
   const createMessageDto: CreateMessageDto = {

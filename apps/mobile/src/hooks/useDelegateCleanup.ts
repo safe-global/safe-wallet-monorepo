@@ -57,7 +57,7 @@ export const useDelegateCleanup = (): UseDelegateCleanupProps => {
 
   const { cleanupNotificationsForDelegate } = useNotificationCleanup()
 
-  const [deleteDelegate] = cgwApi.useDelegatesDeleteDelegateV2Mutation()
+  const [deleteDelegate] = cgwApi.useDelegatesDeleteDelegateV3Mutation()
 
   const cleanupService = useMemo(() => {
     return new DelegateCleanupService({

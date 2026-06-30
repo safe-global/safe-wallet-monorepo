@@ -64,6 +64,43 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['delegates'],
       }),
+      delegatesGetDelegatesV3: build.query<DelegatesGetDelegatesV3ApiResponse, DelegatesGetDelegatesV3ApiArg>({
+        query: (queryArg) => ({
+          url: `/v3/chains/${queryArg.chainId}/delegates`,
+          params: {
+            cursor: queryArg.cursor,
+            label: queryArg.label,
+            delegator: queryArg.delegator,
+            delegate: queryArg.delegate,
+            safe: queryArg.safe,
+          },
+        }),
+        providesTags: ['delegates'],
+      }),
+      delegatesPostDelegateV3: build.mutation<DelegatesPostDelegateV3ApiResponse, DelegatesPostDelegateV3ApiArg>({
+        query: (queryArg) => ({
+          url: `/v3/chains/${queryArg.chainId}/delegates`,
+          method: 'POST',
+          body: queryArg.createDelegateDto,
+        }),
+        invalidatesTags: ['delegates'],
+      }),
+      delegatesUpdateDelegateV3: build.mutation<DelegatesUpdateDelegateV3ApiResponse, DelegatesUpdateDelegateV3ApiArg>({
+        query: (queryArg) => ({
+          url: `/v3/chains/${queryArg.chainId}/delegates`,
+          method: 'PATCH',
+          body: queryArg.updateDelegateV3Dto,
+        }),
+        invalidatesTags: ['delegates'],
+      }),
+      delegatesDeleteDelegateV3: build.mutation<DelegatesDeleteDelegateV3ApiResponse, DelegatesDeleteDelegateV3ApiArg>({
+        query: (queryArg) => ({
+          url: `/v3/chains/${queryArg.chainId}/delegates/${queryArg.delegateAddress}`,
+          method: 'DELETE',
+          body: queryArg.deleteDelegateV3Dto,
+        }),
+        invalidatesTags: ['delegates'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -132,6 +169,45 @@ export type DelegatesDeleteDelegateV2ApiArg = {
   /** Signature and data proving authorization to delete the delegate */
   deleteDelegateV2Dto: DeleteDelegateV2Dto
 }
+export type DelegatesGetDelegatesV3ApiResponse =
+  /** status 200 Paginated list of delegates retrieved successfully */ DelegatePage
+export type DelegatesGetDelegatesV3ApiArg = {
+  /** Chain ID where delegates are registered */
+  chainId: string
+  /** Pagination cursor for retrieving the next set of results */
+  cursor?: string
+  /** Filter by delegate label or name */
+  label?: string
+  /** Filter by delegator address (0x prefixed hex string) */
+  delegator?: string
+  /** Filter by delegate address (0x prefixed hex string) */
+  delegate?: string
+  /** Filter by Safe address (0x prefixed hex string) */
+  safe?: string
+}
+export type DelegatesPostDelegateV3ApiResponse = unknown
+export type DelegatesPostDelegateV3ApiArg = {
+  /** Chain ID where the delegate will be registered */
+  chainId: string
+  /** Delegate creation data including Safe address, delegate address, label, and authorization signature */
+  createDelegateDto: CreateDelegateDto
+}
+export type DelegatesUpdateDelegateV3ApiResponse = unknown
+export type DelegatesUpdateDelegateV3ApiArg = {
+  /** Chain ID where the delegate is registered */
+  chainId: string
+  /** Delegate update data including Safe address, delegate address, delegator, label, and authorization signature */
+  updateDelegateV3Dto: UpdateDelegateV3Dto
+}
+export type DelegatesDeleteDelegateV3ApiResponse = unknown
+export type DelegatesDeleteDelegateV3ApiArg = {
+  /** Chain ID where the delegate is registered */
+  chainId: string
+  /** Delegate address to remove (0x prefixed hex string) */
+  delegateAddress: string
+  /** Signature and data proving authorization to delete the delegate */
+  deleteDelegateV3Dto: DeleteDelegateV3Dto
+}
 export type Delegate = {
   safe?: string | null
   delegate: string
@@ -161,6 +237,18 @@ export type DeleteDelegateV2Dto = {
   safe?: string | null
   signature: string
 }
+export type UpdateDelegateV3Dto = {
+  safe?: string | null
+  delegate: string
+  delegator: string
+  signature: string
+  label: string
+}
+export type DeleteDelegateV3Dto = {
+  delegator?: string | null
+  safe?: string | null
+  signature: string
+}
 export const {
   useDelegatesGetDelegatesV1Query,
   useLazyDelegatesGetDelegatesV1Query,
@@ -170,4 +258,9 @@ export const {
   useLazyDelegatesGetDelegatesV2Query,
   useDelegatesPostDelegateV2Mutation,
   useDelegatesDeleteDelegateV2Mutation,
+  useDelegatesGetDelegatesV3Query,
+  useLazyDelegatesGetDelegatesV3Query,
+  useDelegatesPostDelegateV3Mutation,
+  useDelegatesUpdateDelegateV3Mutation,
+  useDelegatesDeleteDelegateV3Mutation,
 } = injectedRtkApi
