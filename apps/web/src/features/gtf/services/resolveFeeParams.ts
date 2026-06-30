@@ -46,7 +46,7 @@ export const resolveFeeParams = async ({
           operation,
           gasToken,
           numberSignatures,
-          nonce: String(nonce),
+          nonce,
           fiatCode: toSupportedFiatCode(currency),
         },
       },

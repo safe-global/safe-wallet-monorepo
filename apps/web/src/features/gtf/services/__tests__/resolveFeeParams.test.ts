@@ -87,7 +87,7 @@ describe('resolveFeeParams', () => {
           operation: safeTx.data.operation,
           gasToken: '0xa0b86991000000000000000000000000000000aa',
           numberSignatures: 3,
-          nonce: String(safeTx.data.nonce),
+          nonce: safeTx.data.nonce,
           fiatCode: 'USD',
         },
       },

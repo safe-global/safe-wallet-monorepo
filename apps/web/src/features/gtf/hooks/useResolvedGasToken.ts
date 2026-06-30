@@ -100,7 +100,7 @@ export const useResolvedGasToken = (
             ...tx,
             gasToken: currentCandidate,
             numberSignatures: safe.threshold,
-            nonce: String(recommendedNonce),
+            nonce: recommendedNonce ?? 0,
             fiatCode: toSupportedFiatCode(currency),
           },
         }

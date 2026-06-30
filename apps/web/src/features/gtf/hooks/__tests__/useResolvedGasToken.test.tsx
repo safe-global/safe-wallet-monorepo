@@ -128,7 +128,7 @@ describe('useResolvedGasToken', () => {
     await waitFor(() => expect(result.current).toEqual({ status: 'resolved', address: ETH_ADDRESS }))
     // The probe is priced against the recommended next nonce, not the Safe's current nonce.
     expect(spy.mock.calls.at(-1)?.[0]).toMatchObject({
-      tx: expect.objectContaining({ gasToken: ETH_ADDRESS, nonce: String(RECOMMENDED_NONCE) }),
+      tx: expect.objectContaining({ gasToken: ETH_ADDRESS, nonce: RECOMMENDED_NONCE }),
     })
   })
 
