@@ -1,11 +1,13 @@
 appId: ${APP_ID}
 tags:
   - transactions
-  - pending
   - safe-shield
   - suite
 ---
 # SafeShield Test Suite
+# Runs by path or the `safe-shield` tag. Intentionally NOT tagged `pending` so a
+# `--include-tags pending` run does not execute this suite alongside the main
+# pending suite (which would re-seed the same safes and double-run coverage).
 # All tests target the same safe via the e2eSafeShieldSafe button, each tapping a
 # different pending tx card. First test does a clean start; the rest preserve state.
 

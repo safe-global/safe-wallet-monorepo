@@ -78,11 +78,11 @@ tags:
           text: 'Run'
       # Wait for simulation to complete (shows "Running..." then changes to "View").
       # When finished the button gains a link icon (iconAfter), so on iOS its single
-      # accessibility label is exposed as "View, " — match with a trailing .* rather
-      # than the exact "View" (the icon-less "Run"/"Running..." states match exactly).
+      # accessibility label is exposed as "View, " — match the comma so we don't also
+      # match unrelated labels like "View on explorer".
       - extendedWaitUntil:
           visible:
-            text: 'View.*'
+            text: 'View,.*'
           timeout: 30000
       # Verify simulation result based on EXPECTED_SIMULATION_RESULT
       # If "success" expected, verify "Simulation successful"

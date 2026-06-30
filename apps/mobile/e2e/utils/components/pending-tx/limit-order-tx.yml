@@ -69,8 +69,8 @@ tags:
       - text: 'Network'
 
 # Status row (scoped to details section)
-# Accept any statusMap label: fixtures age on staging, so an order past its
-# validUntil shows "Expired" rather than "Execution needed".
+# Fixtures age on staging, so a still-pending order shows "Execution needed"
+# while one past its validUntil shows "Expired". Only accept those two states.
 - assertVisible:
     id: 'swap-order-table'
     containsDescendants:
@@ -78,7 +78,7 @@ tags:
 - assertVisible:
     id: 'swap-order-table'
     containsDescendants:
-      - text: '.*(Execution needed|Filled|Open|Cancelled|Expired|Partially filled).*'
+      - text: '.*(Execution needed|Expired).*'
 
 # Widget fee row (scoped to details section)
 - extendedWaitUntil:
@@ -151,12 +151,13 @@ tags:
 # ===========================================
 # Review and Confirm Screen (only when signable)
 # ===========================================
-# An expired order can't be signed (no SignForm, so no "Continue" button), so
-# only run this flow when the order is still signable.
+# An expired order can't be signed (no SignForm, so no Continue button), so
+# only run this flow when the order is still signable. Scope to the SignForm
+# button's testID rather than bare "Continue" text, which appears elsewhere.
 - runFlow:
     when:
       visible:
-        text: 'Continue'
+        id: 'sign-transaction-continue-button'
     commands:
       - runFlow:
           file: ../../assertions/verify-review-and-execute.yml

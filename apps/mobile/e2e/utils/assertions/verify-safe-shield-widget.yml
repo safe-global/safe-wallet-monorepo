@@ -65,10 +65,11 @@ tags:
     commands:
       - tapOn:
           text: 'Run'
-      # Finished button gains a link icon, so its iOS label is "View, " — match View.*
+      # Finished button gains a link icon, so its iOS label is "View, " — match the
+      # comma so we don't also match unrelated labels like "View on explorer".
       - extendedWaitUntil:
           visible:
-            text: 'View.*'
+            text: 'View,.*'
           timeout: 30000
       - runFlow:
           when:
@@ -83,7 +84,7 @@ tags:
             - assertVisible:
                 text: 'Simulation failed'
       - assertVisible:
-          text: 'View.*'
+          text: 'View,.*'
 
 # Verify risk disclaimer flow (optional, for CRITICAL severity)
 # Flow: Try Continue without disclaimer -> stays on screen -> tap disclaimer -> Continue -> goes to Review -> go back
