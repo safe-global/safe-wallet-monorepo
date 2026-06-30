@@ -21,7 +21,13 @@ import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import AddressInput from '@/components/common/AddressInput'
-import React from 'react'
+import React, { useMemo, useState } from 'react'
+import { isAddress } from 'ethers'
+import {
+  useAddressSimilarityGate,
+  AddressSimilarityWarning,
+  SimilarAddressConfirmDialog,
+} from '@/features/address-poisoning'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
@@ -63,6 +69,16 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
   const safeAddress = watch(Field.address)
   const randomName = useMnemonicSafeName()
   const { ens, name, resolving } = useAddressResolver(safeAddress)
+
+  // Mode A: warn (and gate) when the Safe address being loaded resembles a trusted anchor.
+  const similarityCandidate = useMemo(() => {
+    const raw = String(safeAddress ?? '')
+      .split(':')
+      .pop()
+    return raw && isAddress(raw) ? raw : undefined
+  }, [safeAddress])
+  const similarityGate = useAddressSimilarityGate(similarityCandidate)
+  const [isCompareOpen, setIsCompareOpen] = useState(false)
 
   // Address book, ENS, mnemonic
   const fallbackName = name || ens || randomName
@@ -157,6 +173,25 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
             name={Field.address}
           />
 
+          {similarityGate.match && (
+            <Box mt={2}>
+              <AddressSimilarityWarning match={similarityGate.match} onReview={() => setIsCompareOpen(true)} />
+            </Box>
+          )}
+
+          {similarityGate.match && similarityCandidate && (
+            <SimilarAddressConfirmDialog
+              open={isCompareOpen}
+              candidate={similarityCandidate}
+              match={similarityGate.match}
+              onConfirm={() => {
+                similarityGate.acknowledge()
+                setIsCompareOpen(false)
+              }}
+              onCancel={() => setIsCompareOpen(false)}
+            />
+          )}
+
           <Typography
             sx={{
               mt: 4,
@@ -188,7 +223,13 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
             <Button variant="outlined" size="large" onClick={handleBack} startIcon={<ArrowBackIcon fontSize="small" />}>
               Back
             </Button>
-            <Button data-testid="load-safe-next-btn" type="submit" variant="contained" size="large" disabled={!isValid}>
+            <Button
+              data-testid="load-safe-next-btn"
+              type="submit"
+              variant="contained"
+              size="large"
+              disabled={!isValid || similarityGate.isBlocked}
+            >
               Next
             </Button>
           </Box>

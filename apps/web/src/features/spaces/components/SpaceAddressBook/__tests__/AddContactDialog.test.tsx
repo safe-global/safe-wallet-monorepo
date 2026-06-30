@@ -27,6 +27,12 @@ jest.mock('@/hooks/useChains', () => ({
   }),
 }))
 
+jest.mock('@/features/address-poisoning', () => ({
+  useAddressSimilarityGate: () => ({ match: null, isBlocked: false, acknowledged: false, acknowledge: () => {} }),
+  AddressSimilarityWarning: () => null,
+  SimilarAddressConfirmDialog: () => null,
+}))
+
 jest.mock('@/components/common/ModalDialog', () => ({
   __esModule: true,
   default: ({ children, open, dialogTitle }: { children: React.ReactNode; open: boolean; dialogTitle: string }) =>

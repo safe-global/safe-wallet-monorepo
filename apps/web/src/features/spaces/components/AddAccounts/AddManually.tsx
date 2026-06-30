@@ -8,10 +8,16 @@ import useChains from '@/hooks/useChains'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Button, DialogActions, DialogContent, MenuItem, Select, Stack, Box } from '@mui/material'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
+import { isAddress } from 'ethers'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
+import {
+  useAddressSimilarityGate,
+  AddressSimilarityWarning,
+  SimilarAddressConfirmDialog,
+} from '@/features/address-poisoning'
 
 export type AddManuallyFormValues = {
   address: string
@@ -41,6 +47,17 @@ const AddManually = ({
 
   const chainId = watch('chainId')
   const selectedChain = configs.find((chain) => chain.chainId === chainId)
+
+  // Mode A: warn (and gate) when the Safe address being added resembles a trusted anchor.
+  const address = watch('address')
+  const similarityCandidate = useMemo(() => {
+    const raw = String(address ?? '')
+      .split(':')
+      .pop()
+    return raw && isAddress(raw) ? raw : undefined
+  }, [address])
+  const similarityGate = useAddressSimilarityGate(similarityCandidate)
+  const [isCompareOpen, setIsCompareOpen] = useState(false)
 
   const onSubmit = handleSubmit((data) => {
     trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY })
@@ -141,13 +158,32 @@ const AddManually = ({
                   </Select>
                 </Box>
               </Stack>
+
+              {similarityGate.match && (
+                <Box mt={2}>
+                  <AddressSimilarityWarning match={similarityGate.match} onReview={() => setIsCompareOpen(true)} />
+                </Box>
+              )}
+
+              {similarityGate.match && similarityCandidate && (
+                <SimilarAddressConfirmDialog
+                  open={isCompareOpen}
+                  candidate={similarityCandidate}
+                  match={similarityGate.match}
+                  onConfirm={() => {
+                    similarityGate.acknowledge()
+                    setIsCompareOpen(false)
+                  }}
+                  onCancel={() => setIsCompareOpen(false)}
+                />
+              )}
             </DialogContent>
             <DialogActions>
               <Button onClick={onClose}>Cancel</Button>
               <Button
                 data-testid="add-space-account-manually-button"
                 variant="contained"
-                disabled={!formState.isValid}
+                disabled={!formState.isValid || similarityGate.isBlocked}
                 type="submit"
               >
                 Add

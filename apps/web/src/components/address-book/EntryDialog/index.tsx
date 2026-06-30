@@ -1,6 +1,8 @@
 import type { ReactElement, BaseSyntheticEvent } from 'react'
+import { useMemo, useState } from 'react'
 import { Box, Button, DialogActions, DialogContent, type SxProps, type Theme } from '@mui/material'
-import { FormProvider, useForm } from 'react-hook-form'
+import { FormProvider, useForm, useWatch } from 'react-hook-form'
+import { isAddress } from 'ethers'
 
 import AddressInput from '@/components/common/AddressInput'
 import ModalDialog from '@/components/common/ModalDialog'
@@ -9,6 +11,11 @@ import useChainId from '@/hooks/useChainId'
 import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useChain } from '@/hooks/useChains'
+import {
+  useAddressSimilarityGate,
+  AddressSimilarityWarning,
+  SimilarAddressConfirmDialog,
+} from '@/features/address-poisoning'
 
 export type AddressEntry = {
   name: string
@@ -44,6 +51,18 @@ function EntryDialog({
   })
 
   const { handleSubmit, formState } = methods
+
+  // Mode A: warn (and gate) when the contact address being entered resembles a trusted anchor.
+  const addressValue = useWatch({ control: methods.control, name: 'address' })
+  const similarityCandidate = useMemo(() => {
+    if (disableAddressInput) return undefined
+    const raw = String(addressValue ?? '')
+      .split(':')
+      .pop()
+    return raw && isAddress(raw) ? raw : undefined
+  }, [disableAddressInput, addressValue])
+  const similarityGate = useAddressSimilarityGate(similarityCandidate)
+  const [isCompareOpen, setIsCompareOpen] = useState(false)
 
   const submitCallback = handleSubmit((data: AddressEntry) => {
     dispatch(upsertAddressBookEntries({ ...data, chainIds: chainIds ?? [actualChainId] }))
@@ -84,6 +103,25 @@ function EntryDialog({
                 showPrefix={!!currentChainId}
               />
             </Box>
+
+            {similarityGate.match && (
+              <Box mt={2}>
+                <AddressSimilarityWarning match={similarityGate.match} onReview={() => setIsCompareOpen(true)} />
+              </Box>
+            )}
+
+            {similarityGate.match && similarityCandidate && (
+              <SimilarAddressConfirmDialog
+                open={isCompareOpen}
+                candidate={similarityCandidate}
+                match={similarityGate.match}
+                onConfirm={() => {
+                  similarityGate.acknowledge()
+                  setIsCompareOpen(false)
+                }}
+                onCancel={() => setIsCompareOpen(false)}
+              />
+            )}
           </DialogContent>
 
           <DialogActions>
@@ -94,7 +132,7 @@ function EntryDialog({
               data-testid="save-btn"
               type="submit"
               variant="contained"
-              disabled={!formState.isValid}
+              disabled={!formState.isValid || similarityGate.isBlocked}
               disableElevation
             >
               Save

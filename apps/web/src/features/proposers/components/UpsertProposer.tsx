@@ -47,8 +47,14 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
-import { FormProvider, useForm, type Validate } from 'react-hook-form'
+import { FormProvider, useForm, useWatch, type Validate } from 'react-hook-form'
+import { isAddress } from 'ethers'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import {
+  useAddressSimilarityGate,
+  AddressSimilarityWarning,
+  SimilarAddressConfirmDialog,
+} from '@/features/address-poisoning'
 import SignerSelector from '@/components/common/SignerSelector'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import SignatureIcon from '@/public/images/transactions/signature.svg'
@@ -115,6 +121,18 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
   )
 
   const { handleSubmit, formState } = methods
+
+  // Mode A: warn (and gate) when the proposer address being entered resembles a trusted anchor.
+  const addressValue = useWatch({ control: methods.control, name: 'address' })
+  const similarityCandidate = useMemo(() => {
+    if (isEditing) return undefined
+    const raw = String(addressValue ?? '')
+      .split(':')
+      .pop()
+    return raw && isAddress(raw) ? raw : undefined
+  }, [isEditing, addressValue])
+  const similarityGate = useAddressSimilarityGate(similarityCandidate)
+  const [isCompareOpen, setIsCompareOpen] = useState(false)
 
   const onConfirm = handleSubmit(async (data: ProposerEntry) => {
     if (!wallet) return
@@ -303,6 +321,25 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
               )}
             </Box>
 
+            {!isEditing && similarityGate.match && (
+              <Box mb={2}>
+                <AddressSimilarityWarning match={similarityGate.match} onReview={() => setIsCompareOpen(true)} />
+              </Box>
+            )}
+
+            {!isEditing && similarityGate.match && similarityCandidate && (
+              <SimilarAddressConfirmDialog
+                open={isCompareOpen}
+                candidate={similarityCandidate}
+                match={similarityGate.match}
+                onConfirm={() => {
+                  similarityGate.acknowledge()
+                  setIsCompareOpen(false)
+                }}
+                onCancel={() => setIsCompareOpen(false)}
+              />
+            )}
+
             <Box mb={2}>
               <NameInput name="name" label="Name" required />
             </Box>
@@ -354,7 +391,14 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
                   variant="contained"
                   color="primary"
                   type="submit"
-                  disabled={!isOk || isLoading || isParentLoading || (isEditing && !canEdit) || !formState.isValid}
+                  disabled={
+                    !isOk ||
+                    isLoading ||
+                    isParentLoading ||
+                    (isEditing && !canEdit) ||
+                    !formState.isValid ||
+                    similarityGate.isBlocked
+                  }
                   sx={{ minWidth: '122px', minHeight: '36px' }}
                 >
                   {isLoading ? <CircularProgress size={20} /> : 'Continue'}

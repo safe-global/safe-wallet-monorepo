@@ -19,13 +19,19 @@ import {
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
-import { useContext, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import type { ReactElement } from 'react'
+import { isAddress } from 'ethers'
 
 import TxCard from '../../common/TxCard'
 import { useRecoveryPeriods } from './useRecoveryPeriods'
 import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
+import {
+  useAddressSimilarityGate,
+  AddressSimilarityWarning,
+  SimilarAddressConfirmDialog,
+} from '@/features/address-poisoning'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -103,6 +109,16 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
     }
   }
 
+  // Mode A: warn (and gate) when the Recoverer being entered resembles a trusted anchor.
+  const similarityCandidate = useMemo(() => {
+    const raw = String(recoverer ?? '')
+      .split(':')
+      .pop()
+    return raw && isAddress(raw) ? raw : undefined
+  }, [recoverer])
+  const similarityGate = useAddressSimilarityGate(similarityCandidate)
+  const [isCompareOpen, setIsCompareOpen] = useState(false)
+
   const validateCustomDelay = (delay: string) => {
     if (!delay) return ''
     if (delay === '0' || !Number.isInteger(Number(delay))) {
@@ -115,7 +131,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
     trackEvent(RECOVERY_EVENTS.SHOW_ADVANCED)
   }
 
-  const isDisabled = !understandsRisk || !isDirty || !!customDelayState.error
+  const isDisabled = !understandsRisk || !isDirty || !!customDelayState.error || similarityGate.isBlocked
 
   const isEdit = !!delayModifier
 
@@ -163,6 +179,23 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
               validate={validateRecoverer}
             />
             <RecovererWarning />
+            {similarityGate.match && (
+              <Box mt={2}>
+                <AddressSimilarityWarning match={similarityGate.match} onReview={() => setIsCompareOpen(true)} />
+              </Box>
+            )}
+            {similarityGate.match && similarityCandidate && (
+              <SimilarAddressConfirmDialog
+                open={isCompareOpen}
+                candidate={similarityCandidate}
+                match={similarityGate.match}
+                onConfirm={() => {
+                  similarityGate.acknowledge()
+                  setIsCompareOpen(false)
+                }}
+                onCancel={() => setIsCompareOpen(false)}
+              />
+            )}
           </FormControl>
 
           <Box mb={2}>

@@ -1,10 +1,15 @@
-import { useCallback, useContext, useMemo } from 'react'
+import { useCallback, useContext, useMemo, useState } from 'react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
-import { Button, CardActions, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
+import { Box, Button, CardActions, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded'
-import { parseUnits, AbiCoder } from 'ethers'
+import { parseUnits, AbiCoder, isAddress } from 'ethers'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
+import {
+  useAddressSimilarityGate,
+  AddressSimilarityWarning,
+  SimilarAddressConfirmDialog,
+} from '@/features/address-poisoning'
 import useChainId from '@/hooks/useChainId'
 import { getResetTimeOptions } from '../../constants'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
@@ -44,6 +49,17 @@ const CreateSpendingLimit = () => {
     ? balances.items.find((item) => item.tokenInfo.address === tokenAddress)
     : undefined
 
+  // Mode A: warn (and gate) when the beneficiary being entered resembles a trusted anchor.
+  const beneficiary = watch(SpendingLimitFields.beneficiary)
+  const similarityCandidate = useMemo(() => {
+    const raw = String(beneficiary ?? '')
+      .split(':')
+      .pop()
+    return raw && isAddress(raw) ? raw : undefined
+  }, [beneficiary])
+  const similarityGate = useAddressSimilarityGate(similarityCandidate)
+  const [isCompareOpen, setIsCompareOpen] = useState(false)
+
   const validateSpendingLimit = useCallback(
     (value: string) => {
       return (
@@ -66,6 +82,25 @@ const CreateSpendingLimit = () => {
               label="Beneficiary"
             />
           </FormControl>
+
+          {similarityGate.match && (
+            <Box mb={3}>
+              <AddressSimilarityWarning match={similarityGate.match} onReview={() => setIsCompareOpen(true)} />
+            </Box>
+          )}
+
+          {similarityGate.match && similarityCandidate && (
+            <SimilarAddressConfirmDialog
+              open={isCompareOpen}
+              candidate={similarityCandidate}
+              match={similarityGate.match}
+              onConfirm={() => {
+                similarityGate.acknowledge()
+                setIsCompareOpen(false)
+              }}
+              onCancel={() => setIsCompareOpen(false)}
+            />
+          )}
 
           <TokenAmountInput balances={balances.items} selectedToken={selectedToken} validate={validateSpendingLimit} />
 
@@ -104,7 +139,7 @@ const CreateSpendingLimit = () => {
           </FormControl>
 
           <CardActions>
-            <Button data-testid="next-btn" variant="contained" type="submit">
+            <Button data-testid="next-btn" variant="contained" type="submit" disabled={similarityGate.isBlocked}>
               Next
             </Button>
           </CardActions>
