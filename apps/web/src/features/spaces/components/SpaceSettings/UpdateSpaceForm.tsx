@@ -23,7 +23,8 @@ const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => 
 
   const formName = watch('name')
   const isNameChanged = formName !== space?.name
-  const canSubmit = isNameChanged && isAdmin && formState.isValid && !formState.isSubmitting
+  const hasNameError = Boolean(formState.errors.name)
+  const canSubmit = isNameChanged && isAdmin && !hasNameError && !formState.isSubmitting
 
   const onSubmit = handleSubmit(handleUpdate)
 
