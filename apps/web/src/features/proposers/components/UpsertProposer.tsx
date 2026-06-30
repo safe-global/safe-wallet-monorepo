@@ -20,6 +20,7 @@ import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { addressIsNotCurrentSafe, addressIsNotOwner } from '@safe-global/utils/utils/validation'
 import { isEthSignWallet } from '@/utils/wallets'
@@ -122,6 +123,8 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
     setError(undefined)
     setIsLoading(true)
 
+    const name = sanitizeName(data.name)
+
     try {
       const shouldEthSign = isEthSignWallet(wallet)
       const signer = await getAssertedChainSigner(wallet.provider)
@@ -134,7 +137,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
           // Multi-sig flow: create off-chain message on parent Safe for signature collection
           const eoaSignature = await signProposerTypedDataForSafe(chainId, data.address, parentSafeAddress, signer)
           const delegateTypedData = getDelegateTypedData(chainId, data.address) as TypedData
-          const origin = buildDelegationOrigin(proposer ? 'edit' : 'add', data.address, safeAddress, data.name)
+          const origin = buildDelegationOrigin(proposer ? 'edit' : 'add', data.address, safeAddress, name)
 
           await createDelegationMessage(dispatch, chainId, parentSafeAddress, delegateTypedData, eoaSignature, origin)
 
@@ -160,7 +163,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
       const createDelegateDto: CreateDelegateDto = {
         delegate: data.address,
         delegator,
-        label: data.name,
+        label: name,
         signature,
         safe: safeAddress,
       }
@@ -304,7 +307,14 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
             </Box>
 
             <Box mb={2}>
-              <NameInput name="name" label="Name" required />
+              <NameInput
+                name="name"
+                label="Name"
+                required
+                validateCharset
+                minLength={NAME_MIN_LENGTH}
+                maxLength={NAME_MAX_LENGTH}
+              />
             </Box>
 
             {error && (

@@ -6,6 +6,7 @@ import { FormProvider, useForm } from 'react-hook-form'
 import SpaceIcon from '@/public/images/spaces/space.svg'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
+import { NAME_MIN_LENGTH, SPACE_NAME_MAX_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -25,10 +26,11 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
+    const name = sanitizeName(data.name)
 
     try {
       setIsSubmitting(true)
-      const response = await createSpaceWithUser({ createSpaceDto: { name: data.name } })
+      const response = await createSpaceWithUser({ createSpaceDto: { name } })
 
       if (response.data) {
         const spaceId = response.data.uuid
@@ -39,7 +41,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
 
         dispatch(
           showNotification({
-            message: `Created workspace with name ${data.name}.`,
+            message: `Created workspace with name ${name}.`,
             variant: 'success',
             groupKey: 'create-space-success',
           }),
@@ -74,7 +76,16 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
         <form onSubmit={onSubmit}>
           <DialogContent sx={{ py: 2 }}>
             <Box mb={2}>
-              <NameInput data-testid="space-name-input" label="Name" autoFocus name="name" required />
+              <NameInput
+                data-testid="space-name-input"
+                label="Name"
+                autoFocus
+                name="name"
+                required
+                validateCharset
+                minLength={NAME_MIN_LENGTH}
+                maxLength={SPACE_NAME_MAX_LENGTH}
+              />
             </Box>
             <Typography variant="body2" color="text.secondary">
               How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>

@@ -4,6 +4,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import { useState, useMemo } from 'react'
 import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import NameInput from '@/components/common/NameInput'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -81,7 +82,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
     setError(undefined)
 
     const addressBookItem = {
-      name: data.name,
+      name: sanitizeName(data.name),
       address: data.address,
       chainIds: data.networks.map((network) => network.chainId),
     }
@@ -127,7 +128,14 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
                 <AddressInputReadOnly address={entry.address} chainId={entry.chainIds[0]} />
               </Box>
 
-              <NameInput name="name" label="Name" required />
+              <NameInput
+                name="name"
+                label="Name"
+                required
+                validateCharset
+                minLength={NAME_MIN_LENGTH}
+                maxLength={ADDRESS_BOOK_NAME_MAX_LENGTH}
+              />
 
               <Box>
                 <Typography variant="h5" fontWeight={700} display="inline-flex" alignItems="center" gap={1} mt={2}>
