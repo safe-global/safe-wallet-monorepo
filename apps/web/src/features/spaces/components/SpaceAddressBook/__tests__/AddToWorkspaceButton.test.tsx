@@ -99,4 +99,26 @@ describe('AddToWorkspaceButton', () => {
       expect(notifications.some((n) => /Something went wrong \(500\)\. Please try again/.test(n.message))).toBe(true)
     })
   })
+
+  it('disables the button and skips the mutation when the local name has invalid characters', async () => {
+    render(<AddToWorkspaceButton address={address} name="Bad/Name" chainIds={['1']} />, {
+      initialReduxState: { addressBook: { '1': { [address]: 'Bad/Name' } } },
+    })
+
+    const button = screen.getByRole('button', { name: 'Add to workspace' })
+    expect(button).toBeDisabled()
+
+    await userEvent.click(button)
+    expect(mockUpsert).not.toHaveBeenCalled()
+  })
+
+  it('shows a tooltip explaining why an invalid-name contact cannot be added', async () => {
+    render(<AddToWorkspaceButton address={address} name="Bad/Name" chainIds={['1']} />, {
+      initialReduxState: { addressBook: { '1': { [address]: 'Bad/Name' } } },
+    })
+
+    await userEvent.hover(screen.getByRole('button', { name: 'Add to workspace' }).parentElement as HTMLElement)
+
+    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the workspace/)).toBeInTheDocument())
+  })
 })

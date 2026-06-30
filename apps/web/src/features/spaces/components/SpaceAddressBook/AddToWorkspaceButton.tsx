@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { Spinner } from '@/components/ui/spinner'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { validateContactName } from './utils'
 
 type AddToWorkspaceButtonProps = {
   address: string
@@ -20,8 +22,10 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [added, setAdded] = useState(false)
 
+  const nameError = validateContactName(name)
+
   const handleAdd = async () => {
-    if (!spaceId || added) return
+    if (!spaceId || added || nameError) return
 
     try {
       setIsSubmitting(true)
@@ -59,10 +63,21 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
     }
   }
 
-  return (
-    <Button variant="outline" size="sm" onClick={handleAdd} disabled={isSubmitting || added}>
+  const button = (
+    <Button variant="outline" size="sm" onClick={handleAdd} disabled={isSubmitting || added || !!nameError}>
       {isSubmitting ? <Spinner className="size-3.5" /> : added ? 'Added' : 'Add to workspace'}
     </Button>
+  )
+
+  if (!nameError) {
+    return button
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<div className="inline-flex w-fit" />}>{button}</TooltipTrigger>
+      <TooltipContent>Rename this contact to add it to the workspace. {nameError}</TooltipContent>
+    </Tooltip>
   )
 }
 
