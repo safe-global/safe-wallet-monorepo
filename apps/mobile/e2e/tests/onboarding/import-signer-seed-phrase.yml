@@ -164,4 +164,4 @@ tags:
 # Verify we're back on signers screen
 - assertVisible:
     id: 'signers-screen'
-- assertVisible: 'My signers'
+- assertVisible: 'Your signers'

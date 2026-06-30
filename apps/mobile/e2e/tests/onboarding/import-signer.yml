@@ -39,4 +39,4 @@ tags:
     id: 'import-success-continue'
 - assertVisible:
     id: 'signers-screen'
-- assertVisible: 'My signers'
+- assertVisible: 'Your signers'
