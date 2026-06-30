@@ -22,6 +22,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
 import { validateContactName } from './utils'
+import { sanitizeName } from '@safe-global/utils/validation/names'
 
 type RequestToAddButtonProps = {
   address: string
@@ -58,7 +59,7 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested }: Reque
 
       const result = await createRequest({
         spaceId,
-        createAddressBookRequestDto: { address, name: name.trim(), chainIds },
+        createAddressBookRequestDto: { address, name: sanitizeName(name), chainIds },
       })
 
       if (result.error) {

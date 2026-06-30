@@ -190,17 +190,19 @@ describe('space address book utils', () => {
       expect(validateContactName('Alice')).toBeUndefined()
       expect(validateContactName('alice_1.test-name')).toBeUndefined()
       expect(validateContactName(' Padded name ')).toBeUndefined()
+      expect(validateContactName('José')).toBeUndefined()
+      expect(validateContactName("O'Brien")).toBeUndefined()
+      expect(validateContactName('Smith & Co')).toBeUndefined()
     })
 
     it('rejects names that are too short or too long', () => {
-      expect(validateContactName('ab')).toMatch(/3 to 50 characters/)
-      expect(validateContactName('a'.repeat(51))).toMatch(/3 to 50 characters/)
+      expect(validateContactName('ab')).toMatch(/at least 3 character/)
+      expect(validateContactName('a'.repeat(51))).toMatch(/at most 50 character/)
     })
 
     it('rejects names with characters the workspace book does not allow', () => {
-      expect(validateContactName('José')).toMatch(/must start with a letter or number/)
-      expect(validateContactName('name\!')).toMatch(/must start with a letter or number/)
-      expect(validateContactName('-leading')).toMatch(/must start with a letter or number/)
+      expect(validateContactName('name!')).toMatch(/can only contain/)
+      expect(validateContactName('100%')).toMatch(/can only contain/)
     })
   })
 })
