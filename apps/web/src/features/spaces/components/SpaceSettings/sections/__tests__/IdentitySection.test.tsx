@@ -124,4 +124,15 @@ describe('IdentitySection', () => {
     expect(getInput().value).toBe('Test Space')
     expect(screen.queryByText(DISALLOWED_CHARACTER_MESSAGE)).not.toBeInTheDocument()
   })
+
+  it('treats a name that sanitizes back to the saved name as unchanged', async () => {
+    setup(true)
+
+    fireEvent.change(getInput(), { target: { value: 'Test Space  ' } })
+
+    await waitFor(() => {
+      expect(getSaveButton()).toBeDisabled()
+    })
+    expect(screen.queryByTestId('space-cancel-button')).not.toBeInTheDocument()
+  })
 })
