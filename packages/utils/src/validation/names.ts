@@ -5,8 +5,6 @@ export const NAME_MIN_LENGTH = 3
 export const NAME_MAX_LENGTH = 30
 export const ADDRESS_BOOK_NAME_MAX_LENGTH = 50
 export const MEMBER_NAME_MAX_LENGTH = 255
-// CGW has no dedicated constants for these; both use the default NameSchema (max 30).
-export const MEMBER_ALIAS_MAX_LENGTH = NAME_MAX_LENGTH
 export const SPACE_NAME_MAX_LENGTH = NAME_MAX_LENGTH
 
 const INVISIBLE_CHARACTERS = /[\p{Cc}\p{Cf}]/gu

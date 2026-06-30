@@ -20,7 +20,7 @@ import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
+import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { addressIsNotCurrentSafe, addressIsNotOwner } from '@safe-global/utils/utils/validation'
 import { isEthSignWallet } from '@/utils/wallets'
@@ -313,7 +313,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
                 required
                 validateCharset
                 minLength={NAME_MIN_LENGTH}
-                maxLength={NAME_MAX_LENGTH}
+                maxLength={ADDRESS_BOOK_NAME_MAX_LENGTH}
               />
             </Box>
 
