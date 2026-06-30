@@ -9,7 +9,10 @@ import type {
 import { Container } from '@/src/components/Container'
 import { TokenAmount } from '@/src/components/TokenAmount'
 import { useAppSelector } from '@/src/store/hooks'
-import { selectActiveChainCurrency } from '@/src/store/chains'
+import { RootState } from '@/src/store'
+import { selectActiveChainCurrency, selectChainById } from '@/src/store/chains'
+import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { selectCurrency } from '@/src/store/settingsSlice'
 import { useBalances } from '@/src/hooks/useBalances'
 import { useTokenDetails } from '@/src/hooks/useTokenDetails/useTokenDetails'
@@ -27,6 +30,9 @@ export function FeesBreakdown({
   detailedExecutionInfo: MultisigExecutionDetails
   txDetails?: TransactionDetails
 }) {
+  const activeSafe = useDefinedActiveSafe()
+  const activeChain = useAppSelector((state: RootState) => selectChainById(state, activeSafe.chainId))
+  const isGtfEnabled = hasFeature(activeChain, FEATURES.GTF)
   const nativeCurrency = useAppSelector(selectActiveChainCurrency)
   const currency = useAppSelector(selectCurrency)
   const { balances } = useBalances()
@@ -52,7 +58,8 @@ export function FeesBreakdown({
 
   const breakdown = useFeesBreakdown({ detailedExecutionInfo, outgoing, balances })
 
-  if (!breakdown) {
+  // The fees block is part of the GTF rollout, hide it entirely on chains where GTF is disabled
+  if (!isGtfEnabled || !breakdown) {
     return null
   }
 
