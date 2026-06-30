@@ -159,9 +159,9 @@ tags:
     when:
       true: '${output.isExecuteFlow === true}'
     commands:
-      # Verify "Execution method" label is visible
+      # Verify "Pay fees from" (execution method) label is visible
       - assertVisible:
-          text: 'Execution method'
+          text: 'Pay fees from'
 
       # ===========================================
       # Dynamically Detect: Relay (Sponsored by Safe) or Signer
@@ -209,7 +209,7 @@ tags:
 
             # Tap on execution method to open the sheet
             - tapOn:
-                text: 'Execution method'
+                text: 'Pay fees from'
             # Wait for sheet to open
             - waitForAnimationToEnd:
                 timeout: 1000
@@ -274,7 +274,7 @@ tags:
                 timeout: ${output.defaults.extendedWaitUntilTimeout}
             # Optionally verify we can still open the sheet and see both options
             - tapOn:
-                text: 'Execution method'
+                text: 'Pay fees from'
             # Wait for sheet to open
             - waitForAnimationToEnd:
                 timeout: 1000
