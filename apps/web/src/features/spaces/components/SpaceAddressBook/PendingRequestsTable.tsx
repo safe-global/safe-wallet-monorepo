@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/spinner'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { NetworkLogosList } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
+import { useListSimilarityWarnings } from '@/features/address-poisoning'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
   useAddressBookRequestsApproveRequestV1Mutation,
@@ -44,6 +45,10 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     () => new Set(spaceAddressBook.map((item) => item.address.toLowerCase())),
     [spaceAddressBook],
   )
+
+  // Mode B: a pending request is an unapproved, member-submitted address; flag any that
+  // resembles a trusted anchor so an admin spots a lookalike before approving it.
+  const getSimilarityWarning = useListSimilarityWarnings(useMemo(() => requests.map((req) => req.address), [requests]))
 
   const handleApprove = async (requestId: number) => {
     if (!spaceId) return
@@ -132,6 +137,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
                   hasExplorer
                   showCopyButton
                   avatarSize={24}
+                  similarityWarning={getSimilarityWarning(req.address)}
                 />
               </div>
             </TableCell>

@@ -24,6 +24,7 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Tooltip } from '@mui/material'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
+import { useListSimilarityWarnings } from '@/features/address-poisoning'
 
 const headCells = [
   {
@@ -77,6 +78,14 @@ const ProposersList = () => {
   const { threshold: parentThreshold } = useParentSafeThreshold(nestedSafeOwners?.[0])
   const showPendingDelegations = isNestedSafeOwner && parentThreshold !== undefined && parentThreshold > 1
 
+  // Mode B: proposers come from the backend, so flag any delegate/delegator that
+  // resembles a trusted anchor.
+  const similarityAddresses = useMemo(
+    () => proposers.data?.results.flatMap((proposer) => [proposer.delegate, proposer.delegator]) ?? [],
+    [proposers.data],
+  )
+  const getSimilarityWarning = useListSimilarityWarnings(similarityAddresses)
+
   const rows = useMemo(() => {
     if (!proposers.data) return []
 
@@ -92,13 +101,22 @@ const ProposersList = () => {
                 hasExplorer
                 name={proposer.label || undefined}
                 shortAddress
+                similarityWarning={getSimilarityWarning(proposer.delegate)}
               />
             ),
           },
 
           creator: {
             rawValue: proposer.delegator,
-            content: <EthHashInfo address={proposer.delegator} showCopyButton hasExplorer shortAddress />,
+            content: (
+              <EthHashInfo
+                address={proposer.delegator}
+                showCopyButton
+                hasExplorer
+                shortAddress
+                similarityWarning={getSimilarityWarning(proposer.delegator)}
+              />
+            ),
           },
           actions: {
             rawValue: '',
@@ -113,7 +131,7 @@ const ProposersList = () => {
         },
       }
     })
-  }, [isEnabled, proposers.data])
+  }, [isEnabled, proposers.data, getSimilarityWarning])
 
   if (!proposers.data?.results) return null
 

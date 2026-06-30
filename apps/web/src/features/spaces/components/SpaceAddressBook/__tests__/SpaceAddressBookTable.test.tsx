@@ -5,6 +5,9 @@ import { Builder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
 
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
+jest.mock('@/features/address-poisoning', () => ({
+  useListSimilarityWarnings: () => () => undefined,
+}))
 jest.mock('@/components/common/EthHashInfo', () => {
   const EthHashInfo = ({ address }: { address: string }) => <span data-testid="eth-hash-info">{address}</span>
   return EthHashInfo

@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import type { ReactElement } from 'react'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
+import { useListSimilarityWarnings } from '@/features/address-poisoning'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useIsRecoverer } from '../../hooks/useIsRecoverer'
@@ -30,6 +31,12 @@ export default function RecoveryDescription({ item }: { item: RecoveryQueueItem 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [args.data, args.to, args.value, safe.threshold, safe.owners])
 
+  // Mode B: the proposed new owners are decoded from an attacker-controllable recovery
+  // transaction; flag any that resemble a trusted anchor before they are approved.
+  const getSimilarityWarning = useListSimilarityWarnings(
+    useMemo(() => newSetup?.owners.map((owner) => owner.value) ?? [], [newSetup]),
+  )
+
   if (isMalicious) {
     return (
       <ErrorMessage>This transaction potentially calls malicious actions. We recommend cancelling it.</ErrorMessage>
@@ -49,7 +56,14 @@ export default function RecoveryDescription({ item }: { item: RecoveryQueueItem 
   return (
     <InfoDetails title="Add signer(s):">
       {newSetup.owners.map((owner) => (
-        <EthHashInfo key={owner.value} address={owner.value} shortAddress={false} showCopyButton hasExplorer />
+        <EthHashInfo
+          key={owner.value}
+          address={owner.value}
+          shortAddress={false}
+          showCopyButton
+          hasExplorer
+          similarityWarning={getSimilarityWarning(owner.value)}
+        />
       ))}
 
       <div>

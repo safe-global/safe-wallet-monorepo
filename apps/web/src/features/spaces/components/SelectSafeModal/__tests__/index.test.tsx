@@ -50,6 +50,7 @@ const mockUseChains = jest.fn()
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: () => mockUseChains(),
+  useHasFeature: () => false,
 }))
 
 const renderModal = (actionType: ESafeAction, undeployedSafes: Record<string, Record<string, unknown>> = {}) =>

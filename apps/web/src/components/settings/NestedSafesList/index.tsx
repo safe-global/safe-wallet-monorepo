@@ -18,6 +18,7 @@ import { useHasFeature } from '@/hooks/useChains'
 
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useListSimilarityWarnings } from '@/features/address-poisoning'
 
 export function NestedSafesList(): ReactElement | null {
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
@@ -30,15 +31,25 @@ export function NestedSafesList(): ReactElement | null {
     { skip: !isEnabled || !safeLoaded },
   )
 
+  const nestedSafes = useMemo(() => ownedSafes?.safes ?? [], [ownedSafes])
+  // Mode B: nested safes come from the backend; flag any that resemble a trusted anchor.
+  const getSimilarityWarning = useListSimilarityWarnings(nestedSafes)
+
   const rows = useMemo(() => {
-    const nestedSafes = ownedSafes?.safes ?? []
     return nestedSafes.map((nestedSafe) => {
       return {
         cells: {
           owner: {
             rawValue: nestedSafe,
             content: (
-              <EthHashInfo address={nestedSafe} showCopyButton shortAddress={false} showName={true} hasExplorer />
+              <EthHashInfo
+                address={nestedSafe}
+                showCopyButton
+                shortAddress={false}
+                showName={true}
+                hasExplorer
+                similarityWarning={getSimilarityWarning(nestedSafe)}
+              />
             ),
           },
           actions: {
@@ -65,7 +76,7 @@ export function NestedSafesList(): ReactElement | null {
         },
       }
     })
-  }, [ownedSafes])
+  }, [nestedSafes, getSimilarityWarning])
 
   if (!isEnabled) {
     return null

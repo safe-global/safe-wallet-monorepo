@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMediaQuery } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -17,6 +17,7 @@ import { cn } from '@/utils/cn'
 import { formatDate } from '@/features/spaces/utils'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
+import { useListSimilarityWarnings } from '@/features/address-poisoning'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
   isLocal: boolean
@@ -63,6 +64,11 @@ function SpaceAddressBookTable({
   const resolveMemberName = useMemberNameResolver()
   const theme = useTheme()
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'))
+  // Mode B: shared (space) contacts are member-editable, so flag any whose address
+  // resembles a trusted anchor. Local entries are anchors themselves → never flagged.
+  const getSimilarityWarning = useListSimilarityWarnings(
+    useMemo(() => entries.map((entry) => entry.address), [entries]),
+  )
 
   useEffect(() => {
     setPage(0)
@@ -117,6 +123,7 @@ function SpaceAddressBookTable({
                     hasExplorer
                     showCopyButton
                     avatarSize={24}
+                    similarityWarning={getSimilarityWarning(entry.address)}
                   />
                 </div>
               </TableCell>

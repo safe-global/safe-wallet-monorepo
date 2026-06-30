@@ -16,6 +16,8 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import SafeCardReadOnly from '../SafeAccounts/SafeCardReadOnly'
+import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
+import { useSimilarAddressSet } from '@/features/address-poisoning'
 import SafeSearch from './SafeSearch'
 import useSafeActionMapper from './useSafeActionMapper'
 import { safeModalTitles } from './constants'
@@ -39,6 +41,10 @@ const SelectSafeModal = () => {
   const flatSafes = useMemo(() => flattenSafeItems(allSafes), [allSafes])
   const matchSafe = useMatchSafe()
   const filteredSafes = useSearchFilter(flatSafes, query, matchSafe)
+  // Mode B: the picker lists backend-sourced safes; flag any that resemble a trusted anchor.
+  const similarAddresses = useSimilarAddressSet(
+    useMemo(() => filteredSafes.map((safe) => safe.address), [filteredSafes]),
+  )
   const { actionMapper, resetActiveSafe } = useSafeActionMapper({
     onReceiveComplete: () => setQrOpen(true),
   })
@@ -97,12 +103,14 @@ const SelectSafeModal = () => {
                 <p className="py-8 text-center text-sm text-muted-foreground">No safes found</p>
               ) : (
                 <div className="flex flex-col gap-1.5">
+                  {similarAddresses.size > 0 && <SimilarAddressAlert />}
                   {filteredSafes.map((safe) => {
                     const disabledTooltip = getSwapDisabledTooltip(safe)
                     return (
                       <SafeCardReadOnly
                         key={`${safe.chainId}:${safe.address}`}
                         safe={safe}
+                        isSimilar={similarAddresses.has(safe.address.toLowerCase())}
                         hideContextMenu
                         showPending={false}
                         onClick={() => void handleSafeClick(safe)}

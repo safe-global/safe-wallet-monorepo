@@ -1,5 +1,5 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { useState, type ReactElement } from 'react'
+import { useMemo, useState, type ReactElement } from 'react'
 import { Box, Link, List, ListItem, ListItemIcon, ListItemText, Skeleton, SvgIcon, Typography } from '@mui/material'
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
 
@@ -7,6 +7,7 @@ import CreatedIcon from '@/public/images/messages/created.svg'
 import SignedIcon from '@/public/images/messages/signed.svg'
 import DotIcon from '@/public/images/messages/dot.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import { useListSimilarityWarnings } from '@/features/address-poisoning'
 
 import css from '@/components/safe-messages/MsgSigners/styles.module.css'
 import txSignersCss from '@/components/transactions/TxSigners/styles.module.css'
@@ -63,6 +64,11 @@ const MsgSigners = ({
 
   const { confirmations, confirmationsRequired, confirmationsSubmitted } = msg
 
+  // Mode B: confirmation signers come from message details; flag any that resemble a trusted anchor.
+  const getSimilarityWarning = useListSimilarityWarnings(
+    useMemo(() => confirmations.map((confirmation) => confirmation.owner.value), [confirmations]),
+  )
+
   const missingConfirmations = [...new Array(Math.max(0, confirmationsRequired - confirmationsSubmitted))]
 
   const isConfirmed = msg.status === 'CONFIRMED'
@@ -95,7 +101,13 @@ const MsgSigners = ({
               <Dot />
             </ListItemIcon>
             <ListItemText>
-              <EthHashInfo address={owner.value} name={owner.name} hasExplorer showCopyButton />
+              <EthHashInfo
+                address={owner.value}
+                name={owner.name}
+                hasExplorer
+                showCopyButton
+                similarityWarning={getSimilarityWarning(owner.value)}
+              />
             </ListItemText>
           </ListItem>
         ))}

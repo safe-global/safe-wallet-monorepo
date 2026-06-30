@@ -2,9 +2,11 @@ import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/tran
 import { Paper, Typography, SvgIcon } from '@mui/material'
 import type { PaperProps } from '@mui/material'
 import type { ReactElement } from 'react'
+import { useMemo } from 'react'
 
 import PlusIcon from '@/public/images/common/plus.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import { useListSimilarityWarnings } from '@/features/address-poisoning'
 
 import css from './styles.module.css'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
@@ -20,6 +22,10 @@ export function OwnerList({
   title?: string
   sx?: PaperProps['sx']
 }): ReactElement {
+  // Mode B: for an attacker-proposed transaction the owner list is attacker-controlled;
+  // flag any owner that resembles a trusted anchor.
+  const getSimilarityWarning = useListSimilarityWarnings(useMemo(() => owners.map((owner) => owner.value), [owners]))
+
   return (
     <Paper className={css.container} sx={sx}>
       <Typography
@@ -42,6 +48,7 @@ export function OwnerList({
           showCopyButton
           hasExplorer
           avatarSize={32}
+          similarityWarning={getSimilarityWarning(newOwner.value)}
         />
       ))}
     </Paper>
