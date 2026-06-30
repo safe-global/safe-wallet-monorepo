@@ -134,6 +134,9 @@ tags:
 - assertVisible: '.*Signer-3472.*'
 - assertVisible: '.*0x3336...3472.*'
 
+# Verify the imported signer shows the "Imported" badge
+- assertVisible: '.*Imported.*'
+
 # Click on the signer to open detail screen
 - tapOn:
     id: 'signer-0x3336745b7EA628F5134Bd9d08aa68b4979fA3472'

@@ -40,3 +40,6 @@ tags:
 - assertVisible:
     id: 'signers-screen'
 - assertVisible: 'Your signers'
+# Verify the imported signer (Signer-3472) shows the "Imported" badge
+- assertVisible: '.*Signer-3472.*'
+- assertVisible: '.*Imported.*'

@@ -165,3 +165,6 @@ tags:
 - assertVisible:
     id: 'signers-screen'
 - assertVisible: 'Your signers'
+# Verify the imported signer shows the "Imported" badge
+- assertVisible: '.*0xaE03...1154.*'
+- assertVisible: '.*Imported.*'
