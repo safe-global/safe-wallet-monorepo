@@ -61,7 +61,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
 
   // Check if any changes were made
   const hasChanges = useMemo(() => {
-    const nameChanged = watchedName !== entry.name
+    const nameChanged = sanitizeName(watchedName ?? '') !== entry.name
 
     const originalChainIds = entry.chainIds.toSorted()
     const currentChainIds = watchedNetworks.map((network) => network.chainId).sort()
