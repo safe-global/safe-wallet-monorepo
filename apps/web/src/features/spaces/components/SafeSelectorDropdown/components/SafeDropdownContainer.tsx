@@ -1,16 +1,21 @@
-import { RotateCw, Search } from 'lucide-react'
+import { Plus, RotateCw, Search, Settings2 } from 'lucide-react'
 import { useState } from 'react'
 import { SelectContent, SelectItem } from '@/components/ui/select'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
 import useWallet from '@/hooks/wallets/useWallet'
+import { cn } from '@/utils/cn'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import type { SafeItemData } from '../types'
+
+type DropdownTab = 'workspace' | 'local'
 
 const matchesSearch = (item: SafeItemData, displayName: string, query: string): boolean => {
   const name = displayName.toLowerCase()
@@ -22,14 +27,19 @@ const matchesSearch = (item: SafeItemData, displayName: string, query: string): 
 }
 
 export interface SafeDropdownContainerProps {
-  items: SafeItemData[]
+  workspaceItems: SafeItemData[]
+  localItems: SafeItemData[]
+  hasWorkspace: boolean
+  workspaceName?: string
+  isInSpaceContext: boolean
   selectedItemId?: string
   onItemSelect: (itemId: string) => void
   isLoading?: boolean
   isError?: boolean
   onRetry?: () => void
-  header?: React.ReactNode
-  footer?: React.ReactNode | ((close: () => void) => React.ReactNode)
+  onManageTrustedSafes: () => void
+  onSignIn: () => void
+  onAddSafe: () => void
   closeDropdown: () => void
 }
 
@@ -67,36 +77,58 @@ function DropdownContentError({ onRetry }: { onRetry?: () => void }) {
 
 const SKELETON_COUNT = 4
 
+const tabClass = (active: boolean) =>
+  cn(
+    'flex-1 rounded-md px-2 py-1 text-xs font-semibold transition-colors cursor-pointer',
+    active ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+  )
+
 const SafeDropdownContainer = ({
-  items,
+  workspaceItems,
+  localItems,
+  hasWorkspace,
+  workspaceName,
+  isInSpaceContext,
   selectedItemId,
   isLoading,
   isError,
   onRetry,
-  header,
-  footer,
+  onManageTrustedSafes,
+  onSignIn,
+  onAddSafe,
   closeDropdown,
 }: SafeDropdownContainerProps) => {
+  const [tab, setTab] = useState<DropdownTab>(isInSpaceContext ? 'workspace' : 'local')
   const [search, setSearch] = useState('')
   const query = search.trim().toLowerCase()
   const resolveName = useSafeNameResolver()
   const wallet = useWallet()
 
+  const showWorkspacePrompt = tab === 'workspace' && !hasWorkspace
+  const sourceItems = tab === 'workspace' ? workspaceItems : localItems
+
   // Multi-chain items stay visible even when currently selected so the user can expand and switch chains.
-  const structuralItems = items.filter((item) => item.chains.length > 1 || item.id !== selectedItemId)
+  const structuralItems = sourceItems.filter((item) => item.chains.length > 1 || item.id !== selectedItemId)
   const filteredItems = query
     ? structuralItems.filter((item) =>
         matchesSearch(item, resolveName(item.address, item.chains[0]?.chainId, item.name), query),
       )
     : structuralItems
 
-  // Key the search bar to displayable rows, so it's hidden when there's nothing to filter.
-  const showSearch = !isError && structuralItems.length > 0
+  const showSearch = !isError && !showWorkspacePrompt && structuralItems.length > 0
+  // "Add a Safe account" only belongs on the Local tab — adding/creating Safes for a workspace is
+  // a workspace-level action handled on the Safe accounts page, not here.
+  const showAddFooter = !isError && tab === 'local'
 
   // Bottom-fade scroll hint, shown only while more rows lie below the fold.
-  const { setScrollNode, showFade: showScrollHint } = useBottomScrollFade([filteredItems.length, isLoading, isError])
+  const { setScrollNode, showFade: showScrollHint } = useBottomScrollFade([
+    filteredItems.length,
+    isLoading,
+    isError,
+    tab,
+  ])
 
-  const renderContent = () => {
+  const renderList = () => {
     if (isError) {
       return <DropdownContentError onRetry={onRetry} />
     }
@@ -110,9 +142,11 @@ const SafeDropdownContainer = ({
         <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">
           {query
             ? 'No safes match your search'
-            : wallet
-              ? 'No safes yet'
-              : 'Connect a wallet to find your Safe accounts'}
+            : tab === 'local'
+              ? 'No trusted Safes yet'
+              : wallet
+                ? 'No safes in this workspace'
+                : 'Connect a wallet to find your Safe accounts'}
         </p>
       )
     }
@@ -138,64 +172,141 @@ const SafeDropdownContainer = ({
       align="start"
       side="bottom"
       alignItemWithTrigger={false}
-      // outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
-      // :focus-visible and would otherwise draw the browser's blue outline around the whole popup.
       className="w-[430px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-lg [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden"
       sideOffset={20}
       alignOffset={9}
       collisionAvoidance={{ side: 'none', align: 'shift' }}
     >
-      {/* Fallback to 34rem: until base-ui sets --available-height the clamp must still apply, else the
-          list expands to full height, measures as non-overflowing, and the scroll-hint fade is missed. */}
-      <div className="flex max-h-[min(34rem,var(--available-height,34rem))] flex-col">
-        {(header || showSearch) && (
-          <div className="shrink-0 bg-card">
-            {header}
-            {showSearch && (
-              <div className="flex items-center gap-2 px-3 pb-2 pt-1">
-                <InputGroup className="flex-1 rounded-md border-gray-100 shadow-none">
-                  <InputGroupAddon>
-                    <Search className="size-4" />
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    placeholder="by name, address or network"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    // Stop keystrokes reaching base-ui Select's typeahead, which would hijack typing.
-                    // Trade-off: arrows/Enter stay in the input (no list nav); Escape still closes.
-                    onKeyDown={(e) => {
-                      if (e.key !== 'Escape') e.stopPropagation()
-                    }}
-                    autoComplete="off"
-                    data-testid="safe-dropdown-search-input"
-                  />
-                </InputGroup>
-                <SafeListSortToggle />
-              </div>
-            )}
+      {/* Single scroll container: the list scrolls while the header and the add-footer stay pinned
+          via sticky positioning (base-ui's List manages its own scroll, so a flex-pinned footer
+          would overlap the list — sticky is robust against that). */}
+      <div
+        ref={setScrollNode}
+        data-testid="dropdown-scroll-area"
+        className="flex max-h-[min(40rem,var(--available-height,40rem))] flex-col overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
+      >
+        {/* Sticky header: compact tabs + (search/sort) + trusted-manage. Stop keystrokes reaching
+            base-ui Select's typeahead, which would otherwise hijack typing and the tab buttons. */}
+        <div className="bg-card sticky top-0 z-20" onKeyDown={(e) => e.key !== 'Escape' && e.stopPropagation()}>
+          <div className="px-3 pb-2 pt-3">
+            <div className="flex gap-1 rounded-lg bg-muted p-0.5">
+              <button
+                type="button"
+                className={cn(tabClass(tab === 'workspace'), 'min-w-0')}
+                onClick={() => setTab('workspace')}
+                data-testid="dropdown-workspace-tab"
+                title={workspaceName?.trim() || 'Workspace'}
+              >
+                <span className="block truncate">{workspaceName?.trim() || 'Workspace'}</span>
+              </button>
+              <button
+                type="button"
+                className={tabClass(tab === 'local')}
+                onClick={() => setTab('local')}
+                data-testid="dropdown-local-tab"
+              >
+                Local
+              </button>
+            </div>
           </div>
-        )}
 
-        <div
-          ref={setScrollNode}
-          data-testid="dropdown-scroll-area"
-          className="min-h-0 flex-1 overflow-y-auto overscroll-y-none px-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
-        >
-          {renderContent()}
+          {showSearch && (
+            <div className="flex items-center gap-2 px-3 pb-2">
+              <InputGroup className="flex-1 rounded-md border-gray-100 shadow-none">
+                <InputGroupAddon>
+                  <Search className="size-4" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  placeholder="by name, address or network"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  autoComplete="off"
+                  data-testid="safe-dropdown-search-input"
+                />
+              </InputGroup>
+              <SafeListSortToggle />
+            </div>
+          )}
+
+          {tab === 'local' && !showWorkspacePrompt && (
+            <div className="flex items-center justify-between px-4 pb-2 pt-1">
+              <Typography variant="paragraph-small-bold" color="muted">
+                Trusted Safes
+              </Typography>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      aria-label="Manage trusted Safes"
+                      data-testid="dropdown-manage-trusted-btn"
+                      className="text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-7 cursor-pointer items-center justify-center rounded-md transition-colors"
+                      onClick={() => {
+                        closeDropdown()
+                        onManageTrustedSafes()
+                      }}
+                    />
+                  }
+                >
+                  <Settings2 className="size-4" />
+                </TooltipTrigger>
+                <TooltipContent>Manage trusted Safes</TooltipContent>
+              </Tooltip>
+            </div>
+          )}
         </div>
 
-        {footer && (
-          <div className="relative shrink-0 bg-card">
-            {showScrollHint && (
-              <div
-                data-testid="scroll-hint"
-                aria-hidden
-                // Fade the last visible row into the dropdown background. `card` isn't a :root color
-                // token (so `to-card` renders transparent) — reference the paper var it resolves to.
-                className="pointer-events-none absolute inset-x-0 -top-16 h-16 bg-gradient-to-b from-transparent to-[var(--color-background-paper)]"
-              />
-            )}
-            {typeof footer === 'function' ? footer(closeDropdown) : footer}
+        {/* Reserve space at the end so the last row clears the sticky add-footer when fully scrolled. */}
+        <div className={cn('px-1', showAddFooter && 'pb-16')}>
+          {showWorkspacePrompt ? (
+            <div
+              className="flex flex-col items-center gap-2 px-4 py-8 text-center"
+              data-testid="dropdown-signin-prompt"
+            >
+              <p className="text-sm font-semibold">Sign in to a workspace</p>
+              <p className="text-xs text-muted-foreground">Sign in to see the Safes in your workspace.</p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-1"
+                data-testid="dropdown-signin-btn"
+                onClick={() => {
+                  closeDropdown()
+                  onSignIn()
+                }}
+              >
+                Sign in
+              </Button>
+            </div>
+          ) : (
+            renderList()
+          )}
+        </div>
+
+        {/* Bottom-fade hint signalling more rows below. Sits at z-10 so the sticky footer (z-20)
+            renders on top, leaving the fade peeking just above it. */}
+        {showScrollHint && (
+          <div
+            data-testid="scroll-hint"
+            aria-hidden
+            className="pointer-events-none sticky bottom-0 z-10 -mt-16 h-16 bg-gradient-to-b from-transparent to-[var(--color-background-paper)]"
+          />
+        )}
+
+        {showAddFooter && (
+          <div className="border-border bg-card sticky bottom-0 z-20 border-t p-2">
+            <button
+              type="button"
+              data-testid="dropdown-add-safe-btn"
+              onClick={() => {
+                closeDropdown()
+                onAddSafe()
+              }}
+              className="bg-muted/60 text-foreground hover:bg-muted flex w-full cursor-pointer items-center justify-center gap-2 rounded-md py-2.5 text-sm font-semibold transition-colors"
+            >
+              <Plus className="size-4 text-green-500" />
+              Add Safe account
+            </button>
           </div>
         )}
       </div>

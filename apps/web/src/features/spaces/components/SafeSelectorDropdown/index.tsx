@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/utils/cn'
 import SafeSelectorTriggerContent from './components/SafeSelectorTriggerContent'
 import SafeDropdownContainer from './components/SafeDropdownContainer'
+import AddSafeChooser from './components/AddSafeChooser'
 import InlineRetryError from '@/components/common/InlineRetryError'
 import { useSafeSelectorState } from './hooks/useSafeSelectorState'
 import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
@@ -57,15 +58,21 @@ function SafeSelectorDropdownSkeleton() {
 
 function SafeSelectorDropdown({
   items,
+  workspaceItems = items,
+  localItems = items,
+  hasWorkspace = true,
+  workspaceName,
+  isInSpaceContext = false,
   selectedItemId,
   onItemSelect,
   isLoading,
   isError,
   onRetry,
-  header,
-  footer,
+  onManageTrustedSafes = () => {},
+  onSignIn = () => {},
 }: SafeSelectorDropdownProps) {
-  const hasDropdownContent = Boolean(header) || Boolean(footer) || isLoading || isError
+  // The dropdown always has the tabs UI, so it's always openable.
+  const hasDropdownContent = true
   // Force-openable so `isSingleSafe` can't hide the chevron when only one other safe exists.
   const willUseFallbackTrigger =
     items.length > 0 && Boolean(selectedItemId) && !items.some((item) => item.id === selectedItemId)
@@ -86,6 +93,9 @@ function SafeSelectorDropdown({
   })
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
+
+  // "Add a Safe account" chooser lives outside the Select so it survives the dropdown closing.
+  const [addSafeChooserOpen, setAddSafeChooserOpen] = useState(false)
 
   const variants = getSafeSelectorClassVariants(isSingleSafe)
   const safeSelectValue = selectedItemId ?? selectedItem?.id
@@ -138,14 +148,19 @@ function SafeSelectorDropdown({
       </SelectTrigger>
 
       <SafeDropdownContainer
-        items={items}
+        workspaceItems={workspaceItems}
+        localItems={localItems}
+        hasWorkspace={hasWorkspace}
+        workspaceName={workspaceName}
+        isInSpaceContext={isInSpaceContext}
         selectedItemId={safeSelectValue}
         onItemSelect={safeItemSelect}
         isLoading={isLoading}
         isError={isError}
         onRetry={onRetry}
-        header={header}
-        footer={footer}
+        onManageTrustedSafes={onManageTrustedSafes}
+        onSignIn={onSignIn}
+        onAddSafe={() => setAddSafeChooserOpen(true)}
         closeDropdown={closeDropdown}
       />
     </Select>
@@ -161,6 +176,7 @@ function SafeSelectorDropdown({
     <>
       <div className="pointer-events-none absolute inset-1 rounded-md bg-muted/30 opacity-0 group-hover:opacity-100" />
       {selectElement}
+      <AddSafeChooser open={addSafeChooserOpen} onOpenChange={setAddSafeChooserOpen} />
     </>
   )
 

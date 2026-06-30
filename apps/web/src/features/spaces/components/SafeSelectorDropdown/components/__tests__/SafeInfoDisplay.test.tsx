@@ -30,14 +30,16 @@ describe('SafeInfoDisplay', () => {
     expect(screen.getByTestId('safe-item-copy-address')).toBeInTheDocument()
   })
 
-  it('shows the shortened address on the address line', () => {
+  it('shows the bold-truncated address (first 4 + last 6) on the address line', () => {
     render(<SafeInfoDisplay {...baseProps} />)
-    expect(screen.getByText(shortenAddress(address))).toBeInTheDocument()
+    expect(screen.getByText(address.slice(0, 4))).toBeInTheDocument()
+    expect(screen.getByText(address.slice(-6))).toBeInTheDocument()
   })
 
-  it('shows the shortened address on both lines when the name is empty', () => {
+  it('falls back to the shortened address on the name line when the name is empty', () => {
     render(<SafeInfoDisplay name="" address={address} />)
-    // No name → the name line falls back to the address, so it appears on both the name and address lines.
-    expect(screen.getAllByText(shortenAddress(address))).toHaveLength(2)
+    // No name → the name line falls back to the shortened address; the address line shows the bold ends.
+    expect(screen.getByText(shortenAddress(address))).toBeInTheDocument()
+    expect(screen.getByText(address.slice(-6))).toBeInTheDocument()
   })
 })

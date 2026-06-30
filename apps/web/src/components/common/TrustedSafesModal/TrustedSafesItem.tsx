@@ -1,7 +1,16 @@
-import type { MouseEvent } from 'react'
+import type { Ref } from 'react'
 import type { SelectableSafe } from './useTrustedSafesModal.types'
 import { useSafeItemData, AccountItem } from '@/features/myAccounts'
+import { FiatBalance } from '@/features/spaces'
+import Identicon from '@/components/common/Identicon'
+import AddressWithCopy from '@/components/common/AddressWithCopy'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Typography } from '@/components/ui/typography'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { cn } from '@/utils/cn'
 import SimilarityWarning from './SimilarityWarning'
+import { MODAL_SAFE_GRID } from './constants'
+import { ThresholdBadge } from './ThresholdBadge'
 
 interface TrustedSafesItemProps {
   safe: SelectableSafe
@@ -9,70 +18,85 @@ interface TrustedSafesItemProps {
 }
 
 /**
- * Individual safe item in the selection modal
- * Uses AccountItem compound components for consistent styling.
- * Includes balance, signers, status chips, queue actions, and rename menu.
- * Allows selecting/deselecting safes including already-pinned ones.
+ * Single safe row in the selection modal, laid out like the SafesTable rows for visual
+ * consistency. The whole row toggles selection; the checkbox is purely visual.
  */
 const TrustedSafesItem = ({ safe, onToggle }: TrustedSafesItemProps) => {
-  // Get rich data (balance, threshold, owners, etc.)
   const { chain, name, safeOverview, isActivating, threshold, owners, undeployedSafe, elementRef } =
     useSafeItemData(safe)
 
-  const handleClick = (e: MouseEvent) => {
-    e.preventDefault()
-    onToggle(safe.address)
-  }
+  const displayName = name || shortenAddress(safe.address)
 
-  // Check for queued transactions
   const hasQueuedItems =
     !safe.isReadOnly && safeOverview && ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
 
-  const statusChips = (
-    <>
-      <AccountItem.StatusChip
-        isActivating={isActivating}
-        isReadOnly={safe.isReadOnly}
-        undeployedSafe={!!undeployedSafe}
-      />
-      {hasQueuedItems && (
-        <AccountItem.QueueActions
-          safeAddress={safeOverview.address.value}
-          chainShortName={chain?.shortName || ''}
-          queued={safeOverview.queued ?? 0}
-          awaitingConfirmation={safeOverview.awaitingConfirmation ?? 0}
-        />
-      )}
-      {safe.similarityGroup && <SimilarityWarning />}
-    </>
-  )
+  const showStatus = isActivating || !!undeployedSafe || !!hasQueuedItems
 
   return (
-    <AccountItem.Button onClick={handleClick} elementRef={elementRef}>
-      <AccountItem.Checkbox checked={safe.isSelected} address={safe.address} />
-      <AccountItem.Icon address={safe.address} chainId={safe.chainId} threshold={threshold} owners={owners.length} />
-      <AccountItem.Info
-        address={safe.address}
-        chainId={safe.chainId}
-        name={name}
-        fullAddress
-        showCopyButton
-        hasExplorer
-        highlight4bytes={!!safe.similarityGroup}
-      >
-        {statusChips}
-      </AccountItem.Info>
-      <AccountItem.ChainBadge chainId={safe.chainId} />
-      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
-      <AccountItem.ContextMenu
-        address={safe.address}
-        chainId={safe.chainId}
-        name={name}
-        isReplayable={false}
-        undeployedSafe={!!undeployedSafe}
-        hideNestedSafes
+    <div
+      ref={elementRef as Ref<HTMLDivElement>}
+      role="button"
+      tabIndex={0}
+      onClick={() => onToggle(safe.address)}
+      data-testid="safe-list-item"
+      className={cn(
+        MODAL_SAFE_GRID,
+        'group border-muted hover:bg-muted/40 cursor-pointer border-b px-3 py-2 transition-colors',
+        safe.isSelected && 'bg-primary/5',
+      )}
+    >
+      <Checkbox
+        checked={safe.isSelected}
+        tabIndex={-1}
+        aria-hidden
+        className="pointer-events-none"
+        data-testid={`safe-item-checkbox-${safe.address}`}
       />
-    </AccountItem.Button>
+
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="inline-flex shrink-0">
+          <Identicon address={safe.address} />
+        </span>
+        <div className="flex min-w-0 flex-col">
+          <div className="flex items-center gap-1.5">
+            <Typography variant="paragraph-small-bold" className="text-foreground truncate">
+              {displayName}
+            </Typography>
+            {safe.similarityGroup && <SimilarityWarning />}
+          </div>
+          <AddressWithCopy address={safe.address} full />
+          {showStatus && (
+            <div className="mt-1 flex flex-wrap items-center gap-1">
+              <AccountItem.StatusChip
+                isActivating={isActivating}
+                isReadOnly={false}
+                undeployedSafe={!!undeployedSafe}
+              />
+              {hasQueuedItems && (
+                <AccountItem.QueueActions
+                  safeAddress={safeOverview.address.value}
+                  chainShortName={chain?.shortName || ''}
+                  queued={safeOverview.queued ?? 0}
+                  awaitingConfirmation={safeOverview.awaitingConfirmation ?? 0}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex min-w-0 items-center">
+        <AccountItem.ChainBadge chainId={safe.chainId} />
+      </div>
+
+      <div className="flex items-center justify-end">
+        <FiatBalance value={safeOverview?.fiatTotal} />
+      </div>
+
+      <div className="flex items-center justify-end">
+        <ThresholdBadge threshold={threshold} owners={owners.length} />
+      </div>
+    </div>
   )
 }
 

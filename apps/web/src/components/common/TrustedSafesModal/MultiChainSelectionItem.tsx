@@ -1,9 +1,15 @@
-import { useState, type MouseEvent } from 'react'
-import classnames from 'classnames'
 import type { SelectableMultiChainSafe } from './useTrustedSafesModal.types'
-import { useMultiAccountItemData, useSafeItemData, AccountItem } from '@/features/myAccounts'
+import { useMultiAccountItemData, AccountItem } from '@/features/myAccounts'
+import { FiatBalance } from '@/features/spaces'
+import Identicon from '@/components/common/Identicon'
+import AddressWithCopy from '@/components/common/AddressWithCopy'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Typography } from '@/components/ui/typography'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { cn } from '@/utils/cn'
 import SimilarityWarning from './SimilarityWarning'
-import css from './styles.module.css'
+import { MODAL_SAFE_GRID } from './constants'
+import { ThresholdBadge } from './ThresholdBadge'
 
 interface MultiChainSelectionItemProps {
   multiSafe: SelectableMultiChainSafe
@@ -11,125 +17,61 @@ interface MultiChainSelectionItemProps {
 }
 
 /**
- * Sub-item for each chain in a multichain group
- */
-function MultiChainSubItem({
-  safe,
-  onToggle,
-}: {
-  safe: SelectableMultiChainSafe['safes'][number]
-  onToggle: (address: string) => void
-}) {
-  const { chain, safeOverview, isActivating, threshold, owners, undeployedSafe } = useSafeItemData(safe)
-
-  const handleClick = (e: MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    onToggle(safe.address)
-  }
-
-  const hasQueuedItems =
-    !safe.isReadOnly && safeOverview && ((safeOverview.queued ?? 0) > 0 || (safeOverview.awaitingConfirmation ?? 0) > 0)
-
-  return (
-    <AccountItem.Button onClick={handleClick}>
-      <AccountItem.Icon
-        address={safe.address}
-        chainId={safe.chainId}
-        threshold={threshold}
-        owners={owners.length}
-        isMultiChainItem
-      />
-      <AccountItem.Info address={safe.address} chainId={safe.chainId} chainName={chain?.chainName}>
-        <AccountItem.StatusChip
-          undeployedSafe={!!undeployedSafe}
-          isActivating={isActivating}
-          isReadOnly={safe.isReadOnly}
-        />
-        {hasQueuedItems && (
-          <AccountItem.QueueActions
-            safeAddress={safeOverview.address.value}
-            chainShortName={chain?.shortName || ''}
-            queued={safeOverview.queued ?? 0}
-            awaitingConfirmation={safeOverview.awaitingConfirmation ?? 0}
-          />
-        )}
-      </AccountItem.Info>
-      <AccountItem.Balance fiatTotal={safeOverview?.fiatTotal} isLoading={!safeOverview && !undeployedSafe} />
-    </AccountItem.Button>
-  )
-}
-
-/**
- * Multichain safe group item for the selection modal
- * Shows a header with the address and multichain badge, with expandable sub-items for each chain
+ * Multichain safe row in the selection modal. Selecting trusts the address across all its
+ * chains, so it's a single selectable row (the Chains column shows every network) — matching
+ * how multichain safes appear in the SafesTable.
  */
 const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionItemProps) => {
-  const [expanded, setExpanded] = useState(false)
-
-  // Use multiSafe.safes directly as they're already SelectableSafe[]
-  // Only use hook for computed values like sharedSetup and totalFiatValue
   const { sharedSetup, totalFiatValue } = useMultiAccountItemData(multiSafe)
   const { address, safes, name } = multiSafe
 
-  const handleToggle = (e: MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    onToggle(address)
-  }
-
-  const toggleExpand = (e: MouseEvent) => {
-    e.stopPropagation()
-    setExpanded((prev) => !prev)
-  }
-
-  const statusChips = <>{multiSafe.similarityGroup && <SimilarityWarning />}</>
+  const displayName = name || shortenAddress(address)
 
   return (
-    <div data-testid="safe-list-item" className={classnames(css.multiListItem, css.listItem, 'my-0.5')}>
-      <div data-testid="multichain-selection-item">
-        <div onClick={toggleExpand} className="flex items-center">
-          <div className="min-w-0 flex-1" onClick={handleToggle}>
-            <AccountItem.Content data-testid="multichain-selection-content">
-              <AccountItem.Checkbox checked={multiSafe.isSelected} address={address} />
-              <AccountItem.Icon
-                address={address}
-                chainId={safes[0]?.chainId ?? '1'}
-                threshold={sharedSetup?.threshold}
-                owners={sharedSetup?.owners.length}
-              />
-              <AccountItem.Info
-                address={address}
-                chainId={safes[0]?.chainId ?? '1'}
-                name={name}
-                fullAddress
-                showCopyButton
-                hasExplorer
-                showPrefix={false}
-                highlight4bytes={!!multiSafe.similarityGroup}
-              >
-                {statusChips}
-              </AccountItem.Info>
-              <AccountItem.ChainBadge safes={safes} />
-              <AccountItem.Balance fiatTotal={totalFiatValue?.toString()} isLoading={totalFiatValue === undefined} />
-              <AccountItem.ContextMenu
-                address={address}
-                chainId={safes[0]?.chainId ?? '1'}
-                name={name}
-                isReplayable={false}
-                undeployedSafe={false}
-                hideNestedSafes
-              />
-            </AccountItem.Content>
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onToggle(address)}
+      data-testid="safe-list-item"
+      className={cn(
+        MODAL_SAFE_GRID,
+        'group border-muted hover:bg-muted/40 cursor-pointer border-b px-3 py-2 transition-colors',
+        multiSafe.isSelected && 'bg-primary/5',
+      )}
+    >
+      <Checkbox
+        checked={multiSafe.isSelected}
+        tabIndex={-1}
+        aria-hidden
+        className="pointer-events-none"
+        data-testid={`safe-item-checkbox-${multiSafe.address}`}
+      />
+
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="inline-flex shrink-0">
+          <Identicon address={address} />
+        </span>
+        <div className="flex min-w-0 flex-col">
+          <div className="flex items-center gap-1.5">
+            <Typography variant="paragraph-small-bold" className="text-foreground truncate">
+              {displayName}
+            </Typography>
+            {multiSafe.similarityGroup && <SimilarityWarning />}
           </div>
+          <AddressWithCopy address={address} full />
         </div>
-        {expanded && (
-          <div className="px-3" data-testid="multichain-subaccounts-container">
-            {safes.map((safeItem) => (
-              <MultiChainSubItem key={`${safeItem.chainId}:${safeItem.address}`} safe={safeItem} onToggle={onToggle} />
-            ))}
-          </div>
-        )}
+      </div>
+
+      <div className="flex min-w-0 items-center">
+        <AccountItem.ChainBadge safes={safes} />
+      </div>
+
+      <div className="flex items-center justify-end">
+        <FiatBalance value={totalFiatValue?.toString()} />
+      </div>
+
+      <div className="flex items-center justify-end">
+        <ThresholdBadge threshold={sharedSetup?.threshold} owners={sharedSetup?.owners.length} />
       </div>
     </div>
   )

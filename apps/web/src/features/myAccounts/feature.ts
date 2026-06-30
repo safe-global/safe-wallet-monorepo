@@ -13,6 +13,7 @@ import type { MyAccountsContract } from './contract'
 // Direct component imports (already lazy-loaded at feature level)
 import MyAccounts from './components/MyAccounts'
 import MyAccountsV2 from './components/MyAccountsV2'
+import SafesTable from './components/SafesTable'
 import AccountItemButton from './components/AccountItem/AccountItemButton'
 import AccountItemLink from './components/AccountItem/AccountItemLink'
 import AccountItemCheckbox from './components/AccountItem/AccountItemCheckbox'
@@ -36,6 +37,7 @@ const feature: MyAccountsContract = {
   // Main component
   MyAccounts,
   MyAccountsV2,
+  SafesTable,
 
   // Externally used components (individual exports to avoid compound component issues)
   AccountItemButton,

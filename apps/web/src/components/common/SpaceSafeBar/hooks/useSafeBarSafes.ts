@@ -1,8 +1,9 @@
 import { useMemo } from 'react'
-import { useIsQualifiedSafe, useSpaceSafes } from '@/features/spaces'
+import { useIsQualifiedSafe, useSpaceSafes, useCurrentSpaceId } from '@/features/spaces'
 import { useAllSafes, useAllSafesGrouped, getComparator, type AllSafeItems } from '@/hooks/safes'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
 import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -42,6 +43,10 @@ export function useSafeBarSafes() {
   const isQualifiedSafe = useIsQualifiedSafe()
   const isSpaceRoute = useIsSpaceRoute()
   const isInSpaceContext = isQualifiedSafe || isSpaceRoute
+  const isSignedIn = useAppSelector(isAuthenticated)
+  const spaceId = useCurrentSpaceId()
+  // Whether there's a workspace to show in the Workspace tab (signed in + a current space).
+  const hasWorkspace = isSignedIn && Boolean(spaceId)
   const { allSafes: spaceSafes } = useSpaceSafes()
   const urlSafeAddress = useSafeAddressFromUrl()
   const { safeAddress: reduxSafeAddress } = useSafeInfo()
@@ -104,6 +109,9 @@ export function useSafeBarSafes() {
     return orderDropdownSafes(spaceSafes, safeAddress, comparator, current)
   }, [spaceSafes, safeAddress, fallbackCurrentSafe, comparator])
 
+  // Local tab = trusted (pinned) safes only, sorted — no current-safe injection.
+  const trustedSafes = useMemo<AllSafeItems>(() => [...pinnedSafes].sort(comparator), [pinnedSafes, comparator])
+
   // Same for chain selector.
   const chainSelectorSafes = useMemo<AllSafeItems>(() => {
     if (!safeAddress) return allKnownSafes
@@ -116,6 +124,10 @@ export function useSafeBarSafes() {
   return {
     dropdownSafes: isInSpaceContext ? spaceDropdownSafes : dropdownSafes,
     chainSelectorSafes: isInSpaceContext ? spaceSafes : chainSelectorSafes,
+    // Both lists exposed so the dropdown can show them under separate tabs.
+    workspaceSafes: spaceDropdownSafes,
+    trustedSafes,
+    hasWorkspace,
     // Expose so the header label stays in sync with which list is shown
     isInSpaceContext,
   }

@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { buildCurrentNextUrl } from '@/utils/nextUrl'
-import { ChevronRight, CirclePlus, Plus, Search } from 'lucide-react'
+import { ChevronRight, CirclePlus, ListChecks, Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/utils/cn'
@@ -18,10 +18,20 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 type EntryPoint = 'dashboard' | 'safe_accounts'
 
+/**
+ * - `all`: chooser with add-existing + see-all + create (default; used on the dashboard)
+ * - `add`: chooser with just add-existing + create (the "Add new Safe" CTA)
+ * - `manage`: skips the chooser and opens the "see all / manage" modal directly (the "Manage Safes" CTA)
+ */
+type ChooserMode = 'all' | 'add' | 'manage'
+
 interface AddAccountsChooserProps {
   buttonVariant?: 'outline' | 'default'
   buttonLabel?: string
   entryPoint: EntryPoint
+  mode?: ChooserMode
+  /** When provided (mode `add`), shows an extra option that jumps to the Local Safe accounts tab. */
+  onShowLocalSafes?: () => void
 }
 
 type SubModal = 'find' | 'add' | null
@@ -89,6 +99,8 @@ const AddAccountsChooser = ({
   buttonVariant = 'outline',
   buttonLabel = 'Add accounts',
   entryPoint,
+  mode = 'all',
+  onShowLocalSafes,
 }: AddAccountsChooserProps) => {
   const [chooserOpen, setChooserOpen] = useState(false)
   const [subModal, setSubModal] = useState<SubModal>(null)
@@ -117,13 +129,21 @@ const AddAccountsChooser = ({
     setSubModal('add')
   }
 
+  const handleAddManually = () => {
+    setChooserOpen(false)
+    router.push({
+      pathname: AppRoutes.newSafe.load,
+      query: { next: buildCurrentNextUrl(router.pathname, router.query) },
+    })
+  }
+
   return (
     <>
       <Button
         size="lg"
         variant={buttonVariant}
         className="font-normal px-4 py-0"
-        onClick={() => setChooserOpen(true)}
+        onClick={() => (mode === 'manage' ? setSubModal('find') : setChooserOpen(true))}
         data-testid="open-add-accounts-chooser-button"
       >
         <Plus
@@ -137,27 +157,55 @@ const AddAccountsChooser = ({
       <Dialog open={chooserOpen} onOpenChange={setChooserOpen}>
         <DialogContent showCloseButton className="max-w-[440px] p-6 dark:border dark:border-border">
           <DialogHeader className="p-0 pb-3">
-            <DialogTitle className="font-bold">Manage Safe accounts</DialogTitle>
+            <DialogTitle className="font-bold">
+              {mode === 'add' ? 'Add a Safe account' : 'Manage Safe accounts'}
+            </DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-2">
-            <ChooserRow
-              icon={<Plus className="size-4" />}
-              title="Add Safe accounts to this workspace"
-              subtitle="Add your owned and trusted Safes to this workspace"
-              onClick={handleAdd}
-              disabled={!isAdmin}
-              disabledTooltip="You need to be an Admin to add accounts"
-              testId="add-safe-accounts-to-workspace-button"
-            />
-            <ChooserRow
-              icon={<Search className="size-4" />}
-              title="See all Safe accounts"
-              subtitle="Your trusted and owned Safes"
-              onClick={() => {
-                setChooserOpen(false)
-                setSubModal('find')
-              }}
-            />
+            {mode === 'add' ? (
+              <>
+                <ChooserRow
+                  icon={<Plus className="size-4" />}
+                  title="Add Safe manually"
+                  subtitle="Enter a Safe address manually"
+                  onClick={handleAddManually}
+                  testId="add-safe-manually-button"
+                />
+                {onShowLocalSafes && (
+                  <ChooserRow
+                    icon={<ListChecks className="size-4" />}
+                    title="Add from Local Safe account"
+                    subtitle="Pick from your trusted and owned Safes"
+                    onClick={() => {
+                      setChooserOpen(false)
+                      onShowLocalSafes()
+                    }}
+                    testId="add-from-local-safes-button"
+                  />
+                )}
+              </>
+            ) : (
+              <ChooserRow
+                icon={<Plus className="size-4" />}
+                title="Add existing Safe"
+                subtitle="Add your owned and trusted Safes to this workspace"
+                onClick={handleAdd}
+                disabled={!isAdmin}
+                disabledTooltip="You need to be an Admin to add accounts"
+                testId="add-safe-accounts-to-workspace-button"
+              />
+            )}
+            {mode === 'all' && (
+              <ChooserRow
+                icon={<Search className="size-4" />}
+                title="See all Safe accounts"
+                subtitle="Your trusted and owned Safes"
+                onClick={() => {
+                  setChooserOpen(false)
+                  setSubModal('find')
+                }}
+              />
+            )}
             <ChooserRow
               icon={<CirclePlus className="size-4" />}
               title="Create new Safe"

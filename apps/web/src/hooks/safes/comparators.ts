@@ -17,3 +17,20 @@ export const lastVisitedComparator = (a: SafeItem | MultiChainSafeItem, b: SafeI
 export const getComparator = (orderBy: OrderByOption) => {
   return orderBy === OrderByOption.NAME ? nameComparator : lastVisitedComparator
 }
+
+/**
+ * Sort state for the unified Safe accounts table (SafesTable). Kept separate from the shared
+ * `getComparator` / `orderByPreferenceSlice` so the table owns its own sort.
+ *
+ * Balance sorting is handled by the table itself (from the live balances each row reports), so
+ * this helper only produces the name comparator with a direction.
+ */
+export type SafeListSortColumn = 'name' | 'balance'
+export type SafeListSortDirection = 'asc' | 'desc'
+
+export const getSafeListComparator = (_column: SafeListSortColumn, direction: SafeListSortDirection) => {
+  return (a: SafeItem | MultiChainSafeItem, b: SafeItem | MultiChainSafeItem) => {
+    const result = nameComparator(a, b)
+    return direction === 'desc' ? -result : result
+  }
+}
