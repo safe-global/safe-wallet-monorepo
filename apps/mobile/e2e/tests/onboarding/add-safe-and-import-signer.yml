@@ -88,9 +88,9 @@ tags:
 # Tap "Import signer" option from the menu
 - tapOn: 'Import signer'
 
-# Verify we're on the "Import a signer" screen
-- assertVisible: 'Import a signer'
-- assertVisible: "Select how you'd like to import your signer. Ensure it belongs to this Safe account so you can interact with it seamlessly."
+# Verify we're on the "Add signer" screen
+- assertVisible: 'Add signer'
+- assertVisible: "Select how you'd like to add your signer."
 
 # Tap on "Import signer" option (seed/private key option)
 - tapOn:

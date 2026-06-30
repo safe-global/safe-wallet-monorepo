@@ -20,7 +20,7 @@ tags:
 - assertVisible: 'Signers'
 - tapOn:
     id: 'import-signer-button'
-- assertVisible: 'Import a signer'
+- assertVisible: 'Add signer'
 - tapOn:
     id: 'seed'
 - tapOn:

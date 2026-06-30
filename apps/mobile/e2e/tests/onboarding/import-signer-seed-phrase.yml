@@ -32,7 +32,7 @@ tags:
 # Tap "Add Signer" button (Import signer button)
 - tapOn:
     id: 'import-signer-button'
-- assertVisible: 'Import a signer'
+- assertVisible: 'Add signer'
 - tapOn:
     id: 'seed'
 
