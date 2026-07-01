@@ -36,10 +36,11 @@ import { useNotificationHandler } from '@/src/hooks/useNotificationHandler'
 import { usePendingTxsMonitor } from '../hooks/usePendingTxsMonitor'
 import { SigningMonitor } from '@/src/components/SigningMonitor'
 import { ExecutingMonitor } from '@/src/components/ExecutingMonitor'
+import { ToastMonitor } from '@/src/components/ToastMonitor'
 import { useDatadogConsent } from '@/src/hooks/useDatadogConsent'
 import { DatadogWrapper } from '@/src/providers/DatadogWrapper'
 import { AppKitInitializer } from '@/src/features/WalletConnect/Signer/components/AppKitInitializer'
-import { WalletKitGate } from '@/src/features/WalletConnect/Wallet/context/WalletKitGate'
+import { WalletKitController } from '@/src/features/WalletConnect/Wallet/WalletKitController'
 
 Logger.setLevel(__DEV__ ? LogLevel.TRACE : LogLevel.ERROR)
 // Initialize all notification handlers
@@ -112,12 +113,14 @@ function NavigationStack() {
       <Stack.Screen name="(send)" options={{ headerShown: false }} />
       <Stack.Screen name="wallet-connect-scan" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="wallet-connect-manual" options={{ headerShown: true, title: '' }} />
+      <Stack.Screen name="connected-apps" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="safe-shield-details-sheet" options={transparentModalOptions} />
       <Stack.Screen name="import-data" options={{ headerShown: false }} />
       <Stack.Screen name="app-settings" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="conflict-transaction-sheet" options={transparentModalOptions} />
       <Stack.Screen name="accounts-sheet" options={transparentModalOptions} />
       <Stack.Screen name="networks-sheet" options={transparentModalOptions} />
+      <Stack.Screen name="supported-networks" options={transparentModalOptions} />
       <Stack.Screen name="confirmations-sheet" options={transparentModalOptions} />
       <Stack.Screen name="change-signer-sheet" options={transparentModalOptions} />
       <Stack.Screen name="change-estimated-fee-sheet" options={transparentModalOptions} />
@@ -157,16 +160,16 @@ function RootLayout() {
                       <SafeThemeProvider>
                         <BottomSheetModalProvider>
                           <SafeToastProvider>
-                            <WalletKitGate>
-                              <NavigationGuardHOC>
-                                <HooksInitializer />
-                                <SigningMonitor />
-                                <ExecutingMonitor />
-                                <TestCtrls />
-                                <NavigationStack />
-                                <SafeStatusBar />
-                              </NavigationGuardHOC>
-                            </WalletKitGate>
+                            <NavigationGuardHOC>
+                              <HooksInitializer />
+                              <SigningMonitor />
+                              <ExecutingMonitor />
+                              <ToastMonitor />
+                              <TestCtrls />
+                              <NavigationStack />
+                              <SafeStatusBar />
+                              <WalletKitController />
+                            </NavigationGuardHOC>
                           </SafeToastProvider>
                         </BottomSheetModalProvider>
                       </SafeThemeProvider>

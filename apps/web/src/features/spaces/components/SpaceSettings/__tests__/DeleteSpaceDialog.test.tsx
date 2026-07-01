@@ -21,7 +21,13 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
-const mockSpace: GetSpaceResponse = { id: 7, uuid: MOCK_SPACE_UUID, name: 'My Workspace', members: [], safeCount: 0 }
+const mockSpace: GetSpaceResponse = {
+  uuid: MOCK_SPACE_UUID,
+  name: 'My Workspace',
+  members: [],
+  safeCount: 0,
+  memberCount: 0,
+}
 
 const renderDialog = (space = mockSpace, onClose = jest.fn()) => {
   const store = makeStore(undefined, { skipBroadcast: true })

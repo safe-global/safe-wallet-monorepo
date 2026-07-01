@@ -32,7 +32,9 @@ export type FeePreviewTransactionDto = {
   operation: OperationType
   gasToken: string
   numberSignatures: number
+  nonce: number
   fiatCode?: string
+  origin?: string
 }
 
 export type FeePreviewTxData = {
@@ -82,7 +84,7 @@ export const gtfFeePreviewEndpoints = (builder: GatewayEndpointBuilder) => ({
         const response = await fetch(`${GATEWAY_URL}/v1/chains/${chainId}/fees/${safeAddress}/preview`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(tx),
+          body: JSON.stringify({ ...tx, nonce: String(tx.nonce) }),
         })
 
         if (!response.ok) {

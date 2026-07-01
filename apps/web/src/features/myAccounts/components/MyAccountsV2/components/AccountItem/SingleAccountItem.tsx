@@ -1,5 +1,6 @@
 import NextLink from 'next/link'
 import Identicon from '@/components/common/Identicon'
+import AddressWithCopy from '@/components/common/AddressWithCopy'
 import Track from '@/components/common/Track'
 import { FiatBalance } from '@/features/spaces'
 import { AccountItem as BaseAccountItem } from '../../../AccountItem'
@@ -60,9 +61,7 @@ const SingleAccountItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Singl
             <Typography variant="paragraph-medium" className="text-foreground truncate">
               {displayName}
             </Typography>
-            <Typography variant="paragraph-mini" color="muted" className="truncate">
-              {shortenAddress(safeItem.address)}
-            </Typography>
+            <AddressWithCopy address={safeItem.address} />
 
             <div className="mt-1 flex flex-wrap items-center gap-1">
               <BaseAccountItem.StatusChip

@@ -77,7 +77,7 @@ describe('guardScanner', () => {
       expect(result.status).toBe('partial')
       expect(result.severity).toBe('Medium')
       expect(result.partner).toBe('hypernative')
-      expect(result.ctaLabelOverride).toBe('Learn more')
+      expect(result.ctaLabelOverride).toBe('Set up protection')
     })
 
     it('does not recommend for balance at threshold', async () => {
@@ -87,13 +87,14 @@ describe('guardScanner', () => {
         balanceUsd: HIGH_VALUE_THRESHOLD_USD,
       })
       const result = await guardScanner.scan(ctx)
-      expect(result.status).toBe('clear')
+      expect(result.status).toBe('not_applicable')
       expect(result.partner).toBeUndefined()
     })
 
-    // Regression: WA-2369 — small non-zero balances must not trigger the recommendation.
-    it.each([2, 20, 999, 999_999])(
-      'returns clear for low non-zero balance ($%i) on supported chain',
+    // Regression: WA-2369 — non-zero balances below the threshold must not trigger the
+    // recommendation. Derived from the constant so it stays correct if the threshold moves.
+    it.each([1, 2, HIGH_VALUE_THRESHOLD_USD - 1])(
+      'returns not_applicable for low non-zero balance ($%i) on supported chain',
       async (balanceUsd) => {
         const ctx = createMockContext({
           guard: null,
@@ -101,32 +102,32 @@ describe('guardScanner', () => {
           balanceUsd,
         })
         const result = await guardScanner.scan(ctx)
-        expect(result.status).toBe('clear')
+        expect(result.status).toBe('not_applicable')
         expect(result.partner).toBeUndefined()
       },
     )
   })
 
   describe('Tier 4: no guard needed', () => {
-    it('returns clear for no guard on unsupported chain', async () => {
+    it('returns not_applicable for no guard on unsupported chain', async () => {
       const ctx = createMockContext({
         guard: null,
         chainSupportsHypernative: false,
       })
       const result = await guardScanner.scan(ctx)
-      expect(result.status).toBe('clear')
+      expect(result.status).toBe('not_applicable')
       expect(result.severity).toBe('Low')
       expect(result.partner).toBeUndefined()
     })
 
-    it('returns clear for low-value Safe on supported chain', async () => {
+    it('returns not_applicable for low-value Safe on supported chain', async () => {
       const ctx = createMockContext({
         guard: null,
         chainSupportsHypernative: true,
         balanceUsd: 0,
       })
       const result = await guardScanner.scan(ctx)
-      expect(result.status).toBe('clear')
+      expect(result.status).toBe('not_applicable')
     })
 
     it('treats zero address guard as no guard', async () => {
@@ -134,7 +135,7 @@ describe('guardScanner', () => {
         guard: { value: ZERO_ADDRESS, name: null },
       })
       const result = await guardScanner.scan(ctx)
-      expect(result.status).toBe('clear')
+      expect(result.status).toBe('not_applicable')
     })
   })
 })

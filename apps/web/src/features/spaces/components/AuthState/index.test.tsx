@@ -77,7 +77,7 @@ describe('AuthState', () => {
     mockIsUnauthorized.mockReturnValue(false)
     mockUseHasFeature.mockReturnValue(true)
     mockUseSpacesGetOneV1Query.mockReturnValue({
-      currentData: { id: 1, members: [{ user: { id: 'u1' }, status: 'ACTIVE' }] },
+      currentData: { uuid: 'uuid-1', members: [{ user: { id: 'u1' }, status: 'ACTIVE' }] },
       error: undefined,
       isLoading: false,
       isFetching: false,
@@ -89,7 +89,7 @@ describe('AuthState', () => {
     mockIsAuthenticated = false
 
     render(
-      <AuthState spaceId="7">
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div />
       </AuthState>,
     )
@@ -104,11 +104,10 @@ describe('AuthState', () => {
       </AuthState>,
     )
 
-    // Without the guard, Number('') would be 0 and the query would hit /v1/spaces/0
     expect(mockUseSpacesGetOneV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true, ...SPACE_REFRESH_OPTIONS })
   })
 
-  it('skips the space query when spaceId is null at runtime (Number(null) is 0)', () => {
+  it('skips the space query when spaceId is null at runtime', () => {
     render(
       <AuthState spaceId={null as unknown as string}>
         <div />
@@ -143,7 +142,7 @@ describe('AuthState', () => {
 
   it('renders the children for an active member', () => {
     render(
-      <AuthState spaceId="7">
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div data-testid="children" />
       </AuthState>,
     )
@@ -157,7 +156,7 @@ describe('AuthState', () => {
     mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, error: { status: 404 }, isLoading: false })
 
     const { queryByTestId } = render(
-      <AuthState spaceId="7">
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div data-testid="children" />
       </AuthState>,
     )
@@ -176,7 +175,7 @@ describe('AuthState', () => {
     })
 
     const { queryByTestId } = render(
-      <AuthState spaceId="7">
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div data-testid="children" />
       </AuthState>,
     )
@@ -200,7 +199,7 @@ describe('AuthState', () => {
     })
 
     const { queryByTestId } = render(
-      <AuthState spaceId="7">
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div data-testid="children" />
       </AuthState>,
     )
@@ -220,7 +219,7 @@ describe('AuthState', () => {
     })
 
     const { queryByTestId } = render(
-      <AuthState spaceId="7">
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div data-testid="children" />
       </AuthState>,
     )
@@ -233,7 +232,7 @@ describe('AuthState', () => {
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
 
     render(
-      <AuthState spaceId="7">
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div data-testid="children" />
       </AuthState>,
     )
@@ -246,7 +245,7 @@ describe('AuthState', () => {
     mockUseSpacesGetOneV1Query.mockReturnValue({ currentData: undefined, error: undefined, isLoading: true })
 
     const { queryByTestId } = render(
-      <AuthState spaceId="7">
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div data-testid="children" />
       </AuthState>,
     )
@@ -260,7 +259,7 @@ describe('AuthState', () => {
     mockIsUnauthorized.mockReturnValue(true)
 
     const { queryByTestId } = render(
-      <AuthState spaceId="7">
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div data-testid="children" />
       </AuthState>,
     )
@@ -271,7 +270,7 @@ describe('AuthState', () => {
 
   it('does not redirect when the user is still authorized', () => {
     const { queryByTestId } = render(
-      <AuthState spaceId="7">
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
         <div data-testid="children" />
       </AuthState>,
     )

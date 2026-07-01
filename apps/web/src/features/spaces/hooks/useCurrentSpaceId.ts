@@ -5,8 +5,7 @@ import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/s
 
 /**
  * Returns the current space UUID by checking (in priority order):
- * 1. `spaceId` query param (UUID; legacy numeric strings from older URLs are also
- *    accepted by the backend's `LegacySpaceIdPipe` during the deprecation window)
+ * 1. `spaceId` query param (UUID)
  * 2. Last used space stored in Redux
  * 3. First space from the user's spaces list
  */

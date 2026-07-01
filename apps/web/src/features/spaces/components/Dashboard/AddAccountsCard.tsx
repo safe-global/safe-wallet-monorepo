@@ -17,11 +17,11 @@ const AddAccountsCard = () => {
       <Stack direction={{ xs: 'column-reverse', md: 'row' }} alignItems="center" spacing={3}>
         <Box sx={{ flex: 2 }}>
           <Typography variant="h4" fontWeight={700} mb={2}>
-            Add your Safe Accounts
+            Add your Safe accounts
           </Typography>
 
           <Typography variant="body1" color="primary.light" mb={2}>
-            Start by adding Safe Accounts to your workspace. Any accounts that are linked to your connected wallet can
+            Start by adding Safe accounts to your workspace. Any accounts that are linked to your connected wallet can
             be added to the workspace.
           </Typography>
 

@@ -1,7 +1,6 @@
 import { Card, Box, Typography, Stack } from '@mui/material'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SpaceSummary } from '../SpaceCard'
-import { MemberStatus } from '@/features/spaces'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import css from './styles.module.css'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
@@ -16,8 +15,7 @@ type SpaceListInvite = {
 }
 
 const SpaceListInvite = ({ space, invitedByName }: SpaceListInvite) => {
-  const { name, members, safeCount } = space
-  const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
+  const { name, safeCount, memberCount } = space
 
   return (
     <Card sx={{ p: 2, mb: 2 }} data-testid="space-invite-banner">
@@ -39,7 +37,7 @@ const SpaceListInvite = ({ space, invitedByName }: SpaceListInvite) => {
             </Box>
 
             <Box>
-              <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={numberOfMembers} />
+              <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={memberCount} />
             </Box>
           </Stack>
 

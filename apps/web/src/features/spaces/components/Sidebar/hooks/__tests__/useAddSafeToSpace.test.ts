@@ -201,7 +201,7 @@ describe('useAddSafeToSpace', () => {
     )
   })
 
-  it('falls back to status code when FetchBaseQueryError has no data message', async () => {
+  it('shows a friendly network message instead of the raw fetch error', async () => {
     mockAddSafeToSpace.mockResolvedValue({
       error: { status: 'FETCH_ERROR', error: 'TypeError: Failed to fetch' },
     })
@@ -214,7 +214,8 @@ describe('useAddSafeToSpace', () => {
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         payload: expect.objectContaining({
-          message: 'Failed to add Safe to workspace. TypeError: Failed to fetch',
+          message:
+            "Failed to add Safe to workspace. Couldn't connect to the server. Please check your connection and try again.",
           variant: 'error',
         }),
       }),

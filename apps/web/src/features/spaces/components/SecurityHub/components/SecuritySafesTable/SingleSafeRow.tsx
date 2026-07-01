@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
 import type { ScanResult } from '@/features/security/types'
 import Identicon from '@/components/common/Identicon'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { cn } from '@/utils/cn'
@@ -90,9 +91,12 @@ const SingleSafeRow = ({
             >
               {safe.name || shortenAddress(safe.address)}
             </Typography>
-            <Typography sx={{ fontSize: '0.6875rem', color: 'text.secondary', lineHeight: 1 }}>
-              {shortenAddress(safe.address)}
-            </Typography>
+            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ minWidth: 0 }}>
+              <Typography noWrap sx={{ fontSize: '0.6875rem', color: 'text.secondary', lineHeight: 1 }}>
+                {shortenAddress(safe.address)}
+              </Typography>
+              <CopyAddressIconButton address={safe.address} />
+            </Stack>
           </Stack>
         </Stack>
       </div>

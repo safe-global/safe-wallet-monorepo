@@ -29,12 +29,6 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: '**/tests/one-shots/**',
-    },
-    {
-      name: 'one-shots',
-      testDir: './tests/one-shots',
-      use: { ...devices['Desktop Chrome'], video: 'on' },
     },
   ],
   outputDir: './test-results',

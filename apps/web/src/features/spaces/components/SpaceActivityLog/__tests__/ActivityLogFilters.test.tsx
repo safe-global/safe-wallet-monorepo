@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import ActivityLogFilters, { EMPTY_FILTERS } from '../ActivityLogFilters'
+import ActivityLogFilters, { EMPTY_FILTERS, type ActivityLogFilterState } from '../ActivityLogFilters'
 import useGetSpaceAuditLogActors from '../../../hooks/useGetSpaceAuditLogActors'
 
 jest.mock('../../../hooks/useGetSpaceAuditLogActors')
@@ -14,6 +14,8 @@ const mockUseActors = useGetSpaceAuditLogActors as jest.MockedFunction<typeof us
 describe('ActivityLogFilters', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.useFakeTimers().setSystemTime(new Date('2026-06-24T12:00:00'))
+
     mockResolveMemberName.mockReturnValue(undefined)
     // Includes a former/deleted member — the dropdown is fed from the audit
     // log itself, not from current members.
@@ -21,6 +23,10 @@ describe('ActivityLogFilters', () => {
       { actorUserId: 1, actor: '0x1234567890abcdef1234567890abcdef12345678' },
       { actorUserId: 2, actor: 'Former member' },
     ])
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
   it('emits an inclusive ISO lower bound for the from date', () => {
@@ -62,6 +68,122 @@ describe('ActivityLogFilters', () => {
 
     const [filters] = onFiltersChange.mock.lastCall
     expect(filters.createdAtGte).toBeUndefined()
+  })
+
+  it('shows the range error on the from field when the from date is after the to date', () => {
+    render(
+      <ActivityLogFilters
+        filters={{
+          createdAtGte: new Date('2026-06-10T00:00:00').toISOString(),
+          createdAtLte: new Date('2026-06-01T23:59:59').toISOString(),
+        }}
+        onFiltersChange={jest.fn()}
+      />,
+    )
+
+    // The range violation is From's fault, so it's flagged inline on From only.
+    expect(screen.getByRole('alert')).toHaveTextContent("'From' date can't be after the 'To' date")
+    expect(screen.getByLabelText('From')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText('To')).not.toHaveAttribute('aria-invalid')
+  })
+
+  it.each<[string, ActivityLogFilterState]>([
+    [
+      'a valid range',
+      {
+        createdAtGte: new Date('2026-06-01T00:00:00').toISOString(),
+        createdAtLte: new Date('2026-06-10T23:59:59').toISOString(),
+      },
+    ],
+    [
+      // From is start-of-day, To is end-of-day, so the range is valid.
+      'a same-day range',
+      {
+        createdAtGte: new Date('2026-06-01T00:00:00').toISOString(),
+        createdAtLte: new Date('2026-06-01T23:59:59').toISOString(),
+      },
+    ],
+    // Nothing to compare against when only one bound is set.
+    ['a single bound', { createdAtGte: new Date('2026-06-10T00:00:00').toISOString() }],
+  ])('does not show a validation error for %s', (_label, filters) => {
+    render(<ActivityLogFilters filters={filters} onFiltersChange={jest.fn()} />)
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('constrains each date picker with the opposite bound', () => {
+    render(
+      <ActivityLogFilters
+        filters={{
+          createdAtGte: new Date('2026-06-01T00:00:00').toISOString(),
+          createdAtLte: new Date('2026-06-10T23:59:59').toISOString(),
+        }}
+        onFiltersChange={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByLabelText('From')).toHaveAttribute('max', '2026-06-10')
+    expect(screen.getByLabelText('To')).toHaveAttribute('min', '2026-06-01')
+  })
+
+  it('caps both date pickers at today when no opposite bound is set', () => {
+    render(<ActivityLogFilters filters={EMPTY_FILTERS} onFiltersChange={jest.fn()} />)
+
+    expect(screen.getByLabelText('From')).toHaveAttribute('max', '2026-06-24')
+    expect(screen.getByLabelText('To')).toHaveAttribute('max', '2026-06-24')
+  })
+
+  it('keeps the from cap at today when a future to date is set', () => {
+    render(
+      <ActivityLogFilters
+        filters={{ createdAtLte: new Date('2027-01-01T23:59:59').toISOString() }}
+        onFiltersChange={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByLabelText('From')).toHaveAttribute('max', '2026-06-24')
+  })
+
+  it('shows a future-date error and flags only the to field when the to date is in the future', () => {
+    render(
+      <ActivityLogFilters
+        filters={{ createdAtLte: new Date('2027-01-01T23:59:59').toISOString() }}
+        onFiltersChange={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent("Date can't be in the future")
+    expect(screen.getByLabelText('To')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText('From')).not.toHaveAttribute('aria-invalid')
+  })
+
+  it('shows a future-date error and flags only the from field when the from date is in the future', () => {
+    render(
+      <ActivityLogFilters
+        filters={{ createdAtGte: new Date('2027-01-01T00:00:00').toISOString() }}
+        onFiltersChange={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent("Date can't be in the future")
+    expect(screen.getByLabelText('From')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText('To')).not.toHaveAttribute('aria-invalid')
+  })
+
+  it('flags only the future field even when it breaks range order against a valid past bound', () => {
+    render(
+      <ActivityLogFilters
+        filters={{
+          createdAtGte: new Date('2027-01-01T00:00:00').toISOString(),
+          createdAtLte: new Date('2026-06-01T23:59:59').toISOString(),
+        }}
+        onFiltersChange={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('alert')).toHaveTextContent("Date can't be in the future")
+    expect(screen.getByLabelText('From')).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByLabelText('To')).not.toHaveAttribute('aria-invalid')
   })
 
   it('sources the member dropdown from the audit log actors endpoint', () => {

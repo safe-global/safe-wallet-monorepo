@@ -42,7 +42,7 @@ export const unsupportedMigratableContent =
 export const unsupportedCliContent =
   'and may miss security fixes and improvements. You must use our CLI tool to migrate.'
 
-const migrateSafeSubtitle = 'Update Safe Account base contract'
+const migrateSafeSubtitle = 'Update Safe account base contract'
 export const nonPinnedWarningTitle = 'Not in your trusted list'
 export const trustThisSafeButtonTestId = '[data-testid="trust-this-safe-button"]'
 const trustDialogTestId = '[data-testid="add-trusted-safe-dialog"]'

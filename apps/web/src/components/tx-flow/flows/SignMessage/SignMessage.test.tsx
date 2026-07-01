@@ -450,7 +450,7 @@ describe('SignMessage', () => {
     )
 
     expect(
-      getByText("You are currently not a signer of this Safe Account and won't be able to confirm this message."),
+      getByText("You are currently not a signer of this Safe account and won't be able to confirm this message."),
     ).toBeInTheDocument()
 
     expect(getByText('Sign')).toBeDisabled()

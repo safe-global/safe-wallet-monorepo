@@ -3,7 +3,7 @@ import { Typography } from '@/components/ui/typography'
 import { AccountItem } from '../AccountItem'
 import type { Account } from './types'
 import Identicon from '@/components/common/Identicon'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import AddressWithCopy from '@/components/common/AddressWithCopy'
 import { Avatar } from '@/components/ui/avatar'
 
 interface AccountItemContentProps {
@@ -22,9 +22,7 @@ const AccountItemContent = ({ account, children }: AccountItemContentProps): Rea
           <Typography data-testid="multichain-account-name" variant="paragraph-bold">
             {account.name}
           </Typography>
-          <Typography data-testid="multichain-account-address" variant="paragraph-mini" color="muted">
-            {shortenAddress(account.address, 4)}
-          </Typography>
+          <AddressWithCopy address={account.address} data-testid="multichain-account-address" />
         </div>
       </div>
 
