@@ -1,11 +1,9 @@
 import React, { act } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import SafeDropdownContainer from '../SafeDropdownContainer'
+import SafeDropdownContainer, { type SafeDropdownContainerProps } from '../SafeDropdownContainer'
 import type { SafeItemData } from '../../types'
 
-// Resolver is exercised in its own unit test; here we stub it so the component renders without a
-// store. Default behaviour mirrors production: the safe's own name wins, else the address-book name.
 const mockAddressBookNames: Record<string, string> = {}
 const mockUseWallet = jest.fn()
 jest.mock('@/hooks/wallets/useWallet', () => ({
@@ -20,8 +18,6 @@ jest.mock('@/hooks/useAllAddressBooks', () => ({
       preferredName || mockAddressBookNames[address.toLowerCase()] || '',
 }))
 
-// jsdom doesn't implement ResizeObserver; the component uses one to catch popup
-// size changes. A noop stub is enough since tests drive scroll state explicitly.
 class ResizeObserverStub {
   observe() {}
   unobserve() {}
@@ -29,8 +25,6 @@ class ResizeObserverStub {
 }
 ;(globalThis as unknown as { ResizeObserver: typeof ResizeObserverStub }).ResizeObserver = ResizeObserverStub
 
-// Render SelectContent as a plain div carrying the `data-slot` marker that the
-// component's `closest()` lookup relies on, so the scroll-hint effect can find it.
 jest.mock('@/components/ui/select', () => ({
   __esModule: true,
   SelectContent: ({ children, className }: { children?: React.ReactNode; className?: string }) => (
@@ -55,7 +49,6 @@ jest.mock('../MultiChainSafeItemRow', () => ({
   default: ({ item }: { item: SafeItemData }) => <div data-testid="multi-chain-row">{item.name}</div>,
 }))
 
-// Redux-backed; stubbed here so the container test doesn't need a store.
 jest.mock('@/components/common/SafeListSortToggle', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-list-sort-toggle" />,
@@ -71,6 +64,21 @@ const createItem = (overrides: Partial<SafeItemData> = {}): SafeItemData => ({
   chains: [{ chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' }],
   ...overrides,
 })
+
+const baseProps: SafeDropdownContainerProps = {
+  workspaceItems: [],
+  localItems: [],
+  hasWorkspace: true,
+  isInSpaceContext: false, // default tab = Local
+  onItemSelect: jest.fn(),
+  onManageTrustedSafes: jest.fn(),
+  onSignIn: jest.fn(),
+  onAddSafe: jest.fn(),
+  closeDropdown: jest.fn(),
+}
+
+const renderContainer = (props: Partial<SafeDropdownContainerProps> = {}) =>
+  render(<SafeDropdownContainer {...baseProps} {...props} />)
 
 const setScrollMetrics = (
   el: HTMLElement,
@@ -90,61 +98,45 @@ const fireScroll = (el: HTMLElement) => {
 describe('SafeDropdownContainer', () => {
   beforeEach(() => {
     mockUseWallet.mockReturnValue({ address: '0x1234567890123456789012345678901234567890' })
+    for (const key of Object.keys(mockAddressBookNames)) delete mockAddressBookNames[key]
+  })
+
+  describe('tabs', () => {
+    it('renders both tabs', () => {
+      renderContainer()
+      expect(screen.getByTestId('dropdown-workspace-tab')).toBeInTheDocument()
+      expect(screen.getByTestId('dropdown-local-tab')).toBeInTheDocument()
+    })
+
+    it('shows a Manage trusted Safes button on the Local tab', () => {
+      const onManageTrustedSafes = jest.fn()
+      const closeDropdown = jest.fn()
+      renderContainer({ localItems: [createItem()], onManageTrustedSafes, closeDropdown })
+
+      fireEvent.click(screen.getByTestId('dropdown-manage-trusted-btn'))
+      expect(closeDropdown).toHaveBeenCalled()
+      expect(onManageTrustedSafes).toHaveBeenCalled()
+    })
+
+    it('prompts to sign in on the Workspace tab when there is no workspace', () => {
+      const onSignIn = jest.fn()
+      renderContainer({ isInSpaceContext: true, hasWorkspace: false, onSignIn })
+
+      expect(screen.getByTestId('dropdown-signin-prompt')).toBeInTheDocument()
+      fireEvent.click(screen.getByTestId('dropdown-signin-btn'))
+      expect(onSignIn).toHaveBeenCalled()
+    })
   })
 
   describe('empty state', () => {
-    it('prompts to connect a wallet when there are no safes and no wallet is connected', () => {
-      mockUseWallet.mockReturnValue(null)
-
-      render(<SafeDropdownContainer items={[]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
-
-      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('Connect a wallet to find your Safe accounts')
+    it('shows "No trusted Safes yet" on the Local tab when there are none', () => {
+      renderContainer({ localItems: [] })
+      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No trusted Safes yet')
     })
 
-    it('shows "No safes yet" when there are no safes but a wallet is connected', () => {
-      mockUseWallet.mockReturnValue({ address: '0x1234567890123456789012345678901234567890' })
-
-      render(<SafeDropdownContainer items={[]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
-
-      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes yet')
-    })
-  })
-
-  describe('footer', () => {
-    it('renders the footer node when provided', () => {
-      render(
-        <SafeDropdownContainer
-          items={[createItem()]}
-          onItemSelect={jest.fn()}
-          closeDropdown={jest.fn()}
-          footer={<div data-testid="footer-node">All Accounts</div>}
-        />,
-      )
-
-      expect(screen.getByTestId('footer-node')).toBeInTheDocument()
-    })
-
-    it('invokes the footer callback with closeDropdown when footer is a function', () => {
-      const closeDropdown = jest.fn()
-      const footerFn = jest.fn(() => <div data-testid="footer-node">FooterFn</div>)
-
-      render(
-        <SafeDropdownContainer
-          items={[createItem()]}
-          onItemSelect={jest.fn()}
-          closeDropdown={closeDropdown}
-          footer={footerFn}
-        />,
-      )
-
-      expect(footerFn).toHaveBeenCalledWith(closeDropdown)
-      expect(screen.getByTestId('footer-node')).toBeInTheDocument()
-    })
-
-    it('does not render the footer wrapper when no footer prop is passed', () => {
-      render(<SafeDropdownContainer items={[createItem()]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
-
-      expect(screen.queryByTestId('scroll-hint')).not.toBeInTheDocument()
+    it('shows "No safes in this workspace" on the Workspace tab when in a workspace with none', () => {
+      renderContainer({ isInSpaceContext: true, hasWorkspace: true, workspaceItems: [] })
+      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes in this workspace')
     })
   })
 
@@ -162,12 +154,7 @@ describe('SafeDropdownContainer', () => {
       chains: [{ chainId: '137', chainName: 'Polygon', chainLogoUri: null, shortName: 'matic' }],
     })
 
-    const renderWithSearch = () =>
-      render(<SafeDropdownContainer items={[itemA, itemB]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
-
-    beforeEach(() => {
-      for (const key of Object.keys(mockAddressBookNames)) delete mockAddressBookNames[key]
-    })
+    const renderWithSearch = () => renderContainer({ localItems: [itemA, itemB] })
 
     it('renders the search input when there are items', () => {
       renderWithSearch()
@@ -175,36 +162,14 @@ describe('SafeDropdownContainer', () => {
     })
 
     it('hides the search input when the only safe is the currently-selected one', () => {
-      render(
-        <SafeDropdownContainer
-          items={[createItem({ id: '1:0xaaaa', address: '0xaaaa' })]}
-          selectedItemId="1:0xaaaa"
-          onItemSelect={jest.fn()}
-          closeDropdown={jest.fn()}
-        />,
-      )
+      renderContainer({ localItems: [createItem({ id: '1:0xaaaa', address: '0xaaaa' })], selectedItemId: '1:0xaaaa' })
 
       expect(screen.queryByTestId('safe-dropdown-search-input')).not.toBeInTheDocument()
-      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes yet')
-    })
-
-    it('keeps the search input visible when a query matches nothing', async () => {
-      renderWithSearch()
-      await userEvent.type(screen.getByTestId('safe-dropdown-search-input'), 'nonexistent')
-
-      expect(screen.getByTestId('safe-dropdown-search-input')).toBeInTheDocument()
+      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No trusted Safes yet')
     })
 
     it('does not render the search input on error', () => {
-      render(
-        <SafeDropdownContainer
-          items={[itemA]}
-          onItemSelect={jest.fn()}
-          closeDropdown={jest.fn()}
-          isError
-          onRetry={jest.fn()}
-        />,
-      )
+      renderContainer({ localItems: [itemA], isError: true, onRetry: jest.fn() })
       expect(screen.queryByTestId('safe-dropdown-search-input')).not.toBeInTheDocument()
     })
 
@@ -232,14 +197,6 @@ describe('SafeDropdownContainer', () => {
       expect(screen.queryByText('Alpha Treasury')).not.toBeInTheDocument()
     })
 
-    it('filters by chain short name', async () => {
-      renderWithSearch()
-      await userEvent.type(screen.getByTestId('safe-dropdown-search-input'), 'matic')
-
-      expect(screen.getByText('Beta Ops')).toBeInTheDocument()
-      expect(screen.queryByText('Alpha Treasury')).not.toBeInTheDocument()
-    })
-
     it('filters by the address-book name when the safe itself is unnamed', async () => {
       const unnamed = createItem({
         id: '1:0xcccccccccccccccccccccccccccccccccccccccc',
@@ -249,10 +206,9 @@ describe('SafeDropdownContainer', () => {
       })
       mockAddressBookNames['0xcccccccccccccccccccccccccccccccccccccccc'] = 'Cold Storage'
 
-      render(<SafeDropdownContainer items={[itemA, unnamed]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
+      renderContainer({ localItems: [itemA, unnamed] })
       await userEvent.type(screen.getByTestId('safe-dropdown-search-input'), 'cold')
 
-      // The unnamed safe (resolved via address book) survives; the named one is filtered out.
       expect(screen.queryByText('Alpha Treasury')).not.toBeInTheDocument()
       expect(screen.getByTestId('safe-item')).toBeInTheDocument()
     })
@@ -265,11 +221,11 @@ describe('SafeDropdownContainer', () => {
       expect(screen.queryByTestId('safe-item')).not.toBeInTheDocument()
     })
 
-    it('stops character keystrokes from bubbling to the popup (defeats base-ui typeahead) but lets Escape through', () => {
+    it('stops character keystrokes from bubbling to the popup but lets Escape through', () => {
       const onKeyDownSpy = jest.fn()
       render(
         <div onKeyDown={onKeyDownSpy}>
-          <SafeDropdownContainer items={[itemA, itemB]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />
+          <SafeDropdownContainer {...baseProps} localItems={[itemA, itemB]} />
         </div>,
       )
       const input = screen.getByTestId('safe-dropdown-search-input')
@@ -284,14 +240,7 @@ describe('SafeDropdownContainer', () => {
 
   describe('scroll hint', () => {
     it('hides the hint when content does not overflow', () => {
-      render(
-        <SafeDropdownContainer
-          items={[createItem()]}
-          onItemSelect={jest.fn()}
-          closeDropdown={jest.fn()}
-          footer={<div>Footer</div>}
-        />,
-      )
+      renderContainer({ localItems: [createItem()] })
 
       const scroller = screen.getByTestId('dropdown-scroll-area')
       setScrollMetrics(scroller, { scrollHeight: 200, clientHeight: 320, scrollTop: 0 })
@@ -301,14 +250,7 @@ describe('SafeDropdownContainer', () => {
     })
 
     it('shows the hint when content overflows and the user has not scrolled to the bottom', () => {
-      render(
-        <SafeDropdownContainer
-          items={[createItem()]}
-          onItemSelect={jest.fn()}
-          closeDropdown={jest.fn()}
-          footer={<div>Footer</div>}
-        />,
-      )
+      renderContainer({ localItems: [createItem()] })
 
       const scroller = screen.getByTestId('dropdown-scroll-area')
       setScrollMetrics(scroller, { scrollHeight: 1000, clientHeight: 320, scrollTop: 0 })
@@ -318,14 +260,7 @@ describe('SafeDropdownContainer', () => {
     })
 
     it('hides the hint once the user reaches the bottom', () => {
-      render(
-        <SafeDropdownContainer
-          items={[createItem()]}
-          onItemSelect={jest.fn()}
-          closeDropdown={jest.fn()}
-          footer={<div>Footer</div>}
-        />,
-      )
+      renderContainer({ localItems: [createItem()] })
 
       const scroller = screen.getByTestId('dropdown-scroll-area')
       setScrollMetrics(scroller, { scrollHeight: 1000, clientHeight: 320, scrollTop: 0 })

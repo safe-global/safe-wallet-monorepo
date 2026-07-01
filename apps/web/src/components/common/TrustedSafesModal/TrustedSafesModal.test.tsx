@@ -207,25 +207,25 @@ describe('TrustedSafesModal', () => {
     expect(screen.getByText('Similar address detected')).toBeInTheDocument()
   })
 
-  it('should display Select All and Deselect All buttons', () => {
+  it('should display Select all and Deselect all buttons', () => {
     render(<TrustedSafesModal modal={mockModal} />)
 
-    expect(screen.getByText('Select All')).toBeInTheDocument()
-    expect(screen.getByText('Deselect All')).toBeInTheDocument()
+    expect(screen.getByText('Select all')).toBeInTheDocument()
+    expect(screen.getByText('Deselect all')).toBeInTheDocument()
   })
 
-  it('should call selectAll when Select All clicked', () => {
+  it('should call selectAll when Select all clicked', () => {
     render(<TrustedSafesModal modal={mockModal} />)
 
-    fireEvent.click(screen.getByText('Select All'))
+    fireEvent.click(screen.getByText('Select all'))
 
     expect(mockModal.selectAll).toHaveBeenCalled()
   })
 
-  it('should call deselectAll when Deselect All clicked', () => {
+  it('should call deselectAll when Deselect all clicked', () => {
     render(<TrustedSafesModal modal={mockModal} />)
 
-    fireEvent.click(screen.getByText('Deselect All'))
+    fireEvent.click(screen.getByText('Deselect all'))
 
     expect(mockModal.deselectAll).toHaveBeenCalled()
   })
@@ -233,7 +233,8 @@ describe('TrustedSafesModal', () => {
   it('should show selection count', () => {
     render(<TrustedSafesModal modal={mockModal} />)
 
-    expect(screen.getByText('1 of 2 selected')).toBeInTheDocument()
+    // The count is split across spans (the number is emphasised), so match on combined text content.
+    expect(screen.getByText((_, el) => el?.textContent === '1 of 2 selected')).toBeInTheDocument()
   })
 
   it('should show select all confirmation dialog when pendingSelectAllConfirmation is true', () => {

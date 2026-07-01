@@ -7,7 +7,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeInfoDisplay from './SafeInfoDisplay'
-import BalanceDisplay from './BalanceDisplay'
 import ChainLogo from './ChainLogo'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData, SafeItemDataChain } from '../types'
@@ -35,6 +34,10 @@ const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
   const chainId = item.chains[0]?.chainId ?? ''
   const resolvedName = useSafeDisplayName(item.address, chainId, item.name)
 
+  // Aggregate balance across the safe's chains so the summary row always shows a meaningful total.
+  const totalBalance = item.chains.reduce((sum, chain) => sum + Number(chain.balance ?? 0), 0)
+  const balanceLoading = item.chains.some((chain) => chain.isLoading)
+
   return (
     <Collapsible className="my-1 rounded-lg">
       <CollapsibleTrigger className="flex w-full items-center gap-3 rounded-lg px-4 py-4 text-left outline-none hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring cursor-pointer">
@@ -58,7 +61,15 @@ const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
             </span>
           )}
         </div>
-        <BalanceDisplay balance={<FiatValue value={item.balance} />} isLoading={item.isLoading} />
+        <div className="flex w-[88px] shrink-0 items-center justify-end text-right">
+          {balanceLoading ? (
+            <Skeleton className="h-4 w-14 rounded" />
+          ) : (
+            <Typography variant="paragraph-mini-medium" color="muted" className="whitespace-nowrap">
+              <FiatValue value={totalBalance} />
+            </Typography>
+          )}
+        </div>
       </CollapsibleTrigger>
 
       <CollapsibleContent>

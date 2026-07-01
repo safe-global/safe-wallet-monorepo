@@ -99,13 +99,24 @@ const createMockItems = (count: number): SafeItemData[] =>
 
 const mockItemsLong = createMockItems(7)
 
+// Shared defaults for the tabbed dropdown (Workspace / Local).
+const dropdownDefaults = {
+  hasWorkspace: true,
+  isInSpaceContext: true,
+  onManageTrustedSafes: action('Manage trusted Safes'),
+  onSignIn: action('Sign in'),
+}
+
 // Interactive wrapper component to manage state
 const InteractiveWrapper = ({ items, initialItemId }: { items: SafeItemData[]; initialItemId: string }) => {
   const [selectedItemId, setSelectedItemId] = useState(initialItemId)
 
   return (
     <SafeSelectorDropdown
+      {...dropdownDefaults}
       items={items}
+      workspaceItems={items}
+      localItems={items}
       selectedItemId={selectedItemId}
       onItemSelect={(itemId: string) => {
         action('Item selected')(itemId)
@@ -233,7 +244,10 @@ export const MixedActivationStates: Story = {
 export const Loading: Story = {
   render: () => (
     <SafeSelectorDropdown
+      {...dropdownDefaults}
       items={[mockItems[0]]}
+      workspaceItems={[mockItems[0]]}
+      localItems={[mockItems[0]]}
       selectedItemId={mockItems[0].id}
       isLoading
       onItemSelect={action('Item selected')}
@@ -246,7 +260,10 @@ export const Loading: Story = {
 export const Error: Story = {
   render: () => (
     <SafeSelectorDropdown
+      {...dropdownDefaults}
       items={[mockItems[0]]}
+      workspaceItems={[mockItems[0]]}
+      localItems={[mockItems[0]]}
       selectedItemId={mockItems[0].id}
       isError
       onRetry={action('Retry')}
@@ -256,84 +273,36 @@ export const Error: Story = {
   args: {} as any,
 }
 
-/** Loading state with header and footer (non-space context). */
-export const LoadingWithHeaderFooter: Story = {
-  render: () => {
-    const header = (
-      <div className="flex items-center gap-1 px-4 pt-3 pb-2">
-        <span className="text-sm font-semibold text-secondary-foreground">Trusted Safes</span>
-      </div>
-    )
-    const footer = (
-      <div className="px-4 py-3">
-        <button className="w-full rounded-md border px-3 py-1.5 text-sm">All accounts &rsaquo;</button>
-      </div>
-    )
-    return (
-      <SafeSelectorDropdown
-        items={[mockItems[0]]}
-        selectedItemId={mockItems[0].id}
-        isLoading
-        onItemSelect={action('Item selected')}
-        header={header}
-        footer={footer}
-      />
-    )
-  },
-  args: {} as any,
-}
-
-/** Many safes with header + footer — exercises the scrollbar and the bottom scroll-hint fade. */
-export const ManySafesWithFooter: Story = {
+/** Many safes — exercises the scrollbar and the bottom scroll-hint fade. */
+export const ManySafes: Story = {
   render: () => {
     const items = createMockItems(13)
-    const header = (
-      <div className="flex items-center gap-1 px-4 pt-3 pb-2">
-        <span className="text-sm font-semibold text-secondary-foreground">Safes in this workspace</span>
-      </div>
-    )
-    const footer = (
-      <div className="px-4 py-3">
-        <button className="w-full rounded-md border px-3 py-1.5 text-sm">Explore other Safes &rsaquo;</button>
-      </div>
-    )
     return (
       <SafeSelectorDropdown
+        {...dropdownDefaults}
         items={items}
+        workspaceItems={items}
+        localItems={items}
         selectedItemId={items[1].id}
         onItemSelect={action('Item selected')}
-        header={header}
-        footer={footer}
       />
     )
   },
   args: {} as any,
 }
 
-/** Error state with header and footer (non-space context). */
-export const ErrorWithHeaderFooter: Story = {
-  render: () => {
-    const header = (
-      <div className="flex items-center gap-1 px-4 pt-3 pb-2">
-        <span className="text-sm font-semibold text-secondary-foreground">Trusted Safes</span>
-      </div>
-    )
-    const footer = (
-      <div className="px-4 py-3">
-        <button className="w-full rounded-md border px-3 py-1.5 text-sm">All accounts &rsaquo;</button>
-      </div>
-    )
-    return (
-      <SafeSelectorDropdown
-        items={[mockItems[0]]}
-        selectedItemId={mockItems[0].id}
-        isError
-        onRetry={action('Retry')}
-        onItemSelect={action('Item selected')}
-        header={header}
-        footer={footer}
-      />
-    )
-  },
+/** Workspace tab prompts to sign in when the user isn't in a workspace. */
+export const NoWorkspace: Story = {
+  render: () => (
+    <SafeSelectorDropdown
+      {...dropdownDefaults}
+      hasWorkspace={false}
+      items={[mockItems[0]]}
+      workspaceItems={[]}
+      localItems={[mockItems[0]]}
+      selectedItemId={mockItems[0].id}
+      onItemSelect={action('Item selected')}
+    />
+  ),
   args: {} as any,
 }

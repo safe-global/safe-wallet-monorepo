@@ -1,101 +1,152 @@
-import AddAccountsChooser from '../AddAccountsChooser'
-import EmptySafeAccounts from './EmptySafeAccounts'
-import { Stack } from '@mui/material'
+import { useState } from 'react'
+import { TriangleAlert, RotateCw, ListChecks } from 'lucide-react'
 import { Typography } from '@/components/ui/typography'
-import { useMemo } from 'react'
-import { useAppSelector } from '@/store'
-import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
+import { Button } from '@/components/ui/button'
+import { useSpaceSafes, useIsInvited, useCurrentSpaceId, useIsAdmin } from '@/features/spaces'
+import { isMultiChainSafeItem, type AllSafeItems, type MultiChainSafeItem, type SafeItem } from '@/hooks/safes'
 import {
-  type AllSafeItems,
-  type SafeItem,
-  _getMultiChainAccounts,
-  _getSingleChainAccounts,
-  getComparator,
-  useSafeItemBuilder,
-} from '@/hooks/safes'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
-import { useSpaceSafes, useIsInvited } from '@/features/spaces'
+  useSpaceSafesCreateV1Mutation,
+  useSpaceSafesDeleteV1Mutation,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useAppDispatch } from '@/store'
+import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { TriangleAlert, RotateCw } from 'lucide-react'
+import { trackEvent } from '@/services/analytics'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import AccountsSafesList from './AccountsSafesList'
+import AddAccountsChooser from '../AddAccountsChooser'
+import { MyAccountsFeature } from '@/features/myAccounts'
+import { useLoadFeature } from '@/features/__core__'
 
-const _groupAndSort = (
-  items: SafeItem[],
-  sortComparator: (a: AllSafeItems[number], b: AllSafeItems[number]) => number,
-): AllSafeItems => {
-  const multi = _getMultiChainAccounts(items)
-  const single = _getSingleChainAccounts(items, multi)
-  return [...multi, ...single].sort(sortComparator)
-}
+const toSafeAccounts = (items: AllSafeItems) =>
+  items.flatMap((item) =>
+    isMultiChainSafeItem(item)
+      ? item.safes.map((safe) => ({ chainId: safe.chainId, address: safe.address }))
+      : [{ chainId: item.chainId, address: item.address }],
+  )
 
 const SpaceSafeAccounts = () => {
-  const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
+  const {
+    allSafes: workspaceSafes,
+    isError: isSpaceSafesError,
+    error: spaceSafesError,
+    refetch: refetchSpaceSafes,
+  } = useSpaceSafes()
   const isInvited = useIsInvited()
+  const isAdmin = useIsAdmin()
+  const spaceId = useCurrentSpaceId()
+  const dispatch = useAppDispatch()
+  const [removeSafeAccounts] = useSpaceSafesDeleteV1Mutation()
+  const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
 
-  // Use same organization logic as onboarding
-  const { orderBy } = useAppSelector(selectOrderByPreference)
-  const sortComparator = getComparator(orderBy)
-  const { buildSafeItem } = useSafeItemBuilder()
+  const { SafesTable } = useLoadFeature(MyAccountsFeature)
 
-  const spaceSafeItems = useMemo(() => {
-    // Only include safes that are part of the current space
-    const spaceSafes = allSafes?.flatMap((item) => ('safes' in item ? item.safes : [item])) || []
+  const [manageMode, setManageMode] = useState(false)
 
-    return spaceSafes.map((safe) => buildSafeItem(safe.chainId, safe.address))
-  }, [buildSafeItem, allSafes])
+  const handleAddToWorkspace = async (item: SafeItem | MultiChainSafeItem) => {
+    const safes = toSafeAccounts([item])
+    const result = await addSafesToSpace({ spaceId: spaceId ?? '', createSpaceSafesDto: { safes } })
 
-  const similarAddresses = useMemo<Set<string>>(
-    () => getFlaggedSimilarAddressSet(spaceSafeItems.map((s) => s.address)),
-    [spaceSafeItems],
-  )
+    if ('error' in result) {
+      dispatch(showNotification({ message: 'Failed to add Safe to workspace', variant: 'error', groupKey: '' }))
+      return
+    }
 
-  // Group and sort
-  const displaySafes = useMemo<AllSafeItems>(
-    () => _groupAndSort(spaceSafeItems, sortComparator),
-    [spaceSafeItems, sortComparator],
-  )
+    dispatch(showNotification({ message: 'Added Safe to workspace', variant: 'success', groupKey: '' }))
+    refetchSpaceSafes()
+  }
 
-  const hasResults = displaySafes.length > 0
+  const handleRemoveFromWorkspace = async (items: AllSafeItems) => {
+    const safes = toSafeAccounts(items)
+    trackEvent({ ...SPACE_EVENTS.DELETE_ACCOUNT })
+
+    const result = await removeSafeAccounts({ spaceId: spaceId ?? '', deleteSpaceSafesDto: { safes } })
+
+    if ('error' in result) {
+      dispatch(showNotification({ message: 'Failed to remove Safes from workspace', variant: 'error', groupKey: '' }))
+      return
+    }
+
+    safes.forEach(({ chainId, address }) =>
+      trackEvent(
+        { ...SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED, label: spaceId },
+        { workspace_id: spaceId, safe_address: address, chain_id: chainId },
+      ),
+    )
+    dispatch(
+      showNotification({
+        message: `Removed ${safes.length} Safe account${safes.length === 1 ? '' : 's'} from workspace`,
+        variant: 'success',
+        groupKey: '',
+      }),
+    )
+    setManageMode(false)
+    refetchSpaceSafes()
+  }
 
   return (
     <>
       {isInvited && <PreviewInvite />}
-      <div className="mb-6 flex flex-col gap-6">
+      <div className="mb-6">
         <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
           Safe accounts
         </Typography>
-        <Stack direction="row" justifyContent="flex-start">
-          <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
-            <AddAccountsChooser buttonVariant="default" buttonLabel="Manage accounts" entryPoint="safe_accounts" />
-          </Track>
-        </Stack>
       </div>
 
       {isSpaceSafesError ? (
-        <div className="flex items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4">
-          <TriangleAlert className="size-5 shrink-0 text-destructive" />
+        <div className="border-destructive/30 bg-destructive/5 flex items-center gap-3 rounded-2xl border px-5 py-4">
+          <TriangleAlert className="text-destructive size-5 shrink-0" />
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-destructive">Failed to load Safe accounts</span>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-destructive text-sm font-medium">Failed to load Safe accounts</span>
+            <span className="text-muted-foreground text-xs">
               {spaceSafesError ? getRtkQueryErrorMessage(spaceSafesError) : 'Please try again.'}
             </span>
           </div>
           <button
             onClick={refetchSpaceSafes}
-            className="ml-auto flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-destructive transition-colors hover:bg-destructive/10"
+            className="text-destructive hover:bg-destructive/10 ml-auto flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-colors"
             type="button"
           >
             <RotateCw className="size-3.5" />
             Retry
           </button>
         </div>
-      ) : !hasResults && allSafes && allSafes.length === 0 ? (
-        <EmptySafeAccounts />
       ) : (
-        <AccountsSafesList safes={displaySafes} similarAddresses={similarAddresses} />
+        <SafesTable
+          workspaceSafes={workspaceSafes}
+          manageMode={manageMode}
+          onRemoveFromWorkspace={handleRemoveFromWorkspace}
+          canAddToWorkspace={isAdmin}
+          onAddToWorkspace={handleAddToWorkspace}
+          headerActions={(tab, setTab) => (
+            <>
+              <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
+                <AddAccountsChooser
+                  mode="add"
+                  buttonVariant="default"
+                  buttonLabel="Add new Safe"
+                  entryPoint="safe_accounts"
+                  onShowLocalSafes={tab === 'workspace' ? () => setTab('local') : undefined}
+                />
+              </Track>
+
+              {/* "Manage Safes" (workspace multiselect/remove) only applies to the Workspace tab. */}
+              {tab === 'workspace' && (
+                <Button
+                  size="lg"
+                  variant={manageMode ? 'default' : 'outline'}
+                  className="font-normal"
+                  onClick={() => setManageMode((prev) => !prev)}
+                  data-testid="manage-safes-btn"
+                >
+                  {manageMode ? 'Done' : <ListChecks className="size-4" />}
+                  {manageMode ? null : 'Manage Safes'}
+                </Button>
+              )}
+            </>
+          )}
+        />
       )}
     </>
   )

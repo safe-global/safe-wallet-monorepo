@@ -30,7 +30,7 @@ const SecurityBanner = ({ title, className }: SecurityBannerProps) => {
         <ExternalLink
           href={HelpCenterArticle.ADDRESS_POISONING}
           noIcon
-          sx={{ textDecoration: 'underline', '.dark &': { color: 'inherit' } }}
+          sx={{ color: 'inherit', fontWeight: 500, textDecoration: 'underline', textUnderlineOffset: '2px' }}
         >
           Learn more about address poisoning
         </ExternalLink>

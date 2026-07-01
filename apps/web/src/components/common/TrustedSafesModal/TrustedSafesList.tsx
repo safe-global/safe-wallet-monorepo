@@ -2,10 +2,14 @@ import { useMemo } from 'react'
 import { Search } from 'lucide-react'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Spinner } from '@/components/ui/spinner'
+import { cn } from '@/utils/cn'
 import TrustedSafesItem from './TrustedSafesItem'
 import MultiChainSelectionItem from './MultiChainSelectionItem'
+import { MODAL_SAFE_GRID } from './constants'
 import type { SelectableSafe, SelectableItem } from './useTrustedSafesModal.types'
 import { isSelectableMultiChainSafe } from './useTrustedSafesModal.types'
+
+const columnLabel = 'text-muted-foreground text-xs font-semibold uppercase tracking-wide'
 
 interface TrustedSafesListProps {
   items: SelectableItem[]
@@ -13,6 +17,8 @@ interface TrustedSafesListProps {
   searchQuery: string
   onSearchChange: (query: string) => void
   onToggle: (address: string) => void
+  /** When false, the search input is rendered by the caller (e.g. in a shared toolbar). */
+  showSearchInput?: boolean
 }
 
 interface SimilarityGroupData {
@@ -73,20 +79,15 @@ const SimilarityGroupContainer = ({
   onToggle: (address: string) => void
 }) => {
   return (
-    <div
-      className="my-0.5 overflow-hidden rounded-md border border-border/50"
-      data-testid={`similarity-group-${group.groupKey}`}
-    >
+    <div data-testid={`similarity-group-${group.groupKey}`}>
       <div className="bg-yellow-50 px-3 py-1.5 dark:bg-[var(--color-warning-background)]">
         <span className="text-xs font-medium text-yellow-800 dark:text-[var(--color-warning1-contrast-text)]">
           Similar addresses – verify carefully
         </span>
       </div>
-      <div className="mb-4 bg-background p-2">
-        {group.items.map((item) => (
-          <SelectionItem key={item.address} item={item} onToggle={onToggle} />
-        ))}
-      </div>
+      {group.items.map((item) => (
+        <SelectionItem key={item.address} item={item} onToggle={onToggle} />
+      ))}
     </div>
   )
 }
@@ -95,7 +96,14 @@ const SimilarityGroupContainer = ({
  * List of safes for selection
  * Groups similar addresses together with visual highlighting
  */
-const TrustedSafesList = ({ items, isLoading, searchQuery, onSearchChange, onToggle }: TrustedSafesListProps) => {
+const TrustedSafesList = ({
+  items,
+  isLoading,
+  searchQuery,
+  onSearchChange,
+  onToggle,
+  showSearchInput = true,
+}: TrustedSafesListProps) => {
   const { groups, ungroupedItems } = useMemo(() => groupItemsBySimilarity(items), [items])
 
   const sortedUngroupedItems = useMemo(
@@ -111,7 +119,7 @@ const TrustedSafesList = ({ items, isLoading, searchQuery, onSearchChange, onTog
     )
   }
 
-  const showSearch = items.length > 0 || Boolean(searchQuery)
+  const showSearch = showSearchInput && (items.length > 0 || Boolean(searchQuery))
 
   return (
     <div>
@@ -129,29 +137,31 @@ const TrustedSafesList = ({ items, isLoading, searchQuery, onSearchChange, onTog
         </InputGroup>
       )}
 
-      <div>
-        {items.length === 0 ? (
-          <div className="py-8 text-center">
-            <span className="text-sm text-muted-foreground">
-              {searchQuery ? 'No safes found matching your search' : 'No safes available'}
-            </span>
+      {items.length === 0 ? (
+        <div className="py-8 text-center">
+          <span className="text-sm text-muted-foreground">
+            {searchQuery ? 'No safes found matching your search' : 'No safes available'}
+          </span>
+        </div>
+      ) : (
+        <div className="border-border overflow-hidden rounded-2xl border">
+          <div className={cn(MODAL_SAFE_GRID, 'border-border bg-muted/30 border-b px-3 py-2.5')}>
+            <span />
+            <span className={columnLabel}>Account</span>
+            <span className={columnLabel}>Chains</span>
+            <span className={cn(columnLabel, 'text-right')}>Balance</span>
+            <span className={cn(columnLabel, 'text-right')}>Threshold</span>
           </div>
-        ) : (
-          <>
-            {/* Render similarity groups first */}
-            {groups.map((group) => (
-              <SimilarityGroupContainer key={group.groupKey} group={group} onToggle={onToggle} />
-            ))}
 
-            {/* Render ungrouped items */}
-            {sortedUngroupedItems.map((item) => (
-              <div key={item.address} className="my-0.5">
-                <SelectionItem item={item} onToggle={onToggle} />
-              </div>
-            ))}
-          </>
-        )}
-      </div>
+          {/* Similarity groups first, then the rest */}
+          {groups.map((group) => (
+            <SimilarityGroupContainer key={group.groupKey} group={group} onToggle={onToggle} />
+          ))}
+          {sortedUngroupedItems.map((item) => (
+            <SelectionItem key={item.address} item={item} onToggle={onToggle} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

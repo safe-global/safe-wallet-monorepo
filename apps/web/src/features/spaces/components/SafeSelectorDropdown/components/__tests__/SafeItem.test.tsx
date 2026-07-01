@@ -12,12 +12,6 @@ jest.mock('../SafeInfoDisplay', () => {
   return { __esModule: true, default: Mock }
 })
 
-jest.mock('../BalanceDisplay', () => {
-  const Mock = () => <div data-testid="balance-display" />
-  Mock.displayName = 'BalanceDisplay'
-  return { __esModule: true, default: Mock }
-})
-
 jest.mock('../ChainLogo', () => {
   const Mock = ({ chainId }: { chainId: string }) => <div data-testid={`chain-logo-${chainId}`} />
   Mock.displayName = 'ChainLogo'
@@ -25,7 +19,7 @@ jest.mock('../ChainLogo', () => {
 })
 
 jest.mock('@/components/common/FiatValue', () => {
-  const Mock = () => <span />
+  const Mock = ({ value }: { value: string | number | null }) => <span data-testid="fiat-value">{String(value)}</span>
   Mock.displayName = 'FiatValue'
   return { __esModule: true, default: Mock }
 })
@@ -53,7 +47,7 @@ describe('SafeItem undeployed state', () => {
     render(<SafeItem {...createItem(makeChain({ isUndeployed: true }))} />)
 
     expect(screen.getByLabelText('Inactive')).toBeInTheDocument()
-    expect(screen.queryByTestId('balance-display')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('fiat-value')).not.toBeInTheDocument()
   })
 
   it('renders the Activating label for an activating chain', () => {
@@ -65,13 +59,7 @@ describe('SafeItem undeployed state', () => {
   it('renders the balance for a deployed chain', () => {
     render(<SafeItem {...createItem(makeChain())} />)
 
-    expect(screen.getByTestId('balance-display')).toBeInTheDocument()
+    expect(screen.getByTestId('fiat-value')).toBeInTheDocument()
     expect(screen.queryByTestId('not-activated-badge')).not.toBeInTheDocument()
-  })
-
-  it('renders the activation status in the shared row-end column (same trailing slot as the balance)', () => {
-    render(<SafeItem {...createItem(makeChain({ isUndeployed: true }))} />)
-
-    expect(screen.getByTestId('row-end-column')).toContainElement(screen.getByTestId('not-activated-badge'))
   })
 })

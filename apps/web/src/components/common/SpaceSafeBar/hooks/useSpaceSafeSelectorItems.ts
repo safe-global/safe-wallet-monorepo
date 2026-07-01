@@ -2,7 +2,7 @@ import { useMemo, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { isMultiChainSafeItem, flattenSafeItems } from '@/hooks/safes'
-import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
+import type { SafeItem, MultiChainSafeItem, AllSafeItems } from '@/hooks/safes'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
@@ -133,7 +133,7 @@ function buildSingleChainItem(
 }
 
 export function useSpaceSafeSelectorItems() {
-  const { dropdownSafes: allSafes, isInSpaceContext } = useSafeBarSafes()
+  const { workspaceSafes, trustedSafes, isInSpaceContext, hasWorkspace } = useSafeBarSafes()
   const { safe, safeAddress: reduxSafeAddress } = useSafeInfo()
   const urlSafeAddress = useSafeAddressFromUrl()
   const effectiveSafeAddress = urlSafeAddress || reduxSafeAddress
@@ -145,7 +145,20 @@ export function useSpaceSafeSelectorItems() {
   const { address: walletAddress } = useWallet() || {}
   const spaceId = useCurrentSpaceId()
 
-  const flatSafes = useMemo(() => flattenSafeItems(allSafes), [allSafes])
+  // Dedupe the union of both lists so the overviews query fetches each safe once.
+  const combinedSafes = useMemo<AllSafeItems>(() => {
+    const seen = new Set<string>()
+    const out: AllSafeItems = []
+    for (const item of [...workspaceSafes, ...trustedSafes]) {
+      const key = item.address.toLowerCase()
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push(item)
+    }
+    return out
+  }, [workspaceSafes, trustedSafes])
+
+  const flatSafes = useMemo(() => flattenSafeItems(combinedSafes), [combinedSafes])
 
   const {
     data: overviews,
@@ -154,26 +167,41 @@ export function useSpaceSafeSelectorItems() {
     refetch: refetchOverviews,
   } = useGetMultipleSafeOverviewsQuery(flatSafes.length > 0 ? { safes: flatSafes, currency, walletAddress } : skipToken)
 
-  const items: SafeItemData[] = useMemo(() => {
-    return allSafes.map((item) => {
-      const isCurrentSafe = sameAddress(item.address, effectiveSafeAddress)
+  const buildItems = useCallback(
+    (safes: AllSafeItems): SafeItemData[] =>
+      safes.map((item) => {
+        const isCurrentSafe = sameAddress(item.address, effectiveSafeAddress)
 
-      if (isMultiChainSafeItem(item)) {
-        return buildMultiChainItem(
+        if (isMultiChainSafeItem(item)) {
+          return buildMultiChainItem(
+            item,
+            isCurrentSafe,
+            currentChainId,
+            overviews,
+            overviewsLoading,
+            safe,
+            chainConfigs,
+            undeployedSafes,
+          )
+        }
+
+        return buildSingleChainItem(
           item,
           isCurrentSafe,
-          currentChainId,
           overviews,
           overviewsLoading,
           safe,
           chainConfigs,
           undeployedSafes,
         )
-      }
+      }),
+    [effectiveSafeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs, undeployedSafes],
+  )
 
-      return buildSingleChainItem(item, isCurrentSafe, overviews, overviewsLoading, safe, chainConfigs, undeployedSafes)
-    })
-  }, [allSafes, effectiveSafeAddress, currentChainId, safe, overviews, overviewsLoading, chainConfigs, undeployedSafes])
+  const workspaceItems = useMemo(() => buildItems(workspaceSafes), [buildItems, workspaceSafes])
+  const localItems = useMemo(() => buildItems(trustedSafes), [buildItems, trustedSafes])
+  // Trigger + selection use the contextual list (same behaviour as before).
+  const items = isInSpaceContext ? workspaceItems : localItems
 
   const selectedItemId = effectiveSafeAddress ? `${currentChainId}:${effectiveSafeAddress}` : ''
 
@@ -202,6 +230,9 @@ export function useSpaceSafeSelectorItems() {
 
   return {
     items,
+    workspaceItems,
+    localItems,
+    hasWorkspace,
     selectedItemId,
     handleItemSelect,
     isLoading: overviewsLoading || itemsNotReady,

@@ -1,9 +1,9 @@
 import FiatValue from '@/components/common/FiatValue'
 import { cn } from '@/utils/cn'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeInfoDisplay from './SafeInfoDisplay'
-import BalanceDisplay from './BalanceDisplay'
-import RowEndColumn from './RowEndColumn'
 import ChainLogo from './ChainLogo'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import type { SafeItemData } from '../types'
@@ -25,24 +25,23 @@ const SafeItem = ({ name, address, threshold, owners, chains, balance, isLoading
         threshold={threshold}
         owners={owners}
       />
-      <div className="flex items-center gap-2 bg-muted rounded-full p-0.5 shrink-0">
-        {chains.slice(0, 3).map((chainItem, index) => (
-          <span
-            key={chainItem.chainId}
-            className="size-6 rounded-full border-2 border-card overflow-hidden shrink-0 inline-flex items-center justify-center"
-            style={{ marginLeft: index > 0 ? '-8px' : '0' }}
-          >
-            <ChainLogo chainId={chainItem.chainId} />
-          </span>
-        ))}
+      {/* Fixed-width network + balance columns so they line up across every row. */}
+      <div className="flex w-[44px] shrink-0 justify-end">
+        <span className="size-6 overflow-hidden rounded-full inline-flex items-center justify-center shrink-0">
+          <ChainLogo chainId={chainId} />
+        </span>
       </div>
-      {isUndeployed ? (
-        <RowEndColumn>
+      <div className="flex w-[88px] shrink-0 items-center justify-end text-right">
+        {isUndeployed ? (
           <NotActivatedBadge isActivating={isActivating} />
-        </RowEndColumn>
-      ) : (
-        <BalanceDisplay balance={<FiatValue value={balance} />} isLoading={isLoading} />
-      )}
+        ) : isLoading ? (
+          <Skeleton className="h-4 w-14 rounded" />
+        ) : (
+          <Typography variant="paragraph-mini-medium" color="muted" className="whitespace-nowrap">
+            <FiatValue value={balance ?? '0'} />
+          </Typography>
+        )}
+      </div>
     </div>
   )
 }
