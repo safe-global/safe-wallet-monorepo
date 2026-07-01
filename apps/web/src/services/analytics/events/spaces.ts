@@ -3,6 +3,14 @@ import { EventType } from '@/services/analytics/types'
 const SPACE_CATEGORY = 'spaces'
 
 export const SPACE_EVENTS = {
+  COMPARE_PLANS_CLICKED: {
+    action: 'Compare plans clicked',
+    category: SPACE_CATEGORY,
+  },
+  EXPLORE_PLANS_CLICKED: {
+    action: 'Explore plans clicked',
+    category: SPACE_CATEGORY,
+  },
   SIGN_IN_BUTTON: {
     action: 'Open sign in message',
     category: SPACE_CATEGORY,

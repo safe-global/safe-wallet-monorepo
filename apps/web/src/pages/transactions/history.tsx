@@ -14,6 +14,7 @@ import { BRAND_NAME } from '@/config/constants'
 import CsvTxExportButton from '@/components/transactions/CsvTxExportButton'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import HistoryUpsellBanner from '@/components/transactions/HistoryUpsellBanner'
 
 const History: NextPage = () => {
   const [filter] = useTxFilter()
@@ -86,6 +87,10 @@ const History: NextPage = () => {
         >
           <TxFilterForm onClose={handleFilterClose} />
         </Popover>
+
+        <Box mb={1.5}>
+          <HistoryUpsellBanner />
+        </Box>
 
         <Box mb={4}>
           <PaginatedTxns useTxns={useTxHistory} />

@@ -3,9 +3,20 @@
   padding: var(--space-4) var(--space-7);
 }
 
+.upsellBanner {
+  width: 100%;
+  padding: var(--space-3) var(--space-7) 0;
+  margin-bottom: calc(var(--space-3) - var(--space-4));
+  text-align: left;
+}
+
 @media (max-width: 599.95px) {
   .row {
     padding: var(--space-2);
+  }
+
+  .upsellBanner {
+    padding: var(--space-3) var(--space-2) 0;
   }
 }
 

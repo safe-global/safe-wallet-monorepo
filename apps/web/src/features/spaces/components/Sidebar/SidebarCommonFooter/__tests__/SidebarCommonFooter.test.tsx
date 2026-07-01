@@ -121,6 +121,10 @@ jest.mock('../../ApiCtaSidebar', () => ({
   ApiCtaSidebar: () => <div data-testid="api-cta-sidebar" />,
 }))
 
+jest.mock('../../GetFlatPricingBanner', () => ({
+  GetFlatPricingBanner: () => <div data-testid="pricing-cta-sidebar" />,
+}))
+
 jest.mock('../../SidebarIndexingStatus', () => ({
   SidebarIndexingStatus: () => <div data-testid="indexing-status" />,
 }))
