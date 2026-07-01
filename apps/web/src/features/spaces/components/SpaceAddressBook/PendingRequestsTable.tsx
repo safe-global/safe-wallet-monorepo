@@ -101,11 +101,11 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
   }
 
   return (
-    <Table className="table-fixed">
+    <Table className="table-fixed min-w-[720px]">
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[20%]">Name</TableHead>
-          <TableHead className={isSmallScreen ? 'w-[30%]' : 'w-[32%]'}>Address</TableHead>
+          <TableHead className={isSmallScreen ? 'w-[15%]' : 'w-[20%]'}>Name</TableHead>
+          <TableHead className={isSmallScreen ? 'w-[40%]' : 'w-[32%]'}>Address</TableHead>
           <TableHead className={isSmallScreen ? 'w-[15%]' : 'w-[13%]'}>Chains</TableHead>
           <TableHead className="w-[20%]">Requested by</TableHead>
           <TableHead className="w-[15%]" />

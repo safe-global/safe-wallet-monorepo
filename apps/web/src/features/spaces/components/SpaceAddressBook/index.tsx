@@ -206,7 +206,7 @@ const SpaceAddressBook = () => {
                   )}
                 </TabsContent>
 
-                <TabsContent value="pending">
+                <TabsContent value="pending" className="mt-4 sm:mt-0">
                   <PendingRequestsTable requests={pendingRequests} />
                 </TabsContent>
               </>
