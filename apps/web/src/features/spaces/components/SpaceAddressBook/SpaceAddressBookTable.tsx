@@ -78,8 +78,8 @@ function SpaceAddressBookTable({
         <TableHeader>
           <TableRow>
             <TableHead className="w-[20%]">Name</TableHead>
-            <TableHead className={isSmallScreen ? 'w-[30%]' : 'w-[37%]'}>Address</TableHead>
-            <TableHead className={isSmallScreen ? 'w-[15%]' : 'w-[8%]'}>Chains</TableHead>
+            <TableHead className={isSmallScreen ? 'w-[30%]' : 'w-[32%]'}>Address</TableHead>
+            <TableHead className={isSmallScreen ? 'w-[15%]' : 'w-[13%]'}>Chains</TableHead>
             {hasMiddleColumn && <TableHead className="w-[20%]">{showAddedBy ? 'Added by' : 'Last updated'}</TableHead>}
             <TableHead className={hasMiddleColumn ? 'w-[15%]' : 'w-[35%]'} />
           </TableRow>
