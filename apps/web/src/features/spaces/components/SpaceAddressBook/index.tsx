@@ -128,7 +128,7 @@ const SpaceAddressBook = () => {
           </TabsList>
 
           {(activeTab === 'workspace' || activeTab === 'mine') && (
-            <div className="mb-4 mt-4 flex items-center gap-2">
+            <div className="mt-6 flex items-center gap-2">
               <div className="flex shrink-0 gap-2">
                 {isAdmin && activeTab === 'workspace' && (
                   <>
@@ -155,7 +155,7 @@ const SpaceAddressBook = () => {
             </div>
           )}
 
-          <div className="bg-card rounded-lg p-4">
+          <div className="bg-card mt-6 rounded-lg p-4">
             <TabsContent value="workspace">
               {searchQuery && filteredAll.length === 0 ? (
                 <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
