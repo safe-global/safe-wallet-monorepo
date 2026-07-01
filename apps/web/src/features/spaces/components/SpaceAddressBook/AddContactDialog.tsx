@@ -4,10 +4,10 @@ import { Spinner } from '@/components/ui/spinner'
 import { Plus } from 'lucide-react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
-import { useState, type ReactNode } from 'react'
+import { useCallback, useState, type ReactNode } from 'react'
 import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
-import { AddressPoisoningGuard } from '@/features/address-poisoning'
+import { AddressPoisoningGuard, GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import useChains from '@/hooks/useChains'
@@ -80,6 +80,11 @@ const AddContactDialog = ({
 
   // Address-poisoning guard: warns + blocks (until verified) when the contact address resembles a trusted anchor.
   const [poisoningBlocked, setPoisoningBlocked] = useState(false)
+  const [poisoningHint, setPoisoningHint] = useState<BlockedHint>()
+  const onPoisoningBlockedChange = useCallback((blocked: boolean, hint?: BlockedHint) => {
+    setPoisoningBlocked(blocked)
+    setPoisoningHint(hint)
+  }, [])
 
   const handleClose = () => {
     setOpen(false)
@@ -151,7 +156,7 @@ const AddContactDialog = ({
                 <NameInput name="name" label="Name" required />
                 <AddressInput name="address" label="Address or ENS" required showPrefix={false} chain={ensChain} />
 
-                <AddressPoisoningGuard name="address" context="add-entity" onBlockedChange={setPoisoningBlocked} />
+                <AddressPoisoningGuard name="address" context="add-entity" onBlockedChange={onPoisoningBlockedChange} />
 
                 <div>
                   <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
@@ -186,6 +191,7 @@ const AddContactDialog = ({
               <Button data-testid="cancel-btn" onClick={handleClose}>
                 Cancel
               </Button>
+              <GuardBlockedHint hint={poisoningHint} />
               <Button
                 type="submit"
                 variant="contained"

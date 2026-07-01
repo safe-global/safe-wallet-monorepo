@@ -1,5 +1,5 @@
 import { useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
-import { type ReactElement, useContext, useEffect, useMemo, useState } from 'react'
+import { type ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form'
 
@@ -49,6 +49,7 @@ import {
 } from '@/features/no-fee-campaign'
 import { useLoadFeature } from '@/features/__core__'
 import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
+import { GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
 import uniq from 'lodash/uniq'
 
 export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
@@ -150,6 +151,14 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
 
   const canAddMoreRecipients = useMemo(() => recipientFields.length < MAX_RECIPIENTS, [recipientFields])
 
+  // Rows report their poisoning hint (keyed by stable field id); the footer shows the first
+  // active one next to the single Next button. The Next button itself is gated via form validity.
+  const [poisoningHints, setPoisoningHints] = useState<Record<string, BlockedHint | undefined>>({})
+  const onPoisoningChange = useCallback((id: string, hint?: BlockedHint) => {
+    setPoisoningHints((prev) => (prev[id] === hint ? prev : { ...prev, [id]: hint }))
+  }, [])
+  const poisoningHint = useMemo(() => Object.values(poisoningHints).find(Boolean), [poisoningHints])
+
   const addRecipient = (): void => {
     if (!canAddMoreRecipients) {
       setCsvAirdropModalOpen(true)
@@ -200,6 +209,8 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
               {recipientFields.map((field, index) => (
                 <RecipientRow
                   key={field.id}
+                  rowId={field.id}
+                  onPoisoningChange={onPoisoningChange}
                   removable={recipientFields.length > 1}
                   fieldArray={{ name: MultiTokenTransferFields.recipients, index }}
                   remove={removeRecipient}
@@ -274,9 +285,12 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
               <Divider className={commonCss.nestedDivider} />
 
               <CardActions>
-                <Button variant="contained" type="submit" disabled={!formState.isValid}>
-                  Next
-                </Button>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                  <GuardBlockedHint hint={poisoningHint} />
+                  <Button variant="contained" type="submit" disabled={!formState.isValid} sx={{ ml: 'auto' }}>
+                    Next
+                  </Button>
+                </Box>
               </CardActions>
             </Box>
           </Stack>

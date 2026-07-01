@@ -8,18 +8,17 @@ import { splitAddress, type AddressParts } from '../utils/splitAddress'
 
 export type GuardLevel = 'none' | 'warn' | 'critical'
 export type GuardContext = 'recipient' | 'add-entity'
-type GuardPath = 'different' | null
-export type GuardResolution = { kind: 'trusted' | 'warn-override' | 'critical-override' }
+
+/** The short cue shown next to the host's primary action button while it is blocked. */
+export type BlockedHint = { text: string; tone: 'warn' | 'critical' }
 
 export type AddressPoisoningGuardOptions = {
   /** The entered/candidate address (already extracted + validated by the host). */
   address?: string
-  /** Swap the field to the trusted anchor address (recipient flows only). */
-  onUseTrusted?: (trusted: string) => void
+  /** Write an address back into the field: the trusted swap, or the restore-on-undo. */
+  onUseTrusted?: (address: string) => void
   /** Does a one-end (amber) match also block, or only warn? Default true. */
   amberBlocks?: boolean
-  /** For a both-ends (red) match, force middle re-entry vs. just an attestation. Default true. */
-  requireReentry?: boolean
   /** 'recipient' offers the trusted-swap; 'add-entity' (new owner/contact/…) does not. */
   context?: GuardContext
 }
@@ -32,53 +31,40 @@ export type AddressPoisoningGuard = {
   parts: AddressParts
   /** Block the host's continue/sign/confirm button while true. */
   isBlocked: boolean
-  /** Non-null once the user has resolved the warning; drives the resolved chip. */
-  resolved: GuardResolution | null
+  /** Copy for the button-side cue while blocked (empty when the guard is inactive). */
+  blockedHint: string
+  /** True once the field has been swapped to the trusted anchor (drives the green chip). */
   usingTrusted: boolean
   allowTrusted: boolean
-  // verification sub-state
-  expanded: boolean
-  path: GuardPath
-  mid: string
+  /** The attestation checkbox — ticking it alone unblocks; the warning stays visible. */
   ack: boolean
-  midMatch: boolean
-  // handlers
-  expand: () => void
   useTrusted: () => void
-  chooseDifferent: () => void
-  setMid: (value: string) => void
+  undoTrusted: () => void
   toggleAck: () => void
-  compareAgain: () => void
 }
 
 /**
- * Reusable address-poisoning guard for any address-entry field. Compares the
- * entered address against the user's trusted anchors and, by default, BLOCKS the
- * host's action button until the user resolves the warning — either by swapping to
- * the trusted address-book entry (recipient flows) or, for a genuinely new address,
- * re-typing only the middle of it (red) / attesting (amber). Resolution is always a
- * deliberate, high-friction path; there is no one-click "proceed anyway".
+ * Reusable address-poisoning guard for any address-entry field. Compares the entered
+ * address against the user's trusted anchors and, by default, BLOCKS the host's action
+ * button until the user resolves the warning in one deliberate step: either swap to the
+ * trusted address-book entry (recipient flows) or tick the attestation. Ticking the
+ * attestation only unblocks — the warning stays in place (no swap to a "resolved" chip);
+ * only the trusted swap removes the guard (with an undo). There is no one-click "proceed".
  */
 const useAddressPoisoningGuard = ({
   address,
   onUseTrusted,
   amberBlocks = true,
-  requireReentry = true,
   context = 'recipient',
 }: AddressPoisoningGuardOptions): AddressPoisoningGuard => {
   const match = useAddressSimilarity(address)
-  const [expanded, setExpanded] = useState(false)
-  const [path, setPath] = useState<GuardPath>(null)
-  const [mid, setMidState] = useState('')
   const [ack, setAck] = useState(false)
   const [swappedTo, setSwappedTo] = useState<string | null>(null)
+  const [swappedFrom, setSwappedFrom] = useState<string | null>(null)
 
-  // A new candidate must be verified afresh (the trusted-swap state survives, so a
-  // post-swap clean address can still show the green confirmation).
+  // A new candidate must be acknowledged afresh (the trusted-swap survives so a
+  // post-swap clean address still shows the green confirmation).
   useEffect(() => {
-    setExpanded(false)
-    setPath(null)
-    setMidState('')
     setAck(false)
   }, [address, match?.anchor])
 
@@ -94,41 +80,34 @@ const useAddressPoisoningGuard = ({
       return raw
     }
   }, [match?.anchor])
+
   const allowTrusted = context === 'recipient'
   const usingTrusted = !!swappedTo && !!address && sameAddress(address, swappedTo)
-  const midMatch = mid.trim().length > 0 && mid.trim().toLowerCase() === parts.middle.toLowerCase()
-
   const level: GuardLevel = !match ? 'none' : match.severity === Severity.CRITICAL ? 'critical' : 'warn'
 
-  let isBlocked = false
-  let resolved: GuardResolution | null = null
+  const resolved = usingTrusted || ack
+  const isBlocked = level === 'none' ? false : level === 'warn' ? (amberBlocks ? !resolved : false) : !resolved
 
-  if (usingTrusted) {
-    resolved = { kind: 'trusted' }
-  } else if (level === 'warn') {
-    if (ack) resolved = { kind: 'warn-override' }
-    isBlocked = amberBlocks ? !ack : false
-  } else if (level === 'critical') {
-    const overridden = path === 'different' && (requireReentry ? midMatch && ack : ack)
-    if (overridden) resolved = { kind: 'critical-override' }
-    isBlocked = !overridden
-  }
+  // The button-side cue: critical recipient flows ask to verify the recipient, critical
+  // add-entity flows the address, amber flows just to confirm. Empty when inactive.
+  const blockedHint = useMemo(() => {
+    if (level === 'none') return ''
+    if (level === 'critical')
+      return allowTrusted ? 'Verify the recipient to continue' : 'Verify the address to continue'
+    return 'Confirm the address to continue'
+  }, [level, allowTrusted])
 
-  const expand = useCallback(() => setExpanded(true), [])
-  const chooseDifferent = useCallback(() => setPath('different'), [])
-  const setMid = useCallback((value: string) => setMidState(value), [])
   const toggleAck = useCallback(() => setAck((prev) => !prev), [])
   const useTrusted = useCallback(() => {
     if (!anchorAddress) return
+    setSwappedFrom(address ?? null)
     setSwappedTo(anchorAddress)
     onUseTrusted?.(anchorAddress)
-  }, [anchorAddress, onUseTrusted])
-  const compareAgain = useCallback(() => {
-    setExpanded(true)
-    setPath(null)
-    setMidState('')
-    setAck(false)
-  }, [])
+  }, [anchorAddress, onUseTrusted, address])
+  const undoTrusted = useCallback(() => {
+    setSwappedTo(null)
+    if (swappedFrom != null) onUseTrusted?.(swappedFrom)
+  }, [onUseTrusted, swappedFrom])
 
   return {
     level,
@@ -136,20 +115,13 @@ const useAddressPoisoningGuard = ({
     anchorAddress,
     parts,
     isBlocked,
-    resolved,
+    blockedHint,
     usingTrusted,
     allowTrusted,
-    expanded,
-    path,
-    mid,
     ack,
-    midMatch,
-    expand,
     useTrusted,
-    chooseDifferent,
-    setMid,
+    undoTrusted,
     toggleAck,
-    compareAgain,
   }
 }
 

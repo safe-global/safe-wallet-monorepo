@@ -10,6 +10,7 @@ import {
   IconButton,
   Tooltip,
   Alert,
+  Box,
 } from '@mui/material'
 import { useForm, FormProvider, useFieldArray, useFormContext, useWatch, Controller } from 'react-hook-form'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
@@ -20,7 +21,7 @@ import AddIcon from '@/public/images/common/add.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { RecoverAccountFlowFields } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
-import { AddressPoisoningGuard } from '@/features/address-poisoning'
+import { AddressPoisoningGuard, GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
 import { TOOLTIP_TITLES } from '../../common/constants'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -71,20 +72,25 @@ function NewSignerRow({
   fieldId: string
   canRemove: boolean
   onRemove: () => void
-  onBlockedChange: (fieldId: string, isBlocked: boolean) => void
+  onBlockedChange: (fieldId: string, hint?: BlockedHint) => void
 }): ReactElement {
   const { control, trigger } = useFormContext<RecoverAccountFlowProps>()
   const { safeAddress } = useSafeInfo()
   const fieldName = `${RecoverAccountFlowFields.owners}.${index}.value` as const
   const newOwners = useWatch({ control, name: RecoverAccountFlowFields.owners })
   const [blocked, setBlocked] = useState(false)
+  const [hint, setHint] = useState<BlockedHint>()
   const blockedRef = useRef(blocked)
   blockedRef.current = blocked
+  const onGuardBlockedChange = useCallback((isBlocked: boolean, blockedHint?: BlockedHint) => {
+    setBlocked(isBlocked)
+    setHint(blockedHint)
+  }, [])
 
-  // Report blocked state up so the parent can gate Next; re-validate so the field reflects it.
+  // Report the hint up so the parent can gate Next + show it there; re-validate on block change.
   useEffect(() => {
-    onBlockedChange(fieldId, blocked)
-  }, [fieldId, blocked, onBlockedChange])
+    onBlockedChange(fieldId, hint)
+  }, [fieldId, hint, onBlockedChange])
   useEffect(() => {
     void trigger(fieldName)
   }, [blocked, trigger, fieldName])
@@ -105,7 +111,7 @@ function NewSignerRow({
     <Fragment>
       <Grid item xs={11}>
         <AddressBookInput label={`Signer ${index + 1}`} name={fieldName} required fullWidth validate={validate} />
-        <AddressPoisoningGuard name={fieldName} context="add-entity" onBlockedChange={setBlocked} />
+        <AddressPoisoningGuard name={fieldName} context="add-entity" onBlockedChange={onGuardBlockedChange} />
       </Grid>
 
       <Grid
@@ -149,12 +155,14 @@ export function RecoverAccountFlowSetup({
     name: RecoverAccountFlowFields.owners,
   })
 
-  // Mode A: aggregate each signer row's blocked state (keyed by stable field id) to gate Next.
-  const [blockedSigners, setBlockedSigners] = useState<Record<string, boolean>>({})
-  const handleBlockedChange = useCallback((fieldId: string, isBlocked: boolean) => {
-    setBlockedSigners((prev) => (prev[fieldId] === isBlocked ? prev : { ...prev, [fieldId]: isBlocked }))
+  // Mode A: aggregate each signer row's poisoning hint (keyed by stable field id) to gate Next
+  // and show the "verify to continue" cue next to it.
+  const [blockedSigners, setBlockedSigners] = useState<Record<string, BlockedHint | undefined>>({})
+  const handleBlockedChange = useCallback((fieldId: string, hint?: BlockedHint) => {
+    setBlockedSigners((prev) => (prev[fieldId] === hint ? prev : { ...prev, [fieldId]: hint }))
   }, [])
-  const hasBlockedSigner = fields.some((field) => blockedSigners[field.id])
+  const poisoningHint = fields.map((field) => blockedSigners[field.id]).find(Boolean)
+  const hasBlockedSigner = !!poisoningHint
 
   const isSameSetup = _isSameSetup({
     oldOwners: safe.owners,
@@ -292,15 +300,18 @@ export function RecoverAccountFlowSetup({
           <Divider className={commonCss.nestedDivider} />
 
           <CardActions sx={{ mt: '0 !important' }}>
-            <Button
-              data-testid="next-btn"
-              variant="contained"
-              type="submit"
-              sx={{ mt: 1 }}
-              disabled={isSameSetup || hasBlockedSigner}
-            >
-              Next
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+              <GuardBlockedHint hint={poisoningHint} />
+              <Button
+                data-testid="next-btn"
+                variant="contained"
+                type="submit"
+                sx={{ mt: 1, ml: 'auto' }}
+                disabled={isSameSetup || hasBlockedSigner}
+              >
+                Next
+              </Button>
+            </Box>
           </CardActions>
         </TxCard>
       </form>

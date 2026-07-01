@@ -28,8 +28,8 @@ import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { useState } from 'react'
-import { AddressPoisoningGuard } from '@/features/address-poisoning'
+import { useCallback, useState } from 'react'
+import { AddressPoisoningGuard, GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
 
 type FormData = Pick<AddOwnerFlowProps | ReplaceOwnerFlowProps, 'newOwner' | 'threshold'>
 
@@ -66,6 +66,11 @@ export const ChooseOwner = ({
 
   // Address-poisoning guard: warns + blocks (until verified) when the new signer resembles a trusted anchor.
   const [poisoningBlocked, setPoisoningBlocked] = useState(false)
+  const [poisoningHint, setPoisoningHint] = useState<BlockedHint>()
+  const onPoisoningBlockedChange = useCallback((blocked: boolean, hint?: BlockedHint) => {
+    setPoisoningBlocked(blocked)
+    setPoisoningHint(hint)
+  }, [])
 
   // Address book, ENS
   const fallbackName = name || ens
@@ -142,7 +147,11 @@ export const ChooseOwner = ({
             />
           </FormControl>
 
-          <AddressPoisoningGuard name="newOwner.address" context="add-entity" onBlockedChange={setPoisoningBlocked} />
+          <AddressPoisoningGuard
+            name="newOwner.address"
+            context="add-entity"
+            onBlockedChange={onPoisoningBlockedChange}
+          />
 
           <Divider className={commonCss.nestedDivider} />
 
@@ -222,14 +231,18 @@ export const ChooseOwner = ({
           <Divider className={commonCss.nestedDivider} />
 
           <CardActions>
-            <Button
-              data-testid="add-owner-next-btn"
-              variant="contained"
-              type="submit"
-              disabled={!isValid || resolving || poisoningBlocked}
-            >
-              Next
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+              <GuardBlockedHint hint={poisoningHint} />
+              <Button
+                data-testid="add-owner-next-btn"
+                variant="contained"
+                type="submit"
+                disabled={!isValid || resolving || poisoningBlocked}
+                sx={{ ml: 'auto' }}
+              >
+                Next
+              </Button>
+            </Box>
           </CardActions>
         </form>
       </FormProvider>

@@ -11,7 +11,7 @@ import { useTokenAmount } from '../utils'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { AddressPoisoningGuard } from '@/features/address-poisoning'
+import { AddressPoisoningGuard, type BlockedHint } from '@/features/address-poisoning'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { selectSpendingLimits } from '@/features/spending-limits'
 import { useAppSelector } from '@/store'
@@ -36,9 +36,20 @@ type RecipientRowProps = {
   fieldArray: { name: FieldArrayPath<MultiTokenTransferParams>; index: number }
   removable?: boolean
   remove?: (index: number) => void
+  /** Stable field id, used to report this row's poisoning hint up to the shared footer. */
+  rowId?: string
+  /** Reports this row's poisoning block/hint so the parent can show it next to the Next button. */
+  onPoisoningChange?: (id: string, hint?: BlockedHint) => void
 }
 
-const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLimit }: RecipientRowProps) => {
+const RecipientRow = ({
+  fieldArray,
+  removable = true,
+  remove,
+  disableSpendingLimit,
+  rowId,
+  onPoisoningChange,
+}: RecipientRowProps) => {
   const balancesItems = useVisibleTokens()
   const spendingLimits = useAppSelector(selectSpendingLimits)
 
@@ -66,6 +77,19 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
   useEffect(() => {
     void trigger(recipientFieldName)
   }, [poisoningBlocked, trigger, recipientFieldName])
+
+  // Mirror the block into form validity (above) and report the hint up so the shared footer
+  // can show "verify to continue" next to the single Next button.
+  const reportRef = useRef(onPoisoningChange)
+  reportRef.current = onPoisoningChange
+  const onGuardBlockedChange = useCallback(
+    (blocked: boolean, hint?: BlockedHint) => {
+      setPoisoningBlocked(blocked)
+      if (rowId) reportRef.current?.(rowId, hint)
+    },
+    [rowId],
+  )
+  useEffect(() => () => void (rowId && reportRef.current?.(rowId, undefined)), [rowId])
 
   const selectedToken = balancesItems.find((item) => sameAddress(item.tokenInfo.address, tokenAddress))
 
@@ -125,7 +149,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
           <AddressBookInput name={recipientFieldName} canAdd={isAddressValid} validate={validateSimilarity} />
         </FormControl>
 
-        <AddressPoisoningGuard name={recipientFieldName} context="recipient" onBlockedChange={setPoisoningBlocked} />
+        <AddressPoisoningGuard name={recipientFieldName} context="recipient" onBlockedChange={onGuardBlockedChange} />
 
         <FormControl fullWidth>
           <TokenAmountInput

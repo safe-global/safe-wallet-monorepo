@@ -29,6 +29,7 @@ jest.mock('@/hooks/useChains', () => ({
 
 jest.mock('@/features/address-poisoning', () => ({
   AddressPoisoningGuard: () => null,
+  GuardBlockedHint: () => null,
 }))
 
 jest.mock('@/components/common/ModalDialog', () => ({

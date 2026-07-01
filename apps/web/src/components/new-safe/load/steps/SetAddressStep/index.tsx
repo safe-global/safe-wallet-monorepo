@@ -21,8 +21,8 @@ import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import AddressInput from '@/components/common/AddressInput'
-import React, { useState } from 'react'
-import { AddressPoisoningGuard } from '@/features/address-poisoning'
+import React, { useCallback, useState } from 'react'
+import { AddressPoisoningGuard, GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
@@ -67,6 +67,11 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
 
   // Address-poisoning guard: warns + blocks (until verified) when the Safe address resembles a trusted anchor.
   const [poisoningBlocked, setPoisoningBlocked] = useState(false)
+  const [poisoningHint, setPoisoningHint] = useState<BlockedHint>()
+  const onPoisoningBlockedChange = useCallback((blocked: boolean, hint?: BlockedHint) => {
+    setPoisoningBlocked(blocked)
+    setPoisoningHint(hint)
+  }, [])
 
   // Address book, ENS, mnemonic
   const fallbackName = name || ens || randomName
@@ -161,7 +166,7 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
             name={Field.address}
           />
 
-          <AddressPoisoningGuard name={Field.address} context="add-entity" onBlockedChange={setPoisoningBlocked} />
+          <AddressPoisoningGuard name={Field.address} context="add-entity" onBlockedChange={onPoisoningBlockedChange} />
 
           <Typography
             sx={{
@@ -191,9 +196,17 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
               gap: 3,
             }}
           >
-            <Button variant="outlined" size="large" onClick={handleBack} startIcon={<ArrowBackIcon fontSize="small" />}>
-              Back
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Button
+                variant="outlined"
+                size="large"
+                onClick={handleBack}
+                startIcon={<ArrowBackIcon fontSize="small" />}
+              >
+                Back
+              </Button>
+              <GuardBlockedHint hint={poisoningHint} />
+            </Box>
             <Button
               data-testid="load-safe-next-btn"
               type="submit"

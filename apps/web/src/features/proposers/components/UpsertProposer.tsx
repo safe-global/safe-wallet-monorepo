@@ -49,7 +49,7 @@ import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm, type Validate } from 'react-hook-form'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { AddressPoisoningGuard } from '@/features/address-poisoning'
+import { AddressPoisoningGuard, GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
 import SignerSelector from '@/components/common/SignerSelector'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import SignatureIcon from '@/public/images/transactions/signature.svg'
@@ -119,6 +119,11 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
   // Address-poisoning guard: warns + blocks (until verified) when the proposer address resembles a trusted anchor.
   const [poisoningBlocked, setPoisoningBlocked] = useState(false)
+  const [poisoningHint, setPoisoningHint] = useState<BlockedHint>()
+  const onPoisoningBlockedChange = useCallback((blocked: boolean, hint?: BlockedHint) => {
+    setPoisoningBlocked(blocked)
+    setPoisoningHint(hint)
+  }, [])
 
   const onConfirm = handleSubmit(async (data: ProposerEntry) => {
     if (!wallet) return
@@ -309,7 +314,7 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
 
             {!isEditing && (
               <Box mb={2}>
-                <AddressPoisoningGuard name="address" context="add-entity" onBlockedChange={setPoisoningBlocked} />
+                <AddressPoisoningGuard name="address" context="add-entity" onBlockedChange={onPoisoningBlockedChange} />
               </Box>
             )}
 
@@ -352,9 +357,13 @@ const UpsertProposer = ({ onClose, onSuccess, proposer }: UpsertProposerProps) =
           <Divider />
 
           <DialogActions sx={{ padding: 3, justifyContent: 'space-between' }}>
-            <Button size="small" variant="text" onClick={onCancel}>
-              Cancel
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Button size="small" variant="text" onClick={onCancel}>
+                Cancel
+              </Button>
+
+              <GuardBlockedHint hint={poisoningHint} />
+            </Box>
 
             <CheckWallet checkNetwork={!isLoading} allowProposer={false}>
               {(isOk) => (

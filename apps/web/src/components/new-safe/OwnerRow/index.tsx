@@ -13,7 +13,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import css from './styles.module.css'
 import classNames from 'classnames'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { AddressPoisoningGuard } from '@/features/address-poisoning'
+import { AddressPoisoningGuard, type BlockedHint } from '@/features/address-poisoning'
 
 const OwnerRow = ({
   index,
@@ -21,12 +21,18 @@ const OwnerRow = ({
   removable = true,
   remove,
   readOnly = false,
+  rowId,
+  onPoisoningChange,
 }: {
   index: number
   removable?: boolean
   groupName: string
   remove?: (index: number) => void
   readOnly?: boolean
+  /** Stable field id, used to report this row's poisoning hint up to the parent's footer. */
+  rowId?: string
+  /** Reports this row's poisoning hint so the parent can show it next to its Next button. */
+  onPoisoningChange?: (id: string, hint?: BlockedHint) => void
 }) => {
   const { safeAddress } = useSafeInfo()
   const wallet = useWallet()
@@ -54,6 +60,19 @@ const OwnerRow = ({
   useEffect(() => {
     void trigger(addressFieldName)
   }, [poisoningBlocked, trigger, addressFieldName])
+
+  // Mirror the block into form validity (above) and report the hint up so the parent flow can
+  // show "verify to continue" next to its Next button.
+  const reportRef = useRef(onPoisoningChange)
+  reportRef.current = onPoisoningChange
+  const onGuardBlockedChange = useCallback(
+    (blocked: boolean, hint?: BlockedHint) => {
+      setPoisoningBlocked(blocked)
+      if (rowId) reportRef.current?.(rowId, hint)
+    },
+    [rowId],
+  )
+  useEffect(() => () => void (rowId && reportRef.current?.(rowId, undefined)), [rowId])
 
   const validateOwnerAddress = useCallback(
     async (address: string) => {
@@ -161,7 +180,7 @@ const OwnerRow = ({
       </Grid>
 
       {!readOnly && (
-        <AddressPoisoningGuard name={addressFieldName} context="add-entity" onBlockedChange={setPoisoningBlocked} />
+        <AddressPoisoningGuard name={addressFieldName} context="add-entity" onBlockedChange={onGuardBlockedChange} />
       )}
     </>
   )

@@ -1,5 +1,5 @@
 import type { ReactElement, BaseSyntheticEvent } from 'react'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Button, DialogActions, DialogContent, Box, type SxProps, type Theme } from '@mui/material'
 import { FormProvider, useForm } from 'react-hook-form'
 
@@ -10,7 +10,7 @@ import useChainId from '@/hooks/useChainId'
 import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useChain } from '@/hooks/useChains'
-import { AddressPoisoningGuard } from '@/features/address-poisoning'
+import { AddressPoisoningGuard, GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
 
 export type AddressEntry = {
   name: string
@@ -49,6 +49,11 @@ function EntryDialog({
 
   // Address-poisoning guard: warns + blocks (until verified) when the contact address resembles a trusted anchor.
   const [poisoningBlocked, setPoisoningBlocked] = useState(false)
+  const [poisoningHint, setPoisoningHint] = useState<BlockedHint>()
+  const onPoisoningBlockedChange = useCallback((blocked: boolean, hint?: BlockedHint) => {
+    setPoisoningBlocked(blocked)
+    setPoisoningHint(hint)
+  }, [])
 
   const submitCallback = handleSubmit((data: AddressEntry) => {
     dispatch(upsertAddressBookEntries({ ...data, chainIds: chainIds ?? [actualChainId] }))
@@ -91,7 +96,7 @@ function EntryDialog({
             </Box>
 
             {!disableAddressInput && (
-              <AddressPoisoningGuard name="address" context="add-entity" onBlockedChange={setPoisoningBlocked} />
+              <AddressPoisoningGuard name="address" context="add-entity" onBlockedChange={onPoisoningBlockedChange} />
             )}
           </DialogContent>
 
@@ -99,6 +104,7 @@ function EntryDialog({
             <Button data-testid="cancel-btn" onClick={handleClose}>
               Cancel
             </Button>
+            <GuardBlockedHint hint={poisoningHint} />
             <Button
               data-testid="save-btn"
               type="submit"

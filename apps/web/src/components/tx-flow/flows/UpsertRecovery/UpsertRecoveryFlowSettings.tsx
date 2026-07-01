@@ -19,14 +19,14 @@ import {
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
-import { useContext, useState } from 'react'
+import { useCallback, useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 
 import TxCard from '../../common/TxCard'
 import { useRecoveryPeriods } from './useRecoveryPeriods'
 import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
-import { AddressPoisoningGuard } from '@/features/address-poisoning'
+import { AddressPoisoningGuard, GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -106,6 +106,11 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
 
   // Address-poisoning guard: warns + blocks (until verified) when the Recoverer resembles a trusted anchor.
   const [poisoningBlocked, setPoisoningBlocked] = useState(false)
+  const [poisoningHint, setPoisoningHint] = useState<BlockedHint>()
+  const onPoisoningBlockedChange = useCallback((blocked: boolean, hint?: BlockedHint) => {
+    setPoisoningBlocked(blocked)
+    setPoisoningHint(hint)
+  }, [])
 
   const validateCustomDelay = (delay: string) => {
     if (!delay) return ''
@@ -170,7 +175,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
             <AddressPoisoningGuard
               name={UpsertRecoveryFlowFields.recoverer}
               context="add-entity"
-              onBlockedChange={setPoisoningBlocked}
+              onBlockedChange={onPoisoningBlockedChange}
             />
           </FormControl>
 
@@ -324,9 +329,18 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
           />
 
           <CardActions>
-            <Button data-testid="next-btn" variant="contained" type="submit" disabled={isDisabled}>
-              Next
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+              <GuardBlockedHint hint={poisoningHint} />
+              <Button
+                data-testid="next-btn"
+                variant="contained"
+                type="submit"
+                disabled={isDisabled}
+                sx={{ ml: 'auto' }}
+              >
+                Next
+              </Button>
+            </Box>
           </CardActions>
         </form>
       </FormProvider>

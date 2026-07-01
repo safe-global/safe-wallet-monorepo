@@ -20,16 +20,12 @@ export const TONE = {
 
 export type Tone = (typeof TONE)[keyof typeof TONE]
 
-// Resolved chip background + text per resolution kind.
+// Green resolved chip (shown only after the trusted swap) background + text.
 export const RESOLVED_TONE = {
   trusted: 'bg-[var(--color-success-background)] text-[var(--color-success-dark)]',
-  'warn-override': 'bg-[var(--color-warning-background)] text-[var(--color-warning-dark)]',
-  'critical-override': 'bg-[var(--color-error-background)] text-[var(--color-error-dark)]',
 } as const
 
 // Filled circular icon badge in the resolved chip (`.ricon` — solid colour, white glyph).
 export const RESOLVED_ICON_BG = {
   trusted: 'bg-[var(--color-success-main)]',
-  'warn-override': 'bg-[var(--color-warning-dark)]',
-  'critical-override': 'bg-[var(--color-error-dark)]',
 } as const

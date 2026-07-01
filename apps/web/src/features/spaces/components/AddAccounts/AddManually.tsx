@@ -12,7 +12,7 @@ import React, { useCallback, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
-import { AddressPoisoningGuard } from '@/features/address-poisoning'
+import { AddressPoisoningGuard, GuardBlockedHint, type BlockedHint } from '@/features/address-poisoning'
 
 export type AddManuallyFormValues = {
   address: string
@@ -45,6 +45,11 @@ const AddManually = ({
 
   // Address-poisoning guard: warns + blocks (until verified) when the Safe address resembles a trusted anchor.
   const [poisoningBlocked, setPoisoningBlocked] = useState(false)
+  const [poisoningHint, setPoisoningHint] = useState<BlockedHint>()
+  const onPoisoningBlockedChange = useCallback((blocked: boolean, hint?: BlockedHint) => {
+    setPoisoningBlocked(blocked)
+    setPoisoningHint(hint)
+  }, [])
 
   const onSubmit = handleSubmit((data) => {
     trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY })
@@ -146,10 +151,11 @@ const AddManually = ({
                 </Box>
               </Stack>
 
-              <AddressPoisoningGuard name="address" context="add-entity" onBlockedChange={setPoisoningBlocked} />
+              <AddressPoisoningGuard name="address" context="add-entity" onBlockedChange={onPoisoningBlockedChange} />
             </DialogContent>
             <DialogActions>
               <Button onClick={onClose}>Cancel</Button>
+              <GuardBlockedHint hint={poisoningHint} />
               <Button
                 data-testid="add-space-account-manually-button"
                 variant="contained"

@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ReactElement } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
-import useAddressPoisoningGuard, { type GuardContext } from '../../hooks/useAddressPoisoningGuard'
+import useAddressPoisoningGuard, { type BlockedHint, type GuardContext } from '../../hooks/useAddressPoisoningGuard'
 import { extractAddress } from '../../utils/extractAddress'
 import GuardBanner from './GuardBanner'
 import ResolvedChip from './ResolvedChip'
@@ -9,9 +9,11 @@ import ResolvedChip from './ResolvedChip'
 type CommonProps = {
   context?: GuardContext
   amberBlocks?: boolean
-  requireReentry?: boolean
-  /** Notifies the host whether its continue/sign/confirm button must stay disabled. */
-  onBlockedChange?: (blocked: boolean) => void
+  /**
+   * Notifies the host whether its continue/sign/confirm button must stay disabled.
+   * `hint` carries the button-side cue (text + tone) while blocked, undefined otherwise.
+   */
+  onBlockedChange?: (blocked: boolean, hint?: BlockedHint) => void
 }
 
 type RhfProps = CommonProps & {
@@ -33,10 +35,9 @@ const GuardBody = ({
   onUseTrusted,
   context,
   amberBlocks,
-  requireReentry = true,
   onBlockedChange,
-}: ControlledProps & { requireReentry?: boolean }): ReactElement | null => {
-  const guard = useAddressPoisoningGuard({ address, onUseTrusted, context, amberBlocks, requireReentry })
+}: ControlledProps): ReactElement | null => {
+  const guard = useAddressPoisoningGuard({ address, onUseTrusted, context, amberBlocks })
   const entered = guard.parts.front + guard.parts.middle + guard.parts.back
   const { name } = useAddressResolver(guard.anchorAddress ?? entered)
   const trustedName = name || 'a trusted address'
@@ -45,15 +46,18 @@ const GuardBody = ({
   const cb = useRef(onBlockedChange)
   cb.current = onBlockedChange
   useEffect(() => {
-    cb.current?.(guard.isBlocked)
-  }, [guard.isBlocked])
+    cb.current?.(
+      guard.isBlocked,
+      guard.isBlocked ? { text: guard.blockedHint, tone: guard.level === 'critical' ? 'critical' : 'warn' } : undefined,
+    )
+  }, [guard.isBlocked, guard.blockedHint, guard.level])
 
-  if (guard.level === 'none' && !guard.resolved) return null
+  if (guard.level === 'none' && !guard.usingTrusted) return null
 
-  return guard.resolved ? (
-    <ResolvedChip guard={guard} trustedName={trustedName} />
+  return guard.usingTrusted ? (
+    <ResolvedChip trustedName={trustedName} onUndo={guard.undoTrusted} />
   ) : (
-    <GuardBanner guard={guard} trustedName={trustedName} requireReentry={requireReentry} />
+    <GuardBanner guard={guard} trustedName={trustedName} />
   )
 }
 
@@ -71,9 +75,10 @@ const RhfGuard = ({ name, ...rest }: RhfProps): ReactElement | null => {
 
 /**
  * Reusable address-poisoning guard. Drop below any address-entry field; it shows the
- * two-tier warning, blocks by default (no one-click proceed), offers the trusted-swap
- * (recipient flows) or the middle-only re-entry + attestation, and reports its blocked
- * state via `onBlockedChange` so the host can disable its continue/sign/confirm button.
+ * two-tier warning with the address comparison inline, blocks by default (no one-click
+ * proceed), offers the trusted-swap (recipient flows) or a single attestation checkbox,
+ * and reports its blocked state via `onBlockedChange` so the host can disable its
+ * continue/sign/confirm button.
  *
  * RHF mode: pass `name` (reads the field + writes the swap back).
  * Controlled mode: pass `address` + `onUseTrusted`.
