@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useMediaQuery } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -34,6 +36,8 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
   const spaceId = useCurrentSpaceId()
   const dispatch = useAppDispatch()
   const spaceAddressBook = useGetSpaceAddressBook()
+  const theme = useTheme()
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('lg'))
   const [approveRequest] = useAddressBookRequestsApproveRequestV1Mutation()
   const [rejectRequest] = useAddressBookRequestsRejectRequestV1Mutation()
   const [loadingId, setLoadingId] = useState<number | null>(null)
@@ -100,8 +104,8 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       <TableHeader>
         <TableRow>
           <TableHead className="w-[20%]">Name</TableHead>
-          <TableHead className="w-[30%]">Address</TableHead>
-          <TableHead className="w-[15%]">Chains</TableHead>
+          <TableHead className={isSmallScreen ? 'w-[30%]' : 'w-[37%]'}>Address</TableHead>
+          <TableHead className={isSmallScreen ? 'w-[15%]' : 'w-[8%]'}>Chains</TableHead>
           <TableHead className="w-[20%]">Requested by</TableHead>
           <TableHead className="w-[15%]" />
         </TableRow>
@@ -123,12 +127,13 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
             </TableCell>
 
             <TableCell>
-              <div className="text-[0.8em]">
+              <div className="text-[0.8em] font-mono">
                 <EthHashInfo
                   address={req.address}
                   shortAddress={false}
                   showPrefix={false}
                   showName={false}
+                  highlight4bytes
                   hasExplorer
                   showCopyButton
                   avatarSize={24}
@@ -143,7 +148,11 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
                     {chains.configs.length === req.chainIds.length ? (
                       <Badge variant="secondary">All</Badge>
                     ) : (
-                      <NetworkLogosList networks={req.chainIds.map((chainId) => ({ chainId }))} />
+                      <NetworkLogosList
+                        networks={req.chainIds.map((chainId) => ({ chainId }))}
+                        showHasMore
+                        maxVisible={3}
+                      />
                     )}
                   </span>
                 </TooltipTrigger>
