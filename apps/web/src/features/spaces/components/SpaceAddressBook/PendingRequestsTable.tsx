@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { Spinner } from '@/components/ui/spinner'
+import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { NetworkLogosList } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -168,13 +169,32 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
 
             <TableCell>
               {req.requestedBy && (
-                <EthHashInfo
-                  address={req.requestedBy}
-                  avatarSize={20}
-                  onlyName
-                  showPrefix={false}
-                  showCopyButton={false}
-                />
+                <Tooltip>
+                  <TooltipTrigger render={<span className="inline-flex min-w-0" />}>
+                    {isAddress(req.requestedBy) ? (
+                      <div className="text-[0.8em] font-mono">
+                        <EthHashInfo
+                          address={req.requestedBy}
+                          shortAddress={false}
+                          showPrefix={false}
+                          showName={false}
+                          highlight4bytes
+                          showCopyButton={false}
+                          avatarSize={20}
+                        />
+                      </div>
+                    ) : (
+                      <EthHashInfo
+                        address={req.requestedBy}
+                        avatarSize={20}
+                        onlyName
+                        showPrefix={false}
+                        showCopyButton={false}
+                      />
+                    )}
+                  </TooltipTrigger>
+                  <TooltipContent>{req.requestedBy}</TooltipContent>
+                </Tooltip>
               )}
             </TableCell>
 
