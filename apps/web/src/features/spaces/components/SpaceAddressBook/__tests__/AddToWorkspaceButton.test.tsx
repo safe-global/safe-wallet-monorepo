@@ -41,6 +41,22 @@ describe('AddToWorkspaceButton', () => {
     await waitFor(() => expect(screen.getByText('Added')).toBeInTheDocument())
   })
 
+  it('submits the sanitized name so it matches the validated value', async () => {
+    mockUpsert.mockResolvedValue({ data: {} })
+    render(<AddToWorkspaceButton address={address} name=" Alice‚Bob " chainIds={['1']} />, {
+      initialReduxState: { addressBook: { '1': { [address]: ' Alice‚Bob ' } } },
+    })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+
+    await waitFor(() => {
+      expect(mockUpsert).toHaveBeenCalledWith({
+        spaceId: MOCK_SPACE_UUID,
+        upsertAddressBookItemsDto: { items: [{ name: "Alice'Bob", address, chainIds: ['1'] }] },
+      })
+    })
+  })
+
   it('keeps the contact in the local address book after adding to the workspace', async () => {
     mockUpsert.mockResolvedValue({ data: {} })
     render(<AddToWorkspaceButton address={address} name="Alice" chainIds={['1', '137']} />, {

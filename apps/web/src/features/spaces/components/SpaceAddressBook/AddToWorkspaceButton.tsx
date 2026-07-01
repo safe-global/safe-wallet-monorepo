@@ -8,6 +8,7 @@ import { useAppDispatch } from '@/store'
 import { Spinner } from '@/components/ui/spinner'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { validateContactName } from './utils'
+import { sanitizeName } from '@safe-global/utils/validation/names'
 
 type AddToWorkspaceButtonProps = {
   address: string
@@ -32,7 +33,7 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
 
       const result = await upsertAddressBook({
         spaceId: spaceId ?? '',
-        upsertAddressBookItemsDto: { items: [{ name, address, chainIds }] },
+        upsertAddressBookItemsDto: { items: [{ name: sanitizeName(name), address, chainIds }] },
       })
 
       if (result.error) {

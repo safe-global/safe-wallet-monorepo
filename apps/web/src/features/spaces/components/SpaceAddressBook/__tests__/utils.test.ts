@@ -110,6 +110,17 @@ describe('space address book utils', () => {
       )
     })
 
+    it('sanitizes names so the submitted value matches what was validated', () => {
+      const data: ImportContactsFormValues = {
+        contacts: {
+          '1:0x123': ' Alice‚Bob ',
+        },
+      }
+
+      const result = createContactItems(data)
+      expect(result).toEqual([{ chainIds: ['1'], address: '0x123', name: "Alice'Bob" }])
+    })
+
     it('parses multiple valid contacts', () => {
       const data: ImportContactsFormValues = {
         contacts: {

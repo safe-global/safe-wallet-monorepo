@@ -28,7 +28,7 @@ export const createContactItems = (data: ImportContactsFormValues) => {
       return {
         chainIds: [chainId],
         address,
-        name,
+        name: sanitizeName(name),
       }
     })
     .filter(Boolean) as AddressBookItem[]
