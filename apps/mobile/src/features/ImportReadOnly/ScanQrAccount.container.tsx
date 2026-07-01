@@ -3,12 +3,12 @@ import { useRouter } from 'expo-router'
 
 import { QrCameraView } from '@/src/features/ImportReadOnly/components/ScanQrAccountView'
 import { useScan } from '@/src/features/ImportReadOnly/hooks/useScan'
-import { useCameraPermissionFlow } from '@/src/components/Camera/useCameraPermissionFlow'
+import { useCameraPermissionFlow } from '@/src/components/Camera'
 
 export const ScanQrAccountContainer = () => {
   const router = useRouter()
   const { permission, requestPermission, openSettings } = useCameraPermissionFlow()
-  const { onScan, isCameraActive, setIsCameraActive } = useScan()
+  const { onScan, isCameraActive, setIsCameraActive, errorMessage, onTryAgain } = useScan()
 
   const onEnterManuallyPress = useCallback(async () => {
     router.push(`/(import-accounts)/form`)
@@ -27,6 +27,8 @@ export const ScanQrAccountContainer = () => {
       onRequestPermission={requestPermission}
       onPressSettings={openSettings}
       onEnterManuallyPress={onEnterManuallyPress}
+      errorMessage={errorMessage}
+      onTryAgain={onTryAgain}
     />
   )
 }

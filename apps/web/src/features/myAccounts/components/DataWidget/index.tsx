@@ -48,7 +48,7 @@ export const DataWidget = (): ReactElement => {
               <InfoIcon className={css.infoIcon} />
             </TooltipTrigger>
             <TooltipContent side="top">
-              Download or upload your local data with your added Safe Accounts, address book and settings.
+              Download or upload your local data with your added Safe accounts, address book and settings.
             </TooltipContent>
           </Tooltip>
         </div>

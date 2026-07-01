@@ -85,7 +85,7 @@ export function RecoverAccountFlowSetup({
             </Typography>
 
             <Typography variant="paragraph-small" className="mb-2 block">
-              Set the new signer wallet(s) of this Safe Account and how many need to confirm a transaction before it can
+              Set the new signer wallet(s) of this Safe account and how many need to confirm a transaction before it can
               be executed.
             </Typography>
           </div>
@@ -102,7 +102,7 @@ export function RecoverAccountFlowSetup({
                     key={field.id}
                     validate={(value) => {
                       if (sameAddress(value, safeAddress)) {
-                        return 'The Safe Account cannot own itself'
+                        return 'The Safe account cannot own itself'
                       }
 
                       const isDuplicate = newOwners.filter((owner) => owner.value === value).length > 1
@@ -143,7 +143,7 @@ export function RecoverAccountFlowSetup({
             </Typography>
 
             <Typography variant="paragraph-small" className="mb-2 block">
-              After recovery, Safe Account transactions will require:
+              After recovery, Safe account transactions will require:
             </Typography>
           </div>
 

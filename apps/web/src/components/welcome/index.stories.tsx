@@ -28,7 +28,7 @@ export const LoginCard: StoryObj = {
         Get started
       </Typography>
       <Typography variant="paragraph" color="muted" className="mb-6 mt-4">
-        Connect your wallet to create a Safe Account or watch an existing one
+        Connect your wallet to create a Safe account or watch an existing one
       </Typography>
       <Button size="lg" className="w-full">
         Connect wallet
@@ -62,7 +62,7 @@ export const LoginCardConnected: StoryObj = {
         Get started
       </Typography>
       <Typography variant="paragraph" color="muted" className="mb-6 mt-4">
-        Open your existing Safe Accounts or create a new one
+        Open your existing Safe accounts or create a new one
       </Typography>
       <Button size="lg" className="w-full">
         Continue
@@ -85,7 +85,7 @@ export const LoginCardMobile: StoryObj = {
         Get started
       </Typography>
       <Typography variant="paragraph-small" color="muted" className="mb-4 mt-2">
-        Connect your wallet to create a Safe Account
+        Connect your wallet to create a Safe account
       </Typography>
       <Button className="w-full">Connect wallet</Button>
       <div className="my-4 flex items-center gap-4">
@@ -148,7 +148,7 @@ export const WelcomePage: StoryObj = {
           Get started
         </Typography>
         <Typography variant="paragraph" color="muted" className="mb-6 mt-4">
-          Connect your wallet to create a Safe Account or watch an existing one
+          Connect your wallet to create a Safe account or watch an existing one
         </Typography>
         <Button size="lg" className="w-full">
           Connect wallet
@@ -185,7 +185,7 @@ export const OnDarkBackground: StoryObj = {
           Get started
         </Typography>
         <Typography variant="paragraph" color="muted" className="mb-6 mt-4">
-          Connect your wallet to create a Safe Account
+          Connect your wallet to create a Safe account
         </Typography>
         <Button size="lg" className="w-full">
           Connect wallet

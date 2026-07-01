@@ -36,7 +36,7 @@ export function verifyPinnedAccountsSectionVisible() {
 }
 
 export function verifyPinnedSafeExists(address) {
-  cy.get(pinnedAccounts).parent().should('contain.text', address)
+  cy.get(pinnedAccounts).should('contain.text', address)
 }
 
 export function verifyEmptyPinnedList() {
@@ -159,7 +159,7 @@ export function verifyPinnedSectionDoesNotExist() {
 
 export function verifyPinnedSafeDoesNotExist(address) {
   cy.get('body').then(($body) => {
-    if ($body.find(pinnedAccounts).length === 0) return
-    cy.get(pinnedAccounts).nextUntil(':not([data-testid="safe-item-card"])').should('not.contain.text', address)
+    if ($body.find(`${pinnedAccounts} ${safeItemCard}`).length === 0) return
+    cy.get(pinnedAccounts).find(safeItemCard).should('not.contain.text', address)
   })
 }

@@ -99,7 +99,7 @@ describe('GasParams', () => {
     // Details are inside a collapsed accordion (unmounted) until expanded
     await userEvent.click(getByText('Estimated fee'))
 
-    expect(await findByText('Safe Account transaction nonce')).toBeInTheDocument()
+    expect(await findByText('Safe account transaction nonce')).toBeInTheDocument()
     expect(getByText('123')).toBeInTheDocument()
   })
 

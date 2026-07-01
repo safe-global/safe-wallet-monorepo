@@ -96,7 +96,7 @@ export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?
         <Tooltip>
           <TooltipTrigger render={<InfoIcon className="size-4 text-[var(--color-border-main)]" />} />
           <TooltipContent side="top">
-            {`Your connected wallet controls other Safe Accounts, which can sign this transaction. You can select which Account to ${
+            {`Your connected wallet controls other Safe accounts, which can sign this transaction. You can select which Account to ${
               willExecute ? 'execute' : 'sign'
             } with.`}
           </TooltipContent>

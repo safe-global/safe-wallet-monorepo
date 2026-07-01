@@ -5,7 +5,7 @@ import { cn } from '@/utils/cn'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { HistoryFeesData } from '../../hooks/useHistoryFeesBreakdown'
 import { FeeBreakdownRow } from '../shared/FeeBreakdownRow'
-import { EXECUTION_FEE_TOOLTIP, GAS_FEE_TOOLTIP } from '../shared/tooltips'
+import { GAS_FEE_TOOLTIP } from '../shared/tooltips'
 import css from './styles.module.css'
 
 // Match ColorCodedTxAccordion ("Transaction details") so both accordions stack with matching
@@ -72,7 +72,7 @@ const HistoryFeesAccordion = ({
 
         <AccordionContent className="p-0">
           <div className={css.breakdownContainer}>
-            <FeeBreakdownRow {...data.executionFee} tooltip={EXECUTION_FEE_TOOLTIP} strikeAs="del" />
+            <FeeBreakdownRow {...data.executionFee} strikeAs="del" />
             <FeeBreakdownRow {...data.gasFee} tooltip={GAS_FEE_TOOLTIP} strikeAs="del" />
           </div>
         </AccordionContent>

@@ -32,7 +32,7 @@ const OverviewWidget = ({ safeName, networks }: { safeName: string; networks: Ch
       <Card className={css.card}>
         <div className={css.header}>
           <SafeLogo alt="Safe logo" width={LOGO_DIMENSIONS} height={LOGO_DIMENSIONS} />
-          <Typography variant="h4">Your Safe Account preview</Typography>
+          <Typography variant="h4">Your Safe account preview</Typography>
         </div>
         {wallet ? (
           rows.map((row) => (

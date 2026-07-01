@@ -154,7 +154,7 @@ const SpacesList = () => {
   const inviteAmount = pendingInvites?.length
   const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
 
-  const singleSpaceId = activeSpaces.length === 1 ? String(activeSpaces[0].id) : null
+  const singleSpaceId = activeSpaces.length === 1 ? activeSpaces[0].uuid : null
 
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,
@@ -202,7 +202,7 @@ const SpacesList = () => {
           pendingInvites.length > 0 &&
           pendingInvites.map((invitingSpace: GetSpaceResponse) => (
             <SpaceListInvite
-              key={invitingSpace.id}
+              key={invitingSpace.uuid}
               space={invitingSpace}
               invitedByName={getInvitedByName(invitingSpace, currentUser?.id)}
             />

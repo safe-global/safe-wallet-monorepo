@@ -77,7 +77,7 @@ export const ChooseOwner = ({
             <>
               <Typography variant="paragraph-small" className="mb-2">
                 {params.removedOwner &&
-                  'Review the signer you want to replace in the active Safe Account, then specify the new signer you want to replace it with:'}
+                  'Review the signer you want to replace in the active Safe account, then specify the new signer you want to replace it with:'}
               </Typography>
               <div className="my-6">
                 <Typography variant="paragraph-small" className="mb-2 text-muted-foreground">

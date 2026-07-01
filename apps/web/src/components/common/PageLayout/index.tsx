@@ -23,7 +23,6 @@ import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
 import { useIsAuthGateBlocking } from '@/hooks/useIsAuthGateBlocking'
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import { isAlwaysPublic } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
-import ClassicViewToast from '@/components/common/ClassicViewToast'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -63,11 +62,14 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   // legacy workspaces list when signed in — only the list needs the Topbar.
   const isLoginPath = pathname === AppRoutes.welcome.spaces || pathname === AppRoutes.index
   const isWelcomeWorskpacePage = pathname === AppRoutes.welcome.spaces
+  // The Accounts and Workspaces tabs share a header row; keep the Topbar gating in sync
+  // so switching tabs while signed out doesn't shift the row vertically.
+  const isWelcomeAccountsPage = pathname === AppRoutes.welcome.accounts
   const hideHeader =
     NO_HEADER_ROUTES.includes(pathname) ||
     Boolean(isRequireLoginEnabled && isLoginPath) ||
     Boolean(isRequireLoginEnabled && isWelcomeWorskpacePage) ||
-    (pathname === AppRoutes.welcome.spaces && !isSignedIn) ||
+    ((isWelcomeWorskpacePage || isWelcomeAccountsPage) && !isSignedIn) ||
     // While the gate is still resolving, keep the Topbar off the login paths so it
     // can't flash an empty safe-selector skeleton before it (often) gets hidden.
     (isRequireLoginEnabled === undefined && isLoginPath)
@@ -100,8 +102,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      <ClassicViewToast />
-
       {isStaticPage && (
         <div className="px-6 py-4">
           <SafeLogo />

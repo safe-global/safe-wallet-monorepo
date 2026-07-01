@@ -31,7 +31,7 @@ jobs:
       # Post a PR comment before deploying
       - name: Post a comment while building
         if: github.event.number
-        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
+        uses: mshick/add-pr-comment@ec328af66588ab8f77cdeb2c264f14aba45bbf59 # v3.12.0
         with:
           message-id: praul
           message: |
@@ -40,7 +40,7 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]'
 
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6.0.0
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
@@ -56,7 +56,7 @@ jobs:
           secrets: ${{ toJSON(secrets) }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -95,7 +95,7 @@ jobs:
       # Comment
       - name: Post a deployment link in the PR
         if: always() && github.event.number
-        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
+        uses: mshick/add-pr-comment@ec328af66588ab8f77cdeb2c264f14aba45bbf59 # v3.12.0
         with:
           message-id: praul
           message: |
@@ -110,155 +110,3 @@ jobs:
           message-failure: |
             ## Branch preview
             ❌  Deploy failed!
-
-  one-shot-clickthrough:
-    needs: deploy
-    if: github.event.number && needs.deploy.result == 'success'
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    permissions:
-      contents: read
-      pull-requests: write
-      id-token: write
-
-    name: One-shot clickthrough
-
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.0
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      # Only one-shot specs this PR adds or modifies are recorded — running the
-      # whole directory would post the same unrelated clickthrough on every PR.
-      # Paths are emitted relative to apps/web (the playwright test cwd below).
-      - name: Detect one-shot specs changed in this PR
-        id: specs
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          FILES=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" --paginate \
-            --jq '.[] | select(.status != "removed") | .filename')
-          # Strict charset: PR filenames are untrusted input and the spec list is
-          # word-split into a shell command below — allow no shell metacharacters.
-          SPECS=$(printf '%s\n' "$FILES" | grep -E '^apps/web/e2e/tests/one-shots/[A-Za-z0-9._/-]+\.spec\.ts$' | sed 's|^apps/web/||' | xargs || true)
-          if [[ -n "$SPECS" ]]; then
-            echo "One-shot specs in this PR: $SPECS"
-          else
-            echo "No one-shot specs added or modified in this PR — skipping the recording."
-          fi
-          echo "args=$SPECS" >> "$GITHUB_OUTPUT"
-
-      - uses: ./.github/actions/yarn
-        if: steps.specs.outputs.args != ''
-
-      # Extract branch name
-      - name: Extract branch name
-        id: extract_branch
-        if: steps.specs.outputs.args != ''
-        uses: ./.github/actions/branch-slug
-
-      - name: Install Playwright Chromium
-        if: steps.specs.outputs.args != ''
-        run: yarn workspace @safe-global/web exec playwright install --with-deps chromium
-
-      - name: Install ffmpeg
-        if: steps.specs.outputs.args != ''
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-
-      - name: Wait for the preview to be live
-        if: steps.specs.outputs.args != ''
-        env:
-          PREVIEW_URL: https://${{ steps.extract_branch.outputs.slug }}--walletweb.review.5afe.dev
-        run: |
-          for i in $(seq 1 30); do
-            if curl -sfo /dev/null "$PREVIEW_URL"; then
-              echo "Preview is live at $PREVIEW_URL"
-              exit 0
-            fi
-            echo "Attempt $i: preview not reachable yet, retrying in 10s..."
-            sleep 10
-          done
-          echo "Preview did not become reachable after ~5 minutes; continuing anyway."
-          exit 0
-
-      - name: Run this PR's one-shot specs
-        id: oneshot
-        if: steps.specs.outputs.args != ''
-        continue-on-error: true
-        working-directory: apps/web
-        env:
-          CI: true
-          PLAYWRIGHT_BASE_URL: https://${{ steps.extract_branch.outputs.slug }}--walletweb.review.5afe.dev
-          CYPRESS_WALLET_CREDENTIALS: ${{ secrets.CYPRESS_WALLET_CREDENTIALS }}
-          ONESHOT_SPECS: ${{ steps.specs.outputs.args }}
-        # $ONESHOT_SPECS is intentionally unquoted: it word-splits into one file
-        # filter per spec (paths are charset-restricted in the detect step).
-        run: npx playwright test --config=e2e/playwright.config.ts --project=one-shots --retries=0 --workers=1 $ONESHOT_SPECS
-
-      - name: Convert the video to GIF and MP4
-        id: convert
-        if: steps.specs.outputs.args != ''
-        continue-on-error: true
-        working-directory: apps/web/e2e
-        run: bash ../scripts/github/video_to_gif.sh
-
-      - name: Configure AWS credentials
-        if: steps.convert.outcome == 'success'
-        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Upload the clickthrough artifacts to the review bucket
-        id: upload
-        continue-on-error: true
-        if: steps.convert.outcome == 'success'
-        run: |
-          aws s3 cp apps/web/e2e/reports/one-shots/clickthrough.gif s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.slug }}/one-shots/clickthrough.gif --content-type image/gif
-          aws s3 cp apps/web/e2e/reports/one-shots/clickthrough.mp4 s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/walletweb/${{ steps.extract_branch.outputs.slug }}/one-shots/clickthrough.mp4 --content-type video/mp4
-
-      - name: Post the clickthrough GIF in the PR
-        if: always() && steps.upload.outcome == 'success'
-        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
-        with:
-          message-id: oneshot-clickthrough
-          message: |
-            ## 🎬 One-shot clickthrough
-
-            A complete happy-path clickthrough of this PR's feature, recorded against the branch preview.
-
-            ![One-shot clickthrough](https://${{ steps.extract_branch.outputs.slug }}--walletweb.review.5afe.dev/one-shots/clickthrough.gif?${{ github.run_id }})
-
-            ▶️ [Full-resolution MP4](https://${{ steps.extract_branch.outputs.slug }}--walletweb.review.5afe.dev/one-shots/clickthrough.mp4?${{ github.run_id }})
-
-            _This PR's one-shot spec(s): `${{ steps.specs.outputs.args }}`. When several specs record videos, only the longest recording is shown._
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          repo-token-user-login: 'github-actions[bot]'
-
-      - name: Post a fallback comment when the recording failed
-        if: always() && steps.specs.outputs.args != '' && steps.upload.outcome != 'success'
-        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
-        with:
-          message-id: oneshot-clickthrough
-          message: |
-            ## 🎬 One-shot clickthrough
-
-            This PR has a one-shot spec, but no clickthrough video could be recorded or uploaded. This usually means the branch preview wasn't reachable in time, the recording crashed before producing a video, or the artifact upload failed.
-
-            See the run logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          repo-token-user-login: 'github-actions[bot]'
-
-      - name: Post a nudge comment when the PR has no one-shot spec
-        if: always() && steps.specs.outcome == 'success' && steps.specs.outputs.args == ''
-        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
-        with:
-          message-id: oneshot-clickthrough
-          message: |
-            ## 🎬 One-shot clickthrough
-
-            This PR doesn't add or modify any one-shot clickthrough, so nothing was recorded.
-
-            Add a happy-path clickthrough of your feature under `apps/web/e2e/tests/one-shots/` (tag `@one-shot`) and it will be recorded against the branch preview and posted here as a GIF. See [One-shot clickthroughs](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.base_ref }}/apps/web/e2e/docs/README.md#one-shot-clickthroughs).
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          repo-token-user-login: 'github-actions[bot]'

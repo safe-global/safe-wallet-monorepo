@@ -14,7 +14,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import classnames from 'classnames'
 import { type MultiChainSafeItem, type SafeItem } from '@/hooks/safes'
 import { AddNetworkButton } from '../AddNetworkButton'
-import MultiAccountContextMenu from '@/components/sidebar/SafeListContextMenu/MultiAccountContextMenu'
+import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 function MultiChainSubItem({

@@ -87,7 +87,7 @@ const getItems = ({
     const addedSafesPreview: ItemText = {
       primary: (
         <>
-          <b>Added Safe Accounts</b> on {addedSafeChainAmount} {addedSafeChainAmount === 1 ? 'chain' : 'chains'}
+          <b>Added Safe accounts</b> on {addedSafeChainAmount} {addedSafeChainAmount === 1 ? 'chain' : 'chains'}
         </>
       ),
       secondary: showPreview ? getItemSecondaryText(chains, addedSafes, 'Safe', 'Safes') : undefined,
@@ -125,7 +125,7 @@ const getItems = ({
     const visitedSafesPreview: ItemText = {
       primary: (
         <>
-          <b>Visited Safe Accounts history</b>
+          <b>Visited Safe accounts history</b>
         </>
       ),
     }
@@ -150,7 +150,7 @@ const getItems = ({
     const undeployedSafesPreview: ItemText = {
       primary: (
         <>
-          <b>Not activated Safe Accounts</b> {undeployedSafesCount}
+          <b>Not activated Safe accounts</b> {undeployedSafesCount}
         </>
       ),
     }

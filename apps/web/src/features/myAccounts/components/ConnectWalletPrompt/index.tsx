@@ -14,7 +14,7 @@ const ConnectWalletPrompt = () => {
     <Alert data-testid="connect-wallet-prompt" className="mb-4">
       <WalletIcon />
       <AlertTitle>Connect your wallet</AlertTitle>
-      <AlertDescription className="mb-4">Connect your wallet to view and manage your Safe Accounts.</AlertDescription>
+      <AlertDescription className="mb-4">Connect your wallet to view and manage your Safe accounts.</AlertDescription>
       <div>
         <Button size="sm" onClick={connectWallet} data-testid="connect-wallet-button">
           <WalletIcon />

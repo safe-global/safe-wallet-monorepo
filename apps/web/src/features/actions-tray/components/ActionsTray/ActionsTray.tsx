@@ -5,7 +5,7 @@ import { ArrowUpRight, ArrowDownLeft, Repeat, SquareDashedBottomCode } from 'luc
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 import Track from '@/components/common/Track'
-import QrCodeButton from '@/components/sidebar/QrCodeButton'
+import QrCodeButton from '@/components/common/QrCodeButton'
 import CheckWallet from '@/components/common/CheckWallet'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { AppRoutes } from '@/config/routes'

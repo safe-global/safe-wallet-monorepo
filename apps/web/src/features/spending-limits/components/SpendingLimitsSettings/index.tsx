@@ -34,7 +34,7 @@ const SpendingLimitsSettings = () => {
           {isEnabled ? (
             <div>
               <Typography>
-                You can set rules for specific beneficiaries to access funds from this Safe Account without having to
+                You can set rules for specific beneficiaries to access funds from this Safe account without having to
                 collect all signatures.
               </Typography>
 

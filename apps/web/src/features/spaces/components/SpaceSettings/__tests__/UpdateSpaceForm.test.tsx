@@ -5,6 +5,7 @@ import UpdateSpaceForm from '../UpdateSpaceForm'
 
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { spaceBuilder } from '@/tests/builders/space'
+import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUnwrap = jest.fn()
@@ -29,7 +30,7 @@ const renderWithStore = (ui: React.ReactElement) => {
 }
 
 describe('UpdateSpaceForm', () => {
-  const mockSpace = spaceBuilder().with({ id: 123, uuid: MOCK_SPACE_UUID, name: 'Test Space', members: [] }).build()
+  const mockSpace = spaceBuilder().with({ uuid: MOCK_SPACE_UUID, name: 'Test Space', members: [] }).build()
 
   // Helper functions to reduce code duplication
   const setupForm = (space: GetSpaceResponse | undefined, isAdmin: boolean) => {
@@ -76,6 +77,13 @@ describe('UpdateSpaceForm', () => {
       const { input } = getFormElements()
       expect(input).toHaveValue('Updated Space Name')
     })
+  })
+
+  it('should cap the workspace name input length', () => {
+    setupForm(mockSpace, true)
+
+    const { input } = getFormElements()
+    expect(input).toHaveAttribute('maxlength', String(SPACE_NAME_MAX_LENGTH))
   })
 
   it('should disable save button when name is unchanged', () => {
@@ -142,8 +150,8 @@ describe('UpdateSpaceForm', () => {
     })
   })
 
-  it('should display error message when update fails', async () => {
-    mockUnwrap.mockRejectedValue(new Error('Network error'))
+  it('should display the backend error message when update fails', async () => {
+    mockUnwrap.mockRejectedValue({ status: 422, data: { message: 'Name contains invalid characters' } })
     setupForm(mockSpace, true)
 
     changeSpaceName('New Space Name')
@@ -152,7 +160,7 @@ describe('UpdateSpaceForm', () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Error updating the workspace. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Name contains invalid characters')).toBeInTheDocument()
     })
   })
 
@@ -170,7 +178,9 @@ describe('UpdateSpaceForm', () => {
   })
 
   it('should clear error message when user retries after error', async () => {
-    mockUnwrap.mockRejectedValueOnce(new Error('Network error')).mockResolvedValueOnce({})
+    mockUnwrap
+      .mockRejectedValueOnce({ status: 422, data: { message: 'Name contains invalid characters' } })
+      .mockResolvedValueOnce({})
     setupForm(mockSpace, true)
 
     // First attempt fails
@@ -179,7 +189,7 @@ describe('UpdateSpaceForm', () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(screen.getByText('Error updating the workspace. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Name contains invalid characters')).toBeInTheDocument()
     })
 
     // Second attempt succeeds
@@ -187,7 +197,7 @@ describe('UpdateSpaceForm', () => {
     fireEvent.click(saveButton)
 
     await waitFor(() => {
-      expect(screen.queryByText('Error updating the workspace. Please try again.')).not.toBeInTheDocument()
+      expect(screen.queryByText('Name contains invalid characters')).not.toBeInTheDocument()
     })
   })
 })

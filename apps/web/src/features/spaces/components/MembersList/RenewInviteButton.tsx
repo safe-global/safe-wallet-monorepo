@@ -1,43 +1,13 @@
-import { type MemberDto, useMembersRenewInviteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useCurrentSpaceId } from '@/features/spaces'
-import { useAppDispatch } from '@/store'
-import { showNotification } from '@/store/notificationsSlice'
-import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
+import useRenewInvite from './useRenewInvite'
 
 const RenewInviteButton = ({ member }: { member: MemberDto }) => {
-  const spaceId = useCurrentSpaceId()
-  const dispatch = useAppDispatch()
-  const [renewInvite, { isLoading }] = useMembersRenewInviteV1Mutation()
-
-  const handleRenew = async () => {
-    if (!spaceId) return
-
-    const { error } = await renewInvite({ spaceId, userId: member.user.id })
-
-    if (error) {
-      dispatch(
-        showNotification({
-          message: getRtkQueryErrorMessage(error) || 'Failed to renew the invitation. Please try again.',
-          variant: 'error',
-          groupKey: 'renew-invite-error',
-        }),
-      )
-      return
-    }
-
-    dispatch(
-      showNotification({
-        message: `Invitation renewed for ${member.name}`,
-        variant: 'success',
-        groupKey: 'renew-invite-success',
-      }),
-    )
-  }
+  const { renewInvite: handleRenew, isLoading } = useRenewInvite(member)
 
   return (
     <Tooltip>

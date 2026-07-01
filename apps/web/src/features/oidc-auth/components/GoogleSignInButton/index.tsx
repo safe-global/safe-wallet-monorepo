@@ -10,7 +10,6 @@ const GoogleSignInButton = () => (
     icon={<GoogleIcon />}
     analyticsEvent={SPACE_EVENTS.GOOGLE_SIGN_IN}
     testId="google-login-btn"
-    variant="primary"
   />
 )
 

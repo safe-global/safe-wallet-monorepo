@@ -41,7 +41,7 @@ const EmptyBatch = ({ children }: { children: ReactNode }) => (
 
         <span className="min-w-[120px]">
           <SettingsIcon className="mx-auto size-6" />
-          <span className="mt-1 block">Safe Account settings</span>
+          <span className="mt-1 block">Safe account settings</span>
         </span>
       </span>
     </Typography>

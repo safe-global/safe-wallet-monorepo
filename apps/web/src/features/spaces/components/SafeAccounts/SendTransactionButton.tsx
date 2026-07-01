@@ -69,7 +69,7 @@ const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
           <ArrowOutwardIcon />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>{canSend ? 'Send tokens' : 'You are not a signer of this Safe Account'}</TooltipContent>
+      <TooltipContent>{canSend ? 'Send tokens' : 'You are not a signer of this Safe account'}</TooltipContent>
     </Tooltip>
   )
 }

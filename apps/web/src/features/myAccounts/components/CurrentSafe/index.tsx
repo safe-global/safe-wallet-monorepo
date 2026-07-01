@@ -32,7 +32,7 @@ function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLink
   return (
     <div data-testid="current-safe-section" className="mb-6">
       <Typography variant="h4" className="mb-4">
-        Current Safe Account
+        Current Safe account
       </Typography>
       <SafeListItem safeItem={safeItem} onLinkClick={onLinkClick} />
     </div>

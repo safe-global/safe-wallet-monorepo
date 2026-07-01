@@ -22,10 +22,10 @@ export function spaceMemberBuilder(): IBuilder<SpaceMemberDto> {
 
 export function spaceBuilder(): IBuilder<GetSpaceResponse> {
   return Builder.new<GetSpaceResponse>().with({
-    id: 42,
     uuid: faker.string.uuid(),
     name: faker.company.name(),
     safeCount: 0,
+    memberCount: 1,
     members: [spaceMemberBuilder().build()],
   })
 }

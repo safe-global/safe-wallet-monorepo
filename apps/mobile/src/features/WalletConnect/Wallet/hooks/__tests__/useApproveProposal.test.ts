@@ -5,11 +5,8 @@ import { getSdkError } from '@walletconnect/utils'
 import type { IWalletKit, WalletKitTypes } from '@reown/walletkit'
 import { renderHookWithStore, createTestStore } from '@/src/tests/test-utils'
 import { useApproveProposal } from '../useApproveProposal'
-import { selectSessions, selectPending } from '../../store/walletKitSlice'
+import { selectSessions, selectPending, selectVerifyByTopic } from '../../store/walletKitSlice'
 import type { RootState } from '@/src/store'
-
-const mockToastShow = jest.fn()
-jest.mock('@tamagui/toast', () => ({ useToastController: () => ({ show: mockToastShow }) }))
 
 const safeAddress = getAddress(faker.finance.ethereumAddress()) as `0x${string}`
 
@@ -22,6 +19,7 @@ const makePending = (id: number): { id: number; proposal: WalletKitTypes.Session
       requiredNamespaces: { eip155: { chains: ['eip155:1'], methods: [], events: [] } },
       optionalNamespaces: {},
     },
+    verifyContext: { verified: { validation: 'VALID', origin: 'https://dapp.test', isScam: false } },
   } as unknown as WalletKitTypes.SessionProposal,
 })
 
@@ -32,8 +30,6 @@ const storeWithSafe = () =>
   })
 
 describe('useApproveProposal', () => {
-  beforeEach(() => mockToastShow.mockClear())
-
   it('approves the proposal, stores the session, and clears the pending item', async () => {
     const session = { topic: 'topic-1', namespaces: {} }
     const wk = {
@@ -54,7 +50,8 @@ describe('useApproveProposal', () => {
     expect(arg.sessionProperties).toBeDefined()
     expect(selectSessions(store.getState() as RootState)).toHaveLength(1)
     expect(selectPending(store.getState() as RootState)).toHaveLength(0)
-    expect(mockToastShow).toHaveBeenCalledWith('Connected to app', expect.anything())
+    expect(selectVerifyByTopic(store.getState() as RootState)[session.topic]).toBe('verified')
+    expect(store.getState().toast.queue).toContainEqual(expect.objectContaining({ message: 'Connected to app' }))
   })
 
   it('shows an error toast and rejects when approveSession fails', async () => {
@@ -62,15 +59,15 @@ describe('useApproveProposal', () => {
       approveSession: jest.fn().mockRejectedValue(new Error('boom')),
       rejectSession: jest.fn().mockResolvedValue(undefined),
     } as unknown as IWalletKit & { rejectSession: jest.Mock }
-    const { result } = renderHookWithStore(() => useApproveProposal(wk), storeWithSafe())
+    const store = storeWithSafe()
+    const { result } = renderHookWithStore(() => useApproveProposal(wk), store)
 
     await act(async () => {
       await result.current.approve(makePending(3))
     })
 
-    expect(mockToastShow).toHaveBeenCalledWith(
-      'Connection to app failed',
-      expect.objectContaining({ variant: 'error' }),
+    expect(store.getState().toast.queue).toContainEqual(
+      expect.objectContaining({ message: 'Connection to app failed', variant: 'error' }),
     )
     expect(wk.rejectSession).toHaveBeenCalledWith({ id: 3, reason: getSdkError('USER_REJECTED') })
   })

@@ -50,7 +50,7 @@ export const getTransactionType = (tx: Transaction): TxType => {
       return {
         image: toAddress?.logoUri || <SafeFontIcon name={'settings'} />,
         icon: toAddress?.logoUri || <SafeFontIcon name={'settings'} />,
-        text: 'Safe Account created',
+        text: 'Safe account created',
       }
     }
     case TransactionInfoType.SWAP_TRANSFER:

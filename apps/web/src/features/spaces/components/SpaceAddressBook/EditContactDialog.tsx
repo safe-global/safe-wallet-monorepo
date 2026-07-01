@@ -21,6 +21,9 @@ import { useCurrentSpaceId } from '@/features/spaces'
 import { useAppDispatch } from '@/store'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 type EditContactDialogProps = {
   entry: SpaceAddressBookItemDto
@@ -99,7 +102,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
       })
 
       if (result.error) {
-        setError('Something went wrong. Please try again.')
+        setError(getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError))
         return
       }
 
@@ -113,7 +116,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
 
       handleClose()
     } catch (error) {
-      setError('Something went wrong. Please try again.')
+      setError(getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError))
     } finally {
       setIsSubmitting(false)
     }

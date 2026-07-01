@@ -52,7 +52,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
     case TransactionInfoType.CREATION: {
       return {
         icon: toAddress?.logoUri || '/images/transactions/settings.svg',
-        text: 'Safe Account created',
+        text: 'Safe account created',
       }
     }
     case TransactionInfoType.SWAP_TRANSFER:

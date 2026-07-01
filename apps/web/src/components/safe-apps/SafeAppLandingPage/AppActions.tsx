@@ -78,7 +78,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
       }
       button = (
         <Button style={{ width: CTA_BUTTON_WIDTH }} render={<Link href={createSafeHrefWithRedirect} />}>
-          Create new Safe Account
+          Create new Safe account
         </Button>
       )
       break
@@ -93,7 +93,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
   if (hasWallet && hasSafes) {
     body = (
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="safe-select-label">Select a Safe Account</Label>
+        <Label htmlFor="safe-select-label">Select a Safe account</Label>
         <Select
           value={safeToUse?.address || ''}
           onValueChange={(value) => {
@@ -102,7 +102,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
           }}
         >
           <SelectTrigger id="safe-select-label" className="min-h-[56px] w-[311px]">
-            <SelectValue placeholder="Select a Safe Account" />
+            <SelectValue placeholder="Select a Safe account" />
           </SelectTrigger>
           <SelectContent>
             {compatibleSafes.map(({ address, chainId, shortName }) => (
@@ -128,7 +128,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
 
   return (
     <div className="flex flex-col items-center justify-between font-bold" style={{ height: CTA_HEIGHT }}>
-      <Typography variant="paragraph-bold">Use the App with your Safe Account</Typography>
+      <Typography variant="paragraph-bold">Use the App with your Safe account</Typography>
       {body}
       {button}
     </div>

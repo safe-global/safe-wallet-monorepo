@@ -84,7 +84,7 @@ const FirstTxFlow = ({ open, onClose }: { open: boolean; onClose: () => void }) 
         <div>
           <ChoiceButton
             title="Add another signer"
-            description="Improve the security of your Safe Account"
+            description="Improve the security of your Safe account"
             icon={SaveAddressIcon}
             onClick={() => handleClick(onAddSigner)}
           />

@@ -80,7 +80,7 @@ export const FallbackHandler = (): ReactElement | null => {
         <div>
           <div>
             <Typography>
-              The fallback handler adds fallback logic for funtionality that may not be present in the Safe Account
+              The fallback handler adds fallback logic for funtionality that may not be present in the Safe account
               contract. Learn more about the fallback handler{' '}
               <ExternalLink href={HelpCenterArticle.FALLBACK_HANDLER}>here</ExternalLink>
             </Typography>

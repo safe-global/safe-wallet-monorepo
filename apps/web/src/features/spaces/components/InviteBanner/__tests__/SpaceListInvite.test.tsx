@@ -72,4 +72,9 @@ describe('SpaceListInvite', () => {
     render(<SpaceListInvite space={spaceBuilder().build()} invitedByName={undefined} />)
     expect(screen.queryByTestId('inviter')).not.toBeInTheDocument()
   })
+
+  it('does not link into the space — pending members have no access until they accept', () => {
+    render(<SpaceListInvite space={spaceBuilder().build()} invitedByName={undefined} />)
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+  })
 })

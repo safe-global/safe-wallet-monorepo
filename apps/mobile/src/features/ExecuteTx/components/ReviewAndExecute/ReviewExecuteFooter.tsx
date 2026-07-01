@@ -13,11 +13,20 @@ import { Alert } from '@/src/components/Alert'
 import { SafeFontIcon } from '@/src/components/SafeFontIcon'
 import { Signer } from '@/src/store/signersSlice'
 import { WalletConnectGate } from '@/src/features/WalletConnect/Signer/components/WalletConnectGate'
+import { FeeLabelWithInfo } from '@/src/features/ConfirmTx/components/TransactionInfo/FeeLabelWithInfo'
+import { FeeRow, FeeAmount, FeeFreeValue } from '@/src/features/ConfirmTx/components/TransactionInfo/FeeRow'
+import { GAS_FEE_INFO, GAS_FEE_HELP_LINK } from '@/src/features/ConfirmTx/components/TransactionInfo/feeInfoText'
+import { useFeesBreakdown } from '@/src/features/ConfirmTx/components/TransactionInfo/useFeesBreakdown'
+import { useAppSelector } from '@/src/store/hooks'
+import { selectCurrency } from '@/src/store/settingsSlice'
+import type { MultisigExecutionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 interface ReviewExecuteFooterProps {
   txId: string
   activeSigner: Signer | undefined
   executionMethod: ExecutionMethod
+  isPaidFromSafe: boolean
+  detailedExecutionInfo?: MultisigExecutionDetails
   totalFee: string
   isLoadingFees: boolean
   willFail: boolean
@@ -35,6 +44,8 @@ export function ReviewExecuteFooter({
   txId,
   activeSigner,
   executionMethod,
+  isPaidFromSafe,
+  detailedExecutionInfo,
   totalFee,
   isLoadingFees,
   willFail,
@@ -44,6 +55,7 @@ export function ReviewExecuteFooter({
   onConfirmPress,
 }: ReviewExecuteFooterProps) {
   const insets = useSafeAreaInsets()
+  const currency = useAppSelector(selectCurrency)
 
   const isButtonDisabled = !hasSufficientFunds || isExecuting
   const buttonText = isExecuting ? 'Executing...' : getSubmitButtonText(hasSufficientFunds)
@@ -51,24 +63,58 @@ export function ReviewExecuteFooter({
   const signerAddress = (activeSigner?.value ?? '') as Address
   const wcSignerAddress = executionMethod === ExecutionMethod.WITH_WC ? signerAddress : ''
 
+  // Safe-pays: the fee is the deterministic max gas fee in the Safe's gas token, shown like the
+  // sign-screen breakdown. Non-Safe-pays keeps the estimated network fee row.
+  const breakdown = useFeesBreakdown({ detailedExecutionInfo })
+  const paidFromSafeGasFee = isPaidFromSafe ? breakdown : undefined
+
   return (
     <View paddingHorizontal="$4" gap="$3" paddingBottom={insets.bottom ? insets.bottom : '$4'}>
       <Container
         backgroundColor="transparent"
-        gap={'$2'}
+        gap={'$1'}
         borderWidth={1}
         paddingVertical={'$3'}
         borderColor="$borderLight"
       >
-        <SelectExecutor executionMethod={executionMethod} address={signerAddress} txId={txId} />
-
-        <EstimatedNetworkFee
+        <SelectExecutor
           executionMethod={executionMethod}
-          isLoadingFees={isLoadingFees}
+          address={signerAddress}
           txId={txId}
-          willFail={willFail}
-          totalFee={totalFee}
+          isPaidFromSafe={isPaidFromSafe}
         />
+
+        <FeeRow
+          label={
+            <Text color="$textSecondaryLight" fontSize="$4">
+              Execution Fee
+            </Text>
+          }
+        >
+          <FeeFreeValue />
+        </FeeRow>
+
+        {paidFromSafeGasFee ? (
+          <FeeRow
+            label={
+              <FeeLabelWithInfo label="Max gas fee" title="Max gas fee" info={GAS_FEE_INFO} link={GAS_FEE_HELP_LINK} />
+            }
+          >
+            <FeeAmount
+              line={paidFromSafeGasFee.maxGasFee}
+              fiat={paidFromSafeGasFee.maxGasFeeFiat}
+              currency={currency}
+            />
+          </FeeRow>
+        ) : (
+          <EstimatedNetworkFee
+            executionMethod={executionMethod}
+            isLoadingFees={isLoadingFees}
+            txId={txId}
+            willFail={willFail}
+            totalFee={totalFee}
+          />
+        )}
 
         {willFail && (
           <Alert

@@ -12,9 +12,13 @@ import NameInput from '@/components/common/NameInput'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import useChains from '@/hooks/useChains'
+import { DEFAULT_MAINNET_CHAIN_ID } from '@/config/constants'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
 
 export type ContactField = {
   name: string
@@ -59,6 +63,9 @@ const AddContactDialog = ({
   const spaceId = useCurrentSpaceId()
   const isDarkMode = useDarkMode()
 
+  // Contacts are chain-agnostic, so resolve ENS names on mainnet regardless of the connected chain
+  const ensChain = allNetworks.find((chain) => chain.chainId === String(DEFAULT_MAINNET_CHAIN_ID))
+
   const defaultValues = {
     name: '',
     address: '',
@@ -101,7 +108,9 @@ const AddContactDialog = ({
       const result = await submit(item, spaceId ?? '')
 
       if (result.error) {
-        setError('Something went wrong. Please try again.')
+        const message = getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError)
+        setError(message)
+        dispatch(showNotification({ message, variant: 'error', groupKey: `${successGroupKey}-error` }))
         return
       }
 
@@ -116,8 +125,10 @@ const AddContactDialog = ({
       )
 
       handleClose()
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (error) {
+      const message = getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError)
+      setError(message)
+      dispatch(showNotification({ message, variant: 'error', groupKey: `${successGroupKey}-error` }))
     } finally {
       setIsSubmitting(false)
     }
@@ -138,7 +149,7 @@ const AddContactDialog = ({
                   {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
 
                   <NameInput name="name" label="Name" required />
-                  <AddressInput name="address" label="Address or ENS" required showPrefix={false} />
+                  <AddressInput name="address" label="Address or ENS" required showPrefix={false} chain={ensChain} />
 
                   <div>
                     <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>

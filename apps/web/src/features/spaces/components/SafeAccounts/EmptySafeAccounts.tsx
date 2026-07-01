@@ -9,7 +9,7 @@ const EmptySafeAccounts = () => {
       </div>
 
       <Typography variant="paragraph" color="muted" className="mt-4">
-        Add existing Safe Accounts in your space to see them here.
+        Add existing Safe accounts in your space to see them here.
       </Typography>
     </div>
   )

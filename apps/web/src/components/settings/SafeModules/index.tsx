@@ -75,7 +75,7 @@ const SafeModules = () => {
         <div>
           <div>
             <Typography>
-              Modules allow you to customize the access-control logic of your Safe Account. Modules are potentially
+              Modules allow you to customize the access-control logic of your Safe account. Modules are potentially
               risky, so make sure to only use modules from trusted sources. Learn more about modules{' '}
               <ExternalLink href="https://help.safe.global/articles/5490514177-What-is-a-module?">here</ExternalLink>
             </Typography>

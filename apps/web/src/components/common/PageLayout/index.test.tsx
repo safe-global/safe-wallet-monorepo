@@ -8,12 +8,6 @@ jest.mock('@/components/common/Header/Topbar', () => {
   return { __esModule: true, default: MockTopbar }
 })
 
-jest.mock('@/components/common/ClassicViewToast', () => {
-  const MockClassicViewToast = () => null
-  MockClassicViewToast.displayName = 'ClassicViewToast'
-  return { __esModule: true, default: MockClassicViewToast }
-})
-
 jest.mock('@/components/common/SafeLogo', () => {
   const MockSafeLogo = ({ href }: { href?: string }) => <a data-testid="safe-logo" href={href} />
   MockSafeLogo.displayName = 'SafeLogo'
@@ -208,6 +202,30 @@ describe('PageLayout', () => {
     it('hides Topbar on / while the flag is loading (undefined) to avoid an empty-selector flash', () => {
       useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(undefined)
       renderLayout(AppRoutes.index)
+      expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('accounts page topbar gating (/welcome/accounts)', () => {
+    const useIsRequireLoginEnabledModule = jest.requireMock('@/hooks/useIsRequireLoginEnabled') as {
+      useIsRequireLoginEnabled: jest.Mock
+    }
+
+    afterEach(() => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+    })
+
+    it('renders Topbar on /welcome/accounts when the user is signed in', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      mockUseIsSignedIn.mockReturnValue(true)
+      renderLayout(AppRoutes.welcome.accounts)
+      expect(screen.getByTestId('topbar')).toBeInTheDocument()
+    })
+
+    it('hides Topbar on /welcome/accounts when the user is signed out (mirrors /welcome/spaces)', () => {
+      useIsRequireLoginEnabledModule.useIsRequireLoginEnabled.mockReturnValue(false)
+      mockUseIsSignedIn.mockReturnValue(false)
+      renderLayout(AppRoutes.welcome.accounts)
       expect(screen.queryByTestId('topbar')).not.toBeInTheDocument()
     })
   })

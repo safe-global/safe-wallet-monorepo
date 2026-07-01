@@ -91,7 +91,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
 
   const validateRecoverer = (recoverer: string) => {
     if (sameAddress(recoverer, safeAddress)) {
-      return 'The Safe Account cannot be a Recoverer of itself'
+      return 'The Safe account cannot be a Recoverer of itself'
     }
   }
 
@@ -143,7 +143,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
             </Typography>
 
             <Typography variant="paragraph-small" className="block">
-              Choose a Recoverer, such as a hardware wallet or a Safe Account controlled by family or friends, that can
+              Choose a Recoverer, such as a hardware wallet or a Safe account controlled by family or friends, that can
               initiate the recovery process in the future.
             </Typography>
           </div>
@@ -281,7 +281,7 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
               onCheckedChange={(checked) => setUnderstandsRisk(checked === true)}
             />
             <Label htmlFor="recovery-understands-risk" className="font-normal">
-              {`I understand that the Recoverer will be able to initiate recovery of this Safe Account and that I will only be informed within the ${BRAND_NAME}.`}
+              {`I understand that the Recoverer will be able to initiate recovery of this Safe account and that I will only be informed within the ${BRAND_NAME}.`}
             </Label>
           </div>
 

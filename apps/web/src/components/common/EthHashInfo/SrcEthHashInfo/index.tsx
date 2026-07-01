@@ -122,7 +122,9 @@ const SrcEthHashInfo = ({
                         <Cloud className="size-5 text-border" />
                       )}
                     </TooltipTrigger>
-                    <TooltipContent>From your {addressBookNameSource} address book</TooltipContent>
+                    <TooltipContent>
+                      From your {addressBookNameSource === ContactSource.space ? 'workspace' : 'local'} address book
+                    </TooltipContent>
                   </Tooltip>
                 )}
           </div>

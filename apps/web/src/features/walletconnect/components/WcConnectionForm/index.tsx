@@ -55,7 +55,7 @@ const WcConnectionForm = ({ sessions, uri }: { sessions: SessionTypes.Struct[]; 
         <Typography variant="paragraph-small" className="text-muted-foreground">
           {safeLoaded
             ? `Paste the pairing code below to connect to your ${BRAND_NAME} via WalletConnect`
-            : `Please open one of your Safe Accounts to connect to via WalletConnect`}
+            : `Please open one of your Safe accounts to connect to via WalletConnect`}
         </Typography>
 
         {safeLoaded ? (

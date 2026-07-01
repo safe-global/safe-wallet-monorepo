@@ -7,6 +7,7 @@ import { useValidateTxData } from '@/hooks/useValidateTxData'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { SafeTxContext } from '../SafeTxProvider'
 import { useAlreadySigned } from '@/components/tx/shared/hooks'
+import { isRateLimitError, RATE_LIMIT_USER_MESSAGE } from '@/utils/transaction-errors'
 
 const COMBO_SUBMIT_ACTION = 'comboSubmitAction'
 const EXECUTE_ACTION = 'execute'
@@ -59,7 +60,9 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
       {submitError && (
         <div className="mt-2">
           <ErrorMessage error={submitError} context="execution">
-            Error submitting the transaction. Please try again.
+            {isRateLimitError(submitError)
+              ? RATE_LIMIT_USER_MESSAGE
+              : 'Error submitting the transaction. Please try again.'}
           </ErrorMessage>
         </div>
       )}

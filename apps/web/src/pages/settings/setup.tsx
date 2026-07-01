@@ -40,13 +40,13 @@ const Setup: NextPage = () => {
                   <TooltipTrigger
                     render={
                       <span>
-                        Safe Account nonce
+                        Safe account nonce
                         <InfoIcon className="ml-1 inline size-5 align-middle text-[var(--color-border-main)]" />
                       </span>
                     }
                   />
                   <TooltipContent>
-                    For security reasons, transactions made with a Safe Account need to be executed in order. The nonce
+                    For security reasons, transactions made with a Safe account need to be executed in order. The nonce
                     shows you which transaction will be executed next. You can find the nonce for a transaction in the
                     transaction details.
                   </TooltipContent>

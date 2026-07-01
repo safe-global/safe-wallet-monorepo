@@ -103,4 +103,34 @@ describe('AcceptInviteDialog tracking', () => {
       )
     })
   })
+
+  it('bubbles the backend error message when accepting the invite fails', async () => {
+    mockAcceptInvite.mockResolvedValue({
+      error: { status: 422, data: { message: 'Name contains invalid characters' } },
+    })
+
+    render(<AcceptInviteDialog space={mockSpace} onClose={jest.fn()} />)
+
+    fireEvent.change(screen.getByTestId('name-input'), { target: { value: 'Test User' } })
+
+    const submitButton = screen.getByTestId('confirm-accept-invite-button')
+    await waitFor(() => expect(submitButton).not.toBeDisabled())
+    fireEvent.click(submitButton)
+
+    expect(await screen.findByText('Name contains invalid characters')).toBeInTheDocument()
+  })
+
+  it('falls back to a generic error when the backend provides no message', async () => {
+    mockAcceptInvite.mockResolvedValue({ error: { status: 500, data: {} } })
+
+    render(<AcceptInviteDialog space={mockSpace} onClose={jest.fn()} />)
+
+    fireEvent.change(screen.getByTestId('name-input'), { target: { value: 'Test User' } })
+
+    const submitButton = screen.getByTestId('confirm-accept-invite-button')
+    await waitFor(() => expect(submitButton).not.toBeDisabled())
+    fireEvent.click(submitButton)
+
+    expect(await screen.findByText(/Something went wrong \(500\)/)).toBeInTheDocument()
+  })
 })

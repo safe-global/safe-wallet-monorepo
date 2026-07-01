@@ -56,8 +56,11 @@ export {
   useSpaceSafeCount,
 } from './hooks/useIsCurrentSpaceAtSafeLimit'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
+export { default as useFeatureRedirect } from './hooks/useFeatureRedirect'
 export { default as useGetSpaceAddressBook } from './hooks/useGetSpaceAddressBook'
-export { default as useGetPrivateAddressBook } from './hooks/useGetPrivateAddressBook'
+export { useMemberNameResolver } from './hooks/useMemberNameResolver'
+export { default as useGetSpaceAuditLog } from './hooks/useGetSpaceAuditLog'
+export { default as useGetSpaceAuditLogActors } from './hooks/useGetSpaceAuditLogActors'
 export { default as useGetAddressBookRequests } from './hooks/useGetAddressBookRequests'
 export { useAdminCount, useIsLastActiveAdmin } from './hooks/useIsLastActiveAdmin'
 export { default as useIsQualifiedSafe } from './hooks/useIsQualifiedSafe'

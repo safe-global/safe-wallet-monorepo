@@ -94,7 +94,7 @@ export const PushNotifications = (): ReactElement => {
               <NotificationRenewal />
 
               <Typography>
-                Enable push notifications for {safeLoaded ? 'this Safe Account' : 'your Safe Accounts'} in your browser
+                Enable push notifications for {safeLoaded ? 'this Safe account' : 'your Safe accounts'} in your browser
                 with your signature. You will need to enable them again if you clear your browser cache. Learn more
                 about push notifications <ExternalLink href={HelpCenterArticle.PUSH_NOTIFICATIONS}>here</ExternalLink>
               </Typography>
@@ -150,7 +150,7 @@ export const PushNotifications = (): ReactElement => {
 
                   <div className={css.globalInfo}>
                     <Typography variant="paragraph-small">
-                      Want to setup notifications for different or all Safe Accounts? You can do so in your{' '}
+                      Want to setup notifications for different or all Safe accounts? You can do so in your{' '}
                       <ShadcnLink render={<NextLink href={AppRoutes.settings.notifications} />}>
                         global preferences
                       </ShadcnLink>

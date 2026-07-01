@@ -18,11 +18,16 @@ export interface InviteMembersFormValues {
   members: MemberInvite[]
 }
 
+// Mirrors the backend's name.schema NAME_MIN_LENGTH: names shorter than this are rejected.
+const NAME_MIN_LENGTH = 3
+
 /**
  * The onboarding flow has no dedicated name field, so a display name is derived from the
  * identifier. Wallet/ENS invites keep using the address as the name (as before); email
  * invites use the email's local part, sanitized to the alphanumeric-ish characters the
- * backend's name validation accepts (the raw email's "@" would be rejected).
+ * backend's name validation accepts (the raw email's "@" would be rejected). A local part
+ * shorter than the backend minimum (e.g. "r@cc0x.dev") falls back to a default name so the
+ * invite isn't rejected for a too-short name.
  */
 export const toInviteName = (identifier: string): string => {
   if (!isEmailAddress(identifier)) return identifier
@@ -33,7 +38,7 @@ export const toInviteName = (identifier: string): string => {
     .replace(/^[^a-zA-Z0-9]+/, '')
     .trim()
 
-  return sanitized || 'Member'
+  return sanitized.length >= NAME_MIN_LENGTH ? sanitized : 'Member'
 }
 
 const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {

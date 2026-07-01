@@ -148,6 +148,23 @@ describe('SecuritySafesTable', () => {
     expect(screen.getByTestId('chain-1')).toBeInTheDocument()
   })
 
+  it('renders a copy-address button on the safe row', () => {
+    renderTable()
+    expect(screen.getByRole('button', { name: 'Copy address' })).toBeInTheDocument()
+  })
+
+  it('copying the address does not trigger the row click', () => {
+    const writeText = jest.fn()
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
+    const onViewReport = jest.fn()
+    renderTable({ onViewReport })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Copy address' }))
+
+    expect(writeText).toHaveBeenCalledWith(singleSafe.address)
+    expect(onViewReport).not.toHaveBeenCalled()
+  })
+
   it('calls onViewReport when a deployed row is clicked', () => {
     const onViewReport = jest.fn()
     renderTable({ onViewReport })
@@ -197,15 +214,23 @@ describe('SecuritySafesTable', () => {
     expect(container.querySelectorAll('.MuiSkeleton-root').length).toBe(0)
   })
 
-  it('shows the failing-check count beside the grade in the status column', () => {
+  it('shows total non-passing checks in the status column, regardless of status/severity', () => {
     const scanResults = buildScanResults([{ address: singleSafe.address, chainId: singleSafe.chainId }], {
       account_setup: mkResult('issue'),
       recovery: mkResult('partial'),
       guard: mkResult('partial'),
     })
     renderTable({ scanResults })
-    // An issue grades the Safe "at risk"; the status chip reports the failing count.
-    expect(screen.getByText('1 at risk')).toBeInTheDocument()
+    // 1 issue + 2 partial = 3 non-passing; chip color is at_risk (issue → at_risk), text leads
+    // with the grade word so the column matches the panel header and sidebar group chips.
+    expect(screen.getByText('At risk · 3 issues found')).toBeInTheDocument()
+  })
+
+  it('renders just "Healthy" with no count when every check passes', () => {
+    // Default scan results in renderTable are all clear → grade=passing → chip is the bare "Healthy" label.
+    renderTable()
+    expect(screen.getByText('Healthy')).toBeInTheDocument()
+    expect(screen.queryByText(/0 issues found/i)).not.toBeInTheDocument()
   })
 
   describe('multichain safes', () => {

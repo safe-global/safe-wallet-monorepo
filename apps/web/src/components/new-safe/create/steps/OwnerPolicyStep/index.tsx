@@ -137,7 +137,7 @@ const OwnerPolicyStep = ({
                 }
               />
               <TooltipContent>
-                The threshold of a Safe Account specifies how many signers need to confirm a Safe Account transaction
+                The threshold of a Safe account specifies how many signers need to confirm a Safe account transaction
                 before it can be executed.
               </TooltipContent>
             </Tooltip>

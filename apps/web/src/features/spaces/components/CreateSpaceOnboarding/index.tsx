@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactElement } from 'react'
+import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,6 +20,7 @@ import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 import useOnboardingExit from './hooks/useOnboardingExit'
+import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 
 const ONBOARDING_STEP = 1
 const FORM_ID = 'create-space-form'
@@ -34,6 +35,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
     control,
     formState: { isValid, errors },
     setValue,
+    setFocus,
   } = useForm<{ name: string }>({ mode: 'onChange', defaultValues: { name: '' } })
 
   const { spaceId, isEditMode, isSpaceLoading, existingSpace } = useExistingSpace(setValue)
@@ -49,10 +51,20 @@ const CreateSpaceOnboarding = (): ReactElement => {
   const [hasUserEdited, setHasUserEdited] = useState(false)
   const nameReg = register('name', {
     required: true,
-    maxLength: { value: 30, message: 'Workspace name must be 30 characters or less' },
+    maxLength: {
+      value: SPACE_NAME_MAX_LENGTH,
+      message: `Workspace name must be ${SPACE_NAME_MAX_LENGTH} characters or less`,
+    },
     pattern: { value: /^[a-zA-Z0-9 ]+$/, message: 'Workspace name must not contain special characters' },
     validate: (value) => value?.trim() !== '',
   })
+
+  const isInputDisabled = isCheckingAccess || isSpaceLoading
+  useEffect(() => {
+    if (!isEditMode && !isInputDisabled) {
+      setFocus('name')
+    }
+  }, [isEditMode, isInputDisabled, setFocus])
 
   // spaceId gate avoids leaking lastUsedSpace's safes into a fresh "create" landing.
   const { allSafes } = useSpaceSafes()
@@ -88,8 +100,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
             data-testid="space-name-input"
             placeholder="e.g. Treasury Ops, DeFi Team"
             autoComplete="off"
-            autoFocus={!isEditMode}
-            disabled={isCheckingAccess || isSpaceLoading}
+            disabled={isInputDisabled}
             className="mt-2 h-11 rounded-sm bg-card px-4"
             {...nameReg}
             onChange={(e) => {

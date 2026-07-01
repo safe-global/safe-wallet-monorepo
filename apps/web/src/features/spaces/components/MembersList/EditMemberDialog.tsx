@@ -13,6 +13,9 @@ import { useAppDispatch } from '@/store'
 import MemberInfoForm from '../AddMemberModal/MemberInfoForm'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 type MemberField = {
   name: string
@@ -54,31 +57,33 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
       })
 
       if (error) {
-        throw error
+        setError(getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError))
+        return
       }
-
-      trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_ROLE_CHANGED, label: spaceId },
-        {
-          workspace_id: spaceId,
-          target_user_id: member.user.id,
-          from_role: member.role.toLowerCase(),
-          to_role: data.role.toLowerCase(),
-        },
-      )
-
-      dispatch(
-        showNotification({
-          message: `Updated role of ${data.name} to ${data.role}`,
-          variant: 'success',
-          groupKey: 'update-member-success',
-        }),
-      )
-
-      handleClose()
     } catch (e) {
-      setError('An unexpected error occurred while editing the member.')
+      setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
+      return
     }
+
+    trackEvent(
+      { ...SPACE_EVENTS.WORKSPACE_MEMBER_ROLE_CHANGED, label: spaceId },
+      {
+        workspace_id: spaceId,
+        target_user_id: member.user.id,
+        from_role: member.role.toLowerCase(),
+        to_role: data.role.toLowerCase(),
+      },
+    )
+
+    dispatch(
+      showNotification({
+        message: `Updated role of ${data.name} to ${data.role}`,
+        variant: 'success',
+        groupKey: 'update-member-success',
+      }),
+    )
+
+    handleClose()
   })
 
   return (

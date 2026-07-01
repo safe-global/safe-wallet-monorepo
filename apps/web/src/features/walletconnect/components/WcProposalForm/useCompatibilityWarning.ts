@@ -23,7 +23,7 @@ const Warnings: Record<string, { severity: CompatibilityWarningSeverity; message
   },
   UNSUPPORTED_CHAIN: {
     severity: 'error',
-    message: `${NAME_PLACEHOLDER} does not support this Safe Account's network (${CHAIN_PLACEHOLDER}). Please switch to a Safe Account on one of the supported networks below.`,
+    message: `${NAME_PLACEHOLDER} does not support this Safe account's network (${CHAIN_PLACEHOLDER}). Please switch to a Safe account on one of the supported networks below.`,
   },
   WRONG_CHAIN: {
     severity: 'info',

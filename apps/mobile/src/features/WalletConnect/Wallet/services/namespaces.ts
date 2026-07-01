@@ -1,7 +1,7 @@
 import { buildApprovedNamespaces } from '@walletconnect/utils'
 import type { SessionTypes, ProposalTypes } from '@walletconnect/types'
 import { getAddress } from 'ethers'
-import { getEip155ChainId, chainIdToHex } from '@safe-global/utils/features/walletconnect/utils'
+import { getEip155ChainId, toHex } from '@safe-global/utils/features/walletconnect/utils'
 import {
   ATOMIC_CAPABILITY,
   buildAtomicCapabilities,
@@ -64,7 +64,7 @@ export const buildSafeSessionProperties = ({
 }): ProposalTypes.SessionProperties => {
   const checksummed = getAddress(safeAddress)
   const capabilities: Record<string, Record<string, AtomicCapability>> = {
-    [checksummed]: buildAtomicCapabilities(supportedChains.map((c) => chainIdToHex(c.chainId))),
+    [checksummed]: buildAtomicCapabilities(supportedChains.map((c) => toHex(c.chainId))),
   }
   return {
     atomic: JSON.stringify(ATOMIC_CAPABILITY.atomic),

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
 import { ChevronDown } from 'lucide-react'
 
-import { SidebarListItemCounter } from '@/components/sidebar/SidebarList'
+import { SidebarListItemCounter } from '@/components/common/SidebarList'
 import classnames from 'classnames'
 import { useWarningCount } from './useWarningCount'
 import css from './styles.module.css'

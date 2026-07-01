@@ -385,7 +385,7 @@ export const GlobalPushNotifications = (): ReactElement | null => {
         <div className="flex items-center">
           {totalSignaturesRequired > 0 && (
             <Typography className="mr-4 inline text-right">
-              We&apos;ll ask you to verify ownership of each Safe Account with your signature per chain{' '}
+              We&apos;ll ask you to verify ownership of each Safe account with your signature per chain{' '}
               {totalSignaturesRequired} time{maybePlural(totalSignaturesRequired)}
             </Typography>
           )}
@@ -444,7 +444,7 @@ export const GlobalPushNotifications = (): ReactElement | null => {
                   <span className={css.icon}>
                     <Checkbox checked={isChainSelected} aria-hidden tabIndex={-1} className="pointer-events-none" />
                   </span>
-                  <Typography variant="paragraph-bold">{`${chain?.chainName} Safe Accounts`}</Typography>
+                  <Typography variant="paragraph-bold">{`${chain?.chainName} Safe accounts`}</Typography>
                 </div>
 
                 <div className={css.item}>

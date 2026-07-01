@@ -1,5 +1,5 @@
 import type { AddressBookState } from '@/store/addressBookSlice'
-import { createContactItems, flattenAddressBook, getSelectedAddresses } from '../utils'
+import { createContactItems, flattenAddressBook, getSelectedAddresses, validateContactName } from '../utils'
 import type { ImportContactsFormValues } from '../Import/ImportAddressBookDialog'
 
 describe('space address book utils', () => {
@@ -182,6 +182,25 @@ describe('space address book utils', () => {
       const result = getSelectedAddresses(contacts)
       expect(result.size).toBe(1)
       expect(result.has('0xABC')).toBe(true)
+    })
+  })
+
+  describe('validateContactName', () => {
+    it('accepts names that conform to the workspace name schema', () => {
+      expect(validateContactName('Alice')).toBeUndefined()
+      expect(validateContactName('alice_1.test-name')).toBeUndefined()
+      expect(validateContactName(' Padded name ')).toBeUndefined()
+    })
+
+    it('rejects names that are too short or too long', () => {
+      expect(validateContactName('ab')).toMatch(/3 to 50 characters/)
+      expect(validateContactName('a'.repeat(51))).toMatch(/3 to 50 characters/)
+    })
+
+    it('rejects names with characters the workspace book does not allow', () => {
+      expect(validateContactName('José')).toMatch(/must start with a letter or number/)
+      expect(validateContactName('name\!')).toMatch(/must start with a letter or number/)
+      expect(validateContactName('-leading')).toMatch(/must start with a letter or number/)
     })
   })
 })

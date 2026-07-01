@@ -84,7 +84,7 @@ const DataManagement = () => {
           </div>
 
           <div data-testid="export-file-section">
-            <Typography>Download your local data with your added Safe Accounts, address book and settings.</Typography>
+            <Typography>Download your local data with your added Safe accounts, address book and settings.</Typography>
 
             <FileListCard
               avatar={

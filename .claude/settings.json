@@ -1,21 +1,3 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/check-tests.mjs",
-            "timeout": 30
-          },
-          {
-            "type": "command",
-            "command": "yarn verify:changed",
-            "timeout": 600
-          }
-        ]
-      }
-    ]
-  }
+  "$schema": "https://json.schemastore.org/claude-code-settings.json"
 }

@@ -1,7 +1,7 @@
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import type { NavItem } from '@/components/sidebar/SidebarNavigation/config'
+import type { NavItem } from '@/components/common/NavTabs/navItemsConfig'
 
 const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {
   const router = useRouter()

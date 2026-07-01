@@ -16,7 +16,7 @@ export const NoSpendingLimits = () => {
         </Typography>
         <Typography>
           Choose an account that will benefit from this allowance. The beneficiary does not have to be a signer of this
-          Safe Account
+          Safe account
         </Typography>
       </div>
       <div className="col-span-2">
@@ -26,7 +26,7 @@ export const NoSpendingLimits = () => {
         <Typography>
           <b>Select asset and amount</b>
         </Typography>
-        <Typography>You can set allowances for any asset stored in your Safe Account</Typography>
+        <Typography>You can set allowances for any asset stored in your Safe account</Typography>
       </div>
       <div className="col-span-2">
         <TimeIcon data-testid="time-icon" />

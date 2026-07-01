@@ -38,7 +38,7 @@ const CounterfactualStatusButton = () => {
         {isActivating ? <LoopIcon /> : <InfoIcon />}
       </TooltipTrigger>
       <TooltipContent side="right">
-        {isActivating ? 'Safe Account is being activated' : 'Safe Account is not activated'}
+        {isActivating ? 'Safe account is being activated' : 'Safe account is not activated'}
       </TooltipContent>
     </Tooltip>
   )

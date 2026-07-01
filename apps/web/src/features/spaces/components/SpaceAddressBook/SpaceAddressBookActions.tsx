@@ -7,8 +7,11 @@ import EditContactDialog from './EditContactDialog'
 import DeleteContactDialog from './DeleteContactDialog'
 import { useIsAdmin } from '@/features/spaces'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { EllipsisVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 enum ModalType {
   EDIT = 'edit',
@@ -20,6 +23,7 @@ const defaultOpen = { [ModalType.EDIT]: false, [ModalType.REMOVE]: false }
 const SpaceAddressBookActions = ({ entry }: { entry: SpaceAddressBookItemDto }) => {
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const isAdmin = useIsAdmin()
+  const isMobile = useIsMobile()
 
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
     e.stopPropagation()
@@ -31,6 +35,48 @@ const SpaceAddressBookActions = ({ entry }: { entry: SpaceAddressBookItemDto }) 
   }
 
   if (!isAdmin) return null
+
+  const dialogs = (
+    <>
+      {open[ModalType.EDIT] && <EditContactDialog entry={entry} onClose={handleCloseModal} />}
+
+      {open[ModalType.REMOVE] && (
+        <DeleteContactDialog
+          name={entry.name}
+          address={entry.address}
+          networks={entry.chainIds}
+          onClose={handleCloseModal}
+        />
+      )}
+    </>
+  )
+
+  if (isMobile) {
+    return (
+      <>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button variant="ghost" size="icon-sm" aria-label="Contact actions">
+                <EllipsisVertical className="text-muted-foreground size-4" />
+              </Button>
+            }
+          />
+          <DropdownMenuContent align="end">
+            <Track {...SPACE_EVENTS.EDIT_ADDRESS}>
+              <DropdownMenuItem onClick={(e) => handleOpenModal(e, ModalType.EDIT)}>Edit entry</DropdownMenuItem>
+            </Track>
+            <Track {...SPACE_EVENTS.REMOVE_ADDRESS}>
+              <DropdownMenuItem variant="destructive" onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
+                Delete entry
+              </DropdownMenuItem>
+            </Track>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        {dialogs}
+      </>
+    )
+  }
 
   return (
     <>
@@ -70,16 +116,7 @@ const SpaceAddressBookActions = ({ entry }: { entry: SpaceAddressBookItemDto }) 
         </Tooltip>
       </Track>
 
-      {open[ModalType.EDIT] && <EditContactDialog entry={entry} onClose={handleCloseModal} />}
-
-      {open[ModalType.REMOVE] && (
-        <DeleteContactDialog
-          name={entry.name}
-          address={entry.address}
-          networks={entry.chainIds}
-          onClose={handleCloseModal}
-        />
-      )}
+      {dialogs}
     </>
   )
 }

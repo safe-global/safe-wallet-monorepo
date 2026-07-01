@@ -21,7 +21,7 @@ export const ClearPendingTxs = () => {
   }, [dispatch, pendingTxCount, pendingTxIds])
   return (
     <div className="flex flex-col gap-4">
-      <Typography>Clear this Safe Account&apos;s pending transactions.</Typography>
+      <Typography>Clear this Safe account&apos;s pending transactions.</Typography>
       <Alert variant="warning">
         <AlertDescription>
           This action does not delete any transactions but only resets their local state. It does not stop any pending

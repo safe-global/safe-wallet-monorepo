@@ -244,7 +244,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
               executionMethod={executionMethod}
               setExecutionMethod={setExecutionMethod}
               relays={relays}
-              tooltip="You can only relay multisend transactions containing executions from the same Safe Account."
+              tooltip="You can only relay multisend transactions containing executions from the same Safe account."
             />
           </>
         ) : null}

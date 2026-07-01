@@ -62,7 +62,7 @@ const ConnectionSteps = [
 const InteractionTitle = 'How do I interact with a dApp?'
 const InteractionSteps = [
   'Connect a dApp by following the above steps',
-  'Ensure the dApp is connected to the same chain as your Safe Account',
+  'Ensure the dApp is connected to the same chain as your Safe account',
   'Initiate a transaction/signature request via the dApp',
   'Transact/sign as normal via the Safe',
 ]

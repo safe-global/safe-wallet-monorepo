@@ -30,10 +30,10 @@ const UnknownContractError = ({ txData }: { txData: TransactionData | undefined 
   if (!isUnknown || isMigrationTx) return null
 
   return (
-    <ErrorMessage level="error" title="This Safe Account was created with an unsupported base contract.">
+    <ErrorMessage level="error" title="This Safe account was created with an unsupported base contract.">
       {isMigrationPossible ? (
         <>
-          The Safe Account can be migrated to use the supported base contract. We advise to do that in the Safe&apos;s
+          The Safe account can be migrated to use the supported base contract. We advise to do that in the Safe&apos;s
           settings before executing other transactions.
         </>
       ) : (

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsAdmin } from '@/features/spaces'
+import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 
 const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const { handleUpdate, error } = useUpdateSpace(space)
@@ -35,7 +36,13 @@ const UpdateSpaceForm = ({ space }: { space: GetSpaceResponse | undefined }) => 
           render={({ field }) => (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="space-name">Workspace name</Label>
-              <Input {...field} id="space-name" value={field.value || ''} onKeyDown={(e) => e.stopPropagation()} />
+              <Input
+                {...field}
+                id="space-name"
+                value={field.value || ''}
+                maxLength={SPACE_NAME_MAX_LENGTH}
+                onKeyDown={(e) => e.stopPropagation()}
+              />
             </div>
           )}
         />

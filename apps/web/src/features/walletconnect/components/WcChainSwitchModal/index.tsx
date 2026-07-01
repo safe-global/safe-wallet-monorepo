@@ -58,7 +58,7 @@ const WcChainSwitchModal = ({ appInfo, chain, safes, onSelectSafe, onCancel }: W
       <Typography variant="paragraph-small" className="text-muted-foreground">
         {hasSafes
           ? `Select one of your Safes on ${chain.chainName} to continue.`
-          : `Connected dapp wants to switch to chain ${chain.chainName} but you don't have Safe Accounts deployed on that chain.`}
+          : `Connected dapp wants to switch to chain ${chain.chainName} but you don't have Safe accounts deployed on that chain.`}
       </Typography>
 
       {hasSafes ? (

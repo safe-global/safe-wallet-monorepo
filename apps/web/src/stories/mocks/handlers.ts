@@ -315,9 +315,9 @@ export const mockSafeOverviews = [
 /**
  * Mock space data for spaces feature
  */
-export function createMockSpace(spaceId: number = 1) {
+export function createMockSpace(spaceId: string = 'uuid-1') {
   return {
-    id: spaceId,
+    uuid: spaceId,
     name: 'Test Space',
     status: 'ACTIVE' as const,
     members: [
@@ -346,16 +346,16 @@ export function spacesHandlers(): RequestHandler[] {
     // User with wallets endpoint
     http.get(/\/v1\/users$/, () => HttpResponse.json(mockUser)),
     // Get space by ID
-    http.get(/\/v1\/spaces\/\d+$/, ({ params }) => {
+    http.get(/\/v1\/spaces\/[^/]+$/, ({ params }) => {
       const url = new URL(params[0] as string, 'https://example.com')
       const pathParts = url.pathname.split('/')
-      const spaceId = parseInt(pathParts[pathParts.length - 1], 10) || 1
+      const spaceId = pathParts[pathParts.length - 1] || 'uuid-1'
       return HttpResponse.json(createMockSpace(spaceId))
     }),
     // List all spaces for user
-    http.get(/\/v1\/spaces$/, () => HttpResponse.json([createMockSpace(1)])),
+    http.get(/\/v1\/spaces$/, () => HttpResponse.json([createMockSpace('uuid-1')])),
     // Get space safes
-    http.get(/\/v1\/spaces\/\d+\/safes$/, () => HttpResponse.json({ safes: {} })),
+    http.get(/\/v1\/spaces\/[^/]+\/safes$/, () => HttpResponse.json({ safes: {} })),
     // Get all safes owned by address (used by useOwnedSafesGrouped)
     http.get(/\/v2\/owners\/0x[a-fA-F0-9]+\/safes$/, () => HttpResponse.json(mockOwnedSafes)),
     // Safe overviews v1 (batch endpoint for safe card data)
@@ -363,11 +363,11 @@ export function spacesHandlers(): RequestHandler[] {
     // Safe overviews v2 (batch endpoint for safe card data)
     http.get(/\/v2\/safes$/, () => HttpResponse.json(mockSafeOverviews)),
     // Add safes to space (mutation)
-    http.post(/\/v1\/spaces\/\d+\/safes$/, () => HttpResponse.json({ success: true })),
+    http.post(/\/v1\/spaces\/[^/]+\/safes$/, () => HttpResponse.json({ success: true })),
     // Invite members to space (mutation)
-    http.post(/\/v1\/spaces\/\d+\/members\/invite$/, () => HttpResponse.json({ success: true })),
+    http.post(/\/v1\/spaces\/[^/]+\/members\/invite$/, () => HttpResponse.json({ success: true })),
     // Get space members
-    http.get(/\/v1\/spaces\/\d+\/members$/, () =>
+    http.get(/\/v1\/spaces\/[^/]+\/members$/, () =>
       HttpResponse.json([
         {
           id: 1,

@@ -18,7 +18,7 @@ import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 
-const QrModal = dynamic(() => import('@/components/sidebar/QrCodeButton/QrModal'))
+const QrModal = dynamic(() => import('@/components/common/QrCodeButton/QrModal'))
 
 const AccountHeader = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()

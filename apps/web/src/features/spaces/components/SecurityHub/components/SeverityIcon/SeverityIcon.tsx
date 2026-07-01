@@ -19,8 +19,9 @@ const tokenToCssVar = (color: string): string =>
   color.includes('.') ? `var(--color-${color.replace(/\./g, '-')})` : color
 
 /**
- * The most-severe tone — a filled "dangerous" octagon in the darker error shade. Shared by
- * the `critical` SafeGrade chip and any Critical-severity failing check in the report drawer.
+ * The most-severe tone — a filled rounded error circle (`!`) in the darker error shade.
+ * Shared by the `critical` SafeGrade chip and any Critical-severity failing check in the
+ * report drawer. The filled circle distinguishes Critical from At risk (outlined variant).
  */
 export const CRITICAL_TONE: SeverityTone = { Icon: OctagonAlert, color: 'error.dark' }
 
@@ -41,9 +42,10 @@ export const resolveStatusTone = (status: ScanResult['status'], severity?: Secur
   status === 'issue' && severity === 'Critical' ? CRITICAL_TONE : STATUS_TONE[status]
 
 /**
- * Per-Safe grade tones — drives the SafeGrade chip icon. Reuses the report drawer's glyphs:
- * passing→clear, needs_attention→partial, at_risk→issue. `critical` gets the shared
- * `CRITICAL_TONE` "dangerous" glyph so it reads as the most severe.
+ * Per-Safe grade tones — drives the SafeGrade chip icon (in stories) and overrides per-check
+ * row icons where the row's grade should dictate the shape (e.g. `needs_attention` rows
+ * always show the rounded info icon, not the per-status triangle). `critical` gets the
+ * shared `CRITICAL_TONE` "dangerous" glyph so it reads as the most severe.
  */
 export const GRADE_TONE: Record<SafeGrade, SeverityTone> = {
   passing: { Icon: CircleCheck, color: 'success.main' },

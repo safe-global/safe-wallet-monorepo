@@ -34,34 +34,6 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['spaces'],
       }),
-      userAddressBookGetPrivateItemsV1: build.query<
-        UserAddressBookGetPrivateItemsV1ApiResponse,
-        UserAddressBookGetPrivateItemsV1ApiArg
-      >({
-        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/address-book/private` }),
-        providesTags: ['spaces'],
-      }),
-      userAddressBookUpsertPrivateItemsV1: build.mutation<
-        UserAddressBookUpsertPrivateItemsV1ApiResponse,
-        UserAddressBookUpsertPrivateItemsV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/spaces/${queryArg.spaceId}/address-book/private`,
-          method: 'PUT',
-          body: queryArg.upsertAddressBookItemsDto,
-        }),
-        invalidatesTags: ['spaces'],
-      }),
-      userAddressBookDeletePrivateItemV1: build.mutation<
-        UserAddressBookDeletePrivateItemV1ApiResponse,
-        UserAddressBookDeletePrivateItemV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/spaces/${queryArg.spaceId}/address-book/private/${queryArg.address}`,
-          method: 'DELETE',
-        }),
-        invalidatesTags: ['spaces'],
-      }),
       addressBookRequestsGetPendingRequestsV1: build.query<
         AddressBookRequestsGetPendingRequestsV1ApiResponse,
         AddressBookRequestsGetPendingRequestsV1ApiArg
@@ -108,10 +80,6 @@ const injectedRtkApi = api
         query: () => ({ url: `/v1/spaces` }),
         providesTags: ['spaces'],
       }),
-      spacesCreateWithUserV1: build.mutation<SpacesCreateWithUserV1ApiResponse, SpacesCreateWithUserV1ApiArg>({
-        query: (queryArg) => ({ url: `/v1/spaces/create-with-user`, method: 'POST', body: queryArg.createSpaceDto }),
-        invalidatesTags: ['spaces'],
-      }),
       spacesGetOneV1: build.query<SpacesGetOneV1ApiResponse, SpacesGetOneV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.id}` }),
         providesTags: ['spaces'],
@@ -123,6 +91,27 @@ const injectedRtkApi = api
       spacesDeleteV1: build.mutation<SpacesDeleteV1ApiResponse, SpacesDeleteV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.id}`, method: 'DELETE' }),
         invalidatesTags: ['spaces'],
+      }),
+      spaceAuditGetAuditLogV1: build.query<SpaceAuditGetAuditLogV1ApiResponse, SpaceAuditGetAuditLogV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/audit-log`,
+          params: {
+            event_type: queryArg.eventType,
+            actor_user_id: queryArg.actorUserId,
+            created_at__gte: queryArg.createdAtGte,
+            created_at__lte: queryArg.createdAtLte,
+            sort_direction: queryArg.sortDirection,
+            cursor: queryArg.cursor,
+          },
+        }),
+        providesTags: ['spaces'],
+      }),
+      spaceAuditGetAuditLogActorsV1: build.query<
+        SpaceAuditGetAuditLogActorsV1ApiResponse,
+        SpaceAuditGetAuditLogActorsV1ApiArg
+      >({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/audit-log/actors` }),
+        providesTags: ['spaces'],
       }),
       spaceSafesCreateV1: build.mutation<SpaceSafesCreateV1ApiResponse, SpaceSafesCreateV1ApiArg>({
         query: (queryArg) => ({
@@ -217,7 +206,7 @@ export { injectedRtkApi as cgwApi }
 export type AddressBooksGetAddressBookItemsV1ApiResponse =
   /** status 200 Address book items retrieved successfully */ SpaceAddressBookDto
 export type AddressBooksGetAddressBookItemsV1ApiArg = {
-  /** Space UUID to get address book for (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID to get address book for */
   spaceId: string
 }
 export type AddressBooksUpsertAddressBookItemsV1ApiResponse =
@@ -235,31 +224,10 @@ export type AddressBooksDeleteByAddressV1ApiArg = {
   /** Address to remove from the address book (0x prefixed hex string) */
   address: string
 }
-export type UserAddressBookGetPrivateItemsV1ApiResponse =
-  /** status 200 Private address book items retrieved successfully */ UserAddressBookDto
-export type UserAddressBookGetPrivateItemsV1ApiArg = {
-  /** Space UUID (numeric ID accepted for legacy clients, deprecated) */
-  spaceId: string
-}
-export type UserAddressBookUpsertPrivateItemsV1ApiResponse =
-  /** status 200 Private address book updated successfully */ UserAddressBookDto
-export type UserAddressBookUpsertPrivateItemsV1ApiArg = {
-  /** Space UUID */
-  spaceId: string
-  /** Address book items to create or update */
-  upsertAddressBookItemsDto: UpsertAddressBookItemsDto
-}
-export type UserAddressBookDeletePrivateItemV1ApiResponse = unknown
-export type UserAddressBookDeletePrivateItemV1ApiArg = {
-  /** Space UUID */
-  spaceId: string
-  /** Address to remove (0x prefixed) */
-  address: string
-}
 export type AddressBookRequestsGetPendingRequestsV1ApiResponse =
   /** status 200 Pending requests retrieved successfully */ AddressBookRequestsDto
 export type AddressBookRequestsGetPendingRequestsV1ApiArg = {
-  /** Space UUID (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID */
   spaceId: string
 }
 export type AddressBookRequestsCreateRequestV1ApiResponse =
@@ -267,7 +235,7 @@ export type AddressBookRequestsCreateRequestV1ApiResponse =
 export type AddressBookRequestsCreateRequestV1ApiArg = {
   /** Space UUID */
   spaceId: string
-  /** Address of the private contact to request adding */
+  /** The contact to propose for the space address book */
   createAddressBookRequestDto: CreateAddressBookRequestDto
 }
 export type AddressBookRequestsApproveRequestV1ApiResponse = unknown
@@ -291,14 +259,9 @@ export type SpacesCreateV1ApiArg = {
 }
 export type SpacesGetV1ApiResponse = /** status 200 User spaces retrieved successfully */ GetSpaceResponse[]
 export type SpacesGetV1ApiArg = void
-export type SpacesCreateWithUserV1ApiResponse = /** status 200 Space created successfully */ CreateSpaceResponse
-export type SpacesCreateWithUserV1ApiArg = {
-  /** Space creation data including the name of the space */
-  createSpaceDto: CreateSpaceDto
-}
 export type SpacesGetOneV1ApiResponse = /** status 200 Space information retrieved successfully */ GetSpaceResponse
 export type SpacesGetOneV1ApiArg = {
-  /** Space UUID (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID */
   id: string
 }
 export type SpacesUpdateV1ApiResponse = /** status 200 Space updated successfully */ UpdateSpaceResponse
@@ -313,6 +276,29 @@ export type SpacesDeleteV1ApiArg = {
   /** Space UUID to delete */
   id: string
 }
+export type SpaceAuditGetAuditLogV1ApiResponse = /** status 200 Paginated audit log entries */ SpaceAuditLogPage
+export type SpaceAuditGetAuditLogV1ApiArg = {
+  /** Space UUID */
+  spaceId: string
+  /** Comma-separated list of event types to filter by */
+  eventType?: string
+  /** Filter by acting user id */
+  actorUserId?: number
+  /** ISO 8601 lower bound (inclusive) on event creation time */
+  createdAtGte?: string
+  /** ISO 8601 upper bound (inclusive) on event creation time */
+  createdAtLte?: string
+  /** Sort direction over (created_at, id). Defaults to desc. */
+  sortDirection?: 'asc' | 'desc'
+  /** Pagination cursor for retrieving the next set of results */
+  cursor?: string
+}
+export type SpaceAuditGetAuditLogActorsV1ApiResponse =
+  /** status 200 Distinct audit log actors */ SpaceAuditLogActorDto[]
+export type SpaceAuditGetAuditLogActorsV1ApiArg = {
+  /** Space UUID */
+  spaceId: string
+}
 export type SpaceSafesCreateV1ApiResponse = unknown
 export type SpaceSafesCreateV1ApiArg = {
   /** Space UUID to add Safes to */
@@ -322,7 +308,7 @@ export type SpaceSafesCreateV1ApiArg = {
 }
 export type SpaceSafesGetV1ApiResponse = /** status 200 Space Safes retrieved successfully */ GetSpaceSafeResponse
 export type SpaceSafesGetV1ApiArg = {
-  /** Space UUID to get Safes for (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID to get Safes for */
   spaceId: string
 }
 export type SpaceSafesDeleteV1ApiResponse = unknown
@@ -353,14 +339,14 @@ export type MembersDeclineInviteV1ApiArg = {
 }
 export type MembersRenewInviteV1ApiResponse = /** status 200 Invitation renewed successfully */ Invitation
 export type MembersRenewInviteV1ApiArg = {
-  /** Space UUID containing the invitation (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID containing the invitation */
   spaceId: string
   /** User ID of the invited member */
   userId: number
 }
 export type MembersGetUsersV1ApiResponse = /** status 200 Space members retrieved successfully */ MembersDto
 export type MembersGetUsersV1ApiArg = {
-  /** Space UUID to get members for (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID to get members for */
   spaceId: string
 }
 export type MembersSelfRemoveV1ApiResponse = unknown
@@ -370,7 +356,7 @@ export type MembersSelfRemoveV1ApiArg = {
 }
 export type MembersGetMembershipV1ApiResponse = /** status 200 Membership retrieved successfully */ MemberDto
 export type MembersGetMembershipV1ApiArg = {
-  /** Space UUID to fetch the caller's membership for (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID to fetch the caller's membership for */
   spaceId: string
 }
 export type MembersUpdateRoleV1ApiResponse = unknown
@@ -398,7 +384,7 @@ export type MembersRemoveUserV1ApiArg = {
 export type SpaceCounterfactualSafesGetV1ApiResponse =
   /** status 200 Counterfactual Safes retrieved successfully */ GetCounterfactualSafesResponse
 export type SpaceCounterfactualSafesGetV1ApiArg = {
-  /** Space UUID (numeric ID accepted for legacy clients, deprecated) */
+  /** Space UUID */
   spaceId: string
 }
 export type SpaceAddressBookItemDto = {
@@ -417,8 +403,6 @@ export type SpaceAddressBookItemDto = {
   updatedAt: string
 }
 export type SpaceAddressBookDto = {
-  /** Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback */
-  spaceId: string
   /** Space UUID */
   spaceUuid: string
   data: SpaceAddressBookItemDto[]
@@ -430,24 +414,6 @@ export type AddressBookItem = {
 }
 export type UpsertAddressBookItemsDto = {
   items: AddressBookItem[]
-}
-export type UserAddressBookItemDto = {
-  name: string
-  address: string
-  chainIds: string[]
-  /** Email or wallet address of the creator, "Unknown user" if the user has no display identity, or "Deleted user" */
-  createdBy: string
-  /** User ID of the creator */
-  createdByUserId: number
-  createdAt: object
-  updatedAt: object
-}
-export type UserAddressBookDto = {
-  /** Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback */
-  spaceId: string
-  /** Space UUID */
-  spaceUuid: string
-  data: UserAddressBookItemDto[]
 }
 export type AddressBookRequestItemDto = {
   id: number
@@ -467,20 +433,20 @@ export type AddressBookRequestItemDto = {
   updatedAt: string
 }
 export type AddressBookRequestsDto = {
-  /** Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback */
-  spaceId: string
   /** Space UUID */
   spaceUuid: string
   data: AddressBookRequestItemDto[]
 }
 export type CreateAddressBookRequestDto = {
-  /** Address of the private contact to request adding to space */
+  /** Name of the proposed contact */
+  name: string
+  /** Address of the contact to propose for the space address book */
   address: string
+  /** Chain ids the contact applies to (at least one, duplicates are removed) */
+  chainIds: string[]
 }
 export type CreateSpaceResponse = {
   name: string
-  /** Numeric Space id (deprecated, use uuid). Kept for FE fallback */
-  id: number
   /** Space UUID */
   uuid: string
 }
@@ -500,24 +466,62 @@ export type SpaceMemberDto = {
   user: UserDto
 }
 export type GetSpaceResponse = {
-  /** Numeric Space id (deprecated, use uuid). Kept for FE fallback */
-  id: number
   /** Space UUID */
   uuid: string
   name: string
+  /** Members of the space. A pending (INVITED) member only sees their own membership row here, not the other members. */
   members: SpaceMemberDto[]
+  /** Total count of ACTIVE members in the space */
+  memberCount: number
   /** Total count of Safes in the space */
   safeCount: number
 }
 export type UpdateSpaceResponse = {
-  /** Numeric Space id (deprecated, use uuid). Kept for FE fallback */
-  id: number
   /** Space UUID */
   uuid: string
 }
 export type UpdateSpaceDto = {
   name?: string
   status?: 'ACTIVE'
+}
+export type SpaceAuditLogEntryDto = {
+  /** Monotonic entry id (bigint serialized as string) */
+  id: string
+  eventType:
+    | 'SPACE_CREATED'
+    | 'SPACE_UPDATED'
+    | 'SPACE_DELETED'
+    | 'MEMBER_INVITED'
+    | 'MEMBER_INVITE_ACCEPTED'
+    | 'MEMBER_INVITE_DECLINED'
+    | 'MEMBER_INVITE_RENEWED'
+    | 'MEMBER_ROLE_UPDATED'
+    | 'MEMBER_ALIAS_UPDATED'
+    | 'MEMBER_REMOVED'
+    | 'MEMBER_LEFT'
+    | 'SAFE_ADDED'
+    | 'SAFE_REMOVED'
+    | 'ADDRESS_BOOK_UPSERTED'
+    | 'ADDRESS_BOOK_DELETED'
+  actorUserId: number
+  /** Resolved (and masked) display string of the acting user. */
+  actor: string
+  /** Resolved (and masked) display string of the affected user, when the event has one. */
+  targetUser: string | null
+  /** Event-specific payload, allowlisted per event type. Clients must treat every field as optional. */
+  payload: object
+  createdAt: string
+}
+export type SpaceAuditLogPage = {
+  count?: number | null
+  next?: string | null
+  previous?: string | null
+  results: SpaceAuditLogEntryDto[]
+}
+export type SpaceAuditLogActorDto = {
+  actorUserId: number
+  /** Resolved (and masked) display string of the actor. */
+  actor: string
 }
 export type SpaceSafeDto = {
   chainId: string
@@ -537,8 +541,6 @@ export type DeleteSpaceSafesDto = {
 export type Invitation = {
   userId: number
   name: string
-  /** Numeric Space id (deprecated, use spaceUuid). Kept for FE fallback */
-  spaceId: number
   /** Space UUID */
   spaceUuid: string
   role: 'ADMIN' | 'MEMBER'
@@ -615,10 +617,6 @@ export const {
   useLazyAddressBooksGetAddressBookItemsV1Query,
   useAddressBooksUpsertAddressBookItemsV1Mutation,
   useAddressBooksDeleteByAddressV1Mutation,
-  useUserAddressBookGetPrivateItemsV1Query,
-  useLazyUserAddressBookGetPrivateItemsV1Query,
-  useUserAddressBookUpsertPrivateItemsV1Mutation,
-  useUserAddressBookDeletePrivateItemV1Mutation,
   useAddressBookRequestsGetPendingRequestsV1Query,
   useLazyAddressBookRequestsGetPendingRequestsV1Query,
   useAddressBookRequestsCreateRequestV1Mutation,
@@ -627,11 +625,14 @@ export const {
   useSpacesCreateV1Mutation,
   useSpacesGetV1Query,
   useLazySpacesGetV1Query,
-  useSpacesCreateWithUserV1Mutation,
   useSpacesGetOneV1Query,
   useLazySpacesGetOneV1Query,
   useSpacesUpdateV1Mutation,
   useSpacesDeleteV1Mutation,
+  useSpaceAuditGetAuditLogV1Query,
+  useLazySpaceAuditGetAuditLogV1Query,
+  useSpaceAuditGetAuditLogActorsV1Query,
+  useLazySpaceAuditGetAuditLogActorsV1Query,
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesGetV1Query,
   useLazySpaceSafesGetV1Query,

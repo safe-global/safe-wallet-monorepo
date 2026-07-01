@@ -35,7 +35,7 @@ const SpaceSidebarSelector = () => {
   const isDarkMode = useDarkMode()
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
-  const selectedSpace = spaces?.find((space) => space.id === Number(spaceId))
+  const selectedSpace = spaces?.find((space) => space.uuid === spaceId)
 
   const nonDeclinedSpaces = getNonDeclinedSpaces(currentUser, spaces || [])
 
@@ -46,7 +46,7 @@ const SpaceSidebarSelector = () => {
   const handleSelectSpace = (space: GetSpaceResponse) => {
     router.push({
       pathname: router.pathname,
-      query: { ...router.query, spaceId: space.id.toString() },
+      query: { ...router.query, spaceId: space.uuid },
     })
 
     handleClose()
@@ -88,7 +88,7 @@ const SpaceSidebarSelector = () => {
 
           {nonDeclinedSpaces.map((space) => (
             <DropdownMenuItem
-              key={space.id}
+              key={space.uuid}
               onClick={() => handleSelectSpace(space)}
               className="flex justify-between gap-2"
             >
@@ -96,7 +96,7 @@ const SpaceSidebarSelector = () => {
                 <InitialsAvatar name={space.name} size="small" />
                 <Typography variant="paragraph-small">{space.name}</Typography>
               </div>
-              {space.id === selectedSpace.id && <Check className="size-4 text-[var(--color-primary-main)]" />}
+              {space.uuid === selectedSpace.uuid && <Check className="size-4 text-[var(--color-primary-main)]" />}
             </DropdownMenuItem>
           ))}
 

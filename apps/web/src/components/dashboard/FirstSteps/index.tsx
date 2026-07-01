@@ -140,7 +140,7 @@ const AddFundsWidget = ({ completed }: { completed: boolean }) => {
           <ModalDialog
             open={open}
             onClose={toggleDialog}
-            dialogTitle="Add funds to your Safe Account"
+            dialogTitle="Add funds to your Safe account"
             hideChainIndicator
           >
             <div className="px-8 pb-10 pt-8">
@@ -275,7 +275,7 @@ const AccountReadyWidget = () => {
         <CircleCheckBig className="size-[60px]" />
       </div>
       <Typography variant="h4" className="mb-4 mt-4 font-bold">
-        Safe Account is ready!
+        Safe account is ready!
       </Typography>
       <Typography>Continue to improve your account security and unlock more features</Typography>
     </Card>
@@ -320,7 +320,7 @@ const FirstSteps = () => {
           </div>
           <div>
             <Typography variant="h2" className="mb-2">
-              {isActivating ? 'Account is being activated...' : 'Activate your Safe Account'}
+              {isActivating ? 'Account is being activated...' : 'Activate your Safe account'}
             </Typography>
 
             {isActivating ? (
@@ -332,7 +332,7 @@ const FirstSteps = () => {
                 <strong>
                   {stepsCompleted} of {completedItems.length} steps completed.
                 </strong>{' '}
-                Finish the next steps to start using all Safe Account features:
+                Finish the next steps to start using all Safe account features:
               </Typography>
             )}
           </div>

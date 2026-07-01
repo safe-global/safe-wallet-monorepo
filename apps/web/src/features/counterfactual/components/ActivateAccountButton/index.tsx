@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
+import { Rocket } from 'lucide-react'
 import { TxModalContext } from '@/components/tx-flow'
 import { selectUndeployedSafe } from '../../store/undeployedSafesSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -34,19 +35,22 @@ const ActivateAccountButton = () => {
             <Button
               data-testid="activate-account-btn-cf"
               size="default"
-              className="w-full"
               onClick={activateAccount}
               disabled={isProcessing || !isOk}
+              className="w-full group-data-[collapsible=icon]:!min-w-9 group-data-[collapsible=icon]:!w-9 group-data-[collapsible=icon]:!px-0"
             >
               {isProcessing ? (
                 <>
-                  <Typography variant="paragraph-small" className="mr-2">
+                  <Typography variant="paragraph-small" className="mr-2 group-data-[collapsible=icon]:hidden">
                     Processing
                   </Typography>
                   <Spinner className="size-4" />
                 </>
               ) : (
-                'Activate now'
+                <>
+                  <Rocket className="hidden size-4 shrink-0 group-data-[collapsible=icon]:block" />
+                  <span className="group-data-[collapsible=icon]:hidden">Activate now</span>
+                </>
               )}
             </Button>
           )}

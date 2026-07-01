@@ -21,7 +21,7 @@ const NoMessages = (): ReactElement => {
       text={
         <Typography variant="paragraph" className="m-4 max-w-[600px] text-[var(--color-primary-light)]">
           Some applications allow you to interact with them via off-chain contract signatures (&ldquo;messages&ldquo;)
-          that you can generate with your Safe Account.
+          that you can generate with your Safe account.
         </Typography>
       }
     >
@@ -65,7 +65,7 @@ const PaginatedMsgs = (): ReactElement => {
     setPages((prev) => prev.concat(pageUrl))
   }
 
-  // Reset the pages when the Safe Account changes
+  // Reset the pages when the Safe account changes
   useEffect(() => {
     setPages([''])
   }, [safe.chainId, safeAddress])

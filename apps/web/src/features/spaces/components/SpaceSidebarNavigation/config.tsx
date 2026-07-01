@@ -7,7 +7,7 @@ import HomeIcon from '@/public/images/sidebar/home.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import MembersIcon from '@/public/images/sidebar/members.svg'
 import AccountsIcon from '@/public/images/sidebar/wallet.svg'
-import { Shield } from 'lucide-react'
+import { History, Shield } from 'lucide-react'
 
 export type DynamicNavItem = {
   label: string
@@ -25,7 +25,7 @@ export const navItems: DynamicNavItem[] = [
     href: AppRoutes.spaces.index,
   },
   {
-    label: 'Safe Accounts',
+    label: 'Safe accounts',
     icon: <AccountsIcon />,
     href: AppRoutes.spaces.safeAccounts,
   },
@@ -45,6 +45,12 @@ export const navItems: DynamicNavItem[] = [
     label: 'Address book',
     icon: <ABIcon />,
     href: AppRoutes.spaces.addressBook,
+  },
+  {
+    label: 'Activity',
+    icon: <History className="size-5" />,
+    href: AppRoutes.spaces.activity,
+    activeMemberOnly: true,
   },
   {
     label: 'Security',

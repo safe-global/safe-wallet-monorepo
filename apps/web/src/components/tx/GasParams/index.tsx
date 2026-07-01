@@ -139,7 +139,7 @@ export const _GasParams = ({
 
           <AccordionContent className="px-4">
             {nonce !== undefined && (
-              <GasDetail isLoading={false} name="Safe Account transaction nonce" value={nonce.toString()} />
+              <GasDetail isLoading={false} name="Safe account transaction nonce" value={nonce.toString()} />
             )}
 
             {safeTxGas !== undefined && <GasDetail isLoading={false} name="safeTxGas" value={safeTxGas.toString()} />}

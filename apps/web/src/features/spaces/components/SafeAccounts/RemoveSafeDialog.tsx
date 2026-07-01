@@ -69,7 +69,7 @@ const RemoveSafeDialog = ({
   }
 
   return (
-    <ModalDialog open onClose={handleClose} dialogTitle="Remove Safe Account" hideChainIndicator>
+    <ModalDialog open onClose={handleClose} dialogTitle="Remove Safe account" hideChainIndicator>
       <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
         <div className="p-6">
           <Typography variant="paragraph">

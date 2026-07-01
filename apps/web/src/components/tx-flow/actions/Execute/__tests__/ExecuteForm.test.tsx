@@ -4,7 +4,7 @@ import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/types-kit'
 import { type ReactElement } from 'react'
 import { ExecuteForm } from '../ExecuteForm'
-import { RelaySimulationError } from '@/services/tx/relayErrors'
+import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import * as useGasLimit from '@/hooks/useGasLimit'
 import * as useIsValidExecution from '@/hooks/useIsValidExecution'
 import * as useWalletCanRelay from '@/hooks/useWalletCanRelay'
@@ -87,7 +87,7 @@ describe('ExecuteForm', () => {
     const { getByText } = render(<ExecuteForm {...defaultProps} isOwner={false} onlyExecute={false} />)
 
     expect(
-      getByText("You are currently not a signer of this Safe Account and won't be able to submit this transaction."),
+      getByText("You are currently not a signer of this Safe account and won't be able to submit this transaction."),
     ).toBeInTheDocument()
   })
 
@@ -95,7 +95,7 @@ describe('ExecuteForm', () => {
     const { queryByText } = render(<ExecuteForm {...defaultProps} isOwner={false} onlyExecute={true} />)
 
     expect(
-      queryByText("You are currently not a signer of this Safe Account and won't be able to submit this transaction."),
+      queryByText("You are currently not a signer of this Safe account and won't be able to submit this transaction."),
     ).not.toBeInTheDocument()
   })
 
@@ -103,7 +103,7 @@ describe('ExecuteForm', () => {
     const { getByText } = render(<ExecuteForm {...defaultProps} isExecutionLoop={true} />)
 
     expect(
-      getByText('Cannot execute a transaction from the Safe Account itself, please connect a different account.'),
+      getByText('Cannot execute a transaction from the Safe account itself, please connect a different account.'),
     ).toBeInTheDocument()
   })
 

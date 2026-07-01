@@ -68,7 +68,13 @@ export const ExecTransaction = ({
   )
 
   const decodedNestedTxDataBlock = txPreview ? (
-    <TxData txData={txPreview.txData} txInfo={txPreview.txInfo} trusted imitation={false} />
+    <TxData
+      txData={txPreview.txData}
+      txInfo={txPreview.txInfo}
+      trusted
+      imitation={false}
+      executingSafeAddress={data?.to.value}
+    />
   ) : null
 
   return (

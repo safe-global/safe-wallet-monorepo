@@ -19,7 +19,7 @@ export type LoadSafeFormData = NamedAddress & {
 export const LoadSafeSteps: TxStepperProps<LoadSafeFormData>['steps'] = [
   {
     title: 'Choose address, network and a name',
-    subtitle: 'Paste the address of the Safe Account you want to add, select the network and choose a name.',
+    subtitle: 'Paste the address of the Safe account you want to add, select the network and choose a name.',
     render: (data, onSubmit, onBack, setStep) => (
       <SetAddressStep onSubmit={onSubmit} onBack={onBack} data={data} setStep={setStep} />
     ),
@@ -33,7 +33,7 @@ export const LoadSafeSteps: TxStepperProps<LoadSafeFormData>['steps'] = [
   },
   {
     title: 'Review',
-    subtitle: 'Confirm adding Safe Account to your Watchlist',
+    subtitle: 'Confirm adding Safe account to your Watchlist',
     render: (data, onSubmit, onBack, setStep) => (
       <SafeReviewStep onSubmit={onSubmit} onBack={onBack} data={data} setStep={setStep} />
     ),
@@ -56,7 +56,7 @@ const LoadSafe = ({ initialData }: { initialData?: TxStepperProps<LoadSafeFormDa
       <div className="grid grid-cols-12 justify-center gap-x-6">
         <div className="col-span-12 md:col-span-10 lg:col-span-8">
           <Typography variant="h2" className="pb-4">
-            Add existing Safe Account
+            Add existing Safe account
           </Typography>
         </div>
         <div className="order-1 col-span-12 md:order-0 md:col-span-10 lg:col-span-8">

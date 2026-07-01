@@ -79,7 +79,7 @@ const SingleTx = () => {
   }, [setTx, txDetails])
 
   if (txDetails && !sameAddress(txDetails.safeAddress, safeAddress)) {
-    txDetailsError = new Error('Transaction with this id was not found in this Safe Account')
+    txDetailsError = new Error('Transaction with this id was not found in this Safe account')
   }
 
   if (txDetailsError) {

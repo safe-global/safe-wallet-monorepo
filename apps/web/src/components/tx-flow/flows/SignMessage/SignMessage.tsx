@@ -88,7 +88,7 @@ const DialogHeader = ({ threshold }: { threshold: number }) => (
     </Typography>
     {threshold > 1 && (
       <Typography align="center" className="mb-4">
-        To sign this message, collect signatures from <b>{threshold} signers</b> of your Safe Account.
+        To sign this message, collect signatures from <b>{threshold} signers</b> of your Safe account.
       </Typography>
     )}
   </>
@@ -102,7 +102,7 @@ const MessageDialogError = ({ isOwner, submitError }: { isOwner: boolean; submit
     !wallet || !onboard
       ? 'No wallet is connected.'
       : !isOwner
-        ? "You are currently not a signer of this Safe Account and won't be able to confirm this message."
+        ? "You are currently not a signer of this Safe account and won't be able to confirm this message."
         : submitError && isWalletRejection(submitError)
           ? 'User rejected signing.'
           : submitError
@@ -356,7 +356,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
 
             <RiskConfirmationError />
 
-            {!safe.deployed && <ErrorMessage>Your Safe Account is not activated yet.</ErrorMessage>}
+            {!safe.deployed && <ErrorMessage>Your Safe account is not activated yet.</ErrorMessage>}
           </TxCard>
           <TxCard>
             <div className="flex items-center p-2">

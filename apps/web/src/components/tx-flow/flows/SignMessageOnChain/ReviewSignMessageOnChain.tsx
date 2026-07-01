@@ -135,7 +135,7 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
       <div className="my-4 flex items-center">
         <WarningIcon className="size-4 text-[var(--color-warning-main)]" />
         <Typography className="ml-2">
-          Signing a message with your Safe Account requires a transaction on the blockchain
+          Signing a message with your Safe account requires a transaction on the blockchain
         </Typography>
       </div>
 

@@ -17,11 +17,11 @@ const AddAccountsCard = () => {
       <div className="flex flex-col-reverse items-center gap-6 md:flex-row">
         <div className="flex-[2]">
           <Typography variant="h4" className="mb-4">
-            Add your Safe Accounts
+            Add your Safe accounts
           </Typography>
 
           <Typography variant="paragraph" color="muted" className="mb-4">
-            Start by adding Safe Accounts to your workspace. Any accounts that are linked to your connected wallet can
+            Start by adding Safe accounts to your workspace. Any accounts that are linked to your connected wallet can
             be added to the workspace.
           </Typography>
 

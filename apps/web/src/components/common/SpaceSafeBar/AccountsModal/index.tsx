@@ -5,6 +5,7 @@ import { Search, CircleFadingPlus, Plus } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { AppRoutes } from '@/config/routes'
 import { buildCurrentNextUrl } from '@/utils/nextUrl'
 import { isMultiChainSafeItem } from '@/hooks/safes'
@@ -20,6 +21,7 @@ import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet
 import SafeItemCard from './SafeItemCard'
 import MultiSafeItemCard from './MultiSafeItemCard'
 import { useAccountsModalItems } from './useAccountsModalItems'
+import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import type { AllSafeItems } from '@/hooks/safes'
 
 interface AccountsModalProps {
@@ -27,6 +29,8 @@ interface AccountsModalProps {
   onClose: () => void
   /** Analytics label for footer + open-safe events. Distinguishes the entry point (top bar vs. owned-safes modal). */
   trackingLabel?: OVERVIEW_LABELS
+  /** Opens the Manage trusted Safes modal from the Trusted Safes section header. */
+  onManageTrustedSafes?: () => void
 }
 
 interface SectionOptions {
@@ -34,19 +38,26 @@ interface SectionOptions {
   onClose: () => void
   headerPaddingTopClass: string
   openSafeTrackingLabel: OVERVIEW_LABELS
-  headerTestId?: string
+  sectionTestId?: string
+  headerAction?: React.ReactNode
+  /** Render the section even when it has no items (header + action stay visible). */
+  alwaysShow?: boolean
+  /** Message shown in place of the list when the section is empty. */
+  emptyHint?: string
 }
 
 const renderSection = (title: string, items: AllSafeItems, opts: SectionOptions) => {
-  if (items.length === 0) return null
+  // Keep the section (header + action) when it has no items but should stay visible (e.g. Trusted Safes).
+  if (items.length === 0 && !opts.alwaysShow) return null
   return (
-    <>
-      <div
-        className={`flex items-center gap-1.5 px-2 pb-1 ${opts.headerPaddingTopClass}`}
-        data-testid={opts.headerTestId}
-      >
+    <div data-testid={opts.sectionTestId}>
+      <div className={`flex items-center justify-between gap-1.5 px-2 pb-1 ${opts.headerPaddingTopClass}`}>
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</span>
+        {opts.headerAction}
       </div>
+      {items.length === 0 && opts.emptyHint && (
+        <p className="px-2 pb-2 pt-1 text-sm text-muted-foreground">{opts.emptyHint}</p>
+      )}
       {items.map((item) =>
         isMultiChainSafeItem(item) ? (
           <MultiSafeItemCard
@@ -66,11 +77,16 @@ const renderSection = (title: string, items: AllSafeItems, opts: SectionOptions)
           />
         ),
       )}
-    </>
+    </div>
   )
 }
 
-const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar }: AccountsModalProps) => {
+const AccountsModal = ({
+  open,
+  onClose,
+  trackingLabel = OVERVIEW_LABELS.top_bar,
+  onManageTrustedSafes,
+}: AccountsModalProps) => {
   const [search, setSearch] = useState('')
   const [isConnecting, setIsConnecting] = useState(false)
   const wallet = useWallet()
@@ -123,8 +139,8 @@ const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar 
           <DialogTitle>{isQualifiedSafe ? 'Explore other Safes' : 'All Accounts'}</DialogTitle>
         </DialogHeader>
 
-        <div className="shrink-0 px-4 py-3">
-          <InputGroup className="rounded-md border-gray-100 shadow-none">
+        <div className="flex shrink-0 items-center gap-2 px-4 py-3">
+          <InputGroup className="flex-1 rounded-md border-gray-100 shadow-none">
             <InputGroupAddon>
               <Search className="size-4" />
             </InputGroupAddon>
@@ -136,6 +152,7 @@ const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar 
               data-testid="accounts-search-input"
             />
           </InputGroup>
+          <SafeListSortToggle />
         </div>
 
         <div
@@ -155,7 +172,7 @@ const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar 
           )}
           {isLoading ? (
             <SafeListSkeleton />
-          ) : isEmpty ? (
+          ) : isEmpty && !onManageTrustedSafes ? (
             <p className="px-2 py-6 text-center text-sm text-muted-foreground" data-testid="empty-pinned-list">
               {search.trim() ? 'No safes match your search' : 'No safes yet'}
             </p>
@@ -171,7 +188,32 @@ const AccountsModal = ({ open, onClose, trackingLabel = OVERVIEW_LABELS.top_bar 
                 onClose,
                 headerPaddingTopClass: 'pt-1',
                 openSafeTrackingLabel: trackingLabel,
-                headerTestId: 'pinned-accounts',
+                sectionTestId: 'pinned-accounts',
+                // The Trusted Safes section (with its Manage action) stays visible even with no trusted safes.
+                alwaysShow: Boolean(onManageTrustedSafes),
+                emptyHint: search.trim() ? undefined : 'No trusted Safes yet',
+                headerAction: onManageTrustedSafes && (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onClose()
+                            onManageTrustedSafes()
+                          }}
+                          className="cursor-pointer text-xs font-medium normal-case text-primary hover:underline"
+                          data-testid="manage-trusted-safes-link"
+                        />
+                      }
+                    >
+                      Manage trusted Safes
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[260px]">
+                      Trusted Safes aren&apos;t added to this workspace automatically — add them separately.
+                    </TooltipContent>
+                  </Tooltip>
+                ),
               })}
               {renderSection('Other Safes', otherItems, {
                 similarAddresses,

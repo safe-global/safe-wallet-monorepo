@@ -56,10 +56,10 @@ const AddManually = ({
     try {
       const result = await triggerGetSafe({ chainId, safeAddress: address }).unwrap()
       if (!result) {
-        return 'Address given is not a valid Safe Account address'
+        return 'Address given is not a valid Safe account address'
       }
     } catch (error) {
-      return 'Address given is not a valid Safe Account address'
+      return 'Address given is not a valid Safe account address'
     }
   }
 
@@ -88,7 +88,7 @@ const AddManually = ({
               <div className="flex flex-col gap-4 md:flex-row">
                 <AddressInput
                   data-testid="add-address-input"
-                  label="Safe Account"
+                  label="Safe account"
                   chain={selectedChain}
                   validate={validateSafeAddress}
                   name="address"
