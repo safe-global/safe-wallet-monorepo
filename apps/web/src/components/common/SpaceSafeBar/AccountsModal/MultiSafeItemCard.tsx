@@ -18,23 +18,24 @@ import {
   StackedChainLogos,
   NameSourceIcon,
   CopyAddressButton,
-  SimilarityBadge,
   ShortAddressWithTooltip,
 } from './shared'
 import { PinnedSafeSubItem } from './PinnedSafeItem'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { SimilarityFlag } from '@/features/address-poisoning'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 
 interface MultiSafeItemCardProps {
   item: MultiChainSafeItem
-  isSimilar?: boolean
+  match?: SimilarityMatch
   onClose: () => void
   openSafeTrackingLabel?: OVERVIEW_LABELS
 }
 
 const MultiSafeItemCard = ({
   item,
-  isSimilar,
+  match,
   onClose,
   openSafeTrackingLabel = OVERVIEW_LABELS.top_bar,
 }: MultiSafeItemCardProps) => {
@@ -92,10 +93,10 @@ const MultiSafeItemCard = ({
                 {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
               </div>
               <div className="flex items-center gap-1 min-w-0">
-                <ShortAddressWithTooltip address={address} isSimilar={isSimilar} />
+                <ShortAddressWithTooltip address={address} similarity={match} />
                 <CopyAddressButton address={address} />
               </div>
-              {isSimilar && <SimilarityBadge />}
+              <SimilarityFlag match={match} />
             </div>
 
             {/* Stacked chain logos */}

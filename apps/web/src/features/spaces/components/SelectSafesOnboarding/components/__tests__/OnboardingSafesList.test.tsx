@@ -1,4 +1,6 @@
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
+import { INTRA_LIST_MATCH, type SelectionSimilarity } from '@/features/address-poisoning'
 import { render } from '@/tests/test-utils'
 
 import OnboardingSafesList from '../OnboardingSafesList'
@@ -8,23 +10,21 @@ jest.mock('../SafeCard', () => ({
   __esModule: true,
   default: ({
     safe,
-    isSimilar,
+    match,
     isAtLimit,
   }: {
     safe: SafeItem | MultiChainSafeItem
-    isSimilar?: boolean
+    match?: SimilarityMatch
+    intraList?: boolean
     isAtLimit?: boolean
   }) => (
-    <div data-testid={`safe-card-${safe.address}`} data-similar={isSimilar} data-at-limit={isAtLimit}>
+    <div data-testid={`safe-card-${safe.address}`} data-similar={!!match} data-at-limit={isAtLimit}>
       {safe.address}
     </div>
   ),
 }))
 
-jest.mock('@/components/common/SimilarAddressAlert', () => ({
-  __esModule: true,
-  default: () => <div data-testid="similar-address-alert">Similar addresses detected</div>,
-}))
+const noSimilarities: Map<string, SelectionSimilarity> = new Map()
 
 const buildSafeItem = (address: string, chainId = '1'): SafeItem =>
   ({
@@ -39,7 +39,7 @@ const buildSafeItem = (address: string, chainId = '1'): SafeItem =>
 describe('OnboardingSafesList', () => {
   it('renders nothing when both lists are empty', () => {
     const { queryByText } = render(
-      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set()} />,
+      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarities={noSimilarities} />,
     )
 
     expect(queryByText('Trusted safes')).not.toBeInTheDocument()
@@ -50,7 +50,7 @@ describe('OnboardingSafesList', () => {
     const trusted = [buildSafeItem('0xTrusted')]
 
     const { getByText, getByTestId } = render(
-      <OnboardingSafesList trustedSafes={trusted} ownedSafes={[]} similarAddresses={new Set()} />,
+      <OnboardingSafesList trustedSafes={trusted} ownedSafes={[]} similarities={noSimilarities} />,
     )
 
     expect(getByText('Trusted safes')).toBeInTheDocument()
@@ -61,7 +61,7 @@ describe('OnboardingSafesList', () => {
     const owned = [buildSafeItem('0xOwned')]
 
     const { getByText, getByTestId } = render(
-      <OnboardingSafesList trustedSafes={[]} ownedSafes={owned} similarAddresses={new Set()} />,
+      <OnboardingSafesList trustedSafes={[]} ownedSafes={owned} similarities={noSimilarities} />,
     )
 
     expect(getByText('Owned safes')).toBeInTheDocument()
@@ -73,27 +73,11 @@ describe('OnboardingSafesList', () => {
     const owned = [buildSafeItem('0xOwned')]
 
     const { getByText } = render(
-      <OnboardingSafesList trustedSafes={trusted} ownedSafes={owned} similarAddresses={new Set()} />,
+      <OnboardingSafesList trustedSafes={trusted} ownedSafes={owned} similarities={noSimilarities} />,
     )
 
     expect(getByText('Trusted safes')).toBeInTheDocument()
     expect(getByText('Owned safes')).toBeInTheDocument()
-  })
-
-  it('shows similar address alert when similarAddresses is non-empty', () => {
-    const { getByTestId } = render(
-      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set(['0xflagged'])} />,
-    )
-
-    expect(getByTestId('similar-address-alert')).toBeInTheDocument()
-  })
-
-  it('does not show similar address alert when similarAddresses is empty', () => {
-    const { queryByTestId } = render(
-      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set()} />,
-    )
-
-    expect(queryByTestId('similar-address-alert')).not.toBeInTheDocument()
   })
 
   it('passes isAtLimit down to safe cards in both sections', () => {
@@ -101,7 +85,7 @@ describe('OnboardingSafesList', () => {
     const owned = [buildSafeItem('0xOwned')]
 
     const { getByTestId } = render(
-      <OnboardingSafesList trustedSafes={trusted} ownedSafes={owned} similarAddresses={new Set()} isAtLimit />,
+      <OnboardingSafesList trustedSafes={trusted} ownedSafes={owned} similarities={noSimilarities} isAtLimit />,
     )
 
     expect(getByTestId('safe-card-0xTrusted').dataset.atLimit).toBe('true')
@@ -112,7 +96,7 @@ describe('OnboardingSafesList', () => {
     const trusted = [buildSafeItem('0xTrusted')]
 
     const { getByTestId } = render(
-      <OnboardingSafesList trustedSafes={trusted} ownedSafes={[]} similarAddresses={new Set()} />,
+      <OnboardingSafesList trustedSafes={trusted} ownedSafes={[]} similarities={noSimilarities} />,
     )
 
     expect(getByTestId('safe-card-0xTrusted').dataset.atLimit).toBe('false')
@@ -120,7 +104,7 @@ describe('OnboardingSafesList', () => {
 
   it('shows the limit-reached notice when isAtLimit', () => {
     const { getByText } = render(
-      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set()} isAtLimit />,
+      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarities={noSimilarities} isAtLimit />,
     )
 
     expect(getByText(/maximum of \d+ Safe accounts per workspace/i)).toBeInTheDocument()
@@ -128,19 +112,19 @@ describe('OnboardingSafesList', () => {
 
   it('hides the limit-reached notice when below the limit', () => {
     const { queryByText } = render(
-      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarAddresses={new Set()} />,
+      <OnboardingSafesList trustedSafes={[]} ownedSafes={[]} similarities={noSimilarities} />,
     )
 
     expect(queryByText(/maximum of \d+ Safe accounts per workspace/i)).not.toBeInTheDocument()
   })
 
-  it('passes isSimilar=true to SafeCard for flagged addresses', () => {
+  it('passes a match to SafeCard for flagged addresses', () => {
     const trusted = [buildSafeItem('0xflagged')]
     const owned = [buildSafeItem('0xnormal')]
-    const similar = new Set(['0xflagged'])
+    const similar: Map<string, SelectionSimilarity> = new Map([['0xflagged', { match: INTRA_LIST_MATCH }]])
 
     const { getByTestId } = render(
-      <OnboardingSafesList trustedSafes={trusted} ownedSafes={owned} similarAddresses={similar} />,
+      <OnboardingSafesList trustedSafes={trusted} ownedSafes={owned} similarities={similar} />,
     )
 
     expect(getByTestId('safe-card-0xflagged').dataset.similar).toBe('true')

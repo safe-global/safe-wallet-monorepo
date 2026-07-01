@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/preview'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
 import type { SelectableSafe } from './useTrustedSafesModal.types'
+import { INTRA_LIST_MATCH } from '@/features/address-poisoning'
 
 const baseSafe: SelectableSafe = {
   chainId: '1',
@@ -11,7 +12,7 @@ const baseSafe: SelectableSafe = {
   isReadOnly: false,
   lastVisited: 0,
   isSelected: false,
-  similarityGroup: '123456_5678',
+  similarity: { match: INTRA_LIST_MATCH },
 }
 
 const meta = {

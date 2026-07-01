@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/preview'
 import TrustedSafesModal from './index'
 import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
+import { INTRA_LIST_MATCH } from '@/features/address-poisoning'
 
 const baseMockModal: UseTrustedSafesModalReturn = {
   isOpen: true,
@@ -14,7 +15,6 @@ const baseMockModal: UseTrustedSafesModalReturn = {
       isReadOnly: false,
       lastVisited: 0,
       isSelected: false,
-      similarityGroup: undefined,
     },
     {
       chainId: '1',
@@ -24,7 +24,6 @@ const baseMockModal: UseTrustedSafesModalReturn = {
       isReadOnly: false,
       lastVisited: 0,
       isSelected: true,
-      similarityGroup: undefined,
     },
     {
       chainId: '10',
@@ -34,7 +33,6 @@ const baseMockModal: UseTrustedSafesModalReturn = {
       isReadOnly: true,
       lastVisited: 0,
       isSelected: false,
-      similarityGroup: undefined,
     },
   ],
   selectedAddresses: new Set(['0xabcdef1234567890abcdef1234567890abcdef12']),
@@ -108,7 +106,7 @@ export const WithSimilarAddresses: Story = {
           isReadOnly: false,
           lastVisited: 0,
           isSelected: false,
-          similarityGroup: '123456_5678',
+          similarity: { match: INTRA_LIST_MATCH },
         },
       ],
     },
@@ -130,7 +128,7 @@ export const WithPendingConfirmation: Story = {
           isReadOnly: false,
           lastVisited: 0,
           isSelected: false,
-          similarityGroup: '123456_5678',
+          similarity: { match: INTRA_LIST_MATCH },
         },
       ],
     },
@@ -170,7 +168,7 @@ export const WithSelectAllConfirmation: Story = {
           isReadOnly: false,
           lastVisited: 0,
           isSelected: false,
-          similarityGroup: '123456_5678',
+          similarity: { match: INTRA_LIST_MATCH },
         },
         {
           chainId: '1',
@@ -180,7 +178,7 @@ export const WithSelectAllConfirmation: Story = {
           isReadOnly: false,
           lastVisited: 0,
           isSelected: false,
-          similarityGroup: '123456_5678',
+          similarity: { match: INTRA_LIST_MATCH },
         },
       ],
     },

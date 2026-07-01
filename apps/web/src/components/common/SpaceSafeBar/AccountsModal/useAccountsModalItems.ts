@@ -15,7 +15,8 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { useListSimilarities } from '@/features/address-poisoning'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 
@@ -55,10 +56,11 @@ const EMPTY_SAFES: SafeItems = []
  *    membership. A user in a space who never pinned anything sees an
  *    empty Trusted section.
  *
- *  • Similarity is computed on the FULL set. A non-space safe
- *    that resembles a space safe will not be flagged here — known v1
- *    limitation. Revisit if poisoning attacks against space members
- *    surface in production.
+ *  • Similarity is ANCHOR-based (Mode B): each listed address is
+ *    flagged when it resembles a TRUSTED anchor (front-OR-back, two
+ *    tiers), not when two arbitrary rows collide. This is a display /
+ *    switcher surface — you click a safe to navigate, not to decide
+ *    trust — so anchor-only is the right model.
  *
  *  • Owned-safes errors are surfaced (not swallowed) so callers can
  *    render a retry notification.
@@ -120,7 +122,17 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
     [otherMultiChainSafes, otherSingleSafes, comparator],
   )
 
-  const similarAddresses = useMemo(() => getFlaggedSimilarAddressSet(allItems.map((item) => item.address)), [allItems])
+  // Mode B: flag any listed safe that resembles a trusted anchor (impostor-next-to-real).
+  const similarityAddresses = useMemo(() => allItems.map((item) => item.address), [allItems])
+  const similarities = useListSimilarities(similarityAddresses)
+  const getMatch = useMemo(() => {
+    const byLower = new Map<string, SimilarityMatch>()
+    similarities.forEach((annotation) => {
+      if (annotation.match) byLower.set(annotation.address.toLowerCase(), annotation.match)
+    })
+    return (address: string): SimilarityMatch | undefined => byLower.get(address.toLowerCase())
+  }, [similarities])
+  const hasSimilarities = useMemo(() => Array.from(similarities.values()).some((a) => a.match), [similarities])
 
   const matchesSearch = (item: SafeItem | MultiChainSafeItem, query: string): boolean => {
     const name = item.name?.toLowerCase() ?? ''
@@ -158,7 +170,8 @@ export function useAccountsModalItems({ search, open }: { search: string; open: 
   return {
     trustedItems,
     otherItems,
-    similarAddresses,
+    getMatch,
+    hasSimilarities,
     // In workspace context the exclusion set depends on space safes — show the skeleton
     // until both arrive, otherwise the user briefly sees safes that ARE in the workspace
     // before the filter kicks in (contradicting the "Safes not in this workspace" title).

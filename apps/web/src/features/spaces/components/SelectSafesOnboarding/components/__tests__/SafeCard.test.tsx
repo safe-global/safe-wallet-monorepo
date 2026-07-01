@@ -1,6 +1,7 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
+import { INTRA_LIST_MATCH } from '@/features/address-poisoning'
 import type { AddAccountsFormValues } from '../../../../hooks/useSelectAll.types'
 import SafeCard from '../SafeCard'
 
@@ -84,11 +85,11 @@ describe('SafeCard', () => {
     expect(screen.getByText('0xabc1...0def')).toBeInTheDocument()
   })
 
-  it('bolds first and last 4 chars of address when isSimilar', () => {
+  it('bolds first and last 4 chars of address when flagged', () => {
     const address = '0xABCDEF1234567890abcdef'
     const { container } = render(
       <FormWrapper>
-        <SafeCard safe={buildSafe(address)} isSimilar />
+        <SafeCard safe={buildSafe(address)} match={INTRA_LIST_MATCH} />
       </FormWrapper>,
     )
 
@@ -98,7 +99,7 @@ describe('SafeCard', () => {
     expect(boldElements[1].textContent).toBe(address.slice(-4))
   })
 
-  it('does not bold address when not similar', () => {
+  it('does not bold address when not flagged', () => {
     const { container } = render(
       <FormWrapper>
         <SafeCard safe={buildSafe('0xabc123')} />
@@ -108,24 +109,24 @@ describe('SafeCard', () => {
     expect(container.querySelectorAll('b')).toHaveLength(0)
   })
 
-  it('does not show similarity badge when isSimilar is false', () => {
+  it('does not show similarity badge when there is no match', () => {
     render(
       <FormWrapper>
         <SafeCard safe={buildSafe('0xabc123')} />
       </FormWrapper>,
     )
 
-    expect(screen.queryByText('High similarity')).not.toBeInTheDocument()
+    expect(screen.queryByText('High risk')).not.toBeInTheDocument()
   })
 
-  it('shows similarity badge when isSimilar is true', () => {
+  it('shows similarity badge when there is a match', () => {
     render(
       <FormWrapper>
-        <SafeCard safe={buildSafe('0xabc123')} isSimilar />
+        <SafeCard safe={buildSafe('0xabc123')} match={INTRA_LIST_MATCH} />
       </FormWrapper>,
     )
 
-    expect(screen.getByText('High similarity')).toBeInTheDocument()
+    expect(screen.getByText('High risk')).toBeInTheDocument()
   })
 
   it('toggles single-chain safe checkbox on click', () => {

@@ -79,7 +79,8 @@ const ADDR_A = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 const buildHookReturn = (overrides: Partial<ReturnType<typeof useAccountsModalItems>> = {}) => ({
   trustedItems: [],
   otherItems: [safeItem('1', ADDR_A)],
-  similarAddresses: new Set<string>(),
+  getMatch: () => undefined,
+  hasSimilarities: false,
   isLoading: false,
   isOwnedSafesError: false,
   refetchOwnedSafes: jest.fn(),
@@ -172,7 +173,7 @@ describe('AccountsModal', () => {
   it('renders the similar-address warning banner when at least one similar address is detected', () => {
     mockUseAccountsModalItems.mockReturnValue(
       buildHookReturn({
-        similarAddresses: new Set([ADDR_A.toLowerCase()]),
+        hasSimilarities: true,
       }),
     )
 
@@ -182,7 +183,7 @@ describe('AccountsModal', () => {
   })
 
   it('hides the similar-address warning banner when no similar addresses are detected', () => {
-    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ similarAddresses: new Set<string>() }))
+    mockUseAccountsModalItems.mockReturnValue(buildHookReturn({ hasSimilarities: false }))
 
     render(<AccountsModal open onClose={jest.fn()} />)
 

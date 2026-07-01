@@ -1,7 +1,7 @@
 import type { MouseEvent } from 'react'
 import type { SelectableSafe } from './useTrustedSafesModal.types'
 import { useSafeItemData, AccountItem } from '@/features/myAccounts'
-import SimilarityWarning from './SimilarityWarning'
+import { SimilarityFlag } from '@/features/address-poisoning'
 
 interface TrustedSafesItemProps {
   safe: SelectableSafe
@@ -43,7 +43,7 @@ const TrustedSafesItem = ({ safe, onToggle }: TrustedSafesItemProps) => {
           awaitingConfirmation={safeOverview.awaitingConfirmation ?? 0}
         />
       )}
-      {safe.similarityGroup && <SimilarityWarning />}
+      <SimilarityFlag match={safe.similarity?.match} intraList={safe.similarity?.intraList} />
     </>
   )
 
@@ -58,7 +58,7 @@ const TrustedSafesItem = ({ safe, onToggle }: TrustedSafesItemProps) => {
         fullAddress
         showCopyButton
         hasExplorer
-        highlight4bytes={!!safe.similarityGroup}
+        similarity={safe.similarity?.match}
       >
         {statusChips}
       </AccountItem.Info>

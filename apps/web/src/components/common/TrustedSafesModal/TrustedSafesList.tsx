@@ -15,42 +15,6 @@ interface TrustedSafesListProps {
   onToggle: (address: string) => void
 }
 
-interface SimilarityGroupData {
-  groupKey: string
-  items: SelectableItem[]
-}
-
-/**
- * Group items by their similarity group and identify ungrouped items
- */
-const groupItemsBySimilarity = (
-  items: SelectableItem[],
-): { groups: SimilarityGroupData[]; ungroupedItems: SelectableItem[] } => {
-  const groupMap = new Map<string, SelectableItem[]>()
-  const ungroupedItems: SelectableItem[] = []
-
-  for (const item of items) {
-    if (!item.similarityGroup) {
-      ungroupedItems.push(item)
-      continue
-    }
-    const existing = groupMap.get(item.similarityGroup) || []
-    existing.push(item)
-    groupMap.set(item.similarityGroup, existing)
-  }
-
-  const groups: SimilarityGroupData[] = []
-  for (const [groupKey, groupItems] of groupMap) {
-    if (groupItems.length < 2) {
-      ungroupedItems.push(...groupItems)
-      continue
-    }
-    groups.push({ groupKey, items: groupItems })
-  }
-
-  return { groups, ungroupedItems }
-}
-
 /**
  * Render a single item (either multichain or single safe)
  */
@@ -62,46 +26,11 @@ const SelectionItem = ({ item, onToggle }: { item: SelectableItem; onToggle: (ad
 }
 
 /**
- * Similarity group visual container
- * Subtle border to highlight similar addresses
- */
-const SimilarityGroupContainer = ({
-  group,
-  onToggle,
-}: {
-  group: SimilarityGroupData
-  onToggle: (address: string) => void
-}) => {
-  return (
-    <div
-      className="my-0.5 overflow-hidden rounded-md border border-border/50"
-      data-testid={`similarity-group-${group.groupKey}`}
-    >
-      <div className="bg-yellow-50 px-3 py-1.5 dark:bg-[var(--color-warning-background)]">
-        <span className="text-xs font-medium text-yellow-800 dark:text-[var(--color-warning1-contrast-text)]">
-          Similar addresses – verify carefully
-        </span>
-      </div>
-      <div className="mb-4 bg-background p-2">
-        {group.items.map((item) => (
-          <SelectionItem key={item.address} item={item} onToggle={onToggle} />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-/**
- * List of safes for selection
- * Groups similar addresses together with visual highlighting
+ * Flat list of safes for selection. Similarity is surfaced per-row via the Mode B
+ * SimilarityFlag (anchor + intra-list), so there is no separate grouping/bucketing.
  */
 const TrustedSafesList = ({ items, isLoading, searchQuery, onSearchChange, onToggle }: TrustedSafesListProps) => {
-  const { groups, ungroupedItems } = useMemo(() => groupItemsBySimilarity(items), [items])
-
-  const sortedUngroupedItems = useMemo(
-    () => [...ungroupedItems].sort((a, b) => Number(b.isSelected) - Number(a.isSelected)),
-    [ungroupedItems],
-  )
+  const sortedItems = useMemo(() => [...items].sort((a, b) => Number(b.isSelected) - Number(a.isSelected)), [items])
 
   if (isLoading) {
     return (
@@ -137,19 +66,11 @@ const TrustedSafesList = ({ items, isLoading, searchQuery, onSearchChange, onTog
             </span>
           </div>
         ) : (
-          <>
-            {/* Render similarity groups first */}
-            {groups.map((group) => (
-              <SimilarityGroupContainer key={group.groupKey} group={group} onToggle={onToggle} />
-            ))}
-
-            {/* Render ungrouped items */}
-            {sortedUngroupedItems.map((item) => (
-              <div key={item.address} className="my-0.5">
-                <SelectionItem item={item} onToggle={onToggle} />
-              </div>
-            ))}
-          </>
+          sortedItems.map((item) => (
+            <div key={item.address} className="my-0.5">
+              <SelectionItem item={item} onToggle={onToggle} />
+            </div>
+          ))
         )}
       </div>
     </div>

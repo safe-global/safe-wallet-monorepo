@@ -1,12 +1,17 @@
-import type { ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Divider, Typography } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PendingDelegation from './PendingDelegation'
 import DelegationErrorBoundary from './DelegationErrorBoundary'
 import { usePendingDelegations } from '../hooks/usePendingDelegations'
+import { useListSimilarities } from '@/features/address-poisoning'
 
 function PendingDelegationsList(): ReactElement | null {
   const { pendingDelegations, isLoading, refetch } = usePendingDelegations()
+
+  // Mode B: flag any pending delegate that resembles a trusted anchor (impostor-next-to-real).
+  const addresses = useMemo(() => pendingDelegations.map((d) => d.delegateAddress), [pendingDelegations])
+  const similarities = useListSimilarities(addresses)
 
   if (isLoading || pendingDelegations.length === 0) return null
 
@@ -57,7 +62,11 @@ function PendingDelegationsList(): ReactElement | null {
             {pendingDelegations.map((delegation, index) => (
               <Box key={delegation.messageHash}>
                 <DelegationErrorBoundary fallbackMessage="Failed to load this delegation.">
-                  <PendingDelegation delegation={delegation} onRefetch={refetch} />
+                  <PendingDelegation
+                    delegation={delegation}
+                    onRefetch={refetch}
+                    similarity={similarities.get(delegation.delegateAddress)?.match}
+                  />
                 </DelegationErrorBoundary>
                 {index < pendingDelegations.length - 1 && <Divider sx={{ my: 2 }} />}
               </Box>

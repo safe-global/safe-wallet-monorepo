@@ -1,9 +1,11 @@
 import { type AllSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
+import type { SelectionSimilarity } from '@/features/address-poisoning'
 import SafeCard from './SafeCard'
-import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 import SelectAllToggle, { type SelectAllState } from '../../SelectAllToggle/SelectAllToggle'
 import { Typography } from '@/components/ui/typography'
 import { SAFE_ACCOUNTS_LIMIT, safeAccountsLimitReachedText } from '@/features/spaces/constants'
+
+type SimilarityMap = Map<string, SelectionSimilarity>
 
 interface SectionSelectAll {
   state: SelectAllState
@@ -16,19 +18,25 @@ interface SectionSelectAll {
 interface SafeListProps {
   trustedSafes: AllSafeItems
   ownedSafes: AllSafeItems
-  similarAddresses: Set<string>
+  similarities: SimilarityMap
   trustedSelectAll?: SectionSelectAll
   ownedSelectAll?: SectionSelectAll
   isAtLimit?: boolean
 }
 
-const renderSafeCards = (safes: AllSafeItems, similarAddresses: Set<string>, isAtLimit: boolean) =>
+const renderSafeCards = (safes: AllSafeItems, similarities: SimilarityMap, isAtLimit: boolean) =>
   safes.map((safe, index) => {
-    const isSimilar = similarAddresses.has(safe.address.toLowerCase())
-    if (isMultiChainSafeItem(safe)) {
-      return <SafeCard key={`multi-${safe.address}-${index}`} safe={safe} isSimilar={isSimilar} isAtLimit={isAtLimit} />
-    }
-    return <SafeCard key={`${safe.chainId}:${safe.address}`} safe={safe} isSimilar={isSimilar} isAtLimit={isAtLimit} />
+    const similarity = similarities.get(safe.address.toLowerCase())
+    const key = isMultiChainSafeItem(safe) ? `multi-${safe.address}-${index}` : `${safe.chainId}:${safe.address}`
+    return (
+      <SafeCard
+        key={key}
+        safe={safe}
+        match={similarity?.match}
+        intraList={similarity?.intraList}
+        isAtLimit={isAtLimit}
+      />
+    )
   })
 
 const SectionRow = ({ label, selectAll, testId }: { label: string; selectAll?: SectionSelectAll; testId?: string }) => (
@@ -55,7 +63,7 @@ const SectionRow = ({ label, selectAll, testId }: { label: string; selectAll?: S
 const OnboardingSafesList = ({
   trustedSafes,
   ownedSafes,
-  similarAddresses,
+  similarities,
   trustedSelectAll,
   ownedSelectAll,
   isAtLimit = false,
@@ -68,19 +76,17 @@ const OnboardingSafesList = ({
         </Typography>
       )}
 
-      {similarAddresses.size > 0 && <SimilarAddressAlert />}
-
       {trustedSafes.length > 0 && (
         <>
           <SectionRow label="Trusted safes" selectAll={trustedSelectAll} testId="select-all-trusted" />
-          {renderSafeCards(trustedSafes, similarAddresses, isAtLimit)}
+          {renderSafeCards(trustedSafes, similarities, isAtLimit)}
         </>
       )}
 
       {ownedSafes.length > 0 && (
         <>
           <SectionRow label="Owned safes" selectAll={ownedSelectAll} testId="select-all-owned" />
-          {renderSafeCards(ownedSafes, similarAddresses, isAtLimit)}
+          {renderSafeCards(ownedSafes, similarities, isAtLimit)}
         </>
       )}
     </div>

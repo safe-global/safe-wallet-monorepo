@@ -2,10 +2,12 @@
  * Shared shadcn-only primitives used by the AccountsModal safe rows.
  * No MUI dependencies.
  */
-import { type MouseEvent, useState } from 'react'
+import { type CSSProperties, type MouseEvent, useState } from 'react'
 import { isAddress } from 'ethers'
-import { Eye, Cloud, Copy, Check, TriangleAlert } from 'lucide-react'
+import { Eye, Cloud, Copy, Check } from 'lucide-react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import { useChain } from '@/hooks/useChains'
 import { Skeleton } from '@/components/ui/skeleton'
 import NotActivatedBadgeBase from '@/components/common/NotActivatedBadge'
@@ -135,18 +137,29 @@ const TooltipFullAddress = ({ address }: { address: string }) => {
 /**
  * Shortened address; hover shows full address in a tooltip.
  *
- * When `isSimilar` is true, the two visible hex groups (first 4 and last 4) are
- * bolded inline so users can compare against another address at a glance.
+ * When `similarity` is set (Mode B anchor match), the matching visible end(s) —
+ * the first 4 hex when the front matches and/or the last 4 when the back matches —
+ * are highlighted in the match's tone (red for CRITICAL, amber for WARN) so a
+ * look-alike can't hide in the list at a glance. Mirrors EthHashInfo's Mode B highlight.
  */
 export function ShortAddressWithTooltip({
   address,
   className,
-  isSimilar = false,
+  similarity,
 }: {
   address: string
   className?: string
-  isSimilar?: boolean
+  similarity?: SimilarityMatch | null
 }) {
+  const showHighlight = Boolean(similarity) && address.startsWith('0x') && address.length >= 10
+  const isCritical = similarity?.severity === Severity.CRITICAL
+  const hlStyle: CSSProperties = {
+    color: isCritical ? 'var(--color-error-dark)' : 'var(--color-warning-dark)',
+    fontWeight: 700,
+  }
+  const front = (similarity?.prefixLen ?? 0) >= 4
+  const back = (similarity?.suffixLen ?? 0) >= 4
+
   return (
     <Tooltip>
       <TooltipTrigger
@@ -156,12 +169,12 @@ export function ShortAddressWithTooltip({
           />
         }
       >
-        {isSimilar && address.startsWith('0x') && address.length >= 10 ? (
+        {showHighlight ? (
           <>
             0x
-            <b className="text-foreground">{address.slice(2, 6)}</b>
+            {front ? <b style={hlStyle}>{address.slice(2, 6)}</b> : address.slice(2, 6)}
             ...
-            <b className="text-foreground">{address.slice(-4)}</b>
+            {back ? <b style={hlStyle}>{address.slice(-4)}</b> : address.slice(-4)}
           </>
         ) : (
           shortenAddress(address)
@@ -243,14 +256,4 @@ export function ReadOnlyBadge() {
 /** Not activated / activating badge */
 export function NotActivatedBadge({ isActivating }: { isActivating: boolean }) {
   return <NotActivatedBadgeBase isActivating={isActivating} data-testid="pending-activation-icon" />
-}
-
-/** "High similarity" warning badge */
-export function SimilarityBadge() {
-  return (
-    <span className="mt-0.5 inline-flex w-fit items-center gap-1 rounded-full bg-amber-50 px-1.5 py-px text-[11px] leading-none text-amber-700 dark:bg-[var(--color-warning-background)] dark:text-[var(--color-warning1-contrast-text)]">
-      <TriangleAlert className="size-3 shrink-0" />
-      High similarity
-    </span>
-  )
 }

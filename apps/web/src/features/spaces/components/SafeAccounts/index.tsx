@@ -13,7 +13,6 @@ import {
   getComparator,
   useSafeItemBuilder,
 } from '@/hooks/safes'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
 import { useSpaceSafes, useIsInvited } from '@/features/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { TriangleAlert, RotateCw } from 'lucide-react'
@@ -46,11 +45,6 @@ const SpaceSafeAccounts = () => {
 
     return spaceSafes.map((safe) => buildSafeItem(safe.chainId, safe.address))
   }, [buildSafeItem, allSafes])
-
-  const similarAddresses = useMemo<Set<string>>(
-    () => getFlaggedSimilarAddressSet(spaceSafeItems.map((s) => s.address)),
-    [spaceSafeItems],
-  )
 
   // Group and sort
   const displaySafes = useMemo<AllSafeItems>(
@@ -95,7 +89,7 @@ const SpaceSafeAccounts = () => {
       ) : !hasResults && allSafes && allSafes.length === 0 ? (
         <EmptySafeAccounts />
       ) : (
-        <AccountsSafesList safes={displaySafes} similarAddresses={similarAddresses} />
+        <AccountsSafesList safes={displaySafes} />
       )}
     </>
   )

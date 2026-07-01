@@ -23,6 +23,7 @@ import MultiSafeItemCard from './MultiSafeItemCard'
 import { useAccountsModalItems } from './useAccountsModalItems'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import type { AllSafeItems } from '@/hooks/safes'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 
 interface AccountsModalProps {
   open: boolean
@@ -34,7 +35,7 @@ interface AccountsModalProps {
 }
 
 interface SectionOptions {
-  similarAddresses: Set<string>
+  getMatch: (address: string) => SimilarityMatch | undefined
   onClose: () => void
   headerPaddingTopClass: string
   openSafeTrackingLabel: OVERVIEW_LABELS
@@ -63,7 +64,7 @@ const renderSection = (title: string, items: AllSafeItems, opts: SectionOptions)
           <MultiSafeItemCard
             key={item.address}
             item={item}
-            isSimilar={opts.similarAddresses.has(item.address.toLowerCase())}
+            match={opts.getMatch(item.address)}
             onClose={opts.onClose}
             openSafeTrackingLabel={opts.openSafeTrackingLabel}
           />
@@ -71,7 +72,7 @@ const renderSection = (title: string, items: AllSafeItems, opts: SectionOptions)
           <SafeItemCard
             key={`${item.chainId}:${item.address}`}
             safeItem={item}
-            isSimilar={opts.similarAddresses.has(item.address.toLowerCase())}
+            match={opts.getMatch(item.address)}
             onClose={opts.onClose}
             openSafeTrackingLabel={opts.openSafeTrackingLabel}
           />
@@ -96,7 +97,8 @@ const AccountsModal = ({
   const {
     trustedItems,
     otherItems,
-    similarAddresses,
+    getMatch,
+    hasSimilarities,
     isLoading,
     isOwnedSafesError,
     refetchOwnedSafes,
@@ -110,7 +112,7 @@ const AccountsModal = ({
     otherItems.length,
     isWalletConnected,
     isOwnedSafesError,
-    similarAddresses.size,
+    hasSimilarities,
   ])
 
   // Unmount the dialog while the wallet-connect modal is open: the shadcn Dialog
@@ -178,13 +180,13 @@ const AccountsModal = ({
             </p>
           ) : (
             <>
-              {similarAddresses.size > 0 && (
+              {hasSimilarities && (
                 <div className="px-2 pb-2 pt-1">
                   <SimilarAddressAlert />
                 </div>
               )}
               {renderSection('Trusted Safes', trustedItems, {
-                similarAddresses,
+                getMatch,
                 onClose,
                 headerPaddingTopClass: 'pt-1',
                 openSafeTrackingLabel: trackingLabel,
@@ -216,7 +218,7 @@ const AccountsModal = ({
                 ),
               })}
               {renderSection('Other Safes', otherItems, {
-                similarAddresses,
+                getMatch,
                 onClose,
                 headerPaddingTopClass: 'pt-2',
                 openSafeTrackingLabel: trackingLabel,

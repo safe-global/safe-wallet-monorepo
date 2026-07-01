@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
 import type { SelectableSafe } from './useTrustedSafesModal.types'
+import { INTRA_LIST_MATCH } from '@/features/address-poisoning'
 
 const mockSafe: SelectableSafe = {
   chainId: '1',
@@ -10,7 +11,7 @@ const mockSafe: SelectableSafe = {
   isReadOnly: false,
   lastVisited: 0,
   isSelected: false,
-  similarityGroup: '123456_5678',
+  similarity: { match: INTRA_LIST_MATCH },
 }
 
 describe('SimilarityConfirmDialog', () => {

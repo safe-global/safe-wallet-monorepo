@@ -1,5 +1,6 @@
 import { Controller, useFormContext } from 'react-hook-form'
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import type { AddAccountsFormValues } from '../../../hooks/useSelectAll.types'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 
@@ -11,11 +12,12 @@ const getMultiChainSafeId = (mcSafe: MultiChainSafeItem) => `${MULTICHAIN_SAFE_K
 
 interface SafeCardProps {
   safe: SafeItem | MultiChainSafeItem
-  isSimilar?: boolean
+  match?: SimilarityMatch
+  intraList?: boolean
   isAtLimit?: boolean
 }
 
-const SafeCard = ({ safe, isSimilar, isAtLimit = false }: SafeCardProps) => {
+const SafeCard = ({ safe, match, intraList, isAtLimit = false }: SafeCardProps) => {
   const isMultiChain = isMultiChainSafeItem(safe)
   const { setValue, watch, control } = useFormContext<AddAccountsFormValues>()
   const { name, fiatValue, threshold, ownersCount, elementRef, isUndeployed, isActivating } = useSafeCardData(safe)
@@ -50,7 +52,8 @@ const SafeCard = ({ safe, isSimilar, isAtLimit = false }: SafeCardProps) => {
         fiatValue={fiatValue}
         threshold={threshold}
         ownersCount={ownersCount}
-        isSimilar={isSimilar}
+        match={match}
+        intraList={intraList}
         isUndeployed={isUndeployed}
         isActivating={isActivating}
       />
@@ -74,7 +77,8 @@ const SafeCard = ({ safe, isSimilar, isAtLimit = false }: SafeCardProps) => {
           fiatValue={fiatValue}
           threshold={threshold}
           ownersCount={ownersCount}
-          isSimilar={isSimilar}
+          match={match}
+          intraList={intraList}
           isUndeployed={isUndeployed}
           isActivating={isActivating}
         />

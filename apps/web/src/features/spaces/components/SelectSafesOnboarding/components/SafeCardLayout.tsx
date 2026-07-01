@@ -4,8 +4,9 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { AccountItem } from '@/features/myAccounts'
 import Identicon from '@/components/common/Identicon'
 import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
-import { Badge } from '@/components/ui/badge'
-import { TriangleAlert } from 'lucide-react'
+import EthHashInfo from '@/components/common/EthHashInfo'
+import { SimilarityFlag } from '@/features/address-poisoning'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { cn } from '@/utils/cn'
 import FiatBalance from './FiatBalance'
@@ -22,7 +23,8 @@ interface SafeCardLayoutProps {
   fiatValue: string | number | undefined
   threshold: number
   ownersCount: number
-  isSimilar?: boolean
+  match?: SimilarityMatch
+  intraList?: boolean
   isUndeployed?: boolean
   isActivating?: boolean
   disabled?: boolean
@@ -39,7 +41,8 @@ export const SafeCardLayout = ({
   fiatValue,
   threshold,
   ownersCount,
-  isSimilar,
+  match,
+  intraList,
   isUndeployed = false,
   isActivating = false,
   disabled = false,
@@ -73,24 +76,22 @@ export const SafeCardLayout = ({
       </span>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        {isSimilar && (
-          <Badge variant="warning" className="self-start -ml-px">
-            <TriangleAlert data-icon="inline-start" />
-            High similarity
-          </Badge>
-        )}
+        <SimilarityFlag match={match} intraList={intraList} />
+
         <div className="flex min-w-0 items-center gap-2">
           <span className="truncate text-base font-medium text-foreground">{name || shortenAddress(address)}</span>
         </div>
         <div className="flex min-w-0 items-center gap-1.5">
           <span className="block min-w-0 break-all text-xs text-muted-foreground">
-            {isSimilar ? (
-              <>
-                {address.slice(0, 2)}
-                <b>{address.slice(2, 6)}</b>
-                {address.slice(6, -4)}
-                <b>{address.slice(-4)}</b>
-              </>
+            {match ? (
+              <EthHashInfo
+                address={address}
+                showAvatar={false}
+                showCopyButton={false}
+                showPrefix={false}
+                shortAddress={false}
+                similarity={match}
+              />
             ) : (
               shortenAddress(address)
             )}

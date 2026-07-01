@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
-import SimilarityFlag from '../SimilarityFlag'
+import SimilarityFlag, { INTRA_LIST_MATCH } from '../SimilarityFlag'
 
 const match = (severity: Severity): SimilarityMatch => ({
   anchor: 'a1b2c3d4e5f60718293a4b5c6d7e8f9012345678',
@@ -31,5 +31,11 @@ describe('SimilarityFlag', () => {
   it('falls back to the shortened anchor address when no name is given', () => {
     render(<SimilarityFlag match={match(Severity.CRITICAL)} />)
     expect(screen.getByLabelText(/0xa1B2\.\.\.5678/)).toBeInTheDocument()
+  })
+
+  it('shows the generic intra-list copy (no named anchor) in intraList mode', () => {
+    render(<SimilarityFlag match={INTRA_LIST_MATCH} intraList />)
+    expect(screen.getByText('High risk')).toBeInTheDocument()
+    expect(screen.getByLabelText(/closely resembles another one in this list/i)).toBeInTheDocument()
   })
 })

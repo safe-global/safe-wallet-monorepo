@@ -6,6 +6,8 @@ import { SelectItem } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
+import { SimilarityFlag } from '@/features/address-poisoning'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import SafeInfoDisplay from './SafeInfoDisplay'
 import BalanceDisplay from './BalanceDisplay'
 import ChainLogo from './ChainLogo'
@@ -14,6 +16,7 @@ import type { SafeItemData, SafeItemDataChain } from '../types'
 
 interface MultiChainSafeItemRowProps {
   item: SafeItemData
+  match?: SimilarityMatch
 }
 
 function StatusBadge({ chain }: { chain: SafeItemDataChain }) {
@@ -31,14 +34,19 @@ function StatusBadge({ chain }: { chain: SafeItemDataChain }) {
   return null
 }
 
-const MultiChainSafeItemRow = ({ item }: MultiChainSafeItemRowProps) => {
+const MultiChainSafeItemRow = ({ item, match }: MultiChainSafeItemRowProps) => {
   const chainId = item.chains[0]?.chainId ?? ''
   const resolvedName = useSafeDisplayName(item.address, chainId, item.name)
 
   return (
     <Collapsible className="my-1 rounded-lg">
       <CollapsibleTrigger className="flex w-full items-center gap-3 rounded-lg px-4 py-4 text-left outline-none hover:bg-muted/30 focus-visible:ring-2 focus-visible:ring-ring cursor-pointer">
-        <SafeInfoDisplay name={resolvedName} address={item.address} className="flex-1 min-w-0" />
+        <SafeInfoDisplay
+          name={resolvedName}
+          address={item.address}
+          className="flex-1 min-w-0"
+          flag={<SimilarityFlag match={match} />}
+        />
         <div className="flex items-center bg-muted rounded-full p-0.5 shrink-0">
           {item.chains.slice(0, 3).map((chainItem, index) => (
             <span

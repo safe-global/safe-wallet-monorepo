@@ -1,30 +1,28 @@
+import { useMemo } from 'react'
 import { type AllSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
+import { useListSimilarities } from '@/features/address-poisoning'
 import SafeCardReadOnly from './SafeCardReadOnly'
 import SafeCardsErrorBoundary from './SafeCardsErrorBoundary'
-import SimilarAddressAlert from '@/components/common/SimilarAddressAlert'
 
 interface SafeListProps {
   safes: AllSafeItems
-  similarAddresses: Set<string>
 }
 
-const renderSafeCards = (safes: AllSafeItems, similarAddresses: Set<string>) =>
-  safes.map((safe, index) => {
-    const isSimilar = similarAddresses.has(safe.address.toLowerCase())
-    const key = isMultiChainSafeItem(safe) ? `multi-${safe.address}-${index}` : `${safe.chainId}:${safe.address}`
-    return (
-      <SafeCardsErrorBoundary key={key}>
-        <SafeCardReadOnly safe={safe} isSimilar={isSimilar} />
-      </SafeCardsErrorBoundary>
-    )
-  })
+const AccountsSafesList = ({ safes }: SafeListProps) => {
+  // Mode B: flag any listed safe that resembles a trusted anchor (impostor-next-to-real).
+  const addresses = useMemo(() => safes.map((safe) => safe.address), [safes])
+  const similarities = useListSimilarities(addresses)
 
-const AccountsSafesList = ({ safes, similarAddresses }: SafeListProps) => {
   return (
     <div className="flex w-full flex-col gap-2 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]">
-      {similarAddresses.size > 0 && <SimilarAddressAlert />}
-
-      {renderSafeCards(safes, similarAddresses)}
+      {safes.map((safe, index) => {
+        const key = isMultiChainSafeItem(safe) ? `multi-${safe.address}-${index}` : `${safe.chainId}:${safe.address}`
+        return (
+          <SafeCardsErrorBoundary key={key}>
+            <SafeCardReadOnly safe={safe} match={similarities.get(safe.address)?.match} />
+          </SafeCardsErrorBoundary>
+        )
+      })}
     </div>
   )
 }

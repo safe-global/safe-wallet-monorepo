@@ -3,6 +3,7 @@ import TrustedSafesModal from './index'
 import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 import { useRouter } from 'next/router'
 import { useIsQualifiedSafe } from '@/features/spaces'
+import { INTRA_LIST_MATCH } from '@/features/address-poisoning'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
@@ -52,7 +53,6 @@ const mockModal: UseTrustedSafesModalReturn = {
       isReadOnly: false,
       lastVisited: 0,
       isSelected: false,
-      similarityGroup: undefined,
     },
     {
       chainId: '1',
@@ -62,7 +62,6 @@ const mockModal: UseTrustedSafesModalReturn = {
       isReadOnly: false,
       lastVisited: 0,
       isSelected: true,
-      similarityGroup: undefined,
     },
   ],
   selectedAddresses: new Set(['0xabcdef1234567890abcdef1234567890abcdef12']),
@@ -249,7 +248,7 @@ describe('TrustedSafesModal', () => {
           isReadOnly: false,
           lastVisited: 0,
           isSelected: false,
-          similarityGroup: 'test_group',
+          similarity: { match: INTRA_LIST_MATCH },
         },
       ],
     }
@@ -274,7 +273,7 @@ describe('TrustedSafesModal', () => {
           isReadOnly: false,
           lastVisited: 0,
           isSelected: false,
-          similarityGroup: 'test_group',
+          similarity: { match: INTRA_LIST_MATCH },
         },
       ],
     }
@@ -299,7 +298,7 @@ describe('TrustedSafesModal', () => {
           isReadOnly: false,
           lastVisited: 0,
           isSelected: false,
-          similarityGroup: 'test_group',
+          similarity: { match: INTRA_LIST_MATCH },
         },
       ],
     }

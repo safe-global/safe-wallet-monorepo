@@ -23,10 +23,13 @@ import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { cn } from '@/utils/cn'
 import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
+import EthHashInfo from '@/components/common/EthHashInfo'
+import { SimilarityFlag } from '@/features/address-poisoning'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 
 interface SafeCardReadOnlyProps {
   safe: SafeItem | MultiChainSafeItem
-  isSimilar?: boolean
+  match?: SimilarityMatch
   hideContextMenu?: boolean
   className?: string
   showPending?: boolean
@@ -37,7 +40,7 @@ interface SafeCardReadOnlyProps {
 
 const SafeCardReadOnly = ({
   safe,
-  isSimilar,
+  match,
   className,
   showPending = true,
   onClick,
@@ -109,12 +112,8 @@ const SafeCardReadOnly = ({
           </span>
 
           <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-            {isSimilar && (
-              <Badge variant="warning" className="self-start -ml-px">
-                <TriangleAlert data-icon="inline-start" />
-                High similarity
-              </Badge>
-            )}
+            <SimilarityFlag match={match} />
+
             <div className="flex min-w-0 items-center gap-2">
               <span className="truncate text-base font-medium text-foreground">
                 {displayName || shortenAddress(safe.address)}
@@ -122,13 +121,15 @@ const SafeCardReadOnly = ({
             </div>
             <div className="flex min-w-0 items-center gap-1.5">
               <span className="block min-w-0 break-all text-xs text-muted-foreground">
-                {isSimilar ? (
-                  <>
-                    {safe.address.slice(0, 2)}
-                    <b>{safe.address.slice(2, 6)}</b>
-                    {safe.address.slice(6, -4)}
-                    <b>{safe.address.slice(-4)}</b>
-                  </>
+                {match ? (
+                  <EthHashInfo
+                    address={safe.address}
+                    showAvatar={false}
+                    showCopyButton={false}
+                    showPrefix={false}
+                    shortAddress={false}
+                    similarity={match}
+                  />
                 ) : (
                   shortenAddress(safe.address)
                 )}

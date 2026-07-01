@@ -5,13 +5,14 @@
  */
 
 import type { SafeItem, MultiChainSafeItem } from '@/hooks/safes'
+import type { SelectionSimilarity } from '@/features/address-poisoning'
 
 /** A safe item with selection state for the modal - extends SafeItem with selection and similarity data */
 export interface SelectableSafe extends SafeItem {
   /** Whether this safe is currently selected in modal */
   isSelected: boolean
-  /** Bucket key if flagged for similarity */
-  similarityGroup?: string
+  /** Combined anchor + intra-list similarity (Mode B) */
+  similarity?: SelectionSimilarity
 }
 
 /** A multichain safe item with selection state for the modal */
@@ -22,8 +23,8 @@ export interface SelectableMultiChainSafe extends Omit<MultiChainSafeItem, 'safe
   isSelected: boolean
   /** Whether some but not all safes are selected (indeterminate) */
   isPartiallySelected: boolean
-  /** Bucket key if flagged for similarity */
-  similarityGroup?: string
+  /** Combined anchor + intra-list similarity (Mode B) */
+  similarity?: SelectionSimilarity
 }
 
 /** Union type for all selectable items */

@@ -22,22 +22,23 @@ import {
   ReadOnlyBadge,
   NotActivatedBadge,
   CopyAddressButton,
-  SimilarityBadge,
   ShortAddressWithTooltip,
 } from './shared'
 import PinnedSafeContextMenu from './PinnedSafeContextMenu'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { SimilarityFlag } from '@/features/address-poisoning'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 
 interface SafeItemCardProps {
   safeItem: SafeItem
-  isSimilar?: boolean
+  match?: SimilarityMatch
   onClose: () => void
   openSafeTrackingLabel?: OVERVIEW_LABELS
 }
 
 const SafeItemCard = ({
   safeItem,
-  isSimilar,
+  match,
   onClose,
   openSafeTrackingLabel = OVERVIEW_LABELS.top_bar,
 }: SafeItemCardProps) => {
@@ -108,11 +109,11 @@ const SafeItemCard = ({
           {addressBookItem?.name && addressBookItem.source && <NameSourceIcon source={addressBookItem.source} />}
         </div>
         <div className="flex items-center gap-1 min-w-0">
-          <ShortAddressWithTooltip address={safeItem.address} isSimilar={isSimilar} />
+          <ShortAddressWithTooltip address={safeItem.address} similarity={match} />
           <CopyAddressButton address={safeItem.address} />
         </div>
-        {isSimilar && <SimilarityBadge />}
-        {!undeployedSafe && safeItem.isReadOnly && !isSimilar && <ReadOnlyBadge />}
+        <SimilarityFlag match={match} />
+        {!undeployedSafe && safeItem.isReadOnly && !match && <ReadOnlyBadge />}
       </div>
 
       {/* Chain logo */}

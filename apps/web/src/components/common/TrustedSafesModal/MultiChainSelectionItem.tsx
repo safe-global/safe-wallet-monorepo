@@ -2,7 +2,7 @@ import { useState, type MouseEvent } from 'react'
 import classnames from 'classnames'
 import type { SelectableMultiChainSafe } from './useTrustedSafesModal.types'
 import { useMultiAccountItemData, useSafeItemData, AccountItem } from '@/features/myAccounts'
-import SimilarityWarning from './SimilarityWarning'
+import { SimilarityFlag } from '@/features/address-poisoning'
 import css from './styles.module.css'
 
 interface MultiChainSelectionItemProps {
@@ -83,7 +83,7 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
     setExpanded((prev) => !prev)
   }
 
-  const statusChips = <>{multiSafe.similarityGroup && <SimilarityWarning />}</>
+  const statusChips = <SimilarityFlag match={multiSafe.similarity?.match} intraList={multiSafe.similarity?.intraList} />
 
   return (
     <div data-testid="safe-list-item" className={classnames(css.multiListItem, css.listItem, 'my-0.5')}>
@@ -106,7 +106,7 @@ const MultiChainSelectionItem = ({ multiSafe, onToggle }: MultiChainSelectionIte
                 showCopyButton
                 hasExplorer
                 showPrefix={false}
-                highlight4bytes={!!multiSafe.similarityGroup}
+                similarity={multiSafe.similarity?.match}
               >
                 {statusChips}
               </AccountItem.Info>

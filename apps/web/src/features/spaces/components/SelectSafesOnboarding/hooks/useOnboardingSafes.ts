@@ -17,7 +17,7 @@ import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } f
 import useWallet from '@/hooks/wallets/useWallet'
 import useChains from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { useSelectionSimilarities, type SelectionSimilarity } from '@/features/address-poisoning'
 
 const _groupAndSort = (
   items: SafeItem[],
@@ -64,10 +64,18 @@ const useOnboardingSafes = () => {
     return { trustedSafeItems: trusted, ownedSafeItems: owned }
   }, [allChainIds, allAdded, allOwned, allUndeployed, walletAddress, allVisitedSafes, allSafeNames])
 
-  const similarAddresses = useMemo<Set<string>>(() => {
-    const allItems = [...trustedSafeItems, ...ownedSafeItems]
-    return getFlaggedSimilarAddressSet(allItems.map((s) => s.address))
-  }, [trustedSafeItems, ownedSafeItems])
+  // Anchor-based (Mode B): flag an owned/candidate safe that resembles a safe you already trust
+  // (front OR back → one-end amber / both-ends red). Only the impostor flags; the trusted one is skipped.
+  const similarityAddresses = useMemo(
+    () => [...trustedSafeItems, ...ownedSafeItems].map((s) => s.address),
+    [trustedSafeItems, ownedSafeItems],
+  )
+  const selectionSimilarities = useSelectionSimilarities(similarityAddresses)
+  const similarities = useMemo(() => {
+    const map = new Map<string, SelectionSimilarity>()
+    for (const [address, similarity] of selectionSimilarities) map.set(address.toLowerCase(), similarity)
+    return map
+  }, [selectionSimilarities])
 
   // Group into multi-chain / single-chain and sort
   const trustedGrouped = useMemo<AllSafeItems>(
@@ -92,7 +100,7 @@ const useOnboardingSafes = () => {
   return {
     trustedSafes: searchQuery ? filteredTrusted : trustedGrouped,
     ownedSafes: searchQuery ? filteredOwned : ownedGrouped,
-    similarAddresses,
+    similarities,
     handleSearch,
     hasNoSafes,
   }

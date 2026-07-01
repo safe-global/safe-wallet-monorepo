@@ -7,34 +7,49 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 
 /**
- * Mode B list flag: a compact pill (with an explanatory tooltip) marking a list row whose
- * address resembles a trusted anchor. Two tiers, same pattern, tone-differentiated:
- * both-ends match → red "High risk"; one-end match → amber "Caution" — matching the Mode A
- * card chips. Renders nothing when there is no match.
+ * Synthetic match for the intra-list surfaces (nested-safes curate, onboarding, add-accounts):
+ * their old engine buckets on front AND back, so a flag is always a both-ends (CRITICAL) hit.
+ * Used to drive the shared highlight + flag without an anchor (no trusted reference exists yet).
+ */
+export const INTRA_LIST_MATCH: SimilarityMatch = { anchor: '', prefixLen: 4, suffixLen: 4, severity: Severity.CRITICAL }
+
+/**
+ * Mode B list flag: a compact pill (with an explanatory tooltip) marking a list row whose address
+ * resembles either a trusted anchor (anchor mode) or another address in the same list (`intraList`
+ * mode — used where nothing is trusted yet, e.g. picking which owned Safes to add). Two tiers, same
+ * pattern, tone-differentiated: both-ends → red "High risk"; one-end → amber "Caution" — matching the
+ * Mode A card chips. Renders nothing when there is no match.
  */
 const SimilarityFlag = ({
   match,
   anchorName,
+  intraList = false,
 }: {
   match?: SimilarityMatch | null
   anchorName?: string
+  intraList?: boolean
 }): ReactElement | null => {
   if (!match) return null
 
   const isCritical = match.severity === Severity.CRITICAL
   const label = isCritical ? 'High risk' : 'Caution'
 
-  let anchor = `0x${match.anchor}`
-  try {
-    anchor = getAddress(anchor)
-  } catch {
-    // keep the lowercase form if the anchor isn't a valid checksum
+  let tip: string
+  if (intraList) {
+    // No trusted reference at selection time — warn that two list entries collide.
+    tip = 'This address closely resembles another one in this list. Verify carefully before you select it.'
+  } else {
+    let anchor = `0x${match.anchor}`
+    try {
+      anchor = getAddress(anchor)
+    } catch {
+      // keep the lowercase form if the anchor isn't a valid checksum
+    }
+    const name = anchorName || shortenAddress(anchor)
+    tip = isCritical
+      ? `Looks like ${name}, an address you trust — the middle differs. Verify before using it.`
+      : `Shares the visible characters with ${name}, an address you trust. This could be a coincidence — verify.`
   }
-  const name = anchorName || shortenAddress(anchor)
-
-  const tip = isCritical
-    ? `Looks like ${name}, an address you trust — the middle differs. Verify before using it.`
-    : `Shares the visible characters with ${name}, an address you trust. This could be a coincidence — verify.`
 
   return (
     <Tooltip title={tip} arrow>

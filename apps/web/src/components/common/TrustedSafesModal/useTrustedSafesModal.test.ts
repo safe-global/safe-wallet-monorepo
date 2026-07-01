@@ -2,7 +2,9 @@ import { renderHook, act } from '@testing-library/react'
 import useTrustedSafesModal from './useTrustedSafesModal'
 import * as store from '@/store'
 import * as useAllSafes from '@/hooks/safes/useAllSafes'
-import * as addressSimilarity from '@safe-global/utils/utils/addressSimilarity'
+import * as addressPoisoning from '@/features/address-poisoning'
+import { INTRA_LIST_MATCH } from '@/features/address-poisoning'
+import type { SelectionSimilarity } from '@/features/address-poisoning'
 
 jest.mock('@/store', () => ({
   useAppDispatch: jest.fn(),
@@ -14,9 +16,27 @@ jest.mock('@/hooks/safes/useAllSafes', () => ({
   default: jest.fn(),
 }))
 
-jest.mock('@safe-global/utils/utils/addressSimilarity', () => ({
-  detectSimilarAddresses: jest.fn(),
+// The hook only consumes `useSelectionSimilarities` from this barrel; mock just that (plus the
+// real INTRA_LIST_MATCH constant used by fixtures) to avoid eagerly loading the whole feature
+// (AddressPoisoningGuard → address-book → heavy tree).
+jest.mock('@/features/address-poisoning', () => ({
+  __esModule: true,
+  useSelectionSimilarities: jest.fn(),
+  INTRA_LIST_MATCH: jest.requireActual('@/features/address-poisoning/components/SimilarityFlag').INTRA_LIST_MATCH,
 }))
+
+/**
+ * Builds the Map that `useSelectionSimilarities` returns for a given set of addresses:
+ * the listed `flagged` addresses get an intra-list match (truthy `.match`), all others get `{}`.
+ */
+const mockSimilarities = (addresses: string[], flagged: string[] = []): Map<string, SelectionSimilarity> => {
+  const flaggedSet = new Set(flagged.map((a) => a.toLowerCase()))
+  const map = new Map<string, SelectionSimilarity>()
+  for (const address of addresses) {
+    map.set(address, flaggedSet.has(address.toLowerCase()) ? { match: INTRA_LIST_MATCH, intraList: true } : {})
+  }
+  return map
+}
 
 describe('useTrustedSafesModal', () => {
   const mockDispatch = jest.fn()
@@ -25,17 +45,19 @@ describe('useTrustedSafesModal', () => {
     { chainId: '1', address: '0xabcdef1234567890abcdef1234567890abcdef12', name: 'Safe 2', isPinned: false },
   ]
 
+  // Flags the given addresses in the mocked useSelectionSimilarities result.
+  const setFlaggedAddresses = (flagged: string[]) => {
+    ;(addressPoisoning.useSelectionSimilarities as jest.Mock).mockImplementation((addresses: string[]) =>
+      mockSimilarities(addresses, flagged),
+    )
+  }
+
   beforeEach(() => {
     jest.clearAllMocks()
     ;(store.useAppDispatch as jest.Mock).mockReturnValue(mockDispatch)
     ;(store.useAppSelector as jest.Mock).mockReturnValue({})
     ;(useAllSafes.default as jest.Mock).mockReturnValue(mockSafes)
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: () => false,
-      getGroup: () => undefined,
-    })
+    setFlaggedAddresses([])
   })
 
   it('should initialize with modal closed', () => {
@@ -86,12 +108,7 @@ describe('useTrustedSafesModal', () => {
   })
 
   it('should show pending confirmation for flagged address', () => {
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: (addr: string) => addr === mockSafes[0].address,
-      getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
-    })
+    setFlaggedAddresses([mockSafes[0].address])
 
     const { result } = renderHook(() => useTrustedSafesModal())
 
@@ -103,12 +120,7 @@ describe('useTrustedSafesModal', () => {
   })
 
   it('should confirm similar address', () => {
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: (addr: string) => addr === mockSafes[0].address,
-      getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
-    })
+    setFlaggedAddresses([mockSafes[0].address])
 
     const { result } = renderHook(() => useTrustedSafesModal())
 
@@ -233,12 +245,7 @@ describe('useTrustedSafesModal', () => {
   })
 
   it('should show confirmation without changing selection when selecting all with similar addresses', () => {
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: (addr: string) => addr === mockSafes[0].address,
-      getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
-    })
+    setFlaggedAddresses([mockSafes[0].address])
 
     const { result } = renderHook(() => useTrustedSafesModal())
 
@@ -251,12 +258,7 @@ describe('useTrustedSafesModal', () => {
   })
 
   it('should select all including similar when confirmed', () => {
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: (addr: string) => addr === mockSafes[0].address,
-      getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
-    })
+    setFlaggedAddresses([mockSafes[0].address])
 
     const { result } = renderHook(() => useTrustedSafesModal())
 
@@ -275,12 +277,7 @@ describe('useTrustedSafesModal', () => {
   })
 
   it('should revert to the prior selection when select all cancelled', () => {
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: (addr: string) => addr === mockSafes[0].address,
-      getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
-    })
+    setFlaggedAddresses([mockSafes[0].address])
 
     const { result } = renderHook(() => useTrustedSafesModal())
 
@@ -297,12 +294,7 @@ describe('useTrustedSafesModal', () => {
   })
 
   it('should select only non-similar safes when skipping similar addresses', () => {
-    ;(addressSimilarity.detectSimilarAddresses as jest.Mock).mockReturnValue({
-      groups: [],
-      addressToGroups: new Map(),
-      isFlagged: (addr: string) => addr === mockSafes[0].address,
-      getGroup: () => ({ bucketKey: 'test', addresses: [], hasKnownAddress: true, riskLevel: 'high' }),
-    })
+    setFlaggedAddresses([mockSafes[0].address])
 
     const { result } = renderHook(() => useTrustedSafesModal())
 

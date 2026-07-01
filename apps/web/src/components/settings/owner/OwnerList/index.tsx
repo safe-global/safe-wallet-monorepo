@@ -19,11 +19,16 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import type { AddressBook } from '@/store/addressBookSlice'
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
+import { useListSimilarities, SimilarityFlag } from '@/features/address-poisoning'
 
 export const OwnerList = () => {
   const addressBook = useAddressBook()
   const { safe } = useSafeInfo()
   const { setTxFlow } = useContext(TxModalContext)
+
+  // Mode B: flag any listed signer that resembles a trusted anchor (impostor-next-to-real).
+  const addresses = useMemo(() => safe.owners.map((owner) => owner.value), [safe.owners])
+  const similarities = useListSimilarities(addresses)
 
   const rows = useMemo(() => {
     const showRemoveOwnerButton = safe.owners.length > 1
@@ -31,13 +36,26 @@ export const OwnerList = () => {
     return safe.owners.map((owner) => {
       const address = owner.value
       const name = addressBook[address]
+      const match = similarities.get(address)?.match
 
       return {
         key: address,
         cells: {
           owner: {
             rawValue: address,
-            content: <NamedAddressInfo address={address} showCopyButton shortAddress={false} name={name} hasExplorer />,
+            content: (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <NamedAddressInfo
+                  address={address}
+                  showCopyButton
+                  shortAddress={false}
+                  name={name}
+                  hasExplorer
+                  similarity={match}
+                />
+                <SimilarityFlag match={match} />
+              </Box>
+            ),
           },
           actions: {
             rawValue: '',
@@ -89,7 +107,7 @@ export const OwnerList = () => {
         },
       }
     })
-  }, [safe.owners, safe.chainId, addressBook, setTxFlow])
+  }, [safe.owners, safe.chainId, addressBook, setTxFlow, similarities])
 
   return (
     <Box

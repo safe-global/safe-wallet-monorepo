@@ -6,7 +6,7 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { OVERVIEW_EVENTS, PIN_SAFE_LABELS, trackEvent } from '@/services/analytics'
 import { useAllSafesGrouped } from '@/hooks/safes/useAllSafesGrouped'
 import useAllSafes from '@/hooks/safes/useAllSafes'
-import { detectSimilarAddresses } from '@safe-global/utils/utils/addressSimilarity'
+import { useSelectionSimilarities, type SelectionSimilarity } from '@/features/address-poisoning'
 import type { SelectableSafe, SelectableMultiChainSafe, SelectableItem } from './useTrustedSafesModal.types'
 import { isSelectableMultiChainSafe } from './useTrustedSafesModal.types'
 
@@ -103,7 +103,18 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     return allSafes?.map((safe) => safe.address) ?? []
   }, [allSafes])
 
-  const similarityResult = useMemo(() => detectSimilarAddresses(addresses), [addresses])
+  // Combined anchor + intra-list detection (Mode B). Keyed by lowercase address for lookup.
+  const selectionSimilarities = useSelectionSimilarities(addresses)
+  const similarityByAddress = useMemo(() => {
+    const map = new Map<string, SelectionSimilarity>()
+    for (const [address, similarity] of selectionSimilarities) map.set(address.toLowerCase(), similarity)
+    return map
+  }, [selectionSimilarities])
+
+  const isFlagged = useCallback(
+    (address: string): boolean => Boolean(similarityByAddress.get(address.toLowerCase())?.match),
+    [similarityByAddress],
+  )
 
   // Structural list (no selection state) — rebuilds only when the underlying safes, pins,
   // similarity, or search change, not on every checkbox click.
@@ -121,13 +132,13 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     for (const multiSafe of allMultiChainSafes) {
       if (!matchesSearch(multiSafe.address, multiSafe.name)) continue
 
-      const group = similarityResult.getGroup(multiSafe.address)
+      const similarity = similarityByAddress.get(multiSafe.address.toLowerCase())
 
       const selectableSafes: SelectableSafe[] = multiSafe.safes.map((safe) => ({
         ...safe,
         isPinned: Boolean(addedSafes[safe.chainId]?.[safe.address]),
         isSelected: false,
-        similarityGroup: group?.bucketKey,
+        similarity: similarityByAddress.get(safe.address.toLowerCase()),
       }))
 
       const isPinned = selectableSafes.some((s) => s.isPinned)
@@ -140,26 +151,26 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
         name: multiSafe.name,
         isSelected: false,
         isPartiallySelected: false, // All chains share same selection
-        similarityGroup: group?.bucketKey,
+        similarity,
       } as SelectableMultiChainSafe)
     }
 
     for (const safe of allSingleSafes) {
       if (!matchesSearch(safe.address, safe.name)) continue
 
-      const group = similarityResult.getGroup(safe.address)
+      const similarity = similarityByAddress.get(safe.address.toLowerCase())
       const isPinned = Boolean(addedSafes[safe.chainId]?.[safe.address])
 
       items.push({
         ...safe,
         isPinned,
         isSelected: false,
-        similarityGroup: group?.bucketKey,
+        similarity,
       } as SelectableSafe)
     }
 
     return items
-  }, [allMultiChainSafes, allSingleSafes, addedSafes, similarityResult, searchQuery])
+  }, [allMultiChainSafes, allSingleSafes, addedSafes, similarityByAddress, searchQuery])
 
   // Thin overlay injecting selection state over the structural list
   const availableItems = useMemo<SelectableItem[]>(() => {
@@ -189,7 +200,7 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
   }, [allSafes, selectedAddresses, addedSafes])
 
   const similarAddressesForSelectAll = useMemo(() => {
-    return availableItems.filter((item) => item.similarityGroup)
+    return availableItems.filter((item) => item.similarity?.match)
   }, [availableItems])
 
   // Addresses of the currently visible (search-filtered) items; selection itself stays full-list
@@ -208,14 +219,14 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
   const toggleSelection = useCallback(
     (address: string) => {
       const normalizedAddress = address.toLowerCase()
-      const isFlagged = similarityResult.isFlagged(address)
+      const addressIsFlagged = isFlagged(address)
 
       // Functional update so the callback doesn't depend on selectedAddresses
       setSelectedAddresses((prev) => {
         const isCurrentlySelected = prev.has(normalizedAddress)
 
         // Selecting a flagged address needs explicit confirmation first
-        if (!isCurrentlySelected && isFlagged) {
+        if (!isCurrentlySelected && addressIsFlagged) {
           setPendingConfirmation(normalizedAddress)
           return prev
         }
@@ -229,7 +240,7 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
         return next
       })
     },
-    [similarityResult],
+    [isFlagged],
   )
 
   const confirmSimilarAddress = useCallback(() => {
@@ -267,12 +278,12 @@ const useTrustedSafesModal = (): UseTrustedSafesModalReturn => {
     setSelectedAddresses((prev) => {
       const next = new Set(prev)
       for (const item of availableItems) {
-        if (!similarityResult.isFlagged(item.address)) next.add(item.address.toLowerCase())
+        if (!isFlagged(item.address)) next.add(item.address.toLowerCase())
       }
       return next
     })
     setPendingSelectAllConfirmation(false)
-  }, [availableItems, similarityResult])
+  }, [availableItems, isFlagged])
 
   // X / overlay dismissal — abort Select All without changing the selection
   const cancelSelectAll = useCallback(() => {

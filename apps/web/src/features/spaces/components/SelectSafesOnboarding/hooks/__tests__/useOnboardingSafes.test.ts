@@ -19,12 +19,16 @@ describe('useOnboardingSafes', () => {
     } as ReturnType<typeof useWallet.default>)
   })
 
+  // Count only the entries the anchor engine actually flagged (truthy `.match`).
+  const countFlagged = (similarities: Map<string, { match?: unknown }>) =>
+    [...similarities.values()].filter((s) => !!s.match).length
+
   it('returns empty lists when there are no safes', () => {
     const { result } = renderHook(() => useOnboardingSafes())
 
     expect(result.current.trustedSafes).toEqual([])
     expect(result.current.ownedSafes).toEqual([])
-    expect(result.current.similarAddresses.size).toBe(0)
+    expect(countFlagged(result.current.similarities)).toBe(0)
   })
 
   it('returns trusted safes from addedSafes', () => {
@@ -125,17 +129,20 @@ describe('useOnboardingSafes', () => {
     expect('safes' in result.current.ownedSafes[0]).toBe(true)
   })
 
+  const isFlagged = (similarities: Map<string, { match?: unknown }>, address: string) =>
+    !!similarities.get(address.toLowerCase())?.match
+
   describe('similar address detection', () => {
-    it('returns empty set when fewer than 2 unique addresses', () => {
+    it('flags nothing when fewer than 2 unique addresses', () => {
       const mockOwned = { '1': ['0xSingle'] }
       jest.spyOn(allOwnedSafes, 'default').mockReturnValue([mockOwned, undefined, false])
 
       const { result } = renderHook(() => useOnboardingSafes())
 
-      expect(result.current.similarAddresses.size).toBe(0)
+      expect(countFlagged(result.current.similarities)).toBe(0)
     })
 
-    it('returns empty set when addresses are not similar', () => {
+    it('flags nothing when addresses are not similar', () => {
       const mockOwned = {
         '1': ['0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'],
       }
@@ -143,10 +150,10 @@ describe('useOnboardingSafes', () => {
 
       const { result } = renderHook(() => useOnboardingSafes())
 
-      expect(result.current.similarAddresses.size).toBe(0)
+      expect(countFlagged(result.current.similarities)).toBe(0)
     })
 
-    it('detects similar addresses across trusted and owned safes', () => {
+    it('flags an owned safe that resembles a trusted (anchored) safe', () => {
       // Same 6-char prefix and 4-char suffix, differ only in middle
       const addr1 = '0x1234567890abcdef1234567890abcdef12345678'
       const addr2 = '0x123456eeeeeeeeee1234567890abcdef12345678'
@@ -156,6 +163,7 @@ describe('useOnboardingSafes', () => {
 
       const { result } = renderHook(() => useOnboardingSafes(), {
         initialReduxState: {
+          // addedSafes feed both the trusted list AND the anchor index.
           addedSafes: {
             '1': {
               [addr1]: { owners: [], threshold: 1 },
@@ -164,9 +172,9 @@ describe('useOnboardingSafes', () => {
         },
       })
 
-      // Both should be flagged
-      expect(result.current.similarAddresses.has(addr1.toLowerCase())).toBe(true)
-      expect(result.current.similarAddresses.has(addr2.toLowerCase())).toBe(true)
+      // Only the impostor (owned) is flagged; the trusted anchor itself is not.
+      expect(isFlagged(result.current.similarities, addr2)).toBe(true)
+      expect(isFlagged(result.current.similarities, addr1)).toBe(false)
     })
   })
 })

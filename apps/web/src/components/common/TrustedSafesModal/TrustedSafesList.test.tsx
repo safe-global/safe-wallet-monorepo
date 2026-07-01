@@ -1,6 +1,8 @@
 import { render, screen } from '@/tests/test-utils'
 import TrustedSafesList from './TrustedSafesList'
 import type { SelectableItem } from './useTrustedSafesModal.types'
+import { INTRA_LIST_MATCH } from '@/features/address-poisoning'
+import type { SelectionSimilarity } from '@/features/address-poisoning'
 
 jest.mock('next/router', () => ({
   useRouter: () => ({ query: {}, pathname: '/home', push: jest.fn() }),
@@ -26,7 +28,7 @@ jest.mock('@/features/myAccounts/hooks/useSafeItemData', () => ({
   }),
 }))
 
-const makeSafe = (address: string, isSelected: boolean, similarityGroup?: string): SelectableItem => ({
+const makeSafe = (address: string, isSelected: boolean, similarity?: SelectionSimilarity): SelectableItem => ({
   chainId: '1',
   address,
   name: address,
@@ -34,7 +36,7 @@ const makeSafe = (address: string, isSelected: boolean, similarityGroup?: string
   isReadOnly: false,
   lastVisited: 0,
   isSelected,
-  similarityGroup,
+  similarity,
 })
 
 const ADDR = {
@@ -71,11 +73,13 @@ describe('TrustedSafesList ordering', () => {
     expect(checkboxOrder()).toEqual([ADDR.selectedB, ADDR.selectedD, ADDR.unselectedA, ADDR.unselectedC])
   })
 
-  it('keeps similarity groups at the top regardless of selection', () => {
+  // Mode B renders a flat list — similarity no longer buckets/floats rows; only selection floats to
+  // the top. Flagged (but unselected) rows keep their normal, selection-based position.
+  it('does not reorder flagged rows — only selection floats to the top', () => {
     const items = [
       makeSafe(ADDR.selectedB, true),
-      makeSafe(ADDR.unselectedA, false, 'group-1'),
-      makeSafe(ADDR.unselectedC, false, 'group-1'),
+      makeSafe(ADDR.unselectedA, false, { match: INTRA_LIST_MATCH, intraList: true }),
+      makeSafe(ADDR.unselectedC, false, { match: INTRA_LIST_MATCH, intraList: true }),
     ]
 
     render(
@@ -88,6 +92,6 @@ describe('TrustedSafesList ordering', () => {
       />,
     )
 
-    expect(checkboxOrder()).toEqual([ADDR.unselectedA, ADDR.unselectedC, ADDR.selectedB])
+    expect(checkboxOrder()).toEqual([ADDR.selectedB, ADDR.unselectedA, ADDR.unselectedC])
   })
 })

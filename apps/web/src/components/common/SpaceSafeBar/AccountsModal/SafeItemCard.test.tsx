@@ -1,6 +1,10 @@
 import { render, screen } from '@/tests/test-utils'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import SafeItemCard from './SafeItemCard'
+
+const criticalMatch: SimilarityMatch = { anchor: '', prefixLen: 4, suffixLen: 4, severity: Severity.CRITICAL }
 
 const defaultSafeItemData = {
   name: undefined,
@@ -51,9 +55,9 @@ describe('SafeItemCard', () => {
       })
       .build()
 
-    render(<SafeItemCard safeItem={safeItem} isSimilar onClose={noopClose} />)
+    render(<SafeItemCard safeItem={safeItem} match={criticalMatch} onClose={noopClose} />)
 
-    expect(screen.getByText('High similarity')).toBeInTheDocument()
+    expect(screen.getByText('High risk')).toBeInTheDocument()
     expect(screen.queryByText('Read-only')).not.toBeInTheDocument()
   })
 
@@ -66,7 +70,7 @@ describe('SafeItemCard', () => {
 
     render(<SafeItemCard safeItem={safeItem} onClose={noopClose} />)
 
-    expect(screen.queryByText('High similarity')).not.toBeInTheDocument()
+    expect(screen.queryByText('High risk')).not.toBeInTheDocument()
     expect(screen.getByText('Read-only')).toBeInTheDocument()
   })
 
@@ -85,7 +89,7 @@ describe('SafeItemCard', () => {
       })
       .build()
 
-    const { container } = render(<SafeItemCard safeItem={safeItem} isSimilar onClose={noopClose} />)
+    const { container } = render(<SafeItemCard safeItem={safeItem} match={criticalMatch} onClose={noopClose} />)
 
     const bolded = Array.from(container.querySelectorAll('b')).map((el) => el.textContent)
     expect(bolded).toEqual(expect.arrayContaining(['1234', '7890']))

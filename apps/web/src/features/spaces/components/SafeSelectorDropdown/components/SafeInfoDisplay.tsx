@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { blo } from 'blo'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Typography } from '@/components/ui/typography'
@@ -13,9 +14,11 @@ export interface SafeInfoDisplayProps {
   /** When provided, renders a threshold/owners badge on the avatar's bottom-right corner. */
   threshold?: number
   owners?: number
+  /** Address-poisoning similarity flag rendered beside the name (Mode B). */
+  flag?: ReactNode
 }
 
-const SafeInfoDisplay = ({ name, address, className, threshold, owners }: SafeInfoDisplayProps) => {
+const SafeInfoDisplay = ({ name, address, className, threshold, owners, flag }: SafeInfoDisplayProps) => {
   const { shortAddress, displayName } = getSafeDisplayInfo(name, address)
 
   return (
@@ -28,9 +31,12 @@ const SafeInfoDisplay = ({ name, address, className, threshold, owners }: SafeIn
         {threshold !== undefined && owners !== undefined && <ThresholdBadge threshold={threshold} owners={owners} />}
       </div>
       <div className="flex flex-col items-start flex-1 min-w-0">
-        <Typography variant="paragraph-small-medium" className="truncate">
-          {displayName}
-        </Typography>
+        <div className="flex items-center gap-1.5 min-w-0 max-w-full">
+          <Typography variant="paragraph-small-medium" className="truncate">
+            {displayName}
+          </Typography>
+          {flag}
+        </div>
         <div className="flex items-center gap-1 min-w-0">
           <Typography variant="paragraph-mini" color="muted" className="truncate">
             {shortAddress}

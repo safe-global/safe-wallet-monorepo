@@ -4,7 +4,11 @@ import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { useMultiAccountItemData } from '@/features/myAccounts'
 import type { MultiChainSafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 import MultiSafeItemCard from './MultiSafeItemCard'
+
+const criticalMatch: SimilarityMatch = { anchor: '', prefixLen: 4, suffixLen: 4, severity: Severity.CRITICAL }
 
 jest.mock('@/features/myAccounts', () => ({
   useMultiAccountItemData: jest.fn(),
@@ -111,7 +115,9 @@ describe('MultiSafeItemCard', () => {
   })
 
   it('renders the full address with bolded first/last 4 hex chars when flagged as similar', () => {
-    const { container } = render(<MultiSafeItemCard item={buildMultiItem()} isSimilar onClose={noopClose} />)
+    const { container } = render(
+      <MultiSafeItemCard item={buildMultiItem()} match={criticalMatch} onClose={noopClose} />,
+    )
 
     const bolded = Array.from(container.querySelectorAll('b')).map((el) => el.textContent)
     expect(bolded).toEqual(expect.arrayContaining(['1111', '1111']))

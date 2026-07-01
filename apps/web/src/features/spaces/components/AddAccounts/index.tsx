@@ -12,10 +12,10 @@ import {
   useAllOwnedSafes,
 } from '@/hooks/safes'
 import AddManually, { type AddManuallyFormValues } from './AddManually'
-import { getSafeId } from './SafesList'
+import { getSafeId } from '../SelectSafesOnboarding/components/SafeCard'
 import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingSafesList'
 import ConnectWalletHint from '../ConnectWalletHint'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
+import { useSelectionSimilarities, type SelectionSimilarity } from '@/features/address-poisoning'
 import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import {
@@ -169,10 +169,17 @@ const AddAccounts = ({
     spaceSafes,
   ])
 
-  const similarAddresses = useMemo<Set<string>>(() => {
-    const allItems = [...trustedSafes, ...ownedSafes]
-    return getFlaggedSimilarAddressSet(allItems.map((s) => s.address))
-  }, [trustedSafes, ownedSafes])
+  // Selection surface: anchor (resembles a trusted safe) + intra-list (two candidates collide) — see useSelectionSimilarities.
+  const similarityAddresses = useMemo(
+    () => [...trustedSafes, ...ownedSafes].map((s) => s.address),
+    [trustedSafes, ownedSafes],
+  )
+  const selectionSimilarities = useSelectionSimilarities(similarityAddresses)
+  const similarities = useMemo(() => {
+    const map = new Map<string, SelectionSimilarity>()
+    for (const [address, similarity] of selectionSimilarities) map.set(address.toLowerCase(), similarity)
+    return map
+  }, [selectionSimilarities])
 
   const [rawSearchQuery, setRawSearchQuery] = useState('')
   const debouncedSearchQuery = useDebounce(rawSearchQuery, 300)
@@ -447,7 +454,7 @@ const AddAccounts = ({
                         <OnboardingSafesList
                           trustedSafes={visibleTrusted}
                           ownedSafes={visibleOwned}
-                          similarAddresses={similarAddresses}
+                          similarities={similarities}
                           isAtLimit={isAtLimit}
                           trustedSelectAll={{
                             state: trustedSelection.state,

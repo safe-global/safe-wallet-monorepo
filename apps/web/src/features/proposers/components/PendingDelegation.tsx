@@ -22,13 +22,16 @@ import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import type { PendingDelegation as PendingDelegationType } from '@/features/proposers/types'
+import { SimilarityFlag } from '@/features/address-poisoning'
+import type { SimilarityMatch } from '@safe-global/utils/utils/addressSimilarity.types'
 
 type PendingDelegationProps = {
   delegation: PendingDelegationType
   onRefetch: () => void
+  similarity?: SimilarityMatch
 }
 
-function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): ReactElement {
+function PendingDelegation({ delegation, onRefetch, similarity }: PendingDelegationProps): ReactElement {
   const [isSignLoading, setIsSignLoading] = useState(false)
   const [error, setError] = useState<Error>()
   const chainId = useChainId()
@@ -173,8 +176,10 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
               shortAddress={false}
               name={delegation.delegateLabel}
               hasExplorer
+              similarity={similarity}
             />
           </Box>
+          <SimilarityFlag match={similarity} />
         </Box>
       </Box>
 

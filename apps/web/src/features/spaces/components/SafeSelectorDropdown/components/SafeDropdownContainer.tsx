@@ -1,5 +1,5 @@
 import { RotateCw, Search } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { SelectContent, SelectItem } from '@/components/ui/select'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
 import useWallet from '@/hooks/wallets/useWallet'
+import { useListSimilarities } from '@/features/address-poisoning'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
@@ -82,6 +83,10 @@ const SafeDropdownContainer = ({
   const resolveName = useSafeNameResolver()
   const wallet = useWallet()
 
+  // Mode B: flag any dropdown row that resembles a trusted anchor (impostor-next-to-real).
+  const addresses = useMemo(() => items.map((item) => item.address), [items])
+  const similarities = useListSimilarities(addresses)
+
   // Multi-chain items stay visible even when currently selected so the user can expand and switch chains.
   const structuralItems = items.filter((item) => item.chains.length > 1 || item.id !== selectedItemId)
   const filteredItems = query
@@ -118,8 +123,9 @@ const SafeDropdownContainer = ({
     }
 
     return filteredItems.map((item) => {
+      const match = similarities.get(item.address)?.match
       if (item.chains.length > 1) {
-        return <MultiChainSafeItemRow key={item.id} item={item} />
+        return <MultiChainSafeItemRow key={item.id} item={item} match={match} />
       }
       return (
         <SelectItem
@@ -127,7 +133,7 @@ const SafeDropdownContainer = ({
           value={item.id}
           className="h-auto py-4 px-4 rounded-lg my-1 data-[state=checked]:bg-muted hover:bg-muted/30 cursor-pointer"
         >
-          <SafeItem {...item} />
+          <SafeItem {...item} match={match} />
         </SelectItem>
       )
     })
